@@ -1,0 +1,92 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-04"
+  number: 4
+  title: "治理交互流程"
+  status: "pending"
+  plan_lines: "751-994"
+  dependency: "chapters 01-03 completed"
+  tasks_total: 6
+  steps_total: 35
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
+  implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+  mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+  initialized_at: "2026-08-02T14:03:50Z"
+
+tasks:
+  - id: "4.1"
+    title: "实现统一工作流前置条件与规格冻结"
+    plan_anchor: 753
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "4.2"
+    title: "实现 ASK 选项校验与 `answer`"
+    plan_anchor: 791
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "4.3"
+    title: "实现审核包校验与三类批准"
+    plan_anchor: 832
+    status: "pending"
+    steps_total: 7
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "4.4"
+    title: "实现 AUTO 预检和范围护栏"
+    plan_anchor: 878
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "4.5"
+    title: "实现 BLOCK 条件与 `escalate`"
+    plan_anchor: 913
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "4.6"
+    title: "完成治理流程端到端测试和第四章退出检查"
+    plan_anchor: 948
+    status: "pending"
+    steps_total: 7
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+
+exit_check:
+  status: "pending"
+  required_task: "4.6"
+  criteria:
+    - "freeze、answer、approve、AUTO 预检和 escalate 的边界测试通过"
+    - "AUTO、ASK、REVIEW、BLOCK 及混合决策单元端到端路径通过"
+    - "章节累计回归、diff 检查、需求复核和质量复核均有证据"
+  evidence: []
+
+review:
+  requirements_conformance: "pending"
+  quality_review: "pending"
+
+history:
+  - at: "2026-08-02T14:03:50Z"
+    action: "initialized"
+    actor: "Codex"
+    reason: "登记第四章 6 个任务和 35 个步骤，依赖分流与验证等级引擎"
+    evidence: ["docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"]

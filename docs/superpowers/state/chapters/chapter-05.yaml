@@ -1,0 +1,110 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-05"
+  number: 5
+  title: "验证与证据闭环"
+  status: "pending"
+  plan_lines: "995-1302"
+  dependency: "chapters 01-04 completed"
+  tasks_total: 8
+  steps_total: 46
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
+  implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+  mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+  initialized_at: "2026-08-02T14:03:50Z"
+
+tasks:
+  - id: "5.1"
+    title: "解析 V0/V1 验证计划"
+    plan_anchor: 997
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "5.2"
+    title: "实现受控子进程执行器与日志过滤"
+    plan_anchor: 1036
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "5.3"
+    title: "实现最终验证的 Git 清洁度与范围检查"
+    plan_anchor: 1074
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "5.4"
+    title: "生成 `evidence.json` 与版本摘要"
+    plan_anchor: 1108
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "5.5"
+    title: "实现证据和批准失效服务"
+    plan_anchor: 1146
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "5.6"
+    title: "实现 `aiflow verify`"
+    plan_anchor: 1180
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "5.7"
+    title: "实现 `aiflow gate`"
+    plan_anchor: 1219
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "5.8"
+    title: "完成第五章端到端证据回归"
+    plan_anchor: 1259
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+
+exit_check:
+  status: "pending"
+  required_task: "5.8"
+  criteria:
+    - "V0/V1 计划、受控执行器、日志过滤、Git 清洁度和范围检查通过"
+    - "evidence.json、失效矩阵、verify 和 gate 的决策表测试通过"
+    - "通过、失败、恢复、版本失效和章节双重复核均有证据"
+  evidence: []
+
+review:
+  requirements_conformance: "pending"
+  quality_review: "pending"
+
+history:
+  - at: "2026-08-02T14:03:50Z"
+    action: "initialized"
+    actor: "Codex"
+    reason: "登记第五章 8 个任务和 46 个步骤，依赖治理交互流程"
+    evidence: ["docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"]

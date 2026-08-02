@@ -1,0 +1,92 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-02"
+  number: 2
+  title: "任务记录与状态核心"
+  status: "pending"
+  plan_lines: "301-532"
+  dependency: "chapter-01 completed"
+  tasks_total: 6
+  steps_total: 33
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
+  implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+  mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+  initialized_at: "2026-08-02T14:03:50Z"
+
+tasks:
+  - id: "2.1"
+    title: "实现领域错误、任务 ID 与原子存储"
+    plan_anchor: 303
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "2.2"
+    title: "实现 Git 上下文采集"
+    plan_anchor: 344
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "2.3"
+    title: "实现 `aiflow start`"
+    plan_anchor: 378
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "2.4"
+    title: "实现状态转换和可重放事件日志"
+    plan_anchor: 414
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "2.5"
+    title: "实现 `begin`、`close` 与重试规则"
+    plan_anchor: 452
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "2.6"
+    title: "实现 `status` 和第二章退出检查"
+    plan_anchor: 488
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+
+exit_check:
+  status: "pending"
+  required_task: "2.6"
+  criteria:
+    - "start、begin、status、close 的状态边界和重试规则测试通过"
+    - "原子存储、事件重放、Git 上下文和任务 ID 验证通过"
+    - "章节累计回归、diff 检查、需求复核和质量复核均有证据"
+  evidence: []
+
+review:
+  requirements_conformance: "pending"
+  quality_review: "pending"
+
+history:
+  - at: "2026-08-02T14:03:50Z"
+    action: "initialized"
+    actor: "Codex"
+    reason: "登记第二章 6 个任务和 33 个步骤，依赖第一章退出条件"
+    evidence: ["docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"]

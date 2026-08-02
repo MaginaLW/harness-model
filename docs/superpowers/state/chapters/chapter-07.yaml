@@ -1,0 +1,101 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-07"
+  number: 7
+  title: "试点验收与阶段一基线"
+  status: "pending"
+  plan_lines: "1533-1837"
+  dependency: "chapters 01-06 completed"
+  tasks_total: 7
+  steps_total: 39
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
+  implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+  mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+  initialized_at: "2026-08-02T14:03:50Z"
+
+tasks:
+  - id: "7.1"
+    title: "建立端到端场景运行器"
+    plan_anchor: 1535
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "7.2"
+    title: "跑通四类黄金端到端场景"
+    plan_anchor: 1569
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "7.3"
+    title: "准备真实仓库试点与执行授权点"
+    plan_anchor: 1604
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "7.4"
+    title: "在本仓库执行 AUTO、ASK、REVIEW 和 BLOCK 试点"
+    plan_anchor: 1643
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "7.5"
+    title: "建立阶段一验收矩阵"
+    plan_anchor: 1706
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "7.6"
+    title: "验证干净检出、安装和故障恢复"
+    plan_anchor: 1749
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "7.7"
+    title: "形成阶段一发布基线"
+    plan_anchor: 1784
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+
+exit_check:
+  status: "pending"
+  required_task: "7.7"
+  criteria:
+    - "四类黄金端到端场景和四个真实受控试点完成，保留版本绑定证据"
+    - "十二项验收矩阵全部 passed，干净检出、安装和恢复验证通过"
+    - "阶段一版本、验收报告、阶段二输入和最终回归均完成"
+  evidence: []
+
+review:
+  requirements_conformance: "pending"
+  quality_review: "pending"
+
+history:
+  - at: "2026-08-02T14:03:50Z"
+    action: "initialized"
+    actor: "Codex"
+    reason: "登记第七章 7 个任务和 39 个步骤，依赖前六章退出条件"
+    evidence: ["docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"]

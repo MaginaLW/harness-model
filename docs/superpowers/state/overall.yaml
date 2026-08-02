@@ -1,0 +1,145 @@
+schema: "progress.v1"
+state_type: "implementation_overall"
+project: "AI 代码协同系统"
+stage: "phase-01-mvp"
+status: "not_started"
+created_at: "2026-08-02T14:03:50Z"
+updated_at: "2026-08-02T14:03:50Z"
+
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
+  implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+  mvp_design: "docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md"
+  mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+  baseline_commit: "c375c32d2a28294cd4cedd1fd77815feb0d41615"
+  read_at: "2026-08-02T14:03:50Z"
+
+tracking:
+  mode: "manual"
+  cli_available: false
+  executable_policy_available: false
+  runtime_task_records_initialized: false
+  state_directory: "docs/superpowers/state"
+  current_chapter: null
+  current_task: null
+  current_step: null
+
+summary:
+  chapters_total: 7
+  chapters_completed: 0
+  tasks_total: 44
+  tasks_completed: 0
+  steps_total: 243
+  steps_completed: 0
+  exit_checks_total: 7
+  exit_checks_completed: 0
+  blockers_total: 0
+  evidence_items: 0
+
+chapters:
+  - id: "chapter-01"
+    number: 1
+    title: "工程基线与可执行契约"
+    state_file: "docs/superpowers/state/chapters/chapter-01.yaml"
+    status: "pending"
+    dependency: "无"
+    tasks_total: 5
+    steps_total: 28
+  - id: "chapter-02"
+    number: 2
+    title: "任务记录与状态核心"
+    state_file: "docs/superpowers/state/chapters/chapter-02.yaml"
+    status: "pending"
+    dependency: "chapter-01 completed"
+    tasks_total: 6
+    steps_total: 33
+  - id: "chapter-03"
+    number: 3
+    title: "分流与验证等级引擎"
+    state_file: "docs/superpowers/state/chapters/chapter-03.yaml"
+    status: "pending"
+    dependency: "chapter-01 and chapter-02 completed"
+    tasks_total: 6
+    steps_total: 31
+  - id: "chapter-04"
+    number: 4
+    title: "治理交互流程"
+    state_file: "docs/superpowers/state/chapters/chapter-04.yaml"
+    status: "pending"
+    dependency: "chapters 01-03 completed"
+    tasks_total: 6
+    steps_total: 35
+  - id: "chapter-05"
+    number: 5
+    title: "验证与证据闭环"
+    state_file: "docs/superpowers/state/chapters/chapter-05.yaml"
+    status: "pending"
+    dependency: "chapters 01-04 completed"
+    tasks_total: 8
+    steps_total: 46
+  - id: "chapter-06"
+    number: 6
+    title: "Agent、Hooks 与 CI 集成"
+    state_file: "docs/superpowers/state/chapters/chapter-06.yaml"
+    status: "pending"
+    dependency: "chapters 01-05 completed"
+    tasks_total: 6
+    steps_total: 31
+  - id: "chapter-07"
+    number: 7
+    title: "试点验收与阶段一基线"
+    state_file: "docs/superpowers/state/chapters/chapter-07.yaml"
+    status: "pending"
+    dependency: "chapters 01-06 completed"
+    tasks_total: 7
+    steps_total: 39
+
+global_checks:
+  plan_self_review:
+    status: "pending"
+    checks_total: 19
+    completed_checks: []
+  phase_01_acceptance:
+    status: "pending"
+    acceptance_items_total: 12
+    passed_items: []
+  final_release_baseline:
+    status: "pending"
+
+future_phases:
+  - phase: "phase-02"
+    title: "审核与强化验证"
+    status: "not_started"
+    implementation_plan: "按计划，仅在阶段一十二项验收、四个真实试点和阶段二输入证据齐备后另建计划"
+  - phase: "phase-03"
+    title: "高可靠性与模型路由"
+    status: "not_started"
+    implementation_plan: "按计划，仅在阶段二完成并积累足够内部记录后另建计划"
+  - phase: "phase-04"
+    title: "独立编排器"
+    status: "not_started"
+    implementation_plan: "按计划，仅在多仓库、多平台或多模型协调成本成为真实需求后另建计划"
+
+decisions:
+  - id: "DEC-STATE-001"
+    status: "recorded"
+    decided_at: "2026-08-02T14:03:50Z"
+    actor: "Codex"
+    subject: "初始化实施进度追踪"
+    decision: "在 docs/superpowers/state/ 建立总体和七个章节级人工状态文件；全部章节、任务、步骤和退出检查从未开始状态初始化。"
+    rationale: "实施目录要求按章节顺序推进，而当前仓库尚未有 aiflow CLI、可执行 Policy 或 .ai/tasks 运行时结构。"
+    consequence: "在 CLI 上线前只更新这些文档级状态，不伪造 TASK-* 记录；代码、配置、CI 或行为变更仍须进入 AI Flow。"
+    evidence:
+      - "README.md"
+      - "AGENTS.md"
+      - "docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md"
+      - "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
+
+history:
+  - at: "2026-08-02T14:03:50Z"
+    action: "initialized"
+    actor: "Codex"
+    reason: "依据实施目录建立阶段一的总体进度基线"
+    evidence:
+      - "docs/superpowers/state/README.md"
+      - "docs/superpowers/state/chapters/"

@@ -1,0 +1,92 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-03"
+  number: 3
+  title: "分流与验证等级引擎"
+  status: "pending"
+  plan_lines: "532-750"
+  dependency: "chapter-01 and chapter-02 completed"
+  tasks_total: 6
+  steps_total: 31
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
+  implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+  mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+  initialized_at: "2026-08-02T14:03:50Z"
+
+tasks:
+  - id: "3.1"
+    title: "实现 Policy 加载、校验和稳定摘要"
+    plan_anchor: 534
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "3.2"
+    title: "实现决策单元输入与受限谓词"
+    plan_anchor: 569
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "3.3"
+    title: "实现硬规则与 route 汇总"
+    plan_anchor: 604
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "3.4"
+    title: "独立实现 V0/V1 判定"
+    plan_anchor: 639
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "3.5"
+    title: "实现 `aiflow classify`"
+    plan_anchor: 673
+    status: "pending"
+    steps_total: 6
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "3.6"
+    title: "运行四类黄金场景并完成第三章退出检查"
+    plan_anchor: 712
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+
+exit_check:
+  status: "pending"
+  required_task: "3.6"
+  criteria:
+    - "Policy 加载、决策单元、硬规则、route 和 V0/V1 判定均通过定向测试"
+    - "四类黄金场景分类结果与预期一致，且不允许无授权降级"
+    - "章节累计回归、diff 检查、需求复核和质量复核均有证据"
+  evidence: []
+
+review:
+  requirements_conformance: "pending"
+  quality_review: "pending"
+
+history:
+  - at: "2026-08-02T14:03:50Z"
+    action: "initialized"
+    actor: "Codex"
+    reason: "登记第三章 6 个任务和 31 个步骤，依赖任务状态核心"
+    evidence: ["docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"]
