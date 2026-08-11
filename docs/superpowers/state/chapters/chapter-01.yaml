@@ -4,7 +4,7 @@ chapter:
   id: "chapter-01"
   number: 1
   title: "工程基线与可执行契约"
-  status: "pending"
+  status: "needs_revalidation"
   plan_lines: "79-300"
   dependency: "无"
   tasks_total: 5
@@ -19,12 +19,448 @@ tasks:
   - id: "1.1"
     title: "建立 Python 工程与 CLI 骨架"
     plan_anchor: 81
-    status: "pending"
+    status: "needs_revalidation"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: null
-    evidence: []
-    blockers: []
+    completed_steps: [1, 2]
+    in_progress_step: 3
+    evidence:
+      - id: "EVD-T1.1-START-001"
+        kind: "task_start"
+        recorded_at: "2026-08-02T17:01:13Z"
+        actor: "/root/ai_flow_policy_audit"
+        authorization:
+          user_scope: "由 sub-agent 按计划执行并完成第一章；主会话仅负责任务进度、规划和审核管控"
+          delegated_action: "执行 Task 1.1 Task 0 只读 preflight 与开始状态写入"
+          approved_execution_plan: "docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-execution.md"
+          approved_execution_plan_sha256: "dcb556a01cfa304520d84309ca1f72d8cb944a438e06c48924306bab866c5ec4"
+          execution_plan_spec_review: "PASS"
+          execution_plan_quality_review: "PASS"
+        governance_source_digest_map:
+          AGENTS.md: "b99c7e82e022e1aa9c7b07f6d98fda7b9451bd39577ecabe94c7c1586e2609b3"
+          docs/superpowers/state/README.md: "386a0aeadbf056ed2b9f659d82910faea1cc3fe1eddf597f62e61dde1c6c8d56"
+          docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+          docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-execution.md: "dcb556a01cfa304520d84309ca1f72d8cb944a438e06c48924306bab866c5ec4"
+          docs/superpowers/state/overall.yaml#source:
+            implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+            mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+          docs/superpowers/state/chapters/chapter-01.yaml#source:
+            implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+            mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        prewrite_state_file_sha256:
+          docs/superpowers/state/overall.yaml: "6609042a86a0b9967b0dee6e7bff0ab5a229b86dfdc32fa42f716f9bd1dc2ef7"
+          docs/superpowers/state/chapters/chapter-01.yaml: "c31c6ca4743949109b721cc47b6d2fafeb1c04887000bf4d0a09a1caa98a6af9"
+        source_comparison: "matched"
+        git_context:
+          observed_head: "4cf6bb2b3ccf3688c87a887887cef69040a5f0a3"
+          branch: "main"
+          worktree: "D:/repos/harness-model"
+          repository_root: "D:\\repos\\harness-model"
+          subject_commit: "N/A"
+          start_status:
+            command: "git status --porcelain=v1 -z -uall"
+            encoding: "UTF-8"
+            nul_terminated: true
+            raw_sha256: "9a4cfdae96ceb7a8169a5d6f9ba1c01bf781b8279b6ee6836b5911ae5e602fbb"
+            records:
+              - "?? docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-execution.md"
+        environment:
+          python:
+            executable: "C:\\Users\\Magina\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
+            version: "3.13.5"
+            implementation: "CPython"
+            machine: "AMD64"
+            bits: 64
+          uv:
+            available_at_start: false
+            approved_version: "0.11.16"
+            approved_archive_url: "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-pc-windows-msvc.zip"
+            approved_checksum_url: "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-pc-windows-msvc.zip.sha256"
+            network_constraint: "仅在独立公共网络读取 gate 通过后下载"
+          executable_policy_available: false
+          aiflow_cli_available: false
+          runtime_task_records_initialized: false
+          runtime_task_record: "not_created"
+        start_manifest:
+          canonicalization: "PowerShell 5.1 [ordered] objects; ordinal path sort; ConvertTo-Json -Depth 10 -Compress; UTF-8 no BOM; SHA-256"
+          canonical_json: '{"schema":"task-1.1-start-manifest.v1","files":[{"path":".gitignore","sha256":null},{"path":"pyproject.toml","sha256":null},{"path":"src/aiflow/__init__.py","sha256":null},{"path":"src/aiflow/__main__.py","sha256":null},{"path":"src/aiflow/cli.py","sha256":null},{"path":"tests/conftest.py","sha256":null},{"path":"tests/unit/test_cli.py","sha256":null},{"path":"uv.lock","sha256":null}]}'
+          sha256: "b24088ff75830d1bc9fd36b7650d9c686131084cbaa1e6ca4d5cffcf0ab3e1db"
+          files:
+            - {path: ".gitignore", sha256: null}
+            - {path: "pyproject.toml", sha256: null}
+            - {path: "src/aiflow/__init__.py", sha256: null}
+            - {path: "src/aiflow/__main__.py", sha256: null}
+            - {path: "src/aiflow/cli.py", sha256: null}
+            - {path: "tests/conftest.py", sha256: null}
+            - {path: "tests/unit/test_cli.py", sha256: null}
+            - {path: "uv.lock", sha256: null}
+        decision:
+          id: "DEC-T1.1-LOCK-001"
+          category: "scope_and_toolchain_upgrade"
+          route: "REVIEW"
+          decision: "将 uv.lock 加入 Task 1.1 tracked allowlist，并固定使用官方 uv 0.11.16 Windows x64 公共发布资产"
+          rationale: "补足原 Task 1.1 未列出的依赖锁产物，使实现与验证绑定同一冻结工具链"
+          invalidation_conditions:
+            - "执行计划、MVP 或原实施目录摘要变化"
+            - "八路径 allowlist 或任务目标变化"
+            - "uv 版本、官方 URL、checksum 或资产 hash 变化"
+            - "保留资产缺失、损坏或无法重验"
+            - "Python 路径、版本或 AMD64/64 位条件变化"
+            - "出现新的依赖、权限、凭据、付费调用或外部副作用"
+        tracked_allowlist:
+          - ".gitignore"
+          - "pyproject.toml"
+          - "src/aiflow/__init__.py"
+          - "src/aiflow/__main__.py"
+          - "src/aiflow/cli.py"
+          - "tests/conftest.py"
+          - "tests/unit/test_cli.py"
+          - "uv.lock"
+        state_write_allowlist:
+          - "docs/superpowers/state/chapters/chapter-01.yaml"
+          - "docs/superpowers/state/overall.yaml"
+        forbidden_actions:
+          - "commit"
+          - "push"
+          - "merge"
+          - "deploy"
+          - "delete"
+          - "credential_or_secret_use_or_export"
+          - "paid_external_call"
+          - "create_runtime_task_record"
+      - id: "EVD-T1.1-PHASE-A-CONTEXT-001"
+        kind: "phase_context_handoff"
+        recorded_at: "2026-08-02T17:18:28Z"
+        actor: "/root/ai_flow_policy_audit"
+        phase: "A"
+        approved_execution_plan_sha256: "dcb556a01cfa304520d84309ca1f72d8cb944a438e06c48924306bab866c5ec4"
+        context:
+          canonical_audit_root: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b"
+          revision: 1
+          digest: "a1ad1c8551b0522075eda0bbafc09e03f39ffec334677e3c46072e7c158d8cb0"
+          previous_digest: null
+        execution_environment:
+          powershell:
+            executable: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+            version: "5.1"
+            result: "PASS"
+          external_venv:
+            path: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\\project-venv"
+            repository_containment: false
+            result: "PASS"
+          environment_whitelist:
+            result: "PASS"
+            values:
+              UV_PROJECT_ENVIRONMENT: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\\project-venv"
+              UV_PYTHON: "C:\\Users\\Magina\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
+              UV_CACHE_DIR: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\\uv-cache"
+              UV_PYTHON_INSTALL_DIR: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\\uv-python"
+              UV_NO_MANAGED_PYTHON: "1"
+              UV_PYTHON_DOWNLOADS: "never"
+              UV_NO_SYSTEM_CONFIG: "1"
+              UV_DEFAULT_INDEX: "https://pypi.org/simple"
+              UV_INDEX_STRATEGY: "first-index"
+              UV_KEYRING_PROVIDER: "disabled"
+        uv_bootstrap:
+          source: "official_public_release"
+          version: "0.11.16"
+          version_output: "uv 0.11.16"
+          archive_sha256: "dd9d6d6554bfab265bfa98aa8e8a406c5c3a7b97582f93de1f4d48d9154a0395"
+          checksum_expected: "dd9d6d6554bfab265bfa98aa8e8a406c5c3a7b97582f93de1f4d48d9154a0395 *uv-x86_64-pc-windows-msvc.zip"
+          checksum_verification: "PASS"
+          version_verification: "PASS"
+        retained_failures:
+          - condition: "early_git_path_resolution_failure"
+            occurrences: 2
+            structured_index_retained: true
+            retry_result: "PASS"
+            disposition: "早期失败证据保留，未被成功重跑覆盖"
+        handoff_result: "PASS"
+        state_impact:
+          task_status_changed: false
+          completed_steps_changed: false
+          steps_total_changed: false
+          counters_changed: false
+      - id: "EVD-T1.1-PHASE-A-CONTEXT-SUPERSESSION-001"
+        kind: "phase_context_supersession"
+        recorded_at: "2026-08-02T17:22:31Z"
+        actor: "/root/ai_flow_policy_audit"
+        phase: "A"
+        superseded_context:
+          event_id: "EVT-T1.1-PHASE-A-CONTEXT-001"
+          evidence_id: "EVD-T1.1-PHASE-A-CONTEXT-001"
+          digest: "a1ad1c8551b0522075eda0bbafc09e03f39ffec334677e3c46072e7c158d8cb0"
+          status: "superseded_invalid"
+          reason: "PowerShell 5.1 序列化将 previous_digest 的 null 错误表示为 ''，因此旧 digest 不可作为后续 Phase 的有效 expected tuple"
+          historical_record_preserved: true
+        effective_context:
+          canonical_audit_root: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b"
+          revision: 1
+          digest: "3e52b37ef68d869082606f386e0c8be5151bf122a32e4f008369975bf6df6586"
+          previous_digest: null
+          status: "valid"
+        continuity:
+          asset_redownloaded: false
+          repository_scope_changed: false
+        baseline_runner_repair:
+          error_action_preference: "Stop"
+          expected_exit: 1
+          misrecorded_exit: -1
+          structured_failure_retained: true
+          status: "in_progress"
+          completion_effect: "none"
+        state_impact:
+          task_status_changed: false
+          completed_steps_changed: false
+          steps_total_changed: false
+          phase_b_completed: false
+          original_plan_step_completed: false
+          counters_changed: false
+      - id: "EVD-T1.1-PHASE-B-CONTEXT-001"
+        kind: "phase_completion_handoff"
+        recorded_at: "2026-08-02T17:23:18Z"
+        actor: "/root/ai_flow_policy_audit"
+        phase: "B"
+        context:
+          canonical_audit_root: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b"
+          revision: 2
+          digest: "8008baaf3c225460d4687f4a163370aba0aeed5d87c9ab1dbf5de4477977e139"
+          previous_digest: "3e52b37ef68d869082606f386e0c8be5151bf122a32e4f008369975bf6df6586"
+        verification:
+          - id: "BASELINE-PYTEST-MISSING"
+            command: "external project Python -m pytest tests/unit/test_cli.py -q"
+            expected_exit: 1
+            observed_exit: 1
+            reason: "pytest missing before frozen dependency sync"
+            result: "PASS"
+          - id: "UV-LOCK"
+            command: "uv --no-config lock"
+            result: "PASS"
+          - id: "UV-LOCK-CHECK"
+            command: "uv --no-config lock --check"
+            result: "PASS"
+          - id: "UV-SYNC-FROZEN-NO-INSTALL-PROJECT"
+            command: "uv --no-config sync --frozen --extra dev --no-install-project"
+            result: "PASS"
+        original_plan_mapping:
+          completed_steps_added: [1]
+          in_progress_step: 2
+          other_steps_completed: false
+        state_impact:
+          task_status: "in_progress"
+          task_completed: false
+          chapter_completed: false
+          overall_counters_changed: false
+      - id: "EVD-T1.1-PHASE-C-DEVIATION-001"
+        kind: "phase_context_and_process_deviation"
+        recorded_at: "2026-08-02T17:28:53Z"
+        actor: "/root/ai_flow_policy_audit"
+        phase: "C"
+        context:
+          canonical_audit_root: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b"
+          revision: 3
+          digest: "bb50c069345b6b08f18ee930a7e20ab55005b2376564220100b4212a9ee2bbc9"
+          previous_digest: "8008baaf3c225460d4687f4a163370aba0aeed5d87c9ab1dbf5de4477977e139"
+        execution_sequence:
+          - id: "PYTEST-RED"
+            intended_stage: "red"
+            observed_exit: 0
+            observed_summary: "3 passed"
+            classification: "process_deviation_premature_green"
+            satisfies_original_red_stage: false
+          - id: "PYTEST-RED-CORRECTED"
+            implementation_condition: "temporary incorrect description"
+            observed_exit: 1
+            classification: "test_sensitivity_demonstration_only"
+            satisfies_original_red_stage: false
+          - id: "PYTEST-GREEN-CORRECTED"
+            implementation_condition: "approved implementation restored"
+            observed_exit: 0
+            classification: "corrected_green"
+            result: "PASS"
+        repository_actions:
+          tests_modified_for_correction: false
+          files_deleted: false
+          files_moved: false
+          files_renamed: false
+        process_assessment:
+          original_red_then_green_order_satisfied: false
+          original_step_3_completed: false
+          disposition: "等待独立 spec reviewer 裁决流程偏差是否可接受或必须重做"
+        original_plan_mapping:
+          completed_steps_added: [2]
+          completed_steps_after: [1, 2]
+          in_progress_step: 3
+          step_3_completed: false
+        state_impact:
+          task_status: "in_progress"
+          task_completed: false
+          chapter_completed: false
+          overall_counters_changed: false
+      - id: "EVD-T1.1-PHASE-D-HANDOFF-001"
+        kind: "phase_d_implementation_handoff"
+        recorded_at: "2026-08-02T17:39:10Z"
+        actor: "/root/ai_flow_policy_audit"
+        phase: "D"
+        audit_root: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b"
+        repair_3_context:
+          revision: 4
+          digest: "f54fb57ec59b186ebe36382d85e12cb2add6a94d4a6d1c82b89feedfa7511424"
+          previous_digest: "bb50c069345b6b08f18ee930a7e20ab55005b2376564220100b4212a9ee2bbc9"
+          phase_d_result: "PASS"
+          sealed_index_repair_3_sha256: "84e4a6c815d46db6446937d1cc4d451a7b78d13f5d7f7f4f9cc2bba419ebb7e5"
+          implementation_manifest_v1_sha256: "46e03eeae1293aa2a2a769969b9bd167c16022b16bf18c9c1428448ef7d84d88"
+        retained_repairs:
+          - id: "RUFF-I001"
+            issue: "import sorting failure"
+            resolution: "fixed and rerun"
+            history_preserved: true
+          - id: "PS-STDERR-WRAPPER-DIFFERENCE"
+            issue: "PowerShell stderr wrapper changed compared streams"
+            resolution: "replaced with raw Process capture"
+            history_preserved: true
+          - id: "V1-NUL-PARSER-TRAILING-EMPTY"
+            issue: "v1 NUL parser retained the trailing empty string in evidence encoding"
+            resolution: "integrity repair and final-v2 manifest"
+            history_preserved: true
+        final_context:
+          revision: 5
+          digest: "7b92b229ccec59aefc33c01398692d5ab9cf2c87e89d242ff5b8d1d94d701adb"
+          previous_digest: "f54fb57ec59b186ebe36382d85e12cb2add6a94d4a6d1c82b89feedfa7511424"
+        final_artifacts:
+          implementation_manifest:
+            path: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\\evidence\\implementation-manifest.final-v2.json"
+            sha256: "3069aa594e16807f7ae0e58e005b1c5dae61cf1c6a0dedd1411699aa9ab66fc6"
+          integrity_index:
+            path: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\\evidence\\implementation-index-integrity-repair.jsonl"
+            sha256: "8ca3541ac92336f0bc899150e70ae56dea39b6f0fb6cf6fc118188d7094380e8"
+        final_validation:
+          status: "pass_pending_spec"
+          checks:
+            - "SYNC-INEXACT: PASS"
+            - "ENSUREPIP: PASS"
+            - "PIP-EDITABLE: PASS"
+            - "SYNC-EXACT: PASS"
+            - "LOCK-CHECK: PASS"
+            - "LOCK-HASH: PASS"
+            - "PYTEST-DIRECT: PASS"
+            - "PYTEST-ALL: PASS"
+            - "RUFF: PASS"
+            - "MYPY: PASS"
+            - "MODULE-HELP: PASS"
+            - "MODULE-VERSION: PASS"
+            - "EXE-HELP: PASS"
+            - "EXE-VERSION: PASS"
+            - "MODULE-BAD: PASS"
+            - "EXE-BAD: PASS"
+            - "DIFF-CHECK: PASS"
+            - "STATUS: PASS"
+            - "STREAM-COMPARE: PASS"
+          bad_command_exits:
+            module: 2
+            executable: 2
+          python_3_11_verified: false
+          python_3_11_limitation: "Python 3.13/x64 satisfies >=3.11, but Python 3.11 was not executed"
+          exact_status_record_count: 11
+          exact_status_records:
+            - " M docs/superpowers/state/chapters/chapter-01.yaml"
+            - " M docs/superpowers/state/overall.yaml"
+            - "?? .gitignore"
+            - "?? docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-execution.md"
+            - "?? pyproject.toml"
+            - "?? src/aiflow/__init__.py"
+            - "?? src/aiflow/__main__.py"
+            - "?? src/aiflow/cli.py"
+            - "?? tests/conftest.py"
+            - "?? tests/unit/test_cli.py"
+            - "?? uv.lock"
+        phase_c_process_deviation:
+          evidence_id: "EVD-T1.1-PHASE-C-DEVIATION-001"
+          records_preserved: true
+          disposition: "requires_independent_spec_disposition"
+        state_impact:
+          task_status: "in_progress"
+          completed_steps: [1, 2]
+          in_progress_step: 3
+          step_3_completed: false
+          step_4_completed: false
+          step_5_completed: false
+          task_completed: false
+          overall_counters_changed: false
+      - id: "EVD-T1.1-SPEC-REVIEW-FAIL-001"
+        kind: "independent_spec_review"
+        recorded_at: "2026-08-02T17:52:50.3772697Z"
+        actor: "/root/task11_plan_spec_review_v4"
+        role: "spec"
+        review_record:
+          path: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\\evidence\\spec-review-task-1-1-v4\\spec-review-record.json"
+          sha256: "6493635dde8561ee74bea529193bccb516e378ee60c675d5e700f7243e2838fd"
+          implementation_manifest_sha256: "3069aa594e16807f7ae0e58e005b1c5dae61cf1c6a0dedd1411699aa9ab66fc6"
+        result: "FAIL"
+        adjudication:
+          functional_integrity: "PASS"
+          approved_process: "FAIL"
+          completion_gate: "FAIL"
+          quality_review_may_start: false
+        findings:
+          - id: "SPEC-BLOCKER-001"
+            severity: "BLOCKER"
+            status: "OPEN"
+            category: "required_verification_history"
+            conclusion: "premature-green cannot be retroactively initial red"
+            impact: "原 Step 3 和 Task 1.1 completion gate 不能在当前证据链下获批"
+        state_effect: "needs_revalidation"
+      - id: "EVD-T1.1-TDD-REPLAY-DECISION-001"
+        kind: "remediation_decision"
+        recorded_at: "2026-08-02T17:55:28Z"
+        actor: "/root"
+        decision:
+          id: "DEC-T1.1-TDD-REPLAY-001"
+          route: "REVIEW"
+          status: "approved_for_supplemental_plan_creation"
+          rationale: "不降低原 red-before-green 门，使用外置干净基线重建真实 chronology，并保留当前实现和全部历史证据"
+        supplemental_plan:
+          form: "static"
+          creation_status: "pending_planning_agent"
+          constraints:
+            - "仅在现有 canonical AuditRoot 下执行"
+            - "从 git archive HEAD 创建外置干净 baseline"
+            - "复制当前最终配置和测试后，以相同 pytest 命令运行真实 red"
+            - "复制与当前最终 src hash 一致的实现后，以相同 pytest 命令运行 green"
+            - "随后在当前 worktree 完整重跑 Phase D"
+            - "生成新的 context、sealed index 和 implementation manifest"
+            - "按 fresh spec reviewer 后 fresh quality reviewer 的顺序重审"
+        preservation_requirements:
+          lower_gate: false
+          preserve_all_existing_evidence: true
+          preserve_all_existing_repository_files: true
+          delete_existing_files: false
+          move_existing_files: false
+          stash_existing_files: false
+          reset_existing_files: false
+        forbidden_actions:
+          - "git_worktree"
+          - "commit"
+          - "push"
+          - "delete"
+        blocker_release_conditions:
+          - "supplemental remediation plan 完成独立审阅并绑定当前来源"
+          - "外置 baseline 产生真实 same-command red 后产生 hash-identical final-src green"
+          - "当前 worktree 完整 Phase D 重跑通过并重封 context/manifest"
+          - "fresh spec review PASS 后 fresh quality review PASS"
+        state_effect:
+          task_status: "needs_revalidation"
+          chapter_status: "needs_revalidation"
+          completed_steps: [1, 2]
+          in_progress_step: 3
+          overall_counters_changed: false
+    blockers:
+      - id: "SPEC-BLOCKER-001"
+        status: "open"
+        source: "EVD-T1.1-SPEC-REVIEW-FAIL-001"
+        reason: "premature-green cannot be retroactively initial red"
+        required_decision: "DEC-T1.1-TDD-REPLAY-001"
+        release_requires: "supplemental replay、Phase D 重跑、fresh spec PASS 与 fresh quality PASS"
   - id: "1.2"
     title: "定义核心机器契约与 Schema"
     plan_anchor: 123
@@ -81,3 +517,95 @@ history:
     actor: "Codex"
     reason: "登记第一章 5 个任务和 28 个步骤，遵守无跨章实施规则"
     evidence: ["docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"]
+  - id: "EVT-T1.1-START-001"
+    at: "2026-08-02T17:01:13Z"
+    action: "task_started"
+    actor: "/root/ai_flow_policy_audit"
+    reason: "Task 1.1 只读 preflight 全部匹配，依据用户第一章执行授权和已通过双审的执行计划开始人工追踪"
+    transition:
+      chapter: "pending -> in_progress"
+      task: "1.1 pending -> in_progress"
+    decisions: ["DEC-T1.1-LOCK-001"]
+    evidence: ["EVD-T1.1-START-001"]
+  - id: "EVT-T1.1-PHASE-A-CONTEXT-001"
+    at: "2026-08-02T17:18:28Z"
+    action: "phase_context_handoff"
+    actor: "/root/ai_flow_policy_audit"
+    phase: "A"
+    reason: "记录已验证的外置 Phase A context、PS5.1/环境白名单和官方 uv 0.11.16 bootstrap 结果，供后续 Phase 显式重载"
+    context_revision: 1
+    context_digest: "a1ad1c8551b0522075eda0bbafc09e03f39ffec334677e3c46072e7c158d8cb0"
+    previous_digest: null
+    state_change: "none"
+    evidence: ["EVD-T1.1-PHASE-A-CONTEXT-001"]
+  - id: "EVT-T1.1-PHASE-A-CONTEXT-SUPERSESSION-001"
+    at: "2026-08-02T17:22:31Z"
+    action: "phase_context_superseded"
+    actor: "/root/ai_flow_policy_audit"
+    phase: "A"
+    reason: "旧 context 的 previous_digest 被 PS5.1 错误序列化为空字符串；保留旧记录并以 null 语义的新 digest 替代"
+    supersedes_event: "EVT-T1.1-PHASE-A-CONTEXT-001"
+    superseded_digest: "a1ad1c8551b0522075eda0bbafc09e03f39ffec334677e3c46072e7c158d8cb0"
+    effective_context_revision: 1
+    effective_context_digest: "3e52b37ef68d869082606f386e0c8be5151bf122a32e4f008369975bf6df6586"
+    effective_previous_digest: null
+    baseline_runner_repair: "in_progress"
+    state_change: "none"
+    evidence: ["EVD-T1.1-PHASE-A-CONTEXT-SUPERSESSION-001"]
+  - id: "EVT-T1.1-PHASE-B-COMPLETE-001"
+    at: "2026-08-02T17:23:18Z"
+    action: "phase_completed"
+    actor: "/root/ai_flow_policy_audit"
+    phase: "B"
+    reason: "预期 pytest 缺失 baseline 与 uv lock、lock check、frozen no-install-project sync 均按批准计划通过"
+    context_revision: 2
+    context_digest: "8008baaf3c225460d4687f4a163370aba0aeed5d87c9ab1dbf5de4477977e139"
+    previous_digest: "3e52b37ef68d869082606f386e0c8be5151bf122a32e4f008369975bf6df6586"
+    original_step_transition: "Step 1 pending -> completed; Step 2 -> in_progress"
+    task_state: "in_progress"
+    evidence: ["EVD-T1.1-PHASE-B-CONTEXT-001"]
+  - id: "EVT-T1.1-PHASE-C-DEVIATION-001"
+    at: "2026-08-02T17:28:53Z"
+    action: "phase_process_deviation_recorded"
+    actor: "/root/ai_flow_policy_audit"
+    phase: "C"
+    reason: "初次 PYTEST-RED 意外通过；纠正运行仅证明测试敏感性，未满足批准计划要求的原始先红后绿顺序"
+    context_revision: 3
+    context_digest: "bb50c069345b6b08f18ee930a7e20ab55005b2376564220100b4212a9ee2bbc9"
+    previous_digest: "8008baaf3c225460d4687f4a163370aba0aeed5d87c9ab1dbf5de4477977e139"
+    original_step_transition: "Step 2 pending -> completed; Step 3 remains in_progress"
+    pending_decision: "independent_spec_review"
+    task_state: "in_progress"
+    evidence: ["EVD-T1.1-PHASE-C-DEVIATION-001"]
+  - id: "EVT-T1.1-PHASE-D-HANDOFF-001"
+    at: "2026-08-02T17:39:10Z"
+    action: "phase_d_implementation_handoff"
+    actor: "/root/ai_flow_policy_audit"
+    phase: "D"
+    reason: "Phase D 第三 repair 与 final-v2 integrity repair 全部通过，但 Phase C premature-green 仍须独立 spec reviewer 裁决"
+    final_context_revision: 5
+    final_context_digest: "7b92b229ccec59aefc33c01398692d5ab9cf2c87e89d242ff5b8d1d94d701adb"
+    previous_digest: "f54fb57ec59b186ebe36382d85e12cb2add6a94d4a6d1c82b89feedfa7511424"
+    implementation_manifest_sha256: "3069aa594e16807f7ae0e58e005b1c5dae61cf1c6a0dedd1411699aa9ab66fc6"
+    integrity_index_sha256: "8ca3541ac92336f0bc899150e70ae56dea39b6f0fb6cf6fc118188d7094380e8"
+    validation_status: "pass_pending_spec"
+    state_change: "none"
+    evidence: ["EVD-T1.1-PHASE-D-HANDOFF-001"]
+  - id: "EVT-T1.1-SPEC-REVIEW-FAIL-001"
+    at: "2026-08-02T17:52:50.3772697Z"
+    action: "independent_spec_review_failed"
+    actor: "/root/task11_plan_spec_review_v4"
+    reason: "当前功能与完整性通过，但批准流程和 completion gate 因 premature-green 未满足原始先红后绿顺序而失败"
+    review_record_sha256: "6493635dde8561ee74bea529193bccb516e378ee60c675d5e700f7243e2838fd"
+    blocker: "SPEC-BLOCKER-001"
+    quality_review: "not_started"
+    evidence: ["EVD-T1.1-SPEC-REVIEW-FAIL-001"]
+  - id: "EVT-T1.1-TDD-REPLAY-DECISION-001"
+    at: "2026-08-02T17:55:28Z"
+    action: "remediation_decision_recorded"
+    actor: "/root"
+    decision: "DEC-T1.1-TDD-REPLAY-001"
+    route: "REVIEW"
+    reason: "授权规划静态 supplemental remediation，通过外置 git archive baseline 真实重放 red/green，不降低门或破坏现有文件与证据"
+    state_transition: "Task 1.1 and chapter-01 -> needs_revalidation"
+    evidence: ["EVD-T1.1-TDD-REPLAY-DECISION-001"]

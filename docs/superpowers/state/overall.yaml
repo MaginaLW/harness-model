@@ -2,9 +2,9 @@ schema: "progress.v1"
 state_type: "implementation_overall"
 project: "AI 代码协同系统"
 stage: "phase-01-mvp"
-status: "not_started"
+status: "needs_revalidation"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-02T14:03:50Z"
+updated_at: "2026-08-02T17:55:28Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -20,8 +20,8 @@ tracking:
   executable_policy_available: false
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: null
-  current_task: null
+  current_chapter: "chapter-01"
+  current_task: "1.1"
   current_step: null
 
 summary:
@@ -41,7 +41,7 @@ chapters:
     number: 1
     title: "工程基线与可执行契约"
     state_file: "docs/superpowers/state/chapters/chapter-01.yaml"
-    status: "pending"
+    status: "needs_revalidation"
     dependency: "无"
     tasks_total: 5
     steps_total: 28
@@ -143,3 +143,32 @@ history:
     evidence:
       - "docs/superpowers/state/README.md"
       - "docs/superpowers/state/chapters/"
+  - id: "EVT-OVERALL-T1.1-START-001"
+    at: "2026-08-02T17:01:13Z"
+    action: "task_started_summary"
+    actor: "/root/ai_flow_policy_audit"
+    reason: "chapter-01 已成功记录 Task 1.1 启动事件和完整 preflight 证据，随后同步总体状态与当前指针"
+    chapter_event: "EVT-T1.1-START-001"
+    chapter_evidence: "EVD-T1.1-START-001"
+    current_chapter: "chapter-01"
+    current_task: "1.1"
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-T1.1-NEEDS-REVALIDATION-001"
+    at: "2026-08-02T17:55:28Z"
+    action: "task_needs_revalidation_summary"
+    actor: "/root/ai_flow_policy_audit"
+    reason: "独立 spec review 对功能/完整性判定 PASS，但批准流程与 completion gate 因 premature-green 判定 FAIL"
+    chapter_event: "EVT-T1.1-SPEC-REVIEW-FAIL-001"
+    decision_event: "EVT-T1.1-TDD-REPLAY-DECISION-001"
+    chapter_evidence:
+      - "EVD-T1.1-SPEC-REVIEW-FAIL-001"
+      - "EVD-T1.1-TDD-REPLAY-DECISION-001"
+    blocker: "SPEC-BLOCKER-001"
+    decision: "DEC-T1.1-TDD-REPLAY-001"
+    current_chapter: "chapter-01"
+    current_task: "1.1"
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
