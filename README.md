@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前状态：架构、阶段一 MVP 设计及实施目录已完成；工程代码尚未开始实现。
+> 当前状态：阶段一 MVP 已进入 Task 1.1，但其工程基线仍为 `needs_revalidation`；资源感知调度目前只有未来阶段设计与预进入蓝图，尚无运行时实现。
 
 ## 阶段一目标
 
@@ -20,6 +20,9 @@
 | [实施总体规划 V0.2](docs/architecture/AI代码协同系统实施总体规划_V0.2.md) | 总体架构、阶段路线和验收原则 |
 | [阶段一 MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) | 已确认的阶段一技术与治理设计 |
 | [阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md) | 7 章、44 个任务及逐步验证清单 |
+| [资源感知多智能体调度设计](docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) | “编排顾问 + 确定性控制面”、整机资源租约、背压与恢复设计 |
+| [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |
+| [自适应多智能体编排预进入蓝图](docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md) | 安全控制面通过后编写编排顾问与真实 adapter 执行计划的设计输入，当前未授权实施 |
 | [Agent 规则](AGENTS.md) | 所有 Agent 的简短常驻约束 |
 | [Claude Code 规则](CLAUDE.md) | Claude Code 的同源入口 |
 
@@ -34,6 +37,12 @@
 7. 试点验收与阶段一基线
 
 各章节必须按[实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)的前置关系推进，并以其中的命令和通过条件作为完成判据。
+
+## 资源感知调度路线
+
+子智能体并发会同时增加模型、工具进程、内存、CPU 和 I/O 消耗。项目采用两层方案：可选的“编排顾问”负责提出 DAG 和并行建议，确定性调度控制面独占资源准入、全树配额、租约、背压和恢复权。LLM 不能自行提高并发、预算或绕过 AI Flow。
+
+实施顺序为：阶段二先建立非侵入式资源与事件契约，阶段三用真实记录校准容量画像和影子策略，阶段四先交付单机过载防护，再接入自适应编排。当前每会话静态并发上限只是纵深防御，不能视为跨会话、跨进程的整机安全保证。两份预进入蓝图不是执行计划；只有阶段二、阶段三和阶段四进入证据齐备后，才能据此另建正式执行计划。
 
 ## 开始参与
 
