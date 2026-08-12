@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "needs_revalidation"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-02T17:55:28Z"
+updated_at: "2026-08-12T17:19:20Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -119,8 +119,39 @@ future_phases:
     title: "独立编排器"
     status: "not_started"
     implementation_plan: "按计划，仅在多仓库、多平台或多模型协调成本成为真实需求后另建计划"
+    pre_entry_designs:
+      - path: "docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md"
+        sha256: "d7762f0d76c62126902d3ee3888d298cebef95beead4306df5a6af38d0523c7a"
+        authorization: "not_authorized"
+      - path: "docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md"
+        sha256: "50505eaebe6e1c209a670520b3d22870aeab141a4407b8e2402a21bd4171dd6f"
+        authorization: "not_authorized"
+      - path: "docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md"
+        sha256: "d1f7a6db5f86795d7c8f223adf22acf254c5861783f5e1f05b4feb320c393c01"
+        authorization: "not_authorized"
+    entry_gate:
+      status: "blocked"
+      reasons:
+        - "phase-01 needs_revalidation and SPEC-BLOCKER-001 unresolved"
+        - "phase-02 and phase-03 exit evidence unavailable"
+        - "phase-04 quantified coordination-cost and pause/approval-need evidence unavailable"
+        - "Sol/max versus historic Sol/high decision drift unresolved"
+        - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-SCHED-DESIGN-001"
+    status: "recorded"
+    decided_at: "2026-08-12T17:19:20Z"
+    actor: "Codex"
+    subject: "登记资源感知多智能体调度的非执行设计"
+    decision: "接受设计和两份预进入蓝图作为阶段四输入；不授权运行时实现、阶段四代码任务或正式执行计划。"
+    rationale: "用户要求将智能调度纳入项目，但当前阶段一仍 needs_revalidation，阶段二至四的进入证据尚未满足。"
+    consequence: "阶段一状态、计数、基线摘要和 SPEC-BLOCKER-001 不变；达到全部进入门后必须重新 REVIEW 并创建独立执行计划。"
+    subject_commit: "56d1efe39d037237f2ebf2fcdab562fd661312a4"
+    evidence:
+      - "docs/superpowers/decisions/2026-08-13-resource-aware-scheduling-scope.json"
+      - "docs/superpowers/reviews/2026-08-13-resource-aware-scheduling-architecture-review.json"
+      - "docs/superpowers/reviews/2026-08-13-resource-aware-scheduling-governance-review.json"
   - id: "DEC-STATE-001"
     status: "recorded"
     decided_at: "2026-08-02T14:03:50Z"
@@ -172,3 +203,18 @@ history:
     counters_changed: false
     evidence:
       - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-SCHEDULING-BLUEPRINT-001"
+    at: "2026-08-12T17:19:20Z"
+    action: "future_phase_pre_entry_design_recorded"
+    actor: "Codex"
+    reason: "用户授权未来调度与本机过载防护设计；本次仅记录非执行蓝图，不授权运行时实现。"
+    subject_commit: "56d1efe39d037237f2ebf2fcdab562fd661312a4"
+    state_transition: "none"
+    current_chapter: "chapter-01"
+    current_task: "1.1"
+    current_status: "needs_revalidation"
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/decisions/2026-08-13-resource-aware-scheduling-scope.json"
+      - "docs/superpowers/reviews/2026-08-13-resource-aware-scheduling-architecture-review.json"
+      - "docs/superpowers/reviews/2026-08-13-resource-aware-scheduling-governance-review.json"

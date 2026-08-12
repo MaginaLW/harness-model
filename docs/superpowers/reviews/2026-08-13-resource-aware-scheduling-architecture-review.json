@@ -1,0 +1,42 @@
+{
+  "schema": "manual-ai-flow-review.v1",
+  "id": "REV-SCHED-ARCH-001",
+  "status": "PASS",
+  "reviewed_at": "2026-08-12T17:19:20Z",
+  "reviewer": {
+    "task": "/root/scheduler_architecture",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "mode": "independent_read_only"
+  },
+  "subject_commit": "56d1efe39d037237f2ebf2fcdab562fd661312a4",
+  "candidate_manifest": [
+    {
+      "path": "README.md",
+      "sha256": "e916f6a6d2fd0caeb287d686226b6dcefa25eae525b83dedc42946e0478b4ea3"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md",
+      "sha256": "d7762f0d76c62126902d3ee3888d298cebef95beead4306df5a6af38d0523c7a"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md",
+      "sha256": "50505eaebe6e1c209a670520b3d22870aeab141a4407b8e2402a21bd4171dd6f"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md",
+      "sha256": "d1f7a6db5f86795d7c8f223adf22acf254c5861783f5e1f05b4feb320c393c01"
+    }
+  ],
+  "assessment": "架构、安全边界、资源模型、状态机、公平性、单主机一致性和验收标准完整且内部一致；LLM 编排顾问不拥有最终调度权。",
+  "verified_points": [
+    "256-bit attempt capability、adapter/OS 身份绑定、轮换和重放拒绝已定义",
+    "fencing 仅保护调度状态，旧 worker 副作用由隔离、锁保留和退出核对约束",
+    "取消、排空、暂停、孤儿恢复和资源释放条件完整",
+    "唯一仓库外 state root、OS 独占锁、SQLite epoch/CAS 与原子准入避免 split brain",
+    "两级 weighted DRR、aging、可容纳窗口和容量拒绝规则确定性明确",
+    "画像与性能验收冻结了样本量、误差门、硬件和测量条件",
+    "两份蓝图明确为 pre-entry/not_authorized，不提前创建代码任务"
+  ],
+  "blocking_findings": []
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "manual-ai-flow-review.v1",
+  "id": "REV-SCHED-GOV-001",
+  "status": "PASS",
+  "reviewed_at": "2026-08-12T17:19:20Z",
+  "reviewer": {
+    "task": "/root/plan_integration",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "mode": "independent_read_only"
+  },
+  "subject_commit": "56d1efe39d037237f2ebf2fcdab562fd661312a4",
+  "candidate_manifest": [
+    {
+      "path": "README.md",
+      "sha256": "e916f6a6d2fd0caeb287d686226b6dcefa25eae525b83dedc42946e0478b4ea3"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md",
+      "sha256": "d7762f0d76c62126902d3ee3888d298cebef95beead4306df5a6af38d0523c7a"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md",
+      "sha256": "50505eaebe6e1c209a670520b3d22870aeab141a4407b8e2402a21bd4171dd6f"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md",
+      "sha256": "d1f7a6db5f86795d7c8f223adf22acf254c5861783f5e1f05b4feb320c393c01"
+    }
+  ],
+  "assessment": "候选内容符合现有阶段门和人工 AI Flow 约束；仅登记未来阶段非执行设计，不改变阶段一状态、计数、基线摘要或既有 blocker。",
+  "verified_points": [
+    "两份未来文档位于 specs/ 且明确不是 Execution Plan",
+    "正式 plans/ 文件必须等阶段门满足后按届时真实结构创建",
+    "MVP spec 与主实施目录 SHA-256 保持原值",
+    "SPEC-BLOCKER-001 和 needs_revalidation 保持独立有效",
+    "Sol/max 对既有 Sol/high 决定的漂移保留为后续独立 REVIEW 前置条件",
+    "未批准的 external-worker 候选没有被当作授权输入",
+    "跨仓库跨会话使用唯一主机 state root 且失败时 fail-closed"
+  ],
+  "blocking_findings": []
+}

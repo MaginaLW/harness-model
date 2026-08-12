@@ -1,0 +1,77 @@
+{
+  "schema": "manual-ai-flow-decision.v1",
+  "id": "DEC-SCHED-DESIGN-001",
+  "status": "recorded",
+  "recorded_at": "2026-08-12T17:19:20Z",
+  "actor": "Codex",
+  "route": "REVIEW",
+  "verification_level": "V1",
+  "objective": "深度设计资源感知的子智能体调度，并将非执行设计与预进入蓝图登记到项目路线图。",
+  "authorization": {
+    "source": "user_request",
+    "authorized_actions": [
+      "新增调度架构设计与预进入蓝图",
+      "更新 README 文档导航与路线说明",
+      "记录人工 AI Flow 决定、独立复核和总体状态入口",
+      "创建本地 Git 提交"
+    ],
+    "not_authorized_actions": [
+      "实现或运行调度器",
+      "创建阶段四代码任务或正式执行计划",
+      "修改模型路由、并发配置或既有 Policy",
+      "启动外部 worker、付费调用、推送、合并或部署"
+    ]
+  },
+  "scope": {
+    "kind": "documentation_only_future_phase_design",
+    "allowed_paths": [
+      "README.md",
+      "docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md",
+      "docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md",
+      "docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md",
+      "docs/superpowers/decisions/2026-08-13-resource-aware-scheduling-scope.json",
+      "docs/superpowers/reviews/2026-08-13-resource-aware-scheduling-architecture-review.json",
+      "docs/superpowers/reviews/2026-08-13-resource-aware-scheduling-governance-review.json",
+      "docs/superpowers/state/overall.yaml"
+    ]
+  },
+  "baseline": {
+    "base_commit": "970641402713d0a21b4d2aca0c66650e799fea6f",
+    "mvp_design_sha256": "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc",
+    "implementation_directory_sha256": "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a",
+    "current_stage": "phase-01-mvp",
+    "current_status": "needs_revalidation",
+    "existing_blocker": "SPEC-BLOCKER-001",
+    "known_configuration_drift": ".codex/config.toml 为 Sol/max，而 2026-08-05 路由决定记录 Sol/high；本次不修改，阶段四实现前必须单独 REVIEW。"
+  },
+  "decision": "接受资源感知调度设计和两份预进入蓝图作为阶段四的非执行设计输入。真正执行计划只能在阶段一发布、阶段二与阶段三退出证据、量化协调成本、接口稳定性、真实暂停/恢复或集中审批需求以及独立阶段四 REVIEW 决定全部满足后创建。",
+  "subject_commit": "56d1efe39d037237f2ebf2fcdab562fd661312a4",
+  "candidate_manifest": [
+    {
+      "path": "README.md",
+      "sha256": "e916f6a6d2fd0caeb287d686226b6dcefa25eae525b83dedc42946e0478b4ea3"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md",
+      "sha256": "d7762f0d76c62126902d3ee3888d298cebef95beead4306df5a6af38d0523c7a"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md",
+      "sha256": "50505eaebe6e1c209a670520b3d22870aeab141a4407b8e2402a21bd4171dd6f"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md",
+      "sha256": "d1f7a6db5f86795d7c8f223adf22acf254c5861783f5e1f05b4feb320c393c01"
+    }
+  ],
+  "reviews": [
+    "REV-SCHED-ARCH-001",
+    "REV-SCHED-GOV-001"
+  ],
+  "invalidation_conditions": [
+    "subject_commit 或 candidate_manifest 中任一内容变化",
+    "阶段、Policy、模型路由、运行时 adapter 能力或安全边界变化",
+    "从非执行设计转入正式执行计划或运行时实现"
+  ],
+  "attestation_binding": "本 JSON、两份 review 与 overall.yaml 首次共同出现的后续 Git 提交构成治理凭证提交；subject_commit 单独绑定已复核内容以避免自引用。"
+}
