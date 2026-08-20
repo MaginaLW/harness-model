@@ -53,10 +53,10 @@ tasks:
   - id: "5.2"
     title: "实现受控子进程执行器与日志过滤"
     plan_anchor: 1036
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T5.2-START-001"
         kind: "execution_plan"
@@ -65,6 +65,24 @@ tasks:
         base_commit: "dbe04231ca10ac4dc778748b14ace8c63b41e5af"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T5.2-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T18:49:51Z"
+        subject_commit: "51c1a1a57878011e73d11928e803d65222b400f0"
+        artifacts:
+          - "src/aiflow/process_runner.py@sha256:55692a9d67af168b972602d45dca6321551253e6d5a0ed36e6c8f295563cce24"
+          - "src/aiflow/redaction.py@sha256:ae5811789c80be4d0496f7b4b05e1763c5c502617d0ac041515ec75102f4a550"
+          - "tests/unit/test_process_runner.py@sha256:a3b6e4cbe54ec472ecd4b54191c29b42d8136e8c1937c39028a3ac7dc87482de"
+          - "tests/unit/test_redaction.py@sha256:f1e40b762157e580a5f34eca90cb40b1f88f0f2c176af1398afdf68053eb523b"
+        checks:
+          - "pytest process_runner + redaction: 9 passed"
+          - "pytest: 412 passed, 2 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --cached --check: passed"
+        reviews:
+          requirements_conformance: "passed（执行结果、超时树终止、日志脱敏与路径边界完整）"
+          quality: "passed（五项具体 blocker 关闭，无新增阻断）"
     blockers: []
   - id: "5.3"
     title: "实现最终验证的 Git 清洁度与范围检查"
@@ -163,3 +181,14 @@ history:
     actor: "/root"
     reason: "登记 Task 5.2 的 REVIEW + V1 范围，进入受控执行器与日志脱敏实现。"
     evidence: ["EVD-T5.2-START-001"]
+  - id: "EVT-T5.2-COMPLETE-001"
+    at: "2026-08-20T18:49:51Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T5.2-EXECUTION-001"
+    reason: "Task 5.2 的无 Shell 执行、超时进程树终止、最小环境和脱敏完整日志通过 V1 与精简复核。"
+    transition:
+      task_5_2: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "5.3"
+    evidence: ["EVD-T5.2-COMPLETE-001"]
