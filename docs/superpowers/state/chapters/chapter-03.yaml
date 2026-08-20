@@ -52,10 +52,10 @@ tasks:
   - id: "3.2"
     title: "实现决策单元输入与受限谓词"
     plan_anchor: 569
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T3.2-START-001"
         kind: "execution_plan"
@@ -64,6 +64,26 @@ tasks:
         base_commit: "545aedba2ef37d695db04c9ab82d62ee9bf4a889"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T3.2-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T16:05:23Z"
+        subject_commit: "26669128ab36df93b728f468a5db6f6666419d09"
+        artifacts:
+          - "src/aiflow/decision_units.py@sha256:c6cdaf16f46a75ce814db44127d4c892ff3f4330186fb41c6d075b0570142c41"
+          - "src/aiflow/predicates.py@sha256:5d452a8c22ec5755e7671b3fc84b823b048214c22626db0bcefec76ced2140fc"
+          - "tests/unit/test_decision_units.py@sha256:4f069783abb3bbebcf7aa64ed441083e635b66acd35ec2579d07a20edcf52e4a"
+          - "tests/unit/test_predicates.py@sha256:5e0d2844166a2f0dc93544aa2593ea07bb16fc6cedd3c1c22fdf56f265c86435"
+          - ".ai/templates/task.yaml@sha256:0aaa4acbf9a31209c17ef87ca4a964f5d4a33b374700730b1eb7afaefb63a698"
+        checks:
+          - "pytest tests/unit/test_decision_units.py tests/unit/test_predicates.py: 21 passed"
+          - "pytest: 217 passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+          - "forbidden execution primitive scan: no matches"
+        reviews:
+          requirements_conformance: "passed（Task 3.2 五步全部覆盖）"
+          quality: "passed（封闭谓词、稳定解释、批准类型对齐既有 Schema）"
     blockers: []
   - id: "3.3"
     title: "实现硬规则与 route 汇总"
@@ -144,3 +164,14 @@ history:
     actor: "/root"
     reason: "登记 Task 3.2 的精简 REVIEW + V1 范围，进入决策单元与受限谓词实现。"
     evidence: ["EVD-T3.2-START-001"]
+  - id: "EVT-T3.2-COMPLETE-001"
+    at: "2026-08-20T16:05:23Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T3.2-EXECUTION-001"
+    reason: "决策单元解析、受限谓词与无敏感值解释完成，并通过 V1 与内联双复核。"
+    transition:
+      task_3_2: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "3.3"
+    evidence: ["EVD-T3.2-COMPLETE-001"]
