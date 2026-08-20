@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import re
@@ -24,6 +23,7 @@ from aiflow.errors import (
     StorageError,
 )
 from aiflow.git_context import GitContext, collect_git_context
+from aiflow.specification import specification_digest, validate_specification
 from aiflow.state import create_record_event, create_transition_event, replay_events
 from aiflow.storage import (
     atomic_write_json,
@@ -45,6 +45,9 @@ ESCALATING_FAILURE_MARKERS = frozenset(
         "unverifiable",
         "high_risk_side_effects",
     }
+)
+FREEZE_ALLOWED_STATES = frozenset(
+    {"NEW", "CLASSIFIED", "WAITING_FOR_SPEC_REVIEW", "READY_TO_IMPLEMENT"}
 )
 
 
@@ -547,6 +550,79 @@ def record_task_event(
     return TransitionResult(task=task, event=event)
 
 
+def freeze_task(
+    repository_root: Path,
+    task_id: str,
+    *,
+    actor: str,
+    allow_waiting_for_ask: bool = False,
+) -> TransitionResult:
+    """Validate and freeze the current specification without changing task state."""
+    record = load_task_record(repository_root, task_id)
+    allowed_states = set(FREEZE_ALLOWED_STATES)
+    if allow_waiting_for_ask:
+        allowed_states.add("WAITING_FOR_ASK")
+    current_state = record.task.get("current_state")
+    if current_state not in allowed_states:
+        raise StateTransitionError(
+            "Task specification cannot be frozen from its current state",
+            code="STATE_TRANSITION_NOT_ALLOWED",
+            details={"current_state": current_state},
+        )
+
+    spec_path = resolve_task_path(repository_root, task_id, "spec.md")
+    try:
+        content = spec_path.read_bytes().decode("utf-8")
+    except (OSError, UnicodeError) as error:
+        raise StorageError(
+            "Could not read task specification",
+            code="SPECIFICATION_READ_FAILED",
+            details={"task_id": task_id},
+        ) from error
+    assessment = validate_specification(content)
+
+    event = create_record_event(
+        record.task,
+        event_type="spec_frozen",
+        actor=actor,
+        payload={
+            "spec_sha256": assessment.sha256,
+            "previous_spec_sha256": record.task.get("frozen_spec_sha256"),
+            "normalized": assessment.normalized != content,
+        },
+        sequence=len(record.events) + 1,
+    )
+    task = {
+        **record.task,
+        "frozen_spec_sha256": assessment.sha256,
+        "spec_frozen_at": event["occurred_at"],
+        "updated_at": event["occurred_at"],
+    }
+    require_valid_contract("task", task)
+    if assessment.normalized != content:
+        atomic_write_text(spec_path, assessment.normalized)
+    _persist_event_and_task(resolve_task_path(repository_root, task_id), task, event)
+    return TransitionResult(task=task, event=event)
+
+
+def specification_is_current(repository_root: Path, task_id: str) -> bool:
+    """Return whether the current specification matches the recorded frozen digest."""
+    record = load_task_record(repository_root, task_id)
+    frozen_digest = record.task.get("frozen_spec_sha256")
+    if not isinstance(frozen_digest, str):
+        return False
+    spec_path = resolve_task_path(repository_root, task_id, "spec.md")
+    try:
+        content = spec_path.read_bytes().decode("utf-8")
+    except (OSError, UnicodeError) as error:
+        raise StorageError(
+            "Could not read task specification",
+            code="SPECIFICATION_READ_FAILED",
+            details={"task_id": task_id},
+        ) from error
+    return specification_digest(content) == frozen_digest
+
+
 def _load_classification(repository_root: Path, task_id: str) -> dict[str, Any]:
     value = read_task_json(
         repository_root,
@@ -577,6 +653,11 @@ def _load_approvals(repository_root: Path, task_id: str) -> list[dict[str, Any]]
 def _require_ready_artifacts(repository_root: Path, task_id: str, record: TaskRecord) -> None:
     if not any(event.get("event_type") == "spec_frozen" for event in record.events):
         raise ContractError("Task specification is not frozen", code="BEGIN_SPEC_NOT_FROZEN")
+    if not specification_is_current(repository_root, task_id):
+        raise ContractError(
+            "Task specification changed after it was frozen",
+            code="BEGIN_SPEC_CHANGED",
+        )
     classification = _load_classification(repository_root, task_id)
     entries = classification.get("classifications")
     if not isinstance(entries, list):
@@ -609,7 +690,7 @@ def _require_ready_artifacts(repository_root: Path, task_id: str, record: TaskRe
     approvals = _load_approvals(repository_root, task_id)
     spec_path = resolve_task_path(repository_root, task_id, "spec.md")
     try:
-        spec_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
+        spec_sha = specification_digest(spec_path.read_text(encoding="utf-8"))
     except OSError as error:
         raise StorageError(
             "Could not read frozen specification", code="BEGIN_SPEC_READ_FAILED"

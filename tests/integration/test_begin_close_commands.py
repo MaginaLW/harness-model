@@ -13,8 +13,8 @@ import pytest
 from aiflow.cli import main
 from aiflow.storage import atomic_write_json
 from aiflow.task_service import (
+    freeze_task,
     load_task_record,
-    record_task_event,
     transition_task_record,
 )
 
@@ -122,13 +122,7 @@ def make_ready(
         satisfied_preconditions={"classification_available"},
     )
     if freeze_spec:
-        record_task_event(
-            repository,
-            "TASK-0001",
-            event_type="spec_frozen",
-            actor="tester",
-            payload={},
-        )
+        freeze_task(repository, "TASK-0001", actor="tester")
     atomic_write_json(task_directory / "classification.json", classification(route))
     approvals: list[dict[str, Any]] = []
     if valid_approval:

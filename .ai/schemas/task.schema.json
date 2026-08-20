@@ -57,6 +57,8 @@
     "current_state": {"$ref": "#/$defs/task_state"},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"},
+    "frozen_spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "spec_frozen_at": {"type": "string", "format": "date-time"},
     "decision_units": {
       "type": "array",
       "minItems": 1,
@@ -69,6 +71,10 @@
       "type": "string",
       "pattern": "^(?:[A-Za-z]:[\\\\/]|/)"
     }
+  },
+  "dependentRequired": {
+    "frozen_spec_sha256": ["spec_frozen_at"],
+    "spec_frozen_at": ["frozen_spec_sha256"]
   },
   "$defs": {
     "task_state": {
