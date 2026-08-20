@@ -10,7 +10,8 @@ from aiflow.contracts import validate_contract
 from aiflow.errors import PolicyError
 
 KNOWN_REVERSIBILITY = frozenset({"reversible", "conditionally_reversible", "irreversible"})
-DECLARED_PERMISSION_REQUIREMENTS = frozenset({"spec", "code", "action"})
+# Requirement tokens name gates; approval records use the related spec/code/action types.
+DECLARED_PERMISSION_REQUIREMENTS = frozenset({"spec_approval", "code_approval", "action_approval"})
 
 
 def _error(message: str, code: str, **details: object) -> PolicyError:

@@ -71,8 +71,8 @@ def test_parse_decision_units_rejects_duplicate_and_task_mismatch() -> None:
 
 def test_parse_decision_units_supports_narrowed_permission_vocabulary() -> None:
     unit = _unit()
-    unit["permission_requirements"] = ["spec"]
-    assert parse_decision_units(_task(unit))[0]["permission_requirements"] == ["spec"]
+    unit["permission_requirements"] = ["spec_approval"]
+    assert parse_decision_units(_task(unit))[0]["permission_requirements"] == ["spec_approval"]
     with pytest.raises(PolicyError) as raised:
         parse_decision_units(_task(unit), declared_permissions=frozenset())
     assert raised.value.code == "DECISION_UNIT_PERMISSION_UNDECLARED"
