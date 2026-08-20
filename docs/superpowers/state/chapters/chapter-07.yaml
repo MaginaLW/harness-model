@@ -41,8 +41,10 @@ tasks:
           - "examples/scenarios/README.md"
         checks:
           - "pytest scenario isolation + golden contracts: 13 passed"
+          - "pytest full suite: 569 passed, 3 skipped (Windows symlink privilege unavailable)"
           - "ruff focused: passed"
-          - "mypy scenarios: passed"
+          - "ruff check and format: passed"
+          - "mypy src tools: passed"
           - "git diff --check: passed"
     blockers: []
   - id: "7.2"
