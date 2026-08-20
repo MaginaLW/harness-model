@@ -1,0 +1,58 @@
+schema_version: '1.0'
+task_id: TASK-0001
+goal: Add a bounded evidence-expiry documentation example
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: pilot/auto-doc
+base_commit: 01e0e282afaead31b9653391584267f20ccbf13a
+subject_commit: 2b1900a0207d106147d21e0d9c7e85a8d450fa4b
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- docs/operations/evidence-expiry-example.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: APPROVED_FOR_MERGE
+created_at: '2026-08-20T23:43:53Z'
+updated_at: '2026-08-20T23:44:41Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0001
+  decision_unit_id: DU-001
+  goal: Add a bounded evidence-expiry documentation example
+  inputs: []
+  planned_actions:
+  - Implement the bounded task objective
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - Define and run executable verification
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: false
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: true
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: local
+    regression_risk: false
+    error_detectability: high
+repository_path_at_creation: D:/Repos/harness-model-pilot-auto
+frozen_spec_sha256: 2ab8edb065ede233d0cf393c11bc6be784d598fc23390f01663a578d50dd71ca
+spec_frozen_at: '2026-08-20T23:44:22Z'

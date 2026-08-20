@@ -1,0 +1,27 @@
+usage: aiflow [-h] [--version]
+              {start,begin,close,classify,freeze,answer,approve,escalate,resolve,status,verify,gate,validate,scope,sync}
+              ...
+
+Auditable AI code collaboration CLI
+
+positional arguments:
+  {start,begin,close,classify,freeze,answer,approve,escalate,resolve,status,verify,gate,validate,scope,sync}
+    start               create or recover an AI Flow task
+    begin               begin implementation or retry
+    close               record an externally completed merge
+    classify            classify a task using the active Policy
+    freeze              validate and freeze a task specification
+    answer              record an ASK selection and freeze its spec
+    approve             record a version-bound approval
+    escalate            raise a task's governance route
+    resolve             record evidence for an escalation condition
+    status              show a read-only task summary
+    verify              run controlled verification
+    gate                evaluate the read-only merge gate
+    validate            validate governed task artifacts
+    scope               validate the final task Git scope
+    sync                synchronize an explicitly scoped task subject
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
