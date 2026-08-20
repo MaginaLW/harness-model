@@ -68,6 +68,14 @@ def classification(route: str) -> dict[str, Any]:
         "schema_version": "1.0",
         "task_id": "TASK-0001",
         "classification_input_sha256": "a" * 64,
+        "policy_version": "1.0.0",
+        "policy_sha256": POLICY_SHA,
+        "base_commit": "1" * 40,
+        "subject_commit": "1" * 40,
+        "classified_at": "2026-08-20T14:00:00Z",
+        "effective_route": route,
+        "effective_verification_level": "V1",
+        "change_reason": "unchanged",
         "classifications": [
             {
                 "decision_unit_id": "DU-001",
@@ -75,6 +83,19 @@ def classification(route: str) -> dict[str, Any]:
                 "verification_level": "V1",
                 "rule_id": "TEST-RULE",
                 "explanation": "test classification",
+                "matched_rules": [
+                    {
+                        "rule_id": "TEST-RULE",
+                        "priority": 1,
+                        "route": route,
+                        "explanation": "test classification",
+                        "predicate_explanations": [],
+                    }
+                ],
+                "explanations": ["test classification"],
+                "verification_rule_ids": ["TEST-VERIFICATION"],
+                "verification_explanations": ["test verification"],
+                "verification_blocking_reasons": [],
                 "policy_version": "1.0.0",
                 "policy_sha256": POLICY_SHA,
                 "classified_at": "2026-08-20T14:00:00Z",
@@ -373,7 +394,24 @@ def test_close_records_existing_merge_without_running_merge(
     assert run_git(repository, "branch", "--show-current") == branch_before
 
 
-@pytest.mark.parametrize("command", ["begin", "close"])
+def test_classify_records_durable_evidence_and_is_idempotent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    first = load_task_record(repository, "TASK-0001")
+    assert first.task["current_state"] == "BLOCKED"
+    assert (repository / ".ai" / "tasks" / "TASK-0001" / "classification.json").is_file()
+    event_count = len(first.events)
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    assert len(load_task_record(repository, "TASK-0001").events) == event_count
+
+
+@pytest.mark.parametrize("command", ["begin", "close", "classify"])
 def test_command_help_is_available(command: str, capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as caught:
         main([command, "--help"])

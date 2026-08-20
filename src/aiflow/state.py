@@ -51,7 +51,7 @@ TRANSITIONS: Mapping[tuple[str, str], TransitionRule] = MappingProxyType(
             "spec_review_required", "classification_route_selected"
         ),
         ("CLASSIFIED", "READY_TO_IMPLEMENT"): _rule(
-            "implementation_ready", "classification_route_selected", "spec_frozen"
+            "implementation_ready", "classification_route_selected"
         ),
         ("CLASSIFIED", "BLOCKED"): _rule("classification_blocked", "blocking_condition_recorded"),
         ("WAITING_FOR_ASK", "READY_TO_IMPLEMENT"): _rule(
@@ -85,7 +85,14 @@ TRANSITIONS: Mapping[tuple[str, str], TransitionRule] = MappingProxyType(
 )
 
 NON_STATE_EVENTS = frozenset(
-    {"task_created", "spec_frozen", "approval_recorded", "evidence_generated", "state_recovered"}
+    {
+        "task_created",
+        "spec_frozen",
+        "approval_recorded",
+        "evidence_generated",
+        "state_recovered",
+        "resolution_recorded",
+    }
 )
 
 

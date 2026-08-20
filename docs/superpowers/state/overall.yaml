@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T16:23:35Z"
+updated_at: "2026-08-20T16:24:36Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-03"
   current_task: "3.5"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T3.5-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T16:24:36Z"
+    actor: "/root"
+    subject: "执行 Task 3.5 classify 命令"
+    decision: "按 REVIEW + V1 流程实现完整分类记录、两阶段状态推进、幂等身份和无授权降级保护。"
+    rationale: "分类结果驱动治理状态，必须绑定当前 Policy、稳定输入和 Git 提交；现有简化 Schema 与状态前置不足以表达实施目录要求。"
+    consequence: "Task 3.5 进入 in_progress，允许范围经记录扩展到直接相关 Schema/fixture 和状态决策表，累计计数暂不变。"
+    base_commit: "847a1a2a8cd0d1d24eb009e76d098b0910f71565"
+    subject_commit: null
+    evidence:
+      - "docs/superpowers/plans/2026-08-21-chapter-03-task-3-5-execution.md"
+      - "docs/superpowers/state/chapters/chapter-03.yaml#EVD-T3.5-START-001"
   - id: "DEC-T3.4-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T16:16:21Z"
