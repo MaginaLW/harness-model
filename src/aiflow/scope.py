@@ -51,6 +51,15 @@ class ChangedPaths:
 
 
 @dataclass(frozen=True)
+class VerificationChangedPaths:
+    """All independently governed path sets used by verification."""
+
+    committed: tuple[str, ...]
+    attestation: tuple[str, ...]
+    worktree: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class AutoPreflightFacts:
     """Facts a caller collects before allowing an AUTO command to proceed."""
 
@@ -271,33 +280,77 @@ def collect_changed_paths(
     head_commit: str | None = None,
 ) -> ChangedPaths:
     """Collect committed, attestation, tracked, untracked, deleted, and renamed paths."""
+    changes = collect_verification_changed_paths(
+        repository_root,
+        base_commit=base_commit,
+        subject_commit=subject_commit,
+        head_commit=head_commit,
+    )
+    return ChangedPaths(
+        tuple(sorted(set(changes.committed) | set(changes.attestation) | set(changes.worktree)))
+    )
+
+
+def collect_verification_changed_paths(
+    repository_root: Path,
+    *,
+    base_commit: str,
+    subject_commit: str,
+    head_commit: str | None = None,
+) -> VerificationChangedPaths:
+    """Collect range, attestation, and worktree paths without collapsing their meanings."""
     root = repository_root.resolve()
     committed = _diff_paths(
         _run_git(
             root,
-            ("diff", "--name-status", "-z", "--find-renames", base_commit, subject_commit),
+            (
+                "diff",
+                "--name-status",
+                "-z",
+                "--find-renames",
+                "--find-copies",
+                base_commit,
+                subject_commit,
+            ),
         )
     )
+    attestation: set[str] = set()
     if head_commit is not None and head_commit != subject_commit:
-        committed.update(
-            _diff_paths(
-                _run_git(
-                    root,
-                    (
-                        "diff",
-                        "--name-status",
-                        "-z",
-                        "--find-renames",
-                        subject_commit,
-                        head_commit,
-                    ),
-                )
+        attestation = _diff_paths(
+            _run_git(
+                root,
+                (
+                    "diff",
+                    "--name-status",
+                    "-z",
+                    "--find-renames",
+                    "--find-copies",
+                    subject_commit,
+                    head_commit,
+                ),
             )
         )
     worktree = _status_paths(
         _run_git(root, ("status", "--porcelain=v1", "-z", "--untracked-files=all"))
     )
-    return ChangedPaths(tuple(sorted(committed | worktree)))
+    return VerificationChangedPaths(
+        committed=tuple(sorted(committed)),
+        attestation=tuple(sorted(attestation)),
+        worktree=tuple(sorted(worktree)),
+    )
+
+
+def assess_governance_only_scope(
+    paths: Sequence[str], *, task_id: str, repository_root: Path | None = None
+) -> ScopeAssessment:
+    """Require every path to be a record owned by the active task, without cache exceptions."""
+    return assess_scope(
+        paths,
+        (f".ai/tasks/{task_id}/**",),
+        task_id=task_id,
+        repository_root=repository_root,
+        cache_patterns=(),
+    )
 
 
 def evaluate_auto_preflight(facts: AutoPreflightFacts) -> AutoPreflightResult:

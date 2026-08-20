@@ -7,8 +7,15 @@ import subprocess
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from aiflow.errors import AiflowError
+from aiflow.scope import (
+    ScopeAssessment,
+    assess_governance_only_scope,
+    assess_scope,
+    collect_verification_changed_paths,
+)
 
 GIT_TIMEOUT_SECONDS = 10
 HEAD_PATTERN = re.compile(r"^[0-9a-f]{40}$")
@@ -24,6 +31,31 @@ class GitContext:
     head: str
     worktree_dirty: bool
     dirty_paths: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class VerificationGitBinding:
+    """Immutable task version facts that a verification run must preserve."""
+
+    repository_id: str
+    branch: str
+    base_commit: str
+    subject_commit: str
+
+
+@dataclass(frozen=True)
+class VerificationGitAssessment:
+    """Replayable Git boundary decision for one provisional or final verification."""
+
+    mode: Literal["provisional", "final"]
+    gate_eligible: bool
+    reason_codes: tuple[str, ...]
+    subject_commit: str
+    attestation_head: str
+    committed_scope: ScopeAssessment
+    attestation_scope: ScopeAssessment
+    worktree_scope: ScopeAssessment
+    subject_sync_event: dict[str, object] | None
 
 
 def _error(message: str, code: str, **details: object) -> AiflowError:
@@ -185,4 +217,121 @@ def collect_git_context(path: Path) -> GitContext:
         head=head,
         worktree_dirty=bool(dirty_paths),
         dirty_paths=dirty_paths,
+    )
+
+
+def _is_ancestor(repository_root: Path, ancestor: str, descendant: str) -> bool:
+    if HEAD_PATTERN.fullmatch(ancestor) is None or HEAD_PATTERN.fullmatch(descendant) is None:
+        return False
+    try:
+        result = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+            cwd=repository_root,
+            capture_output=True,
+            check=False,
+            timeout=GIT_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+
+def evaluate_verification_git_context(
+    repository_root: Path,
+    *,
+    task_id: str,
+    allowed_scope: tuple[str, ...],
+    binding: VerificationGitBinding,
+    mode: Literal["provisional", "final"],
+) -> VerificationGitAssessment:
+    """Assess a verification snapshot without mutating task state or Git history."""
+    if mode not in {"provisional", "final"}:
+        raise _error("Verification mode is invalid", "VERIFY_MODE_INVALID")
+    context = collect_git_context(repository_root)
+    reasons: list[str] = []
+    if context.repository_id != binding.repository_id:
+        reasons.append("VERIFY_REPOSITORY_CHANGED")
+    if context.branch != binding.branch:
+        reasons.append("VERIFY_BRANCH_CHANGED")
+    if not _is_ancestor(Path(context.repository_path), binding.base_commit, context.head):
+        reasons.append("VERIFY_BASE_UNREACHABLE")
+
+    initial_changes = collect_verification_changed_paths(
+        Path(context.repository_path),
+        base_commit=binding.base_commit,
+        subject_commit=binding.subject_commit,
+        head_commit=context.head,
+    )
+    committed_scope = assess_scope(
+        initial_changes.committed,
+        allowed_scope,
+        task_id=task_id,
+        repository_root=Path(context.repository_path),
+        cache_patterns=(),
+    )
+    attestation_scope = assess_governance_only_scope(
+        initial_changes.attestation,
+        task_id=task_id,
+        repository_root=Path(context.repository_path),
+    )
+    worktree_scope = assess_governance_only_scope(
+        initial_changes.worktree,
+        task_id=task_id,
+        repository_root=Path(context.repository_path),
+    )
+    subject = binding.subject_commit
+    sync_candidate = False
+    if mode == "final" and not attestation_scope.passed:
+        sync_candidate = any(
+            not path.startswith(".ai/tasks/") for path in attestation_scope.out_of_scope
+        )
+        if sync_candidate:
+            subject = context.head
+            candidate_changes = collect_verification_changed_paths(
+                Path(context.repository_path),
+                base_commit=binding.base_commit,
+                subject_commit=subject,
+                head_commit=context.head,
+            )
+            committed_scope = assess_scope(
+                candidate_changes.committed,
+                allowed_scope,
+                task_id=task_id,
+                repository_root=Path(context.repository_path),
+                cache_patterns=(),
+            )
+    if mode == "provisional":
+        reasons.append("VERIFY_PROVISIONAL_NOT_GATE")
+    else:
+        if not committed_scope.passed or (not sync_candidate and not attestation_scope.passed):
+            reasons.append("VERIFY_SCOPE_EXCEEDED")
+        if not worktree_scope.passed:
+            reasons.append("VERIFY_WORKTREE_DIRTY")
+
+    ordered = tuple(sorted(set(reasons)))
+    synchronized = mode == "final" and sync_candidate and not ordered and subject == context.head
+    event: dict[str, object] | None = (
+        {
+            "event_type": "subject_commit_synchronized",
+            "old_subject_commit": binding.subject_commit,
+            "new_subject_commit": context.head,
+            "base_commit": binding.base_commit,
+            "repository_id": context.repository_id,
+            "branch": context.branch,
+            "observed_head": context.head,
+            "mode": mode,
+        }
+        if synchronized
+        else None
+    )
+    return VerificationGitAssessment(
+        mode=mode,
+        gate_eligible=mode == "final" and not ordered,
+        reason_codes=ordered,
+        subject_commit=subject,
+        attestation_head=context.head,
+        committed_scope=committed_scope,
+        attestation_scope=attestation_scope,
+        worktree_scope=worktree_scope,
+        subject_sync_event=event,
     )

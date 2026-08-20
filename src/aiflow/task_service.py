@@ -10,7 +10,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
 import yaml
 
@@ -23,7 +23,13 @@ from aiflow.errors import (
     StateTransitionError,
     StorageError,
 )
-from aiflow.git_context import GitContext, collect_git_context
+from aiflow.git_context import (
+    GitContext,
+    VerificationGitAssessment,
+    VerificationGitBinding,
+    collect_git_context,
+    evaluate_verification_git_context,
+)
 from aiflow.policy import load_policy_bundle
 from aiflow.scope import (
     AutoPreflightFacts,
@@ -437,6 +443,34 @@ def _persist_event_and_task(
         ) from error
 
 
+def _is_subject_sync_staged_patch(
+    raw_task: Mapping[str, object], staged_task: Mapping[str, object], event: Mapping[str, object]
+) -> bool:
+    """Accept only the exact materialization left after a subject-sync replace interruption."""
+    payload = event.get("payload")
+    if event.get("event_type") != "subject_commit_synchronized" or not isinstance(payload, Mapping):
+        return False
+    old_subject = payload.get("old_subject_commit")
+    new_subject = payload.get("new_subject_commit")
+    occurred_at = event.get("occurred_at")
+    if not all(isinstance(value, str) for value in (old_subject, new_subject, occurred_at)):
+        return False
+    for field, payload_field in (
+        ("base_commit", "base_commit"),
+        ("repository_id", "repository_id"),
+        ("branch", "branch"),
+    ):
+        value = payload.get(payload_field)
+        if (
+            not isinstance(value, str)
+            or raw_task.get(field) != value
+            or staged_task.get(field) != value
+        ):
+            return False
+    expected = {**raw_task, "subject_commit": new_subject, "updated_at": occurred_at}
+    return raw_task.get("subject_commit") == old_subject and dict(staged_task) == expected
+
+
 def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
     """Load and replay a task, repairing event-ahead materialization if necessary."""
     raw_task = read_task_yaml(
@@ -450,10 +484,34 @@ def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
     task: dict[str, Any] = raw_task
     events = _read_event_log(repository_root, task_id)
     terminal_state = replay_events(events, task_id=task_id)
-    if task.get("current_state") == terminal_state:
-        return TaskRecord(task=task, events=tuple(events))
-
     staged_path = resolve_task_path(repository_root, task_id, "task.yaml.next")
+    if task.get("current_state") == terminal_state:
+        if not staged_path.is_file():
+            return TaskRecord(task=task, events=tuple(events))
+        staged_task = read_task_yaml(
+            repository_root,
+            task_id,
+            "task.yaml.next",
+            contract_name="task",
+        )
+        if not isinstance(staged_task, dict) or not _is_subject_sync_staged_patch(
+            task, staged_task, events[-1]
+        ):
+            raise StateTransitionError(
+                "Materialized task has an invalid staged replacement",
+                code="STATE_MATERIALIZATION_MISMATCH",
+                details={},
+            )
+        try:
+            _replace_materialized_task(
+                staged_path, resolve_task_path(repository_root, task_id, "task.yaml")
+            )
+        except OSError as error:
+            raise StorageError(
+                "Could not recover materialized task", code="STATE_MATERIALIZATION_FAILED"
+            ) from error
+        return TaskRecord(task=staged_task, events=tuple(events))
+
     if not staged_path.is_file():
         raise StateTransitionError(
             "Materialized task differs from replay without a staged replacement",
@@ -557,6 +615,68 @@ def record_task_event(
     task_directory = resolve_task_path(repository_root, task_id)
     _persist_event_and_task(task_directory, task, event)
     return TransitionResult(task=task, event=event)
+
+
+def evaluate_and_sync_verification_subject(
+    repository_root: Path,
+    task_id: str,
+    *,
+    mode: str,
+    actor: str,
+) -> VerificationGitAssessment:
+    """Evaluate a Git verification snapshot and atomically record an eligible subject sync."""
+    if mode not in {"provisional", "final"}:
+        raise ContractError("Verification mode is invalid", code="VERIFY_MODE_INVALID")
+    if not actor.strip():
+        raise ContractError("Verification actor is required", code="VERIFY_ACTOR_REQUIRED")
+    record = load_task_record(repository_root, task_id)
+    task = record.task
+    allowed_scope = task.get("allowed_scope")
+    fields = ("repository_id", "branch", "base_commit", "subject_commit")
+    if (
+        not isinstance(allowed_scope, list)
+        or not all(isinstance(value, str) for value in allowed_scope)
+        or not all(isinstance(task.get(field), str) for field in fields)
+    ):
+        raise ContractError(
+            "Task Git verification binding is invalid", code="VERIFY_BINDING_INVALID"
+        )
+    assessment = evaluate_verification_git_context(
+        repository_root,
+        task_id=task_id,
+        allowed_scope=tuple(allowed_scope),
+        binding=VerificationGitBinding(
+            repository_id=str(task["repository_id"]),
+            branch=str(task["branch"]),
+            base_commit=str(task["base_commit"]),
+            subject_commit=str(task["subject_commit"]),
+        ),
+        mode=cast(Literal["provisional", "final"], mode),
+    )
+    if (
+        mode == "provisional"
+        or not assessment.gate_eligible
+        or assessment.subject_sync_event is None
+        or assessment.subject_commit == task["subject_commit"]
+    ):
+        return assessment
+    payload = dict(assessment.subject_sync_event)
+    payload.pop("event_type", None)
+    event = create_record_event(
+        task,
+        event_type="subject_commit_synchronized",
+        actor=actor,
+        payload=payload,
+        sequence=len(record.events) + 1,
+    )
+    updated = {
+        **task,
+        "subject_commit": assessment.subject_commit,
+        "updated_at": event["occurred_at"],
+    }
+    require_valid_contract("task", updated)
+    _persist_event_and_task(resolve_task_path(repository_root, task_id), updated, event)
+    return assessment
 
 
 def freeze_task(

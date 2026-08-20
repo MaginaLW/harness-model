@@ -112,6 +112,7 @@ NON_STATE_EVENTS = frozenset(
         "ask_answer_recorded",
         "approval_recorded",
         "evidence_generated",
+        "subject_commit_synchronized",
         "state_recovered",
         "resolution_recorded",
     }

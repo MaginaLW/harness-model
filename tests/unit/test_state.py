@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import pytest
 import yaml
 
 from aiflow.errors import StateTransitionError, StorageError
+from aiflow.git_context import VerificationGitAssessment
+from aiflow.scope import ScopeAssessment
 from aiflow.state import (
     ALL_STATES,
     NON_STATE_EVENTS,
@@ -20,7 +22,11 @@ from aiflow.state import (
     replay_events,
 )
 from aiflow.storage import atomic_write_text, atomic_write_yaml
-from aiflow.task_service import load_task_record, transition_task_record
+from aiflow.task_service import (
+    evaluate_and_sync_verification_subject,
+    load_task_record,
+    transition_task_record,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TRANSITION_FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "state" / "transitions.json"
@@ -56,7 +62,9 @@ def test_transition_table_matches_independent_fixture() -> None:
     actual = {edge: (rule.event_type, rule.preconditions) for edge, rule in TRANSITIONS.items()}
 
     assert actual == expected
-    assert NON_STATE_EVENTS == frozenset(fixture()["non_state_events"])
+    assert NON_STATE_EVENTS == frozenset(fixture()["non_state_events"]) | {
+        "subject_commit_synchronized"
+    }
 
 
 @pytest.mark.parametrize("transition", fixture()["transitions"])
@@ -213,6 +221,7 @@ def persistent_task(repository: Path) -> dict[str, Any]:
     )
     task["current_state"] = "NEW"
     task["task_id"] = "TASK-0001"
+    task["subject_commit"] = "1" * 40
     task["decision_units"][0]["task_id"] = "TASK-0001"
     directory = repository / ".ai" / "tasks" / "TASK-0001"
     directory.mkdir(parents=True)
@@ -299,3 +308,133 @@ def test_replace_interruption_is_recovered_from_appended_event(
     assert len(recovered.events) == 3
     assert recovered.events[-1]["event_type"] == "state_recovered"
     assert recovered.events[-1]["from_state"] == recovered.events[-1]["to_state"] == "CLASSIFIED"
+
+
+def sync_assessment(mode: Literal["provisional", "final"] = "final") -> VerificationGitAssessment:
+    scope = ScopeAssessment((), (), ())
+    return VerificationGitAssessment(
+        mode=mode,
+        gate_eligible=mode == "final",
+        reason_codes=() if mode == "final" else ("VERIFY_PROVISIONAL_NOT_GATE",),
+        subject_commit="2" * 40,
+        attestation_head="2" * 40,
+        committed_scope=scope,
+        attestation_scope=scope,
+        worktree_scope=scope,
+        subject_sync_event={
+            "event_type": "subject_commit_synchronized",
+            "old_subject_commit": "1" * 40,
+            "new_subject_commit": "2" * 40,
+            "base_commit": "1" * 40,
+            "observed_head": "2" * 40,
+            "repository_id": "123e4567-e89b-42d3-a456-426614174000",
+            "branch": "main",
+            "mode": mode,
+        },
+    )
+
+
+def test_verification_subject_sync_is_atomic_and_idempotent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aiflow import task_service
+
+    persistent_task(tmp_path)
+    monkeypatch.setattr(
+        task_service,
+        "evaluate_verification_git_context",
+        lambda *_args, **_kwargs: sync_assessment(),
+    )
+
+    first = evaluate_and_sync_verification_subject(
+        tmp_path, "TASK-0001", mode="final", actor="verifier"
+    )
+    record = load_task_record(tmp_path, "TASK-0001")
+    assert first.subject_commit == "2" * 40
+    assert record.task["subject_commit"] == "2" * 40
+    assert len(record.events) == 2
+    assert record.events[-1]["event_type"] == "subject_commit_synchronized"
+    assert record.events[-1]["payload"]["observed_head"] == "2" * 40
+
+    evaluate_and_sync_verification_subject(tmp_path, "TASK-0001", mode="final", actor="verifier")
+    assert len(load_task_record(tmp_path, "TASK-0001").events) == 2
+
+
+def test_provisional_does_not_persist_and_sync_recovery_replaces_staged_task(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aiflow import task_service
+
+    persistent_task(tmp_path)
+    monkeypatch.setattr(
+        task_service,
+        "evaluate_verification_git_context",
+        lambda *_args, **_kwargs: sync_assessment("provisional"),
+    )
+    evaluate_and_sync_verification_subject(
+        tmp_path, "TASK-0001", mode="provisional", actor="verifier"
+    )
+    assert len(load_task_record(tmp_path, "TASK-0001").events) == 1
+
+    monkeypatch.setattr(
+        task_service,
+        "evaluate_verification_git_context",
+        lambda *_args, **_kwargs: sync_assessment(),
+    )
+    original = task_service._replace_materialized_task
+    monkeypatch.setattr(
+        task_service,
+        "_replace_materialized_task",
+        lambda *_args: (_ for _ in ()).throw(OSError("replace")),
+    )
+    with pytest.raises(StorageError) as caught:
+        evaluate_and_sync_verification_subject(
+            tmp_path, "TASK-0001", mode="final", actor="verifier"
+        )
+    assert caught.value.code == "STATE_MATERIALIZATION_FAILED"
+
+    monkeypatch.setattr(task_service, "_replace_materialized_task", original)
+    evaluate_and_sync_verification_subject(tmp_path, "TASK-0001", mode="final", actor="verifier")
+    recovered = load_task_record(tmp_path, "TASK-0001")
+    assert recovered.task["subject_commit"] == "2" * 40
+    assert len(recovered.events) == 2
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("goal", "tampered"), ("subject_commit", "3" * 40)],
+)
+def test_subject_sync_recovery_rejects_unbound_staged_patch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: str,
+) -> None:
+    from aiflow import task_service
+
+    persistent_task(tmp_path)
+    monkeypatch.setattr(
+        task_service,
+        "evaluate_verification_git_context",
+        lambda *_args, **_kwargs: sync_assessment(),
+    )
+    original = task_service._replace_materialized_task
+    monkeypatch.setattr(
+        task_service,
+        "_replace_materialized_task",
+        lambda *_args: (_ for _ in ()).throw(OSError("replace")),
+    )
+    with pytest.raises(StorageError):
+        evaluate_and_sync_verification_subject(
+            tmp_path, "TASK-0001", mode="final", actor="verifier"
+        )
+    staged_path = tmp_path / ".ai" / "tasks" / "TASK-0001" / "task.yaml.next"
+    staged = yaml.safe_load(staged_path.read_text(encoding="utf-8"))
+    assert isinstance(staged, dict)
+    staged[field] = value
+    atomic_write_yaml(staged_path, staged)
+
+    monkeypatch.setattr(task_service, "_replace_materialized_task", original)
+    with pytest.raises(StateTransitionError) as caught:
+        load_task_record(tmp_path, "TASK-0001")
+    assert caught.value.code == "STATE_MATERIALIZATION_MISMATCH"
