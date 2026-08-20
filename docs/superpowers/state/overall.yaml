@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T18:23:11Z"
+updated_at: "2026-08-20T18:24:38Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-05"
   current_task: "5.1"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T5.1-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T18:24:38Z"
+    actor: "/root"
+    subject: "执行 Task 5.1 V0/V1 验证计划解析"
+    decision: "按 REVIEW + V1 流程实现无 Shell、路径受限、能力完整且类别可追溯的验证计划模型。"
+    rationale: "后续执行器和 evidence 必须消费同一个确定性计划，不能在命令运行时再解释自由文本或隐式降级。"
+    consequence: "Chapter 5 与 Task 5.1 进入 in_progress；本任务只解析和预检，不执行验证命令。"
+    base_commit: "6b0601b216d033d714cfa229a65c0d19d1ec8787"
+    subject_commit: null
+    evidence:
+      - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-1-execution.md"
+      - "docs/superpowers/state/chapters/chapter-05.yaml#EVD-T5.1-START-001"
   - id: "DEC-T4.6-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T18:18:56Z"
@@ -1174,3 +1187,16 @@ history:
       - "docs/superpowers/state/chapters/chapter-04.yaml"
       - "docs/implementation/chapter-04-governance-workflows.md"
       - "tests/integration/test_governance_paths.py"
+  - id: "EVT-OVERALL-T5.1-START-001"
+    at: "2026-08-20T18:24:38Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 5 已登记 Task 5.1 的 REVIEW + V1 范围并进入 Step 1。"
+    chapter_event: "EVT-T5.1-START-001"
+    chapter_evidence: "EVD-T5.1-START-001"
+    current_chapter: "chapter-05"
+    current_task: "5.1"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-05.yaml"
