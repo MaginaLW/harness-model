@@ -7,8 +7,7 @@
     "HARD-BLOCK-IRREVERSIBLE-NO-BACKUP"
   ],
   "reasons": [
-    "The planned overwrite is irreversible and no verified backup exists.",
-    "The broad target has no dry-run evidence that identifies the exact affected files."
+    "An irreversible action requires a verified backup."
   ],
   "next_allowed_state": "BLOCKED",
   "required_approvals": [],

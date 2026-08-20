@@ -9,11 +9,11 @@ from typing import Any
 
 from aiflow.contracts import require_valid_contract
 from aiflow.git_context import collect_git_context
+from aiflow.routing import ROUTE_ORDER
 from aiflow.state import TRANSITIONS
 from aiflow.storage import read_task_json, resolve_task_path
 from aiflow.task_service import TaskRecord, read_task_record_strict
 
-ROUTE_PRIORITY = {"AUTO": 0, "ASK": 1, "REVIEW": 2, "BLOCK": 3}
 MISSING_BY_STATE: dict[str, tuple[str, ...]] = {
     "NEW": ("classification",),
     "CLASSIFIED": ("route_resolution",),
@@ -85,14 +85,13 @@ def _classification(repository_root: Path, task_id: str) -> tuple[str, str]:
     value = read_task_json(
         repository_root, task_id, "classification.json", contract_name="classification"
     )
-    if not isinstance(value, dict) or not isinstance(value.get("classifications"), list):
+    if not isinstance(value, dict):
         return "not_available", "not_available"
-    entries = [entry for entry in value["classifications"] if isinstance(entry, dict)]
-    routes = [entry.get("route") for entry in entries if entry.get("route") in ROUTE_PRIORITY]
-    levels = [entry.get("verification_level") for entry in entries]
-    route = max(routes, key=lambda item: ROUTE_PRIORITY[str(item)]) if routes else "not_available"
-    verification = "V1" if "V1" in levels else ("V0" if "V0" in levels else "not_available")
-    return str(route), verification
+    route = value.get("effective_route")
+    verification = value.get("effective_verification_level")
+    if route not in ROUTE_ORDER or verification not in {"V0", "V1"}:
+        return "not_available", "not_available"
+    return str(route), str(verification)
 
 
 def _approval_status(repository_root: Path, task_id: str, task: dict[str, Any]) -> str:

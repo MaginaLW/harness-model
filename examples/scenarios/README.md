@@ -1,13 +1,15 @@
 # Golden Scenarios
 
 These files are static contracts for the first-stage AUTO, ASK, REVIEW, and BLOCK semantics.
-They are inputs and expected outputs for a future classification engine; they are not claims that
-runtime classification has already been implemented or executed.
+The golden integration test runs every input through the real classification engine in a fresh Git
+repository and compares the durable, non-dynamic classification evidence with `expected.json`.
 
 Each scenario contains:
 
 - `input.yaml`: one decision unit that satisfies the machine contract;
-- `expected.json`: stable route, verification, Policy rule, ordered reasons, and next-state data.
+- `expected.json`: stable route, verification, Policy rule IDs, ordered Policy explanations, and
+  next-state data.
 
-Expected files deliberately exclude timestamps and absolute checkout paths so later engines can
-compare deterministic fields directly.
+Expected files deliberately exclude timestamps and absolute checkout paths so runtime results can
+be compared deterministically. They do not copy raw task inputs or sensitive values; explanations
+come from the active Policy wording.

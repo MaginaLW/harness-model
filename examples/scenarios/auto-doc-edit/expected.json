@@ -7,9 +7,7 @@
     "ROUTE-AUTO-EXPLICIT-GUARDS"
   ],
   "reasons": [
-    "Scope is limited to ordinary documentation under docs/**.",
-    "The edit is reversible through Git and has no external side effect.",
-    "A diff and Markdown check can verify the result automatically."
+    "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects."
   ],
   "next_allowed_state": "READY_TO_IMPLEMENT",
   "required_approvals": [],

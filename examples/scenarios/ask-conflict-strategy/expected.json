@@ -7,8 +7,7 @@
     "ROUTE-ASK-MULTIPLE-DIRECTIONS"
   ],
   "reasons": [
-    "Markdown, JSON, and dual output are three reasonable product directions.",
-    "The alternatives trade human readability against machine compatibility and maintenance cost."
+    "Multiple reasonable business directions require a user choice."
   ],
   "next_allowed_state": "WAITING_FOR_ASK",
   "required_approvals": [],

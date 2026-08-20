@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T16:43:22Z"
+updated_at: "2026-08-20T16:44:55Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-03"
   current_task: "3.6"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T3.6-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T16:44:55Z"
+    actor: "/root"
+    subject: "执行 Task 3.6 黄金场景与 Chapter 3 退出"
+    decision: "按 REVIEW + V1 章节验收流程，用真实分类服务锁定四类黄金/变形场景，完成说明、累计门和双重复核。"
+    rationale: "本章所有引擎已实现；黄金 reasons 必须从人工未来描述收敛到真实 Policy 规范解释，才能成为可重复比较的运行时契约。"
+    consequence: "Task 3.6 进入 in_progress；route/V/state 结论不变，允许范围包含黄金 expected reasons 和场景 README。"
+    base_commit: "5e8363c1c40af6a16c5d395af4075ad2b6f2ff92"
+    subject_commit: null
+    evidence:
+      - "docs/superpowers/plans/2026-08-21-chapter-03-task-3-6-execution.md"
+      - "docs/superpowers/state/chapters/chapter-03.yaml#EVD-T3.6-START-001"
   - id: "DEC-T3.5-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T16:24:36Z"
