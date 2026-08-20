@@ -158,10 +158,10 @@ tasks:
   - id: "3.5"
     title: "实现 `aiflow classify`"
     plan_anchor: 673
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T3.5-START-001"
         kind: "execution_plan"
@@ -171,6 +171,27 @@ tasks:
         route: "REVIEW"
         verification: "V1"
         scope_change: "扩展完整分类契约并纠正 classify→freeze 顺序的状态前置；begin 冻结门保持。"
+      - id: "EVD-T3.5-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T16:43:22Z"
+        subject_commit: "262de3caa5b1f4a7948aaf00ff9a50db02ee0531"
+        artifacts:
+          - "src/aiflow/classification_service.py@sha256:9d36ef5bcf5d26e2564cc757ba66fed39b16338d0d57e8c21b6362ec461db6a2"
+          - "src/aiflow/cli.py@sha256:bb64c1d2caf475ccce18117fe5e7e0fe4b4072c3a05a9549215bcaa26ccdfd32"
+          - "src/aiflow/state.py@sha256:e2823996cc6a6c327e7cdfe669afcc0bb9152257fc1d499d0a1b7d15063d0fd2"
+          - ".ai/schemas/classification.schema.json@sha256:ac968bedce7b880b83feb01d9e690099b7ad0b52114a9e19dfd138e1cb212360"
+          - "tests/integration/test_classify_command.py@sha256:e5998a2dad62180472e12c2de2c5c39145b84d869884f6d5db94fb7947d0f418"
+        checks:
+          - "pytest tests/integration/test_classify_command.py: 14 passed"
+          - "pytest classify + begin/close + status + contracts + state: 130 passed"
+          - "pytest: 254 passed"
+          - "aiflow classify --help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 3.5 六步全部覆盖）"
+          quality: "passed（独立只读复核后修正双跳恢复、授权绑定、segment-aware scope 与完整记录）"
     blockers: []
   - id: "3.6"
     title: "运行四类黄金场景并完成第三章退出检查"
@@ -284,3 +305,14 @@ history:
     actor: "/root"
     reason: "登记 Task 3.5 的 REVIEW + V1 范围，补全分类记录契约与既定工作流所需状态边。"
     evidence: ["EVD-T3.5-START-001"]
+  - id: "EVT-T3.5-COMPLETE-001"
+    at: "2026-08-20T16:43:22Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T3.5-EXECUTION-001"
+    reason: "classify 完整记录、状态推进、幂等恢复与授权降级保护完成，并通过 V1 和独立只读复核。"
+    transition:
+      task_3_5: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "3.6"
+    evidence: ["EVD-T3.5-COMPLETE-001"]

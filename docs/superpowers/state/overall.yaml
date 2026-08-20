@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T16:24:36Z"
+updated_at: "2026-08-20T16:43:22Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-03"
-  current_task: "3.5"
-  current_step: 1
+  current_task: "3.6"
+  current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 2
   tasks_total: 44
-  tasks_completed: 15
+  tasks_completed: 16
   steps_total: 243
-  steps_completed: 81
+  steps_completed: 87
   exit_checks_total: 7
   exit_checks_completed: 2
   blockers_total: 0
@@ -148,7 +148,7 @@ decisions:
     rationale: "分类结果驱动治理状态，必须绑定当前 Policy、稳定输入和 Git 提交；现有简化 Schema 与状态前置不足以表达实施目录要求。"
     consequence: "Task 3.5 进入 in_progress，允许范围经记录扩展到直接相关 Schema/fixture 和状态决策表，累计计数暂不变。"
     base_commit: "847a1a2a8cd0d1d24eb009e76d098b0910f71565"
-    subject_commit: null
+    subject_commit: "262de3caa5b1f4a7948aaf00ff9a50db02ee0531"
     evidence:
       - "docs/superpowers/plans/2026-08-21-chapter-03-task-3-5-execution.md"
       - "docs/superpowers/state/chapters/chapter-03.yaml#EVD-T3.5-START-001"
