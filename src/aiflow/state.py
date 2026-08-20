@@ -82,11 +82,13 @@ TRANSITIONS: Mapping[tuple[str, str], TransitionRule] = MappingProxyType(
         ("IMPLEMENTING", "BLOCKED"): _rule("task_blocked", "blocking_condition_recorded"),
         ("VERIFYING", "VERIFIED"): _rule("verification_passed", "verification_passed"),
         ("VERIFYING", "FAILED"): _rule("verification_failed", "verification_failed"),
+        ("VERIFYING", "IMPLEMENTING"): _rule("verification_checked", "provisional_complete"),
         ("VERIFYING", "ESCALATED"): _rule("verification_escalated", "escalation_recorded"),
         ("VERIFYING", "BLOCKED"): _rule("verification_blocked", "blocking_condition_recorded"),
         ("VERIFIED", "APPROVED_FOR_MERGE"): _rule(
             "merge_approved_automatically", "final_review_not_required"
         ),
+        ("VERIFIED", "VERIFYING"): _rule("verification_restarted", "reverification_requested"),
         ("VERIFIED", "WAITING_FOR_FINAL_REVIEW"): _rule(
             "final_review_required", "final_review_required"
         ),
@@ -96,8 +98,14 @@ TRANSITIONS: Mapping[tuple[str, str], TransitionRule] = MappingProxyType(
         ("WAITING_FOR_FINAL_REVIEW", "BLOCKED"): _rule(
             "task_blocked", "blocking_condition_recorded"
         ),
+        ("WAITING_FOR_FINAL_REVIEW", "VERIFYING"): _rule(
+            "verification_restarted", "reverification_requested"
+        ),
         ("WAITING_FOR_FINAL_REVIEW", "APPROVED_FOR_MERGE"): _rule(
             "code_approved", "code_approval_valid"
+        ),
+        ("APPROVED_FOR_MERGE", "VERIFYING"): _rule(
+            "verification_restarted", "reverification_requested"
         ),
         ("APPROVED_FOR_MERGE", "MERGED"): _rule("merge_recorded", "merge_commit_verified"),
         ("ESCALATED", "CLASSIFIED"): _rule("escalation_resolved", "resolution_recorded"),

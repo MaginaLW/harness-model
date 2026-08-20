@@ -15,6 +15,7 @@ from aiflow.errors import AiflowError
 from aiflow.escalation import ESCALATION_REASON_CODES, escalate_task, record_resolution
 from aiflow.status_service import summarize_task
 from aiflow.task_service import begin_task, close_task, freeze_task, recover_task, start_task
+from aiflow.verification_service import verify_task
 
 DESCRIPTION = "Auditable AI code collaboration CLI"
 
@@ -75,6 +76,13 @@ def build_parser() -> ArgumentParser:
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
+    verify = subparsers.add_parser("verify", help="run controlled verification")
+    verify.add_argument("task_id")
+    verify.add_argument("--actor")
+    verify.add_argument("--check", action="append", default=[])
+    verify.add_argument("--ci", action="store_true")
+    verify.add_argument("--ci-run-dir", type=Path)
+    verify.add_argument("--output", type=Path)
     return parser
 
 
@@ -170,6 +178,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif arguments.command == "status":
             summary = summarize_task(Path.cwd(), arguments.task_id)
             print(summary.to_json() if arguments.format == "json" else summary.to_text())
+        elif arguments.command == "verify":
+            result = verify_task(
+                Path.cwd(),
+                arguments.task_id,
+                actor=arguments.actor,
+                check_ids=arguments.check,
+                ci=arguments.ci,
+                ci_run_dir=arguments.ci_run_dir,
+                output=arguments.output,
+            )
+            print(f"{result.task_id} {result.state or 'CI'} {result.conclusion}")
     except AiflowError as error:
         print(error.message, file=sys.stderr)
         return 1

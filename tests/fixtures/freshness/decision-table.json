@@ -6,6 +6,7 @@
   {"artifact_type":"classification","artifact":{"classification_input_sha256":"a"},"current":{"task_id":"TASK-0001","classification_input_sha256":"b"},"status":"stale","reasons":["FRESHNESS_CLASSIFICATION_CHANGED"]},
   {"artifact_type":"classification","artifact":{"base_commit":"a"},"current":{"task_id":"TASK-0001","base_commit":"b"},"status":"stale","reasons":["FRESHNESS_SCOPE_CHANGED"]},
   {"artifact_type":"classification","artifact":{"subject_commit":"a"},"current":{"task_id":"TASK-0001","subject_commit":"b"},"status":"stale","reasons":["FRESHNESS_SUBJECT_CHANGED"]},
+  {"artifact_type":"classification","artifact":{"subject_commit":"a"},"current":{"task_id":"TASK-0001","subject_commit":"b","subject_synchronized":true},"status":"fresh","reasons":[]},
   {"artifact_type":"evidence","artifact":{"conclusion":"passed","spec_sha256":"a"},"current":{"task_id":"TASK-0001","spec_sha256":"b","governance_only":true},"status":"stale","reasons":["FRESHNESS_SPEC_CHANGED"]},
   {"artifact_type":"evidence","artifact":{"conclusion":"passed","policy_sha256":"a"},"current":{"task_id":"TASK-0001","policy_sha256":"b","governance_only":true},"status":"stale","reasons":["FRESHNESS_POLICY_CHANGED"]},
   {"artifact_type":"evidence","artifact":{"conclusion":"passed","classification_input_sha256":"a"},"current":{"task_id":"TASK-0001","classification_input_sha256":"b","governance_only":true},"status":"stale","reasons":["FRESHNESS_CLASSIFICATION_CHANGED"]},

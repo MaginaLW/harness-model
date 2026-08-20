@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Any
 
 from aiflow.contracts import require_valid_contract
-from aiflow.decision_units import classification_input_digest, parse_decision_units
+from aiflow.decision_units import parse_decision_units
 from aiflow.errors import AiflowError, ContractError
-from aiflow.freshness import evaluate_freshness
+from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import collect_git_context
 from aiflow.policy import load_policy_bundle
 from aiflow.routing import ROUTE_ORDER
@@ -116,6 +116,7 @@ def _current_facts(
     *,
     observed_head: str,
     classification: dict[str, Any] | None,
+    events: tuple[dict[str, Any], ...],
 ) -> dict[str, object]:
     """Collect the current public bindings once for every freshness consumer."""
     facts: dict[str, object] = {
@@ -138,9 +139,14 @@ def _current_facts(
     except (OSError, UnicodeError):
         facts["spec_sha256"] = "unavailable"
     try:
-        facts["classification_input_sha256"] = classification_input_digest(
-            task, parse_decision_units(task)
+        units = parse_decision_units(task)
+        if classification is None:
+            raise ContractError("Classification is unavailable")
+        digest, synchronized = current_classification_input_digest(
+            task, units, classification, events
         )
+        facts["classification_input_sha256"] = digest
+        facts["subject_synchronized"] = synchronized
     except AiflowError:
         facts["classification_input_sha256"] = "unavailable"
     if classification is not None:
@@ -251,6 +257,7 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
         task,
         observed_head=context.head,
         classification=classification,
+        events=record.events,
     )
     classification_report = evaluate_freshness(
         "classification", classification, current, invalid=classification_invalid

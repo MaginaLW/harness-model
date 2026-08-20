@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Literal
+
+from aiflow.decision_units import classification_input_digest
 
 FreshnessStatus = Literal["fresh", "stale", "missing", "not_applicable"]
 _ORDER = (
@@ -33,6 +35,30 @@ class ArtifactFreshness:
     reproduce_argv: tuple[str, ...]
 
 
+def current_classification_input_digest(
+    task: Mapping[str, object],
+    units: Sequence[Mapping[str, object]],
+    classification: Mapping[str, object],
+    events: Sequence[Mapping[str, object]],
+) -> tuple[str, bool]:
+    """Preserve classification facts across one audited subject synchronization."""
+    current_subject = task.get("subject_commit")
+    classified_subject = classification.get("subject_commit")
+
+    def matches(event: Mapping[str, object]) -> bool:
+        payload = event.get("payload")
+        return (
+            event.get("event_type") == "subject_commit_synchronized"
+            and isinstance(payload, Mapping)
+            and payload.get("old_subject_commit") == classified_subject
+            and payload.get("new_subject_commit") == current_subject
+        )
+
+    synchronized = current_subject != classified_subject and any(matches(event) for event in events)
+    digest_task = {**task, "subject_commit": classified_subject} if synchronized else dict(task)
+    return classification_input_digest(digest_task, units), synchronized
+
+
 def evaluate_freshness(
     artifact_type: Literal[
         "classification", "evidence", "spec_approval", "code_approval", "action_approval"
@@ -56,13 +82,15 @@ def evaluate_freshness(
             return ArtifactFreshness("not_applicable", (), ())
         return ArtifactFreshness("missing", ("FRESHNESS_ARTIFACT_MISSING",), command)
     reasons: list[str] = ["FRESHNESS_ARTIFACT_INVALID"] if invalid else []
+    classification_fields = [
+        "base_commit",
+        "policy_sha256",
+        "classification_input_sha256",
+    ]
+    if current.get("subject_synchronized") is not True:
+        classification_fields.append("subject_commit")
     fields = {
-        "classification": (
-            "base_commit",
-            "subject_commit",
-            "policy_sha256",
-            "classification_input_sha256",
-        ),
+        "classification": (*classification_fields,),
         "evidence": (
             "repository_id",
             "branch",

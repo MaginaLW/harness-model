@@ -24,16 +24,20 @@
     {"from": "IMPLEMENTING", "to": "BLOCKED", "event_type": "task_blocked", "preconditions": ["blocking_condition_recorded"]},
     {"from": "VERIFYING", "to": "VERIFIED", "event_type": "verification_passed", "preconditions": ["verification_passed"]},
     {"from": "VERIFYING", "to": "FAILED", "event_type": "verification_failed", "preconditions": ["verification_failed"]},
+    {"from": "VERIFYING", "to": "IMPLEMENTING", "event_type": "verification_checked", "preconditions": ["provisional_complete"]},
     {"from": "VERIFYING", "to": "ESCALATED", "event_type": "verification_escalated", "preconditions": ["escalation_recorded"]},
     {"from": "VERIFYING", "to": "BLOCKED", "event_type": "verification_blocked", "preconditions": ["blocking_condition_recorded"]},
     {"from": "VERIFIED", "to": "APPROVED_FOR_MERGE", "event_type": "merge_approved_automatically", "preconditions": ["final_review_not_required"]},
+    {"from": "VERIFIED", "to": "VERIFYING", "event_type": "verification_restarted", "preconditions": ["reverification_requested"]},
     {"from": "VERIFIED", "to": "WAITING_FOR_FINAL_REVIEW", "event_type": "final_review_required", "preconditions": ["final_review_required"]},
     {"from": "VERIFIED", "to": "ESCALATED", "event_type": "task_escalated", "preconditions": ["escalation_recorded"]},
     {"from": "VERIFIED", "to": "BLOCKED", "event_type": "task_blocked", "preconditions": ["blocking_condition_recorded"]},
     {"from": "WAITING_FOR_FINAL_REVIEW", "to": "APPROVED_FOR_MERGE", "event_type": "code_approved", "preconditions": ["code_approval_valid"]},
+    {"from": "WAITING_FOR_FINAL_REVIEW", "to": "VERIFYING", "event_type": "verification_restarted", "preconditions": ["reverification_requested"]},
     {"from": "WAITING_FOR_FINAL_REVIEW", "to": "ESCALATED", "event_type": "task_escalated", "preconditions": ["escalation_recorded"]},
     {"from": "WAITING_FOR_FINAL_REVIEW", "to": "BLOCKED", "event_type": "task_blocked", "preconditions": ["blocking_condition_recorded"]},
     {"from": "APPROVED_FOR_MERGE", "to": "MERGED", "event_type": "merge_recorded", "preconditions": ["merge_commit_verified"]},
+    {"from": "APPROVED_FOR_MERGE", "to": "VERIFYING", "event_type": "verification_restarted", "preconditions": ["reverification_requested"]},
     {"from": "ESCALATED", "to": "CLASSIFIED", "event_type": "escalation_resolved", "preconditions": ["resolution_recorded"]},
     {"from": "BLOCKED", "to": "CLASSIFIED", "event_type": "block_resolved", "preconditions": ["resolution_recorded"]}
   ],
@@ -43,6 +47,7 @@
     "ask_answer_recorded",
     "approval_recorded",
     "evidence_generated",
+    "subject_commit_synchronized",
     "state_recovered",
     "resolution_recorded"
   ]
