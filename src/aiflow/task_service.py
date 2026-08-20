@@ -651,7 +651,7 @@ def _load_approvals(repository_root: Path, task_id: str) -> list[dict[str, Any]]
 
 
 def _require_ready_artifacts(repository_root: Path, task_id: str, record: TaskRecord) -> None:
-    if not any(event.get("event_type") == "spec_frozen" for event in record.events):
+    if not isinstance(record.task.get("frozen_spec_sha256"), str):
         raise ContractError("Task specification is not frozen", code="BEGIN_SPEC_NOT_FROZEN")
     if not specification_is_current(repository_root, task_id):
         raise ContractError(

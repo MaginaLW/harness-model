@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -78,10 +78,12 @@ def _require_baseline(root: Path, task: Mapping[str, object]) -> None:
         )
 
 
-def _target(route: str, blocked: bool) -> tuple[str, str, set[str]]:
+def _target(
+    route: str, blocked: bool, entries: Sequence[Mapping[str, object]]
+) -> tuple[str, str, set[str]]:
     if blocked or route == "BLOCK":
         return "BLOCKED", "classification_blocked", {"blocking_condition_recorded"}
-    if route == "ASK":
+    if any(entry.get("route") == "ASK" for entry in entries):
         return "WAITING_FOR_ASK", "ask_required", {"classification_route_selected"}
     if route == "REVIEW":
         return "WAITING_FOR_SPEC_REVIEW", "spec_review_required", {"classification_route_selected"}
@@ -379,7 +381,7 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
             payload=evidence,
             satisfied_preconditions={"classification_available"},
         )
-    target_state, event_type, preconditions = _target(route, blocked)
+    target_state, event_type, preconditions = _target(route, blocked, entries)
     transition_task_record(
         repository_root,
         task_id,

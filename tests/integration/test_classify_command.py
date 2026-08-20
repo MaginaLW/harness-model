@@ -124,6 +124,36 @@ def test_classify_same_identity_does_not_append_events(
     assert len(load_task_record(repository, "TASK-0001").events) == count
 
 
+def test_mixed_ask_review_waits_for_answer_before_spec_review(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    ask = _unit("TASK-0001", business_direction_count=2)
+    review = _unit("TASK-0001", impact_categories=["ci"])
+    review["decision_unit_id"] = "DU-002"
+    task["decision_units"] = [ask, review]
+    atomic_write_yaml(task_path, task)
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    assert classification["effective_route"] == "REVIEW"
+    assert {entry["route"] for entry in classification["classifications"]} == {
+        "ASK",
+        "REVIEW",
+    }
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["current_state"] == "WAITING_FOR_ASK"
+    assert record.events[-1]["event_type"] == "ask_required"
+
+
 def test_blocked_reclassification_binds_old_and_new_identity_and_authorization(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

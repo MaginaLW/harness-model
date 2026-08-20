@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from aiflow import __version__
+from aiflow.ask_service import answer_task
 from aiflow.classification_service import classify_task
 from aiflow.errors import AiflowError
 from aiflow.status_service import summarize_task
@@ -42,6 +43,12 @@ def build_parser() -> ArgumentParser:
     freeze = subparsers.add_parser("freeze", help="validate and freeze a task specification")
     freeze.add_argument("task_id")
     freeze.add_argument("--actor", required=True)
+    answer = subparsers.add_parser("answer", help="record an ASK selection and freeze its spec")
+    answer.add_argument("task_id")
+    answer.add_argument("--options-file", required=True, type=Path)
+    answer.add_argument("--select", required=True)
+    answer.add_argument("--actor", required=True)
+    answer.add_argument("--reason", required=True)
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
@@ -93,6 +100,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif arguments.command == "freeze":
             freeze_result = freeze_task(Path.cwd(), arguments.task_id, actor=arguments.actor)
             print(f"{arguments.task_id} {freeze_result.task['current_state']}")
+        elif arguments.command == "answer":
+            answer_result = answer_task(
+                Path.cwd(),
+                arguments.task_id,
+                options_file=arguments.options_file,
+                selected_option_id=arguments.select,
+                actor=arguments.actor,
+                reason=arguments.reason,
+            )
+            print(f"{arguments.task_id} {answer_result.task['current_state']}")
+            print("ASK option structure was validated; semantic exclusivity was not proven.")
         elif arguments.command == "status":
             summary = summarize_task(Path.cwd(), arguments.task_id)
             print(summary.to_json() if arguments.format == "json" else summary.to_text())

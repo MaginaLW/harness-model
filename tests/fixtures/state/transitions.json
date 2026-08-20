@@ -7,6 +7,7 @@
     {"from": "CLASSIFIED", "to": "READY_TO_IMPLEMENT", "event_type": "implementation_ready", "preconditions": ["classification_route_selected"]},
     {"from": "CLASSIFIED", "to": "BLOCKED", "event_type": "classification_blocked", "preconditions": ["blocking_condition_recorded"]},
     {"from": "WAITING_FOR_ASK", "to": "READY_TO_IMPLEMENT", "event_type": "ask_answered", "preconditions": ["answer_recorded", "spec_frozen"]},
+    {"from": "WAITING_FOR_ASK", "to": "WAITING_FOR_SPEC_REVIEW", "event_type": "ask_answered", "preconditions": ["answer_recorded", "spec_frozen"]},
     {"from": "WAITING_FOR_SPEC_REVIEW", "to": "READY_TO_IMPLEMENT", "event_type": "spec_approved", "preconditions": ["spec_frozen", "spec_approval_valid"]},
     {"from": "READY_TO_IMPLEMENT", "to": "IMPLEMENTING", "event_type": "implementation_started", "preconditions": ["readiness_satisfied"]},
     {"from": "FAILED", "to": "IMPLEMENTING", "event_type": "implementation_retried", "preconditions": ["retry_reason_recorded"]},
@@ -25,6 +26,7 @@
   "non_state_events": [
     "task_created",
     "spec_frozen",
+    "ask_answer_recorded",
     "approval_recorded",
     "evidence_generated",
     "state_recovered",
