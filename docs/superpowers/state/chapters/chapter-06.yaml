@@ -85,10 +85,10 @@ tasks:
   - id: "6.3"
     title: "建立统一验证包装和薄层 Hooks"
     plan_anchor: 1374
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T6.3-START-001"
         kind: "execution_plan"
@@ -97,6 +97,27 @@ tasks:
         base_commit: "6a1f2da211e301ed4b0e4faed08f18aade8ff2fe"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T6.3-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T21:33:21Z"
+        subject_commit: "0ac7de1a698d47fff9fa6d8e24a3df5d7ae873a2"
+        artifacts:
+          - "tools/gauntlet.py@sha256:9280018da20933af982136e1beeaf02e257343e8f8c1585d38c8e17836b72415"
+          - "tools/hooks/pre_commit.py@sha256:466b228b8e50b2fc2fe2f74a2aa2c90fdd68e344805f14db0987a34a06958fd6"
+          - "tools/hooks/pre_command.py@sha256:6b20e79be062e35f2cea7d9f5d2d44c9740a6f785e1dcbabd06966f5cb965f09"
+          - "tests/integration/test_tool_wrappers.py@sha256:219293cbade6b8fcfc5ac559e88aed78775a5e06c3cb52c0476b637ff10378ea"
+          - "docs/operations/hooks.md@sha256:66383daa73cede787c302194428673b1b5f713b83addd848c13026165ab40ddd"
+        checks:
+          - "pytest tool wrappers: 14 passed"
+          - "pytest related verification/policy/workflow: 45 passed"
+          - "pytest full suite: 551 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "wrapper help commands: passed"
+          - "ruff check and format: passed"
+          - "mypy src tools: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（gauntlet、pre-commit、pre-command 和平台接入边界完整）"
+          quality: "passed（适配器仅委托核心，不执行外部动作、不改索引且不解析任意 Shell）"
     blockers: []
   - id: "6.4"
     title: "建立 GitHub Actions 质量门"
@@ -183,3 +204,13 @@ history:
     actor: "/root"
     reason: "登记 Task 6.3 的 REVIEW + V1 范围，进入统一验证包装与薄层 Hooks 实现。"
     evidence: ["EVD-T6.3-START-001"]
+  - id: "EVT-T6.3-COMPLETE-001"
+    at: "2026-08-20T21:33:21Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "统一验证包装、范围/状态 Hook、权限 Hook 和平台接入说明通过全量回归。"
+    transition:
+      task_6_3: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "6.4"
+    evidence: ["EVD-T6.3-COMPLETE-001"]
