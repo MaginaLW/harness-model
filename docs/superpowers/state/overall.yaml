@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T18:18:56Z"
+updated_at: "2026-08-20T18:23:11Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -20,19 +20,19 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-04"
-  current_task: "4.6"
-  current_step: 1
+  current_chapter: "chapter-05"
+  current_task: "5.1"
+  current_step: null
 
 summary:
   chapters_total: 7
-  chapters_completed: 3
+  chapters_completed: 4
   tasks_total: 44
-  tasks_completed: 22
+  tasks_completed: 23
   steps_total: 243
-  steps_completed: 120
+  steps_completed: 127
   exit_checks_total: 7
-  exit_checks_completed: 3
+  exit_checks_completed: 4
   blockers_total: 0
   evidence_items: 0
 
@@ -65,7 +65,7 @@ chapters:
     number: 4
     title: "治理交互流程"
     state_file: "docs/superpowers/state/chapters/chapter-04.yaml"
-    status: "in_progress"
+    status: "completed"
     dependency: "chapters 01-03 completed"
     tasks_total: 6
     steps_total: 35
@@ -148,7 +148,7 @@ decisions:
     rationale: "Chapter 5 将直接消费这些治理状态和批准边界，必须先以真实事件重放锁定顺序与隔离性。"
     consequence: "Task 4.6 进入 in_progress；Chapter 4 在测试、说明和双复核通过前不置绿。"
     base_commit: "6614eb6417257fa48dfe4f0dd7893e46260c8afb"
-    subject_commit: null
+    subject_commit: "d564b3f7044d82fb0c28ef8a4cc1a410260da36e"
     evidence:
       - "docs/superpowers/plans/2026-08-21-chapter-04-task-4-6-execution.md"
       - "docs/superpowers/state/chapters/chapter-04.yaml#EVD-T4.6-START-001"
@@ -1151,3 +1151,26 @@ history:
     counters_changed: false
     evidence:
       - "docs/superpowers/state/chapters/chapter-04.yaml"
+  - id: "EVT-OVERALL-T4.6-COMPLETE-001"
+    at: "2026-08-20T18:23:11Z"
+    action: "chapter_exit_completed_summary"
+    actor: "/root"
+    reason: "Chapter 4 四类治理端到端、说明、累计门和双重复核全部通过。"
+    chapter_event: "EVT-T4.6-COMPLETE-001"
+    chapter_evidence: "EVD-T4.6-COMPLETE-001"
+    decision: "DEC-T4.6-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_04_status: "completed"
+      task_4_6_status: "completed"
+      current_chapter: "chapter-05"
+      current_task: "5.1"
+      current_step: null
+      chapters_completed: 4
+      tasks_completed: 23
+      steps_completed: 127
+      exit_checks_completed: 4
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-04.yaml"
+      - "docs/implementation/chapter-04-governance-workflows.md"
+      - "tests/integration/test_governance_paths.py"

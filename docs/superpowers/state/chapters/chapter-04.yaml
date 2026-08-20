@@ -4,7 +4,7 @@ chapter:
   id: "chapter-04"
   number: 4
   title: "治理交互流程"
-  status: "in_progress"
+  status: "completed"
   plan_lines: "751-994"
   dependency: "chapters 01-03 completed"
   tasks_total: 6
@@ -206,10 +206,10 @@ tasks:
   - id: "4.6"
     title: "完成治理流程端到端测试和第四章退出检查"
     plan_anchor: 948
-    status: "in_progress"
+    status: "completed"
     steps_total: 7
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6, 7]
+    in_progress_step: null
     evidence:
       - id: "EVD-T4.6-START-001"
         kind: "execution_plan"
@@ -218,20 +218,37 @@ tasks:
         base_commit: "6614eb6417257fa48dfe4f0dd7893e46260c8afb"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T4.6-COMPLETE-001"
+        kind: "chapter_exit_bundle"
+        completed_at: "2026-08-20T18:23:11Z"
+        subject_commit: "d564b3f7044d82fb0c28ef8a4cc1a410260da36e"
+        artifacts:
+          - "tests/integration/test_governance_paths.py@sha256:99f9202a8deb6f9f7e7650e24087e435ffb1b7a1b65102c6e0774a7a33e003d0"
+          - "docs/implementation/chapter-04-governance-workflows.md@sha256:d1c2153d273806115e9c86bb97622ca2b667287500491df49ff2f8caad64f55d"
+        checks:
+          - "pytest Chapter 4 unit exit: 36 passed, 1 skipped (Windows symlink privilege unavailable)"
+          - "pytest Chapter 4 integration exit: 64 passed"
+          - "pytest: 383 passed, 1 skipped"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（四类治理路径、混合单元、三类批准与恢复边界均有运行时证据）"
+          quality: "passed（CLI/Policy/服务职责清晰，规则无散落副本，恢复与外部动作禁区无阻断项）"
     blockers: []
 
 exit_check:
-  status: "pending"
+  status: "completed"
   required_task: "4.6"
   criteria:
     - "freeze、answer、approve、AUTO 预检和 escalate 的边界测试通过"
     - "AUTO、ASK、REVIEW、BLOCK 及混合决策单元端到端路径通过"
     - "章节累计回归、diff 检查、需求复核和质量复核均有证据"
-  evidence: []
+  evidence: ["EVD-T4.6-COMPLETE-001"]
 
 review:
-  requirements_conformance: "pending"
-  quality_review: "pending"
+  requirements_conformance: "passed"
+  quality_review: "passed"
 
 history:
   - at: "2026-08-02T14:03:50Z"
@@ -330,3 +347,16 @@ history:
     actor: "/root"
     reason: "登记 Task 4.6 的 REVIEW + V1 范围，进入治理端到端与 Chapter 4 退出检查。"
     evidence: ["EVD-T4.6-START-001"]
+  - id: "EVT-T4.6-COMPLETE-001"
+    at: "2026-08-20T18:23:11Z"
+    action: "chapter_exit_completed"
+    actor: "/root"
+    decision: "DEC-T4.6-EXECUTION-001"
+    reason: "四类治理与混合单元端到端、流程说明、累计门和双重复核全部通过，Chapter 4 完成。"
+    transition:
+      task_4_6: "in_progress -> completed"
+      chapter_04: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6, 7]
+      next_chapter: "chapter-05"
+      next_task: "5.1"
+    evidence: ["EVD-T4.6-COMPLETE-001"]
