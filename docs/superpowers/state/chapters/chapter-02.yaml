@@ -161,10 +161,10 @@ tasks:
   - id: "2.5"
     title: "实现 `begin`、`close` 与重试规则"
     plan_anchor: 452
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T2.5-START-001"
         kind: "execution_plan"
@@ -174,6 +174,24 @@ tasks:
         prerequisite_evidence: "EVD-T2.4-COMPLETE-001"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T2.5-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T14:26:49Z"
+        subject_commit: "76db30d9d921f605a2a02872628ba27069c11b06"
+        artifacts:
+          - "src/aiflow/cli.py@sha256:6f770556bc871aeb310166318687f829abc35ec5637c8ac7a407d8104e438f86"
+          - "src/aiflow/task_service.py@sha256:83a78c203f18281a41b5aa32f546ef8ac4353cc8a6b3494670f6462d3ac48ea8"
+          - "tests/integration/test_begin_close_commands.py@sha256:b1d154d5b5655d4440004619e1199acf31f4c9ad37ef3bc9b643de3c867e0ddf"
+        checks:
+          - "pytest tests/integration/test_begin_close_commands.py: 15 passed"
+          - "pytest: 172 passed"
+          - "begin/close help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 2.5 五步全部覆盖）"
+          quality: "passed（批准绑定当前 spec/policy/commit；close 只读验证 commit）"
     blockers: []
   - id: "2.6"
     title: "实现 `status` 和第二章退出检查"
@@ -278,3 +296,14 @@ history:
     actor: "/root"
     reason: "登记 Task 2.5 的精简 REVIEW + V1 范围，进入 begin、失败重试和 close 实现。"
     evidence: ["EVD-T2.5-START-001"]
+  - id: "EVT-T2.5-COMPLETE-001"
+    at: "2026-08-20T14:26:49Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T2.5-EXECUTION-001"
+    reason: "受控 begin、安全失败重试和只记录外部合并的 close 完成，并通过 V1 与内联双复核。"
+    transition:
+      task_2_5: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "2.6"
+    evidence: ["EVD-T2.5-COMPLETE-001"]
