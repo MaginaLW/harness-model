@@ -57,10 +57,10 @@ tasks:
   - id: "4.2"
     title: "实现 ASK 选项校验与 `answer`"
     plan_anchor: 791
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T4.2-START-001"
         kind: "execution_plan"
@@ -69,6 +69,27 @@ tasks:
         base_commit: "c7f7a0403a4b4e4f948a93281e3d70b77fc8c048"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T4.2-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T17:23:31Z"
+        subject_commit: "fe211669c749928c988d86a21004e247edde24a1"
+        artifacts:
+          - "src/aiflow/ask_service.py@sha256:70460d61d3e6207eb462ffec56ec86cf6b545b8d489ccf1418607e492d5352a4"
+          - "src/aiflow/classification_service.py@sha256:8febe0554c06e537ca8b8d8960e77829327b3fdafc77ba4ab5ccc95451a8b014"
+          - "src/aiflow/state.py@sha256:f1f57a5dd2ad0c0b0a42d555a57b3566560fc63a84c325f2e1ac3fdafa5673e0"
+          - "src/aiflow/task_service.py@sha256:dce61e078552082d226071988675c0ad549349e720aa06a33303eb2e9690a40e"
+          - "src/aiflow/cli.py@sha256:21ef37c771c3f5508e465dfcd8986a8544b62244c2f434be8e2c5365b3a30545"
+          - "tests/integration/test_answer_command.py@sha256:14b4de39105dd5ac5bb5599331a09e53c3522dfbee73c97cadad6ecddd694aeb"
+        checks:
+          - "pytest answer + classify + state + begin/close: 93 passed"
+          - "pytest: 298 passed"
+          - "aiflow answer --help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 4.2 六步全部覆盖）"
+          quality: "passed（ASK+REVIEW 顺序、DU 绑定、恢复标记与 freeze/begin 衔接无阻断项）"
     blockers: []
   - id: "4.3"
     title: "实现审核包校验与三类批准"
@@ -149,3 +170,14 @@ history:
     actor: "/root"
     reason: "登记 Task 4.2 的 REVIEW + V1 范围，进入 ASK 选项、answer 与原子规格冻结实现。"
     evidence: ["EVD-T4.2-START-001"]
+  - id: "EVT-T4.2-COMPLETE-001"
+    at: "2026-08-20T17:23:31Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T4.2-EXECUTION-001"
+    reason: "ASK 结构校验、可恢复 answer、稳定决定摘要和混合 REVIEW 保留完成，并通过 V1 与精简只读复核。"
+    transition:
+      task_4_2: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "4.3"
+    evidence: ["EVD-T4.2-COMPLETE-001"]
