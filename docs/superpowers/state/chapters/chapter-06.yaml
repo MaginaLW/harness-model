@@ -19,10 +19,10 @@ tasks:
   - id: "6.1"
     title: "建立精简的 `AGENTS.md` 与 `CLAUDE.md`"
     plan_anchor: 1305
-    status: "in_progress"
+    status: "completed"
     steps_total: 4
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4]
+    in_progress_step: null
     evidence:
       - id: "EVD-T6.1-START-001"
         kind: "execution_plan"
@@ -31,6 +31,23 @@ tasks:
         base_commit: "8e38b50480ddc26b6ed9d9ff5e60dd57a8d10b77"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T6.1-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T21:18:49Z"
+        subject_commit: "ed4c6e2820797c8ee8fdd8e212d9588a6e72fa75"
+        artifacts:
+          - "AGENTS.md@sha256:35318d099279d4bac2b7f41829540fec2392e1aa297b14d01ece76069dde4826"
+          - "CLAUDE.md@sha256:c8b21954639dbea08139f92d9ce9560a285ee4cba41ebf0a2fdc73b5e9b909c8"
+          - "tests/integration/test_agent_entry_files.py@sha256:8950c8d100118f3d8d2499626ad5c6593445c69819f2629e3ab0b9173298cb0f"
+        checks:
+          - "pytest agent entry files: 5 passed"
+          - "pytest full suite: 532 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（六项常驻原则、启动命令和有效相对链接完整）"
+          quality: "passed（入口简短且无 Policy、状态转换或 V0/V1 命令副本）"
     blockers: []
   - id: "6.2"
     title: "实现 `ai-flow` Skill"
@@ -103,3 +120,13 @@ history:
     actor: "/root"
     reason: "登记 Task 6.1 的 REVIEW + V1 范围，进入精简 Agent 入口文件与一致性契约实现。"
     evidence: ["EVD-T6.1-START-001"]
+  - id: "EVT-T6.1-COMPLETE-001"
+    at: "2026-08-20T21:18:49Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "AGENTS.md 与 CLAUDE.md 的六项原则、启动入口和反规则副本契约通过全量回归。"
+    transition:
+      task_6_1: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4]
+      next_task: "6.2"
+    evidence: ["EVD-T6.1-COMPLETE-001"]

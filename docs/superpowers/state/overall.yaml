@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T21:14:25Z"
+updated_at: "2026-08-20T21:18:49Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-06"
-  current_task: "6.1"
-  current_step: 1
+  current_task: "6.2"
+  current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 5
   tasks_total: 44
-  tasks_completed: 31
+  tasks_completed: 32
   steps_total: 243
-  steps_completed: 173
+  steps_completed: 177
   exit_checks_total: 7
   exit_checks_completed: 5
   blockers_total: 0
@@ -1538,3 +1538,22 @@ history:
     counters_changed: false
     evidence:
       - "docs/superpowers/state/chapters/chapter-06.yaml"
+  - id: "EVT-OVERALL-T6.1-COMPLETE-001"
+    at: "2026-08-20T21:18:49Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 6.1 的精简 Agent 入口与一致性契约通过全量回归。"
+    chapter_event: "EVT-T6.1-COMPLETE-001"
+    chapter_evidence: "EVD-T6.1-COMPLETE-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_06_status: "in_progress"
+      task_6_1_status: "completed"
+      current_chapter: "chapter-06"
+      current_task: "6.2"
+      current_step: null
+      tasks_completed: 32
+      steps_completed: 177
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-06.yaml"
+      - "docs/superpowers/plans/2026-08-21-chapter-06-task-6-1-execution.md"
