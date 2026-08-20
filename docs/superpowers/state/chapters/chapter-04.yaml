@@ -94,10 +94,10 @@ tasks:
   - id: "4.3"
     title: "实现审核包校验与三类批准"
     plan_anchor: 832
-    status: "in_progress"
+    status: "completed"
     steps_total: 7
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6, 7]
+    in_progress_step: null
     evidence:
       - id: "EVD-T4.3-START-001"
         kind: "execution_plan"
@@ -106,6 +106,27 @@ tasks:
         base_commit: "95e43bb5e0364753019bd9d8ff62877f43346746"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T4.3-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T17:43:51Z"
+        subject_commit: "6396d7aa7fc98c1ad16ec9d4d927f027d329adec"
+        artifacts:
+          - "src/aiflow/review.py@sha256:0c0f8566bfee463abd91690acd97f7609297c5b72988c22a7e007b7f4161a0c1"
+          - "src/aiflow/approval.py@sha256:cff382f6e20dcda56e29faa2c61ecba73a4a0183e5b0eb840c0999f513aff3cf"
+          - "src/aiflow/cli.py@sha256:3eedc875179052fbac067e14a15bd1e16ca5d9cf493edde9224f3ea998a76011"
+          - "src/aiflow/git_context.py@sha256:65983884b439aa14d29335ebb77a8fda9b8957398833afc964acb5f8ad2f1823"
+          - ".ai/schemas/approval.schema.json@sha256:10ec0c6612d5c498d8aee0cccbdcd08fd934586c2bc7c70eefdf17e75af585f4"
+          - "tests/integration/test_approve_command.py@sha256:a5fa690536bfc836d67a2acc547c0406b608b9c02c8fa40f25e85756090ab88d"
+        checks:
+          - "pytest review + approve + state/contracts/git: 137 passed"
+          - "pytest: 317 passed"
+          - "aiflow approve --help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 4.3 七步全部覆盖）"
+          quality: "passed（三类隔离、版本失效、治理路径例外、动作不执行与 marker 恢复无阻断项）"
     blockers: []
   - id: "4.4"
     title: "实现 AUTO 预检和范围护栏"
@@ -194,3 +215,14 @@ history:
     actor: "/root"
     reason: "登记 Task 4.3 的 REVIEW + V1 范围，进入审核包与三类版本绑定批准实现。"
     evidence: ["EVD-T4.3-START-001"]
+  - id: "EVT-T4.3-COMPLETE-001"
+    at: "2026-08-20T17:43:51Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T4.3-EXECUTION-001"
+    reason: "审核包与 spec/code/action 三类版本绑定批准完成，并通过 V1 与精简只读复核。"
+    transition:
+      task_4_3: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6, 7]
+      next_task: "4.4"
+    evidence: ["EVD-T4.3-COMPLETE-001"]
