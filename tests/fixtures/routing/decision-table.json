@@ -1,0 +1,41 @@
+{
+  "expected_rule_ids": {
+    "external-sensitive": "HARD-BLOCK-EXTERNAL-SENSITIVE",
+    "irreversible-no-backup": "HARD-BLOCK-IRREVERSIBLE-NO-BACKUP",
+    "verification-tool-missing": "HARD-BLOCK-VERIFICATION-TOOL-MISSING",
+    "production-delete": "HARD-REVIEW-PRODUCTION-DATA-DELETE",
+    "secrets-auth": "HARD-REVIEW-SECRETS-AUTH",
+    "ci-cd": "HARD-REVIEW-CI-CD",
+    "deployment": "HARD-REVIEW-DEPLOYMENT",
+    "external-action": "HARD-REVIEW-REAL-EXTERNAL-ACTION",
+    "ask": "ROUTE-ASK-MULTIPLE-DIRECTIONS",
+    "auto": "ROUTE-AUTO-EXPLICIT-GUARDS",
+    "default": "ROUTE-DEFAULT-REVIEW"
+  },
+  "unit_cases": [
+  {"id":"external-sensitive","expected_route":"BLOCK","facts":{"external_side_effects":["credential_export"],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["change"],"impact_categories":[],"business_direction_count":1}},
+  {"id":"irreversible-no-backup","expected_route":"BLOCK","facts":{"external_side_effects":[],"reversibility":"irreversible","protections":{"verified_backup":false,"dry_run":false},"verification":{"tools_missing":false,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["change"],"impact_categories":[],"business_direction_count":1}},
+  {"id":"verification-tool-missing","expected_route":"BLOCK","facts":{"external_side_effects":[],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":true,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["change"],"impact_categories":[],"business_direction_count":1}},
+  {"id":"production-delete","expected_route":"REVIEW","facts":{"external_side_effects":[],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["production_data_delete"],"impact_categories":[],"business_direction_count":1}},
+  {"id":"secrets-auth","expected_route":"REVIEW","facts":{"external_side_effects":[],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["change"],"impact_categories":["secrets"],"business_direction_count":1}},
+  {"id":"ci-cd","expected_route":"REVIEW","facts":{"external_side_effects":[],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["change"],"impact_categories":["ci"],"business_direction_count":1}},
+  {"id":"deployment","expected_route":"REVIEW","facts":{"external_side_effects":[],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["deploy"],"impact_categories":[],"business_direction_count":1}},
+  {"id":"external-action","expected_route":"REVIEW","facts":{"external_side_effects":["notify"],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["change"],"impact_categories":[],"business_direction_count":1}},
+  {"id":"ask","expected_route":"ASK","facts":{"external_side_effects":[],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":false},"scope":{"clear":false},"impact":{"level":"medium"},"planned_actions":["change"],"impact_categories":[],"business_direction_count":2}},
+  {"id":"auto","expected_route":"AUTO","facts":{"external_side_effects":[],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":true},"scope":{"clear":true},"impact":{"level":"low"},"planned_actions":["change"],"impact_categories":[],"business_direction_count":1}},
+  {"id":"default","expected_route":"REVIEW","facts":{"external_side_effects":[],"reversibility":"reversible","protections":{"verified_backup":true,"dry_run":false},"verification":{"tools_missing":false,"automatic":false},"scope":{"clear":false},"impact":{"level":"medium"},"planned_actions":["change"],"impact_categories":[],"business_direction_count":1}}
+  ],
+  "configuration_cases": [
+    {"id": "auto-ask", "priority": 500, "routes": ["AUTO", "ASK"], "expected_route": "BLOCK"},
+    {"id": "auto-review", "priority": 500, "routes": ["AUTO", "REVIEW"], "expected_route": "BLOCK"},
+    {"id": "auto-block", "priority": 500, "routes": ["AUTO", "BLOCK"], "expected_route": "BLOCK"},
+    {"id": "ask-review", "priority": 500, "routes": ["ASK", "REVIEW"], "expected_route": "BLOCK"},
+    {"id": "ask-block", "priority": 500, "routes": ["ASK", "BLOCK"], "expected_route": "BLOCK"},
+    {"id": "review-block", "priority": 500, "routes": ["REVIEW", "BLOCK"], "expected_route": "BLOCK"}
+  ],
+  "task_cases": [
+    {"id": "multi-unit-highest-unfinished", "expected_route": "ASK"},
+    {"id": "completed-unit-excluded", "expected_route": "ASK"},
+    {"id": "all-completed", "expected_route": "completed"}
+  ]
+}
