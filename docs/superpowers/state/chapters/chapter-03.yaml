@@ -89,10 +89,10 @@ tasks:
   - id: "3.3"
     title: "实现硬规则与 route 汇总"
     plan_anchor: 604
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T3.3-START-001"
         kind: "execution_plan"
@@ -101,6 +101,23 @@ tasks:
         base_commit: "fb6c83092687f6567c34247390215c660ad15ee9"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T3.3-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T16:15:30Z"
+        subject_commit: "8590b8c5f4bd1c39581585921f06340aafa7139f"
+        artifacts:
+          - "src/aiflow/routing.py@sha256:aa8924b33e80406427a7a7d011d4b4b7351cabd9224eaa0aa6c17dd2626b6f64"
+          - "tests/unit/test_routing.py@sha256:f575282844a1bbf6c06b60b009c9e75bfc7aeb112436baced715c3c8c2c73b1e"
+          - "tests/fixtures/routing/decision-table.json@sha256:672c1fcbf612de8a0b31b9d6089a270f0e3929daed9fa744dc47138dd897643f"
+        checks:
+          - "pytest tests/unit/test_decision_units.py tests/unit/test_predicates.py tests/unit/test_routing.py: 29 passed"
+          - "pytest: 225 passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 3.3 五步全部覆盖）"
+          quality: "passed（稳定优先级、全命中留痕、显式默认 REVIEW、配置失败保守 BLOCK）"
     blockers: []
   - id: "3.4"
     title: "独立实现 V0/V1 判定"
@@ -198,3 +215,14 @@ history:
       task_3_2: "completed -> completed"
       task_3_3_base: "91e36d60bead52dde2891fcf3046f7ce584b52b7 -> fb6c83092687f6567c34247390215c660ad15ee9"
     evidence: ["EVD-T3.2-COMPLETE-001", "EVD-T3.3-START-001"]
+  - id: "EVT-T3.3-COMPLETE-001"
+    at: "2026-08-20T16:15:30Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T3.3-EXECUTION-001"
+    reason: "硬规则、route 决策表和未完成单元安全汇总完成，并通过 V1 与内联双复核。"
+    transition:
+      task_3_3: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "3.4"
+    evidence: ["EVD-T3.3-COMPLETE-001"]
