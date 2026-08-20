@@ -52,10 +52,10 @@ tasks:
   - id: "6.2"
     title: "实现 `ai-flow` Skill"
     plan_anchor: 1336
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T6.2-START-001"
         kind: "execution_plan"
@@ -64,6 +64,23 @@ tasks:
         base_commit: "3e9cf54a8edb45c799b0eb4cb966fe925f47ca60"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T6.2-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T21:24:31Z"
+        subject_commit: "002ba222026b1f35177d8b7f8836ee8c972769cd"
+        artifacts:
+          - ".claude/skills/ai-flow/SKILL.md@sha256:51fe3515c2e7e89ad0da3772e6316f9189c8124b41f756bde1e62f0a0d43beb8"
+          - "tests/integration/test_ai_flow_skill.py@sha256:715990412b7f2a97d7c9a742239a3c834deeb9589c10228d68e622bf2510f1de"
+        checks:
+          - "skill-creator quick_validate: passed"
+          - "pytest ai-flow skill: 5 passed"
+          - "pytest full suite: 537 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（真实 CLI 生命周期、ASK/REVIEW 人工闸门和升级恢复完整）"
+          quality: "passed（Skill 自包含、无权限扩张且不复制 Policy/状态/验证矩阵）"
     blockers: []
   - id: "6.3"
     title: "建立统一验证包装和薄层 Hooks"
@@ -143,3 +160,13 @@ history:
     actor: "/root"
     reason: "登记 Task 6.2 的 REVIEW + V1 范围，进入 ai-flow Skill 与 CLI 一致性实现。"
     evidence: ["EVD-T6.2-START-001"]
+  - id: "EVT-T6.2-COMPLETE-001"
+    at: "2026-08-20T21:24:31Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "ai-flow Skill 的真实 CLI 编排、人工闸门、升级条件和反规则副本契约通过全量回归。"
+    transition:
+      task_6_2: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "6.3"
+    evidence: ["EVD-T6.2-COMPLETE-001"]
