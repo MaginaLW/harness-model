@@ -234,10 +234,10 @@ tasks:
   - id: "5.7"
     title: "实现 `aiflow gate`"
     plan_anchor: 1219
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T5.7-START-001"
         kind: "execution_plan"
@@ -246,6 +246,29 @@ tasks:
         base_commit: "988f667096349fc8dca0a2cc81cf0fd549a29361"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T5.7-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T20:31:16Z"
+        subject_commit: "75311e9cd29a3edf8bdcf4788be2e3aff5adec71"
+        artifacts:
+          - "src/aiflow/gate.py@sha256:02057ffcfe185f79d7ee211b624c61d3cbf5115d1feec6af0f3c1c66dddc222d"
+          - "src/aiflow/cli.py@sha256:564530db052d9fa9c4774e364e84810dad9c2d955918270bbbb0b20b26d05d6e"
+          - "src/aiflow/git_context.py@sha256:a071d1055caf3b70a954f5f98e51f25cd98e082f660822a97e201f678234df3e"
+          - "src/aiflow/scope.py@sha256:1150d5852c1be1b09a4181becdb4526984edf4ae4db6e406b6dcb0fdeb643e25"
+          - "src/aiflow/task_service.py@sha256:fc3bbb32ca6be9a676d69b00586f5b43aa5efd26c610c2508fedfa41163964e6"
+          - "tests/unit/test_gate.py@sha256:81f53cd6be572ddf35635b7ccc46bb0036da66903b275c3e36d4758e8da9b6c2"
+          - "tests/fixtures/gate/decision-table.json@sha256:d21abb367747facb62a5cb1658276d49d9bca2f4377b32bcd4d4eee785a7e0fd"
+          - "tests/integration/test_gate_command.py@sha256:0d1c8161b64e6fab075d265c44420b668915ebd4c4b6d47c245b865942047061"
+        checks:
+          - "pytest gate + scope: 38 passed, 1 skipped (Windows symlink privilege unavailable)"
+          - "pytest: 511 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "python -m aiflow gate --help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（混合 ASK/REVIEW、版本、Git、AUTO 护栏与只读退出码完整）"
+          quality: "passed（精确 DU 集合、祖先链和统一范围/禁止动作语义无阻断）"
     blockers: []
   - id: "5.8"
     title: "完成第五章端到端证据回归"
@@ -384,3 +407,14 @@ history:
     actor: "/root"
     reason: "登记 Task 5.7 的 REVIEW + V1 范围，进入只读 Gate 决策表和 CLI 实现。"
     evidence: ["EVD-T5.7-START-001"]
+  - id: "EVT-T5.7-COMPLETE-001"
+    at: "2026-08-20T20:31:16Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T5.7-EXECUTION-001"
+    reason: "确定性只读 Gate、版本/范围/批准/证据矩阵和三类退出码完成，并通过 V1 与精简复核。"
+    transition:
+      task_5_7: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "5.8"
+    evidence: ["EVD-T5.7-COMPLETE-001"]
