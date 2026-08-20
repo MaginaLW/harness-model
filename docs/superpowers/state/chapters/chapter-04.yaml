@@ -131,10 +131,10 @@ tasks:
   - id: "4.4"
     title: "实现 AUTO 预检和范围护栏"
     plan_anchor: 878
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T4.4-START-001"
         kind: "execution_plan"
@@ -143,6 +143,28 @@ tasks:
         base_commit: "5cc3835594285e3d3bb5c3d2e96eca9de93fe276"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T4.4-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T18:01:19Z"
+        subject_commit: "4051af2242bf47b2a641fa34c813fa114775bf62"
+        artifacts:
+          - "src/aiflow/scope.py@sha256:826b1a1dc96142fbe5cf1ca796500dabdb1e62e9fffc0ec47b44e7d2a2d4aa5a"
+          - "src/aiflow/workflow.py@sha256:6b0b6c0db3cee9ec941afe8ec9b6fa42f6aca9da56349039150482dbcbbd4070"
+          - "src/aiflow/task_service.py@sha256:2322ea35ea5bd89548f4244b01701e6f1878336144ad353490e27a9c9096c324"
+          - "src/aiflow/classification_service.py@sha256:d26c0789c1bc0d93be71e43c66607d98ffc073b0d5794dd8b2aa0ffca1f9bb56"
+          - "src/aiflow/decision_units.py@sha256:8e1fb7862c1b1059afed3c9ad5d9e53eed2bc2e62565a6c4967de534d30d392b"
+          - "tests/unit/test_scope.py@sha256:9055f69eb17cff9b15fc94d8f56ac5cec3dd66d7c945e0adb6e7d68964589756"
+          - "tests/integration/test_auto_preflight.py@sha256:69ee5882021742e25916cf07e353dca91d017803f5902a6de3d7e6c4656c3e39"
+        checks:
+          - "pytest scope + auto preflight: 13 passed, 1 skipped (Windows symlink privilege unavailable)"
+          - "pytest targeted workflow/begin/classify/approval: 67 passed, 1 skipped"
+          - "pytest: 332 passed, 1 skipped"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 4.4 五步全部覆盖）"
+          quality: "passed（段级 glob、双端 rename、当前任务治理例外、分类摘要新鲜度与 REVIEW 兼容无阻断项）"
     blockers: []
   - id: "4.5"
     title: "实现 BLOCK 条件与 `escalate`"
@@ -239,3 +261,14 @@ history:
     actor: "/root"
     reason: "登记 Task 4.4 的 REVIEW + V1 范围，进入 AUTO 预检和路径范围护栏实现。"
     evidence: ["EVD-T4.4-START-001"]
+  - id: "EVT-T4.4-COMPLETE-001"
+    at: "2026-08-20T18:01:19Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T4.4-EXECUTION-001"
+    reason: "AUTO 路径范围、Git 变更采集和运行前新鲜度护栏完成，并通过 V1 与精简只读复核。"
+    transition:
+      task_4_4: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "4.5"
+    evidence: ["EVD-T4.4-COMPLETE-001"]
