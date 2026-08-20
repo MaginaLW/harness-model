@@ -19,10 +19,10 @@ tasks:
   - id: "4.1"
     title: "实现统一工作流前置条件与规格冻结"
     plan_anchor: 753
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T4.1-START-001"
         kind: "execution_plan"
@@ -31,6 +31,28 @@ tasks:
         base_commit: "6560f5d4bce1f2fb57888abf561630a71929598f"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T4.1-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T17:10:59Z"
+        subject_commit: "161511dc0060491ef5706a7a0d97842687d20a0f"
+        artifacts:
+          - "src/aiflow/specification.py@sha256:535b2bb1d2ebd0abb64c6587ffc4089a08c8930f8e335389b79fe4aeb6322b61"
+          - "src/aiflow/workflow.py@sha256:bbadeb2efc1b85c7277e1f893690dd0e9db3e0a310e8b17860e461e811034327"
+          - "src/aiflow/task_service.py@sha256:6ac82f350f556f0069798ca98c4f7d4b7cf4a45e97b1c3e20d06a633db6b5dcc"
+          - "src/aiflow/cli.py@sha256:69e2e167585417f12dc8d840bceae31d157d6c4dadc9371c2230215897872134"
+          - ".ai/schemas/task.schema.json@sha256:1362a6b13c83d60684fb9cb6fb99b01be797e8789cfb92ba8c4ac4ac8a13e7d5"
+          - "tests/integration/test_freeze_command.py@sha256:1239d024ea5261ff7622d23d7d5b6a1c0b4675dc0abb0c8b129e806a0c3cabf0"
+        checks:
+          - "pytest workflow + specification + freeze: 21 passed"
+          - "pytest begin/close + contracts: 58 passed"
+          - "pytest: 281 passed"
+          - "aiflow freeze --help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 4.1 五步全部覆盖）"
+          quality: "passed（统一条件、规范摘要、篡改检测与事件恢复边界无阻断项）"
     blockers: []
   - id: "4.2"
     title: "实现 ASK 选项校验与 `answer`"
@@ -103,3 +125,14 @@ history:
     actor: "/root"
     reason: "登记 Task 4.1 的 REVIEW + V1 范围，进入统一工作流条件与规格冻结实现。"
     evidence: ["EVD-T4.1-START-001"]
+  - id: "EVT-T4.1-COMPLETE-001"
+    at: "2026-08-20T17:10:59Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T4.1-EXECUTION-001"
+    reason: "统一工作流条件、规格完整性、显式 freeze 和篡改检测完成，并通过 V1 与精简只读复核。"
+    transition:
+      task_4_1: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "4.2"
+    evidence: ["EVD-T4.1-COMPLETE-001"]
