@@ -169,10 +169,10 @@ tasks:
   - id: "4.5"
     title: "实现 BLOCK 条件与 `escalate`"
     plan_anchor: 913
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T4.5-START-001"
         kind: "execution_plan"
@@ -181,6 +181,27 @@ tasks:
         base_commit: "d041c8496accdacb711e987ef37eba3e99dd3a53"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T4.5-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T18:17:41Z"
+        subject_commit: "82a5f3afe70fb698f4fd9a97675ae17c4bbb26d9"
+        artifacts:
+          - "src/aiflow/escalation.py@sha256:e6556101d7598d4d3733fafbb449f387a4c41f8d1e9579dc842aadeda71ab598"
+          - "src/aiflow/cli.py@sha256:00606abbdb68b34d3aa6470e2930c373d12caa84166d4873bb74b421281961f2"
+          - "src/aiflow/state.py@sha256:af228a2f421e352b4d94fcbf78a5c755c89b26dfa1291326623cab9bae49d4d0"
+          - "src/aiflow/classification_service.py@sha256:2eab3d349043a95a7324875c232183fc3f3bdb233e95edbc2eb57e5e1fb0a912"
+          - "tests/integration/test_escalate_command.py@sha256:f308449bfba69dc5480f77a047d2791bc333e848d8684521300ff2eb610ef2e1"
+          - "tests/fixtures/state/transitions.json@sha256:8fa7bbbc13c0d575b63314dd7483e6dc3f7ca5bb869d7a6b21b14bb2184891fb"
+        checks:
+          - "pytest escalate + classify + state: 107 passed"
+          - "pytest: 378 passed, 1 skipped (Windows symlink privilege unavailable)"
+          - "aiflow escalate/resolve --help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 4.5 五步全部覆盖）"
+          quality: "passed（只升不降、同级命名失效、证据哈希重验与中断恢复无阻断项）"
     blockers: []
   - id: "4.6"
     title: "完成治理流程端到端测试和第四章退出检查"
@@ -285,3 +306,14 @@ history:
     actor: "/root"
     reason: "登记 Task 4.5 的 REVIEW + V1 范围，进入结构化升级与版本绑定解除记录实现。"
     evidence: ["EVD-T4.5-START-001"]
+  - id: "EVT-T4.5-COMPLETE-001"
+    at: "2026-08-20T18:17:41Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T4.5-EXECUTION-001"
+    reason: "结构化升级、只升不降路由和证据绑定可恢复解除流程完成，并通过 V1 与精简只读复核。"
+    transition:
+      task_4_5: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "4.6"
+    evidence: ["EVD-T4.5-COMPLETE-001"]
