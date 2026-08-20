@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T14:52:32Z"
+updated_at: "2026-08-20T16:01:24Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-03"
   current_task: "3.2"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T3.2-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T16:01:24Z"
+    actor: "/root"
+    subject: "执行 Task 3.2 决策单元输入与受限谓词"
+    decision: "按精简 REVIEW + V1 流程实现经过 Schema/交叉字段校验的决策单元输入，以及无表达式执行能力的八种受限谓词。"
+    rationale: "用户要求持续推进直至完成本章；该层是 route 与验证等级引擎的确定性事实边界。"
+    consequence: "Task 3.2 进入 in_progress，完成前累计计数不变。"
+    base_commit: "545aedba2ef37d695db04c9ab82d62ee9bf4a889"
+    subject_commit: null
+    evidence:
+      - "docs/superpowers/plans/2026-08-21-chapter-03-task-3-2-execution.md"
+      - "docs/superpowers/state/chapters/chapter-03.yaml#EVD-T3.2-START-001"
   - id: "DEC-T3.1-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T14:48:10Z"

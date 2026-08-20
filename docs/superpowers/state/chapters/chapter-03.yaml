@@ -52,11 +52,18 @@ tasks:
   - id: "3.2"
     title: "实现决策单元输入与受限谓词"
     plan_anchor: 569
-    status: "pending"
+    status: "in_progress"
     steps_total: 5
     completed_steps: []
-    in_progress_step: null
-    evidence: []
+    in_progress_step: 1
+    evidence:
+      - id: "EVD-T3.2-START-001"
+        kind: "execution_plan"
+        path: "docs/superpowers/plans/2026-08-21-chapter-03-task-3-2-execution.md"
+        sha256: "393a607e85e2cc0fa09790d0b5d6ddbb55fa89d4be3454b0a462014e92ace38b"
+        base_commit: "545aedba2ef37d695db04c9ab82d62ee9bf4a889"
+        route: "REVIEW"
+        verification: "V1"
     blockers: []
   - id: "3.3"
     title: "实现硬规则与 route 汇总"
@@ -131,3 +138,9 @@ history:
       completed_steps: [1, 2, 3, 4, 5]
       next_task: "3.2"
     evidence: ["EVD-T3.1-COMPLETE-001"]
+  - id: "EVT-T3.2-START-001"
+    at: "2026-08-20T16:01:24Z"
+    action: "task_started"
+    actor: "/root"
+    reason: "登记 Task 3.2 的精简 REVIEW + V1 范围，进入决策单元与受限谓词实现。"
+    evidence: ["EVD-T3.2-START-001"]
