@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T18:49:51Z"
+updated_at: "2026-08-20T18:51:04Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-05"
   current_task: "5.3"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,18 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T5.3-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T18:51:04Z"
+    actor: "/root"
+    subject: "执行 Task 5.3 最终验证 Git 与范围检查"
+    decision: "按 REVIEW + V1 流程区分 provisional 与最终验证，并严格绑定清洁 subject commit 和完整路径范围。"
+    rationale: "后续 evidence/gate 只能信任稳定提交，不能把脏工作树或越界变化包装成最终通过。"
+    consequence: "Task 5.3 进入 in_progress；不创建 evidence、approval 或 verify/gate CLI。"
+    base_commit: "7510aeec05413e45a2358ee0973bb6ab6552015e"
+    subject_commit: null
+    evidence:
+      - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-3-execution.md"
   - id: "DEC-T5.2-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T18:38:35Z"
@@ -1265,3 +1277,16 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-05.yaml"
       - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-2-execution.md"
+  - id: "EVT-OVERALL-T5.3-START-001"
+    at: "2026-08-20T18:51:04Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 5 已登记 Task 5.3 的 REVIEW + V1 范围并进入 Step 1。"
+    chapter_event: "EVT-T5.3-START-001"
+    chapter_evidence: "EVD-T5.3-START-001"
+    current_chapter: "chapter-05"
+    current_task: "5.3"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-05.yaml"
