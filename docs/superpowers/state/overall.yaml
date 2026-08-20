@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T18:17:41Z"
+updated_at: "2026-08-20T18:18:56Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-04"
   current_task: "4.6"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T4.6-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T18:18:56Z"
+    actor: "/root"
+    subject: "执行 Task 4.6 治理端到端与 Chapter 4 退出"
+    decision: "按 REVIEW + V1 章节验收流程串联四类治理路径、补说明、跑累计门并做双重复核。"
+    rationale: "Chapter 5 将直接消费这些治理状态和批准边界，必须先以真实事件重放锁定顺序与隔离性。"
+    consequence: "Task 4.6 进入 in_progress；Chapter 4 在测试、说明和双复核通过前不置绿。"
+    base_commit: "6614eb6417257fa48dfe4f0dd7893e46260c8afb"
+    subject_commit: null
+    evidence:
+      - "docs/superpowers/plans/2026-08-21-chapter-04-task-4-6-execution.md"
+      - "docs/superpowers/state/chapters/chapter-04.yaml#EVD-T4.6-START-001"
   - id: "DEC-T4.5-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T18:02:43Z"
@@ -1125,3 +1138,16 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-04.yaml"
       - "docs/superpowers/plans/2026-08-21-chapter-04-task-4-5-execution.md"
+  - id: "EVT-OVERALL-T4.6-START-001"
+    at: "2026-08-20T18:18:56Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 4 已登记 Task 4.6 的 REVIEW + V1 章节验收范围并进入 Step 1。"
+    chapter_event: "EVT-T4.6-START-001"
+    chapter_evidence: "EVD-T4.6-START-001"
+    current_chapter: "chapter-04"
+    current_task: "4.6"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-04.yaml"
