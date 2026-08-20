@@ -164,6 +164,11 @@ def _atomic_write_text(target: Path, content: str) -> None:
         ) from error
 
 
+def atomic_write_text(target: Path, content: str) -> None:
+    """Atomically replace a UTF-8 text document."""
+    _atomic_write_text(target, content)
+
+
 def atomic_write_json(target: Path, value: object) -> None:
     """Serialize and atomically replace a JSON document."""
     try:

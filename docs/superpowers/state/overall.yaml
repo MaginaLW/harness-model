@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T13:55:25Z"
+updated_at: "2026-08-20T14:01:11Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-02"
   current_task: "2.3"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T2.3-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T14:01:11Z"
+    actor: "/root"
+    subject: "执行 Task 2.3 aiflow start"
+    decision: "按精简 REVIEW + V1 流程实现完整初始记录和显式失败恢复，完成后按用户授权本地提交。"
+    rationale: "用户要求持续推进且按大块提交；start 是独立可验证的本地持久化块。"
+    consequence: "Task 2.3 进入 in_progress，完成前累计计数不变。"
+    base_commit: "2a969ea4552f6ec13aed1008b0547be9f67d002e"
+    subject_commit: "N/A（完成验证后更新为本地提交）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-3-execution.md"
+      - "docs/superpowers/state/chapters/chapter-02.yaml#EVD-T2.3-START-001"
   - id: "DEC-T2.2-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T13:50:29Z"
@@ -574,3 +587,16 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-02.yaml"
       - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-2-execution.md"
+  - id: "EVT-OVERALL-T2.3-START-001"
+    at: "2026-08-20T14:01:11Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 2 已登记 Task 2.3 的精简 REVIEW + V1 执行范围并进入 Step 1。"
+    chapter_event: "EVT-T2.3-START-001"
+    chapter_evidence: "EVD-T2.3-START-001"
+    current_chapter: "chapter-02"
+    current_task: "2.3"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-02.yaml"
