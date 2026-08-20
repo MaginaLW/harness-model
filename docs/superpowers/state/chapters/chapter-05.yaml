@@ -159,10 +159,10 @@ tasks:
   - id: "5.5"
     title: "实现证据和批准失效服务"
     plan_anchor: 1146
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T5.5-START-001"
         kind: "execution_plan"
@@ -171,6 +171,27 @@ tasks:
         base_commit: "f3f310bcfd052f80fe08a665a1589159219134bb"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T5.5-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T19:49:12Z"
+        subject_commit: "c8a664080d6bdec78aa2cacaca395b2f4dee452c"
+        artifacts:
+          - "src/aiflow/freshness.py@sha256:f889fa2d083c129a79cd89520844512764f205f2b4fb5a891c6f41a85dc90a66"
+          - "src/aiflow/status_service.py@sha256:aeab27aee2419f7c701c192601a8f5ae6ce9dc3557257bafdb56aa12e5e4ff43"
+          - ".ai/schemas/approval.schema.json@sha256:0b25b70ee90c9ece816f9f6c26395c26315a0fd7857f4ff7e5f82bdb2cdf40e8"
+          - "src/aiflow/approval.py@sha256:6b31a7de262b4c6a546ef38323cd1742f860c3dd1a1e3133cb667c5d68648c1f"
+          - "tests/unit/test_freshness.py@sha256:a2aafd26cf33d64bc790c5c833d581382e63b4a44c66eb95e201dc47d9f8e102"
+          - "tests/fixtures/freshness/decision-table.json@sha256:023823a67d6674295d43ca0e217d0e23b4b39448c2a7d9fb5bf5eb182aef2c92"
+          - "tests/integration/test_status_command.py@sha256:cf5d2e8e98073fb3b526f41378c9404e25d2f338ead28a958cc176ecef8bd27d"
+        checks:
+          - "pytest freshness + status + contracts + approvals: 107 passed"
+          - "pytest: 464 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（五类产物矩阵、规格批准特例和恢复命令完整）"
+          quality: "passed（真实 status facts、旧批准兼容及 action 摘要语义无阻断）"
     blockers: []
   - id: "5.6"
     title: "实现 `aiflow verify`"
@@ -293,3 +314,14 @@ history:
     actor: "/root"
     reason: "登记 Task 5.5 的 REVIEW + V1 范围，进入证据与批准统一失效服务实现。"
     evidence: ["EVD-T5.5-START-001"]
+  - id: "EVT-T5.5-COMPLETE-001"
+    at: "2026-08-20T19:49:12Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T5.5-EXECUTION-001"
+    reason: "五类产物统一新鲜度矩阵、状态事实接入和旧批准兼容完成，并通过 V1 与精简复核。"
+    transition:
+      task_5_5: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "5.6"
+    evidence: ["EVD-T5.5-COMPLETE-001"]

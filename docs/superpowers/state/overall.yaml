@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T19:27:16Z"
+updated_at: "2026-08-20T19:49:12Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-05"
-  current_task: "5.5"
-  current_step: 1
+  current_task: "5.6"
+  current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 4
   tasks_total: 44
-  tasks_completed: 27
+  tasks_completed: 28
   steps_total: 243
-  steps_completed: 150
+  steps_completed: 155
   exit_checks_total: 7
   exit_checks_completed: 4
   blockers_total: 0
@@ -148,7 +148,7 @@ decisions:
     rationale: "status、批准和 Gate 不能维护互相漂移的版本判断副本。"
     consequence: "Task 5.5 进入 in_progress；只判断并展示，不自动删除或重做产物。"
     base_commit: "f3f310bcfd052f80fe08a665a1589159219134bb"
-    subject_commit: null
+    subject_commit: "c8a664080d6bdec78aa2cacaca395b2f4dee452c"
     evidence:
       - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-5-execution.md"
   - id: "DEC-T5.4-EXECUTION-001"
@@ -1380,3 +1380,23 @@ history:
     counters_changed: false
     evidence:
       - "docs/superpowers/state/chapters/chapter-05.yaml"
+  - id: "EVT-OVERALL-T5.5-COMPLETE-001"
+    at: "2026-08-20T19:49:12Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 5.5 的统一新鲜度矩阵、status 事实接入和旧批准兼容通过 V1 与精简复核。"
+    chapter_event: "EVT-T5.5-COMPLETE-001"
+    chapter_evidence: "EVD-T5.5-COMPLETE-001"
+    decision: "DEC-T5.5-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_05_status: "in_progress"
+      task_5_5_status: "completed"
+      current_chapter: "chapter-05"
+      current_task: "5.6"
+      current_step: null
+      tasks_completed: 28
+      steps_completed: 155
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-05.yaml"
+      - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-5-execution.md"
