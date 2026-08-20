@@ -196,10 +196,10 @@ tasks:
   - id: "5.6"
     title: "实现 `aiflow verify`"
     plan_anchor: 1180
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T5.6-START-001"
         kind: "execution_plan"
@@ -208,6 +208,28 @@ tasks:
         base_commit: "d344b05dcee1124f2d0ac70f22ecb724b0930471"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T5.6-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T20:10:23Z"
+        subject_commit: "e80f5b0decef490fd72d7bbb6a7f973397b96f2f"
+        artifacts:
+          - "src/aiflow/verification_service.py@sha256:148898c3e2f7208434ef73108b0e711093770b46aff334abb3c2881b766eccb8"
+          - "src/aiflow/cli.py@sha256:230a687bf95b9fb11686c53ddcc80fb562a2512aa7c5d7164fce9e4a24182a2a"
+          - "src/aiflow/state.py@sha256:880881aa0c290b33ea49e8b6ddaaa38ce91d83ad119cd4d47326ec4e673df0bf"
+          - "src/aiflow/freshness.py@sha256:fbd6e452e8fc17d69e91b92607503c04d6783becf7ae64706976350b5f734688"
+          - "src/aiflow/status_service.py@sha256:29abde2568fa01dcd629184f99b8174593db0422fe9ed7b0fd93996edbeed1b0"
+          - "tests/integration/test_verify_command.py@sha256:94792aecc08664688e4b555c203bb70423736021f1a7b067a537cd43693ab2e5"
+          - "tests/fixtures/state/transitions.json@sha256:dea2b6d065d4f67d7a52b6b9d23178ae0c6e37957a5e9a68aebdc7d9aad8c31c"
+        checks:
+          - "pytest verify + freshness + status + state: 129 passed"
+          - "pytest: 483 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "python -m aiflow verify --help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（local/CI、三态 evidence、路由终态与重跑完整）"
+          quality: "passed（subject 同步一致性、CI 只读加载和写失败边界无阻断）"
     blockers: []
   - id: "5.7"
     title: "实现 `aiflow gate`"
@@ -338,3 +360,14 @@ history:
     actor: "/root"
     reason: "登记 Task 5.6 的 REVIEW + V1 范围，进入 verify 编排、本地生命周期与 CI 只读重验实现。"
     evidence: ["EVD-T5.6-START-001"]
+  - id: "EVT-T5.6-COMPLETE-001"
+    at: "2026-08-20T20:10:23Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T5.6-EXECUTION-001"
+    reason: "本地与 CI verify、三态 evidence、终态分流和显式重跑完成，并通过 V1 与精简复核。"
+    transition:
+      task_5_6: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "5.7"
+    evidence: ["EVD-T5.6-COMPLETE-001"]
