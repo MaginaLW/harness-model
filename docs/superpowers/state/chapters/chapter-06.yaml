@@ -122,10 +122,10 @@ tasks:
   - id: "6.4"
     title: "建立 GitHub Actions 质量门"
     plan_anchor: 1416
-    status: "in_progress"
+    status: "completed"
     steps_total: 7
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6, 7]
+    in_progress_step: null
     evidence:
       - id: "EVD-T6.4-START-001"
         kind: "execution_plan"
@@ -134,6 +134,24 @@ tasks:
         base_commit: "9fafa586ae07ebdc6d5315e8a024233f702ffc39"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T6.4-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T21:40:13Z"
+        subject_commit: "e3bb9875c390677253aa025899c2e1dfeab09927"
+        artifacts:
+          - ".github/workflows/ai-quality-gate.yml@sha256:53da562242cbe5ac0fc42390ee07eae951b88b54ddaf02d8bea7c16dfdb2610d"
+          - "tools/ci/resolve_task.py@sha256:9133558f99fe049cf5897aa34c085daeab1a1b97b3487ea933a7111aaa60f4ba"
+          - "tests/integration/test_github_workflow.py@sha256:33075f99565317962888f4a824c9204350b6a3e78d770b0eeb223d1a11c18fc5"
+          - "docs/operations/github-branch-protection.md@sha256:f3aa883945949b2dda577987bd5e81139169ba950b10dc4b1ad49b1fe6b97acb"
+        checks:
+          - "pytest GitHub workflow: 7 passed"
+          - "pytest full suite: 558 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src tools: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（PR 触发、唯一任务、CI evidence/Gate 传递、诊断上传和保护清单完整）"
+          quality: "passed（contents read、无 secrets/pull_request_target、固定超时并取消旧运行）"
     blockers: []
   - id: "6.5"
     title: "验证本地、包装器和 CI 决策一致性"
@@ -227,3 +245,13 @@ history:
     actor: "/root"
     reason: "登记 Task 6.4 的 REVIEW + V1 范围，进入最小权限 GitHub Actions 质量门实现。"
     evidence: ["EVD-T6.4-START-001"]
+  - id: "EVT-T6.4-COMPLETE-001"
+    at: "2026-08-20T21:40:13Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "最小权限 PR 质量门、任务解析、权威证据上传与分支保护清单通过全量回归。"
+    transition:
+      task_6_4: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6, 7]
+      next_task: "6.5"
+    evidence: ["EVD-T6.4-COMPLETE-001"]
