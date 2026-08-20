@@ -126,10 +126,10 @@ tasks:
   - id: "2.4"
     title: "实现状态转换和可重放事件日志"
     plan_anchor: 414
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T2.4-START-001"
         kind: "execution_plan"
@@ -139,6 +139,24 @@ tasks:
         prerequisite_evidence: "EVD-T2.3-COMPLETE-001"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T2.4-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T14:18:14Z"
+        subject_commit: "e4570414c5f09714b51776ccd82dbad6a1a7bfe8"
+        artifacts:
+          - "src/aiflow/state.py@sha256:57c8384c8cc913b7d7f60aa9296597e338fc09c6c192d08c397eff4a34930af5"
+          - "src/aiflow/task_service.py@sha256:77d2a44d51053c71f69847892ad45f73bafff502993880328401754d9ac7a137"
+          - "tests/fixtures/state/transitions.json@sha256:48d833e6677a1173f5fac6e067ce6463868617c4eb3be58fdfeb67af761a6e88"
+          - "tests/unit/test_state.py@sha256:9f59a40814703f4e138d15ca189221f556f389321df81e6b0401672f1970d88e"
+        checks:
+          - "pytest tests/unit/test_state.py: 45 passed"
+          - "pytest: 157 passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 2.4 六步全部覆盖）"
+          quality: "passed（逐边夹具独立、直接篡改拒绝、仅 staged 替换失败可恢复）"
     blockers: []
   - id: "2.5"
     title: "实现 `begin`、`close` 与重试规则"
@@ -235,3 +253,14 @@ history:
     actor: "/root"
     reason: "登记 Task 2.4 的精简 REVIEW + V1 范围，进入状态图、重放和恢复实现。"
     evidence: ["EVD-T2.4-START-001"]
+  - id: "EVT-T2.4-COMPLETE-001"
+    at: "2026-08-20T14:18:14Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T2.4-EXECUTION-001"
+    reason: "数据化状态图、封闭非状态事件、严格重放和 staged 中断恢复完成，并通过 V1 与内联双复核。"
+    transition:
+      task_2_4: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "2.5"
+    evidence: ["EVD-T2.4-COMPLETE-001"]
