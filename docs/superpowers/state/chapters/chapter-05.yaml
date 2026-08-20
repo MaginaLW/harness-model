@@ -123,10 +123,10 @@ tasks:
   - id: "5.4"
     title: "生成 `evidence.json` 与版本摘要"
     plan_anchor: 1108
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T5.4-START-001"
         kind: "execution_plan"
@@ -135,6 +135,26 @@ tasks:
         base_commit: "9c31952238c32afa011617bab935cc340cbecc08"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T5.4-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T19:26:06Z"
+        subject_commit: "b40e3d03876e4d5fa5c304f73cbea840e7a7f9e8"
+        artifacts:
+          - "src/aiflow/evidence.py@sha256:5aa666a083a0c2a107584feecb87e5da8dfbecc9a5d57e2d74c9c85b5b7657c2"
+          - ".ai/schemas/evidence.schema.json@sha256:6809e058a3c4383d70a4a78b426e1c8a2d3a4551ca9addd37896b86385a7276a"
+          - ".ai/templates/evidence.json@sha256:c1c1cd6f65be6c1942ed2eb12a88100f1c0d7c8cffa18da30affb16ed5196535"
+          - "src/aiflow/approval.py@sha256:dee28721a39fbe35d98b0d708e9daf360f9b2ddaf35bc448f60e2e1a4c852291"
+          - "src/aiflow/contracts.py@sha256:a0cc0f0d1cf87cb17f4c2c1d5605d6511b509e905a511224cf031e57cd8d49e0"
+          - "tests/unit/test_evidence.py@sha256:70285e70cc34d7f76e742be0a570aabcbb942c773c44a18984a8a2bcfcba8f0a"
+        checks:
+          - "pytest evidence + contracts + approve + governance: 79 passed"
+          - "pytest: 431 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --cached --check: passed"
+        reviews:
+          requirements_conformance: "passed（版本、检查、未验证、三态结论和失败保存完整）"
+          quality: "passed（真实run日志、required门与approval兼容无阻断）"
     blockers: []
   - id: "5.5"
     title: "实现证据和批准失效服务"
@@ -249,3 +269,14 @@ history:
     actor: "/root"
     reason: "登记 Task 5.4 的 REVIEW + V1 范围，进入 evidence 汇总与原子保存实现。"
     evidence: ["EVD-T5.4-START-001"]
+  - id: "EVT-T5.4-COMPLETE-001"
+    at: "2026-08-20T19:26:06Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T5.4-EXECUTION-001"
+    reason: "Task 5.4 的版本强绑定 evidence、三态决策表、真实日志引用和失败原子保存通过 V1 与精简复核。"
+    transition:
+      task_5_4: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "5.5"
+    evidence: ["EVD-T5.4-COMPLETE-001"]
