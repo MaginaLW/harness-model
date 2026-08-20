@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T21:46:35Z"
+updated_at: "2026-08-20T21:48:01Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -20,19 +20,19 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-06"
-  current_task: "6.6"
-  current_step: 1
+  current_chapter: "chapter-07"
+  current_task: "7.1"
+  current_step: null
 
 summary:
   chapters_total: 7
-  chapters_completed: 5
+  chapters_completed: 6
   tasks_total: 44
-  tasks_completed: 36
+  tasks_completed: 37
   steps_total: 243
-  steps_completed: 201
+  steps_completed: 204
   exit_checks_total: 7
-  exit_checks_completed: 5
+  exit_checks_completed: 6
   blockers_total: 0
   evidence_items: 0
 
@@ -81,7 +81,7 @@ chapters:
     number: 6
     title: "Agent、Hooks 与 CI 集成"
     state_file: "docs/superpowers/state/chapters/chapter-06.yaml"
-    status: "in_progress"
+    status: "completed"
     dependency: "chapters 01-05 completed"
     tasks_total: 6
     steps_total: 31
@@ -1685,3 +1685,24 @@ history:
       steps_completed: 201
     evidence:
       - "docs/superpowers/state/chapters/chapter-06.yaml"
+  - id: "EVT-OVERALL-T6.6-COMPLETE-001"
+    at: "2026-08-20T21:48:01Z"
+    action: "task_completed_and_chapter_exited_summary"
+    actor: "/root"
+    reason: "Task 6.6 平台回归、危险配置扫描和双重复核通过，Chapter 6 退出检查完成。"
+    chapter_event: "EVT-T6.6-COMPLETE-001"
+    chapter_evidence: "EVD-T6.6-COMPLETE-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_06_status: "completed"
+      task_6_6_status: "completed"
+      current_chapter: "chapter-07"
+      current_task: "7.1"
+      current_step: null
+      chapters_completed: 6
+      tasks_completed: 37
+      steps_completed: 204
+      exit_checks_completed: 6
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-06.yaml"
+      - "docs/implementation/chapter-06-agent-ci.md"

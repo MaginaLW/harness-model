@@ -4,7 +4,7 @@ chapter:
   id: "chapter-06"
   number: 6
   title: "Agent、Hooks 与 CI 集成"
-  status: "in_progress"
+  status: "completed"
   plan_lines: "1303-1532"
   dependency: "chapters 01-05 completed"
   tasks_total: 6
@@ -189,25 +189,48 @@ tasks:
   - id: "6.6"
     title: "完成第六章退出检查"
     plan_anchor: 1493
-    status: "in_progress"
+    status: "completed"
     steps_total: 3
-    completed_steps: []
-    in_progress_step: 1
-    evidence: []
+    completed_steps: [1, 2, 3]
+    in_progress_step: null
+    evidence:
+      - id: "EVD-T6.6-COMPLETE-001"
+        kind: "chapter_exit_bundle"
+        completed_at: "2026-08-20T21:48:01Z"
+        subject_commit: "bc9670494d05fb2d2f8294a1893c226c98ddda60"
+        artifacts:
+          - "AGENTS.md"
+          - "CLAUDE.md"
+          - ".claude/skills/ai-flow/SKILL.md"
+          - "tools/"
+          - ".github/workflows/ai-quality-gate.yml"
+          - "docs/operations/"
+          - "docs/implementation/chapter-06-agent-ci.md"
+        checks:
+          - "pytest Chapter 6 platform integration: 40 passed"
+          - "pytest full suite: 567 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src tools: passed"
+          - "git diff --check: passed"
+          - "rule-copy scan: no matches"
+          - "dangerous workflow configuration scan: no matches"
+        reviews:
+          requirements_conformance: "passed（Agent 入口、Skill、Hooks、CI、分支保护和三入口一致性逐项闭合）"
+          quality: "passed（适配层薄、最小权限、无外部动作、机器诊断稳定且核心决策单一）"
     blockers: []
 
 exit_check:
-  status: "pending"
+  status: "completed"
   required_task: "6.6"
   criteria:
     - "Agent 入口、ai-flow Skill、gauntlet、薄层 Hooks 和 CI Workflow 通过静态与行为检查"
     - "本地、包装器和 CI 使用同一核心 Gate，且集成层不复制规则"
     - "平台回归、危险配置扫描、需求复核和质量复核均有证据"
-  evidence: []
+  evidence: ["EVD-T6.6-COMPLETE-001"]
 
 review:
-  requirements_conformance: "pending"
-  quality_review: "pending"
+  requirements_conformance: "passed"
+  quality_review: "passed"
 
 history:
   - at: "2026-08-02T14:03:50Z"
@@ -301,3 +324,14 @@ history:
     actor: "/root"
     reason: "进入第六章平台集成回归、危险配置扫描和章节双重复核。"
     evidence: ["EVD-T6.5-COMPLETE-001"]
+  - id: "EVT-T6.6-COMPLETE-001"
+    at: "2026-08-20T21:48:01Z"
+    action: "task_completed_and_chapter_exited"
+    actor: "/root"
+    reason: "平台集成回归、规则副本/危险配置扫描与章节需求/质量复核通过，第六章退出检查完成。"
+    transition:
+      task_6_6: "in_progress -> completed"
+      chapter_06: "in_progress -> completed"
+      completed_steps: [1, 2, 3]
+      next_task: "7.1"
+    evidence: ["EVD-T6.6-COMPLETE-001"]
