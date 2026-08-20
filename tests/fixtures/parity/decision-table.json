@@ -1,0 +1,10 @@
+[
+  {"id":"passed-auto","facts":{"task_id":"TASK-0001","current_state":"APPROVED_FOR_MERGE","route":"AUTO","verification_level":"V0"},"passed":true,"reasons":[]},
+  {"id":"missing-ask-answer","facts":{"task_id":"TASK-0001","current_state":"APPROVED_FOR_MERGE","route":"ASK","verification_level":"V0","ask_required":true,"ask_answered":false},"passed":false,"reasons":["GATE_ASK_UNANSWERED"]},
+  {"id":"missing-review-approval","facts":{"task_id":"TASK-0001","current_state":"APPROVED_FOR_MERGE","route":"REVIEW","verification_level":"V1","review_required":true,"code_approval_current":false},"passed":false,"reasons":["GATE_CODE_APPROVAL_STALE"]},
+  {"id":"stale-evidence","facts":{"task_id":"TASK-0001","current_state":"APPROVED_FOR_MERGE","route":"AUTO","verification_level":"V0","evidence_current":false},"passed":false,"reasons":["GATE_EVIDENCE_STALE"]},
+  {"id":"blocked","facts":{"task_id":"TASK-0001","current_state":"BLOCKED","route":"BLOCK","verification_level":"V1","unresolved_block_or_escalation":true},"passed":false,"reasons":["GATE_BLOCKED","GATE_STATE_INVALID"]},
+  {"id":"ambiguous-task","resolver_candidates":[".ai/tasks/TASK-0001/task.yaml",".ai/tasks/TASK-0002/task.yaml"],"resolver_error":"exactly one"},
+  {"id":"governance-attestation-tail","facts":{"task_id":"TASK-0001","current_state":"APPROVED_FOR_MERGE","route":"AUTO","verification_level":"V0","scope_current":true},"passed":true,"reasons":[]},
+  {"id":"outside-tail","facts":{"task_id":"TASK-0001","current_state":"APPROVED_FOR_MERGE","route":"AUTO","verification_level":"V0","scope_current":false},"passed":false,"reasons":["GATE_SCOPE_CHANGED"]}
+]
