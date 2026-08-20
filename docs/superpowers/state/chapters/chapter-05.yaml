@@ -19,10 +19,10 @@ tasks:
   - id: "5.1"
     title: "解析 V0/V1 验证计划"
     plan_anchor: 997
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T5.1-START-001"
         kind: "execution_plan"
@@ -31,6 +31,24 @@ tasks:
         base_commit: "6b0601b216d033d714cfa229a65c0d19d1ec8787"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T5.1-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T18:36:46Z"
+        subject_commit: "1d2be45b7cdb3e25bda4041c8cbb94b751f4fca3"
+        artifacts:
+          - "src/aiflow/verification.py@sha256:1b1466ffac3d89ff8ed9a8dbbd168d822d6a01db12821bcc057ad4e165dddfd8"
+          - "tests/unit/test_verification_plan.py@sha256:e8ffef029904c46d9c2fc6b5de7ace714dd0495ec2f93dcd3b714fe3c268a324"
+          - "tests/fixtures/verification/plans/v0.json@sha256:a00c771f1f0d46103932975a7c0e5f74aa5269fb95c224295fe205dc4f05d6fd"
+          - "tests/fixtures/verification/plans/v1.json@sha256:4940c9fbb2b1fdb647d4a9680ace979303da1731dba5ce06b20862a922bb260"
+        checks:
+          - "pytest test_verification_plan: 20 passed, 1 skipped (Windows symlink privilege unavailable)"
+          - "pytest: 403 passed, 2 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（V0/V1 类别、占位符、路径、工具与输出语义完整）"
+          quality: "passed（重复关键旗标和 coverage 降级绕过已封闭）"
     blockers: []
   - id: "5.2"
     title: "实现受控子进程执行器与日志过滤"
@@ -121,3 +139,14 @@ history:
     actor: "/root"
     reason: "登记 Task 5.1 的 REVIEW + V1 范围，进入 V0/V1 验证计划解析实现。"
     evidence: ["EVD-T5.1-START-001"]
+  - id: "EVT-T5.1-COMPLETE-001"
+    at: "2026-08-20T18:36:46Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T5.1-EXECUTION-001"
+    reason: "Task 5.1 的确定性 V0/V1 计划、路径边界与 coverage/diff-cover 语义通过 V1 和精简复核。"
+    transition:
+      task_5_1: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "5.2"
+    evidence: ["EVD-T5.1-COMPLETE-001"]
