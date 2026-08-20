@@ -1,0 +1,7 @@
+{
+  "unit_cases": [
+    {"id": "auto-label-v1", "route_label": "AUTO", "facts": {"mechanical": true, "behavior_changed": true, "code_modified": false, "interaction_scope": "local", "regression_risk": false, "error_detectability": "high"}, "expected_level": "V1"},
+    {"id": "ask-label-v0", "route_label": "ASK", "facts": {"mechanical": true, "behavior_changed": false, "code_modified": false, "interaction_scope": "local", "regression_risk": false, "error_detectability": "high"}, "expected_level": "V0"},
+    {"id": "review-label-v1", "route_label": "REVIEW", "facts": {"mechanical": false, "behavior_changed": false, "code_modified": true, "interaction_scope": "cross_file", "regression_risk": true, "error_detectability": "low"}, "expected_level": "V1"}
+  ]
+}

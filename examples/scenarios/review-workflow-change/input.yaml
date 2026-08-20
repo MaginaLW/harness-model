@@ -31,3 +31,10 @@ impact_categories:
   - ci
   - cd
 business_direction_count: 1
+change_characteristics:
+  mechanical: false
+  behavior_changed: true
+  code_modified: true
+  interaction_scope: cross_file
+  regression_risk: true
+  error_detectability: low

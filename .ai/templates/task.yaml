@@ -47,3 +47,12 @@ decision_units:
     impact_categories:
       - documentation
     business_direction_count: 1
+    # Omit only for legacy records; new decision units must state every fact so
+    # the verification engine can determine whether V0 is warranted.
+    change_characteristics:
+      mechanical: true
+      behavior_changed: false
+      code_modified: false
+      interaction_scope: local
+      regression_risk: false
+      error_detectability: high

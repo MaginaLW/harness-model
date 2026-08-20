@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T16:15:30Z"
+updated_at: "2026-08-20T16:16:21Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-03"
   current_task: "3.4"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T3.4-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T16:16:21Z"
+    actor: "/root"
+    subject: "执行 Task 3.4 独立 V0/V1 判定"
+    decision: "按 REVIEW + V1 流程，以向后兼容的封闭 change_characteristics 补全确定性输入，并实现与 route 独立的等级引擎。"
+    rationale: "现有契约无法程序裁决行为变化、代码修改、跨文件交互、回归风险和错误可检测性；不应从路径或自然语言猜测。"
+    consequence: "Task 3.4 进入 in_progress，允许范围经记录扩展到直接相关 Schema、模板和黄金输入，累计计数暂不变。"
+    base_commit: "e863a9c07253077b7fa46e6f1a9726f2ede22ec5"
+    subject_commit: null
+    evidence:
+      - "docs/superpowers/plans/2026-08-21-chapter-03-task-3-4-execution.md"
+      - "docs/superpowers/state/chapters/chapter-03.yaml#EVD-T3.4-START-001"
   - id: "DEC-T3.3-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T16:06:21Z"

@@ -104,6 +104,26 @@
     "business_direction_count": {
       "type": "integer",
       "minimum": 1
+    },
+    "change_characteristics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mechanical",
+        "behavior_changed",
+        "code_modified",
+        "interaction_scope",
+        "regression_risk",
+        "error_detectability"
+      ],
+      "properties": {
+        "mechanical": {"type": "boolean"},
+        "behavior_changed": {"type": "boolean"},
+        "code_modified": {"type": "boolean"},
+        "interaction_scope": {"enum": ["local", "cross_file", "cross_module"]},
+        "regression_risk": {"type": "boolean"},
+        "error_detectability": {"enum": ["high", "low"]}
+      }
     }
   }
 }

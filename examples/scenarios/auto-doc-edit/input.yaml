@@ -27,3 +27,10 @@ verification:
 impact_categories:
   - documentation
 business_direction_count: 1
+change_characteristics:
+  mechanical: true
+  behavior_changed: false
+  code_modified: false
+  interaction_scope: local
+  regression_risk: false
+  error_detectability: high
