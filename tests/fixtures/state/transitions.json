@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "transitions": [
+    {"from": "NEW", "to": "CLASSIFIED", "event_type": "classification_recorded", "preconditions": ["classification_available"]},
+    {"from": "CLASSIFIED", "to": "WAITING_FOR_ASK", "event_type": "ask_required", "preconditions": ["classification_route_selected"]},
+    {"from": "CLASSIFIED", "to": "WAITING_FOR_SPEC_REVIEW", "event_type": "spec_review_required", "preconditions": ["classification_route_selected"]},
+    {"from": "CLASSIFIED", "to": "READY_TO_IMPLEMENT", "event_type": "implementation_ready", "preconditions": ["classification_route_selected", "spec_frozen"]},
+    {"from": "CLASSIFIED", "to": "BLOCKED", "event_type": "classification_blocked", "preconditions": ["blocking_condition_recorded"]},
+    {"from": "WAITING_FOR_ASK", "to": "READY_TO_IMPLEMENT", "event_type": "ask_answered", "preconditions": ["answer_recorded", "spec_frozen"]},
+    {"from": "WAITING_FOR_SPEC_REVIEW", "to": "READY_TO_IMPLEMENT", "event_type": "spec_approved", "preconditions": ["spec_frozen", "spec_approval_valid"]},
+    {"from": "READY_TO_IMPLEMENT", "to": "IMPLEMENTING", "event_type": "implementation_started", "preconditions": ["readiness_satisfied"]},
+    {"from": "FAILED", "to": "IMPLEMENTING", "event_type": "implementation_retried", "preconditions": ["retry_reason_recorded"]},
+    {"from": "IMPLEMENTING", "to": "VERIFYING", "event_type": "verification_started", "preconditions": ["implementation_complete"]},
+    {"from": "VERIFYING", "to": "VERIFIED", "event_type": "verification_passed", "preconditions": ["verification_passed"]},
+    {"from": "VERIFYING", "to": "FAILED", "event_type": "verification_failed", "preconditions": ["verification_failed"]},
+    {"from": "VERIFYING", "to": "ESCALATED", "event_type": "verification_escalated", "preconditions": ["escalation_recorded"]},
+    {"from": "VERIFYING", "to": "BLOCKED", "event_type": "verification_blocked", "preconditions": ["blocking_condition_recorded"]},
+    {"from": "VERIFIED", "to": "APPROVED_FOR_MERGE", "event_type": "merge_approved_automatically", "preconditions": ["final_review_not_required"]},
+    {"from": "VERIFIED", "to": "WAITING_FOR_FINAL_REVIEW", "event_type": "final_review_required", "preconditions": ["final_review_required"]},
+    {"from": "WAITING_FOR_FINAL_REVIEW", "to": "APPROVED_FOR_MERGE", "event_type": "code_approved", "preconditions": ["code_approval_valid"]},
+    {"from": "APPROVED_FOR_MERGE", "to": "MERGED", "event_type": "merge_recorded", "preconditions": ["merge_commit_verified"]},
+    {"from": "ESCALATED", "to": "CLASSIFIED", "event_type": "escalation_resolved", "preconditions": ["resolution_recorded"]},
+    {"from": "BLOCKED", "to": "CLASSIFIED", "event_type": "block_resolved", "preconditions": ["resolution_recorded"]}
+  ],
+  "non_state_events": [
+    "task_created",
+    "spec_frozen",
+    "approval_recorded",
+    "evidence_generated",
+    "state_recovered"
+  ]
+}

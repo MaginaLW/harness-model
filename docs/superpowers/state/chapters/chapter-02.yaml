@@ -126,11 +126,19 @@ tasks:
   - id: "2.4"
     title: "实现状态转换和可重放事件日志"
     plan_anchor: 414
-    status: "pending"
+    status: "in_progress"
     steps_total: 6
     completed_steps: []
-    in_progress_step: null
-    evidence: []
+    in_progress_step: 1
+    evidence:
+      - id: "EVD-T2.4-START-001"
+        kind: "execution_plan"
+        path: "docs/superpowers/plans/2026-08-20-chapter-02-task-2-4-execution.md"
+        sha256: "759b78919dd4d976fd7ce29af758b2d6e4f5ff878b3d3445735410c4c58b7b66"
+        base_commit: "a2b4fcc0a7f7f84053581b3ff241e2abbc2965fd"
+        prerequisite_evidence: "EVD-T2.3-COMPLETE-001"
+        route: "REVIEW"
+        verification: "V1"
     blockers: []
   - id: "2.5"
     title: "实现 `begin`、`close` 与重试规则"
@@ -221,3 +229,9 @@ history:
       completed_steps: [1, 2, 3, 4, 5]
       next_task: "2.4"
     evidence: ["EVD-T2.3-COMPLETE-001"]
+  - id: "EVT-T2.4-START-001"
+    at: "2026-08-20T14:10:30Z"
+    action: "task_started"
+    actor: "/root"
+    reason: "登记 Task 2.4 的精简 REVIEW + V1 范围，进入状态图、重放和恢复实现。"
+    evidence: ["EVD-T2.4-START-001"]

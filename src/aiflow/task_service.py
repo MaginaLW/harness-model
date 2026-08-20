@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -12,13 +13,21 @@ from typing import Any
 import yaml
 
 from aiflow.contracts import require_valid_contract
-from aiflow.errors import AiflowError, ContractError, PolicyError, StorageError
+from aiflow.errors import (
+    AiflowError,
+    ContractError,
+    PolicyError,
+    StateTransitionError,
+    StorageError,
+)
 from aiflow.git_context import GitContext, collect_git_context
+from aiflow.state import create_record_event, create_transition_event, replay_events
 from aiflow.storage import (
     atomic_write_json,
     atomic_write_text,
     atomic_write_yaml,
     read_task_json,
+    read_task_yaml,
     reserve_task_id,
     resolve_task_path,
 )
@@ -32,6 +41,22 @@ class StartResult:
 
     task_id: str
     task_directory: Path
+
+
+@dataclass(frozen=True)
+class TaskRecord:
+    """A validated materialized task and its replayable event history."""
+
+    task: dict[str, Any]
+    events: tuple[dict[str, Any], ...]
+
+
+@dataclass(frozen=True)
+class TransitionResult:
+    """The new task materialization and appended transition event."""
+
+    task: dict[str, Any]
+    event: dict[str, Any]
 
 
 def _utc_now() -> str:
@@ -308,3 +333,157 @@ def recover_task(repository_root: Path, task_id: str) -> StartResult:
         )
     task_directory = resolve_task_path(Path(context.repository_path), task_id)
     return _complete_bundle(task_id, task_directory, raw_bundle)
+
+
+def _read_event_log(repository_root: Path, task_id: str) -> list[dict[str, Any]]:
+    path = resolve_task_path(repository_root, task_id, "events.jsonl")
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError) as error:
+        raise StorageError(
+            "Could not read task event log",
+            code="STATE_EVENT_LOG_READ_FAILED",
+            details={"task_id": task_id},
+        ) from error
+    events: list[dict[str, Any]] = []
+    for sequence, line in enumerate(lines, start=1):
+        try:
+            value = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise StorageError(
+                "Could not parse task event log",
+                code="STATE_EVENT_LOG_PARSE_FAILED",
+                details={"sequence": sequence},
+            ) from error
+        if not isinstance(value, dict):
+            raise StorageError(
+                "Task event must be a JSON object",
+                code="STATE_EVENT_LOG_PARSE_FAILED",
+                details={"sequence": sequence},
+            )
+        events.append(value)
+    return events
+
+
+def _append_event(path: Path, event: Mapping[str, object]) -> None:
+    content = (json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
+    descriptor: int | None = None
+    try:
+        descriptor = os.open(path, os.O_APPEND | os.O_WRONLY)
+        written = os.write(descriptor, content)
+        if written != len(content):
+            raise OSError("partial event append")
+        os.fsync(descriptor)
+    except OSError as error:
+        raise StorageError(
+            "Could not append task event",
+            code="STATE_EVENT_APPEND_FAILED",
+            details={"task_id": path.parent.name},
+        ) from error
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
+
+def _replace_materialized_task(staged: Path, target: Path) -> None:
+    os.replace(staged, target)
+
+
+def _persist_event_and_task(
+    task_directory: Path,
+    task: Mapping[str, object],
+    event: Mapping[str, object],
+) -> None:
+    target = task_directory / "task.yaml"
+    staged = task_directory / "task.yaml.next"
+    atomic_write_yaml(staged, task)
+    try:
+        _append_event(task_directory / "events.jsonl", event)
+    except AiflowError:
+        staged.unlink(missing_ok=True)
+        raise
+    try:
+        _replace_materialized_task(staged, target)
+    except OSError as error:
+        raise StorageError(
+            "Event was appended but materialized task replacement failed",
+            code="STATE_MATERIALIZATION_FAILED",
+            details={"task_id": task_directory.name},
+        ) from error
+
+
+def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
+    """Load and replay a task, repairing event-ahead materialization if necessary."""
+    raw_task = read_task_yaml(
+        repository_root,
+        task_id,
+        "task.yaml",
+        contract_name="task",
+    )
+    if not isinstance(raw_task, dict):
+        raise StorageError("Task document must be an object", code="STATE_TASK_INVALID")
+    task: dict[str, Any] = raw_task
+    events = _read_event_log(repository_root, task_id)
+    terminal_state = replay_events(events, task_id=task_id)
+    if task.get("current_state") == terminal_state:
+        return TaskRecord(task=task, events=tuple(events))
+
+    staged_path = resolve_task_path(repository_root, task_id, "task.yaml.next")
+    if not staged_path.is_file():
+        raise StateTransitionError(
+            "Materialized task differs from replay without a staged replacement",
+            code="STATE_MATERIALIZATION_MISMATCH",
+            details={"materialized": task.get("current_state"), "replayed": terminal_state},
+        )
+    staged_task = read_task_yaml(
+        repository_root,
+        task_id,
+        "task.yaml.next",
+        contract_name="task",
+    )
+    if not isinstance(staged_task, dict) or staged_task.get("current_state") != terminal_state:
+        raise StateTransitionError(
+            "Materialized task differs from replay without a valid staged replacement",
+            code="STATE_MATERIALIZATION_MISMATCH",
+            details={"materialized": task.get("current_state"), "replayed": terminal_state},
+        )
+    repaired: dict[str, Any] = staged_task
+    recovery_event = create_record_event(
+        repaired,
+        event_type="state_recovered",
+        actor="aiflow",
+        payload={"materialized_state": task.get("current_state")},
+        sequence=len(events) + 1,
+    )
+    require_valid_contract("task", repaired)
+    task_directory = resolve_task_path(repository_root, task_id)
+    _persist_event_and_task(task_directory, repaired, recovery_event)
+    return TaskRecord(task=repaired, events=tuple([*events, recovery_event]))
+
+
+def transition_task_record(
+    repository_root: Path,
+    task_id: str,
+    *,
+    target_state: str,
+    event_type: str,
+    actor: str,
+    payload: Mapping[str, object],
+    satisfied_preconditions: set[str],
+) -> TransitionResult:
+    """Validate, append, and materialize one state transition."""
+    record = load_task_record(repository_root, task_id)
+    event = create_transition_event(
+        record.task,
+        target_state=target_state,
+        event_type=event_type,
+        actor=actor,
+        payload=payload,
+        sequence=len(record.events) + 1,
+        satisfied_preconditions=satisfied_preconditions,
+    )
+    task = {**record.task, "current_state": target_state, "updated_at": event["occurred_at"]}
+    require_valid_contract("task", task)
+    task_directory = resolve_task_path(repository_root, task_id)
+    _persist_event_and_task(task_directory, task, event)
+    return TransitionResult(task=task, event=event)

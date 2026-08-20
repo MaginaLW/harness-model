@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T14:07:18Z"
+updated_at: "2026-08-20T14:10:30Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-02"
   current_task: "2.4"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T2.4-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T14:10:30Z"
+    actor: "/root"
+    subject: "执行 Task 2.4 状态转换与事件重放"
+    decision: "按精简 REVIEW + V1 流程实现数据化状态图、封闭非状态事件和中断恢复，完成后本地提交。"
+    rationale: "用户要求持续推进并按大块提交；状态核心需要逐边确定性验证。"
+    consequence: "Task 2.4 进入 in_progress，完成前累计计数不变。"
+    base_commit: "a2b4fcc0a7f7f84053581b3ff241e2abbc2965fd"
+    subject_commit: "N/A（完成验证后更新为本地提交）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-4-execution.md"
+      - "docs/superpowers/state/chapters/chapter-02.yaml#EVD-T2.4-START-001"
   - id: "DEC-T2.3-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T14:01:11Z"
@@ -620,3 +633,16 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-02.yaml"
       - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-3-execution.md"
+  - id: "EVT-OVERALL-T2.4-START-001"
+    at: "2026-08-20T14:10:30Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 2 已登记 Task 2.4 的精简 REVIEW + V1 执行范围并进入 Step 1。"
+    chapter_event: "EVT-T2.4-START-001"
+    chapter_evidence: "EVD-T2.4-START-001"
+    current_chapter: "chapter-02"
+    current_task: "2.4"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-02.yaml"
