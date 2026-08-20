@@ -156,10 +156,10 @@ tasks:
   - id: "6.5"
     title: "验证本地、包装器和 CI 决策一致性"
     plan_anchor: 1458
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T6.5-START-001"
         kind: "execution_plan"
@@ -168,14 +168,31 @@ tasks:
         base_commit: "70040098a06506dc08f7d6ebeb91817a0766a3e8"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T6.5-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T21:46:35Z"
+        subject_commit: "ef8421fb0429ebaf6b8e720395d6ee08c9c5dafc"
+        artifacts:
+          - "tests/fixtures/parity/decision-table.json@sha256:f03ecc0f3c2a0acc9d8dc5d3b858be92a4ab1af9a290ea6e19aa37f5a9b16289"
+          - "tests/integration/test_gate_parity.py@sha256:8fa7b40ac03738a8bbdc9fc527e21d1ea6e478c5ccc94dd65cabd5f6842f9b39"
+          - "docs/implementation/chapter-06-agent-ci.md@sha256:f800e785e9bd2ddf43045d3f301a46bb29d1f11e8c1e711800e87a4cf7087fd1"
+        checks:
+          - "pytest Gate parity: 9 passed"
+          - "pytest full suite: 567 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src tools: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（八场景、三入口机器结论、只读摘要和路径独立身份完整）"
+          quality: "passed（同一 Gate 决策源、拒绝 JSON 稳定且无适配层规则副本）"
     blockers: []
   - id: "6.6"
     title: "完成第六章退出检查"
     plan_anchor: 1493
-    status: "pending"
+    status: "in_progress"
     steps_total: 3
     completed_steps: []
-    in_progress_step: null
+    in_progress_step: 1
     evidence: []
     blockers: []
 
@@ -268,3 +285,19 @@ history:
     actor: "/root"
     reason: "登记 Task 6.5 的 REVIEW + V1 范围，进入本地、包装器与 CI Gate 一致性验证。"
     evidence: ["EVD-T6.5-START-001"]
+  - id: "EVT-T6.5-COMPLETE-001"
+    at: "2026-08-20T21:46:35Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "八场景 Gate 一致性、只读摘要和路径独立身份验证通过全量回归。"
+    transition:
+      task_6_5: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "6.6"
+    evidence: ["EVD-T6.5-COMPLETE-001"]
+  - id: "EVT-T6.6-START-001"
+    at: "2026-08-20T21:46:35Z"
+    action: "task_started"
+    actor: "/root"
+    reason: "进入第六章平台集成回归、危险配置扫描和章节双重复核。"
+    evidence: ["EVD-T6.5-COMPLETE-001"]
