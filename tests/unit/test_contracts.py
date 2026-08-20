@@ -129,17 +129,19 @@ def test_ci_evidence_requires_attestation_head() -> None:
     evidence = valid_fixture("evidence")
     evidence["mode"] = "ci"
 
-    assert validate_contract("evidence", evidence) == [
-        "/attestation_head: required for CI evidence"
-    ]
+    errors = validate_contract("evidence", evidence)
+    assert "/attestation_head: required for CI evidence" in errors
+    assert (
+        "/attestation_governance_only: CI evidence requires governance-only attestation" in errors
+    )
 
 
 def test_passed_evidence_cannot_contain_a_failed_check() -> None:
     evidence = valid_fixture("evidence")
-    evidence["checks"][0]["result"] = "failed"
+    evidence["checks"][0]["status"] = "failed"
 
     assert validate_contract("evidence", evidence) == [
-        "/conclusion: passed evidence contains a failed check"
+        "/conclusion: passed evidence contains an incomplete required check"
     ]
 
 

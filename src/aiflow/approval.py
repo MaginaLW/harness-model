@@ -334,11 +334,17 @@ def _evidence(
         and value.get("subject_commit") == task.get("subject_commit")
         and value.get("spec_sha256") == spec_sha256
         and value.get("policy_sha256") == policy_sha256
+        and value.get("classification_input_sha256")
+        == classification.get("classification_input_sha256")
         and value.get("verification_level") == classification.get("effective_verification_level")
         and value.get("conclusion") == "passed"
         and isinstance(checks, list)
-        and bool(checks)
-        and all(isinstance(check, Mapping) and check.get("result") == "passed" for check in checks)
+        and any(isinstance(check, Mapping) and check.get("required") is True for check in checks)
+        and all(
+            isinstance(check, Mapping)
+            and (check.get("required") is not True or check.get("status") == "passed")
+            for check in checks
+        )
         and isinstance(value.get("decision_unit_ids"), list)
         and review_ids.issubset(set(value["decision_unit_ids"]))
     )

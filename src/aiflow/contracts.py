@@ -132,13 +132,33 @@ def _cross_field_errors(contract_name: str, value: object) -> list[str]:
     if contract_name == "evidence":
         if value.get("mode") == "ci" and "attestation_head" not in value:
             errors.append("/attestation_head: required for CI evidence")
+        if value.get("mode") == "ci" and value.get("attestation_governance_only") is not True:
+            errors.append(
+                "/attestation_governance_only: CI evidence requires governance-only attestation"
+            )
+        if value.get("mode") == "local" and (
+            "attestation_head" in value or "attestation_governance_only" in value
+        ):
+            errors.append("/mode: local evidence cannot claim CI attestation")
 
         checks = value.get("checks")
         if value.get("conclusion") == "passed" and isinstance(checks, list):
-            if any(
-                isinstance(check, Mapping) and check.get("result") == "failed" for check in checks
+            required = [
+                check
+                for check in checks
+                if isinstance(check, Mapping) and check.get("required") is True
+            ]
+            if (
+                not checks
+                or not required
+                or any(
+                    isinstance(check, Mapping)
+                    and check.get("required") is True
+                    and check.get("status") != "passed"
+                    for check in checks
+                )
             ):
-                errors.append("/conclusion: passed evidence contains a failed check")
+                errors.append("/conclusion: passed evidence contains an incomplete required check")
 
     return errors
 
