@@ -4,7 +4,7 @@ chapter:
   id: "chapter-02"
   number: 2
   title: "任务记录与状态核心"
-  status: "pending"
+  status: "in_progress"
   plan_lines: "301-532"
   dependency: "chapter-01 completed"
   tasks_total: 6
@@ -19,20 +19,73 @@ tasks:
   - id: "2.1"
     title: "实现领域错误、任务 ID 与原子存储"
     plan_anchor: 303
-    status: "pending"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5, 6]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T2.1-START-001"
+        kind: "execution_plan"
+        path: "docs/superpowers/plans/2026-08-20-chapter-02-task-2-1-execution.md"
+        sha256: "4208e1ff9976da5f0c496534c546c094b66591879badc86341f81dc73fc843fe"
+        base_commit: "519601e93a00de3eb41cb8737461d8adacae91aa"
+        route: "REVIEW"
+        verification: "V1"
+      - id: "EVD-T2.1-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T13:48:03Z"
+        subject_commit: "N/A（未获 commit 授权）"
+        artifacts:
+          - "src/aiflow/errors.py@sha256:ceda9b034ebe7ba1656c1c65e50eac30f8b33b2dbed6f07af7f2869e1aa6261d"
+          - "src/aiflow/storage.py@sha256:a768b20e15540a5fe68835f98098ed4b08247b85243a6bacdf4a20b930dae338"
+          - "src/aiflow/cli.py@sha256:829250c7e3967b78aa403a92168522423cd05cb0a2c5db1d3963a178d2f2de95"
+          - "src/aiflow/contracts.py@sha256:eaacbeae96b87e303155412d1536e93414216584d56c4cc7c005327ffde40390"
+          - "tests/unit/test_storage.py@sha256:f331a29f814a10923adbcd724a6167f62261a803b83a7954c75c60adcaab3b36"
+        checks:
+          - "pytest tests/unit/test_storage.py: 19 passed"
+          - "pytest: 88 passed"
+          - "ruff check: passed"
+          - "ruff format --check: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 2.1 六步全部覆盖）"
+          quality: "passed（异常保留旧文件、竞争重试有上限、真实 junction 逃逸被拒绝）"
     blockers: []
   - id: "2.2"
     title: "实现 Git 上下文采集"
     plan_anchor: 344
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T2.2-START-001"
+        kind: "execution_plan"
+        path: "docs/superpowers/plans/2026-08-20-chapter-02-task-2-2-execution.md"
+        sha256: "4b8b9a380c0e43464ee247bb6e4ffe7b25bde2860a94a07742c1ff8b01729c1c"
+        base_commit: "519601e93a00de3eb41cb8737461d8adacae91aa"
+        prerequisite_evidence: "EVD-T2.1-COMPLETE-001"
+        route: "REVIEW"
+        verification: "V1"
+      - id: "EVD-T2.2-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T13:55:25Z"
+        subject_commit: "N/A（未获 commit 授权）"
+        artifacts:
+          - "src/aiflow/git_context.py@sha256:08b8051ed0553f644a2853e909b434f790b791bad83780594b846432e86af1a2"
+          - "tests/unit/test_git_context.py@sha256:b48dbdb85666f7bf54a2262a88d8ad0b639b3c3fae91a4589f7244e81f9ac836"
+          - ".ai/schemas/task.schema.json@sha256:09c17a8583f2b74e4df64df7c4697a3c4a08ebfa396277d13e207fea9e2700dd"
+        checks:
+          - "pytest tests/unit/test_git_context.py: 14 passed"
+          - "pytest: 102 passed"
+          - "ruff check: passed"
+          - "ruff format --check: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 2.2 五步全部覆盖）"
+          quality: "passed（只读参数数组、10 秒超时、错误不包含 stderr 或环境变量）"
     blockers: []
   - id: "2.3"
     title: "实现 `aiflow start`"
@@ -90,3 +143,37 @@ history:
     actor: "Codex"
     reason: "登记第二章 6 个任务和 33 个步骤，依赖第一章退出条件"
     evidence: ["docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"]
+  - id: "EVT-T2.1-START-001"
+    at: "2026-08-20T13:40:25Z"
+    action: "task_started"
+    actor: "/root"
+    reason: "登记 Task 2.1 的精简 REVIEW + V1 范围，进入领域错误与存储契约实现。"
+    evidence: ["EVD-T2.1-START-001"]
+  - id: "EVT-T2.1-COMPLETE-001"
+    at: "2026-08-20T13:48:03Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T2.1-EXECUTION-001"
+    reason: "领域错误、安全任务路径、竞争安全 ID 预留和原子 YAML/JSON 存储完成，并通过 V1 与内联双复核。"
+    transition:
+      task_2_1: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "2.2"
+    evidence: ["EVD-T2.1-COMPLETE-001"]
+  - id: "EVT-T2.2-START-001"
+    at: "2026-08-20T13:50:29Z"
+    action: "task_started"
+    actor: "/root"
+    reason: "登记 Task 2.2 的精简 REVIEW + V1 范围，进入只读 Git 上下文采集实现。"
+    evidence: ["EVD-T2.2-START-001"]
+  - id: "EVT-T2.2-COMPLETE-001"
+    at: "2026-08-20T13:55:25Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T2.2-EXECUTION-001"
+    reason: "限时只读 Git 命令、稳定仓库身份和规范化上下文完成，并通过 V1 与内联双复核。"
+    transition:
+      task_2_2: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "2.3"
+    evidence: ["EVD-T2.2-COMPLETE-001"]

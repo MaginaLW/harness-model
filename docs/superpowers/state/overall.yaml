@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T06:44:18Z"
+updated_at: "2026-08-20T13:55:25Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-02"
-  current_task: "2.1"
+  current_task: "2.3"
   current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 1
   tasks_total: 44
-  tasks_completed: 5
+  tasks_completed: 7
   steps_total: 243
-  steps_completed: 28
+  steps_completed: 39
   exit_checks_total: 7
   exit_checks_completed: 1
   blockers_total: 0
@@ -49,7 +49,7 @@ chapters:
     number: 2
     title: "任务记录与状态核心"
     state_file: "docs/superpowers/state/chapters/chapter-02.yaml"
-    status: "pending"
+    status: "in_progress"
     dependency: "chapter-01 completed"
     tasks_total: 6
     steps_total: 33
@@ -139,6 +139,32 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T2.2-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T13:50:29Z"
+    actor: "/root"
+    subject: "执行 Task 2.2 Git 上下文采集"
+    decision: "按精简 REVIEW + V1 流程实现四类限时只读 Git 命令和稳定上下文，不提前实现 start。"
+    rationale: "用户要求持续推进；Git 结果是后续身份与版本输入，需要真实临时仓库测试，但没有外部或破坏性动作。"
+    consequence: "Task 2.2 进入 in_progress，完成前累计计数不变。"
+    base_commit: "519601e93a00de3eb41cb8737461d8adacae91aa"
+    subject_commit: "N/A（Task 2.1 与 2.2 的提交前人工流程）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-2-execution.md"
+      - "docs/superpowers/state/chapters/chapter-02.yaml#EVD-T2.2-START-001"
+  - id: "DEC-T2.1-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T13:40:25Z"
+    actor: "/root"
+    subject: "执行 Task 2.1 领域错误、任务 ID 与原子存储"
+    decision: "按精简 REVIEW + V1 流程实现本地持久化核心，不提前实现 Git 上下文、状态机或 CLI 命令。"
+    rationale: "用户要求继续下一章节；任务影响本地持久化，需要定向故障测试和全量回归，但不需要额外审计层。"
+    consequence: "Chapter 2 与 Task 2.1 进入 in_progress，完成前累计计数不变。"
+    base_commit: "519601e93a00de3eb41cb8737461d8adacae91aa"
+    subject_commit: "N/A（Task 2.1 的提交前人工流程）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-1-execution.md"
+      - "docs/superpowers/state/chapters/chapter-02.yaml#EVD-T2.1-START-001"
   - id: "DEC-T1.5-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T06:39:22Z"
@@ -482,3 +508,69 @@ history:
       - "docs/superpowers/state/chapters/chapter-01.yaml"
       - "docs/implementation/chapter-01-contract-baseline.md"
       - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-5-execution.md"
+  - id: "EVT-OVERALL-T2.1-START-001"
+    at: "2026-08-20T13:40:25Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 2 已登记 Task 2.1 的精简 REVIEW + V1 执行范围并进入 Step 1。"
+    chapter_event: "EVT-T2.1-START-001"
+    chapter_evidence: "EVD-T2.1-START-001"
+    current_chapter: "chapter-02"
+    current_task: "2.1"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-02.yaml"
+  - id: "EVT-OVERALL-T2.1-COMPLETE-001"
+    at: "2026-08-20T13:48:03Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 2.1 的领域错误、安全路径、任务 ID 和原子存储已通过 V1 与内联双复核。"
+    chapter_event: "EVT-T2.1-COMPLETE-001"
+    chapter_evidence: "EVD-T2.1-COMPLETE-001"
+    decision: "DEC-T2.1-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_02_status: "in_progress"
+      task_2_1_status: "completed"
+      current_chapter: "chapter-02"
+      current_task: "2.2"
+      current_step: null
+      tasks_completed: 6
+      steps_completed: 34
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-02.yaml"
+      - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-1-execution.md"
+  - id: "EVT-OVERALL-T2.2-START-001"
+    at: "2026-08-20T13:50:29Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 2 已登记 Task 2.2 的精简 REVIEW + V1 执行范围并进入 Step 1。"
+    chapter_event: "EVT-T2.2-START-001"
+    chapter_evidence: "EVD-T2.2-START-001"
+    current_chapter: "chapter-02"
+    current_task: "2.2"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-02.yaml"
+  - id: "EVT-OVERALL-T2.2-COMPLETE-001"
+    at: "2026-08-20T13:55:25Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 2.2 的只读 Git 上下文采集已通过 V1 与内联双复核。"
+    chapter_event: "EVT-T2.2-COMPLETE-001"
+    chapter_evidence: "EVD-T2.2-COMPLETE-001"
+    decision: "DEC-T2.2-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_02_status: "in_progress"
+      task_2_2_status: "completed"
+      current_chapter: "chapter-02"
+      current_task: "2.3"
+      current_step: null
+      tasks_completed: 7
+      steps_completed: 39
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-02.yaml"
+      - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-2-execution.md"

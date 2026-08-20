@@ -11,6 +11,8 @@ from jsonschema import Draft202012Validator, FormatChecker  # type: ignore[impor
 from jsonschema.exceptions import ValidationError  # type: ignore[import-untyped]
 from referencing import Registry, Resource
 
+from aiflow.errors import ContractError
+
 JsonObject = dict[str, Any]
 
 SCHEMA_RELATIVE_DIRECTORY = Path(".ai") / "schemas"
@@ -26,13 +28,17 @@ SCHEMA_FILES = {
 }
 
 
-class ContractValidationError(ValueError):
+class ContractValidationError(ContractError):
     """Raised when a value does not satisfy a named machine contract."""
 
     def __init__(self, contract_name: str, errors: list[str]) -> None:
         self.contract_name = contract_name
         self.errors = errors
-        super().__init__(f"Invalid {contract_name} contract: {'; '.join(errors)}")
+        super().__init__(
+            f"Invalid {contract_name} contract: {'; '.join(errors)}",
+            code="CONTRACT_VALIDATION_FAILED",
+            details={"contract_name": contract_name, "errors": errors},
+        )
 
 
 def load_schema(contract_name: str, schema_directory: Path | None = None) -> JsonObject:
