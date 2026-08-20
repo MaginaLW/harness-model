@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import Any
 
 from aiflow.contracts import require_valid_contract
-from aiflow.decision_units import parse_decision_units
+from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.errors import ContractError, StateTransitionError
 from aiflow.git_context import collect_git_context
 from aiflow.policy import load_policy_bundle
 from aiflow.routing import ROUTE_ORDER, route_task
+from aiflow.scope import matches_scope, normalize_repository_path
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import TaskRecord, read_task_record_strict, transition_task_record
 from aiflow.verification_level import verification_for_task
@@ -25,44 +24,21 @@ def _now() -> str:
 
 
 def _stable_input(task: Mapping[str, object], units: tuple[dict[str, Any], ...]) -> str:
-    """Digest only durable decision facts, never state/timestamps/worktree paths."""
-    value = {
-        "task_id": task.get("task_id"),
-        "goal": task.get("goal"),
-        "allowed_scope": task.get("allowed_scope"),
-        "forbidden_actions": task.get("forbidden_actions"),
-        "base_commit": task.get("base_commit"),
-        "subject_commit": task.get("subject_commit"),
-        "decision_units": units,
-    }
-    canonical = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    """Compatibility wrapper for the shared stable classification digest."""
+    return classification_input_digest(task, units)
 
 
 def _scope_allowed(impact: object, allowed: object) -> bool:
     if not isinstance(impact, list) or not isinstance(allowed, list):
         return False
-    patterns = [item.replace("\\", "/") for item in allowed if isinstance(item, str)]
-    if len(patterns) != len(allowed):
+    if not all(isinstance(item, str) for item in impact + allowed):
         return False
-    for item in impact:
-        if not isinstance(item, str) or not item.strip():
-            return False
-        path = item.replace("\\", "/")
-        if (
-            path.startswith("/")
-            or (len(path) >= 3 and path[1:3] == ":/")
-            or ".." in PurePosixPath(path).parts
-        ):
-            return False
-        # pathlib's ** semantics vary at the directory boundary, hence prefix too.
-        if not any(
-            PurePosixPath(path).match(pattern)
-            or (pattern.endswith("/**") and path.startswith(pattern[:-3].rstrip("/") + "/"))
-            for pattern in patterns
-        ):
-            return False
-    return True
+    try:
+        paths = [normalize_repository_path(item) for item in impact]
+        patterns = [normalize_repository_path(item) for item in allowed]
+        return all(any(matches_scope(path, pattern) for pattern in patterns) for path in paths)
+    except ContractError:
+        return False
 
 
 def _require_baseline(root: Path, task: Mapping[str, object]) -> None:

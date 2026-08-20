@@ -13,6 +13,7 @@ _SAFETY_PRIORITY = {
     "GIT_CONTEXT_INVALID": 30,
     "POLICY_SUMMARY_MISMATCH": 40,
     "CLASSIFICATION_STALE": 50,
+    "VERIFICATION_CONFIGURATION_INCOMPLETE": 55,
     "SPECIFICATION_TAMPERED": 60,
     "SPECIFICATION_INCOMPLETE": 70,
     "SPECIFICATION_NOT_FROZEN": 80,
@@ -38,6 +39,8 @@ class WorkflowFacts:
     git_context_valid: bool = True
     scope_unchanged: bool = True
     action_allowed: bool = True
+    verification_configuration_complete: bool = True
+    require_verification_configuration: bool = False
 
 
 @dataclass(frozen=True)
@@ -132,6 +135,16 @@ def evaluate_preconditions(facts: WorkflowFacts) -> WorkflowEvaluation:
         )
     else:
         results.append(PreconditionResult("specification_summary_matches", "not_applicable"))
+    if facts.require_verification_configuration:
+        results.append(
+            _result(
+                "verification_configuration_complete",
+                facts.verification_configuration_complete,
+                "VERIFICATION_CONFIGURATION_INCOMPLETE",
+            )
+        )
+    else:
+        results.append(PreconditionResult("verification_configuration_complete", "not_applicable"))
     return WorkflowEvaluation(_sort_results(results))
 
 

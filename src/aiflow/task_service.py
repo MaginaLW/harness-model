@@ -15,6 +15,7 @@ from typing import Any
 import yaml
 
 from aiflow.contracts import require_valid_contract
+from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.errors import (
     AiflowError,
     ContractError,
@@ -23,6 +24,13 @@ from aiflow.errors import (
     StorageError,
 )
 from aiflow.git_context import GitContext, collect_git_context
+from aiflow.policy import load_policy_bundle
+from aiflow.scope import (
+    AutoPreflightFacts,
+    assess_auto_scope,
+    collect_changed_paths,
+    evaluate_auto_preflight,
+)
 from aiflow.specification import specification_digest, validate_specification
 from aiflow.state import create_record_event, create_transition_event, replay_events
 from aiflow.storage import (
@@ -34,6 +42,7 @@ from aiflow.storage import (
     reserve_task_id,
     resolve_task_path,
 )
+from aiflow.workflow import WorkflowFacts, evaluate_preconditions
 
 CREATION_MARKER = "creation_failed.json"
 COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
@@ -714,16 +723,19 @@ def _require_ready_artifacts(repository_root: Path, task_id: str, record: TaskRe
             )
 
 
-def _is_governance_path(path: str) -> bool:
+def _is_governance_path(path: str, task_id: str) -> bool:
     normalized = path.rstrip("/")
-    return normalized == ".ai/tasks" or normalized.startswith(".ai/tasks/")
+    prefix = f".ai/tasks/{task_id}"
+    return normalized == prefix or normalized.startswith(f"{prefix}/")
 
 
 def _require_git_baseline(repository_root: Path, task_id: str, task: Mapping[str, object]) -> None:
     context = collect_git_context(repository_root)
     baseline_paths = task.get("worktree_dirty_paths")
     expected_paths = set(baseline_paths) if isinstance(baseline_paths, list) else set()
-    current_business_paths = {path for path in context.dirty_paths if not _is_governance_path(path)}
+    current_business_paths = {
+        path for path in context.dirty_paths if not _is_governance_path(path, task_id)
+    }
     if (
         context.repository_id != task.get("repository_id")
         or context.head != task.get("subject_commit")
@@ -734,6 +746,119 @@ def _require_git_baseline(repository_root: Path, task_id: str, task: Mapping[str
             "Current Git context exceeds the task baseline",
             code="BEGIN_GIT_CONTEXT_CHANGED",
             details={"task_id": task_id},
+        )
+
+
+def _unit_completed(unit: Mapping[str, object]) -> bool:
+    return (
+        unit.get("completed") is True
+        or str(unit.get("status", unit.get("state", ""))).upper() == "COMPLETED"
+    )
+
+
+def _require_auto_preflight(
+    repository_root: Path,
+    task_id: str,
+    record: TaskRecord,
+) -> None:
+    """Require current AUTO evidence, complete verification, and bounded changed paths."""
+    classification = _load_classification(repository_root, task_id)
+    entries = classification.get("classifications")
+    units = record.task.get("decision_units")
+    if not isinstance(entries, list) or not isinstance(units, list):
+        raise ContractError("AUTO preflight inputs are invalid", code="AUTO_PREFLIGHT_INVALID")
+    unfinished = [unit for unit in units if isinstance(unit, Mapping) and not _unit_completed(unit)]
+    by_id = {
+        entry.get("decision_unit_id"): entry for entry in entries if isinstance(entry, Mapping)
+    }
+    unfinished_entries = [by_id.get(unit.get("decision_unit_id")) for unit in unfinished]
+    routes = tuple(
+        str(entry.get("route")) if isinstance(entry, Mapping) else "UNKNOWN"
+        for entry in unfinished_entries
+    )
+    verification_complete = bool(unfinished_entries) and all(
+        isinstance(entry, Mapping)
+        and entry.get("verification_level") in {"V0", "V1"}
+        and isinstance(entry.get("verification_rule_ids"), list)
+        and bool(entry.get("verification_rule_ids"))
+        and entry.get("verification_blocking_reasons") == []
+        for entry in unfinished_entries
+    )
+    context = collect_git_context(repository_root)
+    changed = collect_changed_paths(
+        repository_root,
+        base_commit=str(record.task.get("base_commit")),
+        subject_commit=str(record.task.get("subject_commit")),
+        head_commit=context.head,
+    )
+    task_scope = record.task.get("allowed_scope")
+    if not isinstance(task_scope, list) or not all(isinstance(item, str) for item in task_scope):
+        raise ContractError("AUTO task scope is invalid", code="AUTO_PREFLIGHT_INVALID")
+    unit_scopes = [
+        [path for path in unit.get("impact_scope", []) if isinstance(path, str)]
+        for unit in unfinished
+    ]
+    scope = assess_auto_scope(
+        changed.paths,
+        task_scope,
+        unit_scopes,
+        task_id=task_id,
+        repository_root=repository_root,
+    )
+    bundle = load_policy_bundle(repository_root)
+    current_input = classification_input_digest(record.task, parse_decision_units(record.task))
+    classification_fresh = (
+        classification.get("base_commit") == record.task.get("base_commit")
+        and classification.get("subject_commit") == record.task.get("subject_commit")
+        and classification.get("classification_input_sha256") == current_input
+    )
+    policy_fresh = classification.get("policy_sha256") == bundle.sha256
+    spec_current = specification_is_current(repository_root, task_id)
+    required_approvals = any(
+        bool(unit.get("permission_requirements")) or bool(unit.get("external_side_effects"))
+        for unit in unfinished
+    )
+    forbidden = {
+        str(action).strip().casefold()
+        for action in record.task.get("forbidden_actions", [])
+        if isinstance(action, str)
+    }
+    forbidden_present = any(
+        str(action).strip().casefold() in forbidden
+        for unit in unfinished
+        for action in unit.get("planned_actions", [])
+    )
+    workflow = evaluate_preconditions(
+        WorkflowFacts(
+            current_state=str(record.task.get("current_state")),
+            allowed_states=frozenset({"READY_TO_IMPLEMENT"}),
+            classification_fresh=classification_fresh,
+            policy_summary_matches=policy_fresh,
+            specification_frozen=isinstance(record.task.get("frozen_spec_sha256"), str),
+            specification_summary_matches=spec_current,
+            require_specification_frozen=True,
+            scope_unchanged=scope.passed,
+            action_allowed=not forbidden_present,
+            verification_configuration_complete=verification_complete,
+            require_verification_configuration=True,
+        )
+    )
+    preflight = evaluate_auto_preflight(
+        AutoPreflightFacts(
+            unfinished_routes=routes,
+            specification_frozen=spec_current,
+            required_approvals_present=required_approvals,
+            forbidden_actions_present=forbidden_present,
+            scope=scope,
+            verification_complete=verification_complete,
+        )
+    )
+    if not workflow.passed or not preflight.passed:
+        codes = tuple(dict.fromkeys((*workflow.failure_codes, *preflight.failure_codes)))
+        raise ContractError(
+            f"AUTO preflight rejected the current task: {', '.join(codes)}",
+            code="AUTO_PREFLIGHT_FAILED",
+            details={"failure_codes": codes, "out_of_scope": scope.out_of_scope},
         )
 
 
@@ -750,6 +875,16 @@ def begin_task(
     if state == "READY_TO_IMPLEMENT":
         _require_ready_artifacts(repository_root, task_id, record)
         _require_git_baseline(repository_root, task_id, record.task)
+        classification = _load_classification(repository_root, task_id)
+        entries = classification.get("classifications")
+        if (
+            isinstance(entries, list)
+            and entries
+            and all(
+                isinstance(entry, Mapping) and entry.get("route") == "AUTO" for entry in entries
+            )
+        ):
+            _require_auto_preflight(repository_root, task_id, record)
         return transition_task_record(
             repository_root,
             task_id,

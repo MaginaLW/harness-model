@@ -11,6 +11,8 @@ from typing import Any
 import pytest
 
 from aiflow.cli import main
+from aiflow.decision_units import classification_input_digest, parse_decision_units
+from aiflow.policy import load_policy_bundle
 from aiflow.storage import atomic_write_json
 from aiflow.task_service import (
     freeze_task,
@@ -20,7 +22,6 @@ from aiflow.task_service import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
-POLICY_SHA = "b" * 64
 
 
 def run_git(repository: Path, *arguments: str) -> str:
@@ -63,13 +64,13 @@ def start(repository: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert main(["start", "--objective", "bounded", "--allow", "src/**"]) == 0
 
 
-def classification(route: str) -> dict[str, Any]:
+def classification(route: str, policy_sha: str = "b" * 64) -> dict[str, Any]:
     return {
         "schema_version": "1.0",
         "task_id": "TASK-0001",
         "classification_input_sha256": "a" * 64,
         "policy_version": "1.0.0",
-        "policy_sha256": POLICY_SHA,
+        "policy_sha256": policy_sha,
         "base_commit": "1" * 40,
         "subject_commit": "1" * 40,
         "classified_at": "2026-08-20T14:00:00Z",
@@ -97,7 +98,7 @@ def classification(route: str) -> dict[str, Any]:
                 "verification_explanations": ["test verification"],
                 "verification_blocking_reasons": [],
                 "policy_version": "1.0.0",
-                "policy_sha256": POLICY_SHA,
+                "policy_sha256": policy_sha,
                 "classified_at": "2026-08-20T14:00:00Z",
             }
         ],
@@ -123,10 +124,17 @@ def make_ready(
     )
     if freeze_spec:
         freeze_task(repository, "TASK-0001", actor="tester")
-    atomic_write_json(task_directory / "classification.json", classification(route))
+    policy_sha = load_policy_bundle(repository).sha256
+    task = load_task_record(repository, "TASK-0001").task
+    classification_record = classification(route, policy_sha)
+    classification_record["base_commit"] = task["base_commit"]
+    classification_record["subject_commit"] = task["subject_commit"]
+    classification_record["classification_input_sha256"] = classification_input_digest(
+        task, parse_decision_units(task)
+    )
+    atomic_write_json(task_directory / "classification.json", classification_record)
     approvals: list[dict[str, Any]] = []
     if valid_approval:
-        task = load_task_record(repository, "TASK-0001").task
         spec_sha = hashlib.sha256((task_directory / "spec.md").read_bytes()).hexdigest()
         approvals.append(
             {
@@ -137,7 +145,7 @@ def make_ready(
                 "actor": "reviewer",
                 "reason": "spec is complete",
                 "spec_sha256": spec_sha,
-                "policy_sha256": POLICY_SHA,
+                "policy_sha256": policy_sha,
                 "subject_commit": task["subject_commit"],
                 "approved_at": "2026-08-20T14:00:00Z",
             }

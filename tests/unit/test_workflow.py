@@ -64,6 +64,16 @@ def test_tampered_frozen_specification_fails() -> None:
     assert result.failure_codes == ("SPECIFICATION_TAMPERED",)
 
 
+def test_required_verification_configuration_must_be_complete() -> None:
+    result = evaluate_preconditions(
+        ready_facts(
+            require_verification_configuration=True,
+            verification_configuration_complete=False,
+        )
+    )
+    assert result.failure_codes == ("VERIFICATION_CONFIGURATION_INCOMPLETE",)
+
+
 def test_unrequired_frozen_metadata_still_detects_tampering() -> None:
     result = evaluate_preconditions(
         ready_facts(

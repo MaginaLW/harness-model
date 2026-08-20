@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Collection, Mapping, Sequence
 from copy import deepcopy
 from typing import Any
@@ -97,3 +99,20 @@ def parse_decision_units(
         parsed.append(deepcopy(unit))
 
     return tuple(sorted(parsed, key=lambda unit: str(unit["decision_unit_id"])))
+
+
+def classification_input_digest(
+    task: Mapping[str, object], units: Sequence[Mapping[str, object]]
+) -> str:
+    """Hash only stable task and decision facts used to classify a task."""
+    value = {
+        "task_id": task.get("task_id"),
+        "goal": task.get("goal"),
+        "allowed_scope": task.get("allowed_scope"),
+        "forbidden_actions": task.get("forbidden_actions"),
+        "base_commit": task.get("base_commit"),
+        "subject_commit": task.get("subject_commit"),
+        "decision_units": units,
+    }
+    canonical = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
