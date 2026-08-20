@@ -1,0 +1,41 @@
+schema_version: "1.0"
+policy_version: "1.0.0"
+policy_kind: permissions
+forbidden_automatic_actions:
+  - push
+  - merge
+  - deploy
+  - delete
+  - secret_export
+  - paid_external_call
+rules:
+  - id: PERMISSION-DENY-AUTO-PUSH
+    priority: 690
+    action: push
+    effect: deny_automatic
+    required_approval: action
+  - id: PERMISSION-DENY-AUTO-MERGE
+    priority: 680
+    action: merge
+    effect: deny_automatic
+    required_approval: action
+  - id: PERMISSION-DENY-AUTO-DEPLOY
+    priority: 670
+    action: deploy
+    effect: deny_automatic
+    required_approval: action
+  - id: PERMISSION-DENY-AUTO-DELETE
+    priority: 660
+    action: delete
+    effect: deny_automatic
+    required_approval: action
+  - id: PERMISSION-DENY-AUTO-SECRET-EXPORT
+    priority: 650
+    action: secret_export
+    effect: deny_automatic
+    required_approval: action
+  - id: PERMISSION-DENY-AUTO-PAID-CALL
+    priority: 640
+    action: paid_external_call
+    effect: deny_automatic
+    required_approval: action

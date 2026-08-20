@@ -4,7 +4,7 @@ chapter:
   id: "chapter-01"
   number: 1
   title: "工程基线与可执行契约"
-  status: "needs_revalidation"
+  status: "completed"
   plan_lines: "79-300"
   dependency: "无"
   tasks_total: 5
@@ -19,10 +19,10 @@ tasks:
   - id: "1.1"
     title: "建立 Python 工程与 CLI 骨架"
     plan_anchor: 81
-    status: "needs_revalidation"
+    status: "completed"
     steps_total: 5
-    completed_steps: [1, 2]
-    in_progress_step: 3
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T1.1-START-001"
         kind: "task_start"
@@ -454,62 +454,432 @@ tasks:
           completed_steps: [1, 2]
           in_progress_step: 3
           overall_counters_changed: false
+      - id: "EVD-T1.1-LEAN-REVALIDATION-001"
+        kind: "task_completion_revalidation"
+        recorded_at: "2026-08-20T04:40:05Z"
+        actor: "/root"
+        authorization:
+          user_direction: "读取项目文件继续任务，但是要注意避免过度审核和过度安全投入"
+          route: "REVIEW"
+          decision: "DEC-T1.1-LEAN-REVALIDATION-001"
+          plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-1-lean-revalidation.md"
+          plan_sha256: "eed8802392019681974e38056a9a11db57525d333685118eee1930105a64ef63"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Task 1.1 的提交前人工流程）"
+          changed_artifact: "tests/conftest.py"
+          changed_artifact_sha256: "9fa50088dd4a98d87b2831909c36ed238c7a13a5d25765d82ba5dd693293a13b"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        decision_basis:
+          history_preserved: true
+          old_spec_failure_rewritten: false
+          tdd_replay_plan_status: "invalidated_not_executed"
+          completion_basis: "阶段一实施目录 Task 1.1 的原始五步完成标准"
+          verification_level_reduced: false
+        implementation_adjustment:
+          finding: "tests/conftest.py 的 subprocess.run 缺少全局工程约定要求的显式超时"
+          fix: "增加 timeout=10"
+          scope_expansion: "仅限 Task 1.1 相邻测试夹具"
+        validation:
+          python: "3.11.9"
+          install: "PASS — .venv/Scripts/python.exe -m pip install -e .[dev]"
+          targeted_pytest: "PASS — 3 passed"
+          cumulative_pytest: "PASS — 3 passed"
+          ruff: "PASS — All checks passed"
+          mypy: "PASS — no issues in 3 source files"
+          module_cli: "PASS — help/version exit 0; bad argument exit 2"
+          console_cli: "PASS — help/version exit 0; bad argument exit 2"
+          git_diff_check: "PASS"
+          status_scope: "PASS — Task 1.1 修改仅 tests/conftest.py；已有 state/.reasonix 与新计划分别保留和排除"
+        reviews:
+          requirements_conformance:
+            result: "PASS"
+            note: "修复显式超时后，打包、依赖、src layout、版本、入口、CLI 契约、忽略规则与测试均满足 Task 1.1"
+          quality:
+            result: "PASS"
+            note: "实现保持最小 argparse 根命令，无伪业务子命令；测试、Ruff、mypy 和双入口行为一致"
+        state_effect:
+          task_status: "completed"
+          chapter_status: "in_progress"
+          completed_steps: [1, 2, 3, 4, 5]
+          next_task: "1.2"
+          overall_tasks_completed_delta: 1
+          overall_steps_completed_delta: 5
     blockers:
       - id: "SPEC-BLOCKER-001"
-        status: "open"
+        status: "resolved"
         source: "EVD-T1.1-SPEC-REVIEW-FAIL-001"
         reason: "premature-green cannot be retroactively initial red"
         required_decision: "DEC-T1.1-TDD-REPLAY-001"
         release_requires: "supplemental replay、Phase D 重跑、fresh spec PASS 与 fresh quality PASS"
+        resolved_at: "2026-08-20T04:40:05Z"
+        resolution_decision: "DEC-T1.1-LEAN-REVALIDATION-001"
+        resolution_evidence: "EVD-T1.1-LEAN-REVALIDATION-001"
+        resolution: >-
+          保留旧 FAIL 的历史结论；用户授权的新 REVIEW 决定以权威实施目录的 Task 1.1 原始标准取代已失效补救计划的完成路径，完成同等级功能与质量重验证后解除阻断。
   - id: "1.2"
     title: "定义核心机器契约与 Schema"
     plan_anchor: 123
-    status: "pending"
+    status: "completed"
     steps_total: 7
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5, 6, 7]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T1.2-START-001"
+        kind: "task_start"
+        recorded_at: "2026-08-20T05:59:10Z"
+        actor: "/root"
+        authorization: "用户要求持续推进任务"
+        decision:
+          id: "DEC-T1.2-EXECUTION-001"
+          route: "REVIEW"
+          verification: "V1"
+          rationale: "新增机器契约和校验行为；无新依赖、外部系统或高风险动作"
+        plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-2-execution.md"
+        plan_sha256: "c1e1d2c462b7af4d92dfdd051947767c338f6ebf31e05fd7e2c4437884e77a29"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Task 1.2 的提交前人工流程）"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        state_effect:
+          task_status: "in_progress"
+          in_progress_step: 1
+          counters_changed: false
+      - id: "EVD-T1.2-COMPLETE-001"
+        kind: "task_completion"
+        recorded_at: "2026-08-20T06:10:49Z"
+        actor: "/root"
+        decision: "DEC-T1.2-EXECUTION-001"
+        plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-2-execution.md"
+        plan_sha256: "c1e1d2c462b7af4d92dfdd051947767c338f6ebf31e05fd7e2c4437884e77a29"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Task 1.2 的提交前人工流程）"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        tdd:
+          red: "PASS — contracts 模块不存在，pytest 收集以 ModuleNotFoundError 退出 1"
+          green: "PASS — tests/unit/test_contracts.py 41 passed"
+        artifacts:
+          schema_count: 7
+          schema_bundle_sha256: "8ebd4fcf4c99f9a40c5e2d79f563f4a6d4f382aec2fe7d1a2336da5de6e45370"
+          fixture_count: 28
+          fixture_bundle_sha256: "51e70f06f6c9a9c6e7af928eaa5a245855ae843b99a544f8962e6639a02eab0e"
+          contracts_py_sha256: "b1ef6f496a7dd73a10325de81b1bce035ccee1c100fd22c557faf38d5085d941"
+          contracts_test_sha256: "b55b0a98f556e999770b97f0786ac85f5d96506472734a92bf55cb3a58463600"
+          repository_id_sha256: "57b6ab5776477d16400ff9169819b1f36bd635957d8053de185a0190c7e1b2a4"
+          repository_id_version: 4
+        validation:
+          targeted_pytest: "PASS — 41 passed"
+          cumulative_pytest: "PASS — 44 passed"
+          ruff: "PASS — All checks passed"
+          mypy: "PASS — no issues in 4 source files"
+          uv_lock_check: "PASS — 27 packages resolved"
+          cli_smoke: "PASS — help/version exit 0"
+          git_diff_check: "PASS"
+          scope: "PASS — Task 1.2 产物均在允许范围；Task 1.1 与 .reasonix 既有内容未修改为本任务产物"
+        reviews:
+          requirements_conformance:
+            result: "PASS"
+            note: "公共版本/ID/枚举、七类字段、交叉约束、稳定脱敏错误、28 个正反例和单行 UUIDv4 全部满足"
+          quality:
+            result: "PASS"
+            note: "接口最小且确定；Schema 可从当前或显式 checkout 路径加载；无新依赖或后续业务规则提前实现"
+        state_effect:
+          task_status: "completed"
+          chapter_status: "in_progress"
+          completed_steps: [1, 2, 3, 4, 5, 6, 7]
+          next_task: "1.3"
+          overall_tasks_completed_delta: 1
+          overall_steps_completed_delta: 7
+      - id: "EVD-T1.2-DECISION-UNIT-OBJECT-CORRECTION-001"
+        kind: "completion_evidence_correction"
+        recorded_at: "2026-08-20T06:27:45Z"
+        actor: "/root"
+        reason: >-
+          Task 1.3 的 task 模板对接发现后续 Task 3.2 要求直接从 task.yaml 读取决策单元对象，而 Task 3.2 不修改 task Schema；因此将 decision_units 从 ID 列表纠正为对 decision-unit Schema 的对象引用。
+        scope:
+          - ".ai/schemas/task.schema.json"
+          - "src/aiflow/contracts.py 的 Schema registry"
+          - "tests/fixtures/contracts/*/task.*.json"
+        validation:
+          task_1_2_targeted_pytest: "PASS — 41 passed"
+          ruff: "PASS"
+          mypy: "PASS"
+          cumulative_pytest: "PASS — 58 passed（包含 Task 1.3）"
+        corrected_artifacts:
+          seven_schema_bundle_sha256: "5b7dab4fc456b8a22e177cc4e42896966e8d70b42db913c36dc66bb79efe33f8"
+          fixture_bundle_sha256: "394babb1a068a8bdc57d5f957aab5348d95a1e1110747bb66e79a02ce37f7262"
+          contracts_py_sha256: "6d2fe13f8c1e0024183d6c453896f240cfe1079aa244adc698c7c65d434499bd"
+        supersedes_artifact_hashes_in: "EVD-T1.2-COMPLETE-001"
+        preserves_completion_result: true
+        counters_changed: false
+      - id: "EVD-T1.2-CLASSIFICATION-FACTS-EXTENSION-001"
+        kind: "backward_compatible_contract_extension"
+        recorded_at: "2026-08-20T06:36:30Z"
+        actor: "/root"
+        reason: "Task 1.4 黄金输入需要 Policy 已引用的封闭分类事实；在 decision-unit Schema 中增加可选 scope/impact/protections/verification/categories/direction-count 对象，不改变原必填字段。"
+        validation:
+          task_1_2_contract_tests: "PASS（包含于累计 69 passed）"
+          ruff: "PASS"
+          mypy: "PASS"
+        corrected_artifacts:
+          decision_unit_schema_sha256: "07510fc5feef197379ce290e4ec191853b67ab8e6562b88e48a714f67bfb27bb"
+          seven_schema_bundle_sha256: "0ed071653c194cec7557af0667b0e3c64cde991b5d450ecf04b673aa232f37a3"
+        preserves_completion_result: true
+        counters_changed: false
     blockers: []
   - id: "1.3"
     title: "建立 Policy、模板及其 Schema"
     plan_anchor: 175
-    status: "pending"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5, 6]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T1.3-START-001"
+        kind: "task_start"
+        recorded_at: "2026-08-20T06:15:43Z"
+        actor: "/root"
+        authorization: "用户要求持续推进任务"
+        decision:
+          id: "DEC-T1.3-EXECUTION-001"
+          route: "REVIEW"
+          verification: "V1"
+          rationale: "Policy 是后续确定性分流、权限和验证的单一规则来源"
+        plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-3-execution.md"
+        plan_sha256: "2935b3a1d5ff507546087d71e7b785177d2722be2e9f8dec1b05279028f8c051"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Task 1.3 的提交前人工流程）"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        state_effect:
+          task_status: "in_progress"
+          in_progress_step: 1
+          counters_changed: false
+      - id: "EVD-T1.3-COMPLETE-001"
+        kind: "task_completion"
+        recorded_at: "2026-08-20T06:27:45Z"
+        actor: "/root"
+        decision: "DEC-T1.3-EXECUTION-001"
+        plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-3-execution.md"
+        plan_sha256: "2935b3a1d5ff507546087d71e7b785177d2722be2e9f8dec1b05279028f8c051"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Task 1.3 的提交前人工流程）"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        tdd:
+          red: "PASS — 12 tests 因 Policy/模板文件缺失失败，1 test 通过"
+          green: "PASS — 14 passed"
+        artifacts:
+          policy_schema_sha256: "b5a32fdd311e878605969dbb97df75d7eee34a947599476d7ef9d34a9b563776"
+          policy_file_count: 4
+          policy_bundle_sha256: "5f593eeb0bcb6984d14f23faf8f1529e19f43e51658d934eb74c85df15867403"
+          template_count: 5
+          template_bundle_sha256: "7c09be9f6983ebace901ed659608840e7bfd67305cec9c088f78eb7f20c7f0f7"
+          integration_test_sha256: "a4b02d6ed3a7f922d3102fb798c0f2f8e7ca7fac7217b93b4e1b7b7c93b2eb2e"
+          global_rule_ids: 17
+          global_rule_ids_unique: true
+        validation:
+          targeted_pytest: "PASS — 14 passed"
+          cumulative_pytest: "PASS — 58 passed"
+          ruff_check: "PASS"
+          ruff_format_check: "PASS — 8 files already formatted"
+          mypy: "PASS — no issues in 4 source files"
+          uv_lock_check: "PASS — 27 packages resolved"
+          forbidden_placeholder_search: "PASS — rg exit 1 with no matches"
+          git_diff_check: "PASS"
+        reviews:
+          requirements_conformance:
+            result: "PASS"
+            note: "硬规则、默认 REVIEW、AUTO/ASK、V0/V1、变量/环境边界、权限禁止集和模板标题全部满足 Task 1.3"
+          quality:
+            result: "PASS"
+            note: "Policy 纯声明、规则 ID 唯一、命令为参数数组；未提前实现 Task 3.1 加载器或路由引擎"
+        state_effect:
+          task_status: "completed"
+          chapter_status: "in_progress"
+          completed_steps: [1, 2, 3, 4, 5, 6]
+          next_task: "1.4"
+          overall_tasks_completed_delta: 1
+          overall_steps_completed_delta: 6
     blockers: []
   - id: "1.4"
     title: "建立四类黄金场景"
     plan_anchor: 221
-    status: "pending"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5, 6]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T1.4-START-001"
+        kind: "task_start"
+        recorded_at: "2026-08-20T06:31:39Z"
+        actor: "/root"
+        authorization: "用户要求持续推进任务"
+        decision:
+          id: "DEC-T1.4-EXECUTION-001"
+          route: "REVIEW"
+          verification: "V1"
+          rationale: "黄金结果约束后续路由实现，但当前仅建立静态输入、期望和比较测试"
+        plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-4-execution.md"
+        plan_sha256: "c0d055ff35059eb0fe6965b5bac9d4b3b57e1f6c096647574562719186a89ac5"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Task 1.4 的提交前人工流程）"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        state_effect:
+          task_status: "in_progress"
+          in_progress_step: 1
+          counters_changed: false
+      - id: "EVD-T1.4-COMPLETE-001"
+        kind: "task_completion"
+        recorded_at: "2026-08-20T06:36:30Z"
+        actor: "/root"
+        decision: "DEC-T1.4-EXECUTION-001"
+        plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-4-execution.md"
+        plan_sha256: "c0d055ff35059eb0fe6965b5bac9d4b3b57e1f6c096647574562719186a89ac5"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Task 1.4 的提交前人工流程）"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        tdd:
+          red: "PASS — 11 tests 因黄金场景目录缺失失败"
+          green: "PASS — 11 passed"
+        artifacts:
+          scenario_file_count: 9
+          scenario_bundle_sha256: "24553fbb603098e8e57ea1e0a2cab3faa12e3d66b568cccb985ccb2b46face14"
+          golden_test_sha256: "758f90b6e04e8ce9545cfae3930eff4affdc043bbfdfb571e86c6f301e151539"
+          routes: ["AUTO", "ASK", "REVIEW", "BLOCK"]
+          dynamic_comparison_keys: []
+        validation:
+          targeted_pytest: "PASS — 11 passed"
+          cumulative_pytest: "PASS — 69 passed"
+          ruff_check: "PASS"
+          ruff_format_check: "PASS — 9 files already formatted"
+          mypy: "PASS — no issues in 4 source files"
+          uv_lock_check: "PASS — 27 packages resolved"
+          git_diff_check: "PASS"
+        reviews:
+          requirements_conformance:
+            result: "PASS"
+            note: "四类 route、V0/V1、规则 ID、有序理由、下一状态、ASK 选项、REVIEW 批准和 BLOCK 恢复条件全部满足"
+          quality:
+            result: "PASS"
+            note: "输入/期望静态可比较，无时间或绝对路径；未伪装成已运行分类引擎"
+        state_effect:
+          task_status: "completed"
+          chapter_status: "in_progress"
+          completed_steps: [1, 2, 3, 4, 5, 6]
+          next_task: "1.5"
+          overall_tasks_completed_delta: 1
+          overall_steps_completed_delta: 6
     blockers: []
   - id: "1.5"
     title: "完成第一章契约回归与基线说明"
     plan_anchor: 265
-    status: "pending"
+    status: "completed"
     steps_total: 4
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T1.5-START-001"
+        kind: "task_start"
+        recorded_at: "2026-08-20T06:39:22Z"
+        actor: "/root"
+        authorization: "用户要求持续推进任务"
+        decision:
+          id: "DEC-T1.5-EXECUTION-001"
+          route: "REVIEW"
+          verification: "V1"
+          rationale: "该任务决定是否满足 Chapter 1 跨章退出门"
+        plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-5-execution.md"
+        plan_sha256: "ed29b8d0b783dd2c405abafa108cc6b35a22a29fe31f1df3a9c46a09983d6e29"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Task 1.5 的提交前人工流程）"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        state_effect:
+          task_status: "in_progress"
+          in_progress_step: 1
+          counters_changed: false
+      - id: "EVD-T1.5-CHAPTER-EXIT-001"
+        kind: "task_and_chapter_completion"
+        recorded_at: "2026-08-20T06:44:18Z"
+        actor: "/root"
+        decision: "DEC-T1.5-EXECUTION-001"
+        plan: "docs/superpowers/plans/2026-08-20-chapter-01-task-1-5-execution.md"
+        plan_sha256: "ed29b8d0b783dd2c405abafa108cc6b35a22a29fe31f1df3a9c46a09983d6e29"
+        binding:
+          base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+          subject_commit: "N/A（Chapter 1 的提交前人工流程）"
+          implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
+          mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+        tdd:
+          red: "PASS — pytest -m contract 选择 0 项并以非零退出，69 项全部 deselected"
+          green: "PASS — 66 contract passed，3 CLI tests deselected"
+        artifacts:
+          ai_contract_file_count: 18
+          ai_contract_bundle_sha256: "0eda9d316eb0fb590d164dfb6388ea332c64f7e3163b522d81cf1735e4bf75b3"
+          scenario_file_count: 9
+          scenario_bundle_sha256: "24553fbb603098e8e57ea1e0a2cab3faa12e3d66b568cccb985ccb2b46face14"
+          contract_test_module_count: 3
+          contract_test_bundle_sha256: "48c18aa02deb59a9ac3f66285daea48f54981ab84bc238946edc7e9dfb5ca5f2"
+          baseline_document_sha256: "29e888ac46cf7678128a208f9af4b2f749baa4d055bb916360d560f23536b373"
+          pyproject_sha256: "c6e828f43d2919cae2324994920db0b71787293d22b346e8e223cb0bcc4df7e7"
+        validation:
+          initial_exit_attempt: "FAIL retained — Ruff found two import-order findings"
+          final_contract_pytest: "PASS — 66 passed, 3 deselected"
+          final_cumulative_pytest: "PASS — 69 passed"
+          ruff_check: "PASS — All checks passed"
+          ruff_format_check: "PASS — 9 files already formatted"
+          mypy: "PASS — no issues in 4 source files"
+          cli_help: "PASS — exit 0"
+          uv_lock_check: "PASS — 27 packages resolved"
+          forbidden_placeholder_search: "PASS — rg exit 1 with no matches"
+          git_diff_check: "PASS"
+        reviews:
+          requirements_conformance:
+            result: "PASS"
+            note: "Task 1.1—1.5 与 MVP 第 4—9 节的 Chapter 1 范围逐项满足；后续状态机、分类和执行能力未被伪造"
+          quality:
+            result: "PASS"
+            note: "任务状态枚举单一来源；Policy 无生产代码副本；错误按 JSON Pointer 稳定定位且不回显实例敏感值"
+          audit:
+            state_enum_schema_occurrences: 1
+            production_policy_duplicate_matches: 0
+            ambient_contract_test_dependency_matches: 0
+        state_effect:
+          task_status: "completed"
+          chapter_status: "completed"
+          completed_steps: [1, 2, 3, 4]
+          next_chapter: "chapter-02"
+          next_task: "2.1"
+          overall_chapters_completed_delta: 1
+          overall_tasks_completed_delta: 1
+          overall_steps_completed_delta: 4
+          overall_exit_checks_completed_delta: 1
     blockers: []
 
 exit_check:
-  status: "pending"
+  status: "completed"
   required_task: "1.5"
   criteria:
     - "契约、模板、Policy 和四类黄金场景测试通过"
     - "Ruff、mypy、CLI 帮助和 git diff --check 通过"
     - "需求符合性复核和代码质量复核均有证据"
-  evidence: []
+  evidence: ["EVD-T1.5-CHAPTER-EXIT-001"]
 
 review:
-  requirements_conformance: "pending"
-  quality_review: "pending"
+  requirements_conformance: "passed"
+  quality_review: "passed"
 
 history:
   - at: "2026-08-02T14:03:50Z"
@@ -609,3 +979,184 @@ history:
     reason: "授权规划静态 supplemental remediation，通过外置 git archive baseline 真实重放 red/green，不降低门或破坏现有文件与证据"
     state_transition: "Task 1.1 and chapter-01 -> needs_revalidation"
     evidence: ["EVD-T1.1-TDD-REPLAY-DECISION-001"]
+  - id: "EVT-T1.1-TDD-REPLAY-PLAN-INVALIDATED-001"
+    at: "2026-08-18T16:16:38Z"
+    action: "supplemental_plan_invalidated"
+    actor: "Reasonix(main-session)"
+    decision: "DEC-T1.1-TDD-REPLAY-001"
+    reason: >-
+      只读 preflight 判定 supplemental remediation plan 已触发其自身失效条款（Materials 与固定治理边界第 21 行）：任一锁定前置变化即失效并回 REVIEW，不可自行放宽比较。
+    preflight_findings:
+      locked_head: "4cf6bb2b3ccf3688c87a887887cef69040a5f0a3"
+      actual_head: "350fecb237a9cc449405494438e4781f18e8e372"
+      locked_status_expectation: "精确十二条 NUL records（计划创建时）"
+      actual_status: "精确零条（八个工程文件与两份计划已由提交 9706414 入库）"
+      auditroot_expected: "C:\\Users\\Magina\\AppData\\Local\\Temp\\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b"
+      auditroot_actual: "目录不存在，全盘 Temp 无 aiflow* 副本"
+      auditroot_irrecoverable_items:
+        - "spec-review-task-1-1-v4/spec-review-record.json（SPEC-BLOCKER-001 的原始 FAIL 记录）"
+        - "implementation-manifest.final-v2.json 与 integrity index"
+        - "context/run-context.json revision 5 及全部 context chain"
+        - "Phase A-D 全部 evidence 与 execute.ps1"
+      environment_findings:
+        powershell_5_1: "5.1.26100.9168（满足）"
+        python_runtime: "缺失（仅 WindowsApps stub）"
+        uv_runtime: "缺失"
+      salvageable_items:
+        - "git 对象完整：git archive 4cf6bb2 仍可产出 replay 基线归档"
+        - "仓库内容 SHA-256 与计划固定值逐一吻合（.gitignore/pyproject.toml/src 三文件/tests 两文件/uv.lock）"
+        - "工作树与计划 hash 的差异仅为 core.autocrlf=true 的 CRLF 行尾转换，git diff HEAD 为空"
+    state_effect:
+      task_status: "needs_revalidation"
+      chapter_status: "needs_revalidation"
+      overall_status: "needs_revalidation"
+      completed_steps: [1, 2]
+      in_progress_step: 3
+      counters_changed: false
+      pointer_changed: false
+    consequence: >-
+      旧计划不可继续执行；SPEC-BLOCKER-001 保持 open。恢复路径需重新 REVIEW 并制定新计划（重新绑定当前 HEAD、重建 AuditRoot、重装环境），在获得批准前本会话不执行任何 replay。
+    invalidation_basis:
+      plan: "docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-tdd-replay-remediation.md"
+      plan_sha256: "5dd172aa2509620411f18afc1307a8f3e98ce6ce39a0db70c3d28079ec690ce7"
+      user_decision: "用户选择仅登记失效并暂停推进；同时授权安装 Python 3.11 与 uv 以备后续新计划执行"
+    evidence: ["EVD-T1.1-TDD-REPLAY-PLAN-INVALIDATED-001"]
+  - id: "EVT-T1.1-ENV-RESTORE-001"
+    at: "2026-08-18T16:18:55Z"
+    action: "environment_restored"
+    actor: "Reasonix(main-session)"
+    reason: >-
+      依据用户在失效登记时给出的安装授权，通过 winget 静默安装 Python 3.11.9（Python.Python.3.11）与 uv 0.12.5（astral-sh.uv），修复旧计划环境 preflight 发现的运行时缺失。
+    environment_result:
+      python: "3.11.9 @ C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+      uv: "0.12.5 @ C:\\Users\\Admin\\AppData\\Local\\Microsoft\\WinGet\\Packages\\astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe\\uv.exe"
+      powershell: "5.1.26100.9168（先前已确认）"
+    state_effect:
+      task_status: "needs_revalidation"
+      chapter_status: "needs_revalidation"
+      counters_changed: false
+      pointer_changed: false
+    consequence: >-
+      仅恢复工具可用性；不恢复旧计划执行资格。旧计划的失效登记不因环境修复而撤回，SPEC-BLOCKER-001 保持 open，后续仍需新计划与新批准。
+    evidence: ["EVD-T1.1-ENV-RESTORE-001"]
+  - id: "EVT-T1.1-LEAN-REVALIDATION-COMPLETE-001"
+    at: "2026-08-20T04:40:05Z"
+    action: "task_revalidated_and_completed"
+    actor: "/root"
+    decision: "DEC-T1.1-LEAN-REVALIDATION-001"
+    reason: >-
+      依据用户继续授权和精简重验证计划，保留旧失败历史但停止执行已失效且超出权威 Task 1.1 标准的 replay 路径；修复子进程显式超时缺口后，安装、测试、Ruff、mypy、模块/控制台 CLI、diff 与两项复核全部通过。
+    transition:
+      task_1_1: "needs_revalidation -> completed"
+      chapter_01: "needs_revalidation -> in_progress"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "1.2"
+      blocker: "SPEC-BLOCKER-001 open -> resolved"
+    evidence: ["EVD-T1.1-LEAN-REVALIDATION-001"]
+  - id: "EVT-T1.2-START-001"
+    at: "2026-08-20T05:59:10Z"
+    action: "task_started"
+    actor: "/root"
+    decision: "DEC-T1.2-EXECUTION-001"
+    reason: "依据用户持续推进授权，以精简 REVIEW + V1 流程开始核心机器契约与 Schema 实施"
+    transition:
+      task_1_2: "pending -> in_progress"
+      in_progress_step: 1
+      counters_changed: false
+    evidence: ["EVD-T1.2-START-001"]
+  - id: "EVT-T1.2-COMPLETE-001"
+    at: "2026-08-20T06:10:49Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T1.2-EXECUTION-001"
+    reason: "七个核心 Schema、统一验证接口、28 个夹具与稳定 repository ID 完成，并通过 V1、需求和质量复核"
+    transition:
+      task_1_2: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6, 7]
+      next_task: "1.3"
+    evidence: ["EVD-T1.2-COMPLETE-001"]
+  - id: "EVT-T1.3-START-001"
+    at: "2026-08-20T06:15:43Z"
+    action: "task_started"
+    actor: "/root"
+    decision: "DEC-T1.3-EXECUTION-001"
+    reason: "依据用户持续推进授权，以精简 REVIEW + V1 流程开始 Policy、模板与 Schema 实施"
+    transition:
+      task_1_3: "pending -> in_progress"
+      in_progress_step: 1
+      counters_changed: false
+    evidence: ["EVD-T1.3-START-001"]
+  - id: "EVT-T1.2-DECISION-UNIT-OBJECT-CORRECTION-001"
+    at: "2026-08-20T06:27:45Z"
+    action: "completion_evidence_corrected"
+    actor: "/root"
+    reason: "将 task.decision_units 纠正为 decision-unit 对象引用并通过原 Task 1.2 验证集"
+    state_change: "none"
+    counters_changed: false
+    evidence: ["EVD-T1.2-DECISION-UNIT-OBJECT-CORRECTION-001"]
+  - id: "EVT-T1.3-COMPLETE-001"
+    at: "2026-08-20T06:27:45Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T1.3-EXECUTION-001"
+    reason: "Policy Schema、四份 Policy、五份模板与集成测试完成，并通过 V1 与双复核"
+    transition:
+      task_1_3: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "1.4"
+    evidence: ["EVD-T1.3-COMPLETE-001"]
+  - id: "EVT-T1.4-START-001"
+    at: "2026-08-20T06:31:39Z"
+    action: "task_started"
+    actor: "/root"
+    decision: "DEC-T1.4-EXECUTION-001"
+    reason: "依据用户持续推进授权，以精简 REVIEW + V1 流程开始四类黄金场景"
+    transition:
+      task_1_4: "pending -> in_progress"
+      in_progress_step: 1
+      counters_changed: false
+    evidence: ["EVD-T1.4-START-001"]
+  - id: "EVT-T1.2-CLASSIFICATION-FACTS-EXTENSION-001"
+    at: "2026-08-20T06:36:30Z"
+    action: "contract_extended_backward_compatibly"
+    actor: "/root"
+    reason: "为黄金场景增加封闭可选分类事实，并通过原契约与累计回归"
+    state_change: "none"
+    counters_changed: false
+    evidence: ["EVD-T1.2-CLASSIFICATION-FACTS-EXTENSION-001"]
+  - id: "EVT-T1.4-COMPLETE-001"
+    at: "2026-08-20T06:36:30Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T1.4-EXECUTION-001"
+    reason: "四类黄金输入、期望结果和比较测试完成，并通过 V1 与双复核"
+    transition:
+      task_1_4: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "1.5"
+    evidence: ["EVD-T1.4-COMPLETE-001"]
+  - id: "EVT-T1.5-START-001"
+    at: "2026-08-20T06:39:22Z"
+    action: "task_started"
+    actor: "/root"
+    decision: "DEC-T1.5-EXECUTION-001"
+    reason: "依据用户持续推进授权，开始 Chapter 1 契约回归、基线说明和退出检查"
+    transition:
+      task_1_5: "pending -> in_progress"
+      in_progress_step: 1
+      counters_changed: false
+    evidence: ["EVD-T1.5-START-001"]
+  - id: "EVT-T1.5-CHAPTER-EXIT-001"
+    at: "2026-08-20T06:44:18Z"
+    action: "task_and_chapter_completed"
+    actor: "/root"
+    decision: "DEC-T1.5-EXECUTION-001"
+    reason: "契约集合、基线说明、完整退出命令和 Chapter 1 双复核全部通过"
+    transition:
+      task_1_5: "in_progress -> completed"
+      chapter_01: "in_progress -> completed"
+      exit_check: "pending -> completed"
+      completed_steps: [1, 2, 3, 4]
+      next_chapter: "chapter-02"
+      next_task: "2.1"
+    evidence: ["EVD-T1.5-CHAPTER-EXIT-001"]

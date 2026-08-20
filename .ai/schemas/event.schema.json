@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/event.schema.json",
+  "title": "AI Flow event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "sequence",
+    "from_state",
+    "to_state",
+    "event_type",
+    "actor",
+    "occurred_at",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "from_state": {
+      "$ref": "https://aiflow.local/schemas/task.schema.json#/$defs/task_state"
+    },
+    "to_state": {
+      "$ref": "https://aiflow.local/schemas/task.schema.json#/$defs/task_state"
+    },
+    "event_type": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "payload": {"type": "object"}
+  }
+}

@@ -1,0 +1,1 @@
+{"schema_version":"1.0","task_id":"TASK-0001","decision_unit_id":"DU-1","goal":"Define schema","inputs":["design"],"planned_actions":["create"],"impact_scope":["schema"],"reversibility":"reversible","verification_methods":["pytest"],"external_side_effects":[],"permission_requirements":[]}

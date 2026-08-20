@@ -1,0 +1,33 @@
+schema_version: "1.0"
+task_id: TASK-1003
+decision_unit_id: DU-103
+goal: Change the repository quality-gate workflow.
+inputs:
+  - Current quality-gate workflow
+  - Proposed required-check behavior
+planned_actions:
+  - modify_ci_cd
+impact_scope:
+  - .github/workflows/ai-quality-gate.yml
+reversibility: reversible
+verification_methods:
+  - workflow_schema_check
+  - regression_tests
+external_side_effects: []
+permission_requirements:
+  - spec_approval
+  - code_approval
+scope:
+  clear: true
+impact:
+  level: high
+protections:
+  verified_backup: false
+  dry_run: true
+verification:
+  automatic: true
+  tools_missing: false
+impact_categories:
+  - ci
+  - cd
+business_direction_count: 1

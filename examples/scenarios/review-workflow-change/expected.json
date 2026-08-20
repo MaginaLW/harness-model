@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "review-workflow-change",
+  "route": "REVIEW",
+  "verification_level": "V1",
+  "rule_ids": [
+    "HARD-REVIEW-CI-CD"
+  ],
+  "reasons": [
+    "The target is a CI/CD workflow that controls the team quality gate.",
+    "The file is recoverable, but an incorrect rule can block or incorrectly admit team changes."
+  ],
+  "next_allowed_state": "WAITING_FOR_SPEC_REVIEW",
+  "required_approvals": [
+    "spec",
+    "code"
+  ],
+  "recovery_conditions": [],
+  "options": [],
+  "external_actions": []
+}

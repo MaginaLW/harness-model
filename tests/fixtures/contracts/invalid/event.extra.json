@@ -1,0 +1,1 @@
+{"schema_version":"1.0","task_id":"TASK-0001","sequence":1,"from_state":"NEW","to_state":"CLASSIFIED","event_type":"classified","actor":"aiflow","occurred_at":"2026-08-20T05:00:00Z","payload":{},"unexpected":true}

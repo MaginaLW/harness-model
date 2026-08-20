@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "auto-doc-edit",
+  "route": "AUTO",
+  "verification_level": "V0",
+  "rule_ids": [
+    "ROUTE-AUTO-EXPLICIT-GUARDS"
+  ],
+  "reasons": [
+    "Scope is limited to ordinary documentation under docs/**.",
+    "The edit is reversible through Git and has no external side effect.",
+    "A diff and Markdown check can verify the result automatically."
+  ],
+  "next_allowed_state": "READY_TO_IMPLEMENT",
+  "required_approvals": [],
+  "recovery_conditions": [],
+  "options": [],
+  "external_actions": []
+}

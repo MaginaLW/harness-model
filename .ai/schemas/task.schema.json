@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/task.schema.json",
+  "title": "AI Flow task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "goal",
+    "repository_id",
+    "branch",
+    "base_commit",
+    "subject_commit",
+    "worktree_dirty",
+    "allowed_scope",
+    "forbidden_actions",
+    "current_state",
+    "created_at",
+    "updated_at",
+    "decision_units"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "goal": {"type": "string", "minLength": 1},
+    "repository_id": {"type": "string", "format": "uuid"},
+    "branch": {"type": "string", "minLength": 1},
+    "base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "subject_commit": {
+      "oneOf": [
+        {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        {"type": "null"}
+      ]
+    },
+    "worktree_dirty": {"type": "boolean"},
+    "allowed_scope": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "forbidden_actions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "current_state": {"$ref": "#/$defs/task_state"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "decision_units": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://aiflow.local/schemas/decision-unit.schema.json"
+      }
+    },
+    "repository_path_at_creation": {
+      "type": "string",
+      "pattern": "^(?:[A-Za-z]:[\\\\/]|/)"
+    }
+  },
+  "$defs": {
+    "task_state": {
+      "enum": [
+        "NEW",
+        "CLASSIFIED",
+        "WAITING_FOR_ASK",
+        "WAITING_FOR_SPEC_REVIEW",
+        "READY_TO_IMPLEMENT",
+        "BLOCKED",
+        "IMPLEMENTING",
+        "VERIFYING",
+        "VERIFIED",
+        "FAILED",
+        "ESCALATED",
+        "WAITING_FOR_FINAL_REVIEW",
+        "APPROVED_FOR_MERGE",
+        "MERGED"
+      ]
+    }
+  }
+}

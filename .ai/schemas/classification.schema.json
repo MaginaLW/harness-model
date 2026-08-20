@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/classification.schema.json",
+  "title": "AI Flow classification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "classification_input_sha256",
+    "classifications"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "classification_input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "classifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "decision_unit_id",
+          "route",
+          "verification_level",
+          "rule_id",
+          "explanation",
+          "policy_version",
+          "policy_sha256",
+          "classified_at"
+        ],
+        "properties": {
+          "decision_unit_id": {"type": "string", "pattern": "^DU-[0-9]{3,}$"},
+          "route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
+          "verification_level": {"enum": ["V0", "V1"]},
+          "rule_id": {"type": "string", "minLength": 1},
+          "explanation": {"type": "string", "minLength": 1},
+          "policy_version": {"type": "string", "minLength": 1},
+          "policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "classified_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  }
+}

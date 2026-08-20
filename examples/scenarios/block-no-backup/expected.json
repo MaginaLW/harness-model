@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "block-no-backup",
+  "route": "BLOCK",
+  "verification_level": "V1",
+  "rule_ids": [
+    "HARD-BLOCK-IRREVERSIBLE-NO-BACKUP"
+  ],
+  "reasons": [
+    "The planned overwrite is irreversible and no verified backup exists.",
+    "The broad target has no dry-run evidence that identifies the exact affected files."
+  ],
+  "next_allowed_state": "BLOCKED",
+  "required_approvals": [],
+  "recovery_conditions": [
+    "Provide a verified backup with a demonstrated restore check.",
+    "Reduce the target scope to an explicit, reviewable file list."
+  ],
+  "options": [],
+  "external_actions": []
+}

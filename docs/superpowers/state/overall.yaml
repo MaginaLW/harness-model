@@ -2,9 +2,9 @@ schema: "progress.v1"
 state_type: "implementation_overall"
 project: "AI 代码协同系统"
 stage: "phase-01-mvp"
-status: "needs_revalidation"
+status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-12T17:19:20Z"
+updated_at: "2026-08-20T06:44:18Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -20,19 +20,19 @@ tracking:
   executable_policy_available: false
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-01"
-  current_task: "1.1"
+  current_chapter: "chapter-02"
+  current_task: "2.1"
   current_step: null
 
 summary:
   chapters_total: 7
-  chapters_completed: 0
+  chapters_completed: 1
   tasks_total: 44
-  tasks_completed: 0
+  tasks_completed: 5
   steps_total: 243
-  steps_completed: 0
+  steps_completed: 28
   exit_checks_total: 7
-  exit_checks_completed: 0
+  exit_checks_completed: 1
   blockers_total: 0
   evidence_items: 0
 
@@ -41,7 +41,7 @@ chapters:
     number: 1
     title: "工程基线与可执行契约"
     state_file: "docs/superpowers/state/chapters/chapter-01.yaml"
-    status: "needs_revalidation"
+    status: "completed"
     dependency: "无"
     tasks_total: 5
     steps_total: 28
@@ -132,13 +132,79 @@ future_phases:
     entry_gate:
       status: "blocked"
       reasons:
-        - "phase-01 needs_revalidation and SPEC-BLOCKER-001 unresolved"
+        - "phase-01 in_progress；chapter-02 至 chapter-07 尚未完成"
         - "phase-02 and phase-03 exit evidence unavailable"
         - "phase-04 quantified coordination-cost and pause/approval-need evidence unavailable"
         - "Sol/max versus historic Sol/high decision drift unresolved"
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T1.5-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T06:39:22Z"
+    actor: "/root"
+    subject: "执行 Task 1.5 与 Chapter 1 退出检查"
+    decision: "建立 contract 测试集合和基线说明，并以完整退出命令及双复核决定是否进入 Chapter 2。"
+    rationale: "用户要求持续推进；跨章必须满足实施目录退出条件。"
+    consequence: "Task 1.5 进入 in_progress，完成前 Chapter 1 与总体计数不变。"
+    base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+    subject_commit: "N/A（Task 1.5 的提交前人工流程）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-5-execution.md"
+      - "docs/superpowers/state/chapters/chapter-01.yaml#EVD-T1.5-START-001"
+  - id: "DEC-T1.4-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T06:31:39Z"
+    actor: "/root"
+    subject: "执行 Task 1.4 四类黄金场景"
+    decision: "按精简 REVIEW + V1 流程建立四组静态输入、期望结果和可比较契约。"
+    rationale: "用户要求持续推进；场景冻结后续行为但当前不执行外部动作或分类引擎。"
+    consequence: "Task 1.4 进入 in_progress，完成前总体计数不变。"
+    base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+    subject_commit: "N/A（Task 1.4 的提交前人工流程）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-4-execution.md"
+      - "docs/superpowers/state/chapters/chapter-01.yaml#EVD-T1.4-START-001"
+  - id: "DEC-T1.3-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T06:15:43Z"
+    actor: "/root"
+    subject: "执行 Task 1.3 Policy、模板及其 Schema"
+    decision: "按精简 REVIEW + V1 流程建立声明式 Policy 与模板结构，不提前实现路由或执行引擎。"
+    rationale: "用户要求持续推进；Policy 行为关键但当前范围不涉及外部动作或新依赖。"
+    consequence: "Task 1.3 进入 in_progress，完成前总体计数不变。"
+    base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+    subject_commit: "N/A（Task 1.3 的提交前人工流程）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-3-execution.md"
+      - "docs/superpowers/state/chapters/chapter-01.yaml#EVD-T1.3-START-001"
+  - id: "DEC-T1.2-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T05:59:10Z"
+    actor: "/root"
+    subject: "执行 Task 1.2 核心机器契约与 Schema"
+    decision: "按精简 REVIEW + V1 流程实施七个 Schema、统一校验接口、夹具和 repository ID。"
+    rationale: "用户要求持续推进；范围限于 Task 1.2，且不需要新增依赖或外部高风险动作。"
+    consequence: "Task 1.2 进入 in_progress，完成前总体计数不变。"
+    base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+    subject_commit: "N/A（Task 1.2 的提交前人工流程）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-2-execution.md"
+      - "docs/superpowers/state/chapters/chapter-01.yaml#EVD-T1.2-START-001"
+  - id: "DEC-T1.1-LEAN-REVALIDATION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T04:40:05Z"
+    actor: "/root"
+    subject: "以权威 Task 1.1 标准完成精简重验证"
+    decision: "保留旧 spec FAIL 与失效 replay 记录，不再执行失效补救计划；按实施目录原始五步标准修复并重验证 Task 1.1。"
+    rationale: "用户要求继续任务并避免过度审核；失效 replay 的外置 AuditRoot、旧 HEAD 和多层审计链不是实施目录 Task 1.1 的原始完成条件。"
+    consequence: "验证等级不降低；Task 1.1 完成，SPEC-BLOCKER-001 解决，当前指针推进到 Task 1.2。"
+    base_commit: "350fecb237a9cc449405494438e4781f18e8e372"
+    subject_commit: "N/A（Task 1.1 的提交前人工流程）"
+    subject_artifact: "tests/conftest.py@sha256:9fa50088dd4a98d87b2831909c36ed238c7a13a5d25765d82ba5dd693293a13b"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-1-lean-revalidation.md"
+      - "docs/superpowers/state/chapters/chapter-01.yaml#EVD-T1.1-LEAN-REVALIDATION-001"
   - id: "DEC-SCHED-DESIGN-001"
     status: "recorded"
     decided_at: "2026-08-12T17:19:20Z"
@@ -218,3 +284,201 @@ history:
       - "docs/superpowers/decisions/2026-08-13-resource-aware-scheduling-scope.json"
       - "docs/superpowers/reviews/2026-08-13-resource-aware-scheduling-architecture-review.json"
       - "docs/superpowers/reviews/2026-08-13-resource-aware-scheduling-governance-review.json"
+  - id: "EVT-OVERALL-T1.1-TDD-REPLAY-PLAN-INVALIDATED-001"
+    at: "2026-08-18T16:16:38Z"
+    action: "supplemental_plan_invalidated_summary"
+    actor: "Reasonix(main-session)"
+    reason: >-
+      Task 1.1 supplemental remediation plan 只读 preflight 判定失效：HEAD 漂移至 350fecb、精确十二条 status 已消失、外置 AuditRoot 及 SPEC-BLOCKER-001 原始证据全部丢失。依据计划自身失效条款回 REVIEW，本会话不执行任何 replay。
+    chapter_event: "EVT-T1.1-TDD-REPLAY-PLAN-INVALIDATED-001"
+    chapter_evidence: "EVD-T1.1-TDD-REPLAY-PLAN-INVALIDATED-001"
+    state_effect:
+      overall_status: "needs_revalidation"
+      chapter_01_status: "needs_revalidation"
+      current_chapter: "chapter-01"
+      current_task: "1.1"
+      current_step: 3
+      counters_changed: false
+      pointer_changed: false
+    user_decision: "用户选择仅登记失效并暂停推进；同时授权安装 Python 3.11 与 uv 以备后续新计划执行"
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-T1.1-ENV-RESTORE-001"
+    at: "2026-08-18T16:18:55Z"
+    action: "environment_restored_summary"
+    actor: "Reasonix(main-session)"
+    reason: "依据用户授权通过 winget 安装 Python 3.11.9 与 uv 0.12.5，修复旧计划环境 preflight 的运行时缺失；不恢复旧计划执行资格。"
+    chapter_event: "EVT-T1.1-ENV-RESTORE-001"
+    chapter_evidence: "EVD-T1.1-ENV-RESTORE-001"
+    state_effect:
+      overall_status: "needs_revalidation"
+      counters_changed: false
+      pointer_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-T1.1-LEAN-REVALIDATION-COMPLETE-001"
+    at: "2026-08-20T04:40:05Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 1.1 按精简计划修复显式超时缺口并通过原始完成标准、需求复核与质量复核。"
+    chapter_event: "EVT-T1.1-LEAN-REVALIDATION-COMPLETE-001"
+    chapter_evidence: "EVD-T1.1-LEAN-REVALIDATION-001"
+    decision: "DEC-T1.1-LEAN-REVALIDATION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_01_status: "in_progress"
+      task_1_1_status: "completed"
+      current_chapter: "chapter-01"
+      current_task: "1.2"
+      current_step: null
+      tasks_completed: 1
+      steps_completed: 5
+      blocker: "SPEC-BLOCKER-001 resolved"
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-1-lean-revalidation.md"
+  - id: "EVT-OVERALL-T1.2-START-001"
+    at: "2026-08-20T05:59:10Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 1 已登记 Task 1.2 的精简 REVIEW + V1 执行范围并进入 Step 1。"
+    chapter_event: "EVT-T1.2-START-001"
+    chapter_evidence: "EVD-T1.2-START-001"
+    current_chapter: "chapter-01"
+    current_task: "1.2"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-T1.2-COMPLETE-001"
+    at: "2026-08-20T06:10:49Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 1.2 的七个 Schema、验证接口、夹具和 repository ID 已通过 V1 与双复核。"
+    chapter_event: "EVT-T1.2-COMPLETE-001"
+    chapter_evidence: "EVD-T1.2-COMPLETE-001"
+    decision: "DEC-T1.2-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_01_status: "in_progress"
+      task_1_2_status: "completed"
+      current_chapter: "chapter-01"
+      current_task: "1.3"
+      current_step: null
+      tasks_completed: 2
+      steps_completed: 12
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-2-execution.md"
+  - id: "EVT-OVERALL-T1.3-START-001"
+    at: "2026-08-20T06:15:43Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 1 已登记 Task 1.3 的 Policy/模板范围并进入 Step 1。"
+    chapter_event: "EVT-T1.3-START-001"
+    chapter_evidence: "EVD-T1.3-START-001"
+    current_chapter: "chapter-01"
+    current_task: "1.3"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-T1.2-DECISION-UNIT-OBJECT-CORRECTION-001"
+    at: "2026-08-20T06:27:45Z"
+    action: "completion_evidence_corrected_summary"
+    actor: "/root"
+    reason: "Task 1.2 的 decision_units 对象契约纠正已通过原验证集；完成状态和累计计数不变。"
+    chapter_event: "EVT-T1.2-DECISION-UNIT-OBJECT-CORRECTION-001"
+    chapter_evidence: "EVD-T1.2-DECISION-UNIT-OBJECT-CORRECTION-001"
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-T1.3-COMPLETE-001"
+    at: "2026-08-20T06:27:45Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 1.3 的 Policy Schema、四份 Policy、五份模板已通过 V1 与双复核。"
+    chapter_event: "EVT-T1.3-COMPLETE-001"
+    chapter_evidence: "EVD-T1.3-COMPLETE-001"
+    decision: "DEC-T1.3-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_01_status: "in_progress"
+      task_1_3_status: "completed"
+      current_chapter: "chapter-01"
+      current_task: "1.4"
+      current_step: null
+      tasks_completed: 3
+      steps_completed: 18
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-3-execution.md"
+  - id: "EVT-OVERALL-T1.4-START-001"
+    at: "2026-08-20T06:31:39Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 1 已登记 Task 1.4 的黄金场景范围并进入 Step 1。"
+    chapter_event: "EVT-T1.4-START-001"
+    chapter_evidence: "EVD-T1.4-START-001"
+    current_chapter: "chapter-01"
+    current_task: "1.4"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-T1.4-COMPLETE-001"
+    at: "2026-08-20T06:36:30Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 1.4 的四类黄金场景已通过 V1 与双复核。"
+    chapter_event: "EVT-T1.4-COMPLETE-001"
+    chapter_evidence: "EVD-T1.4-COMPLETE-001"
+    decision: "DEC-T1.4-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_01_status: "in_progress"
+      task_1_4_status: "completed"
+      current_chapter: "chapter-01"
+      current_task: "1.5"
+      current_step: null
+      tasks_completed: 4
+      steps_completed: 24
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-4-execution.md"
+  - id: "EVT-OVERALL-T1.5-START-001"
+    at: "2026-08-20T06:39:22Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 1 已登记 Task 1.5 的契约回归与退出范围并进入 Step 1。"
+    chapter_event: "EVT-T1.5-START-001"
+    chapter_evidence: "EVD-T1.5-START-001"
+    current_chapter: "chapter-01"
+    current_task: "1.5"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+  - id: "EVT-OVERALL-CHAPTER-01-COMPLETE-001"
+    at: "2026-08-20T06:44:18Z"
+    action: "chapter_completed_summary"
+    actor: "/root"
+    reason: "Task 1.5、Chapter 1 退出检查、需求复核和质量复核全部通过。"
+    chapter_event: "EVT-T1.5-CHAPTER-EXIT-001"
+    chapter_evidence: "EVD-T1.5-CHAPTER-EXIT-001"
+    decision: "DEC-T1.5-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_01_status: "completed"
+      task_1_5_status: "completed"
+      current_chapter: "chapter-02"
+      current_task: "2.1"
+      current_step: null
+      chapters_completed: 1
+      tasks_completed: 5
+      steps_completed: 28
+      exit_checks_completed: 1
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-01.yaml"
+      - "docs/implementation/chapter-01-contract-baseline.md"
+      - "docs/superpowers/plans/2026-08-20-chapter-01-task-1-5-execution.md"

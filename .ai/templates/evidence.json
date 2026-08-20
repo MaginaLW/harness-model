@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-0000",
+  "decision_unit_ids": [
+    "DU-000"
+  ],
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "branch": "main",
+  "base_commit": "0000000000000000000000000000000000000000",
+  "subject_commit": "0000000000000000000000000000000000000000",
+  "spec_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "policy_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "verification_level": "V1",
+  "mode": "local",
+  "checks": [
+    {
+      "check_id": "replace-with-check-id",
+      "command": [
+        "replace-with-program",
+        "replace-with-argument"
+      ],
+      "tool_version": "record-the-observed-version",
+      "result": "failed",
+      "log_ref": "logs/run-id/check.log"
+    }
+  ],
+  "unverified_scenarios": [
+    "List a concrete scenario that remains unverified."
+  ],
+  "conclusion": "failed",
+  "generated_at": "2000-01-01T00:00:00Z",
+  "reproduce_command": [
+    "python",
+    "-m",
+    "aiflow",
+    "verify",
+    "TASK-0000"
+  ]
+}

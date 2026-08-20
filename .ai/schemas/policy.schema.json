@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/policy.schema.json",
+  "title": "AI Flow Policy document",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "policy_version", "policy_kind"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "policy_version": {"type": "string", "minLength": 1},
+    "policy_kind": {
+      "enum": ["hard_rules", "routing", "verification_levels", "permissions"]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {"$ref": "#/$defs/routing_rule"},
+          {"$ref": "#/$defs/permission_rule"}
+        ]
+      }
+    },
+    "default_route": {"$ref": "#/$defs/default_route"},
+    "allowed_placeholders": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "{python}",
+          "{repository_root}",
+          "{base_commit}",
+          "{subject_commit}",
+          "{task_id}",
+          "{run_dir}"
+        ]
+      }
+    },
+    "allowed_commands": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["{python}", "diff-cover"]}
+    },
+    "allowed_environment": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"const": "COVERAGE_FILE"}
+    },
+    "run_directories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_root", "ci_root_source", "require_descendant"],
+      "properties": {
+        "local_root": {"type": "string", "minLength": 1},
+        "ci_root_source": {"const": "runner_temp"},
+        "require_descendant": {"const": true}
+      }
+    },
+    "levels": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/$defs/verification_level"}
+    },
+    "forbidden_automatic_actions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["push", "merge", "deploy", "delete", "secret_export", "paid_external_call"]
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "policy_kind": {"const": "hard_rules"},
+        "rules": {
+          "items": {"$ref": "#/$defs/routing_rule"}
+        }
+      },
+      "required": ["rules"],
+      "not": {
+        "anyOf": [
+          {"required": ["default_route"]},
+          {"required": ["levels"]},
+          {"required": ["forbidden_automatic_actions"]}
+        ]
+      }
+    },
+    {
+      "properties": {
+        "policy_kind": {"const": "routing"},
+        "rules": {
+          "items": {"$ref": "#/$defs/routing_rule"}
+        }
+      },
+      "required": ["rules", "default_route"],
+      "not": {
+        "anyOf": [
+          {"required": ["levels"]},
+          {"required": ["forbidden_automatic_actions"]}
+        ]
+      }
+    },
+    {
+      "properties": {"policy_kind": {"const": "verification_levels"}},
+      "required": [
+        "allowed_placeholders",
+        "allowed_commands",
+        "allowed_environment",
+        "run_directories",
+        "levels"
+      ],
+      "not": {
+        "anyOf": [
+          {"required": ["rules"]},
+          {"required": ["default_route"]},
+          {"required": ["forbidden_automatic_actions"]}
+        ]
+      }
+    },
+    {
+      "properties": {
+        "policy_kind": {"const": "permissions"},
+        "rules": {
+          "items": {"$ref": "#/$defs/permission_rule"}
+        }
+      },
+      "required": ["rules", "forbidden_automatic_actions"],
+      "not": {
+        "anyOf": [
+          {"required": ["default_route"]},
+          {"required": ["levels"]},
+          {"required": ["allowed_placeholders"]}
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "operator", "missing"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$"
+        },
+        "operator": {
+          "enum": [
+            "equals",
+            "not_equals",
+            "in",
+            "contains_any",
+            "contains_all",
+            "exists",
+            "is_empty",
+            "greater_than_or_equal"
+          ]
+        },
+        "value": {},
+        "missing": {"enum": ["no_match", "match", "error"]}
+      }
+    },
+    "routing_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "priority", "route", "explanation", "match", "conditions"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Z][A-Z0-9-]+$"},
+        "priority": {"type": "integer"},
+        "route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
+        "explanation": {"type": "string", "minLength": 1},
+        "match": {"enum": ["all", "any"]},
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/condition"}
+        },
+        "recovery_conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "default_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "priority", "route", "explanation"],
+      "properties": {
+        "id": {"const": "ROUTE-DEFAULT-REVIEW"},
+        "priority": {"type": "integer"},
+        "route": {"const": "REVIEW"},
+        "explanation": {"type": "string", "minLength": 1}
+      }
+    },
+    "permission_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "priority", "action", "effect", "required_approval"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Z][A-Z0-9-]+$"},
+        "priority": {"type": "integer"},
+        "action": {
+          "enum": ["push", "merge", "deploy", "delete", "secret_export", "paid_external_call"]
+        },
+        "effect": {"const": "deny_automatic"},
+        "required_approval": {"const": "action"}
+      }
+    },
+    "verification_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "command", "timeout_seconds", "required", "result_parser"],
+      "properties": {
+        "id": {
+          "enum": [
+            "contract",
+            "scope",
+            "ruff_check",
+            "ruff_format_check",
+            "smoke",
+            "unit_tests",
+            "regression_tests",
+            "mypy",
+            "coverage_xml",
+            "diff_coverage"
+          ]
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"}
+        },
+        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 3600},
+        "required": {"type": "boolean"},
+        "result_parser": {"enum": ["exit_zero", "pytest", "coverage_xml", "diff_cover"]},
+        "environment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "COVERAGE_FILE": {"type": "string", "minLength": 1}
+          }
+        },
+        "threshold": {"type": "integer", "minimum": 0, "maximum": 100}
+      }
+    },
+    "verification_level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "checks"],
+      "properties": {
+        "id": {"enum": ["V0", "V1"]},
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/verification_check"}
+        }
+      }
+    }
+  }
+}

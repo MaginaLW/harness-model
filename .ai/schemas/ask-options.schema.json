@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/ask-options.schema.json",
+  "title": "AI Flow ASK options",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "decision_unit_id", "options", "generated_at"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "decision_unit_id": {"type": "string", "pattern": "^DU-[0-9]{3,}$"},
+    "options": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["option_id", "description", "benefit", "cost", "risk", "recommended"],
+        "properties": {
+          "option_id": {"type": "string", "pattern": "^OPT-[0-9]{2,}$"},
+          "description": {"type": "string", "minLength": 1},
+          "benefit": {"type": "string", "minLength": 1},
+          "cost": {"type": "string", "minLength": 1},
+          "risk": {"type": "string", "minLength": 1},
+          "recommended": {"type": "boolean"}
+        }
+      }
+    },
+    "generated_at": {"type": "string", "format": "date-time"}
+  }
+}

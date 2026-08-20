@@ -1,0 +1,1 @@
+{"schema_version":"1.0","task_id":"TASK-0001","decision_unit_id":"DU-001","options":[{"option_id":"OPT-01","description":"One","benefit":"Benefit","cost":"Cost","risk":"Risk","recommended":true},{"option_id":"OPT-02","description":"Two","benefit":"Benefit","cost":"Cost","risk":"Risk","recommended":false}],"generated_at":"2026-08-20T05:00:00Z","unexpected":true}

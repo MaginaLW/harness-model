@@ -1,0 +1,94 @@
+schema_version: "1.0"
+policy_version: "1.0.0"
+policy_kind: hard_rules
+rules:
+  - id: HARD-BLOCK-EXTERNAL-SENSITIVE
+    priority: 1000
+    route: BLOCK
+    explanation: Credentials or sensitive data must not be sent to an external system.
+    match: any
+    conditions:
+      - field: external_side_effects
+        operator: contains_any
+        value: [credential_export, sensitive_data_export]
+        missing: error
+    recovery_conditions:
+      - Remove the external transfer or provide an approved protected channel.
+  - id: HARD-BLOCK-IRREVERSIBLE-NO-BACKUP
+    priority: 990
+    route: BLOCK
+    explanation: An irreversible action requires a verified backup.
+    match: all
+    conditions:
+      - field: reversibility
+        operator: equals
+        value: irreversible
+        missing: error
+      - field: protections.verified_backup
+        operator: equals
+        value: false
+        missing: match
+    recovery_conditions:
+      - Verify a usable backup or replace the action with a reversible procedure.
+  - id: HARD-BLOCK-VERIFICATION-TOOL-MISSING
+    priority: 980
+    route: BLOCK
+    explanation: Required verification tools must be available.
+    match: all
+    conditions:
+      - field: verification.tools_missing
+        operator: equals
+        value: true
+        missing: error
+    recovery_conditions:
+      - Restore every required verification tool and reclassify.
+  - id: HARD-REVIEW-PRODUCTION-DATA-DELETE
+    priority: 800
+    route: REVIEW
+    explanation: Production data deletion requires review and a separate action approval.
+    match: all
+    conditions:
+      - field: planned_actions
+        operator: contains_any
+        value: [production_data_delete]
+        missing: no_match
+  - id: HARD-REVIEW-SECRETS-AUTH
+    priority: 790
+    route: REVIEW
+    explanation: Secret or authentication changes require review.
+    match: all
+    conditions:
+      - field: impact_categories
+        operator: contains_any
+        value: [secrets, authentication]
+        missing: no_match
+  - id: HARD-REVIEW-CI-CD
+    priority: 780
+    route: REVIEW
+    explanation: CI or CD behavior changes require review.
+    match: all
+    conditions:
+      - field: impact_categories
+        operator: contains_any
+        value: [ci, cd]
+        missing: no_match
+  - id: HARD-REVIEW-DEPLOYMENT
+    priority: 770
+    route: REVIEW
+    explanation: Deployment changes require review.
+    match: all
+    conditions:
+      - field: planned_actions
+        operator: contains_any
+        value: [deploy]
+        missing: no_match
+  - id: HARD-REVIEW-REAL-EXTERNAL-ACTION
+    priority: 760
+    route: REVIEW
+    explanation: A real external action requires review and separate action approval.
+    match: all
+    conditions:
+      - field: external_side_effects
+        operator: not_equals
+        value: []
+        missing: error

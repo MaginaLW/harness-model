@@ -1,0 +1,32 @@
+schema_version: "1.0"
+task_id: TASK-1002
+decision_unit_id: DU-102
+goal: Choose the output format for conflict reports.
+inputs:
+  - Markdown is easy for people to read.
+  - JSON is easier for tools to consume.
+  - Emitting both improves compatibility but increases maintenance.
+planned_actions:
+  - select_conflict_report_format
+impact_scope:
+  - src/aiflow/conflicts.py
+  - docs/conflict-reports.md
+reversibility: reversible
+verification_methods:
+  - unit_tests
+  - regression_tests
+external_side_effects: []
+permission_requirements: []
+scope:
+  clear: false
+impact:
+  level: medium
+protections:
+  verified_backup: false
+  dry_run: true
+verification:
+  automatic: true
+  tools_missing: false
+impact_categories:
+  - documentation
+business_direction_count: 3

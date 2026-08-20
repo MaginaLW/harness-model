@@ -29,6 +29,7 @@ def run_aiflow() -> Callable[[str], subprocess.CompletedProcess[str]]:
             capture_output=True,
             check=False,
             text=True,
+            timeout=10,
         )
 
     return run

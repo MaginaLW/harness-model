@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "ask-conflict-strategy",
+  "route": "ASK",
+  "verification_level": "V1",
+  "rule_ids": [
+    "ROUTE-ASK-MULTIPLE-DIRECTIONS"
+  ],
+  "reasons": [
+    "Markdown, JSON, and dual output are three reasonable product directions.",
+    "The alternatives trade human readability against machine compatibility and maintenance cost."
+  ],
+  "next_allowed_state": "WAITING_FOR_ASK",
+  "required_approvals": [],
+  "recovery_conditions": [],
+  "options": [
+    {
+      "option_id": "OPT-01",
+      "description": "Emit Markdown conflict reports only.",
+      "benefit": "Optimized for human review with minimal implementation complexity.",
+      "cost": "Automation must parse presentation-oriented text.",
+      "risk": "Machine integrations may become fragile.",
+      "recommended": false
+    },
+    {
+      "option_id": "OPT-02",
+      "description": "Emit JSON conflict reports only.",
+      "benefit": "Provides a stable machine-readable contract.",
+      "cost": "People need a viewer or formatting step.",
+      "risk": "Manual incident review becomes less convenient.",
+      "recommended": false
+    },
+    {
+      "option_id": "OPT-03",
+      "description": "Emit both Markdown and JSON from one normalized result.",
+      "benefit": "Supports people and automation without choosing one audience.",
+      "cost": "Maintains two renderers and consistency tests.",
+      "risk": "Renderer drift can create contradictory reports.",
+      "recommended": true
+    }
+  ],
+  "external_actions": []
+}

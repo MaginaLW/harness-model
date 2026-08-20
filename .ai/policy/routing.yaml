@@ -1,0 +1,45 @@
+schema_version: "1.0"
+policy_version: "1.0.0"
+policy_kind: routing
+rules:
+  - id: ROUTE-ASK-MULTIPLE-DIRECTIONS
+    priority: 500
+    route: ASK
+    explanation: Multiple reasonable business directions require a user choice.
+    match: all
+    conditions:
+      - field: business_direction_count
+        operator: greater_than_or_equal
+        value: 2
+        missing: no_match
+  - id: ROUTE-AUTO-EXPLICIT-GUARDS
+    priority: 100
+    route: AUTO
+    explanation: AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.
+    match: all
+    conditions:
+      - field: scope.clear
+        operator: equals
+        value: true
+        missing: error
+      - field: impact.level
+        operator: equals
+        value: low
+        missing: error
+      - field: reversibility
+        operator: in
+        value: [reversible, conditionally_reversible]
+        missing: error
+      - field: verification.automatic
+        operator: equals
+        value: true
+        missing: error
+      - field: external_side_effects
+        operator: is_empty
+        value: true
+        missing: error
+default_route:
+  id: ROUTE-DEFAULT-REVIEW
+  priority: 0
+  route: REVIEW
+  explanation: Unmatched work remains REVIEW; there is no implicit AUTO fallback.
