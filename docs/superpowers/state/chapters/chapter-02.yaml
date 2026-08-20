@@ -34,7 +34,7 @@ tasks:
       - id: "EVD-T2.1-COMPLETE-001"
         kind: "verification_bundle"
         completed_at: "2026-08-20T13:48:03Z"
-        subject_commit: "N/A（未获 commit 授权）"
+        subject_commit: "2a969ea4552f6ec13aed1008b0547be9f67d002e"
         artifacts:
           - "src/aiflow/errors.py@sha256:ceda9b034ebe7ba1656c1c65e50eac30f8b33b2dbed6f07af7f2869e1aa6261d"
           - "src/aiflow/storage.py@sha256:a768b20e15540a5fe68835f98098ed4b08247b85243a6bacdf4a20b930dae338"
@@ -71,7 +71,7 @@ tasks:
       - id: "EVD-T2.2-COMPLETE-001"
         kind: "verification_bundle"
         completed_at: "2026-08-20T13:55:25Z"
-        subject_commit: "N/A（未获 commit 授权）"
+        subject_commit: "2a969ea4552f6ec13aed1008b0547be9f67d002e"
         artifacts:
           - "src/aiflow/git_context.py@sha256:08b8051ed0553f644a2853e909b434f790b791bad83780594b846432e86af1a2"
           - "tests/unit/test_git_context.py@sha256:b48dbdb85666f7bf54a2262a88d8ad0b639b3c3fae91a4589f7244e81f9ac836"
@@ -90,10 +90,10 @@ tasks:
   - id: "2.3"
     title: "实现 `aiflow start`"
     plan_anchor: 378
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T2.3-START-001"
         kind: "execution_plan"
@@ -103,6 +103,25 @@ tasks:
         prerequisite_evidence: "EVD-T2.2-COMPLETE-001"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T2.3-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T14:07:18Z"
+        subject_commit: "ee6c75a45bbf072c88dea3b215b332b94a63a72a"
+        artifacts:
+          - "src/aiflow/task_service.py@sha256:258aed67dca505931a27134c11f254e5c1e2d490bd262d7b1ccfed17ea2067b0"
+          - "src/aiflow/cli.py@sha256:223073e3b11df62b5ab8a7007287a99758b91112fde3da7c95e24a78e96cf7b9"
+          - "src/aiflow/storage.py@sha256:e3f8ec5493248475d34f516c2770c7dc36148e73ffee230fcb4641b0ff213521"
+          - "tests/integration/test_start_command.py@sha256:e70f324889ae03d84df11c3ffd8efcbcb1abee69329b2ad9d1534ec13fd309ed"
+        checks:
+          - "pytest tests/integration/test_start_command.py: 10 passed"
+          - "pytest: 112 passed"
+          - "aiflow start --help: passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 2.3 五步全部覆盖）"
+          quality: "passed（恢复标记先写、必需文件原子替换、半成品 ID 不复用）"
     blockers: []
   - id: "2.4"
     title: "实现状态转换和可重放事件日志"
@@ -191,3 +210,14 @@ history:
     actor: "/root"
     reason: "登记 Task 2.3 的精简 REVIEW + V1 范围，进入 start 命令与失败恢复实现。"
     evidence: ["EVD-T2.3-START-001"]
+  - id: "EVT-T2.3-COMPLETE-001"
+    at: "2026-08-20T14:07:18Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T2.3-EXECUTION-001"
+    reason: "start 完整初始记录、失败标记和显式恢复完成，并通过 V1 与内联双复核。"
+    transition:
+      task_2_3: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "2.4"
+    evidence: ["EVD-T2.3-COMPLETE-001"]
