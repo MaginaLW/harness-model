@@ -60,14 +60,26 @@ TRANSITIONS: Mapping[tuple[str, str], TransitionRule] = MappingProxyType(
         ("WAITING_FOR_ASK", "WAITING_FOR_SPEC_REVIEW"): _rule(
             "ask_answered", "answer_recorded", "spec_frozen"
         ),
+        ("WAITING_FOR_ASK", "ESCALATED"): _rule("task_escalated", "escalation_recorded"),
+        ("WAITING_FOR_ASK", "BLOCKED"): _rule("task_blocked", "blocking_condition_recorded"),
         ("WAITING_FOR_SPEC_REVIEW", "READY_TO_IMPLEMENT"): _rule(
             "spec_approved", "spec_frozen", "spec_approval_valid"
+        ),
+        ("WAITING_FOR_SPEC_REVIEW", "ESCALATED"): _rule("task_escalated", "escalation_recorded"),
+        ("WAITING_FOR_SPEC_REVIEW", "BLOCKED"): _rule(
+            "task_blocked", "blocking_condition_recorded"
         ),
         ("READY_TO_IMPLEMENT", "IMPLEMENTING"): _rule(
             "implementation_started", "readiness_satisfied"
         ),
+        ("READY_TO_IMPLEMENT", "ESCALATED"): _rule("task_escalated", "escalation_recorded"),
+        ("READY_TO_IMPLEMENT", "BLOCKED"): _rule("task_blocked", "blocking_condition_recorded"),
         ("FAILED", "IMPLEMENTING"): _rule("implementation_retried", "retry_reason_recorded"),
+        ("FAILED", "ESCALATED"): _rule("task_escalated", "escalation_recorded"),
+        ("FAILED", "BLOCKED"): _rule("task_blocked", "blocking_condition_recorded"),
         ("IMPLEMENTING", "VERIFYING"): _rule("verification_started", "implementation_complete"),
+        ("IMPLEMENTING", "ESCALATED"): _rule("task_escalated", "escalation_recorded"),
+        ("IMPLEMENTING", "BLOCKED"): _rule("task_blocked", "blocking_condition_recorded"),
         ("VERIFYING", "VERIFIED"): _rule("verification_passed", "verification_passed"),
         ("VERIFYING", "FAILED"): _rule("verification_failed", "verification_failed"),
         ("VERIFYING", "ESCALATED"): _rule("verification_escalated", "escalation_recorded"),
@@ -77,6 +89,12 @@ TRANSITIONS: Mapping[tuple[str, str], TransitionRule] = MappingProxyType(
         ),
         ("VERIFIED", "WAITING_FOR_FINAL_REVIEW"): _rule(
             "final_review_required", "final_review_required"
+        ),
+        ("VERIFIED", "ESCALATED"): _rule("task_escalated", "escalation_recorded"),
+        ("VERIFIED", "BLOCKED"): _rule("task_blocked", "blocking_condition_recorded"),
+        ("WAITING_FOR_FINAL_REVIEW", "ESCALATED"): _rule("task_escalated", "escalation_recorded"),
+        ("WAITING_FOR_FINAL_REVIEW", "BLOCKED"): _rule(
+            "task_blocked", "blocking_condition_recorded"
         ),
         ("WAITING_FOR_FINAL_REVIEW", "APPROVED_FOR_MERGE"): _rule(
             "code_approved", "code_approval_valid"

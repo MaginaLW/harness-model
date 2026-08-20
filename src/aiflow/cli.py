@@ -12,6 +12,7 @@ from aiflow.approval import approve_task
 from aiflow.ask_service import answer_task
 from aiflow.classification_service import classify_task
 from aiflow.errors import AiflowError
+from aiflow.escalation import ESCALATION_REASON_CODES, escalate_task, record_resolution
 from aiflow.status_service import summarize_task
 from aiflow.task_service import begin_task, close_task, freeze_task, recover_task, start_task
 
@@ -56,6 +57,21 @@ def build_parser() -> ArgumentParser:
     approve.add_argument("--actor", required=True)
     approve.add_argument("--reason", required=True)
     approve.add_argument("--action-file", type=Path)
+    escalate = subparsers.add_parser("escalate", help="raise a task's governance route")
+    escalate.add_argument("task_id")
+    escalate.add_argument("--to", required=True, choices=["ASK", "REVIEW", "BLOCK"])
+    escalate.add_argument("--reason-code", required=True, choices=sorted(ESCALATION_REASON_CODES))
+    escalate.add_argument("--impact", required=True)
+    escalate.add_argument("--next-step", required=True)
+    escalate.add_argument("--actor", required=True)
+    escalate.add_argument("--existing-work", default="preserve_and_reassess")
+    resolve = subparsers.add_parser("resolve", help="record evidence for an escalation condition")
+    resolve.add_argument("task_id")
+    resolve.add_argument("--condition", required=True)
+    resolve.add_argument("--evidence-ref", action="append", required=True)
+    resolve.add_argument("--reason", required=True)
+    resolve.add_argument("--actor", required=True)
+    resolve.add_argument("--authorize-downgrade", action="store_true")
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
@@ -128,6 +144,29 @@ def main(argv: Sequence[str] | None = None) -> int:
                 action_file=arguments.action_file,
             )
             print(f"{arguments.task_id} {approval_result.task['current_state']}")
+        elif arguments.command == "escalate":
+            escalation_result = escalate_task(
+                Path.cwd(),
+                arguments.task_id,
+                target_route=arguments.to,
+                reason_code=arguments.reason_code,
+                impact=arguments.impact,
+                next_step=arguments.next_step,
+                actor=arguments.actor,
+                existing_work_disposition=arguments.existing_work,
+            )
+            print(f"{arguments.task_id} {escalation_result.task['current_state']}")
+        elif arguments.command == "resolve":
+            resolution_result = record_resolution(
+                Path.cwd(),
+                arguments.task_id,
+                condition=arguments.condition,
+                evidence_refs=arguments.evidence_ref,
+                actor=arguments.actor,
+                reason=arguments.reason,
+                authorize_downgrade=arguments.authorize_downgrade,
+            )
+            print(f"{arguments.task_id} {resolution_result.task['current_state']}")
         elif arguments.command == "status":
             summary = summarize_task(Path.cwd(), arguments.task_id)
             print(summary.to_json() if arguments.format == "json" else summary.to_text())

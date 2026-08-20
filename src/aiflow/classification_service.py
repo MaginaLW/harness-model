@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
@@ -9,7 +10,7 @@ from typing import Any
 
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import classification_input_digest, parse_decision_units
-from aiflow.errors import ContractError, StateTransitionError
+from aiflow.errors import AiflowError, ContractError, StateTransitionError
 from aiflow.git_context import collect_git_context
 from aiflow.policy import load_policy_bundle
 from aiflow.routing import ROUTE_ORDER, route_task
@@ -74,13 +75,121 @@ def _previous_identity(root: Path, task_id: str) -> Mapping[str, object] | None:
     return value if isinstance(value, Mapping) else None
 
 
+def _resume_classification(
+    repository_root: Path,
+    task_id: str,
+    marker: Mapping[str, object],
+) -> dict[str, Any]:
+    """Resume a version-checked BLOCK/ESCALATED classification transaction."""
+    classification = marker.get("classification")
+    if not isinstance(classification, dict):
+        raise StateTransitionError(
+            "Classification recovery marker is invalid", code="CLASSIFICATION_RECOVERY_INVALID"
+        )
+    require_valid_contract("classification", classification)
+    record = read_task_record_strict(repository_root, task_id)
+    resolution_sequence = marker.get("resolution_event_sequence")
+    resolution_payload = marker.get("resolution_payload")
+    if (
+        not isinstance(resolution_sequence, int)
+        or resolution_sequence < 1
+        or resolution_sequence > len(record.events)
+        or record.events[resolution_sequence - 1].get("event_type") != "resolution_recorded"
+        or record.events[resolution_sequence - 1].get("payload") != resolution_payload
+        or not isinstance(resolution_payload, Mapping)
+        or resolution_payload.get("previous_classification_input_sha256")
+        != marker.get("previous_classification_input_sha256")
+        or resolution_payload.get("previous_policy_sha256") != marker.get("previous_policy_sha256")
+        or not _resolution_evidence_current(repository_root, task_id, resolution_payload)
+    ):
+        raise StateTransitionError(
+            "Classification recovery resolution is stale",
+            code="CLASSIFICATION_RESOLUTION_REQUIRED",
+        )
+    target_state = marker.get("target_state")
+    if (
+        record.task.get("current_state") == target_state
+        and record.events
+        and record.events[-1].get("event_type") == marker.get("target_event_type")
+    ):
+        resolve_task_path(repository_root, task_id, "classification_pending.json").unlink(
+            missing_ok=True
+        )
+        return dict(classification)
+    units = parse_decision_units(record.task)
+    bundle = load_policy_bundle(repository_root)
+    if _stable_input(record.task, units) != classification.get(
+        "classification_input_sha256"
+    ) or bundle.sha256 != classification.get("policy_sha256"):
+        raise StateTransitionError(
+            "Classification recovery identity changed",
+            code="CLASSIFICATION_RECOVERY_IDENTITY_MISMATCH",
+        )
+    atomic_write_json(
+        resolve_task_path(repository_root, task_id, "classification.json"), classification
+    )
+    source_state = marker.get("source_state")
+    actor = marker.get("actor")
+    evidence = marker.get("evidence")
+    if not isinstance(actor, str) or not isinstance(evidence, Mapping):
+        raise StateTransitionError(
+            "Classification recovery marker is invalid", code="CLASSIFICATION_RECOVERY_INVALID"
+        )
+    if record.task.get("current_state") == source_state:
+        transition_task_record(
+            repository_root,
+            task_id,
+            target_state="CLASSIFIED",
+            event_type=str(marker.get("resolution_event_type")),
+            actor=actor,
+            payload={
+                **evidence,
+                "resolution_event_sequence": marker.get("resolution_event_sequence"),
+            },
+            satisfied_preconditions={"resolution_recorded"},
+        )
+        record = read_task_record_strict(repository_root, task_id)
+    if record.task.get("current_state") == "CLASSIFIED":
+        preconditions = marker.get("target_preconditions")
+        payload = marker.get("target_payload")
+        if not isinstance(preconditions, list) or not isinstance(payload, Mapping):
+            raise StateTransitionError(
+                "Classification recovery marker is invalid",
+                code="CLASSIFICATION_RECOVERY_INVALID",
+            )
+        transition_task_record(
+            repository_root,
+            task_id,
+            target_state=str(target_state),
+            event_type=str(marker.get("target_event_type")),
+            actor=actor,
+            payload=payload,
+            satisfied_preconditions=set(preconditions),
+        )
+        record = read_task_record_strict(repository_root, task_id)
+    if record.task.get("current_state") != target_state:
+        raise StateTransitionError(
+            "Classification recovery state is invalid", code="CLASSIFICATION_RECOVERY_INVALID"
+        )
+    try:
+        resolve_task_path(repository_root, task_id, "classification_pending.json").unlink()
+    except OSError as error:
+        raise StateTransitionError(
+            "Classification recovery marker remains", code="CLASSIFICATION_RECOVERY_INVALID"
+        ) from error
+    return dict(classification)
+
+
 def _resolution_allowed(
     record: TaskRecord,
     *,
+    repository_root: Path,
+    task_id: str,
     authorization_required: bool,
     previous: Mapping[str, object] | None,
     input_sha256: str,
     policy_sha256: str,
+    effective_route: str,
 ) -> bool:
     if record.task.get("current_state") not in {"BLOCKED", "ESCALATED"}:
         return True
@@ -104,6 +213,37 @@ def _resolution_allowed(
         or payload.get("previous_policy_sha256") != previous.get("policy_sha256")
     ):
         return False
+    resolution_events = []
+    escalation_event: Mapping[str, object] | None = None
+    for event in reversed(record.events):
+        if event.get("event_type") == "resolution_recorded":
+            resolution_events.append(event)
+            continue
+        escalation_event = event
+        break
+    escalation_payload = escalation_event.get("payload") if escalation_event else None
+    if isinstance(escalation_payload, Mapping):
+        requested_route = escalation_payload.get("new_route")
+        if (
+            isinstance(requested_route, str)
+            and requested_route in ROUTE_ORDER
+            and ROUTE_ORDER.index(effective_route) < ROUTE_ORDER.index(requested_route)
+        ):
+            authorization_required = True
+        required = escalation_payload.get("required_conditions")
+        if isinstance(required, list) and required:
+            resolved = {
+                item_payload.get("condition")
+                for event in resolution_events
+                if isinstance((item_payload := event.get("payload")), Mapping)
+                and item_payload.get("previous_classification_input_sha256")
+                == previous.get("classification_input_sha256")
+                and item_payload.get("previous_policy_sha256") == previous.get("policy_sha256")
+            }
+            if not set(required).issubset(resolved):
+                return False
+    if not _resolution_evidence_current(repository_root, task_id, payload):
+        return False
     if authorization_required and (
         payload.get("manual_authorization") is not True
         or not isinstance(payload.get("authorized_by"), str)
@@ -112,6 +252,30 @@ def _resolution_allowed(
         or payload.get("authorized_policy_sha256") != policy_sha256
     ):
         return False
+    return True
+
+
+def _resolution_evidence_current(
+    repository_root: Path, task_id: str, payload: Mapping[str, object]
+) -> bool:
+    """Validate structured resolution evidence when present; retain legacy refs compatibility."""
+    evidence = payload.get("evidence")
+    if evidence is None:
+        return True
+    if not isinstance(evidence, list) or not evidence:
+        return False
+    for item in evidence:
+        if not isinstance(item, Mapping):
+            return False
+        reference, digest = item.get("ref"), item.get("sha256")
+        if not isinstance(reference, str) or not isinstance(digest, str):
+            return False
+        try:
+            current = resolve_task_path(repository_root, task_id, reference).read_bytes()
+        except (OSError, AiflowError):
+            return False
+        if hashlib.sha256(current).hexdigest() != digest:
+            return False
     return True
 
 
@@ -239,6 +403,15 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
     """Strictly classify a task, writing evidence before any state transition."""
     if not actor.strip():
         raise ContractError("Classification actor is required", code="CLASSIFICATION_ACTOR_INVALID")
+    pending_path = resolve_task_path(repository_root, task_id, "classification_pending.json")
+    if pending_path.is_file():
+        pending = read_task_json(repository_root, task_id, "classification_pending.json")
+        if not isinstance(pending, Mapping):
+            raise StateTransitionError(
+                "Classification recovery marker is invalid",
+                code="CLASSIFICATION_RECOVERY_INVALID",
+            )
+        return _resume_classification(repository_root, task_id, pending)
     record = read_task_record_strict(repository_root, task_id)
     state = record.task.get("current_state")
     _require_baseline(repository_root, record.task)
@@ -268,6 +441,12 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
             previous.get("subject_commit"),
         )
         and state in {"BLOCKED", "WAITING_FOR_ASK", "WAITING_FOR_SPEC_REVIEW", "READY_TO_IMPLEMENT"}
+        and not (
+            state == "BLOCKED"
+            and (
+                not record.events or record.events[-1].get("event_type") != "classification_blocked"
+            )
+        )
     ):
         return dict(previous)
     if state == "CLASSIFIED" and (
@@ -301,10 +480,13 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
     )
     if state in {"BLOCKED", "ESCALATED"} and not _resolution_allowed(
         record,
+        repository_root=repository_root,
+        task_id=task_id,
         authorization_required=downgrade,
         previous=previous,
         input_sha256=stable_hash,
         policy_sha256=bundle.sha256,
+        effective_route=route,
     ):
         raise StateTransitionError(
             "Blocked task requires a complete authorized resolution record",
@@ -325,10 +507,6 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
         "classifications": entries,
     }
     require_valid_contract("classification", classification)
-    # This is deliberately first: a failed durable classification cannot mutate state.
-    atomic_write_json(
-        resolve_task_path(repository_root, task_id, "classification.json"), classification
-    )
     evidence = {
         "classification_input_sha256": stable_hash,
         "policy_sha256": bundle.sha256,
@@ -336,18 +514,44 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
         "effective_verification_level": verification.level,
         "change_reason": _change_reason(previous, entries, route=route, level=verification.level),
     }
+    target_state, event_type, preconditions = _target(route, blocked, entries)
+    target_payload = {
+        **evidence,
+        "blocking_reasons": list(verification.blocking_reasons),
+        "previous_classification_input_sha256": previous.get("classification_input_sha256")
+        if previous
+        else None,
+        "downgrade": downgrade,
+    }
     if state in {"BLOCKED", "ESCALATED"}:
-        event_type = "block_resolved" if state == "BLOCKED" else "escalation_resolved"
-        transition_task_record(
-            repository_root,
-            task_id,
-            target_state="CLASSIFIED",
-            event_type=event_type,
-            actor=actor,
-            payload={**evidence, "resolution_event_sequence": record.events[-1]["sequence"]},
-            satisfied_preconditions={"resolution_recorded"},
-        )
-    elif state == "NEW":
+        marker = {
+            "schema_version": "1.0",
+            "task_id": task_id,
+            "source_state": state,
+            "actor": actor.strip(),
+            "classification": classification,
+            "evidence": evidence,
+            "resolution_event_type": "block_resolved"
+            if state == "BLOCKED"
+            else "escalation_resolved",
+            "resolution_event_sequence": record.events[-1]["sequence"],
+            "resolution_payload": record.events[-1].get("payload"),
+            "previous_classification_input_sha256": previous.get("classification_input_sha256")
+            if previous
+            else None,
+            "previous_policy_sha256": previous.get("policy_sha256") if previous else None,
+            "target_state": target_state,
+            "target_event_type": event_type,
+            "target_preconditions": sorted(preconditions),
+            "target_payload": target_payload,
+        }
+        atomic_write_json(pending_path, marker)
+        return _resume_classification(repository_root, task_id, marker)
+    # Initial classification is durable before its state events; CLASSIFIED retry recovers it.
+    atomic_write_json(
+        resolve_task_path(repository_root, task_id, "classification.json"), classification
+    )
+    if state == "NEW":
         transition_task_record(
             repository_root,
             task_id,
@@ -357,21 +561,13 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
             payload=evidence,
             satisfied_preconditions={"classification_available"},
         )
-    target_state, event_type, preconditions = _target(route, blocked, entries)
     transition_task_record(
         repository_root,
         task_id,
         target_state=target_state,
         event_type=event_type,
         actor=actor,
-        payload={
-            **evidence,
-            "blocking_reasons": list(verification.blocking_reasons),
-            "previous_classification_input_sha256": previous.get("classification_input_sha256")
-            if previous
-            else None,
-            "downgrade": downgrade,
-        },
+        payload=target_payload,
         satisfied_preconditions=preconditions,
     )
     return classification
