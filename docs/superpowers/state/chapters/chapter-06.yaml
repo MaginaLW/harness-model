@@ -85,11 +85,18 @@ tasks:
   - id: "6.3"
     title: "建立统一验证包装和薄层 Hooks"
     plan_anchor: 1374
-    status: "pending"
+    status: "in_progress"
     steps_total: 6
     completed_steps: []
-    in_progress_step: null
-    evidence: []
+    in_progress_step: 1
+    evidence:
+      - id: "EVD-T6.3-START-001"
+        kind: "execution_plan"
+        path: "docs/superpowers/plans/2026-08-21-chapter-06-task-6-3-execution.md"
+        sha256: "feceede0f795d5384eef55192a3f85fd2e0f05a7dff6d4d881d4cb75d112d48a"
+        base_commit: "6a1f2da211e301ed4b0e4faed08f18aade8ff2fe"
+        route: "REVIEW"
+        verification: "V1"
     blockers: []
   - id: "6.4"
     title: "建立 GitHub Actions 质量门"
@@ -170,3 +177,9 @@ history:
       completed_steps: [1, 2, 3, 4, 5, 6]
       next_task: "6.3"
     evidence: ["EVD-T6.2-COMPLETE-001"]
+  - id: "EVT-T6.3-START-001"
+    at: "2026-08-20T21:26:58Z"
+    action: "task_started"
+    actor: "/root"
+    reason: "登记 Task 6.3 的 REVIEW + V1 范围，进入统一验证包装与薄层 Hooks 实现。"
+    evidence: ["EVD-T6.3-START-001"]
