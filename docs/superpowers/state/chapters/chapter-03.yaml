@@ -4,7 +4,7 @@ chapter:
   id: "chapter-03"
   number: 3
   title: "分流与验证等级引擎"
-  status: "in_progress"
+  status: "completed"
   plan_lines: "532-750"
   dependency: "chapter-01 and chapter-02 completed"
   tasks_total: 6
@@ -196,10 +196,10 @@ tasks:
   - id: "3.6"
     title: "运行四类黄金场景并完成第三章退出检查"
     plan_anchor: 712
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T3.6-START-001"
         kind: "execution_plan"
@@ -209,20 +209,44 @@ tasks:
         route: "REVIEW"
         verification: "V1"
         scope_refinement: "黄金 route/V/state 不变；reasons 收敛为可程序比较的 Policy 规范解释。"
+      - id: "EVD-T3.6-CHAPTER-EXIT-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T16:54:17Z"
+        subject_commit: "59f201faa03a32b8e79fc1c0ca79ae3c877ccc8f"
+        artifacts:
+          - "tests/integration/test_golden_classification.py@sha256:6c26b83519fc51e39edf594ae928e7ac554a29393757ad8b9875f796476de934"
+          - "docs/implementation/chapter-03-routing-verification.md@sha256:4614fc634371753189a4124ece131ae423d091369c1aca0494280c1a48888934"
+          - "src/aiflow/status_service.py@sha256:7fb61808a7b76e13630c80cb6e57033c72fd78f89eeaf3df4f880e9f8fe6f1b6"
+          - "examples/scenarios/auto-doc-edit/expected.json@sha256:a954c8d3b9220725d36835a86ed56d23c6a3c420a8a9430df9757bdc689f4af2"
+          - "examples/scenarios/ask-conflict-strategy/expected.json@sha256:f1884879a3e48b682ec7a60e2ab529c629efe7c5f871d980fcd115e366f87d45"
+          - "examples/scenarios/review-workflow-change/expected.json@sha256:9ab5a474e5d43747ff0f5eaf43d0a88e2d23c94f099f959a7abec574a59d4c4c"
+          - "examples/scenarios/block-no-backup/expected.json@sha256:f127efb042f69d418395abf88362e6ec5bc69e06d40371553818b9a4adddd965"
+        checks:
+          - "pytest Chapter 3 unit exit set: 53 passed"
+          - "pytest classify + golden integration: 20 passed"
+          - "pytest: 260 passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+          - "forbidden execution primitive scan: no matches"
+          - "duplicate route priority and route-to-V scan: no matches"
+        reviews:
+          requirements_conformance: "passed（四类运行时黄金、变形与授权恢复覆盖，五项退出步骤全部完成）"
+          quality: "passed（无动态表达式执行、无隐式 AUTO、route 与 V 正交、route 优先级单一来源）"
     blockers: []
 
 exit_check:
-  status: "pending"
+  status: "completed"
   required_task: "3.6"
   criteria:
     - "Policy 加载、决策单元、硬规则、route 和 V0/V1 判定均通过定向测试"
     - "四类黄金场景分类结果与预期一致，且不允许无授权降级"
     - "章节累计回归、diff 检查、需求复核和质量复核均有证据"
-  evidence: []
+  evidence: ["EVD-T3.6-CHAPTER-EXIT-001"]
 
 review:
-  requirements_conformance: "pending"
-  quality_review: "pending"
+  requirements_conformance: "passed"
+  quality_review: "passed"
 
 history:
   - at: "2026-08-02T14:03:50Z"
@@ -330,3 +354,16 @@ history:
     actor: "/root"
     reason: "登记 Task 3.6 的 REVIEW + V1 章节验收范围，并将黄金 reasons 收敛到真实 Policy 输出。"
     evidence: ["EVD-T3.6-START-001"]
+  - id: "EVT-T3.6-CHAPTER-EXIT-001"
+    at: "2026-08-20T16:54:17Z"
+    action: "chapter_completed"
+    actor: "/root"
+    decision: "DEC-T3.6-EXECUTION-001"
+    reason: "四类黄金分类、变形、授权恢复、累计回归和第三章双重复核全部通过。"
+    transition:
+      task_3_6: "in_progress -> completed"
+      chapter_03: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_chapter: "chapter-04"
+      next_task: "4.1"
+    evidence: ["EVD-T3.6-CHAPTER-EXIT-001"]

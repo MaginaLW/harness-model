@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T16:44:55Z"
+updated_at: "2026-08-20T16:54:17Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -16,23 +16,23 @@ source:
 
 tracking:
   mode: "manual"
-  cli_available: false
-  executable_policy_available: false
+  cli_available: true
+  executable_policy_available: true
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-03"
-  current_task: "3.6"
-  current_step: 1
+  current_chapter: "chapter-04"
+  current_task: "4.1"
+  current_step: null
 
 summary:
   chapters_total: 7
-  chapters_completed: 2
+  chapters_completed: 3
   tasks_total: 44
-  tasks_completed: 16
+  tasks_completed: 17
   steps_total: 243
-  steps_completed: 87
+  steps_completed: 92
   exit_checks_total: 7
-  exit_checks_completed: 2
+  exit_checks_completed: 3
   blockers_total: 0
   evidence_items: 0
 
@@ -57,7 +57,7 @@ chapters:
     number: 3
     title: "分流与验证等级引擎"
     state_file: "docs/superpowers/state/chapters/chapter-03.yaml"
-    status: "in_progress"
+    status: "completed"
     dependency: "chapter-01 and chapter-02 completed"
     tasks_total: 6
     steps_total: 31
@@ -148,7 +148,7 @@ decisions:
     rationale: "本章所有引擎已实现；黄金 reasons 必须从人工未来描述收敛到真实 Policy 规范解释，才能成为可重复比较的运行时契约。"
     consequence: "Task 3.6 进入 in_progress；route/V/state 结论不变，允许范围包含黄金 expected reasons 和场景 README。"
     base_commit: "5e8363c1c40af6a16c5d395af4075ad2b6f2ff92"
-    subject_commit: null
+    subject_commit: "59f201faa03a32b8e79fc1c0ca79ae3c877ccc8f"
     evidence:
       - "docs/superpowers/plans/2026-08-21-chapter-03-task-3-6-execution.md"
       - "docs/superpowers/state/chapters/chapter-03.yaml#EVD-T3.6-START-001"
@@ -872,3 +872,26 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-03.yaml"
       - "docs/superpowers/plans/2026-08-20-chapter-03-task-3-1-execution.md"
+  - id: "EVT-OVERALL-CHAPTER-03-COMPLETE-001"
+    at: "2026-08-20T16:54:17Z"
+    action: "chapter_completed_summary"
+    actor: "/root"
+    reason: "Task 3.2—3.6、Chapter 3 退出检查、需求复核和质量复核全部通过。"
+    chapter_event: "EVT-T3.6-CHAPTER-EXIT-001"
+    chapter_evidence: "EVD-T3.6-CHAPTER-EXIT-001"
+    decision: "DEC-T3.6-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_03_status: "completed"
+      task_3_6_status: "completed"
+      current_chapter: "chapter-04"
+      current_task: "4.1"
+      current_step: null
+      chapters_completed: 3
+      tasks_completed: 17
+      steps_completed: 92
+      exit_checks_completed: 3
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-03.yaml"
+      - "docs/implementation/chapter-03-routing-verification.md"
+      - "docs/superpowers/plans/2026-08-21-chapter-03-task-3-6-execution.md"
