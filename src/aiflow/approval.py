@@ -41,6 +41,7 @@ class ApprovalContext:
     task_state: str
     spec_sha256: str
     policy_sha256: str
+    base_commit: str
     subject_commit: str
     action_sha256: str | None = None
 
@@ -188,6 +189,7 @@ def prepare_approval(
         "reason": normalized_reason,
         "spec_sha256": context.spec_sha256,
         "policy_sha256": context.policy_sha256,
+        "base_commit": context.base_commit,
         "subject_commit": context.subject_commit,
         "approved_at": approved_at,
     }
@@ -216,16 +218,16 @@ def approval_is_current(
         require_valid_contract("approval", dict(approval))
     except ContractError:
         return False
-    current = all(
-        approval.get(field) == expected
-        for field, expected in {
-            "task_id": context.task_id,
-            "decision_unit_id": context.decision_unit_id,
-            "spec_sha256": context.spec_sha256,
-            "policy_sha256": context.policy_sha256,
-            "subject_commit": context.subject_commit,
-        }.items()
-    )
+    fields = {
+        "task_id": context.task_id,
+        "decision_unit_id": context.decision_unit_id,
+        "spec_sha256": context.spec_sha256,
+        "policy_sha256": context.policy_sha256,
+        "base_commit": context.base_commit,
+    }
+    if approval.get("approval_type") != "spec":
+        fields["subject_commit"] = context.subject_commit
+    current = all(approval.get(field) == expected for field, expected in fields.items())
     if approval.get("approval_type") == "action":
         expires_at = approval.get("expires_at")
         if not isinstance(expires_at, str):
@@ -540,6 +542,7 @@ def approve_task(
                 task_state=preparation_state,
                 spec_sha256=spec_sha256,
                 policy_sha256=policy.sha256,
+                base_commit=str(record.task.get("base_commit")),
                 subject_commit=str(record.task.get("subject_commit")),
             ),
             actor=actor,

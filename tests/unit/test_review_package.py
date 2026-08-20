@@ -63,6 +63,7 @@ def context(state: str = "WAITING_FOR_SPEC_REVIEW", **changes: object) -> Approv
         "task_state": state,
         "spec_sha256": HASH,
         "policy_sha256": HASH,
+        "base_commit": COMMIT,
         "subject_commit": COMMIT,
     }
     values.update(changes)

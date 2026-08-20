@@ -201,6 +201,34 @@ def test_status_reports_classification_route(
     assert summary["verification_level"] == "V1"
 
 
+def test_status_does_not_treat_unrequested_action_approval_as_stale(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    directory = create_task(repository, "READY_TO_IMPLEMENT")
+    approval = json.loads(
+        (PROJECT_ROOT / "tests" / "fixtures" / "contracts" / "valid" / "approval.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    approval.update(
+        {
+            "approval_type": "action",
+            "action_sha256": "c" * 64,
+            "expires_at": "2099-01-01T00:00:00Z",
+            "single_use": True,
+        }
+    )
+    atomic_write_json(directory / "approvals.json", [approval])
+    monkeypatch.chdir(repository)
+
+    assert main(["status", "TASK-0001", "--format", "json"]) == 0
+    summary = json.loads(capsys.readouterr().out)
+    assert summary["approvals"] == "not_applicable"
+
+
 def test_status_rejects_corrupt_event_log(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

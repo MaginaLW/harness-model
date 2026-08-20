@@ -2,14 +2,22 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from aiflow.contracts import require_valid_contract
+from aiflow.decision_units import classification_input_digest, parse_decision_units
+from aiflow.errors import AiflowError, ContractError
+from aiflow.freshness import evaluate_freshness
 from aiflow.git_context import collect_git_context
+from aiflow.policy import load_policy_bundle
 from aiflow.routing import ROUTE_ORDER
+from aiflow.scope import assess_governance_only_scope, collect_verification_changed_paths
+from aiflow.specification import specification_digest
 from aiflow.state import TRANSITIONS
 from aiflow.storage import read_task_json, resolve_task_path
 from aiflow.task_service import TaskRecord, read_task_record_strict
@@ -47,6 +55,7 @@ class StatusSummary:
     observed_head: str
     worktree_dirty: bool
     dirty_paths: tuple[str, ...]
+    classification: str
     approvals: str
     evidence: str
 
@@ -73,55 +82,158 @@ class StatusSummary:
                 f"Missing: {missing}",
                 f"Subject / observed HEAD: {self.subject_commit} / {self.observed_head}",
                 f"Worktree dirty: {str(self.worktree_dirty).lower()}",
-                f"Approvals / evidence: {self.approvals} / {self.evidence}",
+                f"Classification / approvals / evidence: "
+                f"{self.classification} / {self.approvals} / {self.evidence}",
             )
         )
 
 
-def _classification(repository_root: Path, task_id: str) -> tuple[str, str]:
+def _classification(
+    repository_root: Path, task_id: str
+) -> tuple[str, str, dict[str, Any] | None, bool]:
     path = resolve_task_path(repository_root, task_id, "classification.json")
     if not path.is_file():
-        return "not_available", "not_available"
-    value = read_task_json(
-        repository_root, task_id, "classification.json", contract_name="classification"
-    )
+        return "not_available", "not_available", None, False
+    try:
+        value = read_task_json(
+            repository_root, task_id, "classification.json", contract_name="classification"
+        )
+    except AiflowError:
+        return "stale", "stale", None, True
     if not isinstance(value, dict):
-        return "not_available", "not_available"
+        return "stale", "stale", None, True
     route = value.get("effective_route")
     verification = value.get("effective_verification_level")
     if route not in ROUTE_ORDER or verification not in {"V0", "V1"}:
-        return "not_available", "not_available"
-    return str(route), str(verification)
+        return "stale", "stale", value, True
+    return str(route), str(verification), value, False
 
 
-def _approval_status(repository_root: Path, task_id: str, task: dict[str, Any]) -> str:
+def _current_facts(
+    repository_root: Path,
+    task_id: str,
+    task: dict[str, Any],
+    *,
+    observed_head: str,
+    classification: dict[str, Any] | None,
+) -> dict[str, object]:
+    """Collect the current public bindings once for every freshness consumer."""
+    facts: dict[str, object] = {
+        "task_id": task_id,
+        "repository_id": task.get("repository_id"),
+        "branch": task.get("branch"),
+        "base_commit": task.get("base_commit"),
+        "subject_commit": task.get("subject_commit"),
+        "attestation_head": observed_head,
+        "now": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "used_action_sha256s": (),
+    }
+    try:
+        facts["policy_sha256"] = load_policy_bundle(repository_root).sha256
+    except AiflowError:
+        facts["policy_sha256"] = "unavailable"
+    spec_path = resolve_task_path(repository_root, task_id, "spec.md")
+    try:
+        facts["spec_sha256"] = specification_digest(spec_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError):
+        facts["spec_sha256"] = "unavailable"
+    try:
+        facts["classification_input_sha256"] = classification_input_digest(
+            task, parse_decision_units(task)
+        )
+    except AiflowError:
+        facts["classification_input_sha256"] = "unavailable"
+    if classification is not None:
+        facts["verification_level"] = classification.get("effective_verification_level")
+    subject = task.get("subject_commit")
+    base = task.get("base_commit")
+    governance_only = False
+    if isinstance(subject, str) and isinstance(base, str):
+        try:
+            paths = collect_verification_changed_paths(
+                repository_root,
+                base_commit=base,
+                subject_commit=subject,
+                head_commit=observed_head,
+            )
+            governance_only = assess_governance_only_scope(
+                (*paths.attestation, *paths.worktree),
+                task_id=task_id,
+                repository_root=repository_root,
+            ).passed
+        except AiflowError:
+            governance_only = False
+    facts["governance_only"] = governance_only
+    facts["attestation_governance_only"] = governance_only
+    return facts
+
+
+def _artifact_digest(value: dict[str, Any]) -> str:
+    canonical = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _approval_status(
+    repository_root: Path,
+    task_id: str,
+    current: dict[str, object],
+    evidence: dict[str, Any] | None,
+) -> str:
     path = resolve_task_path(repository_root, task_id, "approvals.json")
     if not path.is_file():
         return "not_available"
-    value = read_task_json(repository_root, task_id, "approvals.json")
+    try:
+        value = read_task_json(repository_root, task_id, "approvals.json")
+    except AiflowError:
+        return "stale"
     if not isinstance(value, list) or not value:
         return "not_available"
-    for approval in value:
-        require_valid_contract("approval", approval)
-    return (
-        "current"
-        if all(approval.get("subject_commit") == task.get("subject_commit") for approval in value)
-        else "stale"
-    )
+    try:
+        for approval in value:
+            require_valid_contract("approval", approval)
+    except ContractError:
+        return "stale"
+    approval_facts = dict(current)
+    if evidence is not None:
+        evidence_report = evaluate_freshness("evidence", evidence, current)
+        approval_facts["evidence_sha256"] = _artifact_digest(evidence)
+        approval_facts["evidence_current"] = evidence_report.status == "fresh"
+    else:
+        approval_facts["evidence_current"] = False
+    relevant = [item for item in value if item.get("approval_type") != "action"]
+    if not relevant:
+        return "not_applicable"
+    reports = [
+        evaluate_freshness(
+            "spec_approval" if item.get("approval_type") == "spec" else "code_approval",
+            item,
+            approval_facts,
+        )
+        for item in relevant
+    ]
+    return "current" if all(report.status == "fresh" for report in reports) else "stale"
 
 
-def _evidence_status(repository_root: Path, task_id: str, task: dict[str, Any]) -> str:
+def _evidence_status(value: dict[str, Any] | None, current: dict[str, object]) -> str:
+    if value is None:
+        return "not_available"
+    report = evaluate_freshness("evidence", value, current)
+    if report.status != "fresh":
+        return "stale"
+    return "passed"
+
+
+def _read_evidence(repository_root: Path, task_id: str) -> tuple[dict[str, Any] | None, bool]:
     path = resolve_task_path(repository_root, task_id, "evidence.json")
     if not path.is_file():
-        return "not_available"
-    value = read_task_json(repository_root, task_id, "evidence.json", contract_name="evidence")
+        return None, False
+    try:
+        value = read_task_json(repository_root, task_id, "evidence.json", contract_name="evidence")
+    except AiflowError:
+        return None, True
     if not isinstance(value, dict):
-        return "stale"
-    if value.get("repository_id") != task.get("repository_id") or value.get(
-        "subject_commit"
-    ) != task.get("subject_commit"):
-        return "stale"
-    return "passed" if value.get("conclusion") == "passed" else "failed"
+        return None, True
+    return value, False
 
 
 def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
@@ -130,7 +242,21 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
     task = record.task
     context = collect_git_context(repository_root)
     state = str(task["current_state"])
-    route, verification = _classification(repository_root, task_id)
+    route, verification, classification, classification_invalid = _classification(
+        repository_root, task_id
+    )
+    current = _current_facts(
+        repository_root,
+        task_id,
+        task,
+        observed_head=context.head,
+        classification=classification,
+    )
+    classification_report = evaluate_freshness(
+        "classification", classification, current, invalid=classification_invalid
+    )
+    evidence_value, evidence_invalid = _read_evidence(repository_root, task_id)
+    evidence_status = "stale" if evidence_invalid else _evidence_status(evidence_value, current)
     next_events = tuple(
         sorted(
             rule.event_type for (source, _target), rule in TRANSITIONS.items() if source == state
@@ -150,6 +276,7 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
         observed_head=context.head,
         worktree_dirty=context.worktree_dirty,
         dirty_paths=context.dirty_paths,
-        approvals=_approval_status(repository_root, task_id, task),
-        evidence=_evidence_status(repository_root, task_id, task),
+        classification=classification_report.status,
+        approvals=_approval_status(repository_root, task_id, current, evidence_value),
+        evidence=evidence_status,
     )
