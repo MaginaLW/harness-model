@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T18:51:04Z"
+updated_at: "2026-08-20T19:07:15Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-05"
-  current_task: "5.3"
-  current_step: 1
+  current_task: "5.4"
+  current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 4
   tasks_total: 44
-  tasks_completed: 25
+  tasks_completed: 26
   steps_total: 243
-  steps_completed: 139
+  steps_completed: 144
   exit_checks_total: 7
   exit_checks_completed: 4
   blockers_total: 0
@@ -148,7 +148,7 @@ decisions:
     rationale: "后续 evidence/gate 只能信任稳定提交，不能把脏工作树或越界变化包装成最终通过。"
     consequence: "Task 5.3 进入 in_progress；不创建 evidence、approval 或 verify/gate CLI。"
     base_commit: "7510aeec05413e45a2358ee0973bb6ab6552015e"
-    subject_commit: null
+    subject_commit: "da2b9d7ada7e5c9dfb8846a8cd272c961d0a1d1f"
     evidence:
       - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-3-execution.md"
   - id: "DEC-T5.2-EXECUTION-001"
@@ -1290,3 +1290,23 @@ history:
     counters_changed: false
     evidence:
       - "docs/superpowers/state/chapters/chapter-05.yaml"
+  - id: "EVT-OVERALL-T5.3-COMPLETE-001"
+    at: "2026-08-20T19:07:15Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 5.3 的 provisional/final Git 边界、attestation 保留和原子 subject 同步通过 V1 与精简复核。"
+    chapter_event: "EVT-T5.3-COMPLETE-001"
+    chapter_evidence: "EVD-T5.3-COMPLETE-001"
+    decision: "DEC-T5.3-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_05_status: "in_progress"
+      task_5_3_status: "completed"
+      current_chapter: "chapter-05"
+      current_task: "5.4"
+      current_step: null
+      tasks_completed: 26
+      steps_completed: 144
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-05.yaml"
+      - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-3-execution.md"

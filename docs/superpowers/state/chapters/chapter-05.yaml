@@ -87,10 +87,10 @@ tasks:
   - id: "5.3"
     title: "实现最终验证的 Git 清洁度与范围检查"
     plan_anchor: 1074
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T5.3-START-001"
         kind: "execution_plan"
@@ -99,6 +99,26 @@ tasks:
         base_commit: "7510aeec05413e45a2358ee0973bb6ab6552015e"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T5.3-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T19:07:15Z"
+        subject_commit: "da2b9d7ada7e5c9dfb8846a8cd272c961d0a1d1f"
+        artifacts:
+          - "src/aiflow/git_context.py@sha256:8f35411e696a5250204dd335f26c0042aee95cc1764ed4e0eb0083eaa81677fb"
+          - "src/aiflow/scope.py@sha256:87fc177cbf97ea54bad9177071f34ffced55e7cd4e3c0707f828a1699b4917c5"
+          - "src/aiflow/state.py@sha256:25025e2345fa4663272b6fe76039d4aa6f94460bc84fcb0f051452a65f7ef762"
+          - "src/aiflow/task_service.py@sha256:8648bded7a092f32a1524087510ea23beb93094544e899b94eb256b1e5cea5a4"
+          - "tests/unit/test_state.py@sha256:fb1a3d5474badcb74442a48b6899b0ed1abd9c9bf16ab67a68d74cc7bf6c6312"
+          - "tests/integration/test_verification_git_scope.py@sha256:cbd6644ab46a2485bbb056e933f9bd9c3b68861036b180c01a2587bb50e6cf08"
+        checks:
+          - "pytest verification_git_scope + scope + git_context + state: 92 passed, 2 skipped"
+          - "pytest: 420 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --cached --check: passed"
+        reviews:
+          requirements_conformance: "passed（provisional/final、全路径范围与 subject 同步完整）"
+          quality: "passed（attestation 保留、精确恢复与直接重试幂等无阻断）"
     blockers: []
   - id: "5.4"
     title: "生成 `evidence.json` 与版本摘要"
@@ -205,3 +225,14 @@ history:
     actor: "/root"
     reason: "登记 Task 5.3 的 REVIEW + V1 范围，进入最终验证 Git 与范围边界实现。"
     evidence: ["EVD-T5.3-START-001"]
+  - id: "EVT-T5.3-COMPLETE-001"
+    at: "2026-08-20T19:07:15Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T5.3-EXECUTION-001"
+    reason: "Task 5.3 的 provisional/final Git 边界、attestation 保留和原子 subject 同步通过 V1 与精简复核。"
+    transition:
+      task_5_3: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "5.4"
+    evidence: ["EVD-T5.3-COMPLETE-001"]
