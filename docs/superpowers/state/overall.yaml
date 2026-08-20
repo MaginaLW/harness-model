@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T14:26:49Z"
+updated_at: "2026-08-20T14:39:24Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-02"
   current_task: "2.6"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,19 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T2.6-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T14:39:24Z"
+    actor: "/root"
+    subject: "执行 Task 2.6 status 与 Chapter 2 退出"
+    decision: "实现严格只读双格式状态摘要，完成章节说明和累计退出检查，完成后本地提交。"
+    rationale: "用户要求继续下一部分；跨章必须满足第二章退出条件。"
+    consequence: "Task 2.6 进入 in_progress，完成前章节和累计计数不变。"
+    base_commit: "0891dccfadebd3b7696b948382c01c0c8cdc7685"
+    subject_commit: "N/A（完成验证后更新为本地提交）"
+    evidence:
+      - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-6-execution.md"
+      - "docs/superpowers/state/chapters/chapter-02.yaml#EVD-T2.6-START-001"
   - id: "DEC-T2.5-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T14:20:38Z"
@@ -712,3 +725,16 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-02.yaml"
       - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-5-execution.md"
+  - id: "EVT-OVERALL-T2.6-START-001"
+    at: "2026-08-20T14:39:24Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 2 已登记 Task 2.6 与章节退出范围并进入 Step 1。"
+    chapter_event: "EVT-T2.6-START-001"
+    chapter_evidence: "EVD-T2.6-START-001"
+    current_chapter: "chapter-02"
+    current_task: "2.6"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-02.yaml"

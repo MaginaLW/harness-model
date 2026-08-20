@@ -9,6 +9,7 @@ from pathlib import Path
 
 from aiflow import __version__
 from aiflow.errors import AiflowError
+from aiflow.status_service import summarize_task
 from aiflow.task_service import begin_task, close_task, recover_task, start_task
 
 DESCRIPTION = "Auditable AI code collaboration CLI"
@@ -34,6 +35,9 @@ def build_parser() -> ArgumentParser:
     close.add_argument("--result", required=True, choices=["merged"])
     close.add_argument("--merge-commit", required=True)
     close.add_argument("--actor", required=True)
+    status = subparsers.add_parser("status", help="show a read-only task summary")
+    status.add_argument("task_id")
+    status.add_argument("--format", choices=["text", "json"], default="text")
     return parser
 
 
@@ -76,6 +80,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 actor=arguments.actor,
             )
             print(f"{arguments.task_id} {transition_result.task['current_state']}")
+        elif arguments.command == "status":
+            summary = summarize_task(Path.cwd(), arguments.task_id)
+            print(summary.to_json() if arguments.format == "json" else summary.to_text())
     except AiflowError as error:
         print(error.message, file=sys.stderr)
         return 1

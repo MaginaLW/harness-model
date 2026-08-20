@@ -474,6 +474,27 @@ def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
     return TaskRecord(task=repaired, events=tuple([*events, recovery_event]))
 
 
+def read_task_record_strict(repository_root: Path, task_id: str) -> TaskRecord:
+    """Read and replay a task without repairing or mutating any file."""
+    raw_task = read_task_yaml(
+        repository_root,
+        task_id,
+        "task.yaml",
+        contract_name="task",
+    )
+    if not isinstance(raw_task, dict):
+        raise StorageError("Task document must be an object", code="STATE_TASK_INVALID")
+    events = _read_event_log(repository_root, task_id)
+    terminal_state = replay_events(events, task_id=task_id)
+    if raw_task.get("current_state") != terminal_state:
+        raise StateTransitionError(
+            "Materialized task state does not match event replay",
+            code="STATE_MATERIALIZATION_MISMATCH",
+            details={"materialized": raw_task.get("current_state"), "replayed": terminal_state},
+        )
+    return TaskRecord(task=raw_task, events=tuple(events))
+
+
 def transition_task_record(
     repository_root: Path,
     task_id: str,
