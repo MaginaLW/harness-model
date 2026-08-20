@@ -6,7 +6,12 @@ from pathlib import Path
 import pytest
 
 from aiflow.errors import ContractError
-from aiflow.scenarios import prepare_scenario_repository
+from aiflow.scenarios import (
+    ScenarioDefinition,
+    ScenarioOperation,
+    prepare_scenario_repository,
+    run_scenario,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -45,3 +50,56 @@ def test_scenario_repository_rejects_missing_input_or_existing_target(tmp_path: 
     existing.mkdir()
     with pytest.raises(ContractError, match="already exists"):
         prepare_scenario_repository(ROOT, existing, "auto-doc-edit")
+
+
+def _start_definition() -> ScenarioDefinition:
+    return ScenarioDefinition(
+        "auto-doc-edit",
+        (
+            ScenarioOperation(
+                (
+                    "start",
+                    "--objective",
+                    "Run isolated scenario",
+                    "--allow",
+                    "docs/example.md",
+                ),
+                None,
+                (),
+                "NEW",
+            ),
+            ScenarioOperation(
+                ("status", "{task_id}", "--format", "json"),
+                None,
+                (),
+                "NEW",
+            ),
+        ),
+    )
+
+
+def test_operations_capture_artifacts_and_replay_deterministically(tmp_path: Path) -> None:
+    first = run_scenario(
+        prepare_scenario_repository(ROOT, tmp_path / "first-run", "auto-doc-edit"),
+        _start_definition(),
+    )
+    second = run_scenario(
+        prepare_scenario_repository(ROOT, tmp_path / "second-run", "auto-doc-edit"),
+        _start_definition(),
+    )
+
+    assert first.materialized_state == first.replayed_state == "NEW"
+    assert first.event_states == ("NEW",)
+    assert [command.exit_code for command in first.commands] == [0, 0]
+    assert first.classification is None
+    assert first.approvals == ()
+    assert first.evidence is None
+    assert first.semantic_view() == second.semantic_view()
+
+
+def test_operation_rejects_undeclared_changes(tmp_path: Path) -> None:
+    prepared = prepare_scenario_repository(ROOT, tmp_path / "scope-run", "auto-doc-edit")
+    (prepared.root / "outside.txt").write_text("unexpected\n", encoding="utf-8")
+
+    with pytest.raises(ContractError, match="must start clean"):
+        run_scenario(prepared, _start_definition())
