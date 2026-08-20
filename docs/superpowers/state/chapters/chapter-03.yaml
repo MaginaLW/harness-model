@@ -122,10 +122,10 @@ tasks:
   - id: "3.4"
     title: "独立实现 V0/V1 判定"
     plan_anchor: 639
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T3.4-START-001"
         kind: "execution_plan"
@@ -135,6 +135,25 @@ tasks:
         route: "REVIEW"
         verification: "V1"
         scope_change: "补充实施目录要求但现有 Schema 缺失的封闭验证事实，并同步模板与黄金输入。"
+      - id: "EVD-T3.4-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T16:23:35Z"
+        subject_commit: "e7e1007bd610be853602c482be111498b3680a81"
+        artifacts:
+          - "src/aiflow/verification_level.py@sha256:3883237736b718bc40d7308f719b627f5ff9fa0c1a1a22739105e5b9cc676102"
+          - "tests/unit/test_verification_level.py@sha256:e499f9f287532ae51169dbacb07de71975c20a4c31cd94b065d23e8b18d00198"
+          - "tests/fixtures/verification/level-table.json@sha256:a5bfaf733de6f7a82ed46791720c65ec72fdc59e1e3c20fd9b1688c347824ef5"
+          - ".ai/schemas/decision-unit.schema.json@sha256:f1b0201ea66f7b683256dc0dac2754304368088a801cf2822141968577302b3d"
+          - ".ai/templates/task.yaml@sha256:9a911b9e52c74cb1bc7109fa99be54136964c51ff970d5d2911baca776acefac"
+        checks:
+          - "pytest verification level + golden contracts + templates: 38 passed"
+          - "pytest: 238 passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 3.4 五步及必要契约补全全部覆盖）"
+          quality: "passed（route 无输入依赖；V0/V1 与阻塞原因正交；旧记录保守兼容）"
     blockers: []
   - id: "3.5"
     title: "实现 `aiflow classify`"
@@ -240,3 +259,14 @@ history:
     actor: "/root"
     reason: "登记 Task 3.4 的 REVIEW + V1 范围；为确定性实现验证等级，最小补充结构化变更特征契约。"
     evidence: ["EVD-T3.4-START-001"]
+  - id: "EVT-T3.4-COMPLETE-001"
+    at: "2026-08-20T16:23:35Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T3.4-EXECUTION-001"
+    reason: "独立 V0/V1 判定、阻塞原因和任务汇总完成，并通过 V1 与内联双复核。"
+    transition:
+      task_3_4: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "3.5"
+    evidence: ["EVD-T3.4-COMPLETE-001"]

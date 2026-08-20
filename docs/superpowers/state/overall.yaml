@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T16:16:21Z"
+updated_at: "2026-08-20T16:23:35Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-03"
-  current_task: "3.4"
-  current_step: 1
+  current_task: "3.5"
+  current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 2
   tasks_total: 44
-  tasks_completed: 14
+  tasks_completed: 15
   steps_total: 243
-  steps_completed: 76
+  steps_completed: 81
   exit_checks_total: 7
   exit_checks_completed: 2
   blockers_total: 0
@@ -148,7 +148,7 @@ decisions:
     rationale: "现有契约无法程序裁决行为变化、代码修改、跨文件交互、回归风险和错误可检测性；不应从路径或自然语言猜测。"
     consequence: "Task 3.4 进入 in_progress，允许范围经记录扩展到直接相关 Schema、模板和黄金输入，累计计数暂不变。"
     base_commit: "e863a9c07253077b7fa46e6f1a9726f2ede22ec5"
-    subject_commit: null
+    subject_commit: "e7e1007bd610be853602c482be111498b3680a81"
     evidence:
       - "docs/superpowers/plans/2026-08-21-chapter-03-task-3-4-execution.md"
       - "docs/superpowers/state/chapters/chapter-03.yaml#EVD-T3.4-START-001"
