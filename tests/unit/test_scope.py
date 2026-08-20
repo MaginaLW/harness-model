@@ -15,6 +15,7 @@ from aiflow.scope import (
     assess_scope,
     collect_changed_paths,
     evaluate_auto_preflight,
+    forbidden_action_present,
     matches_scope,
     normalize_repository_path,
     resolve_repository_path,
@@ -32,6 +33,11 @@ def test_segment_aware_globs_do_not_use_prefix_matching() -> None:
     assert matches_scope("src/nested/module.py", "src/*") is False
     assert matches_scope("src/nested/module.py", "src/**") is True
     assert matches_scope("srcevil/module.py", "src/**") is False
+
+
+def test_forbidden_actions_use_normalized_single_source_semantics() -> None:
+    assert forbidden_action_present(["Deploy"], [" deploy "]) is True
+    assert forbidden_action_present(["Deploy"], ["notify"]) is False
 
 
 def test_scope_allows_current_governance_but_not_other_task_governance() -> None:

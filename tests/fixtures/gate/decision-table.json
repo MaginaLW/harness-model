@@ -1,0 +1,19 @@
+[
+  {"name":"auto_pass","changes":{},"passed":true,"reasons":[]},
+  {"name":"ask_pass","changes":{"route":"ASK","ask_answered":true},"passed":true,"reasons":[]},
+  {"name":"ask_unanswered","changes":{"route":"ASK","ask_answered":false},"passed":false,"reasons":["GATE_ASK_UNANSWERED"]},
+  {"name":"review_pass","changes":{"route":"REVIEW","spec_approval_current":true,"code_approval_current":true},"passed":true,"reasons":[]},
+  {"name":"review_spec_stale","changes":{"route":"REVIEW","spec_approval_current":false},"passed":false,"reasons":["GATE_SPEC_APPROVAL_STALE"]},
+  {"name":"review_code_stale","changes":{"route":"REVIEW","code_approval_current":false},"passed":false,"reasons":["GATE_CODE_APPROVAL_STALE"]},
+  {"name":"mixed_ask_review_unanswered","changes":{"route":"REVIEW","ask_required":true,"review_required":true,"ask_answered":false},"passed":false,"reasons":["GATE_ASK_UNANSWERED"]},
+  {"name":"block_route","changes":{"route":"BLOCK","unresolved_block_or_escalation":true},"passed":false,"reasons":["GATE_BLOCKED"]},
+  {"name":"wrong_state","changes":{"current_state":"WAITING_FOR_FINAL_REVIEW"},"passed":false,"reasons":["GATE_STATE_INVALID"]},
+  {"name":"repository_changed","changes":{"repository_current":false},"passed":false,"reasons":["GATE_REPOSITORY_CHANGED"]},
+  {"name":"scope_changed","changes":{"scope_current":false},"passed":false,"reasons":["GATE_SCOPE_CHANGED"]},
+  {"name":"classification_stale","changes":{"classification_current":false},"passed":false,"reasons":["GATE_CLASSIFICATION_STALE"]},
+  {"name":"spec_stale","changes":{"specification_current":false},"passed":false,"reasons":["GATE_SPEC_STALE"]},
+  {"name":"evidence_stale","changes":{"evidence_current":false},"passed":false,"reasons":["GATE_EVIDENCE_STALE"]},
+  {"name":"evidence_failed","changes":{"evidence_passed":false},"passed":false,"reasons":["GATE_EVIDENCE_NOT_PASSED"]},
+  {"name":"action_irrelevant","changes":{"route":"AUTO","code_approval_current":false,"spec_approval_current":false},"passed":true,"reasons":[]},
+  {"name":"ordered_combination","changes":{"current_state":"FAILED","repository_current":false,"classification_current":false,"evidence_current":false,"evidence_passed":false},"passed":false,"reasons":["GATE_STATE_INVALID","GATE_REPOSITORY_CHANGED","GATE_CLASSIFICATION_STALE","GATE_EVIDENCE_STALE","GATE_EVIDENCE_NOT_PASSED"]}
+]

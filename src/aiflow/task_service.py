@@ -36,6 +36,7 @@ from aiflow.scope import (
     assess_auto_scope,
     collect_changed_paths,
     evaluate_auto_preflight,
+    forbidden_action_present,
 )
 from aiflow.specification import specification_digest, validate_specification
 from aiflow.state import create_record_event, create_transition_event, replay_events
@@ -938,15 +939,9 @@ def _require_auto_preflight(
         bool(unit.get("permission_requirements")) or bool(unit.get("external_side_effects"))
         for unit in unfinished
     )
-    forbidden = {
-        str(action).strip().casefold()
-        for action in record.task.get("forbidden_actions", [])
-        if isinstance(action, str)
-    }
-    forbidden_present = any(
-        str(action).strip().casefold() in forbidden
-        for unit in unfinished
-        for action in unit.get("planned_actions", [])
+    forbidden_present = forbidden_action_present(
+        record.task.get("forbidden_actions", []),
+        tuple(action for unit in unfinished for action in unit.get("planned_actions", [])),
     )
     workflow = evaluate_preconditions(
         WorkflowFacts(

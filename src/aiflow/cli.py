@@ -13,6 +13,7 @@ from aiflow.ask_service import answer_task
 from aiflow.classification_service import classify_task
 from aiflow.errors import AiflowError
 from aiflow.escalation import ESCALATION_REASON_CODES, escalate_task, record_resolution
+from aiflow.gate import evaluate_gate
 from aiflow.status_service import summarize_task
 from aiflow.task_service import begin_task, close_task, freeze_task, recover_task, start_task
 from aiflow.verification_service import verify_task
@@ -83,6 +84,10 @@ def build_parser() -> ArgumentParser:
     verify.add_argument("--ci", action="store_true")
     verify.add_argument("--ci-run-dir", type=Path)
     verify.add_argument("--output", type=Path)
+    gate = subparsers.add_parser("gate", help="evaluate the read-only merge gate")
+    gate.add_argument("task_id")
+    gate.add_argument("--evidence", type=Path)
+    gate.add_argument("--format", choices=["text", "json"], default="text")
     return parser
 
 
@@ -189,6 +194,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 output=arguments.output,
             )
             print(f"{result.task_id} {result.state or 'CI'} {result.conclusion}")
+        elif arguments.command == "gate":
+            decision = evaluate_gate(
+                Path.cwd(), arguments.task_id, evidence_path=arguments.evidence
+            )
+            print(decision.to_json() if arguments.format == "json" else decision.to_text())
+            return 0 if decision.passed else 2
     except AiflowError as error:
         print(error.message, file=sys.stderr)
         return 1

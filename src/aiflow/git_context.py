@@ -236,6 +236,15 @@ def _is_ancestor(repository_root: Path, ancestor: str, descendant: str) -> bool:
     return result.returncode == 0
 
 
+def commits_are_ancestral(
+    repository_root: Path, *, base_commit: str, subject_commit: str, head_commit: str
+) -> bool:
+    """Require the fixed verification chain base -> subject -> observed HEAD."""
+    return _is_ancestor(repository_root, base_commit, subject_commit) and _is_ancestor(
+        repository_root, subject_commit, head_commit
+    )
+
+
 def evaluate_verification_git_context(
     repository_root: Path,
     *,

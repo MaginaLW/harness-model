@@ -92,6 +92,22 @@ def normalize_repository_path(path: str) -> str:
     return "/".join(parts)
 
 
+def forbidden_action_present(
+    forbidden_actions: Sequence[object], planned_actions: Sequence[object]
+) -> bool:
+    """Compare action names using the single normalized AUTO-preflight semantics."""
+    forbidden = {
+        action.strip().casefold()
+        for action in forbidden_actions
+        if isinstance(action, str) and action.strip()
+    }
+    return any(
+        action.strip().casefold() in forbidden
+        for action in planned_actions
+        if isinstance(action, str)
+    )
+
+
 def resolve_repository_path(repository_root: Path, path: str) -> Path:
     """Resolve a relative path and reject a symlink that escapes the repository."""
     normalized = normalize_repository_path(path)
