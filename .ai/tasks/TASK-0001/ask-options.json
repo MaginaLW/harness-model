@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-0001",
+  "decision_unit_id": "DU-001",
+  "generated_at": "2026-08-21T00:00:00Z",
+  "options": [
+    {
+      "option_id": "OPT-01",
+      "description": "Generate a Markdown pilot summary only.",
+      "benefit": "Easy for people to read and review in Git.",
+      "cost": "Automation must parse presentation-oriented text.",
+      "risk": "Machine consumers may need an additional parser.",
+      "recommended": true
+    },
+    {
+      "option_id": "OPT-02",
+      "description": "Generate a JSON pilot summary only.",
+      "benefit": "Provides a stable machine-readable shape.",
+      "cost": "Less convenient for direct human review.",
+      "risk": "Narrative observations may become terse.",
+      "recommended": false
+    },
+    {
+      "option_id": "OPT-03",
+      "description": "Generate both Markdown and JSON summaries.",
+      "benefit": "Serves people and automation without conversion.",
+      "cost": "Maintains two outputs and consistency checks.",
+      "risk": "The two representations can drift.",
+      "recommended": false
+    }
+  ]
+}

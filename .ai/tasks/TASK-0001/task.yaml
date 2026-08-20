@@ -1,0 +1,61 @@
+allowed_scope:
+- docs/pilots/ask-pilot-summary.md
+- docs/pilots/ask-pilot-summary.json
+base_commit: 01e0e282afaead31b9653391584267f20ccbf13a
+branch: pilot/ask-report
+created_at: '2026-08-20T23:45:47Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 3
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: local
+    mechanical: false
+    regression_risk: false
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Choose one output format for the pilot summary
+  impact:
+    level: low
+  impact_categories:
+  - documentation
+  impact_scope:
+  - docs/pilots/ask-pilot-summary.md
+  - docs/pilots/ask-pilot-summary.json
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - select_pilot_summary_format
+  protections:
+    dry_run: true
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: false
+  task_id: TASK-0001
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 2f11c26255c5adcc61107c66ee557488f43386ce4c866151786adb1eaddd23aa
+goal: Choose one output format for the pilot summary
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model-pilot-ask
+schema_version: '1.0'
+spec_frozen_at: '2026-08-20T23:51:24Z'
+subject_commit: e72e5f17d01216210bb05f3811c5ac0c78ec1766
+task_id: TASK-0001
+updated_at: '2026-08-20T23:56:35Z'
+worktree_dirty: false
+worktree_dirty_paths: []

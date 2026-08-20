@@ -1,0 +1,46 @@
+{
+  "base_commit": "01e0e282afaead31b9653391584267f20ccbf13a",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "9909d1ff84cabde6e7e2f2e14268d6d36ce1a563867183cc285230b93708758c",
+  "classifications": [
+    {
+      "classified_at": "2026-08-20T23:46:21Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Multiple reasonable business directions require a user choice.",
+      "explanations": [
+        "Multiple reasonable business directions require a user choice."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Multiple reasonable business directions require a user choice.",
+          "predicate_explanations": [
+            "business_direction_count: greater_than_or_equal -> true"
+          ],
+          "priority": 500,
+          "route": "ASK",
+          "rule_id": "ROUTE-ASK-MULTIPLE-DIRECTIONS"
+        }
+      ],
+      "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+      "policy_version": "1.0.0",
+      "route": "ASK",
+      "rule_id": "ROUTE-ASK-MULTIPLE-DIRECTIONS",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-08-20T23:46:21Z",
+  "effective_route": "ASK",
+  "effective_verification_level": "V1",
+  "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+  "policy_version": "1.0.0",
+  "schema_version": "1.0",
+  "subject_commit": "01e0e282afaead31b9653391584267f20ccbf13a",
+  "task_id": "TASK-0001"
+}
