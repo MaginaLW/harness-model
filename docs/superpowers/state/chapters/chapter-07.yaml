@@ -89,11 +89,28 @@ tasks:
   - id: "7.3"
     title: "准备真实仓库试点与执行授权点"
     plan_anchor: 1604
-    status: "pending"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5, 6]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T7.3-COMPLETE-001"
+        kind: "pilot_preparation"
+        completed_at: "2026-08-20T23:42:48Z"
+        pilot_base: "01e0e282afaead31b9653391584267f20ccbf13a"
+        artifacts:
+          - "docs/pilots/README.md@sha256:f21627c55fdc67daaaea829191f73f67ef9476bc1ef55024cae6f6ec484436dd"
+          - "docs/pilots/pilot-runbook.md@sha256:5d3f02931f4dd01caef234ac6ecf04ea428bc9ef74a5fe1cc7eb1a176ff25e42"
+          - "../harness-model-pilot-artifacts/"
+          - "../harness-model-pilot-auto/@pilot/auto-doc"
+          - "../harness-model-pilot-ask/@pilot/ask-report"
+          - "../harness-model-pilot-review/@pilot/review-policy"
+          - "../harness-model-pilot-block/@pilot/block-dry-run"
+        checks:
+          - "all four worktrees start at pilot_base"
+          - "all five worktrees share repository ID b85e5a53-4935-4436-bdbc-c26a241bfae8"
+          - "main worktree clean"
+          - "pytest tests/e2e: 4 passed"
     blockers: []
   - id: "7.4"
     title: "在本仓库执行 AUTO、ASK、REVIEW 和 BLOCK 试点"
@@ -184,3 +201,12 @@ history:
       completed_steps: [1, 2, 3, 4, 5]
       next_task: "7.3"
     evidence: ["EVD-T7.2-COMPLETE-001"]
+  - id: "EVT-T7.3-COMPLETE-001"
+    at: "2026-08-20T23:42:48Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "四个本地试点 worktree 已从同一 pilot_base 创建，外部 artifact 边界、真实 ASK/独立 REVIEW 授权点和禁止 push/merge/delete 范围已写入运行手册。"
+    transition:
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "7.4"
+    evidence: ["EVD-T7.3-COMPLETE-001"]
