@@ -19,10 +19,10 @@ tasks:
   - id: "7.1"
     title: "建立端到端场景运行器"
     plan_anchor: 1535
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: [1]
-    in_progress_step: 2
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T7.1-START-001"
         kind: "execution_plan"
@@ -43,6 +43,19 @@ tasks:
           - "pytest scenario isolation + golden contracts: 13 passed"
           - "pytest full suite: 569 passed, 3 skipped (Windows symlink privilege unavailable)"
           - "ruff focused: passed"
+          - "ruff check and format: passed"
+          - "mypy src tools: passed"
+          - "git diff --check: passed"
+      - id: "EVD-T7.1-COMPLETE-001"
+        kind: "implementation_completion"
+        completed_at: "2026-08-20T23:28:49Z"
+        subject_commit: "1ffc0e4738cec97480306f4ffc1cbfa8ed6be309"
+        artifacts:
+          - "src/aiflow/scenarios.py@sha256:8b1a34969d01a28b218b2e220ca5ffb06d02ae4541a9a96a2eb64417ace413d9"
+          - "tests/integration/test_scenario_runner.py@sha256:ff621bf1f1266df31f7722cc4ac8853b400a1a1893b914a0bbad5d954a389074"
+        checks:
+          - "pytest scenario runner: 4 passed"
+          - "pytest full suite: 571 passed, 3 skipped (Windows symlink privilege unavailable)"
           - "ruff check and format: passed"
           - "mypy src tools: passed"
           - "git diff --check: passed"
@@ -136,3 +149,12 @@ history:
       completed_step: 1
       next_step: 2
     evidence: ["EVD-T7.1-STEP1-001"]
+  - id: "EVT-T7.1-COMPLETE-001"
+    at: "2026-08-20T23:28:49Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "隔离场景运行器已通过真实 CLI 顺序执行、变更范围约束、治理产物捕获、事件重放和双运行语义确定性验证。"
+    transition:
+      completed_steps: [2, 3, 4, 5]
+      next_task: "7.2"
+    evidence: ["EVD-T7.1-COMPLETE-001"]

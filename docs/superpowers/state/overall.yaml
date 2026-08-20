@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T21:52:29Z"
+updated_at: "2026-08-20T23:28:49Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-07"
-  current_task: "7.1"
-  current_step: 2
+  current_task: "7.2"
+  current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 6
   tasks_total: 44
-  tasks_completed: 37
+  tasks_completed: 38
   steps_total: 243
-  steps_completed: 204
+  steps_completed: 209
   exit_checks_total: 7
   exit_checks_completed: 6
   blockers_total: 0
@@ -1732,3 +1732,22 @@ history:
     counters_changed: false
     evidence:
       - "docs/superpowers/state/chapters/chapter-07.yaml"
+  - id: "EVT-OVERALL-T7.1-COMPLETE-001"
+    at: "2026-08-20T23:28:49Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 7.1 的隔离、可重放且语义确定的真实 CLI 场景运行器通过全量回归。"
+    chapter_event: "EVT-T7.1-COMPLETE-001"
+    chapter_evidence: "EVD-T7.1-COMPLETE-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_07_status: "in_progress"
+      task_7_1_status: "completed"
+      current_chapter: "chapter-07"
+      current_task: "7.2"
+      current_step: null
+      tasks_completed: 38
+      steps_completed: 209
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-07.yaml"
+      - "docs/superpowers/plans/2026-08-21-chapter-07-task-7-1-execution.md"
