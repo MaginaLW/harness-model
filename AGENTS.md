@@ -10,4 +10,6 @@
 6. 可执行 Policy 与 CLI 上线后以其确定性结论为准，不在 Agent 文件中复制规则表。
 7. Codex 原生 sub-agent 路由以当前运行时实际暴露的模型为准。当前 Sol/Terra 使用 Multi-Agent v2、Luna 使用 v1，禁止把 Luna 配成 Sol 的原生 sub-agent 默认值，也禁止通过切换既有主线程模型来伪装成 Sol → Luna。需要 Luna 时只能建立明确标注的独立 Luna 工作线程；它不是原生 sub-agent。待运行时模型目录兼容后，再恢复 Sol → Luna 并以子线程元数据验证。
 
-入口：[项目总览](README.md) · [MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) · [实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)
+启动：先运行 `python -m aiflow --help` 获取当前命令面，再按任务状态使用 CLI。
+
+入口：[项目总览](README.md) · [Policy](.ai/policy/) · [模板](.ai/templates/) · [CLI](src/aiflow/cli.py) · [MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) · [实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)
