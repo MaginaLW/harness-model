@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    "unknown_field",
+    "duplicate_rule_id",
+    "duplicate_priority",
+    "unknown_predicate",
+    "command_string",
+    "missing_permission_rule",
+    "invalid_default_order"
+  ]
+}

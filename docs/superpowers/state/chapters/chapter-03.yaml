@@ -4,7 +4,7 @@ chapter:
   id: "chapter-03"
   number: 3
   title: "分流与验证等级引擎"
-  status: "pending"
+  status: "in_progress"
   plan_lines: "532-750"
   dependency: "chapter-01 and chapter-02 completed"
   tasks_total: 6
@@ -19,11 +19,18 @@ tasks:
   - id: "3.1"
     title: "实现 Policy 加载、校验和稳定摘要"
     plan_anchor: 534
-    status: "pending"
+    status: "in_progress"
     steps_total: 5
     completed_steps: []
-    in_progress_step: null
-    evidence: []
+    in_progress_step: 1
+    evidence:
+      - id: "EVD-T3.1-START-001"
+        kind: "execution_plan"
+        path: "docs/superpowers/plans/2026-08-20-chapter-03-task-3-1-execution.md"
+        sha256: "590e849c9f880edaeeaf00aecd090d91ada98825774327ff49b0495f35345f58"
+        base_commit: "05da404dbfd2e97dd4718f59bb002528b4af3e4b"
+        route: "REVIEW"
+        verification: "V1"
     blockers: []
   - id: "3.2"
     title: "实现决策单元输入与受限谓词"
@@ -90,3 +97,9 @@ history:
     actor: "Codex"
     reason: "登记第三章 6 个任务和 31 个步骤，依赖任务状态核心"
     evidence: ["docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"]
+  - id: "EVT-T3.1-START-001"
+    at: "2026-08-20T14:48:10Z"
+    action: "task_started"
+    actor: "/root"
+    reason: "登记 Task 3.1 的精简 REVIEW + V1 范围，进入 Policy 加载与摘要实现。"
+    evidence: ["EVD-T3.1-START-001"]
