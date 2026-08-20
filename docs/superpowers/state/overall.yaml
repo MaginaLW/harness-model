@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T21:48:01Z"
+updated_at: "2026-08-20T21:50:15Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-07"
   current_task: "7.1"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -89,7 +89,7 @@ chapters:
     number: 7
     title: "试点验收与阶段一基线"
     state_file: "docs/superpowers/state/chapters/chapter-07.yaml"
-    status: "pending"
+    status: "in_progress"
     dependency: "chapters 01-06 completed"
     tasks_total: 7
     steps_total: 39
@@ -1706,3 +1706,16 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-06.yaml"
       - "docs/implementation/chapter-06-agent-ci.md"
+  - id: "EVT-OVERALL-T7.1-START-001"
+    at: "2026-08-20T21:50:15Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 7 已登记 Task 7.1 的 REVIEW + V1 范围并进入 Step 1。"
+    chapter_event: "EVT-T7.1-START-001"
+    chapter_evidence: "EVD-T7.1-START-001"
+    current_chapter: "chapter-07"
+    current_task: "7.1"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-07.yaml"
