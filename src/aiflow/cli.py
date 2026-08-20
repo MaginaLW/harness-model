@@ -9,7 +9,7 @@ from pathlib import Path
 
 from aiflow import __version__
 from aiflow.errors import AiflowError
-from aiflow.task_service import recover_task, start_task
+from aiflow.task_service import begin_task, close_task, recover_task, start_task
 
 DESCRIPTION = "Auditable AI code collaboration CLI"
 
@@ -25,6 +25,15 @@ def build_parser() -> ArgumentParser:
     start.add_argument("--forbid-action", action="append", default=[])
     start.add_argument("--allow-detached", action="store_true")
     start.add_argument("--recover", metavar="TASK-ID")
+    begin = subparsers.add_parser("begin", help="begin implementation or retry")
+    begin.add_argument("task_id")
+    begin.add_argument("--actor", required=True)
+    begin.add_argument("--reason")
+    close = subparsers.add_parser("close", help="record an externally completed merge")
+    close.add_argument("task_id")
+    close.add_argument("--result", required=True, choices=["merged"])
+    close.add_argument("--merge-commit", required=True)
+    close.add_argument("--actor", required=True)
     return parser
 
 
@@ -39,17 +48,34 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "Recovery cannot be combined with creation arguments",
                         code="START_INPUT_INVALID",
                     )
-                result = recover_task(Path.cwd(), arguments.recover)
+                start_result = recover_task(Path.cwd(), arguments.recover)
             else:
-                result = start_task(
+                start_result = start_task(
                     Path.cwd(),
                     objective=arguments.objective,
                     allowed_scope=arguments.allow,
                     forbidden_actions=arguments.forbid_action,
                     allow_detached=arguments.allow_detached,
                 )
-            print(result.task_id)
-            print(result.task_directory.resolve())
+            print(start_result.task_id)
+            print(start_result.task_directory.resolve())
+        elif arguments.command == "begin":
+            transition_result = begin_task(
+                Path.cwd(),
+                arguments.task_id,
+                actor=arguments.actor,
+                reason=arguments.reason,
+            )
+            print(f"{arguments.task_id} {transition_result.task['current_state']}")
+        elif arguments.command == "close":
+            transition_result = close_task(
+                Path.cwd(),
+                arguments.task_id,
+                result=arguments.result,
+                merge_commit=arguments.merge_commit,
+                actor=arguments.actor,
+            )
+            print(f"{arguments.task_id} {transition_result.task['current_state']}")
     except AiflowError as error:
         print(error.message, file=sys.stderr)
         return 1

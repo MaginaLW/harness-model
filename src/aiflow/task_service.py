@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import re
+import subprocess
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -33,6 +36,16 @@ from aiflow.storage import (
 )
 
 CREATION_MARKER = "creation_failed.json"
+COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+ESCALATING_FAILURE_MARKERS = frozenset(
+    {
+        "scope_expanded",
+        "new_dependencies",
+        "new_permissions",
+        "unverifiable",
+        "high_risk_side_effects",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -487,3 +500,255 @@ def transition_task_record(
     task_directory = resolve_task_path(repository_root, task_id)
     _persist_event_and_task(task_directory, task, event)
     return TransitionResult(task=task, event=event)
+
+
+def record_task_event(
+    repository_root: Path,
+    task_id: str,
+    *,
+    event_type: str,
+    actor: str,
+    payload: Mapping[str, object],
+) -> TransitionResult:
+    """Append one closed non-state event without changing task state."""
+    record = load_task_record(repository_root, task_id)
+    event = create_record_event(
+        record.task,
+        event_type=event_type,
+        actor=actor,
+        payload=payload,
+        sequence=len(record.events) + 1,
+    )
+    task = {**record.task, "updated_at": event["occurred_at"]}
+    require_valid_contract("task", task)
+    task_directory = resolve_task_path(repository_root, task_id)
+    _persist_event_and_task(task_directory, task, event)
+    return TransitionResult(task=task, event=event)
+
+
+def _load_classification(repository_root: Path, task_id: str) -> dict[str, Any]:
+    value = read_task_json(
+        repository_root,
+        task_id,
+        "classification.json",
+        contract_name="classification",
+    )
+    if not isinstance(value, dict):
+        raise ContractError(
+            "Task classification must be an object", code="BEGIN_CLASSIFICATION_INVALID"
+        )
+    return value
+
+
+def _load_approvals(repository_root: Path, task_id: str) -> list[dict[str, Any]]:
+    value = read_task_json(repository_root, task_id, "approvals.json")
+    if not isinstance(value, list):
+        raise ContractError("Task approvals must be an array", code="BEGIN_APPROVAL_INVALID")
+    approvals: list[dict[str, Any]] = []
+    for approval in value:
+        if not isinstance(approval, dict):
+            raise ContractError("Task approval must be an object", code="BEGIN_APPROVAL_INVALID")
+        require_valid_contract("approval", approval)
+        approvals.append(approval)
+    return approvals
+
+
+def _require_ready_artifacts(repository_root: Path, task_id: str, record: TaskRecord) -> None:
+    if not any(event.get("event_type") == "spec_frozen" for event in record.events):
+        raise ContractError("Task specification is not frozen", code="BEGIN_SPEC_NOT_FROZEN")
+    classification = _load_classification(repository_root, task_id)
+    entries = classification.get("classifications")
+    if not isinstance(entries, list):
+        raise ContractError(
+            "Task classification is incomplete", code="BEGIN_CLASSIFICATION_INVALID"
+        )
+    task_units = record.task.get("decision_units")
+    if not isinstance(task_units, list):
+        raise ContractError("Task decision units are invalid", code="BEGIN_CLASSIFICATION_INVALID")
+    expected_ids = {
+        unit.get("decision_unit_id") for unit in task_units if isinstance(unit, Mapping)
+    }
+    classified_ids = {
+        entry.get("decision_unit_id") for entry in entries if isinstance(entry, Mapping)
+    }
+    if expected_ids != classified_ids or None in expected_ids:
+        raise ContractError(
+            "Task classification is incomplete", code="BEGIN_CLASSIFICATION_INVALID"
+        )
+    if any(isinstance(entry, Mapping) and entry.get("route") == "BLOCK" for entry in entries):
+        raise ContractError(
+            "Blocked classification cannot begin", code="BEGIN_CLASSIFICATION_BLOCKED"
+        )
+
+    review_entries = [
+        entry for entry in entries if isinstance(entry, Mapping) and entry.get("route") == "REVIEW"
+    ]
+    if not review_entries:
+        return
+    approvals = _load_approvals(repository_root, task_id)
+    spec_path = resolve_task_path(repository_root, task_id, "spec.md")
+    try:
+        spec_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
+    except OSError as error:
+        raise StorageError(
+            "Could not read frozen specification", code="BEGIN_SPEC_READ_FAILED"
+        ) from error
+    subject_commit = record.task.get("subject_commit")
+    for entry in review_entries:
+        decision_unit_id = entry.get("decision_unit_id")
+        policy_sha = entry.get("policy_sha256")
+        if not any(
+            approval.get("approval_type") == "spec"
+            and approval.get("decision_unit_id") == decision_unit_id
+            and approval.get("spec_sha256") == spec_sha
+            and approval.get("policy_sha256") == policy_sha
+            and approval.get("subject_commit") == subject_commit
+            for approval in approvals
+        ):
+            raise ContractError(
+                "Required specification approval is missing or stale",
+                code="BEGIN_APPROVAL_INVALID",
+                details={"decision_unit_id": decision_unit_id},
+            )
+
+
+def _is_governance_path(path: str) -> bool:
+    normalized = path.rstrip("/")
+    return normalized == ".ai/tasks" or normalized.startswith(".ai/tasks/")
+
+
+def _require_git_baseline(repository_root: Path, task_id: str, task: Mapping[str, object]) -> None:
+    context = collect_git_context(repository_root)
+    baseline_paths = task.get("worktree_dirty_paths")
+    expected_paths = set(baseline_paths) if isinstance(baseline_paths, list) else set()
+    current_business_paths = {path for path in context.dirty_paths if not _is_governance_path(path)}
+    if (
+        context.repository_id != task.get("repository_id")
+        or context.head != task.get("subject_commit")
+        or context.branch != task.get("branch")
+        or not current_business_paths.issubset(expected_paths)
+    ):
+        raise ContractError(
+            "Current Git context exceeds the task baseline",
+            code="BEGIN_GIT_CONTEXT_CHANGED",
+            details={"task_id": task_id},
+        )
+
+
+def begin_task(
+    repository_root: Path,
+    task_id: str,
+    *,
+    actor: str,
+    reason: str | None = None,
+) -> TransitionResult:
+    """Begin an implementation or a safe retry after validating prerequisites."""
+    record = load_task_record(repository_root, task_id)
+    state = record.task.get("current_state")
+    if state == "READY_TO_IMPLEMENT":
+        _require_ready_artifacts(repository_root, task_id, record)
+        _require_git_baseline(repository_root, task_id, record.task)
+        return transition_task_record(
+            repository_root,
+            task_id,
+            target_state="IMPLEMENTING",
+            event_type="implementation_started",
+            actor=actor,
+            payload={},
+            satisfied_preconditions={"readiness_satisfied"},
+        )
+    if state == "FAILED":
+        normalized_reason = (reason or "").strip()
+        if not normalized_reason:
+            raise ContractError(
+                "Failed task retry requires a reason", code="BEGIN_RETRY_REASON_REQUIRED"
+            )
+        failure = next(
+            (
+                event
+                for event in reversed(record.events)
+                if event.get("event_type") == "verification_failed"
+            ),
+            None,
+        )
+        payload = failure.get("payload") if failure is not None else None
+        markers = sorted(
+            marker
+            for marker in ESCALATING_FAILURE_MARKERS
+            if isinstance(payload, Mapping) and payload.get(marker)
+        )
+        if markers:
+            raise ContractError(
+                "Failed task must escalate before retry",
+                code="BEGIN_RETRY_REQUIRES_ESCALATION",
+                details={"markers": markers},
+            )
+        _require_git_baseline(repository_root, task_id, record.task)
+        return transition_task_record(
+            repository_root,
+            task_id,
+            target_state="IMPLEMENTING",
+            event_type="implementation_retried",
+            actor=actor,
+            payload={"reason": normalized_reason},
+            satisfied_preconditions={"retry_reason_recorded"},
+        )
+    raise StateTransitionError(
+        "Task cannot begin from its current state",
+        code="STATE_TRANSITION_NOT_ALLOWED",
+        details={"current_state": state},
+    )
+
+
+def _require_commit(repository_root: Path, commit: str) -> None:
+    if COMMIT_PATTERN.fullmatch(commit) is None:
+        raise ContractError("Merge commit is invalid", code="CLOSE_COMMIT_INVALID")
+    try:
+        result = subprocess.run(
+            ["git", "cat-file", "-e", f"{commit}^{{commit}}"],
+            cwd=repository_root,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ContractError(
+            "Could not verify merge commit", code="CLOSE_COMMIT_UNAVAILABLE"
+        ) from error
+    if result.returncode != 0:
+        raise ContractError("Merge commit does not exist", code="CLOSE_COMMIT_UNKNOWN")
+
+
+def close_task(
+    repository_root: Path,
+    task_id: str,
+    *,
+    result: str,
+    merge_commit: str,
+    actor: str,
+) -> TransitionResult:
+    """Record an externally completed merge without performing Git writes."""
+    record = load_task_record(repository_root, task_id)
+    if record.task.get("current_state") != "APPROVED_FOR_MERGE":
+        raise StateTransitionError(
+            "Task cannot close before merge approval",
+            code="STATE_TRANSITION_NOT_ALLOWED",
+            details={"current_state": record.task.get("current_state")},
+        )
+    if result != "merged":
+        raise ContractError("Close result must be merged", code="CLOSE_RESULT_INVALID")
+    context = collect_git_context(repository_root)
+    if context.repository_id != record.task.get("repository_id"):
+        raise ContractError(
+            "Task belongs to a different repository", code="CLOSE_REPOSITORY_MISMATCH"
+        )
+    _require_commit(Path(context.repository_path), merge_commit)
+    return transition_task_record(
+        repository_root,
+        task_id,
+        target_state="MERGED",
+        event_type="merge_recorded",
+        actor=actor,
+        payload={"result": result, "merge_commit": merge_commit},
+        satisfied_preconditions={"merge_commit_verified"},
+    )
