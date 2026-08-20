@@ -13,3 +13,7 @@ Each scenario contains:
 Expected files deliberately exclude timestamps and absolute checkout paths so runtime results can
 be compared deterministically. They do not copy raw task inputs or sensitive values; explanations
 come from the active Policy wording.
+
+The Chapter 7 scenario runner copies one scenario plus the governed Policy, schemas, and templates
+into a fresh temporary Git repository. Runtime tasks and evidence are created only in that isolated
+checkout; the source repository's `.ai/tasks` directory is never used for scenario execution.
