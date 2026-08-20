@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from aiflow import __version__
+from aiflow.approval import approve_task
 from aiflow.ask_service import answer_task
 from aiflow.classification_service import classify_task
 from aiflow.errors import AiflowError
@@ -49,6 +50,12 @@ def build_parser() -> ArgumentParser:
     answer.add_argument("--select", required=True)
     answer.add_argument("--actor", required=True)
     answer.add_argument("--reason", required=True)
+    approve = subparsers.add_parser("approve", help="record a version-bound approval")
+    approve.add_argument("task_id")
+    approve.add_argument("--type", required=True, choices=["spec", "code", "action"])
+    approve.add_argument("--actor", required=True)
+    approve.add_argument("--reason", required=True)
+    approve.add_argument("--action-file", type=Path)
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
@@ -111,6 +118,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(f"{arguments.task_id} {answer_result.task['current_state']}")
             print("ASK option structure was validated; semantic exclusivity was not proven.")
+        elif arguments.command == "approve":
+            approval_result = approve_task(
+                Path.cwd(),
+                arguments.task_id,
+                approval_type=arguments.type,
+                actor=arguments.actor,
+                reason=arguments.reason,
+                action_file=arguments.action_file,
+            )
+            print(f"{arguments.task_id} {approval_result.task['current_state']}")
         elif arguments.command == "status":
             summary = summarize_task(Path.cwd(), arguments.task_id)
             print(summary.to_json() if arguments.format == "json" else summary.to_text())

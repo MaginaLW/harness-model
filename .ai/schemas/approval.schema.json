@@ -26,6 +26,16 @@
     "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "subject_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "approved_at": {"type": "string", "format": "date-time"}
-  }
+    "approved_at": {"type": "string", "format": "date-time"},
+    "evidence_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "action_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "single_use": {"const": true}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"approval_type": {"const": "action"}}, "required": ["approval_type"]},
+      "then": {"required": ["action_sha256", "expires_at", "single_use"]}
+    }
+  ]
 }

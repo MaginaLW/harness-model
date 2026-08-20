@@ -222,7 +222,7 @@ def test_production_git_commands_use_fixed_argument_arrays_and_timeout(
         ("git", "rev-parse", "--show-toplevel"),
         ("git", "rev-parse", "HEAD"),
         ("git", "symbolic-ref", "--short", "-q", "HEAD"),
-        ("git", "status", "--porcelain=v1"),
+        ("git", "status", "--porcelain=v1", "--untracked-files=all"),
     ]
     assert all(kwargs["timeout"] == 10 for _arguments, kwargs in calls)
     assert all(kwargs["cwd"] == repository for _arguments, kwargs in calls)

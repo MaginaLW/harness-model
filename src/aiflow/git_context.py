@@ -174,7 +174,7 @@ def collect_git_context(path: Path) -> GitContext:
     branch = _read_branch(repository_root)
     status = _run_git(
         repository_root,
-        ("status", "--porcelain=v1"),
+        ("status", "--porcelain=v1", "--untracked-files=all"),
         failure_code="GIT_STATUS_UNAVAILABLE",
     )
     dirty_paths = _dirty_paths(status)
