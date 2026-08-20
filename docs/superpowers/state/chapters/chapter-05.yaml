@@ -273,11 +273,18 @@ tasks:
   - id: "5.8"
     title: "完成第五章端到端证据回归"
     plan_anchor: 1259
-    status: "pending"
+    status: "in_progress"
     steps_total: 6
     completed_steps: []
-    in_progress_step: null
-    evidence: []
+    in_progress_step: 1
+    evidence:
+      - id: "EVD-T5.8-START-001"
+        kind: "execution_plan"
+        path: "docs/superpowers/plans/2026-08-21-chapter-05-task-5-8-execution.md"
+        sha256: "6f9b3daa8d216e8580e4a44fb13c2e2eb45d31c31dc45947ace06f5123a1ff24"
+        base_commit: "911b5e94f8fb679dbcbc7c6be6cb459682fc8868"
+        route: "REVIEW"
+        verification: "V1"
     blockers: []
 
 exit_check:
@@ -418,3 +425,9 @@ history:
       completed_steps: [1, 2, 3, 4, 5, 6]
       next_task: "5.8"
     evidence: ["EVD-T5.7-COMPLETE-001"]
+  - id: "EVT-T5.8-START-001"
+    at: "2026-08-20T20:32:47Z"
+    action: "task_started"
+    actor: "/root"
+    reason: "登记 Task 5.8 的 REVIEW + V1 范围，进入第五章端到端证据回归与退出说明。"
+    evidence: ["EVD-T5.8-START-001"]
