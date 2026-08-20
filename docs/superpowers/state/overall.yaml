@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T20:32:47Z"
+updated_at: "2026-08-20T21:12:18Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -20,19 +20,19 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-05"
-  current_task: "5.8"
-  current_step: 1
+  current_chapter: "chapter-06"
+  current_task: "6.1"
+  current_step: null
 
 summary:
   chapters_total: 7
-  chapters_completed: 4
+  chapters_completed: 5
   tasks_total: 44
-  tasks_completed: 30
+  tasks_completed: 31
   steps_total: 243
-  steps_completed: 167
+  steps_completed: 173
   exit_checks_total: 7
-  exit_checks_completed: 4
+  exit_checks_completed: 5
   blockers_total: 0
   evidence_items: 0
 
@@ -73,7 +73,7 @@ chapters:
     number: 5
     title: "验证与证据闭环"
     state_file: "docs/superpowers/state/chapters/chapter-05.yaml"
-    status: "pending"
+    status: "completed"
     dependency: "chapters 01-04 completed"
     tasks_total: 8
     steps_total: 46
@@ -1503,3 +1503,25 @@ history:
     counters_changed: false
     evidence:
       - "docs/superpowers/state/chapters/chapter-05.yaml"
+  - id: "EVT-OVERALL-T5.8-COMPLETE-001"
+    at: "2026-08-20T21:12:18Z"
+    action: "task_completed_and_chapter_exited_summary"
+    actor: "/root"
+    reason: "Task 5.8 真实端到端证据回归与双重复核通过，Chapter 5 退出检查完成。"
+    chapter_event: "EVT-T5.8-COMPLETE-001"
+    chapter_evidence: "EVD-T5.8-COMPLETE-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_05_status: "completed"
+      task_5_8_status: "completed"
+      current_chapter: "chapter-06"
+      current_task: "6.1"
+      current_step: null
+      chapters_completed: 5
+      tasks_completed: 31
+      steps_completed: 173
+      exit_checks_completed: 5
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-05.yaml"
+      - "docs/implementation/chapter-05-verification-evidence.md"
+      - "tests/integration/test_verification_evidence_flow.py"
