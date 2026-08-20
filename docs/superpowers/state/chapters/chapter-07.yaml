@@ -63,11 +63,28 @@ tasks:
   - id: "7.2"
     title: "跑通四类黄金端到端场景"
     plan_anchor: 1569
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T7.2-COMPLETE-001"
+        kind: "golden_e2e_completion"
+        completed_at: "2026-08-20T23:39:52Z"
+        subject_commit: "a499b838f2cdf36738f97ac4af0e1236d096ba26"
+        artifacts:
+          - "tests/e2e/test_auto_scenario.py@sha256:5a1bcd03bafc05a9be2bb7603375b2cc2abc3ca11e1700225c5b4254ea91dc25"
+          - "tests/e2e/test_ask_scenario.py@sha256:e5efc87662171a27ca8c526bfb5009a4b1e689c43473cffd771543398ff90130"
+          - "tests/e2e/test_review_scenario.py@sha256:bdc98d76acf253cc7c3215627a6d16bd2de788ddb74a5124e0fc6b4184f024b8"
+          - "tests/e2e/test_block_scenario.py@sha256:178f6e011743233c3c49bd570b2e97afebaed809a06f2032a264b077e48b5bb8"
+          - "src/aiflow/escalation.py@sha256:d0e3cc258892007350979d8e09f965015a3aa310f6d80f78ba1ae503136e2f2e"
+        checks:
+          - "pytest tests/e2e: 4 passed"
+          - "pytest golden/escalation regression: 53 passed"
+          - "pytest full suite: 575 passed, 3 skipped (Windows symlink privilege unavailable)"
+          - "ruff check and format: passed"
+          - "mypy src tools: passed"
+          - "git diff --check: passed"
     blockers: []
   - id: "7.3"
     title: "准备真实仓库试点与执行授权点"
@@ -158,3 +175,12 @@ history:
       completed_steps: [2, 3, 4, 5]
       next_task: "7.2"
     evidence: ["EVD-T7.1-COMPLETE-001"]
+  - id: "EVT-T7.2-COMPLETE-001"
+    at: "2026-08-20T23:39:52Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "AUTO、ASK、REVIEW、BLOCK 四类黄金路径已通过真实 CLI 状态流、完整 V 类别证据和 Gate/恢复断言；首次直接 BLOCK 的解除绑定缺口已修复。"
+    transition:
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "7.3"
+    evidence: ["EVD-T7.2-COMPLETE-001"]

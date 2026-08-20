@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T23:28:49Z"
+updated_at: "2026-08-20T23:39:52Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-07"
-  current_task: "7.2"
+  current_task: "7.3"
   current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 6
   tasks_total: 44
-  tasks_completed: 38
+  tasks_completed: 39
   steps_total: 243
-  steps_completed: 209
+  steps_completed: 214
   exit_checks_total: 7
   exit_checks_completed: 6
   blockers_total: 0
@@ -1751,3 +1751,22 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-07.yaml"
       - "docs/superpowers/plans/2026-08-21-chapter-07-task-7-1-execution.md"
+  - id: "EVT-OVERALL-T7.2-COMPLETE-001"
+    at: "2026-08-20T23:39:52Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 7.2 四类黄金 E2E 治理路径和首次 BLOCK 恢复通过全量回归。"
+    chapter_event: "EVT-T7.2-COMPLETE-001"
+    chapter_evidence: "EVD-T7.2-COMPLETE-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_07_status: "in_progress"
+      task_7_2_status: "completed"
+      current_chapter: "chapter-07"
+      current_task: "7.3"
+      current_step: null
+      tasks_completed: 39
+      steps_completed: 214
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-07.yaml"
+      - "tests/e2e"
