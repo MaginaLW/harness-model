@@ -19,10 +19,10 @@ tasks:
   - id: "3.1"
     title: "实现 Policy 加载、校验和稳定摘要"
     plan_anchor: 534
-    status: "in_progress"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
     evidence:
       - id: "EVD-T3.1-START-001"
         kind: "execution_plan"
@@ -31,6 +31,23 @@ tasks:
         base_commit: "05da404dbfd2e97dd4718f59bb002528b4af3e4b"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T3.1-COMPLETE-001"
+        kind: "verification_bundle"
+        completed_at: "2026-08-20T14:52:32Z"
+        subject_commit: "e27efaad2c33dde2d1a0343c37650575a2178394"
+        artifacts:
+          - "src/aiflow/policy.py@sha256:72bb5d772b5a5baefc1624bf95f5a0b78105d17e2054309901bf79fe0945fc21"
+          - "tests/unit/test_policy.py@sha256:b9236d722a38332372fc31137e01d47eb0678dfe2eef50316a014bb327307b40"
+          - "tests/fixtures/policy/invalid/cases.json@sha256:973672ea738f4b14f4f09247cb8f06315facfb62e6de40bbd6eb6d0dff95105b"
+        checks:
+          - "pytest tests/unit/test_policy.py: 11 passed"
+          - "pytest: 196 passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 3.1 五步全部覆盖）"
+          quality: "passed（四文件固定、跨文件约束、规范 JSON 语义摘要）"
     blockers: []
   - id: "3.2"
     title: "实现决策单元输入与受限谓词"
@@ -103,3 +120,14 @@ history:
     actor: "/root"
     reason: "登记 Task 3.1 的精简 REVIEW + V1 范围，进入 Policy 加载与摘要实现。"
     evidence: ["EVD-T3.1-START-001"]
+  - id: "EVT-T3.1-COMPLETE-001"
+    at: "2026-08-20T14:52:32Z"
+    action: "task_completed"
+    actor: "/root"
+    decision: "DEC-T3.1-EXECUTION-001"
+    reason: "四文件 Policy 加载、Schema/跨文件校验和稳定摘要完成，并通过 V1 与内联双复核。"
+    transition:
+      task_3_1: "in_progress -> completed"
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "3.2"
+    evidence: ["EVD-T3.1-COMPLETE-001"]
