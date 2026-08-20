@@ -336,6 +336,7 @@ def verify_task(
     *,
     actor: str | None = None,
     check_ids: Sequence[str] = (),
+    provisional: bool = False,
     run_id: str | None = None,
     ci: bool = False,
     ci_run_dir: Path | None = None,
@@ -371,7 +372,7 @@ def verify_task(
         assessment = evaluate_and_sync_verification_subject(
             root,
             task_id,
-            mode="provisional" if check_ids else "final",
+            mode="provisional" if check_ids or provisional else "final",
             actor=cast(str, actor),
         )
         if not check_ids and not assessment.gate_eligible:
@@ -399,7 +400,7 @@ def verify_task(
         _start_local_verification(root, task_id, record, cast(str, actor))
     results = _execute_plan(root, plan)
     versions = {check.check_id: version_probe(check) for check in plan.checks}
-    provisional = bool(check_ids)
+    provisional = bool(check_ids) or provisional
     reproduce_command = (
         (
             "python",

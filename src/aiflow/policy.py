@@ -31,6 +31,34 @@ class PolicyBundle:
     sha256: str
 
 
+@dataclass(frozen=True)
+class ActionPermission:
+    """One Policy-derived automatic action permission decision."""
+
+    action: str
+    allowed_automatically: bool
+    required_approval: str | None = None
+    rule_id: str | None = None
+
+
+def evaluate_action_permission(bundle: PolicyBundle, action: str) -> ActionPermission:
+    """Evaluate one normalized action without performing it."""
+    normalized = action.strip().casefold()
+    if not normalized:
+        raise PolicyError("Action category is required", code="POLICY_ACTION_INVALID")
+    rules = bundle.documents["permissions.yaml"]["rules"]
+    matching = [rule for rule in rules if str(rule["action"]).casefold() == normalized]
+    if not matching:
+        return ActionPermission(normalized, True)
+    rule = matching[0]
+    return ActionPermission(
+        normalized,
+        rule["effect"] != "deny_automatic",
+        str(rule["required_approval"]),
+        str(rule["id"]),
+    )
+
+
 def _is_within(path: Path, root: Path) -> bool:
     try:
         path.relative_to(root)
