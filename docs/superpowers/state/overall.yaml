@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T20:10:23Z"
+updated_at: "2026-08-20T20:11:29Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-05"
   current_task: "5.7"
-  current_step: null
+  current_step: 1
 
 summary:
   chapters_total: 7
@@ -139,6 +139,18 @@ future_phases:
         - "phase-04 implementation REVIEW scope decision not yet created"
 
 decisions:
+  - id: "DEC-T5.7-EXECUTION-001"
+    status: "recorded"
+    decided_at: "2026-08-20T20:11:29Z"
+    actor: "/root"
+    subject: "执行 Task 5.7 只读 Gate"
+    decision: "按 REVIEW + V1 流程以统一 freshness、批准和 Git attestation 事实实现确定性 Gate。"
+    rationale: "最终合并裁决必须可区分输入损坏与门禁不满足，并保持完全只读。"
+    consequence: "Task 5.7 进入 in_progress；Gate 不修改任何治理记录或执行外部动作。"
+    base_commit: "988f667096349fc8dca0a2cc81cf0fd549a29361"
+    subject_commit: null
+    evidence:
+      - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-7-execution.md"
   - id: "DEC-T5.6-EXECUTION-001"
     status: "recorded"
     decided_at: "2026-08-20T19:50:33Z"
@@ -1445,3 +1457,16 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-05.yaml"
       - "docs/superpowers/plans/2026-08-21-chapter-05-task-5-6-execution.md"
+  - id: "EVT-OVERALL-T5.7-START-001"
+    at: "2026-08-20T20:11:29Z"
+    action: "task_started_summary"
+    actor: "/root"
+    reason: "Chapter 5 已登记 Task 5.7 的 REVIEW + V1 范围并进入 Step 1。"
+    chapter_event: "EVT-T5.7-START-001"
+    chapter_evidence: "EVD-T5.7-START-001"
+    current_chapter: "chapter-05"
+    current_task: "5.7"
+    current_step: 1
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-05.yaml"
