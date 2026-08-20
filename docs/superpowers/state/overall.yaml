@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T14:39:24Z"
+updated_at: "2026-08-20T14:45:00Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -20,19 +20,19 @@ tracking:
   executable_policy_available: false
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-02"
-  current_task: "2.6"
-  current_step: 1
+  current_chapter: "chapter-03"
+  current_task: "3.1"
+  current_step: null
 
 summary:
   chapters_total: 7
-  chapters_completed: 1
+  chapters_completed: 2
   tasks_total: 44
-  tasks_completed: 10
+  tasks_completed: 11
   steps_total: 243
-  steps_completed: 55
+  steps_completed: 61
   exit_checks_total: 7
-  exit_checks_completed: 1
+  exit_checks_completed: 2
   blockers_total: 0
   evidence_items: 0
 
@@ -49,7 +49,7 @@ chapters:
     number: 2
     title: "任务记录与状态核心"
     state_file: "docs/superpowers/state/chapters/chapter-02.yaml"
-    status: "in_progress"
+    status: "completed"
     dependency: "chapter-01 completed"
     tasks_total: 6
     steps_total: 33
@@ -148,7 +148,7 @@ decisions:
     rationale: "用户要求继续下一部分；跨章必须满足第二章退出条件。"
     consequence: "Task 2.6 进入 in_progress，完成前章节和累计计数不变。"
     base_commit: "0891dccfadebd3b7696b948382c01c0c8cdc7685"
-    subject_commit: "N/A（完成验证后更新为本地提交）"
+    subject_commit: "17eb70c09b22b1ce8a44e585d9d7c48c837df90f"
     evidence:
       - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-6-execution.md"
       - "docs/superpowers/state/chapters/chapter-02.yaml#EVD-T2.6-START-001"
@@ -738,3 +738,26 @@ history:
     counters_changed: false
     evidence:
       - "docs/superpowers/state/chapters/chapter-02.yaml"
+  - id: "EVT-OVERALL-CHAPTER-02-COMPLETE-001"
+    at: "2026-08-20T14:45:00Z"
+    action: "chapter_completed_summary"
+    actor: "/root"
+    reason: "Task 2.6、Chapter 2 退出检查、需求复核和质量复核全部通过。"
+    chapter_event: "EVT-T2.6-CHAPTER-EXIT-001"
+    chapter_evidence: "EVD-T2.6-CHAPTER-EXIT-001"
+    decision: "DEC-T2.6-EXECUTION-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_02_status: "completed"
+      task_2_6_status: "completed"
+      current_chapter: "chapter-03"
+      current_task: "3.1"
+      current_step: null
+      chapters_completed: 2
+      tasks_completed: 11
+      steps_completed: 61
+      exit_checks_completed: 2
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-02.yaml"
+      - "docs/implementation/chapter-02-task-state.md"
+      - "docs/superpowers/plans/2026-08-20-chapter-02-task-2-6-execution.md"

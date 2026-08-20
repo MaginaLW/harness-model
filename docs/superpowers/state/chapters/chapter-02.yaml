@@ -4,7 +4,7 @@ chapter:
   id: "chapter-02"
   number: 2
   title: "任务记录与状态核心"
-  status: "in_progress"
+  status: "completed"
   plan_lines: "301-532"
   dependency: "chapter-01 completed"
   tasks_total: 6
@@ -196,10 +196,10 @@ tasks:
   - id: "2.6"
     title: "实现 `status` 和第二章退出检查"
     plan_anchor: 488
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: 1
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T2.6-START-001"
         kind: "execution_plan"
@@ -209,20 +209,40 @@ tasks:
         prerequisite_evidence: "EVD-T2.5-COMPLETE-001"
         route: "REVIEW"
         verification: "V1"
+      - id: "EVD-T2.6-CHAPTER-EXIT-001"
+        kind: "chapter_exit_bundle"
+        completed_at: "2026-08-20T14:45:00Z"
+        subject_commit: "17eb70c09b22b1ce8a44e585d9d7c48c837df90f"
+        artifacts:
+          - "src/aiflow/status_service.py@sha256:a6713112e235f3dd5f3de6f6c97b3d5e62cadd1def654e3a0b9bc7dc09cfb69d"
+          - "src/aiflow/task_service.py@sha256:f34c6e4478eb231cb31ab8a3f0c96316ccdf5e6e50402efa6b81e6e9ba80d5c9"
+          - "src/aiflow/cli.py@sha256:1a5d27acca1c427b549ce166146340df3f7a6db58ecef7dd846d3f5ddd4b7ed9"
+          - "tests/integration/test_status_command.py@sha256:9b9d05905d0e5e65d5577f2e6a3700ea72f93bb4cba6677b9a86f233ccc680eb"
+          - "docs/implementation/chapter-02-task-state.md@sha256:bb2ebe4bc4fd88ab2e738ec37ba9febb4c7d9b746eb598916c3bc608349d4858"
+        checks:
+          - "Chapter 2 unit set: 78 passed"
+          - "Chapter 2 integration set: 38 passed"
+          - "full pytest: 185 passed"
+          - "ruff check and format: passed"
+          - "mypy src: passed"
+          - "git diff --check: passed"
+        reviews:
+          requirements_conformance: "passed（Task 2.1—2.6 与设计第 7 节逐项覆盖）"
+          quality: "passed（路径不逃逸、状态表单一来源、status 严格只读）"
     blockers: []
 
 exit_check:
-  status: "pending"
+  status: "completed"
   required_task: "2.6"
   criteria:
     - "start、begin、status、close 的状态边界和重试规则测试通过"
     - "原子存储、事件重放、Git 上下文和任务 ID 验证通过"
     - "章节累计回归、diff 检查、需求复核和质量复核均有证据"
-  evidence: []
+  evidence: ["EVD-T2.6-CHAPTER-EXIT-001"]
 
 review:
-  requirements_conformance: "pending"
-  quality_review: "pending"
+  requirements_conformance: "passed"
+  quality_review: "passed"
 
 history:
   - at: "2026-08-02T14:03:50Z"
@@ -321,3 +341,17 @@ history:
     actor: "/root"
     reason: "登记 Task 2.6 与 Chapter 2 退出的精简 REVIEW + V1 范围。"
     evidence: ["EVD-T2.6-START-001"]
+  - id: "EVT-T2.6-CHAPTER-EXIT-001"
+    at: "2026-08-20T14:45:00Z"
+    action: "task_and_chapter_completed"
+    actor: "/root"
+    decision: "DEC-T2.6-EXECUTION-001"
+    reason: "status、章节说明、累计退出命令和 Chapter 2 双复核全部通过。"
+    transition:
+      task_2_6: "in_progress -> completed"
+      chapter_02: "in_progress -> completed"
+      exit_check: "pending -> completed"
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_chapter: "chapter-03"
+      next_task: "3.1"
+    evidence: ["EVD-T2.6-CHAPTER-EXIT-001"]
