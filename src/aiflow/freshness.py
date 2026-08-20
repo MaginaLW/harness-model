@@ -41,20 +41,20 @@ def current_classification_input_digest(
     classification: Mapping[str, object],
     events: Sequence[Mapping[str, object]],
 ) -> tuple[str, bool]:
-    """Preserve classification facts across one audited subject synchronization."""
+    """Preserve classification facts across an ordered audited subject synchronization chain."""
     current_subject = task.get("subject_commit")
     classified_subject = classification.get("subject_commit")
-
-    def matches(event: Mapping[str, object]) -> bool:
+    cursor = classified_subject
+    for event in events:
         payload = event.get("payload")
-        return (
+        if (
             event.get("event_type") == "subject_commit_synchronized"
             and isinstance(payload, Mapping)
-            and payload.get("old_subject_commit") == classified_subject
-            and payload.get("new_subject_commit") == current_subject
-        )
-
-    synchronized = current_subject != classified_subject and any(matches(event) for event in events)
+            and payload.get("old_subject_commit") == cursor
+            and isinstance(payload.get("new_subject_commit"), str)
+        ):
+            cursor = payload["new_subject_commit"]
+    synchronized = current_subject != classified_subject and cursor == current_subject
     digest_task = {**task, "subject_commit": classified_subject} if synchronized else dict(task)
     return classification_input_digest(digest_task, units), synchronized
 

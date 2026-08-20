@@ -11,7 +11,7 @@ from typing import Any
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.errors import AiflowError, ContractError, StateTransitionError
-from aiflow.git_context import collect_git_context
+from aiflow.git_context import collect_git_context, commits_are_ancestral
 from aiflow.policy import load_policy_bundle
 from aiflow.routing import ROUTE_ORDER, route_task
 from aiflow.scope import matches_scope, normalize_repository_path
@@ -42,14 +42,23 @@ def _scope_allowed(impact: object, allowed: object) -> bool:
         return False
 
 
-def _require_baseline(root: Path, task: Mapping[str, object]) -> None:
+def _require_baseline(root: Path, task: Mapping[str, object], *, recovery: bool = False) -> None:
     context = collect_git_context(root)
-    if (
+    common_mismatch = (
         context.repository_id != task.get("repository_id")
         or context.branch != task.get("branch")
-        or context.head != task.get("base_commit")
         or context.head != task.get("subject_commit")
-    ):
+    )
+    base = task.get("base_commit")
+    subject = task.get("subject_commit")
+    ancestry_invalid = not (
+        isinstance(base, str)
+        and isinstance(subject, str)
+        and commits_are_ancestral(
+            root, base_commit=base, subject_commit=subject, head_commit=context.head
+        )
+    )
+    if common_mismatch or ancestry_invalid or (not recovery and context.head != base):
         raise ContractError(
             "Classification Git baseline does not match", code="CLASSIFICATION_GIT_MISMATCH"
         )
@@ -414,7 +423,7 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
         return _resume_classification(repository_root, task_id, pending)
     record = read_task_record_strict(repository_root, task_id)
     state = record.task.get("current_state")
-    _require_baseline(repository_root, record.task)
+    _require_baseline(repository_root, record.task, recovery=state in {"BLOCKED", "ESCALATED"})
     units = parse_decision_units(record.task)
     if not _scope_allowed(
         [path for unit in units for path in unit["impact_scope"]], record.task.get("allowed_scope")

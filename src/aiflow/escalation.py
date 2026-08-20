@@ -244,6 +244,7 @@ def escalate_task(
         "VERIFIED",
         "FAILED",
         "WAITING_FOR_FINAL_REVIEW",
+        "APPROVED_FOR_MERGE",
     }
     if record.task.get("current_state") not in allowed_states:
         raise _invalid("Task cannot escalate from its current state", "ESCALATION_STATE_INVALID")

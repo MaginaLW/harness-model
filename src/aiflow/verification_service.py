@@ -238,15 +238,16 @@ def _execute_plan(
     repository_root: Path,
     plan: VerificationPlan,
 ) -> list[ProcessResult]:
-    if plan.blocking_reasons:
-        raise ContractError(
-            "Verification plan is blocked",
-            code="VERIFY_PLAN_BLOCKED",
-            details={"reasons": list(plan.blocking_reasons)},
-        )
+    missing_ids = {
+        reason.rsplit(":", 1)[-1]
+        for reason in plan.blocking_reasons
+        if reason.startswith("VERIFICATION_TOOL_MISSING:")
+    }
     by_id = {check.check_id: check for check in plan.checks}
     results: list[ProcessResult] = []
     for sequence, execution in enumerate(plan.executions, start=1):
+        if any(identifier in missing_ids for identifier in execution.check_ids):
+            continue
         results.extend(
             run_execution(
                 execution,
@@ -399,6 +400,31 @@ def verify_task(
     results = _execute_plan(root, plan)
     versions = {check.check_id: version_probe(check) for check in plan.checks}
     provisional = bool(check_ids)
+    reproduce_command = (
+        (
+            "python",
+            "-m",
+            "aiflow",
+            "verify",
+            task_id,
+            "--ci",
+            "--ci-run-dir",
+            str(run_directory),
+            "--output",
+            str(evidence_path),
+        )
+        if ci
+        else (
+            "python",
+            "-m",
+            "aiflow",
+            "verify",
+            task_id,
+            "--actor",
+            cast(str, actor),
+            *(argument for check_id in check_ids for argument in ("--check", check_id)),
+        )
+    )
     facts = EvidenceFacts(
         task_id,
         tuple(str(unit["decision_unit_id"]) for unit in record.task["decision_units"]),
@@ -414,14 +440,7 @@ def verify_task(
         identifier,
         plan.run_dir,
         _now(),
-        (
-            "python",
-            "-m",
-            "aiflow",
-            "verify",
-            task_id,
-            *(argument for check_id in check_ids for argument in ("--check", check_id)),
-        ),
+        reproduce_command,
         assessment.attestation_head if ci else None,
         (assessment.attestation_scope.passed and assessment.worktree_scope.passed) if ci else None,
     )
@@ -430,11 +449,15 @@ def verify_task(
         plan.checks,
         results,
         tool_versions=versions,
-        unverified_scenarios=plan.unverified_check_ids,
+        unverified_scenarios=(*plan.unverified_check_ids, *plan.blocking_reasons),
         provisional=provisional,
     )
     try:
-        save_evidence(evidence_path, evidence)
+        save_evidence(
+            evidence_path,
+            evidence,
+            archive_path=plan.run_dir / "evidence.json" if not ci else None,
+        )
     except AiflowError:
         if not ci:
             transition_task_record(

@@ -114,13 +114,14 @@ def build_evidence(
         result = by_id.get(check.check_id)
         reason_code: str | None
         if result is None:
+            tool_missing = f"VERIFICATION_TOOL_MISSING:{check.check_id}" in unverified_scenarios
             status = "unverified"
             exit_code: int | None = None
             timed_out = False
             duration_ms = 0
             stdout_ref = stderr_ref = None
-            summary = "result unavailable"
-            reason_code = "VERIFICATION_NO_RESULT"
+            summary = "required tool unavailable" if tool_missing else "result unavailable"
+            reason_code = "VERIFICATION_TOOL_MISSING" if tool_missing else "VERIFICATION_NO_RESULT"
             unverified.add(f"check:{check.check_id}:result-unavailable")
         else:
             status = "passed"
@@ -204,7 +205,11 @@ def build_evidence(
     return evidence
 
 
-def save_evidence(path: Path, evidence: Mapping[str, object]) -> None:
-    """Validate then atomically replace the evidence document, including failures."""
+def save_evidence(
+    path: Path, evidence: Mapping[str, object], *, archive_path: Path | None = None
+) -> None:
+    """Persist an optional per-run copy, then atomically replace current evidence."""
     require_valid_contract("evidence", evidence)
+    if archive_path is not None:
+        atomic_write_json(archive_path, evidence)
     atomic_write_json(path, evidence)

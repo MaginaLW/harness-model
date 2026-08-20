@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import shutil
+import sys
 import tempfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -205,10 +206,13 @@ def _tool_available(argv: tuple[str, ...]) -> bool:
             return find_spec(argv[2]) is not None
         except (ImportError, ValueError):
             return False
+    if "/" in program or "\\" in program:
+        return Path(program).is_file()
+    adjacent = Path(sys.executable).resolve().parent / program
     return (
-        Path(program).is_file()
-        if ("/" in program or "\\" in program)
-        else shutil.which(program) is not None
+        shutil.which(program) is not None
+        or adjacent.is_file()
+        or adjacent.with_suffix(".exe").is_file()
     )
 
 
@@ -453,6 +457,8 @@ def parse_check_result(
     if check.result_parser == "coverage_xml" and not coverage_xml_exists:
         return ParsedCheckResult("failed", "VERIFICATION_COVERAGE_XML_MISSING")
     if check.result_parser == "diff_cover":
+        if "No lines with coverage information in this diff." in output:
+            return ParsedCheckResult("passed")
         match = re.search(r"(?:TOTAL|coverage)[^0-9]*([0-9]+(?:\.[0-9]+)?)%", output, re.I)
         if match is None:
             return ParsedCheckResult("failed", "VERIFICATION_DIFF_COVERAGE_UNPARSEABLE")

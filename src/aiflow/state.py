@@ -107,6 +107,8 @@ TRANSITIONS: Mapping[tuple[str, str], TransitionRule] = MappingProxyType(
         ("APPROVED_FOR_MERGE", "VERIFYING"): _rule(
             "verification_restarted", "reverification_requested"
         ),
+        ("APPROVED_FOR_MERGE", "ESCALATED"): _rule("task_escalated", "escalation_recorded"),
+        ("APPROVED_FOR_MERGE", "BLOCKED"): _rule("task_blocked", "blocking_condition_recorded"),
         ("APPROVED_FOR_MERGE", "MERGED"): _rule("merge_recorded", "merge_commit_verified"),
         ("ESCALATED", "CLASSIFIED"): _rule("escalation_resolved", "resolution_recorded"),
         ("BLOCKED", "CLASSIFIED"): _rule("block_resolved", "resolution_recorded"),

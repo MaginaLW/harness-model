@@ -15,7 +15,15 @@ from aiflow.errors import AiflowError
 from aiflow.escalation import ESCALATION_REASON_CODES, escalate_task, record_resolution
 from aiflow.gate import evaluate_gate
 from aiflow.status_service import summarize_task
-from aiflow.task_service import begin_task, close_task, freeze_task, recover_task, start_task
+from aiflow.task_service import (
+    begin_task,
+    close_task,
+    evaluate_and_sync_verification_subject,
+    freeze_task,
+    recover_task,
+    start_task,
+)
+from aiflow.verification_checks import validate_task_artifacts, validate_task_scope
 from aiflow.verification_service import verify_task
 
 DESCRIPTION = "Auditable AI code collaboration CLI"
@@ -88,6 +96,13 @@ def build_parser() -> ArgumentParser:
     gate.add_argument("task_id")
     gate.add_argument("--evidence", type=Path)
     gate.add_argument("--format", choices=["text", "json"], default="text")
+    validate = subparsers.add_parser("validate", help="validate governed task artifacts")
+    validate.add_argument("task_id")
+    scope = subparsers.add_parser("scope", help="validate the final task Git scope")
+    scope.add_argument("task_id")
+    sync = subparsers.add_parser("sync", help="synchronize an explicitly scoped task subject")
+    sync.add_argument("task_id")
+    sync.add_argument("--actor", required=True)
     return parser
 
 
@@ -200,6 +215,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(decision.to_json() if arguments.format == "json" else decision.to_text())
             return 0 if decision.passed else 2
+        elif arguments.command == "validate":
+            validate_task_artifacts(Path.cwd(), arguments.task_id)
+            print(f"{arguments.task_id} valid")
+        elif arguments.command == "scope":
+            validate_task_scope(Path.cwd(), arguments.task_id)
+            print(f"{arguments.task_id} scope-valid")
+        elif arguments.command == "sync":
+            assessment = evaluate_and_sync_verification_subject(
+                Path.cwd(), arguments.task_id, mode="final", actor=arguments.actor
+            )
+            print(f"{arguments.task_id} {assessment.subject_commit}")
     except AiflowError as error:
         print(error.message, file=sys.stderr)
         return 1

@@ -38,6 +38,8 @@
     {"from": "WAITING_FOR_FINAL_REVIEW", "to": "BLOCKED", "event_type": "task_blocked", "preconditions": ["blocking_condition_recorded"]},
     {"from": "APPROVED_FOR_MERGE", "to": "MERGED", "event_type": "merge_recorded", "preconditions": ["merge_commit_verified"]},
     {"from": "APPROVED_FOR_MERGE", "to": "VERIFYING", "event_type": "verification_restarted", "preconditions": ["reverification_requested"]},
+    {"from": "APPROVED_FOR_MERGE", "to": "ESCALATED", "event_type": "task_escalated", "preconditions": ["escalation_recorded"]},
+    {"from": "APPROVED_FOR_MERGE", "to": "BLOCKED", "event_type": "task_blocked", "preconditions": ["blocking_condition_recorded"]},
     {"from": "ESCALATED", "to": "CLASSIFIED", "event_type": "escalation_resolved", "preconditions": ["resolution_recorded"]},
     {"from": "BLOCKED", "to": "CLASSIFIED", "event_type": "block_resolved", "preconditions": ["resolution_recorded"]}
   ],

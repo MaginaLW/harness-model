@@ -7,6 +7,7 @@ import re
 import shutil
 import signal
 import subprocess
+import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -74,7 +75,13 @@ def _validate_run_dir(run_dir: Path, allowed_run_root: Path) -> Path:
 def _environment(check: VerificationCheck, run_dir: Path) -> dict[str, str]:
     if set(check.environment) - {"COVERAGE_FILE"}:
         raise ContractError("Verification environment is not allowed", code="RUNNER_ENV_INVALID")
-    environment = {"PATH": os.defpath}
+    path_entries = [entry for entry in os.defpath.split(os.pathsep) if entry]
+    git_program = shutil.which("git")
+    if git_program is not None:
+        git_directory = str(Path(git_program).resolve().parent)
+        if git_directory not in path_entries:
+            path_entries.append(git_directory)
+    environment = {"PATH": os.pathsep.join(path_entries)}
     if os.name == "nt" and os.environ.get("SystemRoot"):
         environment["SystemRoot"] = os.environ["SystemRoot"]
     coverage = check.environment.get("COVERAGE_FILE")
@@ -118,6 +125,12 @@ def _resolved_argv(argv: tuple[str, ...]) -> tuple[str, ...]:
     if Path(argv[0]).is_absolute():
         return argv
     program = shutil.which(argv[0])
+    if program is None:
+        adjacent = Path(sys.executable).resolve().parent / argv[0]
+        for candidate in (adjacent, adjacent.with_suffix(".exe")):
+            if candidate.is_file():
+                program = str(candidate)
+                break
     return (program, *argv[1:]) if program is not None else argv
 
 

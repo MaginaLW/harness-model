@@ -358,6 +358,15 @@ def test_diff_coverage_threshold_and_missing_xml_are_deterministic(tmp_path: Pat
         ).conclusion
         == "passed"
     )
+    assert (
+        parse_check_result(
+            check,
+            returncode=0,
+            output="No lines with coverage information in this diff.",
+            coverage_xml_exists=True,
+        ).conclusion
+        == "passed"
+    )
     coverage = next(
         check for check in plan("V1", tmp_path).checks if check.check_id == "coverage_xml"
     )

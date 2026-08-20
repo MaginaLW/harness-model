@@ -11,10 +11,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
-from aiflow.classification_service import _stable_input
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import ContractError, StateTransitionError, StorageError
+from aiflow.freshness import current_classification_input_digest
 from aiflow.git_context import collect_git_context
 from aiflow.policy import load_policy_bundle
 from aiflow.review import validate_review_package
@@ -460,11 +460,17 @@ def approve_task(
         raise ContractError(
             "Approval classification is invalid", code="APPROVAL_CLASSIFICATION_INVALID"
         )
+    units = parse_decision_units(record.task)
+    input_sha256, synchronized = current_classification_input_digest(
+        record.task, units, classification, record.events
+    )
     if (
-        classification.get("classification_input_sha256")
-        != _stable_input(record.task, parse_decision_units(record.task))
+        classification.get("classification_input_sha256") != input_sha256
         or classification.get("policy_sha256") != policy.sha256
-        or classification.get("subject_commit") != record.task.get("subject_commit")
+        or (
+            classification.get("subject_commit") != record.task.get("subject_commit")
+            and not synchronized
+        )
     ):
         raise ContractError(
             "Approval classification is stale", code="APPROVAL_CLASSIFICATION_STALE"
