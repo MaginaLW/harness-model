@@ -316,21 +316,18 @@ def record_resolution(
         )
     bundle = load_policy_bundle(repository_root)
     anticipated_input = classification_input_digest(record.task, parse_decision_units(record.task))
+    previous_input = escalation_payload.get("previous_classification_input_sha256")
+    if not isinstance(previous_input, str):
+        previous_input = classification.get("classification_input_sha256")
+    previous_policy = escalation_payload.get("previous_policy_sha256")
+    if not isinstance(previous_policy, str):
+        previous_policy = classification.get("policy_sha256")
     payload = dict(
         prepare_resolution(
             reason=reason,
             evidence_refs=normalized_refs,
-            previous_classification_input_sha256=str(
-                escalation_payload.get(
-                    "previous_classification_input_sha256",
-                    classification.get("classification_input_sha256"),
-                )
-            ),
-            previous_policy_sha256=str(
-                escalation_payload.get(
-                    "previous_policy_sha256", classification.get("policy_sha256")
-                )
-            ),
+            previous_classification_input_sha256=str(previous_input),
+            previous_policy_sha256=str(previous_policy),
             manual_authorization=authorize_downgrade,
             authorized_by=actor if authorize_downgrade else None,
             authorized_classification_input_sha256=anticipated_input
