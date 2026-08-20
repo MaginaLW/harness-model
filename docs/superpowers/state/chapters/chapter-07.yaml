@@ -115,11 +115,24 @@ tasks:
   - id: "7.4"
     title: "在本仓库执行 AUTO、ASK、REVIEW 和 BLOCK 试点"
     plan_anchor: 1643
-    status: "pending"
+    status: "in_progress"
     steps_total: 6
-    completed_steps: []
-    in_progress_step: null
-    evidence: []
+    completed_steps: [1]
+    in_progress_step: 2
+    evidence:
+      - id: "EVD-T7.4-AUTO-001"
+        kind: "real_pilot"
+        completed_at: "2026-08-20T23:48:32Z"
+        pilot: "PILOT-AUTO"
+        task_id: "TASK-0001"
+        branch: "pilot/auto-doc"
+        pilot_base: "01e0e282afaead31b9653391584267f20ccbf13a"
+        subject_commit: "2b1900a0207d106147d21e0d9c7e85a8d450fa4b"
+        attestation_head: "7f73a6de232fb362ece6021a868cf1d3013dbe0f"
+        route: "AUTO"
+        verification: "V0"
+        result: "CI passed; Gate passed; no approvals"
+        artifact_path: "../harness-model-pilot-artifacts/PILOT-AUTO/"
     blockers: []
   - id: "7.5"
     title: "建立阶段一验收矩阵"
@@ -210,3 +223,12 @@ history:
       completed_steps: [1, 2, 3, 4, 5, 6]
       next_task: "7.4"
     evidence: ["EVD-T7.3-COMPLETE-001"]
+  - id: "EVT-T7.4-AUTO-COMPLETE-001"
+    at: "2026-08-20T23:48:32Z"
+    action: "task_step_completed"
+    actor: "/root"
+    reason: "AUTO 真实试点完成业务 commit、治理 attestation、CI V0 和 Gate；ASK 已停在用户选择点，REVIEW 已停在独立 spec approval，BLOCK 已证明拒绝且未删除文件。"
+    transition:
+      completed_step: 1
+      next_step: 2
+    evidence: ["EVD-T7.4-AUTO-001"]
