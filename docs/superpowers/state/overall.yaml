@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-20T23:48:32Z"
+updated_at: "2026-08-21T00:11:42Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,7 +22,7 @@ tracking:
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-07"
   current_task: "7.4"
-  current_step: 2
+  current_step: 3
 
 summary:
   chapters_total: 7
@@ -1803,3 +1803,17 @@ history:
     evidence:
       - "docs/superpowers/state/chapters/chapter-07.yaml"
       - "../harness-model-pilot-artifacts/PILOT-AUTO/"
+  - id: "EVT-OVERALL-T7.4-ASK-BLOCK-COMPLETE-001"
+    at: "2026-08-21T00:11:42Z"
+    action: "task_steps_completed_summary"
+    actor: "/root"
+    reason: "Task 7.4 ASK 与 BLOCK 真实试点完成；REVIEW 已在重新分类和冻结后等待独立 spec approval。"
+    chapter_event: "EVT-T7.4-ASK-BLOCK-COMPLETE-001"
+    current_chapter: "chapter-07"
+    current_task: "7.4"
+    current_step: 3
+    counters_changed: false
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-07.yaml"
+      - "../harness-model-pilot-artifacts/PILOT-ASK/"
+      - "../harness-model-pilot-artifacts/PILOT-BLOCK/"

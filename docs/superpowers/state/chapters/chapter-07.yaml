@@ -117,8 +117,8 @@ tasks:
     plan_anchor: 1643
     status: "in_progress"
     steps_total: 6
-    completed_steps: [1]
-    in_progress_step: 2
+    completed_steps: [1, 2, 4]
+    in_progress_step: 3
     evidence:
       - id: "EVD-T7.4-AUTO-001"
         kind: "real_pilot"
@@ -133,6 +133,32 @@ tasks:
         verification: "V0"
         result: "CI passed; Gate passed; no approvals"
         artifact_path: "../harness-model-pilot-artifacts/PILOT-AUTO/"
+      - id: "EVD-T7.4-ASK-001"
+        kind: "real_pilot"
+        completed_at: "2026-08-21T00:11:42Z"
+        pilot: "PILOT-ASK"
+        task_id: "TASK-0001"
+        branch: "pilot/ask-report"
+        pilot_base: "01e0e282afaead31b9653391584267f20ccbf13a"
+        subject_commit: "e72e5f17d01216210bb05f3811c5ac0c78ec1766"
+        attestation_head: "74d4d1570249273dfbb5e095475a3c0239988f61"
+        route: "ASK"
+        verification: "V1"
+        result: "user selected OPT-01; Markdown only; CI and Gate passed"
+        artifact_path: "../harness-model-pilot-artifacts/PILOT-ASK/"
+      - id: "EVD-T7.4-BLOCK-001"
+        kind: "real_pilot"
+        completed_at: "2026-08-21T00:11:42Z"
+        pilot: "PILOT-BLOCK"
+        task_id: "TASK-0001"
+        branch: "pilot/block-dry-run"
+        pilot_base: "01e0e282afaead31b9653391584267f20ccbf13a"
+        subject_commit: "7c3e32d6a38b966e2892251068647d83aa295a23"
+        attestation_head: "da8ac8990485a1c52ec327d099132ce7d19ab674"
+        route: "BLOCK -> AUTO"
+        verification: "V1 refusal -> V0 pass"
+        result: "no deletion; identical scenario hash manifests; CI and Gate passed after resolution"
+        artifact_path: "../harness-model-pilot-artifacts/PILOT-BLOCK/"
     blockers: []
   - id: "7.5"
     title: "建立阶段一验收矩阵"
@@ -232,3 +258,12 @@ history:
       completed_step: 1
       next_step: 2
     evidence: ["EVD-T7.4-AUTO-001"]
+  - id: "EVT-T7.4-ASK-BLOCK-COMPLETE-001"
+    at: "2026-08-21T00:11:42Z"
+    action: "task_steps_completed"
+    actor: "/root"
+    reason: "用户选择 OPT-01 后 ASK 仅生成 Markdown 并通过 V1 Gate；BLOCK 经用户确认改为 dry-run inventory，场景摘要不变并通过恢复后 Gate。REVIEW 正等待新 Policy/subject/spec 摘要下的独立 spec approval。"
+    transition:
+      completed_steps: [2, 4]
+      next_step: 3
+    evidence: ["EVD-T7.4-ASK-001", "EVD-T7.4-BLOCK-001"]
