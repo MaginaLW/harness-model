@@ -4,7 +4,7 @@ goal: 编写 Quickstart 与故障恢复手册并自动验证干净检出安装�
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 branch: main
 base_commit: 9d7c37a0dad8d1fb6c772157c740dd52cd27ea6e
-subject_commit: a5cb03f317fb36fdc01e578c0ce1a2639e8bc5fa
+subject_commit: d0a047e9f8ab09e60f4b0ba9c0539f1e2464d788
 worktree_dirty: false
 worktree_dirty_paths: []
 allowed_scope: &id001
@@ -21,7 +21,7 @@ forbidden_actions:
 - package_publish
 current_state: APPROVED_FOR_MERGE
 created_at: '2026-08-21T11:44:33Z'
-updated_at: '2026-08-21T11:55:10Z'
+updated_at: '2026-08-21T12:07:02Z'
 decision_units:
 - schema_version: '1.0'
   task_id: TASK-0002
