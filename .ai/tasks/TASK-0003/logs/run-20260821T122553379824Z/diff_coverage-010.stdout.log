@@ -1,0 +1,11 @@
+-------------
+Diff Coverage
+Diff: af4fcf3ca879c2e5895c6d7ee6e752652a027a11...HEAD, staged and unstaged changes
+-------------
+src/aiflow/__init__.py (100%)
+-------------
+Total:   1 line
+Missing: 0 lines
+Coverage: 100%
+-------------
+

@@ -1,0 +1,66 @@
+schema_version: '1.0'
+task_id: TASK-0003
+goal: 固定阶段一 0.1.0 发布基线并交付验收报告与阶段二输入
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: main
+base_commit: af4fcf3ca879c2e5895c6d7ee6e752652a027a11
+subject_commit: 40c24a2947d1547e63421311201c384444adca73
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- src/aiflow/__init__.py
+- pyproject.toml
+- uv.lock
+- tests/unit/test_cli.py
+- CHANGELOG.md
+- README.md
+- docs/implementation/phase-01-acceptance-report.md
+- docs/implementation/phase-02-entry-inputs.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+current_state: APPROVED_FOR_MERGE
+created_at: '2026-08-21T12:14:18Z'
+updated_at: '2026-08-21T12:31:01Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0003
+  decision_unit_id: DU-001
+  goal: 固定阶段一 0.1.0 发布基线并交付验收报告与阶段二输入
+  inputs: []
+  planned_actions:
+  - Implement the bounded task objective
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - Define and run executable verification
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: true
+    code_modified: true
+    interaction_scope: cross_file
+    regression_risk: false
+    error_detectability: high
+repository_path_at_creation: D:/Repos/harness-model
+frozen_spec_sha256: e2b54099b4138c689d5446887b6ab25cba3a2ffeb5316e2e89cc7e9d3b37f005
+spec_frozen_at: '2026-08-21T12:15:25Z'
