@@ -115,10 +115,10 @@ tasks:
   - id: "7.4"
     title: "在本仓库执行 AUTO、ASK、REVIEW 和 BLOCK 试点"
     plan_anchor: 1643
-    status: "in_progress"
+    status: "completed"
     steps_total: 6
-    completed_steps: [1, 2, 4]
-    in_progress_step: 3
+    completed_steps: [1, 2, 3, 4, 5, 6]
+    in_progress_step: null
     evidence:
       - id: "EVD-T7.4-AUTO-001"
         kind: "real_pilot"
@@ -159,6 +159,31 @@ tasks:
         verification: "V1 refusal -> V0 pass"
         result: "no deletion; identical scenario hash manifests; CI and Gate passed after resolution"
         artifact_path: "../harness-model-pilot-artifacts/PILOT-BLOCK/"
+      - id: "EVD-T7.4-REVIEW-001"
+        kind: "real_pilot"
+        completed_at: "2026-08-21T11:19:10Z"
+        pilot: "PILOT-REVIEW"
+        task_id: "TASK-0001"
+        branch: "pilot/review-policy"
+        pilot_base: "01e0e282afaead31b9653391584267f20ccbf13a"
+        subject_commit: "f3d70bd41768dab583e3f2582d13ad9088a2630b"
+        attestation_head: "2d229c325d68529b5f507b030d802fcb88e7cb4e"
+        route: "REVIEW"
+        verification: "V1"
+        result: "policy/spec invalidations replayed; independent spec/code approvals; CI and Gate passed"
+        artifact_path: "../harness-model-pilot-artifacts/PILOT-REVIEW/"
+      - id: "EVD-T7.4-COMPLETE-001"
+        kind: "pilot_suite_completion"
+        completed_at: "2026-08-21T11:19:10Z"
+        checks:
+          - "PILOT-AUTO pytest: 575 passed, 3 skipped"
+          - "PILOT-ASK pytest: 575 passed, 3 skipped"
+          - "PILOT-REVIEW pytest: 576 passed, 3 skipped"
+          - "PILOT-BLOCK pytest: 575 passed, 3 skipped"
+          - "all four CI evidence conclusions: passed"
+          - "all four Gate decisions: passed"
+          - "all four worktrees: clean"
+          - "no push, merge, deployment, deletion, package publish, or external action"
     blockers: []
   - id: "7.5"
     title: "建立阶段一验收矩阵"
@@ -267,3 +292,12 @@ history:
       completed_steps: [2, 4]
       next_step: 3
     evidence: ["EVD-T7.4-ASK-001", "EVD-T7.4-BLOCK-001"]
+  - id: "EVT-T7.4-COMPLETE-001"
+    at: "2026-08-21T11:19:10Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "REVIEW 试点完成 Policy/Schema/测试变更、两次显式失效恢复、独立规格与代码批准、V1/CI/Gate；四个 worktree 回归和 artifact 核验全部通过。"
+    transition:
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "7.5"
+    evidence: ["EVD-T7.4-REVIEW-001", "EVD-T7.4-COMPLETE-001"]
