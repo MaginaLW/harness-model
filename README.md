@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前状态：阶段一 MVP 正在推进，Chapter 1—3 已完成，当前任务为 Chapter 4 / Task 4.1；资源感知调度目前只有未来阶段设计与预进入蓝图，尚无运行时实现。
+> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；资源感知调度、V2/V3、独立 Verifier 和真实模型路由仍是后续阶段输入，尚无运行时实现。
 
 ## 阶段一目标
 
@@ -25,6 +25,9 @@
 | [自适应多智能体编排预进入蓝图](docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md) | 安全控制面通过后编写编排顾问与真实 adapter 执行计划的设计输入，当前未授权实施 |
 | [Agent 规则](AGENTS.md) | 所有 Agent 的简短常驻约束 |
 | [Claude Code 规则](CLAUDE.md) | Claude Code 的同源入口 |
+| [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
+| [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence 等恢复流程 |
+| [阶段一验收报告](docs/implementation/phase-01-acceptance-report.md) | 十二项验收、四试点、覆盖率、限制和风险接受 |
 
 ## 实施路线
 

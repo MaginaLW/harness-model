@@ -22,7 +22,7 @@ def test_module_version_is_stable(
     result = run_aiflow("--version")
 
     assert result.returncode == 0
-    assert result.stdout == "aiflow 0.1.0.dev0\n"
+    assert result.stdout == "aiflow 0.1.0\n"
     assert result.stderr == ""
 
 
