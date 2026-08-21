@@ -2,9 +2,9 @@ schema: "progress.v1"
 state_type: "implementation_overall"
 project: "AI 代码协同系统"
 stage: "phase-01-mvp"
-status: "in_progress"
+status: "completed"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-21T12:12:51Z"
+updated_at: "2026-08-21T12:36:46Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -20,19 +20,19 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-07"
-  current_task: "7.7"
+  current_chapter: null
+  current_task: null
   current_step: null
 
 summary:
   chapters_total: 7
-  chapters_completed: 6
+  chapters_completed: 7
   tasks_total: 44
-  tasks_completed: 43
+  tasks_completed: 44
   steps_total: 243
-  steps_completed: 237
+  steps_completed: 243
   exit_checks_total: 7
-  exit_checks_completed: 6
+  exit_checks_completed: 7
   blockers_total: 0
   evidence_items: 0
 
@@ -89,22 +89,22 @@ chapters:
     number: 7
     title: "试点验收与阶段一基线"
     state_file: "docs/superpowers/state/chapters/chapter-07.yaml"
-    status: "in_progress"
+    status: "completed"
     dependency: "chapters 01-06 completed"
     tasks_total: 7
     steps_total: 39
 
 global_checks:
   plan_self_review:
-    status: "pending"
+    status: "passed"
     checks_total: 19
-    completed_checks: []
+    completed_checks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   phase_01_acceptance:
-    status: "pending"
+    status: "passed"
     acceptance_items_total: 12
-    passed_items: []
+    passed_items: ["ACC-01", "ACC-02", "ACC-03", "ACC-04", "ACC-05", "ACC-06", "ACC-07", "ACC-08", "ACC-09", "ACC-10", "ACC-11", "ACC-12"]
   final_release_baseline:
-    status: "pending"
+    status: "passed"
 
 future_phases:
   - phase: "phase-02"
@@ -1879,3 +1879,30 @@ history:
       - "docs/operations/recovery.md"
       - "tests/e2e/test_clean_checkout.py"
       - "../harness-model-pilot-artifacts/TASK-0002/"
+  - id: "EVT-OVERALL-PHASE-01-COMPLETE-001"
+    at: "2026-08-21T12:36:46Z"
+    action: "phase_completed"
+    actor: "/root"
+    reason: "Task 7.7 和 Chapter 7 完成；全部 44 任务、243 步、7 章退出检查和十二项阶段一验收均通过，0.1.0 本地发布基线 Gate passed。"
+    chapter_event: "EVT-T7.7-CHAPTER-COMPLETE-001"
+    chapter_evidence: "EVD-T7.7-RELEASE-001"
+    state_effect:
+      overall_status: "completed"
+      chapter_07_status: "completed"
+      task_7_7_status: "completed"
+      current_chapter: null
+      current_task: null
+      current_step: null
+      chapters_completed: 7
+      tasks_completed: 44
+      steps_completed: 243
+      exit_checks_completed: 7
+      acceptance_items_passed: 12
+      release_version: "0.1.0"
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-07.yaml"
+      - "docs/implementation/phase-01-acceptance-matrix.md"
+      - "docs/implementation/phase-01-acceptance-report.md"
+      - "docs/implementation/phase-02-entry-inputs.md"
+      - "CHANGELOG.md"
+      - "../harness-model-pilot-artifacts/TASK-0003/"

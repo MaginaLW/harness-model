@@ -4,7 +4,7 @@ chapter:
   id: "chapter-07"
   number: 7
   title: "试点验收与阶段一基线"
-  status: "in_progress"
+  status: "completed"
   plan_lines: "1533-1837"
   dependency: "chapters 01-06 completed"
   tasks_total: 7
@@ -244,25 +244,56 @@ tasks:
   - id: "7.7"
     title: "形成阶段一发布基线"
     plan_anchor: 1784
-    status: "pending"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5, 6]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T7.7-RELEASE-001"
+        kind: "phase_one_release_baseline"
+        completed_at: "2026-08-21T12:36:46Z"
+        task_id: "TASK-0003"
+        route: "AUTO"
+        verification: "V1"
+        version: "0.1.0"
+        base_commit: "af4fcf3ca879c2e5895c6d7ee6e752652a027a11"
+        subject_commit: "40c24a2947d1547e63421311201c384444adca73"
+        attestation_head: "d1e924e59f6bb0b5f62753a1de1e081229e75bc3"
+        checks:
+          - "pip editable dev install: passed"
+          - "ruff: passed"
+          - "mypy: passed for 32 source files"
+          - "full pytest: 584 passed, 3 skipped"
+          - "total branch-aware coverage: 85.76% >= 85%"
+          - "e2e: 7 passed"
+          - "aiflow --version: 0.1.0"
+          - "git diff --check: passed"
+          - "placeholder scan: only explicit rejection implementation/tests and prohibition wording"
+          - "acceptance traceability: twelve items passed"
+          - "local authoritative V1: passed"
+          - "CI V1: 10 required checks passed"
+          - "Gate: passed with no reason codes"
+        ci_evidence_sha256: "3af8cff982eafb827f06c022103c9b52c9242766baf940bc7ea2555c04d02603"
+        gate_sha256: "5f753d505c7eab0de4d2096a85e4af8a297bf771e2de0bc9f3613695f204d425"
+        artifact_path: "../harness-model-pilot-artifacts/TASK-0003/"
     blockers: []
 
 exit_check:
-  status: "pending"
+  status: "completed"
   required_task: "7.7"
   criteria:
     - "四类黄金端到端场景和四个真实受控试点完成，保留版本绑定证据"
     - "十二项验收矩阵全部 passed，干净检出、安装和恢复验证通过"
     - "阶段一版本、验收报告、阶段二输入和最终回归均完成"
-  evidence: []
+  evidence:
+    - "EVD-T7.4-COMPLETE-001"
+    - "EVD-T7.5-ACCEPTANCE-001"
+    - "EVD-T7.6-CLEAN-RECOVERY-001"
+    - "EVD-T7.7-RELEASE-001"
 
 review:
-  requirements_conformance: "pending"
-  quality_review: "pending"
+  requirements_conformance: "passed（两份原始架构文档、获批 MVP 设计、十二项矩阵和 7.1—7.7 全部对应）"
+  quality_review: "passed（全量/覆盖率/e2e/干净检出/CI/Gate 通过，错误可操作，非目标未暗中实现）"
 
 history:
   - at: "2026-08-02T14:03:50Z"
@@ -357,3 +388,13 @@ history:
       completed_steps: [1, 2, 3, 4, 5]
       next_task: "7.7"
     evidence: ["EVD-T7.6-CLEAN-RECOVERY-001"]
+  - id: "EVT-T7.7-CHAPTER-COMPLETE-001"
+    at: "2026-08-21T12:36:46Z"
+    action: "task_chapter_phase_completed"
+    actor: "/root"
+    reason: "0.1.0 版本、CHANGELOG、阶段一验收报告、六类有证据的阶段二输入、最终全量命令、V1、CI 和 Gate 全部通过；第七章与阶段一完成。"
+    transition:
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      chapter_status: "completed"
+      phase_status: "completed"
+    evidence: ["EVD-T7.7-RELEASE-001"]
