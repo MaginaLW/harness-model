@@ -64,7 +64,15 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["push", "merge", "deploy", "delete", "secret_export", "paid_external_call"]
+        "enum": [
+          "push",
+          "merge",
+          "deploy",
+          "delete",
+          "secret_export",
+          "paid_external_call",
+          "package_publish"
+        ]
       }
     }
   },
@@ -201,7 +209,15 @@
         "id": {"type": "string", "pattern": "^[A-Z][A-Z0-9-]+$"},
         "priority": {"type": "integer"},
         "action": {
-          "enum": ["push", "merge", "deploy", "delete", "secret_export", "paid_external_call"]
+          "enum": [
+            "push",
+            "merge",
+            "deploy",
+            "delete",
+            "secret_export",
+            "paid_external_call",
+            "package_publish"
+          ]
         },
         "effect": {"const": "deny_automatic"},
         "required_approval": {"const": "action"}

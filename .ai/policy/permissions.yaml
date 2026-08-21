@@ -8,6 +8,7 @@ forbidden_automatic_actions:
   - delete
   - secret_export
   - paid_external_call
+  - package_publish
 rules:
   - id: PERMISSION-DENY-AUTO-PUSH
     priority: 690
@@ -37,5 +38,10 @@ rules:
   - id: PERMISSION-DENY-AUTO-PAID-CALL
     priority: 640
     action: paid_external_call
+    effect: deny_automatic
+    required_approval: action
+  - id: PERMISSION-DENY-AUTO-PACKAGE-PUBLISH
+    priority: 630
+    action: package_publish
     effect: deny_automatic
     required_approval: action

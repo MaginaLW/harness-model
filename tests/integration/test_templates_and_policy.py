@@ -47,6 +47,7 @@ EXPECTED_FORBIDDEN_ACTIONS = {
     "delete",
     "deploy",
     "merge",
+    "package_publish",
     "paid_external_call",
     "push",
     "secret_export",
