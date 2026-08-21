@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-01-mvp"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-21T11:43:39Z"
+updated_at: "2026-08-21T12:12:51Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -21,16 +21,16 @@ tracking:
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-07"
-  current_task: "7.6"
+  current_task: "7.7"
   current_step: null
 
 summary:
   chapters_total: 7
   chapters_completed: 6
   tasks_total: 44
-  tasks_completed: 42
+  tasks_completed: 43
   steps_total: 243
-  steps_completed: 232
+  steps_completed: 237
   exit_checks_total: 7
   exit_checks_completed: 6
   blockers_total: 0
@@ -1857,3 +1857,25 @@ history:
       - "docs/implementation/phase-01-acceptance-matrix.md"
       - "docs/pilots/results/"
       - "../harness-model-pilot-artifacts/REPORT-TASK-0001/"
+  - id: "EVT-OVERALL-T7.6-COMPLETE-001"
+    at: "2026-08-21T12:12:51Z"
+    action: "task_completed_summary"
+    actor: "/root"
+    reason: "Task 7.6 干净检出、隔离安装、文档命令和八类故障恢复验证全部通过。"
+    chapter_event: "EVT-T7.6-COMPLETE-001"
+    chapter_evidence: "EVD-T7.6-CLEAN-RECOVERY-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_07_status: "in_progress"
+      task_7_6_status: "completed"
+      current_chapter: "chapter-07"
+      current_task: "7.7"
+      current_step: null
+      tasks_completed: 43
+      steps_completed: 237
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-07.yaml"
+      - "docs/operations/quickstart.md"
+      - "docs/operations/recovery.md"
+      - "tests/e2e/test_clean_checkout.py"
+      - "../harness-model-pilot-artifacts/TASK-0002/"

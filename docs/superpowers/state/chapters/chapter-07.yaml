@@ -216,11 +216,30 @@ tasks:
   - id: "7.6"
     title: "验证干净检出、安装和故障恢复"
     plan_anchor: 1749
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T7.6-CLEAN-RECOVERY-001"
+        kind: "clean_checkout_and_recovery"
+        completed_at: "2026-08-21T12:12:51Z"
+        task_id: "TASK-0002"
+        route: "AUTO"
+        verification: "V1"
+        base_commit: "9d7c37a0dad8d1fb6c772157c740dd52cd27ea6e"
+        subject_commit: "d0a047e9f8ab09e60f4b0ba9c0539f1e2464d788"
+        attestation_head: "a556c161746810169b1fb8c216b7396ed3a7156b"
+        checks:
+          - "Quickstart PowerShell and platform-neutral flows documented"
+          - "eight recovery cases include diagnosis, recovery, and forbidden actions"
+          - "targeted clean-checkout test: 3 passed"
+          - "local V1: passed"
+          - "CI V1: 10 required checks passed"
+          - "Gate: passed with no reason codes"
+        ci_evidence_sha256: "9bc365ba0428f71793622462f3a483bfc7213feb2af09c295aa7f801bb035149"
+        gate_sha256: "0dd515cf692be1a5c6675dd0d937ee10a3c104bc6bf6a220b6079374b6c7b153"
+        artifact_path: "../harness-model-pilot-artifacts/TASK-0002/"
     blockers: []
   - id: "7.7"
     title: "形成阶段一发布基线"
@@ -329,3 +348,12 @@ history:
       completed_steps: [1, 2, 3, 4, 5, 6]
       next_task: "7.6"
     evidence: ["EVD-T7.5-ACCEPTANCE-001"]
+  - id: "EVT-T7.6-COMPLETE-001"
+    at: "2026-08-21T12:12:51Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "Quickstart、八类故障恢复手册和干净 clone/隔离安装/文档命令/无外部动作示例已通过定向测试、V1、CI 和 Gate。"
+    transition:
+      completed_steps: [1, 2, 3, 4, 5]
+      next_task: "7.7"
+    evidence: ["EVD-T7.6-CLEAN-RECOVERY-001"]
