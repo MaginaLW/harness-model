@@ -1,0 +1,22 @@
+# 阶段一验收矩阵
+
+本矩阵以《AI 代码协同系统实施总体规划 V0.2》第 13 节前十项为原始基线，并纳入 MVP 设计第 13 节新增的两项。四个试点的权威 Gate 在各自 attestation HEAD 执行；本报告任务只校验已核对的脱敏摘要，不在主 HEAD 重放旧 Gate。
+
+| 验收 ID | 原始要求 | 实现文件 | 定向测试 | 演示命令 | 证据/试点结果 | 结论 | 限制 |
+|---|---|---|---|---|---|---|---|
+| ACC-01 | V0.2-1：每个代码任务有唯一且结构合法的任务记录 | `src/aiflow/task_service.py` | `tests/unit/test_state.py::test_transition_persists_event_and_materialized_state` | `python -m aiflow status TASK-ID --format json` | `docs/implementation/chapter-02-task-state.md` | passed | 唯一性以 repository ID、task ID 和事件重放共同约束 |
+| ACC-02 | V0.2-2：每个决策单元输出可解释 route 和独立验证等级 | `src/aiflow/routing.py` | `tests/unit/test_routing.py::test_decision_table_routes_every_policy_rule` | `python -m aiflow classify TASK-ID --actor classifier` | `docs/implementation/chapter-03-routing-verification.md` | passed | 阶段一仅实施 V0/V1，V2/V3 留待后续阶段 |
+| ACC-03 | V0.2-3：ASK 保存 2—4 个结构完整且实质差异的选项与用户决定 | `src/aiflow/ask_service.py` | `tests/e2e/test_ask_scenario.py::test_ask_scenario_requires_answer_then_passes_v1_gate` | `python -m aiflow answer TASK-ID --decision-unit DU-001 --option OPT-01 --actor owner --reason REASON` | `docs/pilots/results/PILOT-ASK/result.md` | passed | 选项语义差异仍需人工确认；CLI 保证结构和决定留痕 |
+| ACC-04 | V0.2-4：REVIEW 生成不依赖完整对话的审核包 | `src/aiflow/review.py` | `tests/unit/test_review_package.py::test_complete_review_package_has_valid_recommendation` | `python -m aiflow verify TASK-ID` | `docs/pilots/results/PILOT-REVIEW/result.md` | passed | 审核包提供有界上下文，不替代独立代码批准 |
+| ACC-05 | V0.2-5：AUTO 受状态、文件范围、动作权限和验证门约束 | `src/aiflow/scope.py` | `tests/unit/test_scope.py::test_auto_preflight_requires_all_guardrails_in_safety_order` | `python -m aiflow scope TASK-ID --format json` | `docs/pilots/results/PILOT-AUTO/result.md` | passed | 不将 AUTO 解释为外部动作授权 |
+| ACC-06 | V0.2-6：代码行为、规格或 Policy 变化使旧证据/批准失效，治理尾提交不形成自引用 | `src/aiflow/freshness.py` | `tests/unit/test_freshness.py::test_reason_order_and_ci_attestation` | `python -m aiflow validate TASK-ID` | `docs/pilots/results/PILOT-REVIEW/result.md` | passed | CI 在最新 HEAD 重验；仅当尾部为当前任务治理记录时才接受 attestation |
+| ACC-07 | V0.2-7：单一命令能重跑全部要求的验证 | `src/aiflow/verification_service.py` | `tests/integration/test_verify_command.py::test_full_non_review_verification_reaches_merge_approval` | `python -m aiflow verify TASK-ID` | `docs/implementation/chapter-05-verification-evidence.md` | passed | 定向测试只生成 provisional 证据，不替代 final verify |
+| ACC-08 | V0.2-8：CI 在 PR 最新 HEAD 重验并拒绝缺少任务、证据、批准或版本匹配的变更 | `src/aiflow/gate.py` | `tests/integration/test_github_workflow.py::test_non_governance_tail_is_rejected_by_shared_gate` | `python -m aiflow gate TASK-ID --evidence CI-EVIDENCE --format json` | `docs/implementation/chapter-06-agent-ci.md` | passed | 平台层只编排共享核心，不复制 Policy 规则 |
+| ACC-09 | V0.2-9：范围扩大、验证异常或新权限需求触发动态升级 | `src/aiflow/escalation.py` | `tests/integration/test_escalate_command.py::test_every_structured_reason_code_can_raise_auto_to_review` | `python -m aiflow escalate TASK-ID --to REVIEW --reason-code scope_expanded --impact IMPACT --next-step NEXT --actor agent` | `docs/implementation/chapter-04-governance-workflows.md` | passed | 降级必须有完整解决证据和显式授权 |
+| ACC-10 | V0.2-10：真实仓库 AUTO、ASK、REVIEW 全流程及 BLOCK 拒绝/恢复均完成 | `src/aiflow/workflow.py` | `tests/e2e/test_block_scenario.py::test_block_scenario_requires_backup_and_dry_run_before_reclassification` | `python -m pytest tests/e2e -q` | `docs/pilots/results/PILOT-AUTO/result.md`<br>`docs/pilots/results/PILOT-ASK/result.md`<br>`docs/pilots/results/PILOT-REVIEW/result.md`<br>`docs/pilots/results/PILOT-BLOCK/result.md` | passed | 四个权威结论绑定各自分支和 attestation HEAD，不在主 HEAD 重跑旧 Gate |
+| ACC-11 | 设计新增：本地与 CI 对相同输入和 Policy 给出一致结论 | `src/aiflow/gate.py` | `tests/integration/test_gate_parity.py::test_package_local_and_ci_gate_have_identical_machine_decisions` | `python -m pytest tests/integration/test_gate_parity.py -q` | `docs/implementation/chapter-06-agent-ci.md` | passed | CI evidence 使用外部临时目录，本地不伪造 CI mode |
+| ACC-12 | 设计新增：干净检出可按文档安装、测试和运行示例 | `pyproject.toml` | `tests/integration/test_acceptance_traceability.py::test_clean_checkout_evidence_is_passed` | `python -m pip install -e ".[dev]" && python -m pytest -q && python -m aiflow --help` | `docs/pilots/results/clean-checkout.md` | passed | Windows 无符号链接权限时三项相关测试 skip，不影响其他 575 项结论 |
+
+## 报告任务门禁
+
+报告任务 ID 由 `docs/pilots/results/report-task-id.txt` 唯一指定。权威流程为：业务内容 commit 形成 subject，`aiflow sync`、`aiflow verify --ci`和 `aiflow gate` 形成 attestation 与外部 Gate 结论。追踪测试在 VERIFYING、VERIFIED 和 APPROVED_FOR_MERGE 状态均可重放；最终验收必须以 APPROVED_FOR_MERGE 且 Gate passed 为准。
