@@ -84,7 +84,10 @@ def test_clean_clone_installs_and_runs_documented_safe_subset(tmp_path: Path) ->
     assert _run(["git", "status", "--porcelain"], cwd=clone).stdout == ""
     source_head = _run(["git", "rev-parse", "HEAD"], cwd=ROOT).stdout.strip()
     assert _run(["git", "rev-parse", "HEAD"], cwd=clone).stdout.strip() == source_head
-    assert not (clone / ".ai/tasks/TASK-0002").exists()
+    source_tracked = _run(["git", "ls-files"], cwd=ROOT).stdout.splitlines()
+    clone_tracked = _run(["git", "ls-files"], cwd=clone).stdout.splitlines()
+    assert clone_tracked == source_tracked
+    assert _run(["git", "ls-files", "--others", "--exclude-standard"], cwd=clone).stdout == ""
 
     install_env = os.environ.copy()
     install_env["PYTHONNOUSERSITE"] = "1"
