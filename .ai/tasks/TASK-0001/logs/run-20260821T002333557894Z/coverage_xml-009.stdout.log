@@ -1,0 +1,68 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: D:\Repos\harness-model-pilot-review
+configfile: pyproject.toml
+testpaths: tests
+plugins: cov-7.1.0
+collected 579 items
+
+tests\e2e\test_ask_scenario.py .                                         [  0%]
+tests\e2e\test_auto_scenario.py .                                        [  0%]
+tests\e2e\test_block_scenario.py .                                       [  0%]
+tests\e2e\test_review_scenario.py .                                      [  0%]
+tests\integration\test_agent_entry_files.py .....                        [  1%]
+tests\integration\test_ai_flow_skill.py .....                            [  2%]
+tests\integration\test_answer_command.py ...............                 [  5%]
+tests\integration\test_approve_command.py ........                       [  6%]
+tests\integration\test_auto_preflight.py ....                            [  7%]
+tests\integration\test_begin_close_commands.py .................         [ 10%]
+tests\integration\test_classify_command.py ...............               [ 12%]
+tests\integration\test_escalate_command.py ............................. [ 17%]
+...                                                                      [ 18%]
+tests\integration\test_freeze_command.py .......                         [ 19%]
+tests\integration\test_gate_command.py .........                         [ 20%]
+tests\integration\test_gate_parity.py .........                          [ 22%]
+tests\integration\test_github_workflow.py .......                        [ 23%]
+tests\integration\test_golden_classification.py ......                   [ 24%]
+tests\integration\test_golden_contracts.py ...........                   [ 26%]
+tests\integration\test_governance_paths.py .....                         [ 27%]
+tests\integration\test_scenario_runner.py ....                           [ 28%]
+tests\integration\test_start_command.py ..........                       [ 29%]
+tests\integration\test_status_command.py ..............                  [ 32%]
+tests\integration\test_templates_and_policy.py ..............            [ 34%]
+tests\integration\test_tool_wrappers.py ..............                   [ 37%]
+tests\integration\test_verification_evidence_flow.py .............       [ 39%]
+tests\integration\test_verification_git_scope.py ....s                   [ 40%]
+tests\integration\test_verify_command.py .............                   [ 42%]
+tests\unit\test_cli.py ...                                               [ 43%]
+tests\unit\test_contracts.py .........................................   [ 50%]
+tests\unit\test_decision_units.py ......                                 [ 51%]
+tests\unit\test_evidence.py ...........                                  [ 53%]
+tests\unit\test_freshness.py ...................................         [ 59%]
+tests\unit\test_gate.py ..................                               [ 62%]
+tests\unit\test_git_context.py ..............                            [ 64%]
+tests\unit\test_permissions_policy.py .                                  [ 64%]
+tests\unit\test_policy.py ...........                                    [ 66%]
+tests\unit\test_predicates.py ...............                            [ 69%]
+tests\unit\test_process_runner.py ......                                 [ 70%]
+tests\unit\test_redaction.py ...                                         [ 70%]
+tests\unit\test_review_package.py ...........                            [ 72%]
+tests\unit\test_routing.py ........                                      [ 74%]
+tests\unit\test_scope.py ........s...                                    [ 76%]
+tests\unit\test_specification.py ........                                [ 77%]
+tests\unit\test_state.py ............................................... [ 85%]
+.......................                                                  [ 89%]
+tests\unit\test_storage.py ...................                           [ 92%]
+tests\unit\test_verification_level.py .............                      [ 95%]
+tests\unit\test_verification_plan.py .........s...........               [ 98%]
+tests\unit\test_workflow.py .......                                      [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.9-final-0 _______________
+
+Coverage XML written to file D:/Repos/harness-model-pilot-review/.ai/tasks/TASK-0001/logs/run-20260821T002333557894Z/coverage.xml
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\test_verification_git_scope.py:177: symlink creation unavailable
+SKIPPED [1] tests\unit\test_scope.py:83: symlink creation unavailable
+SKIPPED [1] tests\unit\test_verification_plan.py:168: symlink creation unavailable
+================= 576 passed, 3 skipped in 151.85s (0:02:31) ==================

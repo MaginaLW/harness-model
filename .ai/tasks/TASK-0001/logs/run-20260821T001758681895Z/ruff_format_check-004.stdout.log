@@ -1,0 +1,14 @@
+unformatted: File would be reformatted
+  --> tests\integration\test_start_command.py:26:26
+   |
+25 |     "secret_export",
+   -     "paid_external_call",
+   -     "package_publish",
+   - }
+26 +     "paid_external_call",
+27 +     "package_publish",
+28 + }
+29 |
+   |
+
+1 file would be reformatted, 155 files already formatted

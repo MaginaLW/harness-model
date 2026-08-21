@@ -1,0 +1,52 @@
+{
+  "base_commit": "01e0e282afaead31b9653391584267f20ccbf13a",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "87b9cec0034e8cdb8f386c1ee85b4bcc4ba8fcb1cbb0cfbf8882f6314613ec14",
+  "classifications": [
+    {
+      "classified_at": "2026-08-21T00:11:33Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
+      "explanations": [
+        "Unmatched work remains REVIEW; there is no implicit AUTO fallback."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
+          "predicate_explanations": [],
+          "priority": 0,
+          "route": "REVIEW",
+          "rule_id": "ROUTE-DEFAULT-REVIEW"
+        }
+      ],
+      "policy_sha256": "1656ceb52463ed9e812fcef54b2e44d9512f2a71c2302cee75df66f27d9da4a1",
+      "policy_version": "1.0.0",
+      "route": "REVIEW",
+      "rule_id": "ROUTE-DEFAULT-REVIEW",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Cross-file interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-CROSS-FILE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-08-21T00:11:33Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "1656ceb52463ed9e812fcef54b2e44d9512f2a71c2302cee75df66f27d9da4a1",
+  "policy_version": "1.0.0",
+  "schema_version": "1.0",
+  "subject_commit": "f3d70bd41768dab583e3f2582d13ad9088a2630b",
+  "task_id": "TASK-0001"
+}

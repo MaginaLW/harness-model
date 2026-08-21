@@ -1,0 +1,68 @@
+allowed_scope:
+- .ai/schemas/policy.schema.json
+- .ai/policy/permissions.yaml
+- tests/unit/test_permissions_policy.py
+- tests/integration/test_templates_and_policy.py
+- tests/integration/test_start_command.py
+base_commit: 01e0e282afaead31b9653391584267f20ccbf13a
+branch: pilot/review-policy
+created_at: '2026-08-20T23:46:31Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Forbid automatic package publishing in executable permissions Policy
+  impact:
+    level: high
+  impact_scope:
+  - .ai/schemas/policy.schema.json
+  - .ai/policy/permissions.yaml
+  - tests/unit/test_permissions_policy.py
+  - tests/integration/test_templates_and_policy.py
+  - tests/integration/test_start_command.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  planned_actions:
+  - modify_permissions_policy
+  protections:
+    dry_run: true
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0001
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+frozen_spec_sha256: 175d10dae482c7b75af4a83145b704848143b4abf73a3fc9401e6e43885784c6
+goal: Forbid automatic package publishing in executable permissions Policy
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model-pilot-review
+schema_version: '1.0'
+spec_frozen_at: '2026-08-21T00:11:33Z'
+subject_commit: f3d70bd41768dab583e3f2582d13ad9088a2630b
+task_id: TASK-0001
+updated_at: '2026-08-21T11:03:35Z'
+worktree_dirty: false
+worktree_dirty_paths: []
