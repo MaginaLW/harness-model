@@ -1,0 +1,61 @@
+schema_version: '1.0'
+task_id: TASK-0002
+goal: 编写 Quickstart 与故障恢复手册并自动验证干净检出安装流程
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: main
+base_commit: 9d7c37a0dad8d1fb6c772157c740dd52cd27ea6e
+subject_commit: a5cb03f317fb36fdc01e578c0ce1a2639e8bc5fa
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- docs/operations/quickstart.md
+- docs/operations/recovery.md
+- tests/e2e/test_clean_checkout.py
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+current_state: APPROVED_FOR_MERGE
+created_at: '2026-08-21T11:44:33Z'
+updated_at: '2026-08-21T11:55:10Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0002
+  decision_unit_id: DU-001
+  goal: 编写 Quickstart 与故障恢复手册并自动验证干净检出安装流程
+  inputs: []
+  planned_actions:
+  - Implement the bounded task objective
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - Define and run executable verification
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: cross_file
+    regression_risk: false
+    error_detectability: high
+repository_path_at_creation: D:/Repos/harness-model
+frozen_spec_sha256: 289089b579db897551757946ffa6068154f8b3e9a33f60baac3b42467e807a7c
+spec_frozen_at: '2026-08-21T11:45:53Z'
