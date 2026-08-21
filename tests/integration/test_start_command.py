@@ -24,6 +24,7 @@ DEFAULT_FORBIDDEN = {
     "delete",
     "secret_export",
     "paid_external_call",
+    "package_publish",
 }
 
 
