@@ -97,7 +97,6 @@ def test_clean_clone_installs_and_runs_documented_safe_subset(tmp_path: Path) ->
             "install",
             "--disable-pip-version-check",
             "--no-deps",
-            "--no-build-isolation",
             "--target",
             str(installed),
             str(clone),
