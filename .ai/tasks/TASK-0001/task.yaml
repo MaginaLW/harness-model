@@ -1,0 +1,60 @@
+schema_version: '1.0'
+task_id: TASK-0001
+goal: Delete all golden scenario files without a verified backup
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: pilot/block-dry-run
+base_commit: 01e0e282afaead31b9653391584267f20ccbf13a
+subject_commit: 7c3e32d6a38b966e2892251068647d83aa295a23
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope:
+- examples/scenarios/**
+- docs/pilots/block-dry-run-inventory.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: APPROVED_FOR_MERGE
+created_at: '2026-08-20T23:47:26Z'
+updated_at: '2026-08-21T00:04:09Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0001
+  decision_unit_id: DU-001
+  goal: Generate a dry-run inventory without deleting golden scenario files
+  inputs: []
+  planned_actions:
+  - generate_dry_run_inventory
+  impact_scope:
+  - docs/pilots/block-dry-run-inventory.md
+  reversibility: reversible
+  verification_methods:
+  - Define and run executable verification
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: true
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: local
+    regression_risk: false
+    error_detectability: high
+repository_path_at_creation: D:/Repos/harness-model-pilot-block
+frozen_spec_sha256: 709a2dd02275ee51fa3812648862a62a78f1d6e2b656f85c643564f9e3e32f61
+spec_frozen_at: '2026-08-21T00:03:10Z'
