@@ -188,11 +188,30 @@ tasks:
   - id: "7.5"
     title: "建立阶段一验收矩阵"
     plan_anchor: 1706
-    status: "pending"
+    status: "completed"
     steps_total: 6
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5, 6]
     in_progress_step: null
-    evidence: []
+    evidence:
+      - id: "EVD-T7.5-ACCEPTANCE-001"
+        kind: "acceptance_matrix_and_report_task"
+        completed_at: "2026-08-21T11:43:39Z"
+        report_task_id: "TASK-0001"
+        route: "AUTO"
+        verification: "V1"
+        base_commit: "5b3db9dd3354a2b3107dc7f50f69e177506e0d68"
+        subject_commit: "5bb9ea4ae041a6e792c1fadf81a3c735dcec7d8f"
+        attestation_head: "83c9b3b873a66468719fcd27e88217d137e623c5"
+        checks:
+          - "twelve acceptance rows: passed"
+          - "traceability integration test: 6 passed"
+          - "clean local clone install and CLI startup: passed"
+          - "clean local clone test suite: 575 passed, 3 skipped"
+          - "report task CI verification: 10 required checks passed"
+          - "report task Gate: passed with no reason codes"
+        ci_evidence_sha256: "e990bdbf9fb8d0bf988113bc6cf0921e701a8c3f1967e02684294790cdb76393"
+        gate_sha256: "1f25020f60bbdbf5b8edc2eabbd296a86e90db8f9ae7bc6a7201dfe94bed832e"
+        artifact_path: "../harness-model-pilot-artifacts/REPORT-TASK-0001/"
     blockers: []
   - id: "7.6"
     title: "验证干净检出、安装和故障恢复"
@@ -301,3 +320,12 @@ history:
       completed_steps: [1, 2, 3, 4, 5, 6]
       next_task: "7.5"
     evidence: ["EVD-T7.4-REVIEW-001", "EVD-T7.4-COMPLETE-001"]
+  - id: "EVT-T7.5-COMPLETE-001"
+    at: "2026-08-21T11:43:39Z"
+    action: "task_completed"
+    actor: "/root"
+    reason: "十二项验收矩阵、四试点脱敏来源哈希、干净克隆预验收和独立报告任务 V1/CI/Gate 全部通过。"
+    transition:
+      completed_steps: [1, 2, 3, 4, 5, 6]
+      next_task: "7.6"
+    evidence: ["EVD-T7.5-ACCEPTANCE-001"]
