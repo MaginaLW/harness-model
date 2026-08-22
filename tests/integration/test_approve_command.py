@@ -213,6 +213,61 @@ def _evidence(repository: Path, *, conclusion: str = "passed") -> dict[str, obje
     }
 
 
+def _record_review(
+    repository: Path,
+    tmp_path: Path,
+    *,
+    stage: str,
+    review_id: str,
+) -> None:
+    """Create the valid structured-review precondition for an approval test."""
+    context_path = tmp_path / f"{review_id}-context.json"
+    assert (
+        main(
+            [
+                "review",
+                "context",
+                "TASK-0001",
+                "--stage",
+                stage,
+                "--output",
+                str(context_path),
+            ]
+        )
+        == 0
+    )
+    context = json.loads(context_path.read_text(encoding="utf-8"))
+    assert isinstance(context, dict)
+    record_path = tmp_path / f"{review_id}.json"
+    atomic_write_json(
+        record_path,
+        {
+            "schema_version": "1.0",
+            "review_id": review_id,
+            "review_stage": stage,
+            "recorded_at": "2026-08-22T01:00:00Z",
+            "context_sha256": context["context_sha256"],
+            "outcome": "APPROVE",
+            "summary": "approval precondition is satisfied",
+            "findings": [],
+        },
+    )
+    assert (
+        main(
+            [
+                "review",
+                "record",
+                "TASK-0001",
+                "--input",
+                str(record_path),
+                "--actor",
+                "reviewer",
+            ]
+        )
+        == 0
+    )
+
+
 def test_spec_approval_persists_all_review_units_and_is_idempotent(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -228,6 +283,11 @@ def test_spec_approval_persists_all_review_units_and_is_idempotent(
         "direction approved",
     ]
 
+    assert main(arguments) == 1
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == (
+        "WAITING_FOR_SPEC_REVIEW"
+    )
+    _record_review(repository, tmp_path, stage="design", review_id="REV-0001")
     assert main(arguments) == 0
     first = load_task_record(repository, "TASK-0001")
     approvals = read_task_json(repository, "TASK-0001", "approvals.json")
@@ -265,6 +325,10 @@ def test_code_approval_requires_package_and_current_passing_evidence(
     atomic_write_json(
         resolve_task_path(repository, "TASK-0001", "evidence.json"), _evidence(repository)
     )
+    # Legacy Markdown and V1 evidence remain necessary but cannot substitute
+    # for the corresponding implementation review record.
+    assert main(arguments) == 1
+    _record_review(repository, tmp_path, stage="implementation", review_id="REV-0002")
 
     assert main(arguments) == 0
     record = load_task_record(repository, "TASK-0001")
@@ -285,6 +349,7 @@ def test_code_approval_rejects_business_worktree_change(
     atomic_write_json(
         resolve_task_path(repository, "TASK-0001", "evidence.json"), _evidence(repository)
     )
+    _record_review(repository, tmp_path, stage="implementation", review_id="REV-0003")
     (repository / "tracked.txt").write_text("changed\n", encoding="utf-8")
 
     assert (
@@ -424,6 +489,7 @@ def test_spec_approval_recovers_pending_transaction(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     repository = _prepare(tmp_path, monkeypatch, state="WAITING_FOR_SPEC_REVIEW")
+    _record_review(repository, tmp_path, stage="design", review_id="REV-0004")
     original = approval_service._persist_event_and_task
 
     def fail_once(*args: object, **kwargs: object) -> None:
@@ -464,6 +530,7 @@ def test_code_approval_rejects_committed_business_change_after_subject(
     atomic_write_json(
         resolve_task_path(repository, "TASK-0001", "evidence.json"), _evidence(repository)
     )
+    _record_review(repository, tmp_path, stage="implementation", review_id="REV-0005")
     (repository / "tracked.txt").write_text("committed change\n", encoding="utf-8")
     run_git(repository, "add", "tracked.txt")
     run_git(

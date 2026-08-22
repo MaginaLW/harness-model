@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/review-record.schema.json",
+  "title": "AI Flow structured review record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "review_id", "revision", "task_id", "review_stage", "reviewer", "recorded_at", "context_sha256", "outcome", "summary", "findings"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "review_id": {"type": "string", "pattern": "^REV-[0-9]{4,}$"},
+    "revision": {"type": "integer", "minimum": 1},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "review_stage": {"enum": ["design", "implementation"]},
+    "reviewer": {"type": "string", "minLength": 1},
+    "recorded_at": {"type": "string", "format": "date-time"},
+    "context_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "outcome": {"enum": ["APPROVE", "APPROVE_WITH_CONDITIONS", "REQUEST_CHANGES", "REJECT", "BLOCKED"]},
+    "summary": {"type": "string", "minLength": 1},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+  },
+  "$defs": {
+    "finding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["finding_id", "severity", "title", "location", "evidence_refs", "status"],
+      "properties": {
+        "finding_id": {"type": "string", "pattern": "^RF-[0-9]{3,}$"},
+        "severity": {"enum": ["critical", "high", "medium", "low"]},
+        "title": {"type": "string", "minLength": 1},
+        "location": {"type": "object", "additionalProperties": false, "required": ["path"], "properties": {"path": {"type": "string", "minLength": 1}, "line": {"type": "integer", "minimum": 1}}},
+        "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "status": {"enum": ["open", "resolved"]},
+        "resolution": {"type": "object", "additionalProperties": false, "required": ["reason", "actor", "resolved_at"], "properties": {"reason": {"type": "string", "minLength": 1}, "actor": {"type": "string", "minLength": 1}, "resolved_at": {"type": "string", "format": "date-time"}}}
+      },
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "open"}}, "required": ["status"]}, "then": {"not": {"required": ["resolution"]}}},
+        {"if": {"properties": {"status": {"const": "resolved"}}, "required": ["status"]}, "then": {"required": ["resolution"]}}
+      ]
+    }
+  }
+}

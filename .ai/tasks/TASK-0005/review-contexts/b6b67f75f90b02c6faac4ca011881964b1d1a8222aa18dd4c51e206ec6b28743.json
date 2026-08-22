@@ -1,0 +1,91 @@
+{
+  "base_commit": "5eadb1847ae9b2904d2b418eba8d62d46a610a20",
+  "branch": "main",
+  "classification_input_sha256": "768208745c33a4a0db381304bfc6c94ae613dc329d41cb3dfa1063a142ce3be4",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/review-context.schema.json",
+      ".ai/schemas/review-record.schema.json",
+      ".ai/templates/review-context.json",
+      ".ai/templates/review-record.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/review.py",
+      "src/aiflow/review_service.py",
+      "src/aiflow/task_service.py",
+      "src/aiflow/state.py",
+      "src/aiflow/approval.py",
+      "src/aiflow/verification_checks.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_review_package.py",
+      "tests/unit/test_review_records.py",
+      "tests/unit/test_state.py",
+      "tests/integration/test_review_command.py",
+      "tests/integration/test_approve_command.py",
+      "tests/integration/test_gate_command.py",
+      "tests/integration/test_gate_parity.py",
+      "tests/integration/test_governance_paths.py",
+      "tests/integration/test_verification_evidence_flow.py",
+      "tests/e2e/test_review_scenario.py",
+      "docs/operations/quickstart.md",
+      "docs/operations/recovery.md",
+      "docs/implementation/chapter-08-structured-review.md",
+      "docs/superpowers/state/chapters/chapter-08.yaml",
+      "docs/superpowers/state/overall.yaml",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 8 结构化设计审核与实现审核闭环",
+        "impact_scope": [
+          ".ai/schemas/review-context.schema.json",
+          ".ai/schemas/review-record.schema.json",
+          ".ai/templates/review-context.json",
+          ".ai/templates/review-record.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/review.py",
+          "src/aiflow/review_service.py",
+          "src/aiflow/task_service.py",
+          "src/aiflow/state.py",
+          "src/aiflow/approval.py",
+          "src/aiflow/verification_checks.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_review_package.py",
+          "tests/unit/test_review_records.py",
+          "tests/unit/test_state.py",
+          "tests/integration/test_review_command.py",
+          "tests/integration/test_approve_command.py",
+          "tests/integration/test_gate_command.py",
+          "tests/integration/test_gate_parity.py",
+          "tests/integration/test_governance_paths.py",
+          "tests/integration/test_verification_evidence_flow.py",
+          "tests/e2e/test_review_scenario.py",
+          "docs/operations/quickstart.md",
+          "docs/operations/recovery.md",
+          "docs/implementation/chapter-08-structured-review.md",
+          "docs/superpowers/state/chapters/chapter-08.yaml",
+          "docs/superpowers/state/overall.yaml",
+          "README.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 8 结构化设计审核与实现审核闭环",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "b6b67f75f90b02c6faac4ca011881964b1d1a8222aa18dd4c51e206ec6b28743",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "85fdfbc5613477f99f458a4d70533d95be889204a8e4e6a3640b7a23cee8539c",
+  "task_id": "TASK-0005"
+}

@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
-from test_approve_command import review_package
+from test_approve_command import _record_review, review_package
 from test_begin_close_commands import create_repository, make_ready, run_git, start
 from test_governance_paths import _auto_unit
 from test_verify_command import _plan
@@ -171,6 +171,12 @@ def test_review_gate_requires_code_approval_and_then_passes(
     assert "GATE_CODE_APPROVAL_STALE" in rejected["reason_codes"]
     resolve_task_path(repository, "TASK-0001", "review-package.md").write_text(
         review_package(), encoding="utf-8"
+    )
+    _record_review(
+        repository,
+        tmp_path,
+        stage="implementation",
+        review_id="REV-9001",
     )
 
     assert (

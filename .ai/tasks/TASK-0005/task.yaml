@@ -1,0 +1,115 @@
+allowed_scope:
+- .ai/schemas/review-context.schema.json
+- .ai/schemas/review-record.schema.json
+- .ai/templates/review-context.json
+- .ai/templates/review-record.json
+- src/aiflow/contracts.py
+- src/aiflow/review.py
+- src/aiflow/review_service.py
+- src/aiflow/task_service.py
+- src/aiflow/state.py
+- src/aiflow/approval.py
+- src/aiflow/verification_checks.py
+- src/aiflow/cli.py
+- tests/unit/test_contracts.py
+- tests/unit/test_review_package.py
+- tests/unit/test_review_records.py
+- tests/unit/test_state.py
+- tests/integration/test_review_command.py
+- tests/integration/test_approve_command.py
+- tests/integration/test_gate_command.py
+- tests/integration/test_gate_parity.py
+- tests/integration/test_governance_paths.py
+- tests/integration/test_verification_evidence_flow.py
+- tests/e2e/test_review_scenario.py
+- docs/operations/quickstart.md
+- docs/operations/recovery.md
+- docs/implementation/chapter-08-structured-review.md
+- docs/superpowers/state/chapters/chapter-08.yaml
+- docs/superpowers/state/overall.yaml
+- README.md
+base_commit: 5eadb1847ae9b2904d2b418eba8d62d46a610a20
+branch: main
+created_at: '2026-08-22T12:42:20Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 8 结构化设计审核与实现审核闭环
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - .ai/schemas/review-context.schema.json
+  - .ai/schemas/review-record.schema.json
+  - .ai/templates/review-context.json
+  - .ai/templates/review-record.json
+  - src/aiflow/contracts.py
+  - src/aiflow/review.py
+  - src/aiflow/review_service.py
+  - src/aiflow/task_service.py
+  - src/aiflow/state.py
+  - src/aiflow/approval.py
+  - src/aiflow/verification_checks.py
+  - src/aiflow/cli.py
+  - tests/unit/test_contracts.py
+  - tests/unit/test_review_package.py
+  - tests/unit/test_review_records.py
+  - tests/unit/test_state.py
+  - tests/integration/test_review_command.py
+  - tests/integration/test_approve_command.py
+  - tests/integration/test_gate_command.py
+  - tests/integration/test_gate_parity.py
+  - tests/integration/test_governance_paths.py
+  - tests/integration/test_verification_evidence_flow.py
+  - tests/e2e/test_review_scenario.py
+  - docs/operations/quickstart.md
+  - docs/operations/recovery.md
+  - docs/implementation/chapter-08-structured-review.md
+  - docs/superpowers/state/chapters/chapter-08.yaml
+  - docs/superpowers/state/overall.yaml
+  - README.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0005
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+frozen_spec_sha256: 85fdfbc5613477f99f458a4d70533d95be889204a8e4e6a3640b7a23cee8539c
+goal: 完成 Chapter 8 结构化设计审核与实现审核闭环
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-22T13:02:54Z'
+subject_commit: 5eadb1847ae9b2904d2b418eba8d62d46a610a20
+task_id: TASK-0005
+updated_at: '2026-08-22T13:07:01Z'
+worktree_dirty: false
+worktree_dirty_paths: []

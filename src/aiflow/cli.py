@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from argparse import ArgumentParser
 from collections.abc import Sequence
@@ -14,7 +15,14 @@ from aiflow.classification_service import classify_task
 from aiflow.errors import AiflowError
 from aiflow.escalation import ESCALATION_REASON_CODES, escalate_task, record_resolution
 from aiflow.gate import evaluate_gate
+from aiflow.review_service import (
+    build_review_context,
+    list_review_records,
+    record_review,
+    resolve_review_finding,
+)
 from aiflow.status_service import summarize_task
+from aiflow.storage import atomic_write_json
 from aiflow.task_service import (
     begin_task,
     close_task,
@@ -82,6 +90,32 @@ def build_parser() -> ArgumentParser:
     resolve.add_argument("--reason", required=True)
     resolve.add_argument("--actor", required=True)
     resolve.add_argument("--authorize-downgrade", action="store_true")
+    review = subparsers.add_parser("review", help="manage structured staged reviews")
+    review_commands = review.add_subparsers(dest="review_command", required=True)
+    review_context = review_commands.add_parser(
+        "context", help="build a deterministic minimal review context"
+    )
+    review_context.add_argument("task_id")
+    review_context.add_argument("--stage", required=True, choices=["design", "implementation"])
+    review_context.add_argument("--output", type=Path)
+    review_record = review_commands.add_parser(
+        "record", help="persist an immutable structured review"
+    )
+    review_record.add_argument("task_id")
+    review_record.add_argument("--input", required=True, type=Path)
+    review_record.add_argument("--actor", required=True)
+    review_resolve = review_commands.add_parser(
+        "resolve", help="append a finding-resolution revision"
+    )
+    review_resolve.add_argument("task_id")
+    review_resolve.add_argument("--review", required=True)
+    review_resolve.add_argument("--finding", required=True)
+    review_resolve.add_argument("--reason", required=True)
+    review_resolve.add_argument("--actor", required=True)
+    review_show = review_commands.add_parser("show", help="show latest structured reviews")
+    review_show.add_argument("task_id")
+    review_show.add_argument("--stage", choices=["design", "implementation"])
+    review_show.add_argument("--format", choices=["text", "json"], default="text")
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
@@ -195,11 +229,59 @@ def main(argv: Sequence[str] | None = None) -> int:
                 authorize_downgrade=arguments.authorize_downgrade,
             )
             print(f"{arguments.task_id} {resolution_result.task['current_state']}")
+        elif arguments.command == "review":
+            if arguments.review_command == "context":
+                context = build_review_context(Path.cwd(), arguments.task_id, arguments.stage)
+                if arguments.output is not None:
+                    atomic_write_json(arguments.output, context)
+                    print(str(arguments.output.resolve()))
+                else:
+                    print(json.dumps(context, ensure_ascii=False, sort_keys=True))
+            elif arguments.review_command == "record":
+                record_result = record_review(
+                    Path.cwd(),
+                    arguments.task_id,
+                    input_path=arguments.input,
+                    actor=arguments.actor,
+                )
+                print(
+                    f"{arguments.task_id} {record_result.record['review_id']} "
+                    f"r{int(record_result.record['revision']):04d}"
+                )
+            elif arguments.review_command == "resolve":
+                finding_result = resolve_review_finding(
+                    Path.cwd(),
+                    arguments.task_id,
+                    review_id=arguments.review,
+                    finding_id=arguments.finding,
+                    reason=arguments.reason,
+                    actor=arguments.actor,
+                )
+                print(
+                    f"{arguments.task_id} {finding_result.record['review_id']} "
+                    f"r{int(finding_result.record['revision']):04d}"
+                )
+            elif arguments.review_command == "show":
+                reviews = list_review_records(Path.cwd(), arguments.task_id, stage=arguments.stage)
+                if arguments.format == "json":
+                    print(
+                        json.dumps(
+                            {"task_id": arguments.task_id, "reviews": list(reviews)},
+                            ensure_ascii=False,
+                            sort_keys=True,
+                        )
+                    )
+                else:
+                    for record in reviews:
+                        print(
+                            f"{record['review_id']} r{int(record['revision']):04d} "
+                            f"{record['review_stage']} {record['outcome']}"
+                        )
         elif arguments.command == "status":
             summary = summarize_task(Path.cwd(), arguments.task_id)
             print(summary.to_json() if arguments.format == "json" else summary.to_text())
         elif arguments.command == "verify":
-            result = verify_task(
+            verify_result = verify_task(
                 Path.cwd(),
                 arguments.task_id,
                 actor=arguments.actor,
@@ -208,7 +290,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ci_run_dir=arguments.ci_run_dir,
                 output=arguments.output,
             )
-            print(f"{result.task_id} {result.state or 'CI'} {result.conclusion}")
+            print(
+                f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}"
+            )
         elif arguments.command == "gate":
             decision = evaluate_gate(
                 Path.cwd(), arguments.task_id, evidence_path=arguments.evidence

@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from test_answer_command import _prepare_repository
-from test_approve_command import _evidence, review_package
+from test_approve_command import _evidence, _record_review, review_package
 from test_approve_command import _prepare as prepare_review
 from test_begin_close_commands import create_repository, make_ready, start
 
@@ -148,6 +148,7 @@ def test_mixed_ask_review_requires_answer_then_spec_approval_before_begin(
         load_task_record(repository, "TASK-0001").task["current_state"] == "WAITING_FOR_SPEC_REVIEW"
     )
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
+    _record_review(repository, tmp_path, stage="design", review_id="REV-9001")
     assert (
         main(
             [
@@ -210,6 +211,7 @@ def test_review_code_and_action_approvals_remain_independent(tmp_path: Path, mon
     atomic_write_json(
         resolve_task_path(repository, "TASK-0001", "evidence.json"), _evidence(repository)
     )
+    _record_review(repository, tmp_path, stage="implementation", review_id="REV-9002")
     assert (
         main(
             [

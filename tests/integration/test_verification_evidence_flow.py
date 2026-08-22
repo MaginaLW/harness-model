@@ -15,6 +15,7 @@ from test_verify_command import _plan
 
 from aiflow import verification_service
 from aiflow.cli import main
+from aiflow.review_service import build_review_context, record_review
 from aiflow.storage import (
     atomic_write_json,
     atomic_write_yaml,
@@ -182,10 +183,32 @@ def _prepare_real_policy_plan(
     return repository
 
 
+def _record_structured_review(repository: Path, *, stage: str) -> None:
+    review_directory = resolve_task_path(repository, "TASK-0001", "reviews")
+    review_id = f"REV-{9001 + len(list(review_directory.glob('REV-*-r*.json'))):04d}"
+    context = build_review_context(repository, "TASK-0001", stage)
+    record_review(
+        repository,
+        "TASK-0001",
+        actor="reviewer",
+        input_path={
+            "schema_version": "1.0",
+            "review_id": review_id,
+            "review_stage": stage,
+            "recorded_at": "2026-08-22T01:00:00Z",
+            "context_sha256": context["context_sha256"],
+            "outcome": "APPROVE",
+            "summary": f"current {stage} context approved",
+            "findings": [],
+        },
+    )
+
+
 def _approve_code(repository: Path, *, reason: str) -> None:
     resolve_task_path(repository, "TASK-0001", "review-package.md").write_text(
         review_package(), encoding="utf-8"
     )
+    _record_structured_review(repository, stage="implementation")
     assert (
         main(
             [
@@ -538,6 +561,7 @@ def test_spec_change_recovers_via_escalate_resolve_reclassify_and_reapprove(
     )
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     assert main(["freeze", "TASK-0001", "--actor", "specifier"]) == 0
+    _record_structured_review(repository, stage="design")
     assert (
         main(
             [
@@ -633,6 +657,7 @@ def test_policy_change_recovers_after_explicit_scoped_subject_sync(
     )
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     assert main(["freeze", "TASK-0001", "--actor", "specifier"]) == 0
+    _record_structured_review(repository, stage="design")
     assert (
         main(
             [

@@ -9,6 +9,7 @@ from aiflow.decision_units import parse_decision_units
 from aiflow.errors import ContractError
 from aiflow.git_context import VerificationGitBinding, evaluate_verification_git_context
 from aiflow.policy import load_policy_bundle
+from aiflow.review_service import validate_review_artifacts
 from aiflow.specification import validate_specification
 from aiflow.storage import read_task_json, resolve_task_path
 from aiflow.task_service import read_task_record_strict
@@ -36,6 +37,7 @@ def validate_task_artifacts(repository_root: Path, task_id: str) -> None:
             raise ContractError("Task approvals are invalid", code="VALIDATE_ARTIFACT_INVALID")
         for approval in approvals:
             require_valid_contract("approval", approval)
+    validate_review_artifacts(root, task_id)
 
 
 def validate_task_scope(repository_root: Path, task_id: str) -> None:

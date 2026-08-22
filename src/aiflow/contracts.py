@@ -24,6 +24,8 @@ SCHEMA_FILES = {
     "event": "event.schema.json",
     "evidence": "evidence.schema.json",
     "policy": "policy.schema.json",
+    "review-context": "review-context.schema.json",
+    "review-record": "review-record.schema.json",
     "task": "task.schema.json",
 }
 

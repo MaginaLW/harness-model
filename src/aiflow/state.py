@@ -125,6 +125,8 @@ NON_STATE_EVENTS = frozenset(
         "subject_commit_synchronized",
         "state_recovered",
         "resolution_recorded",
+        "review_recorded",
+        "review_finding_resolved",
     }
 )
 

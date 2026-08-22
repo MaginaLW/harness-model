@@ -1,0 +1,28 @@
+[
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-22T12:44:59Z",
+    "base_commit": "5eadb1847ae9b2904d2b418eba8d62d46a610a20",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+    "reason": "批准 Chapter 8 结构化设计审核与实现审核冻结规格 bacb591a",
+    "schema_version": "1.0",
+    "spec_sha256": "bacb591ac9466a5872479d42a01a42d7fd58de723b90f63bb3ec66dc498d8629",
+    "subject_commit": "5eadb1847ae9b2904d2b418eba8d62d46a610a20",
+    "task_id": "TASK-0005"
+  },
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-22T13:05:31Z",
+    "base_commit": "5eadb1847ae9b2904d2b418eba8d62d46a610a20",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+    "reason": "用户批准 TASK-0005 当前更新规格（spec_sha256 85fdfbc5613477f99f458a4d70533d95be889204a8e4e6a3640b7a23cee8539c）",
+    "schema_version": "1.0",
+    "spec_sha256": "85fdfbc5613477f99f458a4d70533d95be889204a8e4e6a3640b7a23cee8539c",
+    "subject_commit": "5eadb1847ae9b2904d2b418eba8d62d46a610a20",
+    "task_id": "TASK-0005"
+  }
+]

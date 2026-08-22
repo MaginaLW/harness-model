@@ -63,7 +63,9 @@ def test_transition_table_matches_independent_fixture() -> None:
 
     assert actual == expected
     assert NON_STATE_EVENTS == frozenset(fixture()["non_state_events"]) | {
-        "subject_commit_synchronized"
+        "subject_commit_synchronized",
+        "review_recorded",
+        "review_finding_resolved",
     }
 
 

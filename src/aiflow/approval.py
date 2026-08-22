@@ -18,6 +18,7 @@ from aiflow.freshness import current_classification_input_digest
 from aiflow.git_context import collect_git_context
 from aiflow.policy import load_policy_bundle
 from aiflow.review import validate_review_package
+from aiflow.review_service import ReviewAssessment, latest_review_assessment
 from aiflow.specification import specification_digest
 from aiflow.state import create_record_event, create_transition_event
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
@@ -505,6 +506,22 @@ def approve_task(
         governance_only = _governance_only(
             repository_root, task_id, str(record.task.get("subject_commit"))
         )
+    structured_review: ReviewAssessment | None = None
+    if approval_type == "spec":
+        structured_review = latest_review_assessment(
+            repository_root,
+            task_id,
+            "design",
+            decision_unit_ids=sorted(review_ids),
+        )
+    elif approval_type == "code":
+        structured_review = latest_review_assessment(
+            repository_root,
+            task_id,
+            "implementation",
+            decision_unit_ids=sorted(review_ids),
+            evidence_sha256=evidence_sha256,
+        )
     action_decision_unit: str | None = None
     if approval_type == "action":
         if action_file is None:
@@ -598,12 +615,24 @@ def approve_task(
             if approval_type == "spec"
             else {"code_approval_valid"}
         )
+        review_payload = None
+        if structured_review is not None:
+            review_payload = {
+                "review_id": structured_review.record["review_id"],
+                "revision": structured_review.record["revision"],
+                "review_stage": structured_review.record["review_stage"],
+                "context_sha256": structured_review.record["context_sha256"],
+            }
         event = create_transition_event(
             record.task,
             target_state=target_state,
             event_type=event_type,
             actor=str(candidates[0]["actor"]),
-            payload={"approval_type": approval_type, "approvals": additions or candidates},
+            payload={
+                "approval_type": approval_type,
+                "approvals": additions or candidates,
+                "structured_review": review_payload,
+            },
             sequence=len(record.events) + 1,
             satisfied_preconditions=preconditions,
         )
