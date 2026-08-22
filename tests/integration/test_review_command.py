@@ -11,6 +11,7 @@ from test_approve_command import _evidence, _prepare, review_package
 from aiflow import review_service
 from aiflow.cli import main
 from aiflow.errors import StorageError
+from aiflow.review_service import list_review_records, validate_review_artifacts
 from aiflow.storage import atomic_write_json, resolve_task_path
 from aiflow.task_service import load_task_record
 
@@ -101,6 +102,11 @@ def test_review_context_is_stage_specific_and_record_replay_is_idempotent(
     before = load_task_record(repository, "TASK-0001")
     _record(repository, "TASK-0001", design, tmp_path, stage="design", review_id="REV-0001")
     assert load_task_record(repository, "TASK-0001").events == before.events
+    validate_review_artifacts(repository, "TASK-0001")
+    assert [value["review_id"] for value in list_review_records(repository, "TASK-0001")] == [
+        "REV-0001"
+    ]
+    assert list_review_records(repository, "TASK-0001", stage="implementation") == ()
 
     assert main(["review", "show", "TASK-0001", "--stage", "design", "--format", "json"]) == 0
 
@@ -252,6 +258,24 @@ def test_review_resolution_appends_revision_without_overwriting_history(
                 "status": "open",
             }
         ],
+    )
+    assert (
+        main(
+            [
+                "review",
+                "resolve",
+                "TASK-0001",
+                "--review",
+                "REV-0005",
+                "--finding",
+                "RF-001",
+                "--reason",
+                "boundary added to specification",
+                "--actor",
+                "reviewer",
+            ]
+        )
+        == 0
     )
     assert (
         main(

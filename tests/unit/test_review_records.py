@@ -11,9 +11,11 @@ from typing import Any
 
 import pytest
 
+from aiflow import review_service
 from aiflow.errors import ContractError
 from aiflow.review_service import (
     _committed_diff_summary,
+    _stage,
     review_is_approvable,
     validate_review_context,
     validate_review_record,
@@ -113,6 +115,51 @@ def test_committed_diff_summary_contains_only_deterministic_numstat(tmp_path: Pa
     }
 
 
+def test_committed_diff_summary_has_stable_git_and_parse_failures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def timeout(*args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+        raise subprocess.TimeoutExpired(["git"], 10)
+
+    monkeypatch.setattr(review_service.subprocess, "run", timeout)
+    with pytest.raises(ContractError) as caught:
+        _committed_diff_summary(tmp_path, COMMIT, COMMIT)
+    assert caught.value.code == "REVIEW_DIFF_TIMEOUT"
+
+    def unavailable(*args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+        raise OSError("git unavailable")
+
+    monkeypatch.setattr(review_service.subprocess, "run", unavailable)
+    with pytest.raises(ContractError) as caught:
+        _committed_diff_summary(tmp_path, COMMIT, COMMIT)
+    assert caught.value.code == "REVIEW_DIFF_FAILED"
+
+    for result, code in (
+        (subprocess.CompletedProcess(["git"], 1, b"", b"failed"), "REVIEW_DIFF_FAILED"),
+        (subprocess.CompletedProcess(["git"], 0, b"\xff", b""), "REVIEW_DIFF_INVALID"),
+        (subprocess.CompletedProcess(["git"], 0, b"malformed\n", b""), "REVIEW_DIFF_INVALID"),
+        (subprocess.CompletedProcess(["git"], 0, b"x\t1\tbad.txt\n", b""), "REVIEW_DIFF_INVALID"),
+    ):
+        monkeypatch.setattr(
+            review_service.subprocess, "run", lambda *args, _result=result, **kwargs: _result
+        )
+        with pytest.raises(ContractError) as caught:
+            _committed_diff_summary(tmp_path, COMMIT, COMMIT)
+        assert caught.value.code == code
+
+    binary = subprocess.CompletedProcess(["git"], 0, b"-\t-\tasset.bin\n", b"")
+    monkeypatch.setattr(review_service.subprocess, "run", lambda *args, **kwargs: binary)
+    assert _committed_diff_summary(tmp_path, COMMIT, COMMIT)["files"] == [
+        {"path": "asset.bin", "additions": None, "deletions": None, "binary": True}
+    ]
+
+
+def test_invalid_review_stage_has_a_stable_error() -> None:
+    with pytest.raises(ContractError) as caught:
+        _stage("final")
+    assert caught.value.code == "REVIEW_STAGE_INVALID"
+
+
 def test_stages_are_mutually_exclusive() -> None:
     design = context()
     design["subject_commit"] = COMMIT
@@ -161,6 +208,22 @@ def test_resolved_high_finding_and_context_binding_are_valid() -> None:
     with pytest.raises(ContractError) as caught:
         validate_review_record(reviewed, current)
     assert caught.value.code == "REVIEW_CONTEXT_MISMATCH"
+
+    wrong_task = record("implementation")
+    wrong_task["task_id"] = "TASK-0002"
+    with pytest.raises(ContractError) as caught:
+        validate_review_record(wrong_task, current)
+    assert caught.value.code == "REVIEW_CONTEXT_MISMATCH"
+
+
+def test_non_list_findings_are_ignored_by_the_semantic_helper() -> None:
+    review_service._validate_findings({"findings": None})
+
+
+def test_blank_review_actor_is_rejected_before_storage(tmp_path: Path) -> None:
+    with pytest.raises(ContractError) as caught:
+        review_service.record_review(tmp_path, "TASK-0001", input_path={}, actor=" ")
+    assert caught.value.code == "REVIEW_ACTOR_INVALID"
 
 
 def test_non_approving_outcomes_cannot_be_approvable() -> None:

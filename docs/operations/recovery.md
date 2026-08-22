@@ -50,7 +50,7 @@
 - 可恢复操作：核对 repository ID 后，向 CI 传入唯一的显式 task ID；若变更实际混合了多任务，建立新的有界任务/分支并重新验证。
 - 禁止操作：不按字典序或最新时间猜选 task ID，不忽略 repository ID，不将多个任务的证据合并成一个 Gate 输入。
 
-## REC-09 stale 或不可批准的结构化审核
+## 结构化审核 stale 或不可批准
 
 - 诊断：运行 `python -m aiflow review show <TASK-ID> --stage <design|implementation> --format json`；再生成当前 context，核对 `context_sha256`、阶段、结论和 high/critical finding 状态。
 - 可恢复操作：事实变化后基于新 context 记录新的 review；现有 finding 已修复时，用 `python -m aiflow review resolve <TASK-ID> --review <REV-ID> --finding <RF-ID> --reason <REASON> --actor <ACTOR>` 追加 revision，然后重新取得对应 spec/code approval。
