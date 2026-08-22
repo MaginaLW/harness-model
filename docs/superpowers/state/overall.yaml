@@ -1,16 +1,18 @@
 schema: "progress.v1"
 state_type: "implementation_overall"
 project: "AI 代码协同系统"
-stage: "phase-01-mvp"
-status: "completed"
+stage: "phase-02-review-verification"
+status: "planning"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-21T12:36:46Z"
+updated_at: "2026-08-22T12:12:54Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
   implementation_plan_sha256: "e531d7b9be3c64d1a8d261a146d76ef2ba96a5f22c3206ebed4ded1ffd39ef7a"
   mvp_design: "docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md"
   mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
+  phase_02_implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+  phase_02_design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
   baseline_commit: "c375c32d2a28294cd4cedd1fd77815feb0d41615"
   read_at: "2026-08-02T14:03:50Z"
 
@@ -20,21 +22,21 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: null
-  current_task: null
+  current_chapter: "chapter-08"
+  current_task: "8.1"
   current_step: null
 
 summary:
-  chapters_total: 7
+  chapters_total: 8
   chapters_completed: 7
-  tasks_total: 44
+  tasks_total: 49
   tasks_completed: 44
-  steps_total: 243
+  steps_total: 268
   steps_completed: 243
-  exit_checks_total: 7
+  exit_checks_total: 11
   exit_checks_completed: 7
-  blockers_total: 0
-  evidence_items: 0
+  blockers_total: 1
+  evidence_items: 1
 
 chapters:
   - id: "chapter-01"
@@ -93,6 +95,14 @@ chapters:
     dependency: "chapters 01-06 completed"
     tasks_total: 7
     steps_total: 39
+  - id: "chapter-08"
+    number: 8
+    title: "结构化设计审核与实现审核"
+    state_file: "docs/superpowers/state/chapters/chapter-08.yaml"
+    status: "planned"
+    dependency: "phase-01 completed and phase-02 design committed"
+    tasks_total: 5
+    steps_total: 25
 
 global_checks:
   plan_self_review:
@@ -109,8 +119,13 @@ global_checks:
 future_phases:
   - phase: "phase-02"
     title: "审核与强化验证"
-    status: "not_started"
-    implementation_plan: "按计划，仅在阶段一十二项验收、四个真实试点和阶段二输入证据齐备后另建计划"
+    status: "planning"
+    implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+    design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+    target_repository: "harness-model"
+    test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
+    current_chapter: "chapter-08"
+    note: "阶段一进入条件已满足；Chapter 8 行为性实现等待版本绑定的 design/spec approval。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"

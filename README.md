@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；资源感知调度、V2/V3、独立 Verifier 和真实模型路由仍是后续阶段输入，尚无运行时实现。
+> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二已完成独立规划并进入 Chapter 8 结构化双阶段审核。V2、独立 Verifier、变异测试和完整 Hooks 仍未实现，V3、真实模型路由及资源调度不在阶段二范围内。
 
 ## 阶段一目标
 
@@ -20,6 +20,8 @@
 | [实施总体规划 V0.2](docs/architecture/AI代码协同系统实施总体规划_V0.2.md) | 总体架构、阶段路线和验收原则 |
 | [阶段一 MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) | 已确认的阶段一技术与治理设计 |
 | [阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md) | 7 章、44 个任务及逐步验证清单 |
+| [阶段二设计](docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md) | 双阶段审核、V2、独立验证、变异与 Hooks 的边界和兼容性设计 |
+| [阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md) | Chapter 8–13 的进入条件、任务顺序、验证与退出条件 |
 | [资源感知多智能体调度设计](docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) | “编排顾问 + 确定性控制面”、整机资源租约、背压与恢复设计 |
 | [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |
 | [自适应多智能体编排预进入蓝图](docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md) | 安全控制面通过后编写编排顾问与真实 adapter 执行计划的设计输入，当前未授权实施 |
@@ -28,6 +30,7 @@
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
 | [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence 等恢复流程 |
 | [阶段一验收报告](docs/implementation/phase-01-acceptance-report.md) | 十二项验收、四试点、覆盖率、限制和风险接受 |
+| [Chapter 8 追踪](docs/implementation/chapter-08-structured-review.md) | 结构化设计/实现审核的任务状态和兼容性护栏 |
 
 ## 实施路线
 

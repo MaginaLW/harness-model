@@ -1,0 +1,83 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-08"
+  number: 8
+  title: "结构化设计审核与实现审核"
+  status: "planned"
+  dependency: "phase-01 completed and phase-02 design committed"
+  tasks_total: 5
+  steps_total: 25
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+  design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+  initialized_at: "2026-08-22T12:12:54Z"
+
+tasks:
+  - id: "8.1"
+    title: "定义审核记录与发现契约"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers:
+      - "等待绑定 frozen spec、Policy 和 base commit 的 design/spec approval"
+  - id: "8.2"
+    title: "生成最小审核上下文包"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "8.3"
+    title: "审核发现处置与 freshness"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "8.4"
+    title: "提供 aiflow review 命令面"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+  - id: "8.5"
+    title: "Chapter 8 集成与文档"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    evidence: []
+    blockers: []
+
+exit_checks:
+  - id: "CH8-EXIT-01"
+    description: "design 与 implementation 审核不可互换且版本绑定可验证"
+    status: "pending"
+  - id: "CH8-EXIT-02"
+    description: "最小上下文足以复核且 canonical hash 可重现"
+    status: "pending"
+  - id: "CH8-EXIT-03"
+    description: "未关闭高严重度发现、陈旧审核和非法结论均阻止批准"
+    status: "pending"
+  - id: "CH8-EXIT-04"
+    description: "阶段一 V0/V1 evidence 与 Gate 行为保持兼容"
+    status: "pending"
+
+chapter_evidence:
+  - id: "EVD-CH8-PLAN-001"
+    kind: "chapter_initialization"
+    task_id: "TASK-0004"
+    artifacts:
+      - "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+      - "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+    note: "只证明章节规划已初始化，不证明任何运行时能力完成。"
+
+blockers:
+  - "Task 8.1 行为性实现尚未获得版本绑定的 design/spec approval"

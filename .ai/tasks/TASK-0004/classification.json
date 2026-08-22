@@ -1,0 +1,52 @@
+{
+  "base_commit": "695da6419cfc6157411ff8488dbeed70dfdf5c61",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "78433e9d28336d958c512cf462c6a0c51484ff9be6264b74c5709b70ff2a6d0c",
+  "classifications": [
+    {
+      "classified_at": "2026-08-22T12:13:30Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.",
+      "explanations": [
+        "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.",
+          "predicate_explanations": [
+            "scope.clear: equals -> true",
+            "impact.level: equals -> true",
+            "reversibility: in -> true",
+            "verification.automatic: equals -> true",
+            "external_side_effects: is_empty -> true"
+          ],
+          "priority": 100,
+          "route": "AUTO",
+          "rule_id": "ROUTE-AUTO-EXPLICIT-GUARDS"
+        }
+      ],
+      "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+      "policy_version": "1.0.0",
+      "route": "AUTO",
+      "rule_id": "ROUTE-AUTO-EXPLICIT-GUARDS",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Cross-file interaction requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-CROSS-FILE",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-08-22T12:13:30Z",
+  "effective_route": "AUTO",
+  "effective_verification_level": "V1",
+  "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+  "policy_version": "1.0.0",
+  "schema_version": "1.0",
+  "subject_commit": "695da6419cfc6157411ff8488dbeed70dfdf5c61",
+  "task_id": "TASK-0004"
+}

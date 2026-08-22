@@ -1,0 +1,64 @@
+schema_version: '1.0'
+task_id: TASK-0004
+goal: 建立阶段二独立规格与实施目录并初始化 Chapter 8 结构化审核章节
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: main
+base_commit: 695da6419cfc6157411ff8488dbeed70dfdf5c61
+subject_commit: 695da6419cfc6157411ff8488dbeed70dfdf5c61
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+- docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+- docs/superpowers/state/chapters/chapter-08.yaml
+- docs/superpowers/state/overall.yaml
+- docs/implementation/chapter-08-structured-review.md
+- README.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+current_state: IMPLEMENTING
+created_at: '2026-08-22T12:12:54Z'
+updated_at: '2026-08-22T12:13:31Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0004
+  decision_unit_id: DU-001
+  goal: 建立阶段二独立规格与实施目录并初始化 Chapter 8 结构化审核章节
+  inputs: []
+  planned_actions:
+  - Implement the bounded task objective
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - Define and run executable verification
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: cross_file
+    regression_risk: false
+    error_detectability: high
+repository_path_at_creation: D:/Repos/harness-model
+frozen_spec_sha256: a543882cb074422e3f5b2b21ac489a5346e1a9e13a03e0208b7a411841f99f79
+spec_frozen_at: '2026-08-22T12:13:31Z'
