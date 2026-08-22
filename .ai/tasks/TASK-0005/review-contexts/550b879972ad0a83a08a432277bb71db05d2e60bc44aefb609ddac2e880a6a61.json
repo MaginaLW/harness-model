@@ -1,0 +1,383 @@
+{
+  "base_commit": "5eadb1847ae9b2904d2b418eba8d62d46a610a20",
+  "branch": "main",
+  "classification_input_sha256": "768208745c33a4a0db381304bfc6c94ae613dc329d41cb3dfa1063a142ce3be4",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/review-context.schema.json",
+      ".ai/schemas/review-record.schema.json",
+      ".ai/templates/review-context.json",
+      ".ai/templates/review-record.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/review.py",
+      "src/aiflow/review_service.py",
+      "src/aiflow/task_service.py",
+      "src/aiflow/state.py",
+      "src/aiflow/approval.py",
+      "src/aiflow/verification_checks.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_review_package.py",
+      "tests/unit/test_review_records.py",
+      "tests/unit/test_state.py",
+      "tests/integration/test_review_command.py",
+      "tests/integration/test_approve_command.py",
+      "tests/integration/test_gate_command.py",
+      "tests/integration/test_gate_parity.py",
+      "tests/integration/test_governance_paths.py",
+      "tests/integration/test_verification_evidence_flow.py",
+      "tests/e2e/test_review_scenario.py",
+      "docs/operations/quickstart.md",
+      "docs/operations/recovery.md",
+      "docs/implementation/chapter-08-structured-review.md",
+      "docs/superpowers/state/chapters/chapter-08.yaml",
+      "docs/superpowers/state/overall.yaml",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 8 结构化设计审核与实现审核闭环",
+        "impact_scope": [
+          ".ai/schemas/review-context.schema.json",
+          ".ai/schemas/review-record.schema.json",
+          ".ai/templates/review-context.json",
+          ".ai/templates/review-record.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/review.py",
+          "src/aiflow/review_service.py",
+          "src/aiflow/task_service.py",
+          "src/aiflow/state.py",
+          "src/aiflow/approval.py",
+          "src/aiflow/verification_checks.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_review_package.py",
+          "tests/unit/test_review_records.py",
+          "tests/unit/test_state.py",
+          "tests/integration/test_review_command.py",
+          "tests/integration/test_approve_command.py",
+          "tests/integration/test_gate_command.py",
+          "tests/integration/test_gate_parity.py",
+          "tests/integration/test_governance_paths.py",
+          "tests/integration/test_verification_evidence_flow.py",
+          "tests/e2e/test_review_scenario.py",
+          "docs/operations/quickstart.md",
+          "docs/operations/recovery.md",
+          "docs/implementation/chapter-08-structured-review.md",
+          "docs/superpowers/state/chapters/chapter-08.yaml",
+          "docs/superpowers/state/overall.yaml",
+          "README.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/review-context.schema.json",
+        ".ai/schemas/review-record.schema.json",
+        ".ai/tasks/TASK-0005/approvals.json",
+        ".ai/tasks/TASK-0005/classification.json",
+        ".ai/tasks/TASK-0005/events.jsonl",
+        ".ai/tasks/TASK-0005/review-contexts/b6b67f75f90b02c6faac4ca011881964b1d1a8222aa18dd4c51e206ec6b28743.json",
+        ".ai/tasks/TASK-0005/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0005/spec.md",
+        ".ai/tasks/TASK-0005/task.yaml",
+        ".ai/templates/review-context.json",
+        ".ai/templates/review-record.json",
+        "README.md",
+        "docs/implementation/chapter-08-structured-review.md",
+        "docs/operations/quickstart.md",
+        "docs/operations/recovery.md",
+        "docs/superpowers/state/chapters/chapter-08.yaml",
+        "docs/superpowers/state/overall.yaml",
+        "src/aiflow/approval.py",
+        "src/aiflow/cli.py",
+        "src/aiflow/contracts.py",
+        "src/aiflow/review_service.py",
+        "src/aiflow/state.py",
+        "src/aiflow/verification_checks.py",
+        "tests/e2e/test_review_scenario.py",
+        "tests/integration/test_approve_command.py",
+        "tests/integration/test_gate_command.py",
+        "tests/integration/test_governance_paths.py",
+        "tests/integration/test_review_command.py",
+        "tests/integration/test_verification_evidence_flow.py",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_review_records.py",
+        "tests/unit/test_state.py"
+      ],
+      "files": [
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/review-context.schema.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/review-record.schema.json"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0005/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0005/classification.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0005/events.jsonl"
+        },
+        {
+          "additions": 91,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0005/review-contexts/b6b67f75f90b02c6faac4ca011881964b1d1a8222aa18dd4c51e206ec6b28743.json"
+        },
+        {
+          "additions": 32,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0005/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0005/spec.md"
+        },
+        {
+          "additions": 115,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0005/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/templates/review-context.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/templates/review-record.json"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "README.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 9,
+          "path": "docs/implementation/chapter-08-structured-review.md"
+        },
+        {
+          "additions": 21,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 24,
+          "path": "docs/superpowers/state/chapters/chapter-08.yaml"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 14,
+          "path": "docs/superpowers/state/overall.yaml"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/approval.py"
+        },
+        {
+          "additions": 86,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 696,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/review_service.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/state.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/verification_checks.py"
+        },
+        {
+          "additions": 53,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/e2e/test_review_scenario.py"
+        },
+        {
+          "additions": 67,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_approve_command.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_gate_command.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_governance_paths.py"
+        },
+        {
+          "additions": 350,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_review_command.py"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_verification_evidence_flow.py"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 250,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_review_records.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_state.py"
+        }
+      ],
+      "totals": {
+        "additions": 2129,
+        "deletions": 55,
+        "files": 32
+      }
+    },
+    "goal": "完成 Chapter 8 结构化设计审核与实现审核闭环",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0005",
+        "--actor",
+        "verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "550b879972ad0a83a08a432277bb71db05d2e60bc44aefb609ddac2e880a6a61",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "eac6f3ac919bc8932d66e1f090a9e1161cbbffe7c086706e45bf37609f2a51ea",
+  "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "85fdfbc5613477f99f458a4d70533d95be889204a8e4e6a3640b7a23cee8539c",
+  "subject_commit": "3c32b5cc97924cb84eafcf0702cf6f842829dd53",
+  "task_id": "TASK-0005"
+}
