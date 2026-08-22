@@ -103,3 +103,24 @@ python -m aiflow gate <TASK-ID> --format json
 ## 继续实际任务前
 
 用 `spec.md` 冻结可执行规格，然后按 route 执行 ASK/REVIEW 决定或批准，再运行 `begin`、实施、`sync`、`verify` 和 Gate。所有命令都以 `python -m aiflow ...` 为权威入口；未获单独批准时不执行 push、merge、deploy、delete、凭据或付费外部调用。
+
+## REVIEW 双阶段审核
+
+`REVIEW` 任务的规格批准前，先生成只含规格、Policy、base、分类和决策单元的 design context，由审核者提交结构化结论：
+
+```sh
+python -m aiflow review context <TASK-ID> --stage design --output design-context.json
+python -m aiflow review record <TASK-ID> --input design-review.json --actor <REVIEWER>
+python -m aiflow approve <TASK-ID> --type spec --actor <APPROVER> --reason "design approved"
+```
+
+实现、commit、`sync` 和 `verify` 通过后，implementation context 会额外绑定当前 subject、evidence digest、committed numstat 摘要和验证摘要。它不会复制完整 patch、日志或实现对话：
+
+```sh
+python -m aiflow review context <TASK-ID> --stage implementation --output implementation-context.json
+python -m aiflow review record <TASK-ID> --input implementation-review.json --actor <REVIEWER>
+python -m aiflow review show <TASK-ID> --stage implementation --format json
+python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "implementation approved"
+```
+
+`review record` 不覆盖历史；需关闭发现时使用 `review resolve` 追加 revision。code approval 仍同时要求现有八节 `review-package.md` 和通过的本地 evidence。
