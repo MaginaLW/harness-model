@@ -383,6 +383,11 @@ def verify_task(
         subject_commit = assessment.subject_commit
 
     level = classification.get("effective_verification_level")
+    if level == "V2":
+        raise ContractError(
+            "V2 verification execution is not available in Chapter 9",
+            code="VERIFY_V2_NOT_EXECUTABLE",
+        )
     if level not in {"V0", "V1"}:
         raise ContractError("Verification level is invalid", code="VERIFY_LEVEL_INVALID")
     context = VerificationContext(

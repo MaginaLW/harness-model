@@ -1,5 +1,5 @@
 schema_version: "1.0"
-policy_version: "1.0.0"
+policy_version: "2.0.0"
 policy_kind: verification_levels
 allowed_placeholders:
   - "{python}"
@@ -112,3 +112,90 @@ levels:
         required: true
         result_parser: diff_cover
         threshold: 90
+  - id: V2
+    checks:
+      - id: contract
+        command: ["{python}", -m, aiflow, validate, "{task_id}"]
+        timeout_seconds: 30
+        required: true
+        result_parser: exit_zero
+      - id: scope
+        command: ["{python}", -m, aiflow, scope, "{task_id}"]
+        timeout_seconds: 30
+        required: true
+        result_parser: exit_zero
+      - id: ruff_check
+        command: ["{python}", -m, ruff, check, .]
+        timeout_seconds: 120
+        required: true
+        result_parser: exit_zero
+      - id: ruff_format_check
+        command: ["{python}", -m, ruff, format, --check, .]
+        timeout_seconds: 120
+        required: true
+        result_parser: exit_zero
+      - id: smoke
+        command: ["{python}", -m, aiflow, --help]
+        timeout_seconds: 30
+        required: true
+        result_parser: exit_zero
+      - id: unit_tests
+        command: ["{python}", -m, pytest, tests/unit, -q]
+        timeout_seconds: 300
+        required: true
+        result_parser: pytest
+      - id: regression_tests
+        command: ["{python}", -m, pytest, -q]
+        timeout_seconds: 600
+        required: true
+        result_parser: pytest
+      - id: mypy
+        command: ["{python}", -m, mypy, src]
+        timeout_seconds: 300
+        required: true
+        result_parser: exit_zero
+      - id: coverage_xml
+        command:
+          - "{python}"
+          - -m
+          - pytest
+          - --cov=aiflow
+          - --cov-branch
+          - "--cov-report=xml:{run_dir}/coverage.xml"
+        timeout_seconds: 600
+        required: true
+        result_parser: coverage_xml
+        environment:
+          COVERAGE_FILE: "{run_dir}/.coverage"
+      - id: diff_coverage
+        command:
+          - diff-cover
+          - "{run_dir}/coverage.xml"
+          - --compare-branch
+          - "{base_commit}"
+          - --fail-under
+          - "90"
+        timeout_seconds: 120
+        required: true
+        result_parser: diff_cover
+        threshold: 90
+      - id: acceptance
+        command: ["{python}", -m, aiflow, --help]
+        timeout_seconds: 30
+        required: true
+        result_parser: exit_zero
+      - id: integration
+        command: ["{python}", -m, aiflow, --help]
+        timeout_seconds: 30
+        required: true
+        result_parser: exit_zero
+      - id: targeted_mutation
+        command: ["{python}", -m, aiflow, --help]
+        timeout_seconds: 30
+        required: true
+        result_parser: exit_zero
+      - id: independent_verifier
+        command: ["{python}", -m, aiflow, --help]
+        timeout_seconds: 30
+        required: true
+        result_parser: exit_zero

@@ -1,0 +1,98 @@
+{
+    "schema_version": "2.0",
+    "task_id": "TASK-0000",
+    "decision_unit_ids": ["DU-000"],
+    "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+    "branch": "main",
+    "base_commit": "0000000000000000000000000000000000000000",
+    "subject_commit": "0000000000000000000000000000000000000000",
+    "spec_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "policy_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "classification_input_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "verification_level": "V2",
+    "mode": "local",
+    "checks": [
+        {
+            "check_id": "acceptance",
+            "category": "acceptance",
+            "status": "failed",
+            "reason_code": "replace-with-stable-reason-code",
+            "required": true,
+            "exit_code": 1,
+            "timed_out": false,
+            "duration_ms": 0,
+            "stdout_log_ref": "logs/run-id/acceptance.stdout.log",
+            "stderr_log_ref": "logs/run-id/acceptance.stderr.log",
+            "command_summary": "replace-with-redacted-command",
+            "tool_version": "record-the-observed-version"
+        },
+        {
+            "check_id": "integration",
+            "category": "integration",
+            "status": "failed",
+            "reason_code": "replace-with-stable-reason-code",
+            "required": true,
+            "exit_code": 1,
+            "timed_out": false,
+            "duration_ms": 0,
+            "stdout_log_ref": "logs/run-id/integration.stdout.log",
+            "stderr_log_ref": "logs/run-id/integration.stderr.log",
+            "command_summary": "replace-with-redacted-command",
+            "tool_version": "record-the-observed-version"
+        },
+        {
+            "check_id": "targeted_mutation",
+            "category": "targeted_mutation",
+            "status": "failed",
+            "reason_code": "replace-with-stable-reason-code",
+            "required": true,
+            "exit_code": 1,
+            "timed_out": false,
+            "duration_ms": 0,
+            "stdout_log_ref": "logs/run-id/mutation.stdout.log",
+            "stderr_log_ref": "logs/run-id/mutation.stderr.log",
+            "command_summary": "replace-with-redacted-command",
+            "tool_version": "record-the-observed-version"
+        },
+        {
+            "check_id": "independent_verifier",
+            "category": "independent_verifier",
+            "status": "failed",
+            "reason_code": "replace-with-stable-reason-code",
+            "required": true,
+            "exit_code": 1,
+            "timed_out": false,
+            "duration_ms": 0,
+            "stdout_log_ref": "logs/run-id/verifier.stdout.log",
+            "stderr_log_ref": "logs/run-id/verifier.stderr.log",
+            "command_summary": "replace-with-redacted-command",
+            "tool_version": "record-the-observed-version"
+        }
+    ],
+    "unverified_scenarios": ["List a concrete scenario that remains unverified."],
+    "conclusion": "failed",
+    "generated_at": "2000-01-01T00:00:00Z",
+    "reproduce_command": ["python", "-m", "aiflow", "verify", "TASK-0000"],
+    "verifier_actor": "replace-with-independent-verifier",
+    "verifier_context_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "review_refs": {
+        "design": {
+            "review_id": "REV-0001",
+            "context_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "implementation": {
+            "review_id": "REV-0002",
+            "context_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+    },
+    "targeted_mutation": {
+        "manifest_ref": "mutants/manifest.json",
+        "results": [
+            {
+                "mutation_id": "MUT-001",
+                "outcome": "unverified",
+                "log_ref": "logs/run-id/mutation.stdout.log"
+            }
+        ]
+    }
+}

@@ -58,6 +58,7 @@
     "levels": {
       "type": "array",
       "minItems": 2,
+      "maxItems": 3,
       "items": {"$ref": "#/$defs/verification_level"}
     },
     "forbidden_automatic_actions": {
@@ -223,7 +224,11 @@
             "regression_tests",
             "mypy",
             "coverage_xml",
-            "diff_coverage"
+            "diff_coverage",
+            "acceptance",
+            "integration",
+            "targeted_mutation",
+            "independent_verifier"
           ]
         },
         "command": {
@@ -249,7 +254,7 @@
       "additionalProperties": false,
       "required": ["id", "checks"],
       "properties": {
-        "id": {"enum": ["V0", "V1"]},
+        "id": {"enum": ["V0", "V1", "V2"]},
         "checks": {
           "type": "array",
           "minItems": 1,

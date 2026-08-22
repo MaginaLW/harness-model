@@ -1,85 +1,127 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aiflow.local/schemas/classification.schema.json",
-  "title": "AI Flow classification",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "schema_version",
-    "task_id",
-    "classification_input_sha256",
-    "policy_version",
-    "policy_sha256",
-    "base_commit",
-    "subject_commit",
-    "classified_at",
-    "effective_route",
-    "effective_verification_level",
-    "change_reason",
-    "classifications"
-  ],
-  "properties": {
-    "schema_version": {"const": "1.0"},
-    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
-    "classification_input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "policy_version": {"type": "string", "minLength": 1},
-    "policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "subject_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "classified_at": {"type": "string", "format": "date-time"},
-    "effective_route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
-    "effective_verification_level": {"enum": ["V0", "V1"]},
-    "change_reason": {"enum": ["unchanged", "upgraded", "downgraded"]},
-    "classifications": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "decision_unit_id",
-          "route",
-          "verification_level",
-          "rule_id",
-          "explanation",
-          "policy_version",
-          "policy_sha256",
-          "classified_at",
-          "matched_rules",
-          "explanations",
-          "verification_rule_ids",
-          "verification_explanations",
-          "verification_blocking_reasons"
-        ],
-        "properties": {
-          "decision_unit_id": {"type": "string", "pattern": "^DU-[0-9]{3,}$"},
-          "route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
-          "verification_level": {"enum": ["V0", "V1"]},
-          "rule_id": {"type": "string", "minLength": 1},
-          "explanation": {"type": "string", "minLength": 1},
-          "policy_version": {"type": "string", "minLength": 1},
-          "policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-          "classified_at": {"type": "string", "format": "date-time"},
-          "matched_rules": {
-            "type": "array", "minItems": 1,
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://aiflow.local/schemas/classification.schema.json",
+    "title": "AI Flow classification",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "schema_version",
+        "task_id",
+        "classification_input_sha256",
+        "policy_version",
+        "policy_sha256",
+        "base_commit",
+        "subject_commit",
+        "classified_at",
+        "effective_route",
+        "effective_verification_level",
+        "change_reason",
+        "classifications"
+    ],
+    "properties": {
+        "schema_version": {"enum": ["1.0", "2.0"]},
+        "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+        "classification_input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "policy_version": {"type": "string", "minLength": 1},
+        "policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "subject_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "classified_at": {"type": "string", "format": "date-time"},
+        "effective_route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
+        "effective_verification_level": {"enum": ["V0", "V1", "V2"]},
+        "change_reason": {"enum": ["unchanged", "upgraded", "downgraded"]},
+        "classifications": {
+            "type": "array",
+            "minItems": 1,
             "items": {
-              "type": "object", "additionalProperties": false,
-              "required": ["rule_id", "priority", "route", "explanation", "predicate_explanations"],
-              "properties": {
-                "rule_id": {"type": "string", "minLength": 1},
-                "priority": {"type": "integer"},
-                "route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
-                "explanation": {"type": "string", "minLength": 1},
-                "predicate_explanations": {"type": "array", "items": {"type": "string"}}
-              }
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "decision_unit_id",
+                    "route",
+                    "verification_level",
+                    "rule_id",
+                    "explanation",
+                    "policy_version",
+                    "policy_sha256",
+                    "classified_at",
+                    "matched_rules",
+                    "explanations",
+                    "verification_rule_ids",
+                    "verification_explanations",
+                    "verification_blocking_reasons"
+                ],
+                "properties": {
+                    "decision_unit_id": {"type": "string", "pattern": "^DU-[0-9]{3,}$"},
+                    "route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
+                    "verification_level": {"enum": ["V0", "V1", "V2"]},
+                    "rule_id": {"type": "string", "minLength": 1},
+                    "explanation": {"type": "string", "minLength": 1},
+                    "policy_version": {"type": "string", "minLength": 1},
+                    "policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                    "classified_at": {"type": "string", "format": "date-time"},
+                    "matched_rules": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "rule_id",
+                                "priority",
+                                "route",
+                                "explanation",
+                                "predicate_explanations"
+                            ],
+                            "properties": {
+                                "rule_id": {"type": "string", "minLength": 1},
+                                "priority": {"type": "integer"},
+                                "route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
+                                "explanation": {"type": "string", "minLength": 1},
+                                "predicate_explanations": {
+                                    "type": "array",
+                                    "items": {"type": "string"}
+                                }
+                            }
+                        }
+                    },
+                    "explanations": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {"type": "string", "minLength": 1}
+                    },
+                    "verification_rule_ids": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {"type": "string", "minLength": 1}
+                    },
+                    "verification_explanations": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {"type": "string", "minLength": 1}
+                    },
+                    "verification_blocking_reasons": {
+                        "type": "array",
+                        "items": {"type": "string", "minLength": 1}
+                    }
+                }
             }
-          },
-          "explanations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-          "verification_rule_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-          "verification_explanations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-          "verification_blocking_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}}
         }
-      }
-    }
-  }
+    },
+    "allOf": [
+        {
+            "if": {
+                "properties": {"schema_version": {"const": "1.0"}},
+                "required": ["schema_version"]
+            },
+            "then": {"properties": {"effective_verification_level": {"enum": ["V0", "V1"]}}}
+        },
+        {
+            "if": {
+                "properties": {"schema_version": {"const": "2.0"}},
+                "required": ["schema_version"]
+            },
+            "then": {"properties": {"effective_verification_level": {"const": "V2"}}}
+        }
+    ]
 }

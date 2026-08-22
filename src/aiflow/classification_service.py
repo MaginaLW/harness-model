@@ -20,6 +20,9 @@ from aiflow.task_service import TaskRecord, read_task_record_strict, transition_
 from aiflow.verification_level import verification_for_task
 
 
+VERIFICATION_LEVEL_ORDER = ("V0", "V1", "V2")
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
@@ -315,7 +318,14 @@ def _is_downgrade(
         # A verification-only BLOCK preserves the raw route as the comparison subject.
         and not (old_route == "BLOCK" and "BLOCK" not in old_raw_routes)
     )
-    if top_route_downgrade or (effective_level == "V0" and old_level == "V1"):
+    level_downgrade = (
+        isinstance(old_level, str)
+        and old_level in VERIFICATION_LEVEL_ORDER
+        and effective_level in VERIFICATION_LEVEL_ORDER
+        and VERIFICATION_LEVEL_ORDER.index(effective_level)
+        < VERIFICATION_LEVEL_ORDER.index(old_level)
+    )
+    if top_route_downgrade or level_downgrade:
         return True
     for entry in entries:
         old = old_by_id.get(entry["decision_unit_id"])
@@ -323,8 +333,10 @@ def _is_downgrade(
             continue
         if (
             ROUTE_ORDER.index(str(entry["route"])) < ROUTE_ORDER.index(str(old.get("route")))
-            or entry["verification_level"] == "V0"
-            and old.get("verification_level") == "V1"
+            or entry["verification_level"] in VERIFICATION_LEVEL_ORDER
+            and old.get("verification_level") in VERIFICATION_LEVEL_ORDER
+            and VERIFICATION_LEVEL_ORDER.index(str(entry["verification_level"]))
+            < VERIFICATION_LEVEL_ORDER.index(str(old.get("verification_level")))
         ):
             return True
     return False
@@ -358,7 +370,12 @@ def _change_reason(
     if (
         isinstance(old_effective_route, str)
         and ROUTE_ORDER.index(route) > ROUTE_ORDER.index(old_effective_route)
-    ) or (level == "V1" and previous.get("effective_verification_level") == "V0"):
+    ) or (
+        level in VERIFICATION_LEVEL_ORDER
+        and previous.get("effective_verification_level") in VERIFICATION_LEVEL_ORDER
+        and VERIFICATION_LEVEL_ORDER.index(level)
+        > VERIFICATION_LEVEL_ORDER.index(str(previous.get("effective_verification_level")))
+    ):
         return "upgraded"
     if any(
         old_routes.get(entry["decision_unit_id"]) in ROUTE_ORDER
@@ -368,9 +385,14 @@ def _change_reason(
     ):
         return "upgraded"
     if any(
-        entry["verification_level"] == "V1"
+        entry["verification_level"] in VERIFICATION_LEVEL_ORDER
         and isinstance(old_entries.get(entry["decision_unit_id"]), Mapping)
-        and old_entries[entry["decision_unit_id"]].get("verification_level") == "V0"
+        and old_entries[entry["decision_unit_id"]].get("verification_level")
+        in VERIFICATION_LEVEL_ORDER
+        and VERIFICATION_LEVEL_ORDER.index(str(entry["verification_level"]))
+        > VERIFICATION_LEVEL_ORDER.index(
+            str(old_entries[entry["decision_unit_id"]].get("verification_level"))
+        )
         for entry in entries
     ):
         return "upgraded"
@@ -502,7 +524,7 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
             code="CLASSIFICATION_RESOLUTION_REQUIRED",
         )
     classification: dict[str, Any] = {
-        "schema_version": "1.0",
+        "schema_version": "2.0" if verification.level == "V2" else "1.0",
         "task_id": task_id,
         "classification_input_sha256": stable_hash,
         "policy_version": bundle.policy_version,

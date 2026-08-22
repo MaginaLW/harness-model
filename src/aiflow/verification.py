@@ -1,4 +1,4 @@
-"""Safe, deterministic parsing of Policy-defined V0 and V1 verification plans."""
+"""Safe, deterministic parsing of Policy-defined V0, V1, and V2 plans."""
 
 from __future__ import annotations
 
@@ -18,6 +18,13 @@ from aiflow.policy import PolicyBundle
 V0_CHECK_IDS = ("contract", "scope", "ruff_check", "ruff_format_check", "smoke")
 V1_EXTRA_CHECK_IDS = ("unit_tests", "regression_tests", "mypy", "coverage_xml", "diff_coverage")
 V1_CHECK_IDS = V0_CHECK_IDS + V1_EXTRA_CHECK_IDS
+V2_EXTRA_CHECK_IDS = (
+    "acceptance",
+    "integration",
+    "targeted_mutation",
+    "independent_verifier",
+)
+V2_CHECK_IDS = V1_CHECK_IDS + V2_EXTRA_CHECK_IDS
 ALLOWED_VARIABLES = frozenset(
     {"python", "repository_root", "base_commit", "subject_commit", "task_id", "run_dir"}
 )
@@ -138,7 +145,7 @@ def _levels(bundle: PolicyBundle) -> Mapping[str, Mapping[str, object]]:
     levels = {
         str(level.get("id")): level for level in raw_levels if isinstance(level.get("id"), str)
     }
-    if set(levels) != {"V0", "V1"} or len(raw_levels) != 2:
+    if list(levels) not in (["V0", "V1"], ["V0", "V1", "V2"]) or len(raw_levels) != len(levels):
         raise ContractError(
             "Verification Policy levels are invalid", code="VERIFICATION_POLICY_INVALID"
         )
@@ -162,7 +169,13 @@ def _commands_for(level: Mapping[str, object]) -> Mapping[str, Mapping[str, obje
 
 
 def _required_ids(level: str) -> tuple[str, ...]:
-    return V0_CHECK_IDS if level == "V0" else V1_CHECK_IDS
+    if level == "V0":
+        return V0_CHECK_IDS
+    if level == "V1":
+        return V1_CHECK_IDS
+    if level == "V2":
+        return V2_CHECK_IDS
+    raise ContractError("Verification level is invalid", code="VERIFICATION_POLICY_INVALID")
 
 
 def _variables(context: VerificationContext, run_dir: Path) -> Mapping[str, str]:
@@ -346,7 +359,7 @@ def parse_verification_plan(
     bundle: PolicyBundle,
     context: VerificationContext,
     *,
-    level: Literal["V0", "V1"],
+    level: Literal["V0", "V1", "V2"],
     tool_available: Callable[[tuple[str, ...]], bool] = _tool_available,
 ) -> VerificationPlan:
     """Parse exactly the selected V0/V1 Policy checks, without starting processes."""
@@ -373,6 +386,8 @@ def parse_verification_plan(
         )
     run_dir = _run_directory(context)
     levels = _levels(bundle)
+    if level not in levels:
+        raise ContractError("Verification level is invalid", code="VERIFICATION_POLICY_INVALID")
     by_id = _commands_for(levels[level])
     required_ids = _required_ids(level)
     if set(by_id) != set(required_ids):
@@ -386,6 +401,17 @@ def parse_verification_plan(
             raise ContractError(
                 "V1 must contain the complete V0 checks",
                 code="VERIFICATION_V1_PREFIX_INVALID",
+            )
+    if level == "V2":
+        v1 = _commands_for(levels["V1"])
+        if any(dict(by_id[check_id]) != dict(v1[check_id]) for check_id in V1_CHECK_IDS):
+            raise ContractError(
+                "V2 must contain the complete V1 checks",
+                code="VERIFICATION_V2_PREFIX_INVALID",
+            )
+        if any(by_id[check_id].get("required") is not True for check_id in V2_EXTRA_CHECK_IDS):
+            raise ContractError(
+                "V2 extra checks must be required", code="VERIFICATION_V2_EXTRA_INVALID"
             )
     checks = tuple(
         _parse_check(

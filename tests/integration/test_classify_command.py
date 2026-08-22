@@ -8,7 +8,7 @@ import pytest
 import yaml
 from test_begin_close_commands import create_repository, start
 
-from aiflow.classification_service import _stable_input
+from aiflow.classification_service import _change_reason, _is_downgrade, _stable_input
 from aiflow.cli import main
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import StorageError
@@ -152,6 +152,82 @@ def test_mixed_ask_review_waits_for_answer_before_spec_review(
     record = load_task_record(repository, "TASK-0001")
     assert record.task["current_state"] == "WAITING_FOR_ASK"
     assert record.events[-1]["event_type"] == "ask_required"
+
+
+@pytest.mark.parametrize(
+    ("route_changes", "expected_route"),
+    [({}, "AUTO"), ({"impact_categories": ["ci"]}, "REVIEW")],
+)
+def test_v2_facts_use_the_v2_contract_independently_of_route(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    route_changes: dict[str, object],
+    expected_route: str,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(
+        repository,
+        monkeypatch,
+        verification_requirements={
+            "acceptance_required": True,
+            "integration_required": False,
+            "targeted_mutation_required": False,
+            "independent_verifier_required": False,
+        },
+        **route_changes,
+    )
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    assert classification["schema_version"] == "2.0"
+    assert classification["effective_route"] == expected_route
+    assert classification["effective_verification_level"] == "V2"
+    assert classification["classifications"][0]["verification_rule_ids"] == [
+        "VERIFICATION-V2-ACCEPTANCE-REQUIRED"
+    ]
+
+    assert main(["status", "TASK-0001", "--format", "json"]) == 0
+    assert '"verification_level": "V2"' in capsys.readouterr().out
+
+
+def test_v2_to_v1_is_a_downgrade_and_v1_to_v2_is_an_upgrade() -> None:
+    previous_v2 = {
+        "effective_route": "AUTO",
+        "effective_verification_level": "V2",
+        "classifications": [
+            {"decision_unit_id": "DU-001", "route": "AUTO", "verification_level": "V2"}
+        ],
+    }
+    v1_entries = [
+        {"decision_unit_id": "DU-001", "route": "AUTO", "verification_level": "V1"}
+    ]
+    assert _is_downgrade(
+        previous_v2,
+        v1_entries,
+        effective_route="AUTO",
+        effective_level="V1",
+    )
+    assert (
+        _change_reason(previous_v2, v1_entries, route="AUTO", level="V1")
+        == "downgraded"
+    )
+
+    previous_v1 = {
+        "effective_route": "AUTO",
+        "effective_verification_level": "V1",
+        "classifications": v1_entries,
+    }
+    v2_entries = [
+        {"decision_unit_id": "DU-001", "route": "AUTO", "verification_level": "V2"}
+    ]
+    assert (
+        _change_reason(previous_v1, v2_entries, route="AUTO", level="V2")
+        == "upgraded"
+    )
 
 
 def test_blocked_reclassification_binds_old_and_new_identity_and_authorization(

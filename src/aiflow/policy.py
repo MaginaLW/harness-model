@@ -191,9 +191,21 @@ def _validate_cross_file(documents: dict[str, dict[str, Any]]) -> str:
         )
 
     levels = documents["verification-levels.yaml"]["levels"]
+    level_ids = [level["id"] for level in levels]
+    version = str(next(iter(versions)))
+    major = version.split(".", maxsplit=1)[0]
+    if major == "1":
+        expected_levels = ["V0", "V1"]
+    elif major == "2":
+        expected_levels = ["V0", "V1", "V2"]
+    else:
+        raise PolicyError("Policy version is unsupported", code="POLICY_LEVEL_INVALID")
+    if level_ids != expected_levels:
+        raise PolicyError(
+            "Policy verification levels are missing, duplicated, unknown, or unordered",
+            code="POLICY_LEVEL_INVALID",
+        )
     by_level = {level["id"]: level for level in levels}
-    if set(by_level) != {"V0", "V1"} or len(levels) != 2:
-        raise PolicyError("Policy must define V0 and V1 exactly once", code="POLICY_LEVEL_INVALID")
     check_sets: dict[str, set[str]] = {}
     for level_id, level in by_level.items():
         check_ids = [check["id"] for check in level["checks"]]
@@ -205,7 +217,25 @@ def _validate_cross_file(documents: dict[str, dict[str, Any]]) -> str:
         check_sets[level_id] = set(check_ids)
     if not check_sets["V0"].issubset(check_sets["V1"]):
         raise PolicyError("V1 must include every V0 check", code="POLICY_CHECK_REFERENCE_INVALID")
-    return str(next(iter(versions)))
+    v0_checks = by_level["V0"]["checks"]
+    v1_checks = by_level["V1"]["checks"]
+    if v1_checks[: len(v0_checks)] != v0_checks:
+        raise PolicyError(
+            "V1 must retain the complete V0 check prefix", code="POLICY_CHECK_REFERENCE_INVALID"
+        )
+    if major == "2":
+        v2_checks = by_level["V2"]["checks"]
+        extras = ("acceptance", "integration", "targeted_mutation", "independent_verifier")
+        if (
+            v2_checks[: len(v1_checks)] != v1_checks
+            or tuple(check["id"] for check in v2_checks[len(v1_checks) :]) != extras
+            or any(check["required"] is not True for check in v2_checks[len(v1_checks) :])
+        ):
+            raise PolicyError(
+                "V2 must retain V1 and add the required checks in fixed order",
+                code="POLICY_CHECK_REFERENCE_INVALID",
+            )
+    return version
 
 
 def _digest(documents: Mapping[str, Mapping[str, Any]]) -> str:

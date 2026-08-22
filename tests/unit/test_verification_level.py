@@ -10,6 +10,7 @@ from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.verification_level import (
     V0,
     V1,
+    V2,
     determine_verification_level,
     summarize_task_verification,
 )
@@ -30,6 +31,37 @@ def _unit(
         "verification": {"tools_missing": False},
         **extra,
     }
+
+
+def _v2_bundle() -> PolicyBundle:
+    bundle = _bundle()
+    documents = deepcopy(bundle.documents)
+    levels = documents["verification-levels.yaml"]["levels"]
+    checks = levels[1]["checks"]
+    levels.append(
+        {
+            "id": "V2",
+            "checks": [
+                *deepcopy(checks),
+                *[
+                    {
+                        "id": identifier,
+                        "command": ["{python}", "-m", "aiflow", "--help"],
+                        "timeout_seconds": 30,
+                        "required": True,
+                        "result_parser": "exit_zero",
+                    }
+                    for identifier in (
+                        "acceptance",
+                        "integration",
+                        "targeted_mutation",
+                        "independent_verifier",
+                    )
+                ],
+            ],
+        }
+    )
+    return PolicyBundle(documents, "2.0.0", bundle.sha256)
 
 
 def test_level_table_is_route_independent() -> None:
@@ -73,6 +105,86 @@ def test_missing_legacy_characteristics_are_conservative_v1() -> None:
     result = determine_verification_level({"decision_unit_id": "DU-001"}, _bundle())
     assert result.level == V1
     assert result.rule_ids == ("VERIFICATION-FACTS-INCOMPLETE",)
+
+
+@pytest.mark.parametrize(
+    ("requirement", "rule_id"),
+    (
+        ("acceptance_required", "VERIFICATION-V2-ACCEPTANCE-REQUIRED"),
+        ("integration_required", "VERIFICATION-V2-INTEGRATION-REQUIRED"),
+        ("targeted_mutation_required", "VERIFICATION-V2-TARGETED-MUTATION-REQUIRED"),
+        ("independent_verifier_required", "VERIFICATION-V2-INDEPENDENT-VERIFIER-REQUIRED"),
+    ),
+)
+def test_each_explicit_v2_requirement_selects_v2_with_a_stable_rule(
+    requirement: str, rule_id: str
+) -> None:
+    facts = {
+        "mechanical": True,
+        "behavior_changed": False,
+        "code_modified": False,
+        "interaction_scope": "local",
+        "regression_risk": False,
+        "error_detectability": "high",
+    }
+    result = determine_verification_level(
+        _unit("DU-001", facts, verification_requirements={requirement: True}), _v2_bundle()
+    )
+    assert result.level == V2
+    assert result.rule_ids == (rule_id,)
+
+
+def test_absent_or_false_v2_requirements_preserve_legacy_selection() -> None:
+    facts = {
+        "mechanical": True,
+        "behavior_changed": False,
+        "code_modified": False,
+        "interaction_scope": "local",
+        "regression_risk": False,
+        "error_detectability": "high",
+    }
+    assert determine_verification_level(_unit("DU-001", facts), _v2_bundle()).level == V0
+    assert (
+        determine_verification_level(
+            _unit(
+                "DU-001",
+                facts,
+                verification_requirements={
+                    "acceptance_required": False,
+                    "integration_required": False,
+                    "targeted_mutation_required": False,
+                    "independent_verifier_required": False,
+                },
+            ),
+            _v2_bundle(),
+        ).level
+        == V0
+    )
+
+
+def test_v2_task_aggregation_ignores_completed_v2_units() -> None:
+    facts = {
+        "mechanical": True,
+        "behavior_changed": False,
+        "code_modified": False,
+        "interaction_scope": "local",
+        "regression_risk": False,
+        "error_detectability": "high",
+    }
+    result = summarize_task_verification(
+        [
+            _unit(
+                "DU-001",
+                facts,
+                completed=True,
+                verification_requirements={"acceptance_required": True},
+            ),
+            _unit("DU-002", facts),
+        ],
+        _v2_bundle(),
+    )
+    assert result.level == V0
+    assert [item.level for item in result.unit_decisions] == [V2, V0]
 
 
 @pytest.mark.parametrize("behavior_changed,expected_level", [(False, V0), (True, V1)])

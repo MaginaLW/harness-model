@@ -50,14 +50,17 @@ def valid_fixture(contract_name: str) -> dict[str, Any]:
 
 def contract_name_for(path: Path) -> str:
     """Derive a contract name from a fixture file name."""
-    return path.name.split(".", maxsplit=1)[0]
+    return path.name.split(".", maxsplit=1)[0].removesuffix("-v2")
 
 
 def test_fixture_matrix_is_complete() -> None:
     valid_names = {path.stem for path in VALID_ROOT.glob("*.json")}
-    assert valid_names == CONTRACT_NAMES
+    assert valid_names == CONTRACT_NAMES | {"classification-v2", "evidence-v2"}
 
     for contract_name in CONTRACT_NAMES:
+        invalid = list(INVALID_ROOT.glob(f"{contract_name}.*.json"))
+        assert {path.name.split(".")[1] for path in invalid} == {"extra", "invalid", "missing"}
+    for contract_name in ("classification-v2", "evidence-v2"):
         invalid = list(INVALID_ROOT.glob(f"{contract_name}.*.json"))
         assert {path.name.split(".")[1] for path in invalid} == {"extra", "invalid", "missing"}
 
@@ -124,6 +127,13 @@ def test_structured_review_templates_satisfy_registered_contracts(contract_name:
 
     Draft202012Validator.check_schema(load_schema(contract_name))
     assert validate_contract(contract_name, value) == []
+
+
+def test_v2_evidence_template_satisfies_the_v2_contract() -> None:
+    template = REPOSITORY_ROOT / ".ai" / "templates" / "evidence-v2.json"
+    value = load_json(template)
+
+    assert validate_contract("evidence", value) == []
 
 
 def test_code_approval_requires_subject_commit() -> None:
@@ -203,3 +213,27 @@ def test_validation_does_not_mutate_the_input() -> None:
     validate_contract("evidence", value)
 
     assert value == original
+
+
+def test_v2_contracts_do_not_relax_legacy_versions() -> None:
+    classification = load_json(VALID_ROOT / "classification-v2.json")
+    classification["schema_version"] = "1.0"
+    assert validate_contract("classification", classification)
+
+    evidence = load_json(VALID_ROOT / "evidence-v2.json")
+    evidence["schema_version"] = "1.0"
+    assert validate_contract("evidence", evidence)
+
+
+def test_v2_selection_facts_are_optional_but_complete_when_present() -> None:
+    unit = valid_fixture("decision-unit")
+    unit["verification_requirements"] = {
+        "acceptance_required": True,
+        "integration_required": True,
+        "targeted_mutation_required": True,
+        "independent_verifier_required": True,
+    }
+    assert validate_contract("decision-unit", unit) == []
+
+    del unit["verification_requirements"]["independent_verifier_required"]
+    assert validate_contract("decision-unit", unit)

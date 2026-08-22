@@ -104,7 +104,7 @@ def _classification(
         return "stale", "stale", None, True
     route = value.get("effective_route")
     verification = value.get("effective_verification_level")
-    if route not in ROUTE_ORDER or verification not in {"V0", "V1"}:
+    if route not in ROUTE_ORDER or verification not in {"V0", "V1", "V2"}:
         return "stale", "stale", value, True
     return str(route), str(verification), value, False
 

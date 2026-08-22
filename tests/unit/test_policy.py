@@ -11,7 +11,7 @@ import pytest
 import yaml
 
 from aiflow.errors import PolicyError
-from aiflow.policy import POLICY_FILES, load_policy_bundle
+from aiflow.policy import POLICY_FILES, _validate_cross_file, load_policy_bundle
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_POLICY = PROJECT_ROOT / ".ai" / "policy"
@@ -33,13 +33,69 @@ def write(path: Path, value: object) -> None:
     path.write_text(yaml.safe_dump(value, sort_keys=False), encoding="utf-8")
 
 
+def v2_documents() -> dict[str, dict[str, object]]:
+    """Return an independent copy of the active V2 Policy documents."""
+    return {filename: read(SOURCE_POLICY / filename) for filename in POLICY_FILES}
+
+
+def v1_documents() -> dict[str, dict[str, object]]:
+    """Build a legacy 1.x bundle to prove the old V0/V1 branch remains valid."""
+    documents = v2_documents()
+    for document in documents.values():
+        document["policy_version"] = "1.0.0"
+    levels = documents["verification-levels.yaml"]["levels"]
+    assert isinstance(levels, list)
+    del levels[2:]
+    return documents
+
+
 def test_valid_policy_has_complete_stable_bundle() -> None:
     bundle = load_policy_bundle(PROJECT_ROOT)
 
     assert set(bundle.documents) == set(POLICY_FILES)
-    assert bundle.policy_version == "1.0.0"
+    assert bundle.policy_version == "2.0.0"
     assert len(bundle.sha256) == 64
     assert bundle.sha256 == load_policy_bundle(PROJECT_ROOT).sha256
+
+
+def test_legacy_v1_policy_branch_remains_valid() -> None:
+    assert _validate_cross_file(v1_documents()) == "1.0.0"
+
+
+def test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras() -> None:
+    documents = v2_documents()
+    assert _validate_cross_file(documents) == "2.0.0"
+
+    levels = documents["verification-levels.yaml"]["levels"]
+    assert isinstance(levels, list)
+    levels[1], levels[2] = levels[2], levels[1]
+    with pytest.raises(PolicyError) as caught:
+        _validate_cross_file(documents)
+    assert caught.value.code == "POLICY_LEVEL_INVALID"
+
+    documents = v2_documents()
+    levels = documents["verification-levels.yaml"]["levels"]
+    assert isinstance(levels, list)
+    v2 = levels[2]
+    assert isinstance(v2, dict)
+    checks = v2["checks"]
+    assert isinstance(checks, list)
+    checks[0]["timeout_seconds"] = 31
+    with pytest.raises(PolicyError) as caught:
+        _validate_cross_file(documents)
+    assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
+
+    documents = v2_documents()
+    levels = documents["verification-levels.yaml"]["levels"]
+    assert isinstance(levels, list)
+    v2 = levels[2]
+    assert isinstance(v2, dict)
+    checks = v2["checks"]
+    assert isinstance(checks, list)
+    checks[-1]["required"] = False
+    with pytest.raises(PolicyError) as caught:
+        _validate_cross_file(documents)
+    assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
 
 
 def test_missing_fixed_file_is_rejected(tmp_path: Path) -> None:

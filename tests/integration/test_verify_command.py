@@ -11,7 +11,7 @@ from test_begin_close_commands import create_repository, make_ready, run_git, st
 
 from aiflow import verification_service
 from aiflow.cli import main
-from aiflow.errors import StorageError
+from aiflow.errors import ContractError, StorageError
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import load_task_record
 from aiflow.verification import (
@@ -235,6 +235,40 @@ def test_stale_policy_rejects_before_process_execution(
 
     monkeypatch.setattr(verification_service, "run_execution", unexpected)
     assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 1
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "IMPLEMENTING"
+
+
+def test_v2_rejects_before_plan_parsing_or_check_start(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    classification["schema_version"] = "2.0"
+    classification["effective_verification_level"] = "V2"
+    classification["classifications"][0]["verification_level"] = "V2"
+    classification["classifications"][0]["verification_rule_ids"] = [
+        "VERIFICATION-V2-ACCEPTANCE-REQUIRED"
+    ]
+    classification["classifications"][0]["verification_explanations"] = [
+        "Acceptance verification requires V2."
+    ]
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "classification.json"), classification
+    )
+
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError("V2 verification must stop before parsing or starting checks")
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "_start_local_verification", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(repository, "TASK-0001", actor="verifier")
+    assert caught.value.code == "VERIFY_V2_NOT_EXECUTABLE"
     assert load_task_record(repository, "TASK-0001").task["current_state"] == "IMPLEMENTING"
 
 

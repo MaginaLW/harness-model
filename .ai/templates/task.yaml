@@ -56,3 +56,10 @@ decision_units:
       interaction_scope: local
       regression_risk: false
       error_detectability: high
+    # Optional V2 selection facts. If supplied, all four facts are required;
+    # a true value requests the corresponding higher-strength verification.
+    verification_requirements:
+      acceptance_required: false
+      integration_required: false
+      targeted_mutation_required: false
+      independent_verifier_required: false

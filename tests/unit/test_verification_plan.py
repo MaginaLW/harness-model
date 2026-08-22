@@ -49,6 +49,35 @@ def bundle_copy() -> PolicyBundle:
     return PolicyBundle(deepcopy(bundle.documents), bundle.policy_version, bundle.sha256)
 
 
+def v2_bundle() -> PolicyBundle:
+    bundle = bundle_copy()
+    checks_v1 = checks(bundle, "V1")
+    bundle.documents["verification-levels.yaml"]["levels"].append(
+        {
+            "id": "V2",
+            "checks": [
+                *deepcopy(checks_v1),
+                *[
+                    {
+                        "id": identifier,
+                        "command": ["{python}", "-m", "aiflow", "--help"],
+                        "timeout_seconds": 30,
+                        "required": True,
+                        "result_parser": "exit_zero",
+                    }
+                    for identifier in (
+                        "acceptance",
+                        "integration",
+                        "targeted_mutation",
+                        "independent_verifier",
+                    )
+                ],
+            ],
+        }
+    )
+    return PolicyBundle(bundle.documents, "2.0.0", bundle.sha256)
+
+
 def checks(bundle: PolicyBundle, level: str) -> list[dict[str, object]]:
     document = bundle.documents["verification-levels.yaml"]
     selected = next(item for item in document["levels"] if item["id"] == level)
@@ -76,6 +105,43 @@ def test_v1_contains_v0_categories_and_coverage_environment(tmp_path: Path) -> N
     coverage = next(check for check in v1.checks if check.check_id == "coverage_xml")
     assert coverage.environment["COVERAGE_FILE"] == (v1.run_dir / ".coverage").as_posix()
     assert v1.comparison_subject == "b" * 40
+
+
+def test_v2_has_complete_v1_prefix_and_fixed_extra_order(tmp_path: Path) -> None:
+    expected = json.loads(
+        (ROOT / "tests" / "fixtures" / "verification" / "plans" / "v2.json").read_text()
+    )
+    parsed = parse_verification_plan(
+        v2_bundle(), context(tmp_path), level="V2", tool_available=lambda _argv: True
+    )
+    assert [check.check_id for check in parsed.checks] == expected["check_ids"]
+    assert all(check.required for check in parsed.checks[-4:])
+
+
+def test_v2_rejects_prefix_tampering_missing_extra_and_optional_extra(tmp_path: Path) -> None:
+    prefix = v2_bundle()
+    checks(prefix, "V2")[0]["timeout_seconds"] = 31
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            prefix, context(tmp_path), level="V2", tool_available=lambda _argv: True
+        )
+    assert caught.value.code == "VERIFICATION_V2_PREFIX_INVALID"
+
+    missing = v2_bundle()
+    checks(missing, "V2").pop()
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            missing, context(tmp_path), level="V2", tool_available=lambda _argv: True
+        )
+    assert caught.value.code == "VERIFICATION_CATEGORY_MISSING"
+
+    optional = v2_bundle()
+    checks(optional, "V2")[-1]["required"] = False
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            optional, context(tmp_path), level="V2", tool_available=lambda _argv: True
+        )
+    assert caught.value.code == "VERIFICATION_V2_EXTRA_INVALID"
 
 
 def test_repeated_argv_keeps_distinct_category_mapping(tmp_path: Path) -> None:

@@ -1,0 +1,1 @@
+{"check_ids":["contract","scope","ruff_check","ruff_format_check","smoke","unit_tests","regression_tests","mypy","coverage_xml","diff_coverage","acceptance","integration","targeted_mutation","independent_verifier"]}
