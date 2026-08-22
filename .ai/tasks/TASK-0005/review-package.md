@@ -29,9 +29,9 @@ REVIEW 任务的 spec approval 现在要求当前且可批准的 design record�
 
 ## 证据
 
-- TASK-0005 V1 evidence：结论 `passed`，10 个 required checks 全部 passed，无未验证项。
-- 完整 regression：`604 passed, 3 skipped`；跳过项均为 Windows symlink 条件。
-- diff coverage：90%；Ruff、format check、mypy、scope、contract 均 passed。
+- 已验证：TASK-0005 V1 evidence 结论 `passed`，10 个 required checks 全部 passed；完整 regression 为 `604 passed, 3 skipped`，跳过项均为 Windows symlink 条件。
+- 已验证：diff coverage 90%；Ruff、format check、mypy、scope、contract 均 passed。
+- 未验证：未执行 push、merge、deploy、真实外部副作用或任何禁止动作；这些也不属于本章实现范围。
 - implementation context：`550b879972ad0a83a08a432277bb71db05d2e60bc44aefb609ddac2e880a6a61`。
 - evidence digest：`eac6f3ac919bc8932d66e1f090a9e1161cbbffe7c086706e45bf37609f2a51ea`。
 
