@@ -10,11 +10,12 @@
 - 新建 `chapter-08.yaml`，只初始化结构化设计审核/实现审核及最小审核上下文的任务清单，不宣称运行时能力已经完成。
 - 更新总体状态和 README，使阶段二从 `not_started` 进入 `planning`，并记录当前仓库、测试类型和业务风险。
 - 新建 Chapter 8 实施追踪文档骨架。
+- 修正 `tests/integration/test_governance_paths.py` 中在 2026-08-22 到期的单一 action fixture，使回归测试不依赖执行日期；不改变被测运行时语义。
 - 当前任务 `.ai/tasks/TASK-0004/**` 治理记录。
 
 ## 非目标
 
-不修改 Python 运行时、Policy、schema、模板、测试、CI 或 Hooks；不实现 V2、双审核、独立 Verifier、变异测试、升级传感器、模型路由或资源调度；不把规划状态写成已经验证或完成。
+不修改 Python 运行时、Policy、schema、模板、其他测试、CI 或 Hooks；除单一过期 action fixture 外不扩展测试行为；不实现 V2、双审核、独立 Verifier、变异测试、升级传感器、模型路由或资源调度；不把规划状态写成已经验证或完成。
 
 ## 验收条件
 
@@ -23,6 +24,7 @@
 3. Chapter 8 状态文件只标记初始化完成，所有运行时实施任务均为 `pending`，统计与总体状态一致。
 4. 总体状态保留阶段一已完成事实，同时将阶段二标记为 `planning`，当前章节为 `chapter-08`。
 5. YAML 可解析，Markdown 引用路径存在，阶段二需求到章节的追踪无遗漏；`aiflow validate/scope`、Ruff、格式检查、测试和 `git diff --check` 通过。
+6. action approval 独立性集成测试使用明确的远期到期时间，当前日期运行时通过，既有过期拒绝测试仍保持覆盖。
 
 ## 禁止动作
 

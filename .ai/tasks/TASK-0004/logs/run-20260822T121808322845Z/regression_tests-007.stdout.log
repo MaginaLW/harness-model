@@ -1,0 +1,62 @@
+........................................................................ [ 12%]
+........................................................................ [ 24%]
+......................F................................................. [ 36%]
+.........................s.............................................. [ 49%]
+........................................................................ [ 61%]
+........................................................................ [ 73%]
+.............s.......................................................... [ 85%]
+................................................................s....... [ 98%]
+...........                                                              [100%]
+================================== FAILURES ===================================
+__________ test_review_code_and_action_approvals_remain_independent ___________
+
+tmp_path = WindowsPath('C:/Windows/Temp/pytest-of-unknown/pytest-40/test_review_code_and_action_ap0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002887F51B990>
+
+    def test_review_code_and_action_approvals_remain_independent(tmp_path: Path, monkeypatch) -> None:
+        repository = prepare_review(tmp_path, monkeypatch, state="WAITING_FOR_FINAL_REVIEW")
+        action_path = tmp_path / "action.json"
+        task = load_task_record(repository, "TASK-0001").task
+        action_path.write_text(
+            json.dumps(
+                {
+                    "action_type": "notify",
+                    "decision_unit_id": "DU-001",
+                    "target": "issue-123",
+                    "parameter_summary": "one notification",
+                    "subject_commit": task["subject_commit"],
+                    "conditions": ["review approved"],
+                    "expires_at": "2026-08-22T01:00:00Z",
+                    "single_use": True,
+                }
+            ),
+            encoding="utf-8",
+        )
+        action_arguments = [
+            "approve",
+            "TASK-0001",
+            "--type",
+            "action",
+            "--action-file",
+            str(action_path),
+            "--actor",
+            "reviewer",
+            "--reason",
+            "notification approved",
+        ]
+>       assert main(action_arguments) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = main(['approve', 'TASK-0001', '--type', 'action', '--action-file', 'C:\\Windows\\Temp\\pytest-of-unknown\\pytest-40\\test_review_code_and_action_ap0\\action.json', ...])
+
+D:\Repos\harness-model\tests\integration\test_governance_paths.py:201: AssertionError
+---------------------------- Captured stdout call -----------------------------
+TASK-0001
+C:\Windows\Temp\pytest-of-unknown\pytest-40\test_review_code_and_action_ap0\repository\.ai\tasks\TASK-0001
+---------------------------- Captured stderr call -----------------------------
+Action approval has expired
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\test_verification_git_scope.py:177: symlink creation unavailable
+SKIPPED [1] tests\unit\test_scope.py:83: symlink creation unavailable
+SKIPPED [1] tests\unit\test_verification_plan.py:168: symlink creation unavailable
+FAILED tests/integration/test_governance_paths.py::test_review_code_and_action_approvals_remain_independent
+1 failed, 583 passed, 3 skipped in 148.69s (0:02:28)

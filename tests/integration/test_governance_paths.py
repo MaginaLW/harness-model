@@ -180,7 +180,7 @@ def test_review_code_and_action_approvals_remain_independent(tmp_path: Path, mon
                 "parameter_summary": "one notification",
                 "subject_commit": task["subject_commit"],
                 "conditions": ["review approved"],
-                "expires_at": "2026-08-22T01:00:00Z",
+                "expires_at": "2099-01-01T00:00:00Z",
                 "single_use": True,
             }
         ),

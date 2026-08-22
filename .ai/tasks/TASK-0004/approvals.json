@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-22T12:28:54Z",
+    "base_commit": "695da6419cfc6157411ff8488dbeed70dfdf5c61",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+    "reason": "批准范围扩展后的冻结规格：阶段二规划产物及单一过期 action fixture 修复",
+    "schema_version": "1.0",
+    "spec_sha256": "68ed55e29a1607b328ffa5ee5d388e40801358482b47431ad36c5e31f48e9b9e",
+    "subject_commit": "eb3243a3895a45edcf42840041d48b9d7709f080",
+    "task_id": "TASK-0004"
+  }
+]
