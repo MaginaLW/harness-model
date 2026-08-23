@@ -1,0 +1,83 @@
+allowed_scope:
+- README.md
+- docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md
+- docs/superpowers/state/README.md
+- docs/superpowers/state/chapters/chapter-10.yaml
+- docs/superpowers/state/chapters/chapter-11.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 6522d2df7d3e360aada9f3bed74dfccedcef06ed
+branch: main
+created_at: '2026-08-23T10:42:37Z'
+current_state: READY_TO_IMPLEMENT
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: false
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 10 退出核验与治理状态对齐，并初始化 Chapter 11 待办状态，不改变运行时行为
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - README.md
+  - docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md
+  - docs/superpowers/state/README.md
+  - docs/superpowers/state/chapters/chapter-10.yaml
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - TASK-0009 在 ed9ef1e5a781713e1798075c3013a4a1727d0375 上通过 validate、scope 与 V1 Gate
+  - TASK-0009 subject_commit 为 8eee9c1bb3c7c4ac35aa7843a1a3ec85e0fb4326
+  - TASK-0008 已在 6522d2df7d3e360aada9f3bed74dfccedcef06ed 追加式阻断
+  permission_requirements: []
+  planned_actions:
+  - verify_chapter_10_exit_evidence
+  - reconcile_manual_state_projection
+  - initialize_chapter_11_pending_state
+  - document_live_v2_boundary
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0010
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - replay TASK-0009 baseline validate, scope, and Gate facts
+  - verify chapter and overall state counters and dependencies
+  - run repository quality checks required by the frozen specification
+  - perform independent design and implementation reviews
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: cde966aabfe51f01f84387e5cb229d9561258267a49cfe287808c5fbc4bd0876
+goal: 完成 Chapter 10 退出核验与治理状态对齐，并初始化 Chapter 11 待办状态，不改变运行时行为
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-23T10:45:00Z'
+subject_commit: 6522d2df7d3e360aada9f3bed74dfccedcef06ed
+task_id: TASK-0010
+updated_at: '2026-08-23T11:22:37Z'
+worktree_dirty: false
+worktree_dirty_paths: []

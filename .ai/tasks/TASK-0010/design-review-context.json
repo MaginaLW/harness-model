@@ -1,0 +1,48 @@
+{
+  "base_commit": "6522d2df7d3e360aada9f3bed74dfccedcef06ed",
+  "branch": "main",
+  "classification_input_sha256": "ed1754f8d103b4cbc249dc4f1a3940b6c4cbf9c7b931cc3e48abc83224359300",
+  "content": {
+    "allowed_scope": [
+      "README.md",
+      "docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md",
+      "docs/superpowers/state/README.md",
+      "docs/superpowers/state/chapters/chapter-10.yaml",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 10 退出核验与治理状态对齐，并初始化 Chapter 11 待办状态，不改变运行时行为",
+        "impact_scope": [
+          "README.md",
+          "docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md",
+          "docs/superpowers/state/README.md",
+          "docs/superpowers/state/chapters/chapter-10.yaml",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "verify_chapter_10_exit_evidence",
+          "reconcile_manual_state_projection",
+          "initialize_chapter_11_pending_state",
+          "document_live_v2_boundary"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 10 退出核验与治理状态对齐，并初始化 Chapter 11 待办状态，不改变运行时行为",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "19c050a4c67c33900d58d285fb8ee36217702637f6e6bf779b78737c8185ab24",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "cde966aabfe51f01f84387e5cb229d9561258267a49cfe287808c5fbc4bd0876",
+  "task_id": "TASK-0010"
+}
