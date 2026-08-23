@@ -27,6 +27,7 @@ SCHEMA_FILES = {
     "review-context": "review-context.schema.json",
     "review-record": "review-record.schema.json",
     "task": "task.schema.json",
+    "verifier-context": "verifier-context.schema.json",
 }
 
 

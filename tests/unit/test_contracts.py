@@ -32,6 +32,7 @@ CONTRACT_NAMES = {
     "event",
     "evidence",
     "task",
+    "verifier-context",
 }
 pytestmark = pytest.mark.contract
 
@@ -120,7 +121,7 @@ def test_schema_loader_accepts_a_different_checkout_path(tmp_path: Path) -> None
     assert schema["title"] == "AI Flow task"
 
 
-@pytest.mark.parametrize("contract_name", ["review-context", "review-record"])
+@pytest.mark.parametrize("contract_name", ["review-context", "review-record", "verifier-context"])
 def test_structured_review_templates_satisfy_registered_contracts(contract_name: str) -> None:
     template = REPOSITORY_ROOT / ".ai" / "templates" / f"{contract_name}.json"
     value = load_json(template)
