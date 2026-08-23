@@ -14,6 +14,7 @@ from typing import Literal
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import ContractError, StateTransitionError, StorageError
+from aiflow.evidence import V2_FINAL, validate_v2_snapshot
 from aiflow.freshness import current_classification_input_digest
 from aiflow.git_context import collect_git_context
 from aiflow.policy import load_policy_bundle
@@ -23,6 +24,13 @@ from aiflow.specification import specification_digest
 from aiflow.state import create_record_event, create_transition_event
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import _persist_event_and_task, load_task_record
+from aiflow.verifier_service import (
+    build_verifier_context,
+    current_implementer_actor,
+    load_verifier_context,
+    validate_verifier_actor,
+    validate_verifier_context_current,
+)
 
 ApprovalType = Literal["spec", "code", "action"]
 _APPROVAL_STATES: Mapping[ApprovalType, str | None] = {
@@ -321,13 +329,15 @@ def _evidence(
     spec_sha256: str,
     policy_sha256: str,
     review_ids: set[str],
-) -> tuple[bool, str | None]:
+    events: Sequence[Mapping[str, object]],
+    policy_checks: Sequence[Mapping[str, object]],
+) -> tuple[bool, str | None, Mapping[str, object] | None]:
     path = resolve_task_path(repository_root, task_id, "evidence.json")
     if not path.is_file():
-        return False, None
+        return False, None, None
     value = read_task_json(repository_root, task_id, "evidence.json", contract_name="evidence")
     if not isinstance(value, Mapping):
-        return False, None
+        return False, None, None
     checks = value.get("checks")
     current = (
         value.get("task_id") == task_id
@@ -351,10 +361,64 @@ def _evidence(
         and isinstance(value.get("decision_unit_ids"), list)
         and review_ids.issubset(set(value["decision_unit_ids"]))
     )
+    if value.get("schema_version") == "2.0":
+        current = current and _v2_evidence_current(
+            repository_root, task_id, value, events=events, policy_checks=policy_checks
+        )
     digest = hashlib.sha256(
         json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
-    return current, digest
+    return current, digest, value
+
+
+def _v2_evidence_current(
+    repository_root: Path,
+    task_id: str,
+    evidence: Mapping[str, object],
+    *,
+    events: Sequence[Mapping[str, object]],
+    policy_checks: Sequence[Mapping[str, object]],
+) -> bool:
+    """Require the V2 final facts that make local code approval meaningful."""
+    if evidence.get("phase") != V2_FINAL or evidence.get("mode") != "local":
+        return False
+    try:
+        validate_v2_snapshot(evidence)
+        verifier = evidence.get("verifier_actor")
+        if not isinstance(verifier, str):
+            return False
+        validate_verifier_actor(current_implementer_actor(events), verifier)
+        context_digest = evidence.get("verifier_context_sha256")
+        if not isinstance(context_digest, str):
+            return False
+        stored = load_verifier_context(repository_root, task_id, context_digest)
+        validate_verifier_context_current(stored, build_verifier_context(repository_root, task_id))
+    except ContractError:
+        return False
+    expected = {
+        str(check.get("id"))
+        for check in policy_checks
+        if check.get("required") is True and isinstance(check.get("id"), str)
+    }
+    checks = evidence.get("checks")
+    if not isinstance(checks, list):
+        return False
+    by_id = {
+        str(check.get("check_id")): check
+        for check in checks
+        if isinstance(check, Mapping) and isinstance(check.get("check_id"), str)
+    }
+    if len(by_id) != len(checks) or not expected.issubset(by_id):
+        return False
+    if any(by_id[identifier].get("status") != "passed" for identifier in expected):
+        return False
+    mutation = evidence.get("targeted_mutation")
+    results = mutation.get("results") if isinstance(mutation, Mapping) else None
+    return (
+        isinstance(results, list)
+        and bool(results)
+        and all(isinstance(item, Mapping) and item.get("outcome") == "killed" for item in results)
+    )
 
 
 def _load_approvals(repository_root: Path, task_id: str) -> list[dict[str, object]]:
@@ -487,6 +551,7 @@ def approve_task(
     review_package: str | None = None
     evidence_current = False
     evidence_sha256: str | None = None
+    evidence_value: Mapping[str, object] | None = None
     governance_only = True
     action_value: Mapping[str, object] | None = None
     if approval_type == "code":
@@ -494,7 +559,20 @@ def approve_task(
             resolve_task_path(repository_root, task_id, "review-package.md"),
             code="CODE_REVIEW_PACKAGE_MISSING",
         )
-        evidence_current, evidence_sha256 = _evidence(
+        levels = policy.documents["verification-levels.yaml"].get("levels")
+        v2_checks: object = (
+            next(
+                (
+                    level.get("checks")
+                    for level in levels
+                    if isinstance(level, Mapping) and level.get("id") == "V2"
+                ),
+                [],
+            )
+            if isinstance(levels, list)
+            else []
+        )
+        evidence_current, evidence_sha256, evidence_value = _evidence(
             repository_root,
             task_id,
             task=record.task,
@@ -502,6 +580,10 @@ def approve_task(
             spec_sha256=spec_sha256,
             policy_sha256=policy.sha256,
             review_ids=review_ids,
+            events=record.events,
+            policy_checks=[check for check in v2_checks if isinstance(check, Mapping)]
+            if isinstance(v2_checks, list)
+            else [],
         )
         governance_only = _governance_only(
             repository_root, task_id, str(record.task.get("subject_commit"))
@@ -515,13 +597,41 @@ def approve_task(
             decision_unit_ids=sorted(review_ids),
         )
     elif approval_type == "code":
+        snapshot = (
+            evidence_value.get("verification_snapshot_sha256")
+            if isinstance(evidence_value, Mapping) and evidence_value.get("schema_version") == "2.0"
+            else None
+        )
         structured_review = latest_review_assessment(
             repository_root,
             task_id,
             "implementation",
             decision_unit_ids=sorted(review_ids),
-            evidence_sha256=evidence_sha256,
+            evidence_sha256=evidence_sha256 if snapshot is None else None,
+            verification_snapshot_sha256=snapshot if isinstance(snapshot, str) else None,
         )
+        if isinstance(evidence_value, Mapping) and evidence_value.get("schema_version") == "2.0":
+            refs = evidence_value.get("review_refs")
+            if not isinstance(refs, Mapping):
+                raise ContractError("V2 review references are invalid", code="CODE_EVIDENCE_STALE")
+            design = latest_review_assessment(
+                repository_root,
+                task_id,
+                "design",
+                decision_unit_ids=sorted(review_ids),
+            )
+            implementation_ref = refs.get("implementation")
+            design_ref = refs.get("design")
+            if not all(
+                isinstance(reference, Mapping)
+                and reference.get("review_id") == assessment.record.get("review_id")
+                and reference.get("context_sha256") == assessment.record.get("context_sha256")
+                for reference, assessment in (
+                    (design_ref, design),
+                    (implementation_ref, structured_review),
+                )
+            ):
+                raise ContractError("V2 review references are stale", code="CODE_EVIDENCE_STALE")
     action_decision_unit: str | None = None
     if approval_type == "action":
         if action_file is None:

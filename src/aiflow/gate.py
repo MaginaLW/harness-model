@@ -12,9 +12,11 @@ from typing import Any
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import ContractError
+from aiflow.evidence import V2_FINAL, validate_v2_snapshot
 from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import collect_git_context, commits_are_ancestral
 from aiflow.policy import load_policy_bundle
+from aiflow.review_service import latest_review_assessment
 from aiflow.routing import ROUTE_ORDER, route_task
 from aiflow.scope import (
     AutoPreflightFacts,
@@ -29,6 +31,13 @@ from aiflow.specification import specification_digest
 from aiflow.storage import read_task_json, resolve_task_path
 from aiflow.task_service import read_task_record_strict
 from aiflow.verification_level import verification_for_task
+from aiflow.verifier_service import (
+    build_verifier_context,
+    current_implementer_actor,
+    load_verifier_context,
+    validate_verifier_actor,
+    validate_verifier_context_current,
+)
 
 _REASON_ORDER = (
     "GATE_BLOCKED",
@@ -42,6 +51,13 @@ _REASON_ORDER = (
     "GATE_SPEC_APPROVAL_STALE",
     "GATE_EVIDENCE_STALE",
     "GATE_EVIDENCE_NOT_PASSED",
+    "GATE_V2_EVIDENCE_NOT_FINAL",
+    "GATE_V2_SNAPSHOT_STALE",
+    "GATE_V2_VERIFIER_NOT_INDEPENDENT",
+    "GATE_V2_CONTEXT_STALE",
+    "GATE_V2_REVIEW_STALE",
+    "GATE_V2_CHECKS_INCOMPLETE",
+    "GATE_V2_MUTATION_NOT_KILLED",
     "GATE_CODE_APPROVAL_STALE",
 )
 
@@ -66,6 +82,13 @@ class GateFacts:
     evidence_passed: bool = True
     code_approval_current: bool = True
     unresolved_block_or_escalation: bool = False
+    v2_final_evidence: bool = True
+    v2_snapshot_current: bool = True
+    v2_verifier_independent: bool = True
+    v2_context_current: bool = True
+    v2_reviews_current: bool = True
+    v2_checks_current: bool = True
+    v2_mutation_killed: bool = True
 
 
 @dataclass(frozen=True)
@@ -116,7 +139,7 @@ def evaluate_gate_facts(facts: GateFacts) -> GateDecision:
         reasons.append("GATE_SCOPE_CHANGED")
     if not facts.classification_current:
         reasons.append("GATE_CLASSIFICATION_STALE")
-    if facts.route not in ROUTE_ORDER or facts.verification_level not in {"V0", "V1"}:
+    if facts.route not in ROUTE_ORDER or facts.verification_level not in {"V0", "V1", "V2"}:
         reasons.append("GATE_ROUTE_INVALID")
     if not facts.specification_current:
         reasons.append("GATE_SPEC_STALE")
@@ -128,6 +151,21 @@ def evaluate_gate_facts(facts: GateFacts) -> GateDecision:
         reasons.append("GATE_EVIDENCE_STALE")
     if not facts.evidence_passed:
         reasons.append("GATE_EVIDENCE_NOT_PASSED")
+    if facts.verification_level == "V2":
+        if not facts.v2_final_evidence:
+            reasons.append("GATE_V2_EVIDENCE_NOT_FINAL")
+        if not facts.v2_snapshot_current:
+            reasons.append("GATE_V2_SNAPSHOT_STALE")
+        if not facts.v2_verifier_independent:
+            reasons.append("GATE_V2_VERIFIER_NOT_INDEPENDENT")
+        if not facts.v2_context_current:
+            reasons.append("GATE_V2_CONTEXT_STALE")
+        if not facts.v2_reviews_current:
+            reasons.append("GATE_V2_REVIEW_STALE")
+        if not facts.v2_checks_current:
+            reasons.append("GATE_V2_CHECKS_INCOMPLETE")
+        if not facts.v2_mutation_killed:
+            reasons.append("GATE_V2_MUTATION_NOT_KILLED")
     if (facts.route == "REVIEW" or facts.review_required) and not facts.code_approval_current:
         reasons.append("GATE_CODE_APPROVAL_STALE")
     ordered = tuple(code for code in _REASON_ORDER if code in reasons)
@@ -149,6 +187,13 @@ def evaluate_gate_facts(facts: GateFacts) -> GateDecision:
         ),
         "GATE_EVIDENCE_STALE": ("aiflow", "verify", facts.task_id),
         "GATE_EVIDENCE_NOT_PASSED": ("aiflow", "verify", facts.task_id),
+        "GATE_V2_EVIDENCE_NOT_FINAL": ("aiflow", "verify", facts.task_id, "--finalize"),
+        "GATE_V2_SNAPSHOT_STALE": ("aiflow", "verify", facts.task_id),
+        "GATE_V2_VERIFIER_NOT_INDEPENDENT": ("aiflow", "verify", facts.task_id),
+        "GATE_V2_CONTEXT_STALE": ("aiflow", "verify", facts.task_id),
+        "GATE_V2_REVIEW_STALE": ("aiflow", "review", facts.task_id),
+        "GATE_V2_CHECKS_INCOMPLETE": ("aiflow", "verify", facts.task_id),
+        "GATE_V2_MUTATION_NOT_KILLED": ("aiflow", "verify", facts.task_id),
         "GATE_CODE_APPROVAL_STALE": (
             "aiflow",
             "approve",
@@ -212,6 +257,98 @@ def _read_local_evidence(repository_root: Path, task_id: str) -> dict[str, Any] 
     if not isinstance(value, dict):
         raise ContractError("Gate evidence is invalid", code="GATE_INPUT_INVALID")
     return value
+
+
+def _v2_gate_facts(
+    repository_root: Path,
+    task_id: str,
+    evidence: Mapping[str, object] | None,
+    *,
+    events: tuple[Mapping[str, object], ...],
+    policy_checks: list[Mapping[str, object]],
+    decision_unit_ids: list[str],
+) -> dict[str, bool]:
+    """Derive the extra V2 final-evidence predicates without changing V0/V1 paths."""
+    result = {
+        "v2_final_evidence": False,
+        "v2_snapshot_current": False,
+        "v2_verifier_independent": False,
+        "v2_context_current": False,
+        "v2_reviews_current": False,
+        "v2_checks_current": False,
+        "v2_mutation_killed": False,
+    }
+    if not isinstance(evidence, Mapping) or evidence.get("schema_version") != "2.0":
+        return result
+    result["v2_final_evidence"] = evidence.get("phase") == V2_FINAL
+    try:
+        validate_v2_snapshot(evidence)
+        result["v2_snapshot_current"] = True
+        implementer = current_implementer_actor(events)
+        verifier = evidence.get("verifier_actor")
+        if isinstance(verifier, str):
+            validate_verifier_actor(implementer, verifier)
+            result["v2_verifier_independent"] = True
+        digest = evidence.get("verifier_context_sha256")
+        if isinstance(digest, str):
+            stored = load_verifier_context(repository_root, task_id, digest)
+            validate_verifier_context_current(
+                stored, build_verifier_context(repository_root, task_id)
+            )
+            result["v2_context_current"] = True
+        expected_checks = {
+            str(check.get("id"))
+            for check in policy_checks
+            if check.get("required") is True and isinstance(check.get("id"), str)
+        }
+        checks = evidence.get("checks")
+        if isinstance(checks, list):
+            by_id = {
+                str(check.get("check_id")): check
+                for check in checks
+                if isinstance(check, Mapping) and isinstance(check.get("check_id"), str)
+            }
+            result["v2_checks_current"] = (
+                len(by_id) == len(checks)
+                and expected_checks.issubset(by_id)
+                and all(by_id[check_id].get("status") == "passed" for check_id in expected_checks)
+            )
+        mutation = evidence.get("targeted_mutation")
+        if isinstance(mutation, Mapping):
+            mutations = mutation.get("results")
+            result["v2_mutation_killed"] = (
+                isinstance(mutations, list)
+                and bool(mutations)
+                and all(
+                    isinstance(item, Mapping) and item.get("outcome") == "killed"
+                    for item in mutations
+                )
+            )
+        refs = evidence.get("review_refs")
+        snapshot = evidence.get("verification_snapshot_sha256")
+        if isinstance(refs, Mapping) and isinstance(snapshot, str):
+            design = latest_review_assessment(
+                repository_root, task_id, "design", decision_unit_ids=decision_unit_ids
+            )
+            implementation = latest_review_assessment(
+                repository_root,
+                task_id,
+                "implementation",
+                decision_unit_ids=decision_unit_ids,
+                verification_snapshot_sha256=snapshot,
+            )
+            result["v2_reviews_current"] = all(
+                isinstance(ref, Mapping)
+                and ref.get("review_id") == assessment.record.get("review_id")
+                and ref.get("context_sha256") == assessment.record.get("context_sha256")
+                for ref, assessment in (
+                    (refs.get("design"), design),
+                    (refs.get("implementation"), implementation),
+                )
+            )
+    except ContractError:
+        return result
+    return result
 
 
 def evaluate_gate(
@@ -323,6 +460,31 @@ def evaluate_gate(
         and len(evidence_ids) == len(expected_ids)
         and expected_ids == {str(identifier) for identifier in evidence_ids}
     )
+    v2_facts: dict[str, bool] = {}
+    if classification.get("effective_verification_level") == "V2":
+        levels = policy.documents["verification-levels.yaml"].get("levels")
+        v2_checks: object = (
+            next(
+                (
+                    level.get("checks")
+                    for level in levels
+                    if isinstance(level, Mapping) and level.get("id") == "V2"
+                ),
+                [],
+            )
+            if isinstance(levels, list)
+            else []
+        )
+        v2_facts = _v2_gate_facts(
+            root,
+            task_id,
+            evidence,
+            events=record.events,
+            policy_checks=[check for check in v2_checks if isinstance(check, Mapping)]
+            if isinstance(v2_checks, list)
+            else [],
+            decision_unit_ids=sorted(expected_ids),
+        )
     approvals = _read_approvals(root, task_id)
     approval_current: dict[str, set[str]] = {"spec": set(), "code": set()}
     local_evidence_report = (
@@ -437,5 +599,6 @@ def evaluate_gate(
         code_approval_current=review_ids.issubset(approval_current["code"]),
         unresolved_block_or_escalation=block_present
         or task.get("current_state") in {"BLOCKED", "ESCALATED"},
+        **v2_facts,
     )
     return evaluate_gate_facts(facts)
