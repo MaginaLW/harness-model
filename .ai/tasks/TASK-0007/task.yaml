@@ -1,0 +1,183 @@
+allowed_scope:
+- .gitignore
+- .ai/tasks/TASK-0005/logs/**
+- .ai/tasks/TASK-0006/logs/**
+base_commit: 3d8c45c2458a1efc4d15a18c6ca02a4cda2af395
+branch: main
+created_at: '2026-08-23T02:48:30Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: local
+    mechanical: true
+    regression_risk: false
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 忽略并清理 TASK-0005/TASK-0006 自动生成的原始验证日志
+  impact:
+    level: low
+  impact_categories: []
+  impact_scope:
+  - .gitignore
+  - .ai/tasks/TASK-0005/logs/**
+  - .ai/tasks/TASK-0006/logs/**
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - update_gitignore
+  - delete_generated_logs
+  protections:
+    dry_run: true
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0007
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - git check-ignore verifies nested AI Flow logs are ignored
+  - exact target directories are absent after deletion
+  - git status contains no generated log files
+forbidden_actions:
+- push
+- merge
+- deploy
+- secret_export
+- paid_external_call
+frozen_spec_sha256: c261d1093fed082650bad4fb7b9af82145eb2f1402d975c8b6e278b33ecc6e50
+goal: 忽略并清理 TASK-0005/TASK-0006 自动生成的原始验证日志
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-23T02:50:23Z'
+subject_commit: 3d8c45c2458a1efc4d15a18c6ca02a4cda2af395
+task_id: TASK-0007
+updated_at: '2026-08-23T02:50:41Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- .ai/tasks/TASK-0005/logs/coverage-check-2/.coverage
+- .ai/tasks/TASK-0005/logs/coverage-check-2/coverage.xml
+- .ai/tasks/TASK-0005/logs/coverage-check/.coverage
+- .ai/tasks/TASK-0005/logs/coverage-check/coverage.xml
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/.coverage
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/contract-001.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/contract-001.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/coverage.xml
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/coverage_xml-009.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/coverage_xml-009.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/diff_coverage-010.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/diff_coverage-010.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/evidence.json
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/mypy-008.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/mypy-008.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/regression_tests-007.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/regression_tests-007.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/ruff_check-003.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/ruff_check-003.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/ruff_format_check-004.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/ruff_format_check-004.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/scope-002.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/scope-002.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/smoke-005.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/smoke-005.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/unit_tests-006.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T131631430143Z/unit_tests-006.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/.coverage
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/contract-001.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/contract-001.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/coverage.xml
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/coverage_xml-009.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/coverage_xml-009.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/diff_coverage-010.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/diff_coverage-010.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/evidence.json
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/mypy-008.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/mypy-008.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/regression_tests-007.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/regression_tests-007.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/ruff_check-003.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/ruff_check-003.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/ruff_format_check-004.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/ruff_format_check-004.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/scope-002.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/scope-002.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/smoke-005.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/smoke-005.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/unit_tests-006.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T132713274196Z/unit_tests-006.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/.coverage
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/contract-001.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/contract-001.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/coverage.xml
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/coverage_xml-009.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/coverage_xml-009.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/diff_coverage-010.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/diff_coverage-010.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/evidence.json
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/mypy-008.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/mypy-008.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/regression_tests-007.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/regression_tests-007.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/ruff_check-003.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/ruff_check-003.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/ruff_format_check-004.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/ruff_format_check-004.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/scope-002.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/scope-002.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/smoke-005.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/smoke-005.stdout.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/unit_tests-006.stderr.log
+- .ai/tasks/TASK-0005/logs/run-20260822T133447001728Z/unit_tests-006.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/.coverage
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/contract-001.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/contract-001.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/coverage.xml
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/coverage_xml-009.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/coverage_xml-009.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/diff_coverage-010.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/diff_coverage-010.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/evidence.json
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/mypy-008.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/mypy-008.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/regression_tests-007.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/regression_tests-007.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/ruff_check-003.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/ruff_check-003.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/ruff_format_check-004.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/ruff_format_check-004.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/scope-002.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/scope-002.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/smoke-005.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/smoke-005.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/unit_tests-006.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T020037636363Z/unit_tests-006.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/.coverage
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/contract-001.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/contract-001.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/coverage.xml
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/coverage_xml-009.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/coverage_xml-009.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/diff_coverage-010.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/diff_coverage-010.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/evidence.json
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/mypy-008.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/mypy-008.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/regression_tests-007.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/regression_tests-007.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/ruff_check-003.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/ruff_check-003.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/ruff_format_check-004.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/ruff_format_check-004.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/scope-002.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/scope-002.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/smoke-005.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/smoke-005.stdout.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/unit_tests-006.stderr.log
+- .ai/tasks/TASK-0006/logs/run-20260823T021426073960Z/unit_tests-006.stdout.log

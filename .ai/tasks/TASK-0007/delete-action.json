@@ -1,0 +1,14 @@
+{
+  "decision_unit_id": "DU-001",
+  "action_type": "delete",
+  "target": "D:\\Repos\\harness-model\\.ai\\tasks\\TASK-0005\\logs; D:\\Repos\\harness-model\\.ai\\tasks\\TASK-0006\\logs",
+  "parameter_summary": "Recursively delete only the two untracked generated log directories after resolving and validating both exact workspace paths",
+  "subject_commit": "3d8c45c2458a1efc4d15a18c6ca02a4cda2af395",
+  "conditions": [
+    "Both targets resolve inside D:\\Repos\\harness-model\\.ai\\tasks",
+    "Each target is exactly a logs directory for TASK-0005 or TASK-0006",
+    "No tracked task evidence or other task files are removed"
+  ],
+  "expires_at": "2026-08-24T00:00:00Z",
+  "single_use": true
+}

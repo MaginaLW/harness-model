@@ -4,5 +4,6 @@ __pycache__/
 .ruff_cache/
 /.coverage
 /coverage.xml
+/.ai/tasks/*/logs/
 /.venv/
 *.egg-info/

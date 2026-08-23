@@ -1,0 +1,18 @@
+[
+  {
+    "action_sha256": "6641fafc678043b78c8212f8075ca97c24d6451424586830b864b23365045fca",
+    "actor": "user",
+    "approval_type": "action",
+    "approved_at": "2026-08-23T02:50:40Z",
+    "base_commit": "3d8c45c2458a1efc4d15a18c6ca02a4cda2af395",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-24T00:00:00Z",
+    "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+    "reason": "用户明确批准执行已说明的日志删除与忽略操作",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "c261d1093fed082650bad4fb7b9af82145eb2f1402d975c8b6e278b33ecc6e50",
+    "subject_commit": "3d8c45c2458a1efc4d15a18c6ca02a4cda2af395",
+    "task_id": "TASK-0007"
+  }
+]
