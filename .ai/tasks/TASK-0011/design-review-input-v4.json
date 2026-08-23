@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0003",
+  "revision": 1,
+  "task_id": "TASK-0011",
+  "review_stage": "design",
+  "recorded_at": "2026-08-23T13:30:44Z",
+  "context_sha256": "0007e56957617b19d9d679bca5480727f89fce957c65bed73f85bc568be5e6fe",
+  "outcome": "APPROVE",
+  "summary": "APPROVE. The final active bundle is consistently versioned 2.1.0 and its digest f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf matches the current design-review context. Relative to the Chapter 10 baseline, hard-rules, routing, and permissions changed only policy_version; verification-levels changed only policy_version plus the frozen exact offline pytest acceptance and integration definitions. Chapter 9 documentation is limited to clarifying 2.0.0 as its historical active baseline and directing readers to the active Policy bundle; historical task, classification, approval, evidence, state, and fixture bindings remain 2.0.0. Targeted mutation remains the sole Chapter 11 pending check with its stable unverified boundary. The final Policy resolution correctly defers governed V1 verification, remaining Chapter 11.1 documentation/state projection, and implementation review until the final policy_changed cycle completes with reclassification, refreeze, this review, and a fresh spec approval bound to the 2.1.0 digest.",
+  "findings": []
+}
