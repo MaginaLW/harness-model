@@ -872,7 +872,7 @@ def _require_git_baseline(repository_root: Path, task_id: str, task: Mapping[str
         governance_only_head = commits_are_ancestral(
             repository_root,
             base_commit=subject_commit,
-            subject_commit=context.head,
+            subject_commit=subject_commit,
             head_commit=context.head,
         ) and all(is_task_governance_path(path, task_id) for path in changes.attestation)
     if (
