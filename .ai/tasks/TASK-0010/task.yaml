@@ -8,7 +8,7 @@ allowed_scope:
 base_commit: 6522d2df7d3e360aada9f3bed74dfccedcef06ed
 branch: main
 created_at: '2026-08-23T10:42:37Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -78,6 +78,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-08-23T10:45:00Z'
 subject_commit: b86ef8ef5d837765ee36cbc037386192a5b47cd8
 task_id: TASK-0010
-updated_at: '2026-08-23T11:41:25Z'
+updated_at: '2026-08-23T11:57:13Z'
 worktree_dirty: false
 worktree_dirty_paths: []
