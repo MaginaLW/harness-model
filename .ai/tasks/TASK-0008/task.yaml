@@ -1,0 +1,119 @@
+schema_version: '1.0'
+task_id: TASK-0008
+goal: 完成 Chapter 10 独立 Verifier、最小上下文及 V2 evidence/Gate 解释
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: main
+base_commit: 39efe849f16500354f3be485a9617ba8b5014e31
+subject_commit: 39efe849f16500354f3be485a9617ba8b5014e31
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- .ai/schemas/verifier-context.schema.json
+- .ai/schemas/evidence.schema.json
+- .ai/schemas/review-context.schema.json
+- .ai/templates/verifier-context.json
+- .ai/templates/evidence-v2.json
+- src/aiflow/contracts.py
+- src/aiflow/verifier_service.py
+- src/aiflow/task_service.py
+- src/aiflow/verification_service.py
+- src/aiflow/verification.py
+- src/aiflow/verification_checks.py
+- src/aiflow/evidence.py
+- src/aiflow/freshness.py
+- src/aiflow/gate.py
+- src/aiflow/review_service.py
+- src/aiflow/approval.py
+- src/aiflow/status_service.py
+- src/aiflow/cli.py
+- tests/fixtures/contracts/valid/verifier-context.json
+- tests/fixtures/contracts/valid/evidence-v2.json
+- tests/fixtures/contracts/invalid/verifier-context.missing.json
+- tests/fixtures/contracts/invalid/verifier-context.invalid.json
+- tests/fixtures/contracts/invalid/verifier-context.extra.json
+- tests/fixtures/contracts/invalid/evidence-v2.missing.json
+- tests/fixtures/contracts/invalid/evidence-v2.invalid.json
+- tests/fixtures/contracts/invalid/evidence-v2.extra.json
+- tests/fixtures/gate/decision-table.json
+- tests/fixtures/parity/decision-table.json
+- tests/unit/test_verifier_service.py
+- tests/unit/test_contracts.py
+- tests/unit/test_evidence.py
+- tests/unit/test_freshness.py
+- tests/unit/test_gate.py
+- tests/unit/test_verification_plan.py
+- tests/unit/test_review_package.py
+- tests/unit/test_review_records.py
+- tests/integration/test_verify_command.py
+- tests/integration/test_verification_evidence_flow.py
+- tests/integration/test_gate_command.py
+- tests/integration/test_gate_parity.py
+- tests/integration/test_approve_command.py
+- tests/integration/test_status_command.py
+- tests/integration/test_review_command.py
+- tests/integration/test_golden_contracts.py
+- tests/e2e/scenario_support.py
+- tests/e2e/test_v2_verifier_scenario.py
+- docs/operations/quickstart.md
+- docs/operations/recovery.md
+- docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md
+- docs/superpowers/state/chapters/chapter-10.yaml
+- docs/superpowers/state/overall.yaml
+- README.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: WAITING_FOR_SPEC_REVIEW
+created_at: '2026-08-23T02:59:27Z'
+updated_at: '2026-08-23T03:06:20Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0008
+  decision_unit_id: DU-001
+  goal: 完成 Chapter 10 独立 Verifier、最小上下文及 V2 evidence/Gate 解释
+  inputs: []
+  planned_actions:
+  - define_verifier_context_contract
+  - enforce_v2_actor_independence
+  - write_two_phase_v2_evidence
+  - replay_v2_gate
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - contract and canonical-hash unit tests
+  - V2 verify and Gate integration tests
+  - V0/V1 compatibility regression tests
+  - full offline V1 project verification
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: medium
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories: []
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: true
+    code_modified: true
+    interaction_scope: cross_module
+    regression_risk: true
+    error_detectability: high
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
+repository_path_at_creation: D:/Repos/harness-model
+frozen_spec_sha256: d3d23cded4e19a5652e3f09f15ca1501fa4622dcd714f57992c42bc3431ceac4
+spec_frozen_at: '2026-08-23T03:05:06Z'
