@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "review_stage", "task_id", "decision_unit_ids", "repository_id", "branch", "base_commit", "spec_sha256", "policy_sha256", "classification_input_sha256", "context_sha256", "content"],
   "properties": {
-    "schema_version": {"const": "1.0"},
+    "schema_version": {"enum": ["1.0", "2.0"]},
     "review_stage": {"enum": ["design", "implementation"]},
     "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
     "decision_unit_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^DU-[0-9]{3,}$"}},
@@ -19,10 +19,12 @@
     "context_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "subject_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "evidence_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "verification_snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "content": {"type": "object"}
   },
   "allOf": [
-    {"if": {"properties": {"review_stage": {"const": "design"}}, "required": ["review_stage"]}, "then": {"not": {"anyOf": [{"required": ["subject_commit"]}, {"required": ["evidence_sha256"]}]}}},
-    {"if": {"properties": {"review_stage": {"const": "implementation"}}, "required": ["review_stage"]}, "then": {"required": ["subject_commit", "evidence_sha256"]}}
+    {"if": {"properties": {"review_stage": {"const": "design"}}, "required": ["review_stage"]}, "then": {"properties": {"schema_version": {"const": "1.0"}}, "not": {"anyOf": [{"required": ["subject_commit"]}, {"required": ["evidence_sha256"]}, {"required": ["verification_snapshot_sha256"]}]}}},
+    {"if": {"properties": {"schema_version": {"const": "1.0"}, "review_stage": {"const": "implementation"}}, "required": ["schema_version", "review_stage"]}, "then": {"required": ["subject_commit", "evidence_sha256"], "not": {"required": ["verification_snapshot_sha256"]}}},
+    {"if": {"properties": {"schema_version": {"const": "2.0"}, "review_stage": {"const": "implementation"}}, "required": ["schema_version", "review_stage"]}, "then": {"required": ["subject_commit", "verification_snapshot_sha256"], "not": {"required": ["evidence_sha256"]}}}
   ]
 }

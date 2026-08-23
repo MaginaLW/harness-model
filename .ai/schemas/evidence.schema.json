@@ -50,6 +50,8 @@
         "reproduce_command": {"type": "array", "minItems": 1, "items": {"type": "string"}},
         "verifier_actor": {"type": "string", "minLength": 1},
         "verifier_context_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "phase": {"enum": ["pre_implementation_review", "final"]},
+        "verification_snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "review_refs": {"$ref": "#/$defs/review_refs"},
         "targeted_mutation": {"$ref": "#/$defs/targeted_mutation"}
     },
@@ -69,6 +71,8 @@
                     "anyOf": [
                         {"required": ["verifier_actor"]},
                         {"required": ["verifier_context_sha256"]},
+                        {"required": ["phase"]},
+                        {"required": ["verification_snapshot_sha256"]},
                         {"required": ["review_refs"]},
                         {"required": ["targeted_mutation"]}
                     ]
@@ -85,6 +89,8 @@
                 "required": [
                     "verifier_actor",
                     "verifier_context_sha256",
+                    "phase",
+                    "verification_snapshot_sha256",
                     "review_refs",
                     "targeted_mutation"
                 ],
@@ -144,6 +150,14 @@
                                 "minContains": 1
                             }
                         }
+                    },
+                    {
+                        "if": {"properties": {"phase": {"const": "pre_implementation_review"}}, "required": ["phase"]},
+                        "then": {"properties": {"review_refs": {"not": {"required": ["implementation"]}}}}
+                    },
+                    {
+                        "if": {"properties": {"phase": {"const": "final"}}, "required": ["phase"]},
+                        "then": {"properties": {"review_refs": {"required": ["implementation"]}}}
                     }
                 ]
             }
@@ -194,7 +208,7 @@
         "review_refs": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["design", "implementation"],
+            "required": ["design"],
             "properties": {
                 "design": {"$ref": "#/$defs/review_ref"},
                 "implementation": {"$ref": "#/$defs/review_ref"}

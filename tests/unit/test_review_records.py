@@ -172,6 +172,23 @@ def test_stages_are_mutually_exclusive() -> None:
     assert any("required property is missing" in error for error in _errors(implementation))
 
 
+def test_v2_implementation_context_uses_snapshot_not_legacy_evidence_digest() -> None:
+    implementation = context("implementation")
+    implementation["schema_version"] = "2.0"
+    implementation.pop("evidence_sha256")
+    implementation["verification_snapshot_sha256"] = HASH
+    stable = {key: value for key, value in implementation.items() if key != "context_sha256"}
+    implementation["context_sha256"] = hashlib.sha256(
+        json.dumps(stable, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
+    ).hexdigest()
+    validate_review_context(implementation)
+
+    implementation["evidence_sha256"] = HASH
+    assert any("contract constraint failed" in error for error in _errors(implementation))
+
+
 def _errors(value: dict[str, Any]) -> list[str]:
     from aiflow.contracts import validate_contract
 

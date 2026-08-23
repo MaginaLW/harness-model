@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-from typing import Literal
+from typing import Literal, cast
 
 from aiflow.contracts import require_valid_contract
 from aiflow.errors import ContractError
@@ -15,6 +17,8 @@ from aiflow.storage import atomic_write_json
 from aiflow.verification import VerificationCheck
 
 _RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+V2_PRE_IMPLEMENTATION_REVIEW = "pre_implementation_review"
+V2_FINAL = "final"
 
 
 @dataclass(frozen=True)
@@ -91,6 +95,78 @@ def decide_evidence_conclusion(
     if any(check.get("required") is True and check.get("status") != "passed" for check in checks):
         return "failed"
     return "provisional" if provisional else "passed"
+
+
+def verification_snapshot_sha256(evidence: Mapping[str, object]) -> str:
+    """Hash the V2 verification facts that must survive review finalization."""
+    if evidence.get("schema_version") != "2.0" or evidence.get("verification_level") != "V2":
+        raise ContractError(
+            "Verification snapshot requires V2 evidence", code="EVIDENCE_SNAPSHOT_INVALID"
+        )
+    projection = json.loads(json.dumps(dict(evidence)))
+    projection.pop("phase", None)
+    projection.pop("verification_snapshot_sha256", None)
+    review_refs = projection.get("review_refs")
+    if not isinstance(review_refs, dict):
+        raise ContractError(
+            "Verification snapshot review references are invalid", code="EVIDENCE_SNAPSHOT_INVALID"
+        )
+    review_refs.pop("implementation", None)
+    canonical = json.dumps(projection, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def validate_v2_snapshot(evidence: Mapping[str, object]) -> None:
+    """Reject a V2 artifact whose declared stable verification projection changed."""
+    snapshot = evidence.get("verification_snapshot_sha256")
+    if not isinstance(snapshot, str) or snapshot != verification_snapshot_sha256(evidence):
+        raise ContractError("V2 verification snapshot is stale", code="EVIDENCE_SNAPSHOT_STALE")
+
+
+def prepare_v2_pre_evidence(evidence: Mapping[str, object]) -> dict[str, object]:
+    """Create schema-valid V2 evidence before an implementation review exists."""
+    candidate = cast(dict[str, object], json.loads(json.dumps(dict(evidence))))
+    if candidate.get("schema_version") != "2.0" or candidate.get("verification_level") != "V2":
+        raise ContractError("V2 pre evidence is invalid", code="EVIDENCE_V2_PHASE_INVALID")
+    review_refs = candidate.get("review_refs")
+    if not isinstance(review_refs, dict):
+        raise ContractError("V2 pre evidence lacks design review", code="EVIDENCE_V2_PHASE_INVALID")
+    review_refs.pop("implementation", None)
+    candidate["phase"] = V2_PRE_IMPLEMENTATION_REVIEW
+    candidate["verification_snapshot_sha256"] = verification_snapshot_sha256(candidate)
+    require_valid_contract("evidence", candidate)
+    return candidate
+
+
+def finalize_v2_evidence(
+    evidence: Mapping[str, object], implementation_review: Mapping[str, object]
+) -> dict[str, object]:
+    """Append the implementation review without changing V2 verification facts."""
+    candidate = cast(dict[str, object], json.loads(json.dumps(dict(evidence))))
+    if candidate.get("phase") != V2_PRE_IMPLEMENTATION_REVIEW:
+        raise ContractError(
+            "V2 evidence is not awaiting implementation review", code="EVIDENCE_V2_PHASE_INVALID"
+        )
+    if candidate.get("conclusion") != "passed":
+        raise ContractError("V2 pre evidence has not passed", code="EVIDENCE_V2_NOT_PASSED")
+    validate_v2_snapshot(candidate)
+    review_id = implementation_review.get("review_id")
+    context_sha256 = implementation_review.get("context_sha256")
+    if not isinstance(review_id, str) or not isinstance(context_sha256, str):
+        raise ContractError(
+            "Implementation review reference is invalid", code="EVIDENCE_REVIEW_REF_INVALID"
+        )
+    review_refs = candidate.get("review_refs")
+    if not isinstance(review_refs, dict):
+        raise ContractError("V2 review references are invalid", code="EVIDENCE_REVIEW_REF_INVALID")
+    review_refs["implementation"] = {
+        "review_id": review_id,
+        "context_sha256": context_sha256,
+    }
+    candidate["phase"] = V2_FINAL
+    validate_v2_snapshot(candidate)
+    require_valid_contract("evidence", candidate)
+    return candidate
 
 
 def build_evidence(

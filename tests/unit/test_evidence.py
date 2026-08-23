@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
 
 from aiflow.errors import ContractError, StorageError
-from aiflow.evidence import EvidenceFacts, build_evidence, decide_evidence_conclusion, save_evidence
+from aiflow.evidence import (
+    EvidenceFacts,
+    build_evidence,
+    decide_evidence_conclusion,
+    finalize_v2_evidence,
+    prepare_v2_pre_evidence,
+    save_evidence,
+    validate_v2_snapshot,
+)
 from aiflow.process_runner import ProcessResult
 from aiflow.verification import VerificationCheck
 
@@ -55,6 +64,13 @@ def result(*, conclusion: str = "passed", timed_out: bool = False) -> ProcessRes
         conclusion,
         "RUNNER_TIMEOUT" if timed_out else None,
     )
+
+
+def v2_evidence() -> dict[str, object]:
+    path = Path(__file__).parents[1] / "fixtures" / "contracts" / "valid" / "evidence-v2.json"
+    value = json.loads(path.read_text(encoding="utf-8"))
+    assert isinstance(value, dict)
+    return value
 
 
 @pytest.mark.parametrize(
@@ -123,6 +139,30 @@ def test_ci_binds_governance_attestation_and_local_cannot_claim_it() -> None:
             [result()],
             tool_versions={"pytest": "pytest 9"},
         )
+
+
+def test_v2_snapshot_is_stable_across_implementation_review_finalization() -> None:
+    pre = prepare_v2_pre_evidence(v2_evidence())
+    assert pre["phase"] == "pre_implementation_review"
+    validate_v2_snapshot(pre)
+
+    final = finalize_v2_evidence(
+        pre,
+        {"review_id": "REV-0002", "context_sha256": "f" * 64},
+    )
+    assert final["phase"] == "final"
+    assert final["verification_snapshot_sha256"] == pre["verification_snapshot_sha256"]
+    validate_v2_snapshot(final)
+
+
+def test_v2_snapshot_rejects_mutation_of_bound_verification_facts() -> None:
+    pre = prepare_v2_pre_evidence(v2_evidence())
+    checks = pre["checks"]
+    assert isinstance(checks, list) and isinstance(checks[0], dict)
+    checks[0]["status"] = "failed"
+    with pytest.raises(ContractError) as caught:
+        validate_v2_snapshot(pre)
+    assert caught.value.code == "EVIDENCE_SNAPSHOT_STALE"
 
 
 def test_failure_evidence_is_atomically_saved_and_write_error_propagates(

@@ -13,6 +13,7 @@ from typing import Any, Literal
 
 from aiflow.contracts import require_valid_contract
 from aiflow.errors import ContractError, StorageError
+from aiflow.evidence import validate_v2_snapshot
 from aiflow.freshness import current_classification_input_digest
 from aiflow.policy import load_policy_bundle
 from aiflow.specification import specification_digest
@@ -250,7 +251,24 @@ def build_review_context(repository_root: Path, task_id: str, stage: str) -> Map
                 "Implementation review requires passed evidence", code="REVIEW_EVIDENCE_INVALID"
             )
         context["subject_commit"] = subject
-        context["evidence_sha256"] = _artifact_digest(evidence)
+        if evidence.get("schema_version") == "2.0":
+            try:
+                validate_v2_snapshot(evidence)
+            except ContractError as error:
+                raise ContractError(
+                    "Implementation review requires current V2 verification evidence",
+                    code="REVIEW_EVIDENCE_INVALID",
+                ) from error
+            snapshot = evidence.get("verification_snapshot_sha256")
+            if not isinstance(snapshot, str):
+                raise ContractError(
+                    "Implementation review requires V2 verification snapshot",
+                    code="REVIEW_EVIDENCE_INVALID",
+                )
+            context["schema_version"] = "2.0"
+            context["verification_snapshot_sha256"] = snapshot
+        else:
+            context["evidence_sha256"] = _artifact_digest(evidence)
         base = task.get("base_commit")
         if not isinstance(base, str):
             raise ContractError(
@@ -639,6 +657,7 @@ def latest_review_assessment(
     stage: str,
     decision_unit_ids: Sequence[str] | None = None,
     evidence_sha256: str | None = None,
+    verification_snapshot_sha256: str | None = None,
 ) -> ReviewAssessment:
     """Return the latest current, approvable review for one stage or raise a stable error."""
     review_stage = _stage(stage)
@@ -686,6 +705,10 @@ def latest_review_assessment(
         selected.get("context_sha256") != expected["context_sha256"]
         or not current_ids.issubset(set(expected["decision_unit_ids"]))
         or (evidence_sha256 is not None and expected.get("evidence_sha256") != evidence_sha256)
+        or (
+            verification_snapshot_sha256 is not None
+            and expected.get("verification_snapshot_sha256") != verification_snapshot_sha256
+        )
     ):
         raise ContractError("Review record is stale", code="REVIEW_RECORD_STALE")
     validate_review_record(selected, expected)
