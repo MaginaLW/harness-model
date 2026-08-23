@@ -1,0 +1,35 @@
+{
+  "context_sha256": "88e1cb2a769767f37329c5e555fa4222ae22a1bac9295274e969e61b09e3b99b",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0013/spec.md:24",
+        ".ai/tasks/TASK-0013/spec.md:65-67",
+        ".ai/policy/verification-levels.yaml:80-100",
+        "src/aiflow/verification.py:19-20"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 24,
+        "path": ".ai/tasks/TASK-0013/spec.md"
+      },
+      "resolution": {
+        "actor": "codex",
+        "reason": "规格已将授权单位改为精确外层命令事务：focused integration 预算 1 次 runner；完整 local/CI V1 verify 绑定当前 plan 且预算最多 2 次（regression_tests 与 coverage_xml），提前失败不复用余额，任何重跑重新批准。",
+        "resolved_at": "2026-08-23T22:55:30Z"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Single-run delete approval cannot cover the complete V1 transaction"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-08-23T22:55:30Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "task0013-design-reviewer",
+  "revision": 2,
+  "schema_version": "1.0",
+  "summary": "The frozen design is structurally implementable, but its single-use delete approval is scoped to one five-probe runner invocation while the frozen V1 verification transaction collects the real integration test twice through regression_tests and coverage_xml. The current authorization unit therefore cannot support a compliant full V1 replay.",
+  "task_id": "TASK-0013"
+}

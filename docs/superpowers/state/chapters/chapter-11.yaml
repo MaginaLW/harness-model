@@ -43,9 +43,9 @@ tasks:
     blockers: []
   - id: "11.3"
     title: "在隔离 fixture/subprocess 中运行 mutant，不修改主工作树"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
     blockers: []
   - id: "11.4"
@@ -105,6 +105,23 @@ chapter_evidence:
       - "tests/unit/test_mutation_manifest.py"
       - "tests/integration/test_mutation_manifest_contract.py"
     limitation: "11.3–11.5 与两个 Chapter 11 exit checks 仍未完成；manifest 存在不代表 mutation 已执行、killed 或真实 live V2 passed。"
+  - id: "EVD-CH11-11.3-001"
+    kind: "implementation_projection_focused_integration_passed_pending_v1"
+    task_id: "TASK-0013"
+    implementation_subject_commit: "pending TASK-0013 implementation subject"
+    implementation_subject_role: "11.3 隔离 runner、契约测试与状态投影的受控实现范围；修复后的 focused integration 已验证五项原始 probe fact 与完全 cleanup，当前仍不是完整 V1 或持久 killed/survived evidence。"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    scope: "固定五项 manifest 的隔离执行、主工作树不变性与 cleanup 失败语义；不持久化 mutation evidence，不接入 live V2/Gate。"
+    artifacts:
+      - "src/aiflow/mutation_runner.py"
+      - "tests/unit/test_mutation_runner.py"
+      - "tests/integration/test_mutation_runner_contract.py"
+      - "docs/implementation/chapter-11-acceptance-integration-mutation.md"
+      - ".ai/tasks/TASK-0013/action-use-bc652d7b9115335fd42ebaa39f3ee6e972fd3cf058b135b7730e6b0012bbd394.md"
+      - ".ai/tasks/TASK-0013/action-use-9c98f556fbd50c16082110cf465629e2642e417e4c9b2459927230c58aaeeec5.md"
+      - ".ai/tasks/TASK-0013/action-use-659ed5eed4b25a1daf73aa636219da690fcc5cbddf1c416a9ad2aa5dc4a2ab40.md"
+    limitation: "首次 focused integration 的 MUTATION_WORKTREE_CLEANUP_FAILED 与独立残留清理均已封存；修复后的 focused integration 已通过，五项 baseline/mutant 原始退出码分别为 0/1，且无残留。完整 V1 尚未执行，任何新的真实 worktree create/remove 仍须当前 single-use delete action approval。11.4、11.5、两个 Chapter 11 exit checks、持久 mutation evidence 与真实 live V2 passed 均仍 pending。"
 
 blockers:
-  - "11.3–11.5 仍需后续 AI Flow 行为性任务、冻结规格、独立审核和所需批准；不得将 11.2 manifest、11.1 acceptance/integration 编排或 V1 证据扩展为 mutation 执行证据或真实 live V2 passed。"
+  - "11.4–11.5、两个 Chapter 11 exit checks、持久 mutation evidence 与真实 live V2 仍需后续 AI Flow 行为性任务、冻结规格、独立审核和所需批准；11.3 修复后的 focused integration 已通过，但完整 V1 仍须单独批准。不得将 focused 原始退出码、11.3 实现投影、11.2 manifest、11.1 acceptance/integration 编排或其他 V1 证据扩展为持久 killed/survived evidence 或真实 live V2 passed。"

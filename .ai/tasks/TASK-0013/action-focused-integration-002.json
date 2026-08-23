@@ -1,0 +1,20 @@
+{
+  "decision_unit_id": "DU-001",
+  "action_type": "delete",
+  "target": "C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-*",
+  "parameter_summary": "transaction_id=TASK-0013-FOCUSED-002; transaction_type=focused_integration; outer_argv=[D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe,-m,pytest,-q,tests/integration/test_mutation_runner_contract.py]; runner_source_sha256=4b227bf5785513cd757567b7b20d3d1e64680909340eec26a5817f80697372fd; integration_test_sha256=2084d3f76007c7579f2b06d3ce2a62f16bfa3efa05dec78ec7c1d440c61883e1; manifest_sha256=1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0; runner_invocation_budget=1; root_budget=1; per_root_worktree_budget=5; shell=false",
+  "subject_commit": "dc49293936ae8f705b7a474dc5c7b0ac0c981865",
+  "conditions": [
+    "Bind this transaction to TASK-0013 DU-001, frozen spec 949aee0bca38d4dc5977d3a3a289b463b8f27fb666f6f67d416d1fb3f5a4a281, Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf, classification input 14b746b5cf4e5553e896c9863c7cb156133919dfbe818bb1eacd581d96b6f6bb, base and subject dc49293936ae8f705b7a474dc5c7b0ac0c981865",
+    "Before launch require successful separately approved cleanup of C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-m2g_7m9b and verify no pre-existing C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-* direct child remains",
+    "Before launch verify runner source SHA-256 4b227bf5785513cd757567b7b20d3d1e64680909340eec26a5817f80697372fd, integration test SHA-256 2084d3f76007c7579f2b06d3ce2a62f16bfa3efa05dec78ec7c1d440c61883e1, and manifest SHA-256 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0",
+    "The one outer command is exactly D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m pytest -q tests/integration/test_mutation_runner_contract.py with cwd D:\\Repos\\harness-model and shell false",
+    "Permit at most one run_targeted_mutations invocation, one tempfile.mkdtemp root matching the resolved direct-child pattern C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-*, and at most five serial detached worktrees beneath that root",
+    "Every hooks, scratch, and worktree path must resolve beneath the one transaction-created root; every removal must revalidate direct-child containment and may retry at most three times within one second, including the contained read-only callback",
+    "Delete only objects created by this transaction; never delete or modify the repository root, workspace root, user directory, pre-existing paths, branches, tags, refs, credentials, logs, task evidence, or the residual root from the previous transaction",
+    "Before launch verify this action's canonical SHA, expiry, bindings, and absence of an existing use record, then create the task-local status started use record; launch or interruption consumes the approval and no unused budget may be reused",
+    "No push, merge, deploy, package publish, paid external call, credential export, task close, full pytest, coverage, or second invocation is authorized"
+  ],
+  "expires_at": "2026-08-25T00:00:00Z",
+  "single_use": true
+}

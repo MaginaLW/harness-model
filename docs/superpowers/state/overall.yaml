@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-23T15:44:00Z"
+updated_at: "2026-08-23T23:08:55Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -23,20 +23,20 @@ tracking:
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-11"
-  current_task: "11.3"
+  current_task: "11.4"
   current_step: null
 
 summary:
   chapters_total: 11
   chapters_completed: 10
   tasks_total: 65
-  tasks_completed: 62
+  tasks_completed: 63
   steps_total: 348
-  steps_completed: 333
+  steps_completed: 338
   exit_checks_total: 18
   exit_checks_completed: 16
   blockers_total: 0
-  evidence_items: 6
+  evidence_items: 7
 
 chapters:
   - id: "chapter-01"
@@ -149,7 +149,7 @@ future_phases:
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
     current_chapter: "chapter-11"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11.1 已完成确定性、离线 acceptance/integration 编排，11.2 已建立五项受控 mutant manifest 与只读校验，11.3–11.5 的执行、结果和失败重放仍未实现，故真实 live V2 仍必须因 unverified 检查失败。"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11.1 已完成确定性、离线 acceptance/integration 编排，11.2 已建立五项受控 mutant manifest 与只读校验，11.3 已完成隔离 runner 的实现投影，修复后的 focused integration 已验证五项 baseline/mutant 原始退出码为 0/1 且完全 cleanup；完整 V1 尚待独立 action approval。11.4–11.5 的持久结果和失败重放仍未实现，故真实 live V2 仍必须因 unverified 检查失败。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2012,3 +2012,28 @@ history:
       - ".ai/mutations/phase-02-critical-manifest.json"
       - ".ai/schemas/mutation-manifest.schema.json"
       - ".ai/tasks/TASK-0012/evidence.json"
+  - id: "EVT-OVERALL-CH11-11.3-COMPLETE-001"
+    at: "2026-08-23T23:08:55Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "TASK-0013 完成固定 manifest 的隔离 mutant runner 实现投影；首次 focused cleanup failure、独立残留清理与修复后的 focused pass 均已封存，五项 baseline/mutant 原始退出码为 0/1 且无残留；完整 V1 仍须独立 action approval，未产出持久 killed/survived evidence，真实 live V2 继续失败。"
+    chapter_evidence: "EVD-CH11-11.3-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_11_status: "in_progress"
+      task_11_3_status: "completed"
+      current_chapter: "chapter-11"
+      current_task: "11.4"
+      current_step: null
+      chapters_completed: 10
+      tasks_completed: 63
+      steps_completed: 338
+      exit_checks_completed: 16
+      evidence_items: 7
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-11.yaml"
+      - "docs/implementation/chapter-11-acceptance-integration-mutation.md"
+      - ".ai/tasks/TASK-0013/spec.md"
+      - ".ai/tasks/TASK-0013/action-use-bc652d7b9115335fd42ebaa39f3ee6e972fd3cf058b135b7730e6b0012bbd394.md"
+      - ".ai/tasks/TASK-0013/action-use-9c98f556fbd50c16082110cf465629e2642e417e4c9b2459927230c58aaeeec5.md"
+      - ".ai/tasks/TASK-0013/action-use-659ed5eed4b25a1daf73aa636219da690fcc5cbddf1c416a9ad2aa5dc4a2ab40.md"

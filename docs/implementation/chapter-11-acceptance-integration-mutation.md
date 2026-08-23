@@ -19,17 +19,24 @@ Chapter 11 分阶段补全 live V2 的执行证据。本章不把 Chapter 10 的
 - manifest 中每项 detector 都指向普通、确定性的 pytest 测试。11.2 只证明声明和当前保障测试可定位；由 manifest 驱动的隔离变异及 detector 调度仍属于 11.3。
 - `MUT-V2-003` 与 `MUT-V2-004` 的 detector 直接覆盖 `_v2_evidence_current` 对 non-passing required check 的拒绝，以及 `_v2_gate_facts` 对非 killed mutation 的拒绝，避免只存在但不触达保障的 nodeid。
 
-## 仍待完成：11.3–11.5 targeted mutation
+## 11.3 已完成：隔离 mutant runner 实现投影
+
+- 已纳入 11.3 的实现范围是：只从固定五项 manifest 读取声明，在逐项 detached 临时 worktree 中应用封闭 AST operator，并以 shell-free、固定 argv 的 subprocess 运行唯一 detector；runner 只返回不可变的内存原始执行事实。
+- 主工作树保护、受控临时根/路径 containment、worktree 注册表快照、稳定错误码与 cleanup 失败语义均属于 11.3；不会在主工作树应用 mutant，也不会自动 stash、reset、checkout 或宽泛删除。
+- 本投影不等同于完整 V1 已运行。首个精确绑定的 focused integration 事务在 `MUT-V2-002` 的 Windows 只读 scratch cleanup 失败；该失败回执已封存，残留根随后由独立 single-use action 精确清理。修复后的第二个精确事务已通过：五项 baseline detector 退出码均为 `0`，对应 mutant detector 退出码均为 `1`，无 timeout/reason，主工作树状态、受控文件哈希与 Git worktree 注册表不变，事务根和五个串行 worktree 全部清理。该 focused pass 仍不是完整 V1 或持久 mutation evidence。
+- mutant 的 `0`/`1` 在 11.3 仅为原始 probe fact；不命名或持久化为 killed/survived，不写 task evidence/log ref，也不改变 live V2、approval 或 Gate 结论。
+
+## 仍待完成：11.4–11.5 targeted mutation
 
 | 任务 | 状态 | 边界 |
 |---|---|---|
 | 11.2 mutant manifest | completed | 五项关键保障、封闭 schema、只读 loader 和 detector 绑定已建立；尚未执行 mutant |
-| 11.3 隔离 mutant runner | pending | 尚不运行 mutation，且不得修改主工作树 |
+| 11.3 隔离 mutant runner | completed | 实现投影及修复后的 focused integration 已通过；完整 V1 尚待独立、精确 action approval |
 | 11.4 killed/survived evidence | pending | 尚无 mutation 结果、日志或覆盖结论 |
 | 11.5 replay/Gate failure | pending | 尚未实现 survived/missing mutant 的重放失败路径 |
 
-`targeted_mutation` 在当前 live V2 中保持 `unverified`，reason code 为 `VERIFICATION_CHAPTER11_NOT_IMPLEMENTED`，并写入 `chapter-11-pending` manifest 与 `CHAPTER11-PENDING` 结果。因此 live V2 conclusion 必须为 failed；它不能 finalize，不能支持 code approval，也不能走向 Gate passed。
+`targeted_mutation` 在当前 live V2 中仍保持 `unverified`，reason code 为 `VERIFICATION_CHAPTER11_NOT_IMPLEMENTED`，并写入 `chapter-11-pending` manifest 与 `CHAPTER11-PENDING` 结果。因此 live V2 conclusion 必须为 failed；它不能 finalize，不能支持 code approval，也不能走向 Gate passed。11.3 的隔离 runner 实现不改变这一结论。
 
 ## 后续验证边界
 
-Chapter 11.1 与 11.2 均按 `REVIEW + V1` 完成各自增量实现验证。V2 的 acceptance/integration 运行结果是独立的 pre-evidence facts，11.2 manifest 也只是后续 runner 的受控输入；11.3–11.5 尚未完成，因此 `targeted_mutation` 继续 unverified 并阻止任何 live V2 passed 宣称。完成 11.3–11.5 后，才可新增 mutation 运行、结果和重放验证；其范围、Policy、规格或验证要求变化仍须走 AI Flow 的升级、冻结、审核和批准流程。
+Chapter 11.1 与 11.2 均按 `REVIEW + V1` 完成各自增量实现验证。11.3 已完成隔离 runner 的实现投影和一次修复后的 focused integration pass；该 pass 仅是 task-local 原始执行事实，完整 V1 尚待独立 action approval，也未新增持久 killed/survived evidence。V2 的 acceptance/integration 运行结果是独立的 pre-evidence facts，11.2 manifest 也只是后续 runner 的受控输入。11.4–11.5 尚未完成，故 `targeted_mutation` 继续 unverified 并阻止任何 live V2 passed 宣称。完成 11.4–11.5 并取得所需验证证据后，才可新增持久 mutation 结果和重放验证；其范围、Policy、规格或验证要求变化仍须走 AI Flow 的升级、冻结、审核和批准流程。

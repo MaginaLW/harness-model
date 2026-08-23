@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0001",
+  "revision": 1,
+  "task_id": "TASK-0013",
+  "review_stage": "design",
+  "reviewer": "task0013-design-reviewer",
+  "recorded_at": "2026-08-23T22:52:20Z",
+  "context_sha256": "88e1cb2a769767f37329c5e555fa4222ae22a1bac9295274e969e61b09e3b99b",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "The frozen design is structurally implementable, but its single-use delete approval is scoped to one five-probe runner invocation while the frozen V1 verification transaction collects the real integration test twice through regression_tests and coverage_xml. The current authorization unit therefore cannot support a compliant full V1 replay.",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "title": "Single-run delete approval cannot cover the complete V1 transaction",
+      "location": {
+        "path": ".ai/tasks/TASK-0013/spec.md",
+        "line": 24
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0013/spec.md:24",
+        ".ai/tasks/TASK-0013/spec.md:65-67",
+        ".ai/policy/verification-levels.yaml:80-100",
+        "src/aiflow/verification.py:19-20"
+      ],
+      "status": "open"
+    }
+  ]
+}

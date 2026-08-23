@@ -1,0 +1,104 @@
+allowed_scope:
+- src/aiflow/mutation_runner.py
+- tests/unit/test_mutation_runner.py
+- tests/integration/test_mutation_runner_contract.py
+- docs/implementation/chapter-11-acceptance-integration-mutation.md
+- docs/superpowers/state/chapters/chapter-11.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: dc49293936ae8f705b7a474dc5c7b0ac0c981865
+branch: main
+created_at: '2026-08-23T16:40:53Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects:
+  - create_and_delete_task_owned_temporary_worktrees
+  goal: 完成 Chapter 11.3：从阶段二固定 mutant manifest 在逐项隔离的临时 worktree/subprocess 中应用五个封闭
+    mutation operator 并运行唯一 detector，证明不修改主工作树；仅返回内存执行事实，不持久化 killed/survived evidence、不接入
+    live V2/Gate；begin 前要求 TASK-0012 已记录 external merge
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  impact_scope:
+  - src/aiflow/mutation_runner.py
+  - tests/unit/test_mutation_runner.py
+  - tests/integration/test_mutation_runner_contract.py
+  - docs/implementation/chapter-11-acceptance-integration-mutation.md
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - .ai/tasks/TASK-0012/spec.md
+  - .ai/mutations/phase-02-critical-manifest.json
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Load only the fixed, exact five-entry Phase 02 mutation manifest
+  - Create one detached temporary worktree per declaration from the governed base
+    commit
+  - Delete only task-created worktrees and files contained by the validated dedicated
+    system temporary root after one approved execution
+  - Apply one hard-coded AST mutation operator to exactly one frozen target function
+  - Run only the declaration's exact pytest detector in a shell-free, bounded subprocess
+  - Return immutable in-memory execution facts and prove the main worktree remains
+    unchanged
+  - Keep live V2, persisted mutation evidence, approval and Gate behavior unchanged
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0013
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Unit tests for all five AST operators, precondition failures, path containment
+    and process outcomes
+  - Integration replay proving all five frozen detectors fail only inside isolated
+    worktrees
+  - Main-worktree status and target-byte invariance before and after success and failure
+    paths
+  - Windows-deterministic worktree escape and cleanup failure coverage without permission-based
+    skips
+  - Ruff, format, mypy, full pytest, branch coverage, diff coverage at least 90%,
+    and git diff check
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+frozen_spec_sha256: 949aee0bca38d4dc5977d3a3a289b463b8f27fb666f6f67d416d1fb3f5a4a281
+goal: 完成 Chapter 11.3：从阶段二固定 mutant manifest 在逐项隔离的临时 worktree/subprocess 中应用五个封闭
+  mutation operator 并运行唯一 detector，证明不修改主工作树；仅返回内存执行事实，不持久化 killed/survived evidence、不接入
+  live V2/Gate；begin 前要求 TASK-0012 已记录 external merge
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-23T23:03:15Z'
+subject_commit: dc49293936ae8f705b7a474dc5c7b0ac0c981865
+task_id: TASK-0013
+updated_at: '2026-08-23T23:52:06Z'
+worktree_dirty: false
+worktree_dirty_paths: []

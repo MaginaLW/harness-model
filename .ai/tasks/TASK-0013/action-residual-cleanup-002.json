@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "action_type": "delete",
+  "target": "C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-m2g_7m9b",
+  "parameter_summary": "transaction_id=TASK-0013-CLEANUP-002; transaction_type=residual_cleanup; outer_argv=[C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe,-NoLogo,-NoProfile,-NonInteractive,-Command,Remove-Item -LiteralPath 'C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-m2g_7m9b' -Recurse -Force -ErrorAction Stop]; root_budget=1; shell=false",
+  "subject_commit": "dc49293936ae8f705b7a474dc5c7b0ac0c981865",
+  "conditions": [
+    "Bind this transaction to TASK-0013 DU-001, frozen spec 949aee0bca38d4dc5977d3a3a289b463b8f27fb666f6f67d416d1fb3f5a4a281, Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf, classification input 14b746b5cf4e5553e896c9863c7cb156133919dfbe818bb1eacd581d96b6f6bb, base and subject dc49293936ae8f705b7a474dc5c7b0ac0c981865",
+    "The only target is the resolved absolute direct child C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-m2g_7m9b beneath C:\\Users\\Admin\\AppData\\Local\\Temp, left by consumed transaction TASK-0013-FOCUSED-001; no wildcard or computed target is permitted",
+    "Before launch verify the exact target still resolves as that direct child, no registered Git worktree is at or beneath it, repository HEAD still matches the subject, and the target contains only the recorded residual MUT-V2-002-tmp scratch tree",
+    "The one outer command is exactly C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -NonInteractive -Command Remove-Item -LiteralPath 'C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-m2g_7m9b' -Recurse -Force -ErrorAction Stop with shell false",
+    "Before launch verify this action's canonical SHA, expiry, bindings, and absence of an existing use record, then create the task-local status started use record; launch or interruption consumes the approval and no retry is authorized",
+    "After the command perform only read-only checks that the exact root is absent, Git worktree registry is unchanged, and the main worktree status is unchanged",
+    "No other deletion, focused integration, runner invocation, worktree creation, push, merge, deploy, package publish, paid external call, credential export, task close, full pytest, or coverage is authorized"
+  ],
+  "expires_at": "2026-08-25T00:00:00Z",
+  "single_use": true
+}
