@@ -23,7 +23,7 @@ Chapter 11 分阶段补全 live V2 的执行证据。本章不把 Chapter 10 的
 
 - 已纳入 11.3 的实现范围是：只从固定五项 manifest 读取声明，在逐项 detached 临时 worktree 中应用封闭 AST operator，并以 shell-free、固定 argv 的 subprocess 运行唯一 detector；runner 只返回不可变的内存原始执行事实。
 - 主工作树保护、受控临时根/路径 containment、worktree 注册表快照、稳定错误码与 cleanup 失败语义均属于 11.3；不会在主工作树应用 mutant，也不会自动 stash、reset、checkout 或宽泛删除。
-- 本投影不等同于完整 V1 已运行。首个精确绑定的 focused integration 事务在 `MUT-V2-002` 的 Windows 只读 scratch cleanup 失败；该失败回执已封存，残留根随后由独立 single-use action 精确清理。修复后的第二个精确事务已通过：五项 baseline detector 退出码均为 `0`，对应 mutant detector 退出码均为 `1`，无 timeout/reason，主工作树状态、受控文件哈希与 Git worktree 注册表不变，事务根和五个串行 worktree 全部清理。该 focused pass 仍不是完整 V1 或持久 mutation evidence。
+- 本投影不等同于完整 V1 已运行。首个精确绑定的 focused integration 事务在 `MUT-V2-002` 的 Windows 只读 scratch cleanup 失败；该失败回执已封存，残留根随后由独立 single-use action 精确清理。修复后的第二个精确事务已通过：五项 baseline detector 退出码均为 `0`，对应 mutant detector 退出码均为 `1`，无 timeout/reason，主工作树状态、受控文件哈希与 Git worktree 注册表不变，事务根和五个串行 worktree 全部清理；完整回执为 `.ai/tasks/TASK-0013/action-use-659ed5eed4b25a1daf73aa636219da690fcc5cbddf1c416a9ad2aa5dc4a2ab40.md`。该 focused pass 仍不是完整 V1 或持久 mutation evidence。
 - mutant 的 `0`/`1` 在 11.3 仅为原始 probe fact；不命名或持久化为 killed/survived，不写 task evidence/log ref，也不改变 live V2、approval 或 Gate 结论。
 
 ## 仍待完成：11.4–11.5 targeted mutation
