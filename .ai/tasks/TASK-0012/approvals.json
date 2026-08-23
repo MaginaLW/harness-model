@@ -11,5 +11,19 @@
     "spec_sha256": "8b2244cc388b78eaab141a9257bc6ee1bf759f025ab97df234ddff333fd9ea36",
     "subject_commit": "9d8a7d1dad7d256bbefaafad9ce5d4270238b4fe",
     "task_id": "TASK-0012"
+  },
+  {
+    "actor": "user",
+    "approval_type": "code",
+    "approved_at": "2026-08-23T16:35:05Z",
+    "base_commit": "9d8a7d1dad7d256bbefaafad9ce5d4270238b4fe",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "a80481670ebc3e5f092cce153fc6c87b6e06b5c6a6212a53b3c57f75af5bb928",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "用户明确批准 TASK-0012 当前代码和文档变更",
+    "schema_version": "1.0",
+    "spec_sha256": "8b2244cc388b78eaab141a9257bc6ee1bf759f025ab97df234ddff333fd9ea36",
+    "subject_commit": "0351bcb5dcbb88423675149c1def6fc7e18c5b3c",
+    "task_id": "TASK-0012"
   }
 ]

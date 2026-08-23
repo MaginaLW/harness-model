@@ -2,7 +2,7 @@
 
 ## 审核目标
 
-确认 TASK-0012 在 subject `e2b6522efa2a900110b449c25f7c386f98027e12` 上完成的 Chapter 11.2 变更准确满足冻结规格：仓库拥有精确五项阶段二关键保障的版本化 mutant manifest、封闭 schema、只读且安全的 loader，以及可实际触达相应保障的 detector 绑定；本任务没有执行 mutant、生成 killed/survived evidence 或改变真实 live V2/Gate 结论。
+确认 TASK-0012 在 subject `0351bcb5dcbb88423675149c1def6fc7e18c5b3c` 上完成的 Chapter 11.2 变更准确满足冻结规格：仓库拥有精确五项阶段二关键保障的版本化 mutant manifest、封闭 schema、只读且安全的 loader，以及可实际触达相应保障的 detector 绑定；本任务没有执行 mutant、生成 killed/survived evidence 或改变真实 live V2/Gate 结论。
 
 ## 背景
 
@@ -13,6 +13,8 @@ Chapter 11.1 已让 V2 acceptance/integration 真实、离线执行，但 `targe
 首次实现审查 `REV-0003` 发现精确五项未在 loader 强制、schema 路径可经 symlink 逃逸、公共 contract API 被扩大为任意 schema 目录，以及 JSON 重复键语义不唯一。四项 finding 均在 revisions 2–5 关闭：schema 固定五项基数、loader 锁定完整有序声明、schema 目录和文件均做 containment、公共 API 恢复固定签名，duplicate key 在 JSON 读取阶段稳定拒绝。修复已形成新 subject 并完整重跑 V1。
 
 修复后的安全复审 `REV-0004` 进一步发现仓库内 mutation schema 损坏或不可解析时会泄出底层 JSON/schema-resolution 异常。该 finding 已在 revision 2 关闭：loader 保留正常 `ContractValidationError`，并把 schema I/O、解码、结构、规范判定和引用解析失败稳定归一为 `MUTATION_MANIFEST_READ_FAILED`；损坏 JSON 与不可解析 `$ref` 均有回归覆盖并经独立复验通过。
+
+最终独立实现审查 `REV-0005` 绑定 context `d3a52245813afce67d51639b67578544254a4a69d1f07927f5a9c5992015e8d2`，核对当前 subject、canonical evidence fingerprint、全部历史 findings 与 11.2 范围边界后给出 `APPROVE`，无 findings。
 
 ## 代码地图
 
@@ -40,11 +42,12 @@ Chapter 11.1 已让 V2 acceptance/integration 真实、离线执行，但 `targe
 
 ## 证据
 
-- subject：`e2b6522efa2a900110b449c25f7c386f98027e12`；base：`9d8a7d1dad7d256bbefaafad9ce5d4270238b4fe`。
+- 已验证：当前 subject、冻结规格、Policy、canonical evidence fingerprint、10 个 required checks、定向/全量测试、静态检查、范围检查与最终独立实现审查均保持 current 且通过。
+- subject：`0351bcb5dcbb88423675149c1def6fc7e18c5b3c`；base：`9d8a7d1dad7d256bbefaafad9ce5d4270238b4fe`。
 - 冻结规格：`8b2244cc388b78eaab141a9257bc6ee1bf759f025ab97df234ddff333fd9ea36`；Policy `2.1.0`：`f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf`。
-- 当前 V1 evidence SHA-256：`7c298a41637dfcac9ea0d54a26fdafa2e330f816e1e31c417447024869c7c1c5`；10 个 required checks 全部 passed。
-- focused mutation-manifest suite：`43 passed`；unit：`445 passed, 2 skipped`；全量回归与 branch coverage：`736 passed, 3 skipped`。
-- Python diff coverage：`96%`（130 行、4 missing），高于冻结规格的 90% 门槛；`contracts.py` 为 100%，`mutation_manifest.py` 为 96.7%。
+- 当前 V1 evidence 文件 SHA-256：`575b9208fdcfa63b85482824b9c6986be3924bca011234b15d780cd4ed9f7547`；AI Flow canonical artifact fingerprint：`a80481670ebc3e5f092cce153fc6c87b6e06b5c6a6212a53b3c57f75af5bb928`；10 个 required checks 全部 passed。
+- focused mutation-manifest suite：`45 passed`；unit：`447 passed, 2 skipped`；全量回归与 branch coverage：`738 passed, 3 skipped`。
+- Python diff coverage：`97%`（139 行、4 missing），高于冻结规格的 90% 门槛；`contracts.py` 为 100%，`mutation_manifest.py` 为 96.9%。
 - contract、scope、Ruff、format、smoke、mypy、coverage XML、diff coverage 与 `git diff --check` 均通过。
 - 三个既有 skip 均是环境缺少真实 symlink 创建权限；TASK-0012 自身的 symlink escape 新增测试通过 monkeypatch 路径解析边界确定性执行，没有 skip。
 - 未验证且未执行：任何 mutant、manifest 驱动 detector 调度、隔离 subprocess/worktree、killed/survived 日志与 evidence、survived/missing V2 replay、Chapter 11 两个退出检查，以及 push、merge、deploy、delete、凭据导出、付费调用和 task close。
@@ -60,4 +63,4 @@ Chapter 11.1 已让 V2 acceptance/integration 真实、离线执行，但 `targe
 
 ## 推荐结论
 
-当前 subject 的完整 V1 evidence 已通过，设计、首次实现审查及安全复审 findings 已关闭，范围和状态投影与冻结规格一致。schema 异常归一修复形成新 subject 后须重新运行完整 V1，并由新的独立实现 reviewer 对新 context 给出最终结论；该建议不授权 code approval、push、merge、deploy、close，也不代表 targeted mutation 或真实 live V2 passed。
+当前 subject 的完整 V1 evidence 已通过，设计、首次实现审查及安全复审 findings 已关闭，最终独立实现审查已 `APPROVE`，范围和状态投影与冻结规格一致。当前变更可进入用户 code/document approval 门；本结论不授权 push、merge、deploy、close，也不代表 targeted mutation 或真实 live V2 passed。

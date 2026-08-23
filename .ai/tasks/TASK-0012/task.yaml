@@ -11,7 +11,7 @@ allowed_scope:
 base_commit: 9d8a7d1dad7d256bbefaafad9ce5d4270238b4fe
 branch: main
 created_at: '2026-08-23T15:25:17Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -93,8 +93,8 @@ repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
 spec_frozen_at: '2026-08-23T15:33:34Z'
-subject_commit: e2b6522efa2a900110b449c25f7c386f98027e12
+subject_commit: 0351bcb5dcbb88423675149c1def6fc7e18c5b3c
 task_id: TASK-0012
-updated_at: '2026-08-23T16:19:42Z'
+updated_at: '2026-08-23T16:35:05Z'
 worktree_dirty: false
 worktree_dirty_paths: []
