@@ -1,0 +1,74 @@
+{
+  "base_commit": "b6189010660e4e3adfd8f68309a95b7d81bdc419",
+  "branch": "main",
+  "classification_input_sha256": "17ee1318b9f996f56c7e83210d89cf4d3fcc592cdbc92ecdd195a714e0819ec3",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/policy/permissions.yaml",
+      "src/aiflow/verification.py",
+      "src/aiflow/verification_service.py",
+      "tests/acceptance/test_v2_acceptance.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/integration/test_templates_and_policy.py",
+      "tests/integration/test_verify_command.py",
+      "tests/integration/test_v2_acceptance_integration.py",
+      "docs/implementation/chapter-09-v2-policy-contracts.md",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/operations/quickstart.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "实现 Chapter 11.1：为 V2 编排确定性、离线的 acceptance 与 integration 检查，并保持 targeted mutation 未实现且 live V2 失败",
+        "impact_scope": [
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/policy/permissions.yaml",
+          "src/aiflow/verification.py",
+          "src/aiflow/verification_service.py",
+          "tests/acceptance/test_v2_acceptance.py",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/integration/test_templates_and_policy.py",
+          "tests/integration/test_verify_command.py",
+          "tests/integration/test_v2_acceptance_integration.py",
+          "docs/implementation/chapter-09-v2-policy-contracts.md",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/operations/quickstart.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml",
+          "README.md"
+        ],
+        "planned_actions": [
+          "Increment all four Policy documents from 2.0.0 to 2.1.0 for the semantic verification change",
+          "Replace V2 acceptance and integration placeholder commands with deterministic offline pytest commands",
+          "Execute acceptance and integration as distinct V2 checks with auditable process results and logs",
+          "Preserve targeted mutation as explicitly unverified until Chapter 11.2 through 11.5",
+          "Clarify Chapter 9 Policy 2.0.0 as a historical baseline rather than the current active version",
+          "Update focused tests and Chapter 11 progress documentation"
+        ]
+      }
+    ],
+    "goal": "实现 Chapter 11.1：为 V2 编排确定性、离线的 acceptance 与 integration 检查，并保持 targeted mutation 未实现且 live V2 失败",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "dab6e2b6ea446583b91d796134b3514a325e29f382b0ecab757f257b6eea6aa5",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "9dd10d4839c77ef624856ea593683a28a607980673d3fbacd76e759e9fdbaca4",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "e0963471d8be49a33d6dc14c68561bc726c8ebebef8408d9d0f64b2fbaebb91f",
+  "task_id": "TASK-0011"
+}

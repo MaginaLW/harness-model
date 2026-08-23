@@ -11,6 +11,7 @@ allowed_scope:
 - tests/integration/test_templates_and_policy.py
 - tests/integration/test_verify_command.py
 - tests/integration/test_v2_acceptance_integration.py
+- docs/implementation/chapter-09-v2-policy-contracts.md
 - docs/implementation/chapter-11-acceptance-integration-mutation.md
 - docs/operations/quickstart.md
 - docs/superpowers/state/chapters/chapter-11.yaml
@@ -19,7 +20,7 @@ allowed_scope:
 base_commit: b6189010660e4e3adfd8f68309a95b7d81bdc419
 branch: main
 created_at: '2026-08-23T12:24:32Z'
-current_state: ESCALATED
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -50,6 +51,7 @@ decision_units:
   - tests/integration/test_templates_and_policy.py
   - tests/integration/test_verify_command.py
   - tests/integration/test_v2_acceptance_integration.py
+  - docs/implementation/chapter-09-v2-policy-contracts.md
   - docs/implementation/chapter-11-acceptance-integration-mutation.md
   - docs/operations/quickstart.md
   - docs/superpowers/state/chapters/chapter-11.yaml
@@ -69,6 +71,8 @@ decision_units:
     results and logs
   - Preserve targeted mutation as explicitly unverified until Chapter 11.2 through
     11.5
+  - Clarify Chapter 9 Policy 2.0.0 as a historical baseline rather than the current
+    active version
   - Update focused tests and Chapter 11 progress documentation
   protections:
     dry_run: true
@@ -103,15 +107,15 @@ forbidden_actions:
 - secret_export
 - paid_external_call
 - package_publish
-frozen_spec_sha256: 7a609a9c1c22e35ff71c3d7f7f54f3f45699d1c246498c5797c648cb4e6ca893
+frozen_spec_sha256: e0963471d8be49a33d6dc14c68561bc726c8ebebef8408d9d0f64b2fbaebb91f
 goal: 实现 Chapter 11.1：为 V2 编排确定性、离线的 acceptance 与 integration 检查，并保持 targeted mutation
   未实现且 live V2 失败
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-23T12:27:33Z'
-subject_commit: b6189010660e4e3adfd8f68309a95b7d81bdc419
+spec_frozen_at: '2026-08-23T13:16:35Z'
+subject_commit: 1481a0123b8bc55371bdbca3aa5fac63f79e45c6
 task_id: TASK-0011
-updated_at: '2026-08-23T13:09:28Z'
+updated_at: '2026-08-23T13:18:09Z'
 worktree_dirty: false
 worktree_dirty_paths: []

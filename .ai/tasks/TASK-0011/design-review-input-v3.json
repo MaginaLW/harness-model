@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0002",
+  "revision": 1,
+  "task_id": "TASK-0011",
+  "review_stage": "design",
+  "recorded_at": "2026-08-23T13:17:56Z",
+  "context_sha256": "dab6e2b6ea446583b91d796134b3514a325e29f382b0ecab757f257b6eea6aa5",
+  "outcome": "APPROVE",
+  "summary": "APPROVE. The v3 frozen design minimally adds the Chapter 9 implementation record solely to distinguish its historical active Policy 2.0.0 baseline from the current active bundle; it neither rewrites historical task, classification, approval, evidence, state, nor fixture bindings, all of which remain correctly 2.0.0. The four active Policy documents must advance together to 2.1.0, with hard-rules, routing, and permissions limited to policy_version-only edits and verification-levels carrying the already specified acceptance/integration semantic change. The post-expansion specification, task scope, classification and context are mutually bound to the same intermediate 2.0.0 Policy digest, and the newly added Chapter 9 document remains unmodified before fresh approval. After the four-file version update creates the final 2.1.0 digest, a second policy_changed escalation, reclassification, refreeze, independent design review, and fresh Policy-bound spec approval remain mandatory before final verification; the current approval cannot be reused for that final Policy fact.",
+  "findings": []
+}

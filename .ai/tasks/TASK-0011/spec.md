@@ -6,7 +6,7 @@
 
 ## 范围
 
-1. 本次把 V2 `acceptance`/`integration` 从帮助占位变为真实检查，属于语义性 Policy 变化。依据 Chapter 1 Policy change rules，`.ai/policy/hard-rules.yaml`、`.ai/policy/routing.yaml`、`.ai/policy/verification-levels.yaml` 与 `.ai/policy/permissions.yaml` 的 `policy_version` 必须从 `2.0.0` 一致递增到 `2.1.0`；前三份非 verification Policy 除版本字段外不得改变。同步更新 `tests/unit/test_policy.py` 对 active bundle 的精确版本断言，历史 task、classification、evidence、Chapter 9/10 状态和 fixtures 继续保留原始 `2.0.0` 绑定。
+1. 本次把 V2 `acceptance`/`integration` 从帮助占位变为真实检查，属于语义性 Policy 变化。依据 Chapter 1 Policy change rules，`.ai/policy/hard-rules.yaml`、`.ai/policy/routing.yaml`、`.ai/policy/verification-levels.yaml` 与 `.ai/policy/permissions.yaml` 的 `policy_version` 必须从 `2.0.0` 一致递增到 `2.1.0`；前三份非 verification Policy 除版本字段外不得改变。同步更新 `tests/unit/test_policy.py` 对 active bundle 的精确版本断言；`docs/implementation/chapter-09-v2-policy-contracts.md` 只把 `2.0.0` 明确为 Chapter 9 当时的历史 active baseline，并指向当前 Policy 获取现行版本。历史 task、classification、evidence、Chapter 9/10 状态和 fixtures 继续保留原始 `2.0.0` 绑定。
 2. 将 `.ai/policy/verification-levels.yaml` 中 V2 `acceptance` 命令固定为 `"{python}" -m pytest tests/acceptance -q`，`integration` 命令固定为 `"{python}" -m pytest tests/integration -q`；二者 `required: true`、`result_parser: pytest`，只使用本地仓库和已安装依赖，不访问网络或外部服务。
 3. 在 `src/aiflow/verification.py` 对上述两个 check ID 增加精确输出语义校验：拒绝 `aiflow --help`、错误测试目录、错误 parser、额外 shell 形式或其他不能证明对应行为的命令。现有 allow-list、参数数组、单次占位符展开、cwd、超时和无 Shell 约束继续生效。
 4. 在 `src/aiflow/verification_service.py` 令默认 V2 live run 按 Policy 顺序执行完整 V1 prefix 后的 `acceptance` 与 `integration`；`--check acceptance` 或 `--check integration` 只执行所选真实检查并保持 provisional 语义。`independent_verifier` 继续使用 Chapter 10 的角色事实，不能被当作外部身份认证。
@@ -16,7 +16,7 @@
 8. V0/V1 Policy check 定义、执行次序、evidence schema `1.0`、approval 与 Gate 语义保持不变；V2 的 schema、snapshot、review refs、Gate 和 approval 契约也不在本任务扩展。
 9. 更新 README、Quickstart、Chapter 11 实施记录和状态投影：仅将 11.1 标为 completed，11.2–11.5 与两个 chapter exit checks 保持 pending；整体计数对齐为 11/10 chapters、65/61 tasks、348/328 steps、18/16 exits，并明确 live V2 仍失败。
 10. TASK-0011 自身按 `REVIEW + V1` 建立本章增量实现基线。原因是本任务刻意不实现 V2 所必需的 targeted mutation，不能用不完整的 live V2 为自身产生 passed evidence；V1 全量验证和本任务定向测试必须证明新增编排行为。这不是 V2 passed 或验证要求降级。
-11. 当前 verification 命令变化已触发首次 `policy_changed`。新增三份 Policy 的纯版本同步和 `test_policy.py` 属于显式 scope/spec 扩展，必须重新分类、冻结、独立 design review 并取得批准后才能修改。四份 Policy 升到 `2.1.0` 后会产生最终 Policy 哈希，必须再次记录 `policy_changed`，并取得绑定该最终哈希的 fresh spec approval，之后才能继续最终验证。
+11. 当前 verification 命令变化已触发首次 `policy_changed`。新增三份 Policy 的纯版本同步、`test_policy.py` 和 Chapter 9 历史措辞澄清属于显式 scope/spec 扩展，必须重新分类、冻结、独立 design review 并取得批准后才能修改。四份 Policy 升到 `2.1.0` 后会产生最终 Policy 哈希，必须再次记录 `policy_changed`，并取得绑定该最终哈希的 fresh spec approval，之后才能继续最终验证。
 
 ## 非目标
 
@@ -38,7 +38,7 @@
 7. V0/V1 计划、执行、evidence、approval、Gate 和既有 fixtures 回放不变；现有 V2 两阶段 snapshot、review 与 Gate 定向测试继续通过。
 8. `tests/acceptance` 与 `tests/integration` 均可离线、确定性执行；测试验证 runner 不使用 Shell、不访问网络且不在主工作树业务路径落盘。
 9. `uv run aiflow validate TASK-0011`、`uv run aiflow scope TASK-0011`、Ruff、format、mypy、全量 pytest、branch coverage、Python diff coverage 不低于 90% 及 `git diff --check` 全部通过，并完成独立 implementation review。
-10. README、Quickstart、Chapter 11 实施记录和 chapter/overall 状态准确显示 11.1 完成、11.2–11.5 pending、整体累计计数及 live V2 pending-mutation 失败边界。
+10. README、Quickstart、Chapter 9 历史版本措辞、Chapter 11 实施记录和 chapter/overall 状态准确显示当前 Policy `2.1.0`、Chapter 9 的历史 `2.0.0` 基线、11.1 完成、11.2–11.5 pending、整体累计计数及 live V2 pending-mutation 失败边界。
 11. 初始与中间规格批准在相应 Policy 变化后按 freshness 规则失效；scope/spec 扩展和最终 `2.1.0` Policy 哈希都必须经过各自的升级、重新分类/冻结、设计审核和 fresh spec approval，最终验证只能绑定最后一组版本事实。
 
 ## 禁止动作

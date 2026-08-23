@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0002",
+  "revision": 1,
+  "task_id": "TASK-0011",
+  "review_stage": "design",
+  "context_sha256": "ba30ea460d019a5a4bc5466e026c6a29a92f44e9d9d98488e9ae0e3b9dc9b93c",
+  "outcome": "APPROVE",
+  "summary": "APPROVE. The expanded frozen design is the minimum compliant correction for the already-implemented semantic V2 acceptance/integration change: it makes all four active Policy documents advance together from 2.0.0 to 2.1.0, confines the three non-verification Policy edits to policy_version, and leaves historical 2.0.0 task, evidence, state, and fixture bindings untouched. It preserves the Chapter 1 requirement that semantic Policy edits invalidate classification, approval, and evidence, including the required second policy_changed cycle after the final 2.1.0 digest, reclassification/refreeze, independent design review, and fresh spec approval before final verification. The existing implementation remains aligned with the design: exact offline pytest Policy commands are parsed without Shell; default V2 schedules the V1 prefix plus acceptance and integration; selected checks are provisional; process-derived acceptance/integration evidence is retained; and targeted_mutation alone remains unverified with the stable Chapter 11 reason, forcing failed live V2 and preventing finalization or Gate passage. No schema, Gate, approval, V0/V1 semantic, mutation-runner, external-action, or scope expansion is introduced.",
+  "findings": []
+}
