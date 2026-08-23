@@ -32,12 +32,12 @@ V2 verify 在任何 runner 启动前要求 trim 后的 Implementer 与 Verifier 
 
 ## 证据
 
-- TASK-0009 当前 V1 evidence 绑定 subject `8eee9c1bb3c7c4ac35aa7843a1a3ec85e0fb4326`，10 个 required checks 全部 passed。
+- 已验证：TASK-0009 当前 V1 evidence 绑定 subject `8eee9c1bb3c7c4ac35aa7843a1a3ec85e0fb4326`，10 个 required checks 全部 passed。
 - 全量回归与 branch coverage 各为 `680 passed, 3 skipped`；跳过项均为 Windows symlink 条件。
 - Ruff、format、mypy、contract、scope、smoke、unit、regression 与 coverage 均 passed；468 行 Python diff coverage 为 `91%`，高于 90% 门槛。
 - implementation review context：`a42bd4bd72e04cf16208d8f75b04091050f23a8c22c7e0d46e85650fcfe23ad6`；evidence digest：`0a7e93bc30cb7680b2e27eff75df01dd10e6c12b56ae7c70b2fd829a6c39d61c`。
 - E2E 使用确定性完整 V2 fixture 回放 pre → implementation review → finalize → code approval → local Gate PASS，并验证 finalize 不启动 runner、snapshot 不变及 context 篡改拒绝。
-- 未执行 push、merge、deploy 或真实 Chapter 11 runner；这些动作不在本章授权和范围内。
+- 未验证：push、merge、deploy 与真实 Chapter 11 runner 均未执行；这些动作不在本章授权和范围内。
 
 ## 审核问题
 
