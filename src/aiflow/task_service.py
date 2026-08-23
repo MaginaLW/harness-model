@@ -28,6 +28,7 @@ from aiflow.git_context import (
     VerificationGitAssessment,
     VerificationGitBinding,
     collect_git_context,
+    commits_are_ancestral,
     evaluate_verification_git_context,
 )
 from aiflow.policy import load_policy_bundle
@@ -35,8 +36,10 @@ from aiflow.scope import (
     AutoPreflightFacts,
     assess_auto_scope,
     collect_changed_paths,
+    collect_verification_changed_paths,
     evaluate_auto_preflight,
     forbidden_action_present,
+    is_task_governance_path,
 )
 from aiflow.specification import specification_digest, validate_specification
 from aiflow.state import create_record_event, create_transition_event, replay_events
@@ -857,9 +860,24 @@ def _require_git_baseline(repository_root: Path, task_id: str, task: Mapping[str
     current_business_paths = {
         path for path in context.dirty_paths if not _is_governance_path(path, task_id)
     }
+    subject_commit = task.get("subject_commit")
+    governance_only_head = context.head == subject_commit
+    if isinstance(subject_commit, str) and not governance_only_head:
+        changes = collect_verification_changed_paths(
+            repository_root,
+            base_commit=subject_commit,
+            subject_commit=subject_commit,
+            head_commit=context.head,
+        )
+        governance_only_head = commits_are_ancestral(
+            repository_root,
+            base_commit=subject_commit,
+            subject_commit=context.head,
+            head_commit=context.head,
+        ) and all(is_task_governance_path(path, task_id) for path in changes.attestation)
     if (
         context.repository_id != task.get("repository_id")
-        or context.head != task.get("subject_commit")
+        or not governance_only_head
         or context.branch != task.get("branch")
         or not current_business_paths.issubset(expected_paths)
     ):

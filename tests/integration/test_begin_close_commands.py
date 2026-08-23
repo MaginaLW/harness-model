@@ -36,6 +36,20 @@ def run_git(repository: Path, *arguments: str) -> str:
     return result.stdout.rstrip("\r\n")
 
 
+def commit_all(repository: Path, message: str) -> None:
+    run_git(repository, "add", ".")
+    run_git(
+        repository,
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit",
+        "-m",
+        message,
+    )
+
+
 def create_repository(path: Path) -> Path:
     path.mkdir()
     run_git(path, "init", "-b", "main")
@@ -269,6 +283,44 @@ def test_begin_rejects_business_worktree_drift(
     start(repository, monkeypatch)
     make_ready(repository)
     (repository / "tracked.txt").write_text("changed after start\n", encoding="utf-8")
+
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
+    assert "git context" in capsys.readouterr().err.lower()
+
+
+def test_begin_accepts_current_task_governance_only_commits(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route="REVIEW", valid_approval=True)
+    commit_all(repository, "record current task governance")
+
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["subject_commit"] != run_git(repository, "rev-parse", "HEAD")
+    assert record.task["current_state"] == "IMPLEMENTING"
+
+
+@pytest.mark.parametrize("drift", ["business", "other-task-governance"])
+def test_begin_rejects_non_current_task_commits_after_subject(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    drift: str,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route="REVIEW", valid_approval=True)
+    if drift == "business":
+        (repository / "tracked.txt").write_text("committed business drift\n", encoding="utf-8")
+    else:
+        other = repository / ".ai" / "tasks" / "TASK-9999"
+        other.mkdir(parents=True)
+        (other / "note.txt").write_text("other task\n", encoding="utf-8")
+    commit_all(repository, "commit non-governance drift")
 
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
     assert "git context" in capsys.readouterr().err.lower()

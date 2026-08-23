@@ -1,0 +1,13 @@
+{
+  "context_sha256": "0de728d15c80b6bc6837c3c93a1616c7b614cd11d50979ef44ab2523c65028bc",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-23T03:12:04Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "chapter9_policy_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE. The V2 pre/final evidence design explicitly breaks the implementation-review hash cycle while preserving V0/V1 1.0 evidence and review-context semantics. The begin recovery is narrowly limited to subject..HEAD commits whose every changed path is under the current task governance prefix; the frozen scope requires success coverage for that exact case and rejection coverage for business and other-task paths. No unrelated behavioral scope expansion was found.",
+  "task_id": "TASK-0009"
+}
