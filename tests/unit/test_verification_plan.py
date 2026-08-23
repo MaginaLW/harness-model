@@ -50,32 +50,7 @@ def bundle_copy() -> PolicyBundle:
 
 
 def v2_bundle() -> PolicyBundle:
-    bundle = bundle_copy()
-    checks_v1 = checks(bundle, "V1")
-    bundle.documents["verification-levels.yaml"]["levels"].append(
-        {
-            "id": "V2",
-            "checks": [
-                *deepcopy(checks_v1),
-                *[
-                    {
-                        "id": identifier,
-                        "command": ["{python}", "-m", "aiflow", "--help"],
-                        "timeout_seconds": 30,
-                        "required": True,
-                        "result_parser": "exit_zero",
-                    }
-                    for identifier in (
-                        "acceptance",
-                        "integration",
-                        "targeted_mutation",
-                        "independent_verifier",
-                    )
-                ],
-            ],
-        }
-    )
-    return PolicyBundle(bundle.documents, "2.0.0", bundle.sha256)
+    return bundle_copy()
 
 
 def checks(bundle: PolicyBundle, level: str) -> list[dict[str, object]]:

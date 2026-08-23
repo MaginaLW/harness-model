@@ -34,34 +34,7 @@ def _unit(
 
 
 def _v2_bundle() -> PolicyBundle:
-    bundle = _bundle()
-    documents = deepcopy(bundle.documents)
-    levels = documents["verification-levels.yaml"]["levels"]
-    checks = levels[1]["checks"]
-    levels.append(
-        {
-            "id": "V2",
-            "checks": [
-                *deepcopy(checks),
-                *[
-                    {
-                        "id": identifier,
-                        "command": ["{python}", "-m", "aiflow", "--help"],
-                        "timeout_seconds": 30,
-                        "required": True,
-                        "result_parser": "exit_zero",
-                    }
-                    for identifier in (
-                        "acceptance",
-                        "integration",
-                        "targeted_mutation",
-                        "independent_verifier",
-                    )
-                ],
-            ],
-        }
-    )
-    return PolicyBundle(documents, "2.0.0", bundle.sha256)
+    return _bundle()
 
 
 def test_level_table_is_route_independent() -> None:
