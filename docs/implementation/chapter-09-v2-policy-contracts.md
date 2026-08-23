@@ -43,7 +43,7 @@ V2 在 Chapter 9 仍是 contract-only 能力。`aiflow verify` 遇到 V2 时会�
 - 核心提交：`e17a34d`；fixture 隔离修复：`f21887e`；active Policy test helper 整合：`fa89a32`；版本明细约束：`fc33612`。
 - 定向交叉矩阵：`160 passed, 1 skipped`。
 - classification/contract 定向补强：`79 passed`。
-- 累计回归：`630 passed, 3 skipped`；跳过项均为 Windows symlink 能力条件。
+- 累计回归：`639 passed, 3 skipped`；跳过项均为 Windows symlink 能力条件。
 
 ## 后续章节边界
 

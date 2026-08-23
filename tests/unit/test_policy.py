@@ -62,6 +62,29 @@ def test_legacy_v1_policy_branch_remains_valid() -> None:
     assert _validate_cross_file(v1_documents()) == "1.0.0"
 
 
+def test_unknown_policy_major_version_is_rejected() -> None:
+    documents = v2_documents()
+    for document in documents.values():
+        document["policy_version"] = "3.0.0"
+    with pytest.raises(PolicyError) as caught:
+        _validate_cross_file(documents)
+    assert caught.value.code == "POLICY_LEVEL_INVALID"
+
+
+def test_v1_must_preserve_the_semantic_v0_prefix() -> None:
+    documents = v2_documents()
+    levels = documents["verification-levels.yaml"]["levels"]
+    assert isinstance(levels, list)
+    v1 = levels[1]
+    assert isinstance(v1, dict)
+    checks = v1["checks"]
+    assert isinstance(checks, list)
+    checks[0]["timeout_seconds"] = 31
+    with pytest.raises(PolicyError) as caught:
+        _validate_cross_file(documents)
+    assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
+
+
 def test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras() -> None:
     documents = v2_documents()
     assert _validate_cross_file(documents) == "2.0.0"

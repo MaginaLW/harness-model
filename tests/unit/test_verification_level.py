@@ -81,6 +81,59 @@ def test_missing_legacy_characteristics_are_conservative_v1() -> None:
 
 
 @pytest.mark.parametrize(
+    "requirements",
+    [
+        "not-an-object",
+        {"unknown_required": True},
+        {"acceptance_required": "yes"},
+    ],
+)
+def test_invalid_v2_requirement_shapes_are_conservative_v1(requirements: object) -> None:
+    facts = {
+        "mechanical": True,
+        "behavior_changed": False,
+        "code_modified": False,
+        "interaction_scope": "local",
+        "regression_risk": False,
+        "error_detectability": "high",
+    }
+    result = determine_verification_level(
+        _unit("DU-001", facts, verification_requirements=requirements), _v2_bundle()
+    )
+    assert result.level == V1
+    assert result.rule_ids == ("VERIFICATION-V2-FACTS-INVALID",)
+
+
+@pytest.mark.parametrize("corruption", ["missing_document", "wrong_levels", "invalid_checks"])
+def test_explicit_v2_is_blocked_when_v2_policy_is_incomplete(corruption: str) -> None:
+    bundle = _bundle()
+    documents = deepcopy(bundle.documents)
+    policy = documents["verification-levels.yaml"]
+    if corruption == "missing_document":
+        del documents["verification-levels.yaml"]
+    elif corruption == "wrong_levels":
+        policy["levels"] = policy["levels"][:2]
+    else:
+        policy["levels"][2]["checks"] = "invalid"
+    incomplete = PolicyBundle(documents, bundle.policy_version, bundle.sha256)
+    facts = {
+        "mechanical": True,
+        "behavior_changed": False,
+        "code_modified": False,
+        "interaction_scope": "local",
+        "regression_risk": False,
+        "error_detectability": "high",
+    }
+    result = determine_verification_level(
+        _unit("DU-001", facts, verification_requirements={"acceptance_required": True}),
+        incomplete,
+    )
+    assert result.level == V1
+    assert result.rule_ids == ("VERIFICATION-V2-POLICY-INCOMPLETE",)
+    assert result.blocking_reasons == ("VERIFICATION-V2-POLICY-INCOMPLETE",)
+
+
+@pytest.mark.parametrize(
     ("requirement", "rule_id"),
     (
         ("acceptance_required", "VERIFICATION-V2-ACCEPTANCE-REQUIRED"),

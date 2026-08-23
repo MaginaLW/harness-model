@@ -82,6 +82,6 @@ chapter_evidence:
     verification:
       targeted: "160 passed, 1 skipped"
       contracts: "79 passed"
-      pytest: "630 passed, 3 skipped"
+      pytest: "639 passed, 3 skipped"
 
 blockers: []

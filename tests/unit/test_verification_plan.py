@@ -14,6 +14,7 @@ from aiflow.errors import ContractError
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.verification import (
     VerificationContext,
+    _required_ids,
     parse_check_result,
     parse_verification_plan,
 )
@@ -117,6 +118,21 @@ def test_v2_rejects_prefix_tampering_missing_extra_and_optional_extra(tmp_path: 
             optional, context(tmp_path), level="V2", tool_available=lambda _argv: True
         )
     assert caught.value.code == "VERIFICATION_V2_EXTRA_INVALID"
+
+
+def test_unknown_level_is_rejected_before_plan_lookup(tmp_path: Path) -> None:
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle_copy(),
+            context(tmp_path),
+            level="V3",  # type: ignore[arg-type]
+            tool_available=lambda _argv: True,
+        )
+    assert caught.value.code == "VERIFICATION_POLICY_INVALID"
+
+    with pytest.raises(ContractError) as required_error:
+        _required_ids("V3")
+    assert required_error.value.code == "VERIFICATION_POLICY_INVALID"
 
 
 def test_repeated_argv_keeps_distinct_category_mapping(tmp_path: Path) -> None:

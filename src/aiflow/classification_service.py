@@ -19,7 +19,6 @@ from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import TaskRecord, read_task_record_strict, transition_task_record
 from aiflow.verification_level import verification_for_task
 
-
 VERIFICATION_LEVEL_ORDER = ("V0", "V1", "V2")
 
 

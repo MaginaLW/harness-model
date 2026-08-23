@@ -202,32 +202,22 @@ def test_v2_to_v1_is_a_downgrade_and_v1_to_v2_is_an_upgrade() -> None:
             {"decision_unit_id": "DU-001", "route": "AUTO", "verification_level": "V2"}
         ],
     }
-    v1_entries = [
-        {"decision_unit_id": "DU-001", "route": "AUTO", "verification_level": "V1"}
-    ]
+    v1_entries = [{"decision_unit_id": "DU-001", "route": "AUTO", "verification_level": "V1"}]
     assert _is_downgrade(
         previous_v2,
         v1_entries,
         effective_route="AUTO",
         effective_level="V1",
     )
-    assert (
-        _change_reason(previous_v2, v1_entries, route="AUTO", level="V1")
-        == "downgraded"
-    )
+    assert _change_reason(previous_v2, v1_entries, route="AUTO", level="V1") == "downgraded"
 
     previous_v1 = {
         "effective_route": "AUTO",
         "effective_verification_level": "V1",
         "classifications": v1_entries,
     }
-    v2_entries = [
-        {"decision_unit_id": "DU-001", "route": "AUTO", "verification_level": "V2"}
-    ]
-    assert (
-        _change_reason(previous_v1, v2_entries, route="AUTO", level="V2")
-        == "upgraded"
-    )
+    v2_entries = [{"decision_unit_id": "DU-001", "route": "AUTO", "verification_level": "V2"}]
+    assert _change_reason(previous_v1, v2_entries, route="AUTO", level="V2") == "upgraded"
 
 
 def test_blocked_reclassification_binds_old_and_new_identity_and_authorization(

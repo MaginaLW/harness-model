@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import cast
 
 from aiflow.policy import PolicyBundle
 
@@ -116,17 +117,14 @@ def _policy_v2_complete(bundle: PolicyBundle) -> bool:
     if not isinstance(document, Mapping) or not isinstance(document.get("levels"), list):
         return False
     levels = document["levels"]
-    if not isinstance(levels, list) or [
-        level.get("id") for level in levels if isinstance(level, Mapping)
-    ] != [
+    if len(levels) != 3 or [level.get("id") for level in levels if isinstance(level, Mapping)] != [
         V0,
         V1,
         V2,
     ]:
         return False
-    v1, v2 = levels[1], levels[2]
-    if not isinstance(v1, Mapping) or not isinstance(v2, Mapping):
-        return False
+    v1 = cast(Mapping[str, object], levels[1])
+    v2 = cast(Mapping[str, object], levels[2])
     v1_checks, v2_checks = v1.get("checks"), v2.get("checks")
     if not isinstance(v1_checks, list) or not isinstance(v2_checks, list):
         return False
