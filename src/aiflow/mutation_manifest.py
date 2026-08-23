@@ -13,11 +13,62 @@ from dataclasses import dataclass
 from pathlib import Path, PureWindowsPath
 from typing import Any
 
-from aiflow.contracts import require_valid_contract
+from aiflow.contracts import (
+    ContractValidationError,
+    _require_valid_contract_with_schema_directory,
+)
 from aiflow.errors import ContractError
 
 CANONICAL_MANIFEST_PATH = Path(".ai/mutations/phase-02-critical-manifest.json")
 _SCHEMA_DIRECTORY = Path(".ai/schemas")
+_SCHEMA_PATH = _SCHEMA_DIRECTORY / "mutation-manifest.schema.json"
+_EXPECTED_DECLARATIONS = (
+    (
+        "MUT-V2-001",
+        "V2_REQUIRED_CHECK_SET",
+        "src/aiflow/policy.py",
+        "_validate_cross_file",
+        "drop_targeted_mutation_required_check",
+        "tests/unit/test_policy.py::test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras",
+        "killed",
+    ),
+    (
+        "MUT-V2-002",
+        "V2_VERIFIER_INDEPENDENCE",
+        "src/aiflow/verifier_service.py",
+        "validate_verifier_actor",
+        "allow_same_verifier_actor",
+        "tests/integration/test_verify_command.py::test_v2_actor_rejections_happen_before_plan_or_runner",
+        "killed",
+    ),
+    (
+        "MUT-V2-003",
+        "V2_CODE_APPROVAL_REQUIRES_PASSING_EVIDENCE",
+        "src/aiflow/approval.py",
+        "_v2_evidence_current",
+        "allow_nonpassing_required_check",
+        "tests/integration/test_mutation_manifest_contract.py::test_v2_code_approval_rejects_nonpassing_required_check",
+        "killed",
+    ),
+    (
+        "MUT-V2-004",
+        "V2_GATE_REQUIRES_KILLED_MUTATIONS",
+        "src/aiflow/gate.py",
+        "_v2_gate_facts",
+        "accept_non_killed_mutation",
+        "tests/integration/test_mutation_manifest_contract.py::test_v2_gate_rejects_non_killed_mutation",
+        "killed",
+    ),
+    (
+        "MUT-V2-005",
+        "V2_SNAPSHOT_BINDS_VERIFICATION_FACTS",
+        "src/aiflow/evidence.py",
+        "validate_v2_snapshot",
+        "ignore_snapshot_mismatch",
+        "tests/unit/test_evidence.py::test_v2_snapshot_rejects_mutation_of_bound_verification_facts",
+        "killed",
+    ),
+)
 
 
 @dataclass(frozen=True)
@@ -47,10 +98,23 @@ def _manifest_error(message: str, code: str) -> ContractError:
     return ContractError(message, code=code)
 
 
+class _DuplicateJsonKeyError(ValueError):
+    """A JSON object used the same key more than once."""
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise _DuplicateJsonKeyError(key)
+        value[key] = item
+    return value
+
+
 def _read_manifest(path: Path) -> Any:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        value = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_unique_json_object)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, _DuplicateJsonKeyError) as error:
         raise _manifest_error(
             "Mutation manifest could not be read", "MUTATION_MANIFEST_READ_FAILED"
         ) from error
@@ -66,6 +130,28 @@ def _duplicates(manifest: Mapping[str, Any]) -> bool:
         if len(values) != len(set(values)):
             return True
     return False
+
+
+def _declaration_values(mutation: Mapping[str, Any]) -> tuple[str, ...]:
+    return (
+        str(mutation["mutation_id"]),
+        str(mutation["safeguard_id"]),
+        str(mutation["target"]),
+        str(mutation["target_symbol"]),
+        str(mutation["operator"]),
+        str(mutation["expected_detector"]),
+        str(mutation["expected_outcome"]),
+    )
+
+
+def _require_exact_declarations(mutations: list[Any]) -> None:
+    actual = tuple(
+        _declaration_values(mutation) for mutation in mutations if isinstance(mutation, Mapping)
+    )
+    if actual != _EXPECTED_DECLARATIONS:
+        raise ContractValidationError(
+            "mutation-manifest", ["/mutations: contract constraint failed (const)"]
+        )
 
 
 def _validate_target_lexically(target: str) -> None:
@@ -123,7 +209,13 @@ def load_mutation_manifest(repository_root: Path) -> MutationManifest:
     root = Path(repository_root)
     manifest_path = _resolve_repository_path(root, CANONICAL_MANIFEST_PATH.as_posix())
     value = _read_manifest(manifest_path)
-    require_valid_contract("mutation-manifest", value, root / _SCHEMA_DIRECTORY)
+    schema_directory = _resolve_repository_path(root, _SCHEMA_DIRECTORY.as_posix())
+    schema_path = _resolve_repository_path(root, _SCHEMA_PATH.as_posix())
+    if not schema_directory.is_dir() or not schema_path.is_file():
+        raise _manifest_error(
+            "Mutation manifest schema could not be read", "MUTATION_MANIFEST_READ_FAILED"
+        )
+    _require_valid_contract_with_schema_directory("mutation-manifest", value, schema_directory)
     assert isinstance(value, dict)
     manifest: Mapping[str, Any] = value
 
@@ -171,6 +263,7 @@ def load_mutation_manifest(repository_root: Path) -> MutationManifest:
                 "Mutation detector does not exist", "MUTATION_MANIFEST_DETECTOR_MISSING"
             )
 
+    _require_exact_declarations(mutations)
     declarations = tuple(
         MutationDeclaration(
             mutation_id=str(mutation["mutation_id"]),

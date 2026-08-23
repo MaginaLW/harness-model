@@ -171,24 +171,34 @@ def _cross_field_errors(contract_name: str, value: object) -> list[str]:
     return errors
 
 
-def validate_contract(
+def _validate_contract_with_schema_directory(
     contract_name: str,
     value: object,
-    schema_directory: Path = SCHEMA_RELATIVE_DIRECTORY,
+    schema_directory: Path,
 ) -> list[str]:
-    """Return stable, JSON Pointer-addressed validation errors."""
     schema_errors = _safe_schema_errors(contract_name, value, schema_directory)
     cross_field_errors = _cross_field_errors(contract_name, value)
     return sorted(set(schema_errors + cross_field_errors))
 
 
-def require_valid_contract(
+def validate_contract(contract_name: str, value: object) -> list[str]:
+    """Return stable, JSON Pointer-addressed validation errors."""
+    return _validate_contract_with_schema_directory(contract_name, value, SCHEMA_RELATIVE_DIRECTORY)
+
+
+def _require_valid_contract_with_schema_directory(
     contract_name: str,
     value: object,
-    schema_directory: Path = SCHEMA_RELATIVE_DIRECTORY,
+    schema_directory: Path,
 ) -> None:
-    """Raise a domain exception when a contract value is invalid."""
-    errors = validate_contract(contract_name, value, schema_directory)
+    errors = _validate_contract_with_schema_directory(contract_name, value, schema_directory)
+    if errors:
+        raise ContractValidationError(contract_name, errors)
+
+
+def require_valid_contract(contract_name: str, value: object) -> None:
+    """Raise a domain exception when a value violates the fixed local contract."""
+    errors = validate_contract(contract_name, value)
     if errors:
         raise ContractValidationError(contract_name, errors)
 

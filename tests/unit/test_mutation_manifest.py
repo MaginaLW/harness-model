@@ -26,7 +26,7 @@ def manifest_value() -> dict[str, Any]:
             "src/aiflow/policy.py",
             "_validate_cross_file",
             "drop_targeted_mutation_required_check",
-            "tests/unit/test_policy.py::test_required",
+            "tests/unit/test_policy.py::test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras",
         ),
         (
             "MUT-V2-002",
@@ -34,7 +34,7 @@ def manifest_value() -> dict[str, Any]:
             "src/aiflow/verifier_service.py",
             "validate_verifier_actor",
             "allow_same_verifier_actor",
-            "tests/integration/test_verify_command.py::test_independent",
+            "tests/integration/test_verify_command.py::test_v2_actor_rejections_happen_before_plan_or_runner",
         ),
         (
             "MUT-V2-003",
@@ -42,7 +42,7 @@ def manifest_value() -> dict[str, Any]:
             "src/aiflow/approval.py",
             "_v2_evidence_current",
             "allow_nonpassing_required_check",
-            "tests/integration/test_approval.py::test_required",
+            "tests/integration/test_mutation_manifest_contract.py::test_v2_code_approval_rejects_nonpassing_required_check",
         ),
         (
             "MUT-V2-004",
@@ -50,7 +50,7 @@ def manifest_value() -> dict[str, Any]:
             "src/aiflow/gate.py",
             "_v2_gate_facts",
             "accept_non_killed_mutation",
-            "tests/integration/test_gate.py::test_killed",
+            "tests/integration/test_mutation_manifest_contract.py::test_v2_gate_rejects_non_killed_mutation",
         ),
         (
             "MUT-V2-005",
@@ -58,7 +58,7 @@ def manifest_value() -> dict[str, Any]:
             "src/aiflow/evidence.py",
             "validate_v2_snapshot",
             "ignore_snapshot_mismatch",
-            "tests/unit/test_evidence.py::test_snapshot",
+            "tests/unit/test_evidence.py::test_v2_snapshot_rejects_mutation_of_bound_verification_facts",
         ),
     )
     return {
@@ -87,6 +87,7 @@ def write_manifest(repository: Path, value: dict[str, Any]) -> None:
 
 
 def write_target_and_detector_files(repository: Path, value: dict[str, Any]) -> None:
+    detectors: dict[Path, list[str]] = {}
     for mutation in value["mutations"]:
         assert isinstance(mutation, dict)
         target = repository / str(mutation["target"])
@@ -96,8 +97,13 @@ def write_target_and_detector_files(repository: Path, value: dict[str, Any]) -> 
         )
         detector_file, function = str(mutation["expected_detector"]).split("::")
         detector = repository / detector_file
+        detectors.setdefault(detector, []).append(function)
+    for detector, functions in detectors.items():
         detector.parent.mkdir(parents=True, exist_ok=True)
-        detector.write_text(f"def {function}():\n    assert True\n", encoding="utf-8")
+        detector.write_text(
+            "\n".join(f"def {function}():\n    assert True\n" for function in functions),
+            encoding="utf-8",
+        )
 
 
 @pytest.fixture
@@ -140,6 +146,17 @@ def test_schema_rejects_extra_fields_and_empty_declarations() -> None:
     assert validate_contract("mutation-manifest", empty)
 
 
+@pytest.mark.parametrize("size", [4, 6])
+def test_schema_requires_exactly_five_declarations(size: int) -> None:
+    value = manifest_value()
+    if size == 4:
+        value["mutations"].pop()
+    else:
+        value["mutations"].append(deepcopy(value["mutations"][-1]))
+    write_value = validate_contract("mutation-manifest", value)
+    assert write_value
+
+
 @pytest.mark.parametrize(
     ("field", "bad_value"),
     [
@@ -158,6 +175,17 @@ def test_schema_rejects_invalid_operator_id_and_pytest_nodeid(field: str, bad_va
 
 def test_valid_nonobject_json_is_a_contract_failure(repository: Path) -> None:
     (repository / CANONICAL_MANIFEST_PATH).write_text("[]", encoding="utf-8")
+    assert load_error(repository).code == "CONTRACT_VALIDATION_FAILED"
+
+
+@pytest.mark.parametrize("change", ["order", "safeguard"])
+def test_loader_rejects_noncanonical_order_or_fields(repository: Path, change: str) -> None:
+    value = manifest_value()
+    if change == "order":
+        value["mutations"].reverse()
+    else:
+        value["mutations"][0]["safeguard_id"] = "V2_OTHER_SAFEGUARD"
+    write_manifest(repository, value)
     assert load_error(repository).code == "CONTRACT_VALIDATION_FAILED"
 
 
@@ -194,25 +222,28 @@ def test_loader_rejects_lexically_unsafe_or_nonimplementation_targets(
     assert load_error(repository).code == "MUTATION_MANIFEST_PATH_INVALID"
 
 
-def test_loader_rejects_a_missing_target_symbol_and_detector(repository: Path) -> None:
-    for field, changed, expected in (
-        ("target", "src/aiflow/missing.py", "MUTATION_MANIFEST_TARGET_MISSING"),
-        ("target_symbol", "not_present", "MUTATION_MANIFEST_SYMBOL_MISSING"),
-        (
-            "expected_detector",
-            "tests/unit/test_policy.py::test_not_present",
-            "MUTATION_MANIFEST_DETECTOR_MISSING",
-        ),
-        (
-            "expected_detector",
-            "tests/unit/missing.py::test_missing",
-            "MUTATION_MANIFEST_DETECTOR_MISSING",
-        ),
-    ):
-        value = manifest_value()
-        value["mutations"][0][field] = changed
-        write_manifest(repository, value)
-        assert load_error(repository).code == expected
+def test_loader_rejects_a_missing_target(repository: Path) -> None:
+    (repository / "src/aiflow/policy.py").unlink()
+    assert load_error(repository).code == "MUTATION_MANIFEST_TARGET_MISSING"
+
+
+def test_loader_rejects_a_missing_target_symbol(repository: Path) -> None:
+    (repository / "src/aiflow/policy.py").write_text(
+        "def other_symbol():\n    return None\n", encoding="utf-8"
+    )
+    assert load_error(repository).code == "MUTATION_MANIFEST_SYMBOL_MISSING"
+
+
+def test_loader_rejects_a_missing_detector_file(repository: Path) -> None:
+    detector = repository / "tests/unit/test_policy.py"
+    detector.unlink()
+    assert load_error(repository).code == "MUTATION_MANIFEST_DETECTOR_MISSING"
+
+
+def test_loader_rejects_a_missing_detector_function(repository: Path) -> None:
+    detector = repository / "tests/unit/test_policy.py"
+    detector.write_text("def test_other():\n    assert True\n", encoding="utf-8")
+    assert load_error(repository).code == "MUTATION_MANIFEST_DETECTOR_MISSING"
 
 
 def test_loader_returns_immutable_stable_declarations_without_mutating_input(
@@ -248,6 +279,36 @@ def test_loader_rejects_symlink_path_escape_deterministically(
 
     monkeypatch.setattr(mutation_manifest, "_resolve_path", escaped)
     assert load_error(repository).code == "MUTATION_MANIFEST_PATH_ESCAPE"
+
+
+def test_loader_rejects_schema_directory_escape_deterministically(
+    repository: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import aiflow.mutation_manifest as mutation_manifest
+
+    original = mutation_manifest._resolve_path
+
+    def escaped(path: Path) -> Path:
+        if path == repository / ".ai" / "schemas":
+            return repository.parent / "external-schemas"
+        return original(path)
+
+    monkeypatch.setattr(mutation_manifest, "_resolve_path", escaped)
+    assert load_error(repository).code == "MUTATION_MANIFEST_PATH_ESCAPE"
+
+
+def test_loader_rejects_duplicate_json_object_keys(repository: Path) -> None:
+    path = repository / CANONICAL_MANIFEST_PATH
+    text = path.read_text(encoding="utf-8")
+    path.write_text(
+        text.replace(
+            '"scope": "phase-02-critical-safeguards",',
+            '"scope": "phase-02-critical-safeguards",\n  "scope": "phase-02-critical-safeguards",',
+            1,
+        ),
+        encoding="utf-8",
+    )
+    assert load_error(repository).code == "MUTATION_MANIFEST_READ_FAILED"
 
 
 def test_loader_does_not_accept_manifest_input_mutation(repository: Path) -> None:

@@ -11,7 +11,8 @@
     "scope": {"const": "phase-02-critical-safeguards"},
     "mutations": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 5,
+      "maxItems": 5,
       "items": {"$ref": "#/$defs/mutation"}
     }
   },
