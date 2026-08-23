@@ -5,7 +5,7 @@
 
 ## 本章结果边界
 
-本章将 active Policy 升级为 `2.0.0`，定义并解析严格的 V2 验证计划，增加 route-independent V2 选择事实，并为 classification 与 evidence 建立显式版本分支。旧 V0/V1 记录继续使用 `schema_version: "1.0"`，不会被自动迁移或静默重写。
+本章实施当时将 active Policy 升级为 `2.0.0`，定义并解析严格的 V2 验证计划，增加 route-independent V2 选择事实，并为 classification 与 evidence 建立显式版本分支。现行版本以 `.ai/policy/` 中四份 active Policy 文件为准；旧 V0/V1 记录继续使用 `schema_version: "1.0"`，不会被自动迁移或静默重写。
 
 V2 在 Chapter 9 仍是 contract-only 能力。`aiflow verify` 遇到 V2 时会在解析计划或启动检查前以 `VERIFY_V2_NOT_EXECUTABLE` 拒绝。独立 Verifier、V2 evidence writer、Gate V2 判定和 targeted mutation 执行属于 Chapters 10–11。
 
@@ -13,7 +13,7 @@ V2 在 Chapter 9 仍是 contract-only 能力。`aiflow verify` 遇到 V2 时会�
 
 | 任务 | 状态 | 证据 |
 |---|---|---|
-| 9.1 有序 V0/V1/V2 Policy | completed | 四份 Policy 统一为 `2.0.0`；loader 按 1.x/2.x 严格分支 |
+| 9.1 有序 V0/V1/V2 Policy | completed | Chapter 9 实施当时四份 Policy 统一为 `2.0.0`；现行版本见 `.ai/policy/`；loader 按 1.x/2.x 严格分支 |
 | 9.2 V2 必需检查 | completed | 完整 V1 prefix + acceptance、integration、targeted_mutation、independent_verifier |
 | 9.3 route-independent 分类 | completed | 封闭的 `verification_requirements`、稳定 rule IDs、V2 聚合与升降级比较 |
 | 9.4 版本化 contracts | completed | classification/evidence `1.0` 与 `2.0` 分支、V2 正反 fixtures |

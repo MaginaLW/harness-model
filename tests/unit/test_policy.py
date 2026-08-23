@@ -53,7 +53,7 @@ def test_valid_policy_has_complete_stable_bundle() -> None:
     bundle = load_policy_bundle(PROJECT_ROOT)
 
     assert set(bundle.documents) == set(POLICY_FILES)
-    assert bundle.policy_version == "2.0.0"
+    assert bundle.policy_version == "2.1.0"
     assert len(bundle.sha256) == 64
     assert bundle.sha256 == load_policy_bundle(PROJECT_ROOT).sha256
 
@@ -87,7 +87,7 @@ def test_v1_must_preserve_the_semantic_v0_prefix() -> None:
 
 def test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras() -> None:
     documents = v2_documents()
-    assert _validate_cross_file(documents) == "2.0.0"
+    assert _validate_cross_file(documents) == "2.1.0"
 
     levels = documents["verification-levels.yaml"]["levels"]
     assert isinstance(levels, list)
