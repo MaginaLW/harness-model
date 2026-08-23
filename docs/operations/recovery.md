@@ -50,6 +50,18 @@
 - 可恢复操作：核对 repository ID 后，向 CI 传入唯一的显式 task ID；若变更实际混合了多任务，建立新的有界任务/分支并重新验证。
 - 禁止操作：不按字典序或最新时间猜选 task ID，不忽略 repository ID，不将多个任务的证据合并成一个 Gate 输入。
 
+## REC-09 V2 Verifier context、actor 或 pre evidence
+
+- 诊断：记录稳定拒绝码，并检查最近 `implementation_started`/`implementation_retried` actor、`verify --actor`、`.ai/tasks/<TASK-ID>/verifier-contexts/<SHA>.json`、pre evidence 的 subject/spec/Policy/classification 绑定。
+- 可恢复操作：actor 仅是 trim 后比较的 task-local 标签；缺失或与 Implementer 相同时，使用不同且非空的 Verifier 标签重新运行。context、subject、规格、Policy 或 classification 已变化时，重新生成当前 context 和 pre evidence；不要复用旧 hash。
+- 禁止操作：不把 actor 当作身份认证，不编辑 hash-addressed context，不手工把 `unverified` 改为 `passed`，不伪造 reviewer ref 或 implementation review。
+
+## REC-10 V2 finalize、CI 与治理-only begin
+
+- 诊断：`--finalize` 只处理当前、passed 的 pre evidence 和当前可批准 implementation review；它不运行验证命令。Chapter 11 的 acceptance、integration、targeted mutation 未实现时，live V2 pre evidence 会 failed，这是预期限制。
+- 可恢复操作：完成 Chapter 11 检查后，从当前事实重跑 local V2 pre evidence，再记录 implementation review、执行 `verify --finalize`，最后获取 local code approval。CI evidence 仅重做 attestation/Gate 输入，不能替代 local evidence 或 approval。
+- 治理-only begin：若 HEAD 只前移当前任务 `.ai/tasks/<TASK-ID>/**` 的治理提交，可以重试 `begin`；任何业务文件、其他任务治理文件、仓库/分支变化或新增工作树业务路径都必须停止并按范围/新鲜度流程恢复。
+
 ## 结构化审核 stale 或不可批准
 
 - 诊断：运行 `python -m aiflow review show <TASK-ID> --stage <design|implementation> --format json`；再生成当前 context，核对 `context_sha256`、阶段、结论和 high/critical finding 状态。

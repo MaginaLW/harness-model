@@ -1,0 +1,45 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-10"
+  number: 10
+  title: "独立 Verifier 与 V2 evidence/Gate"
+  status: "implemented_verification_pending"
+  dependency: "chapter-09 completed"
+  tasks_total: 6
+  steps_total: 30
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+  design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+  task_id: "TASK-0009"
+
+tasks:
+  - id: "10.1"
+    title: "角色标识与独立性"
+    status: "implemented_verification_pending"
+  - id: "10.2"
+    title: "Verifier 最小上下文与 immutable 存储"
+    status: "implemented_verification_pending"
+  - id: "10.3"
+    title: "V2 verify actor 前置拒绝"
+    status: "implemented_verification_pending"
+  - id: "10.4"
+    title: "两阶段 V2 evidence"
+    status: "implemented_verification_pending"
+  - id: "10.5"
+    title: "V2 Gate 与治理-only begin 兼容"
+    status: "implemented_verification_pending"
+  - id: "10.6"
+    title: "集成、E2E 与文档"
+    status: "verification_pending"
+
+exit_checks:
+  - id: "CH10-EXIT-01"
+    description: "V2 actor/context/evidence/Gate 的定向与全量验证通过"
+    status: "pending"
+  - id: "CH10-EXIT-02"
+    description: "V0/V1 parity 和阶段二边界回归通过"
+    status: "pending"
+
+blockers:
+  - "主任务尚未完成全量质量门、集成/E2E 回归与最终独立复核；不得将本章标记为 completed。"

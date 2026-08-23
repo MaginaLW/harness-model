@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-23T01:58:51Z"
+updated_at: "2026-08-23T02:15:00Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,16 +22,16 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: false
   state_directory: "docs/superpowers/state"
-  current_chapter: null
-  current_task: null
+  current_chapter: "chapter-10"
+  current_task: "TASK-0009"
   current_step: null
 
 summary:
-  chapters_total: 9
+  chapters_total: 10
   chapters_completed: 9
-  tasks_total: 54
+  tasks_total: 60
   tasks_completed: 54
-  steps_total: 293
+  steps_total: 323
   steps_completed: 293
   exit_checks_total: 14
   exit_checks_completed: 14
@@ -111,6 +111,14 @@ chapters:
     dependency: "chapter-08 completed"
     tasks_total: 5
     steps_total: 25
+  - id: "chapter-10"
+    number: 10
+    title: "独立 Verifier 与 V2 evidence/Gate"
+    state_file: "docs/superpowers/state/chapters/chapter-10.yaml"
+    status: "implemented_verification_pending"
+    dependency: "chapter-09 completed"
+    tasks_total: 6
+    steps_total: 30
 
 global_checks:
   plan_self_review:
