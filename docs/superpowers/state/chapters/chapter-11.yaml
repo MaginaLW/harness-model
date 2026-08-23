@@ -4,7 +4,7 @@ chapter:
   id: "chapter-11"
   number: 11
   title: "验收、集成与定向变异"
-  status: "pending"
+  status: "in_progress"
   dependency: "chapter-10 completed"
   tasks_total: 5
   steps_total: 25
@@ -15,10 +15,17 @@ source:
 tasks:
   - id: "11.1"
     title: "增加确定性、离线 acceptance 与 integration 检查编排"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - ".ai/policy/verification-levels.yaml"
+      - "src/aiflow/verification.py"
+      - "src/aiflow/verification_service.py"
+      - "tests/acceptance/test_v2_acceptance.py"
+      - "tests/integration/test_v2_acceptance_integration.py"
+      - ".ai/tasks/TASK-0011/final-policy-change-resolution.md"
     blockers: []
   - id: "11.2"
     title: "建立只覆盖阶段二关键保障的 mutant manifest"
@@ -57,5 +64,21 @@ exit_checks:
     description: "V1 不要求 mutation；未覆盖项不被通过文字掩盖"
     status: "pending"
 
+chapter_evidence:
+  - id: "EVD-CH11-11.1-001"
+    kind: "task_completion_projection"
+    task_id: "TASK-0011"
+    subject_commit: "de0e2603b6e89928597df8479d41c5f1fa13b06f"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    scope: "V2 acceptance/integration 的确定性、离线编排；targeted mutation 不在本项实现。"
+    artifacts:
+      - ".ai/policy/verification-levels.yaml"
+      - "src/aiflow/verification.py"
+      - "src/aiflow/verification_service.py"
+      - "tests/acceptance/test_v2_acceptance.py"
+      - "tests/integration/test_v2_acceptance_integration.py"
+    limitation: "targeted_mutation 仍为 unverified（VERIFICATION_CHAPTER11_NOT_IMPLEMENTED）；真实 live V2 必须 failed，Chapter 11 exit checks 均未完成。"
+
 blockers:
-  - "必须先创建新的 AI Flow 行为性任务，并完成分类、规格冻结、独立设计审核及所需批准；不得将 Chapter 10 的 V1 证据扩展为 Chapter 11 或真实 live V2 passed。"
+  - "11.2–11.5 仍需后续 AI Flow 行为性任务、冻结规格、独立审核和所需批准；不得将 11.1 的 acceptance/integration 编排或 V1 证据扩展为 mutation 证据或真实 live V2 passed。"

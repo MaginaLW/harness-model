@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–10 已完成。Chapter 10 的 V2 独立 Verifier、两阶段 evidence 与 Gate 契约已通过其 V1 基线验证、结构化审核、代码批准和 Gate。下一章为 Chapter 11：acceptance、integration、targeted mutation 尚未实现，故真实 live V2 evidence 仍必然失败；Chapter 10 的完成不等同于 live V2 passed。V3、真实模型路由及资源调度不在阶段二范围内。
+> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–10 已完成，Chapter 11 正在进行。Chapter 11.1 已将 V2 acceptance 与 integration 变为确定性、离线的 pytest 检查；active Policy 为 `2.1.0`。targeted mutation 仍待 Chapters 11.2–11.5 实现，因此真实 live V2 evidence 仍必须失败；这不等同于 V2 passed 或 Gate ready。V3、真实模型路由及资源调度不在阶段二范围内。
 
 ## 阶段一目标
 
@@ -33,6 +33,7 @@
 | [Chapter 8 追踪](docs/implementation/chapter-08-structured-review.md) | 结构化设计/实现审核的任务状态和兼容性护栏 |
 | [Chapter 9 追踪](docs/implementation/chapter-09-v2-policy-contracts.md) | V2 Policy、版本化 contracts、分类规则与兼容性边界 |
 | [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的退出证据与 live V2 限制 |
+| [Chapter 11 追踪](docs/implementation/chapter-11-acceptance-integration-mutation.md) | acceptance/integration 编排、pending mutation 与 live V2 失败边界 |
 
 ## 实施路线
 
