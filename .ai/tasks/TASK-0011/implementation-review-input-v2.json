@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0005",
+  "revision": 1,
+  "task_id": "TASK-0011",
+  "review_stage": "implementation",
+  "recorded_at": "2026-08-23T14:06:11Z",
+  "context_sha256": "f214ae52de08bf293dd6b453a0413f7b9d69cffdf71c9200201577c408fa1938",
+  "outcome": "APPROVE",
+  "summary": "Reviewed c513244 against b618901. RF-001 and RF-002 are closed: selected successful acceptance/integration is provisional and returns to IMPLEMENTING, selected failure is failed, and the Chapter 11 projection explicitly labels de0e260 as the pre-projection implementation snapshot. Default V2 retains failed live evidence because targeted_mutation remains unverified; V0/V1 contracts and the final V1 evidence remain intact.",
+  "findings": []
+}
