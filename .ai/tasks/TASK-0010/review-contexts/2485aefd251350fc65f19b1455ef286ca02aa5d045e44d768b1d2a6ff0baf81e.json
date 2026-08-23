@@ -1,0 +1,221 @@
+{
+  "base_commit": "6522d2df7d3e360aada9f3bed74dfccedcef06ed",
+  "branch": "main",
+  "classification_input_sha256": "ed1754f8d103b4cbc249dc4f1a3940b6c4cbf9c7b931cc3e48abc83224359300",
+  "content": {
+    "allowed_scope": [
+      "README.md",
+      "docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md",
+      "docs/superpowers/state/README.md",
+      "docs/superpowers/state/chapters/chapter-10.yaml",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 10 退出核验与治理状态对齐，并初始化 Chapter 11 待办状态，不改变运行时行为",
+        "impact_scope": [
+          "README.md",
+          "docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md",
+          "docs/superpowers/state/README.md",
+          "docs/superpowers/state/chapters/chapter-10.yaml",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "verify_chapter_10_exit_evidence",
+          "reconcile_manual_state_projection",
+          "initialize_chapter_11_pending_state",
+          "document_live_v2_boundary"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0010/approvals.json",
+        ".ai/tasks/TASK-0010/classification.json",
+        ".ai/tasks/TASK-0010/design-review-context.json",
+        ".ai/tasks/TASK-0010/design-review-input.json",
+        ".ai/tasks/TASK-0010/events.jsonl",
+        ".ai/tasks/TASK-0010/review-contexts/19c050a4c67c33900d58d285fb8ee36217702637f6e6bf779b78737c8185ab24.json",
+        ".ai/tasks/TASK-0010/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0010/spec.md",
+        ".ai/tasks/TASK-0010/task.yaml",
+        "README.md",
+        "docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md",
+        "docs/superpowers/state/README.md",
+        "docs/superpowers/state/chapters/chapter-10.yaml",
+        "docs/superpowers/state/chapters/chapter-11.yaml",
+        "docs/superpowers/state/overall.yaml"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/approvals.json"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/classification.json"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/design-review-context.json"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/design-review-input.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/events.jsonl"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/review-contexts/19c050a4c67c33900d58d285fb8ee36217702637f6e6bf779b78737c8185ab24.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/spec.md"
+        },
+        {
+          "additions": 83,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0010/task.yaml"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 3,
+          "path": "README.md"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 4,
+          "path": "docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 5,
+          "path": "docs/superpowers/state/README.md"
+        },
+        {
+          "additions": 66,
+          "binary": false,
+          "deletions": 11,
+          "path": "docs/superpowers/state/chapters/chapter-10.yaml"
+        },
+        {
+          "additions": 61,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/superpowers/state/chapters/chapter-11.yaml"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 17,
+          "path": "docs/superpowers/state/overall.yaml"
+        }
+      ],
+      "totals": {
+        "additions": 520,
+        "deletions": 40,
+        "files": 15
+      }
+    },
+    "goal": "完成 Chapter 10 退出核验与治理状态对齐，并初始化 Chapter 11 待办状态，不改变运行时行为",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0010",
+        "--actor",
+        "independent-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "2485aefd251350fc65f19b1455ef286ca02aa5d045e44d768b1d2a6ff0baf81e",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "f8650dbaf0e060a3673cf388641c64d3c54e88ef846ab79f82890171c35f8fba",
+  "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "cde966aabfe51f01f84387e5cb229d9561258267a49cfe287808c5fbc4bd0876",
+  "subject_commit": "b86ef8ef5d837765ee36cbc037386192a5b47cd8",
+  "task_id": "TASK-0010"
+}
