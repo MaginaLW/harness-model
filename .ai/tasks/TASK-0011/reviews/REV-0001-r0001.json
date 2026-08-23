@@ -1,0 +1,13 @@
+{
+  "context_sha256": "dc177899ca7644fc1fd2fe8106efbfdb1714146956023a0fdb2d5390254d24b5",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-23T12:32:00Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "chapter11-acceptance-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE. The frozen Chapter 11.1 scope turns only V2 acceptance and integration from placeholders into exact, offline pytest checks while preserving the fixed V1 prefix and V0/V1 schema, approval, evidence, and Gate semantics. It requires parse-time rejection of help, wrong targets, parser drift, and shell-like command forms; live process-derived logs, versions, and failure results; and selected-check provisional behavior that cannot provide final or Gate-eligible evidence. Targeted mutation remains intentionally unexecuted with the stable Chapter 11 pending reason, manifest, result, and failed live-V2 conclusion, so passing acceptance/integration cannot finalize, approve code, or pass Gate. Because the task changes executable Policy, the specified same-route policy_changed escalation, reclassification, refreeze, new design review, and fresh Policy-bound spec approval are required before final verification. The proposed test map covers plan semantics, real orchestration, failures, selection, pending mutation, V0/V1 compatibility, and freshness recovery without external access or main-worktree business writes.",
+  "task_id": "TASK-0011"
+}

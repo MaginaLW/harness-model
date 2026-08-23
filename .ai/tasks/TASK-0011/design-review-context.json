@@ -1,0 +1,62 @@
+{
+  "base_commit": "b6189010660e4e3adfd8f68309a95b7d81bdc419",
+  "branch": "main",
+  "classification_input_sha256": "c32108eb1038f9497efcc53ba452a07d424fd1959b43e2e950e65d8353f88f37",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/verification-levels.yaml",
+      "src/aiflow/verification.py",
+      "src/aiflow/verification_service.py",
+      "tests/acceptance/test_v2_acceptance.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/integration/test_templates_and_policy.py",
+      "tests/integration/test_verify_command.py",
+      "tests/integration/test_v2_acceptance_integration.py",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/operations/quickstart.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "实现 Chapter 11.1：为 V2 编排确定性、离线的 acceptance 与 integration 检查，并保持 targeted mutation 未实现且 live V2 失败",
+        "impact_scope": [
+          ".ai/policy/verification-levels.yaml",
+          "src/aiflow/verification.py",
+          "src/aiflow/verification_service.py",
+          "tests/acceptance/test_v2_acceptance.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/integration/test_templates_and_policy.py",
+          "tests/integration/test_verify_command.py",
+          "tests/integration/test_v2_acceptance_integration.py",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/operations/quickstart.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml",
+          "README.md"
+        ],
+        "planned_actions": [
+          "Replace V2 acceptance and integration placeholder commands with deterministic offline pytest commands",
+          "Execute acceptance and integration as distinct V2 checks with auditable process results and logs",
+          "Preserve targeted mutation as explicitly unverified until Chapter 11.2 through 11.5",
+          "Update focused tests and Chapter 11 progress documentation"
+        ]
+      }
+    ],
+    "goal": "实现 Chapter 11.1：为 V2 编排确定性、离线的 acceptance 与 integration 检查，并保持 targeted mutation 未实现且 live V2 失败",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "dc177899ca7644fc1fd2fe8106efbfdb1714146956023a0fdb2d5390254d24b5",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "7a609a9c1c22e35ff71c3d7f7f54f3f45699d1c246498c5797c648cb4e6ca893",
+  "task_id": "TASK-0011"
+}
