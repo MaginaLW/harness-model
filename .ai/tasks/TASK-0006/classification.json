@@ -1,0 +1,54 @@
+{
+  "base_commit": "52b543e72435afef9e7e5c52c5c09fd1109bd435",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "4961e1199f7a7cb19ce098e044baa5eb913bbfd65cb7f1cad6aaafab1a81e2fa",
+  "classifications": [
+    {
+      "classified_at": "2026-08-22T19:16:12Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "CI or CD behavior changes require review.",
+      "explanations": [
+        "CI or CD behavior changes require review."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "CI or CD behavior changes require review.",
+          "predicate_explanations": [
+            "impact_categories: contains_any -> true"
+          ],
+          "priority": 780,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-CI-CD"
+        }
+      ],
+      "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+      "policy_version": "2.0.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-CI-CD",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Cross-module interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-CROSS-MODULE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-08-22T19:16:12Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+  "policy_version": "2.0.0",
+  "schema_version": "1.0",
+  "subject_commit": "e17a34dca5530dc71149004a5f5a5a6dad96ea70",
+  "task_id": "TASK-0006"
+}

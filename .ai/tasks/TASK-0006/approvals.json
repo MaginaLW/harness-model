@@ -1,0 +1,55 @@
+[
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-22T16:44:18Z",
+    "base_commit": "52b543e72435afef9e7e5c52c5c09fd1109bd435",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "166a5cef3d00311b35543cc281ac042494c4244a595f3e4b8b2b0967851a6e1f",
+    "reason": "User explicitly approved TASK-0006 specification",
+    "schema_version": "1.0",
+    "spec_sha256": "5b411b5f64856c9867792a32303b9854699334cd007cdb94a6fd6a1f3a370cb0",
+    "subject_commit": "52b543e72435afef9e7e5c52c5c09fd1109bd435",
+    "task_id": "TASK-0006"
+  },
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-22T19:11:44Z",
+    "base_commit": "52b543e72435afef9e7e5c52c5c09fd1109bd435",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+    "reason": "User explicitly approved the refrozen TASK-0006 specification bound to Policy 2.0.0",
+    "schema_version": "1.0",
+    "spec_sha256": "5b411b5f64856c9867792a32303b9854699334cd007cdb94a6fd6a1f3a370cb0",
+    "subject_commit": "52b543e72435afef9e7e5c52c5c09fd1109bd435",
+    "task_id": "TASK-0006"
+  },
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-23T01:52:56Z",
+    "base_commit": "52b543e72435afef9e7e5c52c5c09fd1109bd435",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+    "reason": "User explicitly approved the final narrowed TASK-0006 scope and specification",
+    "schema_version": "1.0",
+    "spec_sha256": "cdfa3a3349e92c6596d78bc0aa6c0e6d9ba8dfcc12a686e36497e0266339a83d",
+    "subject_commit": "f21887e0f370424bcef954e3bfd064e6dc678b07",
+    "task_id": "TASK-0006"
+  },
+  {
+    "actor": "user",
+    "approval_type": "code",
+    "approved_at": "2026-08-23T02:42:36Z",
+    "base_commit": "52b543e72435afef9e7e5c52c5c09fd1109bd435",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "e56803ea46387219d7c7795591297e16611014d219bb6a650ec8597919ac7b3d",
+    "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+    "reason": "User explicitly approved TASK-0006 code after passed V1 evidence and independent implementation review",
+    "schema_version": "1.0",
+    "spec_sha256": "cdfa3a3349e92c6596d78bc0aa6c0e6d9ba8dfcc12a686e36497e0266339a83d",
+    "subject_commit": "a1de0800a640634db6cdce4e58b50358a4b7ebd0",
+    "task_id": "TASK-0006"
+  }
+]

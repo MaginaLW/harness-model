@@ -1,0 +1,13 @@
+{
+  "context_sha256": "2fdd67c64f05645a77f8b81b0ab6f9e6174a4219bc1efe58cac85fa7fa291e15",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-22T19:19:46.634111Z",
+  "review_id": "REV-0003",
+  "review_stage": "design",
+  "reviewer": "chapter9-policy-review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent re-review approved the narrowly expanded fixture scope after both additional-property fixtures were corrected to differ from their valid V2 baselines by exactly one unknown top-level field. Contract tests pass and no other scope was added.",
+  "task_id": "TASK-0006"
+}

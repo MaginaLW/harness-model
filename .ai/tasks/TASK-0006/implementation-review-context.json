@@ -1,0 +1,426 @@
+{
+  "base_commit": "52b543e72435afef9e7e5c52c5c09fd1109bd435",
+  "branch": "main",
+  "classification_input_sha256": "4961e1199f7a7cb19ce098e044baa5eb913bbfd65cb7f1cad6aaafab1a81e2fa",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/policy/permissions.yaml",
+      ".ai/schemas/policy.schema.json",
+      ".ai/schemas/decision-unit.schema.json",
+      ".ai/schemas/classification.schema.json",
+      ".ai/schemas/evidence.schema.json",
+      ".ai/templates/task.yaml",
+      ".ai/templates/evidence-v2.json",
+      "src/aiflow/policy.py",
+      "src/aiflow/verification_level.py",
+      "src/aiflow/verification.py",
+      "src/aiflow/classification_service.py",
+      "src/aiflow/status_service.py",
+      "src/aiflow/verification_service.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_verification_level.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/unit/test_contracts.py",
+      "tests/integration/test_templates_and_policy.py",
+      "tests/integration/test_classify_command.py",
+      "tests/integration/test_golden_classification.py",
+      "tests/integration/test_verify_command.py",
+      "tests/fixtures/verification/level-table.json",
+      "tests/fixtures/verification/plans/v2.json",
+      "tests/fixtures/contracts/valid/classification-v2.json",
+      "tests/fixtures/contracts/valid/evidence-v2.json",
+      "tests/fixtures/contracts/invalid/classification-v2.invalid.json",
+      "tests/fixtures/contracts/invalid/classification-v2.extra.json",
+      "tests/fixtures/contracts/invalid/classification-v2.missing.json",
+      "tests/fixtures/contracts/invalid/evidence-v2.invalid.json",
+      "tests/fixtures/contracts/invalid/evidence-v2.extra.json",
+      "tests/fixtures/contracts/invalid/evidence-v2.missing.json",
+      "docs/implementation/chapter-09-v2-policy-contracts.md",
+      "docs/superpowers/state/chapters/chapter-09.yaml",
+      "docs/superpowers/state/overall.yaml",
+      "README.md",
+      ".ai/tasks/TASK-0006/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 9 V2 Policy、版本化 contracts 与独立于 route 的分类闭环",
+        "impact_scope": [
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/policy/permissions.yaml",
+          ".ai/schemas/policy.schema.json",
+          ".ai/schemas/decision-unit.schema.json",
+          ".ai/schemas/classification.schema.json",
+          ".ai/schemas/evidence.schema.json",
+          ".ai/templates/task.yaml",
+          ".ai/templates/evidence-v2.json",
+          "src/aiflow/policy.py",
+          "src/aiflow/verification_level.py",
+          "src/aiflow/verification.py",
+          "src/aiflow/classification_service.py",
+          "src/aiflow/status_service.py",
+          "src/aiflow/verification_service.py",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_verification_level.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/unit/test_contracts.py",
+          "tests/integration/test_templates_and_policy.py",
+          "tests/integration/test_classify_command.py",
+          "tests/integration/test_golden_classification.py",
+          "tests/integration/test_verify_command.py",
+          "tests/fixtures/verification/level-table.json",
+          "tests/fixtures/verification/plans/v2.json",
+          "tests/fixtures/contracts/valid/classification-v2.json",
+          "tests/fixtures/contracts/valid/evidence-v2.json",
+          "tests/fixtures/contracts/invalid/classification-v2.invalid.json",
+          "tests/fixtures/contracts/invalid/classification-v2.extra.json",
+          "tests/fixtures/contracts/invalid/classification-v2.missing.json",
+          "tests/fixtures/contracts/invalid/evidence-v2.invalid.json",
+          "tests/fixtures/contracts/invalid/evidence-v2.extra.json",
+          "tests/fixtures/contracts/invalid/evidence-v2.missing.json",
+          "docs/implementation/chapter-09-v2-policy-contracts.md",
+          "docs/superpowers/state/chapters/chapter-09.yaml",
+          "docs/superpowers/state/overall.yaml",
+          "README.md",
+          ".ai/tasks/TASK-0006/**"
+        ],
+        "planned_actions": [
+          "Version the V2 Policy and contracts without rewriting legacy V0/V1 records",
+          "Add route-independent V2 selection and deterministic plan parsing",
+          "Preserve V0/V1 classification, evidence, and Gate replay semantics"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/hard-rules.yaml",
+        ".ai/policy/permissions.yaml",
+        ".ai/policy/routing.yaml",
+        ".ai/policy/verification-levels.yaml",
+        ".ai/schemas/classification.schema.json",
+        ".ai/schemas/decision-unit.schema.json",
+        ".ai/schemas/evidence.schema.json",
+        ".ai/schemas/policy.schema.json",
+        ".ai/templates/evidence-v2.json",
+        ".ai/templates/task.yaml",
+        "README.md",
+        "docs/implementation/chapter-09-v2-policy-contracts.md",
+        "docs/superpowers/state/chapters/chapter-09.yaml",
+        "docs/superpowers/state/overall.yaml",
+        "src/aiflow/classification_service.py",
+        "src/aiflow/policy.py",
+        "src/aiflow/status_service.py",
+        "src/aiflow/verification.py",
+        "src/aiflow/verification_level.py",
+        "src/aiflow/verification_service.py",
+        "tests/fixtures/contracts/invalid/classification-v2.extra.json",
+        "tests/fixtures/contracts/invalid/classification-v2.invalid.json",
+        "tests/fixtures/contracts/invalid/classification-v2.missing.json",
+        "tests/fixtures/contracts/invalid/evidence-v2.extra.json",
+        "tests/fixtures/contracts/invalid/evidence-v2.invalid.json",
+        "tests/fixtures/contracts/invalid/evidence-v2.missing.json",
+        "tests/fixtures/contracts/valid/classification-v2.json",
+        "tests/fixtures/contracts/valid/evidence-v2.json",
+        "tests/fixtures/verification/plans/v2.json",
+        "tests/integration/test_classify_command.py",
+        "tests/integration/test_verify_command.py",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_verification_level.py",
+        "tests/unit/test_verification_plan.py"
+      ],
+      "files": [
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/hard-rules.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/permissions.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/routing.yaml"
+        },
+        {
+          "additions": 88,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 144,
+          "binary": false,
+          "deletions": 80,
+          "path": ".ai/schemas/classification.schema.json"
+        },
+        {
+          "additions": 118,
+          "binary": false,
+          "deletions": 126,
+          "path": ".ai/schemas/decision-unit.schema.json"
+        },
+        {
+          "additions": 228,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/schemas/evidence.schema.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 2,
+          "path": ".ai/schemas/policy.schema.json"
+        },
+        {
+          "additions": 98,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/templates/evidence-v2.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/templates/task.yaml"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 2,
+          "path": "README.md"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/implementation/chapter-09-v2-policy-contracts.md"
+        },
+        {
+          "additions": 87,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/superpowers/state/chapters/chapter-09.yaml"
+        },
+        {
+          "additions": 20,
+          "binary": false,
+          "deletions": 12,
+          "path": "docs/superpowers/state/overall.yaml"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 7,
+          "path": "src/aiflow/classification_service.py"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/policy.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/status_service.py"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 4,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 98,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/verification_level.py"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/verification_service.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/classification-v2.extra.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/classification-v2.invalid.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/classification-v2.missing.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/evidence-v2.extra.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/evidence-v2.invalid.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/evidence-v2.missing.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/valid/classification-v2.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/valid/evidence-v2.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/verification/plans/v2.json"
+        },
+        {
+          "additions": 67,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_classify_command.py"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_verify_command.py"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 81,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 138,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_verification_level.py"
+        },
+        {
+          "additions": 57,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_verification_plan.py"
+        }
+      ],
+      "totals": {
+        "additions": 1482,
+        "deletions": 249,
+        "files": 35
+      }
+    },
+    "goal": "完成 Chapter 9 V2 Policy、版本化 contracts 与独立于 route 的分类闭环",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0006",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "7a09fca6116902d104a8df70db9fc765bd120526ac0fd6801c8c83d61a984974",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "e56803ea46387219d7c7795591297e16611014d219bb6a650ec8597919ac7b3d",
+  "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "cdfa3a3349e92c6596d78bc0aa6c0e6d9ba8dfcc12a686e36497e0266339a83d",
+  "subject_commit": "a1de0800a640634db6cdce4e58b50358a4b7ebd0",
+  "task_id": "TASK-0006"
+}
