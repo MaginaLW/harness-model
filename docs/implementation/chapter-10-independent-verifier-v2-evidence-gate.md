@@ -1,8 +1,15 @@
 # Chapter 10：独立 Verifier 与 V2 evidence/Gate
 
-状态：implemented / verification pending
+状态：completed
 
-本章实现 V2 的 task-local actor 比较、最小 Verifier context、两阶段 evidence 和 Gate 绑定；最终全量质量门、集成/E2E 回归与章节退出判定仍由主任务验证，尚未宣告完成。
+本章交付 V2 的 task-local actor 比较、最小 Verifier context、两阶段 evidence 和 Gate 绑定。Chapter 10 已基于 TASK-0009 的 V1 基线验证、结构化审核、代码批准与只读 Gate 事实完成退出核验；这不等同于真实 live V2 passed。
+
+## 退出结论与证据绑定
+
+- 实现 subject 为 `8eee9c1bb3c7c4ac35aa7843a1a3ec85e0fb4326`；基线 Gate attestation HEAD 为 `ed9ef1e5a781713e1798075c3013a4a1727d0375`。
+- 在该 attestation HEAD，`aiflow validate TASK-0009` 有效，`aiflow scope TASK-0009` 为 scope-valid，`aiflow gate TASK-0009 --format json` 为 passed；`8eee9c1..ed9ef1e` 仅含 TASK-0009 自身治理路径。
+- 当前 evidence、结构化设计/实现审核、代码批准与 Gate 结论均绑定上述 TASK-0009 subject 及其冻结规格、Policy 和 classification 版本。
+- TASK-0009 仍是 `APPROVED_FOR_MERGE`；本章节退出没有记录或声称 external merge。
 
 ## 已实现边界
 
@@ -12,9 +19,9 @@
 - V2 evidence 采用 `pre_implementation_review` → implementation review → `final` 两阶段；稳定 verification snapshot 排除 phase 和 implementation review ref，避免 evidence/review 哈希循环。
 - local V2 evidence 是 implementation review 与 code approval 的依据。CI evidence 只服务 Gate attestation，不能替代 local evidence 或 code approval。
 
-## 当前限制
+## 仍然有效的 live V2 限制
 
-Chapter 10 live V2 仅执行既有 V1 前缀。Chapter 11 拥有 acceptance、integration、targeted mutation 的真实执行；目前这三项以稳定 `unverified` 事实写入 pre evidence，因此 live V2 结论必须为 failed，不能进入 implementation review、finalize 或 Gate 的 passed 路径。
+真实 live V2 仅执行既有 V1 前缀。Chapter 11 拥有 acceptance、integration、targeted mutation 的真实执行；在其实现前，这三项均为 `unverified`，因此 live V2 结论必须为 failed，不能进入 implementation review、finalize 或 Gate 的 passed 路径。测试 fixture 中的 passed V2 路径不构成真实 live V2 验证成功。
 
 ## 操作顺序
 

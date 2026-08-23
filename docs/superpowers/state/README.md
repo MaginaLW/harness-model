@@ -1,12 +1,13 @@
 # 实施状态追踪
 
-本目录是阶段一实施目录的人工状态投影，用于在 `aiflow` CLI 尚未实现时追踪章节、任务、步骤、退出检查和验证证据。实施目录仍是工作范围与完成判据的唯一来源；状态文件不替代计划，也不伪造运行时任务记录。
+本目录是实施目录的人工状态投影，用于辅助追踪章节、任务、步骤、退出检查和验证证据。实施目录仍是工作范围与完成判据的来源；状态文件不替代计划或 AI Flow 运行时任务记录。
 
 ## 文件关系
 
-- `overall.yaml`：阶段一总体状态、章节依赖、累计计数、全局决定和未来阶段入口条件。
-- `chapters/chapter-01.yaml` 至 `chapter-07.yaml`：每章的任务、步骤计数、证据、阻断项和退出检查。
-- `docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md`：原始实施计划。
+- `overall.yaml`：跨阶段总体状态、章节依赖、累计计数、全局决定和未来阶段入口条件。
+- `chapters/chapter-01.yaml` 至当前阶段章节文件：每章的任务、步骤计数、证据、阻断项和退出检查。
+- `docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md`：阶段一原始实施计划。
+- `docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md`：阶段二审核与强化验证实施目录。
 
 ## 状态约定
 
@@ -29,6 +30,8 @@
 
 ## 当前治理边界
 
-当前仓库尚未有 `src/`、`.ai/tasks/`、可执行 Policy 或 `aiflow` CLI。因此本次只建立文档级追踪状态，不创建或伪造 `TASK-*` 运行时记录，也不把本次状态文件视为代码、配置、CI 或行为变更的批准。CLI 与 Policy 上线后，代码类工作必须通过 AI Flow；本目录只保留对实施目录的进度投影。
+当前仓库已有 `src/`、`.ai/tasks/`、可执行 Policy 与 `aiflow` CLI。AI Flow CLI 的确定性状态、验证、范围和 Gate 结论是运行时权威；人工状态文件只保留对实施目录和已核对运行时事实的辅助投影，不能覆盖、替代或伪造任务账本、批准或证据。
+
+代码、配置、CI 或行为变更必须通过 AI Flow；本目录的更新不构成运行时批准。计划、规格或 Policy 摘要变化后，应以 CLI 和当前任务记录重新验证，再更新人工投影。
 
 删除、推送、合并、部署、凭据、付费调用和其他高风险外部动作仍须单独批准；本状态初始化不授予任何此类权限。

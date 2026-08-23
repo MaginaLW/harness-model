@@ -1,0 +1,61 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-11"
+  number: 11
+  title: "验收、集成与定向变异"
+  status: "pending"
+  dependency: "chapter-10 completed"
+  tasks_total: 5
+  steps_total: 25
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+  design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+
+tasks:
+  - id: "11.1"
+    title: "增加确定性、离线 acceptance 与 integration 检查编排"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "11.2"
+    title: "建立只覆盖阶段二关键保障的 mutant manifest"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "11.3"
+    title: "在隔离 fixture/subprocess 中运行 mutant，不修改主工作树"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "11.4"
+    title: "记录 killed/survived、目标规则、日志和未覆盖项"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "11.5"
+    title: "任一 survived/missing mutant 令 V2 失败，并覆盖重放测试"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+
+exit_checks:
+  - id: "CH11-EXIT-01"
+    description: "关键保障被破坏时测试会失败的结论可重放"
+    status: "pending"
+  - id: "CH11-EXIT-02"
+    description: "V1 不要求 mutation；未覆盖项不被通过文字掩盖"
+    status: "pending"
+
+blockers:
+  - "必须先创建新的 AI Flow 行为性任务，并完成分类、规格冻结、独立设计审核及所需批准；不得将 Chapter 10 的 V1 证据扩展为 Chapter 11 或真实 live V2 passed。"

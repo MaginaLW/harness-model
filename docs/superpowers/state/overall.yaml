@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-23T02:15:00Z"
+updated_at: "2026-08-23T11:24:01Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -20,23 +20,23 @@ tracking:
   mode: "manual"
   cli_available: true
   executable_policy_available: true
-  runtime_task_records_initialized: false
+  runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-10"
-  current_task: "TASK-0009"
+  current_chapter: "chapter-11"
+  current_task: null
   current_step: null
 
 summary:
-  chapters_total: 10
-  chapters_completed: 9
-  tasks_total: 60
-  tasks_completed: 54
-  steps_total: 323
-  steps_completed: 293
-  exit_checks_total: 14
-  exit_checks_completed: 14
+  chapters_total: 11
+  chapters_completed: 10
+  tasks_total: 65
+  tasks_completed: 60
+  steps_total: 348
+  steps_completed: 323
+  exit_checks_total: 18
+  exit_checks_completed: 16
   blockers_total: 0
-  evidence_items: 3
+  evidence_items: 4
 
 chapters:
   - id: "chapter-01"
@@ -115,10 +115,18 @@ chapters:
     number: 10
     title: "独立 Verifier 与 V2 evidence/Gate"
     state_file: "docs/superpowers/state/chapters/chapter-10.yaml"
-    status: "implemented_verification_pending"
+    status: "completed"
     dependency: "chapter-09 completed"
     tasks_total: 6
     steps_total: 30
+  - id: "chapter-11"
+    number: 11
+    title: "验收、集成与定向变异"
+    state_file: "docs/superpowers/state/chapters/chapter-11.yaml"
+    status: "pending"
+    dependency: "chapter-10 completed"
+    tasks_total: 5
+    steps_total: 25
 
 global_checks:
   plan_self_review:
@@ -140,8 +148,8 @@ future_phases:
     design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
-    current_chapter: "chapter-10"
-    note: "Chapter 9 V2 Policy、版本化 contracts 与分类已完成；下一授权范围为 Chapter 10 独立 Verifier 与 V2 evidence/Gate。"
+    current_chapter: "chapter-11"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 尚未授权实现 acceptance、integration 或 targeted mutation，故真实 live V2 仍必须因 unverified 检查失败。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -163,7 +171,6 @@ future_phases:
     entry_gate:
       status: "blocked"
       reasons:
-        - "phase-01 in_progress；chapter-02 至 chapter-07 尚未完成"
         - "phase-02 and phase-03 exit evidence unavailable"
         - "phase-04 quantified coordination-cost and pause/approval-need evidence unavailable"
         - "Sol/max versus historic Sol/high decision drift unresolved"
@@ -1937,3 +1944,27 @@ history:
       - "docs/implementation/phase-02-entry-inputs.md"
       - "CHANGELOG.md"
       - "../harness-model-pilot-artifacts/TASK-0003/"
+  - id: "EVT-OVERALL-CH10-COMPLETE-001"
+    at: "2026-08-23T11:24:01Z"
+    action: "chapter_completed_and_next_initialized"
+    actor: "/root"
+    reason: "TASK-0009 在 ed9ef1e attestation HEAD 的 V1 validate、scope、Gate、质量证据、双阶段结构化审核与 code approval 均已核对；Chapter 11 仅初始化为 pending，未声明真实 live V2 passed。"
+    chapter_evidence: "EVD-CH10-COMPLETE-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_10_status: "completed"
+      chapter_11_status: "pending"
+      current_chapter: "chapter-11"
+      current_task: null
+      current_step: null
+      chapters_completed: 10
+      tasks_completed: 60
+      steps_completed: 323
+      exit_checks_completed: 16
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-10.yaml"
+      - "docs/superpowers/state/chapters/chapter-11.yaml"
+      - ".ai/tasks/TASK-0009/evidence.json"
+      - ".ai/tasks/TASK-0009/reviews/REV-0001-r0001.json"
+      - ".ai/tasks/TASK-0009/reviews/REV-0002-r0001.json"
+      - ".ai/tasks/TASK-0009/approvals.json"

@@ -4,7 +4,7 @@ chapter:
   id: "chapter-10"
   number: 10
   title: "独立 Verifier 与 V2 evidence/Gate"
-  status: "implemented_verification_pending"
+  status: "completed"
   dependency: "chapter-09 completed"
   tasks_total: 6
   steps_total: 30
@@ -16,30 +16,85 @@ source:
 tasks:
   - id: "10.1"
     title: "角色标识与独立性"
-    status: "implemented_verification_pending"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: ["src/aiflow/verifier_service.py", "tests/unit/test_verifier_service.py"]
+    blockers: []
   - id: "10.2"
     title: "Verifier 最小上下文与 immutable 存储"
-    status: "implemented_verification_pending"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: [".ai/schemas/verifier-context.schema.json", ".ai/templates/verifier-context.json", "src/aiflow/contracts.py"]
+    blockers: []
   - id: "10.3"
     title: "V2 verify actor 前置拒绝"
-    status: "implemented_verification_pending"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: ["src/aiflow/verification_service.py", "tests/integration/test_verify_command.py"]
+    blockers: []
   - id: "10.4"
     title: "两阶段 V2 evidence"
-    status: "implemented_verification_pending"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: [".ai/schemas/evidence.schema.json", ".ai/templates/evidence-v2.json", "src/aiflow/evidence.py"]
+    blockers: []
   - id: "10.5"
     title: "V2 Gate 与治理-only begin 兼容"
-    status: "implemented_verification_pending"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: ["src/aiflow/gate.py", "src/aiflow/task_service.py", "tests/integration/test_gate_command.py", "tests/integration/test_begin_close_commands.py"]
+    blockers: []
   - id: "10.6"
     title: "集成、E2E 与文档"
-    status: "verification_pending"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: ["tests/e2e/test_v2_verifier_scenario.py", "docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md"]
+    blockers: []
 
 exit_checks:
   - id: "CH10-EXIT-01"
     description: "V2 actor/context/evidence/Gate 的定向与全量验证通过"
-    status: "pending"
+    status: "passed"
   - id: "CH10-EXIT-02"
     description: "V0/V1 parity 和阶段二边界回归通过"
-    status: "pending"
+    status: "passed"
 
-blockers:
-  - "主任务尚未完成全量质量门、集成/E2E 回归与最终独立复核；不得将本章标记为 completed。"
+chapter_evidence:
+  - id: "EVD-CH10-COMPLETE-001"
+    kind: "chapter_exit"
+    task_id: "TASK-0009"
+    subject_commit: "8eee9c1bb3c7c4ac35aa7843a1a3ec85e0fb4326"
+    attestation_head: "ed9ef1e5a781713e1798075c3013a4a1727d0375"
+    verification_level: "V1"
+    evidence_sha256: "0a7e93bc30cb7680b2e27eff75df01dd10e6c12b56ae7c70b2fd829a6c39d61c"
+    verification:
+      validate: "passed at attestation HEAD"
+      scope: "passed at attestation HEAD; 8eee9c1..ed9ef1e contains only TASK-0009 governance paths"
+      gate: "passed at attestation HEAD"
+      unit_tests: "402 passed, 2 skipped"
+      pytest: "680 passed, 3 skipped"
+      ruff: "passed"
+      format: "passed"
+      mypy: "passed"
+      diff_coverage: "91%"
+    reviews:
+      design: "REV-0001 APPROVE; context 0de728d15c80b6bc6837c3c93a1616c7b614cd11d50979ef44ab2523c65028bc"
+      implementation: "REV-0002 APPROVE; context a42bd4bd72e04cf16208d8f75b04091050f23a8c22c7e0d46e85650fcfe23ad6"
+    approvals:
+      spec: "user approved 2026-08-23T05:14:59Z; spec 61c1ce4fb99425bb3a4f006114413c642083495a4b4900b38a65768467b5688a"
+      code: "user approved 2026-08-23T06:44:23Z for subject 8eee9c1bb3c7c4ac35aa7843a1a3ec85e0fb4326"
+    limitation: "真实 live V2 仍须在 Chapter 11 落地 acceptance、integration 与 targeted mutation；在此之前 unverified 检查必须令 live V2 失败。"
+
+blockers: []

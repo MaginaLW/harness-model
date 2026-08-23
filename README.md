@@ -2,12 +2,12 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–9 已完成。Chapter 10 的 V2 独立 Verifier、两阶段 evidence 与 Gate 实现正在收尾验证（implemented / verification pending）。V2 live run 目前只执行既有 V1 前缀；Chapter 11 的 acceptance、integration、targeted mutation 尚未执行，因此 live V2 evidence 必然失败。V3、真实模型路由及资源调度不在阶段二范围内。
+> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–10 已完成。Chapter 10 的 V2 独立 Verifier、两阶段 evidence 与 Gate 契约已通过其 V1 基线验证、结构化审核、代码批准和 Gate。下一章为 Chapter 11：acceptance、integration、targeted mutation 尚未实现，故真实 live V2 evidence 仍必然失败；Chapter 10 的完成不等同于 live V2 passed。V3、真实模型路由及资源调度不在阶段二范围内。
 
 ## 阶段一目标
 
 - 支持 `AUTO`、`ASK`、`REVIEW`、`BLOCK` 与动态升级。
-- 分别计算决策权分流和 `V0`/`V1`/`V2` 验证强度；V2 当前只完成 contract 与分类，不执行检查。
+- 分别计算决策权分流和 `V0`/`V1`/`V2` 验证强度；阶段一基线中的 V2 只完成 contract 与分类，阶段二按 Chapters 8–13 逐步补齐执行能力。
 - 用 Python CLI 统一任务状态、批准、验证和 Gate。
 - 将规格、Policy、批准和 evidence 绑定到明确版本。
 - 通过本地验证与 GitHub Actions 阻止越权或证据不足的变更。
@@ -32,7 +32,7 @@
 | [阶段一验收报告](docs/implementation/phase-01-acceptance-report.md) | 十二项验收、四试点、覆盖率、限制和风险接受 |
 | [Chapter 8 追踪](docs/implementation/chapter-08-structured-review.md) | 结构化设计/实现审核的任务状态和兼容性护栏 |
 | [Chapter 9 追踪](docs/implementation/chapter-09-v2-policy-contracts.md) | V2 Policy、版本化 contracts、分类规则与兼容性边界 |
-| [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的实现状态与未完成验证 |
+| [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的退出证据与 live V2 限制 |
 
 ## 实施路线
 
@@ -46,6 +46,7 @@
 8. 结构化设计审核与实现审核
 9. V2 Policy、contracts 与分类
 10. 独立 Verifier、两阶段 V2 evidence 与 Gate
+11. acceptance、integration 与 targeted mutation
 
 各章节必须按[实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)的前置关系推进，并以其中的命令和通过条件作为完成判据。
 
