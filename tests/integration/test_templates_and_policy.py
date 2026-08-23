@@ -43,6 +43,12 @@ EXPECTED_V1_EXTRA_CHECKS = {
     "regression_tests",
     "unit_tests",
 }
+EXPECTED_V2_EXTRA_CHECKS = {
+    "acceptance",
+    "integration",
+    "targeted_mutation",
+    "independent_verifier",
+}
 EXPECTED_FORBIDDEN_ACTIONS = {
     "delete",
     "deploy",
@@ -148,6 +154,19 @@ def policy_bundle_errors(bundle: PolicyBundle) -> list[str]:
     if not EXPECTED_V1_EXTRA_CHECKS <= v1_ids:
         errors.append("verification: V1 check set is incomplete")
 
+    v2_ids = {check["id"] for check in _level(bundle, "V2")["checks"]}
+    if v2_ids != v1_ids | EXPECTED_V2_EXTRA_CHECKS:
+        errors.append("verification: V2 check set is incomplete")
+    for check_id, target in (
+        ("acceptance", "tests/acceptance"),
+        ("integration", "tests/integration"),
+    ):
+        check = _check(bundle, "V2", check_id)
+        if check.get("command") != ["{python}", "-m", "pytest", target, "-q"]:
+            errors.append(f"verification: {check_id} must use its fixed offline pytest target")
+        if check.get("required") is not True or check.get("result_parser") != "pytest":
+            errors.append(f"verification: {check_id} must be a required pytest check")
+
     coverage = _check(bundle, "V1", "coverage_xml")
     if coverage.get("environment") != {"COVERAGE_FILE": "{run_dir}/.coverage"}:
         errors.append("verification: coverage environment is not isolated to run_dir")
@@ -250,6 +269,17 @@ def test_v1_cannot_omit_a_v0_check() -> None:
     v1["checks"] = [check for check in v1["checks"] if check["id"] != "scope"]
 
     assert "verification: V1 must include every V0 check" in policy_bundle_errors(bundle)
+
+
+def test_v2_acceptance_and_integration_cannot_be_replaced_with_help_or_wrong_target() -> None:
+    bundle = load_policy_bundle()
+    _check(bundle, "V2", "acceptance")["command"] = ["{python}", "-m", "aiflow", "--help"]
+    _check(bundle, "V2", "integration")["result_parser"] = "exit_zero"
+
+    errors = policy_bundle_errors(bundle)
+
+    assert "verification: acceptance must use its fixed offline pytest target" in errors
+    assert "verification: integration must be a required pytest check" in errors
 
 
 def test_machine_templates_parse_and_satisfy_contracts() -> None:

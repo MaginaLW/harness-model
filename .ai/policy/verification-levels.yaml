@@ -180,15 +180,15 @@ levels:
         result_parser: diff_cover
         threshold: 90
       - id: acceptance
-        command: ["{python}", -m, aiflow, --help]
-        timeout_seconds: 30
+        command: ["{python}", -m, pytest, tests/acceptance, -q]
+        timeout_seconds: 300
         required: true
-        result_parser: exit_zero
+        result_parser: pytest
       - id: integration
-        command: ["{python}", -m, aiflow, --help]
-        timeout_seconds: 30
+        command: ["{python}", -m, pytest, tests/integration, -q]
+        timeout_seconds: 600
         required: true
-        result_parser: exit_zero
+        result_parser: pytest
       - id: targeted_mutation
         command: ["{python}", -m, aiflow, --help]
         timeout_seconds: 30

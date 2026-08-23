@@ -58,7 +58,7 @@ from aiflow.verifier_service import (
 )
 
 VersionProbe = Callable[[VerificationCheck], str]
-_V2_CHAPTER11_CHECK_IDS = frozenset({"acceptance", "integration", "targeted_mutation"})
+_V2_CHAPTER11_CHECK_IDS = frozenset({"targeted_mutation"})
 _V2_CHAPTER11_REASON = "VERIFICATION_CHAPTER11_NOT_IMPLEMENTED"
 
 
@@ -269,14 +269,17 @@ def _empty_plan(plan: VerificationPlan) -> VerificationPlan:
 def _v2_plans(
     plan: VerificationPlan, check_ids: Sequence[str]
 ) -> tuple[VerificationPlan, tuple[VerificationCheck, ...]]:
-    """Retain the V1 executable prefix while representing all V2-only checks."""
+    """Execute V1 plus runnable V2 checks, retaining pending mutation evidence."""
     selected_ids = tuple(dict.fromkeys(check_ids))
     known = {check.check_id for check in plan.checks}
     if any(identifier not in known for identifier in selected_ids):
         raise ContractError("Verification check is unknown", code="VERIFY_CHECK_UNKNOWN")
-    default_ids = tuple(identifier for identifier in V1_CHECK_IDS if identifier in known)
+    default_ids = (*V1_CHECK_IDS, "acceptance", "integration")
+    runnable_ids = frozenset((*V1_CHECK_IDS, "acceptance", "integration"))
     executable_ids = tuple(
-        identifier for identifier in (selected_ids or default_ids) if identifier in V1_CHECK_IDS
+        identifier
+        for identifier in (selected_ids or default_ids)
+        if identifier in known and identifier in runnable_ids
     )
     execution_plan = _selected_plan(plan, executable_ids) if executable_ids else _empty_plan(plan)
     evidence_ids = set(executable_ids) | set(V2_EXTRA_CHECK_IDS)

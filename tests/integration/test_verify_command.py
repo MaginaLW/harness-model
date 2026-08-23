@@ -315,7 +315,7 @@ def test_v2_rejects_a_blank_current_implementer_before_plan_or_runner(
     assert caught.value.code == "VERIFIER_IMPLEMENTER_MISSING"
 
 
-def test_v2_live_run_uses_v1_prefix_and_writes_failed_pre_evidence(
+def test_v2_live_run_executes_acceptance_and_integration_then_preserves_pending_mutation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     repository = _prepare(tmp_path, monkeypatch)
@@ -326,9 +326,29 @@ def test_v2_live_run_uses_v1_prefix_and_writes_failed_pre_evidence(
     def v2_plan(bundle, context: VerificationContext, *, level: str) -> VerificationPlan:
         levels.append(level)
         prefix = base_plan(bundle, context, level=level)
-        extras = tuple(
+        extras = (
             VerificationCheck(
-                check_id,
+                "acceptance",
+                "V2",
+                (sys.executable, "-c", "print('acceptance')"),
+                {},
+                context.repository_root.resolve(),
+                10,
+                True,
+                "pytest",
+            ),
+            VerificationCheck(
+                "integration",
+                "V2",
+                (sys.executable, "-c", "print('integration')"),
+                {},
+                context.repository_root.resolve(),
+                10,
+                True,
+                "pytest",
+            ),
+            VerificationCheck(
+                "targeted_mutation",
                 "V2",
                 (sys.executable, "-m", "aiflow", "--help"),
                 {},
@@ -336,19 +356,34 @@ def test_v2_live_run_uses_v1_prefix_and_writes_failed_pre_evidence(
                 10,
                 True,
                 "exit_zero",
-            )
-            for check_id in (
-                "acceptance",
-                "integration",
-                "targeted_mutation",
+            ),
+            VerificationCheck(
                 "independent_verifier",
+                "V2",
+                (sys.executable, "-m", "aiflow", "--help"),
+                {},
+                context.repository_root.resolve(),
+                10,
+                True,
+                "exit_zero",
+            ),
+        )
+        executable_extras = tuple(
+            VerificationExecution(
+                f"EXEC-V2-{index:03d}",
+                check.argv,
+                check.environment,
+                check.cwd,
+                check.timeout_seconds,
+                (check.check_id,),
             )
+            for index, check in enumerate(extras[:2], start=1)
         )
         return VerificationPlan(
             level,
             prefix.run_dir,
             (*prefix.checks, *extras),
-            prefix.executions,
+            (*prefix.executions, *executable_extras),
             (),
             (),
             prefix.comparison_subject,
@@ -373,10 +408,16 @@ def test_v2_live_run_uses_v1_prefix_and_writes_failed_pre_evidence(
     assert evidence["verification_level"] == "V2"
     assert len(str(evidence["verifier_context_sha256"])) == 64
     checks = {str(check["check_id"]): check for check in evidence["checks"]}
-    for check_id in ("acceptance", "integration", "targeted_mutation"):
-        assert checks[check_id]["status"] == "unverified"
+    for check_id in ("acceptance", "integration"):
+        assert checks[check_id]["status"] == "passed"
         assert checks[check_id]["required"] is True
-        assert checks[check_id]["reason_code"]
+        assert checks[check_id]["exit_code"] == 0
+        assert checks[check_id]["timed_out"] is False
+        assert checks[check_id]["stdout_log_ref"]
+        assert checks[check_id]["stderr_log_ref"]
+        assert str(checks[check_id]["tool_version"]).endswith(":available")
+    assert checks["targeted_mutation"]["status"] == "unverified"
+    assert checks["targeted_mutation"]["reason_code"] == "VERIFICATION_CHAPTER11_NOT_IMPLEMENTED"
     assert checks["independent_verifier"]["status"] == "passed"
     assert checks["independent_verifier"]["required"] is True
 

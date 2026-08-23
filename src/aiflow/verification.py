@@ -234,6 +234,15 @@ def _require_output_semantics(
 ) -> None:
     if check.check_id == "smoke" and check.argv[1:] != ("-m", "aiflow", "--help"):
         raise ContractError("Smoke command is invalid", code="VERIFICATION_COMMAND_INVALID")
+    v2_pytest_targets = {
+        "acceptance": "tests/acceptance",
+        "integration": "tests/integration",
+    }
+    if check.check_id in v2_pytest_targets and (
+        check.argv[1:] != ("-m", "pytest", v2_pytest_targets[check.check_id], "-q")
+        or check.result_parser != "pytest"
+    ):
+        raise ContractError("V2 pytest command is invalid", code="VERIFICATION_COMMAND_INVALID")
     if check.check_id == "coverage_xml":
         expected_coverage = (run_dir / ".coverage").as_posix()
         expected_xml = (run_dir / "coverage.xml").as_posix()

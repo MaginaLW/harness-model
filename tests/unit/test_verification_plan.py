@@ -94,6 +94,43 @@ def test_v2_has_complete_v1_prefix_and_fixed_extra_order(tmp_path: Path) -> None
     assert all(check.required for check in parsed.checks[-4:])
 
 
+def test_v2_acceptance_and_integration_use_exact_offline_pytest_commands(tmp_path: Path) -> None:
+    parsed = parse_verification_plan(
+        v2_bundle(), context(tmp_path), level="V2", tool_available=lambda _argv: True
+    )
+    by_id = {check.check_id: check for check in parsed.checks}
+
+    assert by_id["acceptance"].argv == (sys.executable, "-m", "pytest", "tests/acceptance", "-q")
+    assert by_id["acceptance"].result_parser == "pytest"
+    assert by_id["integration"].argv == (sys.executable, "-m", "pytest", "tests/integration", "-q")
+    assert by_id["integration"].result_parser == "pytest"
+
+
+@pytest.mark.parametrize(
+    ("check_id", "command", "parser"),
+    [
+        ("acceptance", ["{python}", "-m", "aiflow", "--help"], "pytest"),
+        ("acceptance", ["{python}", "-m", "pytest", "tests/unit", "-q"], "pytest"),
+        ("integration", ["{python}", "-m", "pytest", "tests", "-q"], "pytest"),
+        ("integration", ["{python}", "-m", "pytest", "tests/integration", "-q"], "exit_zero"),
+    ],
+)
+def test_v2_acceptance_and_integration_reject_non_exact_commands(
+    tmp_path: Path, check_id: str, command: list[str], parser: str
+) -> None:
+    bundle = v2_bundle()
+    check = next(item for item in checks(bundle, "V2") if item["id"] == check_id)
+    check["command"] = command
+    check["result_parser"] = parser
+
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level="V2", tool_available=lambda _argv: True
+        )
+
+    assert caught.value.code == "VERIFICATION_COMMAND_INVALID"
+
+
 def test_v2_rejects_prefix_tampering_missing_extra_and_optional_extra(tmp_path: Path) -> None:
     prefix = v2_bundle()
     checks(prefix, "V2")[0]["timeout_seconds"] = 31

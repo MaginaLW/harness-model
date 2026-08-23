@@ -1,8 +1,12 @@
 allowed_scope:
+- .ai/policy/hard-rules.yaml
+- .ai/policy/routing.yaml
 - .ai/policy/verification-levels.yaml
+- .ai/policy/permissions.yaml
 - src/aiflow/verification.py
 - src/aiflow/verification_service.py
 - tests/acceptance/test_v2_acceptance.py
+- tests/unit/test_policy.py
 - tests/unit/test_verification_plan.py
 - tests/integration/test_templates_and_policy.py
 - tests/integration/test_verify_command.py
@@ -15,7 +19,7 @@ allowed_scope:
 base_commit: b6189010660e4e3adfd8f68309a95b7d81bdc419
 branch: main
 created_at: '2026-08-23T12:24:32Z'
-current_state: READY_TO_IMPLEMENT
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -34,10 +38,14 @@ decision_units:
   impact_categories:
   - ci
   impact_scope:
+  - .ai/policy/hard-rules.yaml
+  - .ai/policy/routing.yaml
   - .ai/policy/verification-levels.yaml
+  - .ai/policy/permissions.yaml
   - src/aiflow/verification.py
   - src/aiflow/verification_service.py
   - tests/acceptance/test_v2_acceptance.py
+  - tests/unit/test_policy.py
   - tests/unit/test_verification_plan.py
   - tests/integration/test_templates_and_policy.py
   - tests/integration/test_verify_command.py
@@ -53,6 +61,8 @@ decision_units:
   - docs/superpowers/state/chapters/chapter-11.yaml
   permission_requirements: []
   planned_actions:
+  - Increment all four Policy documents from 2.0.0 to 2.1.0 for the semantic verification
+    change
   - Replace V2 acceptance and integration placeholder commands with deterministic
     offline pytest commands
   - Execute acceptance and integration as distinct V2 checks with auditable process
@@ -72,6 +82,7 @@ decision_units:
     automatic: true
     tools_missing: false
   verification_methods:
+  - Cross-file Policy version and bundle validation for the 2.1.0 semantic change
   - Policy and verification-plan unit tests for exact acceptance and integration command
     semantics
   - V2 verify integration tests for passed, failed, selected-check, and pending-mutation
@@ -101,6 +112,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-08-23T12:27:33Z'
 subject_commit: b6189010660e4e3adfd8f68309a95b7d81bdc419
 task_id: TASK-0011
-updated_at: '2026-08-23T13:01:40Z'
+updated_at: '2026-08-23T13:09:28Z'
 worktree_dirty: false
 worktree_dirty_paths: []
