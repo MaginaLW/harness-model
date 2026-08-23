@@ -91,7 +91,7 @@ chapter_evidence:
   - id: "EVD-CH11-11.2-001"
     kind: "task_completion_projection"
     task_id: "TASK-0012"
-    implementation_subject_commit: "3f10d20302ba908afb97bc8ed88f39abce70b325"
+    implementation_subject_commit: "ed92614903fcbe2c4d70ed01944636b1cc6fbb79"
     implementation_subject_role: "状态投影前包含 Chapter 11.2 manifest、schema、只读 loader、detector 绑定与定向测试的实现快照；TASK-0012 的当前验证 subject 以 task-local evidence 为准。"
     verification_evidence_ref: ".ai/tasks/TASK-0012/evidence.json"
     policy_version: "2.1.0"
