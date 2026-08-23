@@ -1,0 +1,100 @@
+{
+  "base_commit": "3d8c45c2458a1efc4d15a18c6ca02a4cda2af395",
+  "branch": "main",
+  "checks": [
+    {
+      "category": "contract",
+      "check_id": "contract",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m aiflow validate TASK-0007",
+      "duration_ms": 234,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260823T025207303087Z/contract-001.stderr.log",
+      "stdout_log_ref": "logs/run-20260823T025207303087Z/contract-001.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    },
+    {
+      "category": "scope",
+      "check_id": "scope",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m aiflow scope TASK-0007",
+      "duration_ms": 329,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260823T025207303087Z/scope-002.stderr.log",
+      "stdout_log_ref": "logs/run-20260823T025207303087Z/scope-002.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    },
+    {
+      "category": "ruff_check",
+      "check_id": "ruff_check",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m ruff check .",
+      "duration_ms": 63,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260823T025207303087Z/ruff_check-003.stderr.log",
+      "stdout_log_ref": "logs/run-20260823T025207303087Z/ruff_check-003.stdout.log",
+      "timed_out": false,
+      "tool_version": "ruff:0.16.1"
+    },
+    {
+      "category": "ruff_format_check",
+      "check_id": "ruff_format_check",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m ruff format --check .",
+      "duration_ms": 62,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260823T025207303087Z/ruff_format_check-004.stderr.log",
+      "stdout_log_ref": "logs/run-20260823T025207303087Z/ruff_format_check-004.stdout.log",
+      "timed_out": false,
+      "tool_version": "ruff:0.16.1"
+    },
+    {
+      "category": "smoke",
+      "check_id": "smoke",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m aiflow --help",
+      "duration_ms": 188,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260823T025207303087Z/smoke-005.stderr.log",
+      "stdout_log_ref": "logs/run-20260823T025207303087Z/smoke-005.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    }
+  ],
+  "classification_input_sha256": "ed374ac366c9d61a1ac0ce9d1c13c1caabc39427074fea6cc3f724827a83be82",
+  "conclusion": "passed",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "generated_at": "2026-08-23T02:52:08Z",
+  "mode": "local",
+  "policy_sha256": "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "reproduce_command": [
+    "python",
+    "-m",
+    "aiflow",
+    "verify",
+    "TASK-0007",
+    "--actor",
+    "codex"
+  ],
+  "schema_version": "1.0",
+  "spec_sha256": "c261d1093fed082650bad4fb7b9af82145eb2f1402d975c8b6e278b33ecc6e50",
+  "subject_commit": "527890e3594d8f810ceba6963120d01ecf1b655c",
+  "task_id": "TASK-0007",
+  "unverified_scenarios": [],
+  "verification_level": "V0"
+}
