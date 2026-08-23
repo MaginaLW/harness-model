@@ -402,6 +402,40 @@ def test_v2_finalize_never_starts_a_runner_and_conflicting_check_is_rejected(
         verification_service.verify_task(repository, "TASK-0001", actor="verifier", finalize=True)
 
 
+def test_finalize_rejects_non_v2_task_without_starting_a_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError("finalize must not parse or execute a verification plan")
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(repository, "TASK-0001", actor="verifier", finalize=True)
+
+    assert caught.value.code == "VERIFY_FINALIZE_LEVEL_INVALID"
+
+
+def test_legacy_verify_still_requires_a_nonempty_actor_before_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError("actor validation must happen before plan parsing or runner start")
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(repository, "TASK-0001", actor=" ")
+
+    assert caught.value.code == "VERIFY_ACTOR_REQUIRED"
+
+
 def test_verify_finalize_cli_forwards_flag_without_starting_a_runner(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

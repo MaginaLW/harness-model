@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -16,6 +17,7 @@ from aiflow.evidence import (
     prepare_v2_pre_evidence,
     save_evidence,
     validate_v2_snapshot,
+    verification_snapshot_sha256,
 )
 from aiflow.process_runner import ProcessResult
 from aiflow.verification import VerificationCheck
@@ -163,6 +165,41 @@ def test_v2_snapshot_rejects_mutation_of_bound_verification_facts() -> None:
     with pytest.raises(ContractError) as caught:
         validate_v2_snapshot(pre)
     assert caught.value.code == "EVIDENCE_SNAPSHOT_STALE"
+
+
+def test_v2_helpers_reject_invalid_versions_missing_refs_and_invalid_finalization_inputs() -> None:
+    legacy = v2_evidence()
+    legacy["schema_version"] = "1.0"
+    with pytest.raises(ContractError) as caught:
+        verification_snapshot_sha256(legacy)
+    assert caught.value.code == "EVIDENCE_SNAPSHOT_INVALID"
+
+    missing_refs = v2_evidence()
+    missing_refs["review_refs"] = []
+    with pytest.raises(ContractError) as caught:
+        verification_snapshot_sha256(missing_refs)
+    assert caught.value.code == "EVIDENCE_SNAPSHOT_INVALID"
+
+    with pytest.raises(ContractError) as caught:
+        prepare_v2_pre_evidence(legacy)
+    assert caught.value.code == "EVIDENCE_V2_PHASE_INVALID"
+
+    pre = prepare_v2_pre_evidence(v2_evidence())
+    wrong_phase = deepcopy(pre)
+    wrong_phase["phase"] = "final"
+    with pytest.raises(ContractError) as caught:
+        finalize_v2_evidence(wrong_phase, {"review_id": "REV-0002", "context_sha256": "f" * 64})
+    assert caught.value.code == "EVIDENCE_V2_PHASE_INVALID"
+
+    failed = deepcopy(pre)
+    failed["conclusion"] = "failed"
+    with pytest.raises(ContractError) as caught:
+        finalize_v2_evidence(failed, {"review_id": "REV-0002", "context_sha256": "f" * 64})
+    assert caught.value.code == "EVIDENCE_V2_NOT_PASSED"
+
+    with pytest.raises(ContractError) as caught:
+        finalize_v2_evidence(pre, {"review_id": "REV-0002"})
+    assert caught.value.code == "EVIDENCE_REVIEW_REF_INVALID"
 
 
 def test_failure_evidence_is_atomically_saved_and_write_error_propagates(

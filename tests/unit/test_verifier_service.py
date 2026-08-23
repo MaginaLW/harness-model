@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
@@ -133,3 +134,71 @@ def test_diff_summary_preserves_binary_paths_without_inventing_numstat(
 
     assert paths == ["assets/blob.bin", "src/text.py"]
     assert summary == {"files": 2, "additions": 2, "deletions": 1, "binary_files": 1}
+
+
+@pytest.mark.parametrize(
+    ("failure", "code"),
+    [
+        (subprocess.TimeoutExpired(["git"], 1), "VERIFIER_CONTEXT_DIFF_TIMEOUT"),
+        (OSError("git unavailable"), "VERIFIER_CONTEXT_DIFF_FAILED"),
+    ],
+)
+def test_diff_summary_reports_runner_failures_with_stable_codes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    failure: BaseException,
+    code: str,
+) -> None:
+    def fail_run(*_args: object, **_kwargs: object) -> SimpleNamespace:
+        raise failure
+
+    monkeypatch.setattr("aiflow.verifier_service.subprocess.run", fail_run)
+
+    with pytest.raises(ContractError) as caught:
+        _diff_summary(tmp_path, "1" * 40, "2" * 40)
+
+    assert caught.value.code == code
+
+
+@pytest.mark.parametrize(
+    ("result", "code"),
+    [
+        (SimpleNamespace(returncode=1, stdout=b""), "VERIFIER_CONTEXT_DIFF_FAILED"),
+        (SimpleNamespace(returncode=0, stdout=b"\xff"), "VERIFIER_CONTEXT_DIFF_INVALID"),
+        (SimpleNamespace(returncode=0, stdout=b"1\t2\n"), "VERIFIER_CONTEXT_DIFF_INVALID"),
+        (
+            SimpleNamespace(returncode=0, stdout=b"not-a-number\t2\tfile.py\n"),
+            "VERIFIER_CONTEXT_DIFF_INVALID",
+        ),
+    ],
+)
+def test_diff_summary_rejects_invalid_git_output(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    result: SimpleNamespace,
+    code: str,
+) -> None:
+    monkeypatch.setattr("aiflow.verifier_service.subprocess.run", lambda *_args, **_kwargs: result)
+
+    with pytest.raises(ContractError) as caught:
+        _diff_summary(tmp_path, "1" * 40, "2" * 40)
+
+    assert caught.value.code == code
+
+
+def test_acceptance_conditions_fall_back_to_unit_methods_then_default() -> None:
+    task = {
+        "decision_units": [
+            {"verification_methods": [" first method ", "", 3]},
+            {"verification_methods": ["second method", "first method"]},
+            "invalid-unit",
+        ]
+    }
+
+    assert _acceptance_conditions("# no acceptance heading\n", task) == [
+        "first method",
+        "second method",
+    ]
+    assert _acceptance_conditions("# no acceptance heading\n", {}) == [
+        "Meet the frozen task specification acceptance conditions"
+    ]
