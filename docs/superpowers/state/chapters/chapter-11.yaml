@@ -29,10 +29,17 @@ tasks:
     blockers: []
   - id: "11.2"
     title: "建立只覆盖阶段二关键保障的 mutant manifest"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - ".ai/mutations/phase-02-critical-manifest.json"
+      - ".ai/schemas/mutation-manifest.schema.json"
+      - "src/aiflow/mutation_manifest.py"
+      - "tests/unit/test_mutation_manifest.py"
+      - "tests/integration/test_mutation_manifest_contract.py"
+      - ".ai/tasks/TASK-0012/evidence.json"
     blockers: []
   - id: "11.3"
     title: "在隔离 fixture/subprocess 中运行 mutant，不修改主工作树"
@@ -81,6 +88,23 @@ chapter_evidence:
       - "tests/acceptance/test_v2_acceptance.py"
       - "tests/integration/test_v2_acceptance_integration.py"
     limitation: "targeted_mutation 仍为 unverified（VERIFICATION_CHAPTER11_NOT_IMPLEMENTED）；真实 live V2 必须 failed，Chapter 11 exit checks 均未完成。"
+  - id: "EVD-CH11-11.2-001"
+    kind: "task_completion_projection"
+    task_id: "TASK-0012"
+    implementation_subject_commit: "e76869631c80183fbf8690c0939a4cc2fbda2c21"
+    implementation_subject_role: "状态投影前包含 Chapter 11.2 manifest、schema、只读 loader、detector 绑定与定向测试的实现快照；TASK-0012 的当前验证 subject 以 task-local evidence 为准。"
+    verification_evidence_ref: ".ai/tasks/TASK-0012/evidence.json"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    scope: "五项阶段二关键保障的受控 mutant manifest 与只读契约校验；不执行 mutant、不产出 killed/survived evidence。"
+    artifacts:
+      - ".ai/mutations/phase-02-critical-manifest.json"
+      - ".ai/schemas/mutation-manifest.schema.json"
+      - "src/aiflow/contracts.py"
+      - "src/aiflow/mutation_manifest.py"
+      - "tests/unit/test_mutation_manifest.py"
+      - "tests/integration/test_mutation_manifest_contract.py"
+    limitation: "11.3–11.5 与两个 Chapter 11 exit checks 仍未完成；manifest 存在不代表 mutation 已执行、killed 或真实 live V2 passed。"
 
 blockers:
-  - "11.2–11.5 仍需后续 AI Flow 行为性任务、冻结规格、独立审核和所需批准；不得将 11.1 的 acceptance/integration 编排或 V1 证据扩展为 mutation 证据或真实 live V2 passed。"
+  - "11.3–11.5 仍需后续 AI Flow 行为性任务、冻结规格、独立审核和所需批准；不得将 11.2 manifest、11.1 acceptance/integration 编排或 V1 证据扩展为 mutation 执行证据或真实 live V2 passed。"
