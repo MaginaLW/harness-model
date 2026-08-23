@@ -225,6 +225,16 @@ def test_v2_contracts_do_not_relax_legacy_versions() -> None:
     assert validate_contract("evidence", evidence)
 
 
+def test_classification_version_branches_bind_aggregate_and_unit_levels() -> None:
+    legacy = valid_fixture("classification")
+    legacy["classifications"][0]["verification_level"] = "V2"
+    assert validate_contract("classification", legacy)
+
+    v2 = load_json(VALID_ROOT / "classification-v2.json")
+    v2["classifications"][0]["verification_level"] = "V1"
+    assert validate_contract("classification", v2)
+
+
 def test_v2_selection_facts_are_optional_but_complete_when_present() -> None:
     unit = valid_fixture("decision-unit")
     unit["verification_requirements"] = {

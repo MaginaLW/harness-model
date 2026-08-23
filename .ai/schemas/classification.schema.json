@@ -114,14 +114,36 @@
                 "properties": {"schema_version": {"const": "1.0"}},
                 "required": ["schema_version"]
             },
-            "then": {"properties": {"effective_verification_level": {"enum": ["V0", "V1"]}}}
+            "then": {
+                "properties": {
+                    "effective_verification_level": {"enum": ["V0", "V1"]},
+                    "classifications": {
+                        "items": {
+                            "properties": {
+                                "verification_level": {"enum": ["V0", "V1"]}
+                            }
+                        }
+                    }
+                }
+            }
         },
         {
             "if": {
                 "properties": {"schema_version": {"const": "2.0"}},
                 "required": ["schema_version"]
             },
-            "then": {"properties": {"effective_verification_level": {"const": "V2"}}}
+            "then": {
+                "properties": {
+                    "effective_verification_level": {"const": "V2"},
+                    "classifications": {
+                        "contains": {
+                            "properties": {"verification_level": {"const": "V2"}},
+                            "required": ["verification_level"]
+                        },
+                        "minContains": 1
+                    }
+                }
+            }
         }
     ]
 }
