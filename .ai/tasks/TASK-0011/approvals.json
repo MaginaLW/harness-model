@@ -11,5 +11,18 @@
     "spec_sha256": "7a609a9c1c22e35ff71c3d7f7f54f3f45699d1c246498c5797c648cb4e6ca893",
     "subject_commit": "b6189010660e4e3adfd8f68309a95b7d81bdc419",
     "task_id": "TASK-0011"
+  },
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-23T13:27:39Z",
+    "base_commit": "b6189010660e4e3adfd8f68309a95b7d81bdc419",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "9dd10d4839c77ef624856ea593683a28a607980673d3fbacd76e759e9fdbaca4",
+    "reason": "User explicitly approved TASK-0011 current expanded frozen specification",
+    "schema_version": "1.0",
+    "spec_sha256": "e0963471d8be49a33d6dc14c68561bc726c8ebebef8408d9d0f64b2fbaebb91f",
+    "subject_commit": "1481a0123b8bc55371bdbca3aa5fac63f79e45c6",
+    "task_id": "TASK-0011"
   }
 ]
