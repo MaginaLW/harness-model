@@ -1,0 +1,422 @@
+{
+  "base_commit": "b6189010660e4e3adfd8f68309a95b7d81bdc419",
+  "branch": "main",
+  "classification_input_sha256": "603f6b1bee62bd2e51b2291dfcdad96074b2e7d1750b7901617c6c212281fd9d",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/policy/permissions.yaml",
+      "src/aiflow/verification.py",
+      "src/aiflow/verification_service.py",
+      "tests/acceptance/test_v2_acceptance.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/integration/test_templates_and_policy.py",
+      "tests/integration/test_verify_command.py",
+      "tests/integration/test_v2_acceptance_integration.py",
+      "docs/implementation/chapter-09-v2-policy-contracts.md",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/operations/quickstart.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "实现 Chapter 11.1：为 V2 编排确定性、离线的 acceptance 与 integration 检查，并保持 targeted mutation 未实现且 live V2 失败",
+        "impact_scope": [
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/policy/permissions.yaml",
+          "src/aiflow/verification.py",
+          "src/aiflow/verification_service.py",
+          "tests/acceptance/test_v2_acceptance.py",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/integration/test_templates_and_policy.py",
+          "tests/integration/test_verify_command.py",
+          "tests/integration/test_v2_acceptance_integration.py",
+          "docs/implementation/chapter-09-v2-policy-contracts.md",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/operations/quickstart.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml",
+          "README.md"
+        ],
+        "planned_actions": [
+          "Increment all four Policy documents from 2.0.0 to 2.1.0 for the semantic verification change",
+          "Replace V2 acceptance and integration placeholder commands with deterministic offline pytest commands",
+          "Execute acceptance and integration as distinct V2 checks with auditable process results and logs",
+          "Preserve targeted mutation as explicitly unverified until Chapter 11.2 through 11.5",
+          "Clarify Chapter 9 Policy 2.0.0 as a historical baseline rather than the current active version",
+          "Update focused tests and Chapter 11 progress documentation"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/hard-rules.yaml",
+        ".ai/policy/permissions.yaml",
+        ".ai/policy/routing.yaml",
+        ".ai/policy/verification-levels.yaml",
+        ".ai/tasks/TASK-0011/approvals.json",
+        ".ai/tasks/TASK-0011/classification.json",
+        ".ai/tasks/TASK-0011/design-review-context-v2.json",
+        ".ai/tasks/TASK-0011/design-review-context-v3.json",
+        ".ai/tasks/TASK-0011/design-review-context-v4.json",
+        ".ai/tasks/TASK-0011/design-review-context.json",
+        ".ai/tasks/TASK-0011/design-review-input-v2.json",
+        ".ai/tasks/TASK-0011/design-review-input-v3.json",
+        ".ai/tasks/TASK-0011/design-review-input-v4.json",
+        ".ai/tasks/TASK-0011/design-review-input.json",
+        ".ai/tasks/TASK-0011/events.jsonl",
+        ".ai/tasks/TASK-0011/final-policy-change-resolution.md",
+        ".ai/tasks/TASK-0011/policy-change-resolution.md",
+        ".ai/tasks/TASK-0011/review-contexts/0007e56957617b19d9d679bca5480727f89fce957c65bed73f85bc568be5e6fe.json",
+        ".ai/tasks/TASK-0011/review-contexts/dab6e2b6ea446583b91d796134b3514a325e29f382b0ecab757f257b6eea6aa5.json",
+        ".ai/tasks/TASK-0011/review-contexts/dc177899ca7644fc1fd2fe8106efbfdb1714146956023a0fdb2d5390254d24b5.json",
+        ".ai/tasks/TASK-0011/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0011/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0011/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0011/spec-change-resolution.md",
+        ".ai/tasks/TASK-0011/spec.md",
+        ".ai/tasks/TASK-0011/task.yaml",
+        "README.md",
+        "docs/implementation/chapter-09-v2-policy-contracts.md",
+        "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+        "docs/operations/quickstart.md",
+        "docs/superpowers/state/chapters/chapter-11.yaml",
+        "docs/superpowers/state/overall.yaml",
+        "src/aiflow/verification.py",
+        "src/aiflow/verification_service.py",
+        "tests/acceptance/test_v2_acceptance.py",
+        "tests/integration/test_templates_and_policy.py",
+        "tests/integration/test_v2_acceptance_integration.py",
+        "tests/integration/test_verify_command.py",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_verification_plan.py"
+      ],
+      "files": [
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/hard-rules.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/permissions.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/routing.yaml"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 7,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/approvals.json"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/classification.json"
+        },
+        {
+          "additions": 71,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/design-review-context-v2.json"
+        },
+        {
+          "additions": 74,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/design-review-context-v3.json"
+        },
+        {
+          "additions": 74,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/design-review-context-v4.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/design-review-context.json"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/design-review-input-v2.json"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/design-review-input-v3.json"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/design-review-input-v4.json"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/design-review-input.json"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/events.jsonl"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/final-policy-change-resolution.md"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/policy-change-resolution.md"
+        },
+        {
+          "additions": 74,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/review-contexts/0007e56957617b19d9d679bca5480727f89fce957c65bed73f85bc568be5e6fe.json"
+        },
+        {
+          "additions": 74,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/review-contexts/dab6e2b6ea446583b91d796134b3514a325e29f382b0ecab757f257b6eea6aa5.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/review-contexts/dc177899ca7644fc1fd2fe8106efbfdb1714146956023a0fdb2d5390254d24b5.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/spec-change-resolution.md"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/spec.md"
+        },
+        {
+          "additions": 121,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0011/task.yaml"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "README.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/implementation/chapter-09-v2-policy-contracts.md"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/implementation/chapter-11-acceptance-integration-mutation.md"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 27,
+          "binary": false,
+          "deletions": 4,
+          "path": "docs/superpowers/state/chapters/chapter-11.yaml"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 7,
+          "path": "docs/superpowers/state/overall.yaml"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 4,
+          "path": "src/aiflow/verification_service.py"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/acceptance/test_v2_acceptance.py"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_templates_and_policy.py"
+        },
+        {
+          "additions": 70,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_v2_acceptance_integration.py"
+        },
+        {
+          "additions": 53,
+          "binary": false,
+          "deletions": 12,
+          "path": "tests/integration/test_verify_command.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_verification_plan.py"
+        }
+      ],
+      "totals": {
+        "additions": 1298,
+        "deletions": 44,
+        "files": 40
+      }
+    },
+    "goal": "实现 Chapter 11.1：为 V2 编排确定性、离线的 acceptance 与 integration 检查，并保持 targeted mutation 未实现且 live V2 失败",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0011",
+        "--actor",
+        "chapter11-independent-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "3080aad653403895856e71a147311b4ad082665e690c200fec738fbf44fe0890",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "0975a41be75a3acb5fc3f251296b065dcb5ef1de47df781fef0d12601521f137",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "e0963471d8be49a33d6dc14c68561bc726c8ebebef8408d9d0f64b2fbaebb91f",
+  "subject_commit": "d8db0afba895915e558e665a017490440ba1d660",
+  "task_id": "TASK-0011"
+}

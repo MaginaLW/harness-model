@@ -321,6 +321,7 @@ def _upgrade_v2_pre_evidence(
     verifier_actor: str,
     verifier_context_sha256: str,
     design_review: ReviewAssessment,
+    provisional_check_ids: Sequence[str] = (),
 ) -> dict[str, object]:
     raw_checks = evidence.get("checks")
     checks = raw_checks if isinstance(raw_checks, list) else []
@@ -351,12 +352,30 @@ def _upgrade_v2_pre_evidence(
         f"check:{identifier}:{_V2_CHAPTER11_REASON}"
         for identifier in sorted(_V2_CHAPTER11_CHECK_IDS)
     )
+    # A selected V2 check is deliberately a partial, non-gating observation.  Its
+    # conclusion may be provisional only when every selected check really passed
+    # and the independent-verifier role fact is present.  In particular, do not
+    # let the pending Chapter 11 mutation (or another unselected real check)
+    # conceal a selected check failure.
+    by_id = {
+        str(check.get("check_id")): check
+        for check in checks
+        if isinstance(check, dict) and isinstance(check.get("check_id"), str)
+    }
+    selected_complete = bool(provisional_check_ids) and all(
+        isinstance(by_id.get(check_id), dict) and by_id[check_id].get("status") == "passed"
+        for check_id in provisional_check_ids
+    )
+    independent_verifier = by_id.get("independent_verifier")
+    role_fact_complete = (
+        isinstance(independent_verifier, dict) and independent_verifier.get("status") == "passed"
+    )
     evidence.update(
         {
             "schema_version": "2.0",
             "verification_level": "V2",
             "unverified_scenarios": sorted(unverified),
-            "conclusion": "failed",
+            "conclusion": "provisional" if selected_complete and role_fact_complete else "failed",
             "verifier_actor": verifier_actor,
             "verifier_context_sha256": verifier_context_sha256,
             "review_refs": {"design": _review_ref(design_review)},
@@ -746,6 +765,7 @@ def verify_task(
             verifier_actor=verifier_actor,
             verifier_context_sha256=verifier_context_sha256,
             design_review=design_review,
+            provisional_check_ids=check_ids if check_ids else (),
         )
     try:
         save_evidence(

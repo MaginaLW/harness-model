@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0004",
+  "revision": 1,
+  "task_id": "TASK-0011",
+  "review_stage": "implementation",
+  "recorded_at": "2026-08-23T13:49:38Z",
+  "context_sha256": "3080aad653403895856e71a147311b4ad082665e690c200fec738fbf44fe0890",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "Implementation review blocks approval: selective V2 acceptance/integration evidence is forced to failed instead of remaining provisional, and the Chapter 11 completion projection references an older subject commit.",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "status": "open",
+      "title": "Selected V2 acceptance or integration is incorrectly forced to failed",
+      "location": {
+        "path": "src/aiflow/verification_service.py",
+        "line": 663
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0011/spec.md#验收条件",
+        "tests/acceptance/test_v2_acceptance.py:49-62",
+        "tests/integration/test_v2_acceptance_integration.py:61-70",
+        "src/aiflow/evidence.py:85-97"
+      ]
+    },
+    {
+      "finding_id": "RF-002",
+      "severity": "medium",
+      "status": "open",
+      "title": "Chapter 11 completion projection uses an older subject commit",
+      "location": {
+        "path": "docs/superpowers/state/chapters/chapter-11.yaml",
+        "line": 71
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0011/evidence.json",
+        ".ai/tasks/TASK-0011/task.yaml",
+        "docs/superpowers/state/chapters/chapter-11.yaml:67-81"
+      ]
+    }
+  ]
+}

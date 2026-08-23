@@ -422,6 +422,168 @@ def test_v2_live_run_executes_acceptance_and_integration_then_preserves_pending_
     assert checks["independent_verifier"]["required"] is True
 
 
+@pytest.mark.parametrize("selected_check", ["acceptance", "integration"])
+def test_v2_selected_real_check_is_provisional_and_returns_to_implementing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, selected_check: str
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    base_plan = _plan()
+
+    def v2_plan(bundle, context: VerificationContext, *, level: str) -> VerificationPlan:
+        prefix = base_plan(bundle, context, level=level)
+        extras = tuple(
+            VerificationCheck(
+                check_id,
+                "V2",
+                (sys.executable, "-c", f"print('{check_id}')"),
+                {},
+                context.repository_root.resolve(),
+                10,
+                True,
+                "pytest" if check_id != "targeted_mutation" else "exit_zero",
+            )
+            for check_id in (
+                "acceptance",
+                "integration",
+                "targeted_mutation",
+                "independent_verifier",
+            )
+        )
+        executions = tuple(
+            VerificationExecution(
+                f"EXEC-V2-{index:03d}",
+                check.argv,
+                check.environment,
+                check.cwd,
+                check.timeout_seconds,
+                (check.check_id,),
+            )
+            for index, check in enumerate(extras[:2], start=1)
+        )
+        return VerificationPlan(
+            level,
+            prefix.run_dir,
+            (*prefix.checks, *extras),
+            (*prefix.executions, *executions),
+            (),
+            (),
+            prefix.comparison_subject,
+        )
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", v2_plan)
+    monkeypatch.setattr(
+        verification_service,
+        "latest_review_assessment",
+        lambda *_args, **_kwargs: ReviewAssessment(
+            {"context_sha256": "d" * 64}, {"review_id": "REV-0001"}
+        ),
+    )
+
+    result = verification_service.verify_task(
+        repository, "TASK-0001", actor="verifier", check_ids=(selected_check,)
+    )
+
+    assert result.conclusion == "provisional"
+    assert result.state == "IMPLEMENTING"
+    evidence = read_task_json(repository, "TASK-0001", "evidence.json", contract_name="evidence")
+    checks = {str(check["check_id"]): check for check in evidence["checks"]}
+    assert checks[selected_check]["status"] == "passed"
+    other = "integration" if selected_check == "acceptance" else "acceptance"
+    assert checks[other]["status"] == "unverified"
+    assert checks["targeted_mutation"]["status"] == "unverified"
+    assert checks["targeted_mutation"]["reason_code"] == "VERIFICATION_CHAPTER11_NOT_IMPLEMENTED"
+    assert evidence["targeted_mutation"] == {
+        "manifest_ref": "chapter-11-pending",
+        "results": [{"mutation_id": "CHAPTER11-PENDING", "outcome": "unverified", "log_ref": None}],
+    }
+
+
+def test_v2_selected_failure_remains_failed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    base_plan = _plan()
+
+    def v2_plan(bundle, context: VerificationContext, *, level: str) -> VerificationPlan:
+        prefix = base_plan(bundle, context, level=level)
+        acceptance = VerificationCheck(
+            "acceptance",
+            "V2",
+            (sys.executable, "-c", "import sys; sys.exit(1)"),
+            {},
+            context.repository_root.resolve(),
+            10,
+            True,
+            "pytest",
+        )
+        integration = VerificationCheck(
+            "integration",
+            "V2",
+            (sys.executable, "-c", "print('integration')"),
+            {},
+            context.repository_root.resolve(),
+            10,
+            True,
+            "pytest",
+        )
+        mutation = VerificationCheck(
+            "targeted_mutation",
+            "V2",
+            (sys.executable, "-m", "aiflow", "--help"),
+            {},
+            context.repository_root.resolve(),
+            10,
+            True,
+            "exit_zero",
+        )
+        role = VerificationCheck(
+            "independent_verifier",
+            "V2",
+            (sys.executable, "-m", "aiflow", "--help"),
+            {},
+            context.repository_root.resolve(),
+            10,
+            True,
+            "exit_zero",
+        )
+        return VerificationPlan(
+            level,
+            prefix.run_dir,
+            (*prefix.checks, acceptance, integration, mutation, role),
+            (
+                *prefix.executions,
+                VerificationExecution(
+                    "EXEC-V2-001", acceptance.argv, {}, acceptance.cwd, 10, ("acceptance",)
+                ),
+            ),
+            (),
+            (),
+            prefix.comparison_subject,
+        )
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", v2_plan)
+    monkeypatch.setattr(
+        verification_service,
+        "latest_review_assessment",
+        lambda *_args, **_kwargs: ReviewAssessment(
+            {"context_sha256": "d" * 64}, {"review_id": "REV-0001"}
+        ),
+    )
+
+    result = verification_service.verify_task(
+        repository, "TASK-0001", actor="verifier", check_ids=("acceptance",)
+    )
+
+    assert result.conclusion == "failed"
+    assert result.state == "FAILED"
+    evidence = read_task_json(repository, "TASK-0001", "evidence.json", contract_name="evidence")
+    checks = {str(check["check_id"]): check for check in evidence["checks"]}
+    assert checks["acceptance"]["status"] == "failed"
+    assert evidence["conclusion"] == "failed"
+
+
 def test_v2_finalize_never_starts_a_runner_and_conflicting_check_is_rejected(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
