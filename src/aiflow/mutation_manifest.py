@@ -13,6 +13,9 @@ from dataclasses import dataclass
 from pathlib import Path, PureWindowsPath
 from typing import Any
 
+from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
+from referencing.exceptions import CannotDetermineSpecification, Unresolvable
+
 from aiflow.contracts import (
     ContractValidationError,
     _require_valid_contract_with_schema_directory,
@@ -204,6 +207,26 @@ def _split_detector(detector: str) -> tuple[str, str]:
     return path, function
 
 
+def _require_valid_manifest_contract(value: object, schema_directory: Path) -> None:
+    """Validate with the contained schema while preserving manifest reason codes."""
+    try:
+        _require_valid_contract_with_schema_directory("mutation-manifest", value, schema_directory)
+    except ContractValidationError:
+        raise
+    except (
+        OSError,
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+        TypeError,
+        SchemaError,
+        CannotDetermineSpecification,
+        Unresolvable,
+    ) as error:
+        raise _manifest_error(
+            "Mutation manifest schema could not be read", "MUTATION_MANIFEST_READ_FAILED"
+        ) from error
+
+
 def load_mutation_manifest(repository_root: Path) -> MutationManifest:
     """Load the fixed manifest from ``repository_root`` without executing it."""
     root = Path(repository_root)
@@ -215,7 +238,7 @@ def load_mutation_manifest(repository_root: Path) -> MutationManifest:
         raise _manifest_error(
             "Mutation manifest schema could not be read", "MUTATION_MANIFEST_READ_FAILED"
         )
-    _require_valid_contract_with_schema_directory("mutation-manifest", value, schema_directory)
+    _require_valid_manifest_contract(value, schema_directory)
     assert isinstance(value, dict)
     manifest: Mapping[str, Any] = value
 

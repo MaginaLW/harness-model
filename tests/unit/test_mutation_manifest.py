@@ -311,6 +311,13 @@ def test_loader_rejects_duplicate_json_object_keys(repository: Path) -> None:
     assert load_error(repository).code == "MUTATION_MANIFEST_READ_FAILED"
 
 
+@pytest.mark.parametrize("schema_text", ["{not-json", '{"$ref": "urn:missing"}'])
+def test_loader_normalizes_unusable_schema(repository: Path, schema_text: str) -> None:
+    schema = repository / ".ai" / "schemas" / "mutation-manifest.schema.json"
+    schema.write_text(schema_text, encoding="utf-8")
+    assert load_error(repository).code == "MUTATION_MANIFEST_READ_FAILED"
+
+
 def test_loader_does_not_accept_manifest_input_mutation(repository: Path) -> None:
     """Changing an in-memory copy cannot affect the read-only on-disk declaration."""
     value = manifest_value()

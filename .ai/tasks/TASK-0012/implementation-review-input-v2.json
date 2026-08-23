@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0004",
+  "revision": 1,
+  "task_id": "TASK-0012",
+  "review_stage": "implementation",
+  "recorded_at": "2026-08-23T16:15:49Z",
+  "context_sha256": "896fb1c4eacb13600a1fa27790f057e8cac48945b18cbf4e8d839d863c6994c6",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "Security re-review confirms the four REV-0003 findings are closed but blocks final approval because malformed repository-owned mutation schema JSON escapes as a raw JSONDecodeError instead of the frozen MUTATION_MANIFEST_READ_FAILED reason code.",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "medium",
+      "title": "Malformed mutation schema JSON bypasses the manifest reason-code contract",
+      "location": {
+        "path": "src/aiflow/mutation_manifest.py",
+        "line": 218
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0012/spec.md#错误行为",
+        "src/aiflow/mutation_manifest.py:212-218",
+        "src/aiflow/contracts.py:48-59"
+      ],
+      "status": "open"
+    }
+  ]
+}
