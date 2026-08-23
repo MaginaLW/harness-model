@@ -1,0 +1,55 @@
+{
+  "base_commit": "9d8a7d1dad7d256bbefaafad9ce5d4270238b4fe",
+  "branch": "main",
+  "classification_input_sha256": "8e34f41edd886caf9fd530e06674ba0ba08235f9b6b0dd9b5b7cd304491f4cbe",
+  "content": {
+    "allowed_scope": [
+      ".ai/mutations/phase-02-critical-manifest.json",
+      ".ai/schemas/mutation-manifest.schema.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/mutation_manifest.py",
+      "tests/unit/test_mutation_manifest.py",
+      "tests/integration/test_mutation_manifest_contract.py",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 11.2：建立仅覆盖阶段二关键保障的版本化 mutant manifest；不执行 mutant、不写 killed/survived evidence、不改变 live V2 或 Gate 结论",
+        "impact_scope": [
+          ".ai/mutations/phase-02-critical-manifest.json",
+          ".ai/schemas/mutation-manifest.schema.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/mutation_manifest.py",
+          "tests/unit/test_mutation_manifest.py",
+          "tests/integration/test_mutation_manifest_contract.py",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Add a versioned, repository-owned manifest for exactly five Phase 2 critical safeguards",
+          "Add a strict JSON Schema and a read-only loader with path, identifier, operator, and detector validation",
+          "Add deterministic unit and integration tests for valid, invalid, duplicate, escaping, and drifted manifests",
+          "Preserve targeted mutation execution, results, and live V2 behavior as explicitly unimplemented",
+          "Project only Chapter 11.2 completion into implementation documentation and progress state"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 11.2：建立仅覆盖阶段二关键保障的版本化 mutant manifest；不执行 mutant、不写 killed/survived evidence、不改变 live V2 或 Gate 结论",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "7d7f37b849fb219c42637dc664200ae4d734abd17cd44fab6764a3167cddac61",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "8b2244cc388b78eaab141a9257bc6ee1bf759f025ab97df234ddff333fd9ea36",
+  "task_id": "TASK-0012"
+}

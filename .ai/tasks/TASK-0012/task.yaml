@@ -1,0 +1,100 @@
+allowed_scope:
+- .ai/mutations/phase-02-critical-manifest.json
+- .ai/schemas/mutation-manifest.schema.json
+- src/aiflow/contracts.py
+- src/aiflow/mutation_manifest.py
+- tests/unit/test_mutation_manifest.py
+- tests/integration/test_mutation_manifest_contract.py
+- docs/implementation/chapter-11-acceptance-integration-mutation.md
+- docs/superpowers/state/chapters/chapter-11.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 9d8a7d1dad7d256bbefaafad9ce5d4270238b4fe
+branch: main
+created_at: '2026-08-23T15:25:17Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 11.2：建立仅覆盖阶段二关键保障的版本化 mutant manifest；不执行 mutant、不写 killed/survived
+    evidence、不改变 live V2 或 Gate 结论
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  impact_scope:
+  - .ai/mutations/phase-02-critical-manifest.json
+  - .ai/schemas/mutation-manifest.schema.json
+  - src/aiflow/contracts.py
+  - src/aiflow/mutation_manifest.py
+  - tests/unit/test_mutation_manifest.py
+  - tests/integration/test_mutation_manifest_contract.py
+  - docs/implementation/chapter-11-acceptance-integration-mutation.md
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - .ai/schemas/evidence.schema.json
+  permission_requirements: []
+  planned_actions:
+  - Add a versioned, repository-owned manifest for exactly five Phase 2 critical safeguards
+  - Add a strict JSON Schema and a read-only loader with path, identifier, operator,
+    and detector validation
+  - Add deterministic unit and integration tests for valid, invalid, duplicate, escaping,
+    and drifted manifests
+  - Preserve targeted mutation execution, results, and live V2 behavior as explicitly
+    unimplemented
+  - Project only Chapter 11.2 completion into implementation documentation and progress
+    state
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0012
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Validate the canonical manifest and all negative fixtures through focused pytest
+    suites
+  - Prove every declared target, symbol, and detector exists without executing a mutant
+  - Replay current live V2 tests to prove targeted_mutation remains unverified and
+    V2 remains failed
+  - Run contract validation, scope validation, Ruff, formatting, mypy, full pytest,
+    branch coverage, diff coverage, and git diff checks
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 8b2244cc388b78eaab141a9257bc6ee1bf759f025ab97df234ddff333fd9ea36
+goal: 完成 Chapter 11.2：建立仅覆盖阶段二关键保障的版本化 mutant manifest；不执行 mutant、不写 killed/survived
+  evidence、不改变 live V2 或 Gate 结论
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-23T15:33:34Z'
+subject_commit: 9d8a7d1dad7d256bbefaafad9ce5d4270238b4fe
+task_id: TASK-0012
+updated_at: '2026-08-23T15:35:55Z'
+worktree_dirty: false
+worktree_dirty_paths: []

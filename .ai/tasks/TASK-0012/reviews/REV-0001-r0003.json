@@ -1,0 +1,69 @@
+{
+  "context_sha256": "cc2d16b33a526209e73faabe4ca27a37959e9cf31eaf269b0bacd9d5d63c9ec0",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0012/spec.md:10-16",
+        ".ai/tasks/TASK-0012/spec.md:18"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 10,
+        "path": ".ai/tasks/TASK-0012/spec.md"
+      },
+      "resolution": {
+        "actor": "codex",
+        "reason": "规格已将 target 冻结为不含 symbol 的仓库相对 Python 路径，将 target_symbol 冻结为独立顶层函数名，并为五项分别给出两个字段的精确值与唯一性规则。",
+        "resolved_at": "2026-08-23T15:33:17Z"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Target path and symbol fields are ambiguous"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0012/spec.md:12",
+        ".ai/tasks/TASK-0012/spec.md:18"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 18,
+        "path": ".ai/tasks/TASK-0012/spec.md"
+      },
+      "resolution": {
+        "actor": "codex",
+        "reason": "规格已把禁止边界精确限定为 .ai/policy/** 受控配置目录，并明确 src/aiflow/policy.py 是允许的 Python 实现目标。",
+        "resolved_at": "2026-08-23T15:33:23Z"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Policy target prohibition conflicts with the canonical manifest"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0012/spec.md:14-15",
+        "tests/integration/test_approve_command.py:305",
+        "tests/unit/test_gate.py:46",
+        "src/aiflow/approval.py:374",
+        "src/aiflow/gate.py:262"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 14,
+        "path": ".ai/tasks/TASK-0012/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "Two declared detectors do not reach their mutation targets"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-08-23T15:33:23Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "chapter11-manifest-design-reviewer",
+  "revision": 3,
+  "schema_version": "1.0",
+  "summary": "The frozen manifest design is not yet implementable as an auditable detector contract: target and target_symbol are ambiguous, the Policy-target prohibition conflicts with the required policy.py mutation, and two declared detectors do not execute their stated enforcement points.",
+  "task_id": "TASK-0012"
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "manifest_id": "phase-02-critical",
+  "scope": "phase-02-critical-safeguards",
+  "mutations": [
+    {
+      "mutation_id": "MUT-V2-001",
+      "safeguard_id": "V2_REQUIRED_CHECK_SET",
+      "target": "src/aiflow/policy.py",
+      "target_symbol": "_validate_cross_file",
+      "operator": "drop_targeted_mutation_required_check",
+      "expected_detector": "tests/unit/test_policy.py::test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras",
+      "expected_outcome": "killed"
+    },
+    {
+      "mutation_id": "MUT-V2-002",
+      "safeguard_id": "V2_VERIFIER_INDEPENDENCE",
+      "target": "src/aiflow/verifier_service.py",
+      "target_symbol": "validate_verifier_actor",
+      "operator": "allow_same_verifier_actor",
+      "expected_detector": "tests/integration/test_verify_command.py::test_v2_actor_rejections_happen_before_plan_or_runner",
+      "expected_outcome": "killed"
+    },
+    {
+      "mutation_id": "MUT-V2-003",
+      "safeguard_id": "V2_CODE_APPROVAL_REQUIRES_PASSING_EVIDENCE",
+      "target": "src/aiflow/approval.py",
+      "target_symbol": "_v2_evidence_current",
+      "operator": "allow_nonpassing_required_check",
+      "expected_detector": "tests/integration/test_mutation_manifest_contract.py::test_v2_code_approval_rejects_nonpassing_required_check",
+      "expected_outcome": "killed"
+    },
+    {
+      "mutation_id": "MUT-V2-004",
+      "safeguard_id": "V2_GATE_REQUIRES_KILLED_MUTATIONS",
+      "target": "src/aiflow/gate.py",
+      "target_symbol": "_v2_gate_facts",
+      "operator": "accept_non_killed_mutation",
+      "expected_detector": "tests/integration/test_mutation_manifest_contract.py::test_v2_gate_rejects_non_killed_mutation",
+      "expected_outcome": "killed"
+    },
+    {
+      "mutation_id": "MUT-V2-005",
+      "safeguard_id": "V2_SNAPSHOT_BINDS_VERIFICATION_FACTS",
+      "target": "src/aiflow/evidence.py",
+      "target_symbol": "validate_v2_snapshot",
+      "operator": "ignore_snapshot_mismatch",
+      "expected_detector": "tests/unit/test_evidence.py::test_v2_snapshot_rejects_mutation_of_bound_verification_facts",
+      "expected_outcome": "killed"
+    }
+  ]
+}

@@ -23,6 +23,7 @@ SCHEMA_FILES = {
     "decision-unit": "decision-unit.schema.json",
     "event": "event.schema.json",
     "evidence": "evidence.schema.json",
+    "mutation-manifest": "mutation-manifest.schema.json",
     "policy": "policy.schema.json",
     "review-context": "review-context.schema.json",
     "review-record": "review-record.schema.json",
@@ -98,11 +99,15 @@ def _additional_property_errors(error: ValidationError) -> list[str]:
     return [f"{_pointer([*base, name])}: unexpected property" for name in extras]
 
 
-def _safe_schema_errors(contract_name: str, value: object) -> list[str]:
+def _safe_schema_errors(
+    contract_name: str,
+    value: object,
+    schema_directory: Path = SCHEMA_RELATIVE_DIRECTORY,
+) -> list[str]:
     validator = Draft202012Validator(
-        load_schema(contract_name),
+        load_schema(contract_name, schema_directory),
         format_checker=FormatChecker(),
-        registry=_schema_registry(),
+        registry=_schema_registry(schema_directory),
     )
     errors: list[str] = []
     for error in validator.iter_errors(value):
@@ -166,16 +171,24 @@ def _cross_field_errors(contract_name: str, value: object) -> list[str]:
     return errors
 
 
-def validate_contract(contract_name: str, value: object) -> list[str]:
+def validate_contract(
+    contract_name: str,
+    value: object,
+    schema_directory: Path = SCHEMA_RELATIVE_DIRECTORY,
+) -> list[str]:
     """Return stable, JSON Pointer-addressed validation errors."""
-    schema_errors = _safe_schema_errors(contract_name, value)
+    schema_errors = _safe_schema_errors(contract_name, value, schema_directory)
     cross_field_errors = _cross_field_errors(contract_name, value)
     return sorted(set(schema_errors + cross_field_errors))
 
 
-def require_valid_contract(contract_name: str, value: object) -> None:
+def require_valid_contract(
+    contract_name: str,
+    value: object,
+    schema_directory: Path = SCHEMA_RELATIVE_DIRECTORY,
+) -> None:
     """Raise a domain exception when a contract value is invalid."""
-    errors = validate_contract(contract_name, value)
+    errors = validate_contract(contract_name, value, schema_directory)
     if errors:
         raise ContractValidationError(contract_name, errors)
 

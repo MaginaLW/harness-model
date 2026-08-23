@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0001",
+  "revision": 1,
+  "task_id": "TASK-0012",
+  "review_stage": "design",
+  "recorded_at": "2026-08-23T15:31:13Z",
+  "context_sha256": "cc2d16b33a526209e73faabe4ca27a37959e9cf31eaf269b0bacd9d5d63c9ec0",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "The frozen manifest design is not yet implementable as an auditable detector contract: target and target_symbol are ambiguous, the Policy-target prohibition conflicts with the required policy.py mutation, and two declared detectors do not execute their stated enforcement points.",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "title": "Target path and symbol fields are ambiguous",
+      "location": {
+        "path": ".ai/tasks/TASK-0012/spec.md",
+        "line": 10
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0012/spec.md:10-16",
+        ".ai/tasks/TASK-0012/spec.md:18"
+      ],
+      "status": "open"
+    },
+    {
+      "finding_id": "RF-002",
+      "severity": "high",
+      "title": "Policy target prohibition conflicts with the canonical manifest",
+      "location": {
+        "path": ".ai/tasks/TASK-0012/spec.md",
+        "line": 18
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0012/spec.md:12",
+        ".ai/tasks/TASK-0012/spec.md:18"
+      ],
+      "status": "open"
+    },
+    {
+      "finding_id": "RF-003",
+      "severity": "high",
+      "title": "Two declared detectors do not reach their mutation targets",
+      "location": {
+        "path": ".ai/tasks/TASK-0012/spec.md",
+        "line": 14
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0012/spec.md:14-15",
+        "tests/integration/test_approve_command.py:305",
+        "tests/unit/test_gate.py:46",
+        "src/aiflow/approval.py:374",
+        "src/aiflow/gate.py:262"
+      ],
+      "status": "open"
+    }
+  ]
+}
