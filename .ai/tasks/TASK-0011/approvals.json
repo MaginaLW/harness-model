@@ -37,5 +37,19 @@
     "spec_sha256": "e0963471d8be49a33d6dc14c68561bc726c8ebebef8408d9d0f64b2fbaebb91f",
     "subject_commit": "de0e2603b6e89928597df8479d41c5f1fa13b06f",
     "task_id": "TASK-0011"
+  },
+  {
+    "actor": "user",
+    "approval_type": "code",
+    "approved_at": "2026-08-23T14:59:11Z",
+    "base_commit": "b6189010660e4e3adfd8f68309a95b7d81bdc419",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "debf8c3764cb68d8e5c5ab7e30336e28c8ce22c11ce49a9d0e6d7a802d89de71",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved TASK-0011 current code and documentation changes",
+    "schema_version": "1.0",
+    "spec_sha256": "e0963471d8be49a33d6dc14c68561bc726c8ebebef8408d9d0f64b2fbaebb91f",
+    "subject_commit": "c5132446450aba9a8fe09ee839425c126bb134eb",
+    "task_id": "TASK-0011"
   }
 ]
