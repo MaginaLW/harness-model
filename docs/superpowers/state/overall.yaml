@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-22T13:20:00Z"
+updated_at: "2026-08-23T01:58:51Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -27,16 +27,16 @@ tracking:
   current_step: null
 
 summary:
-  chapters_total: 8
-  chapters_completed: 8
-  tasks_total: 49
-  tasks_completed: 49
-  steps_total: 268
-  steps_completed: 268
-  exit_checks_total: 11
-  exit_checks_completed: 11
+  chapters_total: 9
+  chapters_completed: 9
+  tasks_total: 54
+  tasks_completed: 54
+  steps_total: 293
+  steps_completed: 293
+  exit_checks_total: 14
+  exit_checks_completed: 14
   blockers_total: 0
-  evidence_items: 2
+  evidence_items: 3
 
 chapters:
   - id: "chapter-01"
@@ -103,6 +103,14 @@ chapters:
     dependency: "phase-01 completed and phase-02 design committed"
     tasks_total: 5
     steps_total: 25
+  - id: "chapter-09"
+    number: 9
+    title: "V2 Policy、contracts 与分类"
+    state_file: "docs/superpowers/state/chapters/chapter-09.yaml"
+    status: "completed"
+    dependency: "chapter-08 completed"
+    tasks_total: 5
+    steps_total: 25
 
 global_checks:
   plan_self_review:
@@ -124,8 +132,8 @@ future_phases:
     design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
-    current_chapter: "chapter-09"
-    note: "Chapter 8 结构化双阶段审核已完成；下一授权范围为 Chapter 9 V2 evidence。"
+    current_chapter: "chapter-10"
+    note: "Chapter 9 V2 Policy、版本化 contracts 与分类已完成；下一授权范围为 Chapter 10 独立 Verifier 与 V2 evidence/Gate。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"

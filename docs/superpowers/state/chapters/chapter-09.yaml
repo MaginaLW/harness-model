@@ -1,0 +1,87 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-09"
+  number: 9
+  title: "V2 Policy、contracts 与分类"
+  status: "completed"
+  dependency: "chapter-08 completed"
+  tasks_total: 5
+  steps_total: 25
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+  design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+  initialized_at: "2026-08-22T16:36:39Z"
+
+tasks:
+  - id: "9.1"
+    title: "扩展有序 V0/V1/V2 Policy"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: [".ai/policy/verification-levels.yaml", "src/aiflow/policy.py", "tests/unit/test_policy.py"]
+    blockers: []
+  - id: "9.2"
+    title: "定义 V2 必需检查"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: ["src/aiflow/verification.py", "tests/fixtures/verification/plans/v2.json"]
+    blockers: []
+  - id: "9.3"
+    title: "增加 V2 选择事实与分类规则"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: ["src/aiflow/verification_level.py", "src/aiflow/classification_service.py", "tests/integration/test_classify_command.py"]
+    blockers: []
+  - id: "9.4"
+    title: "版本化 evidence/classification contracts"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: [".ai/schemas/classification.schema.json", ".ai/schemas/evidence.schema.json", ".ai/templates/evidence-v2.json"]
+    blockers: []
+  - id: "9.5"
+    title: "Chapter 9 集成与文档"
+    status: "completed"
+    steps_total: 5
+    completed_steps: [1, 2, 3, 4, 5]
+    in_progress_step: null
+    evidence: ["tests/integration/test_verify_command.py", "docs/implementation/chapter-09-v2-policy-contracts.md", "README.md"]
+    blockers: []
+
+exit_checks:
+  - id: "CH9-EXIT-01"
+    description: "V2 只增不减、固定顺序且可确定解析；V3 与未知值被拒绝"
+    status: "passed"
+  - id: "CH9-EXIT-02"
+    description: "旧 V0/V1 Policy、classification、evidence 与 Gate 回放保持原语义"
+    status: "passed"
+  - id: "CH9-EXIT-03"
+    description: "Policy/spec/scope 变化均完成重新分类、冻结、独立审核与批准"
+    status: "passed"
+
+chapter_evidence:
+  - id: "EVD-CH9-COMPLETE-001"
+    kind: "chapter_exit"
+    task_id: "TASK-0006"
+    subject_commit: "fc33612"
+    policy_version: "2.0.0"
+    policy_sha256: "81699424c71ecf0af58936e449e1683b03e632bac50cb7007a430dea5aa85e60"
+    artifacts:
+      - ".ai/policy/verification-levels.yaml"
+      - ".ai/schemas/classification.schema.json"
+      - ".ai/schemas/evidence.schema.json"
+      - "src/aiflow/verification_level.py"
+      - "src/aiflow/verification_service.py"
+    verification:
+      targeted: "160 passed, 1 skipped"
+      contracts: "79 passed"
+      pytest: "630 passed, 3 skipped"
+
+blockers: []
