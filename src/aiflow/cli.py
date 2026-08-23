@@ -122,7 +122,9 @@ def build_parser() -> ArgumentParser:
     verify = subparsers.add_parser("verify", help="run controlled verification")
     verify.add_argument("task_id")
     verify.add_argument("--actor")
-    verify.add_argument("--check", action="append", default=[])
+    verify_mode = verify.add_mutually_exclusive_group()
+    verify_mode.add_argument("--check", action="append", default=[])
+    verify_mode.add_argument("--finalize", action="store_true")
     verify.add_argument("--ci", action="store_true")
     verify.add_argument("--ci-run-dir", type=Path)
     verify.add_argument("--output", type=Path)
@@ -289,6 +291,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ci=arguments.ci,
                 ci_run_dir=arguments.ci_run_dir,
                 output=arguments.output,
+                finalize=arguments.finalize,
             )
             print(
                 f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}"

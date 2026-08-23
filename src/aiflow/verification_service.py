@@ -13,7 +13,14 @@ from typing import Literal, cast
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import AiflowError, ContractError
-from aiflow.evidence import EvidenceFacts, build_evidence, save_evidence
+from aiflow.evidence import (
+    EvidenceFacts,
+    build_evidence,
+    finalize_v2_evidence,
+    prepare_v2_pre_evidence,
+    save_evidence,
+    validate_v2_snapshot,
+)
 from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import (
     VerificationGitAssessment,
@@ -22,6 +29,7 @@ from aiflow.git_context import (
 )
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.process_runner import ProcessResult, run_execution
+from aiflow.review_service import ReviewAssessment, latest_review_assessment
 from aiflow.specification import specification_digest
 from aiflow.storage import read_task_json, resolve_task_path
 from aiflow.task_service import (
@@ -32,14 +40,26 @@ from aiflow.task_service import (
     transition_task_record,
 )
 from aiflow.verification import (
+    V1_CHECK_IDS,
+    V2_EXTRA_CHECK_IDS,
     VerificationCheck,
     VerificationContext,
     VerificationExecution,
     VerificationPlan,
     parse_verification_plan,
 )
+from aiflow.verifier_service import (
+    build_verifier_context,
+    current_implementer_actor,
+    load_verifier_context,
+    save_verifier_context,
+    validate_verifier_actor,
+    validate_verifier_context_current,
+)
 
 VersionProbe = Callable[[VerificationCheck], str]
+_V2_CHAPTER11_CHECK_IDS = frozenset({"acceptance", "integration", "targeted_mutation"})
+_V2_CHAPTER11_REASON = "VERIFICATION_CHAPTER11_NOT_IMPLEMENTED"
 
 
 @dataclass(frozen=True)
@@ -234,6 +254,124 @@ def _selected_plan(plan: VerificationPlan, check_ids: Sequence[str]) -> Verifica
     )
 
 
+def _empty_plan(plan: VerificationPlan) -> VerificationPlan:
+    return VerificationPlan(
+        plan.level,
+        plan.run_dir,
+        (),
+        (),
+        (),
+        (),
+        plan.comparison_subject,
+    )
+
+
+def _v2_plans(
+    plan: VerificationPlan, check_ids: Sequence[str]
+) -> tuple[VerificationPlan, tuple[VerificationCheck, ...]]:
+    """Retain the V1 executable prefix while representing all V2-only checks."""
+    selected_ids = tuple(dict.fromkeys(check_ids))
+    known = {check.check_id for check in plan.checks}
+    if any(identifier not in known for identifier in selected_ids):
+        raise ContractError("Verification check is unknown", code="VERIFY_CHECK_UNKNOWN")
+    default_ids = tuple(identifier for identifier in V1_CHECK_IDS if identifier in known)
+    executable_ids = tuple(
+        identifier for identifier in (selected_ids or default_ids) if identifier in V1_CHECK_IDS
+    )
+    execution_plan = _selected_plan(plan, executable_ids) if executable_ids else _empty_plan(plan)
+    evidence_ids = set(executable_ids) | set(V2_EXTRA_CHECK_IDS)
+    evidence_checks = tuple(check for check in plan.checks if check.check_id in evidence_ids)
+    return execution_plan, evidence_checks
+
+
+def _review_ref(assessment: ReviewAssessment) -> dict[str, str]:
+    return {
+        "review_id": str(assessment.record["review_id"]),
+        "context_sha256": str(assessment.context["context_sha256"]),
+    }
+
+
+def _independent_verifier_result() -> ProcessResult:
+    observed_at = _now()
+    return ProcessResult(
+        "ROLE-CHECK",
+        "independent_verifier",
+        (
+            "task-local implementer and verifier actor labels differ; "
+            "external identity is not authenticated"
+        ),
+        observed_at,
+        observed_at,
+        0,
+        0,
+        False,
+        "",
+        "",
+        "passed",
+        None,
+    )
+
+
+def _upgrade_v2_pre_evidence(
+    evidence: dict[str, object],
+    *,
+    verifier_actor: str,
+    verifier_context_sha256: str,
+    design_review: ReviewAssessment,
+) -> dict[str, object]:
+    raw_checks = evidence.get("checks")
+    checks = raw_checks if isinstance(raw_checks, list) else []
+    for check in checks:
+        if not isinstance(check, dict) or check.get("check_id") not in _V2_CHAPTER11_CHECK_IDS:
+            continue
+        check.update(
+            {
+                "status": "unverified",
+                "reason_code": _V2_CHAPTER11_REASON,
+                "exit_code": None,
+                "timed_out": False,
+                "duration_ms": 0,
+                "stdout_log_ref": None,
+                "stderr_log_ref": None,
+                "command_summary": "owned by Chapter 11 and not executed",
+                "tool_version": "not-executed:chapter-11",
+            }
+        )
+    raw_unverified = evidence.get("unverified_scenarios")
+    unverified_values = raw_unverified if isinstance(raw_unverified, list) else []
+    unverified = {
+        str(reason)
+        for reason in unverified_values
+        if not any(f"check:{identifier}:" in str(reason) for identifier in _V2_CHAPTER11_CHECK_IDS)
+    }
+    unverified.update(
+        f"check:{identifier}:{_V2_CHAPTER11_REASON}"
+        for identifier in sorted(_V2_CHAPTER11_CHECK_IDS)
+    )
+    evidence.update(
+        {
+            "schema_version": "2.0",
+            "verification_level": "V2",
+            "unverified_scenarios": sorted(unverified),
+            "conclusion": "failed",
+            "verifier_actor": verifier_actor,
+            "verifier_context_sha256": verifier_context_sha256,
+            "review_refs": {"design": _review_ref(design_review)},
+            "targeted_mutation": {
+                "manifest_ref": "chapter-11-pending",
+                "results": [
+                    {
+                        "mutation_id": "CHAPTER11-PENDING",
+                        "outcome": "unverified",
+                        "log_ref": None,
+                    }
+                ],
+            },
+        }
+    )
+    return prepare_v2_pre_evidence(evidence)
+
+
 def _execute_plan(
     repository_root: Path,
     plan: VerificationPlan,
@@ -330,6 +468,99 @@ def _finish_local_verification(
     return str(result.task["current_state"])
 
 
+def _finalize_v2_task(
+    repository_root: Path,
+    task_id: str,
+    *,
+    actor: str | None,
+    check_ids: Sequence[str],
+    ci: bool,
+    ci_run_dir: Path | None,
+    output: Path | None,
+) -> VerifyResult:
+    if ci or check_ids or ci_run_dir is not None or output is not None:
+        raise ContractError(
+            "V2 finalization cannot run checks or CI verification",
+            code="VERIFY_FINALIZE_ARGUMENT_INVALID",
+        )
+    root = repository_root.resolve()
+    record = load_task_record(root, task_id)
+    classification = _classification(root, task_id)
+    bundle = load_policy_bundle(root)
+    spec_sha256 = specification_digest(_read_spec(root, task_id))
+    _require_fresh_inputs(root, record, classification, bundle, spec_sha256)
+    if classification.get("effective_verification_level") != "V2":
+        raise ContractError(
+            "Finalization requires V2 verification", code="VERIFY_FINALIZE_LEVEL_INVALID"
+        )
+    _ci_git_assessment(root, task_id, record)
+    implementer = current_implementer_actor(record.events)
+    _implementer, verifier = validate_verifier_actor(implementer, actor or "")
+    evidence_path = resolve_task_path(root, task_id, "evidence.json")
+    if not evidence_path.is_file():
+        raise ContractError("V2 pre evidence is missing", code="VERIFY_FINALIZE_EVIDENCE_INVALID")
+    evidence = read_task_json(root, task_id, "evidence.json", contract_name="evidence")
+    if not isinstance(evidence, dict):
+        raise ContractError("V2 pre evidence is invalid", code="VERIFY_FINALIZE_EVIDENCE_INVALID")
+    if (
+        evidence.get("schema_version") != "2.0"
+        or evidence.get("verification_level") != "V2"
+        or evidence.get("phase") != "pre_implementation_review"
+        or evidence.get("mode") != "local"
+    ):
+        raise ContractError("V2 pre evidence is invalid", code="VERIFY_FINALIZE_EVIDENCE_INVALID")
+    if evidence.get("verifier_actor") != verifier:
+        raise ContractError("Verifier actor is stale", code="VERIFY_FINALIZE_ACTOR_STALE")
+    validate_v2_snapshot(evidence)
+    current = {
+        "task_id": task_id,
+        "repository_id": record.task.get("repository_id"),
+        "branch": record.task.get("branch"),
+        "base_commit": record.task.get("base_commit"),
+        "subject_commit": record.task.get("subject_commit"),
+        "policy_sha256": bundle.sha256,
+        "spec_sha256": spec_sha256,
+        "classification_input_sha256": classification.get("classification_input_sha256"),
+        "verification_level": "V2",
+    }
+    if evaluate_freshness("evidence", evidence, current).status != "fresh":
+        raise ContractError("V2 pre evidence is stale", code="VERIFY_FINALIZE_EVIDENCE_STALE")
+    context_digest = evidence.get("verifier_context_sha256")
+    if not isinstance(context_digest, str):
+        raise ContractError("Verifier context is invalid", code="VERIFY_FINALIZE_CONTEXT_INVALID")
+    stored_context = load_verifier_context(root, task_id, context_digest)
+    current_context = build_verifier_context(root, task_id)
+    validate_verifier_context_current(stored_context, current_context)
+    decision_ids = tuple(str(unit["decision_unit_id"]) for unit in record.task["decision_units"])
+    design_review = latest_review_assessment(
+        root, task_id, "design", decision_unit_ids=decision_ids
+    )
+    review_refs = evidence.get("review_refs")
+    if not isinstance(review_refs, Mapping) or review_refs.get("design") != _review_ref(
+        design_review
+    ):
+        raise ContractError("Design review reference is stale", code="VERIFY_FINALIZE_REVIEW_STALE")
+    snapshot = evidence.get("verification_snapshot_sha256")
+    if not isinstance(snapshot, str):
+        raise ContractError("V2 snapshot is invalid", code="VERIFY_FINALIZE_EVIDENCE_INVALID")
+    implementation_review = latest_review_assessment(
+        root,
+        task_id,
+        "implementation",
+        decision_unit_ids=decision_ids,
+        verification_snapshot_sha256=snapshot,
+    )
+    final = finalize_v2_evidence(evidence, implementation_review.record)
+    save_evidence(evidence_path, final)
+    return VerifyResult(
+        task_id,
+        "passed",
+        str(record.task.get("current_state")),
+        evidence_path,
+        (),
+    )
+
+
 def verify_task(
     repository_root: Path,
     task_id: str,
@@ -341,10 +572,21 @@ def verify_task(
     ci: bool = False,
     ci_run_dir: Path | None = None,
     output: Path | None = None,
+    finalize: bool = False,
     version_probe: VersionProbe = _default_version_probe,
 ) -> VerifyResult:
     """Execute one governed local verification or read-only CI attestation."""
     root = repository_root.resolve()
+    if finalize:
+        return _finalize_v2_task(
+            root,
+            task_id,
+            actor=actor,
+            check_ids=check_ids,
+            ci=ci,
+            ci_run_dir=ci_run_dir,
+            output=output,
+        )
     record = read_task_record_strict(root, task_id) if ci else load_task_record(root, task_id)
     state = str(record.task.get("current_state"))
     if ci:
@@ -354,8 +596,6 @@ def verify_task(
             )
         run_directory, evidence_path = _ci_paths(ci_run_dir, output)
     else:
-        if actor is None or not actor.strip():
-            raise ContractError("Verification actor is required", code="VERIFY_ACTOR_REQUIRED")
         run_directory = Path()
         evidence_path = resolve_task_path(root, task_id, "evidence.json")
 
@@ -363,6 +603,16 @@ def verify_task(
     bundle = load_policy_bundle(root)
     spec_sha256 = specification_digest(_read_spec(root, task_id))
     _require_fresh_inputs(root, record, classification, bundle, spec_sha256)
+    level = classification.get("effective_verification_level")
+    if level not in {"V0", "V1", "V2"}:
+        raise ContractError("Verification level is invalid", code="VERIFY_LEVEL_INVALID")
+    verifier_actor: str | None = None
+    if level == "V2":
+        implementer = current_implementer_actor(record.events)
+        _implementer, verifier_actor = validate_verifier_actor(implementer, actor or "")
+    elif not ci and (actor is None or not actor.strip()):
+        raise ContractError("Verification actor is required", code="VERIFY_ACTOR_REQUIRED")
+    effective_actor = verifier_actor if level == "V2" else actor
 
     if ci:
         assessment = _ci_git_assessment(root, task_id, record)
@@ -373,7 +623,7 @@ def verify_task(
             root,
             task_id,
             mode="provisional" if check_ids or provisional else "final",
-            actor=cast(str, actor),
+            actor=cast(str, effective_actor),
         )
         if not check_ids and not assessment.gate_eligible:
             raise ContractError("Git verification context is stale", code="VERIFY_GIT_STALE")
@@ -382,14 +632,6 @@ def verify_task(
         identifier = run_id or _run_id()
         subject_commit = assessment.subject_commit
 
-    level = classification.get("effective_verification_level")
-    if level == "V2":
-        raise ContractError(
-            "V2 verification execution is not available in Chapter 9",
-            code="VERIFY_V2_NOT_EXECUTABLE",
-        )
-    if level not in {"V0", "V1"}:
-        raise ContractError("Verification level is invalid", code="VERIFY_LEVEL_INVALID")
     context = VerificationContext(
         root,
         task_id,
@@ -399,12 +641,41 @@ def verify_task(
         identifier,
         run_directory if ci else None,
     )
-    full_plan = parse_verification_plan(bundle, context, level=cast(Literal["V0", "V1"], level))
-    plan = _selected_plan(full_plan, check_ids)
+    full_plan = parse_verification_plan(
+        bundle, context, level=cast(Literal["V0", "V1", "V2"], level)
+    )
+    design_review: ReviewAssessment | None = None
+    verifier_context_sha256: str | None = None
+    if level == "V2":
+        verifier_context = build_verifier_context(root, task_id)
+        verifier_context_sha256 = str(verifier_context["context_sha256"])
+        if not ci:
+            save_verifier_context(root, task_id, verifier_context)
+        decision_ids = tuple(
+            str(unit["decision_unit_id"]) for unit in record.task["decision_units"]
+        )
+        design_review = latest_review_assessment(
+            root, task_id, "design", decision_unit_ids=decision_ids
+        )
+        execution_plan, planned_evidence_checks = _v2_plans(full_plan, check_ids)
+    else:
+        execution_plan = _selected_plan(full_plan, check_ids)
+        planned_evidence_checks = execution_plan.checks
     if not ci:
-        _start_local_verification(root, task_id, record, cast(str, actor))
-    results = _execute_plan(root, plan)
-    versions = {check.check_id: version_probe(check) for check in plan.checks}
+        _start_local_verification(root, task_id, record, cast(str, effective_actor))
+    results = _execute_plan(root, execution_plan)
+    if level == "V2":
+        results.append(_independent_verifier_result())
+    versions = {
+        check.check_id: (
+            "not-executed:chapter-11"
+            if check.check_id in _V2_CHAPTER11_CHECK_IDS
+            else "aiflow-local"
+            if check.check_id == "independent_verifier"
+            else version_probe(check)
+        )
+        for check in planned_evidence_checks
+    }
     provisional = bool(check_ids) or provisional
     reproduce_command = (
         (
@@ -418,6 +689,7 @@ def verify_task(
             str(run_directory),
             "--output",
             str(evidence_path),
+            *(("--actor", cast(str, verifier_actor)) if level == "V2" else ()),
         )
         if ci
         else (
@@ -427,10 +699,11 @@ def verify_task(
             "verify",
             task_id,
             "--actor",
-            cast(str, actor),
+            cast(str, effective_actor),
             *(argument for check_id in check_ids for argument in ("--check", check_id)),
         )
     )
+    facts_level = "V1" if level == "V2" else level
     facts = EvidenceFacts(
         task_id,
         tuple(str(unit["decision_unit_id"]) for unit in record.task["decision_units"]),
@@ -441,10 +714,10 @@ def verify_task(
         spec_sha256,
         bundle.sha256,
         str(classification["classification_input_sha256"]),
-        cast(Literal["V0", "V1"], level),
+        cast(Literal["V0", "V1"], facts_level),
         "ci" if ci else "local",
         identifier,
-        plan.run_dir,
+        full_plan.run_dir,
         _now(),
         reproduce_command,
         assessment.attestation_head if ci else None,
@@ -452,17 +725,30 @@ def verify_task(
     )
     evidence = build_evidence(
         facts,
-        plan.checks,
+        planned_evidence_checks,
         results,
         tool_versions=versions,
-        unverified_scenarios=(*plan.unverified_check_ids, *plan.blocking_reasons),
+        unverified_scenarios=(
+            *execution_plan.unverified_check_ids,
+            *execution_plan.blocking_reasons,
+        ),
         provisional=provisional,
     )
+    if level == "V2":
+        assert verifier_actor is not None
+        assert verifier_context_sha256 is not None
+        assert design_review is not None
+        evidence = _upgrade_v2_pre_evidence(
+            evidence,
+            verifier_actor=verifier_actor,
+            verifier_context_sha256=verifier_context_sha256,
+            design_review=design_review,
+        )
     try:
         save_evidence(
             evidence_path,
             evidence,
-            archive_path=plan.run_dir / "evidence.json" if not ci else None,
+            archive_path=full_plan.run_dir / "evidence.json" if not ci else None,
         )
     except AiflowError:
         if not ci:
@@ -471,7 +757,7 @@ def verify_task(
                 task_id,
                 target_state="FAILED",
                 event_type="verification_failed",
-                actor=cast(str, actor),
+                actor=cast(str, effective_actor),
                 payload={"conclusion": "failed", "reason_code": "EVIDENCE_WRITE_FAILED"},
                 satisfied_preconditions={"verification_failed"},
             )
@@ -482,7 +768,7 @@ def verify_task(
         final_state = _finish_local_verification(
             root,
             task_id,
-            actor=cast(str, actor),
+            actor=cast(str, effective_actor),
             conclusion=conclusion,
             route=str(classification["effective_route"]),
         )

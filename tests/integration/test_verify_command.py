@@ -9,9 +9,10 @@ from pathlib import Path
 import pytest
 from test_begin_close_commands import create_repository, make_ready, run_git, start
 
-from aiflow import verification_service
-from aiflow.cli import main
+from aiflow import cli, verification_service
+from aiflow.cli import build_parser, main
 from aiflow.errors import ContractError, StorageError
+from aiflow.review_service import ReviewAssessment
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import load_task_record
 from aiflow.verification import (
@@ -20,6 +21,7 @@ from aiflow.verification import (
     VerificationExecution,
     VerificationPlan,
 )
+from aiflow.verification_service import VerifyResult
 
 
 def _plan(*, failed: bool = False):
@@ -82,6 +84,29 @@ def _prepare(
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
     monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
     return repository
+
+
+def _enable_v2(repository: Path) -> None:
+    """Turn the prepared task into a current V2 classification fixture."""
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    classification["schema_version"] = "2.0"
+    classification["effective_verification_level"] = "V2"
+    entry = classification["classifications"][0]
+    assert isinstance(entry, dict)
+    entry["verification_level"] = "V2"
+    entry["verification_rule_ids"] = [
+        "VERIFICATION-V2-ACCEPTANCE-REQUIRED",
+        "VERIFICATION-V2-INTEGRATION-REQUIRED",
+        "VERIFICATION-V2-TARGETED-MUTATION-REQUIRED",
+        "VERIFICATION-V2-INDEPENDENT-VERIFIER-REQUIRED",
+    ]
+    entry["verification_explanations"] = ["V2 verification is required."]
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "classification.json"), classification
+    )
 
 
 @pytest.mark.parametrize("route", ["AUTO", "ASK"])
@@ -238,29 +263,47 @@ def test_stale_policy_rejects_before_process_execution(
     assert load_task_record(repository, "TASK-0001").task["current_state"] == "IMPLEMENTING"
 
 
-def test_v2_rejects_before_plan_parsing_or_check_start(
+@pytest.mark.parametrize(
+    ("actor", "expected_code"),
+    [(" ", "VERIFIER_ACTOR_REQUIRED"), (" implementer ", "VERIFIER_ACTOR_NOT_INDEPENDENT")],
+)
+def test_v2_actor_rejections_happen_before_plan_or_runner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    actor: str,
+    expected_code: str,
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError("V2 rejection must happen before plan parsing or runner start")
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "_start_local_verification", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(repository, "TASK-0001", actor=actor)
+
+    assert caught.value.code == expected_code
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "IMPLEMENTING"
+
+
+def test_v2_rejects_a_blank_current_implementer_before_plan_or_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     repository = _prepare(tmp_path, monkeypatch)
-    classification = read_task_json(
-        repository, "TASK-0001", "classification.json", contract_name="classification"
-    )
-    assert isinstance(classification, dict)
-    classification["schema_version"] = "2.0"
-    classification["effective_verification_level"] = "V2"
-    classification["classifications"][0]["verification_level"] = "V2"
-    classification["classifications"][0]["verification_rule_ids"] = [
-        "VERIFICATION-V2-ACCEPTANCE-REQUIRED"
-    ]
-    classification["classifications"][0]["verification_explanations"] = [
-        "Acceptance verification requires V2."
-    ]
-    atomic_write_json(
-        resolve_task_path(repository, "TASK-0001", "classification.json"), classification
+    _enable_v2(repository)
+    events_path = resolve_task_path(repository, "TASK-0001", "events.jsonl")
+    events = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines()]
+    events[-1]["actor"] = " "
+    events_path.write_text(
+        "".join(json.dumps(event, sort_keys=True) + "\n" for event in events), encoding="utf-8"
     )
 
     def unexpected(*_args, **_kwargs):
-        raise AssertionError("V2 verification must stop before parsing or starting checks")
+        raise AssertionError("V2 actor rejection must happen before plan parsing or runner start")
 
     monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
     monkeypatch.setattr(verification_service, "_start_local_verification", unexpected)
@@ -268,8 +311,119 @@ def test_v2_rejects_before_plan_parsing_or_check_start(
 
     with pytest.raises(ContractError) as caught:
         verification_service.verify_task(repository, "TASK-0001", actor="verifier")
-    assert caught.value.code == "VERIFY_V2_NOT_EXECUTABLE"
-    assert load_task_record(repository, "TASK-0001").task["current_state"] == "IMPLEMENTING"
+
+    assert caught.value.code == "VERIFIER_IMPLEMENTER_MISSING"
+
+
+def test_v2_live_run_uses_v1_prefix_and_writes_failed_pre_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    levels: list[str] = []
+    base_plan = _plan()
+
+    def v2_plan(bundle, context: VerificationContext, *, level: str) -> VerificationPlan:
+        levels.append(level)
+        prefix = base_plan(bundle, context, level=level)
+        extras = tuple(
+            VerificationCheck(
+                check_id,
+                "V2",
+                (sys.executable, "-m", "aiflow", "--help"),
+                {},
+                context.repository_root.resolve(),
+                10,
+                True,
+                "exit_zero",
+            )
+            for check_id in (
+                "acceptance",
+                "integration",
+                "targeted_mutation",
+                "independent_verifier",
+            )
+        )
+        return VerificationPlan(
+            level,
+            prefix.run_dir,
+            (*prefix.checks, *extras),
+            prefix.executions,
+            (),
+            (),
+            prefix.comparison_subject,
+        )
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", v2_plan)
+    monkeypatch.setattr(
+        verification_service,
+        "latest_review_assessment",
+        lambda *_args, **_kwargs: ReviewAssessment(
+            {"context_sha256": "d" * 64}, {"review_id": "REV-0001"}
+        ),
+    )
+
+    result = verification_service.verify_task(repository, "TASK-0001", actor="verifier")
+
+    assert levels == ["V2"]
+    assert result.conclusion == "failed"
+    evidence = read_task_json(repository, "TASK-0001", "evidence.json", contract_name="evidence")
+    assert evidence["schema_version"] == "2.0"
+    assert evidence["phase"] == "pre_implementation_review"
+    assert evidence["verification_level"] == "V2"
+    assert len(str(evidence["verifier_context_sha256"])) == 64
+    checks = {str(check["check_id"]): check for check in evidence["checks"]}
+    for check_id in ("acceptance", "integration", "targeted_mutation"):
+        assert checks[check_id]["status"] == "unverified"
+        assert checks[check_id]["required"] is True
+        assert checks[check_id]["reason_code"]
+    assert checks["independent_verifier"]["status"] == "passed"
+    assert checks["independent_verifier"]["required"] is True
+
+
+def test_v2_finalize_never_starts_a_runner_and_conflicting_check_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError("finalize must not parse or execute a verification plan")
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "_start_local_verification", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+
+    with pytest.raises(ContractError):
+        verification_service.verify_task(
+            repository, "TASK-0001", actor="verifier", finalize=True, check_ids=("smoke",)
+        )
+    with pytest.raises(ContractError):
+        verification_service.verify_task(repository, "TASK-0001", actor="verifier", finalize=True)
+
+
+def test_verify_finalize_cli_forwards_flag_without_starting_a_runner(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    received: dict[str, object] = {}
+
+    def finalize_only(*_args: object, **kwargs: object) -> VerifyResult:
+        received.update(kwargs)
+        return VerifyResult("TASK-0001", "failed", "FAILED", Path("evidence.json"), ())
+
+    monkeypatch.setattr(cli, "verify_task", finalize_only)
+
+    assert cli.main(["verify", "TASK-0001", "--actor", "verifier", "--finalize"]) == 0
+    assert received["finalize"] is True
+
+
+def test_verify_finalize_cli_rejects_a_check_selection() -> None:
+    with pytest.raises(SystemExit) as caught:
+        build_parser().parse_args(
+            ["verify", "TASK-0001", "--actor", "verifier", "--finalize", "--check", "smoke"]
+        )
+
+    assert caught.value.code == 2
 
 
 def test_evidence_write_failure_enters_failed(
