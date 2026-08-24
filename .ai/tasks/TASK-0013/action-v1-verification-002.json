@@ -1,0 +1,23 @@
+{
+  "decision_unit_id": "DU-001",
+  "action_type": "delete",
+  "target": "C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-*",
+  "parameter_summary": "transaction_id=TASK-0013-V1-002; transaction_type=full_v1_verification_rerun; outer_argv=[D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe,-m,aiflow,verify,TASK-0013,--actor,task0013-independent-verifier]; subject_commit=290254cc70791bcfa9895feab98154b411c2ef55; runner_source_sha256=4b227bf5785513cd757567b7b20d3d1e64680909340eec26a5817f80697372fd; unit_test_sha256=90f6e66c32f758dac159663c0b520d88410747cba4a77cd5568a6e149263aa64; integration_test_sha256=2084d3f76007c7579f2b06d3ce2a62f16bfa3efa05dec78ec7c1d440c61883e1; manifest_sha256=1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0; outer_invocation_budget=1; runner_invocation_budget=2; root_budget=2; per_root_worktree_budget=5; total_worktree_budget=10; shell=false",
+  "subject_commit": "290254cc70791bcfa9895feab98154b411c2ef55",
+  "conditions": [
+    "Bind this transaction to TASK-0013 DU-001, frozen spec 949aee0bca38d4dc5977d3a3a289b463b8f27fb666f6f67d416d1fb3f5a4a281, Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf, classification input 14b746b5cf4e5553e896c9863c7cb156133919dfbe818bb1eacd581d96b6f6bb, base dc49293936ae8f705b7a474dc5c7b0ac0c981865, and remediation subject 290254cc70791bcfa9895feab98154b411c2ef55",
+    "Before launch verify runner source SHA-256 4b227bf5785513cd757567b7b20d3d1e64680909340eec26a5817f80697372fd, remediated unit test SHA-256 90f6e66c32f758dac159663c0b520d88410747cba4a77cd5568a6e149263aa64, integration test SHA-256 2084d3f76007c7579f2b06d3ce2a62f16bfa3efa05dec78ec7c1d440c61883e1, and manifest SHA-256 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0",
+    "The one outer command is exactly D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m aiflow verify TASK-0013 --actor task0013-independent-verifier with cwd D:\\Repos\\harness-model and shell false; --check, --finalize, --ci, --ci-run-dir, and --output are forbidden",
+    "The resolved V1 plan must remain exactly contract, scope, ruff_check, ruff_format_check, smoke, unit_tests, regression_tests, mypy, coverage_xml, and diff_coverage in Policy order",
+    "Only regression_tests and coverage_xml may collect tests/integration/test_mutation_runner_contract.py; permit at most two run_targeted_mutations invocations, two separately created tempfile.mkdtemp roots matching the resolved direct-child pattern C:\\Users\\Admin\\AppData\\Local\\Temp\\aiflow-mutation-*, and ten serial detached worktrees total",
+    "A passing transaction must execute exactly two runner invocations and remove both roots and all ten worktrees; a failure may execute fewer, consumes the approval, and authorizes no retry or reuse of unused budget",
+    "Before launch require subject and observed HEAD 290254cc70791bcfa9895feab98154b411c2ef55, classification fresh, worktree changes limited to TASK-0013 governance files, prior V1 action-use-f647e210f7442ae9bb8fea27b01fdfa34ace02c18a364f1f039140bc31cd8f85.md failed/consumed/non-reusable, remediation review approved, and zero pre-existing aiflow-mutation-* system-temp direct children",
+    "Every hooks, scratch, and worktree path must resolve beneath its transaction-created root; every removal must revalidate direct-child containment and may retry at most three times within one second, including the contained read-only callback",
+    "Delete only objects created by the two authorized runner invocations; never delete or modify the repository root, workspace root, user directory, pre-existing paths, branches, tags, refs, credentials, verification logs, evidence, or other task governance",
+    "Before launch verify this action's canonical SHA, expiry, bindings, and absence of an existing use record, then create the task-local status started use record; outer-command launch or interruption consumes the approval and no unused budget may be reused",
+    "The normal task-local logs, coverage artifacts, and verification evidence produced by the exact aiflow verify command are permitted outputs but do not extend delete authority",
+    "No push, merge, deploy, package publish, paid external call, credential export, task close, code approval, full V2, targeted_mutation persistence, or second outer invocation is authorized"
+  ],
+  "expires_at": "2026-08-25T02:00:00Z",
+  "single_use": true
+}
