@@ -23,7 +23,7 @@ Chapter 11 分阶段补全 live V2 的执行证据。本章不把 Chapter 10 的
 
 - 已纳入 11.3 的实现范围是：只从固定五项 manifest 读取声明，在逐项 detached 临时 worktree 中应用封闭 AST operator，并以 shell-free、固定 argv 的 subprocess 运行唯一 detector；runner 只返回不可变的内存原始执行事实。
 - 主工作树保护、受控临时根/路径 containment、worktree 注册表快照、稳定错误码与 cleanup 失败语义均属于 11.3；不会在主工作树应用 mutant，也不会自动 stash、reset、checkout 或宽泛删除。
-- 本投影不等同于完整 V1 已运行。首个精确绑定的 focused integration 事务在 `MUT-V2-002` 的 Windows 只读 scratch cleanup 失败；该失败回执已封存，残留根随后由独立 single-use action 精确清理。修复后的第二个精确事务已通过：五项 baseline detector 退出码均为 `0`，对应 mutant detector 退出码均为 `1`，无 timeout/reason，主工作树状态、受控文件哈希与 Git worktree 注册表不变，事务根和五个串行 worktree 全部清理；完整回执为 `.ai/tasks/TASK-0013/action-use-659ed5eed4b25a1daf73aa636219da690fcc5cbddf1c416a9ad2aa5dc4a2ab40.md`。该 focused pass 仍不是完整 V1 或持久 mutation evidence。
+- 本投影不等同于完整 V1 已通过。首个精确绑定的 focused integration 事务在 `MUT-V2-002` 的 Windows 只读 scratch cleanup 失败；该失败回执已封存，残留根随后由独立 single-use action 精确清理。修复后的第二个精确事务已通过：五项 baseline detector 退出码均为 `0`，对应 mutant detector 退出码均为 `1`，无 timeout/reason，主工作树状态、受控文件哈希与 Git worktree 注册表不变，事务根和五个串行 worktree 全部清理；完整回执为 `.ai/tasks/TASK-0013/action-use-659ed5eed4b25a1daf73aa636219da690fcc5cbddf1c416a9ad2aa5dc4a2ab40.md`。首次完整 V1 的两次 full pytest 均为 `786 passed, 3 skipped`，两次 runner/十个 worktree 完全清理，但 Ruff format 与 `87%` diff coverage 令结论 failed；随后仅以 mocked unit 修复格式和缺口，52 个定向 unit 与 `90.6%` unit-only diff coverage 已通过，完整 V1 rerun 仍须新的 subject-bound action approval。
 - mutant 的 `0`/`1` 在 11.3 仅为原始 probe fact；不命名或持久化为 killed/survived，不写 task evidence/log ref，也不改变 live V2、approval 或 Gate 结论。
 
 ## 仍待完成：11.4–11.5 targeted mutation
@@ -31,7 +31,7 @@ Chapter 11 分阶段补全 live V2 的执行证据。本章不把 Chapter 10 的
 | 任务 | 状态 | 边界 |
 |---|---|---|
 | 11.2 mutant manifest | completed | 五项关键保障、封闭 schema、只读 loader 和 detector 绑定已建立；尚未执行 mutant |
-| 11.3 隔离 mutant runner | completed | 实现投影及修复后的 focused integration 已通过；完整 V1 尚待独立、精确 action approval |
+| 11.3 隔离 mutant runner | completed | 实现投影和 focused integration 已通过；首次完整 V1 因 format/diff coverage 失败，remediation 已定向通过，完整 V1 rerun 待新 action approval |
 | 11.4 killed/survived evidence | pending | 尚无 mutation 结果、日志或覆盖结论 |
 | 11.5 replay/Gate failure | pending | 尚未实现 survived/missing mutant 的重放失败路径 |
 
@@ -39,4 +39,4 @@ Chapter 11 分阶段补全 live V2 的执行证据。本章不把 Chapter 10 的
 
 ## 后续验证边界
 
-Chapter 11.1 与 11.2 均按 `REVIEW + V1` 完成各自增量实现验证。11.3 已完成隔离 runner 的实现投影和一次修复后的 focused integration pass；该 pass 仅是 task-local 原始执行事实，完整 V1 尚待独立 action approval，也未新增持久 killed/survived evidence。V2 的 acceptance/integration 运行结果是独立的 pre-evidence facts，11.2 manifest 也只是后续 runner 的受控输入。11.4–11.5 尚未完成，故 `targeted_mutation` 继续 unverified 并阻止任何 live V2 passed 宣称。完成 11.4–11.5 并取得所需验证证据后，才可新增持久 mutation 结果和重放验证；其范围、Policy、规格或验证要求变化仍须走 AI Flow 的升级、冻结、审核和批准流程。
+Chapter 11.1 与 11.2 均按 `REVIEW + V1` 完成各自增量实现验证。11.3 已完成隔离 runner 的实现投影和一次修复后的 focused integration pass；首次完整 V1 失败证据已保留，format 与 changed-line coverage remediation 只通过定向 unit/static 检查，尚不能替代新的完整 V1。focused/V1 中的 mutation 退出码仍只是 task-local 原始执行事实，也未新增持久 killed/survived evidence。V2 的 acceptance/integration 运行结果是独立的 pre-evidence facts，11.2 manifest 也只是后续 runner 的受控输入。11.4–11.5 尚未完成，故 `targeted_mutation` 继续 unverified 并阻止任何 live V2 passed 宣称。完成 11.4–11.5 并取得所需验证证据后，才可新增持久 mutation 结果和重放验证；其范围、Policy、规格或验证要求变化仍须走 AI Flow 的升级、冻结、审核和批准流程。

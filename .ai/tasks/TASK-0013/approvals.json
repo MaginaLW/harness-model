@@ -59,5 +59,21 @@
     "spec_sha256": "949aee0bca38d4dc5977d3a3a289b463b8f27fb666f6f67d416d1fb3f5a4a281",
     "subject_commit": "dc49293936ae8f705b7a474dc5c7b0ac0c981865",
     "task_id": "TASK-0013"
+  },
+  {
+    "action_sha256": "f647e210f7442ae9bb8fea27b01fdfa34ace02c18a364f1f039140bc31cd8f85",
+    "actor": "user",
+    "approval_type": "action",
+    "approved_at": "2026-08-24T00:19:48Z",
+    "base_commit": "dc49293936ae8f705b7a474dc5c7b0ac0c981865",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-25T00:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "用户明确批准 TASK-0013 full V1 action f647e210f7442ae9bb8fea27b01fdfa34ace02c18a364f1f039140bc31cd8f85",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "949aee0bca38d4dc5977d3a3a289b463b8f27fb666f6f67d416d1fb3f5a4a281",
+    "subject_commit": "531d9bdf1c0daebbac547e05bfcbf941534b22e7",
+    "task_id": "TASK-0013"
   }
 ]

@@ -166,6 +166,23 @@ def test_public_results_are_frozen_exact_and_do_not_expose_scratch_paths() -> No
     assert "scratch" not in repr(result).lower()
 
 
+def test_ast_guard_helpers_reject_ambiguous_or_wrong_shapes() -> None:
+    function = _target_function(
+        ast.parse("def target():\n    if True:\n        pass\n    if True:\n        pass\n"),
+        "target",
+    )
+    assert runner._replace_guard(function, lambda _node: True) is False
+
+    non_raise = ast.If(test=ast.Constant(True), body=[ast.Pass()], orelse=[])
+    wrong_raise = ast.If(
+        test=ast.Constant(True),
+        body=[ast.Raise(exc=ast.Call(func=ast.Name(id="Other"), args=[], keywords=[]))],
+        orelse=[],
+    )
+    assert runner._raises_contract_code(non_raise, "CODE") is False
+    assert runner._raises_contract_code(wrong_raise, "CODE") is False
+
+
 @pytest.mark.parametrize("name", ["", "../outside", "nested/name", "nested\\name"])
 def test_validated_child_rejects_non_direct_or_escaping_names(tmp_path: Path, name: str) -> None:
     root = tmp_path.resolve()
@@ -177,6 +194,25 @@ def test_validated_child_rejects_non_direct_or_escaping_names(tmp_path: Path, na
 def test_validated_child_accepts_one_resolved_direct_child(tmp_path: Path) -> None:
     child = runner._validated_child(tmp_path.resolve(), "MUT-V2-001")
     assert child.parent == tmp_path.resolve()
+
+
+def test_workspace_root_normalizes_creation_and_containment_failures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    system_temp = tmp_path / "system-temp"
+    system_temp.mkdir()
+    monkeypatch.setattr(runner.tempfile, "gettempdir", lambda: str(system_temp))
+    monkeypatch.setattr(
+        runner.tempfile,
+        "mkdtemp",
+        lambda **_kwargs: (_ for _ in ()).throw(OSError("creation failed")),
+    )
+    assert _failure_code(runner._create_workspace_root) == "MUTATION_WORKSPACE_INVALID"
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    monkeypatch.setattr(runner.tempfile, "mkdtemp", lambda **_kwargs: str(outside))
+    assert _failure_code(runner._create_workspace_root) == "MUTATION_WORKSPACE_INVALID"
 
 
 def test_git_wrapper_uses_empty_hooks_fixed_argv_and_no_shell(
@@ -335,6 +371,22 @@ def test_snapshot_detects_byte_changes_and_read_failures(
     with pytest.raises(ContractError) as caught:
         runner._snapshot_main_tree(tmp_path, hooks, ("controlled.py",))
     assert caught.value.code == "MUTATION_SUBJECT_INVALID"
+
+
+def test_main_tree_comparison_normalizes_snapshot_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    hooks = tmp_path / "hooks"
+    hooks.mkdir()
+    snapshot = runner._MainSnapshot(b"status", b"registry", ())
+    monkeypatch.setattr(
+        runner,
+        "_snapshot_main_tree",
+        lambda *_args: (_ for _ in ()).throw(
+            ContractError("snapshot failed", code="MUTATION_SUBJECT_INVALID")
+        ),
+    )
+    assert runner._main_tree_unchanged(tmp_path, hooks, snapshot) is False
 
 
 def test_minimal_environment_is_closed_and_contains_resolved_tool_dirs(
@@ -511,6 +563,16 @@ def test_process_tree_termination_accepts_successful_platform_kill(
     assert process.killed is False
 
 
+def test_windows_system_root_rejects_missing_or_invalid_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("SystemRoot", raising=False)
+    assert _failure_code(runner._windows_system_root) == "MUTATION_DETECTOR_EXECUTION_FAILED"
+
+    monkeypatch.setenv("SystemRoot", str(tmp_path / "missing"))
+    assert _failure_code(runner._windows_system_root) == "MUTATION_DETECTOR_EXECUTION_FAILED"
+
+
 def test_worktree_create_and_cleanup_helpers_are_bounded_and_contained(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -546,6 +608,27 @@ def test_worktree_create_and_cleanup_helpers_are_bounded_and_contained(
     assert runner._remove_tree_with_retry(tmp_path, outside) is False
 
 
+def test_worktree_cleanup_retries_stop_after_three_git_failures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    hooks = tmp_path / "hooks"
+    hooks.mkdir()
+    worktree = root / "MUT-V2-001"
+    worktree.mkdir()
+    attempts: list[tuple[object, ...]] = []
+
+    def blocked(*args: object, **_kwargs: object) -> None:
+        attempts.append(args)
+        raise OSError("git remove failed")
+
+    monkeypatch.setattr(runner, "_git", blocked)
+    monkeypatch.setattr(runner, "monotonic", lambda: 0.0)
+    assert runner._remove_worktree_with_retry(tmp_path, hooks, root, worktree) is False
+    assert len(attempts) == 3
+
+
 def test_delete_retries_stop_after_three_attempts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -578,6 +661,7 @@ def test_delete_clears_readonly_entry_only_inside_validated_child(
         try:
             raise PermissionError("readonly")
         except PermissionError:
+
             def remove(failed_path: str) -> None:
                 target = Path(failed_path)
                 retried.append(target)

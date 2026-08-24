@@ -149,7 +149,7 @@ future_phases:
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
     current_chapter: "chapter-11"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11.1 已完成确定性、离线 acceptance/integration 编排，11.2 已建立五项受控 mutant manifest 与只读校验，11.3 已完成隔离 runner 的实现投影，修复后的 focused integration 已验证五项 baseline/mutant 原始退出码为 0/1 且完全 cleanup；完整 V1 尚待独立 action approval。11.4–11.5 的持久结果和失败重放仍未实现，故真实 live V2 仍必须因 unverified 检查失败。"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11.1 已完成确定性、离线 acceptance/integration 编排，11.2 已建立五项受控 mutant manifest 与只读校验，11.3 已完成隔离 runner 投影和 focused pass。首次完整 V1 的两次 full pytest/runner cleanup 通过但 format 与 87% diff coverage 令结论 failed；remediation 已定向通过 52 unit、Ruff/mypy 与 90.6% unit-only diff coverage，passing V1 rerun 尚待新 action approval。11.4–11.5 的持久结果和失败重放仍未实现，故真实 live V2 仍必须因 unverified 检查失败。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2016,7 +2016,7 @@ history:
     at: "2026-08-23T23:08:55Z"
     action: "task_completed_and_next_initialized"
     actor: "/root"
-    reason: "TASK-0013 的 H1 实现快照 cd692b8e191af5a8b3edd64f4d5a3716bc7798d0 完成固定 manifest 的隔离 mutant runner 投影；首次 focused cleanup failure、独立残留清理与修复后的 focused pass 均已封存，五项 baseline/mutant 原始退出码为 0/1 且无残留；完整 V1 仍须独立 action approval，未产出持久 killed/survived evidence，真实 live V2 继续失败。"
+    reason: "TASK-0013 完成固定 manifest 的隔离 mutant runner 投影和 focused pass；首次完整 V1 的两次 full pytest/runner cleanup 通过但 Ruff format 与 87% diff coverage 令 evidence failed，随后 remediation 已定向通过 52 unit、Ruff/mypy 与 90.6% unit-only diff coverage；passing V1 rerun 仍须新 subject-bound action approval，未产出持久 killed/survived evidence，真实 live V2 继续失败。"
     chapter_evidence: "EVD-CH11-11.3-001"
     state_effect:
       overall_status: "in_progress"
@@ -2037,3 +2037,5 @@ history:
       - ".ai/tasks/TASK-0013/action-use-bc652d7b9115335fd42ebaa39f3ee6e972fd3cf058b135b7730e6b0012bbd394.md"
       - ".ai/tasks/TASK-0013/action-use-9c98f556fbd50c16082110cf465629e2642e417e4c9b2459927230c58aaeeec5.md"
       - ".ai/tasks/TASK-0013/action-use-659ed5eed4b25a1daf73aa636219da690fcc5cbddf1c416a9ad2aa5dc4a2ab40.md"
+      - ".ai/tasks/TASK-0013/action-use-f647e210f7442ae9bb8fea27b01fdfa34ace02c18a364f1f039140bc31cd8f85.md"
+      - ".ai/tasks/TASK-0013/evidence.json"
