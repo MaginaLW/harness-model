@@ -31,6 +31,7 @@ CONTRACT_NAMES = {
     "decision-unit",
     "event",
     "evidence",
+    "mutation-evidence",
     "task",
     "verifier-context",
 }
@@ -135,6 +136,80 @@ def test_v2_evidence_template_satisfies_the_v2_contract() -> None:
     value = load_json(template)
 
     assert validate_contract("evidence", value) == []
+
+
+def test_mutation_evidence_template_satisfies_the_named_contract() -> None:
+    template = REPOSITORY_ROOT / ".ai" / "templates" / "mutation-evidence.json"
+
+    assert validate_contract("mutation-evidence", load_json(template)) == []
+
+
+def _mutation_evidence_with(path: tuple[str | int, ...], replacement: object) -> dict[str, Any]:
+    value = valid_fixture("mutation-evidence")
+    target: Any = value
+    for part in path[:-1]:
+        target = target[part]
+    target[path[-1]] = replacement
+    return value
+
+
+@pytest.mark.parametrize(
+    ("path", "replacement", "expected_pointer"),
+    [
+        (("record_id",), "not-a-record", "/record_id:"),
+        (("manifest_sha256",), "a" * 63, "/manifest_sha256:"),
+        (("results", 0, "log_ref"), "/absolute.json", "/results/0/log_ref:"),
+        (("results", 0, "log_ref"), ".ai\\tasks\\TASK-0000\\logs\\bad", "/results/0/log_ref:"),
+        (
+            ("results", 0, "log_ref"),
+            ".ai/tasks/TASK-0000/logs/MUTRUN-20000101T000000Z-0000000000000000/targeted-mutation/logs/../MUT-V2-001.json",
+            "/results/0/log_ref:",
+        ),
+        (("results", 0, "outcome"), "passed", "/results/0/outcome:"),
+        (("results", 0, "baseline_exit_code"), 1.5, "/results/0/baseline_exit_code:"),
+        (("results", 0, "mutant_exit_code"), "1", "/results/0/mutant_exit_code:"),
+        (("results", 0, "baseline_exit_code"), True, "/results/0/baseline_exit_code:"),
+        (("results", 0, "duration_ms"), -1, "/results/0/duration_ms:"),
+    ],
+)
+def test_mutation_evidence_schema_rejects_closed_field_boundaries(
+    path: tuple[str | int, ...], replacement: object, expected_pointer: str
+) -> None:
+    value = _mutation_evidence_with(path, replacement)
+
+    first = validate_contract("mutation-evidence", value)
+    second = validate_contract("mutation-evidence", value)
+
+    assert first == second
+    assert any(error.startswith(expected_pointer) for error in first)
+
+
+@pytest.mark.parametrize("count", [0, 4, 6])
+def test_mutation_evidence_schema_requires_exactly_five_results(count: int) -> None:
+    value = valid_fixture("mutation-evidence")
+    results = value["results"]
+    assert isinstance(results, list)
+    if count < len(results):
+        value["results"] = results[:count]
+    else:
+        value["results"] = [*results, deepcopy(results[0])]
+
+    assert any(
+        error.startswith("/results:") for error in validate_contract("mutation-evidence", value)
+    )
+
+
+def test_mutation_evidence_schema_rejects_an_extra_result_field() -> None:
+    value = valid_fixture("mutation-evidence")
+    results = value["results"]
+    assert isinstance(results, list)
+    assert isinstance(results[0], dict)
+    results[0]["unexpected"] = "reject"
+
+    assert any(
+        error.startswith("/results/0/unexpected:")
+        for error in validate_contract("mutation-evidence", value)
+    )
 
 
 def test_code_approval_requires_subject_commit() -> None:

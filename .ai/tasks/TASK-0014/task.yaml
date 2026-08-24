@@ -1,0 +1,122 @@
+allowed_scope:
+- .ai/schemas/mutation-evidence.schema.json
+- .ai/templates/mutation-evidence.json
+- src/aiflow/contracts.py
+- src/aiflow/mutation_evidence.py
+- tests/fixtures/contracts/valid/mutation-evidence.json
+- tests/fixtures/contracts/invalid/mutation-evidence.missing.json
+- tests/fixtures/contracts/invalid/mutation-evidence.invalid.json
+- tests/fixtures/contracts/invalid/mutation-evidence.extra.json
+- tests/unit/test_contracts.py
+- tests/unit/test_mutation_evidence.py
+- tests/integration/test_mutation_runner_contract.py
+- docs/implementation/chapter-11-acceptance-integration-mutation.md
+- docs/superpowers/state/chapters/chapter-11.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 3c87fc931329c903e2d22feff88a4fd4966718b6
+branch: main
+created_at: '2026-08-24T06:08:20Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects:
+  - create_and_delete_task_owned_temporary_worktrees
+  - write_task_local_mutation_evidence_and_logs
+  goal: 完成 Chapter 11.4：在 TASK-0013 merge_recorded 后，将固定五项隔离 mutation runner 的原始 probe
+    规范化并持久化为绑定当前 manifest、base/subject 与受控日志的 killed/survived/unverified evidence
+    和明确未覆盖项；不接入 live V2、approval 或 Gate，真实 worktree 执行须单独 action approval
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  impact_scope:
+  - .ai/schemas/mutation-evidence.schema.json
+  - .ai/templates/mutation-evidence.json
+  - src/aiflow/contracts.py
+  - src/aiflow/mutation_evidence.py
+  - tests/fixtures/contracts/valid/mutation-evidence.json
+  - tests/fixtures/contracts/invalid/mutation-evidence.missing.json
+  - tests/fixtures/contracts/invalid/mutation-evidence.invalid.json
+  - tests/fixtures/contracts/invalid/mutation-evidence.extra.json
+  - tests/unit/test_contracts.py
+  - tests/unit/test_mutation_evidence.py
+  - tests/integration/test_mutation_runner_contract.py
+  - docs/implementation/chapter-11-acceptance-integration-mutation.md
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - .ai/tasks/TASK-0013/spec.md
+  - .ai/tasks/TASK-0013/evidence.json
+  - .ai/mutations/phase-02-critical-manifest.json
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Define a closed versioned mutation-evidence contract and template for the exact
+    five Phase 02 safeguards
+  - Run only the existing fixed mutation runner against the governed subject and derive
+    killed, survived, or unverified outcomes from raw probe facts
+  - Persist bounded structured task-local execution logs and an immutable evidence
+    artifact under a validated task run directory
+  - Validate manifest, task, subject, result completeness, canonical digest, log hashes,
+    and uncovered-item semantics for deterministic replay
+  - Preserve the current live V2 pending marker and defer all V2, approval, Gate,
+    and replay enforcement to Chapter 11.5
+  - Update only the Chapter 11.4 documentation and state projection after current
+    V1 evidence passes
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0014
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Contract and semantic unit tests for exact five-result evidence, canonical digest,
+    outcome derivation, containment, log integrity, and stale bindings
+  - One real focused integration transaction reusing the existing isolated five-worktree
+    runner and recording structured logs without changing the main worktree
+  - V2 pending regression proving the new artifact is not consumed by verification,
+    approval, or Gate in Chapter 11.4
+  - Ruff, format, mypy, full pytest, branch coverage, diff coverage at least 90%,
+    and git diff check
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+frozen_spec_sha256: a38fe5af6458a3c7f495616f96243d52347a08027bf0d8acde6c668893c0e9d9
+goal: 完成 Chapter 11.4：在 TASK-0013 merge_recorded 后，将固定五项隔离 mutation runner 的原始 probe
+  规范化并持久化为绑定当前 manifest、base/subject 与受控日志的 killed/survived/unverified evidence 和明确未覆盖项；不接入
+  live V2、approval 或 Gate，真实 worktree 执行须单独 action approval
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-24T06:33:50Z'
+subject_commit: 3c87fc931329c903e2d22feff88a4fd4966718b6
+task_id: TASK-0014
+updated_at: '2026-08-24T06:38:35Z'
+worktree_dirty: false
+worktree_dirty_paths: []

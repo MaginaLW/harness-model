@@ -1,0 +1,66 @@
+{
+  "base_commit": "3c87fc931329c903e2d22feff88a4fd4966718b6",
+  "branch": "main",
+  "classification_input_sha256": "cebbc4df4fe06a50521d0f3246d968dcc1660343d041570d09fa4f289a38e6d0",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/mutation-evidence.schema.json",
+      ".ai/templates/mutation-evidence.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/mutation_evidence.py",
+      "tests/fixtures/contracts/valid/mutation-evidence.json",
+      "tests/fixtures/contracts/invalid/mutation-evidence.missing.json",
+      "tests/fixtures/contracts/invalid/mutation-evidence.invalid.json",
+      "tests/fixtures/contracts/invalid/mutation-evidence.extra.json",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_mutation_evidence.py",
+      "tests/integration/test_mutation_runner_contract.py",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 11.4：在 TASK-0013 merge_recorded 后，将固定五项隔离 mutation runner 的原始 probe 规范化并持久化为绑定当前 manifest、base/subject 与受控日志的 killed/survived/unverified evidence 和明确未覆盖项；不接入 live V2、approval 或 Gate，真实 worktree 执行须单独 action approval",
+        "impact_scope": [
+          ".ai/schemas/mutation-evidence.schema.json",
+          ".ai/templates/mutation-evidence.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/mutation_evidence.py",
+          "tests/fixtures/contracts/valid/mutation-evidence.json",
+          "tests/fixtures/contracts/invalid/mutation-evidence.missing.json",
+          "tests/fixtures/contracts/invalid/mutation-evidence.invalid.json",
+          "tests/fixtures/contracts/invalid/mutation-evidence.extra.json",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_mutation_evidence.py",
+          "tests/integration/test_mutation_runner_contract.py",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Define a closed versioned mutation-evidence contract and template for the exact five Phase 02 safeguards",
+          "Run only the existing fixed mutation runner against the governed subject and derive killed, survived, or unverified outcomes from raw probe facts",
+          "Persist bounded structured task-local execution logs and an immutable evidence artifact under a validated task run directory",
+          "Validate manifest, task, subject, result completeness, canonical digest, log hashes, and uncovered-item semantics for deterministic replay",
+          "Preserve the current live V2 pending marker and defer all V2, approval, Gate, and replay enforcement to Chapter 11.5",
+          "Update only the Chapter 11.4 documentation and state projection after current V1 evidence passes"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 11.4：在 TASK-0013 merge_recorded 后，将固定五项隔离 mutation runner 的原始 probe 规范化并持久化为绑定当前 manifest、base/subject 与受控日志的 killed/survived/unverified evidence 和明确未覆盖项；不接入 live V2、approval 或 Gate，真实 worktree 执行须单独 action approval",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "8e97b395d859ee26c65e6e3fba2e4ce8c12e257e13c4fca0998f676af55498cd",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "a38fe5af6458a3c7f495616f96243d52347a08027bf0d8acde6c668893c0e9d9",
+  "task_id": "TASK-0014"
+}

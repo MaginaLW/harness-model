@@ -23,6 +23,7 @@ SCHEMA_FILES = {
     "decision-unit": "decision-unit.schema.json",
     "event": "event.schema.json",
     "evidence": "evidence.schema.json",
+    "mutation-evidence": "mutation-evidence.schema.json",
     "mutation-manifest": "mutation-manifest.schema.json",
     "policy": "policy.schema.json",
     "review-context": "review-context.schema.json",

@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-24T06:37:14Z",
+    "base_commit": "3c87fc931329c903e2d22feff88a4fd4966718b6",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "批准 TASK-0014 当前冻结规格",
+    "schema_version": "1.0",
+    "spec_sha256": "a38fe5af6458a3c7f495616f96243d52347a08027bf0d8acde6c668893c0e9d9",
+    "subject_commit": "3c87fc931329c903e2d22feff88a4fd4966718b6",
+    "task_id": "TASK-0014"
+  }
+]

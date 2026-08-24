@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/mutation-evidence.schema.json",
+  "title": "AI Flow targeted mutation evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "record_id", "task_id", "repository_id", "branch",
+    "base_commit", "subject_commit", "spec_sha256", "policy_sha256",
+    "classification_input_sha256", "manifest_id", "manifest_ref", "manifest_sha256",
+    "runner_source_sha256", "generated_at", "main_tree_unchanged", "run_reason_code",
+    "results", "uncovered_mutation_ids", "mutation_evidence_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "record_id": {"$ref": "#/$defs/record_id"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "repository_id": {"type": "string", "format": "uuid"},
+    "branch": {"type": "string", "minLength": 1},
+    "base_commit": {"$ref": "#/$defs/commit"},
+    "subject_commit": {"$ref": "#/$defs/commit"},
+    "spec_sha256": {"$ref": "#/$defs/sha256"},
+    "policy_sha256": {"$ref": "#/$defs/sha256"},
+    "classification_input_sha256": {"$ref": "#/$defs/sha256"},
+    "manifest_id": {"const": "phase-02-critical"},
+    "manifest_ref": {"const": ".ai/mutations/phase-02-critical-manifest.json"},
+    "manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "runner_source_sha256": {"$ref": "#/$defs/sha256"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "main_tree_unchanged": {"type": "boolean"},
+    "run_reason_code": {"type": ["string", "null"]},
+    "results": {
+      "type": "array", "minItems": 5, "maxItems": 5,
+      "items": {"$ref": "#/$defs/result"}
+    },
+    "uncovered_mutation_ids": {
+      "type": "array", "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^MUT-V2-[0-9]{3}$"}
+    },
+    "mutation_evidence_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "record_id": {"type": "string", "pattern": "^MUTRUN-[0-9]{8}T[0-9]{6}Z-[0-9a-f]{16}$"},
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "mutation_id": {"type": "string", "pattern": "^MUT-V2-[0-9]{3}$"},
+    "declaration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mutation_id", "safeguard_id", "target", "target_symbol", "operator", "expected_detector", "expected_outcome"],
+      "properties": {
+        "mutation_id": {"$ref": "#/$defs/mutation_id"},
+        "safeguard_id": {"type": "string", "pattern": "^V2_[A-Z0-9_]+$"},
+        "target": {"type": "string", "pattern": "^src/aiflow/[A-Za-z0-9_]+\\.py$"},
+        "target_symbol": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+        "operator": {"enum": ["drop_targeted_mutation_required_check", "allow_same_verifier_actor", "allow_nonpassing_required_check", "accept_non_killed_mutation", "ignore_snapshot_mismatch"]},
+        "expected_detector": {"type": "string", "pattern": "^tests/(?:[A-Za-z0-9_][A-Za-z0-9_.-]*/)*[A-Za-z0-9_][A-Za-z0-9_.-]*\\.py::test_[A-Za-z0-9_]*$"},
+        "expected_outcome": {"const": "killed"}
+      }
+    },
+    "result": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mutation_id", "safeguard_id", "target", "target_symbol", "operator", "expected_detector", "expected_outcome", "baseline_exit_code", "mutant_exit_code", "timed_out", "duration_ms", "reason_code", "outcome", "log_ref", "log_sha256"],
+      "properties": {
+        "mutation_id": {"$ref": "#/$defs/mutation_id"},
+        "safeguard_id": {"type": "string", "pattern": "^V2_[A-Z0-9_]+$"},
+        "target": {"type": "string", "pattern": "^src/aiflow/[A-Za-z0-9_]+\\.py$"},
+        "target_symbol": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+        "operator": {"enum": ["drop_targeted_mutation_required_check", "allow_same_verifier_actor", "allow_nonpassing_required_check", "accept_non_killed_mutation", "ignore_snapshot_mismatch"]},
+        "expected_detector": {"type": "string", "pattern": "^tests/(?:[A-Za-z0-9_][A-Za-z0-9_.-]*/)*[A-Za-z0-9_][A-Za-z0-9_.-]*\\.py::test_[A-Za-z0-9_]*$"},
+        "expected_outcome": {"const": "killed"},
+        "baseline_exit_code": {"type": ["integer", "null"]},
+        "mutant_exit_code": {"type": ["integer", "null"]},
+        "timed_out": {"type": "boolean"},
+        "duration_ms": {"type": "integer", "minimum": 0},
+        "reason_code": {"type": ["string", "null"]},
+        "outcome": {"enum": ["killed", "survived", "unverified"]},
+        "log_ref": {"type": "string", "pattern": "^\\.ai/tasks/TASK-[0-9]{4,}/logs/MUTRUN-[0-9]{8}T[0-9]{6}Z-[0-9a-f]{16}/targeted-mutation/logs/MUT-V2-[0-9]{3}\\.json$"},
+        "log_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "execution_log": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mutation_id", "safeguard_id", "target", "target_symbol", "operator", "expected_detector", "expected_outcome", "baseline_exit_code", "mutant_exit_code", "timed_out", "duration_ms", "reason_code", "outcome", "run_reason_code", "main_tree_unchanged"],
+      "properties": {
+        "mutation_id": {"$ref": "#/$defs/mutation_id"},
+        "safeguard_id": {"type": "string", "pattern": "^V2_[A-Z0-9_]+$"},
+        "target": {"type": "string", "pattern": "^src/aiflow/[A-Za-z0-9_]+\\.py$"},
+        "target_symbol": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+        "operator": {"enum": ["drop_targeted_mutation_required_check", "allow_same_verifier_actor", "allow_nonpassing_required_check", "accept_non_killed_mutation", "ignore_snapshot_mismatch"]},
+        "expected_detector": {"type": "string", "pattern": "^tests/(?:[A-Za-z0-9_][A-Za-z0-9_.-]*/)*[A-Za-z0-9_][A-Za-z0-9_.-]*\\.py::test_[A-Za-z0-9_]*$"},
+        "expected_outcome": {"const": "killed"},
+        "baseline_exit_code": {"type": ["integer", "null"]},
+        "mutant_exit_code": {"type": ["integer", "null"]},
+        "timed_out": {"type": "boolean"},
+        "duration_ms": {"type": "integer", "minimum": 0},
+        "reason_code": {"type": ["string", "null"]},
+        "outcome": {"enum": ["killed", "survived", "unverified"]},
+        "run_reason_code": {"type": ["string", "null"]},
+        "main_tree_unchanged": {"type": "boolean"}
+      }
+    }
+  }
+}
