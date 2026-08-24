@@ -2016,7 +2016,7 @@ history:
     at: "2026-08-23T23:08:55Z"
     action: "task_completed_and_next_initialized"
     actor: "/root"
-    reason: "TASK-0013 完成固定 manifest 的隔离 mutant runner 投影和 focused pass；首次完整 V1 的两次 full pytest/runner cleanup 通过但 Ruff format 与 87% diff coverage 令 evidence failed，随后 remediation 已定向通过 52 unit、Ruff/mypy 与 90.6% unit-only diff coverage；passing V1 rerun 仍须新 subject-bound action approval，未产出持久 killed/survived evidence，真实 live V2 继续失败。"
+    reason: "TASK-0013 的 H3 remediation 快照 763fbba25b9f3d612950d3a3f54248c650638900 包含固定 manifest 的隔离 mutant runner 投影和 focused pass；首次完整 V1 的两次 full pytest/runner cleanup 通过但 Ruff format 与 87% diff coverage 令 evidence failed，随后 remediation 已定向通过 52 unit、Ruff/mypy 与 90.6% unit-only diff coverage；passing V1 rerun 仍须新 subject-bound action approval，未产出持久 killed/survived evidence，真实 live V2 继续失败。"
     chapter_evidence: "EVD-CH11-11.3-001"
     state_effect:
       overall_status: "in_progress"
