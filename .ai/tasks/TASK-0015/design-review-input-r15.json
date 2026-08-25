@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0015",
+  "revision": 1,
+  "task_id": "TASK-0015",
+  "review_stage": "design",
+  "reviewer": "/reviewer",
+  "recorded_at": "2026-08-25T16:37:50Z",
+  "context_sha256": "cddabffab217a7850a2ad8367f6817ec824568d817b3fa5733c7cd5d066d8034",
+  "outcome": "APPROVE",
+  "summary": "APPROVE. r15 is current for synchronized subject 9d48321d825a09a299bd7df0e70b716b2b598430: its canonical context, frozen specification, classification digest, Policy, REVIEW/V2 route, DU-001 scope, and action-approval requirements are unchanged and valid. r10's immutable real-survivor artifact is internally consistent (four killed, MUT-V2-003 survived) and remains failed historical evidence. The 9d detector-only isolation correctly kills the declared guard-removal mutant without changing production authority, the manifest, or operator identity. Actions 36fbb908… (unused/stale), 165b0ba2… (consumed), and afeaeaf1… (consumed) cannot authorize this subject; any future real mutation run requires a new explicit single-use approval.",
+  "findings": []
+}

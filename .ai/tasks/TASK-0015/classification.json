@@ -1,10 +1,10 @@
 {
   "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
   "change_reason": "unchanged",
-  "classification_input_sha256": "7b014b397b50dc3504dc6a463fb342d4686a45bbcaae203a29a23afeeeea3d05",
+  "classification_input_sha256": "a9cd100f35aae520fb178d07764ff927df34e0115101180910ad5efd69c40d2a",
   "classifications": [
     {
-      "classified_at": "2026-08-25T15:57:28Z",
+      "classified_at": "2026-08-25T16:33:44Z",
       "decision_unit_id": "DU-001",
       "explanation": "CI or CD behavior changes require review.",
       "explanations": [
@@ -51,12 +51,12 @@
       ]
     }
   ],
-  "classified_at": "2026-08-25T15:57:28Z",
+  "classified_at": "2026-08-25T16:33:44Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V2",
   "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
   "policy_version": "2.1.0",
   "schema_version": "2.0",
-  "subject_commit": "c1a66567ba844f51d569aa3adb818febd1a0793e",
+  "subject_commit": "9d48321d825a09a299bd7df0e70b716b2b598430",
   "task_id": "TASK-0015"
 }
