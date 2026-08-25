@@ -16,6 +16,7 @@ from aiflow.approval import canonical_action_sha256, validate_action_file
 from aiflow.cli import build_parser, main
 from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.errors import ContractError, StorageError
+from aiflow.mutation_manifest import load_mutation_manifest
 from aiflow.review_service import ReviewAssessment
 from aiflow.storage import (
     atomic_write_json,
@@ -368,6 +369,96 @@ def test_v2_mutation_binding_allows_only_current_task_governance_attestation(
         and event["payload"].get("action_status") == "consumed"
         for event in load_task_record(repository, "TASK-0001").events
     )
+
+
+def test_v2_runner_allows_current_task_governance_head_after_subject(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _action_path, digest = _approve_v2_action(repository, "001")
+    subject = str(load_task_record(repository, "TASK-0001").task["subject_commit"])
+    attestation = repository / ".ai" / "tasks" / "TASK-0001" / "attestation.md"
+    attestation.write_text("current task governance attestation\n", encoding="utf-8")
+    commit_all(repository, "current task governance attestation after subject")
+
+    assert run_git(repository, "rev-parse", "HEAD") != subject
+    assert run_git(repository, "merge-base", subject, "HEAD") == subject
+
+    record = load_task_record(repository, "TASK-0001")
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+    action_use = mutation_evidence._consume_targeted_mutation_action(
+        repository,
+        "TASK-0001",
+        subject,
+        task,
+        classification,
+        policy_sha256,
+    )
+    mutation_evidence._revalidate_targeted_mutation_action(
+        repository, "TASK-0001", subject, action_use
+    )
+    authorization = mutation_runner._issue_runner_authorization(
+        repository,
+        "TASK-0001",
+        subject,
+        action_sha256=action_use.action_sha256,
+        receipt_path=action_use.receipt_path,
+        action_path=action_use.action_path,
+        decision_unit_id=action_use.decision_unit_id,
+        spec_sha256=action_use.spec_sha256,
+        policy_sha256=action_use.policy_sha256,
+        base_commit=action_use.base_commit,
+        classification_input_sha256=action_use.classification_input_sha256,
+    )
+    worktrees_before = run_git(repository, "worktree", "list", "--porcelain")
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+
+    def controlled_paths_sentinel(*_args: object, **_kwargs: object) -> tuple[str, ...]:
+        raise ContractError("controlled paths seam reached", code="TEST_CONTROLLED_PATHS_REACHED")
+
+    monkeypatch.setattr(mutation_runner, "load_mutation_manifest", lambda _root: manifest)
+    monkeypatch.setattr(mutation_runner, "_controlled_paths", controlled_paths_sentinel)
+    with pytest.raises(ContractError) as caught:
+        mutation_runner.run_targeted_mutations(
+            repository,
+            subject,
+            authorization=authorization,
+        )
+
+    assert caught.value.code == "TEST_CONTROLLED_PATHS_REACHED"
+    receipt = action_use.receipt_path.read_text(encoding="utf-8")
+    assert "Status: `started`" in receipt
+    assert "Approval consumed: `true`" in receipt
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    claim_path = task_directory / "logs" / f"action-launch-{digest}.json"
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    assert set(claim) == {
+        "action_sha256",
+        "claimed_at",
+        "receipt_device",
+        "receipt_inode",
+        "receipt_ref",
+        "schema_version",
+        "single_use",
+        "subject_commit",
+        "task_id",
+    }
+    assert claim["action_sha256"] == digest
+    assert isinstance(claim["claimed_at"], str)
+    assert claim["receipt_device"] == action_use.receipt_device
+    assert claim["receipt_inode"] == action_use.receipt_inode
+    assert claim["receipt_ref"] == action_use.receipt_path.relative_to(repository).as_posix()
+    assert claim["schema_version"] == "1.0"
+    assert claim["single_use"] is True
+    assert claim["subject_commit"] == subject
+    assert claim["task_id"] == "TASK-0001"
+    assert run_git(repository, "worktree", "list", "--porcelain") == worktrees_before
+    assert not tuple((task_directory / "logs").glob("MUTRUN-*/targeted-mutation/evidence.json"))
 
 
 def test_v2_mutation_binding_rejects_equivalent_nonancestor_business_head(

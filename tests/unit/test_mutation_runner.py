@@ -425,7 +425,40 @@ def test_git_wrapper_uses_empty_hooks_fixed_argv_and_no_shell(
     assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
 
 
-def test_subject_validation_rejects_invalid_and_non_head_values(
+def test_subject_validation_allows_a_governance_attestation_head_descendant(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    hooks = tmp_path / "hooks"
+    hooks.mkdir()
+    head = "b" * 40
+    calls: list[tuple[tuple[str, ...], bool]] = []
+
+    def ancestor(
+        _root: Path, _hooks: Path, *arguments: str, check: bool = True
+    ) -> subprocess.CompletedProcess[bytes]:
+        calls.append((arguments, check))
+        if arguments[:2] == ("rev-parse", "--verify"):
+            output = SUBJECT.encode()
+        elif arguments == ("rev-parse", "HEAD"):
+            output = head.encode()
+        else:
+            assert arguments == ("merge-base", "--is-ancestor", SUBJECT, head)
+            assert check is False
+            output = b""
+        return subprocess.CompletedProcess(list(arguments), 0, output + b"\n", b"")
+
+    monkeypatch.setattr(runner, "_git", ancestor)
+
+    runner._validate_subject(tmp_path, hooks, SUBJECT)
+
+    assert calls == [
+        (("rev-parse", "--verify", f"{SUBJECT}^{{commit}}"), True),
+        (("rev-parse", "HEAD"), True),
+        (("merge-base", "--is-ancestor", SUBJECT, head), False),
+    ]
+
+
+def test_subject_validation_rejects_invalid_nonancestor_and_unresolved_values(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     hooks = tmp_path / "hooks"
@@ -447,10 +480,38 @@ def test_subject_validation_rejects_invalid_and_non_head_values(
         _root: Path, _hooks: Path, *arguments: str, check: bool = True
     ) -> subprocess.CompletedProcess[bytes]:
         del check
-        output = SUBJECT.encode() if "--verify" in arguments else ("b" * 40).encode()
+        output = ("c" * 40).encode() if "--verify" in arguments else ("b" * 40).encode()
         return subprocess.CompletedProcess(list(arguments), 0, output + b"\n", b"")
 
     monkeypatch.setattr(runner, "_git", mismatch)
+    with pytest.raises(ContractError) as caught:
+        runner._validate_subject(tmp_path, hooks, SUBJECT)
+    assert caught.value.code == "MUTATION_SUBJECT_INVALID"
+
+    def nonancestor(
+        _root: Path, _hooks: Path, *arguments: str, check: bool = True
+    ) -> subprocess.CompletedProcess[bytes]:
+        if arguments[:2] == ("rev-parse", "--verify"):
+            return subprocess.CompletedProcess(list(arguments), 0, SUBJECT.encode() + b"\n", b"")
+        if arguments == ("rev-parse", "HEAD"):
+            return subprocess.CompletedProcess(list(arguments), 0, ("b" * 40).encode() + b"\n", b"")
+        assert arguments == ("merge-base", "--is-ancestor", SUBJECT, "b" * 40)
+        assert check is False
+        return subprocess.CompletedProcess(list(arguments), 1, b"", b"")
+
+    monkeypatch.setattr(runner, "_git", nonancestor)
+    with pytest.raises(ContractError) as caught:
+        runner._validate_subject(tmp_path, hooks, SUBJECT)
+    assert caught.value.code == "MUTATION_SUBJECT_INVALID"
+
+    def invalid_head(
+        _root: Path, _hooks: Path, *arguments: str, check: bool = True
+    ) -> subprocess.CompletedProcess[bytes]:
+        del check
+        output = SUBJECT.encode() if "--verify" in arguments else b"not-a-commit"
+        return subprocess.CompletedProcess(list(arguments), 0, output + b"\n", b"")
+
+    monkeypatch.setattr(runner, "_git", invalid_head)
     with pytest.raises(ContractError) as caught:
         runner._validate_subject(tmp_path, hooks, SUBJECT)
     assert caught.value.code == "MUTATION_SUBJECT_INVALID"

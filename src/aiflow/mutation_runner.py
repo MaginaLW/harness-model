@@ -274,15 +274,28 @@ def _validate_subject(root: Path, hooks: Path, subject_commit: str) -> None:
             root, hooks, "rev-parse", "--verify", f"{subject_commit}^{{commit}}"
         ).stdout.strip()
         head = _git(root, hooks, "rev-parse", "HEAD").stdout.strip()
-    except (OSError, subprocess.SubprocessError) as error:
+        ancestry = _git(
+            root,
+            hooks,
+            "merge-base",
+            "--is-ancestor",
+            subject_commit,
+            head.decode("ascii", "strict"),
+            check=False,
+        )
+    except (OSError, UnicodeDecodeError, subprocess.SubprocessError) as error:
         raise _contract(
             "Mutation subject could not be inspected", "MUTATION_SUBJECT_INVALID"
         ) from error
     if (
         resolved.decode("ascii", "replace") != subject_commit
-        or head.decode("ascii", "replace") != subject_commit
+        or _COMMIT.fullmatch(head.decode("ascii", "replace")) is None
+        or ancestry.returncode != 0
     ):
-        raise _contract("Mutation subject is not the current HEAD", "MUTATION_SUBJECT_INVALID")
+        raise _contract(
+            "Mutation subject is not an ancestor of the governed HEAD",
+            "MUTATION_SUBJECT_INVALID",
+        )
 
 
 def _controlled_paths(manifest: MutationManifest) -> tuple[str, ...]:
