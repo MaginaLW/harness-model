@@ -160,5 +160,21 @@
     "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
     "subject_commit": "c1a66567ba844f51d569aa3adb818febd1a0793e",
     "task_id": "TASK-0015"
+  },
+  {
+    "action_sha256": "afeaeaf100365eddb7f5d6a9179f884fb3ee3b1da7d6a1c1b179c5c91c196dcf",
+    "actor": "/user",
+    "approval_type": "action",
+    "approved_at": "2026-08-25T16:05:25Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-26T16:30:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved one TASK-0015 targeted mutation execution bound to canonical action digest afeaeaf100365eddb7f5d6a9179f884fb3ee3b1da7d6a1c1b179c5c91c196dcf.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
+    "subject_commit": "c1a66567ba844f51d569aa3adb818febd1a0793e",
+    "task_id": "TASK-0015"
   }
 ]

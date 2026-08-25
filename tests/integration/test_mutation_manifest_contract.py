@@ -138,6 +138,13 @@ def _final_evidence(
 
 def test_v2_code_approval_rejects_nonpassing_required_check(monkeypatch: Any) -> None:
     _patch_v2_context(monkeypatch, approval)
+    downstream_calls: list[tuple[object, ...]] = []
+
+    def passing_mutation_fact(*arguments: object) -> TargetedMutationFacts:
+        downstream_calls.append(arguments)
+        return TargetedMutationFacts(True, None, None, None, None, ())
+
+    monkeypatch.setattr(approval, "consume_targeted_mutation_evidence", passing_mutation_fact)
     assert not approval._v2_evidence_current(
         REPOSITORY_ROOT,
         "TASK-0012",
@@ -145,6 +152,7 @@ def test_v2_code_approval_rejects_nonpassing_required_check(monkeypatch: Any) ->
         events=(),
         policy_checks=[{"id": "required", "required": True}],
     )
+    assert downstream_calls == []
 
 
 def test_v2_gate_rejects_non_killed_mutation(monkeypatch: Any) -> None:
