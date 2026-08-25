@@ -1,0 +1,13 @@
+{
+  "context_sha256": "6a701b4d96d4974ef2192be99fafebdb1f24802d68007659ca3273126002006e",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-25T15:21:28Z",
+  "review_id": "REV-0013",
+  "review_stage": "design",
+  "reviewer": "/reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE. r13 correctly binds the repaired subject 2599e878a37d8c970bd70c1257943381f08e4155 to the frozen specification, Policy, and current REVIEW/V2 classification. The r6 failure was proven pre-consumption and r7 records the fail-closed correction: authoritative final Git assessment, original-subject preservation, governance-only attestation, and fixed ancestry enforcement. Scope, risk, action approval, and all V2 verification requirements remain unchanged. The unused action 36fbb908… is immutable historical evidence bound to the prior subject and cannot authorize this subject; a new separately approved action remains required. No blocking design finding was identified.",
+  "task_id": "TASK-0015"
+}
