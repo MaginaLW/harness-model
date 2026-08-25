@@ -200,6 +200,118 @@ def test_action_consumption_history_fails_closed_for_read_or_digest_errors(
     assert caught.value.code == "ACTION_APPROVAL_INVALID"
 
 
+@pytest.mark.parametrize(
+    "payload, duplicate",
+    [
+        ({"receipt_ref": None}, False),
+        ({"receipt_ref": 1}, False),
+        ({"receipt_device": None}, False),
+        ({"receipt_device": -1}, False),
+        ({"receipt_device": True}, False),
+        ({"receipt_inode": None}, False),
+        ({"receipt_inode": -1}, False),
+        ({"receipt_inode": True}, False),
+        ({}, True),
+    ],
+    ids=(
+        "missing-receipt-ref",
+        "invalid-receipt-ref",
+        "missing-receipt-device",
+        "negative-receipt-device",
+        "boolean-receipt-device",
+        "missing-receipt-inode",
+        "negative-receipt-inode",
+        "boolean-receipt-inode",
+        "duplicate-authoritative-digest",
+    ),
+)
+def test_action_consumption_ledger_rejects_invalid_receipt_identity(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    payload: dict[str, object],
+    duplicate: bool,
+) -> None:
+    digest = "a" * 64
+    valid = {
+        "approval_type": "action",
+        "action_status": "consumed",
+        "action_sha256": digest,
+        "receipt_ref": f".ai/tasks/TASK-0014/action-use-{digest}.md",
+        "receipt_device": 1,
+        "receipt_inode": 2,
+    }
+    invalid = {**valid, **payload}
+    events = [{"event_type": "approval_recorded", "payload": invalid}]
+    if duplicate:
+        events.append({"event_type": "approval_recorded", "payload": valid})
+    monkeypatch.setattr(
+        evidence, "read_task_record_strict", lambda *_args: SimpleNamespace(events=events)
+    )
+
+    with pytest.raises(ContractError) as caught:
+        evidence._used_action_digests(tmp_path, "TASK-0014")
+
+    assert caught.value.code == "ACTION_APPROVAL_INVALID"
+
+
+@pytest.mark.parametrize("identity_part", ["receipt_ref", "receipt_device", "receipt_inode"])
+def test_action_revalidation_rejects_ledger_receipt_identity_mismatch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, identity_part: str
+) -> None:
+    digest = "a" * 64
+    receipt = tmp_path / f"action-use-{digest}.md"
+    receipt.write_text("authorized\n", encoding="utf-8")
+    receipt_stat = receipt.stat()
+    action_path = tmp_path / "action-v2-targeted-mutation-test.json"
+    action_path.write_text("{}\n", encoding="utf-8")
+    action = {"value": "bound"}
+    action_use = evidence.MutationActionUse(
+        digest,
+        receipt,
+        action_path,
+        "DU-001",
+        "b" * 64,
+        "c" * 64,
+        "d" * 40,
+        "e" * 64,
+        receipt_stat.st_dev,
+        receipt_stat.st_ino,
+    )
+    task = {
+        "current_state": "VERIFYING",
+        "frozen_spec_sha256": action_use.spec_sha256,
+        "base_commit": action_use.base_commit,
+    }
+    classification = {"classification_input_sha256": action_use.classification_input_sha256}
+    ledger_identity: tuple[str, int, int] = (
+        receipt.relative_to(tmp_path).as_posix(),
+        receipt_stat.st_dev,
+        receipt_stat.st_ino,
+    )
+    mismatched = list(ledger_identity)
+    index = {"receipt_ref": 0, "receipt_device": 1, "receipt_inode": 2}[identity_part]
+    mismatched[index] = "other-receipt.md" if index == 0 else int(mismatched[index]) + 1
+
+    monkeypatch.setattr(
+        evidence,
+        "_validate_bindings",
+        lambda *_args: (task, classification, action_use.policy_sha256),
+    )
+    monkeypatch.setattr(evidence, "_require_no_pending_approval", lambda *_args: None)
+    monkeypatch.setattr(evidence, "_require_action_task_facts", lambda *_args: {})
+    monkeypatch.setattr(
+        evidence, "_used_action_digests", lambda *_args: {digest: tuple(mismatched)}
+    )
+    monkeypatch.setattr(
+        evidence, "_normalized_current_action", lambda *_args, **_kwargs: (action, "DU-001")
+    )
+
+    with pytest.raises(ContractError) as caught:
+        evidence._revalidate_targeted_mutation_action(tmp_path, "TASK-0014", "f" * 40, action_use)
+
+    assert caught.value.code == "ACTION_BINDING_STALE"
+
+
 def test_pending_approval_inspection_error_fails_closed(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

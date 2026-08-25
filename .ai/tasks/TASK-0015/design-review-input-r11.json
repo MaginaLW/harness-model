@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0011",
+  "revision": 1,
+  "task_id": "TASK-0015",
+  "review_stage": "design",
+  "reviewer": "/reviewer",
+  "recorded_at": "2026-08-25T14:23:23Z",
+  "context_sha256": "90bbd058cdfcc6e295cbf5c46fa0553bf0c0ae92c16c2eefdb318b6790e8837f",
+  "outcome": "APPROVE",
+  "summary": "APPROVE. r11 accurately binds the independently reviewed and fully verified checkpoint 88335978dfef9a6421903b329b9745295655ff39 to its current subject-bound classification and frozen specification. Scope, REVIEW/V2 routing, action approval, and all verification requirements are unchanged. The receipt, ledger, authoritative replay, and single-use launch-claim controls remain intact; no blocking design finding was identified.",
+  "findings": []
+}

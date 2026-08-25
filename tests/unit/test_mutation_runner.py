@@ -13,6 +13,7 @@ from typing import Any, Iterator
 
 import pytest
 
+import aiflow.mutation_evidence as mutation_evidence
 import aiflow.mutation_runner as runner
 from aiflow.errors import ContractError
 from aiflow.mutation_manifest import MutationManifest, load_mutation_manifest
@@ -92,6 +93,54 @@ def test_runner_authorization_is_one_shot(tmp_path: Path, monkeypatch: pytest.Mo
         receipt.unlink(missing_ok=True)
 
     assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+
+
+def test_runner_authorization_forwards_all_bound_facts_to_authority_replay(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    authorization, receipt = _new_runner_authorization(tmp_path, SUBJECT)
+    captured: dict[str, object] = {}
+    replay_calls = 0
+
+    def authorize(
+        repository_root: Path, task_id: str, subject_commit: str, **bindings: object
+    ) -> None:
+        nonlocal replay_calls
+        replay_calls += 1
+        captured.update(
+            {
+                "repository_root": repository_root,
+                "task_id": task_id,
+                "subject_commit": subject_commit,
+                **bindings,
+            }
+        )
+
+    monkeypatch.setattr(mutation_evidence, "_authorize_targeted_mutation_runner_launch", authorize)
+    try:
+        runner._consume_runner_authorization(tmp_path.resolve(), SUBJECT, authorization)
+        with pytest.raises(ContractError) as caught:
+            runner._consume_runner_authorization(tmp_path.resolve(), SUBJECT, authorization)
+    finally:
+        receipt.unlink(missing_ok=True)
+
+    assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+    assert replay_calls == 1
+    assert captured == {
+        "repository_root": tmp_path.resolve(),
+        "task_id": "TASK-9999",
+        "subject_commit": SUBJECT,
+        "action_sha256": "a" * 64,
+        "receipt_path": receipt,
+        "action_path": receipt.parent / "action-v2-targeted-mutation-test.json",
+        "decision_unit_id": "DU-001",
+        "spec_sha256": "b" * 64,
+        "policy_sha256": "c" * 64,
+        "base_commit": "d" * 40,
+        "classification_input_sha256": "e" * 64,
+        "receipt_device": authorization.receipt_device,
+        "receipt_inode": authorization.receipt_inode,
+    }
 
 
 def test_runner_authorization_rejects_replaced_receipt(tmp_path: Path) -> None:

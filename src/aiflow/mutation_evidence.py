@@ -332,8 +332,10 @@ def _used_action_digests(root: Path, task_id: str) -> Mapping[str, tuple[str, in
             or _SHA256.fullmatch(digest) is None
             or not isinstance(receipt_ref, str)
             or not isinstance(receipt_device, int)
+            or isinstance(receipt_device, bool)
             or receipt_device < 0
             or not isinstance(receipt_inode, int)
+            or isinstance(receipt_inode, bool)
             or receipt_inode < 0
             or digest in consumed
         ):
