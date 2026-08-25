@@ -1,0 +1,90 @@
+schema_version: '1.0'
+task_id: TASK-0016
+goal: 完成 TASK-0015 合并后的 Chapter 11.5 与 Chapter 11 退出状态投影：基于当前已提交的 V2 evidence、REV-0016、code
+  approval、external merge 与 close receipt，将 Chapter 11 标记完成并初始化 Chapter 12/12.1；修正文档中的陈旧
+  pending 叙述，不重跑 mutation、不修改 TASK-0015 历史或运行时代码。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: main
+base_commit: 1342cd23302cdb918b19c2fc42aeaaaa3ee20639
+subject_commit: 1342cd23302cdb918b19c2fc42aeaaaa3ee20639
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- README.md
+- docs/implementation/chapter-11-acceptance-integration-mutation.md
+- docs/superpowers/state/chapters/chapter-11.yaml
+- docs/superpowers/state/chapters/chapter-12.yaml
+- docs/superpowers/state/overall.yaml
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+current_state: BLOCKED
+created_at: '2026-08-25T23:06:56Z'
+updated_at: '2026-08-25T23:10:20Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0016
+  decision_unit_id: DU-001
+  goal: 完成 TASK-0015 合并后的 Chapter 11.5 与 Chapter 11 退出状态投影：基于当前已提交的 V2 evidence、REV-0016、code
+    approval、external merge 与 close receipt，将 Chapter 11 标记完成并初始化 Chapter 12/12.1；修正文档中的陈旧
+    pending 叙述，不重跑 mutation、不修改 TASK-0015 历史或运行时代码。
+  inputs:
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/README.md
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - docs/superpowers/state/overall.yaml
+  - .ai/tasks/TASK-0015/task.yaml
+  - .ai/tasks/TASK-0015/evidence.json
+  - .ai/tasks/TASK-0015/reviews/REV-0016-r0001.json
+  - .ai/tasks/TASK-0015/approvals.json
+  - .ai/tasks/TASK-0015/events.jsonl
+  planned_actions:
+  - Revalidate the committed TASK-0015 V2, review, approval and external-merge facts
+  - Mark Chapter 11.5 and both Chapter 11 exit checks complete with bounded evidence
+    references
+  - Initialize the Chapter 12 state skeleton from the approved Phase 02 implementation
+    directory
+  - Update overall counters, chapter entries and the current pointer to Chapter 12.1
+  - Correct stale Chapter 11 and README status prose without changing runtime behavior
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - Validate all projected commits, hashes and task-local evidence references against
+    committed files
+  - Parse chapter and overall YAML and assert counters, task states, exit checks and
+    pointers agree
+  - Run AI Flow validate, scope and the Policy-selected verification plan
+  - Run git diff check and independent design and implementation reviews
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: medium
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: cross_file
+    regression_risk: true
+    error_detectability: low
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
+repository_path_at_creation: D:/Repos/harness-model

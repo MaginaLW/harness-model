@@ -1,0 +1,44 @@
+{
+  "base_commit": "1342cd23302cdb918b19c2fc42aeaaaa3ee20639",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "3ab1c54a464b2d8de707e8dbc3a9a3e350de1404345c1042093537855c730721",
+  "classifications": [
+    {
+      "classified_at": "2026-08-25T23:07:02Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Routing blocked: PREDICATE_FIELD_MISSING.",
+      "explanations": [
+        "Routing blocked: PREDICATE_FIELD_MISSING."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Routing blocked: PREDICATE_FIELD_MISSING.",
+          "predicate_explanations": [],
+          "priority": -1,
+          "route": "BLOCK",
+          "rule_id": "ROUTING-PREDICATE_FIELD_MISSING"
+        }
+      ],
+      "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+      "policy_version": "2.1.0",
+      "route": "BLOCK",
+      "rule_id": "ROUTING-PREDICATE_FIELD_MISSING",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Explicit low-risk verification facts are unavailable; V1 is required."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-FACTS-INCOMPLETE"
+      ]
+    }
+  ],
+  "classified_at": "2026-08-25T23:07:02Z",
+  "effective_route": "BLOCK",
+  "effective_verification_level": "V1",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "policy_version": "2.1.0",
+  "schema_version": "1.0",
+  "subject_commit": "1342cd23302cdb918b19c2fc42aeaaaa3ee20639",
+  "task_id": "TASK-0016"
+}
