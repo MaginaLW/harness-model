@@ -27,6 +27,7 @@ from aiflow.git_context import (
     VerificationGitBinding,
     evaluate_verification_git_context,
 )
+from aiflow.mutation_evidence import TargetedMutationFacts, consume_targeted_mutation_evidence
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.process_runner import ProcessResult, run_execution
 from aiflow.review_service import ReviewAssessment, latest_review_assessment
@@ -59,7 +60,6 @@ from aiflow.verifier_service import (
 
 VersionProbe = Callable[[VerificationCheck], str]
 _V2_CHAPTER11_CHECK_IDS = frozenset({"targeted_mutation"})
-_V2_CHAPTER11_REASON = "VERIFICATION_CHAPTER11_NOT_IMPLEMENTED"
 
 
 @dataclass(frozen=True)
@@ -71,6 +71,48 @@ class VerifyResult:
     state: str | None
     evidence_path: Path
     reason_codes: tuple[str, ...]
+
+
+def _v2_targeted_mutation_artifact(
+    repository_root: Path, task_id: str, subject_commit: str
+) -> Mapping[str, object] | None:
+    """Return a task-bound artifact supplied by the controlled collection seam.
+
+    Collection is deliberately not implicit in verification: absent a governed
+    collection integration this fail-closed default prevents V2 from starting a
+    mutation runner.  The seam is also the sole test injection point.
+    """
+    del repository_root, task_id, subject_commit
+    return None
+
+
+def _missing_mutation_projection(task_id: str) -> dict[str, object]:
+    """Return a schema-shaped sentinel that the public consumer rejects."""
+    return {
+        "evidence_ref": (
+            f".ai/tasks/{task_id}/logs/MUTRUN-19700101T000000Z-0000000000000000/"
+            "targeted-mutation/evidence.json"
+        ),
+        "mutation_evidence_sha256": "0" * 64,
+        "manifest_ref": ".ai/mutations/phase-02-critical-manifest.json",
+        "results": [
+            {"mutation_id": f"MUT-V2-{index:03d}", "outcome": "unverified", "log_ref": None}
+            for index in range(1, 6)
+        ],
+    }
+
+
+def _targeted_mutation_projection(
+    repository_root: Path, task_id: str, subject_commit: str
+) -> dict[str, object]:
+    """Project a supplied immutable artifact, or a fail-closed missing sentinel."""
+    artifact = _v2_targeted_mutation_artifact(repository_root, task_id, subject_commit)
+    if not isinstance(artifact, Mapping):
+        return _missing_mutation_projection(task_id)
+    fields = ("evidence_ref", "mutation_evidence_sha256", "manifest_ref", "results")
+    if not all(field in artifact for field in fields):
+        return _missing_mutation_projection(task_id)
+    return {field: artifact[field] for field in fields}
 
 
 def _now() -> str:

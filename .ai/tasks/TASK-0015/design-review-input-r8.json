@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0008",
+  "revision": 1,
+  "task_id": "TASK-0015",
+  "review_stage": "design",
+  "reviewer": "/reviewer",
+  "recorded_at": "2026-08-25T11:55:56Z",
+  "context_sha256": "0112e131cac965b37453e2c748f650e58c179a961604ac947578e3dc7aec45ac",
+  "outcome": "APPROVE",
+  "summary": "APPROVE. The r8 scope addition of mutation_runner.py and its unit tests is narrowly necessary to migrate the existing MUT-V2-004 `accept_non_killed_mutation` AST anchor from Gate's former inline outcome loop to the shared consumer's `passed` guard. The manifest declaration, ID, target symbol, operator name, detector, and expected outcome remain unchanged. With a unique guard in `_v2_gate_facts`, mutating that guard causes Gate to accept a consumer-rejected survived/unverified artifact, so the same detector remains meaningful; baseline Gate has no separate outcome loop or policy table and therefore has no bypass decision. The specified zero-or-multiple-anchor failure is fail-closed. Current subject 5f5c731..., spec SHA 59be2e15..., Policy SHA f4854d..., and classification input SHA 70c080ef... match r8; REVIEW/V2 and separate action restrictions remain in force, and `aiflow validate TASK-0015` passes. No new blocker was found.",
+  "findings": []
+}

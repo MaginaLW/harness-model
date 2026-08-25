@@ -2,6 +2,7 @@ allowed_scope:
 - src/aiflow/verification_service.py
 - src/aiflow/evidence.py
 - src/aiflow/mutation_evidence.py
+- src/aiflow/mutation_runner.py
 - src/aiflow/approval.py
 - src/aiflow/gate.py
 - .ai/schemas/evidence.schema.json
@@ -12,6 +13,7 @@ allowed_scope:
 - tests/fixtures/contracts/invalid/evidence-v2.extra.json
 - tests/unit/test_contracts.py
 - tests/unit/test_mutation_evidence.py
+- tests/unit/test_mutation_runner.py
 - tests/unit/test_evidence.py
 - tests/unit/test_gate.py
 - tests/integration/test_verify_command.py
@@ -105,15 +107,15 @@ forbidden_actions:
 - secret_export
 - paid_external_call
 - package_publish
-frozen_spec_sha256: f4bbf4916d84ec5fc929a60490558e3bc715f96a32b702f476a017982f746d93
+frozen_spec_sha256: 59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade
 goal: 完成 Chapter 11.5：在当前任务版本边界内采集并消费 targeted mutation evidence，任一 survived、unverified、missing
   或陈旧记录均令 V2 失败；补齐确定性重放测试与 Chapter 11 退出证据，不复用 TASK-0014 的本地记录
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-25T11:48:34Z'
-subject_commit: 17ab98cf879cf913e91dfcdf69861b387eabf7ac
+spec_frozen_at: '2026-08-25T11:55:43Z'
+subject_commit: 5f5c731fd049d4dfa738c06aeadd054c5b9ad409
 task_id: TASK-0015
-updated_at: '2026-08-25T11:49:14Z'
+updated_at: '2026-08-25T11:56:34Z'
 worktree_dirty: false
 worktree_dirty_paths: []

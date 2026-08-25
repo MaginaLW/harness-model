@@ -17,7 +17,7 @@
 ## 非目标
 
 1. 不实现 Chapter 12 Hooks、Chapter 13 自举试点、V3、模型路由或资源调度。
-2. 不改变固定五项 manifest、mutation operator、detector、runner worktree/cleanup 语义或既有 mutation-evidence schema；允许且必须按本规格扩展 V2 evidence schema，以绑定 immutable mutation artifact identity 与精确 projection。
+2. 不改变固定五项 manifest 的 mutation ID、保障目标、target、operator 名称、detector、expected outcome，不改变 runner worktree/cleanup 语义或既有 mutation-evidence schema；允许且必须按本规格扩展 V2 evidence schema，以绑定 immutable mutation artifact identity 与精确 projection。唯一允许的 operator 实现调整是让现有 `accept_non_killed_mutation` AST 变换从旧 Gate 内嵌 outcome loop 迁移到共享 consumer 的 complete-killed `passed` 守卫；变异后同一 detector 必须失败，未找到唯一新锚点或出现多个锚点必须 fail closed。
 3. 不把 task-local ignored evidence 描述为可跨 checkout 或机器保存；可提交 receipt 仍只是哈希索引。
 4. 不自动批准、合并、推送、部署、删除临时或历史文件，也不执行付费外部调用。
 

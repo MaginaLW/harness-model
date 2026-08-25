@@ -24,5 +24,31 @@
     "spec_sha256": "f4bbf4916d84ec5fc929a60490558e3bc715f96a32b702f476a017982f746d93",
     "subject_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
     "task_id": "TASK-0015"
+  },
+  {
+    "actor": "/reviewer",
+    "approval_type": "spec",
+    "approved_at": "2026-08-25T11:52:41Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0007 approved the formally reclassified and refrozen synchronized subject; REVIEW plus V2 and separate real-runner action approval remain unchanged.",
+    "schema_version": "1.0",
+    "spec_sha256": "f4bbf4916d84ec5fc929a60490558e3bc715f96a32b702f476a017982f746d93",
+    "subject_commit": "5f5c731fd049d4dfa738c06aeadd054c5b9ad409",
+    "task_id": "TASK-0015"
+  },
+  {
+    "actor": "/reviewer",
+    "approval_type": "spec",
+    "approved_at": "2026-08-25T11:56:34Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0008 approved migrating the existing MUT-V2-004 AST anchor to the authoritative shared consumer passed guard while preserving manifest and detector semantics.",
+    "schema_version": "1.0",
+    "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
+    "subject_commit": "5f5c731fd049d4dfa738c06aeadd054c5b9ad409",
+    "task_id": "TASK-0015"
   }
 ]
