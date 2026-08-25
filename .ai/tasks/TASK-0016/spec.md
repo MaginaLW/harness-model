@@ -18,7 +18,8 @@ Chapter 12/12.1，使章节文件、总体计数、当前指针、README 和 Cha
    删除已被 TASK-0015 当前 V2/merge 事实取代的 pending 描述，同时保留本地 ignored artifact
    不跨 checkout/机器承诺持久的边界。
 5. 投影只引用已提交的 TASK-0015 subject、final V2 evidence、REV-0016、code approval、
-   action receipt、mutation digest、external merge commit 与 merge-record governance commit。
+   action receipt、mutation digest、merge-record event 中的 external merge target 与
+   merge-record governance commit。
 
 ## 非目标
 
@@ -31,19 +32,34 @@ Chapter 12/12.1，使章节文件、总体计数、当前指针、README 和 Cha
 ## 验收条件
 
 1. TASK-0015 必须仍为 `MERGED`；subject `9d48321d825a09a299bd7df0e70b716b2b598430`、
-   integration commit `cc1e1bb55eabd44ef2b2e767e41637e7c36446e0` 与 merge-record governance
-   commit `1342cd23302cdb918b19c2fc42aeaaaa3ee20639` 均存在且引用准确。
-2. 投影核对 final V2 evidence 为 passed、14 项 required checks 全通过、unverified 为空，
-   `MUT-V2-001` 至 `MUT-V2-005` 全部 killed，并记录当前 evidence/review/receipt 的文件哈希与
-   canonical digest；任何引用或哈希不一致都不得标记完成。
-3. Chapter 11 的 11.5 为 completed、五步完成、两个 exit checks 为 passed、blockers 为空，
+   `merge_recorded` event 的 external merge target
+   `cc1e1bb55eabd44ef2b2e767e41637e7c36446e0` 与 merge-record governance commit
+   `1342cd23302cdb918b19c2fc42aeaaaa3ee20639` 均存在且引用准确。
+2. 投影核对 `.ai/tasks/TASK-0015/evidence.json`（file SHA-256
+   `c6dea52afff6c43df365c614cdf35e03727cb1f6b5b38ff299df22612057089b`）为 passed、
+   14 项 required checks 全通过、unverified 为空，且 `MUT-V2-001` 至 `MUT-V2-005`
+   全部 killed；其 mutation canonical digest 必须为
+   `483af46c5f517952be8b0382737d04bcb57ff7a11db6910ba886a11c1429e312`。
+3. 投影核对 `.ai/tasks/TASK-0015/reviews/REV-0016-r0001.json`（file SHA-256
+   `1a8e432d59f4153576a88325b75df4c8f28ef98cf1dcc225980f93a45ed1b644`）为
+   APPROVE、无 findings，context SHA-256 为
+   `fd07f7c5b869a88471584af4f7952e8e9a9462a1219207a2001da62fc968ad78`；code approval
+   绑定的 evidence SHA-256 必须为
+   `23364985863374bfc1ef5a02c652b808376ff3b48168190cca4c686b2d96d07f`。
+4. 投影核对 action
+   `ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff` 的 receipt
+   `.ai/tasks/TASK-0015/action-use-ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff.md`
+   （file SHA-256 `c6974444c35796d472d7681269fba977b89ef9818dea1c105dc46dc9d658bfa4`）
+   与 subject、mutation record 及 canonical digest 绑定一致；任何上述引用或哈希不一致都不得
+   标记完成。
+5. Chapter 11 的 11.5 为 completed、五步完成、两个 exit checks 为 passed、blockers 为空，
    且新增一条只绑定 TASK-0015 当前事实的 chapter evidence。
-4. Chapter 12 只按实施目录初始化 12.1–12.6 和两个 pending exit checks；不得提前声明 Hook 已实现。
-5. overall 的章节、任务、步骤、退出检查、evidence 计数与 chapter 文件一致，并把当前指针移到
+6. Chapter 12 只按实施目录初始化 12.1–12.6 和两个 pending exit checks；不得提前声明 Hook 已实现。
+7. overall 的章节、任务、步骤、退出检查、evidence 计数与 chapter 文件一致，并把当前指针移到
    Chapter 12.1；历史只追加、不删除。
-6. README 与 Chapter 11 实施文档准确表述 Chapter 11 已完成和 live V2 当前通过，同时明确
+8. README 与 Chapter 11 实施文档准确表述 Chapter 11 已完成和 live V2 当前通过，同时明确
    Phase 02 尚未完成、Chapter 12 待实施、V3/真实模型路由/资源调度仍不在当前范围。
-7. `aiflow validate`、`aiflow scope`、Policy 选定的 V1 检查、YAML/引用一致性复核、
+9. `aiflow validate`、`aiflow scope`、Policy 选定的 V1 检查、YAML/引用一致性复核、
    `git diff --check`、设计审核和实现审核均通过。
 
 ## 禁止动作

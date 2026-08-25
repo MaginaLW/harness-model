@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "/root/task16_projection_design",
+    "approval_type": "spec",
+    "approved_at": "2026-08-25T23:27:52Z",
+    "base_commit": "1342cd23302cdb918b19c2fc42aeaaaa3ee20639",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0017 independently approved the current frozen TASK-0016 design specification with no findings; external merge target terminology, exact evidence/review/receipt hashes, Chapter 11 completion projection, Chapter 12 pending initialization, counts, scope and rollback are all bounded and reviewable.",
+    "schema_version": "1.0",
+    "spec_sha256": "b235881a62ae9305c303c4b7ad51ae578ccc2c54a247ae176a665b84050027fb",
+    "subject_commit": "238a9b6682790c7c64f786cd3c2ce322d80ada98",
+    "task_id": "TASK-0016"
+  }
+]

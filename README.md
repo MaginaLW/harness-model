@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–10 已完成，Chapter 11 正在进行。Chapter 11.1 已将 V2 acceptance 与 integration 变为确定性、离线的 pytest 检查；active Policy 为 `2.1.0`。targeted mutation 仍待 Chapters 11.2–11.5 实现，因此真实 live V2 evidence 仍必须失败；这不等同于 V2 passed 或 Gate ready。V3、真实模型路由及资源调度不在阶段二范围内。
+> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–11 已完成，Chapter 12 已初始化，当前指针为 12.1。active Policy 为 `2.1.0`。TASK-0015 当前 subject 的 final V2 evidence 已通过 14 项 required checks，五项权威 mutant 全部 killed，独立实现审核、code approval 与 external merge 均已记录；这些结论严格绑定该任务版本，不自动适用于未来 task 或 subject。阶段二尚未完成；Chapter 12 Hooks 与运行期升级观测仍待实现，V3、真实模型路由及资源调度不在阶段二范围内。
 
 ## 阶段一目标
 
@@ -33,7 +33,8 @@
 | [Chapter 8 追踪](docs/implementation/chapter-08-structured-review.md) | 结构化设计/实现审核的任务状态和兼容性护栏 |
 | [Chapter 9 追踪](docs/implementation/chapter-09-v2-policy-contracts.md) | V2 Policy、版本化 contracts、分类规则与兼容性边界 |
 | [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的退出证据与 live V2 限制 |
-| [Chapter 11 追踪](docs/implementation/chapter-11-acceptance-integration-mutation.md) | acceptance/integration 编排、pending mutation 与 live V2 失败边界 |
+| [Chapter 11 追踪](docs/implementation/chapter-11-acceptance-integration-mutation.md) | 已完成的 acceptance/integration、targeted mutation、live V2 与退出证据边界 |
+| [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与完整 Hooks 的 pending 初始化状态；当前任务为 12.1 |
 
 ## 实施路线
 
@@ -48,6 +49,8 @@
 9. V2 Policy、contracts 与分类
 10. 独立 Verifier、两阶段 V2 evidence 与 Gate
 11. acceptance、integration 与 targeted mutation
+12. 运行期升级观测与完整 Hooks
+13. 自举 REVIEW 试点与阶段二基线
 
 各章节必须按[实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)的前置关系推进，并以其中的命令和通过条件作为完成判据。
 

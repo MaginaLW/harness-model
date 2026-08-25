@@ -4,7 +4,7 @@ chapter:
   id: "chapter-11"
   number: 11
   title: "验收、集成与定向变异"
-  status: "in_progress"
+  status: "completed"
   dependency: "chapter-10 completed"
   tasks_total: 5
   steps_total: 25
@@ -67,19 +67,25 @@ tasks:
     blockers: []
   - id: "11.5"
     title: "任一 survived/missing mutant 令 V2 失败，并覆盖重放测试"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - ".ai/tasks/TASK-0015/evidence.json"
+      - ".ai/tasks/TASK-0015/reviews/REV-0016-r0001.json"
+      - ".ai/tasks/TASK-0015/approvals.json"
+      - ".ai/tasks/TASK-0015/action-use-ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff.md"
+      - ".ai/tasks/TASK-0015/events.jsonl"
     blockers: []
 
 exit_checks:
   - id: "CH11-EXIT-01"
     description: "关键保障被破坏时测试会失败的结论可重放"
-    status: "pending"
+    status: "passed"
   - id: "CH11-EXIT-02"
     description: "V1 不要求 mutation；未覆盖项不被通过文字掩盖"
-    status: "pending"
+    status: "passed"
 
 chapter_evidence:
   - id: "EVD-CH11-11.1-001"
@@ -97,7 +103,7 @@ chapter_evidence:
       - "src/aiflow/verification_service.py"
       - "tests/acceptance/test_v2_acceptance.py"
       - "tests/integration/test_v2_acceptance_integration.py"
-    limitation: "targeted_mutation 仍为 unverified（VERIFICATION_CHAPTER11_NOT_IMPLEMENTED）；真实 live V2 必须 failed，Chapter 11 exit checks 均未完成。"
+    limitation: "本条只证明 11.1 当时的 acceptance/integration 增量，不单独证明 targeted mutation 或 live V2；后续当前 subject 的完成事实由 EVD-CH11-11.5-001 绑定。"
   - id: "EVD-CH11-11.2-001"
     kind: "task_completion_projection"
     task_id: "TASK-0012"
@@ -114,7 +120,7 @@ chapter_evidence:
       - "src/aiflow/mutation_manifest.py"
       - "tests/unit/test_mutation_manifest.py"
       - "tests/integration/test_mutation_manifest_contract.py"
-    limitation: "11.3 与 11.4 已完成，但 manifest 本身不代表 live V2 targeted-mutation consumer、真实 live V2 passed 或两个 Chapter 11 exit checks 已完成。"
+    limitation: "manifest 本身不代表执行结果或 live V2；后续 runner、consumer、当前 V2 与退出检查的完成事实由各自任务证据及 EVD-CH11-11.5-001 绑定。"
   - id: "EVD-CH11-11.3-001"
     kind: "task_completion_projection"
     task_id: "TASK-0013"
@@ -139,7 +145,7 @@ chapter_evidence:
       - ".ai/tasks/TASK-0013/evidence.json"
       - ".ai/tasks/TASK-0013/reviews/REV-0004-r0001.json"
       - ".ai/tasks/TASK-0013/approvals.json"
-    limitation: "11.3 runner 的 raw probe 不单独构成持久 killed/survived evidence，也不改变 live V2。11.4 已在自己的 current subject/action transactions 中记录 local evidence；11.5、两个 Chapter 11 exit checks 与真实 live V2 passed 仍 pending。"
+    limitation: "11.3 runner 的 raw probe 不单独构成持久 killed/survived evidence，也不改变 live V2；后续 11.4/11.5 完成只由各自 current task、subject、evidence 与批准绑定。"
   - id: "EVD-CH11-11.4-001"
     kind: "task_completion_projection"
     task_id: "TASK-0014"
@@ -172,7 +178,51 @@ chapter_evidence:
       - ".ai/tasks/TASK-0014/reviews/REV-0002-r0001.json"
       - ".ai/tasks/TASK-0014/action-use-997bdb20ca1ca1a9e374df0f6797484a20b209455ed850cf21cbd90578538c43.md"
       - ".ai/tasks/TASK-0014/action-use-5aacdcd307e58560328646d34d272e176d4d076c8f66229084e2afb2cbaf11a4.md"
-    limitation: "Task-local mutation evidence/log JSON 被 .gitignore 排除；receipt 只索引当次本地 artifact/log hashes，不声称 ignored bodies 可跨 checkout 或机器重放。11.5 不得跨 task/subject/spec/Policy/classification 复用这些 records；它、两个 Chapter 11 exit checks、live V2 targeted-mutation consumer 和真实 live V2 passed 均仍 pending。"
+    limitation: "Task-local mutation evidence/log JSON 被 .gitignore 排除；receipt 只索引当次本地 artifact/log hashes，不声称 ignored bodies 可跨 checkout 或机器重放。11.5 没有复用这些 records，而是在 TASK-0015 当前绑定下完成独立 action 与 V2 evidence。"
+  - id: "EVD-CH11-11.5-001"
+    kind: "chapter_exit"
+    task_id: "TASK-0015"
+    task_state: "MERGED"
+    implementation_subject_commit: "9d48321d825a09a299bd7df0e70b716b2b598430"
+    verification_level: "V2"
+    classification_input_sha256: "a9cd100f35aae520fb178d07764ff927df34e0115101180910ad5efd69c40d2a"
+    spec_sha256: "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    verification_evidence_ref: ".ai/tasks/TASK-0015/evidence.json"
+    verification_evidence_file_sha256: "c6dea52afff6c43df365c614cdf35e03727cb1f6b5b38ff299df22612057089b"
+    verification_evidence_sha256: "23364985863374bfc1ef5a02c652b808376ff3b48168190cca4c686b2d96d07f"
+    verification_snapshot_sha256: "6b96ff977cfb491f10dcfc083f4366d1299b778254a1d778b1b7a45248e3c7ec"
+    verifier_context_sha256: "0360d25c9b2fc91ae9ad9a2517a9cda45dbef7f54e71cd8b6e03fb1d097ace4a"
+    verification_summary:
+      conclusion: "passed"
+      required_checks: 14
+      passed_required_checks: 14
+      unverified_scenarios: []
+    targeted_mutation:
+      action_sha256: "ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff"
+      record_id: "MUTRUN-20260825T165450Z-1b35a08a31b37fce"
+      receipt_ref: ".ai/tasks/TASK-0015/action-use-ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff.md"
+      receipt_file_sha256: "c6974444c35796d472d7681269fba977b89ef9818dea1c105dc46dc9d658bfa4"
+      mutation_evidence_sha256: "483af46c5f517952be8b0382737d04bcb57ff7a11db6910ba886a11c1429e312"
+      killed_mutation_ids: ["MUT-V2-001", "MUT-V2-002", "MUT-V2-003", "MUT-V2-004", "MUT-V2-005"]
+      uncovered_mutation_ids: []
+    implementation_review_ref: ".ai/tasks/TASK-0015/reviews/REV-0016-r0001.json"
+    implementation_review_file_sha256: "1a8e432d59f4153576a88325b75df4c8f28ef98cf1dcc225980f93a45ed1b644"
+    implementation_review_context_sha256: "fd07f7c5b869a88471584af4f7952e8e9a9462a1219207a2001da62fc968ad78"
+    implementation_review_outcome: "APPROVE"
+    code_approval_ref: ".ai/tasks/TASK-0015/approvals.json"
+    code_approval_evidence_sha256: "23364985863374bfc1ef5a02c652b808376ff3b48168190cca4c686b2d96d07f"
+    external_merge_event_sequence: 126
+    external_merge_target_commit: "cc1e1bb55eabd44ef2b2e767e41637e7c36446e0"
+    merge_record_governance_commit: "1342cd23302cdb918b19c2fc42aeaaaa3ee20639"
+    scope: "TASK-0015 当前 subject 的 shared targeted-mutation consumer、真实单次 action、五项 killed 结果、passing V2、独立实现审核、code approval 与 external merge；同时保留 V1 零 mutation 调用及 fail-closed replay/Gate 边界。"
+    artifacts:
+      - ".ai/tasks/TASK-0015/evidence.json"
+      - ".ai/tasks/TASK-0015/reviews/REV-0016-r0001.json"
+      - ".ai/tasks/TASK-0015/approvals.json"
+      - ".ai/tasks/TASK-0015/action-use-ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff.md"
+      - ".ai/tasks/TASK-0015/events.jsonl"
+    limitation: "本条只投影 TASK-0015 已提交的 current V2 与 merge 事实；task-local ignored mutation record/log bodies 不保证跨 checkout 或机器保留，也不得被未来 task、subject、spec、Policy 或 classification 复用。"
 
-blockers:
-  - "11.5、两个 Chapter 11 exit checks、live V2 targeted-mutation consumer 与真实 live V2 passed 仍需后续 AI Flow 行为性任务、冻结规格、独立审核和所需批准。不得把 11.4 的 task-local records 或 receipt hash indexes 跨 task/subject/spec/Policy/classification/checkout 复用，也不得把 11.1–11.4 的完成扩展为真实 live V2 passed。"
+blockers: []

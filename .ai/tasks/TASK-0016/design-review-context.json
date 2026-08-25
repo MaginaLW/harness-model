@@ -1,0 +1,47 @@
+{
+  "base_commit": "1342cd23302cdb918b19c2fc42aeaaaa3ee20639",
+  "branch": "main",
+  "classification_input_sha256": "2dfc65fd0f4bdaf87c5a69df630b0f844650b7f2d5baf495b29ee2dc1e979e83",
+  "content": {
+    "allowed_scope": [
+      "README.md",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 TASK-0015 合并后的 Chapter 11.5 与 Chapter 11 退出状态投影：基于当前已提交的 V2 evidence、REV-0016、code approval、external merge 与 merge-record governance commit，将 Chapter 11 标记完成并初始化 Chapter 12/12.1；修正文档中的陈旧 pending 叙述，不重跑 mutation、不修改 TASK-0015 历史或运行时代码。",
+        "impact_scope": [
+          "README.md",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Revalidate the committed TASK-0015 V2, review, approval and external-merge facts",
+          "Mark Chapter 11.5 and both Chapter 11 exit checks complete with bounded evidence references",
+          "Initialize the Chapter 12 state skeleton from the approved Phase 02 implementation directory",
+          "Update overall counters, chapter entries and the current pointer to Chapter 12.1",
+          "Correct stale Chapter 11 and README status prose without changing runtime behavior"
+        ]
+      }
+    ],
+    "goal": "完成 TASK-0015 合并后的 Chapter 11.5 与 Chapter 11 退出状态投影：基于当前已提交的 V2 evidence、REV-0016、code approval、external merge 与 merge-record governance commit，将 Chapter 11 标记完成并初始化 Chapter 12/12.1；修正文档中的陈旧 pending 叙述，不重跑 mutation、不修改 TASK-0015 历史或运行时代码。",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "fb69a772dd82d4e268783e65c222c8af03be12fd694222b221f4e1b04ed0dec1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "b235881a62ae9305c303c4b7ad51ae578ccc2c54a247ae176a665b84050027fb",
+  "task_id": "TASK-0016"
+}

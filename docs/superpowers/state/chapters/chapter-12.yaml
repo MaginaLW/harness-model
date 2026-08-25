@@ -1,0 +1,69 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-12"
+  number: 12
+  title: "运行期升级观测与完整 Hooks"
+  status: "pending"
+  dependency: "chapter-11 completed"
+  tasks_total: 6
+  steps_total: 30
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+  design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+
+tasks:
+  - id: "12.1"
+    title: "定义范围越界、Policy/受控文件变化、高风险命令和 evidence 缺失观察事件"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "12.2"
+    title: "共享核心将事件映射为 escalation/refusal，禁止自动降级"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "12.3"
+    title: "实现编辑后范围检查 Hook，只提交观察事实"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "12.4"
+    title: "实现明确命令形式的 pre-command 拒绝与审计记录"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "12.5"
+    title: "证明 Hook、CLI、CI parity，并记录 shell/平台覆盖限制"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "12.6"
+    title: "更新恢复与操作文档"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+
+exit_checks:
+  - id: "CH12-EXIT-01"
+    description: "支持范围内的越界/高风险请求在执行前被一致升级或拒绝"
+    status: "pending"
+  - id: "CH12-EXIT-02"
+    description: "Hook 不含独立 Policy 决策表，不宣称通用安全沙箱"
+    status: "pending"
+
+chapter_evidence: []
+
+blockers: []

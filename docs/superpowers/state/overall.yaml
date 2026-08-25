@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-25T04:36:11Z"
+updated_at: "2026-08-25T23:28:36Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,21 +22,21 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-11"
-  current_task: "11.5"
+  current_chapter: "chapter-12"
+  current_task: "12.1"
   current_step: null
 
 summary:
-  chapters_total: 11
-  chapters_completed: 10
-  tasks_total: 65
-  tasks_completed: 64
-  steps_total: 348
-  steps_completed: 343
-  exit_checks_total: 18
-  exit_checks_completed: 16
+  chapters_total: 12
+  chapters_completed: 11
+  tasks_total: 71
+  tasks_completed: 65
+  steps_total: 378
+  steps_completed: 348
+  exit_checks_total: 20
+  exit_checks_completed: 18
   blockers_total: 0
-  evidence_items: 8
+  evidence_items: 9
 
 chapters:
   - id: "chapter-01"
@@ -123,10 +123,18 @@ chapters:
     number: 11
     title: "验收、集成与定向变异"
     state_file: "docs/superpowers/state/chapters/chapter-11.yaml"
-    status: "in_progress"
+    status: "completed"
     dependency: "chapter-10 completed"
     tasks_total: 5
     steps_total: 25
+  - id: "chapter-12"
+    number: 12
+    title: "运行期升级观测与完整 Hooks"
+    state_file: "docs/superpowers/state/chapters/chapter-12.yaml"
+    status: "pending"
+    dependency: "chapter-11 completed"
+    tasks_total: 6
+    steps_total: 30
 
 global_checks:
   plan_self_review:
@@ -148,8 +156,8 @@ future_phases:
     design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
-    current_chapter: "chapter-11"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11.1 已完成确定性、离线 acceptance/integration 编排，11.2 已建立五项受控 mutant manifest 与只读校验，11.3 的最终 V1、review、code approval、integration merge 与 close facts 已记录，11.4 已完成投影前实现 subject 62df888baf2afa858ef096949ab1ade861cef7ea 的 local mutation-evidence recording。11.4 的 ignored local logs/evidence 仅由可提交 receipt hash indexes 审计，不宣称跨 checkout 或机器保留。11.5 的 consumer/replay enforcement 仍未实现，故真实 live V2 仍必须因 `targeted_mutation` unverified 而 failed。"
+    current_chapter: "chapter-12"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 已基于 TASK-0015 的 committed V2 evidence、REV-0016、code approval、external merge target 与 merge-record governance commit 完成，五项 targeted mutants 均已 killed，两个 Chapter 11 exit checks 均为 passed。Chapter 12 仅初始化为 pending，当前从 12.1 的运行期升级观测定义开始；尚未实施 Hooks、命令拒绝或 parity。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2064,3 +2072,29 @@ history:
       - ".ai/tasks/TASK-0014/reviews/REV-0002-r0001.json"
       - ".ai/tasks/TASK-0014/action-use-997bdb20ca1ca1a9e374df0f6797484a20b209455ed850cf21cbd90578538c43.md"
       - ".ai/tasks/TASK-0014/action-use-5aacdcd307e58560328646d34d272e176d4d076c8f66229084e2afb2cbaf11a4.md"
+  - id: "EVT-OVERALL-CH11-COMPLETE-001"
+    at: "2026-08-25T23:28:36Z"
+    action: "chapter_completed_and_next_initialized"
+    actor: "/root"
+    reason: "TASK-0015 的 committed V2 evidence、REV-0016 implementation review、code approval、external merge target cc1e1bb55eabd44ef2b2e767e41637e7c36446e0 与 merge-record governance commit 1342cd23302cdb918b19c2fc42aeaaaa3ee20639 均已核对；五项 targeted mutants killed、unverified 为空，Chapter 11 的两个 exit checks 通过。Chapter 12 仅初始化为 pending，不实施其任务或 Hooks。"
+    chapter_evidence: "EVD-CH11-11.5-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_11_status: "completed"
+      chapter_12_status: "pending"
+      current_chapter: "chapter-12"
+      current_task: "12.1"
+      current_step: null
+      chapters_completed: 11
+      tasks_completed: 65
+      steps_completed: 348
+      exit_checks_completed: 18
+      evidence_items: 9
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-11.yaml"
+      - "docs/superpowers/state/chapters/chapter-12.yaml"
+      - ".ai/tasks/TASK-0015/evidence.json"
+      - ".ai/tasks/TASK-0015/reviews/REV-0016-r0001.json"
+      - ".ai/tasks/TASK-0015/approvals.json"
+      - ".ai/tasks/TASK-0015/action-use-ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff.md"
+      - ".ai/tasks/TASK-0015/events.jsonl"

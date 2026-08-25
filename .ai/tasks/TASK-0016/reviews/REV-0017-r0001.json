@@ -1,0 +1,13 @@
+{
+  "context_sha256": "fb69a772dd82d4e268783e65c222c8af03be12fd694222b221f4e1b04ed0dec1",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-25T23:26:15Z",
+  "review_id": "REV-0017",
+  "review_stage": "design",
+  "reviewer": "/root/task16_projection_design",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE。规格将 TASK-0015 的 merge_recorded external merge target 与其治理记录提交准确区分，未宣称不存在的 close receipt；并冻结了 evidence、REV-0016、code approval、action receipt 与 mutation digest 的受限核对锚点。范围只覆盖 Chapter 11 完成投影、Chapter 12/12.1 pending 初始化及陈旧文档修正；明确排除运行时代码、Policy、mutation 重跑和 TASK-0015 历史改写。计数、退出检查、回滚与阶段二边界均可由当前状态和实施目录复核。",
+  "task_id": "TASK-0016"
+}
