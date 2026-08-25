@@ -17,3 +17,11 @@ The governed code subject is `4f50383e9dcf95fc8b264858b8bd510d31f2101a`; observe
 Reuse the read-only final `evaluate_verification_git_context` assessment inside mutation binding validation. Require its original subject to remain unchanged and require gate-eligible committed, attestation, and worktree scope. This permits only current-task governance attestation while continuing to reject business HEAD synchronization, other-task governance, dirty business paths, repository/branch changes, and ancestry failures.
 
 The existing Chapter 11.5 goal, allowed scope, REVIEW/V2 route, permissions, and verification level remain unchanged. A repaired code subject must be reclassified, refrozen, independently reviewed, and separately action-approved before any real mutation run.
+
+## Implemented outcome
+
+The retry now delegates the Git boundary decision to `evaluate_verification_git_context(..., mode="final")`, requires the assessment to retain the original subject, requires all committed/attestation/worktree scope decisions to pass, and independently requires the fixed `base -> subject -> attestation HEAD` ancestry chain before action consumption.
+
+Regression coverage includes current-task governance attestation, business and other-task attestation, dirty/scope assessment failures, business-subject synchronization attempts, and a real Git graph whose subject and alternate HEAD have equivalent business trees but are not ancestral. Every rejected case asserts that no receipt, consumed event, launch claim, or runner call occurs.
+
+The focused binding/verification suite passed 141 tests with one platform-condition skip. The final full branch-coverage run passed 946 tests with four platform-condition skips; Ruff, formatting, mypy, diff-check, AI Flow validation, 87% total coverage, and 91% task-base diff coverage all passed. Independent review marked both discovered P1 findings closed and the retry safe to checkpoint.

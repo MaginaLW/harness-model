@@ -29,7 +29,12 @@ from aiflow.contracts import ContractValidationError, require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import AiflowError, ContractError
 from aiflow.freshness import current_classification_input_digest
-from aiflow.git_context import collect_git_context
+from aiflow.git_context import (
+    VerificationGitBinding,
+    collect_git_context,
+    commits_are_ancestral,
+    evaluate_verification_git_context,
+)
 from aiflow.mutation_manifest import (
     CANONICAL_MANIFEST_PATH,
     MutationManifest,
@@ -228,17 +233,44 @@ def _validate_bindings(
     task = record.task
     if task.get("subject_commit") != subject or _COMMIT.fullmatch(subject) is None:
         raise _error("Mutation evidence subject is invalid", "MUTATION_EVIDENCE_SUBJECT_INVALID")
+    allowed_scope = task.get("allowed_scope")
+    binding_fields = ("repository_id", "branch", "base_commit")
+    if (
+        not isinstance(allowed_scope, list)
+        or not all(isinstance(path, str) for path in allowed_scope)
+        or not all(isinstance(task.get(field), str) for field in binding_fields)
+    ):
+        raise _error("Mutation evidence bindings are stale", "MUTATION_EVIDENCE_BINDING_STALE")
     try:
-        context = collect_git_context(root)
+        git_assessment = evaluate_verification_git_context(
+            root,
+            task_id=task_id,
+            allowed_scope=tuple(allowed_scope),
+            binding=VerificationGitBinding(
+                repository_id=str(task["repository_id"]),
+                branch=str(task["branch"]),
+                base_commit=str(task["base_commit"]),
+                subject_commit=subject,
+            ),
+            mode="final",
+        )
     except (AiflowError, OSError, UnicodeError) as error:
         raise _error(
             "Mutation evidence subject could not be resolved",
             "MUTATION_EVIDENCE_SUBJECT_INVALID",
         ) from error
     if (
-        context.repository_id != task.get("repository_id")
-        or context.branch != task.get("branch")
-        or context.head != subject
+        not git_assessment.gate_eligible
+        or git_assessment.subject_commit != subject
+        or not git_assessment.committed_scope.passed
+        or not git_assessment.attestation_scope.passed
+        or not git_assessment.worktree_scope.passed
+        or not commits_are_ancestral(
+            root,
+            base_commit=str(task["base_commit"]),
+            subject_commit=subject,
+            head_commit=git_assessment.attestation_head,
+        )
     ):
         raise _error("Mutation evidence bindings are stale", "MUTATION_EVIDENCE_BINDING_STALE")
     try:

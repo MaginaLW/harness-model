@@ -9,7 +9,7 @@ from pathlib import Path
 from threading import Barrier
 
 import pytest
-from test_begin_close_commands import create_repository, make_ready, run_git, start
+from test_begin_close_commands import commit_all, create_repository, make_ready, run_git, start
 
 from aiflow import cli, mutation_evidence, mutation_runner, verification_service
 from aiflow.approval import canonical_action_sha256, validate_action_file
@@ -314,6 +314,156 @@ def test_v2_recorder_rejects_pending_action_approval_transaction(
         mutation_evidence.record_targeted_mutation_evidence(repository, "TASK-0001", subject)
 
     assert caught.value.code == "ACTION_APPROVAL_PENDING"
+
+
+@pytest.mark.parametrize(
+    ("attestation_path", "reaches_consume"),
+    [
+        (".ai/tasks/TASK-0001/attestation.md", True),
+        ("src/attestation.py", False),
+        (".ai/tasks/TASK-0002/attestation.md", False),
+    ],
+)
+def test_v2_mutation_binding_allows_only_current_task_governance_attestation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    attestation_path: str,
+    reaches_consume: bool,
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _approve_v2_action(repository, "001")
+    subject = str(load_task_record(repository, "TASK-0001").task["subject_commit"])
+    path = repository / attestation_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("attestation\n", encoding="utf-8")
+    commit_all(repository, "attestation after fixed subject")
+    record = load_task_record(repository, "TASK-0001")
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    reached: list[str] = []
+
+    def consume(*_args: object, **_kwargs: object) -> object:
+        reached.append("consume")
+        raise ContractError("consume seam reached", code="TEST_ACTION_CONSUME_REACHED")
+
+    def unexpected_runner(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("binding failures must precede the runner")
+
+    monkeypatch.setattr(mutation_evidence, "_consume_targeted_mutation_action", consume)
+    monkeypatch.setattr(mutation_evidence, "run_targeted_mutations", unexpected_runner)
+
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence.record_targeted_mutation_evidence(repository, "TASK-0001", subject)
+
+    assert caught.value.code == (
+        "TEST_ACTION_CONSUME_REACHED" if reaches_consume else "MUTATION_EVIDENCE_BINDING_STALE"
+    )
+    assert reached == (["consume"] if reaches_consume else [])
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    assert not tuple(task_directory.glob("action-use-*.md"))
+    assert not tuple((task_directory / "logs").glob("action-launch-*.json"))
+    assert not any(
+        event["event_type"] == "approval_recorded"
+        and event["payload"].get("action_status") == "consumed"
+        for event in load_task_record(repository, "TASK-0001").events
+    )
+
+
+def test_v2_mutation_binding_rejects_equivalent_nonancestor_business_head(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    initial = load_task_record(repository, "TASK-0001").task
+    base = str(initial["base_commit"])
+    business_path = repository / "src" / "equivalent.py"
+    business_path.parent.mkdir(exist_ok=True)
+    business_path.write_text("same business tree\n", encoding="utf-8")
+    run_git(repository, "add", "src/equivalent.py")
+    run_git(
+        repository,
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit",
+        "-m",
+        "subject business change",
+    )
+    subject = run_git(repository, "rev-parse", "HEAD")
+    task = load_task_record(repository, "TASK-0001").task
+    task["subject_commit"] = subject
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
+    classification = read_task_json(repository, "TASK-0001", "classification.json")
+    assert isinstance(classification, dict)
+    classification["subject_commit"] = subject
+    classification["classification_input_sha256"] = classification_input_digest(
+        task, parse_decision_units(task)
+    )
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "classification.json"), classification
+    )
+    commit_all(repository, "current task governance after subject")
+    governance_head = run_git(repository, "rev-parse", "HEAD")
+
+    run_git(repository, "switch", "-c", "equivalent-nonancestor", base)
+    business_path.parent.mkdir(exist_ok=True)
+    business_path.write_text("same business tree\n", encoding="utf-8")
+    run_git(repository, "add", "src/equivalent.py")
+    run_git(
+        repository,
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit",
+        "-m",
+        "equivalent business change",
+    )
+    run_git(repository, "checkout", governance_head, "--", ".ai/tasks/TASK-0001")
+    commit_all(repository, "current task governance attestation")
+    head = run_git(repository, "rev-parse", "HEAD")
+
+    assert run_git(repository, "merge-base", subject, head) != subject
+    assert run_git(repository, "show", f"{subject}:src/equivalent.py") == business_path.read_text(
+        encoding="utf-8"
+    ).rstrip("\n")
+    assert run_git(repository, "diff", "--name-only", f"{subject}..{head}").splitlines() == [
+        ".ai/tasks/TASK-0001/approvals.json",
+        ".ai/tasks/TASK-0001/classification.json",
+        ".ai/tasks/TASK-0001/events.jsonl",
+        ".ai/tasks/TASK-0001/spec.md",
+        ".ai/tasks/TASK-0001/task.yaml",
+    ]
+
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["subject_commit"] == subject
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    monkeypatch.setattr(
+        mutation_evidence,
+        "_consume_targeted_mutation_action",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("consume must not run")),
+    )
+    monkeypatch.setattr(
+        mutation_evidence,
+        "run_targeted_mutations",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("runner must not run")),
+    )
+
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence.record_targeted_mutation_evidence(repository, "TASK-0001", subject)
+
+    assert caught.value.code == "MUTATION_EVIDENCE_BINDING_STALE"
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    assert not tuple(task_directory.glob("action-use-*.md"))
+    assert not tuple((task_directory / "logs").glob("action-launch-*.json"))
+    assert not any(
+        event["event_type"] == "approval_recorded"
+        and event["payload"].get("action_status") == "consumed"
+        for event in load_task_record(repository, "TASK-0001").events
+    )
 
 
 def test_v2_mutation_action_is_consumed_once_before_collection(

@@ -755,12 +755,21 @@ def test_binding_introspection_errors_are_stable(
         evidence._validate_bindings(tmp_path, "TASK-0014", "a" * 40)
     assert caught.value.code == "MUTATION_EVIDENCE_BINDING_STALE"
 
-    record = SimpleNamespace(task={"subject_commit": "a" * 40}, events=())
+    record = SimpleNamespace(
+        task={
+            "subject_commit": "a" * 40,
+            "repository_id": "repo",
+            "branch": "main",
+            "base_commit": "b" * 40,
+            "allowed_scope": ["src/**"],
+        },
+        events=(),
+    )
     monkeypatch.setattr(evidence, "read_task_record_strict", lambda *_: record)
     monkeypatch.setattr(
         evidence,
-        "collect_git_context",
-        lambda *_: (_ for _ in ()).throw(AiflowError("bad git")),
+        "evaluate_verification_git_context",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AiflowError("bad git")),
     )
     with pytest.raises(ContractError) as caught:
         evidence._validate_bindings(tmp_path, "TASK-0014", "a" * 40)
@@ -778,6 +787,7 @@ def test_bindings_accept_only_current_governance_and_an_audited_subject_sync(
         "base_commit": "b" * 40,
         "subject_commit": "a" * 40,
         "frozen_spec_sha256": evidence.specification_digest("# current spec\n"),
+        "allowed_scope": ["src/**"],
         "decision_units": [],
     }
     record = SimpleNamespace(task=task, events=({"event_type": "subject_commit_synchronized"},))
@@ -787,9 +797,22 @@ def test_bindings_accept_only_current_governance_and_an_audited_subject_sync(
         "policy_sha256": "e" * 64,
         "classification_input_sha256": "d" * 64,
     }
-    context = SimpleNamespace(repository_id=task["repository_id"], branch="main", head="a" * 40)
     monkeypatch.setattr(evidence, "read_task_record_strict", lambda *_: record)
-    monkeypatch.setattr(evidence, "collect_git_context", lambda *_: context)
+    monkeypatch.setattr(
+        evidence,
+        "evaluate_verification_git_context",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            gate_eligible=True,
+            subject_commit="a" * 40,
+            attestation_head="a" * 40,
+            committed_scope=SimpleNamespace(passed=True),
+            attestation_scope=SimpleNamespace(passed=True),
+            worktree_scope=SimpleNamespace(passed=True),
+        ),
+    )
+    monkeypatch.setattr(
+        evidence, "commits_are_ancestral", lambda *_args, **_kwargs: True, raising=False
+    )
     monkeypatch.setattr(evidence, "resolve_task_path", lambda *_: spec_path)
     monkeypatch.setattr(evidence, "read_task_json", lambda *_args, **_kwargs: classification)
     monkeypatch.setattr(evidence, "load_policy_bundle", lambda *_: SimpleNamespace(sha256="e" * 64))
@@ -820,6 +843,122 @@ def test_bindings_accept_only_current_governance_and_an_audited_subject_sync(
     with pytest.raises(ContractError) as caught:
         evidence._validate_bindings(tmp_path, "TASK-0014", "a" * 40)
     assert caught.value.code == "MUTATION_EVIDENCE_BINDING_STALE"
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [None, "gate", "subject", "committed", "attestation", "worktree", "ancestry"],
+    ids=(
+        "current-task-governance-attestation-is-allowed",
+        "gate-ineligible",
+        "assessment-synchronizes-subject-to-head",
+        "committed-scope-failed",
+        "attestation-scope-failed",
+        "worktree-scope-failed",
+        "base-subject-attestation-chain-is-not-ancestral",
+    ),
+)
+def test_bindings_require_a_current_final_git_assessment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str | None
+) -> None:
+    """Keep an unconsumed action bound to the final Git assessment contract."""
+    subject = "a" * 40
+    head = "f" * 40
+    task = {
+        "repository_id": "repo",
+        "branch": "main",
+        "base_commit": "b" * 40,
+        "subject_commit": subject,
+        "frozen_spec_sha256": "c" * 64,
+        "allowed_scope": ["src/**"],
+        "decision_units": [],
+    }
+    classification = {
+        "base_commit": task["base_commit"],
+        "subject_commit": subject,
+        "policy_sha256": "d" * 64,
+        "classification_input_sha256": "e" * 64,
+    }
+    scopes = {
+        name: SimpleNamespace(passed=failure != name)
+        for name in ("committed", "attestation", "worktree")
+    }
+    assessment = SimpleNamespace(
+        gate_eligible=failure != "gate",
+        subject_commit=head if failure == "subject" else subject,
+        attestation_head=head,
+        committed_scope=scopes["committed"],
+        attestation_scope=scopes["attestation"],
+        worktree_scope=scopes["worktree"],
+    )
+    calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    ancestry_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+
+    def evaluate(*args: object, **kwargs: object) -> SimpleNamespace:
+        calls.append((args, kwargs))
+        return assessment
+
+    def ancestral(*args: object, **kwargs: object) -> bool:
+        ancestry_calls.append((args, kwargs))
+        return failure != "ancestry"
+
+    spec_path = tmp_path / "spec.md"
+    spec_path.write_text("# current spec\n", encoding="utf-8")
+    record = SimpleNamespace(task=task, events=())
+    monkeypatch.setattr(evidence, "read_task_record_strict", lambda *_args: record)
+    monkeypatch.setattr(
+        evidence,
+        "collect_git_context",
+        lambda *_args: SimpleNamespace(repository_id="repo", branch="main", head=head),
+    )
+    monkeypatch.setattr(evidence, "resolve_task_path", lambda *_args: spec_path)
+    monkeypatch.setattr(evidence, "read_task_json", lambda *_args, **_kwargs: classification)
+    monkeypatch.setattr(
+        evidence, "load_policy_bundle", lambda *_args: SimpleNamespace(sha256="d" * 64)
+    )
+    monkeypatch.setattr(evidence, "specification_digest", lambda *_args: "c" * 64)
+    monkeypatch.setattr(
+        evidence, "current_classification_input_digest", lambda *_args: ("e" * 64, False)
+    )
+    monkeypatch.setattr(evidence, "evaluate_verification_git_context", evaluate, raising=False)
+    monkeypatch.setattr(evidence, "commits_are_ancestral", ancestral, raising=False)
+
+    if failure is None:
+        loaded_task, loaded_classification, policy_sha = evidence._validate_bindings(
+            tmp_path, "TASK-0015", subject
+        )
+        assert loaded_task is task
+        assert loaded_classification is classification
+        assert policy_sha == "d" * 64
+    else:
+        with pytest.raises(ContractError) as caught:
+            evidence._validate_bindings(tmp_path, "TASK-0015", subject)
+        assert caught.value.code == "MUTATION_EVIDENCE_BINDING_STALE"
+
+    assert len(calls) == 1
+    arguments, keywords = calls[0]
+    assert arguments == (tmp_path,)
+    assert keywords["task_id"] == "TASK-0015"
+    assert keywords["allowed_scope"] == ("src/**",)
+    assert keywords["mode"] == "final"
+    binding = keywords["binding"]
+    assert binding.repository_id == "repo"
+    assert binding.branch == "main"
+    assert binding.base_commit == "b" * 40
+    assert binding.subject_commit == subject
+    if failure in {None, "ancestry"}:
+        assert ancestry_calls == [
+            (
+                (tmp_path,),
+                {
+                    "base_commit": "b" * 40,
+                    "subject_commit": subject,
+                    "head_commit": head,
+                },
+            )
+        ]
+    else:
+        assert ancestry_calls == []
 
 
 def test_small_helpers_fail_closed_without_runner(tmp_path: Path) -> None:
@@ -915,30 +1054,51 @@ def test_selector_ignores_historical_nonterminal_tasks_on_old_subjects(
 
 
 @pytest.mark.parametrize(
-    ("subject", "context", "expected"),
+    ("subject", "assessment", "expected"),
     [
         ("not-a-commit", None, "MUTATION_EVIDENCE_SUBJECT_INVALID"),
         ("a" * 40, AiflowError("git unavailable"), "MUTATION_EVIDENCE_SUBJECT_INVALID"),
         (
             "a" * 40,
-            SimpleNamespace(repository_id="wrong", branch="main", head="a" * 40),
+            SimpleNamespace(
+                gate_eligible=False,
+                subject_commit="a" * 40,
+                committed_scope=SimpleNamespace(passed=True),
+                attestation_scope=SimpleNamespace(passed=True),
+                worktree_scope=SimpleNamespace(passed=True),
+            ),
             "MUTATION_EVIDENCE_BINDING_STALE",
         ),
     ],
 )
 def test_binding_subject_and_context_fail_closed(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, subject: str, context: object, expected: str
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    subject: str,
+    assessment: object,
+    expected: str,
 ) -> None:
     record = SimpleNamespace(
-        task={"subject_commit": subject, "repository_id": "repo", "branch": "main"}, events=()
+        task={
+            "subject_commit": subject,
+            "repository_id": "repo",
+            "branch": "main",
+            "base_commit": "b" * 40,
+            "allowed_scope": ["src/**"],
+        },
+        events=(),
     )
     monkeypatch.setattr(evidence, "read_task_record_strict", lambda *_: record)
-    if isinstance(context, Exception):
+    if isinstance(assessment, Exception):
         monkeypatch.setattr(
-            evidence, "collect_git_context", lambda *_: (_ for _ in ()).throw(context)
+            evidence,
+            "evaluate_verification_git_context",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(assessment),
         )
-    elif context is not None:
-        monkeypatch.setattr(evidence, "collect_git_context", lambda *_: context)
+    elif assessment is not None:
+        monkeypatch.setattr(
+            evidence, "evaluate_verification_git_context", lambda *_args, **_kwargs: assessment
+        )
     with pytest.raises(ContractError) as caught:
         evidence._validate_bindings(tmp_path, "TASK-0014", subject)
     assert caught.value.code == expected
