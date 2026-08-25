@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0009",
+  "revision": 1,
+  "task_id": "TASK-0015",
+  "review_stage": "design",
+  "reviewer": "/reviewer",
+  "recorded_at": "2026-08-25T11:57:45Z",
+  "context_sha256": "178b4e061df42613692bb21dad0ac55e7a6bfe652a0bce715d7c1713b21369a3",
+  "outcome": "APPROVE",
+  "summary": "APPROVE. The current subject 3b5d6f3bb2784994bf8795729dc5edbf050dd191 is an audited checkpoint containing only TASK-0015 governance/review history and the permitted in-scope verification-service TDD seam; no real mutation action occurred. The MUT-V2-004 correction remains constrained to migration of the existing AST operator anchor to the shared consumer passed guard, with manifest identity, detector semantics, runner cleanup behavior, REVIEW/V2 route, and single-use action-approval restrictions preserved. The r9 context matches current subject, spec SHA 59be2e15..., Policy SHA f4854d..., and classification input SHA c274284e...; `aiflow validate TASK-0015` passes. No open design finding or new blocker was found.",
+  "findings": []
+}

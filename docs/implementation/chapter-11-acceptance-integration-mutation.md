@@ -9,7 +9,7 @@ Chapter 11 分阶段补全 live V2 的执行证据。本章不把 Chapter 10 的
 - active Policy 四文件统一为 `2.1.0`。
 - V2 `acceptance` 固定执行 `python -m pytest tests/acceptance -q`；`integration` 固定执行 `python -m pytest tests/integration -q`。两项均使用本地仓库和已安装依赖，不访问网络或外部服务。
 - 默认 live V2 保留完整 V1 prefix，并按 Policy 顺序执行 acceptance 与 integration。每个检查的状态、退出码、时长、stdout/stderr task-local log ref、命令摘要与 pytest 工具版本来自真实进程结果。
-- `--check acceptance` 或 `--check integration` 只运行所选检查，并保留 provisional 语义；未运行的必需检查不能被当作 final 或 Gate-eligible evidence。
+- `--check acceptance` 或 `--check integration` 只运行所选进程且不调度 mutation；但 V2 的必需 mutation artifact 缺失时整体结论仍为 `failed`，不能用 partial/provisional 语义掩盖，也不能成为 Gate-eligible evidence。只有显式选择并通过 `targeted_mutation`、且所选检查与 verifier role fact 同时完整时，partial observation 才可为 provisional。
 - 计划解析继续拒绝错误 pytest 目录、错误 parser、`aiflow --help` 占位和 shell-like 命令形式。
 
 ## 11.2 已完成：受控 mutant manifest
@@ -33,17 +33,24 @@ Chapter 11 分阶段补全 live V2 的执行证据。本章不把 Chapter 10 的
 - 可提交的审计索引是 focused receipt `.ai/tasks/TASK-0014/action-use-997bdb20ca1ca1a9e374df0f6797484a20b209455ed850cf21cbd90578538c43.md`（file SHA-256 `eea9969e6c3d1a0ea053a34f2075c603ed195b245e00e4452bb32928124721f2`；canonical mutation-evidence SHA-256 `0d1bb294c1c07531fe17ca26936214d47705b2fb3ed1f69eeee2445fcee4638a`）和 local V1 receipt `.ai/tasks/TASK-0014/action-use-5aacdcd307e58560328646d34d272e176d4d076c8f66229084e2afb2cbaf11a4.md`（file SHA-256 `bdb6ed9975223350fcc6dda9744c5ee030291ccd9a504114826176f55d878fb6`；two canonical mutation-evidence SHA-256 values `f2730e54e40f71efbe052796fd618f5105fa6dc5efa6d0f916a72e92b41eb00a` and `ee329846aedb75ea91de3ccd91ec407032a7b7a81e2f8cf5e02c27ca0c9de143`）。V1 evidence is passed with 10/10 required checks and has file SHA-256 `538dc3bfe0fabdfe863daaae0a193554a79857d7a252a388932f01f7d83c3a76`; independent implementation review `REV-0002` is APPROVE.
 - Task-local record JSON and structured logs are deliberately excluded by `.gitignore`. The receipts are auditable hash indexes of their local existence, references, and cleanup facts; they do not claim that ignored log or evidence bodies survive another checkout or machine, and they cannot be reused by 11.5.
 
-## 仍待完成：11.5 targeted mutation consumer 与 replay/Gate failure
+## 11.5 实现已落地，当前治理验证待完成：targeted mutation consumer 与 replay/Gate failure
+
+- V2 evidence 的 `targeted_mutation` 现在必须绑定 repository-relative `evidence_ref`、canonical `mutation_evidence_sha256`、权威 manifest reference，以及严格按 `MUT-V2-001` 至 `MUT-V2-005` 排序的五项 projection；verification snapshot 同时绑定这些 artifact identity 与结果事实。
+- `consume_targeted_mutation_evidence` 不信任内嵌 outcome。它通过 public loader 重放当前 task/subject/spec/Policy/classification/manifest/runner 绑定、canonical digest、结构化日志与 uncovered 集合，再把唯一的 current/all-killed fact 提供给 verification、code approval 和 Gate。missing、陈旧、篡改、顺序/身份不符、survived 或 unverified 均 fail closed。
+- 完整 local V2 的生产调用图固定为 verification service 调用一次 recorder、既有 runner 一次、shared consumer 内的 public loader 一次，再投影到 V2 evidence。授权闸门位于 public recorder 本身：它只识别 task 目录直接子项 `action-v2-targeted-mutation-*.json`，要求 action type `targeted_mutation_v2`、target 为当前 task、决策单元声明 `action_approval`/targeted mutation、并把当前 classification input SHA-256、spec、Policy、base、subject 和精确 action canonical SHA 绑定到 current approval。
+- recorder 在任何 runner 调用前先拒绝尚有 `approval_pending.json` 的未完成审批事务，再在 task-local 跨进程锁内以排他 create-new 方式写入并 fsync `action-use-<canonical-action-sha256>.md`，捕获 receipt 的 device/inode 后才把同一身份与精确 action digest 作为 `consumed` 事件原子追加到任务历史；事件持久化失败时 receipt 仍作为不可重用的消费标记保留。随后会重验同一 action 文件、approval、expiry、classification/spec/Policy/base/subject、HEAD、governance-only worktree、账本记录和 receipt 身份；runner 入口不能只凭合成 receipt/token 启动，它会独立重放这些权威绑定，并以排他 `action-launch-<digest>.json` claim 固化唯一一次 launch。结果只通过已校验身份的 append fd 写回，替换为普通文件或 symlink 均 fail closed。并发双消费和 token 重放都不能产生第二次 runner，旧 subject/旧 classification/已用批准不能复用；只有新的精确 action 文件和单独批准才能授权 retry。内部 token 仍只是 trusted-code 的防误用载体，不是抵御能够改写 Python 进程或本地任务历史的安全沙箱；真正的执行门来自当前 approval、append-only consumed event、receipt identity 和 single-use launch claim 的共同重验。本地事件日志仍依靠 AI Flow strict replay、Git 审计和禁止重写历史的工作约定。`--check acceptance`/`integration` 不隐式运行 mutation，CI 或未授权/缺失 artifact 保持失败。
+- `MUT-V2-004` 保留原 manifest ID、保障目标、operator 名称和 detector；其封闭 AST 锚点迁移到 Gate 的共享 consumer `passed` 守卫，使“接受非 killed mutation”的 mutant 仍是非等价且必须被 detector 杀死。找不到唯一锚点或锚点歧义仍为 operator precondition failure。
+- 离线 acceptance、integration、unit 与 E2E replay 覆盖 all-killed、survived、unverified、missing、projection/digest tamper、approval/Gate 同源拒绝、snapshot tamper，以及 V1 零 mutation 调用。当前实现全量测试已通过；真实 action-approved mutation collection、final V2 evidence 与 implementation review 仍是 TASK-0015 的治理完成门。
 
 | 任务 | 状态 | 边界 |
 |---|---|---|
 | 11.2 mutant manifest | completed | 五项关键保障、封闭 schema、只读 loader 和 detector 绑定已建立；尚未执行 mutant |
 | 11.3 隔离 mutant runner | completed | 最终 V1、独立 implementation review、code approval、integration merge 与 close facts 已记录；runner 原始 probe 不单独构成持久 evidence |
 | 11.4 killed/survived evidence | completed | 投影前 subject 的 focused 与 local V1 production records 已由 receipt hash indexes 审计；三次均为五项 killed、无未覆盖项，local records/logs 不跨 checkout 保留 |
-| 11.5 replay/Gate failure | pending | 尚未实现 survived/missing mutant 的重放失败路径 |
+| 11.5 replay/Gate failure | in progress | consumer、schema、verify、approval/Gate、operator 与 synthetic replay 已实现；真实 current action-approved collection、V2 evidence 和 implementation review 待完成 |
 
-`targeted_mutation` 在当前 live V2 中仍保持 `unverified`，reason code 为 `VERIFICATION_CHAPTER11_NOT_IMPLEMENTED`，并写入 `chapter-11-pending` manifest 与 `CHAPTER11-PENDING` 结果。因此 live V2 conclusion 必须为 failed；它不能 finalize，不能支持 code approval，也不能走向 Gate passed。11.3 的隔离 runner 实现不改变这一结论。
+完整 local V2 不再写入 `chapter-11-pending` 或 `CHAPTER11-PENDING` 占位；它只接受本任务当前版本中新采集并由 public loader 重验的 artifact。没有合规授权或 artifact、任一结果非 killed、任何 replay/binding 失败，或 selected run 缺少 mutation 时，targeted-mutation check 与 V2 conclusion 均为 failed，code approval 和 Gate 同步拒绝。当前 TASK-0015 尚未执行真实 action-approved collection，因此本文不宣称 live V2、code approval 或 Gate 已通过。
 
 ## 后续验证边界
 
-Chapter 11.1、11.2 与 11.4 均按 `REVIEW + V1` 完成各自增量实现验证；11.3 的最终 V1、review、code approval、integration merge 与 close facts 也已审计记录。11.4 的 standalone mutation-evidence 仅证明当前 local action transactions 的受控结果，不被 live V2、approval 或 Gate 消费，也不能跨 task、subject、spec、Policy 或 checkout 复用。11.5 尚未完成，故 `targeted_mutation` 继续 unverified 并阻止任何 live V2 passed 宣称；完成其 consumer/replay enforcement 并取得新的 current evidence 后，才可改变该结论。
+Chapter 11.1、11.2 与 11.4 均按 `REVIEW + V1` 完成各自增量实现验证；11.3 的最终 V1、review、code approval、integration merge 与 close facts 也已审计记录。11.4 的 standalone mutation-evidence 仅证明当时 local action transactions 的受控结果，不能跨 task、subject、spec、Policy 或 checkout 复用。11.5 的行为实现已由 synthetic replay 和全量回归覆盖，但任务及 Chapter 11 状态继续保持 in progress；只有取得 TASK-0015 当前 subject 的独立 action approval、真实五项 evidence、passing V2、implementation review 和所需批准后，才能投影完成与两个 exit checks。

@@ -20,6 +20,7 @@ import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from threading import Lock
 from time import monotonic
 from types import TracebackType
 from typing import Callable
@@ -41,6 +42,10 @@ _OPERATOR_BINDINGS = {
     "accept_non_killed_mutation": ("src/aiflow/gate.py", "_v2_gate_facts"),
     "ignore_snapshot_mismatch": ("src/aiflow/evidence.py", "validate_v2_snapshot"),
 }
+_RUNNER_AUTHORITY = object()
+_RUNNER_AUTHORIZATIONS: set[object] = set()
+_RUNNER_AUTHORIZATION_LOCK = Lock()
+_ACTION_RECEIPT_NAME = re.compile(r"^action-use-[0-9a-f]{64}\.md$")
 
 
 @dataclass(frozen=True)
@@ -64,6 +69,159 @@ class MutationRun:
     probes: tuple[MutationProbe, ...]
     main_tree_unchanged: bool
     reason_code: str | None
+
+
+@dataclass(frozen=True)
+class _MutationRunnerAuthorization:
+    authority: object
+    token: object
+    repository_root: Path
+    task_id: str
+    subject_commit: str
+    action_sha256: str
+    receipt_path: Path
+    action_path: Path
+    decision_unit_id: str
+    spec_sha256: str
+    policy_sha256: str
+    base_commit: str
+    classification_input_sha256: str
+    receipt_device: int
+    receipt_inode: int
+
+
+def _issue_runner_authorization(
+    repository_root: Path,
+    task_id: str,
+    subject_commit: str,
+    *,
+    action_sha256: str,
+    receipt_path: Path,
+    action_path: Path,
+    decision_unit_id: str,
+    spec_sha256: str,
+    policy_sha256: str,
+    base_commit: str,
+    classification_input_sha256: str,
+) -> _MutationRunnerAuthorization:
+    """Issue one fully bound token; the runner independently replays its authority."""
+    root = Path(repository_root).resolve()
+    receipt = Path(os.path.abspath(receipt_path))
+    action = Path(os.path.abspath(action_path))
+    try:
+        relative = receipt.relative_to(root)
+        action_relative = action.relative_to(root)
+        receipt_stat = receipt.stat(follow_symlinks=False)
+    except (OSError, ValueError) as error:
+        raise _contract(
+            "Targeted mutation runner authorization is invalid",
+            "MUTATION_ACTION_REQUIRED",
+        ) from error
+    if (
+        _COMMIT.fullmatch(subject_commit) is None
+        or len(relative.parts) != 4
+        or relative.parts[:2] != (".ai", "tasks")
+        or relative.parts[2] != task_id
+        or re.fullmatch(r"TASK-[0-9]{4,}", task_id) is None
+        or relative.name != f"action-use-{action_sha256}.md"
+        or _ACTION_RECEIPT_NAME.fullmatch(relative.name) is None
+        or len(action_relative.parts) != 4
+        or action_relative.parts[:3] != relative.parts[:3]
+        or re.fullmatch(r"action-v2-targeted-mutation-.+\.json", action_relative.name) is None
+        or not stat.S_ISREG(receipt_stat.st_mode)
+    ):
+        raise _contract(
+            "Targeted mutation runner authorization is invalid",
+            "MUTATION_ACTION_REQUIRED",
+        )
+    token = object()
+    with _RUNNER_AUTHORIZATION_LOCK:
+        _RUNNER_AUTHORIZATIONS.add(token)
+    return _MutationRunnerAuthorization(
+        _RUNNER_AUTHORITY,
+        token,
+        root,
+        task_id,
+        subject_commit,
+        action_sha256,
+        receipt,
+        action,
+        decision_unit_id,
+        spec_sha256,
+        policy_sha256,
+        base_commit,
+        classification_input_sha256,
+        receipt_stat.st_dev,
+        receipt_stat.st_ino,
+    )
+
+
+def _validate_authoritative_runner_launch(
+    authorization: _MutationRunnerAuthorization,
+) -> None:
+    """Replay current approval/ledger facts and atomically claim the sole launch."""
+    from aiflow.mutation_evidence import _authorize_targeted_mutation_runner_launch
+
+    _authorize_targeted_mutation_runner_launch(
+        authorization.repository_root,
+        authorization.task_id,
+        authorization.subject_commit,
+        action_sha256=authorization.action_sha256,
+        receipt_path=authorization.receipt_path,
+        action_path=authorization.action_path,
+        decision_unit_id=authorization.decision_unit_id,
+        spec_sha256=authorization.spec_sha256,
+        policy_sha256=authorization.policy_sha256,
+        base_commit=authorization.base_commit,
+        classification_input_sha256=authorization.classification_input_sha256,
+        receipt_device=authorization.receipt_device,
+        receipt_inode=authorization.receipt_inode,
+    )
+
+
+def _consume_runner_authorization(
+    root: Path,
+    subject_commit: str,
+    authorization: _MutationRunnerAuthorization | None,
+) -> None:
+    valid_shape = (
+        isinstance(authorization, _MutationRunnerAuthorization)
+        and authorization.authority is _RUNNER_AUTHORITY
+    )
+    if not valid_shape:
+        raise _contract(
+            "Targeted mutation runner requires recorder authorization",
+            "MUTATION_ACTION_REQUIRED",
+        )
+    assert authorization is not None
+    with _RUNNER_AUTHORIZATION_LOCK:
+        if authorization.token not in _RUNNER_AUTHORIZATIONS:
+            raise _contract(
+                "Targeted mutation runner authorization was already used",
+                "MUTATION_ACTION_REQUIRED",
+            )
+        _RUNNER_AUTHORIZATIONS.remove(authorization.token)
+    try:
+        receipt_stat = authorization.receipt_path.stat(follow_symlinks=False)
+    except OSError as error:
+        raise _contract(
+            "Targeted mutation runner authorization changed before launch",
+            "MUTATION_ACTION_REQUIRED",
+        ) from error
+    if (
+        authorization.repository_root != root
+        or authorization.subject_commit != subject_commit
+        or (authorization.receipt_path.parent / "approval_pending.json").exists()
+        or (authorization.receipt_path.parent / "approval_pending.json").is_symlink()
+        or not stat.S_ISREG(receipt_stat.st_mode)
+        or receipt_stat.st_dev != authorization.receipt_device
+        or receipt_stat.st_ino != authorization.receipt_inode
+    ):
+        raise _contract(
+            "Targeted mutation runner authorization changed before launch",
+            "MUTATION_ACTION_REQUIRED",
+        )
+    _validate_authoritative_runner_launch(authorization)
 
 
 @dataclass(frozen=True)
@@ -430,28 +588,18 @@ def _apply_mutation(declaration: MutationDeclaration, path: Path) -> None:
             ),
         )
     elif operator == "accept_non_killed_mutation" and declaration.target_symbol == "_v2_gate_facts":
-        calls = [
+        assignments = [
             node
             for node in ast.walk(function)
-            if isinstance(node, ast.Call)
-            and ast.unparse(node)
-            == (
-                "all((isinstance(item, Mapping) and item.get('outcome') == 'killed' "
-                "for item in mutations))"
+            if isinstance(node, ast.Assign)
+            and ast.unparse(node.value) == "mutation_facts.passed"
+            and any(
+                ast.unparse(target) == "result['v2_mutation_killed']" for target in node.targets
             )
         ]
-        if len(calls) == 1:
-            generator = calls[0].args[0]
-            if isinstance(generator, ast.GeneratorExp):
-                generator.elt = ast.Call(
-                    func=ast.Name(id="isinstance", ctx=ast.Load()),
-                    args=[
-                        ast.Name(id="item", ctx=ast.Load()),
-                        ast.Name(id="Mapping", ctx=ast.Load()),
-                    ],
-                    keywords=[],
-                )
-                changed = True
+        if len(assignments) == 1:
+            assignments[0].value = ast.Constant(value=True)
+            changed = True
     elif (
         operator == "ignore_snapshot_mismatch"
         and declaration.target_symbol == "validate_v2_snapshot"
@@ -619,7 +767,12 @@ def _cleanup_workspace_root(workspace: Path | None) -> bool:
         return False
 
 
-def run_targeted_mutations(repository_root: Path, subject_commit: str) -> MutationRun:
+def run_targeted_mutations(
+    repository_root: Path,
+    subject_commit: str,
+    *,
+    authorization: _MutationRunnerAuthorization | None = None,
+) -> MutationRun:
     """Run the five fixed mutations in serial disposable worktrees.
 
     Preflight failures deliberately raise ``ContractError``.  Once a workspace
@@ -627,6 +780,7 @@ def run_targeted_mutations(repository_root: Path, subject_commit: str) -> Mutati
     facts so callers can never mistake a partial run for success.
     """
     root = Path(repository_root).resolve()
+    _consume_runner_authorization(root, subject_commit, authorization)
     manifest = load_mutation_manifest(root)
     workspace: Path | None = None
     hooks: Path | None = None

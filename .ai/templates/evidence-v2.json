@@ -88,12 +88,34 @@
         }
     },
     "targeted_mutation": {
-        "manifest_ref": "mutants/manifest.json",
+        "evidence_ref": ".ai/tasks/TASK-0000/logs/MUTRUN-20000101T000000Z-0000000000000000/targeted-mutation/evidence.json",
+        "mutation_evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "manifest_ref": ".ai/mutations/phase-02-critical-manifest.json",
         "results": [
             {
-                "mutation_id": "MUT-001",
+                "mutation_id": "MUT-V2-001",
                 "outcome": "unverified",
-                "log_ref": "logs/run-id/mutation.stdout.log"
+                "log_ref": null
+            },
+            {
+                "mutation_id": "MUT-V2-002",
+                "outcome": "unverified",
+                "log_ref": null
+            },
+            {
+                "mutation_id": "MUT-V2-003",
+                "outcome": "unverified",
+                "log_ref": null
+            },
+            {
+                "mutation_id": "MUT-V2-004",
+                "outcome": "unverified",
+                "log_ref": null
+            },
+            {
+                "mutation_id": "MUT-V2-005",
+                "outcome": "unverified",
+                "log_ref": null
             }
         ]
     }

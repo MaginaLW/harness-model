@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 import aiflow.mutation_evidence as evidence
-from aiflow.errors import AiflowError, ContractError
+from aiflow.errors import AiflowError, ContractError, StorageError
 from aiflow.mutation_manifest import load_mutation_manifest
 from aiflow.mutation_runner import MutationProbe, MutationRun
 
@@ -38,7 +38,13 @@ def _run(
     )
 
 
-def _prepare(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, run: MutationRun):
+def _prepare(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    run: MutationRun,
+    *,
+    authorized: bool = True,
+):
     root = tmp_path
     (root / ".ai" / "tasks" / "TASK-0014").mkdir(parents=True)
     manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
@@ -57,13 +63,63 @@ def _prepare(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, run: MutationRun):
     monkeypatch.setattr(evidence, "_source_sha256", lambda _: "f" * 64)
     monkeypatch.setattr(evidence, "_utc_now", lambda: datetime(2000, 1, 1, tzinfo=timezone.utc))
     monkeypatch.setattr(evidence, "_nonce_hex", lambda: "0" * 16)
+    if authorized:
+        task_directory = root / ".ai" / "tasks" / "TASK-0014"
+        receipt = task_directory / f"action-use-{'a' * 64}.md"
+        receipt.write_text("authorized\n", encoding="utf-8")
+        action_path = task_directory / "action-v2-targeted-mutation-test.json"
+        action_path.write_text("{}\n", encoding="utf-8")
+        receipt_stat = receipt.stat()
+        action_use = evidence.MutationActionUse(
+            "a" * 64,
+            receipt,
+            action_path,
+            "DU-001",
+            "c" * 64,
+            "e" * 64,
+            "b" * 40,
+            "d" * 64,
+            receipt_stat.st_dev,
+            receipt_stat.st_ino,
+        )
+        monkeypatch.setattr(
+            evidence,
+            "_consume_targeted_mutation_action",
+            lambda *_args: action_use,
+        )
+        monkeypatch.setattr(
+            evidence,
+            "_revalidate_targeted_mutation_action",
+            lambda *_args: (task, classification, "e" * 64),
+        )
+        monkeypatch.setattr(
+            evidence,
+            "_complete_targeted_mutation_action",
+            lambda *_args: None,
+        )
+        monkeypatch.setattr(
+            evidence, "_issue_runner_authorization", lambda *_args, **_kwargs: object()
+        )
 
-    def runner(*_args):
+    def runner(*_args, **_kwargs):
         calls["runner"] += 1
         return run
 
     monkeypatch.setattr(evidence, "run_targeted_mutations", runner)
     return root, manifest, calls
+
+
+def test_public_recorder_rejects_missing_action_before_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest), authorized=False)
+
+    with pytest.raises(ContractError) as caught:
+        evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+
+    assert caught.value.code == "ACTION_STATE_INVALID"
+    assert calls == {"runner": 0}
 
 
 def _resign(value: dict) -> None:
@@ -89,6 +145,166 @@ def _v2_projection(artifact: dict, artifact_ref: str) -> dict[str, object]:
     }
 
 
+@pytest.mark.parametrize("case", ["not-list", "not-object", "invalid-contract"])
+def test_action_approval_inventory_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    value: object = {} if case == "not-list" else [None]
+    if case == "invalid-contract":
+        value = [{}]
+        monkeypatch.setattr(
+            evidence,
+            "require_valid_contract",
+            lambda *_args: (_ for _ in ()).throw(ContractError("invalid", code="CONTRACT_INVALID")),
+        )
+    monkeypatch.setattr(evidence, "read_task_json", lambda *_args, **_kwargs: value)
+
+    with pytest.raises(ContractError) as caught:
+        evidence._action_approvals(tmp_path, "TASK-0014")
+
+    assert caught.value.code == "ACTION_APPROVAL_INVALID"
+
+
+def test_action_consumption_history_fails_closed_for_read_or_digest_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        evidence,
+        "read_task_record_strict",
+        lambda *_args: (_ for _ in ()).throw(
+            StorageError("unreadable", code="STATE_EVENT_LOG_READ_FAILED")
+        ),
+    )
+    with pytest.raises(ContractError) as caught:
+        evidence._used_action_digests(tmp_path, "TASK-0014")
+    assert caught.value.code == "ACTION_APPROVAL_INVALID"
+
+    monkeypatch.setattr(
+        evidence,
+        "read_task_record_strict",
+        lambda *_args: SimpleNamespace(
+            events=[
+                {
+                    "event_type": "approval_recorded",
+                    "payload": {
+                        "approval_type": "action",
+                        "action_status": "consumed",
+                        "action_sha256": "invalid",
+                    },
+                }
+            ]
+        ),
+    )
+    with pytest.raises(ContractError) as caught:
+        evidence._used_action_digests(tmp_path, "TASK-0014")
+    assert caught.value.code == "ACTION_APPROVAL_INVALID"
+
+
+def test_pending_approval_inspection_error_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    task_directory = tmp_path / "TASK-0014"
+    task_directory.mkdir()
+    monkeypatch.setattr(evidence, "resolve_task_path", lambda *_args: task_directory)
+    original_lstat = Path.lstat
+
+    def fail_marker_lstat(self: Path):
+        if self.name == evidence.APPROVAL_MARKER:
+            raise OSError("marker unavailable")
+        return original_lstat(self)
+
+    monkeypatch.setattr(Path, "lstat", fail_marker_lstat)
+    with pytest.raises(ContractError) as caught:
+        evidence._require_no_pending_approval(tmp_path, "TASK-0014")
+
+    assert caught.value.code == "ACTION_APPROVAL_PENDING"
+
+
+def test_posix_action_lock_adapter_uses_flock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[int] = []
+    fake_fcntl = SimpleNamespace(
+        LOCK_EX=1,
+        LOCK_UN=2,
+        flock=lambda _descriptor, operation: calls.append(operation),
+    )
+    monkeypatch.setattr(evidence.os, "name", "posix")
+    monkeypatch.setattr(evidence.importlib, "import_module", lambda _name: fake_fcntl)
+    path = tmp_path / "lock"
+    descriptor = evidence.os.open(path, evidence.os.O_CREAT | evidence.os.O_RDWR)
+    try:
+        evidence._lock_descriptor(descriptor)
+        evidence._unlock_descriptor(descriptor)
+    finally:
+        evidence.os.close(descriptor)
+
+    assert calls == [fake_fcntl.LOCK_EX, fake_fcntl.LOCK_UN]
+
+
+def test_action_lock_reservation_error_is_stable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    lock_directory = tmp_path / "logs"
+    monkeypatch.setattr(evidence, "resolve_task_path", lambda *_args: lock_directory)
+    monkeypatch.setattr(
+        evidence.os,
+        "open",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("lock unavailable")),
+    )
+
+    with pytest.raises(ContractError) as caught:
+        with evidence._locked_action_consumption(tmp_path, "TASK-0014"):
+            pass
+
+    assert caught.value.code == "ACTION_RECEIPT_WRITE_FAILED"
+
+
+@pytest.mark.parametrize(
+    ("projection", "recorded", "expected"),
+    [
+        (
+            {"unexpected": True},
+            evidence.MutationEvidenceArtifact("record", "ref", "a" * 64, ()),
+            "MUTATION_EVIDENCE_PROJECTION_INVALID",
+        ),
+        ({}, None, "MUTATION_EVIDENCE_MISSING"),
+        (
+            {
+                "targeted_mutation": {
+                    "evidence_ref": "ref",
+                    "mutation_evidence_sha256": "a" * 64,
+                }
+            },
+            None,
+            "MUTATION_EVIDENCE_PROJECTION_INVALID",
+        ),
+    ],
+)
+def test_v2_consumer_rejects_incomplete_projection_before_loader(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    projection: dict[str, object],
+    recorded: evidence.MutationEvidenceArtifact | None,
+    expected: str,
+) -> None:
+    monkeypatch.setattr(
+        evidence,
+        "load_targeted_mutation_evidence",
+        lambda *_args: (_ for _ in ()).throw(AssertionError("loader must not run")),
+    )
+
+    facts = evidence.consume_targeted_mutation_evidence(
+        tmp_path,
+        "TASK-0014",
+        projection,
+        recorded_artifact=recorded,
+    )
+
+    assert facts.passed is False
+    assert facts.reason_code == expected
+
+
 def test_v2_consumer_uses_only_current_loader_replay(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -103,7 +319,9 @@ def test_v2_consumer_uses_only_current_loader_replay(
 
     assert facts.passed is True
     assert facts.reason_code is None
-    assert facts.results == tuple(_v2_projection(artifact, receipt.evidence_ref)["targeted_mutation"]["results"])
+    assert facts.results == tuple(
+        _v2_projection(artifact, receipt.evidence_ref)["targeted_mutation"]["results"]
+    )
 
 
 @pytest.mark.parametrize("tamper", ["missing", "digest", "projection", "survived"])
@@ -111,7 +329,9 @@ def test_v2_consumer_fails_closed_for_missing_or_non_killed_artifacts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tamper: str
 ) -> None:
     manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
-    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest, mutant=0 if tamper == "survived" else 1))
+    root, _, _ = _prepare(
+        tmp_path, monkeypatch, _run(manifest, mutant=0 if tamper == "survived" else 1)
+    )
     receipt = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", receipt.evidence_ref)
     projection = _v2_projection(artifact, receipt.evidence_ref)

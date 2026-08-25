@@ -32,6 +32,125 @@ def _failure_code(call: Any) -> str:
     return caught.value.code
 
 
+def _new_runner_authorization(
+    root: Path, subject: str
+) -> tuple[runner._MutationRunnerAuthorization, Path]:
+    task_directory = root / ".ai" / "tasks" / "TASK-9999"
+    task_directory.mkdir(parents=True, exist_ok=True)
+    receipt = task_directory / f"action-use-{'a' * 64}.md"
+    receipt.write_text("authorized\n", encoding="utf-8")
+    action = task_directory / "action-v2-targeted-mutation-test.json"
+    action.write_text("{}\n", encoding="utf-8")
+    return _issue_test_authorization(root, subject, receipt), receipt
+
+
+def _issue_test_authorization(
+    root: Path, subject: str, receipt: Path
+) -> runner._MutationRunnerAuthorization:
+    task_id = "TASK-9999"
+    return runner._issue_runner_authorization(
+        root,
+        task_id,
+        subject,
+        action_sha256="a" * 64,
+        receipt_path=receipt,
+        action_path=root / ".ai" / "tasks" / task_id / "action-v2-targeted-mutation-test.json",
+        decision_unit_id="DU-001",
+        spec_sha256="b" * 64,
+        policy_sha256="c" * 64,
+        base_commit="d" * 40,
+        classification_input_sha256="e" * 64,
+    )
+
+
+def _authorized_run(root: Path, subject: str):
+    authorization, receipt = _new_runner_authorization(root, subject)
+    validator = runner._validate_authoritative_runner_launch
+    runner._validate_authoritative_runner_launch = lambda _authorization: None
+    try:
+        return runner.run_targeted_mutations(root, subject, authorization=authorization)
+    finally:
+        runner._validate_authoritative_runner_launch = validator
+        receipt.unlink(missing_ok=True)
+
+
+def test_public_runner_requires_recorder_authorization(tmp_path: Path) -> None:
+    with pytest.raises(ContractError) as caught:
+        runner.run_targeted_mutations(tmp_path, SUBJECT)
+
+    assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+
+
+def test_runner_authorization_is_one_shot(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    authorization, receipt = _new_runner_authorization(tmp_path, SUBJECT)
+    monkeypatch.setattr(runner, "_validate_authoritative_runner_launch", lambda _value: None)
+    try:
+        runner._consume_runner_authorization(tmp_path.resolve(), SUBJECT, authorization)
+        with pytest.raises(ContractError) as caught:
+            runner._consume_runner_authorization(tmp_path.resolve(), SUBJECT, authorization)
+    finally:
+        receipt.unlink(missing_ok=True)
+
+    assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+
+
+def test_runner_authorization_rejects_replaced_receipt(tmp_path: Path) -> None:
+    authorization, receipt = _new_runner_authorization(tmp_path, SUBJECT)
+    original = receipt.with_suffix(".original")
+    receipt.replace(original)
+    receipt.write_text("replacement\n", encoding="utf-8")
+
+    with pytest.raises(ContractError) as caught:
+        runner._consume_runner_authorization(tmp_path.resolve(), SUBJECT, authorization)
+
+    assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+    assert receipt.read_text(encoding="utf-8") == "replacement\n"
+
+
+def test_runner_authorization_rejects_pending_approval_transaction(tmp_path: Path) -> None:
+    authorization, receipt = _new_runner_authorization(tmp_path, SUBJECT)
+    (receipt.parent / "approval_pending.json").write_text("{}\n", encoding="utf-8")
+
+    with pytest.raises(ContractError) as caught:
+        runner._consume_runner_authorization(tmp_path.resolve(), SUBJECT, authorization)
+
+    assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+
+
+def test_runner_issuer_rejects_missing_or_malformed_receipt(tmp_path: Path) -> None:
+    missing = tmp_path / ".ai" / "tasks" / "TASK-9999" / f"action-use-{'a' * 64}.md"
+    with pytest.raises(ContractError) as caught:
+        _issue_test_authorization(tmp_path, SUBJECT, missing)
+    assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+
+    malformed = tmp_path / "action-use-malformed.md"
+    malformed.write_text("invalid\n", encoding="utf-8")
+    with pytest.raises(ContractError) as caught:
+        _issue_test_authorization(tmp_path, SUBJECT, malformed)
+    assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+
+
+def test_runner_authorization_rejects_deleted_receipt(tmp_path: Path) -> None:
+    authorization, receipt = _new_runner_authorization(tmp_path, SUBJECT)
+    receipt.unlink()
+
+    with pytest.raises(ContractError) as caught:
+        runner._consume_runner_authorization(tmp_path.resolve(), SUBJECT, authorization)
+
+    assert caught.value.code == "MUTATION_ACTION_REQUIRED"
+
+
+def test_runner_issuer_has_only_the_recorder_as_a_production_caller() -> None:
+    callers = {
+        path.name
+        for path in (REPOSITORY_ROOT / "src" / "aiflow").glob("*.py")
+        if path.name != "mutation_runner.py"
+        and "_issue_runner_authorization" in path.read_text(encoding="utf-8")
+    }
+
+    assert callers == {"mutation_evidence.py"}
+
+
 def _target_function(tree: ast.Module, symbol: str) -> ast.FunctionDef:
     matches = [
         node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == symbol
@@ -82,16 +201,32 @@ def test_each_closed_operator_changes_only_its_exact_function(
             for node in ast.walk(function)
         )
     else:
-        generators = [
-            node.args[0]
+        assignments = [
+            node
             for node in ast.walk(function)
-            if isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Name)
-            and node.func.id == "all"
-            and node.args
-            and isinstance(node.args[0], ast.GeneratorExp)
+            if isinstance(node, ast.Assign)
+            and any(
+                ast.unparse(target) == "result['v2_mutation_killed']" for target in node.targets
+            )
         ]
-        assert any(ast.unparse(item.elt) == "isinstance(item, Mapping)" for item in generators)
+        assert len(assignments) == 1
+        assert isinstance(assignments[0].value, ast.Constant)
+        assert assignments[0].value.value is True
+
+
+def test_gate_operator_rejects_an_ambiguous_consumer_guard(
+    tmp_path: Path, manifest: MutationManifest
+) -> None:
+    declaration = manifest.mutations[3]
+    source = (REPOSITORY_ROOT / declaration.target).read_text(encoding="utf-8")
+    anchor = '        result["v2_mutation_killed"] = mutation_facts.passed'
+    assert source.count(anchor) == 1
+    path = tmp_path / "gate.py"
+    path.write_text(source.replace(anchor, f"{anchor}\n{anchor}"), encoding="utf-8")
+
+    assert _failure_code(lambda: runner._apply_mutation(declaration, path)) == (
+        "MUTATION_OPERATOR_PRECONDITION_FAILED"
+    )
 
 
 def test_operator_rejects_crossed_binding_missing_and_duplicate_anchor(
@@ -754,7 +889,7 @@ def test_orchestrator_returns_five_ordered_success_facts_without_persistence(
     )
     attempts = _mock_orchestrator(monkeypatch, tmp_path, manifest, results)
 
-    result = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    result = _authorized_run(tmp_path, SUBJECT)
 
     assert len(attempts) == 5
     assert tuple(probe.mutation_id for probe in result.probes) == tuple(
@@ -778,7 +913,7 @@ def test_orchestrator_preserves_baseline_and_fills_after_operator_failure(
         apply_failure="MUTATION_OPERATOR_PRECONDITION_FAILED",
     )
 
-    result = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    result = _authorized_run(tmp_path, SUBJECT)
 
     assert len(attempts) == 1
     assert result.probes[0].baseline_exit_code == 0
@@ -803,7 +938,7 @@ def test_orchestrator_stops_on_baseline_or_detector_failure(
     expected: str,
 ) -> None:
     attempts = _mock_orchestrator(monkeypatch, tmp_path, manifest, iter((detector_fact,)))
-    result = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    result = _authorized_run(tmp_path, SUBJECT)
     assert len(attempts) == 1
     assert result.probes[0].reason_code == expected
     assert result.reason_code == expected
@@ -824,7 +959,7 @@ def test_orchestrator_stops_on_mutant_detector_failure(
             )
         ),
     )
-    result = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    result = _authorized_run(tmp_path, SUBJECT)
     assert len(attempts) == 1
     assert result.probes[0].baseline_exit_code == 0
     assert result.probes[0].timed_out is True
@@ -842,7 +977,7 @@ def test_orchestrator_stops_after_create_or_cleanup_failure(
         iter(()),
         create_failure_at=1,
     )
-    created = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    created = _authorized_run(tmp_path, SUBJECT)
     assert len(attempts) == 1
     assert created.probes[0].reason_code == "MUTATION_WORKTREE_CREATE_FAILED"
     assert created.reason_code == "MUTATION_WORKTREE_CREATE_FAILED"
@@ -855,7 +990,7 @@ def test_orchestrator_stops_after_create_or_cleanup_failure(
         iter(((0, False, 1, None), (1, False, 1, None))),
         cleanup_ok=False,
     )
-    cleaned = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    cleaned = _authorized_run(tmp_path, SUBJECT)
     assert len(attempts) == 1
     assert cleaned.reason_code == "MUTATION_WORKTREE_CLEANUP_FAILED"
     assert all(item.reason_code == "MUTATION_NOT_EXECUTED" for item in cleaned.probes[1:])
@@ -872,7 +1007,7 @@ def test_item_contract_errors_are_normalized_for_body_and_cleanup(
             ContractError("hooks changed", code="MUTATION_WORKSPACE_INVALID")
         ),
     )
-    body = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    body = _authorized_run(tmp_path, SUBJECT)
     assert attempts == []
     assert body.probes[0].reason_code == "MUTATION_WORKSPACE_INVALID"
     assert body.reason_code == "MUTATION_WORKSPACE_INVALID"
@@ -891,7 +1026,7 @@ def test_item_contract_errors_are_normalized_for_body_and_cleanup(
             ContractError("hooks changed", code="MUTATION_WORKSPACE_INVALID")
         ),
     )
-    cleanup = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    cleanup = _authorized_run(tmp_path, SUBJECT)
     assert cleanup.reason_code == "MUTATION_WORKTREE_CLEANUP_FAILED"
     assert all(item.reason_code == "MUTATION_NOT_EXECUTED" for item in cleanup.probes[1:])
 
@@ -907,7 +1042,7 @@ def test_main_tree_change_overrides_cleanup_and_probe_results(
         cleanup_ok=False,
         unchanged=False,
     )
-    result = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    result = _authorized_run(tmp_path, SUBJECT)
     assert result.main_tree_unchanged is False
     assert result.reason_code == "MUTATION_MAIN_TREE_CHANGED"
 
@@ -945,7 +1080,7 @@ def test_orchestrator_rejects_isolated_manifest_drift(
     monkeypatch.setattr(runner, "_create_detached_worktree", create)
     monkeypatch.setattr(runner, "_remove_worktree_with_retry", lambda *_args: True)
     monkeypatch.setattr(runner, "_remove_tree_with_retry", lambda *_args: True)
-    result = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    result = _authorized_run(tmp_path, SUBJECT)
     assert hooks is not None
     assert result.probes[0].reason_code == "MUTATION_SUBJECT_DRIFT"
     assert result.reason_code == "MUTATION_SUBJECT_DRIFT"
@@ -966,7 +1101,7 @@ def test_orchestrator_normalizes_isolated_loader_failure(
         raise OSError("isolated manifest unreadable")
 
     monkeypatch.setattr(runner, "load_mutation_manifest", load)
-    result = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    result = _authorized_run(tmp_path, SUBJECT)
     assert result.probes[0].reason_code == "MUTATION_SUBJECT_DRIFT"
 
 
@@ -988,7 +1123,7 @@ def test_runtime_os_error_returns_five_facts_and_always_cleans_root(
         original_mkdir(self, *args, **kwargs)  # type: ignore[arg-type]
 
     monkeypatch.setattr(Path, "mkdir", mkdir)
-    result = runner.run_targeted_mutations(tmp_path, SUBJECT)
+    result = _authorized_run(tmp_path, SUBJECT)
     assert attempts == []
     assert result.probes[0].reason_code == "MUTATION_WORKSPACE_INVALID"
     assert all(item.reason_code == "MUTATION_NOT_EXECUTED" for item in result.probes[1:])
@@ -1007,7 +1142,7 @@ def test_workspace_failure_before_first_worktree_is_a_contract_error(
         lambda: (_ for _ in ()).throw(runner._RunFailure("MUTATION_WORKSPACE_INVALID")),
     )
     with pytest.raises(ContractError) as caught:
-        runner.run_targeted_mutations(tmp_path, SUBJECT)
+        _authorized_run(tmp_path, SUBJECT)
     assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
 
 
@@ -1034,7 +1169,7 @@ def test_preflight_contract_and_os_errors_clean_workspace_and_remain_stable(
             lambda _parent, path: cleaned.append(path) is None or True,
         )
         with pytest.raises(ContractError) as caught:
-            runner.run_targeted_mutations(tmp_path, SUBJECT)
+            _authorized_run(tmp_path, SUBJECT)
         assert caught.value.code == expected
         assert cleaned == [workspace]
         monkeypatch.undo()
@@ -1056,5 +1191,5 @@ def test_preflight_cleanup_failure_overrides_the_original_error(
     )
     monkeypatch.setattr(runner, "_remove_tree_with_retry", lambda *_args: False)
     with pytest.raises(ContractError) as caught:
-        runner.run_targeted_mutations(tmp_path, SUBJECT)
+        _authorized_run(tmp_path, SUBJECT)
     assert caught.value.code == "MUTATION_WORKTREE_CLEANUP_FAILED"

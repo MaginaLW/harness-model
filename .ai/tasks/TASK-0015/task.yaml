@@ -16,9 +16,12 @@ allowed_scope:
 - tests/unit/test_mutation_runner.py
 - tests/unit/test_evidence.py
 - tests/unit/test_gate.py
+- tests/unit/test_review_package.py
+- tests/integration/test_approve_command.py
 - tests/integration/test_verify_command.py
 - tests/integration/test_verification_evidence_flow.py
 - tests/integration/test_gate_command.py
+- tests/integration/test_mutation_manifest_contract.py
 - tests/integration/test_mutation_runner_contract.py
 - tests/acceptance/test_v2_acceptance.py
 - tests/e2e/test_v2_verifier_scenario.py
@@ -51,20 +54,26 @@ decision_units:
   - src/aiflow/verification_service.py
   - src/aiflow/evidence.py
   - src/aiflow/mutation_evidence.py
+  - src/aiflow/mutation_runner.py
   - src/aiflow/approval.py
   - src/aiflow/gate.py
   - .ai/schemas/evidence.schema.json
+  - .ai/templates/evidence-v2.json
   - tests/fixtures/contracts/valid/evidence-v2.json
   - tests/fixtures/contracts/invalid/evidence-v2.missing.json
   - tests/fixtures/contracts/invalid/evidence-v2.invalid.json
   - tests/fixtures/contracts/invalid/evidence-v2.extra.json
   - tests/unit/test_contracts.py
   - tests/unit/test_mutation_evidence.py
+  - tests/unit/test_mutation_runner.py
   - tests/unit/test_evidence.py
   - tests/unit/test_gate.py
+  - tests/unit/test_review_package.py
+  - tests/integration/test_approve_command.py
   - tests/integration/test_verify_command.py
   - tests/integration/test_verification_evidence_flow.py
   - tests/integration/test_gate_command.py
+  - tests/integration/test_mutation_manifest_contract.py
   - tests/integration/test_mutation_runner_contract.py
   - tests/acceptance/test_v2_acceptance.py
   - tests/e2e/test_v2_verifier_scenario.py
@@ -113,9 +122,9 @@ goal: 完成 Chapter 11.5：在当前任务版本边界内采集并消费 target
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-25T11:55:43Z'
-subject_commit: 5f5c731fd049d4dfa738c06aeadd054c5b9ad409
+spec_frozen_at: '2026-08-25T14:07:30Z'
+subject_commit: 3b5d6f3bb2784994bf8795729dc5edbf050dd191
 task_id: TASK-0015
-updated_at: '2026-08-25T11:56:34Z'
+updated_at: '2026-08-25T14:08:42Z'
 worktree_dirty: false
 worktree_dirty_paths: []

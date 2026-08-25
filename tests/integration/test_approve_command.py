@@ -414,6 +414,51 @@ def test_action_approval_records_exact_single_use_action_without_state_change(
     assert load_task_record(repository, "TASK-0001").events == first.events
 
 
+def test_targeted_mutation_action_approval_rejects_stale_classification_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch, state="CLASSIFIED")
+    before = load_task_record(repository, "TASK-0001")
+    approvals_before = read_task_json(repository, "TASK-0001", "approvals.json")
+    action_path = tmp_path / "targeted-mutation-action.json"
+    action_path.write_text(
+        json.dumps(
+            {
+                "decision_unit_id": "DU-001",
+                "classification_input_sha256": "f" * 64,
+                "action_type": "targeted_mutation_v2",
+                "target": "TASK-0001",
+                "parameter_summary": "one fixed V2 mutation collection",
+                "subject_commit": before.task["subject_commit"],
+                "conditions": ["single fixed transaction"],
+                "expires_at": "2099-01-01T00:00:00Z",
+                "single_use": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert (
+        main(
+            [
+                "approve",
+                "TASK-0001",
+                "--type",
+                "action",
+                "--actor",
+                "reviewer",
+                "--reason",
+                "approve fixed V2 mutation collection",
+                "--action-file",
+                str(action_path),
+            ]
+        )
+        == 1
+    )
+    assert load_task_record(repository, "TASK-0001").events == before.events
+    assert read_task_json(repository, "TASK-0001", "approvals.json") == approvals_before
+
+
 def test_action_approval_rejects_expired_or_non_single_use_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -15,6 +15,7 @@ from aiflow.errors import ContractError
 from aiflow.evidence import V2_FINAL, validate_v2_snapshot
 from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import collect_git_context, commits_are_ancestral
+from aiflow.mutation_evidence import consume_targeted_mutation_evidence
 from aiflow.policy import load_policy_bundle
 from aiflow.review_service import latest_review_assessment
 from aiflow.routing import ROUTE_ORDER, route_task
@@ -313,17 +314,8 @@ def _v2_gate_facts(
                 and expected_checks.issubset(by_id)
                 and all(by_id[check_id].get("status") == "passed" for check_id in expected_checks)
             )
-        mutation = evidence.get("targeted_mutation")
-        if isinstance(mutation, Mapping):
-            mutations = mutation.get("results")
-            result["v2_mutation_killed"] = (
-                isinstance(mutations, list)
-                and bool(mutations)
-                and all(
-                    isinstance(item, Mapping) and item.get("outcome") == "killed"
-                    for item in mutations
-                )
-            )
+        mutation_facts = consume_targeted_mutation_evidence(repository_root, task_id, evidence)
+        result["v2_mutation_killed"] = mutation_facts.passed
         refs = evidence.get("review_refs")
         snapshot = evidence.get("verification_snapshot_sha256")
         if isinstance(refs, Mapping) and isinstance(snapshot, str):

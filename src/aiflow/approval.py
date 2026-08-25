@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
@@ -32,6 +33,9 @@ from aiflow.verifier_service import (
     validate_verifier_context_current,
 )
 
+if TYPE_CHECKING:
+    from aiflow.mutation_evidence import TargetedMutationFacts
+
 ApprovalType = Literal["spec", "code", "action"]
 _APPROVAL_STATES: Mapping[ApprovalType, str | None] = {
     "spec": "WAITING_FOR_SPEC_REVIEW",
@@ -39,6 +43,17 @@ _APPROVAL_STATES: Mapping[ApprovalType, str | None] = {
     "action": None,
 }
 APPROVAL_MARKER = "approval_pending.json"
+
+
+def consume_targeted_mutation_evidence(
+    repository_root: Path, task_id: str, evidence: Mapping[str, object]
+) -> "TargetedMutationFacts":
+    """Lazily delegate to the shared consumer without an import cycle."""
+    from aiflow.mutation_evidence import (
+        consume_targeted_mutation_evidence as consume_mutation,
+    )
+
+    return consume_mutation(repository_root, task_id, evidence)
 
 
 @dataclass(frozen=True)
@@ -99,6 +114,7 @@ def validate_action_file(
     """Validate exact, single-use action authorization data without executing it."""
     allowed_keys = {
         "decision_unit_id",
+        "classification_input_sha256",
         "action_type",
         "target",
         "parameter_summary",
@@ -126,6 +142,9 @@ def validate_action_file(
         "expires_at": action_file.get("expires_at"),
         "single_use": action_file.get("single_use"),
     }
+    for optional_key in ("decision_unit_id", "classification_input_sha256"):
+        if optional_key in action_file:
+            value[optional_key] = action_file[optional_key]
     strings = ("action_type", "target", "parameter_summary", "subject_commit", "expires_at")
     for key in strings:
         field = value[key]
@@ -140,10 +159,33 @@ def validate_action_file(
         raise _invalid("Action approval conditions are invalid", "ACTION_FILE_INVALID")
     if value["single_use"] is not True:
         raise _invalid("Action approval must be single use", "ACTION_SINGLE_USE_REQUIRED")
+    decision_unit_id = value.get("decision_unit_id")
+    if decision_unit_id is not None and (
+        not isinstance(decision_unit_id, str)
+        or re.fullmatch(r"DU-[0-9]{3,}", decision_unit_id) is None
+    ):
+        raise _invalid("Action decision unit is invalid", "ACTION_FILE_INVALID")
+    classification_sha256 = value.get("classification_input_sha256")
+    if classification_sha256 is not None and (
+        not isinstance(classification_sha256, str)
+        or re.fullmatch(r"[0-9a-f]{64}", classification_sha256) is None
+    ):
+        raise _invalid("Action classification binding is invalid", "ACTION_FILE_INVALID")
     expires_at = _utc(str(value["expires_at"]))
     if now is not None and expires_at <= _utc(now):
         raise _invalid("Action approval has expired", "ACTION_APPROVAL_EXPIRED")
     return {**value, "conditions": list(conditions)}
+
+
+def canonical_action_sha256(action: Mapping[str, object]) -> str:
+    """Return the approval-bound digest of one normalized action."""
+    try:
+        payload = json.dumps(
+            action, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+    except (TypeError, ValueError) as error:
+        raise _invalid("Action approval file is invalid", "ACTION_FILE_INVALID") from error
+    return hashlib.sha256(payload).hexdigest()
 
 
 def prepare_approval(
@@ -203,11 +245,7 @@ def prepare_approval(
         "approved_at": approved_at,
     }
     if action is not None:
-        action_sha256 = hashlib.sha256(
-            json.dumps(action, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode(
-                "utf-8"
-            )
-        ).hexdigest()
+        action_sha256 = canonical_action_sha256(action)
         raw_record.update(
             {
                 "action_sha256": action_sha256,
@@ -412,13 +450,7 @@ def _v2_evidence_current(
         return False
     if any(by_id[identifier].get("status") != "passed" for identifier in expected):
         return False
-    mutation = evidence.get("targeted_mutation")
-    results = mutation.get("results") if isinstance(mutation, Mapping) else None
-    return (
-        isinstance(results, list)
-        and bool(results)
-        and all(isinstance(item, Mapping) and item.get("outcome") == "killed" for item in results)
-    )
+    return consume_targeted_mutation_evidence(repository_root, task_id, evidence).passed
 
 
 def _load_approvals(repository_root: Path, task_id: str) -> list[dict[str, object]]:
@@ -639,6 +671,14 @@ def approve_task(
                 "Action approval requires an action file", code="ACTION_FILE_REQUIRED"
             )
         action_value = _read_external_json(action_file, code="ACTION_FILE_INVALID")
+        if (
+            action_value.get("action_type") == "targeted_mutation_v2"
+            and action_value.get("classification_input_sha256") != input_sha256
+        ):
+            raise ContractError(
+                "Targeted mutation action classification binding is stale",
+                code="ACTION_CLASSIFICATION_MISMATCH",
+            )
         raw_decision_unit = action_value.get("decision_unit_id")
         if not isinstance(raw_decision_unit, str) or raw_decision_unit not in {
             unit.get("decision_unit_id")

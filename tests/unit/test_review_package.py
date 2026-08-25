@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import pytest
 
+import aiflow.approval as approval
+import aiflow.mutation_evidence as mutation_evidence
 from aiflow.approval import (
     ApprovalContext,
     approval_is_current,
+    canonical_action_sha256,
     prepare_approval,
     validate_action_file,
 )
@@ -165,6 +168,40 @@ def test_action_file_is_exact_single_use_and_expiry_bound() -> None:
     with pytest.raises(ContractError) as caught:
         validate_action_file(action_file(expires_at=NOW), subject_commit=COMMIT, now=NOW)
     assert caught.value.code == "ACTION_APPROVAL_EXPIRED"
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"decision_unit_id": "invalid"},
+        {"classification_input_sha256": "not-a-digest"},
+    ],
+)
+def test_action_file_rejects_invalid_optional_bindings(changes: dict[str, object]) -> None:
+    with pytest.raises(ContractError) as caught:
+        validate_action_file(action_file(**changes), subject_commit=COMMIT, now=NOW)
+
+    assert caught.value.code == "ACTION_FILE_INVALID"
+
+
+def test_action_digest_rejects_non_json_values() -> None:
+    with pytest.raises(ContractError) as caught:
+        canonical_action_sha256({"invalid": object()})
+
+    assert caught.value.code == "ACTION_FILE_INVALID"
+
+
+def test_approval_lazy_mutation_consumer_delegates(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sentinel = object()
+    monkeypatch.setattr(
+        mutation_evidence,
+        "consume_targeted_mutation_evidence",
+        lambda *_args: sentinel,
+    )
+
+    assert approval.consume_targeted_mutation_evidence(tmp_path, "TASK-0001", {}) is sentinel
 
 
 def test_action_approval_does_not_execute_and_keeps_metadata_separate() -> None:

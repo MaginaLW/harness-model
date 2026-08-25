@@ -27,7 +27,11 @@ from aiflow.git_context import (
     VerificationGitBinding,
     evaluate_verification_git_context,
 )
-from aiflow.mutation_evidence import TargetedMutationFacts, consume_targeted_mutation_evidence
+from aiflow.mutation_evidence import (
+    TargetedMutationFacts,
+    consume_targeted_mutation_evidence,
+    record_targeted_mutation_evidence,
+)
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.process_runner import ProcessResult, run_execution
 from aiflow.review_service import ReviewAssessment, latest_review_assessment
@@ -75,15 +79,18 @@ class VerifyResult:
 
 def _v2_targeted_mutation_artifact(
     repository_root: Path, task_id: str, subject_commit: str
-) -> Mapping[str, object] | None:
-    """Return a task-bound artifact supplied by the controlled collection seam.
+) -> TargetedMutationFacts:
+    """Collect once, then replay the exact immutable task-bound artifact.
 
-    Collection is deliberately not implicit in verification: absent a governed
-    collection integration this fail-closed default prevents V2 from starting a
-    mutation runner.  The seam is also the sole test injection point.
+    The caller is the frozen production seam.  The recorder itself atomically
+    consumes and revalidates the separately approved single-use action before
+    its fixed runner call, so direct recorder use cannot bypass authorization.
     """
-    del repository_root, task_id, subject_commit
-    return None
+    recorded = record_targeted_mutation_evidence(repository_root, task_id, subject_commit)
+    facts = consume_targeted_mutation_evidence(
+        repository_root, task_id, {}, recorded_artifact=recorded
+    )
+    return facts
 
 
 def _missing_mutation_projection(task_id: str) -> dict[str, object]:
@@ -103,16 +110,50 @@ def _missing_mutation_projection(task_id: str) -> dict[str, object]:
 
 
 def _targeted_mutation_projection(
-    repository_root: Path, task_id: str, subject_commit: str
-) -> dict[str, object]:
-    """Project a supplied immutable artifact, or a fail-closed missing sentinel."""
-    artifact = _v2_targeted_mutation_artifact(repository_root, task_id, subject_commit)
-    if not isinstance(artifact, Mapping):
-        return _missing_mutation_projection(task_id)
-    fields = ("evidence_ref", "mutation_evidence_sha256", "manifest_ref", "results")
-    if not all(field in artifact for field in fields):
-        return _missing_mutation_projection(task_id)
-    return {field: artifact[field] for field in fields}
+    repository_root: Path,
+    task_id: str,
+    subject_commit: str,
+    *,
+    collect: bool,
+) -> tuple[dict[str, object], TargetedMutationFacts]:
+    """Return a schema-valid projection plus loader-backed fail-closed facts."""
+    if not collect:
+        projection = _missing_mutation_projection(task_id)
+        return projection, TargetedMutationFacts(
+            False,
+            "MUTATION_EVIDENCE_MISSING",
+            str(projection["evidence_ref"]),
+            str(projection["mutation_evidence_sha256"]),
+            str(projection["manifest_ref"]),
+            tuple(cast(list[Mapping[str, object]], projection["results"])),
+        )
+    try:
+        facts = _v2_targeted_mutation_artifact(repository_root, task_id, subject_commit)
+    except AiflowError as error:
+        projection = _missing_mutation_projection(task_id)
+        return projection, TargetedMutationFacts(
+            False,
+            error.code if error.code.startswith("ACTION_") else "MUTATION_EVIDENCE_INVALID",
+            str(projection["evidence_ref"]),
+            str(projection["mutation_evidence_sha256"]),
+            str(projection["manifest_ref"]),
+            tuple(cast(list[Mapping[str, object]], projection["results"])),
+        )
+    if (
+        not isinstance(facts.evidence_ref, str)
+        or not isinstance(facts.mutation_evidence_sha256, str)
+        or not isinstance(facts.manifest_ref, str)
+        or len(facts.results) != 5
+    ):
+        projection = _missing_mutation_projection(task_id)
+    else:
+        projection = {
+            "evidence_ref": facts.evidence_ref,
+            "mutation_evidence_sha256": facts.mutation_evidence_sha256,
+            "manifest_ref": facts.manifest_ref,
+            "results": [dict(item) for item in facts.results],
+        }
+    return projection, facts
 
 
 def _now() -> str:
@@ -360,6 +401,8 @@ def _independent_verifier_result() -> ProcessResult:
 def _upgrade_v2_pre_evidence(
     evidence: dict[str, object],
     *,
+    mutation_projection: Mapping[str, object],
+    mutation_facts: TargetedMutationFacts,
     verifier_actor: str,
     verifier_context_sha256: str,
     design_review: ReviewAssessment,
@@ -372,15 +415,15 @@ def _upgrade_v2_pre_evidence(
             continue
         check.update(
             {
-                "status": "unverified",
-                "reason_code": _V2_CHAPTER11_REASON,
-                "exit_code": None,
+                "status": "passed" if mutation_facts.passed else "failed",
+                "reason_code": mutation_facts.reason_code,
+                "exit_code": 0 if mutation_facts.passed else 1,
                 "timed_out": False,
                 "duration_ms": 0,
                 "stdout_log_ref": None,
                 "stderr_log_ref": None,
-                "command_summary": "owned by Chapter 11 and not executed",
-                "tool_version": "not-executed:chapter-11",
+                "command_summary": "loader-validated targeted mutation evidence",
+                "tool_version": "aiflow-mutation-evidence-v1",
             }
         )
     raw_unverified = evidence.get("unverified_scenarios")
@@ -390,10 +433,10 @@ def _upgrade_v2_pre_evidence(
         for reason in unverified_values
         if not any(f"check:{identifier}:" in str(reason) for identifier in _V2_CHAPTER11_CHECK_IDS)
     }
-    unverified.update(
-        f"check:{identifier}:{_V2_CHAPTER11_REASON}"
-        for identifier in sorted(_V2_CHAPTER11_CHECK_IDS)
-    )
+    if not mutation_facts.passed:
+        unverified.add(
+            f"check:targeted_mutation:{mutation_facts.reason_code or 'MUTATION_EVIDENCE_INVALID'}"
+        )
     # A selected V2 check is deliberately a partial, non-gating observation.  Its
     # conclusion may be provisional only when every selected check really passed
     # and the independent-verifier role fact is present.  In particular, do not
@@ -412,25 +455,33 @@ def _upgrade_v2_pre_evidence(
     role_fact_complete = (
         isinstance(independent_verifier, dict) and independent_verifier.get("status") == "passed"
     )
+    required_complete = bool(checks) and all(
+        check.get("required") is not True or check.get("status") == "passed"
+        for check in checks
+        if isinstance(check, dict)
+    )
+    conclusion = (
+        "provisional"
+        if (
+            provisional_check_ids
+            and selected_complete
+            and role_fact_complete
+            and mutation_facts.passed
+        )
+        else "passed"
+        if not provisional_check_ids and required_complete
+        else "failed"
+    )
     evidence.update(
         {
             "schema_version": "2.0",
             "verification_level": "V2",
             "unverified_scenarios": sorted(unverified),
-            "conclusion": "provisional" if selected_complete and role_fact_complete else "failed",
+            "conclusion": conclusion,
             "verifier_actor": verifier_actor,
             "verifier_context_sha256": verifier_context_sha256,
             "review_refs": {"design": _review_ref(design_review)},
-            "targeted_mutation": {
-                "manifest_ref": "chapter-11-pending",
-                "results": [
-                    {
-                        "mutation_id": "CHAPTER11-PENDING",
-                        "outcome": "unverified",
-                        "log_ref": None,
-                    }
-                ],
-            },
+            "targeted_mutation": dict(mutation_projection),
         }
     )
     return prepare_v2_pre_evidence(evidence)
@@ -730,9 +781,18 @@ def verify_task(
     results = _execute_plan(root, execution_plan)
     if level == "V2":
         results.append(_independent_verifier_result())
+        mutation_projection, mutation_facts = _targeted_mutation_projection(
+            root,
+            task_id,
+            subject_commit,
+            collect=not ci and (not check_ids or "targeted_mutation" in check_ids),
+        )
+    else:
+        mutation_projection = None
+        mutation_facts = None
     versions = {
         check.check_id: (
-            "not-executed:chapter-11"
+            "aiflow-mutation-evidence-v1"
             if check.check_id in _V2_CHAPTER11_CHECK_IDS
             else "aiflow-local"
             if check.check_id == "independent_verifier"
@@ -802,8 +862,12 @@ def verify_task(
         assert verifier_actor is not None
         assert verifier_context_sha256 is not None
         assert design_review is not None
+        assert mutation_projection is not None
+        assert mutation_facts is not None
         evidence = _upgrade_v2_pre_evidence(
             evidence,
+            mutation_projection=mutation_projection,
+            mutation_facts=mutation_facts,
             verifier_actor=verifier_actor,
             verifier_context_sha256=verifier_context_sha256,
             design_review=design_review,

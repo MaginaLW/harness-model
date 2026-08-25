@@ -8,10 +8,11 @@ from pathlib import Path
 import pytest
 from scenario_support import TASK_ID, complete_spec, prepare_task, review_package
 
-from aiflow import verification_service
+from aiflow import approval, gate, verification_service
 from aiflow.cli import main
 from aiflow.evidence import prepare_v2_pre_evidence
 from aiflow.gate import evaluate_gate
+from aiflow.mutation_evidence import TargetedMutationFacts
 from aiflow.policy import load_policy_bundle
 from aiflow.storage import (
     atomic_write_json,
@@ -104,8 +105,20 @@ def _passed_v2_pre(repository: Path, design_context: dict[str, object]) -> dict[
             "design": {"review_id": "REV-1001", "context_sha256": design_context["context_sha256"]}
         },
         "targeted_mutation": {
-            "manifest_ref": "tests/mutations.json",
-            "results": [{"mutation_id": "MUT-001", "outcome": "killed", "log_ref": None}],
+            "evidence_ref": (
+                ".ai/tasks/TASK-0001/logs/MUTRUN-20260823T050000Z-"
+                "0000000000000000/targeted-mutation/evidence.json"
+            ),
+            "mutation_evidence_sha256": "0" * 64,
+            "manifest_ref": ".ai/mutations/phase-02-critical-manifest.json",
+            "results": [
+                {
+                    "mutation_id": f"MUT-V2-{index:03d}",
+                    "outcome": "killed",
+                    "log_ref": None,
+                }
+                for index in range(1, 6)
+            ],
         },
     }
     return prepare_v2_pre_evidence(evidence)
@@ -172,6 +185,16 @@ def test_v2_pre_review_finalize_replay_is_runner_free(
     resolve_task_path(repository, TASK_ID, "review-package.md").write_text(
         review_package(), encoding="utf-8"
     )
+    replay_facts = TargetedMutationFacts(
+        True,
+        None,
+        str(final["targeted_mutation"]["evidence_ref"]),
+        str(final["targeted_mutation"]["mutation_evidence_sha256"]),
+        str(final["targeted_mutation"]["manifest_ref"]),
+        tuple(final["targeted_mutation"]["results"]),
+    )
+    monkeypatch.setattr(approval, "consume_targeted_mutation_evidence", lambda *_args: replay_facts)
+    monkeypatch.setattr(gate, "consume_targeted_mutation_evidence", lambda *_args: replay_facts)
     assert (
         main(
             [

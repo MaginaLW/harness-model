@@ -237,7 +237,14 @@
                     "minItems": 5,
                     "maxItems": 5,
                     "uniqueItems": true,
-                    "items": {"$ref": "#/$defs/targeted_mutation_result"}
+                    "prefixItems": [
+                        {"allOf": [{"$ref": "#/$defs/targeted_mutation_result"}, {"properties": {"mutation_id": {"const": "MUT-V2-001"}}}]},
+                        {"allOf": [{"$ref": "#/$defs/targeted_mutation_result"}, {"properties": {"mutation_id": {"const": "MUT-V2-002"}}}]},
+                        {"allOf": [{"$ref": "#/$defs/targeted_mutation_result"}, {"properties": {"mutation_id": {"const": "MUT-V2-003"}}}]},
+                        {"allOf": [{"$ref": "#/$defs/targeted_mutation_result"}, {"properties": {"mutation_id": {"const": "MUT-V2-004"}}}]},
+                        {"allOf": [{"$ref": "#/$defs/targeted_mutation_result"}, {"properties": {"mutation_id": {"const": "MUT-V2-005"}}}]}
+                    ],
+                    "items": false
                 }
             }
         }

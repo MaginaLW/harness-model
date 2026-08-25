@@ -166,6 +166,14 @@ def test_v2_snapshot_rejects_mutation_of_bound_verification_facts() -> None:
         validate_v2_snapshot(pre)
     assert caught.value.code == "EVIDENCE_SNAPSHOT_STALE"
 
+    artifact_tamper = prepare_v2_pre_evidence(v2_evidence())
+    targeted = artifact_tamper["targeted_mutation"]
+    assert isinstance(targeted, dict)
+    targeted["mutation_evidence_sha256"] = "1" * 64
+    with pytest.raises(ContractError) as caught:
+        validate_v2_snapshot(artifact_tamper)
+    assert caught.value.code == "EVIDENCE_SNAPSHOT_STALE"
+
 
 def test_v2_helpers_reject_invalid_versions_missing_refs_and_invalid_finalization_inputs() -> None:
     legacy = v2_evidence()

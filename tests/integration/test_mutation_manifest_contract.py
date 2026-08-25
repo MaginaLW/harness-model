@@ -7,6 +7,7 @@ from typing import Any
 
 import aiflow.approval as approval
 import aiflow.gate as gate
+from aiflow.mutation_evidence import TargetedMutationFacts
 from aiflow.mutation_manifest import load_mutation_manifest
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -117,7 +118,20 @@ def _final_evidence(
         "verifier_context_sha256": "a" * 64,
         "checks": [{"check_id": "required", "status": check_status}],
         "targeted_mutation": {
-            "results": [{"mutation_id": "MUT-V2-001", "outcome": mutation_outcome}]
+            "evidence_ref": (
+                ".ai/tasks/TASK-0012/logs/MUTRUN-20260825T120000Z-"
+                "0000000000000000/targeted-mutation/evidence.json"
+            ),
+            "mutation_evidence_sha256": "a" * 64,
+            "manifest_ref": ".ai/mutations/phase-02-critical-manifest.json",
+            "results": [
+                {
+                    "mutation_id": f"MUT-V2-{index:03d}",
+                    "outcome": mutation_outcome,
+                    "log_ref": None,
+                }
+                for index in range(1, 6)
+            ],
         },
     }
 
@@ -145,3 +159,69 @@ def test_v2_gate_rejects_non_killed_mutation(monkeypatch: Any) -> None:
     )
     assert facts["v2_checks_current"] is True
     assert facts["v2_mutation_killed"] is False
+
+
+def test_v2_approval_and_gate_use_the_same_loader_backed_mutation_fact(
+    monkeypatch: Any,
+) -> None:
+    evidence = _final_evidence()
+    _patch_v2_context(monkeypatch, approval)
+    _patch_v2_context(monkeypatch, gate)
+    rejected = TargetedMutationFacts(
+        False,
+        "MUTATION_EVIDENCE_INVALID",
+        None,
+        None,
+        None,
+        (),
+    )
+    monkeypatch.setattr(approval, "consume_targeted_mutation_evidence", lambda *_args: rejected)
+    monkeypatch.setattr(gate, "consume_targeted_mutation_evidence", lambda *_args: rejected)
+
+    assert not approval._v2_evidence_current(
+        REPOSITORY_ROOT,
+        "TASK-0012",
+        evidence,
+        events=(),
+        policy_checks=[{"id": "required", "required": True}],
+    )
+    rejected_gate = gate._v2_gate_facts(
+        REPOSITORY_ROOT,
+        "TASK-0012",
+        evidence,
+        events=(),
+        policy_checks=[{"id": "required", "required": True}],
+        decision_unit_ids=[],
+    )
+    assert rejected_gate["v2_mutation_killed"] is False
+
+    mutation = evidence["targeted_mutation"]
+    assert isinstance(mutation, dict)
+    results = mutation["results"]
+    assert isinstance(results, list)
+    accepted = TargetedMutationFacts(
+        True,
+        None,
+        str(mutation["evidence_ref"]),
+        "a" * 64,
+        ".ai/mutations/phase-02-critical-manifest.json",
+        tuple(results),
+    )
+    monkeypatch.setattr(approval, "consume_targeted_mutation_evidence", lambda *_args: accepted)
+    monkeypatch.setattr(gate, "consume_targeted_mutation_evidence", lambda *_args: accepted)
+    assert approval._v2_evidence_current(
+        REPOSITORY_ROOT,
+        "TASK-0012",
+        evidence,
+        events=(),
+        policy_checks=[{"id": "required", "required": True}],
+    )
+    accepted_gate = gate._v2_gate_facts(
+        REPOSITORY_ROOT,
+        "TASK-0012",
+        evidence,
+        events=(),
+        policy_checks=[{"id": "required", "required": True}],
+        decision_unit_ids=[],
+    )
+    assert accepted_gate["v2_mutation_killed"] is True

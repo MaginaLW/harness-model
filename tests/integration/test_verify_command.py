@@ -4,16 +4,25 @@ from __future__ import annotations
 
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from threading import Barrier
 
 import pytest
 from test_begin_close_commands import create_repository, make_ready, run_git, start
 
-from aiflow import cli, verification_service
+from aiflow import cli, mutation_evidence, mutation_runner, verification_service
+from aiflow.approval import canonical_action_sha256, validate_action_file
 from aiflow.cli import build_parser, main
+from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.errors import ContractError, StorageError
 from aiflow.review_service import ReviewAssessment
-from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
+from aiflow.storage import (
+    atomic_write_json,
+    atomic_write_yaml,
+    read_task_json,
+    resolve_task_path,
+)
 from aiflow.task_service import load_task_record
 from aiflow.verification import (
     VerificationCheck,
@@ -22,6 +31,78 @@ from aiflow.verification import (
     VerificationPlan,
 )
 from aiflow.verification_service import VerifyResult
+
+
+def _mutation_artifact(outcome: str = "killed", task_id: str = "TASK-0001") -> dict[str, object]:
+    results = [
+        {"mutation_id": f"MUT-V2-{index:03d}", "outcome": outcome, "log_ref": None}
+        for index in range(1, 6)
+    ]
+    return {
+        "evidence_ref": (
+            f".ai/tasks/{task_id}/logs/MUTRUN-20260825T120000Z-"
+            "0000000000000000/targeted-mutation/evidence.json"
+        ),
+        "mutation_evidence_sha256": "1" * 64,
+        "manifest_ref": ".ai/mutations/phase-02-critical-manifest.json",
+        "results": results,
+        "uncovered_mutation_ids": (
+            [] if outcome == "killed" else [item["mutation_id"] for item in results]
+        ),
+    }
+
+
+def test_v2_mutation_collection_seam_records_once_then_publicly_replays(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[str, str]] = []
+    evidence_ref = (
+        ".ai/tasks/TASK-0001/logs/MUTRUN-20260825T120000Z-"
+        "0000000000000000/targeted-mutation/evidence.json"
+    )
+    expected = _mutation_artifact()
+    expected_facts = mutation_evidence.TargetedMutationFacts(
+        True,
+        None,
+        evidence_ref,
+        str(expected["mutation_evidence_sha256"]),
+        str(expected["manifest_ref"]),
+        tuple(expected["results"]),  # type: ignore[arg-type]
+    )
+
+    def record(
+        _root: Path, task_id: str, subject: str
+    ) -> mutation_evidence.MutationEvidenceArtifact:
+        calls.append((task_id, subject))
+        return mutation_evidence.MutationEvidenceArtifact(
+            "MUTRUN-20260825T120000Z-0000000000000000",
+            evidence_ref,
+            str(expected["mutation_evidence_sha256"]),
+            (),
+        )
+
+    def consume(
+        _root: Path,
+        task_id: str,
+        evidence: dict[str, object],
+        *,
+        recorded_artifact: mutation_evidence.MutationEvidenceArtifact,
+    ) -> mutation_evidence.TargetedMutationFacts:
+        assert evidence == {}
+        calls.append((task_id, recorded_artifact.evidence_ref))
+        return expected_facts
+
+    monkeypatch.setattr(verification_service, "record_targeted_mutation_evidence", record)
+    monkeypatch.setattr(verification_service, "consume_targeted_mutation_evidence", consume)
+
+    assert (
+        verification_service._v2_targeted_mutation_artifact(tmp_path, "TASK-0001", "f" * 40)
+        == expected_facts
+    )
+    assert calls == [
+        ("TASK-0001", "f" * 40),
+        ("TASK-0001", evidence_ref),
+    ]
 
 
 def _plan(*, failed: bool = False):
@@ -109,6 +190,543 @@ def _enable_v2(repository: Path) -> None:
     )
 
 
+def _enable_v2_action_requirement(repository: Path) -> None:
+    """Add the permission facts enforced by the real mutation action boundary."""
+    record = load_task_record(repository, "TASK-0001")
+    task = record.task
+    unit = task["decision_units"][0]
+    assert isinstance(unit, dict)
+    unit["permission_requirements"] = ["action_approval"]
+    unit["verification_requirements"] = {
+        "acceptance_required": True,
+        "integration_required": True,
+        "targeted_mutation_required": True,
+        "independent_verifier_required": True,
+    }
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    classification["classification_input_sha256"] = classification_input_digest(
+        task, parse_decision_units(task)
+    )
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "classification.json"), classification
+    )
+
+
+def _approve_v2_action(
+    repository: Path,
+    suffix: str,
+    *,
+    parameter_summary: str | None = None,
+) -> tuple[Path, str]:
+    record = load_task_record(repository, "TASK-0001")
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    action_path = resolve_task_path(
+        repository,
+        "TASK-0001",
+        f"action-v2-targeted-mutation-{suffix}.json",
+    )
+    atomic_write_json(
+        action_path,
+        {
+            "decision_unit_id": "DU-001",
+            "classification_input_sha256": classification["classification_input_sha256"],
+            "action_type": "targeted_mutation_v2",
+            "target": "TASK-0001",
+            "parameter_summary": parameter_summary
+            or f"fixed V2 mutation collection {suffix}; one runner; five worktrees maximum",
+            "subject_commit": record.task["subject_commit"],
+            "conditions": [
+                f"Action {suffix}: launch, failure, or interruption consumes approval; no retry."
+            ],
+            "expires_at": "2999-01-01T00:00:00Z",
+            "single_use": True,
+        },
+    )
+    assert (
+        main(
+            [
+                "approve",
+                "TASK-0001",
+                "--type",
+                "action",
+                "--actor",
+                "user",
+                "--reason",
+                f"approve fixed V2 mutation collection {suffix}",
+                "--action-file",
+                str(action_path),
+            ]
+        )
+        == 0
+    )
+    approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+    assert isinstance(approvals, list)
+    return action_path, str(approvals[-1]["action_sha256"])
+
+
+def test_v2_recorder_without_action_approval_never_calls_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    record = load_task_record(repository, "TASK-0001")
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("runner must not run without current action approval")
+
+    monkeypatch.setattr(mutation_evidence, "run_targeted_mutations", unexpected)
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence.record_targeted_mutation_evidence(
+            repository, "TASK-0001", str(record.task["subject_commit"])
+        )
+
+    assert caught.value.code == "ACTION_APPROVAL_REQUIRED"
+
+
+def test_v2_recorder_rejects_pending_action_approval_transaction(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "approval_pending.json"),
+        {"incomplete": True},
+    )
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("pending approval transaction must fail before runner")
+
+    monkeypatch.setattr(mutation_evidence, "run_targeted_mutations", unexpected)
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence.record_targeted_mutation_evidence(repository, "TASK-0001", subject)
+
+    assert caught.value.code == "ACTION_APPROVAL_PENDING"
+
+
+def test_v2_mutation_action_is_consumed_once_before_collection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    action_path, digest = _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+
+    action_use = mutation_evidence._consume_targeted_mutation_action(
+        repository,
+        "TASK-0001",
+        subject,
+        task,
+        classification,
+        policy_sha256,
+    )
+
+    assert action_use.action_sha256 == digest
+    assert action_use.receipt_path.name == f"action-use-{digest}.md"
+    assert "Status: `started`" in action_use.receipt_path.read_text(encoding="utf-8")
+    mutation_evidence._revalidate_targeted_mutation_action(
+        repository, "TASK-0001", subject, action_use
+    )
+    launch_arguments = {
+        "action_sha256": action_use.action_sha256,
+        "receipt_path": action_use.receipt_path,
+        "action_path": action_use.action_path,
+        "decision_unit_id": action_use.decision_unit_id,
+        "spec_sha256": action_use.spec_sha256,
+        "policy_sha256": action_use.policy_sha256,
+        "base_commit": action_use.base_commit,
+        "classification_input_sha256": action_use.classification_input_sha256,
+        "receipt_device": action_use.receipt_device,
+        "receipt_inode": action_use.receipt_inode,
+    }
+    mutation_evidence._authorize_targeted_mutation_runner_launch(
+        repository, "TASK-0001", subject, **launch_arguments
+    )
+    assert resolve_task_path(
+        repository,
+        "TASK-0001",
+        f"logs/action-launch-{action_use.action_sha256}.json",
+    ).is_file()
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence._authorize_targeted_mutation_runner_launch(
+            repository, "TASK-0001", subject, **launch_arguments
+        )
+    assert caught.value.code == "ACTION_APPROVAL_USED"
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence._consume_targeted_mutation_action(
+            repository,
+            "TASK-0001",
+            subject,
+            task,
+            classification,
+            policy_sha256,
+        )
+    assert caught.value.code == "ACTION_APPROVAL_USED"
+
+    changed_action = read_task_json(repository, "TASK-0001", action_path.name)
+    assert isinstance(changed_action, dict)
+    changed_action["parameter_summary"] = "changed after receipt"
+    atomic_write_json(action_path, changed_action)
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence._revalidate_targeted_mutation_action(
+            repository, "TASK-0001", subject, action_use
+        )
+    assert caught.value.code == "ACTION_BINDING_STALE"
+
+
+def test_v2_runner_rejects_synthetic_token_without_consumption_ledger(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    action_path, digest = _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+    receipt = resolve_task_path(repository, "TASK-0001", f"action-use-{digest}.md")
+    receipt.write_text("synthetic receipt\n", encoding="utf-8")
+    authorization = mutation_runner._issue_runner_authorization(
+        repository,
+        "TASK-0001",
+        subject,
+        action_sha256=digest,
+        receipt_path=receipt,
+        action_path=action_path,
+        decision_unit_id="DU-001",
+        spec_sha256=str(task["frozen_spec_sha256"]),
+        policy_sha256=policy_sha256,
+        base_commit=str(task["base_commit"]),
+        classification_input_sha256=str(classification["classification_input_sha256"]),
+    )
+
+    with pytest.raises(ContractError) as caught:
+        mutation_runner._consume_runner_authorization(repository, subject, authorization)
+
+    assert caught.value.code == "ACTION_BINDING_STALE"
+    assert not resolve_task_path(
+        repository, "TASK-0001", f"logs/action-launch-{digest}.json"
+    ).exists()
+
+
+def test_v2_consumption_ledger_blocks_replay_after_receipt_deletion(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+    action_use = mutation_evidence._consume_targeted_mutation_action(
+        repository,
+        "TASK-0001",
+        subject,
+        task,
+        classification,
+        policy_sha256,
+    )
+    consumed = load_task_record(repository, "TASK-0001").events[-1]
+    assert consumed["payload"]["action_status"] == "consumed"
+    assert consumed["payload"]["receipt_device"] == action_use.receipt_device
+    assert consumed["payload"]["receipt_inode"] == action_use.receipt_inode
+
+    action_use.receipt_path.unlink()
+
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence._consume_targeted_mutation_action(
+            repository,
+            "TASK-0001",
+            subject,
+            task,
+            classification,
+            policy_sha256,
+        )
+    assert caught.value.code == "ACTION_APPROVAL_USED"
+
+
+def test_v2_consumption_stays_used_when_event_persistence_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _path, digest = _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+    original_record_event = mutation_evidence.record_task_event
+    monkeypatch.setattr(
+        mutation_evidence,
+        "record_task_event",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            StorageError("event unavailable", code="STATE_EVENT_APPEND_FAILED")
+        ),
+    )
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence._consume_targeted_mutation_action(
+            repository,
+            "TASK-0001",
+            subject,
+            task,
+            classification,
+            policy_sha256,
+        )
+    assert caught.value.code == "ACTION_RECEIPT_WRITE_FAILED"
+    assert resolve_task_path(repository, "TASK-0001", f"action-use-{digest}.md").is_file()
+
+    monkeypatch.setattr(mutation_evidence, "record_task_event", original_record_event)
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence._consume_targeted_mutation_action(
+            repository,
+            "TASK-0001",
+            subject,
+            task,
+            classification,
+            policy_sha256,
+        )
+    assert caught.value.code == "ACTION_APPROVAL_USED"
+
+
+def test_v2_result_append_rejects_replaced_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+    action_use = mutation_evidence._consume_targeted_mutation_action(
+        repository,
+        "TASK-0001",
+        subject,
+        task,
+        classification,
+        policy_sha256,
+    )
+    original = action_use.receipt_path.with_suffix(".original")
+    action_use.receipt_path.replace(original)
+    replacement = "replacement must remain unchanged\n"
+    action_use.receipt_path.write_text(replacement, encoding="utf-8")
+    artifact = mutation_evidence.MutationEvidenceArtifact(
+        "MUTRUN-20260825T000000Z-0123456789abcdef",
+        ".ai/tasks/TASK-0001/logs/MUTRUN-20260825T000000Z-0123456789abcdef/"
+        "targeted-mutation/evidence.json",
+        "a" * 64,
+        (),
+    )
+
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence._complete_targeted_mutation_action(action_use, artifact)
+
+    assert caught.value.code == "ACTION_RECEIPT_WRITE_FAILED"
+    assert action_use.receipt_path.read_text(encoding="utf-8") == replacement
+    assert "## Result" not in original.read_text(encoding="utf-8")
+
+
+def test_v2_action_digest_binds_decision_unit_and_classification() -> None:
+    base = {
+        "decision_unit_id": "DU-001",
+        "classification_input_sha256": "a" * 64,
+        "action_type": "targeted_mutation_v2",
+        "target": "TASK-0001",
+        "parameter_summary": "one fixed collection",
+        "subject_commit": "b" * 40,
+        "conditions": ["single fixed transaction"],
+        "expires_at": "2999-01-01T00:00:00Z",
+        "single_use": True,
+    }
+    normalized = validate_action_file(base, subject_commit="b" * 40)
+    changed_unit = validate_action_file(
+        {**base, "decision_unit_id": "DU-002"}, subject_commit="b" * 40
+    )
+    changed_classification = validate_action_file(
+        {**base, "classification_input_sha256": "c" * 64},
+        subject_commit="b" * 40,
+    )
+
+    assert canonical_action_sha256(normalized) != canonical_action_sha256(changed_unit)
+    assert canonical_action_sha256(normalized) != canonical_action_sha256(changed_classification)
+
+
+def test_v2_old_action_approval_is_rejected_after_reclassification(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    task = record.task
+    unit = task["decision_units"][0]
+    assert isinstance(unit, dict)
+    unit["planned_actions"] = [*unit["planned_actions"], "reclassified action facts"]
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    classification["classification_input_sha256"] = classification_input_digest(
+        task, parse_decision_units(task)
+    )
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "classification.json"), classification
+    )
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("stale action approval must fail before runner")
+
+    monkeypatch.setattr(mutation_evidence, "run_targeted_mutations", unexpected)
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence.record_targeted_mutation_evidence(repository, "TASK-0001", subject)
+    assert caught.value.code == "ACTION_CLASSIFICATION_MISMATCH"
+
+
+def test_v2_used_action_allows_only_a_new_separately_approved_retry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _path, first_digest = _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+    first = mutation_evidence._consume_targeted_mutation_action(
+        repository,
+        "TASK-0001",
+        subject,
+        task,
+        classification,
+        policy_sha256,
+    )
+    _path, second_digest = _approve_v2_action(repository, "002")
+    second = mutation_evidence._consume_targeted_mutation_action(
+        repository,
+        "TASK-0001",
+        subject,
+        task,
+        classification,
+        policy_sha256,
+    )
+
+    assert first.action_sha256 == first_digest
+    assert second.action_sha256 == second_digest
+    assert first_digest != second_digest
+
+
+def test_v2_multiple_unused_current_actions_are_ambiguous(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _approve_v2_action(repository, "001")
+    _approve_v2_action(repository, "002")
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+
+    with pytest.raises(ContractError) as caught:
+        mutation_evidence._consume_targeted_mutation_action(
+            repository,
+            "TASK-0001",
+            subject,
+            task,
+            classification,
+            policy_sha256,
+        )
+    assert caught.value.code == "ACTION_APPROVAL_AMBIGUOUS"
+
+
+def test_v2_concurrent_consumers_get_one_action_use(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    _enable_v2(repository)
+    _enable_v2_action_requirement(repository)
+    _approve_v2_action(repository, "001")
+    record = load_task_record(repository, "TASK-0001")
+    subject = str(record.task["subject_commit"])
+    verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
+    task, classification, policy_sha256 = mutation_evidence._validate_bindings(
+        repository, "TASK-0001", subject
+    )
+    barrier = Barrier(2)
+
+    def consume() -> mutation_evidence.MutationActionUse | str:
+        barrier.wait()
+        try:
+            return mutation_evidence._consume_targeted_mutation_action(
+                repository,
+                "TASK-0001",
+                subject,
+                task,
+                classification,
+                policy_sha256,
+            )
+        except ContractError as error:
+            return error.code
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = tuple(executor.map(lambda _index: consume(), range(2)))
+
+    assert sum(isinstance(result, mutation_evidence.MutationActionUse) for result in results) == 1
+    assert results.count("ACTION_APPROVAL_USED") == 1
+    events = load_task_record(repository, "TASK-0001").events
+    consumed = [
+        event
+        for event in events
+        if event["event_type"] == "approval_recorded"
+        and event["payload"].get("action_status") == "consumed"
+    ]
+    assert len(consumed) == 1
+    assert len({event["sequence"] for event in events}) == len(events)
+
+
 @pytest.mark.parametrize("route", ["AUTO", "ASK"])
 def test_full_non_review_verification_reaches_merge_approval(
     tmp_path: Path,
@@ -117,6 +735,11 @@ def test_full_non_review_verification_reaches_merge_approval(
     route: str,
 ) -> None:
     repository = _prepare(tmp_path, monkeypatch, route=route)
+
+    def unexpected_mutation(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("V1 must not collect or consume targeted mutation evidence")
+
+    monkeypatch.setattr(verification_service, "_v2_targeted_mutation_artifact", unexpected_mutation)
 
     assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
 
@@ -315,12 +938,26 @@ def test_v2_rejects_a_blank_current_implementer_before_plan_or_runner(
     assert caught.value.code == "VERIFIER_IMPLEMENTER_MISSING"
 
 
-def test_v2_live_run_executes_acceptance_and_integration_then_preserves_pending_mutation(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize(
+    ("mutation_outcome", "expected_conclusion", "expected_reason"),
+    [
+        ("killed", "passed", None),
+        ("survived", "failed", "MUTATION_EVIDENCE_NOT_KILLED"),
+        ("unverified", "failed", "MUTATION_EVIDENCE_NOT_KILLED"),
+        (None, "failed", "ACTION_APPROVAL_REQUIRED"),
+    ],
+)
+def test_v2_live_run_consumes_current_mutation_or_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mutation_outcome: str | None,
+    expected_conclusion: str,
+    expected_reason: str | None,
 ) -> None:
     repository = _prepare(tmp_path, monkeypatch)
     _enable_v2(repository)
     levels: list[str] = []
+    loader_calls: list[str] = []
     base_plan = _plan()
 
     def v2_plan(bundle, context: VerificationContext, *, level: str) -> VerificationPlan:
@@ -397,11 +1034,34 @@ def test_v2_live_run_executes_acceptance_and_integration_then_preserves_pending_
             {"context_sha256": "d" * 64}, {"review_id": "REV-0001"}
         ),
     )
+    if mutation_outcome is not None:
+        artifact = _mutation_artifact(mutation_outcome)
+
+        def load_artifact(_root: Path, _task_id: str, evidence_ref: str) -> dict[str, object]:
+            loader_calls.append(evidence_ref)
+            return artifact
+
+        monkeypatch.setattr(
+            verification_service,
+            "record_targeted_mutation_evidence",
+            lambda *_args: mutation_evidence.MutationEvidenceArtifact(
+                "MUTRUN-20260825T120000Z-0000000000000000",
+                str(artifact["evidence_ref"]),
+                str(artifact["mutation_evidence_sha256"]),
+                (),
+            ),
+        )
+        monkeypatch.setattr(
+            mutation_evidence,
+            "load_targeted_mutation_evidence",
+            load_artifact,
+        )
 
     result = verification_service.verify_task(repository, "TASK-0001", actor="verifier")
 
     assert levels == ["V2"]
-    assert result.conclusion == "failed"
+    assert len(loader_calls) == (1 if mutation_outcome is not None else 0)
+    assert result.conclusion == expected_conclusion
     evidence = read_task_json(repository, "TASK-0001", "evidence.json", contract_name="evidence")
     assert evidence["schema_version"] == "2.0"
     assert evidence["phase"] == "pre_implementation_review"
@@ -416,14 +1076,16 @@ def test_v2_live_run_executes_acceptance_and_integration_then_preserves_pending_
         assert checks[check_id]["stdout_log_ref"]
         assert checks[check_id]["stderr_log_ref"]
         assert str(checks[check_id]["tool_version"]).endswith(":available")
-    assert checks["targeted_mutation"]["status"] == "unverified"
-    assert checks["targeted_mutation"]["reason_code"] == "VERIFICATION_CHAPTER11_NOT_IMPLEMENTED"
+    assert checks["targeted_mutation"]["status"] == (
+        "passed" if mutation_outcome == "killed" else "failed"
+    )
+    assert checks["targeted_mutation"]["reason_code"] == expected_reason
     assert checks["independent_verifier"]["status"] == "passed"
     assert checks["independent_verifier"]["required"] is True
 
 
 @pytest.mark.parametrize("selected_check", ["acceptance", "integration"])
-def test_v2_selected_real_check_is_provisional_and_returns_to_implementing(
+def test_v2_selected_real_check_fails_when_mutation_evidence_is_missing(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, selected_check: str
 ) -> None:
     repository = _prepare(tmp_path, monkeypatch)
@@ -484,18 +1146,30 @@ def test_v2_selected_real_check_is_provisional_and_returns_to_implementing(
         repository, "TASK-0001", actor="verifier", check_ids=(selected_check,)
     )
 
-    assert result.conclusion == "provisional"
-    assert result.state == "IMPLEMENTING"
+    assert result.conclusion == "failed"
+    assert result.state == "FAILED"
     evidence = read_task_json(repository, "TASK-0001", "evidence.json", contract_name="evidence")
     checks = {str(check["check_id"]): check for check in evidence["checks"]}
     assert checks[selected_check]["status"] == "passed"
     other = "integration" if selected_check == "acceptance" else "acceptance"
     assert checks[other]["status"] == "unverified"
-    assert checks["targeted_mutation"]["status"] == "unverified"
-    assert checks["targeted_mutation"]["reason_code"] == "VERIFICATION_CHAPTER11_NOT_IMPLEMENTED"
+    assert checks["targeted_mutation"]["status"] == "failed"
+    assert checks["targeted_mutation"]["reason_code"] == "MUTATION_EVIDENCE_MISSING"
     assert evidence["targeted_mutation"] == {
-        "manifest_ref": "chapter-11-pending",
-        "results": [{"mutation_id": "CHAPTER11-PENDING", "outcome": "unverified", "log_ref": None}],
+        "evidence_ref": (
+            ".ai/tasks/TASK-0001/logs/MUTRUN-19700101T000000Z-0000000000000000/"
+            "targeted-mutation/evidence.json"
+        ),
+        "mutation_evidence_sha256": "0" * 64,
+        "manifest_ref": ".ai/mutations/phase-02-critical-manifest.json",
+        "results": [
+            {
+                "mutation_id": f"MUT-V2-{index:03d}",
+                "outcome": "unverified",
+                "log_ref": None,
+            }
+            for index in range(1, 6)
+        ],
     }
 
 
