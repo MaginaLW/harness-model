@@ -147,5 +147,18 @@
     "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
     "subject_commit": "2599e878a37d8c970bd70c1257943381f08e4155",
     "task_id": "TASK-0015"
+  },
+  {
+    "actor": "/reviewer",
+    "approval_type": "spec",
+    "approved_at": "2026-08-25T16:01:09Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0014 independently approves subject c1a66567 with the runner ancestry repair, immutable failed-action history, REVIEW/V2, scope, Policy, and separate action approval requirement unchanged.",
+    "schema_version": "1.0",
+    "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
+    "subject_commit": "c1a66567ba844f51d569aa3adb818febd1a0793e",
+    "task_id": "TASK-0015"
   }
 ]

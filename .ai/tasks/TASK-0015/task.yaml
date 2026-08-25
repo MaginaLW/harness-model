@@ -122,9 +122,9 @@ goal: 完成 Chapter 11.5：在当前任务版本边界内采集并消费 target
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-25T15:20:07Z'
-subject_commit: 2599e878a37d8c970bd70c1257943381f08e4155
+spec_frozen_at: '2026-08-25T15:57:30Z'
+subject_commit: c1a66567ba844f51d569aa3adb818febd1a0793e
 task_id: TASK-0015
-updated_at: '2026-08-25T15:41:48Z'
+updated_at: '2026-08-25T16:01:10Z'
 worktree_dirty: false
 worktree_dirty_paths: []

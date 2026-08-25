@@ -1,0 +1,13 @@
+{
+  "context_sha256": "95307aa6329393f7bf9365121b11386ec80d01f7a0f5700c6075b2ac4a4ca698",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-25T16:00:47Z",
+  "review_id": "REV-0014",
+  "review_stage": "design",
+  "reviewer": "/reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE. r14 is canonically current for subject c1a66567ba844f51d569aa3adb818febd1a0793e: its context hash and subject-bound classification digest match the current task, classification, and HEAD. r8/r9 accurately preserve the fail-closed runner ancestry repair, audited failed-run evidence, and exact action-use history. Scope, Policy, REVIEW/V2, high-risk action approval, and all verification requirements are unchanged; 36fbb908… is unused but stale, while 165b0ba2… is consumed and non-replayable. No blocking finding was identified.",
+  "task_id": "TASK-0015"
+}
