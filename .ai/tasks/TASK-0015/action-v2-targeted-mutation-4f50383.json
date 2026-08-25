@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "f70f76370b3e735e32be98d3e7ef18fb8c6cbb0afcdcc121ee8456305b678ecb",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0015",
+  "parameter_summary": "Run the five fixed Chapter 11.5 mutations once against subject 4f50383e9dcf95fc8b264858b8bd510d31f2101a in task-owned isolated temporary worktrees and write only TASK-0015-local evidence and logs.",
+  "subject_commit": "4f50383e9dcf95fc8b264858b8bd510d31f2101a",
+  "conditions": [
+    "Use only the committed canonical mutation manifest and detector definitions bound to this subject.",
+    "Create and clean up only TASK-0015-owned temporary worktrees; do not alter the main worktree.",
+    "Do not push, merge, deploy, delete repository data, use credentials, access paid services, or make network calls.",
+    "Fail closed before launch if task, subject, specification, Policy, classification, approval, receipt, or ledger bindings differ.",
+    "Consume this authorization once and persist results only under the TASK-0015 governance directory."
+  ],
+  "expires_at": "2026-08-26T15:00:00Z",
+  "single_use": true
+}
