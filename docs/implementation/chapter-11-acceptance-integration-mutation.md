@@ -19,24 +19,31 @@ Chapter 11 分阶段补全 live V2 的执行证据。本章不把 Chapter 10 的
 - manifest 中每项 detector 都指向普通、确定性的 pytest 测试。11.2 只证明声明和当前保障测试可定位；由 manifest 驱动的隔离变异及 detector 调度仍属于 11.3。
 - `MUT-V2-003` 与 `MUT-V2-004` 的 detector 直接覆盖 `_v2_evidence_current` 对 non-passing required check 的拒绝，以及 `_v2_gate_facts` 对非 killed mutation 的拒绝，避免只存在但不触达保障的 nodeid。
 
-## 11.3 已完成：隔离 mutant runner 实现投影
+## 11.3 已完成：隔离 mutant runner
 
 - 已纳入 11.3 的实现范围是：只从固定五项 manifest 读取声明，在逐项 detached 临时 worktree 中应用封闭 AST operator，并以 shell-free、固定 argv 的 subprocess 运行唯一 detector；runner 只返回不可变的内存原始执行事实。
 - 主工作树保护、受控临时根/路径 containment、worktree 注册表快照、稳定错误码与 cleanup 失败语义均属于 11.3；不会在主工作树应用 mutant，也不会自动 stash、reset、checkout 或宽泛删除。
-- 本投影不等同于完整 V1 已通过。首个精确绑定的 focused integration 事务在 `MUT-V2-002` 的 Windows 只读 scratch cleanup 失败；该失败回执已封存，残留根随后由独立 single-use action 精确清理。修复后的第二个精确事务已通过：五项 baseline detector 退出码均为 `0`，对应 mutant detector 退出码均为 `1`，无 timeout/reason，主工作树状态、受控文件哈希与 Git worktree 注册表不变，事务根和五个串行 worktree 全部清理；完整回执为 `.ai/tasks/TASK-0013/action-use-659ed5eed4b25a1daf73aa636219da690fcc5cbddf1c416a9ad2aa5dc4a2ab40.md`。首次完整 V1 的两次 full pytest 均为 `786 passed, 3 skipped`，两次 runner/十个 worktree 完全清理，但 Ruff format 与 `87%` diff coverage 令结论 failed；随后仅以 mocked unit 修复格式和缺口，52 个定向 unit 与 `90.6%` unit-only diff coverage 已通过，完整 V1 rerun 仍须新的 subject-bound action approval。
+- 历史上首个 focused transaction 曾在 `MUT-V2-002` 的 Windows 只读 scratch cleanup 失败，相关回执和精确清理均已保留；后续完整 V1 的一次失败及 remediation 也保留为审计历史。最终的 TASK-0013 implementation subject 是 `290254cc70791bcfa9895feab98154b411c2ef55`：其 V1 evidence 为 passed（10/10 required checks；`.ai/tasks/TASK-0013/evidence.json`），独立 implementation review `REV-0004` 为 APPROVE，随后获得 code approval。`4680a377591627d4887185b244dcbd0d43156d25` 是记录的 integration merge commit，`3c87fc931329c903e2d22feff88a4fd4966718b6` 是仅含 TASK-0013 close receipt 的后继治理提交。最终事实取代“passing V1 rerun pending”的旧投影，但不把 11.3 的 raw probe 扩展为持久 mutation evidence 或 live V2 passed。
 - mutant 的 `0`/`1` 在 11.3 仅为原始 probe fact；不命名或持久化为 killed/survived，不写 task evidence/log ref，也不改变 live V2、approval 或 Gate 结论。
 
-## 仍待完成：11.4–11.5 targeted mutation
+## 11.4 已完成：killed/survived evidence
+
+- `.ai/schemas/mutation-evidence.schema.json`、`src/aiflow/mutation_evidence.py` 和对应 contract/unit/integration tests 将固定五项 raw probe facts 封闭地记录为 immutable mutation-evidence artifact、五份有界结构化 log 与 manifest 顺序的 uncovered 集合；记录和 loader 绑定当前 task、base/subject、spec、Policy、classification、manifest 与 runner hashes。
+- 在投影前实现 subject `62df888baf2afa858ef096949ab1ade861cef7ea` 上，approved focused transaction 产生一个 record；approved local V1 的 regression 与 coverage collection 分别产生两个不同 record。三次 production collection 均观察五项 baseline detector `(0, 0, 0, 0, 0)`、mutant detector `(1, 1, 1, 1, 1)`、无 timeout/reason、五项 `killed`、`uncovered_mutation_ids: []` 和 `main_tree_unchanged: true`；三个 scratch roots 与十五个串行 worktrees 均无残留。
+- 可提交的审计索引是 focused receipt `.ai/tasks/TASK-0014/action-use-997bdb20ca1ca1a9e374df0f6797484a20b209455ed850cf21cbd90578538c43.md`（file SHA-256 `eea9969e6c3d1a0ea053a34f2075c603ed195b245e00e4452bb32928124721f2`；canonical mutation-evidence SHA-256 `0d1bb294c1c07531fe17ca26936214d47705b2fb3ed1f69eeee2445fcee4638a`）和 local V1 receipt `.ai/tasks/TASK-0014/action-use-5aacdcd307e58560328646d34d272e176d4d076c8f66229084e2afb2cbaf11a4.md`（file SHA-256 `bdb6ed9975223350fcc6dda9744c5ee030291ccd9a504114826176f55d878fb6`；two canonical mutation-evidence SHA-256 values `f2730e54e40f71efbe052796fd618f5105fa6dc5efa6d0f916a72e92b41eb00a` and `ee329846aedb75ea91de3ccd91ec407032a7b7a81e2f8cf5e02c27ca0c9de143`）。V1 evidence is passed with 10/10 required checks and has file SHA-256 `538dc3bfe0fabdfe863daaae0a193554a79857d7a252a388932f01f7d83c3a76`; independent implementation review `REV-0002` is APPROVE.
+- Task-local record JSON and structured logs are deliberately excluded by `.gitignore`. The receipts are auditable hash indexes of their local existence, references, and cleanup facts; they do not claim that ignored log or evidence bodies survive another checkout or machine, and they cannot be reused by 11.5.
+
+## 仍待完成：11.5 targeted mutation consumer 与 replay/Gate failure
 
 | 任务 | 状态 | 边界 |
 |---|---|---|
 | 11.2 mutant manifest | completed | 五项关键保障、封闭 schema、只读 loader 和 detector 绑定已建立；尚未执行 mutant |
-| 11.3 隔离 mutant runner | completed | 实现投影和 focused integration 已通过；首次完整 V1 因 format/diff coverage 失败，remediation 已定向通过，完整 V1 rerun 待新 action approval |
-| 11.4 killed/survived evidence | pending | 尚无 mutation 结果、日志或覆盖结论 |
+| 11.3 隔离 mutant runner | completed | 最终 V1、独立 implementation review、code approval、integration merge 与 close facts 已记录；runner 原始 probe 不单独构成持久 evidence |
+| 11.4 killed/survived evidence | completed | 投影前 subject 的 focused 与 local V1 production records 已由 receipt hash indexes 审计；三次均为五项 killed、无未覆盖项，local records/logs 不跨 checkout 保留 |
 | 11.5 replay/Gate failure | pending | 尚未实现 survived/missing mutant 的重放失败路径 |
 
 `targeted_mutation` 在当前 live V2 中仍保持 `unverified`，reason code 为 `VERIFICATION_CHAPTER11_NOT_IMPLEMENTED`，并写入 `chapter-11-pending` manifest 与 `CHAPTER11-PENDING` 结果。因此 live V2 conclusion 必须为 failed；它不能 finalize，不能支持 code approval，也不能走向 Gate passed。11.3 的隔离 runner 实现不改变这一结论。
 
 ## 后续验证边界
 
-Chapter 11.1 与 11.2 均按 `REVIEW + V1` 完成各自增量实现验证。11.3 已完成隔离 runner 的实现投影和一次修复后的 focused integration pass；首次完整 V1 失败证据已保留，format 与 changed-line coverage remediation 只通过定向 unit/static 检查，尚不能替代新的完整 V1。focused/V1 中的 mutation 退出码仍只是 task-local 原始执行事实，也未新增持久 killed/survived evidence。V2 的 acceptance/integration 运行结果是独立的 pre-evidence facts，11.2 manifest 也只是后续 runner 的受控输入。11.4–11.5 尚未完成，故 `targeted_mutation` 继续 unverified 并阻止任何 live V2 passed 宣称。完成 11.4–11.5 并取得所需验证证据后，才可新增持久 mutation 结果和重放验证；其范围、Policy、规格或验证要求变化仍须走 AI Flow 的升级、冻结、审核和批准流程。
+Chapter 11.1、11.2 与 11.4 均按 `REVIEW + V1` 完成各自增量实现验证；11.3 的最终 V1、review、code approval、integration merge 与 close facts 也已审计记录。11.4 的 standalone mutation-evidence 仅证明当前 local action transactions 的受控结果，不被 live V2、approval 或 Gate 消费，也不能跨 task、subject、spec、Policy 或 checkout 复用。11.5 尚未完成，故 `targeted_mutation` 继续 unverified 并阻止任何 live V2 passed 宣称；完成其 consumer/replay enforcement 并取得新的 current evidence 后，才可改变该结论。

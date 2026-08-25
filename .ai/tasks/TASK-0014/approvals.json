@@ -11,5 +11,37 @@
     "spec_sha256": "a38fe5af6458a3c7f495616f96243d52347a08027bf0d8acde6c668893c0e9d9",
     "subject_commit": "3c87fc931329c903e2d22feff88a4fd4966718b6",
     "task_id": "TASK-0014"
+  },
+  {
+    "action_sha256": "997bdb20ca1ca1a9e374df0f6797484a20b209455ed850cf21cbd90578538c43",
+    "actor": "user",
+    "approval_type": "action",
+    "approved_at": "2026-08-25T02:22:40Z",
+    "base_commit": "3c87fc931329c903e2d22feff88a4fd4966718b6",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-26T00:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "批准 TASK-0014 focused integration action 997bdb20ca1ca1a9e374df0f6797484a20b209455ed850cf21cbd90578538c43",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "a38fe5af6458a3c7f495616f96243d52347a08027bf0d8acde6c668893c0e9d9",
+    "subject_commit": "62df888baf2afa858ef096949ab1ade861cef7ea",
+    "task_id": "TASK-0014"
+  },
+  {
+    "action_sha256": "5aacdcd307e58560328646d34d272e176d4d076c8f66229084e2afb2cbaf11a4",
+    "actor": "user",
+    "approval_type": "action",
+    "approved_at": "2026-08-25T04:19:31Z",
+    "base_commit": "3c87fc931329c903e2d22feff88a4fd4966718b6",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-26T00:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "批准 TASK-0014 full V1 action 5aacdcd307e58560328646d34d272e176d4d076c8f66229084e2afb2cbaf11a4",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "a38fe5af6458a3c7f495616f96243d52347a08027bf0d8acde6c668893c0e9d9",
+    "subject_commit": "62df888baf2afa858ef096949ab1ade861cef7ea",
+    "task_id": "TASK-0014"
   }
 ]

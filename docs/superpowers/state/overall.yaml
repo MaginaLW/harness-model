@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-23T23:08:55Z"
+updated_at: "2026-08-25T04:36:11Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -23,20 +23,20 @@ tracking:
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-11"
-  current_task: "11.4"
+  current_task: "11.5"
   current_step: null
 
 summary:
   chapters_total: 11
   chapters_completed: 10
   tasks_total: 65
-  tasks_completed: 63
+  tasks_completed: 64
   steps_total: 348
-  steps_completed: 338
+  steps_completed: 343
   exit_checks_total: 18
   exit_checks_completed: 16
   blockers_total: 0
-  evidence_items: 7
+  evidence_items: 8
 
 chapters:
   - id: "chapter-01"
@@ -149,7 +149,7 @@ future_phases:
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
     current_chapter: "chapter-11"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11.1 已完成确定性、离线 acceptance/integration 编排，11.2 已建立五项受控 mutant manifest 与只读校验，11.3 已完成隔离 runner 投影和 focused pass。首次完整 V1 的两次 full pytest/runner cleanup 通过但 format 与 87% diff coverage 令结论 failed；remediation 已定向通过 52 unit、Ruff/mypy 与 90.6% unit-only diff coverage，passing V1 rerun 尚待新 action approval。11.4–11.5 的持久结果和失败重放仍未实现，故真实 live V2 仍必须因 unverified 检查失败。"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11.1 已完成确定性、离线 acceptance/integration 编排，11.2 已建立五项受控 mutant manifest 与只读校验，11.3 的最终 V1、review、code approval、integration merge 与 close facts 已记录，11.4 已完成投影前实现 subject 62df888baf2afa858ef096949ab1ade861cef7ea 的 local mutation-evidence recording。11.4 的 ignored local logs/evidence 仅由可提交 receipt hash indexes 审计，不宣称跨 checkout 或机器保留。11.5 的 consumer/replay enforcement 仍未实现，故真实 live V2 仍必须因 `targeted_mutation` unverified 而 failed。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2039,3 +2039,28 @@ history:
       - ".ai/tasks/TASK-0013/action-use-659ed5eed4b25a1daf73aa636219da690fcc5cbddf1c416a9ad2aa5dc4a2ab40.md"
       - ".ai/tasks/TASK-0013/action-use-f647e210f7442ae9bb8fea27b01fdfa34ace02c18a364f1f039140bc31cd8f85.md"
       - ".ai/tasks/TASK-0013/evidence.json"
+  - id: "EVT-OVERALL-CH11-11.4-COMPLETE-001"
+    at: "2026-08-25T04:36:11Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "TASK-0014 在 subject 62df888baf2afa858ef096949ab1ade861cef7ea 上取得 passed 10/10 local V1、approved focused transaction 与 independent implementation review REV-0002；三次 current production collections 均记录五项 baseline 0 / mutant 1 / killed、uncovered 为空、main tree unchanged 且临时根/worktree cleanup 完成。receipt 仅为被 .gitignore 排除的本地 evidence/log bodies 提供 hash index，未声明跨 checkout artifact；11.5 和真实 live V2 仍 pending/failed。"
+    chapter_evidence: "EVD-CH11-11.4-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_11_status: "in_progress"
+      task_11_4_status: "completed"
+      current_chapter: "chapter-11"
+      current_task: "11.5"
+      current_step: null
+      chapters_completed: 10
+      tasks_completed: 64
+      steps_completed: 343
+      exit_checks_completed: 16
+      evidence_items: 8
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-11.yaml"
+      - "docs/implementation/chapter-11-acceptance-integration-mutation.md"
+      - ".ai/tasks/TASK-0014/evidence.json"
+      - ".ai/tasks/TASK-0014/reviews/REV-0002-r0001.json"
+      - ".ai/tasks/TASK-0014/action-use-997bdb20ca1ca1a9e374df0f6797484a20b209455ed850cf21cbd90578538c43.md"
+      - ".ai/tasks/TASK-0014/action-use-5aacdcd307e58560328646d34d272e176d4d076c8f66229084e2afb2cbaf11a4.md"

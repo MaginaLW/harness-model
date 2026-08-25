@@ -1,0 +1,281 @@
+{
+  "base_commit": "3c87fc931329c903e2d22feff88a4fd4966718b6",
+  "branch": "main",
+  "classification_input_sha256": "cebbc4df4fe06a50521d0f3246d968dcc1660343d041570d09fa4f289a38e6d0",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/mutation-evidence.schema.json",
+      ".ai/templates/mutation-evidence.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/mutation_evidence.py",
+      "tests/fixtures/contracts/valid/mutation-evidence.json",
+      "tests/fixtures/contracts/invalid/mutation-evidence.missing.json",
+      "tests/fixtures/contracts/invalid/mutation-evidence.invalid.json",
+      "tests/fixtures/contracts/invalid/mutation-evidence.extra.json",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_mutation_evidence.py",
+      "tests/integration/test_mutation_runner_contract.py",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 11.4：在 TASK-0013 merge_recorded 后，将固定五项隔离 mutation runner 的原始 probe 规范化并持久化为绑定当前 manifest、base/subject 与受控日志的 killed/survived/unverified evidence 和明确未覆盖项；不接入 live V2、approval 或 Gate，真实 worktree 执行须单独 action approval",
+        "impact_scope": [
+          ".ai/schemas/mutation-evidence.schema.json",
+          ".ai/templates/mutation-evidence.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/mutation_evidence.py",
+          "tests/fixtures/contracts/valid/mutation-evidence.json",
+          "tests/fixtures/contracts/invalid/mutation-evidence.missing.json",
+          "tests/fixtures/contracts/invalid/mutation-evidence.invalid.json",
+          "tests/fixtures/contracts/invalid/mutation-evidence.extra.json",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_mutation_evidence.py",
+          "tests/integration/test_mutation_runner_contract.py",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Define a closed versioned mutation-evidence contract and template for the exact five Phase 02 safeguards",
+          "Run only the existing fixed mutation runner against the governed subject and derive killed, survived, or unverified outcomes from raw probe facts",
+          "Persist bounded structured task-local execution logs and an immutable evidence artifact under a validated task run directory",
+          "Validate manifest, task, subject, result completeness, canonical digest, log hashes, and uncovered-item semantics for deterministic replay",
+          "Preserve the current live V2 pending marker and defer all V2, approval, Gate, and replay enforcement to Chapter 11.5",
+          "Update only the Chapter 11.4 documentation and state projection after current V1 evidence passes"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/mutation-evidence.schema.json",
+        ".ai/tasks/TASK-0014/approvals.json",
+        ".ai/tasks/TASK-0014/classification.json",
+        ".ai/tasks/TASK-0014/dependency-resolution.md",
+        ".ai/tasks/TASK-0014/design-review-context.json",
+        ".ai/tasks/TASK-0014/design-review-input.json",
+        ".ai/tasks/TASK-0014/events.jsonl",
+        ".ai/tasks/TASK-0014/review-contexts/8e97b395d859ee26c65e6e3fba2e4ce8c12e257e13c4fca0998f676af55498cd.json",
+        ".ai/tasks/TASK-0014/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0014/spec.md",
+        ".ai/tasks/TASK-0014/task.yaml",
+        ".ai/templates/mutation-evidence.json",
+        "src/aiflow/contracts.py",
+        "src/aiflow/mutation_evidence.py",
+        "tests/fixtures/contracts/invalid/mutation-evidence.extra.json",
+        "tests/fixtures/contracts/invalid/mutation-evidence.invalid.json",
+        "tests/fixtures/contracts/invalid/mutation-evidence.missing.json",
+        "tests/fixtures/contracts/valid/mutation-evidence.json",
+        "tests/integration/test_mutation_runner_contract.py",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_mutation_evidence.py"
+      ],
+      "files": [
+        {
+          "additions": 103,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/mutation-evidence.schema.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/approvals.json"
+        },
+        {
+          "additions": 66,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/classification.json"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/dependency-resolution.md"
+        },
+        {
+          "additions": 66,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/design-review-input.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/events.jsonl"
+        },
+        {
+          "additions": 66,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/review-contexts/8e97b395d859ee26c65e6e3fba2e4ce8c12e257e13c4fca0998f676af55498cd.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 92,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/spec.md"
+        },
+        {
+          "additions": 122,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0014/task.yaml"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/templates/mutation-evidence.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 702,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/mutation_evidence.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/mutation-evidence.extra.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/mutation-evidence.invalid.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/mutation-evidence.missing.json"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/valid/mutation-evidence.json"
+        },
+        {
+          "additions": 102,
+          "binary": false,
+          "deletions": 29,
+          "path": "tests/integration/test_mutation_runner_contract.py"
+        },
+        {
+          "additions": 75,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 815,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_mutation_evidence.py"
+        }
+      ],
+      "totals": {
+        "additions": 2323,
+        "deletions": 29,
+        "files": 21
+      }
+    },
+    "goal": "完成 Chapter 11.4：在 TASK-0013 merge_recorded 后，将固定五项隔离 mutation runner 的原始 probe 规范化并持久化为绑定当前 manifest、base/subject 与受控日志的 killed/survived/unverified evidence 和明确未覆盖项；不接入 live V2、approval 或 Gate，真实 worktree 执行须单独 action approval",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0014",
+        "--actor",
+        "task0014-independent-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "f0f1721f5eed7ad5c83db7f49e4ca713b32f74cfbfe1050e4c1a5845a2da1d8b",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "ba1c3465671d21668e7335601203ad6e52ecd367560f5c4f816261b3faf42f8d",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "a38fe5af6458a3c7f495616f96243d52347a08027bf0d8acde6c668893c0e9d9",
+  "subject_commit": "62df888baf2afa858ef096949ab1ade861cef7ea",
+  "task_id": "TASK-0014"
+}
