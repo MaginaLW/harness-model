@@ -102,5 +102,21 @@
     "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
     "subject_commit": "4f50383e9dcf95fc8b264858b8bd510d31f2101a",
     "task_id": "TASK-0015"
+  },
+  {
+    "action_sha256": "36fbb90847712e2cc701a97c1492607706b23cce3d12b22a94c650608c44ff6b",
+    "actor": "/user",
+    "approval_type": "action",
+    "approved_at": "2026-08-25T14:42:06Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-26T15:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved one TASK-0015 targeted mutation run bound to action digest 36fbb90847712e2cc701a97c1492607706b23cce3d12b22a94c650608c44ff6b.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
+    "subject_commit": "4f50383e9dcf95fc8b264858b8bd510d31f2101a",
+    "task_id": "TASK-0015"
   }
 ]
