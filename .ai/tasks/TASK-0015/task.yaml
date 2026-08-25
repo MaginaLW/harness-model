@@ -1,0 +1,119 @@
+allowed_scope:
+- src/aiflow/verification_service.py
+- src/aiflow/evidence.py
+- src/aiflow/mutation_evidence.py
+- src/aiflow/approval.py
+- src/aiflow/gate.py
+- .ai/schemas/evidence.schema.json
+- .ai/templates/evidence-v2.json
+- tests/fixtures/contracts/valid/evidence-v2.json
+- tests/fixtures/contracts/invalid/evidence-v2.missing.json
+- tests/fixtures/contracts/invalid/evidence-v2.invalid.json
+- tests/fixtures/contracts/invalid/evidence-v2.extra.json
+- tests/unit/test_contracts.py
+- tests/unit/test_mutation_evidence.py
+- tests/unit/test_evidence.py
+- tests/unit/test_gate.py
+- tests/integration/test_verify_command.py
+- tests/integration/test_verification_evidence_flow.py
+- tests/integration/test_gate_command.py
+- tests/integration/test_mutation_runner_contract.py
+- tests/acceptance/test_v2_acceptance.py
+- tests/e2e/test_v2_verifier_scenario.py
+- docs/implementation/chapter-11-acceptance-integration-mutation.md
+- docs/superpowers/state/chapters/chapter-11.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 17ab98cf879cf913e91dfcdf69861b387eabf7ac
+branch: main
+created_at: '2026-08-25T11:38:21Z'
+current_state: READY_TO_IMPLEMENT
+decision_units:
+- change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects:
+  - create_and_delete_task_owned_temporary_worktrees
+  - write_task_local_mutation_evidence_and_logs
+  goal: 完成 Chapter 11.5：在当前任务版本边界内采集并消费 targeted mutation evidence，任一 survived、unverified、missing
+    或陈旧记录均令 V2 失败；补齐确定性重放测试与 Chapter 11 退出证据，不复用 TASK-0014 的本地记录
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  impact_scope:
+  - src/aiflow/verification_service.py
+  - src/aiflow/evidence.py
+  - src/aiflow/mutation_evidence.py
+  - src/aiflow/approval.py
+  - src/aiflow/gate.py
+  - .ai/schemas/evidence.schema.json
+  - tests/fixtures/contracts/valid/evidence-v2.json
+  - tests/fixtures/contracts/invalid/evidence-v2.missing.json
+  - tests/fixtures/contracts/invalid/evidence-v2.invalid.json
+  - tests/fixtures/contracts/invalid/evidence-v2.extra.json
+  - tests/unit/test_contracts.py
+  - tests/unit/test_mutation_evidence.py
+  - tests/unit/test_evidence.py
+  - tests/unit/test_gate.py
+  - tests/integration/test_verify_command.py
+  - tests/integration/test_verification_evidence_flow.py
+  - tests/integration/test_gate_command.py
+  - tests/integration/test_mutation_runner_contract.py
+  - tests/acceptance/test_v2_acceptance.py
+  - tests/e2e/test_v2_verifier_scenario.py
+  - docs/implementation/chapter-11-acceptance-integration-mutation.md
+  - docs/superpowers/state/chapters/chapter-11.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Consume only current TASK-0015 targeted-mutation evidence during V2 verification
+  - Fail V2 deterministically for survived, unverified, missing, stale, tampered,
+    duplicate, or unknown mutation results
+  - Project validated manifest-ordered mutation results into V2 evidence and preserve
+    Gate fail-closed behavior
+  - Add replay, negative-path, V1 non-regression, acceptance, and end-to-end tests
+  - Update Chapter 11 documentation and state only after governed verification passes
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0015
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Focused unit and integration tests for mutation evidence consumption and replay
+  - V1 non-regression and V2 evidence/Gate negative-path tests
+  - Ruff, format check, mypy, full pytest, coverage, and final Git scope validation
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+frozen_spec_sha256: f4bbf4916d84ec5fc929a60490558e3bc715f96a32b702f476a017982f746d93
+goal: 完成 Chapter 11.5：在当前任务版本边界内采集并消费 targeted mutation evidence，任一 survived、unverified、missing
+  或陈旧记录均令 V2 失败；补齐确定性重放测试与 Chapter 11 退出证据，不复用 TASK-0014 的本地记录
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-25T11:48:34Z'
+subject_commit: 17ab98cf879cf913e91dfcdf69861b387eabf7ac
+task_id: TASK-0015
+updated_at: '2026-08-25T11:49:14Z'
+worktree_dirty: false
+worktree_dirty_paths: []

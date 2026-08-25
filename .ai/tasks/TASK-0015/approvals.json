@@ -1,0 +1,28 @@
+[
+  {
+    "actor": "/reviewer",
+    "approval_type": "spec",
+    "approved_at": "2026-08-25T11:46:26Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0004 approved the current reclassified and frozen REVIEW plus V2 specification; all prior findings are resolved and the production mutation action remains separately approval-bound.",
+    "schema_version": "1.0",
+    "spec_sha256": "3d09c500888674d9f4b16e271eb0857f549ba9d482ed3c52dced8e608b2e2b6a",
+    "subject_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "task_id": "TASK-0015"
+  },
+  {
+    "actor": "/reviewer",
+    "approval_type": "spec",
+    "approved_at": "2026-08-25T11:49:14Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0005 approved the current frozen scope; the evidence-v2 template addition is mechanically required by the existing contract test and adds no runtime authority.",
+    "schema_version": "1.0",
+    "spec_sha256": "f4bbf4916d84ec5fc929a60490558e3bc715f96a32b702f476a017982f746d93",
+    "subject_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "task_id": "TASK-0015"
+  }
+]

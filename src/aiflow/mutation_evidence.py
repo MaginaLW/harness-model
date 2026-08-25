@@ -67,6 +67,18 @@ class MutationEvidenceArtifact:
     log_refs: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class TargetedMutationFacts:
+    """Closed V2 facts derived exclusively from one public-loader replay."""
+
+    passed: bool
+    reason_code: str | None
+    evidence_ref: str | None
+    mutation_evidence_sha256: str | None
+    manifest_ref: str | None
+    results: tuple[Mapping[str, object], ...]
+
+
 def _error(message: str, code: str) -> ContractError:
     return ContractError(message, code=code)
 
@@ -700,3 +712,65 @@ def load_targeted_mutation_evidence(
             "Mutation evidence semantics are invalid", "MUTATION_EVIDENCE_SEMANTICS_INVALID"
         )
     return value
+
+
+def consume_targeted_mutation_evidence(
+    repository_root: Path, task_id: str, evidence: Mapping[str, object]
+) -> TargetedMutationFacts:
+    """Return fail-closed V2 mutation facts from a current immutable artifact.
+
+    The V2 projection is never trusted by itself: it must exactly match the
+    public loader's current artifact replay before it can be considered killed.
+    """
+    mutation = evidence.get("targeted_mutation")
+    if not isinstance(mutation, Mapping):
+        return TargetedMutationFacts(False, "MUTATION_EVIDENCE_MISSING", None, None, None, ())
+    evidence_ref = mutation.get("evidence_ref")
+    digest = mutation.get("mutation_evidence_sha256")
+    manifest_ref = mutation.get("manifest_ref")
+    projected = mutation.get("results")
+    if not isinstance(evidence_ref, str) or not isinstance(digest, str):
+        return TargetedMutationFacts(
+            False, "MUTATION_EVIDENCE_MISSING", None, None, None, ()
+        )
+    if not isinstance(manifest_ref, str) or not isinstance(projected, list):
+        return TargetedMutationFacts(
+            False, "MUTATION_EVIDENCE_PROJECTION_INVALID", evidence_ref, digest, None, ()
+        )
+    try:
+        artifact = load_targeted_mutation_evidence(repository_root, task_id, evidence_ref)
+    except ContractError:
+        return TargetedMutationFacts(
+            False, "MUTATION_EVIDENCE_INVALID", evidence_ref, digest, manifest_ref, ()
+        )
+    artifact_digest = artifact.get("mutation_evidence_sha256")
+    artifact_manifest = artifact.get("manifest_ref")
+    artifact_results = artifact.get("results")
+    if (
+        digest != artifact_digest
+        or manifest_ref != artifact_manifest
+        or not isinstance(artifact_results, list)
+    ):
+        return TargetedMutationFacts(
+            False, "MUTATION_EVIDENCE_PROJECTION_INVALID", evidence_ref, digest, manifest_ref, ()
+        )
+    expected = tuple(
+        {
+            "mutation_id": item.get("mutation_id"),
+            "outcome": item.get("outcome"),
+            "log_ref": item.get("log_ref"),
+        }
+        for item in artifact_results
+        if isinstance(item, Mapping)
+    )
+    actual = tuple(item for item in projected if isinstance(item, Mapping))
+    if len(expected) != len(artifact_results) or actual != expected:
+        return TargetedMutationFacts(
+            False, "MUTATION_EVIDENCE_PROJECTION_INVALID", evidence_ref, digest, manifest_ref, ()
+        )
+    uncovered = artifact.get("uncovered_mutation_ids")
+    if uncovered != [] or any(item.get("outcome") != "killed" for item in expected):
+        return TargetedMutationFacts(
+            False, "MUTATION_EVIDENCE_NOT_KILLED", evidence_ref, digest, manifest_ref, expected
+        )
+    return TargetedMutationFacts(None is None, None, evidence_ref, digest, manifest_ref, expected)

@@ -1,0 +1,31 @@
+{
+  "context_sha256": "04cbd9d6318fdbcafc529b6ac9caf432aeea930f3e4b847a13da56deded8377b",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0015/spec.md:12-13",
+        ".ai/tasks/TASK-0015/spec.md:17-21",
+        ".ai/tasks/TASK-0015/task.yaml:11-34",
+        ".ai/tasks/TASK-0015/design-review-context-r2.json:8-66",
+        ".ai/tasks/TASK-0015/reviews/REV-0001-r0004.json:28-42"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 20,
+        "path": ".ai/tasks/TASK-0015/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "The required V2 evidence-schema change is simultaneously forbidden by the specification"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-08-25T11:42:16Z",
+  "review_id": "REV-0002",
+  "review_stage": "design",
+  "reviewer": "/reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "REQUEST_CHANGES. The r2 scope now includes approval.py, the evidence schema, and relevant fixture/test surfaces; the specification also now requires artifact identity, a shared loader-backed consumer, and a bounded single-use action-approved production collection. Those changes resolve RF-001 through RF-003 in REV-0001-r0004. A new blocking contradiction remains: scope item 4 requires changing the V2 evidence schema to add evidence_ref and mutation_evidence_sha256, while non-goal 2 expressly forbids changing the evidence schema. The task must remove or narrow that prohibition, then re-freeze the specification and regenerate current classification/review context before implementation.",
+  "task_id": "TASK-0015"
+}

@@ -1,0 +1,67 @@
+{
+  "context_sha256": "b8cf0f56c186045c75214b00cd46b72e0d39fd06ae59d40a8ddd8b0f437e7d93",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0015/spec.md:12",
+        ".ai/tasks/TASK-0015/task.yaml:11-27",
+        "src/aiflow/approval.py:374-422",
+        "src/aiflow/gate.py:262-333",
+        "tests/integration/test_mutation_manifest_contract.py:124-147"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 11,
+        "path": ".ai/tasks/TASK-0015/task.yaml"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "Allowed scope omits the code-approval consumer and its direct regression test"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0015/spec.md:10-12",
+        ".ai/tasks/TASK-0015/spec.md:20-24",
+        ".ai/tasks/TASK-0015/task.yaml:11-27",
+        ".ai/schemas/evidence.schema.json:217-240",
+        "src/aiflow/mutation_evidence.py:564-690",
+        "src/aiflow/approval.py:415-422",
+        "src/aiflow/gate.py:316-325"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 227,
+        "path": ".ai/schemas/evidence.schema.json"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "V2 evidence contract cannot bind a projected result set to the immutable loader-validated artifact"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0015/spec.md:5-27",
+        ".ai/tasks/TASK-0015/task.yaml:54-78",
+        ".ai/tasks/TASK-0015/approvals.json:1",
+        "src/aiflow/mutation_evidence.py:534-562",
+        "src/aiflow/mutation_runner.py:1-999"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 27,
+        "path": ".ai/tasks/TASK-0015/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "Required real mutation transaction lacks a frozen action graph and measurable approval budget"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-08-25T11:40:14Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "/reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "REQUEST_CHANGES. TASK-0015 is correctly bound to the frozen context, Policy 2.1.0, REVIEW route, and V2 classification, and it correctly prohibits reuse of TASK-0014 local artifacts. However, the frozen scope and contract do not yet make the required loader-backed V2 decision enforceable in both approval and Gate paths, and the required real runner transaction is not specified tightly enough for a separate action approval. These gaps can permit implementation that only trusts projected outcomes or that changes one consumer but not the other; the specification must be revised and reclassified/frozen before implementation.",
+  "task_id": "TASK-0015"
+}

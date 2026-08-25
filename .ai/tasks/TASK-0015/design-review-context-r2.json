@@ -1,0 +1,83 @@
+{
+  "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+  "branch": "main",
+  "classification_input_sha256": "4b5fd47cb004fe9f8eb13aed92671265ff683cd998e36980cc777700178bd474",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/verification_service.py",
+      "src/aiflow/evidence.py",
+      "src/aiflow/mutation_evidence.py",
+      "src/aiflow/approval.py",
+      "src/aiflow/gate.py",
+      ".ai/schemas/evidence.schema.json",
+      "tests/fixtures/contracts/valid/evidence-v2.json",
+      "tests/fixtures/contracts/invalid/evidence-v2.missing.json",
+      "tests/fixtures/contracts/invalid/evidence-v2.invalid.json",
+      "tests/fixtures/contracts/invalid/evidence-v2.extra.json",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_mutation_evidence.py",
+      "tests/unit/test_evidence.py",
+      "tests/unit/test_gate.py",
+      "tests/integration/test_verify_command.py",
+      "tests/integration/test_verification_evidence_flow.py",
+      "tests/integration/test_gate_command.py",
+      "tests/integration/test_mutation_runner_contract.py",
+      "tests/acceptance/test_v2_acceptance.py",
+      "tests/e2e/test_v2_verifier_scenario.py",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 11.5：在当前任务版本边界内采集并消费 targeted mutation evidence，任一 survived、unverified、missing 或陈旧记录均令 V2 失败；补齐确定性重放测试与 Chapter 11 退出证据，不复用 TASK-0014 的本地记录",
+        "impact_scope": [
+          "src/aiflow/verification_service.py",
+          "src/aiflow/evidence.py",
+          "src/aiflow/mutation_evidence.py",
+          "src/aiflow/approval.py",
+          "src/aiflow/gate.py",
+          ".ai/schemas/evidence.schema.json",
+          "tests/fixtures/contracts/valid/evidence-v2.json",
+          "tests/fixtures/contracts/invalid/evidence-v2.missing.json",
+          "tests/fixtures/contracts/invalid/evidence-v2.invalid.json",
+          "tests/fixtures/contracts/invalid/evidence-v2.extra.json",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_mutation_evidence.py",
+          "tests/unit/test_evidence.py",
+          "tests/unit/test_gate.py",
+          "tests/integration/test_verify_command.py",
+          "tests/integration/test_verification_evidence_flow.py",
+          "tests/integration/test_gate_command.py",
+          "tests/integration/test_mutation_runner_contract.py",
+          "tests/acceptance/test_v2_acceptance.py",
+          "tests/e2e/test_v2_verifier_scenario.py",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Consume only current TASK-0015 targeted-mutation evidence during V2 verification",
+          "Fail V2 deterministically for survived, unverified, missing, stale, tampered, duplicate, or unknown mutation results",
+          "Project validated manifest-ordered mutation results into V2 evidence and preserve Gate fail-closed behavior",
+          "Add replay, negative-path, V1 non-regression, acceptance, and end-to-end tests",
+          "Update Chapter 11 documentation and state only after governed verification passes"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 11.5：在当前任务版本边界内采集并消费 targeted mutation evidence，任一 survived、unverified、missing 或陈旧记录均令 V2 失败；补齐确定性重放测试与 Chapter 11 退出证据，不复用 TASK-0014 的本地记录",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "04cbd9d6318fdbcafc529b6ac9caf432aeea930f3e4b847a13da56deded8377b",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "25b5fcddc4456f314cf1a9da05fa23b96ef3e8ca385d02260da7efa8daf7db49",
+  "task_id": "TASK-0015"
+}

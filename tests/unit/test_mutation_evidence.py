@@ -71,6 +71,69 @@ def _resign(value: dict) -> None:
     value["mutation_evidence_sha256"] = evidence._sha256_bytes(evidence._canonical_bytes(unsigned))
 
 
+def _v2_projection(artifact: dict, artifact_ref: str) -> dict[str, object]:
+    return {
+        "targeted_mutation": {
+            "evidence_ref": artifact_ref,
+            "mutation_evidence_sha256": artifact["mutation_evidence_sha256"],
+            "manifest_ref": artifact["manifest_ref"],
+            "results": [
+                {
+                    "mutation_id": item["mutation_id"],
+                    "outcome": item["outcome"],
+                    "log_ref": item["log_ref"],
+                }
+                for item in artifact["results"]
+            ],
+        }
+    }
+
+
+def test_v2_consumer_uses_only_current_loader_replay(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
+    receipt = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", receipt.evidence_ref)
+
+    facts = evidence.consume_targeted_mutation_evidence(
+        root, "TASK-0014", _v2_projection(artifact, receipt.evidence_ref)
+    )
+
+    assert facts.passed is True
+    assert facts.reason_code is None
+    assert facts.results == tuple(_v2_projection(artifact, receipt.evidence_ref)["targeted_mutation"]["results"])
+
+
+@pytest.mark.parametrize("tamper", ["missing", "digest", "projection", "survived"])
+def test_v2_consumer_fails_closed_for_missing_or_non_killed_artifacts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tamper: str
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest, mutant=0 if tamper == "survived" else 1))
+    receipt = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", receipt.evidence_ref)
+    projection = _v2_projection(artifact, receipt.evidence_ref)
+    mutation = projection["targeted_mutation"]
+    assert isinstance(mutation, dict)
+    if tamper == "missing":
+        mutation.pop("evidence_ref")
+    elif tamper == "digest":
+        mutation["mutation_evidence_sha256"] = "0" * 64
+    elif tamper == "projection":
+        mutation["results"] = []
+
+    facts = evidence.consume_targeted_mutation_evidence(root, "TASK-0014", projection)
+
+    assert facts.passed is False
+    assert facts.reason_code in {
+        "MUTATION_EVIDENCE_MISSING",
+        "MUTATION_EVIDENCE_PROJECTION_INVALID",
+        "MUTATION_EVIDENCE_NOT_KILLED",
+    }
+
+
 def test_record_and_public_loader_round_trip_once(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
