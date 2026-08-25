@@ -31,7 +31,7 @@ allowed_scope:
 base_commit: 17ab98cf879cf913e91dfcdf69861b387eabf7ac
 branch: main
 created_at: '2026-08-25T11:38:21Z'
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - change_characteristics:
     behavior_changed: true
@@ -125,6 +125,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-08-25T16:33:45Z'
 subject_commit: 9d48321d825a09a299bd7df0e70b716b2b598430
 task_id: TASK-0015
-updated_at: '2026-08-25T16:38:36Z'
+updated_at: '2026-08-25T17:01:32Z'
 worktree_dirty: false
 worktree_dirty_paths: []

@@ -189,5 +189,35 @@
     "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
     "subject_commit": "9d48321d825a09a299bd7df0e70b716b2b598430",
     "task_id": "TASK-0015"
+  },
+  {
+    "action_sha256": "ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff",
+    "actor": "/user",
+    "approval_type": "action",
+    "approved_at": "2026-08-25T16:41:55Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-26T17:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved one TASK-0015 targeted mutation execution bound to canonical action digest ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
+    "subject_commit": "9d48321d825a09a299bd7df0e70b716b2b598430",
+    "task_id": "TASK-0015"
+  },
+  {
+    "actor": "/reviewer",
+    "approval_type": "code",
+    "approved_at": "2026-08-25T17:01:30Z",
+    "base_commit": "17ab98cf879cf913e91dfcdf69861b387eabf7ac",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "23364985863374bfc1ef5a02c652b808376ff3b48168190cca4c686b2d96d07f",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "Independent implementation review REV-0016 approved subject 9d48321d825a09a299bd7df0e70b716b2b598430 with no P0-P3 findings; finalized V2 evidence passed all required checks and killed all five authoritative mutants under single-use action ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff.",
+    "schema_version": "1.0",
+    "spec_sha256": "59be2e15f5bf1b1d118bc63c7d05f864e5547717f062f64e8546fb0ef6b5cade",
+    "subject_commit": "9d48321d825a09a299bd7df0e70b716b2b598430",
+    "task_id": "TASK-0015"
   }
 ]
