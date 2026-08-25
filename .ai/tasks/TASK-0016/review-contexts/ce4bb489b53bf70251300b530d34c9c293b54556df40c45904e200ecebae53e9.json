@@ -1,0 +1,227 @@
+{
+  "base_commit": "1342cd23302cdb918b19c2fc42aeaaaa3ee20639",
+  "branch": "main",
+  "classification_input_sha256": "2dfc65fd0f4bdaf87c5a69df630b0f844650b7f2d5baf495b29ee2dc1e979e83",
+  "content": {
+    "allowed_scope": [
+      "README.md",
+      "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+      "docs/superpowers/state/chapters/chapter-11.yaml",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 TASK-0015 合并后的 Chapter 11.5 与 Chapter 11 退出状态投影：基于当前已提交的 V2 evidence、REV-0016、code approval、external merge 与 merge-record governance commit，将 Chapter 11 标记完成并初始化 Chapter 12/12.1；修正文档中的陈旧 pending 叙述，不重跑 mutation、不修改 TASK-0015 历史或运行时代码。",
+        "impact_scope": [
+          "README.md",
+          "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+          "docs/superpowers/state/chapters/chapter-11.yaml",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Revalidate the committed TASK-0015 V2, review, approval and external-merge facts",
+          "Mark Chapter 11.5 and both Chapter 11 exit checks complete with bounded evidence references",
+          "Initialize the Chapter 12 state skeleton from the approved Phase 02 implementation directory",
+          "Update overall counters, chapter entries and the current pointer to Chapter 12.1",
+          "Correct stale Chapter 11 and README status prose without changing runtime behavior"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0016/approvals.json",
+        ".ai/tasks/TASK-0016/classification-baseline-resolution.md",
+        ".ai/tasks/TASK-0016/classification-remediation.md",
+        ".ai/tasks/TASK-0016/classification.json",
+        ".ai/tasks/TASK-0016/design-review-context.json",
+        ".ai/tasks/TASK-0016/design-review-input.json",
+        ".ai/tasks/TASK-0016/events.jsonl",
+        ".ai/tasks/TASK-0016/review-contexts/fb69a772dd82d4e268783e65c222c8af03be12fd694222b221f4e1b04ed0dec1.json",
+        ".ai/tasks/TASK-0016/reviews/REV-0017-r0001.json",
+        ".ai/tasks/TASK-0016/spec.md",
+        ".ai/tasks/TASK-0016/task.yaml",
+        "README.md",
+        "docs/implementation/chapter-11-acceptance-integration-mutation.md",
+        "docs/superpowers/state/chapters/chapter-11.yaml",
+        "docs/superpowers/state/chapters/chapter-12.yaml",
+        "docs/superpowers/state/overall.yaml"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/approvals.json"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/classification-baseline-resolution.md"
+        },
+        {
+          "additions": 29,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/classification-remediation.md"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/classification.json"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/design-review-input.json"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/events.jsonl"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/review-contexts/fb69a772dd82d4e268783e65c222c8af03be12fd694222b221f4e1b04ed0dec1.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/reviews/REV-0017-r0001.json"
+        },
+        {
+          "additions": 79,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/spec.md"
+        },
+        {
+          "additions": 97,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0016/task.yaml"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 2,
+          "path": "README.md"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 8,
+          "path": "docs/implementation/chapter-11-acceptance-integration-mutation.md"
+        },
+        {
+          "additions": 61,
+          "binary": false,
+          "deletions": 11,
+          "path": "docs/superpowers/state/chapters/chapter-11.yaml"
+        },
+        {
+          "additions": 69,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/superpowers/state/chapters/chapter-12.yaml"
+        },
+        {
+          "additions": 49,
+          "binary": false,
+          "deletions": 15,
+          "path": "docs/superpowers/state/overall.yaml"
+        }
+      ],
+      "totals": {
+        "additions": 646,
+        "deletions": 36,
+        "files": 16
+      }
+    },
+    "goal": "完成 TASK-0015 合并后的 Chapter 11.5 与 Chapter 11 退出状态投影：基于当前已提交的 V2 evidence、REV-0016、code approval、external merge 与 merge-record governance commit，将 Chapter 11 标记完成并初始化 Chapter 12/12.1；修正文档中的陈旧 pending 叙述，不重跑 mutation、不修改 TASK-0015 历史或运行时代码。",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0016",
+        "--actor",
+        "/verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "ce4bb489b53bf70251300b530d34c9c293b54556df40c45904e200ecebae53e9",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "b7d6c09e8bf9d89d2798824d1ff343d006fde247b1a49857f62da81a0f2df6c4",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "b235881a62ae9305c303c4b7ad51ae578ccc2c54a247ae176a665b84050027fb",
+  "subject_commit": "9827bd46cc3db7a5b62431cc89712dfe16e1774c",
+  "task_id": "TASK-0016"
+}
