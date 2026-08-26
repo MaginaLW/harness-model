@@ -11,7 +11,7 @@ allowed_scope:
 base_commit: 65f2fb4140027ba09c6f0cbf710b26ce87a6cc5b
 branch: main
 created_at: '2026-08-26T15:48:36Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -110,9 +110,9 @@ repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
 spec_frozen_at: '2026-08-26T15:52:48Z'
-subject_commit: 741790f14ccdc79748a1c83a83536c88fd6095bd
+subject_commit: 893ce6bc7f31a20a964776bbbc2b7e5a2c280d90
 task_id: TASK-0022
-updated_at: '2026-08-26T16:46:38Z'
+updated_at: '2026-08-26T17:10:46Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - .ai/tasks/TASK-0021/approvals.json

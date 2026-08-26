@@ -11,5 +11,19 @@
     "spec_sha256": "c73fb731b0fa1f1577203e6087b97079297b27ebdf99e68f654dc8c6034a7cc1",
     "subject_commit": "65f2fb4140027ba09c6f0cbf710b26ce87a6cc5b",
     "task_id": "TASK-0022"
+  },
+  {
+    "actor": "/root",
+    "approval_type": "code",
+    "approved_at": "2026-08-26T17:10:46Z",
+    "base_commit": "65f2fb4140027ba09c6f0cbf710b26ce87a6cc5b",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "9054a208781ba61ff65cd03b30fee6e58168a8865c49ee7ebc0e4dc4e723fd58",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0035 approved current subject after passed V1; local approval only, no remote action",
+    "schema_version": "1.0",
+    "spec_sha256": "c73fb731b0fa1f1577203e6087b97079297b27ebdf99e68f654dc8c6034a7cc1",
+    "subject_commit": "893ce6bc7f31a20a964776bbbc2b7e5a2c280d90",
+    "task_id": "TASK-0022"
   }
 ]

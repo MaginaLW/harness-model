@@ -1,0 +1,321 @@
+{
+  "base_commit": "65f2fb4140027ba09c6f0cbf710b26ce87a6cc5b",
+  "branch": "main",
+  "classification_input_sha256": "72068c839a2f9e46dec59e3a9c2f1f84b2715d1bd11663fd8ddbb7867f9500c7",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/observation_service.py",
+      "src/aiflow/observation_adapter.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_observation_service.py",
+      "tests/unit/test_observation_adapter.py",
+      "tests/integration/test_observation_parity.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.5：新增受限 aiflow observe CLI/CI adapter，复用同一 observation parser、deterministic decision 与 task binding core，证明受支持的 pre-commit/pre-command Hook、CLI apply/dry-run 和 detached CI dry-run 对相同事实给出相同非授权结论；CI 与 dry-run 不写 task ledger，并如实记录 shell/平台覆盖边界。",
+        "impact_scope": [
+          "src/aiflow/observation_service.py",
+          "src/aiflow/observation_adapter.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_observation_service.py",
+          "tests/unit/test_observation_adapter.py",
+          "tests/integration/test_observation_parity.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Refactor the existing current-facts binding check into one public read-only observation evaluation seam without changing the deterministic decision table",
+          "Add a bounded observation adapter with explicit apply, dry-run and CI modes, strict mode/source/actor validation and canonical JSON output",
+          "Keep apply task-local and idempotent through the existing service while making dry-run and CI strictly non-persistent",
+          "Prove semantic parity for every observation kind, route and verification level, plus end-to-end parity for the two actually supported Hook facts",
+          "Cover malformed input, ambiguity, stale bindings, path escape, unknown fields, ledger-write prevention and stable exit behavior",
+          "Record the supported shell, Hook-install and operating-system boundaries without claiming a generic sandbox",
+          "Project only Chapter 12.5 after implementation, formal verification and required review facts are current"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0022/approvals.json",
+        ".ai/tasks/TASK-0022/classification.json",
+        ".ai/tasks/TASK-0022/design-review-context.json",
+        ".ai/tasks/TASK-0022/design-review-input.json",
+        ".ai/tasks/TASK-0022/events.jsonl",
+        ".ai/tasks/TASK-0022/evidence.json",
+        ".ai/tasks/TASK-0022/implementation-review-context-h1.json",
+        ".ai/tasks/TASK-0022/implementation-review-context-h1b.json",
+        ".ai/tasks/TASK-0022/implementation-review-input-h1.json",
+        ".ai/tasks/TASK-0022/implementation-review-input-h1b.json",
+        ".ai/tasks/TASK-0022/review-contexts/5ecd7e93bcd824bb2144de6901ed2603845dba5aa22da9c56e2cde282609668c.json",
+        ".ai/tasks/TASK-0022/review-contexts/e215e14fe0252f88c9a24d0652b2783762fa3b8a0e146e83a5b676fe95cfc661.json",
+        ".ai/tasks/TASK-0022/review-contexts/f50ae437af089d6853974ad9d01ba4ddc9330013a00b4d4d37c09d012e6e088f.json",
+        ".ai/tasks/TASK-0022/reviews/REV-0032-r0001.json",
+        ".ai/tasks/TASK-0022/reviews/REV-0033-r0001.json",
+        ".ai/tasks/TASK-0022/reviews/REV-0033-r0002.json",
+        ".ai/tasks/TASK-0022/reviews/REV-0034-r0001.json",
+        ".ai/tasks/TASK-0022/spec.md",
+        ".ai/tasks/TASK-0022/task.yaml",
+        "docs/implementation/chapter-12-runtime-observations-hooks.md",
+        "docs/superpowers/state/chapters/chapter-12.yaml",
+        "docs/superpowers/state/overall.yaml",
+        "src/aiflow/cli.py",
+        "src/aiflow/observation_adapter.py",
+        "src/aiflow/observation_service.py",
+        "tests/integration/test_observation_parity.py",
+        "tests/unit/test_observation_adapter.py",
+        "tests/unit/test_observation_service.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/classification.json"
+        },
+        {
+          "additions": 57,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/design-review-input.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/evidence.json"
+        },
+        {
+          "additions": 230,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/implementation-review-context-h1.json"
+        },
+        {
+          "additions": 272,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/implementation-review-context-h1b.json"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/implementation-review-input-h1.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/implementation-review-input-h1b.json"
+        },
+        {
+          "additions": 230,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/review-contexts/5ecd7e93bcd824bb2144de6901ed2603845dba5aa22da9c56e2cde282609668c.json"
+        },
+        {
+          "additions": 57,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/review-contexts/e215e14fe0252f88c9a24d0652b2783762fa3b8a0e146e83a5b676fe95cfc661.json"
+        },
+        {
+          "additions": 272,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/review-contexts/f50ae437af089d6853974ad9d01ba4ddc9330013a00b4d4d37c09d012e6e088f.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/reviews/REV-0032-r0001.json"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/reviews/REV-0033-r0001.json"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/reviews/REV-0033-r0002.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/reviews/REV-0034-r0001.json"
+        },
+        {
+          "additions": 142,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/spec.md"
+        },
+        {
+          "additions": 121,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0022/task.yaml"
+        },
+        {
+          "additions": 60,
+          "binary": false,
+          "deletions": 5,
+          "path": "docs/implementation/chapter-12-runtime-observations-hooks.md"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/superpowers/state/chapters/chapter-12.yaml"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 6,
+          "path": "docs/superpowers/state/overall.yaml"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 176,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/observation_adapter.py"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 6,
+          "path": "src/aiflow/observation_service.py"
+        },
+        {
+          "additions": 408,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_observation_parity.py"
+        },
+        {
+          "additions": 332,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_observation_adapter.py"
+        },
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/unit/test_observation_service.py"
+        }
+      ],
+      "totals": {
+        "additions": 2938,
+        "deletions": 21,
+        "files": 28
+      }
+    },
+    "goal": "完成 Chapter 12.5：新增受限 aiflow observe CLI/CI adapter，复用同一 observation parser、deterministic decision 与 task binding core，证明受支持的 pre-commit/pre-command Hook、CLI apply/dry-run 和 detached CI dry-run 对相同事实给出相同非授权结论；CI 与 dry-run 不写 task ledger，并如实记录 shell/平台覆盖边界。",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0022",
+        "--actor",
+        "/root"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "f424e758b3519848b9d0ea68ddf07df81ad9c631bd20869d1aff7085d1538b0b",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "9054a208781ba61ff65cd03b30fee6e58168a8865c49ee7ebc0e4dc4e723fd58",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "c73fb731b0fa1f1577203e6087b97079297b27ebdf99e68f654dc8c6034a7cc1",
+  "subject_commit": "893ce6bc7f31a20a964776bbbc2b7e5a2c280d90",
+  "task_id": "TASK-0022"
+}
