@@ -87,10 +87,21 @@ tasks:
     blockers: []
   - id: "12.5"
     title: "证明 Hook、CLI、CI parity，并记录 shell/平台覆盖限制"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - "src/aiflow/observation_service.py"
+      - "src/aiflow/observation_adapter.py"
+      - "src/aiflow/cli.py"
+      - "tests/unit/test_observation_service.py"
+      - "tests/unit/test_observation_adapter.py"
+      - "tests/integration/test_observation_parity.py"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - ".ai/tasks/TASK-0022/spec.md"
+      - ".ai/tasks/TASK-0022/evidence.json"
+      - ".ai/tasks/TASK-0022/reviews/REV-0034-r0001.json"
     blockers: []
   - id: "12.6"
     title: "更新恢复与操作文档"
@@ -253,5 +264,42 @@ chapter_evidence:
       - ".ai/tasks/TASK-0020/evidence.json"
       - ".ai/tasks/TASK-0020/reviews/REV-0029-r0001.json"
     limitation: "本条只完成 12.4，不证明 12.5–12.6、P2-ESC-01/P2-HOOK-01、Hook/CLI/CI parity 或通用命令/操作系统安全沙箱；H1 V1 与 REV-0029 只构成本次投影前提，最终 merge readiness 仍由 TASK-0020 投影后 current subject 的正式 V1、独立实现审核、code approval 与 Gate 决定。"
+  - id: "EVD-CH12-12.5-001"
+    kind: "task_completion_projection"
+    task_id: "TASK-0022"
+    route: "REVIEW"
+    verification_level: "V1"
+    classification_input_sha256: "72068c839a2f9e46dec59e3a9c2f1f84b2715d1bd11663fd8ddbb7867f9500c7"
+    spec_sha256: "c73fb731b0fa1f1577203e6087b97079297b27ebdf99e68f654dc8c6034a7cc1"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    design_review_ref: ".ai/tasks/TASK-0022/reviews/REV-0032-r0001.json"
+    design_review_context_sha256: "e215e14fe0252f88c9a24d0652b2783762fa3b8a0e146e83a5b676fe95cfc661"
+    projection_basis_subject: "741790f14ccdc79748a1c83a83536c88fd6095bd"
+    implementation_review_ref: ".ai/tasks/TASK-0022/reviews/REV-0034-r0001.json"
+    implementation_review_context_sha256: "f50ae437af089d6853974ad9d01ba4ddc9330013a00b4d4d37c09d012e6e088f"
+    implementation_checks:
+      focused_observe_remediation: "99 passed"
+      formal_v1_required_checks: "10/10 passed; unverified_scenarios empty"
+      formal_v1_full_pytest: "1507 passed, 4 skipped (existing Windows symlink limitations)"
+      relative_base_diff_coverage: "94% (110 changed executable lines, 6 missing; threshold 90%)"
+      review_remediation: "REV-0033 r0001 requested exact observe help; RF-001 resolved in r0002; remediated subject reverified and REV-0034 approved with no findings"
+      ruff: "passed"
+      format_check: "passed"
+      mypy: "passed"
+      validate_scope_smoke: "passed"
+    scope: "受限 aiflow observe apply/dry-run/ci adapter 复用同一 parser、完整 current binding 与 deterministic non-authorizing decision core；apply 保持 task-local audit/幂等/单调升级，dry-run/CI 零写；五 kind × 四 route × 三 V 及两类实际 Hook fact 证明语义 parity。"
+    artifacts:
+      - "src/aiflow/observation_service.py"
+      - "src/aiflow/observation_adapter.py"
+      - "src/aiflow/cli.py"
+      - "tests/unit/test_observation_service.py"
+      - "tests/unit/test_observation_adapter.py"
+      - "tests/integration/test_observation_parity.py"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - ".ai/tasks/TASK-0022/spec.md"
+      - ".ai/tasks/TASK-0022/evidence.json"
+      - ".ai/tasks/TASK-0022/reviews/REV-0034-r0001.json"
+    limitation: "本次只在 Windows 临时仓/wrapper entrypoint 证明支持范围；4 个既有 symlink skips 不证明 Linux/macOS live Hook。未安装 Hook、IDE save、GUI/remote Git 与绕过 wrapper 的调用不被拦截；结构化 action/target 不能解释 PowerShell/cmd/bash、alias、pipe、redirection、quote、wildcard 或 expansion，系统不是通用命令/OS sandbox。12.6、两个 Chapter 12 exit checks 和章节完成状态保持 pending；H1b V1/REV-0034 只构成本次投影前提，最终 merge readiness 仍由 TASK-0022 投影后 current subject 的正式 V1、独立实现审核、code approval 与 Gate 决定。"
 
 blockers: []

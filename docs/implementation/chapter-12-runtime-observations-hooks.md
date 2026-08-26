@@ -1,13 +1,13 @@
 # Chapter 12：运行期升级观测与完整 Hooks
 
-状态：in progress（12.1–12.4 completed；12.5–12.6 pending）
+状态：in progress（12.1–12.5 completed；12.6 pending）
 
 Chapter 12 在 Chapter 11 的 V2 failure/evidence 结构之上增加运行期观察与 Hook 入口，
 当前已完成 12.1 的 observation contract/type 输入层、12.2 的共享确定性
-decision/task-local persistence 核心、12.3 的 pre-commit scope observation adapter，以及
-12.4 的结构化 pre-command 拒绝与审计 adapter。没有新增 `aiflow observe`、CLI/CI adapter
-或 parity，也没有修改现有 CLI、Gate、Policy、evidence 或 approval 行为；其余运行期入口与
-parity 仍由 12.5 完成。
+decision/task-local persistence 核心、12.3 的 pre-commit scope observation adapter、12.4 的
+结构化 pre-command 拒绝与审计 adapter，以及 12.5 的受限 `aiflow observe` CLI/CI adapter
+和支持范围内的语义 parity。12.5 没有改变 Gate、Policy、evidence、approval 或 Hook 的既有
+决策；恢复与操作文档仍由 12.6 完成。
 
 ## 12.1 已完成：版本化 observation contract
 
@@ -166,3 +166,58 @@ reason 枚举，以及冻结的 `Observation`、`PathsSummary`、`CommandSummary
   README/operations/recovery、`CH12-EXIT-01/02`、P2-ESC-01 和 P2-HOOK-01 均保持 pending；
   未安装 Hook，不解析自由 shell，不保证拦截 GUI、IDE、remote 或未集成本 wrapper 的调用，
   也不构成通用命令/操作系统安全沙箱。
+
+## 12.5 已完成：受限 CLI/CI adapter 与语义 parity
+
+- 新命令契约固定为
+  `aiflow observe TASK-ID --input FILE --mode {apply,dry-run,ci} [--actor ACTOR]`。
+  `TASK-ID`、本地 UTF-8 JSON object 输入和 mode 都必须显式提供；adapter 不搜索 active task，
+  不从 stdin、环境、自由 shell、argv 或网络接收事实。重复 key、未知字段、非 object、读取失败
+  和 observation contract 错误均 fail closed。
+- mode/source/actor 是封闭组合：`apply` 只接受 `source=cli` 且要求非空 actor；
+  `dry-run` 只接受 `source=cli` 且禁止 actor；`ci` 只接受 `source=ci` 且禁止 actor。
+  adapter 不伪装 `hook_pre_commit` 或 `hook_pre_command` source。
+- `evaluate_observation` 公开复用 task identity/state、base/subject、repository/branch/HEAD/
+  ancestry、active Policy、current classification input 和 route/V 的完整绑定校验，再委派既有
+  deterministic mapper；该入口不写 task、event、state、approval 或 evidence。
+  `apply_observation` 在任何 ledger 读取前继续拒绝 CI，随后复用同一 evaluator，并保留既有
+  task-local audit、幂等重放和只经 `escalate_task` 的单调升级。
+- `apply` 只委派 persistence service；`dry-run` 与 `ci` 只委派只读 evaluator。成功解析
+  后 stdout 只含协议版本、task、mode、ledger effect、canonical decision 和 apply-only event
+  reference，不回显 observation、summary、path、target 或 actor。所有有效 observation 因
+  `execution_allowed=false` 固定 exit 2；无效输入或状态 exit 1，不存在 observation allow
+  的 exit 0。
+- parity 只比较 decision 的 schema/disposition/reason/current route/current V/
+  `execution_allowed`/required conditions/target route。canonical observation digest 正确包含
+  source，因此 Hook、CLI 与 CI digest 可以且应不同；mode、ledger effect、event metadata、
+  JSON 字节和用户可见文案也不属于语义 parity。
+
+## 12.5 验证事实与边界
+
+- core/adapter matrix 覆盖五类 observation、AUTO/ASK/REVIEW/BLOCK 与 V0/V1/V2；真实临时仓
+  parity 覆盖当前实际支持的 pre-commit `scope_out_of_bounds`、pre-command 六类 Policy
+  禁止 action、CLI apply/dry-run 与 detached CI dry-run。其余三类 observation 只证明 core、
+  CLI 和 CI 语义，不声称现有 Hook 能产生。
+- dry-run/CI 的完整 task 目录逐字节 hash 保持不变；测试同时验证 mutation helper 未被调用。
+  apply replay 复用 audit identity；in-scope edit 保持 allow 且无 observation。focused
+  remediation suite 为 99 passed。
+- 投影前 H1 subject `f977b977dd47482e77bbc2067c9e1a41de470f41` 的正式 V1 首次为
+  10/10 required checks passed、全量 1507 passed/4 skipped、diff coverage 94%；独立审核
+  `REV-0033` 唯一提出 CLI help 契约不精确。remediation subject
+  `741790f14ccdc79748a1c83a83536c88fd6095bd` 修复 help 与精确断言后重新取得正式 V1：
+  10/10 required checks passed、`unverified_scenarios` 为空、全量 1507 passed/4 skipped、
+  diff coverage 94%（110 changed executable lines，6 missing；门槛 90%）。Ruff、format、
+  mypy、validate、scope 与 smoke 均通过。
+- `REV-0033-r0002` 如实保留 RF-001 的解决历史；独立投影前审核 `REV-0034` / context
+  `f50ae437af089d6853974ad9d01ba4ddc9330013a00b4d4d37c09d012e6e088f` 对 remediation
+  subject APPROVE、findings 为空。投影后的 current subject 仍必须重新取得正式 V1、独立实现
+  审核、code approval 与 Gate，方可形成 merge readiness。
+- 上述验证运行在当前 Windows host；4 项 skip 是既有 symlink 平台限制。临时仓和 wrapper
+  entrypoint 测试不证明 Linux/macOS live Hook 安装或全部 host 行为。Git Hook 无法拦截未安装
+  Hook 的客户端、IDE save、GUI/remote Git 或绕过 wrapper 的调用。
+- pre-command 只接受结构化 canonical action/target，不能安全解释 PowerShell、cmd、bash、
+  alias、pipe、redirection、quote、wildcard、variable/command expansion 或任意自由 shell。
+  本系统不是通用命令执行拦截器或操作系统安全沙箱。
+- 本条只完成 12.5 的五步投影。12.6、`CH12-EXIT-01/02`、P2-ESC-01/P2-HOOK-01 与
+  Chapter 12 完成状态保持 pending；当前技术证据不能替代 12.6 的恢复/操作文档和章节最终
+  退出证据。

@@ -110,9 +110,9 @@ repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
 spec_frozen_at: '2026-08-26T15:52:48Z'
-subject_commit: f977b977dd47482e77bbc2067c9e1a41de470f41
+subject_commit: 741790f14ccdc79748a1c83a83536c88fd6095bd
 task_id: TASK-0022
-updated_at: '2026-08-26T16:28:12Z'
+updated_at: '2026-08-26T16:46:38Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - .ai/tasks/TASK-0021/approvals.json

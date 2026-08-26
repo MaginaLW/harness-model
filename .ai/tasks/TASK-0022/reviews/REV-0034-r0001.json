@@ -1,0 +1,13 @@
+{
+  "context_sha256": "f50ae437af089d6853974ad9d01ba4ddc9330013a00b4d4d37c09d012e6e088f",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-26T16:46:18Z",
+  "review_id": "REV-0034",
+  "review_stage": "implementation",
+  "reviewer": "/root/task22_impl_review_h1b",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE。投影前 H1b 独立本地只读审核确认 subject 741790f14ccdc79748a1c83a83536c88fd6095bd 可作为 Chapter 12.5 状态投影前提。RF-001 已修复：observe help 精确声明 TASK-ID、--input、封闭 mode 与 actor 条件并有单测断言。evaluate_observation 复用完整 current task/Git/Policy/classification binding 且保持只读；apply_observation 在任何 ledger 读取前拒绝 CI。mode/source/actor 组合封闭，dry-run/CI 只委派 evaluate，apply 保持审计、重放幂等和单调 escalation；输出不回显 observation、summary、actor 等调用者载荷，有效非授权 decision 统一 exit 2。parity 测试区分 source-sensitive digest 与 decision semantic parity，覆盖五类 observation、全部 route/V 组合及实际支持的 Hook E2E。正式 V1 的 10/10 required checks passed、unverified_scenarios 为空、全量 1507 passed/4 个既有 Windows symlink skips、diff coverage 94%。classification、Policy、spec、subject、context 与 evidence SHA 绑定一致。依据冻结规格第 12 条，当前文档与状态保留 12.5 pending 是正确的投影前治理状态；H2 必须补齐实现、验证与 shell/platform 边界并对新 subject 重新执行正式 V1 和独立最终审核。",
+  "task_id": "TASK-0022"
+}
