@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/observation-decision.schema.json",
+  "title": "AI Flow observation decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "observation_sha256", "disposition", "reason_code", "current_route", "current_verification_level", "execution_allowed", "required_conditions"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "observation_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "disposition": {"enum": ["record", "escalate", "refuse"]},
+    "reason_code": {"enum": ["scope_expanded", "scope_reclassification_required", "policy_changed", "controlled_file_changed", "action_approval_required", "evidence_current_and_passed_required"]},
+    "current_route": {"enum": ["AUTO", "ASK", "REVIEW", "BLOCK"]},
+    "current_verification_level": {"enum": ["V0", "V1", "V2"]},
+    "execution_allowed": {"const": false},
+    "required_conditions": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"enum": ["scope_reclassification_and_spec_freeze", "policy_reclassification", "controlled_file_confirmation_and_reclassification", "current_version_single_use_action_approval", "artifact_current_and_passed"]}
+    },
+    "target_route": {"enum": ["REVIEW", "BLOCK"]}
+  },
+  "allOf": [
+    {"if": {"properties": {"disposition": {"const": "escalate"}}, "required": ["disposition"]}, "then": {"required": ["target_route"]}, "else": {"not": {"required": ["target_route"]}}}
+  ]
+}

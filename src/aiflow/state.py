@@ -127,6 +127,8 @@ NON_STATE_EVENTS = frozenset(
         "resolution_recorded",
         "review_recorded",
         "review_finding_resolved",
+        "observation_recorded",
+        "observation_refused",
     }
 )
 

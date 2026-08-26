@@ -1,0 +1,71 @@
+{
+  "base_commit": "b8c18d31fa350aa3e2100fe098f6b128c66b6997",
+  "branch": "main",
+  "classification_input_sha256": "805184f29241d8686119ce9dc09f6bab17be9704624b1da7e6dc75df65bcd80f",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/observation-decision.schema.json",
+      ".ai/templates/observation-decision.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/observation_decision.py",
+      "src/aiflow/observation_service.py",
+      "tests/fixtures/contracts/valid/observation-decision.json",
+      "tests/fixtures/contracts/invalid/observation-decision.extra.json",
+      "tests/fixtures/contracts/invalid/observation-decision.invalid.json",
+      "tests/fixtures/contracts/invalid/observation-decision.missing.json",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_observation_decision.py",
+      "tests/unit/test_observation_service.py",
+      "tests/integration/test_observation_escalation.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.2：建立消费 12.1 immutable observation 的共享确定性 decision/persistence 核心，将每项事实映射为 record、单调 escalate 或 refuse，持久化 task-local 非状态观察/拒绝事件并仅通过现有 escalate_task 执行升级；禁止 route/V 自动降级，拒绝陈旧绑定和未知输入，不实现 Hook、CLI、CI adapter，不修改 Policy、Gate 或 evidence 行为。",
+        "impact_scope": [
+          ".ai/schemas/observation-decision.schema.json",
+          ".ai/templates/observation-decision.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/observation_decision.py",
+          "src/aiflow/observation_service.py",
+          "tests/fixtures/contracts/valid/observation-decision.json",
+          "tests/fixtures/contracts/invalid/observation-decision.extra.json",
+          "tests/fixtures/contracts/invalid/observation-decision.invalid.json",
+          "tests/fixtures/contracts/invalid/observation-decision.missing.json",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_observation_decision.py",
+          "tests/unit/test_observation_service.py",
+          "tests/integration/test_observation_escalation.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Define one closed version 1.0 observation-decision contract for record, escalate and refuse dispositions with stable reason codes, optional REVIEW/BLOCK targets and closed recovery conditions",
+          "Implement a pure deterministic mapper from the five immutable observation kinds plus current route and verification facts, with no repository reads, mutation or route/verification downgrade",
+          "Add a bounded service that validates task, base, subject and active Policy bindings before consuming a decision",
+          "Persist record and refusal as task-local non-state audit events, and delegate every state-changing escalation exclusively to the existing monotonic escalate_task path",
+          "Fail closed on unknown decisions, stale bindings, unsupported state, lower targets, missing recovery facts and unsafe payloads without echoing sensitive values",
+          "Add contract, unit and integration replay tests across all five kinds, four sources and AUTO/ASK/REVIEW/BLOCK monotonicity",
+          "Project only Chapter 12.2 progress after implementation, verification and required review facts are current; leave Hooks, CLI/CI parity and Chapter exits pending"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 12.2：建立消费 12.1 immutable observation 的共享确定性 decision/persistence 核心，将每项事实映射为 record、单调 escalate 或 refuse，持久化 task-local 非状态观察/拒绝事件并仅通过现有 escalate_task 执行升级；禁止 route/V 自动降级，拒绝陈旧绑定和未知输入，不实现 Hook、CLI、CI adapter，不修改 Policy、Gate 或 evidence 行为。",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "7ac3c4c2b9f6f179f5381a13d6563763794208dee1efd39c9e913aed5be9a63a",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "460a852d9e3b321145a155900f906ca7ef79e3cd395aad991f43eb2856bb46ea",
+  "task_id": "TASK-0018"
+}

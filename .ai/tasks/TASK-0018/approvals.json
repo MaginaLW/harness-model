@@ -1,0 +1,28 @@
+[
+  {
+    "actor": "/user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-26T11:41:57Z",
+    "base_commit": "b8c18d31fa350aa3e2100fe098f6b128c66b6997",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User approved classification input 5cb11bdf357857d811007fb2ee0653e82418a22bb2bd220bbcdd531932e56de3, Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf, frozen spec 2fed82a3089bf1a277449b20c911436c995fe24e35e92d90840654d6974af82e, and REV-0022 design context b6f22f0ac0279af011d87bc934f7f79b06e7878177bd288384ecde63117cd0ba for REVIEW/V1 implementation. This approval does not authorize push, merge, deploy, delete, secret export, package publish, paid external calls, Hook/CLI/CI work, Policy/Gate changes, or real high-risk command execution.",
+    "schema_version": "1.0",
+    "spec_sha256": "2fed82a3089bf1a277449b20c911436c995fe24e35e92d90840654d6974af82e",
+    "subject_commit": "b8c18d31fa350aa3e2100fe098f6b128c66b6997",
+    "task_id": "TASK-0018"
+  },
+  {
+    "actor": "/user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-26T12:00:51Z",
+    "base_commit": "b8c18d31fa350aa3e2100fe098f6b128c66b6997",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "After incident sequence 14 and authorized local-only resolution sequence 15, user re-approved TASK-0018 at classification input 5cb11bdf357857d811007fb2ee0653e82418a22bb2bd220bbcdd531932e56de3, Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf, frozen spec 2fed82a3089bf1a277449b20c911436c995fe24e35e92d90840654d6974af82e, and unchanged approved design REV-0022/context b6f22f0ac0279af011d87bc934f7f79b06e7878177bd288384ecde63117cd0ba for REVIEW/V1. No external or paid call is authorized.",
+    "schema_version": "1.0",
+    "spec_sha256": "2fed82a3089bf1a277449b20c911436c995fe24e35e92d90840654d6974af82e",
+    "subject_commit": "b8c18d31fa350aa3e2100fe098f6b128c66b6997",
+    "task_id": "TASK-0018"
+  }
+]

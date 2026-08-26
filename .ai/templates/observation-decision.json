@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "observation_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "disposition": "escalate",
+  "reason_code": "scope_expanded",
+  "current_route": "AUTO",
+  "current_verification_level": "V1",
+  "execution_allowed": false,
+  "required_conditions": ["scope_reclassification_and_spec_freeze"],
+  "target_route": "REVIEW"
+}

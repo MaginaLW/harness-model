@@ -26,6 +26,7 @@ SCHEMA_FILES = {
     "mutation-evidence": "mutation-evidence.schema.json",
     "mutation-manifest": "mutation-manifest.schema.json",
     "observation": "observation.schema.json",
+    "observation-decision": "observation-decision.schema.json",
     "policy": "policy.schema.json",
     "review-context": "review-context.schema.json",
     "review-record": "review-record.schema.json",

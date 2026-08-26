@@ -1,0 +1,157 @@
+allowed_scope:
+- .ai/schemas/observation-decision.schema.json
+- .ai/templates/observation-decision.json
+- src/aiflow/contracts.py
+- src/aiflow/observation_decision.py
+- src/aiflow/observation_service.py
+- src/aiflow/state.py
+- tests/fixtures/contracts/valid/observation-decision.json
+- tests/fixtures/contracts/invalid/observation-decision.extra.json
+- tests/fixtures/contracts/invalid/observation-decision.invalid.json
+- tests/fixtures/contracts/invalid/observation-decision.missing.json
+- tests/unit/test_contracts.py
+- tests/unit/test_observation_decision.py
+- tests/unit/test_observation_service.py
+- tests/unit/test_state.py
+- tests/integration/test_observation_escalation.py
+- docs/implementation/chapter-12-runtime-observations-hooks.md
+- docs/superpowers/state/chapters/chapter-12.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: b8c18d31fa350aa3e2100fe098f6b128c66b6997
+branch: main
+created_at: '2026-08-26T10:50:35Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 12.2：建立消费 12.1 immutable observation 的共享确定性 decision/persistence
+    核心，将每项事实映射为 record、单调 escalate 或 refuse，持久化 task-local 非状态观察/拒绝事件并仅通过现有 escalate_task
+    执行升级；禁止 route/V 自动降级，拒绝陈旧绑定和未知输入，不实现 Hook、CLI、CI adapter，不修改 Policy、Gate 或 evidence
+    行为。
+  impact:
+    level: medium
+  impact_scope:
+  - .ai/schemas/observation-decision.schema.json
+  - .ai/templates/observation-decision.json
+  - src/aiflow/contracts.py
+  - src/aiflow/observation_decision.py
+  - src/aiflow/observation_service.py
+  - src/aiflow/state.py
+  - tests/fixtures/contracts/valid/observation-decision.json
+  - tests/fixtures/contracts/invalid/observation-decision.extra.json
+  - tests/fixtures/contracts/invalid/observation-decision.invalid.json
+  - tests/fixtures/contracts/invalid/observation-decision.missing.json
+  - tests/unit/test_contracts.py
+  - tests/unit/test_observation_decision.py
+  - tests/unit/test_observation_service.py
+  - tests/unit/test_state.py
+  - tests/integration/test_observation_escalation.py
+  - docs/implementation/chapter-12-runtime-observations-hooks.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - .ai/tasks/TASK-0013/future-chapters-blueprint.md
+  - src/aiflow/observation.py
+  - src/aiflow/escalation.py
+  - src/aiflow/state.py
+  - src/aiflow/task_service.py
+  - .ai/policy/routing.yaml
+  - .ai/policy/verification-levels.yaml
+  - .ai/policy/permissions.yaml
+  permission_requirements: []
+  planned_actions:
+  - Define one closed version 1.0 observation-decision contract for record, escalate
+    and refuse dispositions with stable reason codes, optional REVIEW/BLOCK targets
+    and closed recovery conditions
+  - Implement a pure deterministic mapper from the five immutable observation kinds
+    plus current route and verification facts, with no repository reads, mutation
+    or route/verification downgrade
+  - Add a bounded service that validates task, base, subject and active Policy bindings
+    before consuming a decision
+  - Persist record and refusal as task-local non-state audit events, and delegate
+    every state-changing escalation exclusively to the existing monotonic escalate_task
+    path
+  - Register only observation_recorded and observation_refused as closed non-state
+    event names without adding or changing any task-state transition
+  - Fail closed on unknown decisions, stale bindings, unsupported state, lower targets,
+    missing recovery facts and unsafe payloads without echoing sensitive values
+  - Add contract, unit and integration replay tests across all five kinds, four sources
+    and AUTO/ASK/REVIEW/BLOCK monotonicity
+  - Project only Chapter 12.2 progress after implementation, verification and required
+    review facts are current; leave Hooks, CLI/CI parity and Chapter exits pending
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0018
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Schema and fixture validation for every disposition and closed recovery payload
+  - Unit tests for deterministic mapping, immutability, stable reason codes and no-downgrade
+    behavior
+  - Integration tests for task-local record/refusal events, escalation delegation,
+    idempotency and stale-binding refusal
+  - State-core regression tests proving the two new audit events are non-state only
+    and cannot authorize a transition
+  - Regression proof that existing observation parsing, escalation, task state, V0/V1/V2
+    evidence, Gate, CLI and Policy conclusions remain unchanged
+  - Ruff, format check, mypy, full pytest, branch coverage, diff coverage at least
+    90%, Git scope and git diff check
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+frozen_spec_sha256: 2fed82a3089bf1a277449b20c911436c995fe24e35e92d90840654d6974af82e
+goal: 完成 Chapter 12.2：建立消费 12.1 immutable observation 的共享确定性 decision/persistence
+  核心，将每项事实映射为 record、单调 escalate 或 refuse，持久化 task-local 非状态观察/拒绝事件并仅通过现有 escalate_task
+  执行升级；禁止 route/V 自动降级，拒绝陈旧绑定和未知输入，不实现 Hook、CLI、CI adapter，不修改 Policy、Gate 或 evidence
+  行为。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-26T12:00:15Z'
+subject_commit: b8c18d31fa350aa3e2100fe098f6b128c66b6997
+task_id: TASK-0018
+updated_at: '2026-08-26T12:02:43Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- .ai/schemas/observation-decision.schema.json
+- .ai/templates/observation-decision.json
+- src/aiflow/contracts.py
+- src/aiflow/observation_decision.py
+- src/aiflow/observation_service.py
+- src/aiflow/state.py
+- tests/fixtures/contracts/invalid/observation-decision.extra.json
+- tests/fixtures/contracts/invalid/observation-decision.invalid.json
+- tests/fixtures/contracts/invalid/observation-decision.missing.json
+- tests/fixtures/contracts/valid/observation-decision.json
+- tests/integration/test_observation_escalation.py
+- tests/unit/test_contracts.py
+- tests/unit/test_observation_decision.py
+- tests/unit/test_observation_service.py
+- tests/unit/test_state.py

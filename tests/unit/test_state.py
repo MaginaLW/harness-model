@@ -66,6 +66,8 @@ def test_transition_table_matches_independent_fixture() -> None:
         "subject_commit_synchronized",
         "review_recorded",
         "review_finding_resolved",
+        "observation_recorded",
+        "observation_refused",
     }
 
 
@@ -161,6 +163,32 @@ def test_non_state_events_use_a_closed_separate_api() -> None:
             occurred_at=OCCURRED_AT,
         )
     assert caught.value.code == "STATE_EVENT_NOT_ALLOWED"
+
+
+@pytest.mark.parametrize("event_type", ["observation_recorded", "observation_refused"])
+def test_observation_audit_events_are_non_state_only(event_type: str) -> None:
+    event = create_record_event(
+        minimal_task("IMPLEMENTING"),
+        event_type=event_type,
+        actor="tester",
+        payload={"observation_sha256": "a" * 64, "decision_sha256": "b" * 64},
+        sequence=2,
+        occurred_at=OCCURRED_AT,
+    )
+
+    assert event["from_state"] == event["to_state"] == "IMPLEMENTING"
+    with pytest.raises(StateTransitionError) as caught:
+        create_transition_event(
+            minimal_task("IMPLEMENTING"),
+            target_state="ESCALATED",
+            event_type=event_type,
+            actor="tester",
+            payload={},
+            sequence=2,
+            satisfied_preconditions={"escalation_recorded"},
+            occurred_at=OCCURRED_AT,
+        )
+    assert caught.value.code == "STATE_TRANSITION_NOT_ALLOWED"
 
 
 def classified_events() -> list[dict[str, Any]]:

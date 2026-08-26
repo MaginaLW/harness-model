@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "observation_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "disposition": "record",
+  "reason_code": "scope_reclassification_required",
+  "current_route": "BLOCK",
+  "current_verification_level": "V1",
+  "execution_allowed": true,
+  "required_conditions": ["scope_reclassification_and_spec_freeze"]
+}

@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-26T00:20:52Z"
+updated_at: "2026-08-26T12:16:55Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -23,20 +23,20 @@ tracking:
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-12"
-  current_task: "12.2"
+  current_task: "12.3"
   current_step: null
 
 summary:
   chapters_total: 12
   chapters_completed: 11
   tasks_total: 71
-  tasks_completed: 66
+  tasks_completed: 67
   steps_total: 378
-  steps_completed: 353
+  steps_completed: 358
   exit_checks_total: 20
   exit_checks_completed: 18
   blockers_total: 0
-  evidence_items: 10
+  evidence_items: 11
 
 chapters:
   - id: "chapter-01"
@@ -157,7 +157,7 @@ future_phases:
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
     current_chapter: "chapter-12"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 已基于 TASK-0015 的 committed V2 evidence、REV-0016、code approval、external merge target 与 merge-record governance commit 完成。Chapter 12.1 已建立五类 observation、四类 source、版本绑定、closed minimal summaries 与纯不可变 parser/serializer；当前进入 12.2 的共享 record/escalate/refuse 映射，尚未实现 observation ledger、Hooks、命令拒绝或 Hook/CLI/CI parity。"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 已基于 TASK-0015 的 committed V2 evidence、REV-0016、code approval、external merge target 与 merge-record governance commit 完成。Chapter 12.1–12.2 已建立 immutable observation 输入、closed deterministic record/escalate/refuse decision、当前绑定校验、task-local audit 与只经既有 escalate_task 的中断可恢复升级；当前进入 12.3，尚未实现编辑/命令 Hook、CLI/CI adapter 或 Hook/CLI/CI parity。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2125,3 +2125,35 @@ history:
       - "tests/unit/test_observation.py"
       - ".ai/tasks/TASK-0017/spec.md"
       - ".ai/tasks/TASK-0017/reviews/REV-0019-r0001.json"
+  - id: "EVT-OVERALL-CH12-12.2-COMPLETE-001"
+    at: "2026-08-26T12:16:55Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "TASK-0018 按冻结规格实现 closed observation-decision contract、五类确定性且不授权的 mapper、当前 task/Git/Policy/classification 绑定校验、task-local 非状态 audit、只经既有 escalate_task 的升级及幂等中断恢复；preflight focused 607 passed、全量 1374 passed/4 existing Windows symlink skips、总分支覆盖 87.31%、diff coverage 91%，Ruff/format/mypy/diff check 通过。一次未授权付费外部审查调用已以事件 14 阻塞、事件 15 绑定用户本地恢复授权且输出未采用；12.3–12.6 与两个 exit checks 仍 pending。"
+    chapter_evidence: "EVD-CH12-12.2-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_12_status: "in_progress"
+      task_12_2_status: "completed"
+      current_chapter: "chapter-12"
+      current_task: "12.3"
+      current_step: null
+      chapters_completed: 11
+      tasks_completed: 67
+      steps_completed: 358
+      exit_checks_completed: 18
+      evidence_items: 11
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-12.yaml"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - ".ai/schemas/observation-decision.schema.json"
+      - ".ai/templates/observation-decision.json"
+      - "src/aiflow/observation_decision.py"
+      - "src/aiflow/observation_service.py"
+      - "src/aiflow/state.py"
+      - "tests/unit/test_observation_decision.py"
+      - "tests/unit/test_observation_service.py"
+      - "tests/integration/test_observation_escalation.py"
+      - ".ai/tasks/TASK-0018/spec.md"
+      - ".ai/tasks/TASK-0018/reviews/REV-0022-r0001.json"
+      - ".ai/tasks/TASK-0018/paid-external-call-incident.md"

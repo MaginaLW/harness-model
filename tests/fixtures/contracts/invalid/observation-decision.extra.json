@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "observation_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "disposition": "refuse",
+  "reason_code": "action_approval_required",
+  "current_route": "REVIEW",
+  "current_verification_level": "V1",
+  "execution_allowed": false,
+  "required_conditions": ["current_version_single_use_action_approval"],
+  "credentials": "SUPER_SECRET_VALUE"
+}

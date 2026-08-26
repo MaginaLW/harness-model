@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0021",
+  "revision": 1,
+  "task_id": "TASK-0018",
+  "review_stage": "design",
+  "reviewer": "/root/task18_design_review",
+  "recorded_at": "2026-08-26T10:59:18Z",
+  "context_sha256": "7ac3c4c2b9f6f179f5381a13d6563763794208dee1efd39c9e913aed5be9a63a",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "REQUEST_CHANGES。五类 immutable observation 的矩阵可保持单调：尤其 policy_changed 在 current_route=BLOCK 时应产生 execution_allowed=false 的 record（reason_code=policy_changed），而不是调用现有 escalate_task；这避免了其对 BLOCKED/ESCALATED 状态的拒绝，也不构成批准或降级。Hook、CLI、CI 的边界以及两阶段写入、失败关闭和恢复目标均与 Phase 02 设计一致。但是规格要求追加 observation_recorded 与 observation_refused 两种新的非状态 event，同时禁止修改 state machine，且允许范围不含 src/aiflow/state.py。现有 record_task_event 必须经 create_record_event，而后者只接受 state.NON_STATE_EVENTS 的封闭集合；该集合没有上述两种 event。因此按冻结范围不存在能产生并重放这些指定事件的合规实现路径。必须先重新治理规格与允许范围（或改为已有合法事件语义，但这会违背当前规格）后才能开始实现。",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "title": "Required observation audit events are impossible without forbidden state-machine change",
+      "location": {
+        "path": ".ai/tasks/TASK-0018/spec.md",
+        "line": 44
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0018/spec.md",
+        ".ai/tasks/TASK-0018/task.yaml",
+        "src/aiflow/task_service.py",
+        "src/aiflow/state.py"
+      ],
+      "status": "open"
+    }
+  ]
+}

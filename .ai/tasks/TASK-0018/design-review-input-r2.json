@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0022",
+  "revision": 1,
+  "task_id": "TASK-0018",
+  "review_stage": "design",
+  "reviewer": "/root/task18_design_review",
+  "recorded_at": "2026-08-26T11:03:38Z",
+  "context_sha256": "b6f22f0ac0279af011d87bc934f7f79b06e7878177bd288384ecde63117cd0ba",
+  "outcome": "APPROVE",
+  "summary": "APPROVE。RF-001 已以最小且可实现的范围修复：允许范围仅新增 src/aiflow/state.py 与 tests/unit/test_state.py，冻结规格将 state.py 的改动严格限定为在封闭 NON_STATE_EVENTS 中注册 observation_recorded 和 observation_refused。既有 create_record_event/record_task_event 因而可以追加并重放所需审计事件；两名称不会成为 TRANSITIONS 的边，也不能满足推进 precondition，因此不会改变 current_state 或状态机语义。policy_changed 在 current_route=BLOCK 时现明确映射为 execution_allowed=false 的 record，不调用拒绝 BLOCKED/ESCALATED 的 escalate_task。其余五类映射仍单调、verification level 保持、未知/陈旧输入在副作用前拒绝；escalate 继续只委派既有 escalate_task，并保留首个审计事件以支持失败关闭和幂等恢复。规格仍排除 Hook、CLI、CI adapter、Policy、Gate、evidence 与自由命令解析，符合 Phase 02 12.2 的共享核心/持久化边界，未提前宣称 12.3–12.6 或 parity 完成。",
+  "findings": []
+}
