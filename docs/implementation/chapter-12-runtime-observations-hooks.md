@@ -1,12 +1,12 @@
 # Chapter 12：运行期升级观测与完整 Hooks
 
-状态：in progress（12.1–12.2 completed；12.3–12.6 pending）
+状态：in progress（12.1–12.3 completed；12.4–12.6 pending）
 
 Chapter 12 在 Chapter 11 的 V2 failure/evidence 结构之上增加运行期观察与 Hook 入口，
-当前已完成 12.1 的 observation contract/type 输入层和 12.2 的共享确定性
-decision/task-local persistence 核心。没有新增 `aiflow observe`、Hook 或 CI adapter，也没有
-修改现有 CLI、Gate、Policy、evidence 或 approval 行为；运行期入口与 parity 仍由
-12.3–12.5 完成。
+当前已完成 12.1 的 observation contract/type 输入层、12.2 的共享确定性
+decision/task-local persistence 核心和 12.3 的 pre-commit scope observation adapter。
+没有新增 `pre_command`、`aiflow observe`、CLI/CI adapter 或 parity，也没有修改现有 CLI、
+Gate、Policy、evidence 或 approval 行为；其余运行期入口与 parity 仍由 12.4–12.5 完成。
 
 ## 12.1 已完成：版本化 observation contract
 
@@ -89,3 +89,40 @@ reason 枚举，以及冻结的 `Observation`、`PathsSummary`、`CommandSummary
 - 12.2 不实现 Hook/CLI/CI adapter 或 parity，不完成 P2-ESC-01/P2-HOOK-01，也不构成通用
   命令/操作系统安全沙箱。最终 merge readiness 仍取决于当前 subject 的正式 V1、独立实现
   审核、code approval 与 Gate；12.3 下一步只实现编辑后范围观察 Hook。
+
+## 12.3 已完成：编辑后范围观察 Hook
+
+- `tools/hooks/pre_commit.py` 保留既有显式 task / 唯一 active task 解析、完整 changed-path
+  collector 与共享 `assess_scope` 语义。仅当 `out_of_scope` 非空时，adapter 才加载 active
+  Policy，构造 schema `1.0`、当前 task/base/subject/Policy 绑定、
+  `source=hook_pre_commit`、`kind=scope_out_of_bounds` 和 canonical `summary.paths`，经
+  `parse_observation` 后恰一次委派公开
+  `apply_observation(..., actor="hook_pre_commit")`。
+- Hook 不直接写 task event/state，不导入 escalation helper，也不复刻 decision、route/V 或
+  Policy 表。in-scope 检查不加载 Policy、不构造或持久化 observation。
+- out-of-scope 无论共享 decision 为 `record`、`refuse` 或 `escalate`，都继续由既有 workflow
+  返回 `SCOPE_EXPANDED`，主入口保持 `pre-commit denied` / exit 2；`AiflowError` 继续走既有
+  非敏感 fail-closed exit 1。共享 service 的 audit-first、幂等重放和单调升级语义未在 Hook
+  中复制。
+
+## 12.3 验证事实与边界
+
+- focused wrapper 与真实临时 task-ledger integration 合计 28 passed；包含 in-scope 无副作用、
+  精确 observation/actor/exactly-once、REVIEW refusal 与重放幂等、AUTO/ASK 单调升级、BLOCK
+  record 仍拒绝，以及 service/audit/stale-binding fail-closed。扩大后的 observation 相关
+  focused 回归为 437 passed。
+- 投影前 H1 subject `b98f16212550e9577222908421545dececb39cf8` 的正式 V1 为 10/10
+  required checks passed，full pytest 为 1383 passed、4 skipped；四项 skip 均为既有 Windows
+  symlink 限制，总分支覆盖为 87%。Ruff、format、mypy 与 `git diff --check` 均通过。
+- 相对 base 的 diff-cover 原始输出为 `No lines with coverage information in this diff.`：当前
+  coverage source 只包含 `src/aiflow`，而本次生产 adapter 位于 `tools/`。AI Flow 将该 sentinel
+  确定性判为 pass；它不表示也不被记录为 100% diff coverage。
+- 独立 H1 implementation review `REV-0026` / context
+  `cee1d6478dd098fb14f0f12dfe4e331320af270931e3a32cb9240d273e2761e9` 为 APPROVE、
+  findings 为空；该事实与 H1 正式 V1 共同满足本次完成投影的时序前提。投影后的 current
+  subject 仍须重新取得正式 V1、独立实现审核、code approval 与 Gate，方可形成 merge
+  readiness。
+- 本条只完成 12.3 的 pre-commit scope adapter。12.4 `pre_command`、12.5
+  Hook/CLI/CI parity、12.6 README/operations/recovery、`CH12-EXIT-01/02`、P2-ESC-01 和
+  P2-HOOK-01 均保持 pending；未安装 Hook、未修改 index，也不宣称可拦截所有 Git 客户端、
+  IDE 保存或提供通用命令/操作系统安全沙箱。

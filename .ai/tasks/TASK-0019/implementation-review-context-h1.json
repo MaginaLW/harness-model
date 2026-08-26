@@ -1,0 +1,203 @@
+{
+  "base_commit": "99c550e40448a214a98688bb3ad9615985a2838b",
+  "branch": "main",
+  "classification_input_sha256": "dc0dc067c30ca339c6f7cb61d684c750c7ea02debef2eb0e151edc39893b0f47",
+  "content": {
+    "allowed_scope": [
+      "tools/hooks/pre_commit.py",
+      "tests/integration/test_tool_wrappers.py",
+      "tests/integration/test_observation_escalation.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.3：将现有 pre-commit 编辑后范围检查改造为只构造绑定当前 task/base/subject/Policy 的 hook_pre_commit scope_out_of_bounds immutable observation，并委派 12.2 共享 service 执行确定性审计、拒绝或单调升级；Hook 不复制 Policy/route 表、不直接写 event/state、不放行任何 observation decision，不实现 pre-command、CLI/CI parity 或 Policy/controlled-file 观察。",
+        "impact_scope": [
+          "tools/hooks/pre_commit.py",
+          "tests/integration/test_tool_wrappers.py",
+          "tests/integration/test_observation_escalation.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Preserve the existing explicit/unique active task resolution and full changed-path collection semantics",
+          "Convert only canonical out-of-scope paths into one immutable hook_pre_commit scope_out_of_bounds observation bound to current task/base/subject/Policy",
+          "Delegate the parsed observation exactly once to the existing apply_observation service with a fixed non-user-controlled Hook actor",
+          "Keep in-scope checks side-effect free and deny every out-of-scope result regardless of record, refuse or escalate disposition",
+          "Propagate task, Git, Policy, classification, state, audit and persistence failures through the existing fail-closed Hook error path",
+          "Add focused wrapper and real temporary-repository integration coverage for AUTO/REVIEW/BLOCK, replay idempotency and failure behavior",
+          "Project only Chapter 12.3 after implementation, formal verification and required review facts are current"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0019/approvals.json",
+        ".ai/tasks/TASK-0019/classification.json",
+        ".ai/tasks/TASK-0019/design-review-context.json",
+        ".ai/tasks/TASK-0019/design-review-input.json",
+        ".ai/tasks/TASK-0019/events.jsonl",
+        ".ai/tasks/TASK-0019/review-contexts/6856a4708ef33cb877af149b95125968c06ac1f5a47366196937be5bd41f78b4.json",
+        ".ai/tasks/TASK-0019/reviews/REV-0025-r0001.json",
+        ".ai/tasks/TASK-0019/spec.md",
+        ".ai/tasks/TASK-0019/task.yaml",
+        "tests/integration/test_observation_escalation.py",
+        "tests/integration/test_tool_wrappers.py",
+        "tools/hooks/pre_commit.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/classification.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/design-review-context.json"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/design-review-input.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/events.jsonl"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/review-contexts/6856a4708ef33cb877af149b95125968c06ac1f5a47366196937be5bd41f78b4.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/reviews/REV-0025-r0001.json"
+        },
+        {
+          "additions": 111,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/spec.md"
+        },
+        {
+          "additions": 111,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0019/task.yaml"
+        },
+        {
+          "additions": 144,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_observation_escalation.py"
+        },
+        {
+          "additions": 87,
+          "binary": false,
+          "deletions": 5,
+          "path": "tests/integration/test_tool_wrappers.py"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": "tools/hooks/pre_commit.py"
+        }
+      ],
+      "totals": {
+        "additions": 672,
+        "deletions": 6,
+        "files": 12
+      }
+    },
+    "goal": "完成 Chapter 12.3：将现有 pre-commit 编辑后范围检查改造为只构造绑定当前 task/base/subject/Policy 的 hook_pre_commit scope_out_of_bounds immutable observation，并委派 12.2 共享 service 执行确定性审计、拒绝或单调升级；Hook 不复制 Policy/route 表、不直接写 event/state、不放行任何 observation decision，不实现 pre-command、CLI/CI parity 或 Policy/controlled-file 观察。",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0019",
+        "--actor",
+        "/root"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "cee1d6478dd098fb14f0f12dfe4e331320af270931e3a32cb9240d273e2761e9",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "09935de78592e3d2aac5f4dc558fd13bf51ca20b967dae45a47cb01647908465",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "6d402281787e3cd978e8b1480485f7e716fd1a3445f741880d14249b6f4d35cf",
+  "subject_commit": "b98f16212550e9577222908421545dececb39cf8",
+  "task_id": "TASK-0019"
+}
