@@ -1,0 +1,33 @@
+{
+  "context_sha256": "5ecd7e93bcd824bb2144de6901ed2603845dba5aa22da9c56e2cde282609668c",
+  "findings": [
+    {
+      "evidence_refs": [
+        "src/aiflow/cli.py:127",
+        "src/aiflow/cli.py:130",
+        "src/aiflow/cli.py:131",
+        "src/aiflow/cli.py:132",
+        "tests/unit/test_observation_adapter.py:323",
+        ".ai/tasks/TASK-0022/spec.md:17",
+        ".ai/tasks/TASK-0022/spec.md:96"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 127,
+        "path": "src/aiflow/cli.py"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "observe help does not expose the required closed mode contract"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-08-26T16:26:09Z",
+  "review_id": "REV-0033",
+  "review_stage": "implementation",
+  "reviewer": "/root/task22_impl_review_h1",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "REQUEST_CHANGES。独立本地只读 H1 审核确认核心实现符合受限 adapter 设计：CI persistence guard 位于任何 ledger read 前；evaluate 复用完整 current binding 且只读；mode/source/actor fail closed；dry-run/CI 零写；结果不含原始载荷；有效观察统一非授权 exit 2；source-sensitive digest 与 semantic parity 正确分离。正式 V1 为 10/10 passed、1507 passed/4 个既有 Windows symlink skips、diff coverage 94%。唯一 finding 是 observe help 把 TASK-ID、--input 和 --mode 显示为可选且未说明 actor 的 mode 条件，不满足冻结规格的精确 CLI 协议说明，需修复 help 与断言后重新验证。",
+  "task_id": "TASK-0022"
+}

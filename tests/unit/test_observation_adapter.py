@@ -321,6 +321,12 @@ def test_cli_observe_help_declares_the_closed_protocol(capsys: pytest.CaptureFix
 
     assert caught.value.code == 0
     output = capsys.readouterr().out
-    assert "--input" in output
-    assert "--mode {apply,dry-run,ci}" in output
-    assert "--actor" in output
+    normalized = " ".join(output.split())
+    assert (
+        "usage: aiflow observe TASK-ID --input FILE --mode {apply,dry-run,ci} "
+        "[--actor ACTOR]" in normalized
+    )
+    assert "TASK-ID required explicit task ID" in normalized
+    assert "--input FILE required local UTF-8 observation JSON file" in normalized
+    assert "--mode {apply,dry-run,ci} required; apply writes task audit" in normalized
+    assert "--actor ACTOR required for apply; forbidden for dry-run and ci" in normalized

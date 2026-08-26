@@ -125,12 +125,22 @@ def build_parser() -> ArgumentParser:
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
     observe = subparsers.add_parser(
-        "observe", help="apply or read-only evaluate one immutable observation"
+        "observe",
+        help="apply or read-only evaluate one immutable observation",
+        usage=("aiflow observe TASK-ID --input FILE --mode {apply,dry-run,ci} [--actor ACTOR]"),
     )
-    observe.add_argument("task_id", nargs="?")
-    observe.add_argument("--input", type=Path)
-    observe.add_argument("--mode", metavar="{apply,dry-run,ci}")
-    observe.add_argument("--actor")
+    observe.add_argument("task_id", nargs="?", metavar="TASK-ID", help="required explicit task ID")
+    observe.add_argument(
+        "--input", type=Path, metavar="FILE", help="required local UTF-8 observation JSON file"
+    )
+    observe.add_argument(
+        "--mode",
+        metavar="{apply,dry-run,ci}",
+        help="required; apply writes task audit, dry-run and ci are read-only",
+    )
+    observe.add_argument(
+        "--actor", metavar="ACTOR", help="required for apply; forbidden for dry-run and ci"
+    )
     verify = subparsers.add_parser("verify", help="run controlled verification")
     verify.add_argument("task_id")
     verify.add_argument("--actor")
