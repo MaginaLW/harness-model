@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0023",
+  "revision": 1,
+  "task_id": "TASK-0018",
+  "review_stage": "implementation",
+  "recorded_at": "2026-08-26T12:37:25Z",
+  "context_sha256": "70c9c53db9292478bad38cb823d342368da33db6e19f20aa15e8e75f682f42c1",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "REQUEST_CHANGES。独立本地审核确认实现与测试本身符合冻结规格，focused suite 538 passed，Ruff、format 与 diff check 均通过；唯一阻断项是 Chapter 12.2 完成投影早于当前 subject 所需的 implementation review、code approval 与 Gate 事实。",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "title": "Chapter 12.2 completion projection precedes required review facts",
+      "location": {
+        "path": "docs/implementation/chapter-12-runtime-observations-hooks.md",
+        "line": 3
+      },
+      "evidence_refs": [
+        "docs/implementation/chapter-12-runtime-observations-hooks.md:3",
+        "docs/implementation/chapter-12-runtime-observations-hooks.md:37-90",
+        "docs/superpowers/state/chapters/chapter-12.yaml:37-57",
+        "docs/superpowers/state/chapters/chapter-12.yaml:129-169",
+        "docs/superpowers/state/overall.yaml:26",
+        "docs/superpowers/state/overall.yaml:160",
+        "docs/superpowers/state/overall.yaml:2128-2159"
+      ],
+      "status": "open"
+    }
+  ]
+}

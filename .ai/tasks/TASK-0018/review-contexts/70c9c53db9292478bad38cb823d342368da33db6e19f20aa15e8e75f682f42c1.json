@@ -1,0 +1,382 @@
+{
+  "base_commit": "b8c18d31fa350aa3e2100fe098f6b128c66b6997",
+  "branch": "main",
+  "classification_input_sha256": "5cb11bdf357857d811007fb2ee0653e82418a22bb2bd220bbcdd531932e56de3",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/observation-decision.schema.json",
+      ".ai/templates/observation-decision.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/observation_decision.py",
+      "src/aiflow/observation_service.py",
+      "src/aiflow/state.py",
+      "tests/fixtures/contracts/valid/observation-decision.json",
+      "tests/fixtures/contracts/invalid/observation-decision.extra.json",
+      "tests/fixtures/contracts/invalid/observation-decision.invalid.json",
+      "tests/fixtures/contracts/invalid/observation-decision.missing.json",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_observation_decision.py",
+      "tests/unit/test_observation_service.py",
+      "tests/unit/test_state.py",
+      "tests/integration/test_observation_escalation.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.2：建立消费 12.1 immutable observation 的共享确定性 decision/persistence 核心，将每项事实映射为 record、单调 escalate 或 refuse，持久化 task-local 非状态观察/拒绝事件并仅通过现有 escalate_task 执行升级；禁止 route/V 自动降级，拒绝陈旧绑定和未知输入，不实现 Hook、CLI、CI adapter，不修改 Policy、Gate 或 evidence 行为。",
+        "impact_scope": [
+          ".ai/schemas/observation-decision.schema.json",
+          ".ai/templates/observation-decision.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/observation_decision.py",
+          "src/aiflow/observation_service.py",
+          "src/aiflow/state.py",
+          "tests/fixtures/contracts/valid/observation-decision.json",
+          "tests/fixtures/contracts/invalid/observation-decision.extra.json",
+          "tests/fixtures/contracts/invalid/observation-decision.invalid.json",
+          "tests/fixtures/contracts/invalid/observation-decision.missing.json",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_observation_decision.py",
+          "tests/unit/test_observation_service.py",
+          "tests/unit/test_state.py",
+          "tests/integration/test_observation_escalation.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Define one closed version 1.0 observation-decision contract for record, escalate and refuse dispositions with stable reason codes, optional REVIEW/BLOCK targets and closed recovery conditions",
+          "Implement a pure deterministic mapper from the five immutable observation kinds plus current route and verification facts, with no repository reads, mutation or route/verification downgrade",
+          "Add a bounded service that validates task, base, subject and active Policy bindings before consuming a decision",
+          "Persist record and refusal as task-local non-state audit events, and delegate every state-changing escalation exclusively to the existing monotonic escalate_task path",
+          "Register only observation_recorded and observation_refused as closed non-state event names without adding or changing any task-state transition",
+          "Fail closed on unknown decisions, stale bindings, unsupported state, lower targets, missing recovery facts and unsafe payloads without echoing sensitive values",
+          "Add contract, unit and integration replay tests across all five kinds, four sources and AUTO/ASK/REVIEW/BLOCK monotonicity",
+          "Project only Chapter 12.2 progress after implementation, verification and required review facts are current; leave Hooks, CLI/CI parity and Chapter exits pending"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/observation-decision.schema.json",
+        ".ai/tasks/TASK-0018/approvals.json",
+        ".ai/tasks/TASK-0018/classification.json",
+        ".ai/tasks/TASK-0018/design-remediation.md",
+        ".ai/tasks/TASK-0018/design-review-context-recovery.json",
+        ".ai/tasks/TASK-0018/design-review-context.json",
+        ".ai/tasks/TASK-0018/design-review-input-r2.json",
+        ".ai/tasks/TASK-0018/design-review-input.json",
+        ".ai/tasks/TASK-0018/events.jsonl",
+        ".ai/tasks/TASK-0018/implementation-resume-baseline.md",
+        ".ai/tasks/TASK-0018/paid-external-call-incident.md",
+        ".ai/tasks/TASK-0018/review-contexts/7ac3c4c2b9f6f179f5381a13d6563763794208dee1efd39c9e913aed5be9a63a.json",
+        ".ai/tasks/TASK-0018/review-contexts/b6f22f0ac0279af011d87bc934f7f79b06e7878177bd288384ecde63117cd0ba.json",
+        ".ai/tasks/TASK-0018/reviews/REV-0021-r0001.json",
+        ".ai/tasks/TASK-0018/reviews/REV-0022-r0001.json",
+        ".ai/tasks/TASK-0018/spec.md",
+        ".ai/tasks/TASK-0018/task.yaml",
+        ".ai/templates/observation-decision.json",
+        "docs/implementation/chapter-12-runtime-observations-hooks.md",
+        "docs/superpowers/state/chapters/chapter-12.yaml",
+        "docs/superpowers/state/overall.yaml",
+        "src/aiflow/contracts.py",
+        "src/aiflow/observation_decision.py",
+        "src/aiflow/observation_service.py",
+        "src/aiflow/state.py",
+        "tests/fixtures/contracts/invalid/observation-decision.extra.json",
+        "tests/fixtures/contracts/invalid/observation-decision.invalid.json",
+        "tests/fixtures/contracts/invalid/observation-decision.missing.json",
+        "tests/fixtures/contracts/valid/observation-decision.json",
+        "tests/integration/test_observation_escalation.py",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_observation_decision.py",
+        "tests/unit/test_observation_service.py",
+        "tests/unit/test_state.py"
+      ],
+      "files": [
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/observation-decision.schema.json"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/classification.json"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/design-remediation.md"
+        },
+        {
+          "additions": 76,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/design-review-context-recovery.json"
+        },
+        {
+          "additions": 76,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/design-review-input-r2.json"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/design-review-input.json"
+        },
+        {
+          "additions": 20,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/events.jsonl"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/implementation-resume-baseline.md"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/paid-external-call-incident.md"
+        },
+        {
+          "additions": 71,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/review-contexts/7ac3c4c2b9f6f179f5381a13d6563763794208dee1efd39c9e913aed5be9a63a.json"
+        },
+        {
+          "additions": 76,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/review-contexts/b6f22f0ac0279af011d87bc934f7f79b06e7878177bd288384ecde63117cd0ba.json"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/reviews/REV-0021-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/reviews/REV-0022-r0001.json"
+        },
+        {
+          "additions": 124,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/spec.md"
+        },
+        {
+          "additions": 157,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0018/task.yaml"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/templates/observation-decision.json"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 6,
+          "path": "docs/implementation/chapter-12-runtime-observations-hooks.md"
+        },
+        {
+          "additions": 57,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/superpowers/state/chapters/chapter-12.yaml"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 6,
+          "path": "docs/superpowers/state/overall.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 353,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/observation_decision.py"
+        },
+        {
+          "additions": 266,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/observation_service.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/state.py"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/observation-decision.extra.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/observation-decision.invalid.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/observation-decision.missing.json"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/valid/observation-decision.json"
+        },
+        {
+          "additions": 180,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_observation_escalation.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 305,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_observation_decision.py"
+        },
+        {
+          "additions": 555,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_observation_service.py"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_state.py"
+        }
+      ],
+      "totals": {
+        "additions": 2782,
+        "deletions": 14,
+        "files": 34
+      }
+    },
+    "goal": "完成 Chapter 12.2：建立消费 12.1 immutable observation 的共享确定性 decision/persistence 核心，将每项事实映射为 record、单调 escalate 或 refuse，持久化 task-local 非状态观察/拒绝事件并仅通过现有 escalate_task 执行升级；禁止 route/V 自动降级，拒绝陈旧绑定和未知输入，不实现 Hook、CLI、CI adapter，不修改 Policy、Gate 或 evidence 行为。",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0018",
+        "--actor",
+        "/root"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "70c9c53db9292478bad38cb823d342368da33db6e19f20aa15e8e75f682f42c1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "c011a2d9c84569b38e97fa505a788d99c63095b282b296f0a0e93b14342e468d",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "2fed82a3089bf1a277449b20c911436c995fe24e35e92d90840654d6974af82e",
+  "subject_commit": "57742b33abae52d171692dbceb6c153c873cfbec",
+  "task_id": "TASK-0018"
+}
