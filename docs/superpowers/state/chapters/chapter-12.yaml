@@ -72,10 +72,18 @@ tasks:
     blockers: []
   - id: "12.4"
     title: "实现明确命令形式的 pre-command 拒绝与审计记录"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - "tools/hooks/pre_command.py"
+      - "tests/integration/test_tool_wrappers.py"
+      - "tests/integration/test_observation_escalation.py"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - ".ai/tasks/TASK-0020/spec.md"
+      - ".ai/tasks/TASK-0020/evidence.json"
+      - ".ai/tasks/TASK-0020/reviews/REV-0029-r0001.json"
     blockers: []
   - id: "12.5"
     title: "证明 Hook、CLI、CI parity，并记录 shell/平台覆盖限制"
@@ -210,5 +218,40 @@ chapter_evidence:
       - ".ai/tasks/TASK-0019/evidence.json"
       - ".ai/tasks/TASK-0019/reviews/REV-0026-r0001.json"
     limitation: "本条只完成 12.3，不证明 12.4–12.6、P2-ESC-01/P2-HOOK-01、pre-command、Hook/CLI/CI parity 或通用安全沙箱；H1 V1 与 REV-0026 只构成本次投影前提，最终 merge readiness 仍由 TASK-0019 投影后 current subject 的正式 V1、独立实现审核、code approval 与 Gate 决定。"
+  - id: "EVD-CH12-12.4-001"
+    kind: "task_completion_projection"
+    task_id: "TASK-0020"
+    route: "REVIEW"
+    verification_level: "V1"
+    classification_input_sha256: "27122294cc7b7b20646ebcb226efab60ec206b254587f3effe08272173618e98"
+    spec_sha256: "a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    design_review_ref: ".ai/tasks/TASK-0020/reviews/REV-0028-r0001.json"
+    design_review_context_sha256: "08f25bff59094f631c3df8b51bba2199352c99382317c540b03e6686114204f4"
+    projection_basis_subject: "3c05534c5ec23c4bbabf1ef5534a91f3014351b4"
+    implementation_review_ref: ".ai/tasks/TASK-0020/reviews/REV-0029-r0001.json"
+    implementation_review_context_sha256: "c83dd12e20e147ee31cf4c6d501dec1af9c8741d0cd551df0ad8fdf4ace62f11"
+    implementation_checks:
+      focused_wrapper_and_real_ledger: "52 passed (24 wrapper, 28 real temporary-ledger integration)"
+      broader_observation_regression: "555 passed"
+      formal_v1_required_checks: "10/10 passed; unverified_scenarios empty"
+      formal_v1_full_pytest: "1407 passed, 4 skipped (existing Windows symlink limitations)"
+      total_branch_mode_coverage: "87% aggregate; coverage XML line-rate 90.15%, branch-rate 79.21%"
+      relative_base_diff_coverage: "deterministic pass; diff-cover reported 'No lines with coverage information in this diff.' because configured coverage source is src/aiflow and the production adapter is under tools/; this is not 100%"
+      ruff: "passed"
+      format_check: "passed"
+      mypy: "passed"
+      git_diff_check: "passed"
+    scope: "只实现结构化 pre-command high_risk_command observation adapter：自动允许路径不读取 task 或产生 observation；Policy 禁止路径绑定当前 task/base/subject/Policy，以固定 hook_pre_command actor 恰一次委派 apply_observation，所有 high-risk action 在审计后仍拒绝，且不执行命令、不消费 approval。"
+    artifacts:
+      - "tools/hooks/pre_command.py"
+      - "tests/integration/test_tool_wrappers.py"
+      - "tests/integration/test_observation_escalation.py"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - ".ai/tasks/TASK-0020/spec.md"
+      - ".ai/tasks/TASK-0020/evidence.json"
+      - ".ai/tasks/TASK-0020/reviews/REV-0029-r0001.json"
+    limitation: "本条只完成 12.4，不证明 12.5–12.6、P2-ESC-01/P2-HOOK-01、Hook/CLI/CI parity 或通用命令/操作系统安全沙箱；H1 V1 与 REV-0029 只构成本次投影前提，最终 merge readiness 仍由 TASK-0020 投影后 current subject 的正式 V1、独立实现审核、code approval 与 Gate 决定。"
 
 blockers: []

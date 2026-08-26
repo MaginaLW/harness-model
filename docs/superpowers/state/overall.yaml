@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-26T13:40:21Z"
+updated_at: "2026-08-26T14:50:37Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -23,20 +23,20 @@ tracking:
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-12"
-  current_task: "12.4"
+  current_task: "12.5"
   current_step: null
 
 summary:
   chapters_total: 12
   chapters_completed: 11
   tasks_total: 71
-  tasks_completed: 68
+  tasks_completed: 69
   steps_total: 378
-  steps_completed: 363
+  steps_completed: 368
   exit_checks_total: 20
   exit_checks_completed: 18
   blockers_total: 0
-  evidence_items: 12
+  evidence_items: 13
 
 chapters:
   - id: "chapter-01"
@@ -157,7 +157,7 @@ future_phases:
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
     current_chapter: "chapter-12"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 已基于 TASK-0015 的 committed V2 evidence、REV-0016、code approval、external merge target 与 merge-record governance commit 完成。Chapter 12.1–12.3 已建立 immutable observation 输入、closed deterministic record/escalate/refuse decision、当前绑定校验、task-local audit、只经既有 escalate_task 的中断可恢复升级，以及只提交编辑后 scope_out_of_bounds observation 的 pre-commit adapter；当前进入 12.4，pre-command、CLI/CI adapter、Hook/CLI/CI parity 与 12.6 文档仍 pending。"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 已基于 TASK-0015 的 committed V2 evidence、REV-0016、code approval、external merge target 与 merge-record governance commit 完成。Chapter 12.1–12.4 已建立 immutable observation 输入、closed deterministic record/escalate/refuse decision、当前绑定校验、task-local audit、只经既有 escalate_task 的中断可恢复升级，以及 pre-commit scope observation 与结构化 pre-command refusal/audit adapter；当前进入 12.5，CLI/CI adapter、Hook/CLI/CI parity 与 12.6 文档仍 pending。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2185,3 +2185,31 @@ history:
       - ".ai/tasks/TASK-0019/spec.md"
       - ".ai/tasks/TASK-0019/evidence.json"
       - ".ai/tasks/TASK-0019/reviews/REV-0026-r0001.json"
+  - id: "EVT-OVERALL-CH12-12.4-COMPLETE-001"
+    at: "2026-08-26T14:50:37Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "TASK-0020 按冻结规格实现结构化 pre-command refusal/audit adapter：任意空 target 先失败，Policy 自动允许路径不读取 task 或产生 observation，六类 Policy 禁止 action 精确绑定当前 task/base/subject/Policy、固定 actor 并恰一次委派共享 service，审计后始终拒绝且不执行命令、不消费 approval。focused wrapper/真实 ledger 合计 52 passed、扩大 focused 555 passed，投影前 H1 正式 V1 10/10、全量 1407 passed/4 existing Windows symlink skips、分支模式总覆盖 87%；diff-cover 无 coverage lines sentinel 被确定性判为 pass且未宣称 100%。REV-0029 独立批准 H1；12.5–12.6 与两个 exit checks 仍 pending。"
+    chapter_evidence: "EVD-CH12-12.4-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_12_status: "in_progress"
+      task_12_4_status: "completed"
+      current_chapter: "chapter-12"
+      current_task: "12.5"
+      current_step: null
+      chapters_completed: 11
+      tasks_completed: 69
+      steps_completed: 368
+      exit_checks_completed: 18
+      evidence_items: 13
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-12.yaml"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - "docs/superpowers/state/overall.yaml"
+      - "tools/hooks/pre_command.py"
+      - "tests/integration/test_tool_wrappers.py"
+      - "tests/integration/test_observation_escalation.py"
+      - ".ai/tasks/TASK-0020/spec.md"
+      - ".ai/tasks/TASK-0020/evidence.json"
+      - ".ai/tasks/TASK-0020/reviews/REV-0029-r0001.json"

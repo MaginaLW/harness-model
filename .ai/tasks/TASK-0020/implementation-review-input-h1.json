@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0029",
+  "revision": 1,
+  "task_id": "TASK-0020",
+  "review_stage": "implementation",
+  "reviewer": "/root/task20_h1_review",
+  "recorded_at": "2026-08-26T14:50:04Z",
+  "context_sha256": "c83dd12e20e147ee31cf4c6d501dec1af9c8741d0cd551df0ad8fdf4ace62f11",
+  "outcome": "APPROVE",
+  "summary": "APPROVE。独立本地只读审核确认 H1 subject 3c05534c5ec23c4bbabf1ef5534a91f3014351b4 符合冻结规格：Policy 自动允许路径在 task/observation/service 之前返回，即使提供无效 --task 也不读取 task；任意 action 的空白 target 在加载 Policy 前以 HOOK_TARGET_INVALID 失败。Policy 禁止路径使用规范化 action 和原始 target 构造当前 task/base/subject/Policy 绑定的 hook_pre_command high_risk_command immutable observation，以固定 actor 恰一次委派共享 apply_observation，六类动作及 AUTO/ASK/REVIEW/BLOCK 均保持 ACTION_PERMISSION_DENIED / exit 2、state 不变且无 escalation。显式 task 严格读取，省略时只接受唯一未 MERGED task，显式空串不按省略处理。Hook 未执行命令、未消费 approval、未直接写 ledger/state，亦未复制 Policy/decision 表。wrapper 与真实临时仓测试覆盖重放幂等、不同事实 identity、非法 target、service/audit/stale Git/binding 的 fail-closed。正式 V1 context c83dd12e20e147ee31cf4c6d501dec1af9c8741d0cd551df0ad8fdf4ace62f11、evidence a756a9a4fd3586b0ea7d6af99094c9e6063c0007a07ab903622abf8615dcf313 与 subject/spec/Policy 匹配，10/10 required checks passed、unverified_scenarios 为空、全量 1407 passed/4 个既有 Windows symlink skips；diff-cover 无可覆盖行 sentinel 未被宣称为 100%。12.4 与 overall 尚未投影，符合先验证和审核、后投影的时序。",
+  "findings": []
+}
