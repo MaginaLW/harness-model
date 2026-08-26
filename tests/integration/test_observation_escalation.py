@@ -3,7 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from test_begin_close_commands import commit_all, create_repository, make_ready, start
 
+from aiflow.cli import main as cli_main
 from aiflow.errors import ContractError
 from aiflow.escalation import escalate_task
 from aiflow.observation import parse_observation
@@ -11,7 +13,7 @@ from aiflow.observation_decision import DecisionRoute, VerificationLevel
 from aiflow.observation_service import apply_observation
 from aiflow.policy import load_policy_bundle
 from aiflow.task_service import TaskRecord, TransitionResult, load_task_record
-from tests.integration.test_begin_close_commands import create_repository, make_ready, start
+from tools.hooks import pre_commit
 
 
 def _bound_observation(repository: Path, kind: str):
@@ -40,6 +42,47 @@ def _repository_at_route(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, rou
     start(repository, monkeypatch)
     make_ready(repository, route=route)
     return repository
+
+
+def _hook_repository_at_route(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, route: str
+) -> Path:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route=route, valid_approval=route == "REVIEW")
+    assert cli_main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    return repository
+
+
+def _assert_hook_observation(
+    repository: Path,
+    *,
+    event_type: str,
+    paths: list[str],
+) -> dict[str, object]:
+    record = load_task_record(repository, "TASK-0001")
+    matching = [event for event in record.events if event["event_type"] == event_type]
+    assert len(matching) == 1
+    event = matching[0]
+    payload = event["payload"]
+    assert event["actor"] == "hook_pre_commit"
+    assert payload["observation"]["task_id"] == "TASK-0001"
+    assert payload["observation"]["base_commit"] == record.task["base_commit"]
+    assert payload["observation"]["subject_commit"] == record.task["subject_commit"]
+    assert payload["observation"]["policy_sha256"] == load_policy_bundle(repository).sha256
+    assert payload["observation"]["source"] == "hook_pre_commit"
+    assert payload["observation"]["kind"] == "scope_out_of_bounds"
+    assert payload["observation"]["summary"] == {"paths": paths}
+    return event
+
+
+def _add_out_of_scope_paths(repository: Path) -> list[str]:
+    paths = ["outside/a.py", "outside/z.py"]
+    for path in paths:
+        target = repository / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("outside\n", encoding="utf-8")
+    return paths
 
 
 @pytest.mark.parametrize(
@@ -131,6 +174,106 @@ def test_real_escalation_recovers_after_delegation_failure_without_duplicate_aud
     assert [event["event_type"] for event in final.events].count("observation_recorded") == 1
     assert [event["event_type"] for event in final.events].count("task_escalated") == 1
     assert recovered.escalation_event is not None
+
+
+def test_real_pre_commit_review_refuses_once_and_keeps_implementing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _hook_repository_at_route(tmp_path, monkeypatch, route="REVIEW")
+    paths = _add_out_of_scope_paths(repository)
+
+    first = pre_commit.check_pre_commit(repository, "TASK-0001")
+    second = pre_commit.check_pre_commit(repository, "TASK-0001")
+
+    record = load_task_record(repository, "TASK-0001")
+    event = _assert_hook_observation(repository, event_type="observation_refused", paths=paths)
+    assert first == second == (False, ("SCOPE_EXPANDED",))
+    assert record.task["current_state"] == "IMPLEMENTING"
+    assert event["payload"]["decision"]["disposition"] == "refuse"
+
+
+@pytest.mark.parametrize("route", ("AUTO", "ASK"))
+def test_real_pre_commit_auto_and_ask_escalate_only_through_existing_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, route: str
+) -> None:
+    repository = _hook_repository_at_route(tmp_path, monkeypatch, route=route)
+    paths = _add_out_of_scope_paths(repository)
+
+    passed, reasons = pre_commit.check_pre_commit(repository, "TASK-0001")
+
+    record = load_task_record(repository, "TASK-0001")
+    event = _assert_hook_observation(repository, event_type="observation_recorded", paths=paths)
+    assert passed is False
+    assert reasons == ("SCOPE_EXPANDED",)
+    assert record.task["current_state"] == "ESCALATED"
+    assert event["payload"]["decision"]["disposition"] == "escalate"
+    assert event["payload"]["decision"]["target_route"] == "REVIEW"
+    assert [item["event_type"] for item in record.events].count("task_escalated") == 1
+
+
+def test_real_pre_commit_block_records_but_still_denies(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _repository_at_route(tmp_path, monkeypatch, route="BLOCK")
+    escalate_task(
+        repository,
+        "TASK-0001",
+        target_route="BLOCK",
+        reason_code="policy_changed",
+        impact="test blocked hook disposition",
+        next_step="retain blocked state",
+        actor="setup",
+    )
+    paths = _add_out_of_scope_paths(repository)
+
+    passed, reasons = pre_commit.check_pre_commit(repository, "TASK-0001")
+
+    record = load_task_record(repository, "TASK-0001")
+    event = _assert_hook_observation(repository, event_type="observation_recorded", paths=paths)
+    assert passed is False
+    assert reasons == ("SCOPE_EXPANDED", "STATE_NOT_ALLOWED")
+    assert record.task["current_state"] == "BLOCKED"
+    assert event["payload"]["decision"]["disposition"] == "record"
+
+
+@pytest.mark.parametrize("failure", ("service", "audit", "binding"))
+def test_real_pre_commit_observation_failures_never_allow(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
+) -> None:
+    repository = _hook_repository_at_route(tmp_path, monkeypatch, route="REVIEW")
+    paths = _add_out_of_scope_paths(repository)
+    if failure == "service":
+        monkeypatch.setattr(
+            pre_commit,
+            "apply_observation",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                ContractError("service unavailable", code="OBSERVATION_SERVICE_FAILED")
+            ),
+        )
+    elif failure == "audit":
+        from aiflow import observation_service
+
+        monkeypatch.setattr(
+            observation_service,
+            "record_task_event",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                ContractError("audit unavailable", code="OBSERVATION_AUDIT_FAILED")
+            ),
+        )
+    else:
+        commit_all(repository, "introduce stale hook binding")
+
+    assert pre_commit.main(["--task", "TASK-0001"]) == 1
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["current_state"] == "IMPLEMENTING"
+    assert not [
+        event
+        for event in record.events
+        if event["event_type"] in {"observation_recorded", "observation_refused"}
+    ]
+    assert all((repository / path).is_file() for path in paths)
 
 
 def test_observation_escalation_never_performs_the_observed_action(monkeypatch) -> None:

@@ -1,0 +1,51 @@
+{
+  "base_commit": "99c550e40448a214a98688bb3ad9615985a2838b",
+  "branch": "main",
+  "classification_input_sha256": "dc0dc067c30ca339c6f7cb61d684c750c7ea02debef2eb0e151edc39893b0f47",
+  "content": {
+    "allowed_scope": [
+      "tools/hooks/pre_commit.py",
+      "tests/integration/test_tool_wrappers.py",
+      "tests/integration/test_observation_escalation.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.3：将现有 pre-commit 编辑后范围检查改造为只构造绑定当前 task/base/subject/Policy 的 hook_pre_commit scope_out_of_bounds immutable observation，并委派 12.2 共享 service 执行确定性审计、拒绝或单调升级；Hook 不复制 Policy/route 表、不直接写 event/state、不放行任何 observation decision，不实现 pre-command、CLI/CI parity 或 Policy/controlled-file 观察。",
+        "impact_scope": [
+          "tools/hooks/pre_commit.py",
+          "tests/integration/test_tool_wrappers.py",
+          "tests/integration/test_observation_escalation.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Preserve the existing explicit/unique active task resolution and full changed-path collection semantics",
+          "Convert only canonical out-of-scope paths into one immutable hook_pre_commit scope_out_of_bounds observation bound to current task/base/subject/Policy",
+          "Delegate the parsed observation exactly once to the existing apply_observation service with a fixed non-user-controlled Hook actor",
+          "Keep in-scope checks side-effect free and deny every out-of-scope result regardless of record, refuse or escalate disposition",
+          "Propagate task, Git, Policy, classification, state, audit and persistence failures through the existing fail-closed Hook error path",
+          "Add focused wrapper and real temporary-repository integration coverage for AUTO/REVIEW/BLOCK, replay idempotency and failure behavior",
+          "Project only Chapter 12.3 after implementation, formal verification and required review facts are current"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 12.3：将现有 pre-commit 编辑后范围检查改造为只构造绑定当前 task/base/subject/Policy 的 hook_pre_commit scope_out_of_bounds immutable observation，并委派 12.2 共享 service 执行确定性审计、拒绝或单调升级；Hook 不复制 Policy/route 表、不直接写 event/state、不放行任何 observation decision，不实现 pre-command、CLI/CI parity 或 Policy/controlled-file 观察。",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "6856a4708ef33cb877af149b95125968c06ac1f5a47366196937be5bd41f78b4",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "6d402281787e3cd978e8b1480485f7e716fd1a3445f741880d14249b6f4d35cf",
+  "task_id": "TASK-0019"
+}

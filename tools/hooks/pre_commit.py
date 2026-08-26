@@ -6,6 +6,9 @@ from pathlib import Path
 from typing import Sequence
 
 from aiflow.errors import AiflowError, ContractError
+from aiflow.observation import parse_observation
+from aiflow.observation_service import apply_observation
+from aiflow.policy import load_policy_bundle
 from aiflow.scope import assess_scope, collect_changed_paths
 from aiflow.status_service import summarize_task
 from aiflow.task_service import read_task_record_strict
@@ -57,6 +60,21 @@ def check_pre_commit(root: Path, task_id: str | None) -> tuple[bool, tuple[str, 
         repository_root=root,
         cache_patterns=(),
     )
+    if scope.out_of_scope:
+        policy = load_policy_bundle(root)
+        observation = parse_observation(
+            {
+                "schema_version": "1.0",
+                "task_id": resolved,
+                "base_commit": str(record.task["base_commit"]),
+                "subject_commit": str(record.task["subject_commit"]),
+                "policy_sha256": policy.sha256,
+                "source": "hook_pre_commit",
+                "kind": "scope_out_of_bounds",
+                "summary": {"paths": list(scope.out_of_scope)},
+            }
+        )
+        apply_observation(root, resolved, observation, actor="hook_pre_commit")
     evaluation = evaluate_preconditions(
         WorkflowFacts(
             current_state=summary.current_state,

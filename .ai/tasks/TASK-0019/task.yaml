@@ -1,0 +1,111 @@
+allowed_scope:
+- tools/hooks/pre_commit.py
+- tests/integration/test_tool_wrappers.py
+- tests/integration/test_observation_escalation.py
+- docs/implementation/chapter-12-runtime-observations-hooks.md
+- docs/superpowers/state/chapters/chapter-12.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 99c550e40448a214a98688bb3ad9615985a2838b
+branch: main
+created_at: '2026-08-26T13:03:09Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 12.3：将现有 pre-commit 编辑后范围检查改造为只构造绑定当前 task/base/subject/Policy
+    的 hook_pre_commit scope_out_of_bounds immutable observation，并委派 12.2 共享 service
+    执行确定性审计、拒绝或单调升级；Hook 不复制 Policy/route 表、不直接写 event/state、不放行任何 observation decision，不实现
+    pre-command、CLI/CI parity 或 Policy/controlled-file 观察。
+  impact:
+    level: medium
+  impact_scope:
+  - tools/hooks/pre_commit.py
+  - tests/integration/test_tool_wrappers.py
+  - tests/integration/test_observation_escalation.py
+  - docs/implementation/chapter-12-runtime-observations-hooks.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - .ai/tasks/TASK-0013/future-chapters-blueprint.md
+  - tools/hooks/pre_commit.py
+  - src/aiflow/observation.py
+  - src/aiflow/observation_decision.py
+  - src/aiflow/observation_service.py
+  - src/aiflow/scope.py
+  - tests/integration/test_tool_wrappers.py
+  - tests/integration/test_observation_escalation.py
+  permission_requirements: []
+  planned_actions:
+  - Preserve the existing explicit/unique active task resolution and full changed-path
+    collection semantics
+  - Convert only canonical out-of-scope paths into one immutable hook_pre_commit scope_out_of_bounds
+    observation bound to current task/base/subject/Policy
+  - Delegate the parsed observation exactly once to the existing apply_observation
+    service with a fixed non-user-controlled Hook actor
+  - Keep in-scope checks side-effect free and deny every out-of-scope result regardless
+    of record, refuse or escalate disposition
+  - Propagate task, Git, Policy, classification, state, audit and persistence failures
+    through the existing fail-closed Hook error path
+  - Add focused wrapper and real temporary-repository integration coverage for AUTO/REVIEW/BLOCK,
+    replay idempotency and failure behavior
+  - Project only Chapter 12.3 after implementation, formal verification and required
+    review facts are current
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0019
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Wrapper tests for explicit and unique task resolution, in-scope no-op behavior,
+    exact observation construction and stable Hook exit codes
+  - Real temporary Git/task-ledger integration tests for REVIEW refusal, AUTO/ASK
+    escalation, BLOCK record and replay idempotency
+  - Failure-path tests proving stale bindings, task ambiguity, invalid paths and observation-service
+    errors never become allow
+  - Regression proof that pre-command, shared observation/decision/service, scope/workflow,
+    task state, evidence, approval, Gate, CLI and Policy conclusions remain unchanged
+  - Ruff, format check, mypy, focused and full pytest, branch coverage, diff coverage
+    at least 90 percent, Git scope and git diff check
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 6d402281787e3cd978e8b1480485f7e716fd1a3445f741880d14249b6f4d35cf
+goal: 完成 Chapter 12.3：将现有 pre-commit 编辑后范围检查改造为只构造绑定当前 task/base/subject/Policy 的
+  hook_pre_commit scope_out_of_bounds immutable observation，并委派 12.2 共享 service 执行确定性审计、拒绝或单调升级；Hook
+  不复制 Policy/route 表、不直接写 event/state、不放行任何 observation decision，不实现 pre-command、CLI/CI
+  parity 或 Policy/controlled-file 观察。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-26T13:05:49Z'
+subject_commit: 99c550e40448a214a98688bb3ad9615985a2838b
+task_id: TASK-0019
+updated_at: '2026-08-26T13:08:58Z'
+worktree_dirty: false
+worktree_dirty_paths: []

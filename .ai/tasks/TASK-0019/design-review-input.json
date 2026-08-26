@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0025",
+  "revision": 1,
+  "task_id": "TASK-0019",
+  "review_stage": "design",
+  "recorded_at": "2026-08-26T13:07:35Z",
+  "context_sha256": "6856a4708ef33cb877af149b95125968c06ac1f5a47366196937be5bd41f78b4",
+  "outcome": "APPROVE",
+  "summary": "冻结规格 SHA-256 已核对为 6d402281787e3cd978e8b1480485f7e716fd1a3445f741880d14249b6f4d35cf，并与 design-review context、TASK-0019 task/classification 一致。TASK-0019 当前为 REVIEW/V1。设计边界正确：12.3 仅将共享 scope core 已归一化的 out_of_scope 路径构造成 hook_pre_commit/scope_out_of_bounds observation，并仅经公开 apply_observation 服务处理；不改 12.2 core、Policy、state、pre-command 或 CLI/CI parity。六个允许业务路径足以实现 Hook adapter、两层测试及 12.3 文档/状态投影。in-scope 保持无 Policy/observation/persistence 副作用；out-of-scope 保持 SCOPE_EXPANDED、exit 2，且无论 shared decision 为 record/refuse/escalate 均不放行。12.2 已提供 AUTO/ASK 到 REVIEW 单调升级、REVIEW refusal、BLOCK record、canonical audit/replay idempotency 和中断恢复，均可通过真实临时仓覆盖。classification 中的 dry_run 保护字段不要求新增 Hook dry-run/JSON 协议；冻结 spec 已明确将该 adapter/protocol 排除至后续治理任务。",
+  "findings": []
+}
