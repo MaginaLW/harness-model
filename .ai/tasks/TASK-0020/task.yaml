@@ -8,7 +8,7 @@ allowed_scope:
 base_commit: addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2
 branch: main
 created_at: '2026-08-26T14:12:32Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -105,9 +105,9 @@ goal: 完成 Chapter 12.4：将现有 pre-command 权限薄包装扩展为只对
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-26T14:17:52Z'
-subject_commit: 3c05534c5ec23c4bbabf1ef5534a91f3014351b4
+spec_frozen_at: '2026-08-26T15:10:06Z'
+subject_commit: 794e4fc5831a7221e2b1d3c8f0ef7b53a428df0d
 task_id: TASK-0020
-updated_at: '2026-08-26T14:50:26Z'
+updated_at: '2026-08-26T15:31:10Z'
 worktree_dirty: false
 worktree_dirty_paths: []

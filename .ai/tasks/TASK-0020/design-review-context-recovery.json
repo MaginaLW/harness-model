@@ -1,0 +1,52 @@
+{
+  "base_commit": "addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2",
+  "branch": "main",
+  "classification_input_sha256": "b09c5b50bbd0020636ecc833ada5e17aaa3e0cb1018c01bb60017535483fffe0",
+  "content": {
+    "allowed_scope": [
+      "tools/hooks/pre_command.py",
+      "tests/integration/test_tool_wrappers.py",
+      "tests/integration/test_observation_escalation.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.4：将现有 pre-command 权限薄包装扩展为只对 active Policy 禁止自动执行的规范高风险 action 构造绑定当前 task/base/subject/Policy 的 hook_pre_command high_risk_command immutable observation，并恰一次委派 12.2 共享 service 记录拒绝；Hook 不执行命令、不解析自由 shell、不消费 action approval、不复制 Policy/decision 表，自动允许的非高风险 action 保持无 observation 副作用。",
+        "impact_scope": [
+          "tools/hooks/pre_command.py",
+          "tests/integration/test_tool_wrappers.py",
+          "tests/integration/test_observation_escalation.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Preserve the existing structured action/target interface and Policy-derived automatic permission decision",
+          "Resolve an explicit or unique active task only for Policy-denied high-risk actions",
+          "Construct one immutable hook_pre_command high_risk_command observation bound to the current task, base, subject and active Policy",
+          "Delegate the parsed observation exactly once to the existing apply_observation service with a fixed non-user-controlled Hook actor",
+          "Keep automatically allowed actions observation-free and keep every high-risk action denied after successful audit",
+          "Propagate task, target, Git, Policy, classification, state, audit and persistence failures through the existing fail-closed Hook error path",
+          "Add focused wrapper and real temporary-repository coverage for all six high-risk actions, every route, replay idempotency and failure behavior",
+          "Project only Chapter 12.4 after implementation, formal verification and required review facts are current"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 12.4：将现有 pre-command 权限薄包装扩展为只对 active Policy 禁止自动执行的规范高风险 action 构造绑定当前 task/base/subject/Policy 的 hook_pre_command high_risk_command immutable observation，并恰一次委派 12.2 共享 service 记录拒绝；Hook 不执行命令、不解析自由 shell、不消费 action approval、不复制 Policy/decision 表，自动允许的非高风险 action 保持无 observation 副作用。",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "3a5fc56bbb939cdb8f967c352fc494f107bf06bb36bb7edd16043893cee0f9bb",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315",
+  "task_id": "TASK-0020"
+}

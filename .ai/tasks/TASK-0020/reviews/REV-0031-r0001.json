@@ -1,0 +1,13 @@
+{
+  "context_sha256": "b2e697a4a2bb98a159056d6351367affb901ddb91aa2649617e99caf96e31549",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-26T15:28:37Z",
+  "review_id": "REV-0031",
+  "review_stage": "implementation",
+  "reviewer": "/root/task20_recovery_final_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE。独立本地只读最终审核确认 current subject 794e4fc5831a7221e2b1d3c8f0ef7b53a428df0d 符合恢复后冻结绑定。pre-command 对任意空 target 在 Policy/task 前以 HOOK_TARGET_INVALID 失败；Policy 自动允许路径不读取 task、不 parse/apply observation，即使提供显式空 task 亦然；六类 Policy 禁止 action 只经现有 permission seam 规范化，使用 normalized action 与原始 target 构造当前 task/base/subject/Policy 绑定的 immutable high_risk_command observation，以固定 hook_pre_command actor 恰一次委派 apply_observation，成功后仍返回 ACTION_PERMISSION_DENIED / exit 2。Hook 无命令执行、approval 消费、direct ledger/state 或复制 action/decision 表。wrapper 与真实临时 ledger 覆盖六 action、四 route、状态不变/无 escalation、replay 幂等、不同 action/target identity，以及 service/audit/stale Git/binding/target fail-closed。12.4 投影只完成五步，12.5/12.6、两个 exit checks 和 P2-ESC-01/P2-HOOK-01 仍 pending；overall 指针/计数为 12.5、69/71 tasks、368/378 steps、13 evidence items。H1 V1/REV-0029 仅作为历史投影前提。恢复 sidecars 与事件 18–28 如实保留检测 push、BLOCK、用户确认历史手动 push、仅本地 resolution、REVIEW/V1 重分类、REV-0030、重新 spec approval 与恢复后 H2 V1 的顺序，没有追溯授权或重写时序，也未授权新增远端动作。当前 implementation context b2e697a4a2bb98a159056d6351367affb901ddb91aa2649617e99caf96e31549、canonical evidence acedab28d93d600252186c0f1b23cd4afda2f4ee3fc6442df1cd02f1085250f2 与 classification/spec/Policy/subject 匹配；10/10 required checks passed、unverified_scenarios 为空、全量 1407 passed/4 个既有 Windows symlink skips。diff-cover 无 coverage lines sentinel 只记录为 deterministic pass，未称 100%。findings 为空，可进入仅本地 code approval / Gate。",
+  "task_id": "TASK-0020"
+}

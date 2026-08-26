@@ -11,5 +11,32 @@
     "spec_sha256": "a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315",
     "subject_commit": "addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2",
     "task_id": "TASK-0020"
+  },
+  {
+    "actor": "/user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-26T15:13:11Z",
+    "base_commit": "addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User re-approved TASK-0020 after the manual-push provenance resolution at classification input b09c5b50bbd0020636ecc833ada5e17aaa3e0cb1018c01bb60017535483fffe0, active Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf, unchanged frozen spec a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315, and approved recovery design review REV-0030/context 3a5fc56bbb939cdb8f967c352fc494f107bf06bb36bb7edd16043893cee0f9bb for REVIEW/V1 local verification and final review. This approval authorizes no additional remote or external action.",
+    "schema_version": "1.0",
+    "spec_sha256": "a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315",
+    "subject_commit": "794e4fc5831a7221e2b1d3c8f0ef7b53a428df0d",
+    "task_id": "TASK-0020"
+  },
+  {
+    "actor": "/root/task20_recovery_final_review",
+    "approval_type": "code",
+    "approved_at": "2026-08-26T15:31:10Z",
+    "base_commit": "addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "acedab28d93d600252186c0f1b23cd4afda2f4ee3fc6442df1cd02f1085250f2",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0031 independently approved current subject 794e4fc5831a7221e2b1d3c8f0ef7b53a428df0d with no findings. Recovery-bound V1 canonical evidence acedab28d93d600252186c0f1b23cd4afda2f4ee3fc6442df1cd02f1085250f2 passed all 10 required checks with unverified scenarios empty; full pytest is 1407 passed and 4 existing Windows symlink skips. Diff-cover reported no covered lines because configured coverage source excludes tools, and AI Flow deterministically passed the sentinel without claiming 100 percent. Chapter 12 projects only 12.4 complete and keeps 12.5-12.6, both exit checks, P2-ESC-01 and P2-HOOK-01 pending. Events 18-28 preserve the manual push before final readiness, the user attribution, local-only resolution, unchanged REVIEW/V1 reclassification, REV-0030 and bound spec reapproval; this code approval authorizes no additional remote or external action.",
+    "schema_version": "1.0",
+    "spec_sha256": "a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315",
+    "subject_commit": "794e4fc5831a7221e2b1d3c8f0ef7b53a428df0d",
+    "task_id": "TASK-0020"
   }
 ]

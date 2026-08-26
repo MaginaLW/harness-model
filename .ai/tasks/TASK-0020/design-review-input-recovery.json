@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0030",
+  "revision": 1,
+  "task_id": "TASK-0020",
+  "review_stage": "design",
+  "reviewer": "/root/task20_recovery_design_review",
+  "recorded_at": "2026-08-26T15:11:46Z",
+  "context_sha256": "3a5fc56bbb939cdb8f967c352fc494f107bf06bb36bb7edd16043893cee0f9bb",
+  "outcome": "APPROVE",
+  "summary": "APPROVE。独立本地只读恢复设计审核确认 context 3a5fc56bbb939cdb8f967c352fc494f107bf06bb36bb7edd16043893cee0f9bb 的 task/base/subject/Policy/spec/classification 绑定一致。事件 18–22 如实保留先发现 origin/main 已更新、因 provenance 未建立进入 BLOCK、用户说明该 push 由其手动完成、仅据此记录本地 resolution、重新分类为原 REVIEW/V1 并以相同规格重新冻结的时序；incident 未把早先 push 伪装为先验 readiness、external merge completion 或追溯性 action approval。冻结规格 a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315、六个允许业务路径、目标、非目标与禁止外部动作均未改变；恢复分类输入 b09c5b50bbd0020636ecc833ada5e17aaa3e0cb1018c01bb60017535483fffe0 仅纳入已发生的用户外部事实，route/V 保持 REVIEW/V1。在不产生新增远程动作的前提下，继续本地重验证、最终实现审核、code approval 与 Gate 是安全且符合规格的恢复路径；任何未来 push、force-push、revert、merge、deploy、delete、网络、凭据或付费调用仍须另行取得当前绑定的明确批准。",
+  "findings": []
+}

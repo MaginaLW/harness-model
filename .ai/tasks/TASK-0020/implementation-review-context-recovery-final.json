@@ -1,0 +1,260 @@
+{
+  "base_commit": "addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2",
+  "branch": "main",
+  "classification_input_sha256": "b09c5b50bbd0020636ecc833ada5e17aaa3e0cb1018c01bb60017535483fffe0",
+  "content": {
+    "allowed_scope": [
+      "tools/hooks/pre_command.py",
+      "tests/integration/test_tool_wrappers.py",
+      "tests/integration/test_observation_escalation.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.4：将现有 pre-command 权限薄包装扩展为只对 active Policy 禁止自动执行的规范高风险 action 构造绑定当前 task/base/subject/Policy 的 hook_pre_command high_risk_command immutable observation，并恰一次委派 12.2 共享 service 记录拒绝；Hook 不执行命令、不解析自由 shell、不消费 action approval、不复制 Policy/decision 表，自动允许的非高风险 action 保持无 observation 副作用。",
+        "impact_scope": [
+          "tools/hooks/pre_command.py",
+          "tests/integration/test_tool_wrappers.py",
+          "tests/integration/test_observation_escalation.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Preserve the existing structured action/target interface and Policy-derived automatic permission decision",
+          "Resolve an explicit or unique active task only for Policy-denied high-risk actions",
+          "Construct one immutable hook_pre_command high_risk_command observation bound to the current task, base, subject and active Policy",
+          "Delegate the parsed observation exactly once to the existing apply_observation service with a fixed non-user-controlled Hook actor",
+          "Keep automatically allowed actions observation-free and keep every high-risk action denied after successful audit",
+          "Propagate task, target, Git, Policy, classification, state, audit and persistence failures through the existing fail-closed Hook error path",
+          "Add focused wrapper and real temporary-repository coverage for all six high-risk actions, every route, replay idempotency and failure behavior",
+          "Project only Chapter 12.4 after implementation, formal verification and required review facts are current"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0020/approvals.json",
+        ".ai/tasks/TASK-0020/classification.json",
+        ".ai/tasks/TASK-0020/design-review-context.json",
+        ".ai/tasks/TASK-0020/design-review-input.json",
+        ".ai/tasks/TASK-0020/events.jsonl",
+        ".ai/tasks/TASK-0020/evidence.json",
+        ".ai/tasks/TASK-0020/implementation-review-context-h1.json",
+        ".ai/tasks/TASK-0020/implementation-review-input-h1.json",
+        ".ai/tasks/TASK-0020/review-contexts/08f25bff59094f631c3df8b51bba2199352c99382317c540b03e6686114204f4.json",
+        ".ai/tasks/TASK-0020/review-contexts/c83dd12e20e147ee31cf4c6d501dec1af9c8741d0cd551df0ad8fdf4ace62f11.json",
+        ".ai/tasks/TASK-0020/reviews/REV-0028-r0001.json",
+        ".ai/tasks/TASK-0020/reviews/REV-0029-r0001.json",
+        ".ai/tasks/TASK-0020/spec.md",
+        ".ai/tasks/TASK-0020/task.yaml",
+        "docs/implementation/chapter-12-runtime-observations-hooks.md",
+        "docs/superpowers/state/chapters/chapter-12.yaml",
+        "docs/superpowers/state/overall.yaml",
+        "tests/integration/test_observation_escalation.py",
+        "tests/integration/test_tool_wrappers.py",
+        "tools/hooks/pre_command.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/classification.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/design-review-input.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/evidence.json"
+        },
+        {
+          "additions": 204,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/implementation-review-context-h1.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/implementation-review-input-h1.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/review-contexts/08f25bff59094f631c3df8b51bba2199352c99382317c540b03e6686114204f4.json"
+        },
+        {
+          "additions": 204,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/review-contexts/c83dd12e20e147ee31cf4c6d501dec1af9c8741d0cd551df0ad8fdf4ace62f11.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/reviews/REV-0028-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/reviews/REV-0029-r0001.json"
+        },
+        {
+          "additions": 139,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/spec.md"
+        },
+        {
+          "additions": 113,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0020/task.yaml"
+        },
+        {
+          "additions": 45,
+          "binary": false,
+          "deletions": 5,
+          "path": "docs/implementation/chapter-12-runtime-observations-hooks.md"
+        },
+        {
+          "additions": 45,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/superpowers/state/chapters/chapter-12.yaml"
+        },
+        {
+          "additions": 34,
+          "binary": false,
+          "deletions": 6,
+          "path": "docs/superpowers/state/overall.yaml"
+        },
+        {
+          "additions": 177,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_observation_escalation.py"
+        },
+        {
+          "additions": 186,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/integration/test_tool_wrappers.py"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 3,
+          "path": "tools/hooks/pre_command.py"
+        }
+      ],
+      "totals": {
+        "additions": 1603,
+        "deletions": 19,
+        "files": 20
+      }
+    },
+    "goal": "完成 Chapter 12.4：将现有 pre-command 权限薄包装扩展为只对 active Policy 禁止自动执行的规范高风险 action 构造绑定当前 task/base/subject/Policy 的 hook_pre_command high_risk_command immutable observation，并恰一次委派 12.2 共享 service 记录拒绝；Hook 不执行命令、不解析自由 shell、不消费 action approval、不复制 Policy/decision 表，自动允许的非高风险 action 保持无 observation 副作用。",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0020",
+        "--actor",
+        "/root"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "b2e697a4a2bb98a159056d6351367affb901ddb91aa2649617e99caf96e31549",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "acedab28d93d600252186c0f1b23cd4afda2f4ee3fc6442df1cd02f1085250f2",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315",
+  "subject_commit": "794e4fc5831a7221e2b1d3c8f0ef7b53a428df0d",
+  "task_id": "TASK-0020"
+}
