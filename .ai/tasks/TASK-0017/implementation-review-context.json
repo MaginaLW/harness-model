@@ -1,0 +1,293 @@
+{
+  "base_commit": "2e627da10f699b94584cc90e5565e25c1c57fb77",
+  "branch": "main",
+  "classification_input_sha256": "fef922a06af2cf71410982e17b662eace620e067c8db15ea50939d116a4b6f3e",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/observation.schema.json",
+      ".ai/templates/observation.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/observation.py",
+      "tests/fixtures/contracts/valid/observation.json",
+      "tests/fixtures/contracts/invalid/observation.extra.json",
+      "tests/fixtures/contracts/invalid/observation.invalid.json",
+      "tests/fixtures/contracts/invalid/observation.missing.json",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_observation.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.1：定义五类运行期 observation（scope_out_of_bounds、policy_changed、controlled_file_changed、high_risk_command、evidence_missing）的版本化严格契约与纯解析/类型层，绑定当前 task/base/subject/Policy/source 并仅携带最小安全摘要；覆盖未知字段、非法绑定和敏感/自由命令载荷的 fail-closed 测试，不实现决策映射、事件持久化、CLI、Hook 或 CI adapter。",
+        "impact_scope": [
+          ".ai/schemas/observation.schema.json",
+          ".ai/templates/observation.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/observation.py",
+          "tests/fixtures/contracts/valid/observation.json",
+          "tests/fixtures/contracts/invalid/observation.extra.json",
+          "tests/fixtures/contracts/invalid/observation.invalid.json",
+          "tests/fixtures/contracts/invalid/observation.missing.json",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_observation.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Define one closed version 1.0 observation contract for the five Chapter 12.1 observation kinds and four declared sources",
+          "Bind each fact to task, base commit, subject commit and active Policy digest with one kind-specific minimal safe summary",
+          "Add immutable Python types and a pure parser/serializer that delegates structural validation to the registered contract",
+          "Reject unknown fields, invalid bindings, unsafe repository paths, free-form command payloads and kind/summary mismatches without echoing sensitive input",
+          "Add canonical template and valid/invalid fixtures plus focused contract and parser tests",
+          "Project only Chapter 12.1 progress and document the boundary for later decision, persistence, CLI, Hook and CI tasks"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/observation.schema.json",
+        ".ai/tasks/TASK-0017/approvals.json",
+        ".ai/tasks/TASK-0017/classification.json",
+        ".ai/tasks/TASK-0017/design-review-context.json",
+        ".ai/tasks/TASK-0017/design-review-input.json",
+        ".ai/tasks/TASK-0017/events.jsonl",
+        ".ai/tasks/TASK-0017/evidence.json",
+        ".ai/tasks/TASK-0017/review-contexts/9cf9be4d0acf8075d71ab4d9fca37b6f848c265ee1e3c39520377df7bc794d20.json",
+        ".ai/tasks/TASK-0017/reviews/REV-0019-r0001.json",
+        ".ai/tasks/TASK-0017/spec.md",
+        ".ai/tasks/TASK-0017/task.yaml",
+        ".ai/templates/observation.json",
+        "docs/implementation/chapter-12-runtime-observations-hooks.md",
+        "docs/superpowers/state/chapters/chapter-12.yaml",
+        "docs/superpowers/state/overall.yaml",
+        "src/aiflow/contracts.py",
+        "src/aiflow/observation.py",
+        "tests/fixtures/contracts/invalid/observation.extra.json",
+        "tests/fixtures/contracts/invalid/observation.invalid.json",
+        "tests/fixtures/contracts/invalid/observation.missing.json",
+        "tests/fixtures/contracts/valid/observation.json",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_observation.py"
+      ],
+      "files": [
+        {
+          "additions": 56,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/observation.schema.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/classification.json"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/design-review-input.json"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/evidence.json"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/review-contexts/9cf9be4d0acf8075d71ab4d9fca37b6f848c265ee1e3c39520377df7bc794d20.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/reviews/REV-0019-r0001.json"
+        },
+        {
+          "additions": 88,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/spec.md"
+        },
+        {
+          "additions": 114,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0017/task.yaml"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/templates/observation.json"
+        },
+        {
+          "additions": 53,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/implementation/chapter-12-runtime-observations-hooks.md"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 4,
+          "path": "docs/superpowers/state/chapters/chapter-12.yaml"
+        },
+        {
+          "additions": 34,
+          "binary": false,
+          "deletions": 7,
+          "path": "docs/superpowers/state/overall.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 195,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/observation.py"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/observation.extra.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/observation.invalid.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/observation.missing.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/valid/observation.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 195,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_observation.py"
+        }
+      ],
+      "totals": {
+        "additions": 1246,
+        "deletions": 11,
+        "files": 23
+      }
+    },
+    "goal": "完成 Chapter 12.1：定义五类运行期 observation（scope_out_of_bounds、policy_changed、controlled_file_changed、high_risk_command、evidence_missing）的版本化严格契约与纯解析/类型层，绑定当前 task/base/subject/Policy/source 并仅携带最小安全摘要；覆盖未知字段、非法绑定和敏感/自由命令载荷的 fail-closed 测试，不实现决策映射、事件持久化、CLI、Hook 或 CI adapter。",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0017",
+        "--actor",
+        "/root/task17_requirements"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "215ddaf5ed0cdadc88653318f109c43b4d9a93359bac7533be98b5d9b4e0c506",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "8027f06035455f6430d49249f9987769fd7d069d63e61b6d8726546e448c1a88",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911",
+  "subject_commit": "ea1fc62cb25e1a32e5d8aea365c118d4c69f9ea9",
+  "task_id": "TASK-0017"
+}

@@ -11,5 +11,19 @@
     "spec_sha256": "159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911",
     "subject_commit": "2e627da10f699b94584cc90e5565e25c1c57fb77",
     "task_id": "TASK-0017"
+  },
+  {
+    "actor": "/root/task17_requirements",
+    "approval_type": "code",
+    "approved_at": "2026-08-26T00:54:01Z",
+    "base_commit": "2e627da10f699b94584cc90e5565e25c1c57fb77",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "8027f06035455f6430d49249f9987769fd7d069d63e61b6d8726546e448c1a88",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0020 independently approved current subject ea1fc62cb25e1a32e5d8aea365c118d4c69f9ea9 with no P0-P3 findings. Current local V1 canonical evidence 8027f06035455f6430d49249f9987769fd7d069d63e61b6d8726546e448c1a88 passed all 10 required checks, diff coverage is 91 percent, unverified scenarios are empty, the first 87 percent failure and remediation remain auditable, and the worktree is TASK-0017 governance-only. This approval does not authorize push, merge, deploy, delete or Chapter 12.2-12.6 behavior.",
+    "schema_version": "1.0",
+    "spec_sha256": "159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911",
+    "subject_commit": "ea1fc62cb25e1a32e5d8aea365c118d4c69f9ea9",
+    "task_id": "TASK-0017"
   }
 ]

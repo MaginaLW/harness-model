@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0020",
+  "revision": 1,
+  "task_id": "TASK-0017",
+  "review_stage": "implementation",
+  "reviewer": "/root/task17_requirements",
+  "recorded_at": "2026-08-26T00:53:12Z",
+  "context_sha256": "215ddaf5ed0cdadc88653318f109c43b4d9a93359bac7533be98b5d9b4e0c506",
+  "outcome": "APPROVE",
+  "summary": "APPROVE。base-to-subject diff 仅实现冻结的 Chapter 12.1 observation schema、命名 contract 注册、冻结 dataclass/enum parser/serializer、fixtures/tests、文档和 12.1 状态投影；未进入 12.2 的 decision/persistence、12.3/12.4 Hook、12.5 CLI/CI parity，亦未触及 Policy、Gate 或 state machine。schema 以 closed root/summary、kind conditional 和 oneOf 固定五 kind/四 source/三种 summary；路径与 target_ref 的拒绝边界、未知字段 non-echo、parser 的 tuple/frozen/non-mutation/pure round-trip 均由实现和测试覆盖。首轮 V1 87% diff-coverage failure、retry 及当前 10/10 passed V1 均在 task ledger/evidence 中保留，当前 diff coverage 91%，无未验证项。实现审核未发现 P0-P3 finding。",
+  "findings": []
+}
