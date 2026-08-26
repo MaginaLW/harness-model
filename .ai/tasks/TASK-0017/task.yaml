@@ -1,0 +1,114 @@
+allowed_scope:
+- .ai/schemas/observation.schema.json
+- .ai/templates/observation.json
+- src/aiflow/contracts.py
+- src/aiflow/observation.py
+- tests/fixtures/contracts/valid/observation.json
+- tests/fixtures/contracts/invalid/observation.extra.json
+- tests/fixtures/contracts/invalid/observation.invalid.json
+- tests/fixtures/contracts/invalid/observation.missing.json
+- tests/unit/test_contracts.py
+- tests/unit/test_observation.py
+- docs/implementation/chapter-12-runtime-observations-hooks.md
+- docs/superpowers/state/chapters/chapter-12.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 2e627da10f699b94584cc90e5565e25c1c57fb77
+branch: main
+created_at: '2026-08-26T00:03:04Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 12.1：定义五类运行期 observation（scope_out_of_bounds、policy_changed、controlled_file_changed、high_risk_command、evidence_missing）的版本化严格契约与纯解析/类型层，绑定当前
+    task/base/subject/Policy/source 并仅携带最小安全摘要；覆盖未知字段、非法绑定和敏感/自由命令载荷的 fail-closed
+    测试，不实现决策映射、事件持久化、CLI、Hook 或 CI adapter。
+  impact:
+    level: medium
+  impact_scope:
+  - .ai/schemas/observation.schema.json
+  - .ai/templates/observation.json
+  - src/aiflow/contracts.py
+  - src/aiflow/observation.py
+  - tests/fixtures/contracts/valid/observation.json
+  - tests/fixtures/contracts/invalid/observation.extra.json
+  - tests/fixtures/contracts/invalid/observation.invalid.json
+  - tests/fixtures/contracts/invalid/observation.missing.json
+  - tests/unit/test_contracts.py
+  - tests/unit/test_observation.py
+  - docs/implementation/chapter-12-runtime-observations-hooks.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - .ai/tasks/TASK-0013/future-chapters-blueprint.md
+  - src/aiflow/contracts.py
+  - .ai/schemas/event.schema.json
+  permission_requirements: []
+  planned_actions:
+  - Define one closed version 1.0 observation contract for the five Chapter 12.1 observation
+    kinds and four declared sources
+  - Bind each fact to task, base commit, subject commit and active Policy digest with
+    one kind-specific minimal safe summary
+  - Add immutable Python types and a pure parser/serializer that delegates structural
+    validation to the registered contract
+  - Reject unknown fields, invalid bindings, unsafe repository paths, free-form command
+    payloads and kind/summary mismatches without echoing sensitive input
+  - Add canonical template and valid/invalid fixtures plus focused contract and parser
+    tests
+  - Project only Chapter 12.1 progress and document the boundary for later decision,
+    persistence, CLI, Hook and CI tasks
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0017
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Schema and fixture validation for every supported kind and source
+  - Unit tests for immutable parsing, canonical serialization and non-mutation
+  - Negative tests for missing, extra, invalid, unsafe and mismatched fields
+  - Regression proof that existing contracts, task state, V0/V1 evidence and Gate
+    behavior remain unchanged
+  - Ruff, format check, mypy, full pytest, branch coverage, diff coverage at least
+    90%, Git scope and git diff check
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+frozen_spec_sha256: 159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911
+goal: 完成 Chapter 12.1：定义五类运行期 observation（scope_out_of_bounds、policy_changed、controlled_file_changed、high_risk_command、evidence_missing）的版本化严格契约与纯解析/类型层，绑定当前
+  task/base/subject/Policy/source 并仅携带最小安全摘要；覆盖未知字段、非法绑定和敏感/自由命令载荷的 fail-closed 测试，不实现决策映射、事件持久化、CLI、Hook
+  或 CI adapter。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-26T00:06:40Z'
+subject_commit: 2e627da10f699b94584cc90e5565e25c1c57fb77
+task_id: TASK-0017
+updated_at: '2026-08-26T00:09:23Z'
+worktree_dirty: false
+worktree_dirty_paths: []

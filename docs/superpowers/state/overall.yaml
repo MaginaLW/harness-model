@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-25T23:28:36Z"
+updated_at: "2026-08-26T00:20:52Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -23,20 +23,20 @@ tracking:
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-12"
-  current_task: "12.1"
+  current_task: "12.2"
   current_step: null
 
 summary:
   chapters_total: 12
   chapters_completed: 11
   tasks_total: 71
-  tasks_completed: 65
+  tasks_completed: 66
   steps_total: 378
-  steps_completed: 348
+  steps_completed: 353
   exit_checks_total: 20
   exit_checks_completed: 18
   blockers_total: 0
-  evidence_items: 9
+  evidence_items: 10
 
 chapters:
   - id: "chapter-01"
@@ -131,7 +131,7 @@ chapters:
     number: 12
     title: "运行期升级观测与完整 Hooks"
     state_file: "docs/superpowers/state/chapters/chapter-12.yaml"
-    status: "pending"
+    status: "in_progress"
     dependency: "chapter-11 completed"
     tasks_total: 6
     steps_total: 30
@@ -157,7 +157,7 @@ future_phases:
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
     current_chapter: "chapter-12"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 已基于 TASK-0015 的 committed V2 evidence、REV-0016、code approval、external merge target 与 merge-record governance commit 完成，五项 targeted mutants 均已 killed，两个 Chapter 11 exit checks 均为 passed。Chapter 12 仅初始化为 pending，当前从 12.1 的运行期升级观测定义开始；尚未实施 Hooks、命令拒绝或 parity。"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 已基于 TASK-0015 的 committed V2 evidence、REV-0016、code approval、external merge target 与 merge-record governance commit 完成。Chapter 12.1 已建立五类 observation、四类 source、版本绑定、closed minimal summaries 与纯不可变 parser/serializer；当前进入 12.2 的共享 record/escalate/refuse 映射，尚未实现 observation ledger、Hooks、命令拒绝或 Hook/CLI/CI parity。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2098,3 +2098,30 @@ history:
       - ".ai/tasks/TASK-0015/approvals.json"
       - ".ai/tasks/TASK-0015/action-use-ed3ae68ba3f8362cb99aa4c5bc244ec8318a0aa88c66b5751cf0e4f4e2354dff.md"
       - ".ai/tasks/TASK-0015/events.jsonl"
+  - id: "EVT-OVERALL-CH12-12.1-COMPLETE-001"
+    at: "2026-08-26T00:20:52Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "TASK-0017 按冻结规格建立五类 observation、四类 source、task/base/subject/Policy 绑定、closed minimal summaries 与纯不可变 parser/serializer；focused contract/parser 118 passed，全量 pytest 987 passed/4 existing Windows symlink skips，Ruff、format、mypy 与 git diff check 通过。12.1 不执行 decision、持久化、CLI、Hook 或 CI adapter，Chapter 12 两项退出检查仍 pending。"
+    chapter_evidence: "EVD-CH12-12.1-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_12_status: "in_progress"
+      task_12_1_status: "completed"
+      current_chapter: "chapter-12"
+      current_task: "12.2"
+      current_step: null
+      chapters_completed: 11
+      tasks_completed: 66
+      steps_completed: 353
+      exit_checks_completed: 18
+      evidence_items: 10
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-12.yaml"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - ".ai/schemas/observation.schema.json"
+      - ".ai/templates/observation.json"
+      - "src/aiflow/observation.py"
+      - "tests/unit/test_observation.py"
+      - ".ai/tasks/TASK-0017/spec.md"
+      - ".ai/tasks/TASK-0017/reviews/REV-0019-r0001.json"

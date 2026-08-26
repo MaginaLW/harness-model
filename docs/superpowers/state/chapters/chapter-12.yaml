@@ -4,7 +4,7 @@ chapter:
   id: "chapter-12"
   number: 12
   title: "运行期升级观测与完整 Hooks"
-  status: "pending"
+  status: "in_progress"
   dependency: "chapter-11 completed"
   tasks_total: 6
   steps_total: 30
@@ -15,10 +15,24 @@ source:
 tasks:
   - id: "12.1"
     title: "定义范围越界、Policy/受控文件变化、高风险命令和 evidence 缺失观察事件"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - ".ai/schemas/observation.schema.json"
+      - ".ai/templates/observation.json"
+      - "src/aiflow/contracts.py"
+      - "src/aiflow/observation.py"
+      - "tests/fixtures/contracts/valid/observation.json"
+      - "tests/fixtures/contracts/invalid/observation.extra.json"
+      - "tests/fixtures/contracts/invalid/observation.invalid.json"
+      - "tests/fixtures/contracts/invalid/observation.missing.json"
+      - "tests/unit/test_contracts.py"
+      - "tests/unit/test_observation.py"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - ".ai/tasks/TASK-0017/spec.md"
+      - ".ai/tasks/TASK-0017/reviews/REV-0019-r0001.json"
     blockers: []
   - id: "12.2"
     title: "共享核心将事件映射为 escalation/refusal，禁止自动降级"
@@ -64,6 +78,38 @@ exit_checks:
     description: "Hook 不含独立 Policy 决策表，不宣称通用安全沙箱"
     status: "pending"
 
-chapter_evidence: []
+chapter_evidence:
+  - id: "EVD-CH12-12.1-001"
+    kind: "task_completion_projection"
+    task_id: "TASK-0017"
+    route: "REVIEW"
+    verification_level: "V1"
+    classification_input_sha256: "fef922a06af2cf71410982e17b662eace620e067c8db15ea50939d116a4b6f3e"
+    spec_sha256: "159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    design_review_ref: ".ai/tasks/TASK-0017/reviews/REV-0019-r0001.json"
+    design_review_context_sha256: "9cf9be4d0acf8075d71ab4d9fca37b6f848c265ee1e3c39520377df7bc794d20"
+    implementation_checks:
+      focused_contract_parser: "118 passed"
+      full_pytest: "987 passed, 4 skipped"
+      ruff: "passed"
+      format_check: "passed"
+      mypy: "passed"
+      git_diff_check: "passed"
+    scope: "五类 observation、四类 source、版本绑定、closed minimal summaries、命名 contract 与纯不可变 parser/serializer；不含 decision、持久化或 adapter。"
+    artifacts:
+      - ".ai/schemas/observation.schema.json"
+      - ".ai/templates/observation.json"
+      - "src/aiflow/contracts.py"
+      - "src/aiflow/observation.py"
+      - "tests/fixtures/contracts/valid/observation.json"
+      - "tests/fixtures/contracts/invalid/observation.extra.json"
+      - "tests/fixtures/contracts/invalid/observation.invalid.json"
+      - "tests/fixtures/contracts/invalid/observation.missing.json"
+      - "tests/unit/test_contracts.py"
+      - "tests/unit/test_observation.py"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+    limitation: "本条完成 12.1 的 contract/type 输入层，不证明 observation-to-escalation/refusal、ledger、Hook/CLI/CI parity 或通用安全沙箱；最终 merge readiness 仍由 TASK-0017 当前 subject 的正式 V1 evidence、实现审核、code approval 与 Gate 决定。"
 
 blockers: []

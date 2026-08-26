@@ -1,0 +1,13 @@
+{
+  "context_sha256": "9cf9be4d0acf8075d71ab4d9fca37b6f848c265ee1e3c39520377df7bc794d20",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-26T00:08:39Z",
+  "review_id": "REV-0019",
+  "review_stage": "design",
+  "reviewer": "/root/task17_requirements",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE。冻结规格将 Chapter 12.1 限定为 observation 的严格版本化契约、纯解析/序列化和不可变类型：五种 kind、四个 source、task/base/subject/Policy 绑定，以及按 kind 闭合的最小安全 summary 均有可实现的精确约束。它明确排除 record/escalate/refuse 映射、task ledger 持久化、CLI、Hook、CI、Policy、Gate 和 state-machine 变更，因此未越入 12.2–12.5；现有 Hook 仅为后续适配器的事实来源，不要求本任务修改。13 个允许路径完整覆盖 schema/template/注册/types/fixture/tests/文档与状态投影，且不包含后续 adapter 或治理核心。验收、fail-closed 错误处理、兼容性证明和 append-only 回滚边界与 Phase 02 design、implementation directory 及 TASK-0013 future blueprint 一致。",
+  "task_id": "TASK-0017"
+}

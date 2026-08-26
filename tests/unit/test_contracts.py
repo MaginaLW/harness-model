@@ -32,6 +32,7 @@ CONTRACT_NAMES = {
     "event",
     "evidence",
     "mutation-evidence",
+    "observation",
     "task",
     "verifier-context",
 }
@@ -142,6 +143,12 @@ def test_mutation_evidence_template_satisfies_the_named_contract() -> None:
     template = REPOSITORY_ROOT / ".ai" / "templates" / "mutation-evidence.json"
 
     assert validate_contract("mutation-evidence", load_json(template)) == []
+
+
+def test_observation_template_satisfies_the_named_contract() -> None:
+    template = REPOSITORY_ROOT / ".ai" / "templates" / "observation.json"
+
+    assert validate_contract("observation", load_json(template)) == []
 
 
 def _mutation_evidence_with(path: tuple[str | int, ...], replacement: object) -> dict[str, Any]:

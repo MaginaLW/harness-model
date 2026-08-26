@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/observation.schema.json",
+  "title": "AI Flow runtime observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "base_commit", "subject_commit", "policy_sha256", "source", "kind", "summary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "base_commit": {"$ref": "#/$defs/commit"},
+    "subject_commit": {"$ref": "#/$defs/commit"},
+    "policy_sha256": {"$ref": "#/$defs/sha256"},
+    "source": {"enum": ["hook_pre_commit", "hook_pre_command", "cli", "ci"]},
+    "kind": {"enum": ["scope_out_of_bounds", "policy_changed", "controlled_file_changed", "high_risk_command", "evidence_missing"]},
+    "summary": {"$ref": "#/$defs/summary"}
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "path": {"type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.(?:/|$))(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*//)(?!.*[\\x00-\\x1f\\x7f])[^/]+(?:/[^/]+)*$"},
+    "paths_summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["paths"],
+      "properties": {"paths": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/path"}}}
+    },
+    "command_summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["action", "target_ref"],
+      "properties": {
+        "action": {"enum": ["push", "merge", "deploy", "delete", "secret_export", "paid_external_call"]},
+        "target_ref": {"type": "string", "minLength": 1, "maxLength": 255, "pattern": "^(?!.*[\\s\\x00-\\x1f\\x7f;&|`'\\\"$%<>\\\\(){}\\[\\]!*?]).+$"}
+      }
+    },
+    "evidence_summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact", "reason_code"],
+      "properties": {
+        "artifact": {"enum": ["classification", "specification", "design_review", "spec_approval", "evidence", "verification_snapshot", "targeted_mutation_evidence", "implementation_review", "code_approval", "action_approval", "ci_evidence"]},
+        "reason_code": {"enum": ["missing", "invalid", "stale", "not_passed"]}
+      }
+    },
+    "summary": {
+      "oneOf": [
+        {"$ref": "#/$defs/paths_summary"},
+        {"$ref": "#/$defs/command_summary"},
+        {"$ref": "#/$defs/evidence_summary"}
+      ]
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"kind": {"enum": ["scope_out_of_bounds", "policy_changed", "controlled_file_changed"]}}, "required": ["kind"]}, "then": {"properties": {"summary": {"$ref": "#/$defs/paths_summary"}}}},
+    {"if": {"properties": {"kind": {"const": "high_risk_command"}}, "required": ["kind"]}, "then": {"properties": {"summary": {"$ref": "#/$defs/command_summary"}}}},
+    {"if": {"properties": {"kind": {"const": "evidence_missing"}}, "required": ["kind"]}, "then": {"properties": {"summary": {"$ref": "#/$defs/evidence_summary"}}}}
+  ]
+}

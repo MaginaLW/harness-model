@@ -1,0 +1,64 @@
+{
+  "base_commit": "2e627da10f699b94584cc90e5565e25c1c57fb77",
+  "branch": "main",
+  "classification_input_sha256": "fef922a06af2cf71410982e17b662eace620e067c8db15ea50939d116a4b6f3e",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/observation.schema.json",
+      ".ai/templates/observation.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/observation.py",
+      "tests/fixtures/contracts/valid/observation.json",
+      "tests/fixtures/contracts/invalid/observation.extra.json",
+      "tests/fixtures/contracts/invalid/observation.invalid.json",
+      "tests/fixtures/contracts/invalid/observation.missing.json",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_observation.py",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.1：定义五类运行期 observation（scope_out_of_bounds、policy_changed、controlled_file_changed、high_risk_command、evidence_missing）的版本化严格契约与纯解析/类型层，绑定当前 task/base/subject/Policy/source 并仅携带最小安全摘要；覆盖未知字段、非法绑定和敏感/自由命令载荷的 fail-closed 测试，不实现决策映射、事件持久化、CLI、Hook 或 CI adapter。",
+        "impact_scope": [
+          ".ai/schemas/observation.schema.json",
+          ".ai/templates/observation.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/observation.py",
+          "tests/fixtures/contracts/valid/observation.json",
+          "tests/fixtures/contracts/invalid/observation.extra.json",
+          "tests/fixtures/contracts/invalid/observation.invalid.json",
+          "tests/fixtures/contracts/invalid/observation.missing.json",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_observation.py",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Define one closed version 1.0 observation contract for the five Chapter 12.1 observation kinds and four declared sources",
+          "Bind each fact to task, base commit, subject commit and active Policy digest with one kind-specific minimal safe summary",
+          "Add immutable Python types and a pure parser/serializer that delegates structural validation to the registered contract",
+          "Reject unknown fields, invalid bindings, unsafe repository paths, free-form command payloads and kind/summary mismatches without echoing sensitive input",
+          "Add canonical template and valid/invalid fixtures plus focused contract and parser tests",
+          "Project only Chapter 12.1 progress and document the boundary for later decision, persistence, CLI, Hook and CI tasks"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 12.1：定义五类运行期 observation（scope_out_of_bounds、policy_changed、controlled_file_changed、high_risk_command、evidence_missing）的版本化严格契约与纯解析/类型层，绑定当前 task/base/subject/Policy/source 并仅携带最小安全摘要；覆盖未知字段、非法绑定和敏感/自由命令载荷的 fail-closed 测试，不实现决策映射、事件持久化、CLI、Hook 或 CI adapter。",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "9cf9be4d0acf8075d71ab4d9fca37b6f848c265ee1e3c39520377df7bc794d20",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911",
+  "task_id": "TASK-0017"
+}

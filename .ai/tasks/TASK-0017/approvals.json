@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "/root/task17_requirements",
+    "approval_type": "spec",
+    "approved_at": "2026-08-26T00:09:02Z",
+    "base_commit": "2e627da10f699b94584cc90e5565e25c1c57fb77",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "REV-0019 independently approved frozen TASK-0017 Chapter 12.1 specification 159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911 with no P0-P3 findings; the bounded observation contract, immutable parser/types, exact five kinds and four sources, safe summaries, 13-path scope, verification, rollback and explicit exclusion of 12.2-12.5 behavior are complete and consistent with the Phase 02 design and implementation directory.",
+    "schema_version": "1.0",
+    "spec_sha256": "159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911",
+    "subject_commit": "2e627da10f699b94584cc90e5565e25c1c57fb77",
+    "task_id": "TASK-0017"
+  }
+]
