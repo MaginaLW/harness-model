@@ -15,6 +15,11 @@ from aiflow.classification_service import classify_task
 from aiflow.errors import AiflowError
 from aiflow.escalation import ESCALATION_REASON_CODES, escalate_task, record_resolution
 from aiflow.gate import evaluate_gate
+from aiflow.observation_adapter import (
+    parse_observation_mode,
+    run_observation_file,
+    serialize_observation_result,
+)
 from aiflow.review_service import (
     build_review_context,
     list_review_records,
@@ -119,6 +124,13 @@ def build_parser() -> ArgumentParser:
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
+    observe = subparsers.add_parser(
+        "observe", help="apply or read-only evaluate one immutable observation"
+    )
+    observe.add_argument("task_id", nargs="?")
+    observe.add_argument("--input", type=Path)
+    observe.add_argument("--mode", metavar="{apply,dry-run,ci}")
+    observe.add_argument("--actor")
     verify = subparsers.add_parser("verify", help="run controlled verification")
     verify.add_argument("task_id")
     verify.add_argument("--actor")
@@ -282,6 +294,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif arguments.command == "status":
             summary = summarize_task(Path.cwd(), arguments.task_id)
             print(summary.to_json() if arguments.format == "json" else summary.to_text())
+        elif arguments.command == "observe":
+            if arguments.task_id is None or arguments.input is None or arguments.mode is None:
+                raise AiflowError(
+                    "Observation task, input and mode are required",
+                    code="OBSERVATION_ADAPTER_INVALID",
+                )
+            observe_result = run_observation_file(
+                Path.cwd(),
+                arguments.task_id,
+                arguments.input,
+                mode=parse_observation_mode(arguments.mode),
+                actor=arguments.actor,
+            )
+            print(
+                json.dumps(
+                    serialize_observation_result(observe_result),
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+            )
+            return 0 if observe_result.decision.execution_allowed else 2
         elif arguments.command == "verify":
             verify_result = verify_task(
                 Path.cwd(),

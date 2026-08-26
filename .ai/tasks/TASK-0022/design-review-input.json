@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0032",
+  "revision": 1,
+  "task_id": "TASK-0022",
+  "review_stage": "design",
+  "reviewer": "/root/task22_design_audit",
+  "recorded_at": "2026-08-26T15:53:55Z",
+  "context_sha256": "e215e14fe0252f88c9a24d0652b2783762fa3b8a0e146e83a5b676fe95cfc661",
+  "outcome": "APPROVE",
+  "summary": "APPROVE。独立本地只读设计审核确认 TASK-0022 冻结规格与 task/base/subject、classification input、Policy、REVIEW/V1 及 design context 绑定一致。九个精确业务路径把实现限定为共享 current-facts 只读评估 seam、受限 observe adapter、CLI、测试和 Chapter 12 投影；TASK-0021 的 12.6 文档范围保持隔离。apply/dry-run/ci 的 mode/source/actor 组合封闭，显式 task 和本地 UTF-8 JSON object 排除 active-task 推断、shell、环境与网络输入；mismatch 在任何写入前失败。evaluate 只复用完整 task/Git/Policy/classification freshness 与既有 pure decision，apply 保留幂等 audit 和单调 escalation，dry-run/CI 只读且由 task-directory byte hash 与 mutation-helper call assertions 证明零写。parity 正确排除 source-sensitive observation digest、mode 和 apply-only audit metadata，只比较 canonical decision 语义；真实 Hook E2E 仅声明已实现的 pre-commit scope 与 pre-command high-risk 两类事实，其他三类只证明 core/CLI/CI。duplicate key、unknown fields、binding drift、非回显、exit 1/2、六类高风险 action、shell/Hook/Windows 平台边界及状态投影时序均有可执行验收；12.5 只推进指针到 12.6，chapter exit checks 保持 pending。未发现阻断 finding。",
+  "findings": []
+}

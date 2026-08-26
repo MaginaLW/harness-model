@@ -8,14 +8,19 @@ import pytest
 
 from aiflow.errors import ContractError
 from aiflow.git_context import GitContext
-from aiflow.observation import Observation, parse_observation
+from aiflow.observation import Observation, ObservationSource, parse_observation
 from aiflow.observation_decision import (
     DecisionRoute,
     VerificationLevel,
     decide_observation,
     observation_digest,
 )
-from aiflow.observation_service import _audit_payload, _current_facts, apply_observation
+from aiflow.observation_service import (
+    _audit_payload,
+    _current_facts,
+    apply_observation,
+    evaluate_observation,
+)
 from aiflow.policy import PolicyBundle
 from aiflow.task_service import TaskRecord, TransitionResult
 
@@ -85,6 +90,23 @@ def test_ci_observation_is_rejected_before_any_persistence(monkeypatch: pytest.M
 
     assert error.value.code == "OBSERVATION_CI_PERSISTENCE_FORBIDDEN"
     assert calls == []
+
+
+def test_ci_observation_can_use_the_shared_read_only_evaluation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observation, writes = _install_real_facts(monkeypatch)
+    observation = replace(observation, source=ObservationSource.CI)
+
+    decision = evaluate_observation(ROOT, "TASK-0018", observation)
+
+    assert decision == decide_observation(
+        observation,
+        DecisionRoute.AUTO,
+        VerificationLevel.V1,
+    )
+    assert decision.execution_allowed is False
+    assert writes == []
 
 
 def _install_real_facts(

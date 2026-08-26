@@ -71,8 +71,6 @@ def _current_facts(
 ) -> tuple[dict[str, object], Mapping[str, object], DecisionRoute, VerificationLevel]:
     if not isinstance(observation, Observation):
         raise _invalid("OBSERVATION_INVALID")
-    if observation.source is ObservationSource.CI:
-        raise _invalid("OBSERVATION_CI_PERSISTENCE_FORBIDDEN")
     record = load_task_record(repository_root, task_id)
     task = record.task
     if task.get("current_state") not in {
@@ -134,6 +132,16 @@ def _current_facts(
     return task, classification, route, level
 
 
+def evaluate_observation(
+    repository_root: Path, task_id: str, observation: Observation
+) -> ObservationDecision:
+    """Validate current bindings and decide without writing task-local state."""
+    _task, _classification_value, route, level = _current_facts(
+        repository_root, task_id, observation
+    )
+    return decide_observation(observation, route, level)
+
+
 def _audit_payload(observation: Observation, decision: ObservationDecision) -> dict[str, object]:
     return {
         "observation": serialize_observation(observation),
@@ -191,12 +199,13 @@ def apply_observation(
     repository_root: Path, task_id: str, observation: Observation, *, actor: str
 ) -> ObservationApplication:
     """Validate, decide, audit, and if necessary delegate a monotonic escalation."""
+    if not isinstance(observation, Observation):
+        raise _invalid("OBSERVATION_INVALID")
+    if observation.source is ObservationSource.CI:
+        raise _invalid("OBSERVATION_CI_PERSISTENCE_FORBIDDEN")
     if not actor.strip():
         raise _invalid("OBSERVATION_ACTOR_INVALID")
-    _task, _classification_value, route, level = _current_facts(
-        repository_root, task_id, observation
-    )
-    decision = decide_observation(observation, route, level)
+    decision = evaluate_observation(repository_root, task_id, observation)
     payload = _audit_payload(observation, decision)
     record = load_task_record(repository_root, task_id)
 

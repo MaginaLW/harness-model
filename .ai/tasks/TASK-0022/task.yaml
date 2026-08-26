@@ -1,0 +1,121 @@
+allowed_scope:
+- src/aiflow/observation_service.py
+- src/aiflow/observation_adapter.py
+- src/aiflow/cli.py
+- tests/unit/test_observation_service.py
+- tests/unit/test_observation_adapter.py
+- tests/integration/test_observation_parity.py
+- docs/implementation/chapter-12-runtime-observations-hooks.md
+- docs/superpowers/state/chapters/chapter-12.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 65f2fb4140027ba09c6f0cbf710b26ce87a6cc5b
+branch: main
+created_at: '2026-08-26T15:48:36Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 12.5：新增受限 aiflow observe CLI/CI adapter，复用同一 observation parser、deterministic
+    decision 与 task binding core，证明受支持的 pre-commit/pre-command Hook、CLI apply/dry-run
+    和 detached CI dry-run 对相同事实给出相同非授权结论；CI 与 dry-run 不写 task ledger，并如实记录 shell/平台覆盖边界。
+  impact:
+    level: medium
+  impact_scope:
+  - src/aiflow/observation_service.py
+  - src/aiflow/observation_adapter.py
+  - src/aiflow/cli.py
+  - tests/unit/test_observation_service.py
+  - tests/unit/test_observation_adapter.py
+  - tests/integration/test_observation_parity.py
+  - docs/implementation/chapter-12-runtime-observations-hooks.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - .ai/tasks/TASK-0013/future-chapters-blueprint.md
+  - src/aiflow/observation.py
+  - src/aiflow/observation_decision.py
+  - src/aiflow/observation_service.py
+  - src/aiflow/cli.py
+  - tools/hooks/pre_commit.py
+  - tools/hooks/pre_command.py
+  permission_requirements: []
+  planned_actions:
+  - Refactor the existing current-facts binding check into one public read-only observation
+    evaluation seam without changing the deterministic decision table
+  - Add a bounded observation adapter with explicit apply, dry-run and CI modes, strict
+    mode/source/actor validation and canonical JSON output
+  - Keep apply task-local and idempotent through the existing service while making
+    dry-run and CI strictly non-persistent
+  - Prove semantic parity for every observation kind, route and verification level,
+    plus end-to-end parity for the two actually supported Hook facts
+  - Cover malformed input, ambiguity, stale bindings, path escape, unknown fields,
+    ledger-write prevention and stable exit behavior
+  - Record the supported shell, Hook-install and operating-system boundaries without
+    claiming a generic sandbox
+  - Project only Chapter 12.5 after implementation, formal verification and required
+    review facts are current
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0022
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Unit tests for read-only evaluation, mode/source/actor validation, canonical output
+    and zero-write dry-run/CI behavior
+  - Matrix tests for all five observation kinds across AUTO, ASK, REVIEW, BLOCK and
+    V0, V1, V2 with source-sensitive digests but identical decision semantics
+  - Isolated temporary-repository integration tests for pre-commit scope and pre-command
+    high-risk Hook versus CLI apply/dry-run and CI read-only decisions
+  - Negative tests for malformed or duplicate-key JSON, unknown fields, task mismatch,
+    task ambiguity, path escape, stale Git/Policy/classification bindings and persistence-service
+    failures
+  - Regression proof for observation contracts, decision/service escalation, existing
+    Hook wrappers, task state, evidence, approvals, Gate and CI conclusions
+  - Ruff, format check, mypy, focused and full pytest, branch coverage, relative-base
+    diff coverage and git diff check
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: c73fb731b0fa1f1577203e6087b97079297b27ebdf99e68f654dc8c6034a7cc1
+goal: 完成 Chapter 12.5：新增受限 aiflow observe CLI/CI adapter，复用同一 observation parser、deterministic
+  decision 与 task binding core，证明受支持的 pre-commit/pre-command Hook、CLI apply/dry-run
+  和 detached CI dry-run 对相同事实给出相同非授权结论；CI 与 dry-run 不写 task ledger，并如实记录 shell/平台覆盖边界。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-26T15:52:48Z'
+subject_commit: 65f2fb4140027ba09c6f0cbf710b26ce87a6cc5b
+task_id: TASK-0022
+updated_at: '2026-08-26T15:55:37Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- .ai/tasks/TASK-0021/approvals.json
+- .ai/tasks/TASK-0021/events.jsonl
+- .ai/tasks/TASK-0021/spec.md
+- .ai/tasks/TASK-0021/task.yaml

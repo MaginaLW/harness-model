@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-26T15:55:37Z",
+    "base_commit": "65f2fb4140027ba09c6f0cbf710b26ce87a6cc5b",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "批准 TASK-0022 按分类输入 72068c839a2f9e46dec59e3a9c2f1f84b2715d1bd11663fd8ddbb7867f9500c7、Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf、冻结规格 c73fb731b0fa1f1577203e6087b97079297b27ebdf99e68f654dc8c6034a7cc1，基于 REV-0032 / context e215e14fe0252f88c9a24d0652b2783762fa3b8a0e146e83a5b676fe95cfc661 批准 spec，并按 REVIEW / V1 进入实现。",
+    "schema_version": "1.0",
+    "spec_sha256": "c73fb731b0fa1f1577203e6087b97079297b27ebdf99e68f654dc8c6034a7cc1",
+    "subject_commit": "65f2fb4140027ba09c6f0cbf710b26ce87a6cc5b",
+    "task_id": "TASK-0022"
+  }
+]
