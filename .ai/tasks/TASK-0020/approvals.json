@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "/user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-26T14:19:57Z",
+    "base_commit": "addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User approved TASK-0020 classification input 27122294cc7b7b20646ebcb226efab60ec206b254587f3effe08272173618e98, active Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf, frozen specification a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315, and REV-0028 design context 08f25bff59094f631c3df8b51bba2199352c99382317c540b03e6686114204f4 for REVIEW/V1 implementation. Approval is limited to the six frozen business paths and authorizes no command execution, approval consumption, Policy/core/CLI/CI/Gate/evidence change, push, merge, deploy, delete, credential access, network, paid/external service call, or Chapter 12.5/12.6 work.",
+    "schema_version": "1.0",
+    "spec_sha256": "a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315",
+    "subject_commit": "addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2",
+    "task_id": "TASK-0020"
+  }
+]

@@ -1,0 +1,113 @@
+allowed_scope:
+- tools/hooks/pre_command.py
+- tests/integration/test_tool_wrappers.py
+- tests/integration/test_observation_escalation.py
+- docs/implementation/chapter-12-runtime-observations-hooks.md
+- docs/superpowers/state/chapters/chapter-12.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2
+branch: main
+created_at: '2026-08-26T14:12:32Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 12.4：将现有 pre-command 权限薄包装扩展为只对 active Policy 禁止自动执行的规范高风险 action
+    构造绑定当前 task/base/subject/Policy 的 hook_pre_command high_risk_command immutable
+    observation，并恰一次委派 12.2 共享 service 记录拒绝；Hook 不执行命令、不解析自由 shell、不消费 action approval、不复制
+    Policy/decision 表，自动允许的非高风险 action 保持无 observation 副作用。
+  impact:
+    level: medium
+  impact_scope:
+  - tools/hooks/pre_command.py
+  - tests/integration/test_tool_wrappers.py
+  - tests/integration/test_observation_escalation.py
+  - docs/implementation/chapter-12-runtime-observations-hooks.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - .ai/tasks/TASK-0013/future-chapters-blueprint.md
+  - tools/hooks/pre_command.py
+  - src/aiflow/policy.py
+  - src/aiflow/observation.py
+  - src/aiflow/observation_decision.py
+  - src/aiflow/observation_service.py
+  - tests/integration/test_tool_wrappers.py
+  - tests/integration/test_observation_escalation.py
+  permission_requirements: []
+  planned_actions:
+  - Preserve the existing structured action/target interface and Policy-derived automatic
+    permission decision
+  - Resolve an explicit or unique active task only for Policy-denied high-risk actions
+  - Construct one immutable hook_pre_command high_risk_command observation bound to
+    the current task, base, subject and active Policy
+  - Delegate the parsed observation exactly once to the existing apply_observation
+    service with a fixed non-user-controlled Hook actor
+  - Keep automatically allowed actions observation-free and keep every high-risk action
+    denied after successful audit
+  - Propagate task, target, Git, Policy, classification, state, audit and persistence
+    failures through the existing fail-closed Hook error path
+  - Add focused wrapper and real temporary-repository coverage for all six high-risk
+    actions, every route, replay idempotency and failure behavior
+  - Project only Chapter 12.4 after implementation, formal verification and required
+    review facts are current
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0020
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Wrapper tests for help, structured action/target compatibility, automatically
+    allowed no-op behavior, exact observation construction and stable Hook exit codes
+  - Real temporary Git/task-ledger integration tests for AUTO, ASK, REVIEW and BLOCK
+    refusal audits without escalation or execution
+  - Replay and failure-path tests proving invalid targets, task ambiguity, stale bindings
+    and observation-service errors never become allow
+  - Regression proof that pre-commit, shared observation/decision/service, Policy
+    permission evaluation, task state, evidence, approval, Gate, CLI and CI conclusions
+    remain unchanged
+  - Ruff, format check, mypy, focused and full pytest, branch coverage, relative-base
+    diff coverage and git diff check
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: a50f387c9ada201e791f7506cd780ccdf9ad229dd25a0cd3bc2bcfdc16037315
+goal: 完成 Chapter 12.4：将现有 pre-command 权限薄包装扩展为只对 active Policy 禁止自动执行的规范高风险 action
+  构造绑定当前 task/base/subject/Policy 的 hook_pre_command high_risk_command immutable observation，并恰一次委派
+  12.2 共享 service 记录拒绝；Hook 不执行命令、不解析自由 shell、不消费 action approval、不复制 Policy/decision
+  表，自动允许的非高风险 action 保持无 observation 副作用。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-26T14:17:52Z'
+subject_commit: addaa8d8f46b5dc41593b1f3ad1ea15211fb38b2
+task_id: TASK-0020
+updated_at: '2026-08-26T14:20:04Z'
+worktree_dirty: false
+worktree_dirty_paths: []

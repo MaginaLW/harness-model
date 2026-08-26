@@ -13,7 +13,7 @@ from aiflow.observation_decision import DecisionRoute, VerificationLevel
 from aiflow.observation_service import apply_observation
 from aiflow.policy import load_policy_bundle
 from aiflow.task_service import TaskRecord, TransitionResult, load_task_record
-from tools.hooks import pre_commit
+from tools.hooks import pre_command, pre_commit
 
 
 def _bound_observation(repository: Path, kind: str):
@@ -52,6 +52,58 @@ def _hook_repository_at_route(
     make_ready(repository, route=route, valid_approval=route == "REVIEW")
     assert cli_main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
     return repository
+
+
+def _pre_command_repository_at_route(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, route: str
+) -> Path:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route=route, valid_approval=route == "REVIEW")
+    if route != "BLOCK":
+        assert cli_main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    else:
+        escalate_task(
+            repository,
+            "TASK-0001",
+            target_route="BLOCK",
+            reason_code="policy_changed",
+            impact="test blocked pre-command disposition",
+            next_step="retain blocked state",
+            actor="setup",
+        )
+    return repository
+
+
+def _pre_command_events(repository: Path) -> list[dict[str, object]]:
+    return [
+        event
+        for event in load_task_record(repository, "TASK-0001").events
+        if event["event_type"] in {"observation_recorded", "observation_refused"}
+    ]
+
+
+def _assert_high_risk_refusal(repository: Path, *, action: str, target: str) -> dict[str, object]:
+    record = load_task_record(repository, "TASK-0001")
+    events = _pre_command_events(repository)
+    assert len(events) == 1
+    event = events[0]
+    payload = event["payload"]
+    assert event["event_type"] == "observation_refused"
+    assert event["actor"] == "hook_pre_command"
+    assert payload["observation"] == {
+        "schema_version": "1.0",
+        "task_id": "TASK-0001",
+        "base_commit": record.task["base_commit"],
+        "subject_commit": record.task["subject_commit"],
+        "policy_sha256": load_policy_bundle(repository).sha256,
+        "source": "hook_pre_command",
+        "kind": "high_risk_command",
+        "summary": {"action": action, "target_ref": target},
+    }
+    assert payload["decision"]["disposition"] == "refuse"
+    assert payload["decision"]["execution_allowed"] is False
+    return event
 
 
 def _assert_hook_observation(
@@ -274,6 +326,130 @@ def test_real_pre_commit_observation_failures_never_allow(
         if event["event_type"] in {"observation_recorded", "observation_refused"}
     ]
     assert all((repository / path).is_file() for path in paths)
+
+
+@pytest.mark.parametrize(
+    ("action", "target"),
+    [
+        ("push", "origin/main"),
+        ("merge", "main"),
+        ("deploy", "production"),
+        ("delete", "release-archive"),
+        ("secret_export", "audit-bundle"),
+        ("paid_external_call", "provider-request"),
+    ],
+)
+def test_real_pre_command_refuses_each_policy_denied_action_with_exact_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, action: str, target: str
+) -> None:
+    repository = _pre_command_repository_at_route(tmp_path, monkeypatch, route="REVIEW")
+
+    assert pre_command.main(["--task", "TASK-0001", "--action", action, "--target", target]) == 2
+
+    record = load_task_record(repository, "TASK-0001")
+    _assert_high_risk_refusal(repository, action=action, target=target)
+    assert record.task["current_state"] == "IMPLEMENTING"
+    assert not [event for event in record.events if event["event_type"] == "task_escalated"]
+
+
+@pytest.mark.parametrize("route", ("AUTO", "ASK", "REVIEW", "BLOCK"))
+def test_real_pre_command_always_refuses_without_state_change_or_escalation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, route: str
+) -> None:
+    repository = _pre_command_repository_at_route(tmp_path, monkeypatch, route=route)
+    before = load_task_record(repository, "TASK-0001")
+
+    assert (
+        pre_command.main(["--task", "TASK-0001", "--action", "push", "--target", "origin/main"])
+        == 2
+    )
+
+    after = load_task_record(repository, "TASK-0001")
+    event = _assert_high_risk_refusal(repository, action="push", target="origin/main")
+    assert after.task["current_state"] == before.task["current_state"]
+    assert event["payload"]["decision"]["disposition"] == "refuse"
+    assert not [item for item in after.events if item["event_type"] == "task_escalated"]
+
+
+def test_real_pre_command_replay_is_idempotent_but_distinct_facts_get_distinct_audits(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _pre_command_repository_at_route(tmp_path, monkeypatch, route="REVIEW")
+    first = ["--task", "TASK-0001", "--action", "push", "--target", "origin/main"]
+
+    assert pre_command.main(first) == 2
+    assert pre_command.main(first) == 2
+    assert (
+        pre_command.main(["--task", "TASK-0001", "--action", "push", "--target", "origin/release"])
+        == 2
+    )
+    assert (
+        pre_command.main(["--task", "TASK-0001", "--action", "merge", "--target", "origin/release"])
+        == 2
+    )
+
+    events = _pre_command_events(repository)
+    assert len(events) == 3
+    identities = {event["payload"]["observation_sha256"] for event in events}
+    assert len(identities) == 3
+    assert all(event["event_type"] == "observation_refused" for event in events)
+
+
+@pytest.mark.parametrize("failure", ("service", "audit", "stale_head", "binding"))
+def test_real_pre_command_failures_are_exit_one_without_a_successful_audit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    repository = _pre_command_repository_at_route(tmp_path, monkeypatch, route="REVIEW")
+    if failure == "service":
+        monkeypatch.setattr(
+            pre_command,
+            "apply_observation",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                ContractError("service unavailable", code="OBSERVATION_SERVICE_FAILED")
+            ),
+        )
+    elif failure == "audit":
+        from aiflow import observation_service
+
+        monkeypatch.setattr(
+            observation_service,
+            "record_task_event",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                ContractError("audit unavailable", code="OBSERVATION_AUDIT_FAILED")
+            ),
+        )
+    elif failure == "stale_head":
+        commit_all(repository, "introduce stale high-risk binding")
+    else:
+        task = load_task_record(repository, "TASK-0001").task
+        task["subject_commit"] = "f" * 40
+        from aiflow.storage import atomic_write_yaml
+
+        atomic_write_yaml(repository / ".ai" / "tasks" / "TASK-0001" / "task.yaml", task)
+
+    assert (
+        pre_command.main(["--task", "TASK-0001", "--action", "push", "--target", "origin/main"])
+        == 1
+    )
+    assert not _pre_command_events(repository)
+
+
+def test_real_pre_command_invalid_high_risk_target_fails_before_service_or_audit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _pre_command_repository_at_route(tmp_path, monkeypatch, route="REVIEW")
+    monkeypatch.setattr(
+        pre_command,
+        "apply_observation",
+        lambda *_args, **_kwargs: pytest.fail(
+            "invalid target must not reach the persistence service"
+        ),
+    )
+
+    assert (
+        pre_command.main(["--task", "TASK-0001", "--action", "push", "--target", "$(whoami)"]) == 1
+    )
+    assert not _pre_command_events(repository)
 
 
 def test_observation_escalation_never_performs_the_observed_action(monkeypatch) -> None:

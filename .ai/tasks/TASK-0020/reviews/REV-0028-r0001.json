@@ -1,0 +1,13 @@
+{
+  "context_sha256": "08f25bff59094f631c3df8b51bba2199352c99382317c540b03e6686114204f4",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-26T14:18:45Z",
+  "review_id": "REV-0028",
+  "review_stage": "design",
+  "reviewer": "/root/task20_design_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE。独立本地设计审核确认修订后的 TASK-0020 冻结规格足够明确、最小且可验证：pre-command 只由现有 Policy permission seam 决定是否进入 high_risk_command observation；任意 action 的空 target 先按既有 HOOK_TARGET_INVALID fail closed，非空且 Policy 未禁止的 label 保持现有 allow，将 target 视为不解释、不执行的 opaque label，即使提供 --task 也不读取 task/observation/service。只有 Policy-denied path 才解析显式或唯一 active task，使用 Policy normalized action 与未经修复的原始受限 target，通过 frozen HighRiskAction/command-summary contract 构造当前 task/base/subject/Policy 绑定的 immutable observation，并以固定 hook_pre_command actor 恰一次委派公开 apply_observation。共享 12.2 core 保证 AUTO/ASK/REVIEW/BLOCK 均 canonical refusal、状态不变、无 escalation、execution_allowed=false；Hook 不执行命令、不消费 approval、不复制 Policy/decision 表。六个业务路径范围、fail-closed/非回显负例、六 action/四 route/幂等测试以及 H1 正式验证审核后投影、H2 重新验证审核的时序均明确。第二路对抗审计确认早期 unknown-action 与 target-validation 歧义已消除，未发现新冲突。",
+  "task_id": "TASK-0020"
+}
