@@ -7,13 +7,16 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
+import aiflow.observation as observation_module
 from aiflow.contracts import ContractValidationError, validate_contract
+from aiflow.errors import ContractError
 from aiflow.observation import (
     CommandSummary,
     EvidenceArtifact,
     EvidenceReason,
     EvidenceSummary,
     HighRiskAction,
+    Observation,
     ObservationKind,
     ObservationSource,
     PathsSummary,
@@ -145,9 +148,48 @@ def test_parser_uses_contract_errors_without_echoing_sensitive_values() -> None:
     assert "SUPER_SECRET_VALUE" not in str(caught.value)
 
 
+def test_parser_converts_defensive_conversion_failures_to_a_stable_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = _payload("SUPER_SECRET_VALUE", {"paths": ["src/a.py"]})
+    monkeypatch.setattr(observation_module, "require_valid_contract", lambda *_args: None)
+
+    with pytest.raises(ContractError) as caught:
+        parse_observation(payload)
+
+    assert caught.value.code == "OBSERVATION_INVALID"
+    assert "SUPER_SECRET_VALUE" not in str(caught.value)
+
+
 def test_serialization_returns_a_fresh_json_value() -> None:
     parsed = parse_observation(_payload("scope_out_of_bounds", {"paths": ["src/a.py"]}))
     serialized = serialize_observation(parsed)
     serialized["task_id"] = "TASK-9999"
     assert parsed.task_id == "TASK-0001"
     assert serialize_observation(parsed)["task_id"] == "TASK-0001"
+
+
+def test_serialization_rejects_a_non_observation_without_echoing_input() -> None:
+    with pytest.raises(ContractError) as caught:
+        serialize_observation({"credentials": "SUPER_SECRET_VALUE"})  # type: ignore[arg-type]
+
+    assert caught.value.code == "OBSERVATION_INVALID"
+    assert "SUPER_SECRET_VALUE" not in str(caught.value)
+
+
+def test_serialization_rejects_an_unknown_summary_type() -> None:
+    invalid = Observation(
+        schema_version="1.0",
+        task_id="TASK-0001",
+        base_commit="1" * 40,
+        subject_commit="2" * 40,
+        policy_sha256="a" * 64,
+        source=ObservationSource.CLI,
+        kind=ObservationKind.SCOPE_OUT_OF_BOUNDS,
+        summary=object(),  # type: ignore[arg-type]
+    )
+
+    with pytest.raises(ContractError) as caught:
+        serialize_observation(invalid)
+
+    assert caught.value.code == "OBSERVATION_INVALID"

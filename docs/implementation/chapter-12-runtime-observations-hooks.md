@@ -35,10 +35,15 @@ reason 枚举，以及冻结的 `Observation`、`PathsSummary`、`CommandSummary
 
 ## 验证事实与限制
 
-- focused contract/parser：118 passed。
-- 全量 pytest：987 passed、4 skipped；四项 skip 均是当前 Windows host 无法创建
+- 初始 focused contract/parser：118 passed；首轮 V1 的 diff coverage 暴露 serializer
+  防御分支覆盖不足后，受控 remediation 增加三项 fail-closed 测试，focused 更新为
+  121 passed。
+- 首轮正式 V1 的全量 pytest：987 passed、4 skipped；四项 skip 均是当前 Windows host 无法创建
   symlink 的既有平台限制。
 - 全仓 Ruff、format check 和 mypy 均通过；`git diff --check` 通过。
+- 首轮正式 V1 如实记录为 9/10 required checks passed：唯一失败是 diff coverage 87%，
+  低于 90% 门槛；没有生成 code approval。该失败 evidence 和 retry 事件保留在 TASK-0017
+  历史中，后续 current subject 的正式 V1 evidence 才能取代 merge-readiness 结论。
 - TASK-0017 的确定性分类为 `REVIEW / V1`，冻结规格 SHA-256 为
   `159b3887cc16127361724e431baccc9cba3aed1c6e72df989eaec2ede1761911`；独立设计审核
   `REV-0019` 为 APPROVE、findings 为空。最终 merge readiness 仍以当前 implementation

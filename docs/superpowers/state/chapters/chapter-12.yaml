@@ -91,8 +91,9 @@ chapter_evidence:
     design_review_ref: ".ai/tasks/TASK-0017/reviews/REV-0019-r0001.json"
     design_review_context_sha256: "9cf9be4d0acf8075d71ab4d9fca37b6f848c265ee1e3c39520377df7bc794d20"
     implementation_checks:
-      focused_contract_parser: "118 passed"
-      full_pytest: "987 passed, 4 skipped"
+      focused_contract_parser: "initial 118 passed; post-remediation 121 passed"
+      initial_v1_full_pytest: "987 passed, 4 skipped"
+      initial_v1_diff_coverage: "failed at 87%; fail-closed serializer guard tests added before retry"
       ruff: "passed"
       format_check: "passed"
       mypy: "passed"
