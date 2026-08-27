@@ -154,7 +154,7 @@ chapter_evidence:
     policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
     implementation_subject_commit: "af180adb697b560afa6dfae30e404f7bc6125c0e"
     implementation_subject_role: "H1 pending-state implementation verified before the H2 completion projection"
-    verification_evidence_ref: ".ai/tasks/TASK-0024/evidence.json"
+    verification_evidence_ref: ".ai/tasks/TASK-0024/evidence-h1-af180adb697b560a.json"
     verification_evidence_sha256: "b4d2bb8789e8e0160bffba5bd4188d0ed526ec52691a875cdb831a189ac6a850"
     design_review_ref: ".ai/tasks/TASK-0024/reviews/REV-0039-r0001.json"
     design_review_context_sha256: "21b0aaaf85a79c1be0f62df35942ad2dd33e39c50f3a7b54693799cf262ee9f4"
