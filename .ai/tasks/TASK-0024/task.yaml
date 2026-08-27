@@ -1,0 +1,87 @@
+allowed_scope:
+- docs/superpowers/state/chapters/chapter-13.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 82a6b857b3ca091b36a86df286ea396d1a6489b7
+branch: main
+created_at: '2026-08-27T10:14:34Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: low
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 13.1 治理初始化：建立 Chapter 13 pending 状态，冻结当前仓库未来跨模块 REVIEW/V2 自举试点的候选范围、排除项与
+    fail-closed 边界；本任务只投影 13.1 为当前治理工作，不进入 13.2 实现或宣称 Phase 02 完成。
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - docs/superpowers/state/chapters/chapter-13.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - docs/superpowers/state/overall.yaml
+  - .ai/tasks/TASK-0023/task.yaml
+  - .ai/tasks/TASK-0023/evidence.json
+  - .ai/tasks/TASK-0023/reviews/REV-0038-r0001.json
+  - .ai/tasks/TASK-0023/events.jsonl
+  permission_requirements: []
+  planned_actions:
+  - Create a pending Chapter 13 state with the six planned tasks and four exit checks
+  - Freeze the candidate scope, exclusions, failure semantics and V2 requirements
+    for the future 13.2 self-hosting task without authorizing that task
+  - Update overall totals and pointers for Chapter 13 initialization while keeping
+    Phase 02 in progress
+  - Project 13.1 complete only after current V1 evidence and independent review, with
+    13.2 remaining not started
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0024
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Parse both YAML state files and cross-check chapter, task, step, exit and evidence
+    counters
+  - Validate the future self-hosting envelope against the committed Phase 02 design
+    and implementation directory
+  - Run AI Flow validate, scope and the Policy-selected verification plan
+  - Run git diff check and independent design and implementation reviews
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 57d8f40d00165035dad74f0603299a2c77fd8b01450516096867af978dd9e263
+goal: 完成 Chapter 13.1 治理初始化：建立 Chapter 13 pending 状态，冻结当前仓库未来跨模块 REVIEW/V2 自举试点的候选范围、排除项与
+  fail-closed 边界；本任务只投影 13.1 为当前治理工作，不进入 13.2 实现或宣称 Phase 02 完成。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: C:/Users/Admin/AppData/Local/Temp/aiflow-task0024-1787825673320
+schema_version: '1.0'
+spec_frozen_at: '2026-08-27T10:18:09Z'
+subject_commit: 82a6b857b3ca091b36a86df286ea396d1a6489b7
+task_id: TASK-0024
+updated_at: '2026-08-27T10:23:06Z'
+worktree_dirty: false
+worktree_dirty_paths: []

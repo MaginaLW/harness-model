@@ -1,0 +1,40 @@
+{
+  "base_commit": "82a6b857b3ca091b36a86df286ea396d1a6489b7",
+  "branch": "main",
+  "classification_input_sha256": "5519315d67bb37ca1ab08d23910670e5d7177822eaf5ce526fa8b7f67ceb10e9",
+  "content": {
+    "allowed_scope": [
+      "docs/superpowers/state/chapters/chapter-13.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 13.1 治理初始化：建立 Chapter 13 pending 状态，冻结当前仓库未来跨模块 REVIEW/V2 自举试点的候选范围、排除项与 fail-closed 边界；本任务只投影 13.1 为当前治理工作，不进入 13.2 实现或宣称 Phase 02 完成。",
+        "impact_scope": [
+          "docs/superpowers/state/chapters/chapter-13.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Create a pending Chapter 13 state with the six planned tasks and four exit checks",
+          "Freeze the candidate scope, exclusions, failure semantics and V2 requirements for the future 13.2 self-hosting task without authorizing that task",
+          "Update overall totals and pointers for Chapter 13 initialization while keeping Phase 02 in progress",
+          "Project 13.1 complete only after current V1 evidence and independent review, with 13.2 remaining not started"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 13.1 治理初始化：建立 Chapter 13 pending 状态，冻结当前仓库未来跨模块 REVIEW/V2 自举试点的候选范围、排除项与 fail-closed 边界；本任务只投影 13.1 为当前治理工作，不进入 13.2 实现或宣称 Phase 02 完成。",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "21b0aaaf85a79c1be0f62df35942ad2dd33e39c50f3a7b54693799cf262ee9f4",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "57d8f40d00165035dad74f0603299a2c77fd8b01450516096867af978dd9e263",
+  "task_id": "TASK-0024"
+}

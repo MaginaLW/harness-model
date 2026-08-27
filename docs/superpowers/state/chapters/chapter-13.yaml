@@ -1,0 +1,139 @@
+schema: "progress.v1"
+state_type: "chapter"
+chapter:
+  id: "chapter-13"
+  number: 13
+  title: "自举 REVIEW 试点与阶段二基线"
+  status: "pending"
+  dependency: "chapter-12 completed"
+  tasks_total: 6
+  steps_total: 30
+source:
+  implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+  design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+  initialized_by_task: "TASK-0024"
+  initialized_at: "2026-08-27T10:23:33Z"
+
+tasks:
+  - id: "13.1"
+    title: "冻结当前仓库跨模块 REVIEW 自举规格和允许范围"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "13.2"
+    title: "在隔离本地 worktree 执行设计审核、实现和独立 V2 验证"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "13.3"
+    title: "执行实现审核、code approval、CI 模拟和 Gate"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "13.4"
+    title: "覆盖相同 actor、survived mutant、越界升级和陈旧审核 E2E"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "13.5"
+    title: "建立阶段二验收矩阵与可重放证据索引"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+  - id: "13.6"
+    title: "更新状态、CHANGELOG、操作文档和阶段三输入，提交阶段二基线"
+    status: "pending"
+    steps_total: 5
+    completed_steps: []
+    in_progress_step: null
+    blockers: []
+
+exit_checks:
+  - id: "CH13-EXIT-01"
+    description: "一个真实跨模块 REVIEW + V2 任务完成双审核、独立验证和 CI/Gate"
+    status: "pending"
+  - id: "CH13-EXIT-02"
+    description: "V2 evidence 在 attestation HEAD 可重放并包含验收、集成、定向变异与独立性证据"
+    status: "pending"
+  - id: "CH13-EXIT-03"
+    description: "Hook、CLI 和 CI 对支持范围内的相同事实给出一致结论"
+    status: "pending"
+  - id: "CH13-EXIT-04"
+    description: "未实现 V3、模型路由、资源调度或任何未经授权的外部动作"
+    status: "pending"
+
+self_hosting_envelope:
+  status: "frozen_candidate"
+  frozen_by_task: "TASK-0024"
+  spec_sha256: "57d8f40d00165035dad74f0603299a2c77fd8b01450516096867af978dd9e263"
+  classification_input_sha256: "5519315d67bb37ca1ab08d23910670e5d7177822eaf5ce526fa8b7f67ceb10e9"
+  policy_version: "2.1.0"
+  policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+  design_review:
+    review_id: "REV-0039"
+    context_sha256: "21b0aaaf85a79c1be0f62df35942ad2dd33e39c50f3a7b54693799cf262ee9f4"
+    outcome: "APPROVE"
+  authority: "candidate only; does not authorize 13.2 implementation or external actions"
+  candidate_write_scope:
+    - "tests/acceptance/test_phase_02_self_hosting.py"
+    - "tests/integration/test_phase_02_self_hosting.py"
+    - "tests/e2e/test_phase_02_self_hosting_scenario.py"
+    - "docs/implementation/chapter-13-review-self-hosting.md"
+    - "docs/superpowers/state/chapters/chapter-13.yaml"
+    - "docs/superpowers/state/overall.yaml"
+  read_only_code_map:
+    - ".ai/policy/"
+    - ".ai/schemas/"
+    - ".ai/mutations/phase-02-critical-manifest.json"
+    - "src/aiflow/review_service.py"
+    - "src/aiflow/approval.py"
+    - "src/aiflow/verification_service.py"
+    - "src/aiflow/evidence.py"
+    - "src/aiflow/gate.py"
+    - "src/aiflow/observation_service.py"
+    - "src/aiflow/observation_decision.py"
+    - "src/aiflow/cli.py"
+    - "tools/hooks/"
+    - "tests/unit/"
+    - "tests/integration/"
+    - "tests/acceptance/"
+    - "tests/e2e/"
+  future_task_requirements:
+    separate_aiflow_task: true
+    isolated_local_worktree: true
+    reclassify_under_current_policy: true
+    freeze_new_spec_and_obtain_spec_approval: true
+    verification_requirements:
+      acceptance_required: true
+      integration_required: true
+      targeted_mutation_required: true
+      independent_verifier_required: true
+    implementer_verifier_actor_must_differ: true
+    all_targeted_mutants_must_be_killed: true
+    unverified_scenarios_must_be_empty: true
+    current_implementation_review_code_approval_and_gate_required: true
+  fail_closed_conditions:
+    - "same or empty Implementer/Verifier actor"
+    - "stale or tampered spec, Policy, review context, evidence or attestation"
+    - "survived, missing or unexecuted targeted mutant"
+    - "any unverified scenario"
+    - "scope overrun without recorded escalation and re-governance"
+    - "supported Hook, CLI and CI facts produce inconsistent decisions"
+  limitations:
+    - "Actor labels are auditable task roles, not external identity authentication."
+    - "Existing Hook evidence does not prove cross-platform live Hooks, every client, free-shell parsing or an OS sandbox."
+    - "The candidate write scope is not reusable approval; the future task must bind its own current facts."
+
+chapter_evidence: []
+
+blockers: []

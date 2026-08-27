@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-27T00:32:22Z"
+updated_at: "2026-08-27T10:23:33Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -22,18 +22,18 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-12"
-  current_task: null
+  current_chapter: "chapter-13"
+  current_task: "13.1"
   current_step: null
 
 summary:
-  chapters_total: 12
+  chapters_total: 13
   chapters_completed: 12
-  tasks_total: 71
+  tasks_total: 77
   tasks_completed: 71
-  steps_total: 378
+  steps_total: 408
   steps_completed: 378
-  exit_checks_total: 20
+  exit_checks_total: 24
   exit_checks_completed: 20
   blockers_total: 0
   evidence_items: 15
@@ -135,6 +135,14 @@ chapters:
     dependency: "chapter-11 completed"
     tasks_total: 6
     steps_total: 30
+  - id: "chapter-13"
+    number: 13
+    title: "自举 REVIEW 试点与阶段二基线"
+    state_file: "docs/superpowers/state/chapters/chapter-13.yaml"
+    status: "pending"
+    dependency: "chapter-12 completed"
+    tasks_total: 6
+    steps_total: 30
 
 global_checks:
   plan_self_review:
@@ -157,7 +165,7 @@ future_phases:
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
     current_chapter: "chapter-13"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据，以及 Chapter 11 committed V2 已完成。Chapter 12.1–12.6、P2-ESC-01/P2-HOOK-01 支持范围内的输入和两个 Chapter 12 exit checks 已完成；这些结论不扩展为跨平台 live Hook、全客户端拦截、自由 shell 解析或通用命令/OS sandbox。Chapter 13 尚未初始化，必须另建 13.1 治理任务后才能开始；Phase 02 仍 in_progress。"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据，以及 Chapter 11 committed V2 已完成。Chapter 12.1–12.6、P2-ESC-01/P2-HOOK-01 支持范围内的输入和两个 Chapter 12 exit checks 已完成；这些结论不扩展为跨平台 live Hook、全客户端拦截、自由 shell 解析或通用命令/OS sandbox。Chapter 13 已由 TASK-0024 初始化为 pending，当前仅执行 13.1 治理和冻结候选自举 envelope；该 envelope 不授权 13.2、V2 执行或外部动作，Phase 02 仍 in_progress。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2276,3 +2284,32 @@ history:
       - ".ai/tasks/TASK-0023/evidence.json"
       - ".ai/tasks/TASK-0023/reviews/REV-0036-r0001.json"
       - ".ai/tasks/TASK-0023/reviews/REV-0037-r0001.json"
+  - id: "EVT-OVERALL-CH13-INITIALIZED-001"
+    at: "2026-08-27T10:23:33Z"
+    action: "chapter_initialized"
+    actor: "/root"
+    reason: "TASK-0024 按冻结规格、Policy 2.1.0 与 REV-0039 初始化 Chapter 13 H1：六项任务和四个 exit checks 全部保持 pending，future 13.2 candidate write scope 与只读代码地图分离，四项 V2 requirements 只作为未来 task 的重新治理输入，不构成当前实现或外部动作授权。"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_13_status: "pending"
+      task_13_1_status: "pending"
+      current_chapter: "chapter-13"
+      current_task: "13.1"
+      current_step: null
+      chapters_total: 13
+      chapters_completed: 12
+      tasks_total: 77
+      tasks_completed: 71
+      steps_total: 408
+      steps_completed: 378
+      exit_checks_total: 24
+      exit_checks_completed: 20
+      evidence_items: 15
+    evidence:
+      - "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
+      - "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+      - "docs/superpowers/state/chapters/chapter-12.yaml"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
+      - ".ai/tasks/TASK-0024/spec.md"
+      - ".ai/tasks/TASK-0024/reviews/REV-0039-r0001.json"
