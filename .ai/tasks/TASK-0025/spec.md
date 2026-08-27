@@ -3,11 +3,11 @@
 ## 目标
 
 完成 Chapter 13.2 的真实、隔离本地 `REVIEW + V2` 自举试点：在不修改现有 runtime、
-Policy、schema、mutation manifest 或 Hook 的前提下，新增当前仓库专用的 acceptance、
-integration 与 E2E 测试，证明双阶段审核、独立 verifier、固定 targeted mutation、
-current evidence binding 以及支持范围内 Hook/CLI/CI semantic parity 能由 TASK-0025 自身
-离线重放，并形成实现说明。只有在当前 subject 的 V2 evidence 与独立实现审核通过后，
-才投影 13.2 完成；13.3、四个 Chapter 13 exit checks 和 Phase 02 均保持未完成。
+Policy、schema、mutation manifest、verification order 或 Hook 的前提下，新增当前仓库专用的
+acceptance、integration 与 E2E 测试，分别证明 contract 语义和已发生历史 artifact 的离线
+重放；当前 subject 的真实 authoritative closure 由测试外层的 AI Flow V2、独立实现审核和
+Gate 形成，不能由测试内 fixture 代替。只有在当前 subject 的 V2 evidence 与独立实现审核
+通过后，才投影 13.2 完成；13.3、四个 Chapter 13 exit checks 和 Phase 02 均保持未完成。
 
 ## 范围
 
@@ -19,7 +19,18 @@ current evidence binding 以及支持范围内 Hook/CLI/CI semantic parity 能�
    `docs/implementation/chapter-13-review-self-hosting.md`、
    `docs/superpowers/state/chapters/chapter-13.yaml` 和
    `docs/superpowers/state/overall.yaml`。TASK-0025 的 task-local 治理、review、action、
-   mutation、evidence 与日志记录由 AI Flow 按追加式规则维护；其他历史 task 不得修改。
+   mutation、evidence 与日志记录由 AI Flow 按追加式规则维护；允许在
+   `.ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/` 追加一个明确标记为 non-current 的
+   versioned replay bundle。它必须包含首个 H1 candidate 的 historical `task.yaml`、`spec.md`、
+   `events.jsonl`、classification、approvals、action file、receipt、pre-evidence、verifier
+   context、design/implementation review context 与 record、mutation artifact 和五份日志。
+   bundle manifest 必须记录每个文件的相对路径与 SHA-256、source subject
+   `fe30565e669aa047088b0c25c085effeb2b4bdbc`、source governance commit
+   `ef1f32d42b935ef2f7d8acfdc805a95399b33317`、原始 artifact ref/digest、受控 non-task input
+   的复用规则，以及由有序 path/digest entries 计算的 bundle SHA-256。包含该 bundle 的 Git
+   governance commit 在后续 task-local record 中追加记录，避免把自身 commit 写入 bundle
+   造成自引用。该 bundle 只供离线历史重放，不得写回 current `evidence.json` 或参与 current
+   approval/Gate。其他历史 task 不得修改。
 2. `.ai/policy/`、`.ai/schemas/`、`.ai/mutations/phase-02-critical-manifest.json`、
    `src/aiflow/`、`tools/hooks/` 以及既有 unit/integration/acceptance/E2E 测试只作为
    read-only code/fact map。若实现必须修改这些路径或七文件 allowlist 之外的任何业务路径，
@@ -35,14 +46,33 @@ current evidence binding 以及支持范围内 Hook/CLI/CI semantic parity 能�
    snapshot/finalization、code approval/Gate 前置事实，以及支持范围内 observation/Hook、CLI、
    CI 对同一语义事实的决定一致性；比较 decision fields，不要求 source-sensitive digest、
    ledger effect、event metadata、JSON bytes 或文案相同。
-5. E2E 必须包含一个离线正向 self-hosting scenario，并对相同或空 Implementer/Verifier
-   actor、survived/missing/unexecuted targeted mutant、scope overrun 未升级、陈旧 design 或
-   implementation review、篡改或陈旧 evidence/snapshot/attestation 逐类证明 fail closed。
-   测试不得执行 push、merge、deploy、凭据、网络、付费调用或被 observation 描述的动作。
+5. E2E 必须显式分开三类事实，不得混称为一个 authoritative current closure：
+   (a) 在 pytest 临时目录对当前仓库做纯本地 clone，并把该临时 clone 的本地 `main` 分支
+   checkout/reset 到 source governance commit
+   `ef1f32d42b935ef2f7d8acfdc805a95399b33317`；不得用 detached HEAD，也不得修改源仓库分支或
+   Git metadata。该 clone 只提供历史 commit graph 以及经 bundle manifest 哈希锁定的
+   Policy/schema/manifest/runner 等 non-task inputs；随后把上述 versioned
+   historical bundle 的 task-local 文件复制到 exact historical paths。测试必须先验证 source
+   commit、逐文件摘要、bundle SHA-256 与所有 non-task input 摘要，再使用 public mutation
+   loader/consumer 验证真实 receipt、14/14 pre-V2 checks、独立 verifier、固定五项 `killed`
+   与逐日志摘要，并证明其 `REV-0045 REQUEST_CHANGES` 不能形成 readiness。它不得从主仓库
+   current `.ai/tasks/TASK-0025` 混入任何 task-local binding；source commit 本身不被描述为
+   包含后来追加的 bundle；
+   (b) 使用 current TASK-0025 的 frozen binding 和 public contract/evidence/Gate API 构造明确
+   标记为 `modeled_non_authoritative` 的正向模型，只证明 APPROVE/final evidence/Gate 的
+   contract 组合语义，不宣称该模型是 current artifact；该标识只能由测试名称、fixture 包装
+   或断言承载，不得作为未知字段写入严格 evidence schema；(c) 对相同或空
+   Implementer/Verifier actor、survived/missing/unexecuted targeted mutant、scope overrun
+   未升级、陈旧 design 或 implementation review、篡改或陈旧
+   evidence/snapshot/attestation 逐类证明 fail closed。测试不得执行真实 mutation、push、
+   merge、deploy、凭据、网络、付费调用或被 observation 描述的动作；本地 replay repo 只能
+   写入 pytest-owned temporary directory，不得写主仓库或主仓库 Git metadata。
 6. 实施说明必须记录任务 base/subject、分类、规格、双阶段审核、H1/H2 时序、复现命令、
-   targeted mutation receipt、verifier context、V2 evidence、限制和恢复方法。它必须明确 actor
-   label 不是外部身份认证，Hook parity 不扩展为跨平台 live Hook、所有客户端、自由 shell
-   解析、通用命令拦截或 OS sandbox。
+   targeted mutation receipt、verifier context、V2 evidence、限制和恢复方法。它必须明确
+   historical replay 与 modeled positive 都不是 current readiness；只有 outer AI Flow 对
+   current subject 产生的 evidence、implementation review、code approval 和 Gate 才具权威性。
+   它还必须明确 actor label 不是外部身份认证，Hook parity 不扩展为跨平台 live Hook、所有
+   客户端、自由 shell 解析、通用命令拦截或 OS sandbox。
 7. TASK-0025 必须按当前 active Policy 重新分类并取得 `REVIEW / V2`。四项
    `acceptance_required`、`integration_required`、`targeted_mutation_required` 和
    `independent_verifier_required` 必须保持 true；Implementer 与 Verifier actor 必须为
@@ -59,11 +89,13 @@ current evidence binding 以及支持范围内 Hook/CLI/CI semantic parity 能�
    subject 的 action/evidence 用于另一个 subject。任何第二次真实 collection 必须重新生成
    action 并取得新的用户批准。Runner 的 task-owned cleanup 只是该有界事务的一部分，不是
    通用 delete 权限。
-10. H1 五个非状态业务文件提交并 sync 后，先运行 focused tests 和完整 V2。独立 Verifier
-    生成 pre-implementation-review evidence；独立 implementation review 必须绑定同一
-    verification snapshot 并无未关闭 high/critical finding，再由同一 Verifier finalize，
-    形成 H1 final evidence。H1 evidence body 必须另存不可变 task-local snapshot，避免 H2
-    验证覆盖其引用。
+10. H1 五个非状态业务文件提交并 sync 后，先运行 focused tests 和完整 V2。首次完整 V2 的
+    regression/E2E 早于该次 targeted mutation collection，因此测试只能执行第 5 项定义的
+    historical replay 和 contract model；不得预执行或复用 mutation 来制造测试前置 artifact。
+    独立 Verifier 随后生成 pre-implementation-review evidence；独立 implementation review
+    必须绑定同一 verification snapshot 并无未关闭 high/critical finding，再由同一 Verifier
+    finalize，形成 H1 final evidence。H1 evidence body 必须另存不可变 task-local snapshot，
+    避免 H2 验证覆盖其引用。
 11. 只有 H1 current subject 的 final V2、五项 mutant 全 killed、
     `unverified_scenarios: []` 与独立 implementation review 全部通过后，H2 才可修改两份
     state 文件：将 13.2 置为 `completed`、`completed_steps: [1,2,3,4,5]`，13.3 保持
@@ -86,7 +118,9 @@ current evidence binding 以及支持范围内 Hook/CLI/CI semantic parity 能�
 3. 不实现 V3、安全扫描、故障注入、真实模型调用/路由、资源调度、DAG/跨主机编排、通用
    mutation framework、自由 shell 解析、通用命令拦截或操作系统安全沙箱。
 4. 不修改 fixed manifest 的五个 mutation ID、target、operator、detector、expected outcome
-   或 runner 语义；新增测试只能消费公开事实，不能复制 Policy 决策表或形成 Gate 旁路。
+   或 runner 语义；新增测试只能通过 public API 消费真实历史事实或组装明确标记为
+   non-authoritative 的 contract model，不能复制 Policy 决策表、把 model 写入 task evidence，
+   或形成 approval/Gate 旁路。
 5. 不复用 TASK-0014、TASK-0015、TASK-0022 或 TASK-0024 的 classification、spec approval、
    action approval、review、verifier context、mutation artifact、evidence、code approval 或
    Gate 结论作为 TASK-0025 current 事实；历史材料仅可作为只读设计输入。
@@ -101,12 +135,15 @@ current evidence binding 以及支持范围内 Hook/CLI/CI semantic parity 能�
    实施说明，H2 只含两份 state 文件。默认 full pytest 必须能同时收集 acceptance 与
    integration 的同名模块；`aiflow scope TASK-0025`、`git diff --check` 与 task contract
    均通过。
-3. 新 acceptance、integration、E2E tests 全部离线且确定性通过；正向 scenario 证明同一
-   current task 的双审核、独立 verifier、十四项 V2 checks、mutation 和受限 parity 闭环，
-   所有规定负向 scenario 给出稳定拒绝。
-4. 每个 V2 subject 的权威 manifest 恰含 `MUT-V2-001`–`MUT-V2-005`，结果按 manifest
-   顺序全部为 `killed`，无 missing、duplicate、unknown、survived 或 unverified 结果；
-   artifact identity、摘要、日志引用和 snapshot 可由 public loader 重放。
+3. 新 acceptance、integration、E2E tests 全部离线且确定性通过。E2E 对首个 H1 candidate
+   的真实历史 bundle 完成 public-loader replay，验证真实 14/14 pre-V2、independent verifier、
+   五项 killed 和逐日志摘要，并因 `REV-0045 REQUEST_CHANGES` 及 subject freshness 明确拒绝其
+   current readiness；另一个明确标记的 contract model 证明 APPROVE/final evidence/Gate 的
+   正向组合语义。所有规定负向 scenario 给出稳定拒绝。
+4. 每个实际 V2 subject 的权威 manifest 恰含 `MUT-V2-001`–`MUT-V2-005`，结果按 manifest
+   顺序全部为 `killed`，无 missing、duplicate、unknown、survived 或 unverified 结果；current
+   artifact identity、摘要、日志引用和 snapshot 由 outer V2 的 public loader 重放。版本化
+   E2E 只重放历史 bundle，不要求在首次 regression 之前存在 current subject artifact。
 5. V2 的 14/14 required checks 通过，包括 V1 全集、acceptance、integration、
    targeted_mutation 和 independent_verifier；全量 pytest、Ruff、format、mypy、coverage
    XML 与 diff coverage 达到 Policy 阈值，`unverified_scenarios` 为空。
@@ -136,8 +173,9 @@ current evidence binding 以及支持范围内 Hook/CLI/CI semantic parity 能�
 classification、subject、review context、evidence、snapshot 或 attestation 陈旧/篡改；action
 缺失、歧义、过期、已消费或绑定不符；任一 mutant survived/missing/unexecuted/unknown；存在
 unverified scenario；diff coverage 低于阈值；范围越界未升级；Hook/CLI/CI 支持范围内相同事实
-产生不同 decision；试图复用旧 task/action/evidence；H1/H2 时序或 immutable snapshot 缺失。
-不得自动降为 V1、手写通过、重复消费 action、失败后自动重跑或以 README/文档声明代替证据。
+产生不同 decision；试图复用旧 task/action/evidence；H1/H2 时序或 immutable snapshot 缺失；
+把 historical replay 或 modeled positive 当作 current evidence/readiness。不得自动降为 V1、
+手写通过、重复消费 action、失败后自动重跑或以 README/文档声明代替证据。
 
 ## 回滚
 
