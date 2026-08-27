@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "36500db4687910d92260c80b48ede24ce9a740ae7f5f4bde5cb77f5e29879e50",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0025",
+  "parameter_summary": "Run the five fixed Phase 02 critical mutations once against H1 subject fe30565e669aa047088b0c25c085effeb2b4bdbc in at most five TASK-0025-owned isolated temporary worktrees and write only TASK-0025-local evidence and logs.",
+  "subject_commit": "fe30565e669aa047088b0c25c085effeb2b4bdbc",
+  "conditions": [
+    "Use only the committed .ai/mutations/phase-02-critical-manifest.json entries MUT-V2-001 through MUT-V2-005 in manifest order; run each baseline detector and mutant detector exactly once.",
+    "Create and clean up at most five TASK-0025-owned isolated temporary worktrees; do not alter the main worktree or any non-task-owned path.",
+    "Do not push, merge, deploy, publish, access credentials, call external models or paid services, or make network calls.",
+    "Fail closed before launch if task, decision unit, base, subject, frozen specification, Policy, classification, approval, receipt, manifest, or ledger bindings differ.",
+    "Launch, failure, or interruption consumes this authorization once; do not retry or reuse it for another subject.",
+    "Persist results only under the TASK-0025 governance directory and preserve the immutable H1 evidence snapshot."
+  ],
+  "expires_at": "2026-08-28T12:30:00Z",
+  "single_use": true
+}

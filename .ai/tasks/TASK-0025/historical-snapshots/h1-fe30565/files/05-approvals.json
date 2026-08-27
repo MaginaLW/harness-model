@@ -1,0 +1,44 @@
+[
+  {
+    "actor": "/user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-27T11:38:09Z",
+    "base_commit": "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "用户批准 TASK-0025 按分类输入 c5c68affd65005928ba41982d87ed7830450e8f9a60d69e39015669d223efe0b、Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf、冻结规格 b616f9993b1eaa0d3fd65f9cf94562dfba603ace668a4a5fb23d8a754925c780，基于 REV-0043 / context cff3fbfa9e2c6dad268b320060dd3d57bbcc4d3b8f6106d850d7410645ab905f 批准 spec，并按 REVIEW / V2 进入实现；每个 current subject 的 targeted mutation 仍须另行 single-use action approval，不授权任何远程操作。",
+    "schema_version": "1.0",
+    "spec_sha256": "b616f9993b1eaa0d3fd65f9cf94562dfba603ace668a4a5fb23d8a754925c780",
+    "subject_commit": "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb",
+    "task_id": "TASK-0025"
+  },
+  {
+    "actor": "/user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-27T11:48:19Z",
+    "base_commit": "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "用户批准 TASK-0025 按分类输入 36500db4687910d92260c80b48ede24ce9a740ae7f5f4bde5cb77f5e29879e50、Policy f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf、冻结规格 625ac850cfbfedc05c5af636b4f274faacc8325aa806caee7f47f9ec16bb5a4c，基于 REV-0044 / context 1833cc40e1f5a4bdd5e7ce59e2233965325dce8b30ecf1c94ddfa45586b790e7 重新批准 spec，并按 REVIEW / V2 继续实现；保留现有四个 H1 文件，并仅授权新增空的 tests/acceptance/__init__.py；每个 current subject 的 targeted mutation 仍须另行 single-use action approval，不授权任何远程操作。",
+    "schema_version": "1.0",
+    "spec_sha256": "625ac850cfbfedc05c5af636b4f274faacc8325aa806caee7f47f9ec16bb5a4c",
+    "subject_commit": "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb",
+    "task_id": "TASK-0025"
+  },
+  {
+    "action_sha256": "9740af8fafb53760e829f94fd3c34d252a742fd42f2928e16272f32ee91d2cfa",
+    "actor": "/user",
+    "approval_type": "action",
+    "approved_at": "2026-08-27T12:18:01Z",
+    "base_commit": "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-28T12:30:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "用户批准 TASK-0025 按行动摘要 9740af8fafb53760e829f94fd3c34d252a742fd42f2928e16272f32ee91d2cfa、subject fe30565e669aa047088b0c25c085effeb2b4bdbc 执行一次 H1 targeted mutation；single-use，禁止任何远程操作。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "625ac850cfbfedc05c5af636b4f274faacc8325aa806caee7f47f9ec16bb5a4c",
+    "subject_commit": "fe30565e669aa047088b0c25c085effeb2b4bdbc",
+    "task_id": "TASK-0025"
+  }
+]

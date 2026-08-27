@@ -1,0 +1,148 @@
+# Task Specification
+
+## 目标
+
+完成 Chapter 13.2 的真实、隔离本地 `REVIEW + V2` 自举试点：在不修改现有 runtime、
+Policy、schema、mutation manifest 或 Hook 的前提下，新增当前仓库专用的 acceptance、
+integration 与 E2E 测试，证明双阶段审核、独立 verifier、固定 targeted mutation、
+current evidence binding 以及支持范围内 Hook/CLI/CI semantic parity 能由 TASK-0025 自身
+离线重放，并形成实现说明。只有在当前 subject 的 V2 evidence 与独立实现审核通过后，
+才投影 13.2 完成；13.3、四个 Chapter 13 exit checks 和 Phase 02 均保持未完成。
+
+## 范围
+
+1. 本任务允许修改的业务路径精确限定为七个：
+   `tests/acceptance/__init__.py`、
+   `tests/acceptance/test_phase_02_self_hosting.py`、
+   `tests/integration/test_phase_02_self_hosting.py`、
+   `tests/e2e/test_phase_02_self_hosting_scenario.py`、
+   `docs/implementation/chapter-13-review-self-hosting.md`、
+   `docs/superpowers/state/chapters/chapter-13.yaml` 和
+   `docs/superpowers/state/overall.yaml`。TASK-0025 的 task-local 治理、review、action、
+   mutation、evidence 与日志记录由 AI Flow 按追加式规则维护；其他历史 task 不得修改。
+2. `.ai/policy/`、`.ai/schemas/`、`.ai/mutations/phase-02-critical-manifest.json`、
+   `src/aiflow/`、`tools/hooks/` 以及既有 unit/integration/acceptance/E2E 测试只作为
+   read-only code/fact map。若实现必须修改这些路径或七文件 allowlist 之外的任何业务路径，
+   必须停止，记录 scope/behavior/Policy/verification 变化并重新分类、冻结、设计审核和
+   spec approval；不得静默扩展。
+3. H1 业务实现只新增空的 `tests/acceptance/__init__.py` package marker、三个测试文件与
+   Chapter 13 实施说明，不修改两份 state 文件。Package marker 只解决冻结名称要求下
+   acceptance/integration 同名模块在默认 pytest prepend mode 的 import-file-mismatch；不得
+   包含运行时代码、fixture、hook 或导入副作用。Acceptance 必须从公开 CLI/contract 视角
+   证明 current REVIEW/V2 所需的十四项检查集合、
+   current frozen spec/Policy/classification binding、独立 verifier 与不可复用旧 task 证据。
+4. Integration 必须覆盖设计审核、spec approval、implementation review、V2 evidence
+   snapshot/finalization、code approval/Gate 前置事实，以及支持范围内 observation/Hook、CLI、
+   CI 对同一语义事实的决定一致性；比较 decision fields，不要求 source-sensitive digest、
+   ledger effect、event metadata、JSON bytes 或文案相同。
+5. E2E 必须包含一个离线正向 self-hosting scenario，并对相同或空 Implementer/Verifier
+   actor、survived/missing/unexecuted targeted mutant、scope overrun 未升级、陈旧 design 或
+   implementation review、篡改或陈旧 evidence/snapshot/attestation 逐类证明 fail closed。
+   测试不得执行 push、merge、deploy、凭据、网络、付费调用或被 observation 描述的动作。
+6. 实施说明必须记录任务 base/subject、分类、规格、双阶段审核、H1/H2 时序、复现命令、
+   targeted mutation receipt、verifier context、V2 evidence、限制和恢复方法。它必须明确 actor
+   label 不是外部身份认证，Hook parity 不扩展为跨平台 live Hook、所有客户端、自由 shell
+   解析、通用命令拦截或 OS sandbox。
+7. TASK-0025 必须按当前 active Policy 重新分类并取得 `REVIEW / V2`。四项
+   `acceptance_required`、`integration_required`、`targeted_mutation_required` 和
+   `independent_verifier_required` 必须保持 true；Implementer 与 Verifier actor 必须为
+   不同的非空字符串。
+8. 每个实际执行 V2 的 current subject 都必须先生成精确 action file，并取得用户单独的
+   single-use action approval。Action 只允许读取权威
+   `.ai/mutations/phase-02-critical-manifest.json`，按固定顺序运行五项 mutant，每项恰好一次
+   baseline detector 和一次 mutant detector；最多创建五个 task-owned 临时 worktree，沿用
+   runner 的既有 timeout 与必要 cleanup，只写 TASK-0025 本地 evidence/logs，不接受自由
+   argv、environment、manifest、operator、target 或结果输入。
+9. Action approval 必须绑定当前 task、DU、base、subject、frozen spec、Policy、
+   classification input、action SHA、过期时间和 `single_use: true`。首次 launch、失败或中断
+   均消费该批准；不得自动重跑、复用 TASK-0014/TASK-0015 的 mutation artifact，或把一个
+   subject 的 action/evidence 用于另一个 subject。任何第二次真实 collection 必须重新生成
+   action 并取得新的用户批准。Runner 的 task-owned cleanup 只是该有界事务的一部分，不是
+   通用 delete 权限。
+10. H1 五个非状态业务文件提交并 sync 后，先运行 focused tests 和完整 V2。独立 Verifier
+    生成 pre-implementation-review evidence；独立 implementation review 必须绑定同一
+    verification snapshot 并无未关闭 high/critical finding，再由同一 Verifier finalize，
+    形成 H1 final evidence。H1 evidence body 必须另存不可变 task-local snapshot，避免 H2
+    验证覆盖其引用。
+11. 只有 H1 current subject 的 final V2、五项 mutant 全 killed、
+    `unverified_scenarios: []` 与独立 implementation review 全部通过后，H2 才可修改两份
+    state 文件：将 13.2 置为 `completed`、`completed_steps: [1,2,3,4,5]`，13.3 保持
+    `pending`，Chapter 13 保持 `in_progress`，四个 exit checks 保持 `pending`；overall
+    completed 更新为 12 chapters、73 tasks、388 steps、20 exit checks，evidence items
+    更新为 17，tracking 指向 `chapter-13 / 13.3 / null`，只追加
+    `EVT-OVERALL-CH13-13.2-COMPLETE-001`，不得改写历史。
+12. H2 state 投影改变 subject 后，H1 action/evidence/review 只作为投影时序前提，不能充当
+    H2 current 通过。必须 sync 新 subject、生成新的 single-use action、重新取得用户 action
+    approval、重新执行完整 V2、独立 implementation review 与 finalize；随后才可请求 current
+    code approval 并运行只读 Gate。CI simulation 与 13.3 状态投影属于后续治理，不得在本任务
+    中提前宣称完成。
+
+## 非目标
+
+1. 不修改 `src/`、`.ai/policy/`、`.ai/schemas/`、`.ai/templates/`、现有 mutation
+   manifest、`tools/hooks/`、既有测试文件、README、CHANGELOG、operations 文档或 Chapter 12。
+2. 不实现或投影 13.3–13.6，不通过本任务完成任何 Chapter 13 exit check，不宣称 Phase 02
+   完成。README 当前关于 Chapter 13 的陈旧描述留给 13.6，不能越界顺手修正。
+3. 不实现 V3、安全扫描、故障注入、真实模型调用/路由、资源调度、DAG/跨主机编排、通用
+   mutation framework、自由 shell 解析、通用命令拦截或操作系统安全沙箱。
+4. 不修改 fixed manifest 的五个 mutation ID、target、operator、detector、expected outcome
+   或 runner 语义；新增测试只能消费公开事实，不能复制 Policy 决策表或形成 Gate 旁路。
+5. 不复用 TASK-0014、TASK-0015、TASK-0022 或 TASK-0024 的 classification、spec approval、
+   action approval、review、verifier context、mutation artifact、evidence、code approval 或
+   Gate 结论作为 TASK-0025 current 事实；历史材料仅可作为只读设计输入。
+6. 不执行未经单独批准的 targeted mutation，不执行 push、merge、deploy、delete、publish、
+   secret export、凭据访问、付费调用、外部模型或其他网络写入。
+
+## 验收条件
+
+1. 分类结果为当前 Policy 下的 `REVIEW / V2`，分类输入、Policy、base、冻结规格和 design
+   review context 哈希一致；用户 spec approval 只能在独立设计审核通过后产生。
+2. 业务 diff 始终是七文件 allowlist 的子集；H1 只含一个空 package marker、三个新测试和
+   实施说明，H2 只含两份 state 文件。默认 full pytest 必须能同时收集 acceptance 与
+   integration 的同名模块；`aiflow scope TASK-0025`、`git diff --check` 与 task contract
+   均通过。
+3. 新 acceptance、integration、E2E tests 全部离线且确定性通过；正向 scenario 证明同一
+   current task 的双审核、独立 verifier、十四项 V2 checks、mutation 和受限 parity 闭环，
+   所有规定负向 scenario 给出稳定拒绝。
+4. 每个 V2 subject 的权威 manifest 恰含 `MUT-V2-001`–`MUT-V2-005`，结果按 manifest
+   顺序全部为 `killed`，无 missing、duplicate、unknown、survived 或 unverified 结果；
+   artifact identity、摘要、日志引用和 snapshot 可由 public loader 重放。
+5. V2 的 14/14 required checks 通过，包括 V1 全集、acceptance、integration、
+   targeted_mutation 和 independent_verifier；全量 pytest、Ruff、format、mypy、coverage
+   XML 与 diff coverage 达到 Policy 阈值，`unverified_scenarios` 为空。
+6. Verifier actor 非空且不同于当前 implementation actor；verifier context 最小、不可变并
+   绑定 current repository/task/base/subject/spec/Policy/classification。相同/空 actor 在任何
+   runner 或 action 消费前失败。
+7. H1 final evidence、不可变 snapshot 与独立 implementation review 共同成为 H2 投影前提；
+   Chapter state 的 H1 evidence ref/hash 必须可共同复核，不能指向会被 H2 覆盖的
+   `evidence.json`。
+8. H2 的 13.2/13.3、completed counts、evidence items、tracking、history 与两份 state 文件
+   相互一致；H2 current subject 再次取得完整 V2、独立 implementation review、code approval
+   与 Gate 后才形成 merge readiness。
+9. 所有平台、Hook、shell、actor identity、task-local logs、未来 13.3/Phase 02 和外部动作
+   限制均保留，不以测试名称、自然语言或历史通过事实扩大声明。
+
+## 禁止动作
+
+禁止 push、merge、deploy、delete、package publish、secret export、凭据访问、付费或外部
+模型调用，以及任何未经 current single-use action approval 的 targeted mutation transaction。
+不得安装或执行 Hook，不得执行 observation 所描述的真实动作。软件安装仅在 required V2
+工具确实缺失、用户已有明确授权且不会修改依赖/锁文件/Policy/可重放环境时允许；否则先停止
+并重新治理。
+
+## 错误行为
+
+以下任一情况必须 fail closed：Implementer/Verifier actor 相同或为空；spec、Policy、
+classification、subject、review context、evidence、snapshot 或 attestation 陈旧/篡改；action
+缺失、歧义、过期、已消费或绑定不符；任一 mutant survived/missing/unexecuted/unknown；存在
+unverified scenario；diff coverage 低于阈值；范围越界未升级；Hook/CLI/CI 支持范围内相同事实
+产生不同 decision；试图复用旧 task/action/evidence；H1/H2 时序或 immutable snapshot 缺失。
+不得自动降为 V1、手写通过、重复消费 action、失败后自动重跑或以 README/文档声明代替证据。
+
+## 回滚
+
+空 package marker、三个新增测试、实施说明和状态投影均通过后续受治理提交反向修改；历史
+TASK-0025 task、spec、
+classification、review、approval、action、mutation receipt、verifier context、evidence 和 event
+ledger 保持追加式，不删除或重写。若 H1 未通过，13.2 保持 pending；若 H2 失败，保留 H1
+evidence/review 作为历史事实但不形成 current readiness，并通过新的受治理 subject 前向修正。

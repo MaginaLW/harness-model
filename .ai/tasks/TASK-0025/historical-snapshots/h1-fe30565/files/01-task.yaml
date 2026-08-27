@@ -1,0 +1,117 @@
+allowed_scope:
+- tests/acceptance/__init__.py
+- tests/acceptance/test_phase_02_self_hosting.py
+- tests/integration/test_phase_02_self_hosting.py
+- tests/e2e/test_phase_02_self_hosting_scenario.py
+- docs/implementation/chapter-13-review-self-hosting.md
+- docs/superpowers/state/chapters/chapter-13.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: 7c0bfd807954df8be934d99c7e0a565e4fa2ddcb
+branch: main
+created_at: '2026-08-27T11:32:32Z'
+current_state: WAITING_FOR_FINAL_REVIEW
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects:
+  - create_and_cleanup_task_owned_temporary_worktrees
+  - write_task_local_mutation_evidence_and_logs
+  goal: 完成 Chapter 13.2 的真实隔离本地 REVIEW + V2 自举试点：新增离线 acceptance、integration 与 E2E
+    覆盖，证明双阶段审核、独立 verifier、targeted mutation 与受限 Hook/CLI/CI parity 可由当前任务重放，并形成实施说明；仅在单独批准的一次受控
+    mutation transaction 后生成当前 subject 的 V2 evidence，不宣称 13.3、Chapter 13 或 Phase 02
+    完成。
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  - documentation
+  impact_scope:
+  - tests/acceptance/__init__.py
+  - tests/acceptance/test_phase_02_self_hosting.py
+  - tests/integration/test_phase_02_self_hosting.py
+  - tests/e2e/test_phase_02_self_hosting_scenario.py
+  - docs/implementation/chapter-13-review-self-hosting.md
+  - docs/superpowers/state/chapters/chapter-13.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/state/chapters/chapter-13.yaml
+  - docs/superpowers/state/overall.yaml
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - .ai/tasks/TASK-0024/spec.md
+  - .ai/tasks/TASK-0024/classification.json
+  - .ai/tasks/TASK-0024/evidence.json
+  - .ai/tasks/TASK-0024/reviews/REV-0042-r0001.json
+  - .ai/policy/
+  - .ai/schemas/
+  - .ai/mutations/phase-02-critical-manifest.json
+  - src/aiflow/
+  - tools/hooks/
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Reclassify under current Policy, freeze a new specification, complete independent
+    design review, and obtain version-bound spec approval before implementation
+  - Add one narrow acceptance package marker plus offline acceptance and integration
+    coverage for current REVIEW/V2 bindings, verifier independence, required checks,
+    and supported Hook/CLI/CI parity
+  - Add end-to-end self-hosting success and fail-closed scenarios for actor, mutation,
+    scope, stale review, and tampered evidence facts
+  - Record a bounded implementation guide and verify the H1 subject with one separately
+    approved targeted-mutation transaction and an independent verifier
+  - Preserve immutable H1 evidence, then project only 13.2 complete with 13.3 pending;
+    rebind and reverify the H2 subject under a new single-use action approval
+  protections:
+    dry_run: false
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0025
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Focused acceptance, integration, and E2E self-hosting tests covering success and
+    deterministic fail-closed paths
+  - Policy-selected V2 verification with all fourteen required checks and no unverified
+    scenarios
+  - Fixed-manifest targeted mutation with all five mutants killed and immutable task-local
+    evidence
+  - Independent verifier context plus current design and implementation reviews
+  - YAML state/count/reference checks, Git scope validation, and full regression
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+- external_model_call
+frozen_spec_sha256: 625ac850cfbfedc05c5af636b4f274faacc8325aa806caee7f47f9ec16bb5a4c
+goal: 完成 Chapter 13.2 的真实隔离本地 REVIEW + V2 自举试点：新增离线 acceptance、integration 与 E2E 覆盖，证明双阶段审核、独立
+  verifier、targeted mutation 与受限 Hook/CLI/CI parity 可由当前任务重放，并形成实施说明；仅在单独批准的一次受控 mutation
+  transaction 后生成当前 subject 的 V2 evidence，不宣称 13.3、Chapter 13 或 Phase 02 完成。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: C:/Users/Admin/AppData/Local/Temp/aiflow-task0025-1787830292667
+schema_version: '1.0'
+spec_frozen_at: '2026-08-27T11:43:58Z'
+subject_commit: fe30565e669aa047088b0c25c085effeb2b4bdbc
+task_id: TASK-0025
+updated_at: '2026-08-27T12:41:05Z'
+worktree_dirty: false
+worktree_dirty_paths: []

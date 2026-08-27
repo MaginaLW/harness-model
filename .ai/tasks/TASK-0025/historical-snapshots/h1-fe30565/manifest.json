@@ -1,0 +1,380 @@
+{
+  "artifact_original_ref": ".ai/tasks/TASK-0025/logs/MUTRUN-20260827T123628Z-5dec129d8c0ead69/targeted-mutation/evidence.json",
+  "bundle_digest_algorithm": "sha256(canonical-json-without-bundle_sha256)",
+  "bundle_sha256": "4076b379a431e45a831a591efd2586492b955acf3c6e9b237232ccb720c26580",
+  "design_review": {
+    "context_sha256": "1833cc40e1f5a4bdd5e7ce59e2233965325dce8b30ecf1c94ddfa45586b790e7",
+    "outcome": "APPROVE",
+    "review_id": "REV-0044",
+    "revision": 2
+  },
+  "files": [
+    {
+      "bundle_path": "files/01-task.yaml",
+      "sha256": "74dc529bc0c803ea8a09dd0b31647294369dd6cea854fd17a7c84352d930f8ed",
+      "target_path": ".ai/tasks/TASK-0025/task.yaml"
+    },
+    {
+      "bundle_path": "files/02-spec.md",
+      "sha256": "625ac850cfbfedc05c5af636b4f274faacc8325aa806caee7f47f9ec16bb5a4c",
+      "target_path": ".ai/tasks/TASK-0025/spec.md"
+    },
+    {
+      "bundle_path": "files/03-events.jsonl",
+      "sha256": "051bc05678a9f20e7f34e96ac3e854e080ce7ea5aad6237589f7cc12a1b04958",
+      "target_path": ".ai/tasks/TASK-0025/events.jsonl"
+    },
+    {
+      "bundle_path": "files/04-classification.json",
+      "sha256": "f22683dcbacd73792c8b9abb7c55d8b7a8ce46256fd31a98feb56b37180b1ed9",
+      "target_path": ".ai/tasks/TASK-0025/classification.json"
+    },
+    {
+      "bundle_path": "files/05-approvals.json",
+      "sha256": "e453574eca2e15af2d96cb89bda59ced3ecf21563b0ea24150f186534146f103",
+      "target_path": ".ai/tasks/TASK-0025/approvals.json"
+    },
+    {
+      "bundle_path": "files/06-action.json",
+      "sha256": "1fb3a798ebda0a5fc6a3364b0a9883b6d9cac75da7c5106352c4ba5df5b4f608",
+      "target_path": ".ai/tasks/TASK-0025/action-v2-targeted-mutation-fe30565e.json"
+    },
+    {
+      "bundle_path": "files/07-action-receipt.md",
+      "sha256": "961f3acc7baced27be83045cd52dc7e83263c22e14aeaea2b94c8614938c4822",
+      "target_path": ".ai/tasks/TASK-0025/action-use-9740af8fafb53760e829f94fd3c34d252a742fd42f2928e16272f32ee91d2cfa.md"
+    },
+    {
+      "bundle_path": "files/08-pre-evidence.json",
+      "sha256": "e23cdf008717a0c5bda8c025456fd94115f69307d1ec26af87a22406f2cd3025",
+      "target_path": ".ai/tasks/TASK-0025/evidence.json"
+    },
+    {
+      "bundle_path": "files/09-verifier-context.json",
+      "sha256": "717f342a4aa3838c0888c01c9c65a8d68e3a0e60cb5fe3e7c1c26b9f46cb126e",
+      "target_path": ".ai/tasks/TASK-0025/verifier-contexts/0ecbe5fba9605ed6906e9bab2ab939e4bd004584f139d49da31ac4807673e8fd.json"
+    },
+    {
+      "bundle_path": "files/10-design-context.json",
+      "sha256": "eaf6e66c808d1417e7d9cdea892511ac25f5f71babff576fffa482f2b2343a3e",
+      "target_path": ".ai/tasks/TASK-0025/review-contexts/1833cc40e1f5a4bdd5e7ce59e2233965325dce8b30ecf1c94ddfa45586b790e7.json"
+    },
+    {
+      "bundle_path": "files/11-implementation-context.json",
+      "sha256": "1261866199f0ef9b1da0f6c5a31738b16bb13b80d1ef4bb1d1465e176732286d",
+      "target_path": ".ai/tasks/TASK-0025/review-contexts/69d6b4302b69e7ee3d003aadae58a9a90b3a91c6c43babc1ddb4b97e7fd158ca.json"
+    },
+    {
+      "bundle_path": "files/12-design-review.json",
+      "sha256": "67bbd90401cb59237534ae51479dd0e570a31688560a0fd2e18344cb9d4ec735",
+      "target_path": ".ai/tasks/TASK-0025/reviews/REV-0044-r0002.json"
+    },
+    {
+      "bundle_path": "files/13-implementation-review.json",
+      "sha256": "b78a3a08d44a2333f1c33b6bc7a52620cf6dcf6e0960abf5c5671cda30cc126c",
+      "target_path": ".ai/tasks/TASK-0025/reviews/REV-0045-r0001.json"
+    },
+    {
+      "bundle_path": "files/14-run-evidence.json",
+      "sha256": "e23cdf008717a0c5bda8c025456fd94115f69307d1ec26af87a22406f2cd3025",
+      "target_path": ".ai/tasks/TASK-0025/logs/run-20260827T121844803688Z/evidence.json"
+    },
+    {
+      "bundle_path": "files/15-mutation-evidence.json",
+      "sha256": "7bddfb117059ea53626ee17443900212737ce6dd8d025d14c4f3e8c536b5c735",
+      "target_path": ".ai/tasks/TASK-0025/logs/MUTRUN-20260827T123628Z-5dec129d8c0ead69/targeted-mutation/evidence.json"
+    },
+    {
+      "bundle_path": "files/16-mut-001.json",
+      "sha256": "de8cc1d04aa6fd18fd5de3fb2acc0903b19c79abe3fc525ac25fb576e3518e61",
+      "target_path": ".ai/tasks/TASK-0025/logs/MUTRUN-20260827T123628Z-5dec129d8c0ead69/targeted-mutation/logs/MUT-V2-001.json"
+    },
+    {
+      "bundle_path": "files/17-mut-002.json",
+      "sha256": "01ae9688f234f636956462299ee3e1baf27e3d3b0f39120b8704ecc2ae9a5ad8",
+      "target_path": ".ai/tasks/TASK-0025/logs/MUTRUN-20260827T123628Z-5dec129d8c0ead69/targeted-mutation/logs/MUT-V2-002.json"
+    },
+    {
+      "bundle_path": "files/18-mut-003.json",
+      "sha256": "740d4780ca38bda99751c0f7dc8ee48ed7a73762c8407460ccafb797fefaa924",
+      "target_path": ".ai/tasks/TASK-0025/logs/MUTRUN-20260827T123628Z-5dec129d8c0ead69/targeted-mutation/logs/MUT-V2-003.json"
+    },
+    {
+      "bundle_path": "files/19-mut-004.json",
+      "sha256": "98224d8c882743783f69e7c4ef6c8f07e7db961592febaea6cdf5769327684a2",
+      "target_path": ".ai/tasks/TASK-0025/logs/MUTRUN-20260827T123628Z-5dec129d8c0ead69/targeted-mutation/logs/MUT-V2-004.json"
+    },
+    {
+      "bundle_path": "files/20-mut-005.json",
+      "sha256": "91e8cfe290d64247e03b36200a8cc3d9db736412dc76ab33c119d29755cb0dc6",
+      "target_path": ".ai/tasks/TASK-0025/logs/MUTRUN-20260827T123628Z-5dec129d8c0ead69/targeted-mutation/logs/MUT-V2-005.json"
+    }
+  ],
+  "implementation_review": {
+    "context_sha256": "69d6b4302b69e7ee3d003aadae58a9a90b3a91c6c43babc1ddb4b97e7fd158ca",
+    "outcome": "REQUEST_CHANGES",
+    "review_id": "REV-0045",
+    "revision": 1
+  },
+  "mode": "historical_non_current",
+  "mutation_evidence_sha256": "eea607ff7d518f9f72118398396c6e16da193de7fa94987ebd54c749935a6016",
+  "non_task_inputs": [
+    {
+      "path": ".ai/mutations/phase-02-critical-manifest.json",
+      "sha256": "c7df2f0549822ed527d5712acb425adbc9dab90c72016abb482c1ef18e8bf50a"
+    },
+    {
+      "path": ".ai/policy/hard-rules.yaml",
+      "sha256": "707ce48902f62a3080e91cf9c91b27b09e70367773fcf49ebc1162a414992b9e"
+    },
+    {
+      "path": ".ai/policy/permissions.yaml",
+      "sha256": "5f394f39e070c33bc7a405a4a3f497f241843839a274a9f2c479da3262de43ea"
+    },
+    {
+      "path": ".ai/policy/routing.yaml",
+      "sha256": "14da7a098d1638d9aa4f38325371d081e71c9f199a9eebf123352a536e8b232d"
+    },
+    {
+      "path": ".ai/policy/verification-levels.yaml",
+      "sha256": "741b88daa6808a0ef7086f15e9491f1c681b623aeb2b3312ce88f3bc6b90e5eb"
+    },
+    {
+      "path": ".ai/repository-id",
+      "sha256": "98b0d92de5255a679695f675c0647b560dc78b46e38246d25a3644a0de05813b"
+    },
+    {
+      "path": ".ai/schemas/approval.schema.json",
+      "sha256": "a6058a832e0aaf033b765c477434a156e39fa8da2a686305ea2dabe882e866cb"
+    },
+    {
+      "path": ".ai/schemas/ask-options.schema.json",
+      "sha256": "fa7264d51c231939aeeb54ee45f4fda04332f432c5dea470bf8628c8424f7c19"
+    },
+    {
+      "path": ".ai/schemas/classification.schema.json",
+      "sha256": "a19fb79105dafe97c7165eae6b001be2ff7e378c7d0637b51d0a11a79db9b778"
+    },
+    {
+      "path": ".ai/schemas/decision-unit.schema.json",
+      "sha256": "f351733fc71fd15953612c528ae8d87cb923fe97d21597d8d5bab55b708420e2"
+    },
+    {
+      "path": ".ai/schemas/event.schema.json",
+      "sha256": "f2d1b85f3a7dbdf5b47b1775ff0ec138013c1a2f0c244105abcd03d846d337e7"
+    },
+    {
+      "path": ".ai/schemas/evidence.schema.json",
+      "sha256": "20adf72754792b1096855e9ab37b8085b738713da0835c13c688fb9e2f19ab31"
+    },
+    {
+      "path": ".ai/schemas/mutation-evidence.schema.json",
+      "sha256": "08797ccb889a1d5d20b6c93d41ae423a6a5a17fed2ea462b025aa8bf7edac613"
+    },
+    {
+      "path": ".ai/schemas/mutation-manifest.schema.json",
+      "sha256": "71ba3d792bf27ef7ac984e949a2f143c628c1f61cd0f1d9de5d9ad031857dcfb"
+    },
+    {
+      "path": ".ai/schemas/observation-decision.schema.json",
+      "sha256": "fdb9aaae1e319d1c73c5f48ea919b8f23dd83b5db54a5f6d5db5532adc93944a"
+    },
+    {
+      "path": ".ai/schemas/observation.schema.json",
+      "sha256": "c1c7772d0e960e52a56bc3f40066b060cbddbba2a72edbfa06a624b397e06c97"
+    },
+    {
+      "path": ".ai/schemas/policy.schema.json",
+      "sha256": "736cb5ae74003cf9cd6e8fbc783e4924dd37e7ac337079f48225e3158e5159d1"
+    },
+    {
+      "path": ".ai/schemas/review-context.schema.json",
+      "sha256": "d0f7b2364ace578a10613d5d63a4f934dfa632152033c11f9fbd616aa03982d0"
+    },
+    {
+      "path": ".ai/schemas/review-record.schema.json",
+      "sha256": "6fc2377ac67d57ab4679a9846913090858a8033028a428c4c9936817ede4a3d1"
+    },
+    {
+      "path": ".ai/schemas/task.schema.json",
+      "sha256": "a2df34b56b8dc5b4ec549a6708bf28ef285cd2eb9f604c77da39df07a886c947"
+    },
+    {
+      "path": ".ai/schemas/verifier-context.schema.json",
+      "sha256": "1918b7581cb88de9d84e136dc3854b4637342776655cd053c53076d692d5f22f"
+    },
+    {
+      "path": "src/aiflow/__init__.py",
+      "sha256": "e9b6196b865f3d76b08c2d4616076017ae4f6271b5f639cced45a23c7d17a48d"
+    },
+    {
+      "path": "src/aiflow/__main__.py",
+      "sha256": "7bdcd721df2e73705c5d4566f4e866f29334efc8a4a264cf781f7edf0c315d1c"
+    },
+    {
+      "path": "src/aiflow/approval.py",
+      "sha256": "4606d71d4917c0ec0470aa2472dcd54b86f637a2fb1541cc08ea9a2f060fc531"
+    },
+    {
+      "path": "src/aiflow/ask_service.py",
+      "sha256": "af65c8d75e5c68587718ba5282046b653600bc14fc75b73282cccb0e5f709d79"
+    },
+    {
+      "path": "src/aiflow/classification_service.py",
+      "sha256": "e62c952bbb1e8f1b353a910971b6018f00964098e971fbb2ede5e7449c3b3f60"
+    },
+    {
+      "path": "src/aiflow/cli.py",
+      "sha256": "b18908cb83e12ee5a7c5567d36c59a815a2ed3e08ac5073ce31c64aaa251a31a"
+    },
+    {
+      "path": "src/aiflow/contracts.py",
+      "sha256": "30afc6e4fc77a7d75c363ab1731c8acf5eac7e2fdc79141f786ea834d0dad666"
+    },
+    {
+      "path": "src/aiflow/decision_units.py",
+      "sha256": "6c7a7a4b6e3dfcd0ea9143183121af0285f26f80bda4882ba010de1f94619432"
+    },
+    {
+      "path": "src/aiflow/errors.py",
+      "sha256": "96bced20bc6991133631246f15d6b49d5999697c893970a32b3b1268227a1b51"
+    },
+    {
+      "path": "src/aiflow/escalation.py",
+      "sha256": "1663021a7ce98a4ee9945d0d4a9f337bc9f8937d336978bae5c871280df813ee"
+    },
+    {
+      "path": "src/aiflow/evidence.py",
+      "sha256": "562a09234b4af29c741bf52c15c55dd63d289c753ebd27b55dfbc62159fb314c"
+    },
+    {
+      "path": "src/aiflow/freshness.py",
+      "sha256": "a74f93fc9c729695f666c20c50475e4a6622d2d443fceaf2c7329cc73616b6d4"
+    },
+    {
+      "path": "src/aiflow/gate.py",
+      "sha256": "f8a694bd9d6260b5f78f9b0578001a5c5a97bfb5b65c90b38be6a42a8b7bb36a"
+    },
+    {
+      "path": "src/aiflow/git_context.py",
+      "sha256": "9e80e95a27d5c2aa0bef4d4b03a015bd1cdd6c8f9fec7158e65b72c64a8ae7bf"
+    },
+    {
+      "path": "src/aiflow/mutation_evidence.py",
+      "sha256": "2532ca4444c5b5120c890a751d1eb993bd2d6d6fd613bb03438bf0d92b458020"
+    },
+    {
+      "path": "src/aiflow/mutation_manifest.py",
+      "sha256": "554478860210d00a18305446ba31fcf6ca9b223b646ed62d0935d58e4b6e9e86"
+    },
+    {
+      "path": "src/aiflow/mutation_runner.py",
+      "sha256": "8fac4eda3555d025b4331c4abaf624d328284910d5071066e43a00debdae31dd"
+    },
+    {
+      "path": "src/aiflow/observation.py",
+      "sha256": "643c84b09b203c40ce9c0abd3a33111afdc57d4ed5faa7124498666b779b682a"
+    },
+    {
+      "path": "src/aiflow/observation_adapter.py",
+      "sha256": "cee265b205ddd2559dde7c75abc562284accb0980657fe6b6301f00ddd3389b1"
+    },
+    {
+      "path": "src/aiflow/observation_decision.py",
+      "sha256": "88b432b2f95755e19f10e917b333bbf2487c97eecea1b8601f5b7e4dc7360b11"
+    },
+    {
+      "path": "src/aiflow/observation_service.py",
+      "sha256": "40e45410f127e6cefa7342a2e3c889da6cc997ffd443d8c3229ff73570887956"
+    },
+    {
+      "path": "src/aiflow/policy.py",
+      "sha256": "1c3571ad7ecc7de0a2369ef0798fd6679aa11a54148039f598d6874d0550f46a"
+    },
+    {
+      "path": "src/aiflow/predicates.py",
+      "sha256": "b82b8d388fe4fe88d96bd8c70cad14da71de19629d74eaa9a0803aa0b9631e5e"
+    },
+    {
+      "path": "src/aiflow/process_runner.py",
+      "sha256": "4c947ea4274a2b194194549a1014357b4c092555bfe7a663c2ea5ebacf40a162"
+    },
+    {
+      "path": "src/aiflow/redaction.py",
+      "sha256": "02df3c74f05c02fc02a5518bd130d4ad58c09566112e42358aef6da52a2b9a21"
+    },
+    {
+      "path": "src/aiflow/review.py",
+      "sha256": "896144c207c1bbc87ad5f6e6048173342641ead6445eb0e98ec99342e0d59575"
+    },
+    {
+      "path": "src/aiflow/review_service.py",
+      "sha256": "38906611a07a95fe3becde940eb8590bbe422c7e71fea664b9bbb534872a1988"
+    },
+    {
+      "path": "src/aiflow/routing.py",
+      "sha256": "a9e6685711d294f95ab8663b6c42b6443b26075c2c6db6b7282377172ca4242c"
+    },
+    {
+      "path": "src/aiflow/scenarios.py",
+      "sha256": "854051544202b7a860b86f6bd4a567c2dc259020fc322180a6884c267f24594c"
+    },
+    {
+      "path": "src/aiflow/scope.py",
+      "sha256": "2cb6cc562790c46eec1552c82a3e9755223f35c47bfdec0b2be57e68c9aa0018"
+    },
+    {
+      "path": "src/aiflow/specification.py",
+      "sha256": "f7dac0b71b4251541c5beebf26f4829a7f464750f6954faf4bb4860023dea5ee"
+    },
+    {
+      "path": "src/aiflow/state.py",
+      "sha256": "5f34618560f5a0a1093427efabf9ac3be9fea0bc0dac176ff9355ae92e765697"
+    },
+    {
+      "path": "src/aiflow/status_service.py",
+      "sha256": "7f6c94408edc03e10df91c106fe1ab5863ca4a38bcd06f9eaf11061ec900a6e8"
+    },
+    {
+      "path": "src/aiflow/storage.py",
+      "sha256": "3628a8c91aea011d1827b506ff8540b60c2ce65aaea165322b662166da859d14"
+    },
+    {
+      "path": "src/aiflow/task_service.py",
+      "sha256": "6766bf6d7c8945ab45652266ef5c7e65685cacd69d669066f315993903bad6cd"
+    },
+    {
+      "path": "src/aiflow/verification.py",
+      "sha256": "e505a8dd39487001fcb16feeef0c982ef8afa87d32f51ac6af806ba9dde5f41f"
+    },
+    {
+      "path": "src/aiflow/verification_checks.py",
+      "sha256": "858b25215d2783b9d9f1c086f4be0d87f5756e82303e3adfa7a8270b8182d894"
+    },
+    {
+      "path": "src/aiflow/verification_level.py",
+      "sha256": "e06d0834f88649912bd0f2a1ffdd2512d559b7227d981610c0856167d244c778"
+    },
+    {
+      "path": "src/aiflow/verification_service.py",
+      "sha256": "e17c57984d137d3a94d3ddcebaaedef5de59623792447d5ddc4cd72ddafc05b6"
+    },
+    {
+      "path": "src/aiflow/verifier_service.py",
+      "sha256": "ce68a3affe88dd624521239973b548921e62cdaaa7bb59f4d0855cc609044e3f"
+    },
+    {
+      "path": "src/aiflow/workflow.py",
+      "sha256": "a009164db71438eea90d5c617dcef6c4f1eeb0508193b12ccd68b1922ff1388e"
+    }
+  ],
+  "non_task_reuse_rule": "A pytest-owned local clone must place its local main branch at source_governance_commit, verify every non_task_inputs digest there, then overlay only these bundle files at their target paths. No current outer TASK-0025 task-local file may be mixed into the replay.",
+  "pre_evidence_original_ref": ".ai/tasks/TASK-0025/logs/run-20260827T121844803688Z/evidence.json",
+  "schema_version": "1.0",
+  "snapshot_id": "TASK-0025-H1-fe30565-historical-replay",
+  "source_branch": "main",
+  "source_governance_commit": "ef1f32d42b935ef2f7d8acfdc805a95399b33317",
+  "source_subject_commit": "fe30565e669aa047088b0c25c085effeb2b4bdbc",
+  "task_id": "TASK-0025",
+  "verification_snapshot_sha256": "4ac2f36d103f05d6a3c9b4e3666b8b0dfc81503d3affdc0b18827e93858994b2"
+}

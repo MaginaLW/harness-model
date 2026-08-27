@@ -1,0 +1,17 @@
+{
+  "baseline_exit_code": 0,
+  "duration_ms": 766,
+  "expected_detector": "tests/unit/test_evidence.py::test_v2_snapshot_rejects_mutation_of_bound_verification_facts",
+  "expected_outcome": "killed",
+  "main_tree_unchanged": true,
+  "mutant_exit_code": 1,
+  "mutation_id": "MUT-V2-005",
+  "operator": "ignore_snapshot_mismatch",
+  "outcome": "killed",
+  "reason_code": null,
+  "run_reason_code": null,
+  "safeguard_id": "V2_SNAPSHOT_BINDS_VERIFICATION_FACTS",
+  "target": "src/aiflow/evidence.py",
+  "target_symbol": "validate_v2_snapshot",
+  "timed_out": false
+}

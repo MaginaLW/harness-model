@@ -1,0 +1,17 @@
+{
+  "baseline_exit_code": 0,
+  "duration_ms": 923,
+  "expected_detector": "tests/integration/test_mutation_manifest_contract.py::test_v2_code_approval_rejects_nonpassing_required_check",
+  "expected_outcome": "killed",
+  "main_tree_unchanged": true,
+  "mutant_exit_code": 1,
+  "mutation_id": "MUT-V2-003",
+  "operator": "allow_nonpassing_required_check",
+  "outcome": "killed",
+  "reason_code": null,
+  "run_reason_code": null,
+  "safeguard_id": "V2_CODE_APPROVAL_REQUIRES_PASSING_EVIDENCE",
+  "target": "src/aiflow/approval.py",
+  "target_symbol": "_v2_evidence_current",
+  "timed_out": false
+}
