@@ -32,10 +32,24 @@ tasks:
     blockers: []
   - id: "13.2"
     title: "在隔离本地 worktree 执行设计审核、实现和独立 V2 验证"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - ".ai/tasks/TASK-0025/spec.md"
+      - ".ai/tasks/TASK-0025/classification.json"
+      - ".ai/tasks/TASK-0025/evidence-h1-f08b0b8c.json"
+      - ".ai/tasks/TASK-0025/verifier-contexts/918aa3884f12587602c12ca394c4848114d4f76010b6e75059a7daa509a6b9f9.json"
+      - ".ai/tasks/TASK-0025/reviews/REV-0046-r0001.json"
+      - ".ai/tasks/TASK-0025/reviews/REV-0047-r0001.json"
+      - ".ai/tasks/TASK-0025/action-use-f743b0607e76d4c2dde436d9029919936c0806785320a3bb823336f876e06aa6.md"
+      - "tests/acceptance/test_phase_02_self_hosting.py"
+      - "tests/integration/test_phase_02_self_hosting.py"
+      - "tests/e2e/test_phase_02_self_hosting_scenario.py"
+      - "docs/implementation/chapter-13-review-self-hosting.md"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
     blockers: []
   - id: "13.3"
     title: "执行实现审核、code approval、CI 模拟和 Gate"
@@ -168,5 +182,46 @@ chapter_evidence:
       diff_coverage: "docs/state-only sentinel passed; no numeric coverage claim"
     scope: "Only Chapter 13 pending state, overall initialization and the non-authorizing future 13.2 envelope."
     limitation: "This evidence completes only 13.1. It does not authorize or prove 13.2, REVIEW/V2 self-hosting, CI/Gate, cross-platform live Hooks, model routing, resource scheduling or external actions. The H2 projection subject still requires fresh V1, independent implementation review, code approval and Gate."
+  - id: "EVD-CH13-13.2-001"
+    kind: "task_completion_projection"
+    task_id: "TASK-0025"
+    route: "REVIEW"
+    verification_level: "V2"
+    classification_input_sha256: "2d6cc68d05c4b89d0749700f71ddd98c1c3336cf7d227d59425af802c33e4bd4"
+    spec_sha256: "04f951e922a1183b750111b101b9e47532c9bd9261225c289e6faa5237262318"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    implementation_subject_commit: "f08b0b8cfc3c6b3f81ff4ddba0dc68cb6b2b3694"
+    implementation_subject_role: "H1 non-state implementation verified before the H2 completion projection; it is a temporal prerequisite, not current H2 evidence"
+    verification_evidence_ref: ".ai/tasks/TASK-0025/evidence-h1-f08b0b8c.json"
+    verification_evidence_file_sha256: "cb1f168efe10da2e20e3a9afa0d8f7618adffb399be3184ddbb0b0997b101c94"
+    verification_snapshot_sha256: "8457ca7c96c9d1179644f8b336e4d5332af109105b40650da6cf09b7f2f92e05"
+    verifier_context_ref: ".ai/tasks/TASK-0025/verifier-contexts/918aa3884f12587602c12ca394c4848114d4f76010b6e75059a7daa509a6b9f9.json"
+    verifier_context_sha256: "918aa3884f12587602c12ca394c4848114d4f76010b6e75059a7daa509a6b9f9"
+    verifier_context_file_sha256: "65dba274d54d84ec5504f04b55491e0595c4c6e6f50ad7c916144a7ca7356894"
+    verifier_actor: "/root/task25_h1_verifier_r2"
+    design_review_ref: ".ai/tasks/TASK-0025/reviews/REV-0046-r0001.json"
+    design_review_file_sha256: "1a202e89f9b490628f89fc2bfdf9119ad51c4dadcea6c9d68eb0311f2ae719e9"
+    design_review_context_sha256: "cbdf00194a21d792a13f7b14c75298b1cf1bff67a479feabe5a413c1876dc599"
+    implementation_review_ref: ".ai/tasks/TASK-0025/reviews/REV-0047-r0001.json"
+    implementation_review_file_sha256: "af105b55c6371c4e3ae275ff9e5e86017917dfc505c4a6fb2d5e1e92424431b2"
+    implementation_review_context_sha256: "0a3c60fc9a5f675317a9d4ede180b3a72a6b0fa556bd7b12fdb2a3bcec360472"
+    implementation_review_outcome: "APPROVE"
+    targeted_mutation:
+      action_sha256: "f743b0607e76d4c2dde436d9029919936c0806785320a3bb823336f876e06aa6"
+      receipt_ref: ".ai/tasks/TASK-0025/action-use-f743b0607e76d4c2dde436d9029919936c0806785320a3bb823336f876e06aa6.md"
+      receipt_file_sha256: "1b0b92d0de923e9cf7cb7b5c767fffda57963734c940c2ae1a8ef24ae30c5c31"
+      mutation_evidence_sha256: "23de7a2a1eaadef317cb1da3fdfae3eaeb21cef437e67d15818388c5d4f5600b"
+      killed_mutation_ids: ["MUT-V2-001", "MUT-V2-002", "MUT-V2-003", "MUT-V2-004", "MUT-V2-005"]
+      uncovered_mutation_ids: []
+    verification:
+      conclusion: "passed"
+      required_checks: 14
+      passed_required_checks: 14
+      unit_tests: "1079 passed, 3 existing Windows symlink skips"
+      regression_tests: "1527 passed, 4 existing Windows symlink skips"
+      unverified_scenarios: []
+    scope: "Completes only Chapter 13 task 13.2 from the corrected H1 REVIEW/V2 implementation, immutable evidence snapshot and independent implementation review."
+    limitation: "13.3, all four Chapter 13 exit checks, Chapter 13 completion, Phase 02 completion, CI simulation, code approval, Gate and every external action remain unproven or unauthorized. Because this H2 projection changes the subject, its current V2 action, evidence, implementation review, code approval and Gate must all be fresh; no H1 action, evidence or review is reusable."
 
 blockers: []
