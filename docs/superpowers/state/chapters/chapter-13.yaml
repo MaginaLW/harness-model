@@ -4,7 +4,7 @@ chapter:
   id: "chapter-13"
   number: 13
   title: "自举 REVIEW 试点与阶段二基线"
-  status: "pending"
+  status: "in_progress"
   dependency: "chapter-12 completed"
   tasks_total: 6
   steps_total: 30
@@ -17,10 +17,18 @@ source:
 tasks:
   - id: "13.1"
     title: "冻结当前仓库跨模块 REVIEW 自举规格和允许范围"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - ".ai/tasks/TASK-0024/spec.md"
+      - ".ai/tasks/TASK-0024/classification.json"
+      - ".ai/tasks/TASK-0024/reviews/REV-0039-r0001.json"
+      - ".ai/tasks/TASK-0024/evidence.json"
+      - ".ai/tasks/TASK-0024/reviews/REV-0040-r0001.json"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
     blockers: []
   - id: "13.2"
     title: "在隔离本地 worktree 执行设计审核、实现和独立 V2 验证"
@@ -134,6 +142,31 @@ self_hosting_envelope:
     - "Existing Hook evidence does not prove cross-platform live Hooks, every client, free-shell parsing or an OS sandbox."
     - "The candidate write scope is not reusable approval; the future task must bind its own current facts."
 
-chapter_evidence: []
+chapter_evidence:
+  - id: "EVD-CH13-13.1-001"
+    kind: "task_completion_projection"
+    task_id: "TASK-0024"
+    route: "REVIEW"
+    verification_level: "V1"
+    classification_input_sha256: "5519315d67bb37ca1ab08d23910670e5d7177822eaf5ce526fa8b7f67ceb10e9"
+    spec_sha256: "57d8f40d00165035dad74f0603299a2c77fd8b01450516096867af978dd9e263"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    implementation_subject_commit: "af180adb697b560afa6dfae30e404f7bc6125c0e"
+    implementation_subject_role: "H1 pending-state implementation verified before the H2 completion projection"
+    verification_evidence_ref: ".ai/tasks/TASK-0024/evidence.json"
+    verification_evidence_sha256: "b4d2bb8789e8e0160bffba5bd4188d0ed526ec52691a875cdb831a189ac6a850"
+    design_review_ref: ".ai/tasks/TASK-0024/reviews/REV-0039-r0001.json"
+    design_review_context_sha256: "21b0aaaf85a79c1be0f62df35942ad2dd33e39c50f3a7b54693799cf262ee9f4"
+    implementation_review_ref: ".ai/tasks/TASK-0024/reviews/REV-0040-r0001.json"
+    implementation_review_context_sha256: "28174b3e7bd6c5e1b7b0424f4b560e4943f8006a3ce4da2b08787ffabdc2031e"
+    verification:
+      required_checks: "10/10 passed"
+      unit_tests: "1079 passed, 3 existing Windows symlink skips"
+      regression_tests: "1507 passed, 4 existing Windows symlink skips"
+      unverified_scenarios: []
+      diff_coverage: "docs/state-only sentinel passed; no numeric coverage claim"
+    scope: "Only Chapter 13 pending state, overall initialization and the non-authorizing future 13.2 envelope."
+    limitation: "This evidence completes only 13.1. It does not authorize or prove 13.2, REVIEW/V2 self-hosting, CI/Gate, cross-platform live Hooks, model routing, resource scheduling or external actions. The H2 projection subject still requires fresh V1, independent implementation review, code approval and Gate."
 
 blockers: []
