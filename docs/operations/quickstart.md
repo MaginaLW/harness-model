@@ -100,6 +100,22 @@ python -m aiflow gate <TASK-ID> --format json
 python -m aiflow gate <TASK-ID> --format json
 ```
 
+## 只读 observation 示例
+
+`observe` 的输入必须是已经绑定到当前 task、base、subject 与 Policy 的事实；只读 evaluator
+还会核对当前 repository/branch/HEAD/ancestry、classification freshness、route/V 与 task state，
+因此该输入必须与当前版本一致。新建的空演示任务不能被伪装为可成功观察的输入。已有完整绑定的
+任务可用本地 UTF-8 JSON object 和 `dry-run` 重放只读决策：
+
+```sh
+python -m aiflow observe <TASK-ID> --input <CURRENT-OBSERVATION.json> --mode dry-run
+```
+
+`dry-run` 只接受 `source: "cli"` 的输入且不接受 `--actor`，对完整 task 目录零写。有效的
+observation 仍会以 exit 2 返回 `execution_allowed: false`：这是有效、可审计但**非授权**的
+结论，不会执行或允许所描述的动作。输入、contract 或 binding 错误返回 exit 1，必须先修复
+当前事实，不能借 exit code 或新建空任务绕过它。
+
 ## 继续实际任务前
 
 用 `spec.md` 冻结可执行规格，然后按 route 执行 ASK/REVIEW 决定或批准，再运行 `begin`、实施、`sync`、`verify` 和 Gate。所有命令都以 `python -m aiflow ...` 为权威入口；未获单独批准时不执行 push、merge、deploy、delete、凭据或付费外部调用。
@@ -125,11 +141,15 @@ python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "impl
 
 `review record` 不覆盖历史；需关闭发现时使用 `review resolve` 追加 revision。code approval 仍同时要求现有八节 `review-package.md` 和通过的本地 evidence。
 
-## V2 独立 Verifier 与 Chapter 11.1（implemented / live V2 pending）
+## V2 独立 Verifier 与已完成的 Chapter 11
 
 V2 的 `--actor` 是 task-local 文本标签：会先 trim，再按精确字符串比较。它不代表人员、模型或外部身份认证。当前实现周期的 Implementer 取最近一次 `implementation_started` 或 `implementation_retried` 事件；V2 Verifier 必须提供非空且不同的标签。
 
-V2 采用以下绑定顺序：Verifier context → pre evidence → implementation review → `verify --finalize` → local code approval。context 只携带冻结规格、允许范围、diff 路径/numstat 摘要、验收条件、限制和复现 argv，不携带实现对话、内部推理、完整 patch、原始日志或凭据。
+V2 采用以下 current-version 绑定顺序：Verifier context → action-approved targeted mutation
+artifact 与 pre evidence → implementation review → `verify --finalize` → local code approval →
+Gate。context 只携带冻结规格、允许范围、diff 路径/numstat 摘要、验收条件、限制和复现 argv，
+不携带实现对话、内部推理、完整 patch、原始日志或凭据。每一项都绑定当前 task、subject、规格、
+Policy 与 classification；任一绑定变化后必须从当前版本重建，不能借用其他 task 的 artifact。
 
 ```sh
 python -m aiflow verify <TASK-ID> --actor <VERIFIER>
@@ -139,8 +159,17 @@ python -m aiflow verify <TASK-ID> --actor <VERIFIER> --finalize
 python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "local V2 evidence reviewed"
 ```
 
-active Policy `2.1.0` 下，默认 live V2 在完整 V1 prefix 后，依次执行确定性、离线的 `pytest tests/acceptance -q` 与 `pytest tests/integration -q`；两项各自保留真实进程结果、日志与工具版本。使用 `--check acceptance` 或 `--check integration` 时，只执行所选检查，且 evidence 仅为 provisional，不能形成 final 或 Gate-eligible evidence。
+active Policy `2.1.0` 下，默认 live V2 在完整 V1 prefix 后，依次执行确定性、离线的
+`pytest tests/acceptance -q`、`pytest tests/integration -q`，以及由单独 action approval 绑定的
+targeted mutation；三项各自保留真实进程结果、日志与工具版本，independent Verifier 也必须与
+Implementer 使用不同的非空 task-local actor 标签。Chapter 11 的 acceptance、integration、
+action-approved targeted mutation 与 independent-verifier 流程均已实现。
 
-Chapter 11.1 已完成，但 Chapters 11.2–11.5 的 targeted mutation 尚未实现。它继续以 `unverified` 和 `VERIFICATION_CHAPTER11_NOT_IMPLEMENTED` 写入 pre evidence，因而无论 acceptance/integration 是否通过，live V2 都必须 failed。不能用 `--finalize`、approval 或 CI 输出把该限制变成 V2 passed 或 Gate ready。CI evidence 只用于 Gate attestation，不替代 local evidence 或 code approval。
+使用 `--check acceptance`、`--check integration` 或其他局部检查时，只执行所选检查，所得
+evidence 是 partial/provisional，不能形成 final evidence 或进入 Gate。`--finalize`、code
+approval 和 CI 输出也不能把 missing、stale、tampered、non-killed 或 unverified 的当前 V2
+事实变成 passed。CI evidence 只提供 Gate attestation；它不替代当前本地 evidence、
+implementation review 或 local code approval。Gate 仍逐项核对这些 current-version 绑定，
+不因 Chapter 11 已完成而自动放行任一后续 task。
 
 `begin` 的治理提交兼容仅允许 `subject_commit..HEAD` 中的当前任务路径 `.ai/tasks/<TASK-ID>/**`；业务路径、其他任务路径、仓库/分支不符和超出创建时 dirty baseline 的工作树变化仍会拒绝。

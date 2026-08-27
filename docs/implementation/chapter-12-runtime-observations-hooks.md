@@ -210,8 +210,16 @@ reason 枚举，以及冻结的 `Observation`、`PathsSummary`、`CommandSummary
   mypy、validate、scope 与 smoke 均通过。
 - `REV-0033-r0002` 如实保留 RF-001 的解决历史；独立投影前审核 `REV-0034` / context
   `f50ae437af089d6853974ad9d01ba4ddc9330013a00b4d4d37c09d012e6e088f` 对 remediation
-  subject APPROVE、findings 为空。投影后的 current subject 仍必须重新取得正式 V1、独立实现
-  审核、code approval 与 Gate，方可形成 merge readiness。
+  subject APPROVE、findings 为空。投影后的 final subject
+  `893ce6bc7f31a20a964776bbbc2b7e5a2c280d90` 已重新取得正式 V1：10/10 required checks
+  passed、`unverified_scenarios` 为空、全量 1507 passed/4 skipped、diff coverage 94%；独立
+  `REV-0035` / context
+  `f424e758b3519848b9d0ea68ddf07df81ad9c631bd20869d1aff7085d1538b0b` 批准该 current
+  subject，随后生成绑定 evidence
+  `9054a208781ba61ff65cd03b30fee6e58168a8865c49ee7ebc0e4dc4e723fd58` 的 code approval。
+- TASK-0022 的 external merge 已由 event 25 记录，目标仍是上述 final subject；只追加
+  merge-record 的治理提交为 `d51721b92694d6684e4d3fd14079a18b321a449c`。这组事实只证明
+  TASK-0022 与 12.5 已完成，不能复用于其他 task、subject、spec、Policy 或 classification。
 - 上述验证运行在当前 Windows host；4 项 skip 是既有 symlink 平台限制。临时仓和 wrapper
   entrypoint 测试不证明 Linux/macOS live Hook 安装或全部 host 行为。Git Hook 无法拦截未安装
   Hook 的客户端、IDE save、GUI/remote Git 或绕过 wrapper 的调用。
@@ -221,3 +229,16 @@ reason 枚举，以及冻结的 `Observation`、`PathsSummary`、`CommandSummary
 - 本条只完成 12.5 的五步投影。12.6、`CH12-EXIT-01/02`、P2-ESC-01/P2-HOOK-01 与
   Chapter 12 完成状态保持 pending；当前技术证据不能替代 12.6 的恢复/操作文档和章节最终
   退出证据。
+
+## 12.6 pending：恢复、操作文档与章节退出
+
+- 12.6 将以 README、Hooks、Quickstart、Recovery 和本实施记录为唯一正文范围，校正
+  Chapter 11、12.1–12.5 与 `aiflow observe` 的当前事实，并提供不绕过 ledger、Policy、
+  review、approval 或 Gate 的 fail-closed 恢复路径。
+- 操作文档只描述当前支持的两个 Hook 事实与受限 CLI/CI adapter；decision semantic parity
+  不扩展为 source-sensitive digest、mode、ledger effect、event metadata 或 JSON bytes 相同，
+  也不把 Windows wrapper 测试和四个既有 symlink skips 扩展为 Linux/macOS live Hook 证据。
+- 本节当前只是 H1 候选说明。只有 TASK-0023 的当前 H1 subject 取得正式 V1 和独立实现审核
+  后，才可把 12.6 五步、P2-ESC-01/P2-HOOK-01、`CH12-EXIT-01/02` 与 Chapter 12 completion
+  投影为完成；投影后的新 subject 仍须重新取得正式 V1、独立实现审核、code approval 与 Gate。
+  Chapter 13 保持未初始化，Phase 02 不在本任务中完成。

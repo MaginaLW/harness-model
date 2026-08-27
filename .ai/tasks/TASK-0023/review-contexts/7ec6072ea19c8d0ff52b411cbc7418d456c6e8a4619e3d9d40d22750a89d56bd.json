@@ -1,0 +1,51 @@
+{
+  "base_commit": "d51721b92694d6684e4d3fd14079a18b321a449c",
+  "branch": "main",
+  "classification_input_sha256": "a1a39c4d14329d0a11838ee294f63e61e9510ac793b3ac6747a0758f0658f1f6",
+  "content": {
+    "allowed_scope": [
+      "README.md",
+      "docs/operations/hooks.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/recovery.md",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.6 与 Chapter 12 退出：把 README、Hooks、Quickstart、Recovery 和 Chapter 12 实施文档校正到已合并的 12.1–12.5 / V2 / observe 事实，补齐可执行的 fail-closed 恢复说明；在当前 subject 的正式验证与独立审核通过后，仅将 12.6 五步、P2-ESC-01/P2-HOOK-01 证据和 CH12-EXIT-01/02 投影为完成，保持 Chapter 13 未初始化且不宣称通用命令或操作系统安全沙箱。",
+        "impact_scope": [
+          "README.md",
+          "docs/operations/hooks.md",
+          "docs/operations/quickstart.md",
+          "docs/operations/recovery.md",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Correct README and operations documentation to the committed Chapter 11 and Chapter 12.1-12.5 facts",
+          "Document the exact observe apply/dry-run/ci contract and fail-closed recovery without duplicating Policy decisions",
+          "Revalidate the current P2-ESC-01 and P2-HOOK-01 technical evidence and its platform and shell limitations",
+          "Mark only Chapter 12.6 and the two Chapter 12 exit checks complete after current verification and review",
+          "Update overall counters and completion facts while keeping Chapter 13 uninitialized"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 12.6 与 Chapter 12 退出：把 README、Hooks、Quickstart、Recovery 和 Chapter 12 实施文档校正到已合并的 12.1–12.5 / V2 / observe 事实，补齐可执行的 fail-closed 恢复说明；在当前 subject 的正式验证与独立审核通过后，仅将 12.6 五步、P2-ESC-01/P2-HOOK-01 证据和 CH12-EXIT-01/02 投影为完成，保持 Chapter 13 未初始化且不宣称通用命令或操作系统安全沙箱。",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "7ec6072ea19c8d0ff52b411cbc7418d456c6e8a4619e3d9d40d22750a89d56bd",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "237f9578c30ae0b09467036bd8ee3623859d27d513018c67318a9454eaabfd3f",
+  "task_id": "TASK-0023"
+}

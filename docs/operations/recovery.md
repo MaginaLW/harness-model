@@ -58,9 +58,16 @@
 
 ## V2 finalize、CI 与治理-only begin
 
-- 诊断：`--finalize` 只处理当前、passed 的 pre evidence 和当前可批准 implementation review；它不运行验证命令。Chapter 11 的 acceptance、integration、targeted mutation 未实现时，live V2 pre evidence 会 failed，这是预期限制。
-- 可恢复操作：完成 Chapter 11 检查后，从当前事实重跑 local V2 pre evidence，再记录 implementation review、执行 `verify --finalize`，最后获取 local code approval。CI evidence 仅重做 attestation/Gate 输入，不能替代 local evidence 或 approval。
+- 诊断：`--finalize` 只处理当前、passed 的 pre evidence 和当前可批准 implementation review；它不运行验证命令。Chapter 11 的 acceptance、integration、经 action approval 允许的 targeted mutation 与 independent Verifier 均已实现，但任何 current-version 的 missing、stale、tampered、non-killed 或 unverified mutation/evidence 都必须 failed closed。
+- 可恢复操作：从当前 task/version 的 action approval、immutable mutation artifact 与 pre evidence 开始恢复；确认 artifact 的 task、base、subject、规格、Policy 与 classification 绑定后，重跑完整 local V2 pre evidence，记录当前 implementation review，执行 `verify --finalize`，取得 local code approval，最后以当前 attestation 和 subject 运行 Gate。绑定或事实变化时重建新的 artifact/evidence/review，不得借用 TASK-0015 或其他 task/version 的记录。CI evidence 仅重做 attestation/Gate 输入，不能替代 local evidence、review 或 approval。
 - 治理-only begin：若 HEAD 只前移当前任务 `.ai/tasks/<TASK-ID>/**` 的治理提交，可以重试 `begin`；任何业务文件、其他任务治理文件、仓库/分支变化或新增工作树业务路径都必须停止并按范围/新鲜度流程恢复。
+
+## REC-09 observation、Hook 与 observe
+
+- 诊断：先运行 `python -m aiflow status <TASK-ID> --format json`、`python -m aiflow validate <TASK-ID>`；涉及变更范围或 task 解析时再运行 `python -m aiflow scope <TASK-ID>`。对已经具备 current task/version binding 的本地 UTF-8 JSON object，使用 `python -m aiflow observe <TASK-ID> --input <FILE> --mode dry-run` 重放只读路径。不要以空演示 task 或过期输入模拟成功。
+- 可恢复操作：若 status/validate/scope、input contract 或 `dry-run` 暴露不一致，先修正当前 task、base、subject、Policy、classification 和 Git binding，再从当前事实重建新的 immutable input。不要改写既有 observation event 或 digest 来“刷新”它。仅在确需审计当前事实时，才以 `source: "cli"` 和非空 `--actor` 使用 `--mode apply`；它可能追加 task-local audit 或单调 escalation，但不执行所描述动作。
+- 退出语义：有效 observation 固定 exit 2 且 `execution_allowed: false`，是非授权结论，不能触发请求的命令或消费 action approval；exit 1 表示输入、contract、binding 或状态错误，必须先修复事实。不存在 exit 0 作为 observation 授权。`dry-run` 仅接受 `source: "cli"` 且禁止 actor，`ci` 仅接受 `source: "ci"` 且禁止 actor；后二者对完整 task 目录零写。
+- Hook 边界：对高风险 pre-command，Hook 只处理明确、受支持的 canonical action；Policy 禁止时即使审计已记录也固定拒绝，不消费 action approval、不执行命令。可选 `--task`、高风险 task 解析或 Hook 输入存在歧义时 fail closed。不要把它当作自由 shell 解析器、系统级安全沙箱或全客户端拦截：不解析 alias、pipe、redirection、quote、wildcard、变量/命令展开、argv、environment、stdin/stdout/stderr。Windows 覆盖与四个既有 symlink skips 不证明 Linux/macOS live Hook；未安装 Hook、IDE/GUI、remote Git 也不在已证实拦截范围。Hook/CLI/CI parity 仅适用于支持范围内的 decision semantic fields，不承诺 source digest、mode、ledger effect、event metadata、JSON bytes 或文案相同。
 
 ## 结构化审核 stale 或不可批准
 

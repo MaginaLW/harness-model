@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–11 已完成，Chapter 12 已初始化，当前指针为 12.1。active Policy 为 `2.1.0`。TASK-0015 当前 subject 的 final V2 evidence 已通过 14 项 required checks，五项权威 mutant 全部 killed，独立实现审核、code approval 与 external merge 均已记录；这些结论严格绑定该任务版本，不自动适用于未来 task 或 subject。阶段二尚未完成；Chapter 12 Hooks 与运行期升级观测仍待实现，V3、真实模型路由及资源调度不在阶段二范围内。
+> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–11 已完成，Chapter 12 的 12.1–12.5 已合并，当前工作为 12.6 的入口与运维文档收口。Chapter 12 的两个退出检查与章节完成投影在本任务 H1 阶段仍为 pending；Chapter 13 尚未初始化，阶段二尚未完成。active Policy 为 `2.1.0`。Chapter 11 的 acceptance、integration、action-approved targeted mutation 与独立 verifier 已实现；TASK-0015 的 V2 结论与 TASK-0022 的 observe/Hook parity、审核、批准和合并结论均严格绑定各自 task、subject、规格与 Policy，不能自动复用于未来 task 或 subject。Chapter 12 已提供受限的运行期 observation 与 Hook/CLI/CI 入口，但不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
 ## 阶段一目标
 
@@ -34,7 +34,7 @@
 | [Chapter 9 追踪](docs/implementation/chapter-09-v2-policy-contracts.md) | V2 Policy、版本化 contracts、分类规则与兼容性边界 |
 | [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的退出证据与 live V2 限制 |
 | [Chapter 11 追踪](docs/implementation/chapter-11-acceptance-integration-mutation.md) | 已完成的 acceptance/integration、targeted mutation、live V2 与退出证据边界 |
-| [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与完整 Hooks 的 pending 初始化状态；当前任务为 12.1 |
+| [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与 Hooks：12.1–12.5 已合并，12.6 与 Chapter 12 退出检查仍 pending |
 
 ## 实施路线
 
@@ -52,7 +52,7 @@
 12. 运行期升级观测与完整 Hooks
 13. 自举 REVIEW 试点与阶段二基线
 
-各章节必须按[实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)的前置关系推进，并以其中的命令和通过条件作为完成判据。
+Chapters 1–7 按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)推进；Chapters 8–13 按[阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md)推进。当前事实以 [overall state](docs/superpowers/state/overall.yaml) 和对应 chapter state 为准，计划中的未来能力不能当作已经可用。
 
 ## 资源感知调度路线
 
@@ -63,6 +63,23 @@
 ## 开始参与
 
 1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时同时阅读 [CLAUDE.md](CLAUDE.md)。
-2. 以阶段一 MVP 设计为需求基线，从实施目录的 Task 1.1 开始。
-3. 在 CLI 与 Policy 落地前，不把计划中的命令或能力视为已经可用。
+2. 先核对 [overall state](docs/superpowers/state/overall.yaml) 与当前 chapter state，再按对应阶段的设计和实施目录选择下一项工作。
+3. 以已安装 CLI、active Policy 与当前 task ledger 的确定性结论为准；计划中的未来能力不能当作已经可用。
 4. 保留任务范围、决定、批准和验证证据；出现变化时升级，不自行降级或跳过 Gate。
+
+## 运行期 observation 与 Hooks 的当前边界
+
+`aiflow observe` 仅接收一个显式 task、一个本地 UTF-8 JSON object 输入和封闭的
+`apply`、`dry-run` 或 `ci` mode。它输出的是受当前 task/base/subject/Policy/classification
+绑定约束的 observation decision；所有有效 observation 的
+`execution_allowed=false`，因此以 exit 2 返回非授权结论，绝不以 exit 0 允许所描述的动作。
+`apply` 才可能追加 task-local audit 或单调 escalation；`dry-run` 与 `ci` 对完整 task
+目录零写。完整协议与恢复步骤见 [Hooks](docs/operations/hooks.md) 和
+[故障恢复](docs/operations/recovery.md)。
+
+当前 E2E 证据只覆盖两类 Hook 事实：pre-commit 的 `scope_out_of_bounds`，以及 pre-command
+对六种 Policy 禁止规范高风险 action 的拒绝/审计；在该支持范围内，Hook、CLI 与 CI 比较的是
+decision semantic fields，而非 source-sensitive digest、mode、ledger effect、event metadata、
+JSON 字节或文案。现有验证运行在 Windows，保留 4 项既有 symlink capability skips；这不证明
+Linux/macOS 的 live Hook 安装或全部宿主行为。未安装 Hook 的客户端、IDE 保存、GUI/remote Git
+和绕过 wrapper 的调用都不能被声明为已拦截；pre-command 也不解释自由 shell 或执行命令。

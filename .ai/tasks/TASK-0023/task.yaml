@@ -1,0 +1,104 @@
+allowed_scope:
+- README.md
+- docs/operations/hooks.md
+- docs/operations/quickstart.md
+- docs/operations/recovery.md
+- docs/implementation/chapter-12-runtime-observations-hooks.md
+- docs/superpowers/state/chapters/chapter-12.yaml
+- docs/superpowers/state/overall.yaml
+base_commit: d51721b92694d6684e4d3fd14079a18b321a449c
+branch: main
+created_at: '2026-08-26T23:42:05Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: low
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完成 Chapter 12.6 与 Chapter 12 退出：把 README、Hooks、Quickstart、Recovery 和 Chapter
+    12 实施文档校正到已合并的 12.1–12.5 / V2 / observe 事实，补齐可执行的 fail-closed 恢复说明；在当前 subject
+    的正式验证与独立审核通过后，仅将 12.6 五步、P2-ESC-01/P2-HOOK-01 证据和 CH12-EXIT-01/02 投影为完成，保持 Chapter
+    13 未初始化且不宣称通用命令或操作系统安全沙箱。
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - README.md
+  - docs/operations/hooks.md
+  - docs/operations/quickstart.md
+  - docs/operations/recovery.md
+  - docs/implementation/chapter-12-runtime-observations-hooks.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - docs/superpowers/state/overall.yaml
+  inputs:
+  - docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md
+  - docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md
+  - docs/superpowers/state/README.md
+  - docs/superpowers/state/chapters/chapter-12.yaml
+  - docs/superpowers/state/overall.yaml
+  - .ai/tasks/TASK-0022/task.yaml
+  - .ai/tasks/TASK-0022/evidence.json
+  - .ai/tasks/TASK-0022/reviews/REV-0035-r0001.json
+  - .ai/tasks/TASK-0022/approvals.json
+  - .ai/tasks/TASK-0022/events.jsonl
+  permission_requirements: []
+  planned_actions:
+  - Correct README and operations documentation to the committed Chapter 11 and Chapter
+    12.1-12.5 facts
+  - Document the exact observe apply/dry-run/ci contract and fail-closed recovery
+    without duplicating Policy decisions
+  - Revalidate the current P2-ESC-01 and P2-HOOK-01 technical evidence and its platform
+    and shell limitations
+  - Mark only Chapter 12.6 and the two Chapter 12 exit checks complete after current
+    verification and review
+  - Update overall counters and completion facts while keeping Chapter 13 uninitialized
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0023
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Parse all changed Markdown links and YAML state files and cross-check counters,
+    task states, exits and pointers
+  - Re-run the documented observe help and read-only failure semantics against the
+    current CLI
+  - Run AI Flow validate, scope and the Policy-selected V1 verification plan
+  - Run git diff check and independent design and implementation reviews
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 237f9578c30ae0b09467036bd8ee3623859d27d513018c67318a9454eaabfd3f
+goal: 完成 Chapter 12.6 与 Chapter 12 退出：把 README、Hooks、Quickstart、Recovery 和 Chapter
+  12 实施文档校正到已合并的 12.1–12.5 / V2 / observe 事实，补齐可执行的 fail-closed 恢复说明；在当前 subject 的正式验证与独立审核通过后，仅将
+  12.6 五步、P2-ESC-01/P2-HOOK-01 证据和 CH12-EXIT-01/02 投影为完成，保持 Chapter 13 未初始化且不宣称通用命令或操作系统安全沙箱。
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: C:/Users/Admin/AppData/Local/Temp/aiflow-task0023-1787787595236
+schema_version: '1.0'
+spec_frozen_at: '2026-08-26T23:53:44Z'
+subject_commit: d51721b92694d6684e4d3fd14079a18b321a449c
+task_id: TASK-0023
+updated_at: '2026-08-26T23:58:19Z'
+worktree_dirty: false
+worktree_dirty_paths: []
