@@ -1,0 +1,31 @@
+{
+  "context_sha256": "1833cc40e1f5a4bdd5e7ce59e2233965325dce8b30ecf1c94ddfa45586b790e7",
+  "findings": [
+    {
+      "evidence_refs": [
+        "docs/implementation/chapter-13-review-self-hosting.md:9",
+        "docs/implementation/chapter-13-review-self-hosting.md:13",
+        "docs/implementation/chapter-13-review-self-hosting.md:15",
+        "docs/implementation/chapter-13-review-self-hosting.md:23",
+        ".ai/tasks/TASK-0025/design-review-context-r2.json"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 9,
+        "path": "docs/implementation/chapter-13-review-self-hosting.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "实施说明仍引用上一版 binding 与四文件 H1"
+    }
+  ],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-27T11:46:17Z",
+  "review_id": "REV-0044",
+  "review_stage": "design",
+  "reviewer": "/root/task25_design_r2",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE。修订后的 TASK-0025 仅新增空的 tests/acceptance/__init__.py；这是解决默认 pytest prepend 模式下 acceptance 与 integration 两个同名测试模块 collection import mismatch 的最小变更，不涉及 runtime、Policy、manifest、Hook、依赖或既有测试修改。替代方案排除合理，REVIEW / V2 路由、14 项检查、双阶段审核、独立 verifier、H1/H2 current-subject 重新绑定以及每个 subject 的 single-use mutation action approval 均充分。存在一个非阻断的文档同步项：H1 完成前须把实施说明更新为当前 classification/spec/review binding，并将 H1 业务文件数量从四份更新为五份。",
+  "task_id": "TASK-0025"
+}
