@@ -4,7 +4,7 @@ chapter:
   id: "chapter-12"
   number: 12
   title: "运行期升级观测与完整 Hooks"
-  status: "in_progress"
+  status: "completed"
   dependency: "chapter-11 completed"
   tasks_total: 6
   steps_total: 30
@@ -105,19 +105,29 @@ tasks:
     blockers: []
   - id: "12.6"
     title: "更新恢复与操作文档"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - "README.md"
+      - "docs/operations/hooks.md"
+      - "docs/operations/quickstart.md"
+      - "docs/operations/recovery.md"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - ".ai/tasks/TASK-0023/spec.md"
+      - ".ai/tasks/TASK-0023/evidence.json"
+      - ".ai/tasks/TASK-0023/reviews/REV-0036-r0001.json"
+      - ".ai/tasks/TASK-0023/reviews/REV-0037-r0001.json"
     blockers: []
 
 exit_checks:
   - id: "CH12-EXIT-01"
     description: "支持范围内的越界/高风险请求在执行前被一致升级或拒绝"
-    status: "pending"
+    status: "passed"
   - id: "CH12-EXIT-02"
     description: "Hook 不含独立 Policy 决策表，不宣称通用安全沙箱"
-    status: "pending"
+    status: "passed"
 
 chapter_evidence:
   - id: "EVD-CH12-12.1-001"
@@ -301,5 +311,54 @@ chapter_evidence:
       - ".ai/tasks/TASK-0022/evidence.json"
       - ".ai/tasks/TASK-0022/reviews/REV-0034-r0001.json"
     limitation: "本次只在 Windows 临时仓/wrapper entrypoint 证明支持范围；4 个既有 symlink skips 不证明 Linux/macOS live Hook。未安装 Hook、IDE save、GUI/remote Git 与绕过 wrapper 的调用不被拦截；结构化 action/target 不能解释 PowerShell/cmd/bash、alias、pipe、redirection、quote、wildcard 或 expansion，系统不是通用命令/OS sandbox。12.6、两个 Chapter 12 exit checks 和章节完成状态保持 pending；H1b V1/REV-0034 只构成本次投影前提，最终 merge readiness 仍由 TASK-0022 投影后 current subject 的正式 V1、独立实现审核、code approval 与 Gate 决定。"
+  - id: "EVD-CH12-12.6-001"
+    kind: "chapter_exit"
+    task_id: "TASK-0023"
+    route: "REVIEW"
+    verification_level: "V1"
+    classification_input_sha256: "a1a39c4d14329d0a11838ee294f63e61e9510ac793b3ac6747a0758f0658f1f6"
+    spec_sha256: "237f9578c30ae0b09467036bd8ee3623859d27d513018c67318a9454eaabfd3f"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    design_review_ref: ".ai/tasks/TASK-0023/reviews/REV-0036-r0001.json"
+    design_review_context_sha256: "7ec6072ea19c8d0ff52b411cbc7418d456c6e8a4619e3d9d40d22750a89d56bd"
+    projection_basis_subject: "965e7e92eb8fa694659cf69d89b9325cc26470d9"
+    verification_evidence_ref: ".ai/tasks/TASK-0023/evidence.json"
+    verification_evidence_sha256: "bb2ce3153c31d3acefd89b999dca62394b59f5e2bd8f207809bc5cf3d458e1c6"
+    implementation_review_ref: ".ai/tasks/TASK-0023/reviews/REV-0037-r0001.json"
+    implementation_review_context_sha256: "22f2de7b232cda6468afbc5d363f489b3419da482424076c81d8c2805fd048a3"
+    implementation_checks:
+      formal_v1_required_checks: "10/10 passed; unverified_scenarios empty"
+      formal_v1_full_pytest: "1507 passed, 4 skipped (existing Windows symlink limitations)"
+      relative_base_diff_coverage: "deterministic pass; diff-cover reported 'No lines with coverage information in this diff.' for the documentation-only H1 diff; this is not a numeric or 100% coverage claim"
+      recovery_heading_remediation: "initial V1 preserved 1 failed, 1506 passed, 4 skipped because a supplemental REC-09 heading violated the closed REC-01–REC-08 heading contract; the supplemental heading was corrected, its focused regression passed, and the current subject then passed formal V1"
+      ruff: "passed"
+      format_check: "passed"
+      mypy: "passed"
+      validate_scope_smoke: "passed"
+      git_diff_check: "passed"
+    exit_inputs:
+      P2-ESC-01:
+        status: "passed"
+        evidence: "tests/integration/test_observation_escalation.py"
+        limitation: "只证明支持的 observation 到 task-local audit、单调 escalation 或 refusal 的共享路径；任何 disposition 均不授权执行。"
+      P2-HOOK-01:
+        status: "passed"
+        evidence: "tests/integration/test_observation_parity.py"
+        limitation: "只证明两类实际 Hook facts 与受限 CLI/CI adapter 的 decision semantic parity；source-sensitive digest、mode、ledger effect、event metadata、JSON bytes 与文案不要求相同。"
+    scope: "完成 README、Hooks、Quickstart、Recovery 与 Chapter 12 实施记录的当前事实和 fail-closed 恢复说明，并以既有 P2-ESC-01/P2-HOOK-01 支持范围作为 CH12-EXIT-01/02 的输入；不修改运行时代码、Policy、CLI、Gate 或 Chapter 13。"
+    artifacts:
+      - "README.md"
+      - "docs/operations/hooks.md"
+      - "docs/operations/quickstart.md"
+      - "docs/operations/recovery.md"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - "tests/integration/test_observation_escalation.py"
+      - "tests/integration/test_observation_parity.py"
+      - ".ai/tasks/TASK-0023/spec.md"
+      - ".ai/tasks/TASK-0023/evidence.json"
+      - ".ai/tasks/TASK-0023/reviews/REV-0036-r0001.json"
+      - ".ai/tasks/TASK-0023/reviews/REV-0037-r0001.json"
+    limitation: "现有证据只覆盖 Windows 临时仓/wrapper entrypoint 与两类实际 Hook facts；4 个既有 symlink skips 不证明 Linux/macOS live Hook。未安装 Hook、IDE save、GUI/remote Git、绕过 wrapper 的调用和所有客户端拦截均未证明；结构化 action/target 不解析 PowerShell/cmd/bash、alias、pipe、redirection、quote、wildcard 或 variable/command expansion，系统不是通用命令拦截器或 OS sandbox。Chapter 13 未初始化，Phase 02 仍 in_progress；本 H2 投影改变 subject，merge readiness 仍要求投影后正式 V1、独立实现审核、code approval 与 Gate。"
 
 blockers: []

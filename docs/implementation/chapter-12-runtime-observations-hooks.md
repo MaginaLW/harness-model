@@ -1,13 +1,13 @@
 # Chapter 12：运行期升级观测与完整 Hooks
 
-状态：in progress（12.1–12.5 completed；12.6 pending）
+状态：completed（12.1–12.6 与 `CH12-EXIT-01/02` passed；Chapter 13 未初始化）
 
 Chapter 12 在 Chapter 11 的 V2 failure/evidence 结构之上增加运行期观察与 Hook 入口，
 当前已完成 12.1 的 observation contract/type 输入层、12.2 的共享确定性
 decision/task-local persistence 核心、12.3 的 pre-commit scope observation adapter、12.4 的
 结构化 pre-command 拒绝与审计 adapter，以及 12.5 的受限 `aiflow observe` CLI/CI adapter
 和支持范围内的语义 parity。12.5 没有改变 Gate、Policy、evidence、approval 或 Hook 的既有
-决策；恢复与操作文档仍由 12.6 完成。
+决策；12.6 已完成恢复、操作文档与 Chapter 12 退出投影。
 
 ## 12.1 已完成：版本化 observation contract
 
@@ -226,19 +226,27 @@ reason 枚举，以及冻结的 `Observation`、`PathsSummary`、`CommandSummary
 - pre-command 只接受结构化 canonical action/target，不能安全解释 PowerShell、cmd、bash、
   alias、pipe、redirection、quote、wildcard、variable/command expansion 或任意自由 shell。
   本系统不是通用命令执行拦截器或操作系统安全沙箱。
-- 本条只完成 12.5 的五步投影。12.6、`CH12-EXIT-01/02`、P2-ESC-01/P2-HOOK-01 与
-  Chapter 12 完成状态保持 pending；当前技术证据不能替代 12.6 的恢复/操作文档和章节最终
-  退出证据。
+- 本条历史上只完成 12.5 的五步投影；12.6 的文档、P2 支持输入与 Chapter 12 退出证据见下节，
+  不反向扩大 TASK-0022 的技术证明范围。
 
-## 12.6 pending：恢复、操作文档与章节退出
+## 12.6 已完成：恢复、操作文档与章节退出
 
-- 12.6 将以 README、Hooks、Quickstart、Recovery 和本实施记录为唯一正文范围，校正
+- 12.6 以 README、Hooks、Quickstart、Recovery 和本实施记录为正文范围，校正
   Chapter 11、12.1–12.5 与 `aiflow observe` 的当前事实，并提供不绕过 ledger、Policy、
   review、approval 或 Gate 的 fail-closed 恢复路径。
 - 操作文档只描述当前支持的两个 Hook 事实与受限 CLI/CI adapter；decision semantic parity
   不扩展为 source-sensitive digest、mode、ledger effect、event metadata 或 JSON bytes 相同，
   也不把 Windows wrapper 测试和四个既有 symlink skips 扩展为 Linux/macOS live Hook 证据。
-- 本节当前只是 H1 候选说明。只有 TASK-0023 的当前 H1 subject 取得正式 V1 和独立实现审核
-  后，才可把 12.6 五步、P2-ESC-01/P2-HOOK-01、`CH12-EXIT-01/02` 与 Chapter 12 completion
-  投影为完成；投影后的新 subject 仍须重新取得正式 V1、独立实现审核、code approval 与 Gate。
-  Chapter 13 保持未初始化，Phase 02 不在本任务中完成。
+- 投影前 H1 subject `965e7e92eb8fa694659cf69d89b9325cc26470d9` 的正式 V1 evidence
+  `bb2ce3153c31d3acefd89b999dca62394b59f5e2bd8f207809bc5cf3d458e1c6` 为 10/10
+  required checks passed、`unverified_scenarios` 为空、全量 1507 passed/4 个既有 Windows
+  symlink skips。首次 run 因补充条目占用受控 `REC-09` 标题而保留 1 failed/1506 passed/4
+  skipped；仅标题 remediation 的精准回归通过后，current subject 才取得上述正式 V1。
+- 独立 H1 implementation review `REV-0037` / context
+  `22f2de7b232cda6468afbc5d363f489b3419da482424076c81d8c2805fd048a3` 为 APPROVE、
+  findings 为空。P2-ESC-01 只以共享 observation-to-escalation/refusal integration 为输入；
+  P2-HOOK-01 只以两类实际 Hook facts 与受限 CLI/CI 的 decision semantic parity 及上述限制为
+  输入。在这些边界内，12.6 五步、`CH12-EXIT-01/02` 与 Chapter 12 completion 已投影完成。
+- 本 H2 投影改变了 subject；TASK-0023 仍须对投影后 current subject 重新取得正式 V1、独立
+  implementation review、code approval 与 Gate，方可形成 merge readiness。Chapter 13 未初始化，
+  Phase 02 仍 in progress。

@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "in_progress"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-26T16:48:45Z"
+updated_at: "2026-08-27T00:32:22Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -23,20 +23,20 @@ tracking:
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
   current_chapter: "chapter-12"
-  current_task: "12.6"
+  current_task: null
   current_step: null
 
 summary:
   chapters_total: 12
-  chapters_completed: 11
+  chapters_completed: 12
   tasks_total: 71
-  tasks_completed: 70
+  tasks_completed: 71
   steps_total: 378
-  steps_completed: 373
+  steps_completed: 378
   exit_checks_total: 20
-  exit_checks_completed: 18
+  exit_checks_completed: 20
   blockers_total: 0
-  evidence_items: 14
+  evidence_items: 15
 
 chapters:
   - id: "chapter-01"
@@ -131,7 +131,7 @@ chapters:
     number: 12
     title: "运行期升级观测与完整 Hooks"
     state_file: "docs/superpowers/state/chapters/chapter-12.yaml"
-    status: "in_progress"
+    status: "completed"
     dependency: "chapter-11 completed"
     tasks_total: 6
     steps_total: 30
@@ -156,8 +156,8 @@ future_phases:
     design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
-    current_chapter: "chapter-12"
-    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据已完成；Chapter 11 已基于 TASK-0015 的 committed V2 evidence、REV-0016、code approval、external merge target 与 merge-record governance commit 完成。Chapter 12.1–12.5 已建立 immutable observation 输入、closed deterministic record/escalate/refuse decision、当前绑定校验、task-local audit、pre-commit/pre-command adapter，以及受限 aiflow observe CLI/CI adapter 与支持范围内的语义 parity；当前进入 12.6，恢复/操作文档、两个 Chapter 12 exit checks 和章节完成状态仍 pending。"
+    current_chapter: "chapter-13"
+    note: "Chapter 10 独立 Verifier、V2 actor/context/evidence/Gate 契约与 V1 基线退出证据，以及 Chapter 11 committed V2 已完成。Chapter 12.1–12.6、P2-ESC-01/P2-HOOK-01 支持范围内的输入和两个 Chapter 12 exit checks 已完成；这些结论不扩展为跨平台 live Hook、全客户端拦截、自由 shell 解析或通用命令/OS sandbox。Chapter 13 尚未初始化，必须另建 13.1 治理任务后才能开始；Phase 02 仍 in_progress。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
@@ -2244,3 +2244,35 @@ history:
       - ".ai/tasks/TASK-0022/spec.md"
       - ".ai/tasks/TASK-0022/evidence.json"
       - ".ai/tasks/TASK-0022/reviews/REV-0034-r0001.json"
+  - id: "EVT-OVERALL-CH12-12.6-COMPLETE-001"
+    at: "2026-08-27T00:32:22Z"
+    action: "task_completed_and_chapter_completed"
+    actor: "/root"
+    reason: "TASK-0023 在投影前 subject 965e7e92eb8fa694659cf69d89b9325cc26470d9 上完成 README、Hooks、Quickstart、Recovery 与 Chapter 12 实施记录的当前事实和 fail-closed 恢复说明；正式 V1 为 10/10 passed、全量 1507 passed/4 existing Windows symlink skips、unverified_scenarios 为空，docs-only diff-cover sentinel 未被宣称为数值覆盖率，独立 REV-0037 批准且 findings 为空。P2-ESC-01 只证明共享 observation-to-escalation/refusal，P2-HOOK-01 只证明支持范围内两类 Hook facts 与 CLI/CI decision semantic parity；Chapter 12 两个 exit checks 因此通过。Chapter 13 未初始化，Phase 02 仍 in_progress，H2 后仍须重新 V1、独立审核、code approval 与 Gate。"
+    chapter_evidence: "EVD-CH12-12.6-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_12_status: "completed"
+      task_12_6_status: "completed"
+      current_chapter: "chapter-12"
+      current_task: null
+      current_step: null
+      chapters_completed: 12
+      tasks_completed: 71
+      steps_completed: 378
+      exit_checks_completed: 20
+      evidence_items: 15
+    evidence:
+      - "docs/superpowers/state/chapters/chapter-12.yaml"
+      - "docs/superpowers/state/overall.yaml"
+      - "README.md"
+      - "docs/operations/hooks.md"
+      - "docs/operations/quickstart.md"
+      - "docs/operations/recovery.md"
+      - "docs/implementation/chapter-12-runtime-observations-hooks.md"
+      - "tests/integration/test_observation_escalation.py"
+      - "tests/integration/test_observation_parity.py"
+      - ".ai/tasks/TASK-0023/spec.md"
+      - ".ai/tasks/TASK-0023/evidence.json"
+      - ".ai/tasks/TASK-0023/reviews/REV-0036-r0001.json"
+      - ".ai/tasks/TASK-0023/reviews/REV-0037-r0001.json"

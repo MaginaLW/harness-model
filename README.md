@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–11 已完成，Chapter 12 的 12.1–12.5 已合并，当前工作为 12.6 的入口与运维文档收口。Chapter 12 的两个退出检查与章节完成投影在本任务 H1 阶段仍为 pending；Chapter 13 尚未初始化，阶段二尚未完成。active Policy 为 `2.1.0`。Chapter 11 的 acceptance、integration、action-approved targeted mutation 与独立 verifier 已实现；TASK-0015 的 V2 结论与 TASK-0022 的 observe/Hook parity、审核、批准和合并结论均严格绑定各自 task、subject、规格与 Policy，不能自动复用于未来 task 或 subject。Chapter 12 已提供受限的运行期 observation 与 Hook/CLI/CI 入口，但不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
+> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–12 已完成，其中 Chapter 12.1–12.6 与两个退出检查均已通过。Chapter 13 尚未初始化，阶段二仍未完成。active Policy 为 `2.1.0`。Chapter 11 的 acceptance、integration、action-approved targeted mutation 与独立 verifier 已实现；TASK-0015 的 V2 结论与 TASK-0022 的 observe/Hook parity、审核、批准和合并结论均严格绑定各自 task、subject、规格与 Policy，不能自动复用于未来 task 或 subject。Chapter 12 已提供受限的运行期 observation 与 Hook/CLI/CI 入口，但不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
 ## 阶段一目标
 
@@ -34,7 +34,7 @@
 | [Chapter 9 追踪](docs/implementation/chapter-09-v2-policy-contracts.md) | V2 Policy、版本化 contracts、分类规则与兼容性边界 |
 | [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的退出证据与 live V2 限制 |
 | [Chapter 11 追踪](docs/implementation/chapter-11-acceptance-integration-mutation.md) | 已完成的 acceptance/integration、targeted mutation、live V2 与退出证据边界 |
-| [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与 Hooks：12.1–12.5 已合并，12.6 与 Chapter 12 退出检查仍 pending |
+| [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与 Hooks 已完成；Chapter 13 尚未初始化，Phase 02 仍 in progress |
 
 ## 实施路线
 

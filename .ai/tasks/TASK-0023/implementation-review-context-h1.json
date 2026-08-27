@@ -1,0 +1,231 @@
+{
+  "base_commit": "d51721b92694d6684e4d3fd14079a18b321a449c",
+  "branch": "main",
+  "classification_input_sha256": "a1a39c4d14329d0a11838ee294f63e61e9510ac793b3ac6747a0758f0658f1f6",
+  "content": {
+    "allowed_scope": [
+      "README.md",
+      "docs/operations/hooks.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/recovery.md",
+      "docs/implementation/chapter-12-runtime-observations-hooks.md",
+      "docs/superpowers/state/chapters/chapter-12.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 12.6 与 Chapter 12 退出：把 README、Hooks、Quickstart、Recovery 和 Chapter 12 实施文档校正到已合并的 12.1–12.5 / V2 / observe 事实，补齐可执行的 fail-closed 恢复说明；在当前 subject 的正式验证与独立审核通过后，仅将 12.6 五步、P2-ESC-01/P2-HOOK-01 证据和 CH12-EXIT-01/02 投影为完成，保持 Chapter 13 未初始化且不宣称通用命令或操作系统安全沙箱。",
+        "impact_scope": [
+          "README.md",
+          "docs/operations/hooks.md",
+          "docs/operations/quickstart.md",
+          "docs/operations/recovery.md",
+          "docs/implementation/chapter-12-runtime-observations-hooks.md",
+          "docs/superpowers/state/chapters/chapter-12.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Correct README and operations documentation to the committed Chapter 11 and Chapter 12.1-12.5 facts",
+          "Document the exact observe apply/dry-run/ci contract and fail-closed recovery without duplicating Policy decisions",
+          "Revalidate the current P2-ESC-01 and P2-HOOK-01 technical evidence and its platform and shell limitations",
+          "Mark only Chapter 12.6 and the two Chapter 12 exit checks complete after current verification and review",
+          "Update overall counters and completion facts while keeping Chapter 13 uninitialized"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0023/approvals.json",
+        ".ai/tasks/TASK-0023/classification-remediation.md",
+        ".ai/tasks/TASK-0023/classification.json",
+        ".ai/tasks/TASK-0023/design-review-context.json",
+        ".ai/tasks/TASK-0023/design-review-input.json",
+        ".ai/tasks/TASK-0023/events.jsonl",
+        ".ai/tasks/TASK-0023/evidence.json",
+        ".ai/tasks/TASK-0023/review-contexts/7ec6072ea19c8d0ff52b411cbc7418d456c6e8a4619e3d9d40d22750a89d56bd.json",
+        ".ai/tasks/TASK-0023/reviews/REV-0036-r0001.json",
+        ".ai/tasks/TASK-0023/spec.md",
+        ".ai/tasks/TASK-0023/task.yaml",
+        "README.md",
+        "docs/implementation/chapter-12-runtime-observations-hooks.md",
+        "docs/operations/hooks.md",
+        "docs/operations/quickstart.md",
+        "docs/operations/recovery.md"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/approvals.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/classification-remediation.md"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/classification.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/design-review-input.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/evidence.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/review-contexts/7ec6072ea19c8d0ff52b411cbc7418d456c6e8a4619e3d9d40d22750a89d56bd.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/reviews/REV-0036-r0001.json"
+        },
+        {
+          "additions": 137,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/spec.md"
+        },
+        {
+          "additions": 104,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0023/task.yaml"
+        },
+        {
+          "additions": 22,
+          "binary": false,
+          "deletions": 5,
+          "path": "README.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/implementation/chapter-12-runtime-observations-hooks.md"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/hooks.md"
+        },
+        {
+          "additions": 34,
+          "binary": false,
+          "deletions": 5,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/recovery.md"
+        }
+      ],
+      "totals": {
+        "additions": 777,
+        "deletions": 15,
+        "files": 16
+      }
+    },
+    "goal": "完成 Chapter 12.6 与 Chapter 12 退出：把 README、Hooks、Quickstart、Recovery 和 Chapter 12 实施文档校正到已合并的 12.1–12.5 / V2 / observe 事实，补齐可执行的 fail-closed 恢复说明；在当前 subject 的正式验证与独立审核通过后，仅将 12.6 五步、P2-ESC-01/P2-HOOK-01 证据和 CH12-EXIT-01/02 投影为完成，保持 Chapter 13 未初始化且不宣称通用命令或操作系统安全沙箱。",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0023",
+        "--actor",
+        "/root"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "22f2de7b232cda6468afbc5d363f489b3419da482424076c81d8c2805fd048a3",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "bb2ce3153c31d3acefd89b999dca62394b59f5e2bd8f207809bc5cf3d458e1c6",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "237f9578c30ae0b09467036bd8ee3623859d27d513018c67318a9454eaabfd3f",
+  "subject_commit": "965e7e92eb8fa694659cf69d89b9325cc26470d9",
+  "task_id": "TASK-0023"
+}
