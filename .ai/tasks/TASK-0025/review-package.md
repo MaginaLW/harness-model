@@ -66,7 +66,7 @@ Chapter 13.2 五步均为 completed；13.3–13.6 和四个 exit checks 仍为 p
 overall/Phase 02 保持 in_progress。当前任务没有执行 CI simulation，没有完成 13.3，也没有
 宣称 Chapter 13 或 Phase 02 完成。
 
-## 风险与限制
+## 风险
 
 - verifier/implementer actor 是可审计字符串标签，不是外部身份认证。
 - task-local mutation artifact 与日志受本地执行环境约束；可提交 receipt 提供摘要和引用，
@@ -77,9 +77,9 @@ overall/Phase 02 保持 in_progress。当前任务没有执行 CI simulation，�
   action 也已消费且不可复用。
 - 未执行或授权 push、merge、deploy、publish、凭据、网络、付费调用或其他远程动作。
 
-## 当前证据
+## 证据
 
-- final V2 evidence 为 `passed` / `final`，canonical SHA-256 为
+- 已验证：final V2 evidence 为 `passed` / `final`，canonical SHA-256 为
   `4c5c8806a1a31977bb0ed0848294f30bf87ab36109f8edd9cb3bd7779b3f32e3`；文件字节
   SHA-256 为 `a54d7443edaa55a26f6da36f2ab53bb394f993083629fa1383c159efb6f99dc8`。
 - verification snapshot SHA-256 为
@@ -97,6 +97,8 @@ overall/Phase 02 保持 in_progress。当前任务没有执行 CI simulation，�
 - 独立 implementation review `REV-0048` / context
   `63a0a3df4196b1cec9b2f79e5f0e21065c54acf990f8869b5bc2bc63eccfd6e7` 为 APPROVE，
   findings 为空；final evidence 同时绑定 design `REV-0046` 与 implementation `REV-0048`。
+- 未验证：13.3 CI simulation、Chapter 13 exit checks、Chapter 13/Phase 02 completion、跨平台
+  live Hooks、自由 shell 拦截、操作系统沙箱以及任何 push、merge、deploy 或其他远程动作。
 
 ## 审核问题
 
