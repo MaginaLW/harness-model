@@ -16,10 +16,11 @@ from aiflow.verification import V2_CHECK_IDS
 ROOT = Path(__file__).resolve().parents[2]
 TASK_ID = "TASK-0025"
 BASE_COMMIT = "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb"
-CLASSIFICATION_INPUT_SHA256 = "36500db4687910d92260c80b48ede24ce9a740ae7f5f4bde5cb77f5e29879e50"
+APPROVED_SUBJECT = "fe30565e669aa047088b0c25c085effeb2b4bdbc"
+CLASSIFICATION_INPUT_SHA256 = "2d6cc68d05c4b89d0749700f71ddd98c1c3336cf7d227d59425af802c33e4bd4"
 POLICY_SHA256 = "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
-SPEC_SHA256 = "625ac850cfbfedc05c5af636b4f274faacc8325aa806caee7f47f9ec16bb5a4c"
-DESIGN_CONTEXT_SHA256 = "1833cc40e1f5a4bdd5e7ce59e2233965325dce8b30ecf1c94ddfa45586b790e7"
+SPEC_SHA256 = "04f951e922a1183b750111b101b9e47532c9bd9261225c289e6faa5237262318"
+DESIGN_CONTEXT_SHA256 = "cbdf00194a21d792a13f7b14c75298b1cf1bff67a479feabe5a413c1876dc599"
 
 
 def test_current_task_records_design_review_then_spec_approval_before_implementation() -> None:
@@ -31,7 +32,7 @@ def test_current_task_records_design_review_then_spec_approval_before_implementa
     review = read_task_json(
         ROOT,
         TASK_ID,
-        Path("reviews") / "REV-0044-r0002.json",
+        Path("reviews") / "REV-0046-r0001.json",
         contract_name="review-record",
     )
 
@@ -59,7 +60,7 @@ def test_current_task_records_design_review_then_spec_approval_before_implementa
     assert current_approval["task_id"] == TASK_ID
     assert current_approval["decision_unit_id"] == "DU-001"
     assert current_approval["base_commit"] == BASE_COMMIT
-    assert current_approval["subject_commit"] == BASE_COMMIT
+    assert current_approval["subject_commit"] == APPROVED_SUBJECT
     assert CLASSIFICATION_INPUT_SHA256 in current_approval["reason"]
 
     frozen_event = next(
@@ -70,13 +71,13 @@ def test_current_task_records_design_review_then_spec_approval_before_implementa
     review_event = next(
         event
         for event in record.events
-        if event["event_type"] == "review_recorded" and event["payload"]["review_id"] == "REV-0044"
+        if event["event_type"] == "review_recorded" and event["payload"]["review_id"] == "REV-0046"
     )
     approval_event = next(
         event
         for event in record.events
         if event["event_type"] == "spec_approved"
-        and event["payload"]["structured_review"]["review_id"] == "REV-0044"
+        and event["payload"]["structured_review"]["review_id"] == "REV-0046"
     )
     implementation_event = next(
         event
@@ -87,7 +88,7 @@ def test_current_task_records_design_review_then_spec_approval_before_implementa
 
     expected_review_binding = {
         "context_sha256": DESIGN_CONTEXT_SHA256,
-        "review_id": "REV-0044",
+        "review_id": "REV-0046",
         "review_stage": "design",
         "revision": 1,
     }
