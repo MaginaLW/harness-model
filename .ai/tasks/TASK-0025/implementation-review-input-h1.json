@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0045",
+  "revision": 1,
+  "task_id": "TASK-0025",
+  "review_stage": "implementation",
+  "reviewer": "/root/task25_h1_impl_review",
+  "recorded_at": "2026-08-27T12:40:31Z",
+  "context_sha256": "69d6b4302b69e7ee3d003aadae58a9a90b3a91c6c43babc1ddb4b97e7fd158ca",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "REQUEST_CHANGES。H1 pre-review V2 本身绑定正确：14/14 required checks passed，五项 manifest-ordered mutation 均 killed，public loader/consumer 可重放，marker 为空，scope 与 verifier independence 均通过。但实施说明未记录已经发生的 H1 subject/action receipt/verifier context/evidence/snapshot/review binding；正向 E2E 仍使用合成 TASK-SELF 与默认 GateFacts，未证明同一 current task 闭环；review stale/tamper 场景也只验证合成 context/record。上述三项均不满足冻结规格的明确 H1 验收，必须修正并对新 subject 重新取得 single-use action approval 和完整 V2。另有测试内私有 helper 命名需消除。",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "title": "实施说明未记录已发生的 H1 治理与证据绑定",
+      "location": {
+        "path": "docs/implementation/chapter-13-review-self-hosting.md",
+        "line": 3
+      },
+      "evidence_refs": [
+        "docs/implementation/chapter-13-review-self-hosting.md:3",
+        "docs/implementation/chapter-13-review-self-hosting.md:8",
+        "docs/implementation/chapter-13-review-self-hosting.md:23",
+        ".ai/tasks/TASK-0025/spec.md:42",
+        ".ai/tasks/TASK-0025/evidence.json",
+        ".ai/tasks/TASK-0025/action-use-9740af8fafb53760e829f94fd3c34d252a742fd42f2928e16272f32ee91d2cfa.md"
+      ],
+      "status": "open"
+    },
+    {
+      "finding_id": "RF-002",
+      "severity": "high",
+      "title": "正向 E2E 未证明同一 current TASK-0025 自举闭环",
+      "location": {
+        "path": "tests/e2e/test_phase_02_self_hosting_scenario.py",
+        "line": 58
+      },
+      "evidence_refs": [
+        "tests/e2e/test_phase_02_self_hosting_scenario.py:58",
+        "tests/e2e/test_phase_02_self_hosting_scenario.py:78",
+        ".ai/tasks/TASK-0025/spec.md:32",
+        ".ai/tasks/TASK-0025/spec.md:103"
+      ],
+      "status": "open"
+    },
+    {
+      "finding_id": "RF-003",
+      "severity": "high",
+      "title": "Review stale/tamper E2E 只验证合成绑定",
+      "location": {
+        "path": "tests/e2e/test_phase_02_self_hosting_scenario.py",
+        "line": 144
+      },
+      "evidence_refs": [
+        "tests/e2e/test_phase_02_self_hosting_scenario.py:144",
+        "tests/e2e/test_phase_02_self_hosting_scenario.py:194",
+        ".ai/tasks/TASK-0025/spec.md:34",
+        ".ai/tasks/TASK-0025/spec.md:136"
+      ],
+      "status": "open"
+    },
+    {
+      "finding_id": "RF-004",
+      "severity": "medium",
+      "title": "测试内 V2 fixture helper 使用私有命名",
+      "location": {
+        "path": "tests/e2e/test_phase_02_self_hosting_scenario.py",
+        "line": 39
+      },
+      "evidence_refs": [
+        "tests/e2e/test_phase_02_self_hosting_scenario.py:39",
+        ".ai/tasks/TASK-0025/spec.md:88"
+      ],
+      "status": "open"
+    }
+  ]
+}
