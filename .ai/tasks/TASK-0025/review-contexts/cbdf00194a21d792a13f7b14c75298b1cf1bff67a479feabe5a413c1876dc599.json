@@ -1,0 +1,51 @@
+{
+  "base_commit": "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb",
+  "branch": "main",
+  "classification_input_sha256": "2d6cc68d05c4b89d0749700f71ddd98c1c3336cf7d227d59425af802c33e4bd4",
+  "content": {
+    "allowed_scope": [
+      "tests/acceptance/__init__.py",
+      "tests/acceptance/test_phase_02_self_hosting.py",
+      "tests/integration/test_phase_02_self_hosting.py",
+      "tests/e2e/test_phase_02_self_hosting_scenario.py",
+      "docs/implementation/chapter-13-review-self-hosting.md",
+      "docs/superpowers/state/chapters/chapter-13.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 13.2 的真实隔离本地 REVIEW + V2 自举试点：新增离线 acceptance、integration 与 E2E 覆盖，证明双阶段审核、独立 verifier、targeted mutation 与受限 Hook/CLI/CI parity 可由当前任务重放，并形成实施说明；仅在单独批准的一次受控 mutation transaction 后生成当前 subject 的 V2 evidence，不宣称 13.3、Chapter 13 或 Phase 02 完成。",
+        "impact_scope": [
+          "tests/acceptance/__init__.py",
+          "tests/acceptance/test_phase_02_self_hosting.py",
+          "tests/integration/test_phase_02_self_hosting.py",
+          "tests/e2e/test_phase_02_self_hosting_scenario.py",
+          "docs/implementation/chapter-13-review-self-hosting.md",
+          "docs/superpowers/state/chapters/chapter-13.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Reclassify under current Policy, freeze a new specification, complete independent design review, and obtain version-bound spec approval before implementation",
+          "Add one narrow acceptance package marker plus offline acceptance and integration coverage for current REVIEW/V2 bindings, verifier independence, required checks, and supported Hook/CLI/CI parity",
+          "Add end-to-end self-hosting success and fail-closed scenarios for actor, mutation, scope, stale review, and tampered evidence facts",
+          "Record a bounded implementation guide and verify the H1 subject with one separately approved targeted-mutation transaction and an independent verifier",
+          "Preserve immutable H1 evidence, then project only 13.2 complete with 13.3 pending; rebind and reverify the H2 subject under a new single-use action approval"
+        ]
+      }
+    ],
+    "goal": "完成 Chapter 13.2 的真实隔离本地 REVIEW + V2 自举试点：新增离线 acceptance、integration 与 E2E 覆盖，证明双阶段审核、独立 verifier、targeted mutation 与受限 Hook/CLI/CI parity 可由当前任务重放，并形成实施说明；仅在单独批准的一次受控 mutation transaction 后生成当前 subject 的 V2 evidence，不宣称 13.3、Chapter 13 或 Phase 02 完成。",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "cbdf00194a21d792a13f7b14c75298b1cf1bff67a479feabe5a413c1876dc599",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "04f951e922a1183b750111b101b9e47532c9bd9261225c289e6faa5237262318",
+  "task_id": "TASK-0025"
+}

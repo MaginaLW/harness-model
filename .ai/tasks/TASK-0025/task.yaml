@@ -9,7 +9,7 @@ allowed_scope:
 base_commit: 7c0bfd807954df8be934d99c7e0a565e4fa2ddcb
 branch: main
 created_at: '2026-08-27T11:32:32Z'
-current_state: BLOCKED
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -102,16 +102,16 @@ forbidden_actions:
 - paid_external_call
 - package_publish
 - external_model_call
-frozen_spec_sha256: 625ac850cfbfedc05c5af636b4f274faacc8325aa806caee7f47f9ec16bb5a4c
+frozen_spec_sha256: 04f951e922a1183b750111b101b9e47532c9bd9261225c289e6faa5237262318
 goal: 完成 Chapter 13.2 的真实隔离本地 REVIEW + V2 自举试点：新增离线 acceptance、integration 与 E2E 覆盖，证明双阶段审核、独立
   verifier、targeted mutation 与受限 Hook/CLI/CI parity 可由当前任务重放，并形成实施说明；仅在单独批准的一次受控 mutation
   transaction 后生成当前 subject 的 V2 evidence，不宣称 13.3、Chapter 13 或 Phase 02 完成。
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: C:/Users/Admin/AppData/Local/Temp/aiflow-task0025-1787830292667
 schema_version: '1.0'
-spec_frozen_at: '2026-08-27T11:43:58Z'
+spec_frozen_at: '2026-08-27T13:11:04Z'
 subject_commit: fe30565e669aa047088b0c25c085effeb2b4bdbc
 task_id: TASK-0025
-updated_at: '2026-08-27T13:06:19Z'
+updated_at: '2026-08-27T13:12:09Z'
 worktree_dirty: false
 worktree_dirty_paths: []
