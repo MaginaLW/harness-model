@@ -1,6 +1,8 @@
 # AI Flow Quickstart
 
-本指南从干净 `git clone` 开始，默认只在当前克隆内创建演示任务记录。它不执行 commit、push、merge、deploy 或任何外部动作。
+本指南从干净 `git clone` 开始，默认只在当前克隆内创建虚拟环境和演示任务记录。它不执行
+commit、push、merge、deploy 或任何外部动作。项目要求 Python 3.11 或更高版本；推荐使用
+仓库根目录已提交的 `uv.lock` 建立可复现环境，同时保留标准 `venv` + `pip` 回退路径。
 
 <!-- required-path: pyproject.toml -->
 <!-- required-path: .ai/policy/routing.yaml -->
@@ -8,31 +10,98 @@
 <!-- verify-command: python -m aiflow --help -->
 <!-- verify-command: python -m pytest tests/unit/test_specification.py -q -->
 
-## PowerShell
+## 推荐：使用锁文件安装
+
+先运行 `uv --version` 确认工具可用；未安装时按
+[uv 官方安装说明](https://docs.astral.sh/uv/getting-started/installation/)选择适合本机的方式，
+本项目不要求全局 Python 包安装。
+
+`uv sync --locked --all-extras` 会在仓库内创建或更新 `.venv`，安装项目及开发依赖，并在
+`pyproject.toml` 与 `uv.lock` 不一致时直接失败。后续命令显式调用项目解释器，不依赖环境
+是否已激活，也不会误用系统 Python。`uv sync` 默认执行精确同步，可能移除 `.venv` 中未被
+锁文件声明的额外包，因此应为本项目使用仓库自己的 `.venv`，不要指向共享环境。
+
+### PowerShell
+
+```powershell
+git clone <REPOSITORY-URL> harness-model
+Set-Location harness-model
+uv lock --check
+uv sync --locked --all-extras
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m aiflow --help
+```
+
+### macOS/Linux
+
+```sh
+git clone <REPOSITORY-URL> harness-model
+cd harness-model
+uv lock --check
+uv sync --locked --all-extras
+.venv/bin/python -m pip check
+.venv/bin/python -m pytest -q
+.venv/bin/python -m aiflow --help
+```
+
+## 无 uv 时的标准安装
+
+若本机没有 `uv`，可使用 Python 自带的 `venv`。editable 安装会让仓库中的 `src/aiflow`
+直接成为当前虚拟环境的命令实现；它不会把 `aiflow` 安装到系统 Python。
+
+### PowerShell
 
 ```powershell
 git clone <REPOSITORY-URL> harness-model
 Set-Location harness-model
 py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-python -m pytest -q
-python -m aiflow --help
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m aiflow --help
 ```
 
-## 平台中立 Python 入口
-
-Windows 可将 `python3` 换成 `py -3.11`；macOS/Linux 通常直接使用 `python3`。激活命令是唯一的平台差异，后续统一使用 `python -m ...` 以确保命中当前虚拟环境。
+### macOS/Linux
 
 ```sh
 git clone <REPOSITORY-URL> harness-model
 cd harness-model
 python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -e ".[dev]"
-python -m pytest -q
-python -m aiflow --help
+.venv/bin/python -m pip install -e ".[dev]"
+.venv/bin/python -m pip check
+.venv/bin/python -m pytest -q
+.venv/bin/python -m aiflow --help
 ```
+
+如需使用后文较短的 `python -m ...` 命令，可在 PowerShell 运行
+`.\.venv\Scripts\Activate.ps1`，或在 macOS/Linux 运行 `. .venv/bin/activate`。激活失败不影响
+使用上面的显式项目解释器入口；尤其在 PowerShell 中，无需为了本项目修改系统 execution
+policy。
+
+## 环境自检与常见问题
+
+在已有克隆中，可先运行下列只读检查。`--dry-run` 只报告同步计划，不安装、删除或升级包。
+
+```powershell
+uv lock --check
+uv sync --locked --all-extras --dry-run
+.\.venv\Scripts\python.exe -c "import sys; print(sys.executable)"
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m aiflow --help
+```
+
+macOS/Linux 将最后三条命令中的 `.\.venv\Scripts\python.exe` 换成
+`.venv/bin/python`。
+
+- `No module named aiflow` 通常表示命中了系统 Python。改用项目解释器，或在项目虚拟环境中
+  重新执行 editable 安装；不要用全局安装掩盖解释器选择错误。
+- `uv sync --locked` 报告锁文件过期时，不要移除 `--locked` 或顺手重写锁文件。先运行
+  `uv lock --check`，再将依赖或锁文件变更作为单独受治理任务处理。
+- `pip` 的新版本提示不代表项目依赖损坏。以 `pip check`、锁文件检查和项目测试结果为准，
+  不需要仅为消除提示而升级项目环境。
+- 若 `uv sync --locked --all-extras --dry-run` 计划修改环境，先检查是否使用了仓库根目录的
+  `.venv` 和当前 `uv.lock`；确认后再运行不带 `--dry-run` 的同步命令。
 
 ## 运行无外部动作示例
 
