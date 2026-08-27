@@ -80,8 +80,8 @@ repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: C:/Users/Admin/AppData/Local/Temp/aiflow-task0024-1787825673320
 schema_version: '1.0'
 spec_frozen_at: '2026-08-27T10:18:09Z'
-subject_commit: af180adb697b560afa6dfae30e404f7bc6125c0e
+subject_commit: 7c2d38e3da84f7b3f246e3350287b8947ed105b5
 task_id: TASK-0024
-updated_at: '2026-08-27T10:41:58Z'
+updated_at: '2026-08-27T10:45:06Z'
 worktree_dirty: false
 worktree_dirty_paths: []
