@@ -1,0 +1,35 @@
+{
+  "context_sha256": "f86af7c240d760af3b4c6366570aebb318f963e1dd27e8d6d2c8af1702a9a639",
+  "findings": [
+    {
+      "evidence_refs": [
+        "docs/superpowers/state/chapters/chapter-13.yaml:146-158",
+        ".ai/tasks/TASK-0024/evidence.json",
+        ".ai/tasks/TASK-0024/implementation-review-context-h1.json",
+        ".ai/tasks/TASK-0024/implementation-review-context-h2.json"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 157,
+        "path": "docs/superpowers/state/chapters/chapter-13.yaml"
+      },
+      "resolution": {
+        "actor": "/root",
+        "reason": "Preserved the exact H1 evidence as immutable task-local snapshot evidence-h1-af180adb697b560a.json. Its Git blob equals the H1 verification commit blob and its canonical SHA-256 equals b4d2bb8789e8e0160bffba5bd4188d0ed526ec52691a875cdb831a189ac6a850; EVD-CH13-13.1-001 now references that snapshot, while current evidence.json remains correctly bound to the later H2 subject.",
+        "resolved_at": "2026-08-27T11:17:17Z"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "H1 chapter evidence reference is overwritten by H2 verification"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-08-27T11:17:17Z",
+  "review_id": "REV-0041",
+  "review_stage": "implementation",
+  "reviewer": "/root/task24_h2_reviewer",
+  "revision": 2,
+  "schema_version": "1.0",
+  "summary": "REQUEST_CHANGES。最终 H2 独立只读审核确认分类、Policy、冻结规格、两份业务文件范围、13.1 completed / 13.2 pending / Phase 02 in_progress 边界、统计投影以及最终 V1 10/10 均正确。唯一 P1 finding 是 Chapter 13 的 H1 evidence 条目仍引用会被 H2 验证覆盖的 evidence.json，但声明的是 H1 canonical hash；当前该路径已含 H2 evidence，导致 H1 引用与哈希不能共同复核。须保存不可变 H1 evidence snapshot、修正引用，并在新 subject 上重新执行 V1 与独立终审。",
+  "task_id": "TASK-0024"
+}

@@ -1,0 +1,255 @@
+{
+  "base_commit": "82a6b857b3ca091b36a86df286ea396d1a6489b7",
+  "branch": "main",
+  "classification_input_sha256": "5519315d67bb37ca1ab08d23910670e5d7177822eaf5ce526fa8b7f67ceb10e9",
+  "content": {
+    "allowed_scope": [
+      "docs/superpowers/state/chapters/chapter-13.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 13.1 治理初始化：建立 Chapter 13 pending 状态，冻结当前仓库未来跨模块 REVIEW/V2 自举试点的候选范围、排除项与 fail-closed 边界；本任务只投影 13.1 为当前治理工作，不进入 13.2 实现或宣称 Phase 02 完成。",
+        "impact_scope": [
+          "docs/superpowers/state/chapters/chapter-13.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Create a pending Chapter 13 state with the six planned tasks and four exit checks",
+          "Freeze the candidate scope, exclusions, failure semantics and V2 requirements for the future 13.2 self-hosting task without authorizing that task",
+          "Update overall totals and pointers for Chapter 13 initialization while keeping Phase 02 in progress",
+          "Project 13.1 complete only after current V1 evidence and independent review, with 13.2 remaining not started"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0024/approvals.json",
+        ".ai/tasks/TASK-0024/classification.json",
+        ".ai/tasks/TASK-0024/design-review-context.json",
+        ".ai/tasks/TASK-0024/design-review-input.json",
+        ".ai/tasks/TASK-0024/events.jsonl",
+        ".ai/tasks/TASK-0024/evidence-h1-af180adb697b560a.json",
+        ".ai/tasks/TASK-0024/evidence.json",
+        ".ai/tasks/TASK-0024/implementation-review-context-h1.json",
+        ".ai/tasks/TASK-0024/implementation-review-context-h2.json",
+        ".ai/tasks/TASK-0024/implementation-review-input-h1.json",
+        ".ai/tasks/TASK-0024/implementation-review-input-h2.json",
+        ".ai/tasks/TASK-0024/review-contexts/21b0aaaf85a79c1be0f62df35942ad2dd33e39c50f3a7b54693799cf262ee9f4.json",
+        ".ai/tasks/TASK-0024/review-contexts/28174b3e7bd6c5e1b7b0424f4b560e4943f8006a3ce4da2b08787ffabdc2031e.json",
+        ".ai/tasks/TASK-0024/review-contexts/f86af7c240d760af3b4c6366570aebb318f963e1dd27e8d6d2c8af1702a9a639.json",
+        ".ai/tasks/TASK-0024/reviews/REV-0039-r0001.json",
+        ".ai/tasks/TASK-0024/reviews/REV-0040-r0001.json",
+        ".ai/tasks/TASK-0024/reviews/REV-0041-r0001.json",
+        ".ai/tasks/TASK-0024/spec.md",
+        ".ai/tasks/TASK-0024/task.yaml",
+        "docs/superpowers/state/chapters/chapter-13.yaml",
+        "docs/superpowers/state/overall.yaml"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/approvals.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/classification.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/design-review-input.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/evidence-h1-af180adb697b560a.json"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/evidence.json"
+        },
+        {
+          "additions": 185,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/implementation-review-context-h1.json"
+        },
+        {
+          "additions": 220,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/implementation-review-context-h2.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/implementation-review-input-h1.json"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/implementation-review-input-h2.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/review-contexts/21b0aaaf85a79c1be0f62df35942ad2dd33e39c50f3a7b54693799cf262ee9f4.json"
+        },
+        {
+          "additions": 185,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/review-contexts/28174b3e7bd6c5e1b7b0424f4b560e4943f8006a3ce4da2b08787ffabdc2031e.json"
+        },
+        {
+          "additions": 220,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/review-contexts/f86af7c240d760af3b4c6366570aebb318f963e1dd27e8d6d2c8af1702a9a639.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/reviews/REV-0039-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/reviews/REV-0040-r0001.json"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/reviews/REV-0041-r0001.json"
+        },
+        {
+          "additions": 117,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/spec.md"
+        },
+        {
+          "additions": 87,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0024/task.yaml"
+        },
+        {
+          "additions": 172,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/superpowers/state/chapters/chapter-13.yaml"
+        },
+        {
+          "additions": 79,
+          "binary": false,
+          "deletions": 11,
+          "path": "docs/superpowers/state/overall.yaml"
+        }
+      ],
+      "totals": {
+        "additions": 1879,
+        "deletions": 11,
+        "files": 21
+      }
+    },
+    "goal": "完成 Chapter 13.1 治理初始化：建立 Chapter 13 pending 状态，冻结当前仓库未来跨模块 REVIEW/V2 自举试点的候选范围、排除项与 fail-closed 边界；本任务只投影 13.1 为当前治理工作，不进入 13.2 实现或宣称 Phase 02 完成。",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0024",
+        "--actor",
+        "/root"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "90d5e83147721430bd9ddbbbebd86f2b110eef46f833a6f11263599b681173b2",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "c3cbf5d9cd8be64dc3aac6e6381f58759eba8127edf14b8ee630e195f2281a27",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "57d8f40d00165035dad74f0603299a2c77fd8b01450516096867af978dd9e263",
+  "subject_commit": "7965285736cf790f6fe6d512f242a837f2e5b08c",
+  "task_id": "TASK-0024"
+}
