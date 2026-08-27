@@ -1,0 +1,597 @@
+{
+  "base_commit": "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb",
+  "branch": "main",
+  "classification_input_sha256": "2d6cc68d05c4b89d0749700f71ddd98c1c3336cf7d227d59425af802c33e4bd4",
+  "content": {
+    "allowed_scope": [
+      "tests/acceptance/__init__.py",
+      "tests/acceptance/test_phase_02_self_hosting.py",
+      "tests/integration/test_phase_02_self_hosting.py",
+      "tests/e2e/test_phase_02_self_hosting_scenario.py",
+      "docs/implementation/chapter-13-review-self-hosting.md",
+      "docs/superpowers/state/chapters/chapter-13.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完成 Chapter 13.2 的真实隔离本地 REVIEW + V2 自举试点：新增离线 acceptance、integration 与 E2E 覆盖，证明双阶段审核、独立 verifier、targeted mutation 与受限 Hook/CLI/CI parity 可由当前任务重放，并形成实施说明；仅在单独批准的一次受控 mutation transaction 后生成当前 subject 的 V2 evidence，不宣称 13.3、Chapter 13 或 Phase 02 完成。",
+        "impact_scope": [
+          "tests/acceptance/__init__.py",
+          "tests/acceptance/test_phase_02_self_hosting.py",
+          "tests/integration/test_phase_02_self_hosting.py",
+          "tests/e2e/test_phase_02_self_hosting_scenario.py",
+          "docs/implementation/chapter-13-review-self-hosting.md",
+          "docs/superpowers/state/chapters/chapter-13.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Reclassify under current Policy, freeze a new specification, complete independent design review, and obtain version-bound spec approval before implementation",
+          "Add one narrow acceptance package marker plus offline acceptance and integration coverage for current REVIEW/V2 bindings, verifier independence, required checks, and supported Hook/CLI/CI parity",
+          "Add end-to-end self-hosting success and fail-closed scenarios for actor, mutation, scope, stale review, and tampered evidence facts",
+          "Record a bounded implementation guide and verify the H1 subject with one separately approved targeted-mutation transaction and an independent verifier",
+          "Preserve immutable H1 evidence, then project only 13.2 complete with 13.3 pending; rebind and reverify the H2 subject under a new single-use action approval"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0025/action-use-9740af8fafb53760e829f94fd3c34d252a742fd42f2928e16272f32ee91d2cfa.md",
+        ".ai/tasks/TASK-0025/action-use-f743b0607e76d4c2dde436d9029919936c0806785320a3bb823336f876e06aa6.md",
+        ".ai/tasks/TASK-0025/action-v2-targeted-mutation-f08b0b8c.json",
+        ".ai/tasks/TASK-0025/action-v2-targeted-mutation-fe30565e.json",
+        ".ai/tasks/TASK-0025/approvals.json",
+        ".ai/tasks/TASK-0025/classification.json",
+        ".ai/tasks/TASK-0025/design-review-context-r2.json",
+        ".ai/tasks/TASK-0025/design-review-context-r3.json",
+        ".ai/tasks/TASK-0025/design-review-context.json",
+        ".ai/tasks/TASK-0025/design-review-input-r2.json",
+        ".ai/tasks/TASK-0025/design-review-input-r3.json",
+        ".ai/tasks/TASK-0025/design-review-input.json",
+        ".ai/tasks/TASK-0025/events.jsonl",
+        ".ai/tasks/TASK-0025/evidence-h1-f08b0b8c.json",
+        ".ai/tasks/TASK-0025/evidence.json",
+        ".ai/tasks/TASK-0025/h1-f08b0b8c-final-record.md",
+        ".ai/tasks/TASK-0025/historical-snapshot-h1-fe30565-record.md",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/01-task.yaml",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/02-spec.md",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/03-events.jsonl",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/04-classification.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/05-approvals.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/06-action.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/07-action-receipt.md",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/08-pre-evidence.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/09-verifier-context.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/10-design-context.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/11-implementation-context.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/12-design-review.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/13-implementation-review.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/14-run-evidence.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/15-mutation-evidence.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/16-mut-001.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/17-mut-002.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/18-mut-003.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/19-mut-004.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/20-mut-005.json",
+        ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/manifest.json",
+        ".ai/tasks/TASK-0025/implementation-review-context-h1-r2.json",
+        ".ai/tasks/TASK-0025/implementation-review-context-h1.json",
+        ".ai/tasks/TASK-0025/implementation-review-input-h1-r2.json",
+        ".ai/tasks/TASK-0025/implementation-review-input-h1.json",
+        ".ai/tasks/TASK-0025/review-contexts/0a3c60fc9a5f675317a9d4ede180b3a72a6b0fa556bd7b12fdb2a3bcec360472.json",
+        ".ai/tasks/TASK-0025/review-contexts/1833cc40e1f5a4bdd5e7ce59e2233965325dce8b30ecf1c94ddfa45586b790e7.json",
+        ".ai/tasks/TASK-0025/review-contexts/69d6b4302b69e7ee3d003aadae58a9a90b3a91c6c43babc1ddb4b97e7fd158ca.json",
+        ".ai/tasks/TASK-0025/review-contexts/cbdf00194a21d792a13f7b14c75298b1cf1bff67a479feabe5a413c1876dc599.json",
+        ".ai/tasks/TASK-0025/review-contexts/cff3fbfa9e2c6dad268b320060dd3d57bbcc4d3b8f6106d850d7410645ab905f.json",
+        ".ai/tasks/TASK-0025/reviews/REV-0043-r0001.json",
+        ".ai/tasks/TASK-0025/reviews/REV-0044-r0001.json",
+        ".ai/tasks/TASK-0025/reviews/REV-0044-r0002.json",
+        ".ai/tasks/TASK-0025/reviews/REV-0045-r0001.json",
+        ".ai/tasks/TASK-0025/reviews/REV-0046-r0001.json",
+        ".ai/tasks/TASK-0025/reviews/REV-0047-r0001.json",
+        ".ai/tasks/TASK-0025/scope-expansion-resolution.md",
+        ".ai/tasks/TASK-0025/spec.md",
+        ".ai/tasks/TASK-0025/task.yaml",
+        ".ai/tasks/TASK-0025/verification-unavailable-resolution.md",
+        ".ai/tasks/TASK-0025/verifier-contexts/0ecbe5fba9605ed6906e9bab2ab939e4bd004584f139d49da31ac4807673e8fd.json",
+        ".ai/tasks/TASK-0025/verifier-contexts/918aa3884f12587602c12ca394c4848114d4f76010b6e75059a7daa509a6b9f9.json",
+        "docs/implementation/chapter-13-review-self-hosting.md",
+        "docs/superpowers/state/chapters/chapter-13.yaml",
+        "docs/superpowers/state/overall.yaml",
+        "tests/acceptance/__init__.py",
+        "tests/acceptance/test_phase_02_self_hosting.py",
+        "tests/e2e/test_phase_02_self_hosting_scenario.py",
+        "tests/integration/test_phase_02_self_hosting.py"
+      ],
+      "files": [
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/action-use-9740af8fafb53760e829f94fd3c34d252a742fd42f2928e16272f32ee91d2cfa.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/action-use-f743b0607e76d4c2dde436d9029919936c0806785320a3bb823336f876e06aa6.md"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/action-v2-targeted-mutation-f08b0b8c.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/action-v2-targeted-mutation-fe30565e.json"
+        },
+        {
+          "additions": 73,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/approvals.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/classification.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/design-review-context-r2.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/design-review-context-r3.json"
+        },
+        {
+          "additions": 49,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/design-review-context.json"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/design-review-input-r2.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/design-review-input-r3.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/design-review-input.json"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/events.jsonl"
+        },
+        {
+          "additions": 272,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/evidence-h1-f08b0b8c.json"
+        },
+        {
+          "additions": 272,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/evidence.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/h1-f08b0b8c-final-record.md"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshot-h1-fe30565-record.md"
+        },
+        {
+          "additions": 117,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/01-task.yaml"
+        },
+        {
+          "additions": 148,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/02-spec.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/03-events.jsonl"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/04-classification.json"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/05-approvals.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/06-action.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/07-action-receipt.md"
+        },
+        {
+          "additions": 268,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/08-pre-evidence.json"
+        },
+        {
+          "additions": 98,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/09-verifier-context.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/10-design-context.json"
+        },
+        {
+          "additions": 275,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/11-implementation-context.json"
+        },
+        {
+          "additions": 36,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/12-design-review.json"
+        },
+        {
+          "additions": 78,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/13-implementation-review.json"
+        },
+        {
+          "additions": 268,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/14-run-evidence.json"
+        },
+        {
+          "additions": 108,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/15-mutation-evidence.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/16-mut-001.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/17-mut-002.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/18-mut-003.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/19-mut-004.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/20-mut-005.json"
+        },
+        {
+          "additions": 380,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/manifest.json"
+        },
+        {
+          "additions": 520,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/implementation-review-context-h1-r2.json"
+        },
+        {
+          "additions": 275,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/implementation-review-context-h1.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/implementation-review-input-h1-r2.json"
+        },
+        {
+          "additions": 78,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/implementation-review-input-h1.json"
+        },
+        {
+          "additions": 520,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/review-contexts/0a3c60fc9a5f675317a9d4ede180b3a72a6b0fa556bd7b12fdb2a3bcec360472.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/review-contexts/1833cc40e1f5a4bdd5e7ce59e2233965325dce8b30ecf1c94ddfa45586b790e7.json"
+        },
+        {
+          "additions": 275,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/review-contexts/69d6b4302b69e7ee3d003aadae58a9a90b3a91c6c43babc1ddb4b97e7fd158ca.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/review-contexts/cbdf00194a21d792a13f7b14c75298b1cf1bff67a479feabe5a413c1876dc599.json"
+        },
+        {
+          "additions": 49,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/review-contexts/cff3fbfa9e2c6dad268b320060dd3d57bbcc4d3b8f6106d850d7410645ab905f.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/reviews/REV-0043-r0001.json"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/reviews/REV-0044-r0001.json"
+        },
+        {
+          "additions": 36,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/reviews/REV-0044-r0002.json"
+        },
+        {
+          "additions": 78,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/reviews/REV-0045-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/reviews/REV-0046-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/reviews/REV-0047-r0001.json"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/scope-expansion-resolution.md"
+        },
+        {
+          "additions": 186,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/spec.md"
+        },
+        {
+          "additions": 117,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/task.yaml"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/verification-unavailable-resolution.md"
+        },
+        {
+          "additions": 98,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/verifier-contexts/0ecbe5fba9605ed6906e9bab2ab939e4bd004584f139d49da31ac4807673e8fd.json"
+        },
+        {
+          "additions": 136,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0025/verifier-contexts/918aa3884f12587602c12ca394c4848114d4f76010b6e75059a7daa509a6b9f9.json"
+        },
+        {
+          "additions": 122,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/implementation/chapter-13-review-self-hosting.md"
+        },
+        {
+          "additions": 57,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/superpowers/state/chapters/chapter-13.yaml"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 5,
+          "path": "docs/superpowers/state/overall.yaml"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/acceptance/__init__.py"
+        },
+        {
+          "additions": 84,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/acceptance/test_phase_02_self_hosting.py"
+        },
+        {
+          "additions": 557,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/e2e/test_phase_02_self_hosting_scenario.py"
+        },
+        {
+          "additions": 197,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_phase_02_self_hosting.py"
+        }
+      ],
+      "totals": {
+        "additions": 6841,
+        "deletions": 7,
+        "files": 66
+      }
+    },
+    "goal": "完成 Chapter 13.2 的真实隔离本地 REVIEW + V2 自举试点：新增离线 acceptance、integration 与 E2E 覆盖，证明双阶段审核、独立 verifier、targeted mutation 与受限 Hook/CLI/CI parity 可由当前任务重放，并形成实施说明；仅在单独批准的一次受控 mutation transaction 后生成当前 subject 的 V2 evidence，不宣称 13.3、Chapter 13 或 Phase 02 完成。",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0025",
+        "--actor",
+        "/root/task25_h2_verifier_r2"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "63a0a3df4196b1cec9b2f79e5f0e21065c54acf990f8869b5bc2bc63eccfd6e7",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "04f951e922a1183b750111b101b9e47532c9bd9261225c289e6faa5237262318",
+  "subject_commit": "7191ca4c9c0bc23b75af9599ebb381ed077aa081",
+  "task_id": "TASK-0025",
+  "verification_snapshot_sha256": "e95517a7be2758c2551b5c78479b0f1a3b1407082a845c9808e0af50e71ac134"
+}
