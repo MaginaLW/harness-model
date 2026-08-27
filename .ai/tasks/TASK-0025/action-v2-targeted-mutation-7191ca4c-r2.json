@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "2d6cc68d05c4b89d0749700f71ddd98c1c3336cf7d227d59425af802c33e4bd4",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0025",
+  "parameter_summary": "Run the five fixed Phase 02 critical mutations once in a new H2 V2 collection against state-projection subject 7191ca4c9c0bc23b75af9599ebb381ed077aa081, after preserving the prior integration-timeout failure, using at most five TASK-0025-owned isolated temporary worktrees and writing only TASK-0025-local evidence and logs.",
+  "subject_commit": "7191ca4c9c0bc23b75af9599ebb381ed077aa081",
+  "conditions": [
+    "Use only the committed .ai/mutations/phase-02-critical-manifest.json entries MUT-V2-001 through MUT-V2-005 in manifest order; run each baseline detector and mutant detector exactly once.",
+    "Create and clean up at most five TASK-0025-owned isolated temporary worktrees; do not alter the main worktree or any non-task-owned path.",
+    "Do not push, merge, deploy, publish, access credentials, call external models or paid services, or make network calls.",
+    "Fail closed before launch if task, decision unit, base, subject, frozen specification, Policy, classification, approval, receipt, manifest, or ledger bindings differ.",
+    "Launch, failure, or interruption consumes this authorization once; do not retry or reuse it for another subject.",
+    "Treat the prior f3b1f405 action, failed H2 evidence, b92c5772 mutation artifact and all H1 action/evidence/review records as historical only; do not reuse them as current proof, and preserve them without rewriting."
+  ],
+  "expires_at": "2026-08-29T12:00:00Z",
+  "single_use": true
+}
