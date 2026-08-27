@@ -69,5 +69,21 @@
     "spec_sha256": "04f951e922a1183b750111b101b9e47532c9bd9261225c289e6faa5237262318",
     "subject_commit": "f08b0b8cfc3c6b3f81ff4ddba0dc68cb6b2b3694",
     "task_id": "TASK-0025"
+  },
+  {
+    "action_sha256": "f3b1f40508385614ba1dcdcee97b8bbfb65b979948d652220a0be3c747dad1ff",
+    "actor": "/user",
+    "approval_type": "action",
+    "approved_at": "2026-08-27T14:38:26Z",
+    "base_commit": "7c0bfd807954df8be934d99c7e0a565e4fa2ddcb",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-29T12:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User approved TASK-0025 action digest f3b1f40508385614ba1dcdcee97b8bbfb65b979948d652220a0be3c747dad1ff for subject 7191ca4c9c0bc23b75af9599ebb381ed077aa081 as one H2 targeted mutation; single-use and no remote operations.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "04f951e922a1183b750111b101b9e47532c9bd9261225c289e6faa5237262318",
+    "subject_commit": "7191ca4c9c0bc23b75af9599ebb381ed077aa081",
+    "task_id": "TASK-0025"
   }
 ]
