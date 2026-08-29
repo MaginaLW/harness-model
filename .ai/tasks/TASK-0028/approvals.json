@@ -11,5 +11,21 @@
     "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
     "subject_commit": "3f3ead9eeb3cc1039be58627994a3a0d58102534",
     "task_id": "TASK-0028"
+  },
+  {
+    "action_sha256": "7dcbd975b1721e6e314e8955b012aa7b5b82dcdacade06b1d428214c3e39c0dc",
+    "actor": "human-user",
+    "approval_type": "action",
+    "approved_at": "2026-08-29T13:48:04Z",
+    "base_commit": "3f3ead9eeb3cc1039be58627994a3a0d58102534",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-30T12:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved action digest 7dcbd975b1721e6e314e8955b012aa7b5b82dcdacade06b1d428214c3e39c0dc for subject b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d as one H1 V2 targeted-mutation transaction; single-use, excluding CI simulation, H2, push, merge, deploy, credentials, network, external models and paid calls.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
+    "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
+    "task_id": "TASK-0028"
   }
 ]
