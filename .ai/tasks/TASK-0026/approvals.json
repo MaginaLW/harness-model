@@ -11,5 +11,19 @@
     "spec_sha256": "4fe15dd34b934e8469f64f303b700b61d2ceddf2e30c40049e44aa3650dedcae",
     "subject_commit": "cfd447ef7c997bd2ad80d778d8229d1420ef0afb",
     "task_id": "TASK-0026"
+  },
+  {
+    "actor": "human-user",
+    "approval_type": "code",
+    "approved_at": "2026-08-29T06:56:22Z",
+    "base_commit": "8503660358c20a065a4d2101e682fb58654ba2c1",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "746fd40a9622eb24b1332c4cdb5584629d26eb7d181e697365a1996c0876339e",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved continuing after the bounded fix; current V1 evidence passed and independent implementation review REV-0050 approved with no findings.",
+    "schema_version": "1.0",
+    "spec_sha256": "4fe15dd34b934e8469f64f303b700b61d2ceddf2e30c40049e44aa3650dedcae",
+    "subject_commit": "10393cf59cd8dc1b1306f5295a75b84fc072f423",
+    "task_id": "TASK-0026"
   }
 ]

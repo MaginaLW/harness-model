@@ -1,0 +1,199 @@
+{
+  "base_commit": "8503660358c20a065a4d2101e682fb58654ba2c1",
+  "branch": "main",
+  "classification_input_sha256": "121aa42e0065e96e41c28a2df1cdc5bdf4c77dd6fb517c3856c05349bde28d72",
+  "content": {
+    "allowed_scope": [
+      "docs/operations/quickstart.md",
+      ".gitattributes"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完善项目本地可复现安装与环境自检说明，并确保按字节哈希绑定的历史证据在 Windows 下以 LF 原样检出",
+        "impact_scope": [
+          "docs/operations/quickstart.md",
+          ".gitattributes"
+        ],
+        "planned_actions": [
+          "在 Quickstart 中增加基于 uv.lock 的推荐安装路径，同时保留标准 venv/pip 回退路径",
+          "明确 Windows 与 POSIX 下无需激活环境的项目解释器调用方式",
+          "增加锁文件、依赖完整性和解释器来源的只读自检命令及故障说明",
+          "在根 .gitattributes 中仅为历史 snapshot 路径声明 text eol=lf，阻止 core.autocrlf 改写哈希绑定字节"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0026/approvals.json",
+        ".ai/tasks/TASK-0026/classification.json",
+        ".ai/tasks/TASK-0026/design-review-context.json",
+        ".ai/tasks/TASK-0026/design-review-input.json",
+        ".ai/tasks/TASK-0026/events.jsonl",
+        ".ai/tasks/TASK-0026/evidence.json",
+        ".ai/tasks/TASK-0026/review-contexts/008d74d6b50e79612853bd282602202743724756f027d8234e4344c33148bd03.json",
+        ".ai/tasks/TASK-0026/reviews/REV-0049-r0001.json",
+        ".ai/tasks/TASK-0026/scope-expansion-resolution.md",
+        ".ai/tasks/TASK-0026/spec.md",
+        ".ai/tasks/TASK-0026/task.yaml",
+        ".gitattributes",
+        "docs/operations/quickstart.md"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/approvals.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/classification.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/design-review-input.json"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/evidence.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/review-contexts/008d74d6b50e79612853bd282602202743724756f027d8234e4344c33148bd03.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/reviews/REV-0049-r0001.json"
+        },
+        {
+          "additions": 34,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/scope-expansion-resolution.md"
+        },
+        {
+          "additions": 67,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/spec.md"
+        },
+        {
+          "additions": 78,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0026/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": ".gitattributes"
+        },
+        {
+          "additions": 82,
+          "binary": false,
+          "deletions": 13,
+          "path": "docs/operations/quickstart.md"
+        }
+      ],
+      "totals": {
+        "additions": 619,
+        "deletions": 13,
+        "files": 13
+      }
+    },
+    "goal": "完善项目本地可复现安装与环境自检说明，并确保按字节哈希绑定的历史证据在 Windows 下以 LF 原样检出",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0026",
+        "--actor",
+        "/root"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "7147c1d126976575ce15f033caaefebc7ee7ce8c1ac1d024638d2e4de82897e1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "746fd40a9622eb24b1332c4cdb5584629d26eb7d181e697365a1996c0876339e",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "4fe15dd34b934e8469f64f303b700b61d2ceddf2e30c40049e44aa3650dedcae",
+  "subject_commit": "10393cf59cd8dc1b1306f5295a75b84fc072f423",
+  "task_id": "TASK-0026"
+}
