@@ -57,5 +57,21 @@
     "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
     "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
     "task_id": "TASK-0028"
+  },
+  {
+    "action_sha256": "8f5f45c9a7dd54bc6d7e6548601307a8bad1a21cd81c5c5c640cc6983a238cbc",
+    "actor": "human-user",
+    "approval_type": "action",
+    "approved_at": "2026-08-29T18:03:18Z",
+    "base_commit": "3f3ead9eeb3cc1039be58627994a3a0d58102534",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-31T12:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved canonical action digest 8f5f45c9a7dd54bc6d7e6548601307a8bad1a21cd81c5c5c640cc6983a238cbc for one TASK-0028 H1 CI empty-run-directory cleanup; exact residual target, one non-recursive Directory.Delete invocation, no fallback, excluding CI rerun, mutation, H2, push, merge, deploy, network, credentials, external models, paid calls and task close.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
+    "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
+    "task_id": "TASK-0028"
   }
 ]
