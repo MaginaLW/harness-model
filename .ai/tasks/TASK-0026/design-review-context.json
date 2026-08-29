@@ -1,0 +1,40 @@
+{
+  "base_commit": "8503660358c20a065a4d2101e682fb58654ba2c1",
+  "branch": "main",
+  "classification_input_sha256": "121aa42e0065e96e41c28a2df1cdc5bdf4c77dd6fb517c3856c05349bde28d72",
+  "content": {
+    "allowed_scope": [
+      "docs/operations/quickstart.md",
+      ".gitattributes"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完善项目本地可复现安装与环境自检说明，并确保按字节哈希绑定的历史证据在 Windows 下以 LF 原样检出",
+        "impact_scope": [
+          "docs/operations/quickstart.md",
+          ".gitattributes"
+        ],
+        "planned_actions": [
+          "在 Quickstart 中增加基于 uv.lock 的推荐安装路径，同时保留标准 venv/pip 回退路径",
+          "明确 Windows 与 POSIX 下无需激活环境的项目解释器调用方式",
+          "增加锁文件、依赖完整性和解释器来源的只读自检命令及故障说明",
+          "在根 .gitattributes 中仅为历史 snapshot 路径声明 text eol=lf，阻止 core.autocrlf 改写哈希绑定字节"
+        ]
+      }
+    ],
+    "goal": "完善项目本地可复现安装与环境自检说明，并确保按字节哈希绑定的历史证据在 Windows 下以 LF 原样检出",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "008d74d6b50e79612853bd282602202743724756f027d8234e4344c33148bd03",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "4fe15dd34b934e8469f64f303b700b61d2ceddf2e30c40049e44aa3650dedcae",
+  "task_id": "TASK-0026"
+}

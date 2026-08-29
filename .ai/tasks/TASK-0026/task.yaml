@@ -1,18 +1,57 @@
-schema_version: '1.0'
-task_id: TASK-0026
-goal: 完善项目本地可复现安装与环境自检说明，优先使用 uv.lock 和仓库虚拟环境，避免误用未安装 aiflow 的系统 Python
-repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
-branch: main
-base_commit: 8503660358c20a065a4d2101e682fb58654ba2c1
-subject_commit: 8503660358c20a065a4d2101e682fb58654ba2c1
-worktree_dirty: true
-worktree_dirty_paths:
-- .reasonix/desktop-topic-auto-title-meta.json
-- .reasonix/desktop-topic-created-at.json
-- .reasonix/desktop-topic-title-sources.json
-- .reasonix/desktop-topic-titles.json
-allowed_scope: &id001
+allowed_scope:
 - docs/operations/quickstart.md
+- .gitattributes
+base_commit: 8503660358c20a065a4d2101e682fb58654ba2c1
+branch: main
+created_at: '2026-08-27T16:54:00Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 完善项目本地可复现安装与环境自检说明，并确保按字节哈希绑定的历史证据在 Windows 下以 LF 原样检出
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - docs/operations/quickstart.md
+  - .gitattributes
+  inputs:
+  - pyproject.toml
+  - uv.lock
+  - docs/operations/quickstart.md
+  - .ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/manifest.json
+  - .ai/tasks/TASK-0025/historical-snapshots/h1-fe30565/files/
+  permission_requirements: []
+  planned_actions:
+  - 在 Quickstart 中增加基于 uv.lock 的推荐安装路径，同时保留标准 venv/pip 回退路径
+  - 明确 Windows 与 POSIX 下无需激活环境的项目解释器调用方式
+  - 增加锁文件、依赖完整性和解释器来源的只读自检命令及故障说明
+  - 在根 .gitattributes 中仅为历史 snapshot 路径声明 text eol=lf，阻止 core.autocrlf 改写哈希绑定字节
+  protections:
+    dry_run: false
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0026
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - uv lock --check
+  - uv sync --locked --all-extras --dry-run
+  - .venv 项目解释器执行 pip check、aiflow help 与文档追踪测试
+  - 核对历史 bundle 工作树字节 SHA-256 与 manifest，并运行 phase-02 self-hosting E2E
 forbidden_actions:
 - push
 - merge
@@ -22,50 +61,18 @@ forbidden_actions:
 - paid_external_call
 - package_publish
 - external_model_call
-current_state: IMPLEMENTING
-created_at: '2026-08-27T16:54:00Z'
-updated_at: '2026-08-27T16:59:12Z'
-decision_units:
-- schema_version: '1.0'
-  task_id: TASK-0026
-  decision_unit_id: DU-001
-  goal: 完善项目本地可复现安装与环境自检说明，优先使用 uv.lock 和仓库虚拟环境，避免误用未安装 aiflow 的系统 Python
-  inputs:
-  - pyproject.toml
-  - uv.lock
-  - docs/operations/quickstart.md
-  planned_actions:
-  - 在 Quickstart 中增加基于 uv.lock 的推荐安装路径，同时保留标准 venv/pip 回退路径
-  - 明确 Windows 与 POSIX 下无需激活环境的项目解释器调用方式
-  - 增加锁文件、依赖完整性和解释器来源的只读自检命令及故障说明
-  impact_scope: *id001
-  reversibility: reversible
-  verification_methods:
-  - uv lock --check
-  - uv sync --locked --all-extras --dry-run
-  - .venv 项目解释器执行 pip check、aiflow help 与文档追踪测试
-  external_side_effects: []
-  permission_requirements: []
-  scope:
-    clear: true
-  impact:
-    level: low
-  protections:
-    verified_backup: true
-    dry_run: false
-  verification:
-    automatic: true
-    tools_missing: false
-  impact_categories:
-  - documentation
-  business_direction_count: 1
-  change_characteristics:
-    mechanical: false
-    behavior_changed: false
-    code_modified: false
-    interaction_scope: local
-    regression_risk: false
-    error_detectability: high
+frozen_spec_sha256: 4fe15dd34b934e8469f64f303b700b61d2ceddf2e30c40049e44aa3650dedcae
+goal: 完善项目本地可复现安装与环境自检说明，并确保按字节哈希绑定的历史证据在 Windows 下以 LF 原样检出
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
-frozen_spec_sha256: 5579019f12b68455cb8d877865dafe350e853c5c0b0026aea729366294204843
-spec_frozen_at: '2026-08-27T16:56:00Z'
+schema_version: '1.0'
+spec_frozen_at: '2026-08-27T17:24:38Z'
+subject_commit: cfd447ef7c997bd2ad80d778d8229d1420ef0afb
+task_id: TASK-0026
+updated_at: '2026-08-29T06:35:29Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- .reasonix/desktop-topic-auto-title-meta.json
+- .reasonix/desktop-topic-created-at.json
+- .reasonix/desktop-topic-title-sources.json
+- .reasonix/desktop-topic-titles.json

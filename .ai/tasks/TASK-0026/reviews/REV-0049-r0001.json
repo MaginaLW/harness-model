@@ -1,0 +1,13 @@
+{
+  "context_sha256": "008d74d6b50e79612853bd282602202743724756f027d8234e4344c33148bd03",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-27T17:25:47Z",
+  "review_id": "REV-0049",
+  "review_stage": "design",
+  "reviewer": "/codex/task26_design_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE。扩展后的规格把业务写范围严格限制为 Quickstart 与根 .gitattributes。首次 V1 失败已由原始 Git blob、manifest 和 Windows worktree 三方摘要证明为 core.autocrlf checkout 转换，而不是依赖、Quickstart、历史 artifact 或 expected hash 变化。仅对 .ai/tasks/*/historical-snapshots/** 声明 text eol=lf 能保留文本属性并在所有平台物化现有 LF blob；规格同时禁止修改 TASK-0025 snapshot、manifest、测试和证据，要求 20/20 原摘要、focused E2E 与完整 V1 共同通过。uv 精确同步的额外包移除风险已在文档中显式限制到仓库专用 .venv，pip 回退与非全局入口保留。未发现阻断 finding。",
+  "task_id": "TASK-0026"
+}

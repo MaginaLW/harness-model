@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "human-user",
+    "approval_type": "spec",
+    "approved_at": "2026-08-29T06:35:20Z",
+    "base_commit": "8503660358c20a065a4d2101e682fb58654ba2c1",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved continuing the frozen REVIEW/V1 specification and bounded LF checkout fix.",
+    "schema_version": "1.0",
+    "spec_sha256": "4fe15dd34b934e8469f64f303b700b61d2ceddf2e30c40049e44aa3650dedcae",
+    "subject_commit": "cfd447ef7c997bd2ad80d778d8229d1420ef0afb",
+    "task_id": "TASK-0026"
+  }
+]
