@@ -8,7 +8,7 @@ attestation 与 Gate 分层部分，并允许进入本地只读 Gate。该批准
 临时目录创建或清理、H2 state 投影、第二或第三次 targeted mutation、push、merge、deploy、
 task close 或其他外部动作。
 
-## 当前绑定
+## 背景
 
 - Base commit：`3f3ead9eeb3cc1039be58627994a3a0d58102534`
 - Subject commit：`b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d`
@@ -44,7 +44,7 @@ task close 或其他外部动作。
 
 除 task-local append-only governance/evidence 外，H1 业务改动只涉及上述五个文件。
 
-## 语义与安全边界
+## 语义变更
 
 V2 CI 不再生成固定的 mutation-missing sentinel。它只接受 current、local、final、passed、
 双审核和 verifier context 均有效的 V2 source evidence；source 无效时在 runner 前拒绝。通过后，
@@ -57,25 +57,27 @@ External CI evidence 仍保持 `pre_implementation_review`，只证明本次执�
 
 ## 证据
 
-- H1 final evidence：`.ai/tasks/TASK-0028/evidence-h1-b7c7fb4a.json`，文件 SHA-256
+- 已验证：H1 final evidence `.ai/tasks/TASK-0028/evidence-h1-b7c7fb4a.json`，文件 SHA-256
   `4fc5729ef5e40f468b8966e35696a84e47b2de05e363d517293ac9e2f9823662`；schema 2.0、
   `mode=local`、`phase=final`、`conclusion=passed`。
-- Verification snapshot：
+- 已验证：Verification snapshot：
   `5d761ba9f24dbbb2f9746bc99c4a5f292fb04390039605c57a11b1731dcfcafb`；Verifier
   `/root/task28_h1_verifier`，context
   `1faa4f460ad3f666398707c9570e34a17a9e19d6333c172629de4bb9b81295df`。
-- 14/14 required checks passed；`MUT-V2-001`–`MUT-V2-005` 全部 killed；
+- 已验证：14/14 required checks passed；`MUT-V2-001`–`MUT-V2-005` 全部 killed；
   `unverified_scenarios: []`。单次 H1 mutation action digest
   `7dcbd975b1721e6e314e8955b012aa7b5b82dcdacade06b1d428214c3e39c0dc` 已且仅已消费一次。
-- Unit：1079 passed、3 skipped；完整 regression 与 coverage：1560 passed、4 skipped；
+- 已验证：Unit 1079 passed、3 skipped；完整 regression 与 coverage 1560 passed、4 skipped；
   integration：450 passed、1 skipped；acceptance：9 passed。所有 skip 均为既有 Windows
   symlink 创建限制。
-- Diff coverage 为 94%（95 个变更行中 90 个覆盖）；Ruff check、format check、mypy、
+- 已验证：Diff coverage 为 94%（95 个变更行中 90 个覆盖）；Ruff check、format check、mypy、
   AI Flow validate/scope 与 `git diff --check` 均通过。
-- 独立实现审核 `REV-0056` 为 `APPROVE`，findings 为空，并绑定相同 subject、snapshot、规格、
+- 已验证：独立实现审核 `REV-0056` 为 `APPROVE`，findings 为空，并绑定相同 subject、snapshot、规格、
   Policy 与 classification。
+- 未验证：隔离 CI simulation、H2 state 投影、H2 fresh V2、push、merge、deploy、远程 CI 与
+  task close；这些步骤仍受后续独立授权和治理门约束。
 
-## 风险与未验证项
+## 风险
 
 - 隔离 CI simulation 尚未执行；它需要在 code-approval attestation 形成后生成第二个精确 action，
   再取得用户单独批准。当前 code approval 不包含该授权。
