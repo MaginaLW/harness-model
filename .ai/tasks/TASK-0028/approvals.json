@@ -41,5 +41,21 @@
     "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
     "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
     "task_id": "TASK-0028"
+  },
+  {
+    "action_sha256": "f1d0fec813c2f8f00ede4ba2e9ff7b7c7d0882718f597714a266a5c46ebeb228",
+    "actor": "human-user",
+    "approval_type": "action",
+    "approved_at": "2026-08-29T17:17:27Z",
+    "base_commit": "3f3ead9eeb3cc1039be58627994a3a0d58102534",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-31T12:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved canonical action digest f1d0fec813c2f8f00ede4ba2e9ff7b7c7d0882718f597714a266a5c46ebeb228 for one TASK-0028 H1 isolated CI simulation bound to subject b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d and code-approval attestation f35d3094a8385806abff2996691e5224bedb00e2; single-use, exact OS-temp targets and cleanup only, excluding H2, targeted mutation, push, merge, deploy, network, credentials, external models, paid calls and task close.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
+    "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
+    "task_id": "TASK-0028"
   }
 ]
