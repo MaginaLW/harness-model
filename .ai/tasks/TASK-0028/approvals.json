@@ -27,5 +27,19 @@
     "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
     "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
     "task_id": "TASK-0028"
+  },
+  {
+    "actor": "human-user",
+    "approval_type": "code",
+    "approved_at": "2026-08-29T17:02:25Z",
+    "base_commit": "3f3ead9eeb3cc1039be58627994a3a0d58102534",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "a2589f30cdbf763fd930d924b2829f7ba2158ba4b4dd0841760dfd4af09e6d3b",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User approved H1 subject b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d based on final evidence SHA-256 4fc5729ef5e40f468b8966e35696a84e47b2de05e363d517293ac9e2f9823662 and implementation review REV-0056; approval is limited to the local read-only Gate and does not authorize CI simulation, temporary-directory operations, H2, push, merge, deploy, or close.",
+    "schema_version": "1.0",
+    "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
+    "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
+    "task_id": "TASK-0028"
   }
 ]
