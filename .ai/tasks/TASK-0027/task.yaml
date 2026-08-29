@@ -1,0 +1,76 @@
+allowed_scope:
+- .reasonix/**
+- .gitignore
+base_commit: 71aca9d80a70672d309afeaa82e265359efac1bf
+branch: main
+created_at: '2026-08-29T06:57:11Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Remove the tracked .reasonix runtime metadata directory and ignore future
+    regenerated .reasonix files.
+  impact:
+    level: medium
+  impact_categories:
+  - external_action
+  impact_scope:
+  - .reasonix/**
+  - .gitignore
+  inputs:
+  - Explicit user authorization to delete the repository-local .reasonix directory
+  - Current Git tracked inventory under .reasonix/
+  - Root .gitignore
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - delete
+  - Add a root ignore rule for .reasonix so regenerated runtime metadata stays untracked
+  protections:
+    dry_run: false
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0027
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Confirm .reasonix is absent and git ls-files reports no tracked paths below it
+  - Confirm git check-ignore attributes a .reasonix probe to the new root ignore rule
+  - Run AI Flow validate, scope, Policy-selected verification and git diff checks
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- secret_export
+- paid_external_call
+- package_publish
+- external_model_call
+frozen_spec_sha256: 8886ffb724e5d2630564dff3891e413272a9853c02264ad5b497831197e9df94
+goal: Remove the tracked .reasonix runtime metadata directory and ignore future regenerated
+  .reasonix files.
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-29T06:59:33Z'
+subject_commit: 71aca9d80a70672d309afeaa82e265359efac1bf
+task_id: TASK-0027
+updated_at: '2026-08-29T07:01:24Z'
+worktree_dirty: false
+worktree_dirty_paths: []

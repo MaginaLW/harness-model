@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "d6df74c4d1a78448cf0bfc86f01b23b79cefb9f446480f9b6022e8eb78226dd8",
+  "action_type": "delete_repository_runtime_metadata",
+  "target": ".reasonix/",
+  "parameter_summary": "Delete exactly the current 10 Git-tracked files below the repository-local .reasonix directory, remove the resulting empty directory, and add only /.reasonix/ to the root .gitignore.",
+  "subject_commit": "71aca9d80a70672d309afeaa82e265359efac1bf",
+  "conditions": [
+    "Resolve the target inside the current repository and require it to equal the repository-local .reasonix directory before deletion.",
+    "Require the recursive filesystem inventory to equal the 10-path Git tracked inventory and contain no unknown untracked files immediately before deletion.",
+    "Delete no path outside .reasonix and change no business file except the root .gitignore.",
+    "Treat the first deletion attempt as consuming this authorization; do not retry against a changed inventory or another subject.",
+    "Preserve a task-local receipt with the approved action digest, deleted tracked path list, parent commit, and recovery method.",
+    "Do not push, merge, deploy, publish, export credentials, call external models or paid services, or perform any external action."
+  ],
+  "expires_at": "2026-08-29T11:00:00Z",
+  "single_use": true
+}

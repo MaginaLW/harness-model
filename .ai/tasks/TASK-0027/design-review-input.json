@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0051",
+  "revision": 1,
+  "task_id": "TASK-0027",
+  "review_stage": "design",
+  "reviewer": "/root/task27_design_review",
+  "recorded_at": "2026-08-29T07:00:13Z",
+  "context_sha256": "15808398e3c80332519b17b468df7cbe0b9afd0771891d2f96637fffdbf587b7",
+  "outcome": "APPROVE",
+  "summary": "APPROVE。规格将业务修改严格限制为仓库根下 .reasonix/** 的当前 10 个 Git 跟踪运行时元数据文件删除，以及根 .gitignore 增加唯一规则 /.reasonix/。当前工作树下 .reasonix 的递归文件清单与 Git 跟踪清单完全一致，均为 10 个文件，未发现未知未跟踪内容；根 .gitignore 目前没有相关规则，因此新增根锚定规则不会改变其他路径的忽略语义。删除可由父提交恢复，且 task 明确要求在执行前取得绑定当前清单的单次 delete action approval；该保护与 V1 验证、范围检查和禁止外部动作共同构成完整的可恢复执行边界。",
+  "findings": []
+}

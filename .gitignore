@@ -7,3 +7,4 @@ __pycache__/
 /.ai/tasks/*/logs/
 /.venv/
 *.egg-info/
+/.reasonix/

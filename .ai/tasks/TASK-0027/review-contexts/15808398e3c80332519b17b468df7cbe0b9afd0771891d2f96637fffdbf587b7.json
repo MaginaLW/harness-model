@@ -1,0 +1,38 @@
+{
+  "base_commit": "71aca9d80a70672d309afeaa82e265359efac1bf",
+  "branch": "main",
+  "classification_input_sha256": "d6df74c4d1a78448cf0bfc86f01b23b79cefb9f446480f9b6022e8eb78226dd8",
+  "content": {
+    "allowed_scope": [
+      ".reasonix/**",
+      ".gitignore"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Remove the tracked .reasonix runtime metadata directory and ignore future regenerated .reasonix files.",
+        "impact_scope": [
+          ".reasonix/**",
+          ".gitignore"
+        ],
+        "planned_actions": [
+          "delete",
+          "Add a root ignore rule for .reasonix so regenerated runtime metadata stays untracked"
+        ]
+      }
+    ],
+    "goal": "Remove the tracked .reasonix runtime metadata directory and ignore future regenerated .reasonix files.",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "15808398e3c80332519b17b468df7cbe0b9afd0771891d2f96637fffdbf587b7",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "8886ffb724e5d2630564dff3891e413272a9853c02264ad5b497831197e9df94",
+  "task_id": "TASK-0027"
+}
