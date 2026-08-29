@@ -12,7 +12,7 @@ from typing import Any
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import ContractError
-from aiflow.evidence import V2_FINAL, validate_v2_snapshot
+from aiflow.evidence import V2_FINAL, V2_PRE_IMPLEMENTATION_REVIEW, validate_v2_snapshot
 from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import collect_git_context, commits_are_ancestral
 from aiflow.mutation_evidence import consume_targeted_mutation_evidence
@@ -268,6 +268,7 @@ def _v2_gate_facts(
     events: tuple[Mapping[str, object], ...],
     policy_checks: list[Mapping[str, object]],
     decision_unit_ids: list[str],
+    review_stages: tuple[str, ...] = ("design", "implementation"),
 ) -> dict[str, bool]:
     """Derive the extra V2 final-evidence predicates without changing V0/V1 paths."""
     result = {
@@ -319,24 +320,26 @@ def _v2_gate_facts(
         refs = evidence.get("review_refs")
         snapshot = evidence.get("verification_snapshot_sha256")
         if isinstance(refs, Mapping) and isinstance(snapshot, str):
-            design = latest_review_assessment(
-                repository_root, task_id, "design", decision_unit_ids=decision_unit_ids
-            )
-            implementation = latest_review_assessment(
-                repository_root,
-                task_id,
-                "implementation",
-                decision_unit_ids=decision_unit_ids,
-                verification_snapshot_sha256=snapshot,
-            )
+            assessments = []
+            for stage in review_stages:
+                if stage == "implementation":
+                    assessment = latest_review_assessment(
+                        repository_root,
+                        task_id,
+                        stage,
+                        decision_unit_ids=decision_unit_ids,
+                        verification_snapshot_sha256=snapshot,
+                    )
+                else:
+                    assessment = latest_review_assessment(
+                        repository_root, task_id, stage, decision_unit_ids=decision_unit_ids
+                    )
+                assessments.append((refs.get(stage), assessment))
             result["v2_reviews_current"] = all(
                 isinstance(ref, Mapping)
                 and ref.get("review_id") == assessment.record.get("review_id")
                 and ref.get("context_sha256") == assessment.record.get("context_sha256")
-                for ref, assessment in (
-                    (refs.get("design"), design),
-                    (refs.get("implementation"), implementation),
-                )
+                for ref, assessment in assessments
             )
     except ContractError:
         return result
@@ -438,13 +441,14 @@ def evaluate_gate(
         )
     )
     local_evidence = _read_local_evidence(root, task_id)
-    evidence = (
-        _read_external_evidence(evidence_path) if evidence_path is not None else local_evidence
+    external_evidence = (
+        _read_external_evidence(evidence_path) if evidence_path is not None else None
     )
+    evidence = external_evidence if external_evidence is not None else local_evidence
     evidence_report = (
         evaluate_freshness("evidence", evidence, current) if evidence is not None else None
     )
-    expected_mode = "ci" if evidence_path is not None else "local"
+    expected_mode = "ci" if external_evidence is not None else "local"
     evidence_ids = evidence.get("decision_unit_ids") if evidence is not None else None
     expected_ids = {str(unit["decision_unit_id"]) for unit in units}
     evidence_units_current = (
@@ -467,16 +471,48 @@ def evaluate_gate(
             if isinstance(levels, list)
             else []
         )
-        v2_facts = _v2_gate_facts(
+        local_v2_facts = _v2_gate_facts(
             root,
             task_id,
-            evidence,
+            local_evidence,
             events=record.events,
             policy_checks=[check for check in v2_checks if isinstance(check, Mapping)]
             if isinstance(v2_checks, list)
             else [],
             decision_unit_ids=sorted(expected_ids),
         )
+        if external_evidence is None:
+            v2_facts = local_v2_facts
+        else:
+            # CI evidence is deliberately pre-implementation-review evidence.  It
+            # attests the new CI execution, while the task-local final artifact
+            # remains the sole source for implementation-review finality.
+            ci_v2_facts = _v2_gate_facts(
+                root,
+                task_id,
+                external_evidence,
+                events=record.events,
+                policy_checks=[check for check in v2_checks if isinstance(check, Mapping)]
+                if isinstance(v2_checks, list)
+                else [],
+                decision_unit_ids=sorted(expected_ids),
+                review_stages=("design",),
+            )
+            v2_facts = {
+                "v2_final_evidence": local_v2_facts["v2_final_evidence"],
+                "v2_snapshot_current": local_v2_facts["v2_snapshot_current"]
+                and ci_v2_facts["v2_snapshot_current"],
+                "v2_verifier_independent": local_v2_facts["v2_verifier_independent"]
+                and ci_v2_facts["v2_verifier_independent"],
+                "v2_context_current": local_v2_facts["v2_context_current"]
+                and ci_v2_facts["v2_context_current"],
+                "v2_reviews_current": local_v2_facts["v2_reviews_current"]
+                and ci_v2_facts["v2_reviews_current"],
+                "v2_checks_current": local_v2_facts["v2_checks_current"]
+                and ci_v2_facts["v2_checks_current"],
+                "v2_mutation_killed": local_v2_facts["v2_mutation_killed"]
+                and ci_v2_facts["v2_mutation_killed"],
+            }
     approvals = _read_approvals(root, task_id)
     approval_current: dict[str, set[str]] = {"spec": set(), "code": set()}
     local_evidence_report = (
@@ -566,6 +602,32 @@ def evaluate_gate(
     repository_current = context.repository_id == task.get(
         "repository_id"
     ) and context.branch == task.get("branch")
+    local_evidence_ids = (
+        local_evidence.get("decision_unit_ids") if local_evidence is not None else None
+    )
+    local_evidence_units_current = (
+        isinstance(local_evidence_ids, list)
+        and len(local_evidence_ids) == len(expected_ids)
+        and expected_ids == {str(identifier) for identifier in local_evidence_ids}
+    )
+    external_v2_evidence = (
+        classification.get("effective_verification_level") == "V2" and external_evidence is not None
+    )
+    local_v2_source_current = not external_v2_evidence or (
+        local_evidence_report is not None
+        and local_evidence_report.status == "fresh"
+        and local_evidence_units_current
+        and local_evidence is not None
+        and local_evidence.get("mode") == "local"
+    )
+    local_v2_source_passed = not external_v2_evidence or (
+        local_evidence is not None and local_evidence.get("conclusion") == "passed"
+    )
+    external_v2_phase_current = (
+        classification.get("effective_verification_level") != "V2"
+        or external_evidence is None
+        or (external_evidence.get("phase") == V2_PRE_IMPLEMENTATION_REVIEW)
+    )
     facts = GateFacts(
         task_id=task_id,
         current_state=str(task.get("current_state")),
@@ -586,8 +648,12 @@ def evaluate_gate(
         and evidence_report.status == "fresh"
         and evidence_units_current
         and evidence is not None
-        and evidence.get("mode") == expected_mode,
-        evidence_passed=evidence is not None and evidence.get("conclusion") == "passed",
+        and evidence.get("mode") == expected_mode
+        and external_v2_phase_current
+        and local_v2_source_current,
+        evidence_passed=evidence is not None
+        and evidence.get("conclusion") == "passed"
+        and local_v2_source_passed,
         code_approval_current=review_ids.issubset(approval_current["code"]),
         unresolved_block_or_escalation=block_present
         or task.get("current_state") in {"BLOCKED", "ESCALATED"},

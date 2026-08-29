@@ -5,8 +5,10 @@ from __future__ import annotations
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
 from pathlib import Path
 from threading import Barrier
+from types import SimpleNamespace
 
 import pytest
 from test_begin_close_commands import commit_all, create_repository, make_ready, run_git, start
@@ -1631,6 +1633,630 @@ def test_ci_verification_writes_only_external_run_directory(
     assert ci_evidence["mode"] == "ci"
     assert ci_evidence["conclusion"] == "passed"
     assert ci_evidence["attestation_governance_only"] is True
+
+
+@pytest.mark.parametrize(
+    ("mutation_reason", "actor"),
+    [
+        (None, None),
+        (None, "verifier"),
+        ("MUTATION_EVIDENCE_INVALID", None),
+        ("MUTATION_EVIDENCE_PROJECTION_INVALID", None),
+        ("MUTATION_EVIDENCE_NOT_KILLED", None),
+    ],
+)
+def test_v2_ci_replays_final_source_without_mutation_collection_or_task_writes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mutation_reason: str | None,
+    actor: str | None,
+) -> None:
+    """The V2 CI seam consumes only the finalized source projection."""
+    repository = _prepare(tmp_path, monkeypatch)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _enable_v2(repository)
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    before = {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
+    source = {
+        "schema_version": "2.0",
+        "verification_level": "V2",
+        "mode": "local",
+        "phase": "final",
+        "conclusion": "passed",
+        "verifier_actor": "verifier",
+        "verifier_context_sha256": "c" * 64,
+        "verification_snapshot_sha256": "s" * 64,
+        "review_refs": {
+            "design": {"review_id": "REV-0001", "context_sha256": "d" * 64},
+            "implementation": {"review_id": "REV-0002", "context_sha256": "i" * 64},
+        },
+        "targeted_mutation": _mutation_artifact(),
+    }
+    design = ReviewAssessment({"context_sha256": "d" * 64}, {"review_id": "REV-0001"})
+    implementation = ReviewAssessment({"context_sha256": "i" * 64}, {"review_id": "REV-0002"})
+    facts = mutation_evidence.TargetedMutationFacts(
+        mutation_reason is None,
+        mutation_reason,
+        str(source["targeted_mutation"]["evidence_ref"]),
+        str(source["targeted_mutation"]["mutation_evidence_sha256"]),
+        str(source["targeted_mutation"]["manifest_ref"]),
+        tuple(source["targeted_mutation"]["results"]),
+    )
+    replayed: list[object] = []
+
+    def v2_plan(_bundle: object, context: VerificationContext, *, level: str) -> VerificationPlan:
+        prefix = _plan()(_bundle, context, level=level)
+        checks = tuple(
+            VerificationCheck(
+                check_id,
+                level,
+                (sys.executable, "-c", "pass"),
+                {},
+                context.repository_root,
+                10,
+                True,
+                "exit_zero",
+            )
+            for check_id in (
+                "acceptance",
+                "integration",
+                "targeted_mutation",
+                "independent_verifier",
+            )
+        )
+        executions = tuple(
+            VerificationExecution(
+                f"V2-{index}", check.argv, check.environment, check.cwd, 10, (check.check_id,)
+            )
+            for index, check in enumerate(checks[:2], start=1)
+        )
+        return VerificationPlan(
+            level,
+            prefix.run_dir,
+            (*prefix.checks, *checks),
+            (*prefix.executions, *executions),
+            (),
+            (),
+            prefix.comparison_subject,
+        )
+
+    def replay(
+        _root: Path, _task_id: str, evidence: object, **_kwargs: object
+    ) -> mutation_evidence.TargetedMutationFacts:
+        replayed.append(evidence)
+        return facts
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("V2 CI must not collect, consume an action, or run mutations")
+
+    if mutation_reason is None:
+        monkeypatch.setattr(verification_service, "parse_verification_plan", v2_plan)
+    else:
+        monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    original_read = verification_service.read_task_json
+
+    def read_source(*args: object, **kwargs: object) -> object:
+        if len(args) >= 3 and args[2] == "evidence.json":
+            return source
+        return original_read(*args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(verification_service, "read_task_json", read_source)
+    monkeypatch.setattr(verification_service, "validate_v2_snapshot", lambda *_args: None)
+    monkeypatch.setattr(
+        verification_service, "evaluate_freshness", lambda *_args: SimpleNamespace(status="fresh")
+    )
+    monkeypatch.setattr(verification_service, "load_verifier_context", lambda *_args: object())
+    monkeypatch.setattr(verification_service, "build_verifier_context", lambda *_args: object())
+    monkeypatch.setattr(
+        verification_service, "validate_verifier_context_current", lambda *_args: None
+    )
+    monkeypatch.setattr(
+        verification_service,
+        "latest_review_assessment",
+        lambda *_args, **kwargs: implementation if _args[2] == "implementation" else design,
+    )
+    monkeypatch.setattr(verification_service, "consume_targeted_mutation_evidence", replay)
+    monkeypatch.setattr(verification_service, "record_targeted_mutation_evidence", unexpected)
+    monkeypatch.setattr(mutation_evidence, "_consume_targeted_mutation_action", unexpected)
+    monkeypatch.setattr(mutation_evidence, "run_targeted_mutations", unexpected)
+    run_directory = tmp_path / "ci-v2"
+    run_directory.mkdir()
+    output = run_directory / "evidence.json"
+
+    if mutation_reason is not None:
+        with pytest.raises(ContractError) as caught:
+            verification_service.verify_task(
+                repository,
+                "TASK-0001",
+                actor=actor,
+                ci=True,
+                ci_run_dir=run_directory,
+                output=output,
+            )
+        assert caught.value.code == mutation_reason
+        assert replayed == [source]
+        assert before == {
+            path.relative_to(task_directory): path.read_bytes()
+            for path in task_directory.rglob("*")
+            if path.is_file()
+        }
+        return
+
+    result = verification_service.verify_task(
+        repository,
+        "TASK-0001",
+        actor=actor,
+        ci=True,
+        ci_run_dir=run_directory,
+        output=output,
+    )
+
+    assert result.conclusion == "passed"
+    assert replayed == [source]
+    assert before == {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
+    evidence = json.loads(output.read_text(encoding="utf-8"))
+    checks = {check["check_id"]: check for check in evidence["checks"]}
+    assert checks["targeted_mutation"]["status"] == "passed"
+    assert evidence["verifier_actor"] == "verifier"
+
+
+def test_v2_ci_rejects_missing_source_before_plan_or_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _enable_v2(repository)
+    resolve_task_path(repository, "TASK-0001", "evidence.json").unlink()
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("missing V2 CI source must stop before plan or runner")
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+    run_directory = tmp_path / "ci-missing-source"
+    run_directory.mkdir()
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            repository,
+            "TASK-0001",
+            ci=True,
+            ci_run_dir=run_directory,
+            output=run_directory / "evidence.json",
+        )
+
+    assert caught.value.code == "VERIFY_FINALIZE_EVIDENCE_INVALID"
+
+
+@pytest.mark.parametrize(
+    ("check_ids", "provisional"),
+    [("smoke", False), ("", True)],
+)
+def test_v2_ci_rejects_partial_invocation_before_source_plan_or_runner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    check_ids: str,
+    provisional: bool,
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _enable_v2(repository)
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("partial V2 CI must stop before source, plan, or runner")
+
+    monkeypatch.setattr(verification_service, "_load_v2_ci_source_evidence", unexpected)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+    run_directory = tmp_path / "ci-partial"
+    run_directory.mkdir()
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            repository,
+            "TASK-0001",
+            check_ids=(check_ids,) if check_ids else (),
+            provisional=provisional,
+            ci=True,
+            ci_run_dir=run_directory,
+            output=run_directory / "evidence.json",
+        )
+
+    assert caught.value.code == "VERIFY_CI_V2_PARTIAL_INVALID"
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("phase", "pre_implementation_review"), ("mode", "ci"), ("conclusion", "failed")],
+)
+def test_v2_ci_rejects_nonfinal_source_before_plan_or_runner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: str,
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _enable_v2(repository)
+    source = {
+        "schema_version": "2.0",
+        "verification_level": "V2",
+        "mode": "local",
+        "phase": "final",
+        "conclusion": "passed",
+    }
+    source[field] = value
+    original_read = verification_service.read_task_json
+
+    def read_source(*args: object, **kwargs: object) -> object:
+        if len(args) >= 3 and args[2] == "evidence.json":
+            return source
+        return original_read(*args, **kwargs)  # type: ignore[arg-type]
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("invalid V2 CI source must stop before plan or runner")
+
+    monkeypatch.setattr(verification_service, "read_task_json", read_source)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+    run_directory = tmp_path / "ci-invalid-source"
+    run_directory.mkdir()
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            repository,
+            "TASK-0001",
+            ci=True,
+            ci_run_dir=run_directory,
+            output=run_directory / "evidence.json",
+        )
+
+    assert caught.value.code == "VERIFY_FINALIZE_EVIDENCE_INVALID"
+
+
+def test_v2_ci_rejects_actor_mismatch_before_consumer_plan_or_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _enable_v2(repository)
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    before = {path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()}
+    source = {
+        "schema_version": "2.0",
+        "verification_level": "V2",
+        "mode": "local",
+        "phase": "final",
+        "conclusion": "passed",
+        "verifier_actor": "verifier",
+    }
+    original_read = verification_service.read_task_json
+
+    def read_source(*args: object, **kwargs: object) -> object:
+        if len(args) >= 3 and args[2] == "evidence.json":
+            return source
+        return original_read(*args, **kwargs)  # type: ignore[arg-type]
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("actor mismatch must stop before mutation replay or runner")
+
+    monkeypatch.setattr(verification_service, "read_task_json", read_source)
+    monkeypatch.setattr(verification_service, "validate_v2_snapshot", lambda *_args: None)
+    monkeypatch.setattr(
+        verification_service, "evaluate_freshness", lambda *_args: SimpleNamespace(status="fresh")
+    )
+    monkeypatch.setattr(verification_service, "consume_targeted_mutation_evidence", unexpected)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+    run_directory = tmp_path / "ci-actor"
+    run_directory.mkdir()
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            repository,
+            "TASK-0001",
+            actor="other-verifier",
+            ci=True,
+            ci_run_dir=run_directory,
+            output=run_directory / "evidence.json",
+        )
+
+    assert caught.value.code == "VERIFY_FINALIZE_ACTOR_STALE"
+    assert before == {
+        path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()
+    }
+
+
+@pytest.mark.parametrize("failure", ["stale", "snapshot"])
+def test_v2_ci_rejects_stale_or_tampered_source_before_plan_or_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _enable_v2(repository)
+    source = {
+        "schema_version": "2.0",
+        "verification_level": "V2",
+        "mode": "local",
+        "phase": "final",
+        "conclusion": "passed",
+    }
+    original_read = verification_service.read_task_json
+
+    def read_source(*args: object, **kwargs: object) -> object:
+        if len(args) >= 3 and args[2] == "evidence.json":
+            return source
+        return original_read(*args, **kwargs)  # type: ignore[arg-type]
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("stale or tampered V2 source must stop before plan or runner")
+
+    monkeypatch.setattr(verification_service, "read_task_json", read_source)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+    if failure == "snapshot":
+
+        def stale_snapshot(*_args: object) -> None:
+            raise ContractError("snapshot is stale", code="EVIDENCE_SNAPSHOT_STALE")
+
+        monkeypatch.setattr(verification_service, "validate_v2_snapshot", stale_snapshot)
+        expected = "EVIDENCE_SNAPSHOT_STALE"
+    else:
+        monkeypatch.setattr(verification_service, "validate_v2_snapshot", lambda *_args: None)
+        monkeypatch.setattr(
+            verification_service,
+            "evaluate_freshness",
+            lambda kind, *_args: SimpleNamespace(status="stale" if kind == "evidence" else "fresh"),
+        )
+        expected = "VERIFY_FINALIZE_EVIDENCE_STALE"
+    run_directory = tmp_path / f"ci-{failure}"
+    run_directory.mkdir()
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            repository,
+            "TASK-0001",
+            ci=True,
+            ci_run_dir=run_directory,
+            output=run_directory / "evidence.json",
+        )
+
+    assert caught.value.code == expected
+
+
+@pytest.mark.parametrize(
+    ("failure", "expected"),
+    [
+        ("context", "VERIFIER_CONTEXT_STALE"),
+        ("design_review", "VERIFY_FINALIZE_REVIEW_STALE"),
+        ("implementation_review", "VERIFY_FINALIZE_REVIEW_STALE"),
+    ],
+)
+def test_v2_ci_rejects_stale_context_or_reviews_before_plan_or_runner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
+    expected: str,
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _enable_v2(repository)
+    source = {
+        "schema_version": "2.0",
+        "verification_level": "V2",
+        "mode": "local",
+        "phase": "final",
+        "conclusion": "passed",
+        "verifier_actor": "verifier",
+        "verifier_context_sha256": "c" * 64,
+        "verification_snapshot_sha256": "s" * 64,
+        "review_refs": {
+            "design": {"review_id": "REV-0001", "context_sha256": "d" * 64},
+            "implementation": {"review_id": "REV-0002", "context_sha256": "i" * 64},
+        },
+    }
+    if failure == "design_review":
+        source["review_refs"]["design"]["review_id"] = "REV-0003"
+    if failure == "implementation_review":
+        source["review_refs"]["implementation"]["review_id"] = "REV-0003"
+    original_read = verification_service.read_task_json
+
+    def read_source(*args: object, **kwargs: object) -> object:
+        if len(args) >= 3 and args[2] == "evidence.json":
+            return source
+        return original_read(*args, **kwargs)  # type: ignore[arg-type]
+
+    def unexpected(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("stale V2 source fact must stop before consumer, plan, or runner")
+
+    design = ReviewAssessment({"context_sha256": "d" * 64}, {"review_id": "REV-0001"})
+    implementation = ReviewAssessment({"context_sha256": "i" * 64}, {"review_id": "REV-0002"})
+    monkeypatch.setattr(verification_service, "read_task_json", read_source)
+    monkeypatch.setattr(verification_service, "validate_v2_snapshot", lambda *_args: None)
+    monkeypatch.setattr(
+        verification_service, "evaluate_freshness", lambda *_args: SimpleNamespace(status="fresh")
+    )
+    monkeypatch.setattr(verification_service, "load_verifier_context", lambda *_args: object())
+    monkeypatch.setattr(verification_service, "build_verifier_context", lambda *_args: object())
+    if failure == "context":
+
+        def stale_context(*_args: object) -> None:
+            raise ContractError("context is stale", code="VERIFIER_CONTEXT_STALE")
+
+        monkeypatch.setattr(
+            verification_service, "validate_verifier_context_current", stale_context
+        )
+    else:
+        monkeypatch.setattr(
+            verification_service, "validate_verifier_context_current", lambda *_args: None
+        )
+    monkeypatch.setattr(
+        verification_service,
+        "latest_review_assessment",
+        lambda *_args, **_kwargs: implementation if _args[2] == "implementation" else design,
+    )
+    monkeypatch.setattr(verification_service, "consume_targeted_mutation_evidence", unexpected)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+    run_directory = tmp_path / f"ci-{failure}"
+    run_directory.mkdir()
+
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            repository,
+            "TASK-0001",
+            ci=True,
+            ci_run_dir=run_directory,
+            output=run_directory / "evidence.json",
+        )
+
+    assert caught.value.code == expected
+
+
+def test_v2_ci_real_consumer_rejects_tampered_log_before_plan_or_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Keep the CI seam on the public loader path for an actual artifact tamper."""
+    repository = _prepare(tmp_path, monkeypatch)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _enable_v2(repository)
+    record = load_task_record(repository, "TASK-0001")
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    record_id = "MUTRUN-20000101T000000Z-0000000000000000"
+    record_root = resolve_task_path(repository, "TASK-0001", Path("logs") / record_id)
+    record_root.mkdir(parents=True)
+    task = {
+        "task_id": "TASK-0001",
+        "repository_id": record.task["repository_id"],
+        "branch": record.task["branch"],
+        "base_commit": "b" * 40,
+        "subject_commit": "a" * 40,
+        "frozen_spec_sha256": "c" * 64,
+    }
+    classification = {"classification_input_sha256": "d" * 64}
+    run = mutation_runner.MutationRun(
+        manifest.manifest_id,
+        "a" * 40,
+        tuple(
+            mutation_runner.MutationProbe(item.mutation_id, 0, 1, False, 1, None)
+            for item in manifest.mutations
+        ),
+        True,
+        None,
+    )
+    monkeypatch.setattr(
+        mutation_evidence, "_validate_bindings", lambda *_args: (task, classification, "e" * 64)
+    )
+    monkeypatch.setattr(mutation_evidence, "_load_manifest", lambda _root: manifest)
+    monkeypatch.setattr(mutation_evidence, "_source_sha256", lambda _path: "f" * 64)
+    artifact = mutation_evidence._make_artifact(
+        repository,
+        "TASK-0001",
+        "a" * 40,
+        run=run,
+        now=datetime(2000, 1, 1, tzinfo=timezone.utc),
+        record_id=record_id,
+        record_root=record_root,
+        task=task,
+        classification=classification,
+        policy_sha="e" * 64,
+        manifest=manifest,
+        manifest_sha="f" * 64,
+        runner_sha="f" * 64,
+    )
+    artifact_path = repository / artifact.evidence_ref
+    artifact_value = json.loads(artifact_path.read_text(encoding="utf-8"))
+    first_log = repository / str(artifact_value["results"][0]["log_ref"])
+    first_log.write_text("{}", encoding="utf-8")
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    before = {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
+    source = {
+        "schema_version": "2.0",
+        "verification_level": "V2",
+        "mode": "local",
+        "phase": "final",
+        "conclusion": "passed",
+        "verifier_actor": "verifier",
+        "verifier_context_sha256": "c" * 64,
+        "verification_snapshot_sha256": "s" * 64,
+        "review_refs": {
+            "design": {"review_id": "REV-0001", "context_sha256": "d" * 64},
+            "implementation": {"review_id": "REV-0002", "context_sha256": "i" * 64},
+        },
+        "targeted_mutation": {
+            "evidence_ref": artifact.evidence_ref,
+            "mutation_evidence_sha256": artifact.mutation_evidence_sha256,
+            "manifest_ref": artifact_value["manifest_ref"],
+            "results": [
+                {
+                    "mutation_id": result["mutation_id"],
+                    "outcome": result["outcome"],
+                    "log_ref": result["log_ref"],
+                }
+                for result in artifact_value["results"]
+            ],
+        },
+    }
+    original_read = verification_service.read_task_json
+    monkeypatch.setattr(
+        verification_service,
+        "read_task_json",
+        lambda *args, **kwargs: (
+            source
+            if len(args) >= 3 and args[2] == "evidence.json"
+            else original_read(*args, **kwargs)
+        ),
+    )
+    monkeypatch.setattr(verification_service, "validate_v2_snapshot", lambda *_args: None)
+    monkeypatch.setattr(
+        verification_service, "evaluate_freshness", lambda *_args: SimpleNamespace(status="fresh")
+    )
+    monkeypatch.setattr(verification_service, "load_verifier_context", lambda *_args: object())
+    monkeypatch.setattr(verification_service, "build_verifier_context", lambda *_args: object())
+    monkeypatch.setattr(
+        verification_service, "validate_verifier_context_current", lambda *_args: None
+    )
+    monkeypatch.setattr(
+        verification_service,
+        "latest_review_assessment",
+        lambda *_args, **_kwargs: ReviewAssessment(
+            {"context_sha256": "i" * 64 if _args[2] == "implementation" else "d" * 64},
+            {"review_id": "REV-0002" if _args[2] == "implementation" else "REV-0001"},
+        ),
+    )
+    monkeypatch.setattr(
+        verification_service,
+        "parse_verification_plan",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("must not parse")),
+    )
+    run_directory = tmp_path / "ci-real-tamper"
+    run_directory.mkdir()
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            repository,
+            "TASK-0001",
+            ci=True,
+            ci_run_dir=run_directory,
+            output=run_directory / "evidence.json",
+        )
+    assert caught.value.code == "MUTATION_EVIDENCE_INVALID"
+    assert before == {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
 
 
 def test_ci_requires_temp_run_dir_and_contained_output(

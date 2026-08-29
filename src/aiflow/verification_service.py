@@ -676,6 +676,145 @@ def _finalize_v2_task(
     )
 
 
+def _load_v2_ci_source_evidence(
+    repository_root: Path,
+    task_id: str,
+    record: TaskRecord,
+    classification: Mapping[str, object],
+    bundle: PolicyBundle,
+    spec_sha256: str,
+    actor: str | None,
+) -> tuple[
+    dict[str, object],
+    str,
+    str,
+    ReviewAssessment,
+    dict[str, object],
+    TargetedMutationFacts,
+]:
+    """Load the local-final V2 authority without mutating the task directory.
+
+    CI evidence is an execution attestation, not a second implementation review.
+    It can therefore inherit the verifier identity and mutation projection only
+    from a current, finalized local evidence artifact.
+    """
+    evidence_path = resolve_task_path(repository_root, task_id, "evidence.json")
+    if not evidence_path.is_file():
+        raise ContractError(
+            "V2 local-final evidence is missing", code="VERIFY_FINALIZE_EVIDENCE_INVALID"
+        )
+    evidence = read_task_json(repository_root, task_id, "evidence.json", contract_name="evidence")
+    if not isinstance(evidence, dict):
+        raise ContractError(
+            "V2 local-final evidence is invalid", code="VERIFY_FINALIZE_EVIDENCE_INVALID"
+        )
+    if (
+        evidence.get("schema_version") != "2.0"
+        or evidence.get("verification_level") != "V2"
+        or evidence.get("phase") != "final"
+        or evidence.get("mode") != "local"
+        or evidence.get("conclusion") != "passed"
+    ):
+        raise ContractError(
+            "V2 local-final evidence is invalid", code="VERIFY_FINALIZE_EVIDENCE_INVALID"
+        )
+    validate_v2_snapshot(evidence)
+    current = {
+        "task_id": task_id,
+        "repository_id": record.task.get("repository_id"),
+        "branch": record.task.get("branch"),
+        "base_commit": record.task.get("base_commit"),
+        "subject_commit": record.task.get("subject_commit"),
+        "policy_sha256": bundle.sha256,
+        "spec_sha256": spec_sha256,
+        "classification_input_sha256": classification.get("classification_input_sha256"),
+        "verification_level": "V2",
+    }
+    if evaluate_freshness("evidence", evidence, current).status != "fresh":
+        raise ContractError(
+            "V2 local-final evidence is stale", code="VERIFY_FINALIZE_EVIDENCE_STALE"
+        )
+
+    implementer = current_implementer_actor(record.events)
+    source_actor = evidence.get("verifier_actor")
+    _implementer, verifier_actor = validate_verifier_actor(implementer, source_actor or "")
+    if actor is not None and actor.strip() != verifier_actor:
+        raise ContractError("Verifier actor is stale", code="VERIFY_FINALIZE_ACTOR_STALE")
+
+    context_digest = evidence.get("verifier_context_sha256")
+    if not isinstance(context_digest, str):
+        raise ContractError("Verifier context is invalid", code="VERIFY_FINALIZE_CONTEXT_INVALID")
+    stored_context = load_verifier_context(repository_root, task_id, context_digest)
+    current_context = build_verifier_context(repository_root, task_id)
+    validate_verifier_context_current(stored_context, current_context)
+
+    decision_ids = tuple(str(unit["decision_unit_id"]) for unit in record.task["decision_units"])
+    design_review = latest_review_assessment(
+        repository_root, task_id, "design", decision_unit_ids=decision_ids
+    )
+    review_refs = evidence.get("review_refs")
+    if not isinstance(review_refs, Mapping) or review_refs.get("design") != _review_ref(
+        design_review
+    ):
+        raise ContractError("Design review reference is stale", code="VERIFY_FINALIZE_REVIEW_STALE")
+    snapshot = evidence.get("verification_snapshot_sha256")
+    if not isinstance(snapshot, str):
+        raise ContractError("V2 snapshot is invalid", code="VERIFY_FINALIZE_EVIDENCE_INVALID")
+    implementation_review = latest_review_assessment(
+        repository_root,
+        task_id,
+        "implementation",
+        decision_unit_ids=decision_ids,
+        verification_snapshot_sha256=snapshot,
+    )
+    if review_refs.get("implementation") != _review_ref(implementation_review):
+        raise ContractError(
+            "Implementation review reference is stale", code="VERIFY_FINALIZE_REVIEW_STALE"
+        )
+    mutation_projection, mutation_facts = _ci_v2_targeted_mutation_projection(
+        repository_root, task_id, evidence
+    )
+    if not mutation_facts.passed:
+        raise ContractError(
+            "V2 local-final mutation evidence is invalid",
+            code=mutation_facts.reason_code or "MUTATION_EVIDENCE_INVALID",
+        )
+    return (
+        evidence,
+        verifier_actor,
+        context_digest,
+        design_review,
+        mutation_projection,
+        mutation_facts,
+    )
+
+
+def _ci_v2_targeted_mutation_projection(
+    repository_root: Path, task_id: str, source_evidence: Mapping[str, object]
+) -> tuple[dict[str, object], TargetedMutationFacts]:
+    """Replay a finalized source projection through the public read-only consumer."""
+    try:
+        facts = consume_targeted_mutation_evidence(repository_root, task_id, source_evidence)
+    except AiflowError:
+        facts = TargetedMutationFacts(False, "MUTATION_EVIDENCE_INVALID", None, None, None, ())
+    if (
+        not isinstance(facts.evidence_ref, str)
+        or not isinstance(facts.mutation_evidence_sha256, str)
+        or not isinstance(facts.manifest_ref, str)
+        or len(facts.results) != 5
+    ):
+        return _missing_mutation_projection(task_id), facts
+    return (
+        {
+            "evidence_ref": facts.evidence_ref,
+            "mutation_evidence_sha256": facts.mutation_evidence_sha256,
+            "manifest_ref": facts.manifest_ref,
+            "results": [dict(item) for item in facts.results],
+        },
+        facts,
+    )
+
+
 def verify_task(
     repository_root: Path,
     task_id: str,
@@ -721,10 +860,37 @@ def verify_task(
     level = classification.get("effective_verification_level")
     if level not in {"V0", "V1", "V2"}:
         raise ContractError("Verification level is invalid", code="VERIFY_LEVEL_INVALID")
+    if ci and level == "V2" and (check_ids or provisional):
+        raise ContractError(
+            "V2 CI requires a complete verification run", code="VERIFY_CI_V2_PARTIAL_INVALID"
+        )
     verifier_actor: str | None = None
+    ci_v2_source_evidence: dict[str, object] | None = None
+    ci_v2_design_review: ReviewAssessment | None = None
+    ci_v2_context_sha256: str | None = None
+    ci_v2_mutation_projection: dict[str, object] | None = None
+    ci_v2_mutation_facts: TargetedMutationFacts | None = None
     if level == "V2":
-        implementer = current_implementer_actor(record.events)
-        _implementer, verifier_actor = validate_verifier_actor(implementer, actor or "")
+        if ci:
+            (
+                ci_v2_source_evidence,
+                verifier_actor,
+                ci_v2_context_sha256,
+                ci_v2_design_review,
+                ci_v2_mutation_projection,
+                ci_v2_mutation_facts,
+            ) = _load_v2_ci_source_evidence(
+                root,
+                task_id,
+                record,
+                classification,
+                bundle,
+                spec_sha256,
+                actor,
+            )
+        else:
+            implementer = current_implementer_actor(record.events)
+            _implementer, verifier_actor = validate_verifier_actor(implementer, actor or "")
     elif not ci and (actor is None or not actor.strip()):
         raise ContractError("Verification actor is required", code="VERIFY_ACTOR_REQUIRED")
     effective_actor = verifier_actor if level == "V2" else actor
@@ -762,16 +928,21 @@ def verify_task(
     design_review: ReviewAssessment | None = None
     verifier_context_sha256: str | None = None
     if level == "V2":
-        verifier_context = build_verifier_context(root, task_id)
-        verifier_context_sha256 = str(verifier_context["context_sha256"])
-        if not ci:
+        if ci:
+            assert ci_v2_context_sha256 is not None
+            assert ci_v2_design_review is not None
+            verifier_context_sha256 = ci_v2_context_sha256
+            design_review = ci_v2_design_review
+        else:
+            verifier_context = build_verifier_context(root, task_id)
+            verifier_context_sha256 = str(verifier_context["context_sha256"])
             save_verifier_context(root, task_id, verifier_context)
-        decision_ids = tuple(
-            str(unit["decision_unit_id"]) for unit in record.task["decision_units"]
-        )
-        design_review = latest_review_assessment(
-            root, task_id, "design", decision_unit_ids=decision_ids
-        )
+            decision_ids = tuple(
+                str(unit["decision_unit_id"]) for unit in record.task["decision_units"]
+            )
+            design_review = latest_review_assessment(
+                root, task_id, "design", decision_unit_ids=decision_ids
+            )
         execution_plan, planned_evidence_checks = _v2_plans(full_plan, check_ids)
     else:
         execution_plan = _selected_plan(full_plan, check_ids)
@@ -781,12 +952,19 @@ def verify_task(
     results = _execute_plan(root, execution_plan)
     if level == "V2":
         results.append(_independent_verifier_result())
-        mutation_projection, mutation_facts = _targeted_mutation_projection(
-            root,
-            task_id,
-            subject_commit,
-            collect=not ci and (not check_ids or "targeted_mutation" in check_ids),
-        )
+        if ci:
+            assert ci_v2_source_evidence is not None
+            assert ci_v2_mutation_projection is not None
+            assert ci_v2_mutation_facts is not None
+            mutation_projection = ci_v2_mutation_projection
+            mutation_facts = ci_v2_mutation_facts
+        else:
+            mutation_projection, mutation_facts = _targeted_mutation_projection(
+                root,
+                task_id,
+                subject_commit,
+                collect=not check_ids or "targeted_mutation" in check_ids,
+            )
     else:
         mutation_projection = None
         mutation_facts = None

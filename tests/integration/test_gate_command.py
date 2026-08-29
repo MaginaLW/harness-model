@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from test_approve_command import _record_review, review_package
@@ -14,6 +15,7 @@ from test_verify_command import _plan
 from aiflow import gate as gate_service
 from aiflow import verification_service
 from aiflow.cli import main
+from aiflow.mutation_evidence import TargetedMutationFacts
 from aiflow.storage import (
     atomic_write_json,
     atomic_write_yaml,
@@ -236,6 +238,180 @@ def test_ci_gate_uses_external_attested_evidence_but_local_code_binding(
         == 0
     )
     assert json.loads(capsys.readouterr().out.splitlines()[-1])["passed"] is True
+
+
+def test_v2_ci_evidence_uses_current_design_review_without_implementation_review(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CI's pre-review artifact must not be mistaken for a final local review."""
+    evidence = {
+        "schema_version": "2.0",
+        "phase": "pre_implementation_review",
+        "verifier_actor": "verifier",
+        "verifier_context_sha256": "context",
+        "verification_snapshot_sha256": "snapshot",
+        "checks": [{"check_id": "required", "status": "passed"}],
+        "targeted_mutation": {},
+        "review_refs": {"design": {"review_id": "REV-1", "context_sha256": "design"}},
+    }
+    reviewed_stages: list[str] = []
+    monkeypatch.setattr(gate_service, "validate_v2_snapshot", lambda _evidence: None)
+    monkeypatch.setattr(gate_service, "current_implementer_actor", lambda _events: "implementer")
+    monkeypatch.setattr(gate_service, "validate_verifier_actor", lambda *_args: None)
+    monkeypatch.setattr(gate_service, "load_verifier_context", lambda *_args: object())
+    monkeypatch.setattr(gate_service, "build_verifier_context", lambda *_args: object())
+    monkeypatch.setattr(gate_service, "validate_verifier_context_current", lambda *_args: None)
+    monkeypatch.setattr(
+        gate_service,
+        "consume_targeted_mutation_evidence",
+        lambda *_args: TargetedMutationFacts(True, None, None, None, None, ()),
+    )
+
+    def current_review(*_args: object, **kwargs: object) -> SimpleNamespace:
+        stage = str(_args[2])
+        reviewed_stages.append(stage)
+        return SimpleNamespace(record={"review_id": "REV-1", "context_sha256": "design"})
+
+    monkeypatch.setattr(gate_service, "latest_review_assessment", current_review)
+
+    facts = gate_service._v2_gate_facts(
+        Path("."),
+        "TASK-0001",
+        evidence,
+        events=(),
+        policy_checks=[{"id": "required", "required": True}],
+        decision_unit_ids=["DU-001"],
+        review_stages=("design",),
+    )
+
+    assert facts["v2_reviews_current"] is True
+    assert reviewed_stages == ["design"]
+
+
+@pytest.mark.parametrize(
+    ("tamper", "reason"),
+    [
+        (None, None),
+        ("local_stale", "GATE_EVIDENCE_STALE"),
+        ("local_missing", "GATE_EVIDENCE_STALE"),
+        ("local_final", "GATE_V2_EVIDENCE_NOT_FINAL"),
+        ("local_review", "GATE_V2_REVIEW_STALE"),
+        ("code_approval", "GATE_CODE_APPROVAL_STALE"),
+        ("ci_phase", "GATE_EVIDENCE_STALE"),
+        ("ci_check", "GATE_V2_CHECKS_INCOMPLETE"),
+        ("ci_snapshot", "GATE_V2_SNAPSHOT_STALE"),
+        ("ci_verifier", "GATE_V2_VERIFIER_NOT_INDEPENDENT"),
+        ("ci_context", "GATE_V2_CONTEXT_STALE"),
+        ("ci_review", "GATE_V2_REVIEW_STALE"),
+        ("ci_mutation", "GATE_V2_MUTATION_NOT_KILLED"),
+        ("ci_attestation", "GATE_EVIDENCE_STALE"),
+    ],
+)
+def test_v2_ci_gate_merges_local_final_and_external_pre_facts_fail_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    tamper: str | None,
+    reason: str | None,
+) -> None:
+    """Exercise the real Gate merge path without duplicating the V2 handshake fixture."""
+    repository = _prepare_gate(tmp_path, monkeypatch, review=True)
+    record = load_task_record(repository, "TASK-0001")
+    task = {**record.task, "current_state": "APPROVED_FOR_MERGE"}
+    gate_record = SimpleNamespace(task=task, events=record.events)
+    local = {
+        "mode": "local",
+        "phase": "final",
+        "conclusion": "passed",
+        "decision_unit_ids": ["DU-001"],
+    }
+    external = {
+        "mode": "ci",
+        "phase": "pre_implementation_review",
+        "conclusion": "passed",
+        "decision_unit_ids": ["DU-001"],
+    }
+    local_v2 = {
+        "v2_final_evidence": True,
+        "v2_snapshot_current": True,
+        "v2_verifier_independent": True,
+        "v2_context_current": True,
+        "v2_reviews_current": True,
+        "v2_checks_current": True,
+        "v2_mutation_killed": True,
+    }
+    ci_v2 = dict(local_v2)
+    if tamper == "local_final":
+        local_v2["v2_final_evidence"] = False
+    elif tamper == "local_review":
+        local_v2["v2_reviews_current"] = False
+    elif tamper == "ci_snapshot":
+        ci_v2["v2_snapshot_current"] = False
+    elif tamper == "ci_check":
+        ci_v2["v2_checks_current"] = False
+    elif tamper == "ci_verifier":
+        ci_v2["v2_verifier_independent"] = False
+    elif tamper == "ci_context":
+        ci_v2["v2_context_current"] = False
+    elif tamper == "ci_review":
+        ci_v2["v2_reviews_current"] = False
+    elif tamper == "ci_mutation":
+        ci_v2["v2_mutation_killed"] = False
+    elif tamper == "ci_phase":
+        external["phase"] = "final"
+
+    def freshness(_kind: str, artifact: object, _current: object) -> SimpleNamespace:
+        stale = (tamper == "local_stale" and artifact is local) or (
+            tamper == "ci_attestation" and artifact is external
+        )
+        return SimpleNamespace(status="stale" if stale else "fresh")
+
+    route = SimpleNamespace(
+        effective_route="REVIEW",
+        unit_decisions=(SimpleNamespace(decision_unit_id="DU-001", effective_route="REVIEW"),),
+    )
+    verification = SimpleNamespace(
+        level="V2",
+        unit_decisions=(SimpleNamespace(decision_unit_id="DU-001", level="V2"),),
+    )
+    classification = {
+        "effective_route": "REVIEW",
+        "effective_verification_level": "V2",
+        "classifications": [
+            {"decision_unit_id": "DU-001", "route": "REVIEW", "verification_level": "V2"}
+        ],
+    }
+    approvals = (
+        []
+        if tamper == "code_approval"
+        else [{"approval_type": "code", "decision_unit_id": "DU-001"}]
+    )
+    approvals.append({"approval_type": "spec", "decision_unit_id": "DU-001"})
+
+    monkeypatch.setattr(gate_service, "read_task_record_strict", lambda *_args: gate_record)
+    monkeypatch.setattr(gate_service, "read_task_json", lambda *_args, **_kwargs: classification)
+    monkeypatch.setattr(
+        gate_service,
+        "_read_local_evidence",
+        lambda *_args: None if tamper == "local_missing" else local,
+    )
+    monkeypatch.setattr(gate_service, "_read_external_evidence", lambda *_args: external)
+    monkeypatch.setattr(gate_service, "_read_approvals", lambda *_args: tuple(approvals))
+    monkeypatch.setattr(gate_service, "evaluate_freshness", freshness)
+    monkeypatch.setattr(gate_service, "route_task", lambda *_args: route)
+    monkeypatch.setattr(gate_service, "verification_for_task", lambda *_args: verification)
+    monkeypatch.setattr(
+        gate_service,
+        "_v2_gate_facts",
+        lambda *_args, **kwargs: local_v2 if kwargs.get("review_stages") != ("design",) else ci_v2,
+    )
+
+    decision = gate_service.evaluate_gate(
+        repository, "TASK-0001", evidence_path=tmp_path / "ci.json"
+    )
+
+    assert decision.passed is (reason is None)
+    if reason is not None:
+        assert reason in decision.reason_codes
 
 
 def test_action_approval_does_not_replace_review_code_approval(
