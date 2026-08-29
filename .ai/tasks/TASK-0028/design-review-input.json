@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0053",
+  "revision": 1,
+  "task_id": "TASK-0028",
+  "review_stage": "design",
+  "reviewer": "/root/task28_design_review",
+  "recorded_at": "2026-08-29T07:34:07Z",
+  "context_sha256": "5b77b4c2753cc4cc6d1bdfe888421add63e7e54f21e46f4b9d1bafe2b3559bf1",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "REQUEST_CHANGES。历史 TASK-0025 attestation 绑定、single-use 临时 worktree/run-directory action 边界、13.3-only 状态投影与 REVIEW/V1 路由均可接受；但当前 CI V2 verify 固定使用缺失 mutation projection，不会只读重放已有 immutable targeted-mutation artifact，并且生成的 pre-implementation-review CI evidence 无法满足 V2 Gate 的 final-phase 条件。因此冻结规格要求的 14/14 CI evidence 与 passing Gate 当前不可实现。必须先把只读 CI artifact consumer、current local-final binding 与 CI final attestation 投影及回归测试纳入治理范围，重新分类、冻结和设计审核；否则 13.3 必须保持 pending。",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "title": "CI V2 不重放已有 mutation artifact，无法形成 passing Gate evidence",
+      "location": {
+        "path": "src/aiflow/verification_service.py",
+        "line": 784
+      },
+      "evidence_refs": [
+        "src/aiflow/verification_service.py:120",
+        "src/aiflow/verification_service.py:784",
+        "src/aiflow/mutation_evidence.py:1446",
+        ".ai/tasks/TASK-0028/spec.md:29",
+        ".ai/tasks/TASK-0028/spec.md:52"
+      ],
+      "status": "open"
+    }
+  ]
+}

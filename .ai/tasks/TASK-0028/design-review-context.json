@@ -1,0 +1,43 @@
+{
+  "base_commit": "3f3ead9eeb3cc1039be58627994a3a0d58102534",
+  "branch": "main",
+  "classification_input_sha256": "12f8d6e7e43d488d724e8edbf90ec6291268406b33d65bf5e01dce86e246ebbf",
+  "content": {
+    "allowed_scope": [
+      "docs/implementation/chapter-13-review-self-hosting.md",
+      "docs/superpowers/state/chapters/chapter-13.yaml",
+      "docs/superpowers/state/overall.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Complete Chapter 13.3 by replaying TASK-0025 H2 attestation in one isolated local temporary worktree, running CI-mode verification and Gate without collecting new mutation evidence, recording the bounded result, and projecting only 13.3 complete.",
+        "impact_scope": [
+          "docs/implementation/chapter-13-review-self-hosting.md",
+          "docs/superpowers/state/chapters/chapter-13.yaml",
+          "docs/superpowers/state/overall.yaml"
+        ],
+        "planned_actions": [
+          "Validate the immutable TASK-0025 H2 subject, implementation review, final V2 evidence, code approval and merge ledger facts without modifying TASK-0025",
+          "After a separate single-use action approval, create one exact OS-temporary local Git worktree at the TASK-0025 code-approval attestation commit",
+          "Run CI-mode verification into an exact OS-temporary run directory and evaluate the read-only Gate against that CI evidence; do not launch targeted mutation",
+          "Record a sanitized task-local CI simulation receipt and update the Chapter 13 implementation narrative",
+          "Project only task 13.3 as completed and advance the pointer to pending 13.4"
+        ]
+      }
+    ],
+    "goal": "Complete Chapter 13.3 by replaying TASK-0025 H2 attestation in an isolated local worktree, running CI-mode verification and Gate, recording the bounded result, and projecting only 13.3 complete.",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "5b77b4c2753cc4cc6d1bdfe888421add63e7e54f21e46f4b9d1bafe2b3559bf1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "24f7ef3edf2862d8899bf17d64873020b37d8a2f4a3cee3374d706c8f7ac4eb0",
+  "task_id": "TASK-0028"
+}
