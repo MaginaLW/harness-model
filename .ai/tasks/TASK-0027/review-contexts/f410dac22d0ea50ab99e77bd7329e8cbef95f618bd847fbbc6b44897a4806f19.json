@@ -1,0 +1,260 @@
+{
+  "base_commit": "71aca9d80a70672d309afeaa82e265359efac1bf",
+  "branch": "main",
+  "classification_input_sha256": "d6df74c4d1a78448cf0bfc86f01b23b79cefb9f446480f9b6022e8eb78226dd8",
+  "content": {
+    "allowed_scope": [
+      ".reasonix/**",
+      ".gitignore"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Remove the tracked .reasonix runtime metadata directory and ignore future regenerated .reasonix files.",
+        "impact_scope": [
+          ".reasonix/**",
+          ".gitignore"
+        ],
+        "planned_actions": [
+          "delete",
+          "Add a root ignore rule for .reasonix so regenerated runtime metadata stays untracked"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0027/action-delete-reasonix.json",
+        ".ai/tasks/TASK-0027/action-use-e409dac2cb7cf25273f626918e6d39ff414aa1f3cfa712139295ec7995df0480.md",
+        ".ai/tasks/TASK-0027/approvals.json",
+        ".ai/tasks/TASK-0027/classification.json",
+        ".ai/tasks/TASK-0027/design-review-context.json",
+        ".ai/tasks/TASK-0027/design-review-input.json",
+        ".ai/tasks/TASK-0027/events.jsonl",
+        ".ai/tasks/TASK-0027/review-contexts/15808398e3c80332519b17b468df7cbe0b9afd0771891d2f96637fffdbf587b7.json",
+        ".ai/tasks/TASK-0027/reviews/REV-0051-r0001.json",
+        ".ai/tasks/TASK-0027/spec.md",
+        ".ai/tasks/TASK-0027/task.yaml",
+        ".gitignore",
+        ".reasonix/desktop-topic-auto-title-meta.json",
+        ".reasonix/desktop-topic-created-at.json",
+        ".reasonix/desktop-topic-title-sources.json",
+        ".reasonix/desktop-topic-titles.json",
+        ".reasonix/tasks/20260818-155957.783187500-session--bash-1/events.jsonl",
+        ".reasonix/tasks/20260818-155957.783187500-session--bash-1/snapshot.json",
+        ".reasonix/tasks/20260818-155957.783187500-session--bash-1/task.lock",
+        ".reasonix/tasks/20260818-155957.783187500-session--bash-2/events.jsonl",
+        ".reasonix/tasks/20260818-155957.783187500-session--bash-2/snapshot.json",
+        ".reasonix/tasks/20260818-155957.783187500-session--bash-2/task.lock"
+      ],
+      "files": [
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/action-delete-reasonix.json"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/action-use-e409dac2cb7cf25273f626918e6d39ff414aa1f3cfa712139295ec7995df0480.md"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/approvals.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/classification.json"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/design-review-input.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/events.jsonl"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/review-contexts/15808398e3c80332519b17b468df7cbe0b9afd0771891d2f96637fffdbf587b7.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/reviews/REV-0051-r0001.json"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/spec.md"
+        },
+        {
+          "additions": 76,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0027/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": ".gitignore"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 8,
+          "path": ".reasonix/desktop-topic-auto-title-meta.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 3,
+          "path": ".reasonix/desktop-topic-created-at.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 3,
+          "path": ".reasonix/desktop-topic-title-sources.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 3,
+          "path": ".reasonix/desktop-topic-titles.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 2,
+          "path": ".reasonix/tasks/20260818-155957.783187500-session--bash-1/events.jsonl"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1,
+          "path": ".reasonix/tasks/20260818-155957.783187500-session--bash-1/snapshot.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 0,
+          "path": ".reasonix/tasks/20260818-155957.783187500-session--bash-1/task.lock"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 2,
+          "path": ".reasonix/tasks/20260818-155957.783187500-session--bash-2/events.jsonl"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1,
+          "path": ".reasonix/tasks/20260818-155957.783187500-session--bash-2/snapshot.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 0,
+          "path": ".reasonix/tasks/20260818-155957.783187500-session--bash-2/task.lock"
+        }
+      ],
+      "totals": {
+        "additions": 368,
+        "deletions": 23,
+        "files": 22
+      }
+    },
+    "goal": "Remove the tracked .reasonix runtime metadata directory and ignore future regenerated .reasonix files.",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0027",
+        "--actor",
+        "/root"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "f410dac22d0ea50ab99e77bd7329e8cbef95f618bd847fbbc6b44897a4806f19",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "339adf55e4d0058718da70109dbdff39e6d165cf48dac666fbf6c35f2511b23a",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "8886ffb724e5d2630564dff3891e413272a9853c02264ad5b497831197e9df94",
+  "subject_commit": "f8208d2254c49984ffdbd9879b5a7fb6cd73f65e",
+  "task_id": "TASK-0027"
+}

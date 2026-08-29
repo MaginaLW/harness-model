@@ -27,5 +27,19 @@
     "spec_sha256": "8886ffb724e5d2630564dff3891e413272a9853c02264ad5b497831197e9df94",
     "subject_commit": "71aca9d80a70672d309afeaa82e265359efac1bf",
     "task_id": "TASK-0027"
+  },
+  {
+    "actor": "human-user",
+    "approval_type": "code",
+    "approved_at": "2026-08-29T07:20:44Z",
+    "base_commit": "71aca9d80a70672d309afeaa82e265359efac1bf",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "339adf55e4d0058718da70109dbdff39e6d165cf48dac666fbf6c35f2511b23a",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved continuing and directly deleting the bounded .reasonix directory; current V1 evidence passed and independent implementation review REV-0052 approved with no findings.",
+    "schema_version": "1.0",
+    "spec_sha256": "8886ffb724e5d2630564dff3891e413272a9853c02264ad5b497831197e9df94",
+    "subject_commit": "f8208d2254c49984ffdbd9879b5a7fb6cd73f65e",
+    "task_id": "TASK-0027"
   }
 ]
