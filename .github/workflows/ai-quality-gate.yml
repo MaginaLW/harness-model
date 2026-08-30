@@ -25,11 +25,34 @@ jobs:
           python-version: "3.11"
       - name: Install project
         run: python -m pip install ".[dev]"
+      - name: Detect repository governance mode
+        id: governance
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          marker="$RUNNER_TEMP/base-bootstrap-mode.yaml"
+          if git show "${BASE_SHA}:.ai/bootstrap-mode.yaml" > "$marker" 2>/dev/null \
+            && grep -qx 'mode: bootstrap_auto' "$marker" \
+            && grep -qx 'status: active' "$marker"; then
+            echo "bootstrap_active=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "bootstrap_active=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Validate contracts
         run: python -m pytest tests/unit/test_contracts.py tests/integration/test_templates_and_policy.py -q
+      - name: Bootstrap quality checks
+        if: steps.governance.outputs.bootstrap_active == 'true'
+        run: |
+          python -m pytest -q
+          python -m ruff check .
+          python -m ruff format --check .
+          python -m mypy
       - name: Read repository identity
+        if: steps.governance.outputs.bootstrap_active != 'true'
         run: test -s .ai/repository-id && sha256sum .ai/repository-id
       - name: Resolve task
+        if: steps.governance.outputs.bootstrap_active != 'true'
         id: task
         env:
           AI_FLOW_TASK_ID: ${{ vars.AI_FLOW_TASK_ID }}
@@ -40,6 +63,7 @@ jobs:
           --task "$AI_FLOW_TASK_ID"
           --output "$GITHUB_OUTPUT"
       - name: Verify and Gate
+        if: steps.governance.outputs.bootstrap_active != 'true'
         env:
           TASK_ID: ${{ steps.task.outputs.task_id }}
         run: |
@@ -48,7 +72,7 @@ jobs:
           python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir" --output "$run_dir/evidence.json"
           python -m aiflow gate "$TASK_ID" --evidence "$run_dir/evidence.json" --format json > "$run_dir/gate.json"
       - name: Upload AI Flow diagnostics
-        if: always()
+        if: always() && steps.governance.outputs.bootstrap_active != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ai-flow-${{ steps.task.outputs.task_id }}

@@ -1,11 +1,15 @@
 ---
 name: ai-flow
-description: Orchestrate repository code, configuration, CI, and other behavior-changing work through the executable AI Flow. Purely read-only explanation does not require creating a task.
+description: Orchestrate repository code, configuration, CI, and other behavior-changing work through the executable AI Flow after bootstrap mode is disabled, or when the user explicitly asks to test AI Flow behavior. Purely read-only explanation does not require creating a task.
 ---
 
 # AI Flow
 
 Use this Skill for work that may change repository code, configuration, CI, generated artifacts, or repository behavior. For a purely read-only explanation or inspection, report findings without creating a task. This Skill coordinates the existing CLI; it grants no permission and never computes Policy decisions itself.
+
+## Bootstrap activation guard
+
+Read [the repository bootstrap marker](../../../.ai/bootstrap-mode.yaml) before using this Skill. While it has `mode: bootstrap_auto` and `status: active`, do not trigger this Skill for routine harness-model self-development. Follow the bootstrap rules in [AGENTS.md](../../../AGENTS.md) instead. The Skill remains available when the user explicitly asks to exercise or test AI Flow itself. Once the marker is removed or disabled by explicit project-owner instruction, the governed lifecycle below applies normally.
 
 ## Start and inspect
 

@@ -1,0 +1,23 @@
+schema_version: "1.0"
+mode: bootstrap_auto
+status: active
+scope: harness-model_self_development
+reason: Complete harness-model before requiring it to govern its own development.
+local_actions:
+  - read
+  - edit
+  - test
+  - commit
+ai_flow_self_governance_required: false
+ai_flow_product_testing_allowed: true
+preserved_approval_actions:
+  - delete
+  - push
+  - merge
+  - deploy
+  - secret_export
+  - paid_external_call
+preserved_approval_enforcement: explicit_human_and_platform_controls
+exit:
+  trigger: explicit_project_owner_instruction_after_project_completion
+  action: remove_this_marker_and_restore_full_ai_flow_enforcement

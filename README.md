@@ -2,6 +2,8 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
+> 当前自举模式：项目所有者已决定先完成 harness-model，再将其完整应用于自身开发流程。[bootstrap 标记](.ai/bootstrap-mode.yaml) 有效期间，本仓库的本地开发与 PR 使用普通自动开发和常规质量检查，不要求创建 AI Flow task 或取得 spec/code approval；这不改变产品内 Policy 的 `AUTO`/`REVIEW` 语义，也不授权任何外部或破坏性动作。项目完成后仅由所有者显式移除标记；退出 PR 仍按目标分支的自举状态检查，合并后才恢复完整 AI Flow 自用审批。
+
 > 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–12 已完成，其中 Chapter 12.1–12.6 与两个退出检查均已通过。Chapter 13 尚未初始化，阶段二仍未完成。active Policy 为 `2.1.0`。Chapter 11 的 acceptance、integration、action-approved targeted mutation 与独立 verifier 已实现；TASK-0015 的 V2 结论与 TASK-0022 的 observe/Hook parity、审核、批准和合并结论均严格绑定各自 task、subject、规格与 Policy，不能自动复用于未来 task 或 subject。Chapter 12 已提供受限的运行期 observation 与 Hook/CLI/CI 入口，但不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
 ## 阶段一目标
@@ -61,6 +63,8 @@ Chapters 1–7 按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-c
 实施顺序为：阶段二先建立非侵入式资源与事件契约，阶段三用真实记录校准容量画像和影子策略，阶段四先交付单机过载防护，再接入自适应编排。当前每会话静态并发上限只是纵深防御，不能视为跨会话、跨进程的整机安全保证。两份预进入蓝图不是执行计划；只有阶段二、阶段三和阶段四进入证据齐备后，才能据此另建正式执行计划。
 
 ## 开始参与
+
+bootstrap 标记有效时，先遵循本文顶部的自举例外；以下 AI Flow 自用步骤仅在标记移除或禁用后生效，或用于显式测试 AI Flow 产品行为。
 
 1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时同时阅读 [CLAUDE.md](CLAUDE.md)。
 2. 先核对 [overall state](docs/superpowers/state/overall.yaml) 与当前 chapter state，再按对应阶段的设计和实施目录选择下一项工作。

@@ -37,6 +37,21 @@ def _repo(tmp_path: Path) -> tuple[Path, str]:
     return root, _git(root, "rev-parse", "HEAD")
 
 
+def _bootstrap_active_at_commit(root: Path, commit: str) -> bool:
+    result = subprocess.run(
+        ["git", "show", f"{commit}:.ai/bootstrap-mode.yaml"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=20,
+    )
+    if result.returncode != 0:
+        return False
+    lines = result.stdout.splitlines()
+    return "mode: bootstrap_auto" in lines and "status: active" in lines
+
+
 def test_workflow_is_read_only_reproducible_and_bounded() -> None:
     workflow = _workflow()
     text = WORKFLOW.read_text(encoding="utf-8")
@@ -66,6 +81,70 @@ def test_resolved_task_output_flows_to_verify_and_gate() -> None:
     assert 'verify "$TASK_ID" --ci --ci-run-dir "$run_dir"' in text
     assert 'gate "$TASK_ID" --evidence "$run_dir/evidence.json" --format json' in text
     assert "${{ runner.temp }}/aiflow" in text
+
+
+def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "mode: bootstrap_auto" in text
+    assert "status: active" in text
+    assert "BASE_SHA: ${{ github.event.pull_request.base.sha }}" in text
+    assert 'git show "${BASE_SHA}:.ai/bootstrap-mode.yaml"' in text
+    assert "bootstrap_active=true" in text
+    assert "if: steps.governance.outputs.bootstrap_active == 'true'" in text
+    assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 3
+    assert "python -m pytest -q" in text
+    assert "python -m ruff check ." in text
+    assert "python -m ruff format --check ." in text
+    assert "python -m mypy" in text
+    assert "always() && steps.governance.outputs.bootstrap_active != 'true'" in text
+
+
+@pytest.mark.parametrize(
+    ("marker", "expected"),
+    [
+        (None, False),
+        ("mode: bootstrap_auto\nstatus: active\n", True),
+        ("mode: bootstrap_auto\nstatus: disabled\n", False),
+        ('mode: "bootstrap_auto"\nstatus: "active"\n', False),
+    ],
+)
+def test_bootstrap_detection_is_canonical_and_fail_closed(
+    tmp_path: Path, marker: str | None, expected: bool
+) -> None:
+    root, _ = _repo(tmp_path)
+    if marker is not None:
+        (root / ".ai" / "bootstrap-mode.yaml").write_text(marker, encoding="utf-8")
+    _git(root, "add", "-A")
+    _git(root, "commit", "--allow-empty", "-m", "marker state")
+
+    assert _bootstrap_active_at_commit(root, _git(root, "rev-parse", "HEAD")) is expected
+
+
+def test_base_commit_controls_bootstrap_transition(tmp_path: Path) -> None:
+    exiting, _ = _repo(tmp_path / "exit")
+    exit_marker = exiting / ".ai" / "bootstrap-mode.yaml"
+    exit_marker.write_text("mode: bootstrap_auto\nstatus: active\n", encoding="utf-8")
+    _git(exiting, "add", "-A")
+    _git(exiting, "commit", "-m", "activate bootstrap")
+    active_base = _git(exiting, "rev-parse", "HEAD")
+    exit_marker.unlink()
+    _git(exiting, "add", "-A")
+    _git(exiting, "commit", "-m", "exit bootstrap")
+    exit_head = _git(exiting, "rev-parse", "HEAD")
+
+    entering, inactive_base = _repo(tmp_path / "enter")
+    (entering / ".ai" / "bootstrap-mode.yaml").write_text(
+        "mode: bootstrap_auto\nstatus: active\n", encoding="utf-8"
+    )
+    _git(entering, "add", "-A")
+    _git(entering, "commit", "-m", "attempt bootstrap")
+    entering_head = _git(entering, "rev-parse", "HEAD")
+
+    assert _bootstrap_active_at_commit(exiting, active_base) is True
+    assert _bootstrap_active_at_commit(exiting, exit_head) is False
+    assert _bootstrap_active_at_commit(entering, inactive_base) is False
+    assert _bootstrap_active_at_commit(entering, entering_head) is True
 
 
 @pytest.mark.parametrize("count", [0, 1, 2])
