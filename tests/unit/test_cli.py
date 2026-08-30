@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import subprocess
 from collections.abc import Callable
+from importlib.metadata import version
+
+import aiflow
 
 
 def test_module_help_succeeds(
@@ -22,8 +25,12 @@ def test_module_version_is_stable(
     result = run_aiflow("--version")
 
     assert result.returncode == 0
-    assert result.stdout == "aiflow 0.1.0\n"
+    assert result.stdout == "aiflow 0.2.0\n"
     assert result.stderr == ""
+
+
+def test_package_metadata_matches_runtime_version() -> None:
+    assert version("aiflow") == aiflow.__version__ == "0.2.0"
 
 
 def test_unknown_argument_uses_argparse_error_contract(

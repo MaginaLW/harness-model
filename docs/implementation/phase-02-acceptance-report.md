@@ -96,7 +96,9 @@ records 未被这些清理动作修改。
   integration/self-hosting suite 证明。
 - Hook/CLI/CI parity 只覆盖列出的结构化 facts 与 semantic fields；不证明 Linux/macOS live
   Hook、未安装客户端、IDE/GUI/remote Git、自由 shell、通用命令拦截或 OS sandbox。
-- package 版本保持 `0.1.0`。未创建 tag，未发布 registry，未移除 bootstrap 标记。
+- 阶段二验收冻结时 package 版本保持 `0.1.0`；后续审查收口经项目所有者决定将当前源码包
+  提升为 `0.2.0`，不改写任何绑定历史 evidence。未创建 tag，未发布 registry，未移除
+  bootstrap 标记。
 - Phase 3 保持 `not_started`/blocked；内部记录充分性口径、真实 V3 用例与统一 telemetry
   contract 尚未满足。未实现或授权 V3、模型路由、信任度、成本优化或资源调度。
 - 除历史 single-use action 批准和本轮范围明确的精确 task-owned worktree/OS-temp cleanup 外，
