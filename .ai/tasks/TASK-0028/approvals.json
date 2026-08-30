@@ -73,5 +73,21 @@
     "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
     "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
     "task_id": "TASK-0028"
+  },
+  {
+    "action_sha256": "5e38b326b6b3a09406549510c714200bd4ba6c8002da36468f9a292dd136432b",
+    "actor": "human-user",
+    "approval_type": "action",
+    "approved_at": "2026-08-30T00:06:33Z",
+    "base_commit": "3f3ead9eeb3cc1039be58627994a3a0d58102534",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-08-31T12:00:00Z",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "User explicitly approved canonical action digest 5e38b326b6b3a09406549510c714200bd4ba6c8002da36468f9a292dd136432b for one new TASK-0028 H1 isolated CI simulation bound to audit head 2c1ed8813326ef1501f6ceb38c03c9092ded2977 and code-approval attestation f35d3094a8385806abff2996691e5224bedb00e2; single-use with exact LF checkout, SHA preflight, targets and cleanup, excluding targeted mutation, H2, push, merge, deploy, network, credentials, external models, paid calls and task close.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877",
+    "subject_commit": "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d",
+    "task_id": "TASK-0028"
   }
 ]
