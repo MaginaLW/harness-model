@@ -1,8 +1,12 @@
 # 阶段二审核与强化验证实施目录
 
-状态：proposed
+状态：completed（历史实施目录；实施与验收结论见[阶段二验收报告](../../implementation/phase-02-acceptance-report.md)）
 设计输入：`docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md`
 阶段一输入：`docs/implementation/phase-02-entry-inputs.md`
+
+本文保留阶段二执行前的任务顺序、进入条件和退出条件，供审计历史范围使用。Chapters 8–13
+现已完成；当前状态、不可变证据与回归基线以验收报告及其链接的验收矩阵、证据索引为准。
+这项历史完成不授予发布、tag、合并、推送或退出 bootstrap 的权限，也不改变阶段三边界。
 
 ## 执行原则
 

@@ -12,7 +12,7 @@
 - 分别计算决策权分流和 `V0`/`V1`/`V2` 验证强度；阶段一基线中的 V2 只完成 contract 与分类，阶段二按 Chapters 8–13 逐步补齐执行能力。
 - 用 Python CLI 统一任务状态、批准、验证和 Gate。
 - 将规格、Policy、批准和 evidence 绑定到明确版本。
-- 通过本地验证与 GitHub Actions 阻止越权或证据不足的变更。
+- 通过本地验证与可配置为 required check 的 GitHub Actions 提供门禁；workflow 只有在平台分支保护完成配置并经真实 PR 验证后，才可声明能阻止越权或证据不足的合并。
 
 ## 文档地图
 

@@ -1,9 +1,13 @@
 # 阶段二：审核与强化验证设计
 
-状态：proposed
+状态：completed（历史设计；实施与验收结论见[阶段二验收报告](../../implementation/phase-02-acceptance-report.md)）
 日期：2026-08-22
 目标仓库：`harness-model`
 阶段一基线：`0.1.0` / `695da6419cfc6157411ff8488dbeed70dfdf5c61`
+
+本文保留阶段二开始前的设计边界和当时的计划语义。Chapters 8–13 已按该设计完成；完成
+结论仅由验收报告、验收矩阵和证据索引中的历史证据与当前回归基线共同支持，不把任何
+历史 task 的 approval/evidence 改写为当前 `HEAD` 的授权。
 
 ## 1. 背景与进入结论
 

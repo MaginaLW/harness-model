@@ -264,9 +264,38 @@ python -m pytest -q
 python -m ruff check .
 python -m ruff format --check .
 python -m mypy src
-python -m pytest --cov=aiflow --cov-branch --cov-report=term-missing --cov-fail-under=85
 git diff --check
 ```
+
+覆盖率命令必须把数据库和 XML 写入精确的独立 run directory，不能写入仓库根。下面的
+PowerShell 示例在操作系统临时目录中为本次运行创建唯一目录；命令以 `origin/main` 的共同
+祖先作为本次变更覆盖比较的 base。若任务冻结了不同的 base commit，应把 `$baseCommit`
+改为该精确 SHA。先前的完整质量命令可继续运行，再单独运行以下覆盖率与 diff-cover 门槛：
+
+```powershell
+$runId = "harness-model-quality-{0}" -f ([guid]::NewGuid().ToString("N"))
+$runDir = Join-Path ([System.IO.Path]::GetTempPath()) $runId
+$coverageFile = Join-Path $runDir ".coverage"
+$coverageXml = Join-Path $runDir "coverage.xml"
+$baseCommit = (git merge-base HEAD origin/main).Trim()
+New-Item -ItemType Directory -Force -Path $runDir | Out-Null
+$env:COVERAGE_FILE = $coverageFile
+try {
+    python -m pytest -q --cov=aiflow --cov-branch --cov-report=term-missing --cov-report="xml:$coverageXml" --cov-fail-under=85
+    if ($LASTEXITCODE -ne 0) { throw "coverage pytest failed with exit $LASTEXITCODE" }
+    .\.venv\Scripts\diff-cover.exe $coverageXml --compare-branch=$baseCommit --fail-under=90
+    if ($LASTEXITCODE -ne 0) { throw "diff-cover failed with exit $LASTEXITCODE" }
+}
+finally {
+    Remove-Item Env:COVERAGE_FILE -ErrorAction SilentlyContinue
+}
+```
+
+这两项阈值分别要求总分支覆盖率不低于 85%、相对 `$baseCommit` 的变更覆盖率不低于 90%。
+成功或失败后先保留 run directory 以便定位结果；若要把它绑定为 task evidence，应按正式
+`aiflow verify` 流程生成 task-local run，而不是把这个临时目录当作权威 evidence。只有在确认
+无需保留诊断信息后，才可用精确路径 `Remove-Item -LiteralPath $runDir -Recurse` 删除本次
+临时运行；不要对临时目录的父目录执行递归清理，也不要删除任何 task 运行记录。
 
 需要重放某个 attestation 的 Gate 时，应在该精确提交的隔离只读 checkout/worktree 中使用
 索引记录的 argv 和原 task-local artifact；Windows 必须在 checkout 前按索引固定 LF。ignored
