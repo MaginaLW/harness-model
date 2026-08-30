@@ -286,3 +286,12 @@ def test_quality_replay_keeps_coverage_artifacts_out_of_repository_root() -> Non
     assert "历史命令提示" in plan
     assert "../../operations/quickstart.md#阶段二基线重放" in plan
     assert "不应直接执行其中未隔离" in plan
+
+
+def test_uv_quickstart_does_not_require_pip_inside_the_uv_environment() -> None:
+    quickstart = QUICKSTART.read_text(encoding="utf-8")
+
+    assert "uv pip check --python .\\.venv\\Scripts\\python.exe" in quickstart
+    assert "uv pip check --python .venv/bin/python" in quickstart
+    assert quickstart.count(".\\.venv\\Scripts\\python.exe -m pip check") == 1
+    assert quickstart.count(".venv/bin/python -m pip check") == 1

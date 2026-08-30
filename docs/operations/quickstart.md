@@ -28,7 +28,7 @@ git clone <REPOSITORY-URL> harness-model
 Set-Location harness-model
 uv lock --check
 uv sync --locked --all-extras
-.\.venv\Scripts\python.exe -m pip check
+uv pip check --python .\.venv\Scripts\python.exe
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe -m aiflow --help
 ```
@@ -40,7 +40,7 @@ git clone <REPOSITORY-URL> harness-model
 cd harness-model
 uv lock --check
 uv sync --locked --all-extras
-.venv/bin/python -m pip check
+uv pip check --python .venv/bin/python
 .venv/bin/python -m pytest -q
 .venv/bin/python -m aiflow --help
 ```
@@ -87,7 +87,7 @@ policy。
 uv lock --check
 uv sync --locked --all-extras --dry-run
 .\.venv\Scripts\python.exe -c "import sys; print(sys.executable)"
-.\.venv\Scripts\python.exe -m pip check
+uv pip check --python .\.venv\Scripts\python.exe
 .\.venv\Scripts\python.exe -m aiflow --help
 ```
 
@@ -98,8 +98,8 @@ macOS/Linux 将最后三条命令中的 `.\.venv\Scripts\python.exe` 换成
   重新执行 editable 安装；不要用全局安装掩盖解释器选择错误。
 - `uv sync --locked` 报告锁文件过期时，不要移除 `--locked` 或顺手重写锁文件。先运行
   `uv lock --check`，再将依赖或锁文件变更作为单独受治理任务处理。
-- `pip` 的新版本提示不代表项目依赖损坏。以 `pip check`、锁文件检查和项目测试结果为准，
-  不需要仅为消除提示而升级项目环境。
+- `pip` 或 uv 的新版本提示不代表项目依赖损坏。以当前安装前端的 `pip check` 或
+  `uv pip check`、锁文件检查和项目测试结果为准，不需要仅为消除提示而升级项目环境。
 - 若 `uv sync --locked --all-extras --dry-run` 计划修改环境，先检查是否使用了仓库根目录的
   `.venv` 和当前 `uv.lock`；确认后再运行不带 `--dry-run` 的同步命令。
 

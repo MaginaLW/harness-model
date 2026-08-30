@@ -47,6 +47,10 @@ TASK-0025 另保留已合并 subject `7191ca4c9c0bc23b75af9599ebb381ed077aa081` 
 V2 14/14、五项 killed、独立 `REV-0048 APPROVE`、code approval/local Gate 与 merge ledger；
 它证明闭环可完成，但同样不能跨 task 或 subject 复用。
 
+TASK-0025 H1 历史 snapshot 的 `non_task_inputs` SHA 绑定原 Windows CRLF 工作树字节；跨平台
+测试必须在首次 checkout 前显式固定 `core.autocrlf=true`，逐文件确认 `w/crlf` 后再校验原始
+SHA。这个重放条件不适用于 TASK-0028 的 LF Gate artifact，也不授权改写任一历史 manifest。
+
 ## 当前基线重放
 
 Phase 2 当前实现先使用以下只读/常规非覆盖率命令收口；精确结果记录在验收报告：

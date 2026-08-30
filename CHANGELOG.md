@@ -26,6 +26,8 @@ package 已发布到外部 registry。
 - `aiflow status` 现在区分事件重放得到的历史 lifecycle state 与当前 `merge_readiness`；当 `APPROVED_FOR_MERGE` 的 classification、evidence 或 REVIEW approval 已失效时，明确报告 `reverification_required`，不再把唯一缺失条件显示为 `external_merge`。
 - 将 `ai-quality-gate` 的总时限从 15 分钟提高到 35 分钟，覆盖历史 V2 约 20.5 分钟的实际验证时长及安装、Gate 和 runner 波动；修正阶段二 design/plan 与 Chapter 12 的完成状态漂移。
 - Quickstart 与当前阶段二证据索引的手工 coverage 重放现在把 `.coverage` 与 XML 写入独立临时 run directory，并执行 85% 总覆盖率与 90% diff-cover 门槛；历史实施目录明确标注旧简写命令不可直接重放。
+- 真实 Linux PR CI 现在按 TASK-0025 原始 CRLF 工作树条件重放历史 snapshot；clean-checkout 在 uv 环境不含 pip 时使用锁定工具链中的 uv 离线安装，Quickstart 的 uv 依赖检查不再假定环境内存在 pip。
+- GitHub workflow 的 checkout、Python 与 uv setup actions 已升级到官方 Node 24 运行时版本，消除 hosted runner 的 Node 20 弃用兼容警告。
 
 ### Known limitations
 

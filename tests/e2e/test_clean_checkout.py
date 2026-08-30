@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -52,6 +54,37 @@ def _installed_environment(target: Path) -> dict[str, str]:
     return env
 
 
+def _install_clean_clone(clone: Path, installed: Path, install_env: dict[str, str]) -> None:
+    if importlib.util.find_spec("pip") is not None:
+        argv = [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--disable-pip-version-check",
+            "--no-deps",
+            "--target",
+            str(installed),
+            str(clone),
+        ]
+    else:
+        uv = shutil.which("uv")
+        assert uv is not None, "the active Python has no pip and uv is unavailable"
+        argv = [
+            uv,
+            "pip",
+            "install",
+            "--offline",
+            "--no-deps",
+            "--target",
+            str(installed),
+            "--python",
+            sys.executable,
+            str(clone),
+        ]
+    _run(argv, cwd=clone, env=install_env)
+
+
 def test_quickstart_marked_commands_and_paths_are_executable() -> None:
     content = QUICKSTART.read_text(encoding="utf-8")
     commands = VERIFY_COMMAND.findall(content)
@@ -92,21 +125,7 @@ def test_clean_clone_installs_and_runs_documented_safe_subset(tmp_path: Path) ->
     install_env = os.environ.copy()
     install_env["PYTHONNOUSERSITE"] = "1"
     install_env["PIP_CONFIG_FILE"] = os.devnull
-    _run(
-        [
-            sys.executable,
-            "-m",
-            "pip",
-            "install",
-            "--disable-pip-version-check",
-            "--no-deps",
-            "--target",
-            str(installed),
-            str(clone),
-        ],
-        cwd=clone,
-        env=install_env,
-    )
+    _install_clean_clone(clone, installed, install_env)
     env = _installed_environment(installed)
 
     for command in VERIFY_COMMAND.findall(

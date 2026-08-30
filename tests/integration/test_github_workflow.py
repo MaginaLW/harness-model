@@ -68,7 +68,9 @@ def test_workflow_is_read_only_reproducible_and_bounded() -> None:
     assert "timeout-minutes: 35" in text
     assert "fetch-depth: 0" in text
     assert 'python-version: "3.11"' in text
-    assert "astral-sh/setup-uv@v6" in text
+    assert "actions/checkout@v7" in text
+    assert "actions/setup-python@v7" in text
+    assert "astral-sh/setup-uv@v10.0.1" in text
     assert 'version: "0.12.5"' in text
     assert "uv lock --check" in text
     assert "uv sync --locked --all-extras" in text
