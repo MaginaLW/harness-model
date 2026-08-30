@@ -398,10 +398,10 @@ def _require_no_pending_approval(root: Path, task_id: str) -> None:
 
 def _lock_descriptor(descriptor: int) -> None:
     if os.name == "nt":
-        import msvcrt
+        msvcrt = importlib.import_module("msvcrt")
 
         os.lseek(descriptor, 0, os.SEEK_SET)
-        msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
+        getattr(msvcrt, "locking")(descriptor, getattr(msvcrt, "LK_LOCK"), 1)
         return
     fcntl = importlib.import_module("fcntl")
     fcntl.flock(descriptor, fcntl.LOCK_EX)
@@ -409,10 +409,10 @@ def _lock_descriptor(descriptor: int) -> None:
 
 def _unlock_descriptor(descriptor: int) -> None:
     if os.name == "nt":
-        import msvcrt
+        msvcrt = importlib.import_module("msvcrt")
 
         os.lseek(descriptor, 0, os.SEEK_SET)
-        msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+        getattr(msvcrt, "locking")(descriptor, getattr(msvcrt, "LK_UNLCK"), 1)
         return
     fcntl = importlib.import_module("fcntl")
     fcntl.flock(descriptor, fcntl.LOCK_UN)
