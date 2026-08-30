@@ -14,17 +14,24 @@ concurrency:
 jobs:
   ai-quality-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Historical V2 verify/gate runs take about 20.5 minutes; leave room for
+    # dependency setup, diagnostics, and normal runner variance.
+    timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
-      - name: Install project
-        run: python -m pip install ".[dev]"
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          version: "0.12.5"
+      - name: Install locked project environment
+        run: |
+          uv lock --check
+          uv sync --locked --all-extras
       - name: Detect repository governance mode
         id: governance
         env:
@@ -40,14 +47,25 @@ jobs:
             echo "bootstrap_active=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Validate contracts
-        run: python -m pytest tests/unit/test_contracts.py tests/integration/test_templates_and_policy.py -q
+        run: >-
+          uv run --locked python -m pytest
+          tests/unit/test_contracts.py tests/integration/test_templates_and_policy.py -q
       - name: Bootstrap quality checks
         if: steps.governance.outputs.bootstrap_active == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          python -m pytest -q
-          python -m ruff check .
-          python -m ruff format --check .
-          python -m mypy
+          COVERAGE_FILE="$RUNNER_TEMP/.coverage" \
+            uv run --locked python -m pytest -q \
+            --cov=aiflow --cov-branch --cov-fail-under=85 \
+            --cov-report=term-missing \
+            --cov-report="xml:$RUNNER_TEMP/coverage.xml"
+          uv run --locked diff-cover "$RUNNER_TEMP/coverage.xml" --compare-branch "$BASE_SHA" --fail-under=90
+          git diff --check "$BASE_SHA..$HEAD_SHA"
+          uv run --locked ruff check .
+          uv run --locked ruff format --check .
+          uv run --locked mypy
       - name: Read repository identity
         if: steps.governance.outputs.bootstrap_active != 'true'
         run: test -s .ai/repository-id && sha256sum .ai/repository-id
@@ -57,7 +75,7 @@ jobs:
         env:
           AI_FLOW_TASK_ID: ${{ vars.AI_FLOW_TASK_ID }}
         run: >-
-          python tools/ci/resolve_task.py
+          uv run --locked python tools/ci/resolve_task.py
           --base "${{ github.event.pull_request.base.sha }}"
           --head "${{ github.event.pull_request.head.sha }}"
           --task "$AI_FLOW_TASK_ID"
@@ -69,8 +87,8 @@ jobs:
         run: |
           run_dir="$RUNNER_TEMP/aiflow"
           mkdir -p "$run_dir"
-          python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir" --output "$run_dir/evidence.json"
-          python -m aiflow gate "$TASK_ID" --evidence "$run_dir/evidence.json" --format json > "$run_dir/gate.json"
+          uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir" --output "$run_dir/evidence.json"
+          uv run --locked python -m aiflow gate "$TASK_ID" --evidence "$run_dir/evidence.json" --format json > "$run_dir/gate.json"
       - name: Upload AI Flow diagnostics
         if: always() && steps.governance.outputs.bootstrap_active != 'true'
         uses: actions/upload-artifact@v4

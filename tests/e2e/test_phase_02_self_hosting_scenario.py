@@ -89,13 +89,31 @@ def historical_replay(tmp_path: Path) -> dict[str, object]:
 
     replay = tmp_path / "replay"
     subprocess.run(
-        ["git", "clone", "--no-hardlinks", str(ROOT), str(replay)],
+        [
+            "git",
+            "clone",
+            "-c",
+            "core.autocrlf=true",
+            "--no-hardlinks",
+            str(ROOT),
+            str(replay),
+        ],
         check=True,
         capture_output=True,
         text=True,
     )
     subprocess.run(
-        ["git", "-C", str(replay), "checkout", "-B", "main", source_commit],
+        [
+            "git",
+            "-c",
+            "core.autocrlf=true",
+            "-C",
+            str(replay),
+            "checkout",
+            "-B",
+            "main",
+            source_commit,
+        ],
         check=True,
         capture_output=True,
         text=True,
@@ -117,6 +135,10 @@ def historical_replay(tmp_path: Path) -> dict[str, object]:
         path = item.get("path")
         digest = item.get("sha256")
         assert isinstance(path, str) and isinstance(digest, str)
+        eol = subprocess.check_output(
+            ["git", "-C", str(replay), "ls-files", "--eol", "--", path], text=True
+        ).strip()
+        assert "w/crlf" in eol
         assert hashlib.sha256((replay / path).read_bytes()).hexdigest() == digest
     entries = manifest["files"]
     assert isinstance(entries, list)

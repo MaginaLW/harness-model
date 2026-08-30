@@ -65,26 +65,40 @@ def test_workflow_is_read_only_reproducible_and_bounded() -> None:
     ]
     assert "pull_request_target" not in text
     assert "cancel-in-progress: true" in text
-    assert "timeout-minutes: 15" in text
+    assert "timeout-minutes: 35" in text
     assert "fetch-depth: 0" in text
     assert 'python-version: "3.11"' in text
-    assert 'python -m pip install ".[dev]"' in text
+    assert "actions/checkout@v7" in text
+    assert "actions/setup-python@v7" in text
+    assert "astral-sh/setup-uv@v10.0.1" in text
+    assert 'version: "0.12.5"' in text
+    assert "uv lock --check" in text
+    assert "uv sync --locked --all-extras" in text
+    assert "uv run --locked python -m pytest" in text
     assert "retention-days: 14" in text
     assert "write" not in str(workflow["permissions"])
 
 
 def test_resolved_task_output_flows_to_verify_and_gate() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
+    gate_command = (
+        'uv run --locked python -m aiflow gate "$TASK_ID" '
+        '--evidence "$run_dir/evidence.json" --format json'
+    )
 
     assert "task_id=" in (ROOT / "tools" / "ci" / "resolve_task.py").read_text(encoding="utf-8")
     assert "TASK_ID: ${{ steps.task.outputs.task_id }}" in text
-    assert 'verify "$TASK_ID" --ci --ci-run-dir "$run_dir"' in text
-    assert 'gate "$TASK_ID" --evidence "$run_dir/evidence.json" --format json' in text
+    assert 'uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir"' in text
+    assert gate_command in text
     assert "${{ runner.temp }}/aiflow" in text
 
 
 def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
+    diff_cover_command = (
+        'uv run --locked diff-cover "$RUNNER_TEMP/coverage.xml" '
+        '--compare-branch "$BASE_SHA" --fail-under=90'
+    )
 
     assert "mode: bootstrap_auto" in text
     assert "status: active" in text
@@ -93,10 +107,15 @@ def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
     assert "bootstrap_active=true" in text
     assert "if: steps.governance.outputs.bootstrap_active == 'true'" in text
     assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 3
-    assert "python -m pytest -q" in text
-    assert "python -m ruff check ." in text
-    assert "python -m ruff format --check ." in text
-    assert "python -m mypy" in text
+    assert 'COVERAGE_FILE="$RUNNER_TEMP/.coverage"' in text
+    assert "--cov=aiflow --cov-branch --cov-fail-under=85" in text
+    assert "--cov-report=term-missing" in text
+    assert '--cov-report="xml:$RUNNER_TEMP/coverage.xml"' in text
+    assert diff_cover_command in text
+    assert 'git diff --check "$BASE_SHA..$HEAD_SHA"' in text
+    assert "uv run --locked ruff check ." in text
+    assert "uv run --locked ruff format --check ." in text
+    assert "uv run --locked mypy" in text
     assert "always() && steps.governance.outputs.bootstrap_active != 'true'" in text
 
 

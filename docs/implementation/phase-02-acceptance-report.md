@@ -2,7 +2,7 @@
 
 - 状态：`completed`
 - 基线日期：`2026-08-30`
-- 内容基线 commit：`733962ace50e430f69cd2193a96bc797fc8a18b6`（后续提交只追加本哈希的 attestation 元数据）
+- 内容基线 commit：`733962ace50e430f69cd2193a96bc797fc8a18b6`（后续提交包含 attestation 与自举收尾修订，但不得回写或冒充该历史基线证据）
 - 范围：Chapters 8–13 / P2-REV-01、P2-V2-01、P2-VER-01、P2-MUT-01、P2-ESC-01、P2-HOOK-01
 - Policy：`2.1.0`，SHA-256 `f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf`
 - 治理模式：`.ai/bootstrap-mode.yaml` 为 `active`；本报告是仓库自身的本地质量基线，不是 release、merge 或外部动作授权
@@ -32,7 +32,7 @@ lifecycle 为 `APPROVED_FOR_MERGE`，但 current subject
 这些 exit 是产品阶段交付证据，不是把当前 TASK-0028 判为 merge-ready。历史 review、approval、
 mutation artifact 和 Gate 仍只能用于其原 task/subject/spec/Policy/attestation。
 
-## 当前质量基线
+## 阶段二内容基线质量
 
 | 检查 | 结果 |
 |---|---|
@@ -47,6 +47,14 @@ mutation artifact 和 Gate 仍只能用于其原 task/subject/spec/Policy/attest
 | branch coverage | `87.58%`；`7151` statements、`2406` branches；`--cov-fail-under=85` passed |
 | diff-cover | 基于 `e8f60dacbe1e8681ea9d8a9e299621d34ddb05fe`：`No lines with coverage information in this diff.`；sentinel passed，不是数值或 100% 声明 |
 | whitespace/state | `git diff --check` passed；overall/chapter-13 YAML 可解析 |
+
+基线后的收尾审计发现，原 GitHub Actions job 的 15 分钟总时限小于仓库内保留的真实 V2
+检查耗时，且 bootstrap 路径没有消费锁文件或执行 coverage/diff coverage。提交
+`8e82e3c32061b428bb11952d83cbd31bb45c0b61` 已将
+job 时限改为 35 分钟，改用固定 uv/locked sync，并在 bootstrap 路径执行一次完整 branch
+coverage pytest、85% 总覆盖率、90% diff coverage、PR 范围 whitespace、Ruff、format 与
+mypy。该修订不改变上述历史 evidence 的 subject/attestation，也不能代替一次真实远端 PR
+运行或平台 branch-protection 配置；外部门禁在取得这两项证据前仍不得声明为已启用。
 
 四项 skip 均为已知 Windows symlink capability 限制：verification Git scope、mutation evidence、
 scope 和 verification plan 各一项。它们不证明 Linux/macOS live Hook 或符号链接行为。
@@ -88,7 +96,9 @@ records 未被这些清理动作修改。
   integration/self-hosting suite 证明。
 - Hook/CLI/CI parity 只覆盖列出的结构化 facts 与 semantic fields；不证明 Linux/macOS live
   Hook、未安装客户端、IDE/GUI/remote Git、自由 shell、通用命令拦截或 OS sandbox。
-- package 版本保持 `0.1.0`。未创建 tag，未发布 registry，未移除 bootstrap 标记。
+- 阶段二验收冻结时 package 版本保持 `0.1.0`；后续审查收口经项目所有者决定将当前源码包
+  提升为 `0.2.0`，不改写任何绑定历史 evidence。未创建 tag，未发布 registry，未移除
+  bootstrap 标记。
 - Phase 3 保持 `not_started`/blocked；内部记录充分性口径、真实 V3 用例与统一 telemetry
   contract 尚未满足。未实现或授权 V3、模型路由、信任度、成本优化或资源调度。
 - 除历史 single-use action 批准和本轮范围明确的精确 task-owned worktree/OS-temp cleanup 外，

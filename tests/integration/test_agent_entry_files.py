@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 import pytest
-import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 ENTRY_FILES = (ROOT / "AGENTS.md", ROOT / "CLAUDE.md")
@@ -65,29 +64,15 @@ def test_documented_startup_command_is_available() -> None:
     assert "Auditable AI code collaboration CLI" in result.stdout
 
 
-def test_bootstrap_mode_is_explicit_bounded_and_shared_by_agent_entries() -> None:
-    marker = yaml.safe_load(BOOTSTRAP_MARKER.read_text(encoding="utf-8"))
-
-    assert marker["mode"] == "bootstrap_auto"
-    assert marker["status"] == "active"
-    assert marker["ai_flow_self_governance_required"] is False
-    assert marker["exit"]["trigger"] == (
-        "explicit_project_owner_instruction_after_project_completion"
-    )
-    assert set(marker["preserved_approval_actions"]) == {
-        "delete",
-        "push",
-        "merge",
-        "deploy",
-        "secret_export",
-        "paid_external_call",
-    }
-    assert marker["preserved_approval_enforcement"] == ("explicit_human_and_platform_controls")
+def test_formal_self_governance_is_explicit_and_shared_by_agent_entries() -> None:
+    assert not BOOTSTRAP_MARKER.exists()
     for entry_file in ENTRY_FILES:
         text = entry_file.read_text(encoding="utf-8")
         assert ".ai/bootstrap-mode.yaml" in text
-        assert "不要求创建 AI Flow task" in text
+        assert "AI Flow 正式自用治理已启用" in text
+        assert "task-free 自举例外" in text
         assert "项目所有者" in text
     skill = AI_FLOW_SKILL.read_text(encoding="utf-8")
-    assert "Bootstrap activation guard" in skill
-    assert "bootstrap_auto" in skill
+    assert "Governance activation" in skill
+    assert "bootstrap marker is intentionally absent" in skill
+    assert "task-free bootstrap exception" in skill

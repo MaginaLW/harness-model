@@ -1,8 +1,12 @@
 # 阶段二审核与强化验证实施目录
 
-状态：proposed
+状态：completed（历史实施目录；实施与验收结论见[阶段二验收报告](../../implementation/phase-02-acceptance-report.md)）
 设计输入：`docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md`
 阶段一输入：`docs/implementation/phase-02-entry-inputs.md`
+
+本文保留阶段二执行前的任务顺序、进入条件和退出条件，供审计历史范围使用。Chapters 8–13
+现已完成；当前状态、不可变证据与回归基线以验收报告及其链接的验收矩阵、证据索引为准。
+这项历史完成不授予发布、tag、合并、推送或退出 bootstrap 的权限，也不改变阶段三边界。
 
 ## 执行原则
 
@@ -62,6 +66,12 @@
 5. 提交 Chapter 8 完成基线。
 
 ### 验证
+
+> 历史命令提示：本实施目录保留下列当时的验证清单用于审计，不应直接执行其中未隔离
+> coverage 产物的简写命令。当前阶段二重放应使用
+> [证据索引](../../implementation/phase-02-evidence-index.md)并按
+> [Quickstart 的“阶段二基线重放”](../../operations/quickstart.md#阶段二基线重放)把 coverage
+> 数据库与 XML 写入唯一 run directory，同时执行总覆盖率和 diff-cover 门槛。
 
 ```powershell
 python -m pytest tests/unit/test_review_package.py -q

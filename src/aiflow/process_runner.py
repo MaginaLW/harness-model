@@ -197,7 +197,9 @@ def run_execution(
             errors="replace",
             shell=False,
             start_new_session=os.name != "nt",
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
+            creationflags=(
+                getattr(subprocess, "CREATE_NEW_PROCESS_GROUP") if os.name == "nt" else 0
+            ),
         )
         try:
             stdout, stderr = process.communicate(timeout=execution.timeout_seconds)

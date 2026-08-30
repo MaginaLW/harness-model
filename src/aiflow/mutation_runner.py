@@ -730,7 +730,9 @@ def _run_detector(
             stderr=subprocess.DEVNULL,
             shell=False,
             start_new_session=os.name != "nt",
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
+            creationflags=(
+                getattr(subprocess, "CREATE_NEW_PROCESS_GROUP") if os.name == "nt" else 0
+            ),
         )
         try:
             exit_code = process.wait(timeout=_TIMEOUT_SECONDS)

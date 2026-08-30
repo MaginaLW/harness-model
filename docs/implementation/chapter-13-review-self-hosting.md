@@ -157,11 +157,13 @@ H1/CI-003 与 TASK-0025 的历史 binding，并由 traceability 测试核对路�
 TASK-0028 subject。最终 pytest、Ruff、format、mypy、branch coverage、diff-cover 与历史
 attestation Gate 结果记录在[阶段二验收报告](phase-02-acceptance-report.md)。
 
-README、CHANGELOG、Quickstart、Recovery 和人工状态投影已同步完成；package 仍为本地
-`0.1.0`，未 tag 或发布。[阶段三进入输入](phase-03-entry-inputs.md)只记录可用事实和三个仍未
-满足的门槛，Phase 3 保持 `not_started`。bootstrap 标记未移除；除历史 action 批准和本轮
-范围明确的精确 task-owned worktree/OS-temp cleanup 外，未删除仓库或业务数据，也没有实现
-或授权 V3、模型路由、资源调度、push、merge、deploy、凭据导出或付费调用。
+README、CHANGELOG、Quickstart、Recovery 和人工状态投影已同步完成；阶段二验收冻结时 package
+仍为本地 `0.1.0`，后续审查收口经项目所有者决定将当前源码包提升为 `0.2.0`，不改写历史
+evidence，且未 tag 或发布。[阶段三进入输入](phase-03-entry-inputs.md)只记录可用事实和三个仍未
+满足的门槛，Phase 3 保持 `not_started`。bootstrap 标记未移除；除历史 action 批准、范围明确
+的精确 task-owned worktree/OS-temp cleanup，以及本次所有者授权的收尾分支 push、PR 与 CI
+全绿后的 `main` 保护配置外，未删除仓库或业务数据，也没有实现或授权 V3、模型路由、资源
+调度、merge、deploy、凭据导出或付费调用。
 
 ## 定向复现与边界
 
