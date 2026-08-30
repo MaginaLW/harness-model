@@ -1,11 +1,11 @@
 # Chapter 13：REVIEW / V2 自举与 CI Gate
 
-当前权威进度是 Chapter 13.1、13.2 已完成，13.3 由 TASK-0028 推进中。13.3 的 H1
-只实现 V2 CI attestation 与 Gate 分层、匹配 integration tests 和本说明；
-`docs/superpowers/state/chapters/chapter-13.yaml` 与 overall state 在 H1 保持 13.3
-`pending`。只有 H1 current V2、实现审核、code approval、隔离 CI simulation 和 Gate
-都通过后，H2 才能投影 13.3 完成。13.4–13.6、四个 Chapter 13 exit checks、Chapter 13
-和 Phase 02 均未完成。
+当前权威投影是 Chapter 13.1–13.3 已完成，current task 指向仍为 `pending` 的 13.4。
+13.3 的依据是 TASK-0028 H1 current V2、独立实现审核、code approval/local Gate，以及
+成功的隔离 CI simulation/Gate。H2 只更新本说明和两份 state；它改变 TASK-0028 subject，
+因此在该新 subject 完成全新的 V2、独立实现审核、finalize、code approval 与只读 local Gate
+之前，本次投影不是 TASK-0028 的 merge readiness。13.4–13.6、四个 Chapter 13 exit checks、
+Chapter 13 和 Phase 02 均未完成。
 
 ## Chapter 13.2 已完成事实
 
@@ -44,8 +44,17 @@ Policy 或 classification 复用。
   经 scope/spec escalation、重新分类和冻结后以 revision 2 结构化解决；
 - 当前设计审核为 `REV-0055 APPROVE`，context
   `0d3efee5c9ef2b73936729c5e6fecd88cc2e10756b7ff33823d83acff91e0e71`；
-- 用户已批准上述 frozen spec 进入有界实现，但尚未批准任何 TASK-0028 targeted mutation、
-  临时 worktree/run-directory 清理、push、merge 或远程动作。
+- 用户已批准上述 frozen spec 进入有界实现；H1 subject
+  `b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d` 的 single-use targeted mutation action
+  `7dcbd975b1721e6e314e8955b012aa7b5b82dcdacade06b1d428214c3e39c0dc` 已消费；
+- H1 final evidence 文件 SHA-256 为
+  `4fc5729ef5e40f468b8966e35696a84e47b2de05e363d517293ac9e2f9823662`，
+  `REV-0056 APPROVE` 后的 code-approval attestation 为
+  `f35d3094a8385806abff2996691e5224bedb00e2`；
+- 成功的 CI-003 action
+  `5a3071cd2e446dea89d5b8acb5c6c26399cf69a4ba141da0f3995706bfa28020` 已消费；
+  H2 的第三个 current-subject mutation action 尚未生成或批准，push、merge、deploy、close
+  和远程动作也未获授权。
 
 actor label 只是 task-local 审计字符串，不是人员、模型或外部身份认证。Local V2 的
 Implementer 与 Verifier 仍必须是不同的非空规范化字符串。
@@ -90,22 +99,34 @@ V0/V1 CI 和 local V2 collection/partial-check 语义保持不变。
 
 ## H1、CI simulation 与 H2
 
-H1 业务改动只有两个 runtime seam、两个 integration test 文件和本说明。H1 subject sync 后，
-必须生成绑定该 subject 的精确 `targeted_mutation_v2` action，并由用户单独批准 single-use
-transaction。不同于 Implementer 的 Verifier 执行完整 14/14 V2；五项 mutant 全 killed且
-无 unverified 后，独立 implementation review 绑定同一 snapshot，随后 finalize、code approval
-和 local Gate。H1 final evidence 必须另存 immutable task-local snapshot，供后续投影引用。
+H1 已在 subject `b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d` 上闭环。独立 Verifier
+`/root/task28_h1_verifier` 的 local-final V2 为 14/14 passed；`MUT-V2-001`–`005` 按
+manifest 顺序全部 killed，`unverified_scenarios: []`，local verification snapshot 为
+`5d761ba9f24dbbb2f9746bc99c4a5f292fb04390039605c57a11b1731dcfcafb`。Mutation artifact
+digest 为 `2028bd7cbdeebd26033e3d8dd36728e87362f71f638f2a89087425f73da8530e`；
+`REV-0056 APPROVE` 绑定 context
+`287db9c8c642a0e65a79f32392f270b25fdd7abd7a03a500d04851781196cfb1`。Final evidence、
+code approval 和 local Gate 均通过，code-approval evidence digest 为
+`a2589f30cdbf763fd930d924b2829f7ba2158ba4b4dd0841760dfd4af09e6d3b`。
 
-H1 code-approval attestation 形成后，第二个独立 action 只授权一个精确 OS-temp worktree 与
-一个精确 OS-temp CI run directory 的创建和清理。Simulation 固定 checkout 到 H1 attestation，
-运行无 actor 的 V2 `verify --ci` 和 `gate --evidence`；预期十四项 checks、五项 killed replay、
-attestation freshness 与 Gate 全部通过，源 task 目录逐字节不变。脱敏 receipt 不记录机器名、
-本机用户名、绝对路径、完整日志或凭据。
+CI-003 随后在 governance audit head
+`fd32681ea39418f4176d72738cbe7dc8b8fca5ca` 上成功。Receipt
+`.ai/tasks/TASK-0028/action-use-5a3071cd2e446dea89d5b8acb5c6c26399cf69a4ba141da0f3995706bfa28020.md`
+的文件 SHA-256 为 `3d420bb8ec5845287744b6e19b1890997dba58fdfab158803a84a0bcf86eff94`。
+CI evidence 为 14/14 passed、五项 immutable mutation replay 全 killed、零 unverified，
+attestation 为 governance-only，CI snapshot 为
+`95802c483238bb2eab86ee1528b8c736134bcd44b61a5a560dd27a5893ed5b53`，external evidence
+文件 SHA-256 为 `55e957e41c32009feeb04e3781323d12f16b48d84b148ec457870d87bcdffa13`。
+External-evidence Gate passed，规范化输出 SHA-256 为
+`962262ea382a517a2fa46bed825c7659a3a33547f9018aa4b1961e247ce1fec3`。Checkout 明确使用
+LF，源 task、源工作树与 refs 保持不变，精确 worktree 和 run directory 均已清理。较早失败和
+cleanup receipts 继续保留在 task-local 历史中；它们不替代成功的 CI-003。
 
-只有上述 H1 与 CI facts 完整后，H2 才把 13.3 五步投影完成并指向 pending 13.4。H2 改变
-subject，因此必须取得第三个 current single-use mutation action，重新运行完整 V2、独立实现
-审核、finalize、code approval 和 local Gate。H1 证据只作为投影前提；H2 证据才决定最终
-merge readiness。TASK-0028 不自动 close、merge 或 push。
+上述事实只满足 H2 投影的时序前提，因此本次把 13.3 五步投影完成并指向 pending 13.4。
+H2 subject 形成后必须取得第三个、绑定该 subject 的 single-use mutation action，重新运行完整
+V2、独立实现审核、finalize、code approval 和 local Gate；不要求再次执行 CI simulation。
+H1 evidence/review/approval/CI receipt 均不能充当 H2 merge readiness。TASK-0028 不自动
+close、merge 或 push。
 
 ## 定向复现与边界
 

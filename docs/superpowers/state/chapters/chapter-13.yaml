@@ -53,10 +53,28 @@ tasks:
     blockers: []
   - id: "13.3"
     title: "执行实现审核、code approval、CI 模拟和 Gate"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - ".ai/tasks/TASK-0028/spec.md"
+      - ".ai/tasks/TASK-0028/classification.json"
+      - ".ai/tasks/TASK-0028/evidence-h1-b7c7fb4a.json"
+      - ".ai/tasks/TASK-0028/verifier-contexts/1faa4f460ad3f666398707c9570e34a17a9e19d6333c172629de4bb9b81295df.json"
+      - ".ai/tasks/TASK-0028/reviews/REV-0055-r0001.json"
+      - ".ai/tasks/TASK-0028/reviews/REV-0056-r0001.json"
+      - ".ai/tasks/TASK-0028/action-use-7dcbd975b1721e6e314e8955b012aa7b5b82dcdacade06b1d428214c3e39c0dc.md"
+      - ".ai/tasks/TASK-0028/action-use-5a3071cd2e446dea89d5b8acb5c6c26399cf69a4ba141da0f3995706bfa28020.md"
+      - ".ai/tasks/TASK-0028/approvals.json"
+      - ".ai/tasks/TASK-0028/events.jsonl"
+      - "src/aiflow/verification_service.py"
+      - "src/aiflow/gate.py"
+      - "tests/integration/test_verify_command.py"
+      - "tests/integration/test_gate_command.py"
+      - "docs/implementation/chapter-13-review-self-hosting.md"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
     blockers: []
   - id: "13.4"
     title: "覆盖相同 actor、survived mutant、越界升级和陈旧审核 E2E"
@@ -223,5 +241,66 @@ chapter_evidence:
       unverified_scenarios: []
     scope: "Completes only Chapter 13 task 13.2 from the corrected H1 REVIEW/V2 implementation, immutable evidence snapshot and independent implementation review."
     limitation: "13.3, all four Chapter 13 exit checks, Chapter 13 completion, Phase 02 completion, CI simulation, code approval, Gate and every external action remain unproven or unauthorized. Because this H2 projection changes the subject, its current V2 action, evidence, implementation review, code approval and Gate must all be fresh; no H1 action, evidence or review is reusable."
+  - id: "EVD-CH13-13.3-001"
+    kind: "task_completion_projection"
+    task_id: "TASK-0028"
+    route: "REVIEW"
+    verification_level: "V2"
+    classification_input_sha256: "28204d9e485e11ca0948982038798e99f8148512a491550e80f4ebeb1e14a75a"
+    spec_sha256: "657bac588589c0fabb9c8d6a108ab9077cd101c9648f55d0d3f5e71299f06877"
+    policy_version: "2.1.0"
+    policy_sha256: "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+    implementation_subject_commit: "b7c7fb4a0bab1a2a4b0d9a59edfe237839f3779d"
+    implementation_subject_role: "H1 runtime/test implementation and CI closure verified before the H2 completion projection; it is a temporal prerequisite, not current H2 merge-readiness evidence"
+    verification_evidence_ref: ".ai/tasks/TASK-0028/evidence-h1-b7c7fb4a.json"
+    verification_evidence_file_sha256: "4fc5729ef5e40f468b8966e35696a84e47b2de05e363d517293ac9e2f9823662"
+    verification_snapshot_sha256: "5d761ba9f24dbbb2f9746bc99c4a5f292fb04390039605c57a11b1731dcfcafb"
+    verifier_context_ref: ".ai/tasks/TASK-0028/verifier-contexts/1faa4f460ad3f666398707c9570e34a17a9e19d6333c172629de4bb9b81295df.json"
+    verifier_context_sha256: "1faa4f460ad3f666398707c9570e34a17a9e19d6333c172629de4bb9b81295df"
+    verifier_context_file_sha256: "9933b5b4016530dca7ef15c570353e6479e00d8a36287ab55e64222dbac0c12a"
+    verifier_actor: "/root/task28_h1_verifier"
+    design_review_ref: ".ai/tasks/TASK-0028/reviews/REV-0055-r0001.json"
+    design_review_file_sha256: "3a05a000b50f45d58704ebaa28d10a4ad8d8589dcd3559de4f3bdadb6e68757e"
+    design_review_context_sha256: "0d3efee5c9ef2b73936729c5e6fecd88cc2e10756b7ff33823d83acff91e0e71"
+    implementation_review_ref: ".ai/tasks/TASK-0028/reviews/REV-0056-r0001.json"
+    implementation_review_file_sha256: "e2b92ab258f66b8faacb6770f44de45397a251472adbc14c477e575b3574d8e8"
+    implementation_review_context_sha256: "287db9c8c642a0e65a79f32392f270b25fdd7abd7a03a500d04851781196cfb1"
+    implementation_review_outcome: "APPROVE"
+    code_approval:
+      event_sequence: 24
+      evidence_sha256: "a2589f30cdbf763fd930d924b2829f7ba2158ba4b4dd0841760dfd4af09e6d3b"
+      attestation_commit: "f35d3094a8385806abff2996691e5224bedb00e2"
+      local_gate: "passed"
+    targeted_mutation:
+      action_sha256: "7dcbd975b1721e6e314e8955b012aa7b5b82dcdacade06b1d428214c3e39c0dc"
+      receipt_ref: ".ai/tasks/TASK-0028/action-use-7dcbd975b1721e6e314e8955b012aa7b5b82dcdacade06b1d428214c3e39c0dc.md"
+      receipt_file_sha256: "1a79124949ea8ed2f64ba34361513ea3806d5a8d6fc7580ee175c47e164345a4"
+      mutation_evidence_sha256: "2028bd7cbdeebd26033e3d8dd36728e87362f71f638f2a89087425f73da8530e"
+      killed_mutation_ids: ["MUT-V2-001", "MUT-V2-002", "MUT-V2-003", "MUT-V2-004", "MUT-V2-005"]
+      uncovered_mutation_ids: []
+    verification:
+      conclusion: "passed"
+      required_checks: 14
+      passed_required_checks: 14
+      unverified_scenarios: []
+    isolated_ci_simulation:
+      action_sha256: "5a3071cd2e446dea89d5b8acb5c6c26399cf69a4ba141da0f3995706bfa28020"
+      receipt_ref: ".ai/tasks/TASK-0028/action-use-5a3071cd2e446dea89d5b8acb5c6c26399cf69a4ba141da0f3995706bfa28020.md"
+      receipt_file_sha256: "3d420bb8ec5845287744b6e19b1890997dba58fdfab158803a84a0bcf86eff94"
+      governance_audit_head: "fd32681ea39418f4176d72738cbe7dc8b8fca5ca"
+      audit_record_commit: "d541c041e38a1d998780e2a843f0ff9e7cb027d6"
+      external_evidence_file_sha256: "55e957e41c32009feeb04e3781323d12f16b48d84b148ec457870d87bcdffa13"
+      verification_snapshot_sha256: "95802c483238bb2eab86ee1528b8c736134bcd44b61a5a560dd27a5893ed5b53"
+      gate_output_sha256: "962262ea382a517a2fa46bed825c7659a3a33547f9018aa4b1961e247ce1fec3"
+      attestation_governance_only: true
+      required_checks: "14/14 passed"
+      killed_mutation_ids: ["MUT-V2-001", "MUT-V2-002", "MUT-V2-003", "MUT-V2-004", "MUT-V2-005"]
+      unverified_scenarios: []
+      source_task_unchanged: true
+      refs_unchanged: true
+      temporary_targets_absent: true
+      gate: "passed"
+    scope: "Completes only Chapter 13 task 13.3 from the H1 REVIEW/V2 implementation, current independent review/code approval/local Gate and successful isolated CI simulation/Gate."
+    limitation: "13.4-13.6, all four Chapter 13 exit checks, Chapter 13 completion, Phase 02 completion and every external action remain incomplete or unauthorized. This H2 projection changes the subject and therefore still requires a third current single-use mutation action, fresh 14/14 V2 with five killed and no unverified scenarios, an independent implementation review, finalize, code approval and local Gate. H1 evidence and CI receipt are prerequisites only; no repeat CI simulation is required and no close, merge or push is authorized."
 
 blockers: []
