@@ -354,6 +354,31 @@ def test_posix_action_lock_adapter_uses_flock(
     assert calls == [fake_fcntl.LOCK_EX, fake_fcntl.LOCK_UN]
 
 
+def test_windows_action_lock_adapter_uses_msvcrt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[int, int, int]] = []
+    fake_msvcrt = SimpleNamespace(
+        LK_LOCK=1,
+        LK_UNLCK=2,
+        locking=lambda descriptor, operation, length: calls.append((descriptor, operation, length)),
+    )
+    monkeypatch.setattr(evidence.os, "name", "nt")
+    monkeypatch.setattr(evidence.importlib, "import_module", lambda _name: fake_msvcrt)
+    path = tmp_path / "lock"
+    descriptor = evidence.os.open(path, evidence.os.O_CREAT | evidence.os.O_RDWR)
+    try:
+        evidence._lock_descriptor(descriptor)
+        evidence._unlock_descriptor(descriptor)
+    finally:
+        evidence.os.close(descriptor)
+
+    assert calls == [
+        (descriptor, fake_msvcrt.LK_LOCK, 1),
+        (descriptor, fake_msvcrt.LK_UNLCK, 1),
+    ]
+
+
 def test_action_lock_reservation_error_is_stable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
