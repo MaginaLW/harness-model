@@ -1,4 +1,4 @@
-"""Executable traceability checks for the twelve phase-one acceptance items."""
+"""Executable traceability checks for published phase-one and phase-two acceptance indexes."""
 
 from __future__ import annotations
 
@@ -10,11 +10,14 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 MATRIX = ROOT / "docs/implementation/phase-01-acceptance-matrix.md"
+PHASE_TWO_MATRIX = ROOT / "docs/implementation/phase-02-acceptance-matrix.md"
+PHASE_TWO_INDEX = ROOT / "docs/implementation/phase-02-evidence-index.md"
 RESULTS = ROOT / "docs/pilots/results"
 ROW = re.compile(r"^\| (ACC-\d{2}) \|(.+)\|$", re.MULTILINE)
 BACKTICK = re.compile(r"`([^`]+)`")
 TEST_NODE = re.compile(r"^(tests/[^:]+\.py)::([A-Za-z_][A-Za-z0-9_]*)$")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
+PHASE_TWO_ID = re.compile(r"^\| (P2-[A-Z0-9]+-\d{2}) \|(.+)\|$", re.MULTILINE)
 
 PILOTS = {
     "PILOT-AUTO": {
@@ -149,3 +152,63 @@ def test_clean_checkout_evidence_is_passed() -> None:
     assert "575 passed, 3 skipped" in evidence
     assert "python -m pip install -e `" not in evidence
     assert "python -m aiflow --help" in evidence
+
+
+def test_phase_two_matrix_has_six_fixed_traceable_inputs() -> None:
+    text = PHASE_TWO_MATRIX.read_text(encoding="utf-8")
+    rows = PHASE_TWO_ID.findall(text)
+    assert [identifier for identifier, _ in rows] == [
+        "P2-REV-01",
+        "P2-V2-01",
+        "P2-VER-01",
+        "P2-MUT-01",
+        "P2-ESC-01",
+        "P2-HOOK-01",
+    ]
+    for _identifier, body in rows:
+        cells = [cell.strip() for cell in body.split("|")]
+        assert len(cells) == 7
+        assert all(cells)
+        assert "python -m pytest" in cells[4]
+        assert cells[5]
+        assert cells[6]
+        local_paths = [
+            value
+            for value in BACKTICK.findall("|".join(cells[:4]))
+            if value.startswith(("docs/", "tests/", "src/", "tools/", ".ai/"))
+        ]
+        assert local_paths
+        assert all((ROOT / path).exists() for path in local_paths)
+
+
+def test_phase_two_index_preserves_historical_and_final_replay_boundaries() -> None:
+    matrix = PHASE_TWO_MATRIX.read_text(encoding="utf-8")
+    index = PHASE_TWO_INDEX.read_text(encoding="utf-8")
+    assert "## 阶段二总验收（最终 attestation 执行）" in matrix
+    assert "pending final run" in matrix
+    assert "not current approval" in index
+    assert "not the current HEAD" in index
+    assert "`TASK-0028` H1" in index
+    assert "must not be reported as current merge-ready" in index
+    for identifier in (
+        "P2-REV-01",
+        "P2-V2-01",
+        "P2-VER-01",
+        "P2-MUT-01",
+        "P2-ESC-01",
+        "P2-HOOK-01",
+    ):
+        assert identifier in index
+    assert "current action-authorized" in index
+    assert "python -m aiflow gate <CURRENT-TASK> --format json" in index
+
+
+def test_phase_two_published_artifact_paths_exist() -> None:
+    for document in (PHASE_TWO_MATRIX, PHASE_TWO_INDEX):
+        paths = [
+            value
+            for value in BACKTICK.findall(document.read_text(encoding="utf-8"))
+            if value.startswith(("docs/", "tests/", "src/", "tools/", ".ai/")) and "*" not in value
+        ]
+        assert paths
+        assert all((ROOT / path).exists() for path in paths)
