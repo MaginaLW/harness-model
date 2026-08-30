@@ -4,7 +4,7 @@
 
 > 当前自举模式：项目所有者已决定先完成 harness-model，再将其完整应用于自身开发流程。[bootstrap 标记](.ai/bootstrap-mode.yaml) 有效期间，本仓库的本地开发与 PR 使用普通自动开发和常规质量检查，不要求创建 AI Flow task 或取得 spec/code approval；这不改变产品内 Policy 的 `AUTO`/`REVIEW` 语义，也不授权任何外部或破坏性动作。项目完成后仅由所有者显式移除标记；退出 PR 仍按目标分支的自举状态检查，合并后才恢复完整 AI Flow 自用审批。
 
-> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–12 已完成，Chapter 13 已初始化并处于 `in_progress`。13.1–13.3 已完成，当前任务为仍 `pending` 的 13.4；13.5–13.6、四项 Chapter 13 exit checks 与阶段二均未完成。active Policy 为 `2.1.0`。Chapter 11 的 acceptance、integration、action-approved targeted mutation 与独立 verifier 已实现；TASK-0015 的 V2 结论与 TASK-0022 的 observe/Hook parity、审核、批准和合并结论均严格绑定各自 task、subject、规格与 Policy，不能自动复用于未来 task 或 subject。Chapter 12 已提供受限的运行期 observation 与 Hook/CLI/CI 入口，但不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
+> 当前状态：阶段一 MVP `0.1.0` 本地发布基线与阶段二 Chapters 8–13 均已完成；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.1.0`。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
 ## 阶段一目标
 
@@ -24,6 +24,10 @@
 | [阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md) | 7 章、44 个任务及逐步验证清单 |
 | [阶段二设计](docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md) | 双阶段审核、V2、独立验证、变异与 Hooks 的边界和兼容性设计 |
 | [阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md) | Chapter 8–13 的进入条件、任务顺序、验证与退出条件 |
+| [阶段二验收矩阵](docs/implementation/phase-02-acceptance-matrix.md) | 六项阶段输入到实现、测试、证据、重放命令和限制的映射 |
+| [阶段二证据索引](docs/implementation/phase-02-evidence-index.md) | REVIEW/V2/CI/Gate 历史证据与当前回归基线的可重放边界 |
+| [阶段二验收报告](docs/implementation/phase-02-acceptance-report.md) | Chapter 13 exits、整库质量结果、Gate 与残余限制 |
+| [阶段三进入输入](docs/implementation/phase-03-entry-inputs.md) | 阶段二结束后的可审计输入和仍未满足的阶段三进入门；不构成授权 |
 | [资源感知多智能体调度设计](docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) | “编排顾问 + 确定性控制面”、整机资源租约、背压与恢复设计 |
 | [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |
 | [自适应多智能体编排预进入蓝图](docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md) | 安全控制面通过后编写编排顾问与真实 adapter 执行计划的设计输入，当前未授权实施 |
@@ -37,7 +41,7 @@
 | [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的退出证据与 live V2 限制 |
 | [Chapter 11 追踪](docs/implementation/chapter-11-acceptance-integration-mutation.md) | 已完成的 acceptance/integration、targeted mutation、live V2 与退出证据边界 |
 | [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与 Hooks 已完成 |
-| [Chapter 13 状态](docs/superpowers/state/chapters/chapter-13.yaml) | 自举 REVIEW 试点进行中；13.1–13.3 已完成，当前任务为仍 pending 的 13.4，Phase 02 尚未完成 |
+| [Chapter 13 状态](docs/superpowers/state/chapters/chapter-13.yaml) | 自举 REVIEW 试点、负向 E2E、验收索引和阶段二基线已完成 |
 
 ## 实施路线
 
@@ -61,7 +65,8 @@ Chapters 1–7 按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-c
 
 子智能体并发会同时增加模型、工具进程、内存、CPU 和 I/O 消耗。项目采用两层方案：可选的“编排顾问”负责提出 DAG 和并行建议，确定性调度控制面独占资源准入、全树配额、租约、背压和恢复权。LLM 不能自行提高并发、预算或绕过 AI Flow。
 
-实施顺序为：阶段二先建立非侵入式资源与事件契约，阶段三用真实记录校准容量画像和影子策略，阶段四先交付单机过载防护，再接入自适应编排。当前每会话静态并发上限只是纵深防御，不能视为跨会话、跨进程的整机安全保证。两份预进入蓝图不是执行计划；只有阶段二、阶段三和阶段四进入证据齐备后，才能据此另建正式执行计划。
+阶段二现已完成审核与 V2 可靠性闭环，但未实现资源调度器或模型路由。阶段三只有在
+[进入门](docs/implementation/phase-03-entry-inputs.md)满足并另建正式设计/实施目录后，才可用真实记录定义容量画像、telemetry 或 V3 用例；阶段四还须阶段三退出证据与量化协调成本，再先交付单机过载防护，最后才可能接入自适应编排。当前每会话静态并发上限只是纵深防御，不能视为跨会话、跨进程的整机安全保证；两份预进入蓝图都不是执行授权。
 
 ## 开始参与
 

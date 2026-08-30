@@ -75,6 +75,13 @@
 - 可恢复操作：事实变化后基于新 context 记录新的 review；现有 finding 已修复时，用 `python -m aiflow review resolve <TASK-ID> --review <REV-ID> --finding <RF-ID> --reason <REASON> --actor <ACTOR>` 追加 revision，然后重新取得对应 spec/code approval。
 - 禁止操作：不改写旧 context/record，不把 design record 用作 implementation approval，不复用 subject/evidence 变化前的 implementation review，不以自然语言或旧 Markdown 包替代结构化 record。
 
+## 阶段二矩阵或证据索引漂移（REC-10）
+
+- 诊断：先运行 `python -m pytest tests/integration/test_acceptance_traceability.py -q`，按失败的 `P2-*` 行核对 artifact path、subject/attestation、SHA-256、reproduce argv、outcome 和 known limits；再用 `aiflow status` 区分历史 lifecycle state 与当前 `merge_readiness`。
+- 可恢复操作：仓库文件缺失时，从包含该 immutable artifact 的已提交版本恢复原文件并校验摘要；当前代码或状态变化时，前向生成新的测试/基线证据并更新 current projection。若要复核历史 Gate，只在索引指定的精确 attestation checkout 中重放，不把旧结论直接搬到当前 `HEAD`。
+- 保留规则：失败 verification、survived/missing mutant、拒绝事件、CI failure receipt、stale review/evidence 和平台 skip 都继续保留。后续成功可以追加并解释恢复链，但不能覆盖、删除、重排或静默“修正”历史 task ledger。
+- 禁止操作：不编辑旧 evidence/review/receipt 的 hash 或 subject，不把 TASK-0025/TASK-0028 的历史通过复用于新 task/version，不因 Phase 02 状态完成而跳过新变更的分类、批准、验证或 Gate，也不把 baseline 文档当作 V3/模型路由/资源调度授权。
+
 ## 恢复后共同检查
 
 1. `python -m aiflow validate <TASK-ID>` 通过。

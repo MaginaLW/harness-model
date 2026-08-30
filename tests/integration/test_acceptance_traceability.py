@@ -156,6 +156,7 @@ def test_clean_checkout_evidence_is_passed() -> None:
 
 def test_phase_two_matrix_has_six_fixed_traceable_inputs() -> None:
     text = PHASE_TWO_MATRIX.read_text(encoding="utf-8")
+    assert "状态：`completed`" in text
     rows = PHASE_TWO_ID.findall(text)
     assert [identifier for identifier, _ in rows] == [
         "P2-REV-01",
@@ -170,6 +171,7 @@ def test_phase_two_matrix_has_six_fixed_traceable_inputs() -> None:
         assert len(cells) == 7
         assert all(cells)
         assert "python -m pytest" in cells[4]
+        assert re.search(r"\b(?:[0-9a-f]{40}|[0-9a-f]{64})\b", cells[3])
         assert cells[5]
         assert cells[6]
         local_paths = [
@@ -184,12 +186,14 @@ def test_phase_two_matrix_has_six_fixed_traceable_inputs() -> None:
 def test_phase_two_index_preserves_historical_and_final_replay_boundaries() -> None:
     matrix = PHASE_TWO_MATRIX.read_text(encoding="utf-8")
     index = PHASE_TWO_INDEX.read_text(encoding="utf-8")
-    assert "## 阶段二总验收（最终 attestation 执行）" in matrix
-    assert "pending final run" in matrix
+    assert "状态：`completed`" in index
+    assert "## 阶段二总验收" in matrix
+    assert "pending final run" not in matrix
     assert "not current approval" in index
-    assert "not the current HEAD" in index
+    assert "current HEAD approval" in index
     assert "`TASK-0028` H1" in index
     assert "must not be reported as current merge-ready" in index
+    assert "`merge_readiness: reverification_required`" in index
     for identifier in (
         "P2-REV-01",
         "P2-V2-01",
@@ -199,8 +203,30 @@ def test_phase_two_index_preserves_historical_and_final_replay_boundaries() -> N
         "P2-HOOK-01",
     ):
         assert identifier in index
-    assert "current action-authorized" in index
-    assert "python -m aiflow gate <CURRENT-TASK> --format json" in index
+    assert "current action-authorized" not in index
+    assert "<CURRENT-TASK>" not in index
+    assert "bootstrap 自举例外" in index
+    assert "741790f14ccdc79748a1c83a83536c88fd6095bd" in matrix
+    assert "741790f14ccdc79748a1c83a83536c88fd6095bd" in index
+
+
+def test_phase_two_historical_hashes_and_current_subject_match_records() -> None:
+    expected = {
+        ".ai/tasks/TASK-0028/evidence-h1-b7c7fb4a.json": (
+            "4fc5729ef5e40f468b8966e35696a84e47b2de05e363d517293ac9e2f9823662"
+        ),
+        (
+            ".ai/tasks/TASK-0028/action-use-"
+            "5a3071cd2e446dea89d5b8acb5c6c26399cf69a4ba141da0f3995706bfa28020.md"
+        ): ("3d420bb8ec5845287744b6e19b1890997dba58fdfab158803a84a0bcf86eff94"),
+    }
+    index = PHASE_TWO_INDEX.read_text(encoding="utf-8")
+    for relative_path, digest in expected.items():
+        assert hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest() == digest
+        assert digest in index
+    task = yaml.safe_load((ROOT / ".ai/tasks/TASK-0028/task.yaml").read_text(encoding="utf-8"))
+    assert task["subject_commit"] == "cb1e15b547a8280ddf7b7515f45367aec14aa490"
+    assert task["subject_commit"] in index
 
 
 def test_phase_two_published_artifact_paths_exist() -> None:

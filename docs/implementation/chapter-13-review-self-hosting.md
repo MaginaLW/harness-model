@@ -1,11 +1,10 @@
 # Chapter 13：REVIEW / V2 自举与 CI Gate
 
-当前权威投影是 Chapter 13.1–13.3 已完成，current task 指向仍为 `pending` 的 13.4。
-13.3 的依据是 TASK-0028 H1 current V2、独立实现审核、code approval/local Gate，以及
-成功的隔离 CI simulation/Gate。H2 只更新本说明和两份 state；它改变 TASK-0028 subject，
-因此在该新 subject 完成全新的 V2、独立实现审核、finalize、code approval 与只读 local Gate
-之前，本次投影不是 TASK-0028 的 merge readiness。13.4–13.6、四个 Chapter 13 exit checks、
-Chapter 13 和 Phase 02 均未完成。
+当前权威投影是 Chapter 13.1–13.6、四项 exit checks、Chapter 13 与 Phase 02 均已完成。
+完成依据由精确绑定原 subject/attestation 的 TASK-0025/TASK-0028 REVIEW + V2 + CI/Gate
+历史和阶段结束时的当前整库质量基线共同组成。TASK-0028 的后续 H2 投影改变了 subject，
+所以它当前仍正确显示 stale approval/evidence 与 `merge_readiness: reverification_required`；
+阶段完成没有改写 task ledger，也不是 TASK-0028 当前 merge approval。
 
 ## Chapter 13.2 已完成事实
 
@@ -122,11 +121,12 @@ External-evidence Gate passed，规范化输出 SHA-256 为
 LF，源 task、源工作树与 refs 保持不变，精确 worktree 和 run directory 均已清理。较早失败和
 cleanup receipts 继续保留在 task-local 历史中；它们不替代成功的 CI-003。
 
-上述事实只满足 H2 投影的时序前提，因此本次把 13.3 五步投影完成并指向 pending 13.4。
-H2 subject 形成后必须取得第三个、绑定该 subject 的 single-use mutation action，重新运行完整
+上述事实是 13.3 当时完成投影的时序前提。H2 subject 若要成为 TASK-0028 的当前 merge
+candidate，仍必须取得第三个、绑定该 subject 的 single-use mutation action，重新运行完整
 V2、独立实现审核、finalize、code approval 和 local Gate；不要求再次执行 CI simulation。
-H1 evidence/review/approval/CI receipt 均不能充当 H2 merge readiness。TASK-0028 不自动
-close、merge 或 push。
+Chapter 13 后续 13.4–13.6 在 active bootstrap 例外下完成本仓库的测试、索引、文档和状态
+基线，不以 TASK-0028 为 merge candidate，因此不伪造这条新 transaction。H1 evidence/review/
+approval/CI receipt 仍不能充当 H2 merge readiness，TASK-0028 也未自动 close、merge 或 push。
 
 ## 13.4 负向 E2E
 
@@ -134,8 +134,10 @@ close、merge 或 push。
 fail-closed 场景：
 
 - V2 verifier 与 implementer 相同，或 actor 规范化后为空，均在 plan/runner 前拒绝；
-- current immutable mutation artifact 中存在一个真实 `survived` result 时，CI replay 和 Gate
-  均返回 `MUTATION_EVIDENCE_NOT_KILLED`；
+- fixture 生成的 immutable mutation artifact 中存在一个真实 `survived` result 时，public CI
+  consumer 返回 `MUTATION_EVIDENCE_NOT_KILLED`，Gate 返回
+  `GATE_V2_MUTATION_NOT_KILLED`；current binding、manifest/source digest 与 review freshness
+  的完整组合边界继续由既有 integration/self-hosting suite 覆盖；
 - `scope_out_of_bounds` observation 只经公开 `apply_observation` 记录 observation、escalation 和
   `ESCALATED` 状态，随后 `begin` 仍被拒绝；
 - 同一 current context 中较新的 `REQUEST_CHANGES` 覆盖较早的 `APPROVE`，finalize 返回
@@ -146,6 +148,20 @@ fail-closed 场景：
 测试在每个拒绝点前后比较 task-local 文件字节或对应 ledger/approval 集合；CI replay 还确认
 source task、refs 和 external evidence 均未被失败路径改写。测试只构造 task-local fixture，未
 消费真实 action、未执行外部命令，也不扩大 live Hook、外部身份认证或 OS sandbox 的支持范围。
+
+## 13.5–13.6 验收与阶段收口
+
+[阶段二验收矩阵](phase-02-acceptance-matrix.md)固定六项输入及其实现、测试、artifact、完整
+commit/hash、重放 argv、结果和限制；[证据索引](phase-02-evidence-index.md)另外固定 TASK-0028
+H1/CI-003 与 TASK-0025 的历史 binding，并由 traceability 测试核对路径、hash 和 current
+TASK-0028 subject。最终 pytest、Ruff、format、mypy、branch coverage、diff-cover 与历史
+attestation Gate 结果记录在[阶段二验收报告](phase-02-acceptance-report.md)。
+
+README、CHANGELOG、Quickstart、Recovery 和人工状态投影已同步完成；package 仍为本地
+`0.1.0`，未 tag 或发布。[阶段三进入输入](phase-03-entry-inputs.md)只记录可用事实和三个仍未
+满足的门槛，Phase 3 保持 `not_started`。bootstrap 标记未移除；除历史 action 批准和本轮
+范围明确的精确 task-owned worktree/OS-temp cleanup 外，未删除仓库或业务数据，也没有实现
+或授权 V3、模型路由、资源调度、push、merge、deploy、凭据导出或付费调用。
 
 ## 定向复现与边界
 

@@ -242,3 +242,37 @@ implementation review 或 local code approval。Gate 仍逐项核对这些 curre
 不因 Chapter 11 已完成而自动放行任一后续 task。
 
 `begin` 的治理提交兼容仅允许 `subject_commit..HEAD` 中的当前任务路径 `.ai/tasks/<TASK-ID>/**`；业务路径、其他任务路径、仓库/分支不符和超出创建时 dirty baseline 的工作树变化仍会拒绝。
+
+## 阶段二基线重放
+
+阶段二的入口不是某个历史 task 在当前 `HEAD` 上继续显示 merge-ready，而是
+[阶段二验收矩阵](../implementation/phase-02-acceptance-matrix.md)和
+[阶段二证据索引](../implementation/phase-02-evidence-index.md)中明确区分的两类事实：
+
+- historical/immutable：绑定原 subject 或 attestation 的 review、evidence、mutation artifact、
+  receipt 和 Gate 结论；
+- current projection：当前 Chapter/overall 状态、当前测试集合和本次基线质量检查。
+
+历史 `APPROVED_FOR_MERGE` task 在后续业务 `HEAD` 上可能正确显示
+`merge_readiness: reverification_required`；这不会抹去其历史 evidence，也不能被改写成当前通过。
+先运行自动追踪和四类负向自举回归，再运行完整质量命令：
+
+```powershell
+python -m pytest tests/integration/test_acceptance_traceability.py -q
+python -m pytest tests/acceptance/test_phase_02_self_hosting.py tests/integration/test_phase_02_self_hosting.py tests/e2e/test_phase_02_self_hosting_scenario.py tests/e2e/test_phase_02_negative_self_hosting.py -q
+python -m pytest -q
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy src
+python -m pytest --cov=aiflow --cov-branch --cov-report=term-missing --cov-fail-under=85
+git diff --check
+```
+
+需要重放某个 attestation 的 Gate 时，应在该精确提交的隔离只读 checkout/worktree 中使用
+索引记录的 argv 和原 task-local artifact；Windows 必须在 checkout 前按索引固定 LF。ignored
+runtime artifact 不在 clean clone 中，缺失时应报告不可复放，不能重新制造或修改 evidence/hash。
+不要在新 `HEAD` 上编辑旧 evidence 的 commit/hash 使其“变新”。
+失败输出、Windows symlink capability skips、Hook/actor/platform 限制和 TASK-0028 当前
+reverification requirement 都是基线的一部分。重放本身不执行 push、merge、deploy、仓库/
+业务数据删除、外部模型或付费调用；若创建临时 checkout，只清理经过精确路径校验的本地
+task-owned 临时目标。它也不把 V2 扩大解释为 V3、模型路由或资源调度。

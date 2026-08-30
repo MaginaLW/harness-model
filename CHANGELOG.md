@@ -4,9 +4,27 @@
 
 ## Unreleased
 
+### Added
+
+- 完成阶段二 Chapters 8–13：结构化 design/implementation review、V2 两阶段 evidence、独立 verifier、acceptance/integration、五项定向变异、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举闭环。
+- 新增阶段二六项输入验收矩阵、可重放证据索引、最终验收报告，以及 same/empty actor、survived mutation、越界升级和 stale review 的 fail-closed E2E。
+- 新增阶段三进入输入；明确内部记录口径、真实 V3 用例和统一 telemetry contract 仍未满足，因此不授权阶段三实现。
+
+### Changed
+
+- 总体状态完成为 13/13 chapters、77/77 tasks、408/408 steps、24/24 exit checks；Quickstart 和 Recovery 增加历史/current readiness 区分、阶段二重放与矩阵漂移恢复。
+- 阶段二基线继续使用 package version `0.1.0`：本次是本地、未发布的功能基线，不创建 tag、不发布 registry，也不移除 bootstrap 标记。
+
 ### Fixed
 
 - `aiflow status` 现在区分事件重放得到的历史 lifecycle state 与当前 `merge_readiness`；当 `APPROVED_FOR_MERGE` 的 classification、evidence 或 REVIEW approval 已失效时，明确报告 `reverification_required`，不再把唯一缺失条件显示为 `external_merge`。
+
+### Known limitations
+
+- TASK-0028 的 H1 REVIEW/V2/CI/Gate 只对原 subject/attestation 有效；当前记录正确为 `reverification_required`，阶段完成状态不刷新其 approval/evidence。
+- actor 仍是 task-local 审计标签，不是人员、模型或外部身份认证；负向 mutation E2E 隔离 consumer 语义，完整 binding 由 integration/self-hosting suite 覆盖。
+- 未证明跨平台 live Hook、所有客户端、IDE/GUI/remote Git、自由 shell、通用命令拦截或 OS sandbox；未实现 V3、模型路由、信任度、费用优化、资源调度或编排器。
+- 除历史 single-use action 批准和本轮范围明确的精确 task-owned worktree/OS-temp cleanup 外，未删除仓库或业务数据；未执行或授权 push、merge、deploy、凭据导出、付费调用、package publish 或其他外部动作。
 
 ## 0.1.0 - 2026-08-21
 

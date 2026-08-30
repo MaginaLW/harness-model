@@ -4,7 +4,7 @@ chapter:
   id: "chapter-13"
   number: 13
   title: "自举 REVIEW 试点与阶段二基线"
-  status: "in_progress"
+  status: "completed"
   dependency: "chapter-12 completed"
   tasks_total: 6
   steps_total: 30
@@ -78,42 +78,67 @@ tasks:
     blockers: []
   - id: "13.4"
     title: "覆盖相同 actor、survived mutant、越界升级和陈旧审核 E2E"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - "tests/e2e/test_phase_02_negative_self_hosting.py"
+      - "docs/implementation/chapter-13-review-self-hosting.md"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
     blockers: []
   - id: "13.5"
     title: "建立阶段二验收矩阵与可重放证据索引"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - "docs/implementation/phase-02-acceptance-matrix.md"
+      - "docs/implementation/phase-02-evidence-index.md"
+      - "tests/integration/test_acceptance_traceability.py"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
     blockers: []
   - id: "13.6"
     title: "更新状态、CHANGELOG、操作文档和阶段三输入，提交阶段二基线"
-    status: "pending"
+    status: "completed"
     steps_total: 5
-    completed_steps: []
+    completed_steps: [1, 2, 3, 4, 5]
     in_progress_step: null
+    evidence:
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/implementation/phase-02-acceptance-report.md"
+      - "docs/implementation/phase-03-entry-inputs.md"
+      - "docs/operations/quickstart.md"
+      - "docs/operations/recovery.md"
+      - "docs/superpowers/state/README.md"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
     blockers: []
 
 exit_checks:
   - id: "CH13-EXIT-01"
     description: "一个真实跨模块 REVIEW + V2 任务完成双审核、独立验证和 CI/Gate"
-    status: "pending"
+    status: "passed"
+    evidence: ["EVD-CH13-13.3-001", "EVD-CH13-13.4-001"]
   - id: "CH13-EXIT-02"
     description: "V2 evidence 在 attestation HEAD 可重放并包含验收、集成、定向变异与独立性证据"
-    status: "pending"
+    status: "passed"
+    evidence: ["EVD-CH13-13.3-001", "docs/implementation/phase-02-evidence-index.md"]
   - id: "CH13-EXIT-03"
     description: "Hook、CLI 和 CI 对支持范围内的相同事实给出一致结论"
-    status: "pending"
+    status: "passed"
+    evidence: ["EVD-CH13-13.4-001", "tests/integration/test_phase_02_self_hosting.py"]
   - id: "CH13-EXIT-04"
     description: "未实现 V3、模型路由、资源调度或任何未经授权的外部动作"
-    status: "pending"
+    status: "passed"
+    evidence: ["EVD-CH13-13.6-001", "docs/implementation/phase-03-entry-inputs.md"]
 
 self_hosting_envelope:
-  status: "frozen_candidate"
+  status: "fulfilled_as_historical_evidence"
   frozen_by_task: "TASK-0024"
   spec_sha256: "57d8f40d00165035dad74f0603299a2c77fd8b01450516096867af978dd9e263"
   classification_input_sha256: "5519315d67bb37ca1ab08d23910670e5d7177822eaf5ce526fa8b7f67ceb10e9"
@@ -123,7 +148,11 @@ self_hosting_envelope:
     review_id: "REV-0039"
     context_sha256: "21b0aaaf85a79c1be0f62df35942ad2dd33e39c50f3a7b54693799cf262ee9f4"
     outcome: "APPROVE"
-  authority: "candidate only; does not authorize 13.2 implementation or external actions"
+  authority: "historical envelope only; fulfillment does not authorize reuse for a new subject, task or external action"
+  fulfilled_by:
+    - "TASK-0025 final REVIEW/V2/local Gate and merge ledger"
+    - "TASK-0028 H1 REVIEW/V2/local Gate and isolated CI/Gate"
+    - "Chapter 13.4 fail-closed negative E2E"
   candidate_write_scope:
     - "tests/acceptance/test_phase_02_self_hosting.py"
     - "tests/integration/test_phase_02_self_hosting.py"
@@ -302,5 +331,89 @@ chapter_evidence:
       gate: "passed"
     scope: "Completes only Chapter 13 task 13.3 from the H1 REVIEW/V2 implementation, current independent review/code approval/local Gate and successful isolated CI simulation/Gate."
     limitation: "13.4-13.6, all four Chapter 13 exit checks, Chapter 13 completion, Phase 02 completion and every external action remain incomplete or unauthorized. This H2 projection changes the subject and therefore still requires a third current single-use mutation action, fresh 14/14 V2 with five killed and no unverified scenarios, an independent implementation review, finalize, code approval and local Gate. H1 evidence and CI receipt are prerequisites only; no repeat CI simulation is required and no close, merge or push is authorized."
+  - id: "EVD-CH13-13.4-001"
+    kind: "negative_e2e_completion"
+    governance_mode: "bootstrap_active"
+    implementation_commit: "ce817ffafc8e6e1da81b15f3970baeed9354dcc6"
+    verification:
+      negative_e2e: "5 passed"
+      phase_02_self_hosting: "25 passed"
+      review_gate_observation_integration: "148 passed"
+      independent_audit: "passed; no blocking findings; documentation reason-code precision corrected"
+    covered_failures:
+      - "same or empty V2 verifier actor rejected before runner"
+      - "survived mutation rejected by public CI consumer and Gate"
+      - "scope observation escalates monotonically and begin remains blocked"
+      - "latest current REQUEST_CHANGES blocks finalize, code approval and Gate"
+    zero_write_boundary: "rejected CLI paths preserve task bytes; CI replay preserves source task, refs and external evidence; stale-review code approval remains unchanged"
+    artifacts:
+      - "tests/e2e/test_phase_02_negative_self_hosting.py"
+      - "docs/implementation/chapter-13-review-self-hosting.md"
+    limitation: "The survived fixture isolates public-consumer semantics while integration/self-hosting suites cover binding, manifest/source digest and review freshness. No action approval or external command was consumed."
+  - id: "EVD-CH13-13.5-001"
+    kind: "acceptance_traceability_completion"
+    governance_mode: "bootstrap_active"
+    initial_index_commit: "c6c4b4b0206048996ee3cc6c7a0eb54f490bb03e"
+    inputs: ["P2-REV-01", "P2-V2-01", "P2-VER-01", "P2-MUT-01", "P2-ESC-01", "P2-HOOK-01"]
+    artifacts:
+      - "docs/implementation/phase-02-acceptance-matrix.md"
+      - "docs/implementation/phase-02-evidence-index.md"
+      - "tests/integration/test_acceptance_traceability.py"
+    verification: "six fixed rows, local artifact existence, immutable hashes, full Chapter 12 commit and historical/current boundary are executable assertions"
+    limitation: "The index locates historical facts; it does not refresh TASK-0028 approval/evidence or authorize mutation, cleanup or external actions."
+  - id: "EVD-CH13-13.6-001"
+    kind: "phase_baseline_completion"
+    governance_mode: "bootstrap_active"
+    phase: "phase-02"
+    status: "passed"
+    acceptance_report: "docs/implementation/phase-02-acceptance-report.md"
+    artifacts:
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/implementation/phase-03-entry-inputs.md"
+      - "docs/operations/quickstart.md"
+      - "docs/operations/recovery.md"
+      - "docs/superpowers/state/README.md"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
+    verification:
+      traceability: "10 passed"
+      phase_02_self_hosting: "25 passed"
+      full_pytest: "1581 passed, 4 skipped (existing Windows symlink capability limitations)"
+      branch_coverage: "87.58%; threshold 85% passed"
+      diff_coverage: "No lines with coverage information in the diff from e8f60dacbe1e8681ea9d8a9e299621d34ddb05fe; sentinel passed without a numeric claim"
+      ruff: "passed"
+      format: "332 files already formatted"
+      mypy: "passed for 41 source files"
+      git_diff_check: "passed"
+    historical_gate:
+      task_id: "TASK-0028"
+      attestation_commit: "f35d3094a8385806abff2996691e5224bedb00e2"
+      checkout_line_endings: "core.autocrlf=false; core.eol=lf"
+      preserved_runtime_artifact: ".ai/tasks/TASK-0028/logs/MUTRUN-20260829T140929Z-1ceeb5a57d70bcd9/targeted-mutation/"
+      result: "passed; reason_codes empty"
+      limitation: "clean clone alone lacks the ignored artifact; current TASK-0028 merge_readiness remains reverification_required"
+    phase_03: "not_started; entry evidence remains partial/not_met and grants no implementation authority"
+    limitation: "This local baseline is not a release, tag, push, merge, deploy, package publication, bootstrap removal, V3, model routing or resource scheduling authorization."
+
+history:
+  - id: "EVT-CH13-13.4-COMPLETE-001"
+    at: "2026-08-30T03:33:58Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "五个 fail-closed E2E 与独立只读审查通过；相同/空 actor、survived mutation、越界升级和 latest stale review 均经公开边界拒绝，关键失败路径保持零写。"
+    state_effect: {task_13_4_status: "completed", task_13_5_status: "pending"}
+  - id: "EVT-CH13-13.5-COMPLETE-001"
+    at: "2026-08-30T03:33:59Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "六项阶段二输入已映射到实现、测试、immutable artifact、完整 commit/hash、replay argv、outcome 与 known limits，并由 traceability 测试执行校验。"
+    state_effect: {task_13_5_status: "completed", task_13_6_status: "pending"}
+  - id: "EVT-CH13-13.6-COMPLETE-001"
+    at: "2026-08-30T03:34:00Z"
+    action: "task_completed_and_chapter_completed"
+    actor: "/root"
+    reason: "阶段二当前回归基线、精确历史 REVIEW/V2/CI/Gate 证据、状态和操作文档完成收口；四项 exit checks 通过，阶段三保持未开始且未授权。"
+    state_effect: {task_13_6_status: "completed", chapter_13_status: "completed", phase_02_status: "completed"}
 
 blockers: []

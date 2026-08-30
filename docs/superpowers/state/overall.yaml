@@ -2,9 +2,9 @@ schema: "progress.v1"
 state_type: "implementation_overall"
 project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
-status: "in_progress"
+status: "completed"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-30T01:01:50Z"
+updated_at: "2026-08-30T03:34:00Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -13,6 +13,9 @@ source:
   mvp_design_sha256: "62db47d72b347c52f5b5ffdbb75e67053e1ea66e9df79510c152a907fae792fc"
   phase_02_implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
   phase_02_design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
+  phase_02_acceptance_matrix: "docs/implementation/phase-02-acceptance-matrix.md"
+  phase_02_evidence_index: "docs/implementation/phase-02-evidence-index.md"
+  phase_02_acceptance_report: "docs/implementation/phase-02-acceptance-report.md"
   baseline_commit: "c375c32d2a28294cd4cedd1fd77815feb0d41615"
   read_at: "2026-08-02T14:03:50Z"
 
@@ -22,21 +25,21 @@ tracking:
   executable_policy_available: true
   runtime_task_records_initialized: true
   state_directory: "docs/superpowers/state"
-  current_chapter: "chapter-13"
-  current_task: "13.4"
+  current_chapter: null
+  current_task: null
   current_step: null
 
 summary:
   chapters_total: 13
-  chapters_completed: 12
+  chapters_completed: 13
   tasks_total: 77
-  tasks_completed: 74
+  tasks_completed: 77
   steps_total: 408
-  steps_completed: 393
+  steps_completed: 408
   exit_checks_total: 24
-  exit_checks_completed: 20
+  exit_checks_completed: 24
   blockers_total: 0
-  evidence_items: 18
+  evidence_items: 21
 
 chapters:
   - id: "chapter-01"
@@ -139,7 +142,7 @@ chapters:
     number: 13
     title: "自举 REVIEW 试点与阶段二基线"
     state_file: "docs/superpowers/state/chapters/chapter-13.yaml"
-    status: "in_progress"
+    status: "completed"
     dependency: "chapter-12 completed"
     tasks_total: 6
     steps_total: 30
@@ -155,21 +158,40 @@ global_checks:
     passed_items: ["ACC-01", "ACC-02", "ACC-03", "ACC-04", "ACC-05", "ACC-06", "ACC-07", "ACC-08", "ACC-09", "ACC-10", "ACC-11", "ACC-12"]
   final_release_baseline:
     status: "passed"
+  phase_02_acceptance:
+    status: "passed"
+    acceptance_inputs: ["P2-REV-01", "P2-V2-01", "P2-VER-01", "P2-MUT-01", "P2-ESC-01", "P2-HOOK-01"]
+    chapter_exit_checks: ["CH13-EXIT-01", "CH13-EXIT-02", "CH13-EXIT-03", "CH13-EXIT-04"]
+  phase_02_baseline:
+    status: "passed"
+    report: "docs/implementation/phase-02-acceptance-report.md"
+    full_pytest: "1581 passed, 4 existing Windows symlink capability skips"
+    branch_coverage: "87.58% (85% threshold passed)"
+    diff_coverage: "no executable coverage lines in diff from e8f60dacbe1e8681ea9d8a9e299621d34ddb05fe; sentinel passed without a numeric claim"
+    historical_gate: "TASK-0028 passed at f35d3094a8385806abff2996691e5224bedb00e2 with LF checkout and preserved task-local mutation artifact"
+    release_or_publish_authority: false
 
 future_phases:
   - phase: "phase-02"
     title: "审核与强化验证"
-    status: "in_progress"
+    status: "completed"
     implementation_plan: "docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md"
     design: "docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md"
     target_repository: "harness-model"
     test_types: ["unit", "cli_integration", "e2e", "targeted_mutation"]
-    current_chapter: "chapter-13"
-    note: "Chapter 10 独立 Verifier、Chapter 11 committed V2 与 Chapter 12.1–12.6 已完成。Chapter 13.1–13.3 已投影完成，current task 为仍 pending 的 13.4；TASK-0028 H1 current V2、独立审核、code approval/local Gate 和隔离 CI/Gate 是 13.3 投影前提。投影后的 TASK-0028 subject 仍须第三个 single-use mutation action、fresh V2、独立实现审核、finalize、code approval 与 local Gate；四个 Chapter 13 exit checks、Chapter 13 和 Phase 02 均未完成，结论不扩展为跨平台 live Hook、全客户端拦截、自由 shell 解析、通用命令/OS sandbox 或外部动作。"
+    current_chapter: null
+    note: "Chapters 8–13 与六项阶段输入、四项 Chapter 13 exits、最终回归基线均已完成。TASK-0028 H1 REVIEW/V2/CI/Gate 是绑定其精确 subject/attestation 的历史时序证据；当前 TASK-0028 仍正确显示 reverification_required，未被伪写为 merge-ready。完成结论不扩展为跨平台 live Hook、全客户端拦截、自由 shell、通用命令/OS sandbox、V3、模型路由、资源调度或外部动作。"
   - phase: "phase-03"
     title: "高可靠性与模型路由"
     status: "not_started"
     implementation_plan: "按计划，仅在阶段二完成并积累足够内部记录后另建计划"
+    entry_inputs: "docs/implementation/phase-03-entry-inputs.md"
+    entry_gate:
+      status: "blocked"
+      reasons:
+        - "internal record sufficiency criteria and privacy/bias boundaries not frozen"
+        - "real V3 use case with sandbox and rollback boundary unavailable"
+        - "versioned cost/rework/review-defect/tool-failure telemetry contract unavailable"
   - phase: "phase-04"
     title: "独立编排器"
     status: "not_started"
@@ -187,7 +209,7 @@ future_phases:
     entry_gate:
       status: "blocked"
       reasons:
-        - "phase-02 and phase-03 exit evidence unavailable"
+        - "phase-03 exit evidence unavailable"
         - "phase-04 quantified coordination-cost and pause/approval-need evidence unavailable"
         - "Sol/max versus historic Sol/high decision drift unresolved"
         - "phase-04 implementation REVIEW scope decision not yet created"
@@ -2421,3 +2443,79 @@ history:
       - ".ai/tasks/TASK-0028/reviews/REV-0056-r0001.json"
       - ".ai/tasks/TASK-0028/action-use-7dcbd975b1721e6e314e8955b012aa7b5b82dcdacade06b1d428214c3e39c0dc.md"
       - ".ai/tasks/TASK-0028/action-use-5a3071cd2e446dea89d5b8acb5c6c26399cf69a4ba141da0f3995706bfa28020.md"
+  - id: "EVT-OVERALL-CH13-13.4-COMPLETE-001"
+    at: "2026-08-30T03:33:58Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "13.4 的五项负向 E2E 与独立只读审查通过：same/empty actor、survived mutation、scope escalation 和 latest stale review 均从公开 CLI/service/Gate 边界 fail closed，并验证关键拒绝路径零写；未消费真实 action 或执行外部动作。"
+    chapter_evidence: "EVD-CH13-13.4-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_13_status: "in_progress"
+      task_13_4_status: "completed"
+      task_13_5_status: "pending"
+      current_chapter: "chapter-13"
+      current_task: "13.5"
+      current_step: null
+      chapters_completed: 12
+      tasks_completed: 75
+      steps_completed: 398
+      exit_checks_completed: 20
+      evidence_items: 19
+    evidence:
+      - "tests/e2e/test_phase_02_negative_self_hosting.py"
+      - "docs/implementation/chapter-13-review-self-hosting.md"
+  - id: "EVT-OVERALL-CH13-13.5-COMPLETE-001"
+    at: "2026-08-30T03:33:59Z"
+    action: "task_completed_and_next_initialized"
+    actor: "/root"
+    reason: "13.5 将六项阶段二输入映射到实现、测试、immutable artifact、完整 commit/hash、replay argv、outcome 与 known limits；traceability 测试验证固定行、路径、历史 hash/current subject 和历史/current readiness 边界。"
+    chapter_evidence: "EVD-CH13-13.5-001"
+    state_effect:
+      overall_status: "in_progress"
+      chapter_13_status: "in_progress"
+      task_13_5_status: "completed"
+      task_13_6_status: "pending"
+      current_chapter: "chapter-13"
+      current_task: "13.6"
+      current_step: null
+      chapters_completed: 12
+      tasks_completed: 76
+      steps_completed: 403
+      exit_checks_completed: 20
+      evidence_items: 20
+    evidence:
+      - "docs/implementation/phase-02-acceptance-matrix.md"
+      - "docs/implementation/phase-02-evidence-index.md"
+      - "tests/integration/test_acceptance_traceability.py"
+  - id: "EVT-OVERALL-CH13-PHASE02-COMPLETE-001"
+    at: "2026-08-30T03:34:00Z"
+    action: "task_chapter_and_phase_completed"
+    actor: "/root"
+    reason: "13.6 已完成状态、README/CHANGELOG、操作恢复文档、阶段三非授权输入和阶段二验收报告；当前完整质量基线与精确历史 REVIEW/V2/CI/Gate 证据共同满足五项阶段总验收和四项 Chapter 13 exits。TASK-0028 当前仍正确为 reverification_required，阶段三保持 not_started/blocked，bootstrap 未移除且无 push/merge/deploy/付费或其他外部动作。"
+    chapter_evidence: "EVD-CH13-13.6-001"
+    state_effect:
+      overall_status: "completed"
+      phase_02_status: "completed"
+      chapter_13_status: "completed"
+      task_13_6_status: "completed"
+      current_chapter: null
+      current_task: null
+      current_step: null
+      chapters_completed: 13
+      tasks_completed: 77
+      steps_completed: 408
+      exit_checks_completed: 24
+      evidence_items: 21
+    evidence:
+      - "docs/implementation/phase-02-acceptance-matrix.md"
+      - "docs/implementation/phase-02-evidence-index.md"
+      - "docs/implementation/phase-02-acceptance-report.md"
+      - "docs/implementation/phase-03-entry-inputs.md"
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/operations/quickstart.md"
+      - "docs/operations/recovery.md"
+      - "docs/superpowers/state/README.md"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
