@@ -11,6 +11,7 @@ package 已发布到外部 registry。
 
 ### Added
 
+- 采用 MIT License，并以 PEP 639 的 `MIT` SPDX expression 和显式 license file 发布包元数据。
 - 完成阶段二 Chapters 8–13：结构化 design/implementation review、V2 两阶段 evidence、独立 verifier、acceptance/integration、五项定向变异、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举闭环。
 - 新增阶段二六项输入验收矩阵、可重放证据索引、最终验收报告，以及 same/empty actor、survived mutation、越界升级和 stale review 的 fail-closed E2E。
 - 新增阶段三进入输入；明确内部记录口径、真实 V3 用例和统一 telemetry contract 仍未满足，因此不授权阶段三实现。

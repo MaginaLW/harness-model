@@ -90,6 +90,11 @@ bootstrap 标记有效时，先遵循本文顶部的自举例外；以下 AI Flo
 当前 E2E 证据只覆盖两类 Hook 事实：pre-commit 的 `scope_out_of_bounds`，以及 pre-command
 对六种 Policy 禁止规范高风险 action 的拒绝/审计；在该支持范围内，Hook、CLI 与 CI 比较的是
 decision semantic fields，而非 source-sensitive digest、mode、ledger effect、event metadata、
-JSON 字节或文案。现有验证运行在 Windows，保留 4 项既有 symlink capability skips；这不证明
-Linux/macOS 的 live Hook 安装或全部宿主行为。未安装 Hook 的客户端、IDE 保存、GUI/remote Git
-和绕过 wrapper 的调用都不能被声明为已拦截；pre-command 也不解释自由 shell 或执行命令。
+JSON 字节或文案。本地 Windows 验证保留既有 symlink capability skips，真实 PR 质量门也已在
+Linux 上通过；这些结果仍不证明跨平台 live Hook 安装或全部宿主行为。未安装 Hook 的客户端、
+IDE 保存、GUI/remote Git 和绕过 wrapper 的调用都不能被声明为已拦截；pre-command 也不解释
+自由 shell 或执行命令。
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE)。

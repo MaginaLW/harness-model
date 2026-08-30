@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import subprocess
 from collections.abc import Callable
-from importlib.metadata import version
+from importlib.metadata import metadata, version
 
 import aiflow
 
@@ -31,6 +31,9 @@ def test_module_version_is_stable(
 
 def test_package_metadata_matches_runtime_version() -> None:
     assert version("aiflow") == aiflow.__version__ == "0.2.0"
+    package_metadata = metadata("aiflow")
+    assert package_metadata["License-Expression"] == "MIT"
+    assert package_metadata.get_all("License-File") == ["LICENSE"]
 
 
 def test_unknown_argument_uses_argparse_error_contract(
