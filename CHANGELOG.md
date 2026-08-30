@@ -19,8 +19,9 @@ package 已发布到外部 registry。
 ### Changed
 
 - 总体状态完成为 13/13 chapters、77/77 tasks、408/408 steps、24/24 exit checks；Quickstart 和 Recovery 增加历史/current readiness 区分、阶段二重放与矩阵漂移恢复。
-- 阶段二历史验收完成时继续使用 package version `0.1.0`；本次审查收口由项目所有者将当前源码包提升为本地 `0.2.0` 基线，不创建 tag、不发布 registry，也不移除 bootstrap 标记。
+- 阶段二历史验收完成时继续使用 package version `0.1.0`；本次审查收口由项目所有者将当前源码包提升为 `0.2.0`，明确结束 bootstrap 自举，并授权合并后创建 `v0.2.0` tag 与 GitHub Release；不发布 package registry。
 - 自举 CI 改用固定 `uv 0.12.5` 验证并消费 `uv.lock`，以一次带分支覆盖率的完整 pytest 同时执行 85% 总覆盖率、90% diff coverage、PR 范围 whitespace、Ruff、format 与 mypy 门禁；普通 V1/V2 CI 复用同一锁定环境。
+- 移除 bootstrap 标记并恢复正式 AI Flow 自用治理；退出 PR 继续依据目标分支的 active 标记执行质量门，后续 PR 在不更换 required check 名称的前提下进入 task resolution、`verify` 与 Gate。
 
 ### Fixed
 
@@ -35,7 +36,7 @@ package 已发布到外部 registry。
 - TASK-0028 的 H1 REVIEW/V2/CI/Gate 只对原 subject/attestation 有效；当前记录正确为 `reverification_required`，阶段完成状态不刷新其 approval/evidence。
 - actor 仍是 task-local 审计标签，不是人员、模型或外部身份认证；负向 mutation E2E 隔离 consumer 语义，完整 binding 由 integration/self-hosting suite 覆盖。
 - 未证明跨平台 live Hook、所有客户端、IDE/GUI/remote Git、自由 shell、通用命令拦截或 OS sandbox；未实现 V3、模型路由、信任度、费用优化、资源调度或编排器。
-- 除历史 single-use action 批准和范围明确的精确 task-owned worktree/OS-temp cleanup 外，不删除仓库或业务数据；本次所有者授权仅覆盖收尾分支 push、PR 与 CI 全绿后的 `main` 保护配置，不授权 merge、deploy、凭据导出、付费调用、package publish 或其他外部动作。
+- 除历史 single-use action 批准和范围明确的精确 task-owned worktree/OS-temp cleanup 外，不删除仓库或业务数据；本次所有者授权覆盖收尾分支 push、PR、`main` 保护、bootstrap 退出、PR 合并、`v0.2.0` tag 与 GitHub Release，不授权 deploy、凭据导出、付费调用、package registry publish、远端分支删除或其他外部动作。
 
 ## 0.1.0 - 2026-08-21
 

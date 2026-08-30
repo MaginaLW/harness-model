@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前自举模式：项目所有者已决定先完成 harness-model，再将其完整应用于自身开发流程。[bootstrap 标记](.ai/bootstrap-mode.yaml) 有效期间，本仓库的本地开发与 PR 使用普通自动开发和常规质量检查，不要求创建 AI Flow task 或取得 spec/code approval；这不改变产品内 Policy 的 `AUTO`/`REVIEW` 语义，也不授权任何外部或破坏性动作。项目完成后仅由所有者显式移除标记；退出 PR 仍按目标分支的自举状态检查，合并后才恢复完整 AI Flow 自用审批。
+> 当前治理模式：项目所有者已明确结束自举并移除 bootstrap 标记，AI Flow 正式自用治理已启用。本次退出 PR 仍由目标分支当时的 active 标记触发普通质量门；合并后的后续代码、配置、CI 或行为变更必须创建或恢复 AI Flow task，并通过适用的审批、验证与 Gate。退出自举不授权任何外部或破坏性动作。
 
 > 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.1.0`。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
@@ -12,7 +12,7 @@
 - 分别计算决策权分流和 `V0`/`V1`/`V2` 验证强度；阶段一基线中的 V2 只完成 contract 与分类，阶段二按 Chapters 8–13 逐步补齐执行能力。
 - 用 Python CLI 统一任务状态、批准、验证和 Gate。
 - 将规格、Policy、批准和 evidence 绑定到明确版本。
-- 通过本地验证与可配置为 required check 的 GitHub Actions 提供门禁；workflow 只有在平台分支保护完成配置并经真实 PR 验证后，才可声明能阻止越权或证据不足的合并。
+- 通过本地验证、required `ai-quality-gate` 和已配置的 `main` 分支保护提供门禁；真实 PR 已验证严格状态检查生效，workflow 本身仍不替代平台保护或单独的外部动作授权。
 
 ## 文档地图
 
@@ -70,7 +70,7 @@ Chapters 1–7 按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-c
 
 ## 开始参与
 
-bootstrap 标记有效时，先遵循本文顶部的自举例外；以下 AI Flow 自用步骤仅在标记移除或禁用后生效，或用于显式测试 AI Flow 产品行为。
+AI Flow 正式自用治理已经生效；以下步骤适用于本仓库后续代码、配置、CI 或行为变更。
 
 1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时同时阅读 [CLAUDE.md](CLAUDE.md)。
 2. 先核对 [overall state](docs/superpowers/state/overall.yaml) 与当前 chapter state，再按对应阶段的设计和实施目录选择下一项工作。
