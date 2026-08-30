@@ -49,7 +49,7 @@ V2 14/14、五项 killed、独立 `REV-0048 APPROVE`、code approval/local Gate 
 
 ## 当前基线重放
 
-Phase 2 当前实现使用以下只读/常规质量命令收口；精确结果记录在验收报告：
+Phase 2 当前实现先使用以下只读/常规非覆盖率命令收口；精确结果记录在验收报告：
 
 ```powershell
 python -m pytest tests/integration/test_acceptance_traceability.py -q
@@ -58,9 +58,13 @@ python -m pytest -q
 python -m ruff check .
 python -m ruff format --check .
 python -m mypy src
-python -m pytest --cov=aiflow --cov-branch --cov-report=term-missing --cov-fail-under=85
 git diff --check
 ```
+
+覆盖率重放不得使用会在仓库根生成默认 `.coverage` 的简写命令。当前重放必须按
+[Quickstart 的“阶段二基线重放”](../operations/quickstart.md#阶段二基线重放)创建唯一的独立
+run directory，通过 `COVERAGE_FILE` 和显式 XML 路径隔离产物，并同时执行总分支覆盖率 85%
+与 `diff-cover` 变更覆盖率 90% 两项门槛。
 
 历史 Gate 只在索引指定的 code-approval attestation 隔离 checkout 中重放；当前 TASK-0028
 的 Gate 必须继续 fail closed，不能作为 Phase 2 文档基线的“修复”目标。bootstrap 自举例外

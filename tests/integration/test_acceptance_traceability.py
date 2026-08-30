@@ -263,6 +263,11 @@ def test_phase_two_closeout_documents_distinguish_completion_from_history() -> N
 
 def test_quality_replay_keeps_coverage_artifacts_out_of_repository_root() -> None:
     quickstart = QUICKSTART.read_text(encoding="utf-8")
+    index = PHASE_TWO_INDEX.read_text(encoding="utf-8")
+    plan = PHASE_TWO_PLAN.read_text(encoding="utf-8")
+    unsafe_coverage_command = (
+        "python -m pytest --cov=aiflow --cov-branch --cov-report=term-missing --cov-fail-under=85"
+    )
 
     assert "Join-Path ([System.IO.Path]::GetTempPath()) $runId" in quickstart
     assert "$env:COVERAGE_FILE = $coverageFile" in quickstart
@@ -270,6 +275,14 @@ def test_quality_replay_keeps_coverage_artifacts_out_of_repository_root() -> Non
     assert "--cov-fail-under=85" in quickstart
     assert "--fail-under=90" in quickstart
     assert "Remove-Item Env:COVERAGE_FILE -ErrorAction SilentlyContinue" in quickstart
-    assert (
-        "python -m pytest --cov=aiflow --cov-branch --cov-report=term-missing --cov-fail-under=85"
-    ) not in quickstart
+    assert unsafe_coverage_command not in quickstart
+
+    assert unsafe_coverage_command not in index
+    assert "../operations/quickstart.md#阶段二基线重放" in index
+    assert "`COVERAGE_FILE`" in index
+    assert "显式 XML 路径" in index
+    assert "`diff-cover` 变更覆盖率 90%" in index
+
+    assert "历史命令提示" in plan
+    assert "../../operations/quickstart.md#阶段二基线重放" in plan
+    assert "不应直接执行其中未隔离" in plan

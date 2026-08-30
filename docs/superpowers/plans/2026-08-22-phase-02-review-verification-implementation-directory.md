@@ -67,6 +67,12 @@
 
 ### 验证
 
+> 历史命令提示：本实施目录保留下列当时的验证清单用于审计，不应直接执行其中未隔离
+> coverage 产物的简写命令。当前阶段二重放应使用
+> [证据索引](../../implementation/phase-02-evidence-index.md)并按
+> [Quickstart 的“阶段二基线重放”](../../operations/quickstart.md#阶段二基线重放)把 coverage
+> 数据库与 XML 写入唯一 run directory，同时执行总覆盖率和 diff-cover 门槛。
+
 ```powershell
 python -m pytest tests/unit/test_review_package.py -q
 python -m pytest tests/integration -q
