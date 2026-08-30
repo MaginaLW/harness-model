@@ -12,6 +12,7 @@ from typing import Any
 import pytest
 import yaml
 
+from aiflow import status_service
 from aiflow.cli import main
 from aiflow.state import TRANSITIONS, create_record_event, create_transition_event
 from aiflow.storage import atomic_write_json, atomic_write_text, atomic_write_yaml
@@ -155,10 +156,80 @@ def test_json_status_for_main_states(
     summary = json.loads(capsys.readouterr().out)
     assert summary["task_id"] == "TASK-0001"
     assert summary["current_state"] == state
+    assert summary["merge_readiness"] == (
+        "reverification_required" if state == "APPROVED_FOR_MERGE" else "not_applicable"
+    )
     assert summary["route"] == "not_available"
     assert summary["verification_level"] == "not_available"
     assert isinstance(summary["next_events"], list)
     assert summary["observed_head"] == run_git(repository, "rev-parse", "HEAD")
+    if state == "APPROVED_FOR_MERGE":
+        assert summary["missing_conditions"] == ["reverification"]
+
+
+@pytest.mark.parametrize(
+    ("state", "route", "classification", "approvals", "evidence", "expected"),
+    [
+        (
+            "APPROVED_FOR_MERGE",
+            "REVIEW",
+            "fresh",
+            "current",
+            "passed",
+            "gate_required",
+        ),
+        (
+            "APPROVED_FOR_MERGE",
+            "AUTO",
+            "fresh",
+            "not_available",
+            "passed",
+            "gate_required",
+        ),
+        (
+            "APPROVED_FOR_MERGE",
+            "REVIEW",
+            "fresh",
+            "stale",
+            "passed",
+            "reverification_required",
+        ),
+        (
+            "APPROVED_FOR_MERGE",
+            "REVIEW",
+            "fresh",
+            "current",
+            "stale",
+            "reverification_required",
+        ),
+        (
+            "WAITING_FOR_FINAL_REVIEW",
+            "REVIEW",
+            "fresh",
+            "not_available",
+            "passed",
+            "not_applicable",
+        ),
+    ],
+)
+def test_merge_readiness_projection(
+    state: str,
+    route: str,
+    classification: str,
+    approvals: str,
+    evidence: str,
+    expected: str,
+) -> None:
+    assert (
+        status_service._merge_readiness(
+            state=state,
+            route=route,
+            classification=classification,
+            approvals=approvals,
+            evidence=evidence,
+        )
+        == expected
+    )
 
 
 def test_text_status_is_concise_and_read_only(
@@ -176,6 +247,7 @@ def test_text_status_is_concise_and_read_only(
 
     output = capsys.readouterr().out
     assert "State: READY_TO_IMPLEMENT" in output
+    assert "Merge readiness: not_applicable" in output
     assert "Next events: implementation_started" in output
     assert before == {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
 

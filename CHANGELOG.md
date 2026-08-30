@@ -2,6 +2,12 @@
 
 本项目使用语义化版本。阶段一仅固定本地可安装、可审计的 MVP 基线；不代表 package 已发布到外部 registry。
 
+## Unreleased
+
+### Fixed
+
+- `aiflow status` 现在区分事件重放得到的历史 lifecycle state 与当前 `merge_readiness`；当 `APPROVED_FOR_MERGE` 的 classification、evidence 或 REVIEW approval 已失效时，明确报告 `reverification_required`，不再把唯一缺失条件显示为 `external_merge`。
+
 ## 0.1.0 - 2026-08-21
 
 ### 交付能力

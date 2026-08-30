@@ -37,7 +37,7 @@ aiflow status TASK-0001 --format json
 aiflow close TASK-0001 --result merged --merge-commit <sha> --actor operator-id
 ```
 
-`begin` 验证冻结规格、当前分类、所需规格批准及 Git 基线。风险性失败必须先升级。`close` 只确认 commit 对象存在并记录已经发生的外部合并，不运行 merge、push 或远程 API。`status` 严格只读；route、批准或证据不存在时显示 `not_available`，不会显示为通过。
+`begin` 验证冻结规格、当前分类、所需规格批准及 Git 基线。风险性失败必须先升级。`close` 只确认 commit 对象存在并记录已经发生的外部合并，不运行 merge、push 或远程 API。`status` 严格只读；route、批准或证据不存在时显示 `not_available`，不会显示为通过。`APPROVED_FOR_MERGE` 是事件重放得到的历史生命周期状态，不会因 subject 同步或 artifact 失效而改写；状态摘要另行输出 `merge_readiness`。当前 classification、evidence 或 REVIEW approval 已失效时，它为 `reverification_required`，并以 `reverification` 取代容易误解的 `external_merge` 缺失条件；全部当前时也只显示 `gate_required`，最终是否允许合并仍以只读 Gate 为准。
 
 ## 失败排查
 

@@ -46,6 +46,7 @@ class StatusSummary:
     goal: str
     repository_id: str
     current_state: str
+    merge_readiness: str
     route: str
     verification_level: str
     next_events: tuple[str, ...]
@@ -77,6 +78,7 @@ class StatusSummary:
                 f"Task: {self.task_id}",
                 f"Goal: {self.goal}",
                 f"State: {self.current_state}",
+                f"Merge readiness: {self.merge_readiness}",
                 f"Route / verification: {self.route} / {self.verification_level}",
                 f"Next events: {next_events}",
                 f"Missing: {missing}",
@@ -229,6 +231,23 @@ def _evidence_status(value: dict[str, Any] | None, current: dict[str, object]) -
     return "passed"
 
 
+def _merge_readiness(
+    *,
+    state: str,
+    route: str,
+    classification: str,
+    approvals: str,
+    evidence: str,
+) -> str:
+    """Project an approved state's current merge posture without rewriting its history."""
+    if state != "APPROVED_FOR_MERGE":
+        return "not_applicable"
+    current = classification == "fresh" and evidence == "passed"
+    if route == "REVIEW":
+        current = current and approvals == "current"
+    return "gate_required" if current else "reverification_required"
+
+
 def _read_evidence(repository_root: Path, task_id: str) -> tuple[dict[str, Any] | None, bool]:
     path = resolve_task_path(repository_root, task_id, "evidence.json")
     if not path.is_file():
@@ -264,6 +283,14 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
     )
     evidence_value, evidence_invalid = _read_evidence(repository_root, task_id)
     evidence_status = "stale" if evidence_invalid else _evidence_status(evidence_value, current)
+    approval_status = _approval_status(repository_root, task_id, current, evidence_value)
+    merge_readiness = _merge_readiness(
+        state=state,
+        route=route,
+        classification=classification_report.status,
+        approvals=approval_status,
+        evidence=evidence_status,
+    )
     next_events = tuple(
         sorted(
             rule.event_type for (source, _target), rule in TRANSITIONS.items() if source == state
@@ -274,16 +301,19 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
         goal=str(task["goal"]),
         repository_id=str(task["repository_id"]),
         current_state=state,
+        merge_readiness=merge_readiness,
         route=route,
         verification_level=verification,
         next_events=next_events,
-        missing_conditions=MISSING_BY_STATE[state],
+        missing_conditions=("reverification",)
+        if merge_readiness == "reverification_required"
+        else MISSING_BY_STATE[state],
         base_commit=str(task["base_commit"]),
         subject_commit=str(task["subject_commit"]) if task.get("subject_commit") else None,
         observed_head=context.head,
         worktree_dirty=context.worktree_dirty,
         dirty_paths=context.dirty_paths,
         classification=classification_report.status,
-        approvals=_approval_status(repository_root, task_id, current, evidence_value),
+        approvals=approval_status,
         evidence=evidence_status,
     )
