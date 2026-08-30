@@ -4,7 +4,7 @@
 
 > 当前自举模式：项目所有者已决定先完成 harness-model，再将其完整应用于自身开发流程。[bootstrap 标记](.ai/bootstrap-mode.yaml) 有效期间，本仓库的本地开发与 PR 使用普通自动开发和常规质量检查，不要求创建 AI Flow task 或取得 spec/code approval；这不改变产品内 Policy 的 `AUTO`/`REVIEW` 语义，也不授权任何外部或破坏性动作。项目完成后仅由所有者显式移除标记；退出 PR 仍按目标分支的自举状态检查，合并后才恢复完整 AI Flow 自用审批。
 
-> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–12 已完成，其中 Chapter 12.1–12.6 与两个退出检查均已通过。Chapter 13 尚未初始化，阶段二仍未完成。active Policy 为 `2.1.0`。Chapter 11 的 acceptance、integration、action-approved targeted mutation 与独立 verifier 已实现；TASK-0015 的 V2 结论与 TASK-0022 的 observe/Hook parity、审核、批准和合并结论均严格绑定各自 task、subject、规格与 Policy，不能自动复用于未来 task 或 subject。Chapter 12 已提供受限的运行期 observation 与 Hook/CLI/CI 入口，但不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
+> 当前状态：阶段一 MVP `0.1.0` 已完成本地发布基线验收；阶段二 Chapters 8–12 已完成，Chapter 13 已初始化并处于 `in_progress`。13.1–13.3 已完成，当前任务为仍 `pending` 的 13.4；13.5–13.6、四项 Chapter 13 exit checks 与阶段二均未完成。active Policy 为 `2.1.0`。Chapter 11 的 acceptance、integration、action-approved targeted mutation 与独立 verifier 已实现；TASK-0015 的 V2 结论与 TASK-0022 的 observe/Hook parity、审核、批准和合并结论均严格绑定各自 task、subject、规格与 Policy，不能自动复用于未来 task 或 subject。Chapter 12 已提供受限的运行期 observation 与 Hook/CLI/CI 入口，但不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
 ## 阶段一目标
 
@@ -36,7 +36,8 @@
 | [Chapter 9 追踪](docs/implementation/chapter-09-v2-policy-contracts.md) | V2 Policy、版本化 contracts、分类规则与兼容性边界 |
 | [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的退出证据与 live V2 限制 |
 | [Chapter 11 追踪](docs/implementation/chapter-11-acceptance-integration-mutation.md) | 已完成的 acceptance/integration、targeted mutation、live V2 与退出证据边界 |
-| [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与 Hooks 已完成；Chapter 13 尚未初始化，Phase 02 仍 in progress |
+| [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与 Hooks 已完成 |
+| [Chapter 13 状态](docs/superpowers/state/chapters/chapter-13.yaml) | 自举 REVIEW 试点进行中；13.1–13.3 已完成，当前任务为仍 pending 的 13.4，Phase 02 尚未完成 |
 
 ## 实施路线
 

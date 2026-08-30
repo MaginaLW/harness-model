@@ -1,6 +1,6 @@
 # Chapter 12：运行期升级观测与完整 Hooks
 
-状态：completed（12.1–12.6 与 `CH12-EXIT-01/02` passed；Chapter 13 未初始化）
+状态：completed（12.1–12.6 与 `CH12-EXIT-01/02` passed；Chapter 13 已初始化并推进至 13.4）
 
 Chapter 12 在 Chapter 11 的 V2 failure/evidence 结构之上增加运行期观察与 Hook 入口，
 当前已完成 12.1 的 observation contract/type 输入层、12.2 的共享确定性
@@ -248,5 +248,6 @@ reason 枚举，以及冻结的 `Observation`、`PathsSummary`、`CommandSummary
   P2-HOOK-01 只以两类实际 Hook facts 与受限 CLI/CI 的 decision semantic parity 及上述限制为
   输入。在这些边界内，12.6 五步、`CH12-EXIT-01/02` 与 Chapter 12 completion 已投影完成。
 - 本 H2 投影改变了 subject；TASK-0023 仍须对投影后 current subject 重新取得正式 V1、独立
-  implementation review、code approval 与 Gate，方可形成 merge readiness。Chapter 13 未初始化，
-  Phase 02 仍 in progress。
+  implementation review、code approval 与 Gate，方可形成 merge readiness。该投影发生在
+  Chapter 13 初始化之前；当前 Chapter 13 已初始化，13.1–13.3 已完成，指针位于仍 pending
+  的 13.4，Phase 02 仍 in progress。
