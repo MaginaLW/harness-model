@@ -23,3 +23,18 @@ While the pull request's base commit contains `.ai/bootstrap-mode.yaml` with the
 The workflow file is not proof that enforcement is active. Before claiming the repository is protected, run it on a real pull request, configure `ai-quality-gate` as required, and retain platform evidence that the target branch rejects direct/force pushes and bypasses outside the named emergency roles.
 
 The historical bootstrap mode never granted push, merge, deployment, deletion, secret-export, or paid-call authority. The project owner has now ended bootstrap; future PRs use formal AI Flow task resolution, verification, and Gate while the same external-action and platform controls remain in force.
+
+## First formal-mode pull request evidence
+
+The first pull request after bootstrap exit is accepted as a live formal-mode canary only when its
+final head has a successful required `ai-quality-gate` check and the run shows `Resolve task`,
+`Verify and Gate`, and `Upload AI Flow diagnostics` on the normal path while `Bootstrap quality
+checks` is skipped. The diagnostics artifact must be named `ai-flow-<TASK-ID>`; it is retained for
+14 days for investigation, whereas the pull request and required check remain the durable platform
+record.
+
+Record the task ID, final head SHA, and matching CI run URL in the pull request body. Do not commit
+that run URL back into the governed file in the same pull request: doing so creates a new subject,
+invalidates the old run's binding, and starts another run. Updating only the pull request body does
+not change the governed head. If the base branch or final head changes, require a new successful
+check for that exact head before treating the canary as passed.
