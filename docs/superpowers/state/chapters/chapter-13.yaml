@@ -366,6 +366,7 @@ chapter_evidence:
     governance_mode: "bootstrap_active"
     phase: "phase-02"
     status: "passed"
+    baseline_content_commit: "733962ace50e430f69cd2193a96bc797fc8a18b6"
     acceptance_report: "docs/implementation/phase-02-acceptance-report.md"
     artifacts:
       - "README.md"
@@ -415,5 +416,12 @@ history:
     actor: "/root"
     reason: "阶段二当前回归基线、精确历史 REVIEW/V2/CI/Gate 证据、状态和操作文档完成收口；四项 exit checks 通过，阶段三保持未开始且未授权。"
     state_effect: {task_13_6_status: "completed", chapter_13_status: "completed", phase_02_status: "completed"}
+  - id: "EVT-CH13-PHASE02-BASELINE-COMMIT-001"
+    at: "2026-08-30T03:35:20Z"
+    action: "baseline_content_commit_attested"
+    actor: "/root"
+    reason: "阶段二内容基线 commit 733962ace50e430f69cd2193a96bc797fc8a18b6 已绑定；只追加元数据，不改变 Chapter 13 完成状态、计数或授权。"
+    subject_commit: "733962ace50e430f69cd2193a96bc797fc8a18b6"
+    state_effect: {chapter_13_status: "completed", phase_02_status: "completed"}
 
 blockers: []

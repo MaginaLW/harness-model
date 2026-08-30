@@ -4,7 +4,7 @@ project: "AI 代码协同系统"
 stage: "phase-02-review-verification"
 status: "completed"
 created_at: "2026-08-02T14:03:50Z"
-updated_at: "2026-08-30T03:34:00Z"
+updated_at: "2026-08-30T03:35:20Z"
 
 source:
   implementation_plan: "docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md"
@@ -16,6 +16,7 @@ source:
   phase_02_acceptance_matrix: "docs/implementation/phase-02-acceptance-matrix.md"
   phase_02_evidence_index: "docs/implementation/phase-02-evidence-index.md"
   phase_02_acceptance_report: "docs/implementation/phase-02-acceptance-report.md"
+  phase_02_baseline_commit: "733962ace50e430f69cd2193a96bc797fc8a18b6"
   baseline_commit: "c375c32d2a28294cd4cedd1fd77815feb0d41615"
   read_at: "2026-08-02T14:03:50Z"
 
@@ -164,6 +165,7 @@ global_checks:
     chapter_exit_checks: ["CH13-EXIT-01", "CH13-EXIT-02", "CH13-EXIT-03", "CH13-EXIT-04"]
   phase_02_baseline:
     status: "passed"
+    content_commit: "733962ace50e430f69cd2193a96bc797fc8a18b6"
     report: "docs/implementation/phase-02-acceptance-report.md"
     full_pytest: "1581 passed, 4 existing Windows symlink capability skips"
     branch_coverage: "87.58% (85% threshold passed)"
@@ -2517,5 +2519,27 @@ history:
       - "docs/operations/quickstart.md"
       - "docs/operations/recovery.md"
       - "docs/superpowers/state/README.md"
+      - "docs/superpowers/state/chapters/chapter-13.yaml"
+      - "docs/superpowers/state/overall.yaml"
+  - id: "EVT-OVERALL-PHASE02-BASELINE-COMMIT-001"
+    at: "2026-08-30T03:35:20Z"
+    action: "baseline_content_commit_attested"
+    actor: "/root"
+    reason: "阶段二内容基线已提交为 733962ace50e430f69cd2193a96bc797fc8a18b6；本事件只追加该不可变 commit 绑定，不改变完成计数、运行时 task freshness、bootstrap 状态或任何授权。"
+    subject_commit: "733962ace50e430f69cd2193a96bc797fc8a18b6"
+    state_effect:
+      overall_status: "completed"
+      phase_02_status: "completed"
+      chapter_13_status: "completed"
+      current_chapter: null
+      current_task: null
+      current_step: null
+      chapters_completed: 13
+      tasks_completed: 77
+      steps_completed: 408
+      exit_checks_completed: 24
+      evidence_items: 21
+    evidence:
+      - "docs/implementation/phase-02-acceptance-report.md"
       - "docs/superpowers/state/chapters/chapter-13.yaml"
       - "docs/superpowers/state/overall.yaml"

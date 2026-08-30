@@ -2,6 +2,7 @@
 
 - 状态：`completed`
 - 基线日期：`2026-08-30`
+- 内容基线 commit：`733962ace50e430f69cd2193a96bc797fc8a18b6`（后续提交只追加本哈希的 attestation 元数据）
 - 范围：Chapters 8–13 / P2-REV-01、P2-V2-01、P2-VER-01、P2-MUT-01、P2-ESC-01、P2-HOOK-01
 - Policy：`2.1.0`，SHA-256 `f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf`
 - 治理模式：`.ai/bootstrap-mode.yaml` 为 `active`；本报告是仓库自身的本地质量基线，不是 release、merge 或外部动作授权
