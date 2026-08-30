@@ -128,6 +128,25 @@ V2、独立实现审核、finalize、code approval 和 local Gate；不要求再
 H1 evidence/review/approval/CI receipt 均不能充当 H2 merge readiness。TASK-0028 不自动
 close、merge 或 push。
 
+## 13.4 负向 E2E
+
+`tests/e2e/test_phase_02_negative_self_hosting.py` 从公开 CLI、service 和 Gate 边界覆盖五个
+fail-closed 场景：
+
+- V2 verifier 与 implementer 相同，或 actor 规范化后为空，均在 plan/runner 前拒绝；
+- current immutable mutation artifact 中存在一个真实 `survived` result 时，CI replay 和 Gate
+  均返回 `MUTATION_EVIDENCE_NOT_KILLED`；
+- `scope_out_of_bounds` observation 只经公开 `apply_observation` 记录 observation、escalation 和
+  `ESCALATED` 状态，随后 `begin` 仍被拒绝；
+- 同一 current context 中较新的 `REQUEST_CHANGES` 覆盖较早的 `APPROVE`，finalize 返回
+  `REVIEW_OUTCOME_NOT_APPROVABLE`，code approval 不产生新记录；
+- 上述陈旧审核继续由只读 Gate 投影为 `GATE_V2_EVIDENCE_NOT_FINAL` 和
+  `GATE_V2_REVIEW_STALE`，不会被旧 evidence 或旧 approval 掩盖。
+
+测试在每个拒绝点前后比较 task-local 文件字节或对应 ledger/approval 集合；CI replay 还确认
+source task、refs 和 external evidence 均未被失败路径改写。测试只构造 task-local fixture，未
+消费真实 action、未执行外部命令，也不扩大 live Hook、外部身份认证或 OS sandbox 的支持范围。
+
 ## 定向复现与边界
 
 实现层 focused 命令：
@@ -145,6 +164,7 @@ Chapter 13 自举回归：
 python -m pytest tests/acceptance/test_phase_02_self_hosting.py -q
 python -m pytest tests/integration/test_phase_02_self_hosting.py -q
 python -m pytest tests/e2e/test_phase_02_self_hosting_scenario.py -q
+python -m pytest tests/e2e/test_phase_02_negative_self_hosting.py -q
 ```
 
 普通 pytest、local Gate 或设计批准都不授权 targeted mutation、临时目录清理或外部动作。
