@@ -51,5 +51,18 @@
     "spec_sha256": "8e74f113766f452509bfc9453e2b20c18705388dd28fc4b2dd4a5f881cbc9c66",
     "subject_commit": "26e57b82f6230ae3528583d7829a2270ad89acfd",
     "task_id": "TASK-0030"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-08-31T15:00:49Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner approved TASK-0030 expanded CI specification d51e34b8334247dac947ad140a1e12156d60dee4da72a3cd6e4666c7cbf98b6c under Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f with design review REV-0061 context 42cf08e7b8336af3d923233fdd6bb115392bb6bfa105f7b6f2a340cabc45bc4d.",
+    "schema_version": "1.0",
+    "spec_sha256": "d51e34b8334247dac947ad140a1e12156d60dee4da72a3cd6e4666c7cbf98b6c",
+    "subject_commit": "26e57b82f6230ae3528583d7829a2270ad89acfd",
+    "task_id": "TASK-0030"
   }
 ]
