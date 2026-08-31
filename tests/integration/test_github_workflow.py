@@ -65,7 +65,7 @@ def test_workflow_is_read_only_reproducible_and_bounded() -> None:
     ]
     assert "pull_request_target" not in text
     assert "cancel-in-progress: true" in text
-    assert "timeout-minutes: 35" in text
+    assert "timeout-minutes: 90" in text
     assert "fetch-depth: 0" in text
     assert 'python-version: "3.11"' in text
     assert "actions/checkout@v7" in text

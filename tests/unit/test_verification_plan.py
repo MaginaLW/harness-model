@@ -83,6 +83,34 @@ def test_v1_contains_v0_categories_and_coverage_environment(tmp_path: Path) -> N
     assert v1.comparison_subject == "b" * 40
 
 
+@pytest.mark.parametrize("level", ["V1", "V2"])
+def test_parsed_regression_and_coverage_budgets_are_exact(
+    level: str, tmp_path: Path
+) -> None:
+    parsed = plan(level, tmp_path)
+    by_id = {check.check_id: check for check in parsed.checks}
+    regression = by_id["regression_tests"]
+    coverage = by_id["coverage_xml"]
+
+    assert regression.argv == (sys.executable, "-m", "pytest", "-q")
+    assert regression.timeout_seconds == 900
+    assert regression.required is True
+    assert regression.result_parser == "pytest"
+    assert coverage.argv == (
+        sys.executable,
+        "-m",
+        "pytest",
+        "--cov=aiflow",
+        "--cov-branch",
+        f"--cov-report=xml:{(parsed.run_dir / 'coverage.xml').as_posix()}",
+    )
+    assert coverage.timeout_seconds == 1200
+    assert coverage.required is True
+    assert coverage.result_parser == "coverage_xml"
+    assert coverage.environment == {"COVERAGE_FILE": (parsed.run_dir / ".coverage").as_posix()}
+    assert by_id["diff_coverage"].threshold == 90
+
+
 def test_v2_has_complete_v1_prefix_and_fixed_extra_order(tmp_path: Path) -> None:
     expected = json.loads(
         (ROOT / "tests" / "fixtures" / "verification" / "plans" / "v2.json").read_text()

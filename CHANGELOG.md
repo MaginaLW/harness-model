@@ -5,7 +5,9 @@ package 已发布到外部 registry。
 
 ## Unreleased
 
-暂无。
+### Fixed
+
+- active Policy 升至 `2.2.0`，将 V1/V2 完整回归与 coverage XML 的时限分别调整为 900 秒和 1200 秒，并将 `ai-quality-gate` job 上限调整为 90 分钟以覆盖 68.5 分钟的 V2 最大固定串行预算及安装、Gate 和 runner 波动；检查集合、命令、parser、required 状态、85% 总覆盖率和 90% diff coverage 门槛均保持不变。
 
 ## 0.2.0 - 2026-08-30
 

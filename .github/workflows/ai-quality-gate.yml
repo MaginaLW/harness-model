@@ -14,9 +14,9 @@ concurrency:
 jobs:
   ai-quality-gate:
     runs-on: ubuntu-latest
-    # Historical V2 verify/gate runs take about 20.5 minutes; leave room for
-    # dependency setup, diagnostics, and normal runner variance.
-    timeout-minutes: 35
+    # The fixed V2 checks may consume 68.5 minutes serially; leave room for
+    # dependency setup, Gate evaluation, diagnostics, and runner variance.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
         with:

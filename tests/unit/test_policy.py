@@ -53,9 +53,49 @@ def test_valid_policy_has_complete_stable_bundle() -> None:
     bundle = load_policy_bundle(PROJECT_ROOT)
 
     assert set(bundle.documents) == set(POLICY_FILES)
-    assert bundle.policy_version == "2.1.0"
+    assert bundle.policy_version == "2.2.0"
     assert len(bundle.sha256) == 64
     assert bundle.sha256 == load_policy_bundle(PROJECT_ROOT).sha256
+
+
+def test_active_policy_binds_exact_verification_time_budgets() -> None:
+    documents = v2_documents()
+    assert {document["policy_version"] for document in documents.values()} == {"2.2.0"}
+
+    levels = documents["verification-levels.yaml"]["levels"]
+    assert isinstance(levels, list)
+    for level_id in ("V1", "V2"):
+        level = next(
+            item for item in levels if isinstance(item, dict) and item.get("id") == level_id
+        )
+        raw_checks = level["checks"]
+        assert isinstance(raw_checks, list)
+        by_id = {item["id"]: item for item in raw_checks if isinstance(item, dict)}
+
+        assert by_id["regression_tests"] == {
+            "id": "regression_tests",
+            "command": ["{python}", "-m", "pytest", "-q"],
+            "timeout_seconds": 900,
+            "required": True,
+            "result_parser": "pytest",
+        }
+        assert by_id["coverage_xml"] == {
+            "id": "coverage_xml",
+            "command": [
+                "{python}",
+                "-m",
+                "pytest",
+                "--cov=aiflow",
+                "--cov-branch",
+                "--cov-report=xml:{run_dir}/coverage.xml",
+            ],
+            "timeout_seconds": 1200,
+            "required": True,
+            "result_parser": "coverage_xml",
+            "environment": {"COVERAGE_FILE": "{run_dir}/.coverage"},
+        }
+        assert by_id["diff_coverage"]["command"][-2:] == ["--fail-under", "90"]
+        assert by_id["diff_coverage"]["threshold"] == 90
 
 
 def test_legacy_v1_policy_branch_remains_valid() -> None:
@@ -87,7 +127,7 @@ def test_v1_must_preserve_the_semantic_v0_prefix() -> None:
 
 def test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras() -> None:
     documents = v2_documents()
-    assert _validate_cross_file(documents) == "2.1.0"
+    assert _validate_cross_file(documents) == "2.2.0"
 
     levels = documents["verification-levels.yaml"]["levels"]
     assert isinstance(levels, list)

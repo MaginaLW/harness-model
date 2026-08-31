@@ -26,6 +26,11 @@
 - 可恢复操作：修复具体失败原因后运行 `python -m aiflow begin <TASK-ID> --actor <ACTOR> --reason "<FIX>"`，再执行全量 `verify`。
 - 禁止操作：不在没有 retry reason 时重试，不删除失败 run，不将定向 provisional 证据当作 final evidence。
 
+active Policy `2.2.0` 为 V1/V2 `regression_tests` 和 `coverage_xml` 分别提供 900 秒和 1200 秒。
+达到任一上限仍应保留为失败证据并诊断环境或性能原因；不得通过降为 V0、跳过 coverage、修改
+evidence 或重复碰运气来放行。若确需再次调整 Policy，必须建立或恢复有界 task，重新完成分类、
+规格审批、验证和 Gate。
+
 ## REC-05 BLOCK 解除
 
 - 诊断：读取 classification 中的 BLOCK rule、恢复条件、Policy hash 和当前 classification input hash。
