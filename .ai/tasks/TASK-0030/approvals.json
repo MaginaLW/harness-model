@@ -118,5 +118,19 @@
     "spec_sha256": "089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124",
     "subject_commit": "ebea414fc168f35e0b0abd810f2c27bc1ad71964",
     "task_id": "TASK-0030"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-08-31T23:25:45Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "553e81970629f8cddd7b3c966acda784932597b627c782705c556d3480e1d3ec",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner approved TASK-0030 code for subject acff6cac45c8c7be64bb8a83dbf264fd039e3f17, evidence 553e81970629f8cddd7b3c966acda784932597b627c782705c556d3480e1d3ec, implementation review REV-0066/context ba88900f489b0823b9323e87ad60c4dcc82d81e71a77fdcd55cd50fd87721af3, spec 089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124, and Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f.",
+    "schema_version": "1.0",
+    "spec_sha256": "089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124",
+    "subject_commit": "acff6cac45c8c7be64bb8a83dbf264fd039e3f17",
+    "task_id": "TASK-0030"
   }
 ]
