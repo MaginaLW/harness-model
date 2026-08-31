@@ -1,14 +1,4 @@
-schema_version: '1.0'
-task_id: TASK-0030
-goal: Harden V1 and V2 regression and coverage time budgets for the verified Windows
-  runtime without weakening checks or thresholds.
-repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
-branch: codex/verification-timeout-hardening
-base_commit: 37dce2a61a5dc484b077ba4463cede2be04dd746
-subject_commit: 37dce2a61a5dc484b077ba4463cede2be04dd746
-worktree_dirty: false
-worktree_dirty_paths: []
-allowed_scope: &id001
+allowed_scope:
 - .ai/policy/hard-rules.yaml
 - .ai/policy/routing.yaml
 - .ai/policy/permissions.yaml
@@ -22,22 +12,42 @@ allowed_scope: &id001
 - docs/operations/github-branch-protection.md
 - docs/operations/recovery.md
 - CHANGELOG.md
-forbidden_actions:
-- push
-- merge
-- deploy
-- delete
-- secret_export
-- paid_external_call
-current_state: WAITING_FOR_SPEC_REVIEW
+base_commit: 37dce2a61a5dc484b077ba4463cede2be04dd746
+branch: codex/verification-timeout-hardening
 created_at: '2026-08-30T09:53:29Z'
-updated_at: '2026-08-30T09:58:18Z'
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
-- schema_version: '1.0'
-  task_id: TASK-0030
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: low
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
   decision_unit_id: DU-001
+  external_side_effects: []
   goal: Harden V1 and V2 regression and coverage time budgets for the verified Windows
     runtime without weakening checks or thresholds.
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  - documentation
+  impact_scope:
+  - .ai/policy/hard-rules.yaml
+  - .ai/policy/routing.yaml
+  - .ai/policy/permissions.yaml
+  - .ai/policy/verification-levels.yaml
+  - .github/workflows/ai-quality-gate.yml
+  - tests/unit/test_policy.py
+  - tests/unit/test_verification_plan.py
+  - tests/integration/test_github_workflow.py
+  - README.md
+  - docs/operations/quickstart.md
+  - docs/operations/github-branch-protection.md
+  - docs/operations/recovery.md
+  - CHANGELOG.md
   inputs:
   - TASK-0029 formal V1 runs timed out twice in coverage_xml at the active Policy's
     600-second bound after all preceding required checks passed.
@@ -45,6 +55,7 @@ decision_units:
     skips in 579.8 seconds, leaving insufficient variance below the current bound.
   - The second formal regression run passed in 543.8 seconds, also leaving limited
     variance below its 600-second bound.
+  permission_requirements: []
   planned_actions:
   - Increment every active Policy document from 2.1.0 to 2.2.0 for the semantic time-budget
     change while leaving historical task and acceptance evidence untouched.
@@ -54,41 +65,43 @@ decision_units:
     legal V2 per-check budget plus setup and Gate variance.
   - Add exact raw-Policy, parsed-plan, and workflow contract assertions and update
     current operator documentation and Unreleased notes.
-  impact_scope: *id001
+  protections:
+    dry_run: true
+    verified_backup: true
   reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0030
+  verification:
+    automatic: true
+    tools_missing: false
   verification_methods:
   - Run focused Policy, verification-plan, workflow, contract, and traceability tests.
   - Run the Policy-defined V1 verification plan and read-only Gate on the final subject.
   - Require the real pull request to execute formal task resolution, CI verification,
     Gate, and diagnostics upload for its final head.
-  external_side_effects: []
-  permission_requirements: []
-  scope:
-    clear: true
-  impact:
-    level: medium
-  protections:
-    verified_backup: true
-    dry_run: true
-  verification:
-    automatic: true
-    tools_missing: false
-  impact_categories:
-  - ci
-  - documentation
-  business_direction_count: 1
-  change_characteristics:
-    mechanical: false
-    behavior_changed: true
-    code_modified: false
-    interaction_scope: cross_file
-    regression_risk: true
-    error_detectability: low
   verification_requirements:
     acceptance_required: false
+    independent_verifier_required: false
     integration_required: false
     targeted_mutation_required: false
-    independent_verifier_required: false
-repository_path_at_creation: D:/Repos/harness-model
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
 frozen_spec_sha256: 57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9
-spec_frozen_at: '2026-08-30T09:56:42Z'
+goal: Harden V1 and V2 regression and coverage time budgets for the verified Windows
+  runtime without weakening checks or thresholds.
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-08-31T13:20:47Z'
+subject_commit: 675c7ec0c2b719d0dae288d7c49d87dbf5438847
+task_id: TASK-0030
+updated_at: '2026-08-31T13:24:04Z'
+worktree_dirty: false
+worktree_dirty_paths: []

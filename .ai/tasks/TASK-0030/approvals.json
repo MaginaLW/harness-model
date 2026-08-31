@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-08-31T13:11:03Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+    "reason": "项目所有者批准冻结规格 SHA256:57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9。",
+    "schema_version": "1.0",
+    "spec_sha256": "57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9",
+    "subject_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "task_id": "TASK-0030"
+  }
+]
