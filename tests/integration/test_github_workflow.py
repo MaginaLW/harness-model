@@ -232,17 +232,30 @@ def test_branch_attachment_rejects_post_switch_branch_or_sha_mismatch(
 
 
 def test_resolved_task_output_flows_to_verify_and_gate() -> None:
+    workflow = _workflow()
     text = WORKFLOW.read_text(encoding="utf-8")
     gate_command = (
         'uv run --locked python -m aiflow gate "$TASK_ID" '
         '--evidence "$run_dir/evidence.json" --format json'
     )
+    steps = workflow["jobs"]["ai-quality-gate"]["steps"]
+    assert isinstance(steps, list)
+    verify = next(step for step in steps if step.get("name") == "Verify and Gate")
+    upload = next(step for step in steps if step.get("name") == "Upload AI Flow diagnostics")
 
     assert "task_id=" in (ROOT / "tools" / "ci" / "resolve_task.py").read_text(encoding="utf-8")
-    assert "TASK_ID: ${{ steps.task.outputs.task_id }}" in text
+    assert verify["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert verify["env"] == {
+        "TASK_ID": "${{ steps.task.outputs.task_id }}",
+        "TMPDIR": "${{ runner.temp }}",
+    }
+    assert text.count("TMPDIR: ${{ runner.temp }}") == 1
+    assert 'run_dir="$TMPDIR/aiflow"' in verify["run"]
+    assert 'run_dir="$RUNNER_TEMP/aiflow"' not in verify["run"]
     assert 'uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir"' in text
     assert gate_command in text
-    assert "${{ runner.temp }}/aiflow" in text
+    assert upload["if"] == "always() && steps.governance.outputs.bootstrap_active != 'true'"
+    assert upload["with"]["path"] == "${{ runner.temp }}/aiflow"
 
 
 def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:

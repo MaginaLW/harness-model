@@ -97,8 +97,9 @@ jobs:
         if: steps.governance.outputs.bootstrap_active != 'true'
         env:
           TASK_ID: ${{ steps.task.outputs.task_id }}
+          TMPDIR: ${{ runner.temp }}
         run: |
-          run_dir="$RUNNER_TEMP/aiflow"
+          run_dir="$TMPDIR/aiflow"
           mkdir -p "$run_dir"
           uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir" --output "$run_dir/evidence.json"
           uv run --locked python -m aiflow gate "$TASK_ID" --evidence "$run_dir/evidence.json" --format json > "$run_dir/gate.json"
