@@ -16,7 +16,7 @@ allowed_scope:
 base_commit: 37dce2a61a5dc484b077ba4463cede2be04dd746
 branch: codex/verification-timeout-hardening
 created_at: '2026-08-30T09:53:29Z'
-current_state: APPROVED_FOR_MERGE
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -60,6 +60,9 @@ decision_units:
   - The first Policy 2.2.0 V1 run completed regression in 622.0 seconds and coverage
     in 735.3 seconds without runner timeout, but exposed two acceptance assertions
     that incorrectly treated historical TASK-0025 Policy 2.1.0 facts as current.
+  - GitHub Actions run 33403951577 resolved TASK-0030 correctly but failed before
+    executing checks because the exact PR head SHA checkout was detached while the
+    task remained bound to branch codex/verification-timeout-hardening.
   permission_requirements: []
   planned_actions:
   - Increment every active Policy document from 2.1.0 to 2.2.0 for the semantic time-budget
@@ -73,6 +76,9 @@ decision_units:
   - Update only the Phase 02 self-hosting acceptance test to assert that TASK-0025's
     retained Policy 2.1.0 classification is historical and fails closed under active
     Policy 2.2.0, without modifying any TASK-0025 artifact.
+  - Preserve checkout of the exact pull-request head SHA, then attach that same commit
+    to github.head_ref before formal verification with fail-closed pre/post branch
+    and SHA assertions; do not weaken the runtime branch binding.
   protections:
     dry_run: true
     verified_backup: true
@@ -90,6 +96,9 @@ decision_units:
   - Run the Policy-defined V1 verification plan and read-only Gate on the final subject.
   - Require the real pull request to execute formal task resolution, CI verification,
     Gate, and diagnostics upload for its final head.
+  - Assert the workflow keeps exact-SHA checkout and attaches that immutable commit
+    to the pull-request source branch before formal verification; retain failed run
+    33403951577 as historical platform evidence.
   verification_requirements:
     acceptance_required: false
     independent_verifier_required: false
@@ -102,15 +111,15 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 8e74f113766f452509bfc9453e2b20c18705388dd28fc4b2dd4a5f881cbc9c66
+frozen_spec_sha256: d51e34b8334247dac947ad140a1e12156d60dee4da72a3cd6e4666c7cbf98b6c
 goal: Harden V1 and V2 regression and coverage time budgets for the verified Windows
   runtime without weakening checks or thresholds.
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-31T13:58:02Z'
+spec_frozen_at: '2026-08-31T14:54:57Z'
 subject_commit: 26e57b82f6230ae3528583d7829a2270ad89acfd
 task_id: TASK-0030
-updated_at: '2026-08-31T14:35:46Z'
+updated_at: '2026-08-31T14:56:55Z'
 worktree_dirty: false
 worktree_dirty_paths: []
