@@ -84,9 +84,7 @@ def test_v1_contains_v0_categories_and_coverage_environment(tmp_path: Path) -> N
 
 
 @pytest.mark.parametrize("level", ["V1", "V2"])
-def test_parsed_regression_and_coverage_budgets_are_exact(
-    level: str, tmp_path: Path
-) -> None:
+def test_parsed_regression_and_coverage_budgets_are_exact(level: str, tmp_path: Path) -> None:
     parsed = plan(level, tmp_path)
     by_id = {check.check_id: check for check in parsed.checks}
     regression = by_id["regression_tests"]

@@ -15,16 +15,19 @@ from aiflow.verification import V2_CHECK_IDS, VerificationContext, parse_verific
 from aiflow.verifier_service import (
     build_verifier_context,
     context_sha256,
+    load_verifier_context,
     validate_verifier_actor,
     validate_verifier_context_current,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
 TASK_ID = "TASK-0025"
+HISTORICAL_POLICY_SHA256 = "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf"
+HISTORICAL_CONTEXT_SHA256 = "760023540a0560e312e9136945bb7171560a4b776a0c626eb106e933d45b7c03"
 
 
-def test_current_review_v2_binding_is_frozen_and_has_all_fourteen_checks() -> None:
-    """The trial consumes its own current task facts, not a historical V2 result."""
+def test_historical_review_v2_binding_is_frozen_and_active_policy_has_all_checks() -> None:
+    """The frozen trial remains historical while active V2 keeps all required checks."""
     record = load_task_record(ROOT, TASK_ID)
     task = record.task
     classification = read_task_json(
@@ -38,7 +41,8 @@ def test_current_review_v2_binding_is_frozen_and_has_all_fourteen_checks() -> No
     )
     assert classification["task_id"] == TASK_ID
     assert classification["base_commit"] == task["base_commit"]
-    assert classification["policy_sha256"] == bundle.sha256
+    assert classification["policy_sha256"] == HISTORICAL_POLICY_SHA256
+    assert classification["policy_sha256"] != bundle.sha256
     assert classification["effective_route"] == "REVIEW"
     assert classification["effective_verification_level"] == "V2"
 
@@ -67,14 +71,19 @@ def test_current_review_v2_binding_is_frozen_and_has_all_fourteen_checks() -> No
 
 
 def test_verifier_context_and_roles_fail_closed_for_reused_or_non_independent_facts() -> None:
-    """A valid old-task context is still stale, and role labels cannot be reused."""
-    current = build_verifier_context(ROOT, TASK_ID)
-    reused = dict(current)
+    """Historical classification and context reuse fail closed; roles remain independent."""
+    with pytest.raises(ContractError) as stale_classification:
+        build_verifier_context(ROOT, TASK_ID)
+    assert stale_classification.value.code == "VERIFIER_CONTEXT_CLASSIFICATION_STALE"
+
+    historical = load_verifier_context(ROOT, TASK_ID, HISTORICAL_CONTEXT_SHA256)
+    assert historical["policy_sha256"] == HISTORICAL_POLICY_SHA256
+    reused = dict(historical)
     reused["task_id"] = "TASK-0024"
     reused["context_sha256"] = context_sha256(reused)
 
     with pytest.raises(ContractError, match="stale") as stale:
-        validate_verifier_context_current(reused, current)
+        validate_verifier_context_current(reused, historical)
     assert stale.value.code == "VERIFIER_CONTEXT_STALE"
     with pytest.raises(ContractError) as same_actor:
         validate_verifier_actor("implementer", "implementer")
