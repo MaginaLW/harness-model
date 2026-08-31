@@ -16,12 +16,16 @@ V1/V2 regression 与 coverage 检查提供明确余量，并同步 GitHub job �
    高于新 V2 固定检查的 68.5 分钟最大串行预算，并保留 setup、Gate 与 runner 波动余量。
 4. `tests/unit/test_policy.py`、`tests/unit/test_verification_plan.py` 和
    `tests/integration/test_github_workflow.py` 固定 active version、原始/解析后 timeout 和 job
-   bound；不复制路由或 Gate 决策表。
+   bound；`tests/acceptance/test_phase_02_self_hosting.py` 仅将 TASK-0025 的 Policy `2.1.0`
+   classification 作为历史绑定，明确断言它与 active Policy `2.2.0` 不同且 verifier context
+   构建 fail closed，再用已保留的 immutable context 验证复用拒绝；不复制路由或 Gate 决策表，
+   不修改任何 TASK-0025 artifact。
 5. `README.md`、`docs/operations/quickstart.md`、
    `docs/operations/github-branch-protection.md`、`docs/operations/recovery.md` 和
    `CHANGELOG.md` 同步当前版本、预算理由、失败恢复边界与 Unreleased 记录。
 6. `.ai/tasks/TASK-0030/**` 仅由本任务正式生命周期维护。历史 state、task、evidence、
-   approval 和 acceptance 文档中的 `2.1.0` 保持形成时事实，不得改写。
+   approval 和 acceptance 文档中的 `2.1.0` 保持形成时事实，不得改写；当前 acceptance
+   contract 可按第 4 项显式验证这些历史事实已相对 active Policy 失效。
 
 ## 非目标
 
@@ -31,6 +35,8 @@ V1/V2 regression 与 coverage 检查提供明确余量，并同步 GitHub job �
 3. 不优化测试性能，不引入并行测试、自动重试、缓存复用或平台特例，也不把失败降级为 warning。
 4. 不修改、重验证或关闭 `TASK-0029`；它在本修复合并后另按 current Policy 恢复。
 5. 不启动 Phase 3/4，不发布 package，不创建 tag 或 Release。
+6. 不修改其他 acceptance、integration 或 E2E 测试，不刷新 TASK-0025 的 classification、
+   verifier context、evidence、approval、review 或 Gate 结论。
 
 ## 验收条件
 
@@ -40,11 +46,15 @@ V1/V2 regression 与 coverage 检查提供明确余量，并同步 GitHub job �
    `1200` 秒；其命令、环境、parser、required 与覆盖率阈值不变，V2 prefix 仍严格一致。
 3. workflow job 上限精确为 `90` 分钟，触发器、只读权限、required check 名称、锁定安装、
    bootstrap transition 与 formal resolve/verify/gate 路径均不变。
-4. focused Policy/plan/workflow tests、task contract、scope、Ruff、format、mypy、完整 pytest、
-   coverage XML 与 90% diff coverage 均通过，且只读 Gate 返回 passed。
-5. 真实 PR 最终 head 的 required `ai-quality-gate` 成功并执行 formal `Resolve task`、
+4. Phase 02 self-hosting acceptance 明确保留 TASK-0025 classification 的历史 Policy SHA
+   `f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf`，断言它不等于 active
+   digest；`build_verifier_context` 返回 `VERIFIER_CONTEXT_CLASSIFICATION_STALE`，已保存的
+   immutable context 仍可作为负向复用校验输入且不能形成 current readiness。
+5. focused Policy/plan/workflow/acceptance tests、task contract、scope、Ruff、format、mypy、
+   完整 pytest、coverage XML 与 90% diff coverage 均通过，且只读 Gate 返回 passed。
+6. 真实 PR 最终 head 的 required `ai-quality-gate` 成功并执行 formal `Resolve task`、
    `Verify and Gate` 与 diagnostics upload；push/PR 使用当前用户单独授权，merge 仍未授权。
-6. 最终业务 diff 是本规格列出的文件子集，其余 tracked diff 仅限 TASK-0030 治理产物。
+7. 最终业务 diff 是本规格列出的文件子集，其余 tracked diff 仅限 TASK-0030 治理产物。
 
 ## 禁止动作
 
@@ -54,9 +64,10 @@ PR；不得合并、删除分支、修改保护规则、发布 tag/Release 或�
 
 ## 错误行为
 
-Policy 文件版本不一致、V2 prefix 漂移、检查/阈值/权限被弱化、job bound 小于合法预算、范围
-扩展、绑定失效、审查或批准陈旧、验证失败或 Gate 拒绝时必须停止并按 CLI 指引恢复；不得通过
-降为 V0、跳过 coverage、手改 evidence、重复碰运气或恢复 bootstrap 来放行。
+Policy 文件版本不一致、V2 prefix 漂移、检查/阈值/权限被弱化、job bound 小于合法预算、把
+历史 TASK-0025 classification 当作 active binding、范围扩展、绑定失效、审查或批准陈旧、
+验证失败或 Gate 拒绝时必须停止并按 CLI 指引恢复；不得通过降为 V0、跳过 coverage、手改
+evidence、重复碰运气或恢复 bootstrap 来放行。
 
 ## 回滚
 

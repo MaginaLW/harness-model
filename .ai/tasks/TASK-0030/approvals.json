@@ -11,5 +11,18 @@
     "spec_sha256": "57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9",
     "subject_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
     "task_id": "TASK-0030"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-08-31T13:25:38Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准在 active Policy SHA256:1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f 下重新批准冻结规格 SHA256:57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9。",
+    "schema_version": "1.0",
+    "spec_sha256": "57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9",
+    "subject_commit": "675c7ec0c2b719d0dae288d7c49d87dbf5438847",
+    "task_id": "TASK-0030"
   }
 ]

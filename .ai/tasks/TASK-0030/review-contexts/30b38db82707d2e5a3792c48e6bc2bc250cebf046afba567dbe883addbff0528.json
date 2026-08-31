@@ -1,0 +1,65 @@
+{
+  "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+  "branch": "codex/verification-timeout-hardening",
+  "classification_input_sha256": "fcb29d35ec212dfcd9c75dafa0345141e9a35bc5d805ca285506ca79f09e5656",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/permissions.yaml",
+      ".ai/policy/verification-levels.yaml",
+      ".github/workflows/ai-quality-gate.yml",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/integration/test_github_workflow.py",
+      "tests/acceptance/test_phase_02_self_hosting.py",
+      "README.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/github-branch-protection.md",
+      "docs/operations/recovery.md",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Harden V1 and V2 regression and coverage time budgets for the verified Windows runtime without weakening checks or thresholds.",
+        "impact_scope": [
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/permissions.yaml",
+          ".ai/policy/verification-levels.yaml",
+          ".github/workflows/ai-quality-gate.yml",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/integration/test_github_workflow.py",
+          "tests/acceptance/test_phase_02_self_hosting.py",
+          "README.md",
+          "docs/operations/quickstart.md",
+          "docs/operations/github-branch-protection.md",
+          "docs/operations/recovery.md",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "Increment every active Policy document from 2.1.0 to 2.2.0 for the semantic time-budget change while leaving historical task and acceptance evidence untouched.",
+          "Raise V1 and V2 regression_tests from 600 to 900 seconds and coverage_xml from 600 to 1200 seconds without changing commands, parsers, required flags, or thresholds.",
+          "Raise the GitHub quality job bound from 35 to 90 minutes so it exceeds the 68.5-minute legal V2 per-check budget plus setup and Gate variance.",
+          "Add exact raw-Policy, parsed-plan, and workflow contract assertions and update current operator documentation and Unreleased notes.",
+          "Update only the Phase 02 self-hosting acceptance test to assert that TASK-0025's retained Policy 2.1.0 classification is historical and fails closed under active Policy 2.2.0, without modifying any TASK-0025 artifact."
+        ]
+      }
+    ],
+    "goal": "Harden V1 and V2 regression and coverage time budgets for the verified Windows runtime without weakening checks or thresholds.",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "30b38db82707d2e5a3792c48e6bc2bc250cebf046afba567dbe883addbff0528",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "8e74f113766f452509bfc9453e2b20c18705388dd28fc4b2dd4a5f881cbc9c66",
+  "task_id": "TASK-0030"
+}

@@ -1,0 +1,13 @@
+{
+  "context_sha256": "30b38db82707d2e5a3792c48e6bc2bc250cebf046afba567dbe883addbff0528",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-31T14:00:00Z",
+  "review_id": "REV-0059",
+  "review_stage": "design",
+  "reviewer": "codex-acceptance-scope-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "独立复审确认仅增加 tests/acceptance/test_phase_02_self_hosting.py 是失败 V1 的最小正确范围扩展。唯二失败均来自把 TASK-0025 的历史 Policy 2.1.0 classification 当作 active 2.2.0 绑定；verifier service 以 VERIFIER_CONTEXT_CLASSIFICATION_STALE 拒绝该历史事实是预期的 fail-closed 行为。修订规格要求固定历史 digest 与 active digest 不同、断言当前 context 构建拒绝，并只读取已保留 immutable context 进行负向复用校验；TASK-0025 classification、context、evidence、review、approval、event 与 Gate 结论均不修改。失败 evidence 保留 regression 621.97 秒、coverage 735.31 秒以及相同两项失败，证明新预算消除了旧 600 秒 runner timeout 且未弱化检查、阈值、V2 prefix 或权限。回滚与追加式恢复边界完整。",
+  "task_id": "TASK-0030"
+}

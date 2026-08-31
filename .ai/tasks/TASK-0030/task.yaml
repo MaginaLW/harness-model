@@ -7,6 +7,7 @@ allowed_scope:
 - tests/unit/test_policy.py
 - tests/unit/test_verification_plan.py
 - tests/integration/test_github_workflow.py
+- tests/acceptance/test_phase_02_self_hosting.py
 - README.md
 - docs/operations/quickstart.md
 - docs/operations/github-branch-protection.md
@@ -43,6 +44,7 @@ decision_units:
   - tests/unit/test_policy.py
   - tests/unit/test_verification_plan.py
   - tests/integration/test_github_workflow.py
+  - tests/acceptance/test_phase_02_self_hosting.py
   - README.md
   - docs/operations/quickstart.md
   - docs/operations/github-branch-protection.md
@@ -55,6 +57,9 @@ decision_units:
     skips in 579.8 seconds, leaving insufficient variance below the current bound.
   - The second formal regression run passed in 543.8 seconds, also leaving limited
     variance below its 600-second bound.
+  - The first Policy 2.2.0 V1 run completed regression in 622.0 seconds and coverage
+    in 735.3 seconds without runner timeout, but exposed two acceptance assertions
+    that incorrectly treated historical TASK-0025 Policy 2.1.0 facts as current.
   permission_requirements: []
   planned_actions:
   - Increment every active Policy document from 2.1.0 to 2.2.0 for the semantic time-budget
@@ -65,6 +70,9 @@ decision_units:
     legal V2 per-check budget plus setup and Gate variance.
   - Add exact raw-Policy, parsed-plan, and workflow contract assertions and update
     current operator documentation and Unreleased notes.
+  - Update only the Phase 02 self-hosting acceptance test to assert that TASK-0025's
+    retained Policy 2.1.0 classification is historical and fails closed under active
+    Policy 2.2.0, without modifying any TASK-0025 artifact.
   protections:
     dry_run: true
     verified_backup: true
@@ -77,7 +85,8 @@ decision_units:
     automatic: true
     tools_missing: false
   verification_methods:
-  - Run focused Policy, verification-plan, workflow, contract, and traceability tests.
+  - Run focused Policy, verification-plan, workflow, Phase 02 self-hosting acceptance,
+    contract, and traceability tests.
   - Run the Policy-defined V1 verification plan and read-only Gate on the final subject.
   - Require the real pull request to execute formal task resolution, CI verification,
     Gate, and diagnostics upload for its final head.
@@ -93,15 +102,15 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9
+frozen_spec_sha256: 8e74f113766f452509bfc9453e2b20c18705388dd28fc4b2dd4a5f881cbc9c66
 goal: Harden V1 and V2 regression and coverage time budgets for the verified Windows
   runtime without weakening checks or thresholds.
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-31T13:20:47Z'
+spec_frozen_at: '2026-08-31T13:58:02Z'
 subject_commit: 675c7ec0c2b719d0dae288d7c49d87dbf5438847
 task_id: TASK-0030
-updated_at: '2026-08-31T13:24:04Z'
+updated_at: '2026-08-31T14:00:38Z'
 worktree_dirty: false
 worktree_dirty_paths: []
