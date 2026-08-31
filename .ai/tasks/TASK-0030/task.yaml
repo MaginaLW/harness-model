@@ -8,6 +8,8 @@ allowed_scope:
 - tests/unit/test_verification_plan.py
 - tests/integration/test_github_workflow.py
 - tests/acceptance/test_phase_02_self_hosting.py
+- tests/e2e/test_clean_checkout.py
+- tests/integration/test_verification_evidence_flow.py
 - README.md
 - docs/operations/quickstart.md
 - docs/operations/github-branch-protection.md
@@ -16,7 +18,7 @@ allowed_scope:
 base_commit: 37dce2a61a5dc484b077ba4463cede2be04dd746
 branch: codex/verification-timeout-hardening
 created_at: '2026-08-30T09:53:29Z'
-current_state: APPROVED_FOR_MERGE
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -45,6 +47,8 @@ decision_units:
   - tests/unit/test_verification_plan.py
   - tests/integration/test_github_workflow.py
   - tests/acceptance/test_phase_02_self_hosting.py
+  - tests/e2e/test_clean_checkout.py
+  - tests/integration/test_verification_evidence_flow.py
   - README.md
   - docs/operations/quickstart.md
   - docs/operations/github-branch-protection.md
@@ -67,6 +71,11 @@ decision_units:
     validation, repository identity and task resolution all pass, then failed before
     any Policy check because runner.temp was not Python's default operating-system
     temporary root on ubuntu-latest.
+  - GitHub Actions run 33445448671 proved exact-SHA branch attachment and the unified
+    runner/Python temporary root both work, then exposed two Linux-only test defects;
+    the clean-checkout E2E test depended on uv remaining in the intentionally minimal
+    PATH, and the evidence-flow integration test recursively executed the real V1
+    toolchain instead of its existing controlled full-category plan.
   permission_requirements: []
   planned_actions:
   - Increment every active Policy document from 2.1.0 to 2.2.0 for the semantic time-budget
@@ -86,6 +95,12 @@ decision_units:
   - Bind TMPDIR to runner.temp only for the formal Verify and Gate step and derive
     the run directory beneath it, without changing verifier code or weakening strict
     descendant and evidence-output containment checks.
+  - Make the clean-checkout E2E installer use the active interpreter's base Python
+    pip when a uv-created environment has no pip, without widening the verification
+    runner environment or depending on uv in PATH.
+  - Make the V0/V1 evidence reproduction integration test use its existing controlled
+    full-category plan so it tests evidence identities, replay and Gate without a
+    recursive environment-sensitive real Policy execution.
   protections:
     dry_run: true
     verified_backup: true
@@ -110,6 +125,9 @@ decision_units:
     run directory, evidence, Gate output and diagnostics, while a distinct existing
     sibling root remains rejected; retain failed run 33410732408 as historical platform
     evidence.
+  - Run both Linux-failing tests with focused assertions for the no-pip/base-interpreter
+    installer fallback and the controlled V1 evidence reproduction path; retain failed
+    run 33445448671 and its diagnostics artifact as historical platform evidence.
   verification_requirements:
     acceptance_required: false
     independent_verifier_required: false
@@ -122,15 +140,15 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 83c2543eeb0b9796ecfea00fd02a93df9596dd6717e01583c5a36667f8981f1f
+frozen_spec_sha256: 089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124
 goal: Harden V1 and V2 regression and coverage time budgets for the verified Windows
   runtime without weakening checks or thresholds.
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-31T16:02:02Z'
+spec_frozen_at: '2026-08-31T22:38:42Z'
 subject_commit: ebea414fc168f35e0b0abd810f2c27bc1ad71964
 task_id: TASK-0030
-updated_at: '2026-08-31T22:15:06Z'
+updated_at: '2026-08-31T22:40:36Z'
 worktree_dirty: false
 worktree_dirty_paths: []

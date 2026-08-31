@@ -7,7 +7,9 @@ V1/V2 regression 与 coverage 检查提供明确余量，并同步 GitHub job �
 和当前运维文档。修复真实 PR 暴露的精确 head SHA checkout 处于 detached HEAD、因而无法满足
 task branch binding 的问题；修复后续真实 PR 暴露的 runner temporary root 与 Python OS
 temporary root 不一致、导致 formal verify 在任何 Policy check 前 fail closed 的问题；不得减少
-任何检查、降低阈值、放宽 Git 或临时目录绑定，或扩大自动权限。
+任何检查、降低阈值、放宽 Git 或临时目录绑定，或扩大自动权限。修复统一临时根后的真实 Linux
+V1 所暴露的 clean-checkout 安装测试工具发现依赖和 evidence replay 测试递归真实工具链问题，
+同时保持生产 Policy、runner 环境与状态机不变。
 
 ## 范围
 
@@ -46,14 +48,23 @@ temporary root 不一致、导致 formal verify 在任何 Policy check 前 fail 
    classification 作为历史绑定，明确断言它与 active Policy `2.2.0` 不同且 verifier context
    构建 fail closed，再用已保留的 immutable context 验证复用拒绝；不复制路由或 Gate 决策表，
    不修改任何 TASK-0025 artifact。
-7. `README.md`、`docs/operations/quickstart.md`、
+7. `tests/e2e/test_clean_checkout.py` 保留 active interpreter 自带 `pip` 时的既有安装路径；
+   当 uv-created active environment 没有 `pip` 时，必须验证并使用其 base interpreter 执行
+   `-m pip install --disable-pip-version-check --no-deps --target <isolated-target> <clean-clone>`，
+   后续文档命令仍只用 active interpreter 和隔离 `PYTHONPATH`。不得要求 `uv` 出现在 formal
+   runner 的最小 PATH，不得扩大 runner 环境或改动生产安装逻辑。
+   `tests/integration/test_verification_evidence_flow.py` 的 V0/V1 evidence reproduction 用例必须
+   显式使用文件内既有 `_full_category_plan()`：仍生成全部 required check identity、执行 recorded
+   reproduce command 并通过 Gate，但不得递归执行 host 的真实 Policy toolchain；不得放宽
+   `FAILED` 状态的重验前置条件或给失败自动重试。
+8. `README.md`、`docs/operations/quickstart.md`、
    `docs/operations/github-branch-protection.md`、`docs/operations/recovery.md` 和
    `CHANGELOG.md` 同步当前版本、预算理由、精确 SHA/附着分支的双重 CI 绑定、失败恢复边界与
    Unreleased 记录；文档明确 source branch 只用于命名 runner-local branch，commit 权威仍是
    event head SHA，步骤不 fetch、不 push，也不改变 bootstrap path；当前运维文档与
    `CHANGELOG.md` 还要说明 formal Verify/Gate 将 Python temporary root 明确绑定到 runner
    temporary root，且不放宽 CLI 目录校验。
-8. `.ai/tasks/TASK-0030/**` 仅由本任务正式生命周期维护。历史 state、task、evidence、
+9. `.ai/tasks/TASK-0030/**` 仅由本任务正式生命周期维护。历史 state、task、evidence、
    approval 和 acceptance 文档中的 `2.1.0` 保持形成时事实，不得改写；当前 acceptance
    contract 可按第 6 项显式验证这些历史事实已相对 active Policy 失效。
 
@@ -63,11 +74,13 @@ temporary root 不一致、导致 formal verify 在任何 Policy check 前 fail 
    V2 targeted mutation/independent verifier 语义或 GitHub required check 名称。
 2. 不修改 Python 运行时代码、Git context 判定、Schema、模板、Hook、依赖、锁文件、package
    version 或 Release。
-3. 不优化测试性能，不引入并行测试、自动重试、缓存复用或平台特例，也不把失败降级为 warning。
+3. 不优化测试性能，不引入并行测试、自动重试、缓存复用或生产平台特例，也不把失败降级为
+   warning。
 4. 不修改、重验证或关闭 `TASK-0029`；它在本修复合并后另按 current Policy 恢复。
 5. 不启动 Phase 3/4，不发布 package，不创建 tag 或 Release。
-6. 不修改其他 acceptance、integration 或 E2E 测试，不刷新 TASK-0025 的 classification、
-   verifier context、evidence、approval、review 或 Gate 结论。
+6. 除范围第 7 项两份明确列出的测试外，不修改其他 acceptance、integration 或 E2E 测试；
+   不刷新 TASK-0025 的 classification、verifier context、evidence、approval、review 或 Gate
+   结论。
 
 ## 验收条件
 
@@ -87,11 +100,15 @@ temporary root 不一致、导致 formal verify 在任何 Policy check 前 fail 
    digest；`build_verifier_context` 返回 `VERIFIER_CONTEXT_CLASSIFICATION_STALE`，已保存的
    immutable context 仍可作为负向复用校验输入且不能形成 current readiness。
 5. focused Policy/plan/workflow/acceptance tests、task contract、scope、Ruff、format、mypy、
-   完整 pytest、coverage XML 与 90% diff coverage 均通过，且只读 Gate 返回 passed。
+   clean-checkout E2E、V0/V1 evidence reproduction、完整 pytest、coverage XML 与 90% diff
+   coverage 均通过，且只读 Gate 返回 passed。focused test 证明 active interpreter 无 `pip`
+   时选择有效 base interpreter 而非 PATH 中的 `uv`；受控 V1 reproduction 首次验证与 recorded
+   replay 均为 passed，并保持全部 V1 check identity。
 6. 真实 PR 最终 head 的 required `ai-quality-gate` 成功；日志证明 checkout 的精确 event SHA
    在附着 source branch 前后不变，并执行 formal `Resolve task`、`Verify and Gate` 与
-   diagnostics upload；formal verify 不再因 runner/Python temporary root 不一致而启动前失败。
-   push/PR 使用当前用户单独授权，merge 仍未授权。
+   diagnostics upload；formal verify 不再因 runner/Python temporary root 不一致而启动前失败，
+   regression 与 coverage 不再出现 run `33445448671` 的两项测试失败；push/PR 使用当前用户
+   单独授权，merge 仍未授权。
 7. 最终业务 diff 是本规格列出的文件子集，其余 tracked diff 仅限 TASK-0030 治理产物。
 
 ## 禁止动作
@@ -113,5 +130,5 @@ root 未显式对齐、run directory 不是严格后代或 output 逃逸、范�
 
 未合并时关闭 PR 或前向撤销业务提交；已合并后以新的 AI Flow task 将当前 Policy、job bound
 与 branch attachment 前向修订。历史 TASK-0029/TASK-0030 事件、失败 evidence、review、
-approval 和 GitHub Actions runs `33403951577`、`33410732408` 均保持追加式，不得删除、重排
-或改写为通过。
+approval 和 GitHub Actions runs `33403951577`、`33410732408`、`33445448671` 均保持追加式，
+不得删除、重排或改写为通过。

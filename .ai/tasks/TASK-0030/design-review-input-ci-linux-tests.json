@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0065",
+  "revision": 1,
+  "task_id": "TASK-0030",
+  "review_stage": "design",
+  "reviewer": "/root/ci_linux_tests_design_review",
+  "recorded_at": "2026-08-31T22:40:15Z",
+  "context_sha256": "6f7cb2c37c1a1c489f79e470fbd66a051f04cde940495ebf3d78615500fac071",
+  "outcome": "APPROVE",
+  "summary": "APPROVE。独立只读设计审查绑定冻结规格 089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124、Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f 和 context 6f7cb2c37c1a1c489f79e470fbd66a051f04cde940495ebf3d78615500fac071。run 33445448671 的两项失败与源码一致：clean-checkout 测试不应依赖有意收敛的 runner PATH 中存在 uv，无 pip 时改用经过验证的 base interpreter 执行 pip 安装，不改变生产安装、runner 环境或后续 active-interpreter 路径；evidence-flow 用例显式注入既有 _full_category_plan，继续覆盖完整 V0/V1 check identity、recorded replay 与 Gate，同时避免递归真实 Policy 工具链。FAILED 重验前置条件、检查、阈值和失败证据保留均未放宽。范围、验收与非目标自洽，无 high/critical finding，无未关闭 P2。",
+  "findings": []
+}
