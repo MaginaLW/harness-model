@@ -228,11 +228,16 @@ python -m aiflow verify <TASK-ID> --actor <VERIFIER> --finalize
 python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "local V2 evidence reviewed"
 ```
 
-active Policy `2.1.0` 下，默认 live V2 在完整 V1 prefix 后，依次执行确定性、离线的
+active Policy `2.2.0` 下，默认 live V2 在完整 V1 prefix 后，依次执行确定性、离线的
 `pytest tests/acceptance -q`、`pytest tests/integration -q`，以及由单独 action approval 绑定的
 targeted mutation；三项各自保留真实进程结果、日志与工具版本，independent Verifier 也必须与
 Implementer 使用不同的非空 task-local actor 标签。Chapter 11 的 acceptance、integration、
 action-approved targeted mutation 与 independent-verifier 流程均已实现。
+
+V1/V2 的 `regression_tests` 和 `coverage_xml` 上限分别为 900 秒和 1200 秒；这些上限仅为
+Windows 已验证运行时留出波动余量，不改变命令、parser、required 状态、85% 总覆盖率或
+90% diff coverage 门槛。达到上限仍是验证失败，必须保留 run 并诊断原因，不能靠降级、跳过
+coverage 或无理由重复重试进入 Gate。
 
 使用 `--check acceptance`、`--check integration` 或其他局部检查时，只执行所选检查，所得
 evidence 是 partial/provisional，不能形成 final evidence 或进入 Gate。`--finalize`、code

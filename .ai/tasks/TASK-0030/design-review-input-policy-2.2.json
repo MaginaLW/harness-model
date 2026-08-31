@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0058",
+  "revision": 1,
+  "task_id": "TASK-0030",
+  "review_stage": "design",
+  "reviewer": "codex-policy22-design-reviewer",
+  "recorded_at": "2026-08-31T13:23:19Z",
+  "context_sha256": "692ea1295dfa262380200054354fa20a971ecbf71fc761534086eb9e24dabd8c",
+  "outcome": "APPROVE",
+  "summary": "独立复审确认冻结规格与 active Policy 2.2.0 绑定一致。四份 Policy 版本和 bundle digest 一致，仅将 V1/V2 regression_tests 调为 900 秒、coverage_xml 调为 1200 秒；命令、parser、required、环境、权限、85% 总覆盖率、90% diff coverage 与 V2 extras 均未弱化。V2 固定检查最大串行预算为 4110 秒（68.5 分钟），90 分钟 workflow 上限为安装、Gate、diagnostics 与 runner 波动保留 21.5 分钟余量。业务提交 675c7ec 的路径均在冻结范围内，历史 2.1.0 记录未改写，聚焦测试为 59 passed、1 个既有 Windows symlink capability skip；回滚和追加式恢复边界明确。",
+  "findings": []
+}

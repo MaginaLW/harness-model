@@ -1,0 +1,13 @@
+{
+  "context_sha256": "f5cfa2402f239838d18c9412d1aecab606ef6109a2387ec96d983464335c15b2",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-30T09:57:59Z",
+  "review_id": "REV-0057",
+  "review_stage": "design",
+  "reviewer": "codex-timeout-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "独立审阅确认 TASK-0030 的冻结设计范围完整且不削弱门禁。TASK-0029 的两次正式 coverage_xml 均在 600 秒超时，隔离 Windows coverage 为 1586 passed、4 skipped、579.8 秒，正式 regression 为 543.8 秒；900/1200 秒分别为 regression/coverage 提供必要余量，同时保持命令、parser、required、环境、85% 总覆盖率与 90% diff coverage 不变，V2 继续严格保留 V1 prefix。新 V2 固定检查的最大串行预算为 4110 秒（68.5 分钟），因此 90 分钟 job 上限为 setup、contract、Gate 与 runner 波动保留合理余量。四份 active Policy 一致升级 2.2.0，测试覆盖原始 Policy、解析计划和 workflow bound，当前文档同步且历史 2.1.0 task/evidence 不改写；回滚保持追加式前向修订。",
+  "task_id": "TASK-0030"
+}

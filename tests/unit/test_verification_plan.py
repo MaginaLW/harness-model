@@ -83,6 +83,32 @@ def test_v1_contains_v0_categories_and_coverage_environment(tmp_path: Path) -> N
     assert v1.comparison_subject == "b" * 40
 
 
+@pytest.mark.parametrize("level", ["V1", "V2"])
+def test_parsed_regression_and_coverage_budgets_are_exact(level: str, tmp_path: Path) -> None:
+    parsed = plan(level, tmp_path)
+    by_id = {check.check_id: check for check in parsed.checks}
+    regression = by_id["regression_tests"]
+    coverage = by_id["coverage_xml"]
+
+    assert regression.argv == (sys.executable, "-m", "pytest", "-q")
+    assert regression.timeout_seconds == 900
+    assert regression.required is True
+    assert regression.result_parser == "pytest"
+    assert coverage.argv == (
+        sys.executable,
+        "-m",
+        "pytest",
+        "--cov=aiflow",
+        "--cov-branch",
+        f"--cov-report=xml:{(parsed.run_dir / 'coverage.xml').as_posix()}",
+    )
+    assert coverage.timeout_seconds == 1200
+    assert coverage.required is True
+    assert coverage.result_parser == "coverage_xml"
+    assert coverage.environment == {"COVERAGE_FILE": (parsed.run_dir / ".coverage").as_posix()}
+    assert by_id["diff_coverage"].threshold == 90
+
+
 def test_v2_has_complete_v1_prefix_and_fixed_extra_order(tmp_path: Path) -> None:
     expected = json.loads(
         (ROOT / "tests" / "fixtures" / "verification" / "plans" / "v2.json").read_text()
@@ -229,6 +255,36 @@ def test_ci_accepts_strict_existing_temporary_descendant(tmp_path: Path) -> None
         tool_available=lambda _argv: True,
     )
     assert parsed.run_dir == run_dir.resolve()
+
+
+def test_ci_uses_python_temp_root_not_runner_like_sibling(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    python_temp_root = tmp_path / "python-temp"
+    python_temp_root.mkdir()
+    ci_run_dir = python_temp_root / "ci-run"
+    ci_run_dir.mkdir()
+    runner_like_sibling = tmp_path / "runner-temp"
+    runner_like_sibling.mkdir()
+    monkeypatch.setattr("aiflow.verification.tempfile.gettempdir", lambda: str(python_temp_root))
+
+    parsed = parse_verification_plan(
+        load_policy_bundle(ROOT),
+        context(tmp_path, ci_run_dir=ci_run_dir),
+        level="V0",
+        tool_available=lambda _argv: True,
+    )
+    assert parsed.run_dir == ci_run_dir.resolve()
+
+    for invalid_run_dir in (python_temp_root, runner_like_sibling):
+        with pytest.raises(ContractError) as caught:
+            parse_verification_plan(
+                load_policy_bundle(ROOT),
+                context(tmp_path, ci_run_dir=invalid_run_dir),
+                level="V0",
+                tool_available=lambda _argv: True,
+            )
+        assert caught.value.code == "CI_RUN_DIR_INVALID"
 
 
 def test_ci_rejects_temp_root_and_missing_repository(tmp_path: Path) -> None:

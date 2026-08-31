@@ -24,6 +24,20 @@ def _git(root: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
+def _attach_event_head_to_source_branch(root: Path, source_branch: str, event_head: str) -> None:
+    """Run the workflow's fail-closed branch-attachment contract locally."""
+    if not source_branch:
+        raise ValueError("PR source branch must be nonempty")
+    _git(root, "check-ref-format", "--branch", source_branch)
+    if _git(root, "rev-parse", "HEAD") != event_head:
+        raise ValueError("checkout HEAD does not match the event head")
+    _git(root, "switch", "--force-create", source_branch, event_head)
+    if _git(root, "symbolic-ref", "--quiet", "--short", "HEAD") != source_branch:
+        raise ValueError("attached branch does not match the PR source branch")
+    if _git(root, "rev-parse", "HEAD") != event_head:
+        raise ValueError("attached branch changed the event head")
+
+
 def _repo(tmp_path: Path) -> tuple[Path, str]:
     root = tmp_path / "checkout"
     root.mkdir(parents=True)
@@ -65,7 +79,7 @@ def test_workflow_is_read_only_reproducible_and_bounded() -> None:
     ]
     assert "pull_request_target" not in text
     assert "cancel-in-progress: true" in text
-    assert "timeout-minutes: 35" in text
+    assert "timeout-minutes: 90" in text
     assert "fetch-depth: 0" in text
     assert 'python-version: "3.11"' in text
     assert "actions/checkout@v7" in text
@@ -79,18 +93,169 @@ def test_workflow_is_read_only_reproducible_and_bounded() -> None:
     assert "write" not in str(workflow["permissions"])
 
 
+def test_workflow_attaches_exact_event_head_to_the_pr_source_branch() -> None:
+    workflow = _workflow()
+    steps = workflow["jobs"]["ai-quality-gate"]["steps"]
+    assert isinstance(steps, list)
+
+    checkout = steps[0]
+    assert checkout["with"] == {
+        "fetch-depth": "0",
+        "ref": "${{ github.event.pull_request.head.sha }}",
+    }
+
+    names = [step.get("name") for step in steps]
+    governance_index = names.index("Detect repository governance mode")
+    attachment_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("env")
+        == {
+            "PR_HEAD_REF": "${{ github.head_ref }}",
+            "PR_HEAD_SHA": "${{ github.event.pull_request.head.sha }}",
+        }
+    )
+    identity_index = names.index("Read repository identity")
+    task_index = names.index("Resolve task")
+    assert governance_index < attachment_index < identity_index < task_index
+
+    attachment = steps[attachment_index]
+    assert attachment["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert attachment["env"] == {
+        "PR_HEAD_REF": "${{ github.head_ref }}",
+        "PR_HEAD_SHA": "${{ github.event.pull_request.head.sha }}",
+    }
+    assert attachment["shell"] == "bash"
+
+    commands = [
+        'test -n "$PR_HEAD_REF"',
+        'git check-ref-format --branch "$PR_HEAD_REF"',
+        'test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"',
+        'git switch --force-create "$PR_HEAD_REF" "$PR_HEAD_SHA"',
+        'test "$(git symbolic-ref --quiet --short HEAD)" = "$PR_HEAD_REF"',
+        'test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"',
+    ]
+    script = attachment["run"]
+    assert isinstance(script, str)
+    position = 0
+    for command in commands:
+        position = script.index(command, position) + len(command)
+    assert "git fetch" not in script
+    assert "git push" not in script
+
+
+def test_branch_attachment_preserves_detached_exact_event_head(tmp_path: Path) -> None:
+    root, _ = _repo(tmp_path)
+    (root / "head.txt").write_text("event head\n", encoding="utf-8")
+    _git(root, "add", "head.txt")
+    _git(root, "commit", "-m", "event head")
+    event_head = _git(root, "rev-parse", "HEAD")
+    _git(root, "checkout", "--detach", event_head)
+
+    _attach_event_head_to_source_branch(root, "feature/task-0030", event_head)
+
+    assert _git(root, "rev-parse", "HEAD") == event_head
+    assert _git(root, "symbolic-ref", "--quiet", "--short", "HEAD") == "feature/task-0030"
+
+
+@pytest.mark.parametrize("source_branch", ["", "bad branch", "refs/heads/"])
+def test_branch_attachment_rejects_empty_or_invalid_source_branch(
+    tmp_path: Path, source_branch: str
+) -> None:
+    root, event_head = _repo(tmp_path)
+
+    with pytest.raises((ValueError, subprocess.CalledProcessError)):
+        _attach_event_head_to_source_branch(root, source_branch, event_head)
+
+
+def test_branch_attachment_rejects_initial_event_head_mismatch(tmp_path: Path) -> None:
+    root, base = _repo(tmp_path)
+    (root / "head.txt").write_text("event head\n", encoding="utf-8")
+    _git(root, "add", "head.txt")
+    _git(root, "commit", "-m", "event head")
+    _git(root, "checkout", "--detach", "HEAD")
+
+    with pytest.raises(ValueError, match="checkout HEAD"):
+        _attach_event_head_to_source_branch(root, "feature/task-0030", base)
+
+
+def test_branch_attachment_rejects_switch_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, event_head = _repo(tmp_path)
+    _git(root, "checkout", "--detach", event_head)
+    original_git = _git
+
+    def failed_switch(path: Path, *args: str) -> str:
+        if args[:2] == ("switch", "--force-create"):
+            raise subprocess.CalledProcessError(128, ["git", *args])
+        return original_git(path, *args)
+
+    with monkeypatch.context() as patched:
+        patched.setitem(globals(), "_git", failed_switch)
+        with pytest.raises(subprocess.CalledProcessError):
+            _attach_event_head_to_source_branch(root, "feature/task-0030", event_head)
+
+
+def test_branch_attachment_rejects_post_switch_branch_or_sha_mismatch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, event_head = _repo(tmp_path)
+    _git(root, "checkout", "--detach", event_head)
+    original_git = _git
+
+    def wrong_branch(path: Path, *args: str) -> str:
+        if args == ("symbolic-ref", "--quiet", "--short", "HEAD"):
+            return "different-branch"
+        return original_git(path, *args)
+
+    with monkeypatch.context() as patched:
+        patched.setitem(globals(), "_git", wrong_branch)
+        with pytest.raises(ValueError, match="attached branch"):
+            _attach_event_head_to_source_branch(root, "feature/task-0030", event_head)
+
+    _git(root, "checkout", "--detach", event_head)
+    rev_parse_calls = 0
+
+    def changed_head(path: Path, *args: str) -> str:
+        nonlocal rev_parse_calls
+        if args == ("rev-parse", "HEAD"):
+            rev_parse_calls += 1
+            if rev_parse_calls == 2:
+                return "0" * 40
+        return original_git(path, *args)
+
+    with monkeypatch.context() as patched:
+        patched.setitem(globals(), "_git", changed_head)
+        with pytest.raises(ValueError, match="changed the event head"):
+            _attach_event_head_to_source_branch(root, "feature/task-0030", event_head)
+
+
 def test_resolved_task_output_flows_to_verify_and_gate() -> None:
+    workflow = _workflow()
     text = WORKFLOW.read_text(encoding="utf-8")
     gate_command = (
         'uv run --locked python -m aiflow gate "$TASK_ID" '
         '--evidence "$run_dir/evidence.json" --format json'
     )
+    steps = workflow["jobs"]["ai-quality-gate"]["steps"]
+    assert isinstance(steps, list)
+    verify = next(step for step in steps if step.get("name") == "Verify and Gate")
+    upload = next(step for step in steps if step.get("name") == "Upload AI Flow diagnostics")
 
     assert "task_id=" in (ROOT / "tools" / "ci" / "resolve_task.py").read_text(encoding="utf-8")
-    assert "TASK_ID: ${{ steps.task.outputs.task_id }}" in text
+    assert verify["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert verify["env"] == {
+        "TASK_ID": "${{ steps.task.outputs.task_id }}",
+        "TMPDIR": "${{ runner.temp }}",
+    }
+    assert text.count("TMPDIR: ${{ runner.temp }}") == 1
+    assert 'run_dir="$TMPDIR/aiflow"' in verify["run"]
+    assert 'run_dir="$RUNNER_TEMP/aiflow"' not in verify["run"]
     assert 'uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir"' in text
     assert gate_command in text
-    assert "${{ runner.temp }}/aiflow" in text
+    assert upload["if"] == "always() && steps.governance.outputs.bootstrap_active != 'true'"
+    assert upload["with"]["path"] == "${{ runner.temp }}/aiflow"
 
 
 def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
@@ -106,7 +271,7 @@ def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
     assert 'git show "${BASE_SHA}:.ai/bootstrap-mode.yaml"' in text
     assert "bootstrap_active=true" in text
     assert "if: steps.governance.outputs.bootstrap_active == 'true'" in text
-    assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 3
+    assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 4
     assert 'COVERAGE_FILE="$RUNNER_TEMP/.coverage"' in text
     assert "--cov=aiflow --cov-branch --cov-fail-under=85" in text
     assert "--cov-report=term-missing" in text

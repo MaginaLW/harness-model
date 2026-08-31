@@ -238,6 +238,7 @@ def test_v0_v1_evidence_reproduction_and_gate(
     expected_check_ids: tuple[str, ...],
 ) -> None:
     repository = _prepare_real_policy_plan(tmp_path, monkeypatch, review=review)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", _full_category_plan())
 
     assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
     evidence = read_task_json(repository, "TASK-0001", "evidence.json", contract_name="evidence")

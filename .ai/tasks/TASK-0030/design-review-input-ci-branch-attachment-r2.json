@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0061",
+  "revision": 1,
+  "task_id": "TASK-0030",
+  "review_stage": "design",
+  "reviewer": "/root/ci_branch_design_review",
+  "recorded_at": "2026-08-31T14:56:22Z",
+  "context_sha256": "42cf08e7b8336af3d923233fdd6bb115392bb6bfa105f7b6f2a340cabc45bc4d",
+  "outcome": "APPROVE",
+  "summary": "APPROVE。独立只读设计复审确认冻结规格 d51e34b8334247dac947ad140a1e12156d60dee4da72a3cd6e4666c7cbf98b6c 与 context 42cf08e7b8336af3d923233fdd6bb115392bb6bfa105f7b6f2a340cabc45bc4d 一致。GitHub Actions run 33403951577 的唯一 pre-check 失败事实是精确 PR head SHA checkout 处于 detached HEAD，导致现有 task branch equality 正确拒绝 VERIFY_BRANCH_CHANGED；任务解析、subject ancestry、治理 attestation scope、批准和 evidence 绑定没有失效。扩展设计继续以 event head SHA 为 commit 权威，仅在 bootstrap detection 确认 formal path 后、identity/task resolution 前，通过 step env 取得 github.head_ref 与 event SHA；所有 shell 展开加引号，要求非空 branch、git check-ref-format、switch 前后 SHA 相同及最终 symbolic branch 相同，再用 git switch --force-create 创建或覆盖 runner-local branch。它不 fetch、不按可移动 ref 选择 commit、不 push、不改变 bootstrap path，也不放宽 evaluate_verification_git_context。workflow contract 将固定条件、环境、命令、顺序，以及空/非法 branch、初始 SHA 不匹配、switch 失败、最终 branch 不匹配和 SHA 漂移的 fail-closed 路径；触发器、contents: read、required check 名、锁定安装和 formal resolve/verify/gate 命令保持不变。无 high/critical finding，无未关闭 P2。",
+  "findings": []
+}

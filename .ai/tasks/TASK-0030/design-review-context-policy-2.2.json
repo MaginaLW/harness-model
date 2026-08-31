@@ -1,0 +1,62 @@
+{
+  "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+  "branch": "codex/verification-timeout-hardening",
+  "classification_input_sha256": "43324e7541c50c42b533e369e4f1ef577a7f78a760fa0e6a2336567fc1c38f9d",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/permissions.yaml",
+      ".ai/policy/verification-levels.yaml",
+      ".github/workflows/ai-quality-gate.yml",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/integration/test_github_workflow.py",
+      "README.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/github-branch-protection.md",
+      "docs/operations/recovery.md",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Harden V1 and V2 regression and coverage time budgets for the verified Windows runtime without weakening checks or thresholds.",
+        "impact_scope": [
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/permissions.yaml",
+          ".ai/policy/verification-levels.yaml",
+          ".github/workflows/ai-quality-gate.yml",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/integration/test_github_workflow.py",
+          "README.md",
+          "docs/operations/quickstart.md",
+          "docs/operations/github-branch-protection.md",
+          "docs/operations/recovery.md",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "Increment every active Policy document from 2.1.0 to 2.2.0 for the semantic time-budget change while leaving historical task and acceptance evidence untouched.",
+          "Raise V1 and V2 regression_tests from 600 to 900 seconds and coverage_xml from 600 to 1200 seconds without changing commands, parsers, required flags, or thresholds.",
+          "Raise the GitHub quality job bound from 35 to 90 minutes so it exceeds the 68.5-minute legal V2 per-check budget plus setup and Gate variance.",
+          "Add exact raw-Policy, parsed-plan, and workflow contract assertions and update current operator documentation and Unreleased notes."
+        ]
+      }
+    ],
+    "goal": "Harden V1 and V2 regression and coverage time budgets for the verified Windows runtime without weakening checks or thresholds.",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "692ea1295dfa262380200054354fa20a971ecbf71fc761534086eb9e24dabd8c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9",
+  "task_id": "TASK-0030"
+}

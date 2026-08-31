@@ -4,7 +4,7 @@
 
 > 当前治理模式：项目所有者已明确结束自举并移除 bootstrap 标记，AI Flow 正式自用治理已启用。本次退出 PR 仍由目标分支当时的 active 标记触发普通质量门；合并后的后续代码、配置、CI 或行为变更必须创建或恢复 AI Flow task，并通过适用的审批、验证与 Gate。退出自举不授权任何外部或破坏性动作。
 
-> 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.1.0`。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
+> 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.2.0`。V1/V2 的完整回归和 coverage XML 检查分别使用 900 秒和 1200 秒上限，未减少检查或降低覆盖率门槛。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
 ## 阶段一目标
 
