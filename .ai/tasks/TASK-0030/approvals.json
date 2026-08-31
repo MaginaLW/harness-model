@@ -24,5 +24,32 @@
     "spec_sha256": "57ba50782f8cf2b0e57d4a7dc5634722bbeaabd8364d4113a9644015389915e9",
     "subject_commit": "675c7ec0c2b719d0dae288d7c49d87dbf5438847",
     "task_id": "TASK-0030"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-08-31T14:03:51Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准 TASK-0030 扩展后冻结规格 SHA256:8e74f113766f452509bfc9453e2b20c18705388dd28fc4b2dd4a5f881cbc9c66，绑定 active Policy SHA256:1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f。",
+    "schema_version": "1.0",
+    "spec_sha256": "8e74f113766f452509bfc9453e2b20c18705388dd28fc4b2dd4a5f881cbc9c66",
+    "subject_commit": "675c7ec0c2b719d0dae288d7c49d87dbf5438847",
+    "task_id": "TASK-0030"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-08-31T14:35:46Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "0aceba3d520bceebb1de2ce4a29fd3004d73aebd34a0eb5bcacba545e7bd85db",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner approved subject 26e57b82f6230ae3528583d7829a2270ad89acfd bound to evidence 0aceba3d520bceebb1de2ce4a29fd3004d73aebd34a0eb5bcacba545e7bd85db, implementation review REV-0060 context bab67b8606f36e1e5bb7aace37e893d1e880a3a06ceabfcb02931ebacc57f607, spec 8e74f113766f452509bfc9453e2b20c18705388dd28fc4b2dd4a5f881cbc9c66, and Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f.",
+    "schema_version": "1.0",
+    "spec_sha256": "8e74f113766f452509bfc9453e2b20c18705388dd28fc4b2dd4a5f881cbc9c66",
+    "subject_commit": "26e57b82f6230ae3528583d7829a2270ad89acfd",
+    "task_id": "TASK-0030"
   }
 ]
