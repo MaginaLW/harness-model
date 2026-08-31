@@ -16,7 +16,7 @@ allowed_scope:
 base_commit: 37dce2a61a5dc484b077ba4463cede2be04dd746
 branch: codex/verification-timeout-hardening
 created_at: '2026-08-30T09:53:29Z'
-current_state: APPROVED_FOR_MERGE
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -63,6 +63,10 @@ decision_units:
   - GitHub Actions run 33403951577 resolved TASK-0030 correctly but failed before
     executing checks because the exact PR head SHA checkout was detached while the
     task remained bound to branch codex/verification-timeout-hardening.
+  - GitHub Actions run 33410732408 proved the exact-SHA branch attachment, contract
+    validation, repository identity and task resolution all pass, then failed before
+    any Policy check because runner.temp was not Python's default operating-system
+    temporary root on ubuntu-latest.
   permission_requirements: []
   planned_actions:
   - Increment every active Policy document from 2.1.0 to 2.2.0 for the semantic time-budget
@@ -79,6 +83,9 @@ decision_units:
   - Preserve checkout of the exact pull-request head SHA, then attach that same commit
     to github.head_ref before formal verification with fail-closed pre/post branch
     and SHA assertions; do not weaken the runtime branch binding.
+  - Bind TMPDIR to runner.temp only for the formal Verify and Gate step and derive
+    the run directory beneath it, without changing verifier code or weakening strict
+    descendant and evidence-output containment checks.
   protections:
     dry_run: true
     verified_backup: true
@@ -99,6 +106,10 @@ decision_units:
   - Assert the workflow keeps exact-SHA checkout and attaches that immutable commit
     to the pull-request source branch before formal verification; retain failed run
     33403951577 as historical platform evidence.
+  - Assert formal Verify and Gate use one runner temporary root for Python tempfile,
+    run directory, evidence, Gate output and diagnostics, while a distinct existing
+    sibling root remains rejected; retain failed run 33410732408 as historical platform
+    evidence.
   verification_requirements:
     acceptance_required: false
     independent_verifier_required: false
@@ -111,15 +122,15 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: d51e34b8334247dac947ad140a1e12156d60dee4da72a3cd6e4666c7cbf98b6c
+frozen_spec_sha256: 83c2543eeb0b9796ecfea00fd02a93df9596dd6717e01583c5a36667f8981f1f
 goal: Harden V1 and V2 regression and coverage time budgets for the verified Windows
   runtime without weakening checks or thresholds.
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-08-31T14:54:57Z'
+spec_frozen_at: '2026-08-31T16:02:02Z'
 subject_commit: a05d2005b27f977c87248cd5e535dd52c639b2ff
 task_id: TASK-0030
-updated_at: '2026-08-31T15:48:26Z'
+updated_at: '2026-08-31T16:04:44Z'
 worktree_dirty: false
 worktree_dirty_paths: []

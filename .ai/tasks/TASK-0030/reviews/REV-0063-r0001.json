@@ -1,0 +1,13 @@
+{
+  "context_sha256": "5722f7140e8136d4f0b5336265bf686b086dd4fce6e38ef056f5b675686b0299",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-08-31T16:04:09Z",
+  "review_id": "REV-0063",
+  "review_stage": "design",
+  "reviewer": "/root/ci_temp_design_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE。独立只读设计审查核对冻结规格 83c2543eeb0b9796ecfea00fd02a93df9596dd6717e01583c5a36667f8981f1f、context 5722f7140e8136d4f0b5336265bf686b086dd4fce6e38ef056f5b675686b0299、ci-runner-temp-resolution.md、现有 workflow/verifier/tests 与 GitHub Actions run 33410732408。该 run 已证明 exact-SHA branch attachment、contract、identity 和 task resolution 成功，唯一新失败是 runner.temp 与 Python 默认 OS temporary root 不同。方案仅在 formal Verify and Gate step 通过 env 绑定 TMPDIR 到 runner.temp，并用 $TMPDIR/aiflow 创建既存严格后代；Python verifier 代码、resolve 后目录边界、strict-descendant 与 evidence output containment 均不变，bootstrap 和无关步骤不继承覆盖，artifact/evidence/Gate 保持同一路径。规格要求 workflow env/path contract、独立 Python 与 runner temporary root 的 cross-root 正负测试、真实 PR 最终 head 验收和追加式历史保留；第二只读安全审查亦无阻断项。无 high/critical finding，无未关闭 P2。",
+  "task_id": "TASK-0030"
+}
