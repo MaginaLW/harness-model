@@ -46,6 +46,19 @@ jobs:
           else
             echo "bootstrap_active=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Attach exact PR head branch
+        if: steps.governance.outputs.bootstrap_active != 'true'
+        env:
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          test -n "$PR_HEAD_REF"
+          git check-ref-format --branch "$PR_HEAD_REF"
+          test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+          git switch --force-create "$PR_HEAD_REF" "$PR_HEAD_SHA"
+          test "$(git symbolic-ref --quiet --short HEAD)" = "$PR_HEAD_REF"
+          test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
       - name: Validate contracts
         run: >-
           uv run --locked python -m pytest
