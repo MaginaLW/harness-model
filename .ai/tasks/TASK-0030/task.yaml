@@ -18,7 +18,7 @@ allowed_scope:
 base_commit: 37dce2a61a5dc484b077ba4463cede2be04dd746
 branch: codex/verification-timeout-hardening
 created_at: '2026-08-30T09:53:29Z'
-current_state: IMPLEMENTING
+current_state: WAITING_FOR_FINAL_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -147,8 +147,8 @@ repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
 spec_frozen_at: '2026-08-31T22:38:42Z'
-subject_commit: ebea414fc168f35e0b0abd810f2c27bc1ad71964
+subject_commit: acff6cac45c8c7be64bb8a83dbf264fd039e3f17
 task_id: TASK-0030
-updated_at: '2026-08-31T22:43:32Z'
+updated_at: '2026-08-31T23:19:00Z'
 worktree_dirty: false
 worktree_dirty_paths: []
