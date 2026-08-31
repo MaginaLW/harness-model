@@ -78,5 +78,18 @@
     "spec_sha256": "d51e34b8334247dac947ad140a1e12156d60dee4da72a3cd6e4666c7cbf98b6c",
     "subject_commit": "a05d2005b27f977c87248cd5e535dd52c639b2ff",
     "task_id": "TASK-0030"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-08-31T16:37:38Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner approved TASK-0030 CI temporary-root expanded frozen specification 83c2543eeb0b9796ecfea00fd02a93df9596dd6717e01583c5a36667f8981f1f under Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f with design review REV-0063 context 5722f7140e8136d4f0b5336265bf686b086dd4fce6e38ef056f5b675686b0299.",
+    "schema_version": "1.0",
+    "spec_sha256": "83c2543eeb0b9796ecfea00fd02a93df9596dd6717e01583c5a36667f8981f1f",
+    "subject_commit": "a05d2005b27f977c87248cd5e535dd52c639b2ff",
+    "task_id": "TASK-0030"
   }
 ]
