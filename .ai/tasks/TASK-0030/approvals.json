@@ -105,5 +105,18 @@
     "spec_sha256": "83c2543eeb0b9796ecfea00fd02a93df9596dd6717e01583c5a36667f8981f1f",
     "subject_commit": "ebea414fc168f35e0b0abd810f2c27bc1ad71964",
     "task_id": "TASK-0030"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-08-31T22:43:22Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner approved TASK-0030 Linux CI test expanded frozen specification 089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124 under Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f with design review REV-0065 context 6f7cb2c37c1a1c489f79e470fbd66a051f04cde940495ebf3d78615500fac071.",
+    "schema_version": "1.0",
+    "spec_sha256": "089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124",
+    "subject_commit": "ebea414fc168f35e0b0abd810f2c27bc1ad71964",
+    "task_id": "TASK-0030"
   }
 ]
