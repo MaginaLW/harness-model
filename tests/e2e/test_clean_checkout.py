@@ -7,7 +7,6 @@ import json
 import os
 import re
 import shlex
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -56,8 +55,56 @@ def _installed_environment(target: Path) -> dict[str, str]:
 
 def _install_clean_clone(clone: Path, installed: Path, install_env: dict[str, str]) -> None:
     if importlib.util.find_spec("pip") is not None:
-        argv = [
-            sys.executable,
+        interpreter = sys.executable
+    else:
+        base_executable = getattr(sys, "_base_executable", None)
+        assert base_executable is not None, "the active Python has no pip or base interpreter"
+        base_interpreter = Path(base_executable)
+        assert base_interpreter.is_file(), (
+            "the active Python has no pip and its base interpreter is unavailable"
+        )
+        interpreter = str(base_interpreter)
+    argv = [
+        interpreter,
+        "-m",
+        "pip",
+        "install",
+        "--disable-pip-version-check",
+        "--no-deps",
+        "--target",
+        str(installed),
+        str(clone),
+    ]
+    _run(argv, cwd=clone, env=install_env)
+
+
+def test_clean_clone_uses_base_interpreter_when_active_has_no_pip(
+    monkeypatch, tmp_path: Path
+) -> None:
+    base_interpreter = Path(sys.executable)
+    calls: list[list[str]] = []
+
+    def fake_run(
+        argv: list[str],
+        *,
+        cwd: Path,
+        env: dict[str, str] | None = None,
+        expected: int = 0,
+    ) -> subprocess.CompletedProcess[str]:
+        calls.append(argv)
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    monkeypatch.setattr(importlib.util, "find_spec", lambda name: None)
+    monkeypatch.setattr(sys, "_base_executable", str(base_interpreter), raising=False)
+    monkeypatch.setitem(globals(), "_run", fake_run)
+
+    clone = tmp_path / "checkout"
+    installed = tmp_path / "installed"
+    _install_clean_clone(clone, installed, {})
+
+    assert calls == [
+        [
+            str(base_interpreter),
             "-m",
             "pip",
             "install",
@@ -67,22 +114,7 @@ def _install_clean_clone(clone: Path, installed: Path, install_env: dict[str, st
             str(installed),
             str(clone),
         ]
-    else:
-        uv = shutil.which("uv")
-        assert uv is not None, "the active Python has no pip and uv is unavailable"
-        argv = [
-            uv,
-            "pip",
-            "install",
-            "--offline",
-            "--no-deps",
-            "--target",
-            str(installed),
-            "--python",
-            sys.executable,
-            str(clone),
-        ]
-    _run(argv, cwd=clone, env=install_env)
+    ]
 
 
 def test_quickstart_marked_commands_and_paths_are_executable() -> None:
