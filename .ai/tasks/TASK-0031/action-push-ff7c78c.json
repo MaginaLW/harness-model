@@ -1,0 +1,20 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "4725b8690b42a33569f74d770700e614d30b380bfac6b29f4f4b6732b27e3204",
+  "action_type": "git_push_branch",
+  "target": "repository=https://github.com/MaginaLW/harness-model.git;remote=origin;ref=refs/heads/codex/formal-ci-canary-r2",
+  "parameter_summary": "source_commit=ff7c78c6c4028a32ee78ff1c95af2ff9db68d110;expected_remote_ref=absent;new_remote_tip=ff7c78c6c4028a32ee78ff1c95af2ff9db68d110;force=false;tags=false;delete=false;set_upstream=true;argv=[git,push,--set-upstream,origin,ff7c78c6c4028a32ee78ff1c95af2ff9db68d110:refs/heads/codex/formal-ci-canary-r2]",
+  "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+  "conditions": [
+    "Bind this one push to TASK-0031 DU-001, base 0989da65702a756c229b0dc7a1c14d56639ad384, subject f75f59e9ac245cebc75f4052fbdbd80604376aa7, frozen spec 7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57, Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f and classification input 4725b8690b42a33569f74d770700e614d30b380bfac6b29f4f4b6732b27e3204.",
+    "Before launch require local branch codex/formal-ci-canary-r2 at exact audit head ff7c78c6c4028a32ee78ff1c95af2ff9db68d110, TASK-0031 state APPROVED_FOR_MERGE, current passed V1 evidence file SHA-256 bdb73a919ee282be9a48272098b5aa4bf54edb33759ee2afdf795e42fbe32d02, validate and scope success, and read-only Gate passed with no reason codes.",
+    "Before launch require refs/heads/codex/formal-ci-canary-r2 to be absent on origin. If it exists or resolves to any object, this authorization is invalid and the push must not run.",
+    "Run only the fixed push argv recorded in parameter_summary. Do not force, force-with-lease, delete, push tags, push another ref, rewrite history, alter main, or use a different source commit or remote.",
+    "At launch the source worktree may differ from ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 only by TASK-0031-local action and approval audit artifacts for this exact push. No business path, other task path, secret, credential material or unrelated untracked path is permitted.",
+    "After the command require the remote branch to resolve exactly to ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 and the local branch/HEAD to remain unchanged. Preserve the command result for the TASK-0031 audit record.",
+    "Launch, failure or interruption consumes this authorization once. Do not retry under the same approval.",
+    "This action does not authorize creating or editing a pull request, merging, deleting the source branch, changing repository settings, creating tags or releases, deploying, publishing, exporting secrets, or making paid calls."
+  ],
+  "expires_at": "2026-09-03T23:59:59Z",
+  "single_use": true
+}
