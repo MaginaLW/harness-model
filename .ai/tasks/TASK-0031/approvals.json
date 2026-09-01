@@ -46,5 +46,21 @@
     "spec_sha256": "7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57",
     "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
     "task_id": "TASK-0031"
+  },
+  {
+    "action_sha256": "69fda33e1e0be22467a252aea18f60d9223af4c6666cca93c41070f56f32e5b8",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-01T10:54:40Z",
+    "base_commit": "0989da65702a756c229b0dc7a1c14d56639ad384",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-04T23:59:59Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner explicitly approved exact single-use post-merge audit push action 69fda33e1e0be22467a252aea18f60d9223af4c6666cca93c41070f56f32e5b8 to fast-forward origin refs/heads/codex/formal-ci-canary-r2 from ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 to closure commit 5233f07413bae56dcab8cdc7baaf495487f31768, without force, tags, deletion, main modification or any other remote write; authorization expires 2026-09-04T23:59:59Z.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57",
+    "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+    "task_id": "TASK-0031"
   }
 ]
