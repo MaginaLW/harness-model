@@ -6,7 +6,7 @@ goal: Document the retained evidence and acceptance record for the first post-bo
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 branch: codex/formal-ci-canary-r2
 base_commit: 0989da65702a756c229b0dc7a1c14d56639ad384
-subject_commit: 0989da65702a756c229b0dc7a1c14d56639ad384
+subject_commit: f75f59e9ac245cebc75f4052fbdbd80604376aa7
 worktree_dirty: false
 worktree_dirty_paths: []
 allowed_scope: &id001
@@ -20,7 +20,7 @@ forbidden_actions:
 - paid_external_call
 current_state: IMPLEMENTING
 created_at: '2026-08-31T23:57:40Z'
-updated_at: '2026-08-31T23:59:30Z'
+updated_at: '2026-09-01T00:00:41Z'
 decision_units:
 - schema_version: '1.0'
   task_id: TASK-0031
