@@ -1,0 +1,17 @@
+{
+  "baseline_exit_code": 0,
+  "duration_ms": 828,
+  "expected_detector": "tests/unit/test_policy.py::test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras",
+  "expected_outcome": "killed",
+  "main_tree_unchanged": true,
+  "mutant_exit_code": 1,
+  "mutation_id": "MUT-V2-001",
+  "operator": "drop_targeted_mutation_required_check",
+  "outcome": "killed",
+  "reason_code": null,
+  "run_reason_code": null,
+  "safeguard_id": "V2_REQUIRED_CHECK_SET",
+  "target": "src/aiflow/policy.py",
+  "target_symbol": "_validate_cross_file",
+  "timed_out": false
+}
