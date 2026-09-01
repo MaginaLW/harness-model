@@ -2,6 +2,12 @@
 
 先运行 `python -m aiflow status <TASK-ID> --format json` 和 `git status --short --branch`。保留 `.ai/tasks/<TASK-ID>/events.jsonl`、失败 marker、evidence 和 logs；不通过直接改写 `current_state`、删除事件或伪造批准来“修复”任务。
 
+## 运行时证据、精确清理与路径边界
+
+- `.ai/tasks/<TASK-ID>/logs/` 是运行时生成且由唯一的 task-local 忽略规则排除；它仍是审计证据。保留 events、marker、evidence、logs 及失败验证输出，除非已针对精确 task、run 和文件取得删除批准并确认可恢复路径。忽略的本地 logs 不作跨 clone 或新 worktree 的持久性承诺。
+- 清理只针对已批准、可重建的明确路径；先列出精确目标和用途，再删除本任务创建且确认无用的缓存或构建产物。OS 临时运行目录仅在确认无诊断或审计用途、恢复路径可用且精确删除目标已批准时才可清理。不得用宽泛的 `*.log`、`*.xml` 或目录通配规则清理或忽略未分类文件。
+- 已提交的历史审计记录可能含有当时的绝对路径或用户名；为维持证据 hash 和可追溯性，不改写它们。新的 tracked 文档、模板和示例必须使用 `${REPO_ROOT}`、`${TEMP_ROOT}` 等稳定占位符，不记录机器名、本机用户名或本机绝对路径。当前 CLI 生成的 task、evidence、action 或 snapshot 仍可按现行 schema 保留诊断路径；在独立受治理的运行时脱敏改动上线前，不得为了清理文案而事后替换这些记录中的路径。
+
 ## REC-01 半创建任务
 
 - 诊断：检查 `.ai/tasks/<TASK-ID>/creation_failed.json`，并运行 `python -m aiflow status <TASK-ID> --format json`。

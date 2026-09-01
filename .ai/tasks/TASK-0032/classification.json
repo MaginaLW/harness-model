@@ -1,0 +1,44 @@
+{
+  "base_commit": "5f52afe465e55801597a8ab562d76d24061e3133",
+  "change_reason": "upgraded",
+  "classification_input_sha256": "23c470db1f717cf2b848a79cb9979e0eb707211c2474fad65200a1de0526cd06",
+  "classifications": [
+    {
+      "classified_at": "2026-09-01T11:17:58Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
+      "explanations": [
+        "Unmatched work remains REVIEW; there is no implicit AUTO fallback."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
+          "predicate_explanations": [],
+          "priority": 0,
+          "route": "REVIEW",
+          "rule_id": "ROUTE-DEFAULT-REVIEW"
+        }
+      ],
+      "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+      "policy_version": "2.2.0",
+      "route": "REVIEW",
+      "rule_id": "ROUTE-DEFAULT-REVIEW",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Integration verification requires V2."
+      ],
+      "verification_level": "V2",
+      "verification_rule_ids": [
+        "VERIFICATION-V2-INTEGRATION-REQUIRED"
+      ]
+    }
+  ],
+  "classified_at": "2026-09-01T11:17:58Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V2",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "policy_version": "2.2.0",
+  "schema_version": "2.0",
+  "subject_commit": "5f52afe465e55801597a8ab562d76d24061e3133",
+  "task_id": "TASK-0032"
+}

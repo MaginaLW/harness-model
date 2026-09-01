@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-01T11:22:01Z",
+    "base_commit": "5f52afe465e55801597a8ab562d76d24061e3133",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Approved frozen TASK-0032 specification d7d2a22a988e5ecd34ccc30241baf79913eb491ce2cfcba4073ac042bae481f0 after independent design review REV-0067.",
+    "schema_version": "1.0",
+    "spec_sha256": "d7d2a22a988e5ecd34ccc30241baf79913eb491ce2cfcba4073ac042bae481f0",
+    "subject_commit": "5f52afe465e55801597a8ab562d76d24061e3133",
+    "task_id": "TASK-0032"
+  }
+]

@@ -32,7 +32,7 @@
 | [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |
 | [自适应多智能体编排预进入蓝图](docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md) | 安全控制面通过后编写编排顾问与真实 adapter 执行计划的设计输入，当前未授权实施 |
 | [Agent 规则](AGENTS.md) | 所有 Agent 的简短常驻约束 |
-| [Claude Code 规则](CLAUDE.md) | Claude Code 的同源入口 |
+| [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口；共同治理规则以 Agent 规则为准 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
 | [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence 等恢复流程 |
 | [阶段一验收报告](docs/implementation/phase-01-acceptance-report.md) | 十二项验收、四试点、覆盖率、限制和风险接受 |
@@ -72,7 +72,7 @@ Chapters 1–7 按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-c
 
 AI Flow 正式自用治理已经生效；以下步骤适用于本仓库后续代码、配置、CI 或行为变更。
 
-1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时同时阅读 [CLAUDE.md](CLAUDE.md)。
+1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时，再阅读其 [平台适配入口](CLAUDE.md)。
 2. 先核对 [overall state](docs/superpowers/state/overall.yaml) 与当前 chapter state，再按对应阶段的设计和实施目录选择下一项工作。
 3. 以已安装 CLI、active Policy 与当前 task ledger 的确定性结论为准；计划中的未来能力不能当作已经可用。
 4. 保留任务范围、决定、批准和验证证据；出现变化时升级，不自行降级或跳过 Gate。
