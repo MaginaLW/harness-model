@@ -87,7 +87,7 @@ evidence 或重复碰运气来放行。若确需再次调整 Policy，必须建�
 - 保留规则：失败 verification、survived/missing mutant、拒绝事件、CI failure receipt、stale review/evidence 和平台 skip 都继续保留。后续成功可以追加并解释恢复链，但不能覆盖、删除、重排或静默“修正”历史 task ledger。
 - 禁止操作：不编辑旧 evidence/review/receipt 的 hash 或 subject，不把 TASK-0025/TASK-0028 的历史通过复用于新 task/version，不因 Phase 02 状态完成而跳过新变更的分类、批准、验证或 Gate，也不把 baseline 文档当作 V3/模型路由/资源调度授权。
 
-## REC-11 验证运行被中断
+## 验证运行被中断（REC-11）
 
 - 诊断：`status` 显示任务停在 `VERIFYING`，`missing_conditions` 只有 `verification_result`，事件账本最后一条是 `verification_started` 或 `verification_restarted`，对应 run 目录的日志在某个检查后中断。此时 `verify` 会以 `VERIFY_STATE_INVALID` 拒绝，`begin` 也不接受 `VERIFYING`。
 - 可恢复操作：先确认没有其他进程仍在跑该任务的验证，再运行 `python -m aiflow verify <TASK-ID> --abandon --actor <ACTOR> --reason "<WHY>"` 把这轮无结果的运行如实记为失败并迁移到 `FAILED`，然后按 REC-04 用 `begin <TASK-ID> --actor <ACTOR> --reason "<FIX>"` 重试并重跑全量 `verify`。
