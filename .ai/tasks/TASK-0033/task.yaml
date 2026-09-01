@@ -4,7 +4,7 @@ goal: 将规则明确且重复出现的问题优先沉淀为统一 CLI 的策略
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 branch: codex/repository-hygiene
 base_commit: 77197964369cb8291f9a8b07ff1f7057f9c5b6f0
-subject_commit: 77197964369cb8291f9a8b07ff1f7057f9c5b6f0
+subject_commit: 7278e10799a9306356a096a3fff1694521fb62e9
 worktree_dirty: false
 worktree_dirty_paths: []
 allowed_scope: &id001
@@ -18,7 +18,7 @@ forbidden_actions:
 - paid_external_call
 current_state: IMPLEMENTING
 created_at: '2026-09-01T14:25:55Z'
-updated_at: '2026-09-01T14:29:29Z'
+updated_at: '2026-09-01T14:30:39Z'
 decision_units:
 - schema_version: '1.0'
   task_id: TASK-0033
