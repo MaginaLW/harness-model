@@ -1,0 +1,19 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "294ae375b76576c37cae7c3e9d03ed09745f3d0ebba07696bdaf84bcda4c71dc",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0032",
+  "parameter_summary": "Run the five fixed Phase 02 critical mutations once against repository-hygiene subject 7a27dd9dda01062f97080d549b31f692bd5214d8 in TASK-0032-owned isolated temporary worktrees and write only TASK-0032-local mutation evidence, receipts, and logs.",
+  "subject_commit": "7a27dd9dda01062f97080d549b31f692bd5214d8",
+  "conditions": [
+    "Use only the committed .ai/mutations/phase-02-critical-manifest.json entries MUT-V2-001 through MUT-V2-005 in manifest order; run each baseline detector and mutant detector exactly once.",
+    "Create and clean up at most five TASK-0032-owned isolated temporary worktrees; do not alter the main worktree or any pre-existing repository data.",
+    "Write only TASK-0032-local mutation evidence, action receipts, and logs in addition to the bounded temporary worktrees; preserve every pre-existing task artifact append-only.",
+    "Do not push, merge, deploy, publish, access credentials, call external models or paid services, or make network calls.",
+    "Fail closed before launch if task, decision unit, base, subject, frozen specification, Policy, classification, approval, receipt, manifest, runner source, or ledger bindings differ.",
+    "Launch, failure, or interruption consumes this authorization once; do not retry or reuse it for another subject.",
+    "Use this action only for the current repository-hygiene subject; do not make any further business-file change under this authorization."
+  ],
+  "expires_at": "2026-09-01T14:30:00Z",
+  "single_use": true
+}

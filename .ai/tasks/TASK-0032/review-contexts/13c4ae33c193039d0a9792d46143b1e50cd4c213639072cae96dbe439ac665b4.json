@@ -1,0 +1,251 @@
+{
+  "base_commit": "5f52afe465e55801597a8ab562d76d24061e3133",
+  "branch": "codex/repository-hygiene",
+  "classification_input_sha256": "294ae375b76576c37cae7c3e9d03ed09745f3d0ebba07696bdaf84bcda4c71dc",
+  "content": {
+    "allowed_scope": [
+      ".gitignore",
+      "CLAUDE.md",
+      "README.md",
+      "docs/operations/recovery.md",
+      "tests/integration/test_agent_entry_files.py",
+      "tests/integration/test_repository_hygiene.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Harden repository hygiene guidance and future generated-file exclusions without changing runtime behavior or rewriting historical audit evidence.",
+        "impact_scope": [
+          ".gitignore",
+          "CLAUDE.md",
+          "README.md",
+          "docs/operations/recovery.md",
+          "tests/integration/test_agent_entry_files.py",
+          "tests/integration/test_repository_hygiene.py"
+        ],
+        "planned_actions": [
+          "Add root-scoped ignore rules for Python build, distribution, HTML coverage, and suffixed coverage data without hiding task-local audit evidence.",
+          "Make AGENTS.md the single shared agent authority and reduce CLAUDE.md to a tested Claude-specific adapter that links to it.",
+          "Document append-only runtime evidence retention, bounded cleanup, and the historical absolute-path exception without rewriting existing records.",
+          "Add focused integration coverage for the entry-file and ignore-rule contracts."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0032/approvals.json",
+        ".ai/tasks/TASK-0032/classification.json",
+        ".ai/tasks/TASK-0032/design-review-context.json",
+        ".ai/tasks/TASK-0032/design-review-input.json",
+        ".ai/tasks/TASK-0032/events.jsonl",
+        ".ai/tasks/TASK-0032/evidence.json",
+        ".ai/tasks/TASK-0032/review-contexts/db032eeb6333fbf2ac621155c789adadd70213306e64c1effb2bf234f548600b.json",
+        ".ai/tasks/TASK-0032/reviews/REV-0067-r0001.json",
+        ".ai/tasks/TASK-0032/spec.md",
+        ".ai/tasks/TASK-0032/task.yaml",
+        ".ai/tasks/TASK-0032/verifier-contexts/70c927adb38ab21dc9f59830a21ee27b593f8f33d67c68e868cb24329fd9ee4d.json",
+        ".gitignore",
+        "CLAUDE.md",
+        "README.md",
+        "docs/operations/recovery.md",
+        "tests/integration/test_agent_entry_files.py",
+        "tests/integration/test_repository_hygiene.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/approvals.json"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/classification.json"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/design-review-input.json"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/events.jsonl"
+        },
+        {
+          "additions": 270,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/evidence.json"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/review-contexts/db032eeb6333fbf2ac621155c789adadd70213306e64c1effb2bf234f548600b.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/reviews/REV-0067-r0001.json"
+        },
+        {
+          "additions": 67,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/spec.md"
+        },
+        {
+          "additions": 87,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/task.yaml"
+        },
+        {
+          "additions": 77,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0032/verifier-contexts/70c927adb38ab21dc9f59830a21ee27b593f8f33d67c68e868cb24329fd9ee4d.json"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 0,
+          "path": ".gitignore"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 16,
+          "path": "CLAUDE.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 3,
+          "path": "README.md"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 12,
+          "path": "tests/integration/test_agent_entry_files.py"
+        },
+        {
+          "additions": 71,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_repository_hygiene.py"
+        }
+      ],
+      "totals": {
+        "additions": 809,
+        "deletions": 31,
+        "files": 17
+      }
+    },
+    "goal": "Harden repository hygiene guidance and future generated-file exclusions without changing runtime behavior or rewriting historical audit evidence.",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0032",
+        "--actor",
+        "codex-independent-verifier-v3"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "13c4ae33c193039d0a9792d46143b1e50cd4c213639072cae96dbe439ac665b4",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "d7d2a22a988e5ecd34ccc30241baf79913eb491ce2cfcba4073ac042bae481f0",
+  "subject_commit": "7a27dd9dda01062f97080d549b31f692bd5214d8",
+  "task_id": "TASK-0032",
+  "verification_snapshot_sha256": "fba3d60891ae3f07c69ad849c9948065022cb00cbffd2f27510a5b2d6a4f4afb"
+}
