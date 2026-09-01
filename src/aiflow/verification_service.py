@@ -537,6 +537,52 @@ def _start_local_verification(
     )
 
 
+def _abandon_interrupted_verification(
+    repository_root: Path,
+    task_id: str,
+    *,
+    actor: str | None,
+    reason: str | None,
+) -> VerifyResult:
+    """Record an interrupted verification run as failed without inventing evidence."""
+    normalized_actor = (actor or "").strip()
+    if not normalized_actor:
+        raise ContractError("Verification actor is required", code="VERIFY_ACTOR_REQUIRED")
+    normalized_reason = (reason or "").strip()
+    if not normalized_reason:
+        raise ContractError(
+            "Abandoning a verification run requires a reason",
+            code="VERIFY_ABANDON_REASON_REQUIRED",
+        )
+    root = repository_root.resolve()
+    record = load_task_record(root, task_id)
+    state = str(record.task.get("current_state"))
+    # A recorded verification result always leaves VERIFYING, so this single state
+    # check also rejects a run that already concluded.
+    if state != "VERIFYING":
+        raise ContractError(
+            "Task has no interrupted verification run to abandon",
+            code="VERIFY_ABANDON_STATE_INVALID",
+            details={"current_state": state},
+        )
+    result = transition_task_record(
+        root,
+        task_id,
+        target_state="FAILED",
+        event_type="verification_failed",
+        actor=normalized_actor,
+        payload={"conclusion": "failed", "abandoned": True, "reason": normalized_reason},
+        satisfied_preconditions={"verification_failed"},
+    )
+    return VerifyResult(
+        task_id,
+        "failed",
+        str(result.task["current_state"]),
+        resolve_task_path(root, task_id, "evidence.json"),
+        ("VERIFY_RUN_ABANDONED",),
+    )
+
+
 def _finish_local_verification(
     repository_root: Path,
     task_id: str,
@@ -827,10 +873,19 @@ def verify_task(
     ci_run_dir: Path | None = None,
     output: Path | None = None,
     finalize: bool = False,
+    abandon: bool = False,
+    reason: str | None = None,
     version_probe: VersionProbe = _default_version_probe,
 ) -> VerifyResult:
     """Execute one governed local verification or read-only CI attestation."""
     root = repository_root.resolve()
+    if abandon:
+        if ci or check_ids or finalize or ci_run_dir is not None or output is not None:
+            raise ContractError(
+                "Abandoning a verification run cannot be combined with another mode",
+                code="VERIFY_ABANDON_ARGUMENT_INVALID",
+            )
+        return _abandon_interrupted_verification(root, task_id, actor=actor, reason=reason)
     if finalize:
         return _finalize_v2_task(
             root,

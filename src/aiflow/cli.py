@@ -147,6 +147,8 @@ def build_parser() -> ArgumentParser:
     verify_mode = verify.add_mutually_exclusive_group()
     verify_mode.add_argument("--check", action="append", default=[])
     verify_mode.add_argument("--finalize", action="store_true")
+    verify_mode.add_argument("--abandon", action="store_true")
+    verify.add_argument("--reason")
     verify.add_argument("--ci", action="store_true")
     verify.add_argument("--ci-run-dir", type=Path)
     verify.add_argument("--output", type=Path)
@@ -336,6 +338,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ci_run_dir=arguments.ci_run_dir,
                 output=arguments.output,
                 finalize=arguments.finalize,
+                abandon=arguments.abandon,
+                reason=arguments.reason,
             )
             print(
                 f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}"
