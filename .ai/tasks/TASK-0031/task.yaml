@@ -18,9 +18,9 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 created_at: '2026-08-31T23:57:40Z'
-updated_at: '2026-09-01T00:00:41Z'
+updated_at: '2026-09-01T01:03:10Z'
 decision_units:
 - schema_version: '1.0'
   task_id: TASK-0031
