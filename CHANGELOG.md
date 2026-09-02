@@ -11,6 +11,8 @@ package 已发布到外部 registry。
 
 ### Fixed
 
+- 收敛仓库卫生：为 Python 构建、分发、HTML 覆盖率与带后缀的 coverage 数据补充根级锚定的忽略规则，且不遮蔽 `.ai/tasks/**` 下的审计证据；把 AGENTS.md 确立为唯一共享 Agent 权威、CLAUDE.md 收敛为链接到它的受测 Claude 适配入口；在故障恢复手册记录运行期证据的追加式保留、有界清理与历史绝对路径例外。新增`tests/integration/test_repository_hygiene.py` 覆盖忽略规则契约的正负向路径，并扩展入口文件契约测试。不改变任何运行期行为，不重写历史审计记录。
+
 - 修复 CI 任务解析在 base 分支前移后无法唯一确定任务的缺陷。`tools/ci/resolve_task.py` 原先用两点 `git diff base head` 比较两棵树，一旦 base 合入了另一个任务的记录，该任务目录会作为 head 侧变更出现，解析随即以「must identify exactly one .ai/tasks/TASK-* directory」失败——即使 head 完全没变。改为以 merge-base 起算的三点 `git diff base...head`，只反映本 PR 引入的变更。显式 `AI_FLOW_TASK_ID` 的优先级、零个或多个任务目录的拒绝路径与原错误文案均不变。
 
 - active Policy 升至 `2.2.0`，将 V1/V2 完整回归与 coverage XML 的时限分别调整为 900 秒和 1200 秒，并将 `ai-quality-gate` job 上限调整为 90 分钟以覆盖 68.5 分钟的 V2 最大固定串行预算及安装、Gate 和 runner 波动；检查集合、命令、parser、required 状态、85% 总覆盖率和 90% diff coverage 门槛均保持不变。
