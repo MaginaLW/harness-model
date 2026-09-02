@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0071",
+  "revision": 1,
+  "task_id": "TASK-0035",
+  "review_stage": "implementation",
+  "reviewer": "claude-independent-implementation-reviewer",
+  "recorded_at": "2026-09-02T12:20:00Z",
+  "context_sha256": "63e0b5e98ba06bfbc66fbd788b2fbbaba4a6f53375c483e958508da4f55b92e4",
+  "outcome": "APPROVE",
+  "summary": "Reviewed subject 344faf9fc1024fc469daa774a6d6511646a13798 against frozen specification a209d6c779ae27f84197cc462ccee12d88370580942f5b73c722429f87956cb8. The change is confined to the three files in allowed_scope and scope validation passes. _git_paths now asks git for base...head, so the path set starts at the merge base and contains only what the head introduces; the surrounding resolution rules, the explicit AI_FLOW_TASK_ID branch, the subprocess timeout, the returncode handling and the original error text are untouched. Two regression tests build a real forked history: one asserts that a task directory present only on the advanced base no longer defeats resolution, the other asserts that two directories genuinely introduced by the head are still rejected, so the fix narrows the path set without weakening the guard. The parametrised zero/one/two case retains the previous behaviour. The effect was confirmed against the live failure: for base 5e49a28 and head 7719796 the two-dot form yields TASK-0032 and TASK-0034 while the three-dot form yields TASK-0032 alone. V1 verification passed all ten required checks on this subject, including the full regression suite, 85 percent total coverage and 90 percent diff coverage. No workflow file, required check name, job timeout, threshold, Policy document, evidence schema or package runtime path is modified, and the change is reversible by reverting the three files.",
+  "findings": []
+}
