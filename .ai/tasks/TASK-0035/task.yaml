@@ -1,0 +1,73 @@
+allowed_scope:
+- tools/ci/resolve_task.py
+- tests/integration/test_github_workflow.py
+- CHANGELOG.md
+base_commit: 5e49a281c6cd9919f86be82fecbc145185d05653
+branch: claude/ci-resolve-task-merge-base
+created_at: '2026-09-02T10:53:34Z'
+current_state: READY_TO_IMPLEMENT
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 修复 CI 任务解析使用两点 diff 的缺陷：base 前移后其他任务目录会被误计入 PR 变更，导致唯一解析失败
+  impact:
+    level: low
+  impact_categories:
+  - ci
+  impact_scope:
+  - tools/ci/resolve_task.py
+  - tests/integration/test_github_workflow.py
+  - CHANGELOG.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - 将 resolve_task 的变更集合改为以 merge-base 起算的三点 diff，使其只反映该 PR 引入的变更。
+  - 在 tests/integration/test_github_workflow.py 增加回归测试：base 前移并包含另一个任务目录时，仍唯一解析到本
+    PR 的任务。
+  - 在 CHANGELOG 记录该 CI 行为修复。
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0035
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - 运行 tests/integration/test_github_workflow.py，覆盖 base 前移后的唯一解析回归。
+  - 运行 V1 完整回归，确认既有 CI 适配层与 Gate parity 未回归。
+  - 用真实 PR 复核：base 已含其他任务时，Resolve task 步骤仍解析到本 PR 的任务。
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: a209d6c779ae27f84197cc462ccee12d88370580942f5b73c722429f87956cb8
+goal: 修复 CI 任务解析使用两点 diff 的缺陷：base 前移后其他任务目录会被误计入 PR 变更，导致唯一解析失败
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-09-02T10:56:18Z'
+subject_commit: 5e49a281c6cd9919f86be82fecbc145185d05653
+task_id: TASK-0035
+updated_at: '2026-09-02T10:58:05Z'
+worktree_dirty: false
+worktree_dirty_paths: []

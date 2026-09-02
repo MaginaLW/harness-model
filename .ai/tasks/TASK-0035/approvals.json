@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-02T10:58:05Z",
+    "base_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准 TASK-0035 冻结规格：把 CI 任务解析改为以 merge-base 起算的三点 diff，只反映本 PR 引入的变更；不改 workflow、required check、阈值或任何运行期行为",
+    "schema_version": "1.0",
+    "spec_sha256": "a209d6c779ae27f84197cc462ccee12d88370580942f5b73c722429f87956cb8",
+    "subject_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+    "task_id": "TASK-0035"
+  }
+]
