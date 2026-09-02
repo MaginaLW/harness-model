@@ -1,0 +1,193 @@
+{
+  "base_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+  "branch": "claude/ci-resolve-task-merge-base",
+  "classification_input_sha256": "98843f602bd566e965fb86c7ead39218463e3936645624aa2d91ccb8126b5dbd",
+  "content": {
+    "allowed_scope": [
+      "tools/ci/resolve_task.py",
+      "tests/integration/test_github_workflow.py",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "修复 CI 任务解析使用两点 diff 的缺陷：base 前移后其他任务目录会被误计入 PR 变更，导致唯一解析失败",
+        "impact_scope": [
+          "tools/ci/resolve_task.py",
+          "tests/integration/test_github_workflow.py",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "将 resolve_task 的变更集合改为以 merge-base 起算的三点 diff，使其只反映该 PR 引入的变更。",
+          "在 tests/integration/test_github_workflow.py 增加回归测试：base 前移并包含另一个任务目录时，仍唯一解析到本 PR 的任务。",
+          "在 CHANGELOG 记录该 CI 行为修复。"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0035/approvals.json",
+        ".ai/tasks/TASK-0035/classification.json",
+        ".ai/tasks/TASK-0035/design-review-context.json",
+        ".ai/tasks/TASK-0035/design-review-input.json",
+        ".ai/tasks/TASK-0035/events.jsonl",
+        ".ai/tasks/TASK-0035/review-contexts/50677d7fbc3cce29a75bbbacf156812879c9c4af5e186a1005ea45d322dc6ec5.json",
+        ".ai/tasks/TASK-0035/reviews/REV-0070-r0001.json",
+        ".ai/tasks/TASK-0035/spec.md",
+        ".ai/tasks/TASK-0035/task.yaml",
+        "CHANGELOG.md",
+        "tests/integration/test_github_workflow.py",
+        "tools/ci/resolve_task.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/approvals.json"
+        },
+        {
+          "additions": 68,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/classification.json"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/design-review-input.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/events.jsonl"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/review-contexts/50677d7fbc3cce29a75bbbacf156812879c9c4af5e186a1005ea45d322dc6ec5.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/reviews/REV-0070-r0001.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/spec.md"
+        },
+        {
+          "additions": 73,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0035/task.yaml"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "CHANGELOG.md"
+        },
+        {
+          "additions": 49,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_github_workflow.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 1,
+          "path": "tools/ci/resolve_task.py"
+        }
+      ],
+      "totals": {
+        "additions": 366,
+        "deletions": 1,
+        "files": 12
+      }
+    },
+    "goal": "修复 CI 任务解析使用两点 diff 的缺陷：base 前移后其他任务目录会被误计入 PR 变更，导致唯一解析失败",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0035",
+        "--actor",
+        "claude-primary"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "63e0b5e98ba06bfbc66fbd788b2fbbaba4a6f53375c483e958508da4f55b92e4",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "5098ea49c2e216fbcd77047a826294d63b105f89b8cc4cc7527d302ed6844238",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "a209d6c779ae27f84197cc462ccee12d88370580942f5b73c722429f87956cb8",
+  "subject_commit": "344faf9fc1024fc469daa774a6d6511646a13798",
+  "task_id": "TASK-0035"
+}

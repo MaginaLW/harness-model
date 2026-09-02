@@ -1,0 +1,68 @@
+{
+  "base_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "98843f602bd566e965fb86c7ead39218463e3936645624aa2d91ccb8126b5dbd",
+  "classifications": [
+    {
+      "classified_at": "2026-09-02T10:54:34Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "CI or CD behavior changes require review.",
+      "explanations": [
+        "CI or CD behavior changes require review.",
+        "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "CI or CD behavior changes require review.",
+          "predicate_explanations": [
+            "impact_categories: contains_any -> true"
+          ],
+          "priority": 780,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-CI-CD"
+        },
+        {
+          "explanation": "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.",
+          "predicate_explanations": [
+            "scope.clear: equals -> true",
+            "impact.level: equals -> true",
+            "reversibility: in -> true",
+            "verification.automatic: equals -> true",
+            "external_side_effects: is_empty -> true"
+          ],
+          "priority": 100,
+          "route": "AUTO",
+          "rule_id": "ROUTE-AUTO-EXPLICIT-GUARDS"
+        }
+      ],
+      "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+      "policy_version": "2.2.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-CI-CD",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Cross-file interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-CROSS-FILE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-09-02T10:54:34Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "policy_version": "2.2.0",
+  "schema_version": "1.0",
+  "subject_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+  "task_id": "TASK-0035"
+}

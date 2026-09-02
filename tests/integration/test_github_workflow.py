@@ -373,3 +373,52 @@ def test_non_governance_tail_is_rejected_by_shared_gate() -> None:
 
     assert decision.passed is False
     assert "GATE_SCOPE_CHANGED" in decision.reason_codes
+
+
+def test_diff_task_resolution_ignores_task_directories_only_on_the_base(tmp_path: Path) -> None:
+    """An advancing base branch must not add its own task directories to the diff."""
+    root, fork_point = _repo(tmp_path)
+
+    _git(root, "checkout", "-b", "advanced-base")
+    base_task = root / ".ai" / "tasks" / "TASK-0002"
+    base_task.mkdir(parents=True)
+    (base_task / "task.yaml").write_text("task\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "base advances with another task")
+    advanced_base = _git(root, "rev-parse", "HEAD")
+
+    _git(root, "checkout", "-b", "feature", fork_point)
+    head_task = root / ".ai" / "tasks" / "TASK-0001"
+    head_task.mkdir(parents=True)
+    (head_task / "task.yaml").write_text("task\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "head introduces its own task")
+    head = _git(root, "rev-parse", "HEAD")
+
+    assert resolve_task_id(root, advanced_base, head) == "TASK-0001"
+
+
+def test_diff_task_resolution_still_rejects_two_tasks_introduced_by_the_head(
+    tmp_path: Path,
+) -> None:
+    root, fork_point = _repo(tmp_path)
+
+    _git(root, "checkout", "-b", "advanced-base")
+    base_task = root / ".ai" / "tasks" / "TASK-0003"
+    base_task.mkdir(parents=True)
+    (base_task / "task.yaml").write_text("task\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "base advances")
+    advanced_base = _git(root, "rev-parse", "HEAD")
+
+    _git(root, "checkout", "-b", "feature", fork_point)
+    for identifier in ("TASK-0001", "TASK-0002"):
+        task = root / ".ai" / "tasks" / identifier
+        task.mkdir(parents=True)
+        (task / "task.yaml").write_text("task\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "head introduces two tasks")
+    head = _git(root, "rev-parse", "HEAD")
+
+    with pytest.raises(ValueError, match="exactly one"):
+        resolve_task_id(root, advanced_base, head)

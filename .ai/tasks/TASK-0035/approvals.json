@@ -1,0 +1,29 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-02T10:58:05Z",
+    "base_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准 TASK-0035 冻结规格：把 CI 任务解析改为以 merge-base 起算的三点 diff，只反映本 PR 引入的变更；不改 workflow、required check、阈值或任何运行期行为",
+    "schema_version": "1.0",
+    "spec_sha256": "a209d6c779ae27f84197cc462ccee12d88370580942f5b73c722429f87956cb8",
+    "subject_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+    "task_id": "TASK-0035"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-09-02T11:18:08Z",
+    "base_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "5098ea49c2e216fbcd77047a826294d63b105f89b8cc4cc7527d302ed6844238",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准 subject 344faf9 的实现：CI 任务解析改为 merge-base 三点 diff，V1 十项检查全部通过，独立实现审核 REV-0071 无 finding。批准仅限本地只读 Gate，不授权 push、merge、deploy、删除、凭据或付费调用",
+    "schema_version": "1.0",
+    "spec_sha256": "a209d6c779ae27f84197cc462ccee12d88370580942f5b73c722429f87956cb8",
+    "subject_commit": "344faf9fc1024fc469daa774a6d6511646a13798",
+    "task_id": "TASK-0035"
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0070",
+  "revision": 1,
+  "task_id": "TASK-0035",
+  "review_stage": "design",
+  "reviewer": "claude-independent-spec-reviewer",
+  "recorded_at": "2026-09-02T11:05:00Z",
+  "context_sha256": "50677d7fbc3cce29a75bbbacf156812879c9c4af5e186a1005ea45d322dc6ec5",
+  "outcome": "APPROVE",
+  "summary": "Reviewed frozen specification a209d6c779ae27f84197cc462ccee12d88370580942f5b73c722429f87956cb8. The defect is reproduced from real CI evidence: run 33571530225 passed and run 33621586978 failed on the identical head 7719796, the only difference being that the base branch advanced, which proves the two-dot diff compares trees rather than what the PR introduces. Switching to the merge-base three-dot form matches the tool's stated contract and the workflow's intent, and it strictly narrows the path set, so an explicit AI_FLOW_TASK_ID, a genuinely multi-task PR, and every existing rejection path keep their current behaviour. Scope is confined to one CI adapter function, its regression test and the changelog; no workflow, required check name, threshold, Policy, evidence schema or package runtime behaviour is touched, and the change is reversible by reverting three files. The implementation must add a fork-shaped regression fixture where the base carries one task directory and the head introduces another, and must keep the zero-directory and multi-directory rejections together with the original error text.",
+  "findings": []
+}

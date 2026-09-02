@@ -12,8 +12,11 @@ TASK_PATTERN = re.compile(r"^\.ai/tasks/(TASK-[A-Z0-9][A-Z0-9-]*)/")
 
 
 def _git_paths(root: Path, base: str, head: str) -> tuple[str, ...]:
+    # Three-dot: compare against the merge base so the result is what this pull
+    # request introduces. A two-dot diff compares the two trees, so an advancing
+    # base branch reports its own task directories as head-side changes.
     result = subprocess.run(
-        ["git", "diff", "--name-only", "-z", base, head],
+        ["git", "diff", "--name-only", "-z", f"{base}...{head}"],
         cwd=root,
         capture_output=True,
         check=False,

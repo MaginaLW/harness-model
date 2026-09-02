@@ -1,0 +1,41 @@
+{
+  "base_commit": "5e49a281c6cd9919f86be82fecbc145185d05653",
+  "branch": "claude/ci-resolve-task-merge-base",
+  "classification_input_sha256": "98843f602bd566e965fb86c7ead39218463e3936645624aa2d91ccb8126b5dbd",
+  "content": {
+    "allowed_scope": [
+      "tools/ci/resolve_task.py",
+      "tests/integration/test_github_workflow.py",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "修复 CI 任务解析使用两点 diff 的缺陷：base 前移后其他任务目录会被误计入 PR 变更，导致唯一解析失败",
+        "impact_scope": [
+          "tools/ci/resolve_task.py",
+          "tests/integration/test_github_workflow.py",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "将 resolve_task 的变更集合改为以 merge-base 起算的三点 diff，使其只反映该 PR 引入的变更。",
+          "在 tests/integration/test_github_workflow.py 增加回归测试：base 前移并包含另一个任务目录时，仍唯一解析到本 PR 的任务。",
+          "在 CHANGELOG 记录该 CI 行为修复。"
+        ]
+      }
+    ],
+    "goal": "修复 CI 任务解析使用两点 diff 的缺陷：base 前移后其他任务目录会被误计入 PR 变更，导致唯一解析失败",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "50677d7fbc3cce29a75bbbacf156812879c9c4af5e186a1005ea45d322dc6ec5",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "a209d6c779ae27f84197cc462ccee12d88370580942f5b73c722429f87956cb8",
+  "task_id": "TASK-0035"
+}
