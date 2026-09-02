@@ -2290,3 +2290,143 @@ def test_verify_help(capsys: pytest.CaptureFixture[str]) -> None:
     assert caught.value.code == 0
     output = capsys.readouterr().out
     assert "--ci-run-dir" in output and "--check" in output
+
+
+def _governance_snapshot(repository: Path) -> dict[str, bytes]:
+    """Capture every task artifact that abandoning a run must leave untouched."""
+    root = repository / ".ai" / "tasks" / "TASK-0001"
+    return {
+        str(path.relative_to(root)): path.read_bytes()
+        for path in sorted(root.rglob("*"))
+        if path.is_file() and path.name not in {"events.jsonl", "task.yaml"}
+    }
+
+
+def _interrupted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Leave TASK-0001 in VERIFYING the way a killed verification process does."""
+    repository = _prepare(tmp_path, monkeypatch)
+
+    def _killed(*_args: object, **_kwargs: object) -> list[object]:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(verification_service, "_execute_plan", _killed)
+    with pytest.raises(KeyboardInterrupt):
+        main(["verify", "TASK-0001", "--actor", "implementer"])
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "VERIFYING"
+    return repository
+
+
+def test_abandon_records_interrupted_run_then_allows_retry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _interrupted(tmp_path, monkeypatch)
+    before = _governance_snapshot(repository)
+
+    assert (
+        main(
+            [
+                "verify",
+                "TASK-0001",
+                "--abandon",
+                "--actor",
+                "implementer",
+                "--reason",
+                "the verification process was interrupted before any result",
+            ]
+        )
+        == 0
+    )
+
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["current_state"] == "FAILED"
+    event = record.events[-1]
+    assert event["event_type"] == "verification_failed"
+    assert event["from_state"] == "VERIFYING"
+    assert event["payload"] == {
+        "conclusion": "failed",
+        "abandoned": True,
+        "reason": "the verification process was interrupted before any result",
+    }
+    assert _governance_snapshot(repository) == before
+    assert main(["validate", "TASK-0001"]) == 0
+
+    assert (
+        main(
+            [
+                "begin",
+                "TASK-0001",
+                "--actor",
+                "implementer",
+                "--reason",
+                "retry after the interrupted run was abandoned",
+            ]
+        )
+        == 0
+    )
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "IMPLEMENTING"
+
+
+def test_abandon_rejects_a_task_without_an_interrupted_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    events_before = len(load_task_record(repository, "TASK-0001").events)
+
+    assert (
+        main(["verify", "TASK-0001", "--abandon", "--actor", "implementer", "--reason", "no run"])
+        == 1
+    )
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["current_state"] == "IMPLEMENTING"
+    assert len(record.events) == events_before
+
+    # A run that already recorded a result has left VERIFYING and stays rejected.
+    assert main(["verify", "TASK-0001", "--actor", "implementer"]) == 0
+    concluded = load_task_record(repository, "TASK-0001").task["current_state"]
+    assert concluded == "APPROVED_FOR_MERGE"
+    assert (
+        main(["verify", "TASK-0001", "--abandon", "--actor", "implementer", "--reason", "too late"])
+        == 1
+    )
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == concluded
+
+
+@pytest.mark.parametrize("reason", [None, "   "])
+def test_abandon_requires_a_reason(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, reason: str | None
+) -> None:
+    repository = _interrupted(tmp_path, monkeypatch)
+    argv = ["verify", "TASK-0001", "--abandon", "--actor", "implementer"]
+    if reason is not None:
+        argv += ["--reason", reason]
+
+    assert main(argv) == 1
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "VERIFYING"
+
+
+def test_abandon_rejects_other_verification_modes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _interrupted(tmp_path, monkeypatch)
+
+    assert (
+        main(
+            [
+                "verify",
+                "TASK-0001",
+                "--abandon",
+                "--ci",
+                "--actor",
+                "implementer",
+                "--reason",
+                "combined modes are refused",
+            ]
+        )
+        == 1
+    )
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "VERIFYING"
+
+    parser = build_parser()
+    for conflicting in (["--check", "smoke"], ["--finalize"]):
+        with pytest.raises(SystemExit):
+            parser.parse_args(["verify", "TASK-0001", "--abandon", *conflicting])

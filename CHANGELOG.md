@@ -5,6 +5,10 @@ package 已发布到外部 registry。
 
 ## Unreleased
 
+### Added
+
+- `aiflow verify <TASK-ID> --abandon --actor <ACTOR> --reason "<WHY>"` 为被中断的验证运行提供确定性收尾：把没有产出任何结果的运行如实记为失败并迁移到 `FAILED`，随后按既有 REC-04 路径重试。此前一轮被中途终止的验证会把任务永久卡在 `VERIFYING`——`verify` 只接受 `IMPLEMENTING` 或重启状态，`begin` 只接受 `READY_TO_IMPLEMENT` 或 `FAILED`，唯一可达出口是抬高路由的 `escalate`。作废只追加事件并迁移状态，不写入、不修改也不删除任何 evidence 或运行日志；它不与 `--check`、`--finalize`、`--ci` 组合，要求非空 `--reason`，并拒绝任何不处于 `VERIFYING` 的任务，因此已经记录结果的运行不会被覆盖。对应恢复条目见故障恢复手册 REC-11。
+
 ### Fixed
 
 - active Policy 升至 `2.2.0`，将 V1/V2 完整回归与 coverage XML 的时限分别调整为 900 秒和 1200 秒，并将 `ai-quality-gate` job 上限调整为 90 分钟以覆盖 68.5 分钟的 V2 最大固定串行预算及安装、Gate 和 runner 波动；检查集合、命令、parser、required 状态、85% 总覆盖率和 90% diff coverage 门槛均保持不变。

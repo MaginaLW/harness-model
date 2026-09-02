@@ -1,0 +1,82 @@
+allowed_scope:
+- src/aiflow/cli.py
+- src/aiflow/verification_service.py
+- tests/integration/test_verify_command.py
+- docs/operations/recovery.md
+- CHANGELOG.md
+base_commit: 5f52afe465e55801597a8ab562d76d24061e3133
+branch: claude/verification-interrupt-recovery
+created_at: '2026-09-01T22:36:50Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 2
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 为被中断的验证运行提供确定性 CLI 收尾能力，使任务不再永久卡在 VERIFYING，并复用既有 FAILED 重试路径
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - src/aiflow/cli.py
+  - src/aiflow/verification_service.py
+  - tests/integration/test_verify_command.py
+  - docs/operations/recovery.md
+  - CHANGELOG.md
+  inputs:
+  - TASK-0033 的 events.jsonl 停在 sequence 13 的 verification_started，对应 run 在 mypy 之后被中断，未产出任何终止事件。
+  - src/aiflow/verification_service.py 的 _start_local_verification 在非 CI 路径被无条件调用，只接受
+    IMPLEMENTING 或 VERIFIED/WAITING_FOR_FINAL_REVIEW/APPROVED_FOR_MERGE。
+  - src/aiflow/state.py 中 VERIFYING 的合法出口，以及 src/aiflow/task_service.py 中 begin_task
+    只接受 READY_TO_IMPLEMENT 与 FAILED。
+  - docs/operations/recovery.md 现有 REC-01 至 REC-10 均未覆盖「验证运行被中断」这一状态。
+  permission_requirements: []
+  planned_actions:
+  - 为验证生命周期增加一个显式的中断收尾入口，把没有产出结果的运行如实记录为失败并迁移到 FAILED，复用既有 REC-04 重试路径。
+  - 补充集成测试，覆盖收尾成功路径以及在没有进行中运行时必须拒绝的路径。
+  - 在故障恢复手册新增对应条目，并在 CHANGELOG 记录该行为变化。
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0034
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - 运行 tests/integration/test_verify_command.py，覆盖中断收尾的成功路径与拒绝路径。
+  - 运行 V1 完整回归，确认既有验证生命周期、Gate 与证据语义未回归。
+  - 用临时 fixture 任务复现停在 VERIFYING 且无终止事件的状态，确认新入口迁移到 FAILED 后 validate 仍通过。
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 805f584d63b7fbf1ef7585282c230577018f49eb0b591a9ddbe5916be8002a5c
+goal: 为被中断的验证运行提供确定性 CLI 收尾能力，使任务不再永久卡在 VERIFYING，并复用既有 FAILED 重试路径
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-09-01T22:44:40Z'
+subject_commit: ce70df82af9fb0b4a2156dc59a7c8edd643fb8f0
+task_id: TASK-0034
+updated_at: '2026-09-01T23:23:59Z'
+worktree_dirty: false
+worktree_dirty_paths: []
