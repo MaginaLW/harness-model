@@ -55,6 +55,30 @@ def test_generic_logs_and_xml_reports_remain_visible_to_git() -> None:
     assert "*.xml" not in GITIGNORE.read_text(encoding="utf-8")
 
 
+def test_task_audit_evidence_is_never_ignored() -> None:
+    """The ledger must stay visible whatever ignore rules the repository grows."""
+    for audit_path in (
+        ".ai/tasks/TASK-0000/task.yaml",
+        ".ai/tasks/TASK-0000/events.jsonl",
+        ".ai/tasks/TASK-0000/spec.md",
+        ".ai/tasks/TASK-0000/evidence.json",
+        ".ai/tasks/TASK-0000/approvals.json",
+        ".ai/tasks/TASK-0000/classification.json",
+        ".ai/tasks/TASK-0000/reviews/REV-0000-r0001.json",
+        ".ai/tasks/TASK-0000/review-contexts/context.json",
+        ".ai/tasks/TASK-0000/verifier-contexts/context.json",
+    ):
+        assert not _is_ignored(audit_path), audit_path
+
+
+def test_ledger_extensions_are_never_ignored_globally() -> None:
+    """A broad extension rule would hide the ledger without tripping any path check."""
+    text = GITIGNORE.read_text(encoding="utf-8")
+
+    for pattern in ("*.json", "*.jsonl", "*.yaml", "*.yml", "*.md"):
+        assert pattern not in text, pattern
+
+
 def test_recovery_document_sets_evidence_and_path_boundaries() -> None:
     text = RECOVERY.read_text(encoding="utf-8")
 
