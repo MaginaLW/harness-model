@@ -1,0 +1,81 @@
+allowed_scope:
+- .gitignore
+- CLAUDE.md
+- README.md
+- docs/operations/recovery.md
+- tests/integration/test_agent_entry_files.py
+- tests/integration/test_repository_hygiene.py
+- CHANGELOG.md
+base_commit: 55fd5a530bea9e16df06695b9628b1d5e420093b
+branch: claude/repository-hygiene-redo
+created_at: '2026-09-02T11:32:45Z'
+current_state: READY_TO_IMPLEMENT
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: false
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 在当前 main 上重做仓库卫生收敛：补充根级生成物忽略规则、把 AGENTS.md 确立为唯一共享 Agent 权威并将 CLAUDE.md 收敛为受测适配入口、记录运行期证据保留与有界清理边界，不改运行期行为、不重写历史审计记录
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - .gitignore
+  - CLAUDE.md
+  - README.md
+  - docs/operations/recovery.md
+  - tests/integration/test_agent_entry_files.py
+  - tests/integration/test_repository_hygiene.py
+  - CHANGELOG.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - 增加根级忽略规则覆盖 Python 构建、分发、HTML 覆盖率与带后缀的 coverage 数据，且不遮蔽任务本地审计证据。
+  - 将 AGENTS.md 确立为唯一共享 Agent 权威，把 CLAUDE.md 收敛为链接到它的受测 Claude 适配入口。
+  - 记录运行期证据的追加式保留、有界清理与历史绝对路径例外，不重写既有记录。
+  - 为入口文件契约与忽略规则契约补充聚焦的集成测试覆盖。
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0036
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - 运行聚焦的仓库卫生与 Agent 入口集成测试。
+  - 用 git check-ignore 核对代表性生成路径，并确认任务证据的宽泛扩展名未被全局忽略。
+  - 运行 active Policy 定义的完整验证计划、最终 scope 校验与 Gate。
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 04844c642eb64465cf26b8b9b37ba14b0bc09b75de678108aded6666b3ccbacf
+goal: 在当前 main 上重做仓库卫生收敛：补充根级生成物忽略规则、把 AGENTS.md 确立为唯一共享 Agent 权威并将 CLAUDE.md 收敛为受测适配入口、记录运行期证据保留与有界清理边界，不改运行期行为、不重写历史审计记录
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-09-02T11:33:32Z'
+subject_commit: 55fd5a530bea9e16df06695b9628b1d5e420093b
+task_id: TASK-0036
+updated_at: '2026-09-02T11:34:00Z'
+worktree_dirty: false
+worktree_dirty_paths: []
