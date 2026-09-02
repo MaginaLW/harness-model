@@ -11,6 +11,8 @@ package 已发布到外部 registry。
 
 ### Fixed
 
+- 修复 CI 任务解析在 base 分支前移后无法唯一确定任务的缺陷。`tools/ci/resolve_task.py` 原先用两点 `git diff base head` 比较两棵树，一旦 base 合入了另一个任务的记录，该任务目录会作为 head 侧变更出现，解析随即以「must identify exactly one .ai/tasks/TASK-* directory」失败——即使 head 完全没变。改为以 merge-base 起算的三点 `git diff base...head`，只反映本 PR 引入的变更。显式 `AI_FLOW_TASK_ID` 的优先级、零个或多个任务目录的拒绝路径与原错误文案均不变。
+
 - active Policy 升至 `2.2.0`，将 V1/V2 完整回归与 coverage XML 的时限分别调整为 900 秒和 1200 秒，并将 `ai-quality-gate` job 上限调整为 90 分钟以覆盖 68.5 分钟的 V2 最大固定串行预算及安装、Gate 和 runner 波动；检查集合、命令、parser、required 状态、85% 总覆盖率和 90% diff coverage 门槛均保持不变。
 - 修复正式 `pull_request` CI 在 detached SHA checkout 下的 branch binding：仅在 governance detection 后为 formal path 创建/覆盖以 `github.head_ref` 命名、显式指向 event head SHA 的 runner-local 分支，并校验前后 SHA/branch 与 ref 格式；不 fetch、不 push，bootstrap path 不变。
 - 修复 hosted runner 的临时根不一致：仅 formal `Verify`/`Gate` 将 Python `TMPDIR` 显式绑定到 `${{ runner.temp }}`，使 run、evidence、Gate 与 artifact 同根；CLI strict-descendant 与 output containment 约束不放宽，bootstrap 和其他步骤不变。
