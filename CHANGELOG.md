@@ -7,6 +7,8 @@ package 已发布到外部 registry。
 
 ### Added
 
+- 阶段一 MVP 设计的核心设计原则新增「重复问题优先 CLI 化」：对规则明确、重复出现且需要一致回答或处理的诊断、治理和操作问题，优先沉淀为调用核心程序的统一 CLI 能力，命令应提供稳定契约、自动化测试和可审计输出；探索性、一次性或仍依赖语义判断的问题不强制 CLI 化。其后两条原则编号顺延，文字未变。
+
 - `aiflow verify <TASK-ID> --abandon --actor <ACTOR> --reason "<WHY>"` 为被中断的验证运行提供确定性收尾：把没有产出任何结果的运行如实记为失败并迁移到 `FAILED`，随后按既有 REC-04 路径重试。此前一轮被中途终止的验证会把任务永久卡在 `VERIFYING`——`verify` 只接受 `IMPLEMENTING` 或重启状态，`begin` 只接受 `READY_TO_IMPLEMENT` 或 `FAILED`，唯一可达出口是抬高路由的 `escalate`。作废只追加事件并迁移状态，不写入、不修改也不删除任何 evidence 或运行日志；它不与 `--check`、`--finalize`、`--ci` 组合，要求非空 `--reason`，并拒绝任何不处于 `VERIFYING` 的任务，因此已经记录结果的运行不会被覆盖。对应恢复条目见故障恢复手册 REC-11。
 
 ### Fixed
