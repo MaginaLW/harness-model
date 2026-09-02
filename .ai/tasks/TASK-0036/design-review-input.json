@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0072",
+  "revision": 1,
+  "task_id": "TASK-0036",
+  "review_stage": "design",
+  "reviewer": "claude-independent-spec-reviewer",
+  "recorded_at": "2026-09-02T13:05:00Z",
+  "context_sha256": "72b1b66832d98f545bed6fed0de91304c533c7cbdcc20e185dd7fc327ad23a7e",
+  "outcome": "APPROVE",
+  "summary": "Reviewed frozen specification 04844c642eb64465cf26b8b9b37ba14b0bc09b75de678108aded6666b3ccbacf. The task redoes TASK-0032's content on the current main because that record binds base 5f52afe, main has advanced to 55fd5a5, and no supported CLI operation moves a task's base_commit; the specification states that relationship and leaves the historical record untouched. Scope is confined to root-anchored ignore rules, the two agent entry documents, the recovery manual, two focused integration tests and the changelog, with an explicit non-goal of touching src/aiflow, Policy, evidence schema, Gate or CI. The acceptance conditions pin the real risk of this change from both sides: representative generated paths must be ignored and task-local audit artefacts must not be, which is the failure mode a broad extension rule would introduce. The verification requirements are asserted false and the specification records why: the change touches none of the policy, verifier, approval, gate or evidence safeguards the targeted mutation manifest covers, its own integration tests already run inside the V1 full regression, and the original V2 assertion served the completed phase-two self-hosting pilot rather than this content. That downward difference from TASK-0032 was put to the project owner and confirmed explicitly, so it is a recorded owner decision rather than an agent-initiated downgrade. The implementation must keep every ignore rule root-anchored and must not extend ignores to task directory content beyond .ai/tasks/*/logs/.",
+  "findings": []
+}

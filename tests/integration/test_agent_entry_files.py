@@ -8,7 +8,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-ENTRY_FILES = (ROOT / "AGENTS.md", ROOT / "CLAUDE.md")
+AGENTS_FILE = ROOT / "AGENTS.md"
+CLAUDE_FILE = ROOT / "CLAUDE.md"
 BOOTSTRAP_MARKER = ROOT / ".ai" / "bootstrap-mode.yaml"
 AI_FLOW_SKILL = ROOT / ".claude" / "skills" / "ai-flow" / "SKILL.md"
 CORE_PRINCIPLES = (
@@ -29,9 +30,8 @@ FORBIDDEN_RULE_COPIES = (
 LINK_PATTERN = re.compile(r"\[[^]]+\]\(([^)]+)\)")
 
 
-@pytest.mark.parametrize("entry_file", ENTRY_FILES, ids=lambda path: path.name)
-def test_entry_file_has_stable_principles_and_remains_brief(entry_file: Path) -> None:
-    text = entry_file.read_text(encoding="utf-8")
+def test_agents_entry_has_complete_shared_principles_and_remains_brief() -> None:
+    text = AGENTS_FILE.read_text(encoding="utf-8")
 
     assert all(principle in text for principle in CORE_PRINCIPLES)
     assert "python -m aiflow --help" in text
@@ -40,7 +40,20 @@ def test_entry_file_has_stable_principles_and_remains_brief(entry_file: Path) ->
     assert not re.search(r"\b(?:ROUTE|VERIFY|PERMISSION)-[A-Z0-9-]+\b", text)
 
 
-@pytest.mark.parametrize("entry_file", ENTRY_FILES, ids=lambda path: path.name)
+def test_claude_entry_is_brief_adapter_without_copied_core_principles() -> None:
+    text = CLAUDE_FILE.read_text(encoding="utf-8")
+
+    assert "平台适配入口" in text
+    assert "完整阅读并遵守 [AGENTS.md](AGENTS.md)" in text
+    assert "唯一共同权威" in text
+    assert "python -m aiflow --help" in text
+    assert len(text.splitlines()) <= 12
+    assert not any(principle in text for principle in CORE_PRINCIPLES)
+    assert not any(copied_rule in text for copied_rule in FORBIDDEN_RULE_COPIES)
+    assert not re.search(r"\b(?:ROUTE|VERIFY|PERMISSION)-[A-Z0-9-]+\b", text)
+
+
+@pytest.mark.parametrize("entry_file", (AGENTS_FILE, CLAUDE_FILE), ids=lambda path: path.name)
 def test_entry_file_relative_links_exist(entry_file: Path) -> None:
     links = LINK_PATTERN.findall(entry_file.read_text(encoding="utf-8"))
 
@@ -64,14 +77,13 @@ def test_documented_startup_command_is_available() -> None:
     assert "Auditable AI code collaboration CLI" in result.stdout
 
 
-def test_formal_self_governance_is_explicit_and_shared_by_agent_entries() -> None:
+def test_formal_self_governance_is_explicit_in_shared_agent_authority() -> None:
     assert not BOOTSTRAP_MARKER.exists()
-    for entry_file in ENTRY_FILES:
-        text = entry_file.read_text(encoding="utf-8")
-        assert ".ai/bootstrap-mode.yaml" in text
-        assert "AI Flow 正式自用治理已启用" in text
-        assert "task-free 自举例外" in text
-        assert "项目所有者" in text
+    text = AGENTS_FILE.read_text(encoding="utf-8")
+    assert ".ai/bootstrap-mode.yaml" in text
+    assert "AI Flow 正式自用治理已启用" in text
+    assert "task-free 自举例外" in text
+    assert "项目所有者" in text
     skill = AI_FLOW_SKILL.read_text(encoding="utf-8")
     assert "Governance activation" in skill
     assert "bootstrap marker is intentionally absent" in skill

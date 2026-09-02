@@ -1,0 +1,29 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-02T11:34:00Z",
+    "base_commit": "55fd5a530bea9e16df06695b9628b1d5e420093b",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准 TASK-0036 冻结规格：在当前 main 上重做 TASK-0032 的仓库卫生内容；并已明确确认按内容实情将四项 V2 要求断言为 false，等级定为 V1",
+    "schema_version": "1.0",
+    "spec_sha256": "04844c642eb64465cf26b8b9b37ba14b0bc09b75de678108aded6666b3ccbacf",
+    "subject_commit": "55fd5a530bea9e16df06695b9628b1d5e420093b",
+    "task_id": "TASK-0036"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-09-02T15:46:01Z",
+    "base_commit": "55fd5a530bea9e16df06695b9628b1d5e420093b",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "40ec0cfa701790dee5c2a30cf6e8a06fd4e4ffcf28bb4a41009bd49a7308d9b2",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准 subject 4d2f548 的实现：V1 十项检查全部通过；四视角独立审核加对抗性证伪共 11 条 finding，唯一成立的高严重度缺陷（审计账本缺回归守卫）已在本 subject 修复并经实证验证。批准仅限本地只读 Gate，不授权 push、merge、deploy、删除、凭据或付费调用",
+    "schema_version": "1.0",
+    "spec_sha256": "04844c642eb64465cf26b8b9b37ba14b0bc09b75de678108aded6666b3ccbacf",
+    "subject_commit": "4d2f548b12421b5ac430fcd4d40a63273ad0ce98",
+    "task_id": "TASK-0036"
+  }
+]

@@ -1,0 +1,230 @@
+{
+  "base_commit": "55fd5a530bea9e16df06695b9628b1d5e420093b",
+  "branch": "claude/repository-hygiene-redo",
+  "classification_input_sha256": "d86219b54262ea2e64c72d0246e98e021df758cbedda01b43a45c157a239522c",
+  "content": {
+    "allowed_scope": [
+      ".gitignore",
+      "CLAUDE.md",
+      "README.md",
+      "docs/operations/recovery.md",
+      "tests/integration/test_agent_entry_files.py",
+      "tests/integration/test_repository_hygiene.py",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "在当前 main 上重做仓库卫生收敛：补充根级生成物忽略规则、把 AGENTS.md 确立为唯一共享 Agent 权威并将 CLAUDE.md 收敛为受测适配入口、记录运行期证据保留与有界清理边界，不改运行期行为、不重写历史审计记录",
+        "impact_scope": [
+          ".gitignore",
+          "CLAUDE.md",
+          "README.md",
+          "docs/operations/recovery.md",
+          "tests/integration/test_agent_entry_files.py",
+          "tests/integration/test_repository_hygiene.py",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "增加根级忽略规则覆盖 Python 构建、分发、HTML 覆盖率与带后缀的 coverage 数据，且不遮蔽任务本地审计证据。",
+          "将 AGENTS.md 确立为唯一共享 Agent 权威，把 CLAUDE.md 收敛为链接到它的受测 Claude 适配入口。",
+          "记录运行期证据的追加式保留、有界清理与历史绝对路径例外，不重写既有记录。",
+          "为入口文件契约与忽略规则契约补充聚焦的集成测试覆盖。"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0036/approvals.json",
+        ".ai/tasks/TASK-0036/classification.json",
+        ".ai/tasks/TASK-0036/design-review-context.json",
+        ".ai/tasks/TASK-0036/design-review-input.json",
+        ".ai/tasks/TASK-0036/events.jsonl",
+        ".ai/tasks/TASK-0036/review-contexts/72b1b66832d98f545bed6fed0de91304c533c7cbdcc20e185dd7fc327ad23a7e.json",
+        ".ai/tasks/TASK-0036/reviews/REV-0072-r0001.json",
+        ".ai/tasks/TASK-0036/spec.md",
+        ".ai/tasks/TASK-0036/task.yaml",
+        ".gitignore",
+        "CHANGELOG.md",
+        "CLAUDE.md",
+        "README.md",
+        "docs/operations/recovery.md",
+        "tests/integration/test_agent_entry_files.py",
+        "tests/integration/test_repository_hygiene.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/approvals.json"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/classification.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/design-review-input.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/events.jsonl"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/review-contexts/72b1b66832d98f545bed6fed0de91304c533c7cbdcc20e185dd7fc327ad23a7e.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/reviews/REV-0072-r0001.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/spec.md"
+        },
+        {
+          "additions": 81,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0036/task.yaml"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 0,
+          "path": ".gitignore"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "CHANGELOG.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 16,
+          "path": "CLAUDE.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 3,
+          "path": "README.md"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 12,
+          "path": "tests/integration/test_agent_entry_files.py"
+        },
+        {
+          "additions": 95,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_repository_hygiene.py"
+        }
+      ],
+      "totals": {
+        "additions": 464,
+        "deletions": 31,
+        "files": 16
+      }
+    },
+    "goal": "在当前 main 上重做仓库卫生收敛：补充根级生成物忽略规则、把 AGENTS.md 确立为唯一共享 Agent 权威并将 CLAUDE.md 收敛为受测适配入口、记录运行期证据保留与有界清理边界，不改运行期行为、不重写历史审计记录",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0036",
+        "--actor",
+        "claude-primary"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "5e1012e5a4f51ad6362c48ba52cf1c31837431badeee3d369f80b0812ccd8552",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "40ec0cfa701790dee5c2a30cf6e8a06fd4e4ffcf28bb4a41009bd49a7308d9b2",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "04844c642eb64465cf26b8b9b37ba14b0bc09b75de678108aded6666b3ccbacf",
+  "subject_commit": "4d2f548b12421b5ac430fcd4d40a63273ad0ce98",
+  "task_id": "TASK-0036"
+}
