@@ -9,7 +9,7 @@ allowed_scope:
 base_commit: 55fd5a530bea9e16df06695b9628b1d5e420093b
 branch: claude/repository-hygiene-redo
 created_at: '2026-09-02T11:32:45Z'
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -76,6 +76,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-02T11:33:32Z'
 subject_commit: 4d2f548b12421b5ac430fcd4d40a63273ad0ce98
 task_id: TASK-0036
-updated_at: '2026-09-02T15:31:15Z'
+updated_at: '2026-09-02T15:46:01Z'
 worktree_dirty: false
 worktree_dirty_paths: []
