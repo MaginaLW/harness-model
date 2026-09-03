@@ -28,6 +28,8 @@
 | [阶段二证据索引](docs/implementation/phase-02-evidence-index.md) | REVIEW/V2/CI/Gate 历史证据与当前回归基线的可重放边界 |
 | [阶段二验收报告](docs/implementation/phase-02-acceptance-report.md) | Chapter 13 exits、整库质量结果、Gate 与残余限制 |
 | [阶段三进入输入](docs/implementation/phase-03-entry-inputs.md) | 阶段二结束后的可审计输入和仍未满足的阶段三进入门；不构成授权 |
+| [审批开销治理与未完成任务收敛实施目录](docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md) | 当前唯一在途实施目录：账本审批开销的实测诊断、15 个未收尾 task 的终态，以及 Policy/批准/账本四章改造计划 |
+| [文档归档](docs/archive/README.md) | 章节 1–7 逐任务执行文档的归档位置、归档原则与原路径映射表 |
 | [资源感知多智能体调度设计](docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) | “编排顾问 + 确定性控制面”、整机资源租约、背压与恢复设计 |
 | [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |
 | [自适应多智能体编排预进入蓝图](docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md) | 安全控制面通过后编写编排顾问与真实 adapter 执行计划的设计输入，当前未授权实施 |
