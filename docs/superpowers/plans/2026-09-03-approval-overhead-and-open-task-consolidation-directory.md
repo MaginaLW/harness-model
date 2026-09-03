@@ -41,9 +41,9 @@ priority 0 的兜底规则，而 `ROUTE-AUTO-EXPLICIT-GUARDS` 要求 `scope.clea
 
 **M2 —— 自指放大。** `AGENTS.md` 维护模式的升级清单是 `.github/workflows/**`、
 `.ai/policy/**`、`.ai/schemas/**`、`src/aiflow/**`、`.gitignore` 与 `.gitattributes`、
-任务账本本身。这几乎等于本仓库的全部源码，`HARD-REVIEW-CI-CD`（priority 780）另外命中
-11 次。结果是维护模式对本仓库的自研工作豁免接近零 —— 这解释了为什么进入维护模式后
-体感没有改善。
+任务账本本身，以及任何有外部副作用或不可逆的动作。其中的路径项几乎等于本仓库的
+全部源码，`HARD-REVIEW-CI-CD`（priority 780）另外命中 11 次。结果是维护模式对本
+仓库的自研工作豁免接近零 —— 这解释了为什么进入维护模式后体感没有改善。
 
 **M3 —— 批准绑定精确 commit。** `src/aiflow/freshness.py` 中 `code_approval` 绑定
 `(base_commit, subject_commit, policy_sha256, spec_sha256)` 并附加 `evidence_sha256`
@@ -53,25 +53,51 @@ priority 0 的兜底规则，而 `ROUTE-AUTO-EXPLICIT-GUARDS` 要求 `scope.clea
 由 `subject_commit` 变化驱动。
 
 `subject_commit_synchronized` 的同步容差目前只用于 `classification`，没有用于任何
-approval —— 账本里已有 78 条同步事件证明这条链可审计，但批准侧用不上它。
+approval —— 账本（`.ai/tasks/*/events.jsonl`）里已有 79 条同步事件证明这条链可审计，
+但批准侧用不上它。
 
 **M4 —— action 批准是一次性券。** `.ai/schemas/approval.schema.json` 强制 action 类型
 必须携带 `single_use: true` 与 `expires_at`；`.ai/policy/permissions.yaml` 无条件
-`deny_automatic` push、merge、deploy、delete、secret_export、paid_external_call。因此
-即便任务被判为 AUTO，只要需要开 PR 就至少消耗 2 次 action 批准，每次重试再消耗 1 次。
+`deny_automatic` push、merge、deploy、delete、secret_export、paid_external_call。
 实测 20 条 action 重复批准中，有 12 条与前一条的全部绑定字段完全相同 —— 人被要求把同一
 件事批第二遍，唯一原因是上一张券已被消费。
 
+这里必须区分「Policy 要求」与「代码强制」，二者当前并不重合：
+
+- **push 与 merge 只有 Policy 要求，没有任何代码拦截。** `aiflow` CLI 没有 push、merge
+  或 deploy 子命令，`close` 的定位是 "record an externally completed merge"；
+  `src/aiflow/gate.py:531` 与 `src/aiflow/status_service.py:211` 在计算批准新鲜度前都
+  显式跳过 `approval_type == "action"`。账本可以佐证：AUTO 任务 TASK-0037（PR #8）与
+  TASK-0039（PR #12）的 `approvals.json` 均为 `[]`，终态事件是
+  `merge_approved_automatically` + `merge_recorded`，全程 0 次 action 批准。9 个 AUTO
+  task 中只有 TASK-0031 手工补记了 4 条 push/merge 类 action 批准。
+- **真正被代码单次消费的只有 `targeted_mutation_v2`。** 消费逻辑在
+  `src/aiflow/mutation_evidence.py`（重放追加式事件求已用 digest，并以 `open("x")` 独占
+  创建 `logs/action-launch-<action_sha256>.json`，冲突即 `ACTION_APPROVAL_USED`）；过期
+  由 `src/aiflow/approval.py` 的 `validate_action_file()` 与 `approval_is_current()` 强制。
+  `freshness.py` 的 `FRESHNESS_ACTION_USED` / `FRESHNESS_ACTION_EXPIRED` 分支目前没有任何
+  生产调用方，只被 `tests/fixtures/freshness/decision-table.json` 覆盖。
+
+因此 M4 的实际开销落在 REVIEW 路径与 V2 targeted mutation 上，而不是 AUTO 任务的 PR
+流程；push/merge 的重复授权是流程约定造成的人工开销，不是系统拦截造成的。
+
 **M5 —— 账本推进被计入人类工作。** `bind classification` → `bind subject` →
 `record verification and gate` → `close` 是纯机械步骤，但目前各自成为独立提交，并夹在
-人类审批点之间。一次纯文档变更（TASK-0037）产生 5 个账本提交与 1 个有效提交。全局
-44.2% 的非 merge 提交只改动 `.ai/tasks/`。
+人类审批点之间。一次纯文档变更（TASK-0037）产生 5 个非 merge 提交：4 个纯账本提交
+（`a8ebbd8` bind classification、`8b652cf` bind subject、`641fb11` record verification
+and gate、`8dd0596` close）与 1 个有效提交（`c389f56`，且该提交本身仍夹带账本文件）。
+全局 44.2% 的非 merge 提交只改动 `.ai/tasks/`。
 
 ### 1.2 根因
 
 可靠性被实现为「每一步都绑定当前版本并要求人类确认」，而不是「让机器能自证这一步安全」。
-V0/V1/V2 已经是很强的自动判据（完整测试、85% 总覆盖率、90% diff coverage、mypy、
-targeted mutation、独立 verifier），但当前 Policy 中**验证强度换不到任何审批豁免**：
+V0/V1/V2 已经是很强的自动判据（V1 起有单元测试、完整回归、mypy 与 90% diff coverage，
+V2 另加 acceptance、integration、targeted mutation 与独立 verifier；V0 只有 contract、
+scope、Ruff、format 与 smoke，不含任何测试。注意 85% 总覆盖率阈值**不在**
+`.ai/policy/verification-levels.yaml` 里 —— V1/V2 的 `coverage_xml` 检查不带
+`--cov-fail-under` 也没有 `threshold`，`pyproject.toml` 亦无 `fail_under`；85% 只由
+`.github/workflows/ai-quality-gate.yml` 的 CI 步骤强制），但当前 Policy 中**验证强度
+换不到任何审批豁免**：
 审批与验证是两条并行相加的门，而不是「验证足够强则审批可减」。M1–M5 都是这一根因的表现。
 
 ## 2. 目标与非目标
@@ -89,8 +115,10 @@ targeted mutation、独立 verifier），但当前 Policy 中**验证强度换�
 
 1. 不放松硬风险规则。`HARD-BLOCK-EXTERNAL-SENSITIVE`、`HARD-BLOCK-IRREVERSIBLE-NO-BACKUP`、
    `HARD-BLOCK-VERIFICATION-TOOL-MISSING`、`HARD-REVIEW-PRODUCTION-DATA-DELETE`、
-   `HARD-REVIEW-SECRETS-AUTH`、`HARD-REVIEW-DEPLOYMENT`、`HARD-REVIEW-REAL-EXTERNAL-ACTION`
-   全部保持不变。
+   `HARD-REVIEW-SECRETS-AUTH`、`HARD-REVIEW-CI-CD`、`HARD-REVIEW-DEPLOYMENT`、
+   `HARD-REVIEW-REAL-EXTERNAL-ACTION` 八条全部保持不变。其中 `HARD-REVIEW-CI-CD`
+   （priority 780）是当前账本里唯一实际命中过的 `HARD-*` 规则（11 次，即第 6 节
+   「`HARD-*` 规则命中次数」的全部来源），B1 尤其不得削弱它。
 2. 不降低 CI 质量门禁：完整测试、85% 总覆盖率、90% diff coverage、whitespace、Ruff、
    format、mypy 与 `main` 分支保护均不变。
 3. 不重写、不删除、不移动既有任务记录、证据与日志。
@@ -185,7 +213,12 @@ python -m aiflow validate <TASK_ID>
 #### 退出条件
 
 - 5 个 task 均处于终态或有明确记录的阻塞理由。
-- `backup/task-0033-work` 的保留理由写入文档，不被误删。
+- `backup/task-0033-work` 的保留理由写入文档，不被误删。该分支（tip `a21171b`，本地与
+  `origin` 均在）相对 `main` 领先 11 个提交，保存着 TASK-0032 的 subject `7a27dd9` 与
+  TASK-0033 的 subject `7278e10`，两者都不在 `main` 上；而这两个 task 的 `task.yaml`
+  仍声明 `branch: codex/repository-hygiene`、TASK-0029 声明 `branch: codex/formal-ci-canary`，
+  这两个分支连同 `chore/preserve-task-0031-failed-evidence` 都已不在本地和 `origin` 上。
+  因此 `backup/task-0033-work` 是这些提交的唯一留存位置。
 - 账本中不再存在无人负责的 `VERIFYING` 或 `BLOCKED` 状态。
 
 ### Chapter A3：文档一致性修复
@@ -244,7 +277,8 @@ git grep -n "Users" -- docs
 3. 保留 `ROUTE-DEFAULT-REVIEW` 作为最终兜底，不删除、不降优先级。
 4. 提升 Policy 版本，并按现有兼容性约定处理版本化 contracts。
 5. 为新规则补正向与负向分类测试：验证充分的低风险变更判为 AUTO；secrets/auth、CI/CD、
-   部署、生产数据删除、外部副作用、不可逆无备份六类仍分别命中原有 `HARD-*` 规则。
+   部署、生产数据删除、外部副作用、不可逆无备份、验证工具缺失、凭据或敏感数据外传
+   八类仍分别命中原有 `HARD-*` 规则。
 
 #### 验证
 
@@ -264,7 +298,7 @@ python -m aiflow classify <TASK_ID>
 - 新规则在正向与负向测试中均确定性成立。
 - 用历史 38 个 task 的 classification input 重放，能给出新旧路由分布对比，并逐条解释
   由 REVIEW 转为 AUTO 的每一个 task 为何不属于硬风险。
-- 七条 `HARD-*` 规则的命中结果与改造前逐条一致。
+- 八条 `HARD-*` 规则的命中结果与改造前逐条一致。
 
 ### Chapter B2：批准从绑精确 commit 改为绑范围
 
@@ -308,10 +342,16 @@ python -m aiflow gate <TASK_ID>
 
 针对 M4。20 条 action 重复批准中 12 条的绑定字段与前一条完全相同。
 
+按 M4 的实测结论，本章的改造对象必须分两类，不能只改 schema：`push` 与 `merge` 目前只有
+Policy 要求、没有代码强制，其开销来自流程约定；被代码单次消费的只有 `targeted_mutation_v2`，
+实现在 `src/aiflow/mutation_evidence.py` 与 `src/aiflow/approval.py`，而不是
+`freshness.py` 的 action 分支。
+
 #### 进入条件
 
 - 已确认 `delete`、`secret_export`、`paid_external_call`、`deploy` 四类保持单次一批。
 - 取得对「push 与 merge 改为 task 级授权」的明确决定。
+- 已确认改造后仍不新增任何自动执行 push 或 merge 的代码路径。
 
 #### 任务
 
@@ -320,10 +360,18 @@ python -m aiflow gate <TASK_ID>
    task 级授权。
 2. 定义 task 级授权的边界：一次批准覆盖该 task 在其 `allowed_scope` 内的 push，以及
    CI 门禁通过后对该 task 的 merge；`allowed_scope` 扩大即失效。
-3. 把 `expires_at` 的语义从固定时窗改为随 task 终态失效，并保留显式过期时间上限。
-4. `.ai/policy/permissions.yaml` 的 `forbidden_automatic_actions` 六项不变 —— 本章改变的
+3. 把 `expires_at` 的语义从固定时窗改为随 task 终态失效，并保留显式过期时间上限。改动点
+   在 `src/aiflow/approval.py` 的 `validate_action_file()` 与 `approval_is_current()`。
+4. 若要调整 `targeted_mutation_v2` 的一次性消费语义，改动点在
+   `src/aiflow/mutation_evidence.py`（`_used_action_digests()` 与
+   `logs/action-launch-<action_sha256>.json` 的独占创建），不要误改 `freshness.py`。
+5. 明确记录一项现状：`freshness.py` 的 `action_approval` 分支当前没有生产调用方
+   （`gate.py:531` 与 `status_service.py:211` 均先过滤掉 action，
+   `status_service.py:132` 把 `used_action_sha256s` 硬编码为 `()`）。本章要么给它接上
+   调用方，要么显式记为 dead branch —— 不得让它继续以「看起来在生效」的状态留存。
+6. `.ai/policy/permissions.yaml` 的 `forbidden_automatic_actions` 六项不变 —— 本章改变的
    是一次批准覆盖多少次执行，不是是否需要人类批准。
-5. 补负向测试：`allowed_scope` 扩大后授权失效；task 终态后授权失效；高风险四类仍单次一批。
+7. 补负向测试：`allowed_scope` 扩大后授权失效；task 终态后授权失效；高风险四类仍单次一批。
 
 #### 验证
 
@@ -338,8 +386,10 @@ python -m aiflow validate <TASK_ID>
 #### 退出条件
 
 - 一个 task 的正常 push 与 merge 只需一次 action 批准，重试不再消耗新券。
-- 六类禁止自动执行的动作仍全部需要人类批准。
+- 六类禁止自动执行的动作仍全部需要人类批准，且仍无任何自动执行它们的代码路径。
 - 高风险四类的单次一批语义有测试保护。
+- `freshness.py` 的 `action_approval` 分支已接上调用方，或已在代码与文档中显式标注为
+  当前无生产调用方。
 
 ### Chapter B4：账本推进自动化
 
@@ -404,8 +454,18 @@ python -m aiflow status <TASK_ID>
    终态事件，不得回填、覆盖或删除既有记录。
 5. **本目录不授权任何外部动作。** push、merge、deploy、delete、凭据导出、付费调用在改造
    完成前后都需要按当时生效的 Policy 单独获批。
-6. **未验证结论已标注。** 第 1 节全部数据来自账本与 `git` 历史的直接统计；第 5 节各章的
-   预期效果是设计推断，只有在对应退出条件的复算完成后才能称为已达成。
+6. **已核实与未核实的界线。** 第 1 节指标表与 M1–M5 中的全部计数，可在基线 `3ce0e06`
+   上由 `.ai/tasks/**` 与 `git` 历史直接复算。M1–M4 的机制描述引自 `.ai/policy/**`、
+   `.ai/schemas/**` 与 `src/aiflow/**` 的当前文件内容，已逐条对照源码核实；
+   「13/13 chapters 完成」引自 `docs/superpowers/state/overall.yaml`。但第 1.1 节中
+   「REVIEW 的实际含义」「维护模式体感」「重复批准的唯一原因」等表述，以及第 1.2 节的
+   根因，是对这些计数的解释与诊断，不是测量结果。第 5 节各章的预期效果同样是设计推断，
+   只有在对应退出条件的复算完成后才能称为已达成。
+7. **本目录的事实经过独立复核。** 全部事实断言已由独立 agent 按集群重新推导，并对未获
+   确认的断言做第二轮裁决。该过程改正了八处错误，其中包括一条被推翻的机制结论
+   （M4 原先声称 AUTO 任务开 PR 至少消耗 2 次 action 批准，实际无任何代码路径强制），
+   以及第 2 节非目标中漏列 `HARD-REVIEW-CI-CD` 这一处。复核覆盖第 1 节统计、
+   M1–M5 机制、Part A 的全部终态判断与归档完整性。
 
 ## 8. 归档
 
