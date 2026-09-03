@@ -1,0 +1,66 @@
+schema_version: '1.0'
+task_id: TASK-0039
+goal: 把 TASK-0031 失败轮的详细验证证据从一个游离 stash 正式落进任务账本，使其不再依赖本机 stash 存活；不修改该任务的既有记录
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: chore/preserve-task-0031-failed-evidence
+base_commit: 3fb42b67bab4e786d5305d8a73beef236a9bc989
+subject_commit: 3fb42b67bab4e786d5305d8a73beef236a9bc989
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- .ai/tasks/TASK-0031/evidence-failed-20260901T001936Z.json
+- CHANGELOG.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: READY_TO_IMPLEMENT
+created_at: '2026-09-03T10:16:01Z'
+updated_at: '2026-09-03T10:16:50Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0039
+  decision_unit_id: DU-001
+  goal: 把 TASK-0031 失败轮的详细验证证据从一个游离 stash 正式落进任务账本，使其不再依赖本机 stash 存活；不修改该任务的既有记录
+  inputs: []
+  planned_actions:
+  - 从游离 stash 中逐字节取出 TASK-0031 失败轮的 evidence.json，以带运行时刻的独立文件名落入该任务目录。
+  - 不修改 TASK-0031 的既有 events.jsonl、evidence.json、approvals.json 或其他任何记录。
+  - 在 CHANGELOG 记录该证据保全。
+  impact_scope: *id001
+  reversibility: reversible
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: true
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: local
+    regression_risk: false
+    error_detectability: high
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
+  verification_methods:
+  - 核对落盘文件与 stash 中原件的 SHA-256 逐位相同，确认是保全而非重写。
+  - 核对 TASK-0031 的既有记录字节未变。
+  - 运行 active Policy 定义的完整验证计划、最终 scope 校验与 Gate。
+  external_side_effects: []
+  permission_requirements: []
+repository_path_at_creation: D:/Repos/harness-model
