@@ -78,8 +78,8 @@ repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
 spec_frozen_at: '2026-09-03T00:01:24Z'
-subject_commit: fbdcfc8783e8a5d810fcc7e395a5349c7f10d242
+subject_commit: f6c8cb4dfd98dd1d9101f1002e3995ec9407b548
 task_id: TASK-0038
-updated_at: '2026-09-03T00:01:52Z'
+updated_at: '2026-09-03T00:05:50Z'
 worktree_dirty: false
 worktree_dirty_paths: []
