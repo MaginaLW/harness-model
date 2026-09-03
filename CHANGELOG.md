@@ -13,6 +13,8 @@ package 已发布到外部 registry。
 
 ### Added
 
+- 保全 TASK-0031 失败轮的详细验证证据为 `.ai/tasks/TASK-0031/evidence-failed-20260901T001936Z.json`。该轮 `unit_tests`、`regression_tests`、`coverage_xml` 三项失败，其明细被 01:03:10 通过轮重写 `evidence.json` 时覆盖，此后仅存于一个 GitHub Desktop 创建的 stash，而其依附分支已在分支整理中删除。事件账本记录了失败这一事实，重试理由亦写明本意是保留失败证据，但目录中并无保留明细的文件。落盘副本与原件 SHA-256 逐位相同，TASK-0031 的既有记录一字未改。依据 REC-04「保留失败证据以供审计」与「失败不得被后续成功覆盖」。
+
 - 阶段一 MVP 设计的核心设计原则新增「重复问题优先 CLI 化」：对规则明确、重复出现且需要一致回答或处理的诊断、治理和操作问题，优先沉淀为调用核心程序的统一 CLI 能力，命令应提供稳定契约、自动化测试和可审计输出；探索性、一次性或仍依赖语义判断的问题不强制 CLI 化。其后两条原则编号顺延，文字未变。
 
 - `aiflow verify <TASK-ID> --abandon --actor <ACTOR> --reason "<WHY>"` 为被中断的验证运行提供确定性收尾：把没有产出任何结果的运行如实记为失败并迁移到 `FAILED`，随后按既有 REC-04 路径重试。此前一轮被中途终止的验证会把任务永久卡在 `VERIFYING`——`verify` 只接受 `IMPLEMENTING` 或重启状态，`begin` 只接受 `READY_TO_IMPLEMENT` 或 `FAILED`，唯一可达出口是抬高路由的 `escalate`。作废只追加事件并迁移状态，不写入、不修改也不删除任何 evidence 或运行日志；它不与 `--check`、`--finalize`、`--ci` 组合，要求非空 `--reason`，并拒绝任何不处于 `VERIFYING` 的任务，因此已经记录结果的运行不会被覆盖。对应恢复条目见故障恢复手册 REC-11。
