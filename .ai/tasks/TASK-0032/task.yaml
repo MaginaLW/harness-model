@@ -1,0 +1,87 @@
+allowed_scope:
+- .gitignore
+- CLAUDE.md
+- README.md
+- docs/operations/recovery.md
+- tests/integration/test_agent_entry_files.py
+- tests/integration/test_repository_hygiene.py
+base_commit: 5f52afe465e55801597a8ab562d76d24061e3133
+branch: codex/repository-hygiene
+created_at: '2026-09-01T11:13:35Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: false
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Harden repository hygiene guidance and future generated-file exclusions without
+    changing runtime behavior or rewriting historical audit evidence.
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - .gitignore
+  - CLAUDE.md
+  - README.md
+  - docs/operations/recovery.md
+  - tests/integration/test_agent_entry_files.py
+  - tests/integration/test_repository_hygiene.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Add root-scoped ignore rules for Python build, distribution, HTML coverage, and
+    suffixed coverage data without hiding task-local audit evidence.
+  - Make AGENTS.md the single shared agent authority and reduce CLAUDE.md to a tested
+    Claude-specific adapter that links to it.
+  - Document append-only runtime evidence retention, bounded cleanup, and the historical
+    absolute-path exception without rewriting existing records.
+  - Add focused integration coverage for the entry-file and ignore-rule contracts.
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0032
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run the focused repository-hygiene and agent-entry integration tests.
+  - Check representative generated paths with git check-ignore and verify that broad
+    task evidence extensions are not globally ignored.
+  - Run the active Policy-defined verification plan, final scope validation, and Gate.
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package_publish
+frozen_spec_sha256: d7d2a22a988e5ecd34ccc30241baf79913eb491ce2cfcba4073ac042bae481f0
+goal: Harden repository hygiene guidance and future generated-file exclusions without
+  changing runtime behavior or rewriting historical audit evidence.
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-09-01T11:15:58Z'
+subject_commit: 7a27dd9dda01062f97080d549b31f692bd5214d8
+task_id: TASK-0032
+updated_at: '2026-09-01T13:29:09Z'
+worktree_dirty: false
+worktree_dirty_paths: []

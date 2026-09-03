@@ -1,0 +1,20 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "294ae375b76576c37cae7c3e9d03ed09745f3d0ebba07696bdaf84bcda4c71dc",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0032",
+  "parameter_summary": "Repeat the five fixed Phase 02 critical mutations once against unchanged repository-hygiene subject 7a27dd9dda01062f97080d549b31f692bd5214d8 solely to complete a full V2 retry under the repository .venv after the previous verification used stale global Python package metadata; preserve all prior evidence and write only new TASK-0032-local evidence, receipts, and logs.",
+  "subject_commit": "7a27dd9dda01062f97080d549b31f692bd5214d8",
+  "conditions": [
+    "Use the repository-local .venv/Scripts/python.exe to launch the full V2 verification; its installed aiflow metadata and runtime version must both equal 0.2.0 before launch.",
+    "Use only the committed .ai/mutations/phase-02-critical-manifest.json entries MUT-V2-001 through MUT-V2-005 in manifest order; run each baseline detector and mutant detector exactly once.",
+    "Create and clean up at most five TASK-0032-owned isolated temporary worktrees; do not alter the main worktree or any pre-existing repository data.",
+    "Preserve the prior failed verification, its five killed-mutation results, and action receipt append-only; write only new TASK-0032-local mutation evidence, action receipts, and logs in addition to bounded temporary worktrees.",
+    "Do not push, merge, deploy, publish, access credentials, call external models or paid services, or make network calls.",
+    "Fail closed before launch if task, decision unit, base, subject, frozen specification, Policy, classification, approval, receipt, manifest, runner source, or ledger bindings differ.",
+    "Launch, failure, or interruption consumes this retry authorization once; do not retry or reuse it for another subject.",
+    "Do not make any business-file change under this authorization."
+  ],
+  "expires_at": "2026-09-01T18:00:00Z",
+  "single_use": true
+}

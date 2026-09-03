@@ -1,0 +1,64 @@
+schema_version: '1.0'
+task_id: TASK-0033
+goal: 将规则明确且重复出现的问题优先沉淀为统一 CLI 的策略加入产品核心设计原则，并明确复用核心程序、可测试与可审计边界
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: codex/repository-hygiene
+base_commit: 77197964369cb8291f9a8b07ff1f7057f9c5b6f0
+subject_commit: 7278e10799a9306356a096a3fff1694521fb62e9
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: VERIFYING
+created_at: '2026-09-01T14:25:55Z'
+updated_at: '2026-09-01T14:56:26Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0033
+  decision_unit_id: DU-001
+  goal: 将规则明确且重复出现的问题优先沉淀为统一 CLI 的策略加入产品核心设计原则，并明确复用核心程序、可测试与可审计边界
+  inputs: []
+  planned_actions:
+  - 在阶段一 MVP 的核心设计原则中加入“重复问题优先 CLI 化”，明确适用条件与工程边界。
+  impact_scope: *id001
+  reversibility: reversible
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: local
+    regression_risk: false
+    error_detectability: high
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
+  verification_methods:
+  - 核对核心设计原则中的新增条目与程序裁决、Policy 单一来源和轻薄适配层原则一致。
+  - 运行 Markdown diff 检查、AI Flow contract/scope 校验和 active Policy 指定的验证。
+  external_side_effects: []
+  permission_requirements: []
+repository_path_at_creation: D:/Repos/harness-model
+frozen_spec_sha256: 2b8a627f52a6c6c99c50ce8040f29d3e7cd5813cb904f6d5ffd37008a8ea0aa9
+spec_frozen_at: '2026-09-01T14:29:23Z'
