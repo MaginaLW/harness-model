@@ -2,7 +2,7 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前治理模式：项目所有者已明确结束自举并移除 bootstrap 标记，AI Flow 正式自用治理已启用。本次退出 PR 仍由目标分支当时的 active 标记触发普通质量门；合并后的后续代码、配置、CI 或行为变更必须创建或恢复 AI Flow task，并通过适用的审批、验证与 Gate。退出自举不授权任何外部或破坏性动作。
+> 当前治理模式：项目所有者已明确决定进入仓库维护模式并重建 bootstrap 标记，task-free 例外已启用。本次进入 PR 仍由目标分支当时缺失的标记触发正式路径；合并后的后续代码、配置、CI 或行为变更不再强制创建 AI Flow task。维护模式只解除任务账本的强制性：CI 质量门禁的每一项检查与阈值、`main` 分支保护、以及高风险动作必须单独获批的要求都不放松，AI Flow CLI 保持完全可用。进入维护模式不授权任何外部或破坏性动作；恢复强制模式只需删除标记文件。
 
 > 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.2.0`。V1/V2 的完整回归和 coverage XML 检查分别使用 900 秒和 1200 秒上限，未减少检查或降低覆盖率门槛。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
@@ -70,12 +70,12 @@ Chapters 1–7 按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-c
 
 ## 开始参与
 
-AI Flow 正式自用治理已经生效；以下步骤适用于本仓库后续代码、配置、CI 或行为变更。
+仓库处于维护模式；以下步骤适用于本仓库后续代码、配置、CI 或行为变更。
 
 1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时，再阅读其 [平台适配入口](CLAUDE.md)。
 2. 先核对 [overall state](docs/superpowers/state/overall.yaml) 与当前 chapter state，再按对应阶段的设计和实施目录选择下一项工作。
-3. 以已安装 CLI、active Policy 与当前 task ledger 的确定性结论为准；计划中的未来能力不能当作已经可用。
-4. 保留任务范围、决定、批准和验证证据；出现变化时升级，不自行降级或跳过 Gate。
+3. 变更无需强制创建 task，但仍须通过 CI 质量门禁；风险较高、需要留痕或需要人类决策的变更应主动走 AI Flow。
+4. 使用 AI Flow 时，以已安装 CLI、active Policy 与当前 task ledger 的确定性结论为准，保留范围、决定、批准与验证证据；出现变化时升级，不自行降级或跳过 Gate。
 
 ## 运行期 observation 与 Hooks 的当前边界
 

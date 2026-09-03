@@ -9,7 +9,9 @@ Use this Skill for work that may change repository code, configuration, CI, gene
 
 ## Governance activation
 
-The project owner has ended bootstrap mode. The bootstrap marker is intentionally absent, and the governed lifecycle below applies to repository code, configuration, CI, and other behavior-changing work. Do not recreate a task-free bootstrap exception without a new explicit project-owner decision.
+The project owner has entered repository maintenance mode. The bootstrap marker is active, so the task-free bootstrap exception applies: repository code, configuration, CI, and other behavior-changing work no longer requires a task. Do not remove that marker or unilaterally reinstate mandatory tasks without a new explicit project-owner decision.
+
+Maintenance mode lifts only the task ledger. Every CI quality check and threshold still runs, `main` stays protected, high-risk actions still need their own approval, and existing task records, evidence and logs remain append-only. The governed lifecycle below still applies in full to any change you do take through AI Flow — use it for work that is risky, needs an audit trail, or needs a human decision.
 
 ## Start and inspect
 

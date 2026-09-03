@@ -1,0 +1,85 @@
+allowed_scope:
+- .ai/bootstrap-mode.yaml
+- AGENTS.md
+- README.md
+- .claude/skills/ai-flow/SKILL.md
+- tests/integration/test_agent_entry_files.py
+- CHANGELOG.md
+base_commit: fbdcfc8783e8a5d810fcc7e395a5349c7f10d242
+branch: claude/enter-bootstrap-mode
+created_at: '2026-09-02T23:59:17Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 按项目所有者的明确决定重建 bootstrap 标记，进入仓库维护模式：后续代码、配置、CI 或行为变更不再强制创建 AI Flow task，质量门禁（完整测试、85%
+    覆盖率、90% diff coverage、whitespace、ruff、format、mypy）保持不变
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  - documentation
+  impact_scope:
+  - .ai/bootstrap-mode.yaml
+  - AGENTS.md
+  - README.md
+  - .claude/skills/ai-flow/SKILL.md
+  - tests/integration/test_agent_entry_files.py
+  - CHANGELOG.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - 新建 .ai/bootstrap-mode.yaml，内容为 CI 判定所要求的规范两行：mode 为 bootstrap_auto，status 为 active。
+  - 更新 AGENTS.md 的治理模式声明，记录项目所有者本次的明确决定与其边界。
+  - 更新 README.md 的当前治理模式段落，与 AGENTS.md 保持一致。
+  - 更新 ai-flow Skill 的 Governance activation 小节，使其描述维护模式下的实际适用条件。
+  - 更新 tests/integration/test_agent_entry_files.py，把入口文件契约断言改为维护模式下的事实。
+  - 在 CHANGELOG 记录治理模式切换。
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0038
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - 运行 tests/integration/test_github_workflow.py 与 test_agent_entry_files.py，确认 bootstrap
+    判定契约与入口文件契约在新模式下成立。
+  - 核对标记文件为 CI grep -qx 所要求的精确两行，不含引号或额外字段。
+  - 运行 active Policy 定义的完整验证计划、最终 scope 校验与 Gate。
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 4127ad60c80de1fea7a209919ccb83d841fa3b422f67a5a7541b37a46e5d1db8
+goal: 按项目所有者的明确决定重建 bootstrap 标记，进入仓库维护模式：后续代码、配置、CI 或行为变更不再强制创建 AI Flow task，质量门禁（完整测试、85%
+  覆盖率、90% diff coverage、whitespace、ruff、format、mypy）保持不变
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-09-03T00:01:24Z'
+subject_commit: f6c8cb4dfd98dd1d9101f1002e3995ec9407b548
+task_id: TASK-0038
+updated_at: '2026-09-03T00:20:22Z'
+worktree_dirty: false
+worktree_dirty_paths: []

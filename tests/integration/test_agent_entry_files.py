@@ -10,10 +10,11 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 AGENTS_FILE = ROOT / "AGENTS.md"
 CLAUDE_FILE = ROOT / "CLAUDE.md"
+README_FILE = ROOT / "README.md"
 BOOTSTRAP_MARKER = ROOT / ".ai" / "bootstrap-mode.yaml"
 AI_FLOW_SKILL = ROOT / ".claude" / "skills" / "ai-flow" / "SKILL.md"
 CORE_PRINCIPLES = (
-    "必须进入 AI Flow",
+    "必须走完整流程",
     "不得绕过任务状态、允许范围、所需批准或验证门",
     "不得自行降低分流或验证等级",
     "高风险动作必须单独获批",
@@ -77,14 +78,31 @@ def test_documented_startup_command_is_available() -> None:
     assert "Auditable AI code collaboration CLI" in result.stdout
 
 
-def test_formal_self_governance_is_explicit_in_shared_agent_authority() -> None:
-    assert not BOOTSTRAP_MARKER.exists()
+def test_maintenance_mode_is_explicit_in_shared_agent_authority() -> None:
+    assert BOOTSTRAP_MARKER.read_text(encoding="utf-8").splitlines() == [
+        "mode: bootstrap_auto",
+        "status: active",
+    ]
     text = AGENTS_FILE.read_text(encoding="utf-8")
     assert ".ai/bootstrap-mode.yaml" in text
-    assert "AI Flow 正式自用治理已启用" in text
-    assert "task-free 自举例外" in text
+    assert "仓库维护模式" in text
+    assert "task-free 例外已启用" in text
     assert "项目所有者" in text
     skill = AI_FLOW_SKILL.read_text(encoding="utf-8")
     assert "Governance activation" in skill
-    assert "bootstrap marker is intentionally absent" in skill
+    assert "bootstrap marker is active" in skill
     assert "task-free bootstrap exception" in skill
+
+
+def test_maintenance_mode_states_what_it_does_not_relax() -> None:
+    """The lifted requirement is the task ledger, nothing else."""
+    agents = AGENTS_FILE.read_text(encoding="utf-8")
+    readme = README_FILE.read_text(encoding="utf-8")
+    skill = AI_FLOW_SKILL.read_text(encoding="utf-8")
+
+    for keeps in ("质量门禁", "分支保护", "单独获批", "追加式"):
+        assert keeps in agents, keeps
+
+    assert "维护模式" in readme
+    assert "AI Flow 正式自用治理已启用" not in readme
+    assert "Maintenance mode lifts only the task ledger" in skill
