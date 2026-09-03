@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "1613b7d38b31071260068d75e26c1d25fe05e6ed12011b168a9a3dc6de123761",
+  "action_type": "merge",
+  "target": "GitHub PR #2: codex/verification-timeout-hardening@9b3a58d63070eb8d221c7061fd383cb2ce7bcd3d -> main@37dce2a61a5dc484b077ba4463cede2be04dd746",
+  "parameter_summary": "Execute exactly one GitHub merge-commit merge; preserve the source branch; do not squash, rebase, delete any branch, push any other ref, create a tag or release, or deploy.",
+  "subject_commit": "acff6cac45c8c7be64bb8a83dbf264fd039e3f17",
+  "conditions": [
+    "PR #2 remains OPEN with base main and head 9b3a58d63070eb8d221c7061fd383cb2ce7bcd3d.",
+    "The required ai-quality-gate for head 9b3a58d63070eb8d221c7061fd383cb2ce7bcd3d remains COMPLETED/SUCCESS.",
+    "GitHub reports mergeable MERGEABLE and mergeStateStatus CLEAN.",
+    "Local aiflow gate TASK-0030 remains passed with no reason codes.",
+    "The source branch is preserved and no other external action is performed."
+  ],
+  "expires_at": "2026-09-02T23:59:59Z",
+  "single_use": true
+}
