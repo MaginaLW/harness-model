@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "action_sha256": "9d4d7f602b7962ddff8b7c37b474ac517b8e9cec0802797efb48833c0521f8c6",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-01T04:33:13Z",
+    "base_commit": "0989da65702a756c229b0dc7a1c14d56639ad384",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-03T23:59:59Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner explicitly approved exact single-use push action 9d4d7f602b7962ddff8b7c37b474ac517b8e9cec0802797efb48833c0521f8c6 to create origin refs/heads/codex/formal-ci-canary-r2 at ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 from an absent remote ref, without force, tags, deletion, PR creation or any other remote write; authorization expires 2026-09-03T23:59:59Z.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57",
+    "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+    "task_id": "TASK-0031"
+  },
+  {
+    "action_sha256": "f255a457dc9584df7d788e6fe6febdff5534476acb4648d92206105a0f5f0173",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-01T10:00:48Z",
+    "base_commit": "0989da65702a756c229b0dc7a1c14d56639ad384",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-04T23:59:59Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner explicitly approved exact single-use create-PR action f255a457dc9584df7d788e6fe6febdff5534476acb4648d92206105a0f5f0173 to create one non-draft pull request in MaginaLW/harness-model from codex/formal-ci-canary-r2@ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 into main@0989da65702a756c229b0dc7a1c14d56639ad384 with the fixed title and body, excluding edits and merge; authorization expires 2026-09-04T23:59:59Z.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57",
+    "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+    "task_id": "TASK-0031"
+  },
+  {
+    "action_sha256": "51daf2cdadc15bb02aec3d4fbdb2c0ec359ff5e5253adeba4ebe5d5f004ae8b7",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-01T10:48:25Z",
+    "base_commit": "0989da65702a756c229b0dc7a1c14d56639ad384",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-04T23:59:59Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner explicitly approved exact single-use merge action 51daf2cdadc15bb02aec3d4fbdb2c0ec359ff5e5253adeba4ebe5d5f004ae8b7 for PR #3 head ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 into main@0989da65702a756c229b0dc7a1c14d56639ad384 using a merge commit, preserving the source branch, bound to subject f75f59e9ac245cebc75f4052fbdbd80604376aa7, expiring 2026-09-04T23:59:59Z.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57",
+    "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+    "task_id": "TASK-0031"
+  },
+  {
+    "action_sha256": "69fda33e1e0be22467a252aea18f60d9223af4c6666cca93c41070f56f32e5b8",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-01T10:54:40Z",
+    "base_commit": "0989da65702a756c229b0dc7a1c14d56639ad384",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-04T23:59:59Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner explicitly approved exact single-use post-merge audit push action 69fda33e1e0be22467a252aea18f60d9223af4c6666cca93c41070f56f32e5b8 to fast-forward origin refs/heads/codex/formal-ci-canary-r2 from ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 to closure commit 5233f07413bae56dcab8cdc7baaf495487f31768, without force, tags, deletion, main modification or any other remote write; authorization expires 2026-09-04T23:59:59Z.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57",
+    "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+    "task_id": "TASK-0031"
+  }
+]

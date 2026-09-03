@@ -1,0 +1,21 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "4725b8690b42a33569f74d770700e614d30b380bfac6b29f4f4b6732b27e3204",
+  "action_type": "github_merge_pull_request",
+  "target": "repository=MaginaLW/harness-model;pull_request=3;base=main;head=codex/formal-ci-canary-r2",
+  "parameter_summary": "pull_request=3;base_sha=0989da65702a756c229b0dc7a1c14d56639ad384;head_sha=ff7c78c6c4028a32ee78ff1c95af2ff9db68d110;merge_method=merge_commit;required_check=ai-quality-gate;required_run=33495236530;required_job=99815763364;preserve_source_branch=true;admin_bypass=false;auto_merge=false;argv=[gh,pr,merge,3,--repo,MaginaLW/harness-model,--merge,--match-head-commit,ff7c78c6c4028a32ee78ff1c95af2ff9db68d110]",
+  "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+  "conditions": [
+    "Bind this one merge to TASK-0031 DU-001, base 0989da65702a756c229b0dc7a1c14d56639ad384, subject f75f59e9ac245cebc75f4052fbdbd80604376aa7, audit/PR head ff7c78c6c4028a32ee78ff1c95af2ff9db68d110, frozen spec 7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57, Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f and classification input 4725b8690b42a33569f74d770700e614d30b380bfac6b29f4f4b6732b27e3204.",
+    "Immediately before launch require PR #3 to be open, non-draft, CLEAN and MERGEABLE with base main@0989da65702a756c229b0dc7a1c14d56639ad384 and head codex/formal-ci-canary-r2@ff7c78c6c4028a32ee78ff1c95af2ff9db68d110. Require origin refs/heads/main and refs/heads/codex/formal-ci-canary-r2 to resolve to those exact commits.",
+    "Require the branch-protection check ai-quality-gate to be COMPLETED/SUCCESS for exact head ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 in pull_request run 33495236530 and job 99815763364. Require its formal Verify and Gate step and diagnostics upload to have succeeded.",
+    "Require CI evidence mode=ci, conclusion=passed, V1 10/10 required checks passed, subject f75f59e9ac245cebc75f4052fbdbd80604376aa7, attestation head ff7c78c6c4028a32ee78ff1c95af2ff9db68d110, governance-only attestation true and external Gate passed with no reason codes. Bind the downloaded evidence SHA-256 a1949b1882399b8e1df1423c4a762debd6e93365b1bf22ace2ce154632eb68d9 and Gate SHA-256 d69efb9b43f76e921257e51b0a034327d4b8d5aecdebaae67eacc3ba11502419 to artifact 9795615054 digest sha256:bc50e056ca01d7f0ff88145f10741cc77a92cc06ee077d00b879f16388e0b343.",
+    "Run only the fixed gh pr merge argv recorded in parameter_summary. Use a merge commit; do not squash, rebase, enable auto-merge, bypass protection, override a failed or pending check, edit the pull request, or merge another head/base pair.",
+    "Repository setting deleteBranchOnMerge must remain false. Do not pass --delete-branch; after merge require refs/heads/codex/formal-ci-canary-r2 to remain at ff7c78c6c4028a32ee78ff1c95af2ff9db68d110.",
+    "After success require PR #3 state MERGED and the new main tip to be a merge commit whose first parent is 0989da65702a756c229b0dc7a1c14d56639ad384 and second parent is ff7c78c6c4028a32ee78ff1c95af2ff9db68d110. Record the resulting merge commit in TASK-0031 through the public close command.",
+    "Launch, failure or interruption consumes this authorization once. Do not retry or run a corrective merge under the same approval.",
+    "This action does not authorize another push, force operation, source-branch deletion, repository-setting change, tag or release creation, deployment, publication, secret export, paid call or unrelated pull-request operation."
+  ],
+  "expires_at": "2026-09-04T23:59:59Z",
+  "single_use": true
+}

@@ -1,33 +1,29 @@
-schema_version: '1.0'
-task_id: TASK-0031
-goal: Document the retained evidence and acceptance record for the first post-bootstrap
-  formal AI Flow pull request (#2) without changing workflow behavior or retroactively
-  altering historical task or PR artifacts.
-repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
-branch: codex/formal-ci-canary-r2
-base_commit: 0989da65702a756c229b0dc7a1c14d56639ad384
-subject_commit: f75f59e9ac245cebc75f4052fbdbd80604376aa7
-worktree_dirty: false
-worktree_dirty_paths: []
-allowed_scope: &id001
+allowed_scope:
 - docs/operations/github-branch-protection.md
-forbidden_actions:
-- push
-- merge
-- deploy
-- delete
-- secret_export
-- paid_external_call
-current_state: APPROVED_FOR_MERGE
+base_commit: 0989da65702a756c229b0dc7a1c14d56639ad384
+branch: codex/formal-ci-canary-r2
 created_at: '2026-08-31T23:57:40Z'
-updated_at: '2026-09-01T01:03:10Z'
+current_state: MERGED
 decision_units:
-- schema_version: '1.0'
-  task_id: TASK-0031
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: low
+    interaction_scope: local
+    mechanical: false
+    regression_risk: false
   decision_unit_id: DU-001
+  external_side_effects: []
   goal: Document the retained evidence and acceptance record for the first post-bootstrap
     formal AI Flow pull request (#2) without changing workflow behavior or retroactively
     altering historical task or PR artifacts.
+  impact:
+    level: low
+  impact_categories:
+  - documentation
+  impact_scope:
+  - docs/operations/github-branch-protection.md
   inputs:
   - TASK-0029 remains an immutable BLOCKED historical task on codex/formal-ci-canary;
     its two Policy 2.1.0 V1 attempts timed out at the 600-second coverage bound and
@@ -39,6 +35,7 @@ decision_units:
     merge commit 0989da65702a756c229b0dc7a1c14d56639ad384, and successful run 33450685267;
     its diagnostics artifact is temporary while the PR and check are durable platform
     records.'
+  permission_requirements: []
   planned_actions:
   - 'Add a bounded operations section that records the already-observed PR #2 canary
     facts and the general evidence-retention procedure.'
@@ -46,40 +43,44 @@ decision_units:
     in the historical PR body, without editing that PR or any historical task artifact.
   - Preserve TASK-0029's failed attempts as historical evidence and explain that TASK-0030
     removed the runtime blocker rather than rewriting those failures.
-  impact_scope: *id001
+  protections:
+    dry_run: true
+    verified_backup: true
   reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0031
+  verification:
+    automatic: true
+    tools_missing: false
   verification_methods:
   - Run the active Policy-defined V1 plan and read-only Gate for TASK-0031.
   - Validate task contracts and final Git scope.
   - Re-read the immutable PR, Actions run, job steps, and artifact metadata used by
     the documentation before final verification.
-  external_side_effects: []
-  permission_requirements: []
-  scope:
-    clear: true
-  impact:
-    level: low
-  protections:
-    verified_backup: true
-    dry_run: true
-  verification:
-    automatic: true
-    tools_missing: false
-  impact_categories:
-  - documentation
-  business_direction_count: 1
-  change_characteristics:
-    mechanical: false
-    behavior_changed: false
-    code_modified: false
-    interaction_scope: local
-    regression_risk: false
-    error_detectability: low
   verification_requirements:
     acceptance_required: false
+    independent_verifier_required: false
     integration_required: false
     targeted_mutation_required: false
-    independent_verifier_required: false
-repository_path_at_creation: D:/Repos/harness-model
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
 frozen_spec_sha256: 7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57
+goal: Document the retained evidence and acceptance record for the first post-bootstrap
+  formal AI Flow pull request (#2) without changing workflow behavior or retroactively
+  altering historical task or PR artifacts.
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
 spec_frozen_at: '2026-08-31T23:59:30Z'
+subject_commit: f75f59e9ac245cebc75f4052fbdbd80604376aa7
+task_id: TASK-0031
+updated_at: '2026-09-01T10:54:40Z'
+worktree_dirty: false
+worktree_dirty_paths: []
