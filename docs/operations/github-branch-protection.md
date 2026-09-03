@@ -26,7 +26,7 @@ While the pull request's base commit contains `.ai/bootstrap-mode.yaml` with the
 
 The workflow file is not proof that enforcement is active. Before claiming the repository is protected, run it on a real pull request, configure `ai-quality-gate` as required, and retain platform evidence that the target branch rejects direct/force pushes and bypasses outside the named emergency roles.
 
-The historical bootstrap mode never granted push, merge, deployment, deletion, secret-export, or paid-call authority. The project owner has now ended bootstrap; future PRs use formal AI Flow task resolution, verification, and Gate while the same external-action and platform controls remain in force.
+Bootstrap mode has never granted push, merge, deployment, deletion, secret-export, or paid-call authority, and still does not. The project owner ended bootstrap once and has since re-entered it as repository maintenance mode, so PRs again take the bootstrap path: task resolution, AI Flow `verify`, and the Gate are skipped, while every quality check and threshold above, the branch-protection rule, the required check name, and the separate approval each external action needs all remain in force. AGENTS.md carries the escalation list of change classes that still go through AI Flow.
 
 ## Formal-mode canary evidence
 

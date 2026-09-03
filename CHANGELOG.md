@@ -7,6 +7,8 @@ package 已发布到外部 registry。
 
 ### Changed
 
+- 为维护模式补充升级清单：`.github/workflows/**`、`.ai/policy/**`、`.ai/schemas/**`、`src/aiflow/**`、`.gitignore` 与 `.gitattributes`、任务账本本身，以及任何有外部副作用或不可逆的动作，仍须走 AI Flow。标记本身是二值的，无法区分「改一行文档」与「改 CI 任务解析」——本轮的 TASK-0035 正属于后者，而 TASK-0036 的实现审核抓到了全部测试都放过的忽略规则漏洞；清单由入口文件契约测试强制，AGENTS.md 的行数上限相应放宽到 27。同时修正 `docs/operations/github-branch-protection.md` 中「所有者已结束自举、后续 PR 走正式路径」的过时表述。
+
 - 项目所有者明确决定进入仓库维护模式：重建 `.ai/bootstrap-mode.yaml`（`mode: bootstrap_auto` / `status: active`），代码、配置、CI 或行为变更不再强制创建 AI Flow task。维护模式**只**解除任务账本的强制性——CI 质量门禁的每一项检查与阈值（完整测试、85% 总覆盖率、90% diff coverage、whitespace、Ruff、format、mypy）、`main` 分支保护、以及高风险动作必须单独获批的要求均不放松；既有任务记录、证据与日志仍是追加式的。`src/aiflow/**` 不含任何 bootstrap 感知，CLI 保持完全可用，风险较高或需要留痕的变更仍应主动走 AI Flow。CI 在 base SHA 上读取标记，因此本次进入 PR 自身仍走正式路径；恢复强制模式只需删除标记文件。
 
 ### Added
