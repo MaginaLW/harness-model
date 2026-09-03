@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-03T00:01:51Z",
+    "base_commit": "fbdcfc8783e8a5d810fcc7e395a5349c7f10d242",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者在本次会话中明确授权进入 bootstrap 模式，这构成 AGENTS.md 所要求的新的明确决定。批准冻结规格：重建标记、同步三处治理陈述与入口文件契约测试，不改 workflow、不降低任何质量门槛、不授权任何高风险动作",
+    "schema_version": "1.0",
+    "spec_sha256": "4127ad60c80de1fea7a209919ccb83d841fa3b422f67a5a7541b37a46e5d1db8",
+    "subject_commit": "fbdcfc8783e8a5d810fcc7e395a5349c7f10d242",
+    "task_id": "TASK-0038"
+  }
+]

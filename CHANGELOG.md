@@ -5,6 +5,10 @@ package 已发布到外部 registry。
 
 ## Unreleased
 
+### Changed
+
+- 项目所有者明确决定进入仓库维护模式：重建 `.ai/bootstrap-mode.yaml`（`mode: bootstrap_auto` / `status: active`），代码、配置、CI 或行为变更不再强制创建 AI Flow task。维护模式**只**解除任务账本的强制性——CI 质量门禁的每一项检查与阈值（完整测试、85% 总覆盖率、90% diff coverage、whitespace、Ruff、format、mypy）、`main` 分支保护、以及高风险动作必须单独获批的要求均不放松；既有任务记录、证据与日志仍是追加式的。`src/aiflow/**` 不含任何 bootstrap 感知，CLI 保持完全可用，风险较高或需要留痕的变更仍应主动走 AI Flow。CI 在 base SHA 上读取标记，因此本次进入 PR 自身仍走正式路径；恢复强制模式只需删除标记文件。
+
 ### Added
 
 - 阶段一 MVP 设计的核心设计原则新增「重复问题优先 CLI 化」：对规则明确、重复出现且需要一致回答或处理的诊断、治理和操作问题，优先沉淀为调用核心程序的统一 CLI 能力，命令应提供稳定契约、自动化测试和可审计输出；探索性、一次性或仍依赖语义判断的问题不强制 CLI 化。其后两条原则编号顺延，文字未变。
