@@ -1,0 +1,48 @@
+{
+  "base_commit": "5f52afe465e55801597a8ab562d76d24061e3133",
+  "branch": "codex/repository-hygiene",
+  "classification_input_sha256": "294ae375b76576c37cae7c3e9d03ed09745f3d0ebba07696bdaf84bcda4c71dc",
+  "content": {
+    "allowed_scope": [
+      ".gitignore",
+      "CLAUDE.md",
+      "README.md",
+      "docs/operations/recovery.md",
+      "tests/integration/test_agent_entry_files.py",
+      "tests/integration/test_repository_hygiene.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Harden repository hygiene guidance and future generated-file exclusions without changing runtime behavior or rewriting historical audit evidence.",
+        "impact_scope": [
+          ".gitignore",
+          "CLAUDE.md",
+          "README.md",
+          "docs/operations/recovery.md",
+          "tests/integration/test_agent_entry_files.py",
+          "tests/integration/test_repository_hygiene.py"
+        ],
+        "planned_actions": [
+          "Add root-scoped ignore rules for Python build, distribution, HTML coverage, and suffixed coverage data without hiding task-local audit evidence.",
+          "Make AGENTS.md the single shared agent authority and reduce CLAUDE.md to a tested Claude-specific adapter that links to it.",
+          "Document append-only runtime evidence retention, bounded cleanup, and the historical absolute-path exception without rewriting existing records.",
+          "Add focused integration coverage for the entry-file and ignore-rule contracts."
+        ]
+      }
+    ],
+    "goal": "Harden repository hygiene guidance and future generated-file exclusions without changing runtime behavior or rewriting historical audit evidence.",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "6b578288ff8a3d53fa446b77c3811bf98f8c24c51984dbb2d8c58c7ac2788a79",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "d7d2a22a988e5ecd34ccc30241baf79913eb491ce2cfcba4073ac042bae481f0",
+  "task_id": "TASK-0032"
+}

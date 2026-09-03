@@ -1,0 +1,20 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "4725b8690b42a33569f74d770700e614d30b380bfac6b29f4f4b6732b27e3204",
+  "action_type": "github_create_pull_request",
+  "target": "repository=MaginaLW/harness-model;base=main;head=codex/formal-ci-canary-r2",
+  "parameter_summary": "base_sha=0989da65702a756c229b0dc7a1c14d56639ad384;head_sha=ff7c78c6c4028a32ee78ff1c95af2ff9db68d110;title=docs: retain first formal AI Flow canary evidence;body_file=.ai/tasks/TASK-0031/pr-body-ff7c78c.md;body_file_sha256=d4dc5c840f48f7d0cea1339065708e0cdadcaf481f3431935c40fbc4f7fe9dfb;draft=false;labels=[];reviewers=[];projects=[];milestone=none;argv=[gh,pr,create,--repo,MaginaLW/harness-model,--base,main,--head,codex/formal-ci-canary-r2,--title,docs: retain first formal AI Flow canary evidence,--body-file,.ai/tasks/TASK-0031/pr-body-ff7c78c.md]",
+  "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+  "conditions": [
+    "Bind this one pull-request creation to TASK-0031 DU-001, base 0989da65702a756c229b0dc7a1c14d56639ad384, subject f75f59e9ac245cebc75f4052fbdbd80604376aa7, audit head ff7c78c6c4028a32ee78ff1c95af2ff9db68d110, frozen spec 7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57, Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f and classification input 4725b8690b42a33569f74d770700e614d30b380bfac6b29f4f4b6732b27e3204.",
+    "Before launch require origin main to resolve exactly to 0989da65702a756c229b0dc7a1c14d56639ad384 and origin refs/heads/codex/formal-ci-canary-r2 to resolve exactly to ff7c78c6c4028a32ee78ff1c95af2ff9db68d110. Any movement invalidates this authorization.",
+    "Before launch require no existing open or closed pull request in MaginaLW/harness-model with head codex/formal-ci-canary-r2, TASK-0031 state APPROVED_FOR_MERGE, current passed V1 evidence, and local validate, scope and read-only Gate success.",
+    "Run only the fixed gh pr create argv recorded in parameter_summary with the exact title and body-file bytes. Create one non-draft pull request; do not add labels, reviewers, projects, milestone, issue-closing keywords or other metadata.",
+    "At launch the local worktree may differ from ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 only by TASK-0031-local action, approval, push-receipt and pull-request-body audit artifacts. No business path, other task path, secret, credential material or unrelated untracked path is permitted.",
+    "After creation require the pull request base SHA, head SHA, base ref and head ref to match the authorized values. Preserve the new pull request number and URL for the TASK-0031 audit record.",
+    "Launch, failure or interruption consumes this authorization once. Do not retry or edit a partially created pull request under the same approval.",
+    "This action does not authorize editing the pull request after creation, pushing another commit, merging, closing, converting draft state, deleting the source branch, changing repository settings, creating tags or releases, deploying, publishing, exporting secrets or making paid calls."
+  ],
+  "expires_at": "2026-09-04T23:59:59Z",
+  "single_use": true
+}

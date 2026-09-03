@@ -1,0 +1,79 @@
+{
+  "base_commit": "5f52afe465e55801597a8ab562d76d24061e3133",
+  "branch": "codex/repository-hygiene",
+  "classification_input_sha256": "294ae375b76576c37cae7c3e9d03ed09745f3d0ebba07696bdaf84bcda4c71dc",
+  "content": {
+    "acceptance_conditions": [
+      "1. `git check-ignore -v build/output.whl dist/package.tar.gz htmlcov/index.html .coverage.worker`",
+      "全部命中新增的根目录规则；子目录中的同名普通路径不被过宽规则隐藏。",
+      "2. `CLAUDE.md` 不再复制 `AGENTS.md` 的六条稳定原则，但包含有效的",
+      "`AGENTS.md` 相对链接、平台说明和启动顺序。",
+      "3. 恢复文档明确区分 tracked ledger/evidence、ignored local logs、OS-temp run",
+      "及历史绝对路径，并要求迁移或删除经独立受治理任务和操作批准。",
+      "4. `python -m pytest tests/integration/test_agent_entry_files.py",
+      "tests/integration/test_repository_hygiene.py -q`、`git diff --check`、",
+      "`python -m aiflow validate TASK-0032`、最终 scope、active Policy 验证与 Gate 全部通过。",
+      "5. 业务 diff 仅限于范围中的五个现有文件和一个新测试文件；不出现新的",
+      "机器用户名或本机绝对路径。"
+    ],
+    "code_map": {
+      "allowed_scope": [
+        ".gitignore",
+        "CLAUDE.md",
+        "README.md",
+        "docs/operations/recovery.md",
+        "tests/integration/test_agent_entry_files.py",
+        "tests/integration/test_repository_hygiene.py"
+      ],
+      "changed_paths": [
+        ".ai/tasks/TASK-0032/approvals.json",
+        ".ai/tasks/TASK-0032/classification.json",
+        ".ai/tasks/TASK-0032/design-review-context.json",
+        ".ai/tasks/TASK-0032/design-review-input.json",
+        ".ai/tasks/TASK-0032/events.jsonl",
+        ".ai/tasks/TASK-0032/evidence.json",
+        ".ai/tasks/TASK-0032/review-contexts/db032eeb6333fbf2ac621155c789adadd70213306e64c1effb2bf234f548600b.json",
+        ".ai/tasks/TASK-0032/reviews/REV-0067-r0001.json",
+        ".ai/tasks/TASK-0032/spec.md",
+        ".ai/tasks/TASK-0032/task.yaml",
+        ".ai/tasks/TASK-0032/verifier-contexts/70c927adb38ab21dc9f59830a21ee27b593f8f33d67c68e868cb24329fd9ee4d.json",
+        ".gitignore",
+        "CLAUDE.md",
+        "README.md",
+        "docs/operations/recovery.md",
+        "tests/integration/test_agent_entry_files.py",
+        "tests/integration/test_repository_hygiene.py"
+      ]
+    },
+    "diff_summary": {
+      "additions": 809,
+      "binary_files": 0,
+      "deletions": 31,
+      "files": 17
+    },
+    "frozen_spec": "# Task Specification\n\n## 目标\n\n在不改写历史审计证据、不改变 AI Flow 运行时语义的前提下，防止常见\nPython 生成物误入库，收敛 Agent 入口规则的权威源，并明确本地验证日志、\n审计证据和机器绝对路径的保留与清理边界。\n\n## 范围\n\n1. 在 `.gitignore` 中增加仅限仓库根的 `/build/`、`/dist/`、`/htmlcov/`\n   和 `/.coverage.*`；保留现有 task-local logs 和其他 Python 忽略规则。\n2. 保留 `AGENTS.md` 为共享 Agent 规则的唯一权威；将 `CLAUDE.md` 缩减为\n   Claude Code 平台入口，明确要求先读取并遵循 `AGENTS.md`。\n3. 同步 `README.md` 中的 Agent/Claude 入口说明，避免暗示存在两份并列权威。\n4. 在 `docs/operations/recovery.md` 增加运行时证据保留与清理边界：\n   任务账本和哈希绑定证据不改写；活动 task 的本地 logs 保留；被忽略的\n   logs 不作跨 clone 持久性承诺；只允许精确清理已确认无诊断或审计用途的\n   OS 临时运行目录。\n5. 在同一恢复说明中区分人工编写文档与历史运行时记录：新的文档/\n   示例使用 `${REPO_ROOT}`、`${TEMP_ROOT}` 等占位符；现有 task、evidence、\n   action 和 snapshot 中的绝对路径作为不可变历史保留。\n6. 更新 `tests/integration/test_agent_entry_files.py`，并新增\n   `tests/integration/test_repository_hygiene.py` 锁定上述规则。\n7. `TASK-0032` 自身治理目录由 AI Flow 管理，不计入业务文件数。\n\n## 非目标\n\n1. 不删除、取消跟踪、压缩、迁移或改写任何 `.ai/tasks/**` 历史记录、\n   logs、evidence、action、review 或 snapshot。\n2. 不修改 AI Flow 的路径生成、脱敏、schema、Policy、验证或 Gate 逻辑；\n   运行时路径规范化属于后续独立行为变更。\n3. 不修改 `.gitattributes`，不对全仓库执行行尾重写或 renormalize。\n4. 不忽略全局 `*.log`、`*.xml` 或任意 `coverage/` 目录，不隐藏治理证据。\n5. 不删除空日志目录，不执行 Git GC，不调整历史分支或 worktree。\n\n## 验收条件\n\n1. `git check-ignore -v build/output.whl dist/package.tar.gz htmlcov/index.html .coverage.worker`\n   全部命中新增的根目录规则；子目录中的同名普通路径不被过宽规则隐藏。\n2. `CLAUDE.md` 不再复制 `AGENTS.md` 的六条稳定原则，但包含有效的\n   `AGENTS.md` 相对链接、平台说明和启动顺序。\n3. 恢复文档明确区分 tracked ledger/evidence、ignored local logs、OS-temp run\n   及历史绝对路径，并要求迁移或删除经独立受治理任务和操作批准。\n4. `python -m pytest tests/integration/test_agent_entry_files.py\n   tests/integration/test_repository_hygiene.py -q`、`git diff --check`、\n   `python -m aiflow validate TASK-0032`、最终 scope、active Policy 验证与 Gate 全部通过。\n5. 业务 diff 仅限于范围中的五个现有文件和一个新测试文件；不出现新的\n   机器用户名或本机绝对路径。\n\n## 禁止动作\n\n未经独立批准，禁止 push、merge、deploy、delete、secret export、paid external\ncall、package publish、Git GC、历史改写、分支/worktree 删除与任何外部写入。\n\n## 错误行为\n\n若忽略规则会覆盖 task-local 证据、入口缩减后无法确定权威规则、文档建议\n改写历史审计记录，或实现需扩展到源码、schema、Policy、`.gitattributes`、\n历史 logs 或范围外文件，必须停止实现并扩大范围后重新分类；不得通过\n手工改状态、降低验证等级或删除证据绕过门禁。\n\n## 回滚\n\n通过后续受治理提交恢复上述业务文件即可回滚忽略规则、入口文案、恢复指南和\n测试；`TASK-0032` 的事件、分类、规格和验证记录保持追加式审计，不删除、\n不改写。本任务不会修改历史证据，因此无需对历史哈希做反向迁移。\n",
+    "goal": "Harden repository hygiene guidance and future generated-file exclusions without changing runtime behavior or rewriting historical audit evidence.",
+    "known_limitations": [
+      "Acceptance, integration, and targeted mutation execution are owned by Chapter 11."
+    ],
+    "reproduce_command": [
+      "python",
+      "-m",
+      "aiflow",
+      "verify",
+      "TASK-0032",
+      "--actor",
+      "<verifier>"
+    ]
+  },
+  "context_sha256": "9876abac4640654cf36d88bc311867734bb5848cf51c70d30ad02ef65d32d66a",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "schema_version": "1.0",
+  "spec_sha256": "d7d2a22a988e5ecd34ccc30241baf79913eb491ce2cfcba4073ac042bae481f0",
+  "subject_commit": "7a27dd9dda01062f97080d549b31f692bd5214d8",
+  "task_id": "TASK-0032"
+}

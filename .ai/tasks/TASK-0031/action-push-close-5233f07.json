@@ -1,0 +1,21 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "4725b8690b42a33569f74d770700e614d30b380bfac6b29f4f4b6732b27e3204",
+  "action_type": "git_push_branch",
+  "target": "repository=https://github.com/MaginaLW/harness-model.git;remote=origin;ref=refs/heads/codex/formal-ci-canary-r2",
+  "parameter_summary": "source_commit=5233f07413bae56dcab8cdc7baaf495487f31768;expected_remote_tip=ff7c78c6c4028a32ee78ff1c95af2ff9db68d110;new_remote_tip=5233f07413bae56dcab8cdc7baaf495487f31768;purpose=post_merge_audit_closure;force=false;tags=false;delete=false;argv=[git,push,origin,5233f07413bae56dcab8cdc7baaf495487f31768:refs/heads/codex/formal-ci-canary-r2]",
+  "subject_commit": "f75f59e9ac245cebc75f4052fbdbd80604376aa7",
+  "conditions": [
+    "Bind this one post-merge audit push to TASK-0031 DU-001, base 0989da65702a756c229b0dc7a1c14d56639ad384, subject f75f59e9ac245cebc75f4052fbdbd80604376aa7, frozen spec 7cb771cc47d03b62ca9e43aa256b7275769214e74e125611b0c3fc42834b8b57, Policy 1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f and classification input 4725b8690b42a33569f74d770700e614d30b380bfac6b29f4f4b6732b27e3204.",
+    "Before launch require local branch codex/formal-ci-canary-r2 and the fixed source object to resolve exactly to closure commit 5233f07413bae56dcab8cdc7baaf495487f31768, whose sole parent is ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 and whose diff is restricted to .ai/tasks/TASK-0031/** governance records.",
+    "Before launch require TASK-0031 state MERGED with merge commit 5f52afe465e55801597a8ab562d76d24061e3133, PR #3 state MERGED, origin refs/heads/main at 5f52afe465e55801597a8ab562d76d24061e3133, and origin refs/heads/codex/formal-ci-canary-r2 at exact expected tip ff7c78c6c4028a32ee78ff1c95af2ff9db68d110.",
+    "Require ff7c78c6c4028a32ee78ff1c95af2ff9db68d110 to be an ancestor of 5233f07413bae56dcab8cdc7baaf495487f31768 so the update is a strict fast-forward. If either ref changes or a force operation would be needed, this authorization is invalid and the push must not run.",
+    "At launch the worktree may differ from closure commit 5233f07413bae56dcab8cdc7baaf495487f31768 only by TASK-0031-local action and approval audit artifacts for this exact post-merge push. No business path, other task path, secret, credential material or unrelated untracked path is permitted.",
+    "Run only the fixed push argv recorded in parameter_summary. Do not force, force-with-lease, delete, push tags, push another ref, rewrite history, alter main, reopen or edit PR #3, or use a different source commit or remote.",
+    "After the command require the remote source branch to resolve exactly to 5233f07413bae56dcab8cdc7baaf495487f31768, origin main to remain at 5f52afe465e55801597a8ab562d76d24061e3133, and the local branch and HEAD to remain unchanged. Preserve the command result for the TASK-0031 audit record.",
+    "Launch, failure or interruption consumes this authorization once. Do not retry under the same approval.",
+    "This action does not authorize another push, force operation, source-branch deletion, merge, pull-request edit, repository-setting change, tag or release creation, deployment, publication, secret export, paid call or unrelated remote write. Approval and receipt records created after closure commit 5233f07413bae56dcab8cdc7baaf495487f31768 are local audit facts and do not change the fixed pushed object."
+  ],
+  "expires_at": "2026-09-04T23:59:59Z",
+  "single_use": true
+}

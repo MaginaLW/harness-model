@@ -132,5 +132,21 @@
     "spec_sha256": "089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124",
     "subject_commit": "acff6cac45c8c7be64bb8a83dbf264fd039e3f17",
     "task_id": "TASK-0030"
+  },
+  {
+    "action_sha256": "7a8cf890218b942ee02b26cde0e2ced1fd8a598337707de9255bdb1c4e5c5478",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-08-31T23:43:33Z",
+    "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-02T23:59:59Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner approved exact single-use merge action 7a8cf890218b942ee02b26cde0e2ced1fd8a598337707de9255bdb1c4e5c5478 for PR #2 head 9b3a58d63070eb8d221c7061fd383cb2ce7bcd3d into main base 37dce2a61a5dc484b077ba4463cede2be04dd746 using a merge commit, preserving the source branch, bound to subject acff6cac45c8c7be64bb8a83dbf264fd039e3f17 and expiring 2026-09-02T23:59:59Z.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "089ef571afc432f5e1f5068fb9593e3bb025cbe6144d0cbd01c64fd737fdd124",
+    "subject_commit": "acff6cac45c8c7be64bb8a83dbf264fd039e3f17",
+    "task_id": "TASK-0030"
   }
 ]

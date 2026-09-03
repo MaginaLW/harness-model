@@ -1,0 +1,272 @@
+{
+  "base_commit": "5f52afe465e55801597a8ab562d76d24061e3133",
+  "branch": "codex/repository-hygiene",
+  "checks": [
+    {
+      "category": "contract",
+      "check_id": "contract",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m aiflow validate TASK-0032",
+      "duration_ms": 485,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/contract-001.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/contract-001.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    },
+    {
+      "category": "scope",
+      "check_id": "scope",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m aiflow scope TASK-0032",
+      "duration_ms": 906,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/scope-002.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/scope-002.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    },
+    {
+      "category": "ruff_check",
+      "check_id": "ruff_check",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m ruff check .",
+      "duration_ms": 515,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/ruff_check-003.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/ruff_check-003.stdout.log",
+      "timed_out": false,
+      "tool_version": "ruff:0.16.1"
+    },
+    {
+      "category": "ruff_format_check",
+      "check_id": "ruff_format_check",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m ruff format --check .",
+      "duration_ms": 188,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/ruff_format_check-004.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/ruff_format_check-004.stdout.log",
+      "timed_out": false,
+      "tool_version": "ruff:0.16.1"
+    },
+    {
+      "category": "smoke",
+      "check_id": "smoke",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m aiflow --help",
+      "duration_ms": 360,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/smoke-005.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/smoke-005.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    },
+    {
+      "category": "unit_tests",
+      "check_id": "unit_tests",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m pytest tests/unit -q",
+      "duration_ms": 50359,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/unit_tests-006.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/unit_tests-006.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "regression_tests",
+      "check_id": "regression_tests",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m pytest -q",
+      "duration_ms": 664312,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/regression_tests-007.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/regression_tests-007.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "mypy",
+      "check_id": "mypy",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m mypy src",
+      "duration_ms": 1281,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/mypy-008.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/mypy-008.stdout.log",
+      "timed_out": false,
+      "tool_version": "mypy:1.20.2"
+    },
+    {
+      "category": "coverage_xml",
+      "check_id": "coverage_xml",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m pytest --cov=aiflow --cov-branch --cov-report=xml:D:/Repos/harness-model/.ai/tasks/TASK-0032/logs/run-20260901T124655835192Z/coverage.xml",
+      "duration_ms": 753531,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/coverage_xml-009.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/coverage_xml-009.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "diff_coverage",
+      "check_id": "diff_coverage",
+      "command_summary": "diff-cover D:/Repos/harness-model/.ai/tasks/TASK-0032/logs/run-20260901T124655835192Z/coverage.xml --compare-branch 5f52afe465e55801597a8ab562d76d24061e3133 --fail-under 90",
+      "duration_ms": 750,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/diff_coverage-010.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/diff_coverage-010.stdout.log",
+      "timed_out": false,
+      "tool_version": "diff-cover:9.7.2"
+    },
+    {
+      "category": "acceptance",
+      "check_id": "acceptance",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m pytest tests/acceptance -q",
+      "duration_ms": 1407,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/acceptance-011.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/acceptance-011.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "integration",
+      "check_id": "integration",
+      "command_summary": "D:\\Repos\\harness-model\\.venv\\Scripts\\python.exe -m pytest tests/integration -q",
+      "duration_ms": 448735,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260901T124655835192Z/integration-012.stderr.log",
+      "stdout_log_ref": "logs/run-20260901T124655835192Z/integration-012.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "targeted_mutation",
+      "check_id": "targeted_mutation",
+      "command_summary": "loader-validated targeted mutation evidence",
+      "duration_ms": 0,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": null,
+      "stdout_log_ref": null,
+      "timed_out": false,
+      "tool_version": "aiflow-mutation-evidence-v1"
+    },
+    {
+      "category": "independent_verifier",
+      "check_id": "independent_verifier",
+      "command_summary": "task-local implementer and verifier actor labels differ; external identity is not authenticated",
+      "duration_ms": 0,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": null,
+      "stdout_log_ref": null,
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    }
+  ],
+  "classification_input_sha256": "294ae375b76576c37cae7c3e9d03ed09745f3d0ebba07696bdaf84bcda4c71dc",
+  "conclusion": "passed",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "generated_at": "2026-09-01T13:19:17Z",
+  "mode": "local",
+  "phase": "final",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "reproduce_command": [
+    "python",
+    "-m",
+    "aiflow",
+    "verify",
+    "TASK-0032",
+    "--actor",
+    "codex-independent-verifier-v3"
+  ],
+  "review_refs": {
+    "design": {
+      "context_sha256": "6b578288ff8a3d53fa446b77c3811bf98f8c24c51984dbb2d8c58c7ac2788a79",
+      "review_id": "REV-0068"
+    },
+    "implementation": {
+      "context_sha256": "13c4ae33c193039d0a9792d46143b1e50cd4c213639072cae96dbe439ac665b4",
+      "review_id": "REV-0069"
+    }
+  },
+  "schema_version": "2.0",
+  "spec_sha256": "d7d2a22a988e5ecd34ccc30241baf79913eb491ce2cfcba4073ac042bae481f0",
+  "subject_commit": "7a27dd9dda01062f97080d549b31f692bd5214d8",
+  "targeted_mutation": {
+    "evidence_ref": ".ai/tasks/TASK-0032/logs/MUTRUN-20260901T131900Z-deba91f69e4d39c5/targeted-mutation/evidence.json",
+    "manifest_ref": ".ai/mutations/phase-02-critical-manifest.json",
+    "mutation_evidence_sha256": "1da4eb49db7a9af2f52f4dc1c639ff5ccef8334406be44b92b1ec2549e4f1565",
+    "results": [
+      {
+        "log_ref": ".ai/tasks/TASK-0032/logs/MUTRUN-20260901T131900Z-deba91f69e4d39c5/targeted-mutation/logs/MUT-V2-001.json",
+        "mutation_id": "MUT-V2-001",
+        "outcome": "killed"
+      },
+      {
+        "log_ref": ".ai/tasks/TASK-0032/logs/MUTRUN-20260901T131900Z-deba91f69e4d39c5/targeted-mutation/logs/MUT-V2-002.json",
+        "mutation_id": "MUT-V2-002",
+        "outcome": "killed"
+      },
+      {
+        "log_ref": ".ai/tasks/TASK-0032/logs/MUTRUN-20260901T131900Z-deba91f69e4d39c5/targeted-mutation/logs/MUT-V2-003.json",
+        "mutation_id": "MUT-V2-003",
+        "outcome": "killed"
+      },
+      {
+        "log_ref": ".ai/tasks/TASK-0032/logs/MUTRUN-20260901T131900Z-deba91f69e4d39c5/targeted-mutation/logs/MUT-V2-004.json",
+        "mutation_id": "MUT-V2-004",
+        "outcome": "killed"
+      },
+      {
+        "log_ref": ".ai/tasks/TASK-0032/logs/MUTRUN-20260901T131900Z-deba91f69e4d39c5/targeted-mutation/logs/MUT-V2-005.json",
+        "mutation_id": "MUT-V2-005",
+        "outcome": "killed"
+      }
+    ]
+  },
+  "task_id": "TASK-0032",
+  "unverified_scenarios": [],
+  "verification_level": "V2",
+  "verification_snapshot_sha256": "fba3d60891ae3f07c69ad849c9948065022cb00cbffd2f27510a5b2d6a4f4afb",
+  "verifier_actor": "codex-independent-verifier-v3",
+  "verifier_context_sha256": "9876abac4640654cf36d88bc311867734bb5848cf51c70d30ad02ef65d32d66a"
+}

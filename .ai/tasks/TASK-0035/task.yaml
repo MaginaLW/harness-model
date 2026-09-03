@@ -5,7 +5,7 @@ allowed_scope:
 base_commit: 5e49a281c6cd9919f86be82fecbc145185d05653
 branch: claude/ci-resolve-task-merge-base
 created_at: '2026-09-02T10:53:34Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -68,6 +68,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-02T10:56:18Z'
 subject_commit: 344faf9fc1024fc469daa774a6d6511646a13798
 task_id: TASK-0035
-updated_at: '2026-09-02T11:18:09Z'
+updated_at: '2026-09-02T11:27:05Z'
 worktree_dirty: false
 worktree_dirty_paths: []
