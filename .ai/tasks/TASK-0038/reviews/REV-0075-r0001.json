@@ -1,0 +1,13 @@
+{
+  "context_sha256": "c06978ee78306d2b9d49cf6246a0434a3dc76ab362c99d80a57ec47d42e4f737",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-09-03T03:20:00Z",
+  "review_id": "REV-0075",
+  "review_stage": "implementation",
+  "reviewer": "claude-independent-implementation-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Reviewed subject f6c8cb4dfd98dd1d9101f1002e3995ec9407b548 against frozen specification 4127ad60c80de1fea7a209919ccb83d841fa3b422f67a5a7541b37a46e5d1db8. The marker is exactly the two canonical bare lines the CI matches with grep -qx, which the existing fail-closed detection test pins; no quoted or extra-field form was introduced and tests/integration/test_github_workflow.py is untouched, so the four bootstrap_active guards and the base-sha transition contract keep their assertions. The three prose statements now agree: AGENTS.md, README.md and the ai-flow Skill all describe maintenance mode, and no stale 'AI Flow 正式自用治理已启用' remains in any of them. AGENTS.md stays at exactly 25 lines, inside the cap its own contract test enforces, and CORE_PRINCIPLES was updated to track the reworded first rule rather than being deleted, so the shared-authority contract still requires all six principles and still forbids CLAUDE.md from duplicating them. The entry-file test was rewritten to assert the new fact rather than merely dropped, and a second test was added asserting what maintenance mode does not relax, so the boundary is enforced rather than only prose. Scope validation passes and the change touches exactly the six files in allowed_scope; .github/workflows/ai-quality-gate.yml is correctly left alone because the bootstrap path already exists there. V1 verification passed all ten required checks on this subject. Two facts from an independent measurement pass are worth recording with this decision because they bear on what the mode trades: governance CLI calls were 0.14 percent of all recorded check time across 37 evidence records while test execution was 99.73 percent, so this change buys authoring time and the second CI verification pass rather than machine time in the checks themselves; and the bootstrap path is stricter than the formal path on two checks, since it passes --cov-fail-under=85 and runs git diff --check while the formal coverage_xml check carries no threshold and its parser fails only on a missing XML file. The residual risk is that the marker cannot itself distinguish a one-line doc edit from a change to CI task resolution, and under this mode both skip the ledger; the project owner has accepted that and elected to add a written escalation list immediately after this change lands, under the new mode.",
+  "task_id": "TASK-0038"
+}

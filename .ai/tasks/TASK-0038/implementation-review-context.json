@@ -1,0 +1,223 @@
+{
+  "base_commit": "fbdcfc8783e8a5d810fcc7e395a5349c7f10d242",
+  "branch": "claude/enter-bootstrap-mode",
+  "classification_input_sha256": "4b3abaa0ce7f523e62e79885b9974c37f5a626583bf910d034e2a99a2fa91217",
+  "content": {
+    "allowed_scope": [
+      ".ai/bootstrap-mode.yaml",
+      "AGENTS.md",
+      "README.md",
+      ".claude/skills/ai-flow/SKILL.md",
+      "tests/integration/test_agent_entry_files.py",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "按项目所有者的明确决定重建 bootstrap 标记，进入仓库维护模式：后续代码、配置、CI 或行为变更不再强制创建 AI Flow task，质量门禁（完整测试、85% 覆盖率、90% diff coverage、whitespace、ruff、format、mypy）保持不变",
+        "impact_scope": [
+          ".ai/bootstrap-mode.yaml",
+          "AGENTS.md",
+          "README.md",
+          ".claude/skills/ai-flow/SKILL.md",
+          "tests/integration/test_agent_entry_files.py",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "新建 .ai/bootstrap-mode.yaml，内容为 CI 判定所要求的规范两行：mode 为 bootstrap_auto，status 为 active。",
+          "更新 AGENTS.md 的治理模式声明，记录项目所有者本次的明确决定与其边界。",
+          "更新 README.md 的当前治理模式段落，与 AGENTS.md 保持一致。",
+          "更新 ai-flow Skill 的 Governance activation 小节，使其描述维护模式下的实际适用条件。",
+          "更新 tests/integration/test_agent_entry_files.py，把入口文件契约断言改为维护模式下的事实。",
+          "在 CHANGELOG 记录治理模式切换。"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/bootstrap-mode.yaml",
+        ".ai/tasks/TASK-0038/approvals.json",
+        ".ai/tasks/TASK-0038/classification.json",
+        ".ai/tasks/TASK-0038/design-review-context.json",
+        ".ai/tasks/TASK-0038/design-review-input.json",
+        ".ai/tasks/TASK-0038/events.jsonl",
+        ".ai/tasks/TASK-0038/review-contexts/5eb1281884380bbb4934d248371411cdcf8588de33c5fbf72351741337d783c8.json",
+        ".ai/tasks/TASK-0038/reviews/REV-0074-r0001.json",
+        ".ai/tasks/TASK-0038/spec.md",
+        ".ai/tasks/TASK-0038/task.yaml",
+        ".claude/skills/ai-flow/SKILL.md",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "tests/integration/test_agent_entry_files.py"
+      ],
+      "files": [
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/bootstrap-mode.yaml"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/approvals.json"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/classification.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/design-review-context.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/design-review-input.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/events.jsonl"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/review-contexts/5eb1281884380bbb4934d248371411cdcf8588de33c5fbf72351741337d783c8.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/reviews/REV-0074-r0001.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/spec.md"
+        },
+        {
+          "additions": 85,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0038/task.yaml"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": ".claude/skills/ai-flow/SKILL.md"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 4,
+          "path": "AGENTS.md"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 0,
+          "path": "CHANGELOG.md"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 4,
+          "path": "README.md"
+        },
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 6,
+          "path": "tests/integration/test_agent_entry_files.py"
+        }
+      ],
+      "totals": {
+        "additions": 394,
+        "deletions": 15,
+        "files": 15
+      }
+    },
+    "goal": "按项目所有者的明确决定重建 bootstrap 标记，进入仓库维护模式：后续代码、配置、CI 或行为变更不再强制创建 AI Flow task，质量门禁（完整测试、85% 覆盖率、90% diff coverage、whitespace、ruff、format、mypy）保持不变",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0038",
+        "--actor",
+        "claude-primary"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "c06978ee78306d2b9d49cf6246a0434a3dc76ab362c99d80a57ec47d42e4f737",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "d931a5ff00f9516337fea0b365ef0d884a348186e263f271be07f292218795d9",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "4127ad60c80de1fea7a209919ccb83d841fa3b422f67a5a7541b37a46e5d1db8",
+  "subject_commit": "f6c8cb4dfd98dd1d9101f1002e3995ec9407b548",
+  "task_id": "TASK-0038"
+}
