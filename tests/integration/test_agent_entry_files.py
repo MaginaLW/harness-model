@@ -36,7 +36,9 @@ def test_agents_entry_has_complete_shared_principles_and_remains_brief() -> None
 
     assert all(principle in text for principle in CORE_PRINCIPLES)
     assert "python -m aiflow --help" in text
-    assert len(text.splitlines()) <= 25
+    # 27 covers the maintenance-mode escalation list; the cap still keeps this
+    # file to conclusions, boundaries and pointers rather than rule tables.
+    assert len(text.splitlines()) <= 27
     assert not any(copied_rule in text for copied_rule in FORBIDDEN_RULE_COPIES)
     assert not re.search(r"\b(?:ROUTE|VERIFY|PERMISSION)-[A-Z0-9-]+\b", text)
 
@@ -106,3 +108,20 @@ def test_maintenance_mode_states_what_it_does_not_relax() -> None:
     assert "维护模式" in readme
     assert "AI Flow 正式自用治理已启用" not in readme
     assert "Maintenance mode lifts only the task ledger" in skill
+
+
+def test_maintenance_mode_names_the_change_classes_that_still_need_a_task() -> None:
+    """The marker is binary, so the escalation list has to carry the discrimination."""
+    agents = AGENTS_FILE.read_text(encoding="utf-8")
+
+    assert "升级清单" in agents
+    for change_class in (
+        ".github/workflows/**",
+        ".ai/policy/**",
+        ".ai/schemas/**",
+        "src/aiflow/**",
+        ".gitattributes",
+        "外部副作用",
+        "不可逆",
+    ):
+        assert change_class in agents, change_class
