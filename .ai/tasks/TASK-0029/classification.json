@@ -1,0 +1,52 @@
+{
+  "base_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "a271ac5284047df8fe6a731b1a27bd5e81bcb3cefbd8210fcc58e448d21d8f39",
+  "classifications": [
+    {
+      "classified_at": "2026-08-30T08:24:46Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.",
+      "explanations": [
+        "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.",
+          "predicate_explanations": [
+            "scope.clear: equals -> true",
+            "impact.level: equals -> true",
+            "reversibility: in -> true",
+            "verification.automatic: equals -> true",
+            "external_side_effects: is_empty -> true"
+          ],
+          "priority": 100,
+          "route": "AUTO",
+          "rule_id": "ROUTE-AUTO-EXPLICIT-GUARDS"
+        }
+      ],
+      "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+      "policy_version": "2.1.0",
+      "route": "AUTO",
+      "rule_id": "ROUTE-AUTO-EXPLICIT-GUARDS",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Low error detectability requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-LOW-DETECTABILITY",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-08-30T08:24:46Z",
+  "effective_route": "AUTO",
+  "effective_verification_level": "V1",
+  "policy_sha256": "f4854d7fa05e5bddc21303350476bf47568bfe50f64c9d1f9199c0d744321bbf",
+  "policy_version": "2.1.0",
+  "schema_version": "1.0",
+  "subject_commit": "37dce2a61a5dc484b077ba4463cede2be04dd746",
+  "task_id": "TASK-0029"
+}

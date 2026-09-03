@@ -1,0 +1,76 @@
+schema_version: '1.0'
+task_id: TASK-0029
+goal: Document the evidence retention and acceptance procedure for the first post-bootstrap
+  formal AI Flow pull request without changing workflow behavior.
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: codex/formal-ci-canary
+base_commit: 37dce2a61a5dc484b077ba4463cede2be04dd746
+subject_commit: dabba1047156bf61b19fda33dca6902afd767f5b
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- docs/operations/github-branch-protection.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- package-publish
+- secret-export
+- paid-call
+current_state: BLOCKED
+created_at: '2026-08-30T08:21:41Z'
+updated_at: '2026-08-30T09:18:32Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0029
+  decision_unit_id: DU-001
+  goal: Document the evidence retention and acceptance procedure for the first post-bootstrap
+    formal AI Flow pull request without changing workflow behavior.
+  inputs:
+  - The bootstrap exit pull request used the target branch marker and therefore did
+    not execute the formal task resolution, verification, and Gate path.
+  - The existing workflow retains formal-mode diagnostics for 14 days and GitHub retains
+    the pull request and required check as platform evidence.
+  planned_actions:
+  - Add bounded operations guidance for retaining and accepting the first formal-mode
+    pull request evidence without embedding a self-invalidating run URL in the governed
+    file.
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - Run the Policy-defined V1 verification plan and read-only Gate.
+  - Inspect the real pull request check for Resolve task, Verify and Gate, and diagnostics
+    upload.
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: true
+    dry_run: true
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories:
+  - documentation
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: local
+    regression_risk: false
+    error_detectability: low
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
+repository_path_at_creation: D:/Repos/harness-model
+frozen_spec_sha256: 5ec5d18c4c97d25ef7e3e0e2613ebfc50a453fb8919af9ae78c533459a254403
+spec_frozen_at: '2026-08-30T08:24:55Z'
