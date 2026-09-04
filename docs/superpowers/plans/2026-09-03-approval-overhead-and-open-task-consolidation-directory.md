@@ -315,6 +315,42 @@ git grep -nF "Users\" -- docs
 四章按 B1 → B3 → B2 → B4 推进：先做只改 Policy 与 schema、语义影响可局部验证的部分，
 再做改动 `src/aiflow/**` 判定语义的部分。**四章全部触及升级清单，每章须走 AI Flow。**
 
+### Chapter B0（新增）：治理面守卫 —— B1 的前置条件
+
+状态：`blocked`（2026-09-05）。TASK-0041 已开立并冻结规格，独立设计审核 REV-0001 结论为
+`REQUEST_CHANGES`，8 条 open 发现。**第一次尝试的设计同样不成立。**
+
+#### 失败原因是语义性的，不是覆盖面
+
+`impact_scope` 与 `allowed_scope` 存的都是 **glob 模式**，不是本次变更**触及的文件**。
+用模式去匹配模式，激励是反的：声明 `src/**` 合法允许编辑 `src/aiflow/` 下任何文件，但
+`fnmatch("src/**", "src/aiflow/**")` 为 `False` —— **声明得越宽，越不会被守卫捕获**。
+`task_service.py:203` 默认直接以 `allowed_scope` 填充 `impact_scope`，因此这不是边缘情况。
+
+任何锚定「声明的模式」的守卫都有这个洞。守卫必须锚定**真实变更文件集**，而这只有
+`aiflow scope`（验证期，读 git diff）才有；分类期拿不到。
+
+#### 另外两条推翻了本轮规格自己的论证
+
+1. **「新增 REVIEW 规则只提升严重度、不可能削弱任何既有结论」为假。**
+   `ROUTE_ORDER = ('AUTO','ASK','REVIEW','BLOCK')`，`max(['ASK','REVIEW'])` 为 `REVIEW`。
+   治理面变更若同时 `business_direction_count >= 2`，原本命中
+   `ROUTE-ASK-MULTIPLE-DIRECTIONS`，改后变为 REVIEW —— **ASK 的用户选择义务被静默销毁**。
+   讽刺的是，这正是本轮用来替代 B1「priority 论证」的那个机制。
+2. **`missing: match` 不可达。** `impact_scope` 是 decision-unit schema 的**必填**字段
+   （本轮规格还把这一点当作设计依据引用过），因此 fail-closed 分支永不触发，
+   对应验收条件在测一个引擎无法产生的状态。
+
+另有：模式清单遗漏 `.ai/bootstrap-mode.yaml`（决定 `aiflow verify`/`gate` 在 CI 中是否运行
+的开关）、`.gitignore`、`.gitattributes` 与任务账本 `.ai/tasks/**`；`fnmatch` 与仓库既有
+`scope.matches_scope` 是两套不兼容的 glob 方言（裸目录条目结果相反）；新增的 `governance`
+类别不被任何规则读取，因此 REV-0001/RF-003 并未关闭。
+
+#### 结论
+
+守卫要生效，落点是 `aiflow scope`／`gate` 这类能看到真实 diff 的位置，而不是分类期的路由
+规则。这是比本轮规格更大的一次设计变更，须另行立项并单独受审。**在此之前 B1 保持 blocked。**
+
 ### Chapter B1：让验证强度成为路由输入
 
 状态：`blocked`（2026-09-04）。TASK-0040 已开立并冻结规格，独立设计审核 REV-0001 结论为

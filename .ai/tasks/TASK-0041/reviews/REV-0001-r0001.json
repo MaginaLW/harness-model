@@ -1,0 +1,132 @@
+{
+  "context_sha256": "3939567bb4ad9883fef2ca93487a9ae49deb0a3db9edc317c4645deef591ded7",
+  "findings": [
+    {
+      "evidence_refs": [
+        "decision-unit 的 impact_scope 与 task 的 allowed_scope 同为 glob 模式列表；task_service.py:203 默认直接以 allowed_scope 填充 impact_scope",
+        "规则以 fnmatch 比较 impact_scope 的每个条目字符串与 '.ai/policy/**' 等模式",
+        "fnmatch('src/**','src/aiflow/**') 为 False，而 allowed_scope 为 src/** 的任务合法允许编辑 src/aiflow/ 下任何文件",
+        "结论：把「声明的模式」当作「触及的文件」匹配，语义不成立"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 50,
+        "path": ".ai/tasks/TASK-0041/spec.md"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "impact_scope 存的是 glob 模式而非路径；用模式匹配模式使激励反转——声明越宽越不会被规则捕获，声明 src/** 即可合法编辑 src/aiflow/** 而逃逸到 AUTO"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/routing.py:13 ROUTE_ORDER = ('AUTO','ASK','REVIEW','BLOCK')",
+        "src/aiflow/routing.py:245 effective = max(hits, key=ROUTE_ORDER.index)",
+        "max(['ASK','REVIEW'], key=ROUTE_ORDER.index) == 'REVIEW'",
+        "治理面变更若同时 business_direction_count>=2，原本命中 ROUTE-ASK-MULTIPLE-DIRECTIONS，改后变为 REVIEW，ASK 的用户选择步骤消失"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 30,
+        "path": ".ai/tasks/TASK-0041/spec.md"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "规格的「新增 REVIEW 规则只会提升严重度、不可能削弱任何既有结论」为假：按严重度取最大会使 REVIEW 吞掉 ASK，销毁用户选择义务"
+    },
+    {
+      "evidence_refs": [
+        "decision-unit.schema.json required 含 impact_scope",
+        "账本 41 个 task 的全部决策单元均已填充 impact_scope"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 89,
+        "path": ".ai/tasks/TASK-0041/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "missing: match 不可达：impact_scope 是 decision-unit schema 的必填字段，因此 fail-closed 分支永不触发，验收条件在测一个引擎无法产生的状态"
+    },
+    {
+      "evidence_refs": [
+        ".github/workflows/ai-quality-gate.yml 以 bootstrap_active 为条件跳过 verify 与 gate 步骤",
+        ".ai/bootstrap-mode.yaml 当前为 mode: bootstrap_auto / status: active",
+        "该路径不匹配规则的四个 glob 中任何一个"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 1,
+        "path": ".ai/policy/hard-rules.yaml"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "模式清单遗漏 .ai/bootstrap-mode.yaml——该文件决定 aiflow verify/gate 在 CI 中是否运行，是整个治理引擎的开关"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/scope.py 的 matches_scope 按分段匹配，* 不跨越 /，** 匹配零或多段",
+        "fnmatch 不对 / 做特殊处理，** 等价于两个 *",
+        "对路径 '.ai/policy'：fnmatch 与 '.ai/policy/**' 不匹配，matches_scope 匹配"
+      ],
+      "finding_id": "RF-005",
+      "location": {
+        "line": 38,
+        "path": ".ai/tasks/TASK-0041/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "fnmatch 引入与仓库既有 scope.matches_scope 不同的第二套 glob 方言；裸目录条目在两者下结果相反"
+    },
+    {
+      "evidence_refs": [
+        "classification_service.py:450 在分类时校验 impact_scope 是否落在 allowed_scope 内",
+        "allowed_scope 与真实 git diff 的比对发生在 aiflow scope（验证期），不在分类期",
+        "因此分类期读到的仍是自声明，只是受另一层自声明约束"
+      ],
+      "finding_id": "RF-006",
+      "location": {
+        "line": 17,
+        "path": ".ai/tasks/TASK-0041/spec.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "规格「路径被 aiflow scope 交叉校验，因此比自声明的类别可靠」misdescribe 了实际链条"
+    },
+    {
+      "evidence_refs": [
+        "规格明确规则锚定 impact_scope 而不依赖 impact_categories",
+        "未新增任何读取 governance 取值的规则"
+      ],
+      "finding_id": "RF-007",
+      "location": {
+        "line": 1,
+        "path": ".ai/schemas/decision-unit.schema.json"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "新增的 governance impact_categories 取值不被任何规则读取，REV-0001 的 RF-003（规则依赖可选字段而静默失效）因此并未关闭"
+    },
+    {
+      "evidence_refs": [
+        "AGENTS.md 升级清单：.github/workflows/**、.ai/policy/**、.ai/schemas/**、src/aiflow/**、.gitignore 与 .gitattributes、任务账本本身，以及任何有外部副作用或不可逆的动作"
+      ],
+      "finding_id": "RF-008",
+      "location": {
+        "line": 56,
+        "path": ".ai/tasks/TASK-0041/spec.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "模式清单只覆盖 AGENTS.md 升级清单的一部分，遗漏 .gitignore、.gitattributes 与任务账本 .ai/tasks/**"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-09-05T02:30:00Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-design-review-panel",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "三个独立视角均返回 REQUEST_CHANGES。核心缺陷是语义性的：impact_scope 存的是 glob 模式而非触及的文件，用模式匹配模式使激励反转（声明越宽越不被捕获）。此外规格的「只提升严重度不削弱」论证为假——按严重度取最大会使 REVIEW 吞掉 ASK；fail-closed 分支因 impact_scope 必填而不可达。八条发现均由作者在记录前独立复核确认。守卫应锚定真实变更文件集，而非声明的模式。",
+  "task_id": "TASK-0041"
+}
