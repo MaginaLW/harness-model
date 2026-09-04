@@ -238,6 +238,11 @@ python -m aiflow validate <TASK_ID>
 3. `2026-08-08-external-worker-routing-implementation.md` 是一份从未执行、且输入材料
    （本机临时目录）已失效的计划。明确标注其状态为「未执行」并给出废止或重写的决定点，
    不要让它继续被当作在途计划。
+4. **两处本机路径不得清理，必须原样保留。**
+   `docs/archive/plans/2026-08-02-chapter-01-task-1-1-tdd-replay-remediation.md` 的内容被
+   `docs/superpowers/state/chapters/chapter-01.yaml` 的 `plan_sha256`（`5dd172aa…`）绑定，
+   改动会使该哈希失配；`chapter-01.yaml` 自身的 `environment_result` 记录属于追加式历史
+   证据。两者都在既有记录不得重写的范围内，本章只在文档中登记这一例外，不做替换。
 
 #### 验证
 
@@ -245,13 +250,15 @@ python -m aiflow validate <TASK_ID>
 python -m pytest -q
 python -m ruff check .
 git diff --check
-git grep -n "Users" -- docs
+git grep -nF "Users\" -- docs
 ```
 
 #### 退出条件
 
 - 三处不一致均已修正或已记录明确决定。
-- 仓库 tracked 文档中不再出现本机用户名绝对路径。
+- 仓库 tracked 的**活跃**文档中不再出现本机用户名绝对路径；仅归档的
+  `2026-08-02-chapter-01-task-1-1-tdd-replay-remediation.md` 与 `chapter-01.yaml` 的历史
+  `environment_result` 保留原值，且该例外已写入[文档归档](../../archive/README.md)。
 
 ## 5. Part B：审批开销治理
 

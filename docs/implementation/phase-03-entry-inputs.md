@@ -45,5 +45,7 @@ V3、模型调用/路由、信任评分、成本优化、资源调度、沙箱�
 - 不得把 Codex/Claude/其他模型的配置文件、线程名或 actor label 当作模型能力注册表或身份认证。
 - 不得依据现有少量历史 task 自动计算信任度、成功率、预算或最优模型。
 - 不得自动 push、merge、deploy、delete、导出凭据、发起付费调用或操作外部系统。
-- 不得重建 `.ai/bootstrap-mode.yaml` 或绕过已恢复的正式 AI Flow 自用治理；项目所有者结束
-  bootstrap 的决定不授权阶段三实现或任何外部动作。
+- 不得绕过当前生效的 AI Flow 自用治理。`.ai/bootstrap-mode.yaml` 的状态只由项目所有者
+  决定：本文写作时 bootstrap 已结束，此后所有者又明确决定重建该标记并进入仓库维护模式
+  （TASK-0038，见 `AGENTS.md` 与 `README.md`）。无论该标记处于何种状态，都不授权阶段三
+  实现或任何外部动作；Agent 不得自行重建或移除它。

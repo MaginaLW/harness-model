@@ -14,7 +14,7 @@ Sol/Terra 标为 Multi-Agent v2、Luna 标为 v1；v2 的 active-backend 过滤�
 ## 范围与依据
 
 - 配置文件：`.codex/config.toml`
-- 仅影响本项目的 Codex 会话，不修改用户全局 `C:\Users\Magina\.codex\config.toml`。
+- 仅影响本项目的 Codex 会话，不修改用户全局 `${USERPROFILE}\.codex\config.toml`。
 - 依据：本机 `models_cache.json` 的实际 `multi_agent_version` 分别为 Sol=v2、
   Terra=v2、Luna=v1；当前 `spawn_agent` 模型枚举也只有 Sol 和 Terra。
 - 官方配置文档支持 `agents.default_subagent_model`，但配置值不能绕过运行时的
