@@ -1,12 +1,20 @@
 # External Worker Routing Execution Plan
 
+状态：`not_executed`（历史计划，输入已失效）
+
+本计划从未执行：它列为 Materials 的两份输入位于当时的本机临时目录，现已不存在；其前置的
+Task 1.1 revalidation 也已由另一条路径完成。阶段一 MVP 设计明确把真实多模型编排排除在
+范围之外，阶段三/四的对应能力仍未获授权。保留本文件只为记录当时的接口契约与安全边界
+设计；**要重新启动这项工作，须先由项目所有者决定是废止本计划还是按当前 Policy 重写，
+不得直接照本执行。** 文中的 `${TEMP}` 为占位符，不指向任何现存路径。
+
 > **For agentic workers:** REQUIRED EXECUTION FLOW: Use `subagent-driven-development` to execute this plan task-by-task when subagents are available. If no subagent capability is available, execute inline with the same task checklist and review checkpoints.
 
 **Goal:** Establish, verify, and locally commit an auditable interaction contract in which Sol(max) performs high-order execution and final adjudication while OpenCode Go(max), DeepSeek Official(max), and explicitly independent Luna(max) provide lower-tier work through strict sequential fallback and ACP/envelope/status-file transport.
 
 **Approach:** First repair Task 1.1's existing `needs_revalidation` gate without altering its preserved evidence or unapproved file scope. Then obtain an explicit REVIEW scope decision because the current Phase-01 MVP expressly excludes real multi-model orchestration; turn the externally tested routing candidate into a repository-owned, secret-free contract plus deterministic local validation fixtures. Implement only offline contract/transport validation and documentation in this change: no provider configuration, credential read, payment, model request, desktop automation, or automatic execution of external workers.
 
-**Materials:** `AGENTS.md`; `README.md`; `docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md`; `docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md`; `docs/superpowers/state/README.md`; `docs/superpowers/state/overall.yaml`; `docs/superpowers/state/chapters/chapter-01.yaml`; `docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-execution.md`; `docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-tdd-replay-remediation.md`; `C:\Users\Magina\AppData\Local\Temp\aiflow-reasonix-acp-20260808-001\state\chapter-1-handoff-20260808.json`; and `C:\Users\Magina\AppData\Local\Temp\aiflow-reasonix-acp-20260808-001\routing\external-worker-routing.candidate-v2.json`.
+**Materials:** `AGENTS.md`; `README.md`; `docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md`; `docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md`; `docs/superpowers/state/README.md`; `docs/superpowers/state/overall.yaml`; `docs/superpowers/state/chapters/chapter-01.yaml`; `docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-execution.md`; `docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-tdd-replay-remediation.md`; `${TEMP}\aiflow-reasonix-acp-20260808-001\state\chapter-1-handoff-20260808.json`; and `${TEMP}\aiflow-reasonix-acp-20260808-001\routing\external-worker-routing.candidate-v2.json`.
 
 **Validation:** Fresh requirements review then fresh quality review must pass against a hash-bound implementation manifest. Offline tests must prove priority, fallback, explicit dual-review opt-in, failure semantics, identity evidence levels, envelope integrity, and secret redaction. Final checks must pass from the approved external virtual environment, the worktree must contain only approved paths, and one local commit must bind the final subject commit, specifications, reviews, and verification evidence; no push follows.
 
@@ -28,7 +36,7 @@
 - Review: `docs/superpowers/state/chapters/chapter-01.yaml`
 - Review: `docs/superpowers/state/overall.yaml`
 - Execute: `docs/superpowers/plans/2026-08-02-chapter-01-task-1-1-tdd-replay-remediation.md`
-- Write external evidence only: `C:\Users\Magina\AppData\Local\Temp\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\`
+- Write external evidence only: `${TEMP}\aiflow-task-1-1-808bd85dd990446ab4135df0116cc55b\`
 - Modify after passing reviews: `docs/superpowers/state/chapters/chapter-01.yaml`, `docs/superpowers/state/overall.yaml`
 
 - [ ] **Step 1: Bind the remediation input set**
@@ -138,9 +146,9 @@ Add tests that load every example through the same contract validator and assert
 ### Task 5: Run V1 verification, independent reviews, and make one local commit
 
 **Artifacts / Locations:**
-- Create external evidence: `C:\Users\Magina\AppData\Local\Temp\aiflow-external-worker-routing-20260808\implementation-manifest.json`
-- Create external evidence: `C:\Users\Magina\AppData\Local\Temp\aiflow-external-worker-routing-20260808\spec-review.json`
-- Create external evidence: `C:\Users\Magina\AppData\Local\Temp\aiflow-external-worker-routing-20260808\quality-review.json`
+- Create external evidence: `${TEMP}\aiflow-external-worker-routing-20260808\implementation-manifest.json`
+- Create external evidence: `${TEMP}\aiflow-external-worker-routing-20260808\spec-review.json`
+- Create external evidence: `${TEMP}\aiflow-external-worker-routing-20260808\quality-review.json`
 - Modify after verification: `docs/superpowers/decisions/2026-08-08-external-worker-routing-scope.json`
 - Commit: all and only approved, verified repository paths
 
