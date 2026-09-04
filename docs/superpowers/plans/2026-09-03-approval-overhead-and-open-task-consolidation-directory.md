@@ -160,6 +160,29 @@ scope、Ruff、format 与 smoke，不含任何测试。注意 85% 总覆盖率�
 
 ### Chapter A1：已合并任务的账本收尾
 
+状态：`completed`（2026-09-04）。TASK-0001–0007、0009、0026、0027 共 10 个 task 已收尾为
+`MERGED`，账本悬挂状态由 12 降至 2。
+
+**执行中修正的一个前提。** 本章原写「逐个定位其进入 `main` 的合并提交」，该前提不成立：
+这 10 个 task 的 subject 全部位于 `main` 的第一父主线上，是直接提交，**不存在任何合并
+提交**——它们都早于本仓库的第一个 PR（PR #1，2026-08-30）。因此 `--merge-commit` 取
+subject 自身，即工作进入 `main` 时所处的提交；账本中 `merge_commit == subject_commit`
+对审计者自解释为「直接落到 main，无独立合并提交」。这不属于本章任务 4 所说的「合并提交
+不可唯一定位」，而是已唯一定位且恰为 subject。
+
+**一处连带改动。** `tests/integration/test_acceptance_traceability.py` 有一条断言要求
+TASK-0001（阶段一验收报告的 report task）停留在 `IMPLEMENTING`/`VERIFYING`/`VERIFIED`/
+`APPROVED_FOR_MERGE` 之一，收尾后触发失败。核实结论：该断言守的是状态机位置而非 Gate 结果
+——收尾**之前** `aiflow gate TASK-0001` 就已是 `REJECT`（`GATE_REPOSITORY_CHANGED`、
+`GATE_SCOPE_CHANGED`、`GATE_CLASSIFICATION_STALE`、`GATE_EVIDENCE_STALE` 四项），收尾只是
+再加一项 `GATE_STATE_INVALID`。该 task 的验收证据位于 `docs/pilots/results/`，按哈希绑定，
+不依赖 live task state。因此把 `MERGED` 加入允许集合，并把测试名由
+`..._in_gate_capable_state` 改为 `..._in_expected_state` 以免名称失真；「不得为未开始、
+BLOCKED 或 FAILED」的保护保持不变。该测试无任何外部引用。
+
+`close` 的实际写入范围经确认符合追加式要求：`events.jsonl` 每个 task 仅 +1 行、零删除；
+`task.yaml` 只更新 `current_state` 与 `updated_at` 两行的当前状态投影，无历史记录被重写。
+
 #### 进入条件
 
 - 每个目标 task 的 `subject_commit` 经 `git merge-base --is-ancestor` 确认已在 `main`。
@@ -184,9 +207,33 @@ git diff --check
 #### 退出条件
 
 - 10 个目标 task 的 `current_state` 均为 `MERGED`，或已逐个记录不可收尾的确切原因。
+  ✅ 10/10 已为 `MERGED`，`aiflow validate` 全部通过。
 - 账本无内容被重写；`git log` 显示相关文件只有追加。
+  ✅ `events.jsonl` 零删除行；`task.yaml` 仅状态投影两行变化。
 
 ### Chapter A2：阻塞与在途任务处置
+
+状态：`partial`（2026-09-04）。TASK-0032、TASK-0033 已收尾为 `BLOCKED`；TASK-0008、
+TASK-0029 经核对早已是带完整阻塞记录的 `BLOCKED`，无需再动。账本已无 `VERIFYING`
+状态。**仅 TASK-0028 未完成，且被人类批准阻塞（见下）。**
+
+**执行中发现的一个机制事实。** 状态机没有「被取代／作废」终态：`MERGED` 是唯一无出边的
+终态，`BLOCKED` 只能回到 `CLASSIFIED`，`escalate --reason-code` 的封闭枚举里也没有
+supersede 类取值。因此「按被取代收尾」在机制上只能表达为
+`escalate --to BLOCK --reason-code task_description_changed`，把取代关系写进 `impact` 与
+`existing-work` —— 这正是 TASK-0008 当初使用的形式。TASK-0033 需先用 TASK-0034 交付的
+`verify --abandon` 退出 `VERIFYING`（记 `VERIFY_RUN_ABANDONED`，`VERIFYING → FAILED`），
+再 block。**一个显式的 `SUPERSEDED` 终态是 B 系列之外值得单独考虑的改进**：当前把「工作被
+更好的重做取代」和「工作被外部条件卡住」压进同一个 `BLOCKED`，两者的运维含义并不相同。
+
+**TASK-0028 的收尾成本，是第 1 节问题的一个活样本。** 其 `status` 显示
+`merge_readiness: reverification_required`、`Missing: reverification`，且
+classification／approvals／evidence 三者全部 `stale`。它是 REVIEW / V2 任务，诚实收尾需要：
+重新分类 → 重新冻结规格 → **人类 spec 批准** → 完整 V2 重验（实施目录记该串行成本可达
+68.5 分钟）→ **人类 code 批准** → `close`。也就是说，为一个**代码早已在 `main`、且不产生
+任何代码改动**的 task 收尾，要付出两次人类批准和一次完整 V2 —— 这正是 M1/M3 所描述的
+「审批与验证是并行相加的门」。本章不自行绕过该门；TASK-0028 保持
+`APPROVED_FOR_MERGE`，等待项目所有者决定是走完重验，还是按被取代／已落地另行处置。
 
 #### 进入条件
 
@@ -213,13 +260,16 @@ python -m aiflow validate <TASK_ID>
 #### 退出条件
 
 - 5 个 task 均处于终态或有明确记录的阻塞理由。
-- `backup/task-0033-work` 的保留理由写入文档，不被误删。该分支（tip `a21171b`，本地与
+  ⚠️ 4/5 已达成（TASK-0008、0029、0032、0033）；TASK-0028 待人类批准。
+- `backup/task-0033-work` 的保留理由写入文档，不被误删。✅ 已写入 TASK-0032 的
+  `next_step` 与本章。该分支（tip `a21171b`，本地与
   `origin` 均在）相对 `main` 领先 11 个提交，保存着 TASK-0032 的 subject `7a27dd9` 与
   TASK-0033 的 subject `7278e10`，两者都不在 `main` 上；而这两个 task 的 `task.yaml`
   仍声明 `branch: codex/repository-hygiene`、TASK-0029 声明 `branch: codex/formal-ci-canary`，
   这两个分支连同 `chore/preserve-task-0031-failed-evidence` 都已不在本地和 `origin` 上。
   因此 `backup/task-0033-work` 是这些提交的唯一留存位置。
-- 账本中不再存在无人负责的 `VERIFYING` 或 `BLOCKED` 状态。
+- 账本中不再存在无人负责的 `VERIFYING` 或 `BLOCKED` 状态。✅ 已无 `VERIFYING`；
+  4 个 `BLOCKED` 均带 reason code、impact 与 existing-work 处置说明。
 
 ### Chapter A3：文档一致性修复
 

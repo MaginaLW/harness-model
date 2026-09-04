@@ -41,7 +41,7 @@ allowed_scope:
 base_commit: 52b543e72435afef9e7e5c52c5c09fd1109bd435
 branch: main
 created_at: '2026-08-22T16:36:39Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -135,7 +135,7 @@ schema_version: '1.0'
 spec_frozen_at: '2026-08-22T19:16:12Z'
 subject_commit: a1de0800a640634db6cdce4e58b50358a4b7ebd0
 task_id: TASK-0006
-updated_at: '2026-08-23T02:42:36Z'
+updated_at: '2026-09-04T10:41:36Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - .ai/tasks/TASK-0005/logs/coverage-check-2/.coverage

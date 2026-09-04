@@ -135,16 +135,21 @@ def test_external_artifact_hash_summaries_match_verified_values() -> None:
     assert block["scenario-hashes-before.txt"] == block["scenario-hashes-after.txt"]
 
 
-def test_report_task_is_unique_and_in_gate_capable_state() -> None:
+def test_report_task_is_unique_and_in_expected_state() -> None:
     task_id = (RESULTS / "report-task-id.txt").read_text(encoding="utf-8").strip()
     assert task_id == "TASK-0001"
     task = yaml.safe_load((ROOT / ".ai/tasks" / task_id / "task.yaml").read_text(encoding="utf-8"))
     assert task["task_id"] == task_id
+    # MERGED is the truthful terminal state once the work has landed on main, and
+    # this task's report evidence under docs/pilots/results/ is hash-bound rather
+    # than derived from the live task state. The task must still never appear as
+    # unstarted, BLOCKED or FAILED.
     assert task["current_state"] in {
         "IMPLEMENTING",
         "VERIFYING",
         "VERIFIED",
         "APPROVED_FOR_MERGE",
+        "MERGED",
     }
     assert task["allowed_scope"] == [
         "docs/pilots/results/**",
