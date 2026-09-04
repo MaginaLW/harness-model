@@ -19,9 +19,9 @@ forbidden_actions:
 - secret_export
 - paid_external_call
 - package_publish
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 created_at: '2026-08-21T11:21:30Z'
-updated_at: '2026-08-21T11:37:50Z'
+updated_at: '2026-09-04T10:41:25Z'
 decision_units:
 - schema_version: '1.0'
   task_id: TASK-0001

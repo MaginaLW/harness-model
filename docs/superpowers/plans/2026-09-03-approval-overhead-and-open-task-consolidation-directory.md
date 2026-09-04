@@ -160,6 +160,29 @@ scope、Ruff、format 与 smoke，不含任何测试。注意 85% 总覆盖率�
 
 ### Chapter A1：已合并任务的账本收尾
 
+状态：`completed`（2026-09-04）。TASK-0001–0007、0009、0026、0027 共 10 个 task 已收尾为
+`MERGED`，账本悬挂状态由 12 降至 2。
+
+**执行中修正的一个前提。** 本章原写「逐个定位其进入 `main` 的合并提交」，该前提不成立：
+这 10 个 task 的 subject 全部位于 `main` 的第一父主线上，是直接提交，**不存在任何合并
+提交**——它们都早于本仓库的第一个 PR（PR #1，2026-08-30）。因此 `--merge-commit` 取
+subject 自身，即工作进入 `main` 时所处的提交；账本中 `merge_commit == subject_commit`
+对审计者自解释为「直接落到 main，无独立合并提交」。这不属于本章任务 4 所说的「合并提交
+不可唯一定位」，而是已唯一定位且恰为 subject。
+
+**一处连带改动。** `tests/integration/test_acceptance_traceability.py` 有一条断言要求
+TASK-0001（阶段一验收报告的 report task）停留在 `IMPLEMENTING`/`VERIFYING`/`VERIFIED`/
+`APPROVED_FOR_MERGE` 之一，收尾后触发失败。核实结论：该断言守的是状态机位置而非 Gate 结果
+——收尾**之前** `aiflow gate TASK-0001` 就已是 `REJECT`（`GATE_REPOSITORY_CHANGED`、
+`GATE_SCOPE_CHANGED`、`GATE_CLASSIFICATION_STALE`、`GATE_EVIDENCE_STALE` 四项），收尾只是
+再加一项 `GATE_STATE_INVALID`。该 task 的验收证据位于 `docs/pilots/results/`，按哈希绑定，
+不依赖 live task state。因此把 `MERGED` 加入允许集合，并把测试名由
+`..._in_gate_capable_state` 改为 `..._in_expected_state` 以免名称失真；「不得为未开始、
+BLOCKED 或 FAILED」的保护保持不变。该测试无任何外部引用。
+
+`close` 的实际写入范围经确认符合追加式要求：`events.jsonl` 每个 task 仅 +1 行、零删除；
+`task.yaml` 只更新 `current_state` 与 `updated_at` 两行的当前状态投影，无历史记录被重写。
+
 #### 进入条件
 
 - 每个目标 task 的 `subject_commit` 经 `git merge-base --is-ancestor` 确认已在 `main`。
@@ -184,7 +207,9 @@ git diff --check
 #### 退出条件
 
 - 10 个目标 task 的 `current_state` 均为 `MERGED`，或已逐个记录不可收尾的确切原因。
+  ✅ 10/10 已为 `MERGED`，`aiflow validate` 全部通过。
 - 账本无内容被重写；`git log` 显示相关文件只有追加。
+  ✅ `events.jsonl` 零删除行；`task.yaml` 仅状态投影两行变化。
 
 ### Chapter A2：阻塞与在途任务处置
 

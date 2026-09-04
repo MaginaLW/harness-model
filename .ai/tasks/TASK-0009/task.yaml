@@ -55,7 +55,7 @@ allowed_scope:
 base_commit: 0e7607c9e1ad110f162d4792a2b2386f6b444a41
 branch: main
 created_at: '2026-08-23T03:10:20Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -170,6 +170,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-08-23T03:11:25Z'
 subject_commit: 8eee9c1bb3c7c4ac35aa7843a1a3ec85e0fb4326
 task_id: TASK-0009
-updated_at: '2026-08-23T06:44:23Z'
+updated_at: '2026-09-04T10:41:37Z'
 worktree_dirty: false
 worktree_dirty_paths: []
