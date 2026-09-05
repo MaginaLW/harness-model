@@ -1,0 +1,80 @@
+schema_version: '1.0'
+task_id: TASK-0040
+goal: 在 routing Policy 中新增一条以验证充分性为依据的 AUTO 规则：范围清晰、可自动验证、可逆、无外部副作用且未命中任何 HARD-* 规则的
+  medium 影响变更判为 AUTO，八条 HARD-* 与 ASK 规则的优先级全部保持在其之上，ROUTE-DEFAULT-REVIEW 仍为兜底
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: feat/b1-verified-auto-route
+base_commit: bac31534e1c0e418b68e196feda5d3b6f1fb53fb
+subject_commit: bac31534e1c0e418b68e196feda5d3b6f1fb53fb
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- .ai/policy/routing.yaml
+- tests/unit/test_routing.py
+- tests/integration/test_classify_command.py
+- docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: WAITING_FOR_SPEC_REVIEW
+created_at: '2026-09-04T11:15:04Z'
+updated_at: '2026-09-04T15:13:54Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0040
+  decision_unit_id: DU-001
+  goal: 在 routing Policy 中新增一条以验证充分性为依据的 AUTO 规则：范围清晰、可自动验证、可逆、无外部副作用且未命中任何 HARD-*
+    规则的 medium 影响变更判为 AUTO，八条 HARD-* 与 ASK 规则的优先级全部保持在其之上，ROUTE-DEFAULT-REVIEW 仍为兜底
+  inputs:
+  - .ai/policy/routing.yaml 当前规则集（ROUTE-ASK-MULTIPLE-DIRECTIONS priority 500、ROUTE-AUTO-EXPLICIT-GUARDS
+    priority 100、ROUTE-DEFAULT-REVIEW 兜底）
+  - .ai/policy/hard-rules.yaml 的八条 HARD-* 规则（priority 760-1000）
+  - 账本实测：17 个 ROUTE-DEFAULT-REVIEW 决策单元全部且仅因 impact.level=medium 未匹配 AUTO，其余四项守卫均已满足
+  - src/aiflow/routing.py 与 src/aiflow/verification_level.py：route 与验证等级为独立计算，路由条件不可见验证等级
+  planned_actions:
+  - 在 .ai/policy/routing.yaml 新增一条 priority 低于 ASK(500) 与全部 HARD-*(760+) 的 AUTO 规则
+  - 提升 policy_version 并按既有兼容性约定处理版本化 contracts
+  - 补正向与负向分类测试，含八条 HARD-* 规则逐条仍命中的负向用例
+  - 用 38 个历史 task 的 classification input 重放并给出新旧路由分布对比
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - python -m pytest tests/unit/test_routing.py -q
+  - python -m pytest tests/integration -q
+  - python -m pytest tests/acceptance -q
+  - python -m pytest -q
+  - python -m mypy src
+  - 历史 38 个 classification input 的确定性重放对比
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: high
+  protections:
+    verified_backup: false
+    dry_run: false
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories: []
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: true
+    code_modified: true
+    interaction_scope: cross_module
+    regression_risk: true
+    error_detectability: low
+  verification_requirements:
+    acceptance_required: true
+    integration_required: true
+    targeted_mutation_required: false
+    independent_verifier_required: false
+repository_path_at_creation: D:/Repos/harness-model
+frozen_spec_sha256: 4ff61d54f49aa294f808ba7f0ba013f621a60ad88198151d49a3cd6895ad0edd
+spec_frozen_at: '2026-09-04T11:16:20Z'

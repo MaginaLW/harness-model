@@ -1,0 +1,130 @@
+{
+  "context_sha256": "7f14d2cfcc8765212491b2ca06190a6a6eacd388d7b1bdc639ddf2c0889cba98",
+  "findings": [
+    {
+      "evidence_refs": [
+        "src/aiflow/routing.py:15-23 _AUTO_GUARDS 含 ('impact.level','equals','low','error')",
+        "src/aiflow/routing.py:164 _AUTO_GUARDS.issubset(guard_keys) 否则 PolicyError ROUTING_AUTO_GUARDS_INCOMPLETE",
+        "规格拟用 ('impact.level','in',('low','medium'),'error')，不在白名单内"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 15,
+        "path": "src/aiflow/routing.py"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "AUTO 规则无法只改 Policy 实现：_AUTO_GUARDS 是引擎硬编码白名单，放宽 impact.level 会使整个 Policy bundle 加载失败"
+    },
+    {
+      "evidence_refs": [
+        "TASK-0005 findings=1",
+        "TASK-0018 findings=3 outcomes 含 3 次 REQUEST_CHANGES",
+        "TASK-0022 findings=2 含 2 次 REQUEST_CHANGES",
+        "TASK-0024 findings=2 含 2 次 REQUEST_CHANGES",
+        "合计 findings=8，REQUEST_CHANGES/REJECT=7"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 12,
+        "path": ".ai/tasks/TASK-0040/spec.md"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "立论测量的是「哪个守卫挡住了 AUTO」，而非「是否需要人类审核」：17 个样本中 4 个实际收到 8 条 finding 与 7 次 REQUEST_CHANGES"
+    },
+    {
+      "evidence_refs": [
+        "hard-rules.yaml HARD-REVIEW-SECRETS-AUTH 条件 missing: no_match",
+        "hard-rules.yaml HARD-REVIEW-CI-CD 条件 missing: no_match",
+        "decision-unit.schema.json 未要求 impact_categories 必填"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 64,
+        "path": ".ai/policy/hard-rules.yaml"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "HARD-REVIEW-SECRETS-AUTH 与 HARD-REVIEW-CI-CD 在 impact_categories 缺失时为 missing:no_match，即静默失效；规格的安全故事依赖它们兜底"
+    },
+    {
+      "evidence_refs": [
+        "文件存在：.ai/tasks/TASK-0018/paid-external-call-incident.md",
+        "TASK-0018 属于规格引用的 17 个 ROUTE-DEFAULT-REVIEW 样本"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 1,
+        "path": ".ai/tasks/TASK-0018/paid-external-call-incident.md"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "external_side_effects 是执行前的自声明且无执行期约束；账本中已有其被证伪的案例，且该 task 正是 17 个样本之一"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/routing.py:245 effective = max((hit.route for hit in hits), key=ROUTE_ORDER.index)",
+        "ROUTE_ORDER = ('AUTO','ASK','REVIEW','BLOCK')"
+      ],
+      "finding_id": "RF-005",
+      "location": {
+        "line": 7,
+        "path": ".ai/tasks/TASK-0040/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "规格的安全论证建立在 priority 之上，但引擎的有效路由是按严重度取最大值，priority 只决定写入证据的 rule_id"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/predicates.py:89-95 A missing ``error`` field is intentionally an error rather than a false"
+      ],
+      "finding_id": "RF-006",
+      "location": {
+        "line": 96,
+        "path": ".ai/tasks/TASK-0040/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "规格声称字段缺失时回落到 ROUTE-DEFAULT-REVIEW，实际 missing:error 会抛错导致 BLOCK"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/policy.py:150-153 _validate_cross_file 要求 versions 集合长度为 1，否则 POLICY_VERSION_MISMATCH",
+        ".ai/tasks/TASK-0040/task.yaml allowed_scope 仅含 .ai/policy/routing.yaml"
+      ],
+      "finding_id": "RF-007",
+      "location": {
+        "line": 19,
+        "path": ".ai/tasks/TASK-0040/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "policy_version 必须四个 Policy 文件同步提升，但 allowed_scope 只含 routing.yaml，按规格实施会使 bundle 无法加载"
+    },
+    {
+      "evidence_refs": [
+        "decision-unit.schema.json impact_categories enum = documentation/ci/cd/secrets/authentication/production_data/external_action",
+        "AGENTS.md 升级清单含 .ai/policy/**、.ai/schemas/**、src/aiflow/**"
+      ],
+      "finding_id": "RF-008",
+      "location": {
+        "line": 72,
+        "path": ".ai/tasks/TASK-0040/spec.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "impact_categories 封闭枚举无 policy/governance 取值，因此改动 .ai/policy/**、.ai/schemas/**、src/aiflow/** 的治理面变更无法被任何 HARD-* 规则捕获；规格却把该缺口列为非目标而非前置条件"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-09-04T12:05:00Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-design-review-panel",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "五个独立视角的设计审核：规则按当前规格不可实现（_AUTO_GUARDS 引擎白名单），且立论依据、安全论证机制、错误行为描述与 allowed_scope 均与代码实际行为不符。八条发现全部经作者独立复核确认。建议先补齐 impact_categories 治理取值与对应 HARD-REVIEW 规则，再考虑放宽 AUTO。",
+  "task_id": "TASK-0040"
+}

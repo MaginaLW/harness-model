@@ -317,6 +317,48 @@ git grep -nF "Users\" -- docs
 
 ### Chapter B1：让验证强度成为路由输入
 
+状态：`blocked`（2026-09-04）。TASK-0040 已开立并冻结规格，独立设计审核 REV-0001 结论为
+`REQUEST_CHANGES`，8 条发现全部 open，`aiflow approve --type spec` 被门禁拒绝
+（`Review outcome cannot support approval`）。**本章按原设计不可推进。**
+
+#### 审核推翻的四项前提
+
+1. **规则无法只改 Policy 实现。** `src/aiflow/routing.py:15` 的 `_AUTO_GUARDS` 是引擎级
+   硬编码白名单，`routing.py:164` 要求每条 AUTO 规则的条件集合是其**超集**，其中含
+   `('impact.level','equals','low','error')`。任何放宽 `impact.level` 的 AUTO 规则都会
+   触发 `ROUTING_AUTO_GUARDS_INCOMPLETE`，使整个 Policy bundle 加载失败。要实现必须修改
+   `src/aiflow/routing.py` —— 它在 `AGENTS.md` 升级清单上，且不在 TASK-0040 的
+   `allowed_scope` 内。这也意味着放宽会降低**所有现有与未来** AUTO 规则的守卫下限。
+2. **立论测错了对象。** 「17 个只差 `impact.level`」测的是**哪个守卫挡住了 AUTO**，
+   不是**是否需要人类审核**。这 17 个里有 4 个（TASK-0005、0018、0022、0024）实际收到
+   **8 条审核 finding 与 7 次 `REQUEST_CHANGES`**。把它们判为 AUTO 会跳过发现了真实问题的审核。
+3. **兜底的 HARD-* 规则本身就会静默失效。** `HARD-REVIEW-SECRETS-AUTH` 与
+   `HARD-REVIEW-CI-CD` 的条件都是 `missing: no_match` —— `impact_categories` 缺失即不匹配，
+   而 schema 并不要求该字段必填。此外 `external_side_effects` 只是执行前的自声明：
+   `.ai/tasks/TASK-0018/paid-external-call-incident.md` 记录了它被证伪的案例，而 TASK-0018
+   正是那 17 个样本之一。
+4. **安全论证的机制写错了。** 有效路由是 `routing.py:245`
+   `max((hit.route for hit in hits), key=ROUTE_ORDER.index)` —— 按严重度取最大，**与 priority
+   无关**；priority 只决定写进证据的 `rule_id`。结论（HARD-* 仍然胜出）碰巧成立，但依据不同：
+   保护来自严重度聚合，不是优先级排序。
+
+另有三条：`missing: error` 实际产生 BLOCK 而非回落 REVIEW（`predicates.py:89`）；
+`policy_version` 必须四个 Policy 文件同步提升（`policy.py:150` `_validate_cross_file`），
+而 `allowed_scope` 只含 `routing.yaml`；`impact_categories` 枚举无 policy/governance 取值，
+治理面变更无法被任何 HARD-* 规则捕获。
+
+#### 修正后的推进顺序
+
+审核建议的排序是**反过来的**：先补齐 `impact_categories` 的治理取值并新增一条覆盖
+`.ai/policy/**`、`.ai/schemas/**`、`src/aiflow/**` 的 `HARD-REVIEW` 规则，验证它确实在这些
+路径上触发；**之后**才谈放宽 AUTO。否则「HARD-* 规则仍然兜底」这个安全故事不成立 ——
+而它正是放宽 AUTO 的全部依据。
+
+`_AUTO_GUARDS` 的放宽应作为独立、显式的一次设计决策接受审核，不能夹带在一次 Policy
+文件编辑里。
+
+原章节内容保留在下，作为被推翻的设计记录。
+
 针对 M1 与 M2。当前 `ROUTE-DEFAULT-REVIEW` 兜底导致 17 次非风险性 REVIEW。
 
 #### 进入条件
