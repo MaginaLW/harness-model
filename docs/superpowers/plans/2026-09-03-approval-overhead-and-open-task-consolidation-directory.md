@@ -226,7 +226,32 @@ supersede 类取值。因此「按被取代收尾」在机制上只能表达为
 再 block。**一个显式的 `SUPERSEDED` 终态是 B 系列之外值得单独考虑的改进**：当前把「工作被
 更好的重做取代」和「工作被外部条件卡住」压进同一个 `BLOCKED`，两者的运维含义并不相同。
 
-**TASK-0028 的收尾成本，是第 1 节问题的一个活样本。** 其 `status` 显示
+**TASK-0028 的收尾成本已精确测出（2026-09-05 复核）。** 在当前 `main`（`0b97ae1`）上实测：
+
+- `aiflow verify TASK-0028` → `Classification is stale`
+- `aiflow classify TASK-0028` → `Classification Git baseline does not match`
+- `aiflow gate TASK-0028` → `REJECT`，10 条理由：`GATE_REPOSITORY_CHANGED`、
+  `GATE_SCOPE_CHANGED`、`GATE_CLASSIFICATION_STALE`、`GATE_SPEC_APPROVAL_STALE`、
+  `GATE_EVIDENCE_STALE`、`GATE_V2_CONTEXT_STALE`、`GATE_V2_REVIEW_STALE`、
+  `GATE_V2_CHECKS_INCOMPLETE`、`GATE_V2_MUTATION_NOT_KILLED`、`GATE_CODE_APPROVAL_STALE`
+
+Gate 自述的恢复路径为
+`git checkout <recorded-branch>; aiflow verify; aiflow classify; aiflow approve --type spec;
+aiflow review; aiflow approve --type code`。即**从当前 `main` 无法推进**，必须检出
+300 余个提交之前的旧仓库状态重放，再取得两次人类批准。
+
+`aiflow close` 在机制上可绕过以上全部 —— `close_task` 只校验状态、`result`、
+`repository_id` 与 merge commit 存在，不查询 Gate，而该 task 的 subject `cb1e15b5`
+确实已在 `main`。**但 `README.md` 明确记录了项目所有者的立场：「阶段完成不把它伪写为当前
+merge-ready」。** 因此本目录不单方面执行 `close`；三个选项及其代价如下，须由项目所有者选择：
+
+| 选项 | 代价 | 代价说明 |
+|---|---|---|
+| A. 走完整重验 | 检出旧状态 + 完整 V2 + **2 次人类批准** | 为一个不产生任何代码改动的 task |
+| B. 直接 `close` | 0 | 但与 README 记录的所有者立场冲突，须先由所有者改变该立场 |
+| C. 维持现状 | 0 | 账本长期保留 1 个 `APPROVED_FOR_MERGE`，理由已记录在案 |
+
+以下保留原始描述，作为第 1 节问题的一个活样本。 其 `status` 显示
 `merge_readiness: reverification_required`、`Missing: reverification`，且
 classification／approvals／evidence 三者全部 `stale`。它是 REVIEW / V2 任务，诚实收尾需要：
 重新分类 → 重新冻结规格 → **人类 spec 批准** → 完整 V2 重验（实施目录记该串行成本可达
@@ -579,6 +604,11 @@ python -m aiflow gate <TASK_ID>
 
 ### Chapter B3：action 批准分级
 
+状态：`deferred`（2026-09-05）。实测依据独立成立，但 M4 已证实 push/merge 的 action 批准
+没有任何代码路径强制，其开销来自流程约定；本章因此**不针对人类批准次数**。若要推进，
+应先明确它的目标是收敛语义一致性而非减少审批。
+
+
 针对 M4。20 条 action 重复批准中 12 条的绑定字段与前一条完全相同。
 
 按 M4 的实测结论，本章的改造对象必须分两类，不能只改 schema：`push` 与 `merge` 目前只有
@@ -631,6 +661,11 @@ python -m aiflow validate <TASK_ID>
   当前无生产调用方。
 
 ### Chapter B4：账本推进自动化
+
+状态：`deferred`（2026-09-05）。实测依据（169/382 纯账本提交）独立成立，但本章规格自述
+「不改变任何审批点」——它减少的是提交噪声，**不是人类批准次数**。作为仓库卫生改进有效，
+作为审批治理无效。
+
 
 针对 M5。44.2% 的非 merge 提交只改动 `.ai/tasks/`。
 
