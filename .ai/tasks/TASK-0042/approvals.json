@@ -24,5 +24,51 @@
     "spec_sha256": "fd7825d08a0720e93a67705de619ece53cc2c547be247de8243482152640a3f8",
     "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
     "task_id": "TASK-0042"
+  },
+  {
+    "action_sha256": "60936520c3d37b406169be31768e8a068d3f7445de4692d6122a88a3cb1cd4b5",
+    "actor": "human-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-05T08:49:36Z",
+    "base_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-05T20:49:36Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者明确指示「APPROVE targeted_mutation」：授权对 TASK-0042 执行一次版本绑定的单次 targeted_mutation_v2 动作，重放不可变清单 .ai/mutations/phase-02-critical-manifest.json 的 MUT-V2-001..MUT-V2-005，以满足 V2 的 targeted_mutation 闸口。绑定 subject 91563b1fc68497ed42c6ff03bbeaaea144004ccc、classification input 5372c6d3…55afb。授权边界见 action 文件 conditions：仅在 uv run --locked 下执行、只变异清单声明的 src/aiflow 目标并全部还原、证据只写入 .ai/tasks/TASK-0042/、不得 push/merge/deploy/delete/凭据导出/付费调用/网络访问、不得修改任何测试的期望摘要、单次使用不可重试",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "fd7825d08a0720e93a67705de619ece53cc2c547be247de8243482152640a3f8",
+    "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
+    "task_id": "TASK-0042"
+  },
+  {
+    "action_sha256": "51f8f6f618c8ed7908cac63d49fae9b41d0300785dbbe20b9a5165d12b1af61a",
+    "actor": "human-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-05T10:20:54Z",
+    "base_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-05T22:20:54Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准第二次版本绑定的单次 targeted_mutation_v2 动作。第一次授权被一次本应为 verify --finalize 的完整 verify 运行耗尽（报 ACTION_APPROVAL_USED 并覆盖了通过态证据），需重新生成通过态证据后再用 --finalize 附加 implementation 审核引用。绑定 subject 91563b1、classification input 5372c6d3…55afb。边界同前：仅 uv run --locked、只变异清单目标并全部还原、证据只写入 .ai/tasks/TASK-0042/、不得 push/merge/deploy/delete/凭据导出/付费调用/网络访问、不得修改测试期望摘要、单次使用",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "fd7825d08a0720e93a67705de619ece53cc2c547be247de8243482152640a3f8",
+    "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
+    "task_id": "TASK-0042"
+  },
+  {
+    "actor": "human-owner",
+    "approval_type": "code",
+    "approved_at": "2026-09-05T10:43:53Z",
+    "base_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "c9c26d6f1ba2ae30bb4098e1dc74af832dff5f0dd93ba1586d374fa43bb31f98",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者批准实现（见 REV-0004 implementation review, APPROVE, 无 open 发现；审核包 .ai/tasks/TASK-0042/review-package.md 四个审核问题均已接受）。最终非账本改动只有 .gitattributes 两行；测试期望摘要未改；零 blob 改写经只读全量 CR 预检与提交后 renormalize 空 diff 双重证实；V2 验证 14/14 通过（快照 7fd627cf…a0dd，phase final），MUT-V2-001..005 全部 killed 且源码还原，unverified_scenarios 为空。已留档未验证项：core.autocrlf=input 与 macOS 未实机验证；其他 Windows 工作副本的迁移说明留待单独文档任务。本批准不授权任何外部动作",
+    "schema_version": "1.0",
+    "spec_sha256": "fd7825d08a0720e93a67705de619ece53cc2c547be247de8243482152640a3f8",
+    "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
+    "task_id": "TASK-0042"
   }
 ]
