@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "human-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-05T06:39:49Z",
+    "base_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者审核后批准（见 REV-0001 design review, outcome APPROVE, 无 open 发现）：范围限定 .ai/tasks/**，两行规则 text eol=lf 与其后 .coverage binary；明确拒绝扩大到 .ai/policy/**、.ai/schemas/**、.ai/templates/**、.ai/mutations/** 与 .ai/repository-id。风险接受依据：.ai 下 1027 个索引 blob 仅 6 个 .coverage 含 CR 且已由 binary 规则豁免，其余 987 个的 renormalize 为恒等操作，零 blob 改写，符合任务账本追加式要求；改动完全可逆，无外部副作用。不得修改测试期望摘要",
+    "schema_version": "1.0",
+    "spec_sha256": "ab172857a06838aea49b6891dc3551cfeb2bd061e937730556389cbaabb4756c",
+    "subject_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+    "task_id": "TASK-0042"
+  }
+]

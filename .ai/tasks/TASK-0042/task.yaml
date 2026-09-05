@@ -1,0 +1,98 @@
+allowed_scope:
+- .gitattributes
+base_commit: 0b97ae1b69396cec3a17106c12d11ca27a8b95da
+branch: claude/musing-dijkstra-a7c360
+created_at: '2026-09-05T04:41:28Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: true
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 修复 .gitattributes 的 checkout 归一化缺口：现有规则只覆盖 .ai/tasks/*/historical-snapshots/**，导致
+    .ai/tasks/ 下其余任务证据文件在 core.autocrlf=true 的 Windows 检出为 CRLF，使按字节摘要校验的测试（tests/integration/test_acceptance_traceability.py::test_phase_two_historical_hashes_and_current_subject_match_records）在
+    Windows 必然失败。将 .ai/tasks/** 整体钉为 text eol=lf，并把 6 个二进制 .coverage 文件显式标记为 binary
+    以免被误当文本。不修改任何测试的期望摘要，不改写任何已提交 blob
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - .gitattributes
+  inputs:
+  - .gitattributes 现仅有一条规则 `.ai/tasks/*/historical-snapshots/** text eol=lf`，为 test_phase_02_self_hosting_scenario.py
+    的 bundle 字节校验而设，未覆盖 .ai/tasks/ 其余证据文件
+  - tests/integration/test_acceptance_traceability.py:237 对 .ai/tasks/TASK-0028/evidence-h1-b7c7fb4a.json
+    与 action-use-5a3071cd…8020.md 做 read_bytes() 摘要，期望值等于 blob 摘要（4fc5729e…823662
+    / 3d420bb8…6eff94）
+  - 实测 core.autocrlf=true 的 Windows 工作副本摘要为 476ac2e1…843b2516 / 970fbe2b…079b52，与
+    blob 不符；Linux/LF 的 CI 通过
+  - git ls-files --eol .ai：1027 个跟踪文件中 940 个 i/lf w/crlf attr/（缺口）、21 个 attr/text（已覆盖）、60
+    个空文件、6 个 i/-text
+  - 逐 blob 校验：.ai 下只有 6 个 blob 含 CR，全部是 logs/**/.coverage（SQLite 二进制）；其余 987 个 blob
+    已是纯 LF，故 renormalize 对它们是恒等操作
+  - AGENTS.md 升级清单包含 .gitignore 与 .gitattributes；任务账本记录与证据为追加式，不得重写
+  - 已核查 .ai/tasks/ 之外的 34 个 .ai 文件无任何跨平台字节摘要依赖：test_mutation_runner_contract/test_gate_parity/test_observation_parity
+    均为同次运行内 before==after 自洽校验，test_contracts 对 .ai/repository-id 用 splitlines()
+  permission_requirements: []
+  planned_actions:
+  - 在 .gitattributes 新增 `.ai/tasks/** text eol=lf`，覆盖全部任务账本与证据文件
+  - 紧随其后新增 `.ai/tasks/**/.coverage binary`，让 6 个 coverage SQLite 保持二进制，避免被误当文本改写或损坏
+  - 为两条规则补注释，说明「测试按字节摘要校验任务证据，故检出必须为 LF」的原因
+  - 先提交 .gitattributes 与本任务账本，再执行 git add --renormalize . 并要求 git diff --cached --stat
+    完全为空，证明零 blob 改写
+  - 用 git rm --cached -r . && git reset --hard 按新规则重新检出工作区（renormalize 只修索引，不刷新工作区）
+  - 在 Windows（core.autocrlf=true）跑 uv run --locked python -m pytest 全量，确认目标测试通过且相对基线无新增失败
+  protections:
+    dry_run: true
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0042
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - 只读预检（已完成）：遍历 .ai 下全部 1027 个索引 blob 检查是否含 CR，确认只有 6 个 .coverage 含 CR，据此可精确预测 renormalize
+    对其余 987 个 blob 是恒等操作
+  - 'git check-attr text eol -- 两个被摘要的 TASK-0028 路径，期望 text: set / eol: lf'
+  - 'git check-attr text -- 6 个 .coverage，期望全部 text: unset'
+  - 提交后 git add --renormalize . 且 git diff --cached --stat 完全为空（零 blob 改写）
+  - 重新检出后 git ls-files --eol .ai/tasks 中不再出现 w/crlf
+  - uv run --locked python -m pytest tests/integration/test_acceptance_traceability.py
+    -q（Windows）
+  - uv run --locked python -m pytest -q 全量（Windows），与改动前基线逐项对比不新增失败
+  - git status --porcelain 不出现 .coverage 被修改；最终 diff 只含 .gitattributes 与本任务账本
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: false
+    integration_required: true
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: ab172857a06838aea49b6891dc3551cfeb2bd061e937730556389cbaabb4756c
+goal: 修复 .gitattributes 的 checkout 归一化缺口：现有规则只覆盖 .ai/tasks/*/historical-snapshots/**，导致
+  .ai/tasks/ 下其余任务证据文件在 core.autocrlf=true 的 Windows 检出为 CRLF，使按字节摘要校验的测试（tests/integration/test_acceptance_traceability.py::test_phase_two_historical_hashes_and_current_subject_match_records）在
+  Windows 必然失败。将 .ai/tasks/** 整体钉为 text eol=lf，并把 6 个二进制 .coverage 文件显式标记为 binary
+  以免被误当文本。不修改任何测试的期望摘要，不改写任何已提交 blob
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model/.claude/worktrees/musing-dijkstra-a7c360
+schema_version: '1.0'
+spec_frozen_at: '2026-09-05T04:46:16Z'
+subject_commit: 0b97ae1b69396cec3a17106c12d11ca27a8b95da
+task_id: TASK-0042
+updated_at: '2026-09-05T06:39:56Z'
+worktree_dirty: false
+worktree_dirty_paths: []
