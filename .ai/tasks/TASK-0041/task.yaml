@@ -28,9 +28,9 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-current_state: WAITING_FOR_SPEC_REVIEW
+current_state: BLOCKED
 created_at: '2026-09-04T15:48:07Z'
-updated_at: '2026-09-04T20:13:29Z'
+updated_at: '2026-09-05T04:35:54Z'
 decision_units:
 - schema_version: '1.0'
   task_id: TASK-0041
