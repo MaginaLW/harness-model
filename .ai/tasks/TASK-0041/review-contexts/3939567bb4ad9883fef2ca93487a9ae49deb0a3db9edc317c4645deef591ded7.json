@@ -1,0 +1,59 @@
+{
+  "base_commit": "6515b7dea5bb372a522885b1f55a5abc358d7788",
+  "branch": "feat/b0-governance-surface-guard",
+  "classification_input_sha256": "f011e053fc45b3138016b0df6b05288650eb1037f377bffdb205b81e41895183",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/predicates.py",
+      ".ai/schemas/policy.schema.json",
+      ".ai/schemas/decision-unit.schema.json",
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/permissions.yaml",
+      ".ai/policy/verification-levels.yaml",
+      "tests/unit/test_predicates.py",
+      "tests/unit/test_routing.py",
+      "tests/integration/test_classify_command.py",
+      "docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "让治理面变更无法在不经人类审核的情况下被路由走：新增按路径匹配的谓词运算符并据此新增 HARD-REVIEW-GOVERNANCE-SURFACE 规则，锚定 impact_scope 覆盖 .ai/policy/**、.ai/schemas/**、src/aiflow/**、.github/workflows/**；同时为 impact_categories 补 governance 取值以便审计。不修改 _AUTO_GUARDS，不放宽任何现有 AUTO 规则",
+        "impact_scope": [
+          "src/aiflow/predicates.py",
+          ".ai/schemas/policy.schema.json",
+          ".ai/schemas/decision-unit.schema.json",
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/permissions.yaml",
+          ".ai/policy/verification-levels.yaml",
+          "tests/unit/test_predicates.py",
+          "tests/unit/test_routing.py",
+          "tests/integration/test_classify_command.py",
+          "docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md"
+        ],
+        "planned_actions": [
+          "在 src/aiflow/predicates.py 新增 path_matches_any 运算符（fnmatch glob 语义，作用于字符串列表字段）并同步 .ai/schemas/policy.schema.json 的 operator 枚举",
+          "在 .ai/policy/hard-rules.yaml 新增 HARD-REVIEW-GOVERNANCE-SURFACE，锚定 impact_scope，missing: match（fail-closed）",
+          "为 .ai/schemas/decision-unit.schema.json 的 impact_categories 枚举补 governance 取值",
+          "四个 .ai/policy/*.yaml 的 policy_version 同步提升到 2.3.0",
+          "补单元与集成测试：新运算符语义、新规则在四类治理路径上触发、impact_scope 缺失时 fail-closed、既有八条 HARD-* 命中结果不变"
+        ]
+      }
+    ],
+    "goal": "让治理面变更无法在不经人类审核的情况下被路由走：新增按路径匹配的谓词运算符并据此新增 HARD-REVIEW-GOVERNANCE-SURFACE 规则，锚定 impact_scope 覆盖 .ai/policy/**、.ai/schemas/**、src/aiflow/**、.github/workflows/**；同时为 impact_categories 补 governance 取值以便审计。不修改 _AUTO_GUARDS，不放宽任何现有 AUTO 规则",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "3939567bb4ad9883fef2ca93487a9ae49deb0a3db9edc317c4645deef591ded7",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "d2c80e66129ccecbdcda8ca1ebd0b678c27f517e3ae5b08718737099a33bb5ba",
+  "task_id": "TASK-0041"
+}

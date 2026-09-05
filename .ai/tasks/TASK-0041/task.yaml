@@ -1,0 +1,95 @@
+schema_version: '1.0'
+task_id: TASK-0041
+goal: 让治理面变更无法在不经人类审核的情况下被路由走：新增按路径匹配的谓词运算符并据此新增 HARD-REVIEW-GOVERNANCE-SURFACE 规则，锚定
+  impact_scope 覆盖 .ai/policy/**、.ai/schemas/**、src/aiflow/**、.github/workflows/**；同时为
+  impact_categories 补 governance 取值以便审计。不修改 _AUTO_GUARDS，不放宽任何现有 AUTO 规则
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: feat/b0-governance-surface-guard
+base_commit: 6515b7dea5bb372a522885b1f55a5abc358d7788
+subject_commit: 6515b7dea5bb372a522885b1f55a5abc358d7788
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- src/aiflow/predicates.py
+- .ai/schemas/policy.schema.json
+- .ai/schemas/decision-unit.schema.json
+- .ai/policy/hard-rules.yaml
+- .ai/policy/routing.yaml
+- .ai/policy/permissions.yaml
+- .ai/policy/verification-levels.yaml
+- tests/unit/test_predicates.py
+- tests/unit/test_routing.py
+- tests/integration/test_classify_command.py
+- docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: WAITING_FOR_SPEC_REVIEW
+created_at: '2026-09-04T15:48:07Z'
+updated_at: '2026-09-04T20:13:29Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0041
+  decision_unit_id: DU-001
+  goal: 让治理面变更无法在不经人类审核的情况下被路由走：新增按路径匹配的谓词运算符并据此新增 HARD-REVIEW-GOVERNANCE-SURFACE
+    规则，锚定 impact_scope 覆盖 .ai/policy/**、.ai/schemas/**、src/aiflow/**、.github/workflows/**；同时为
+    impact_categories 补 governance 取值以便审计。不修改 _AUTO_GUARDS，不放宽任何现有 AUTO 规则
+  inputs:
+  - TASK-0040 设计审核 REV-0001 的 8 条 open 发现，特别是 RF-003（HARD-REVIEW-SECRETS-AUTH/CI-CD
+    在 impact_categories 缺失时 missing:no_match 静默失效）与 RF-008（枚举无 governance 取值）
+  - src/aiflow/predicates.py：SUPPORTED_OPERATORS 无路径/glob 运算符；contains_any 为精确成员判断；字段解析为通用点路径，impact_scope
+    可解析
+  - src/aiflow/policy.py:150 _validate_cross_file 要求四个 Policy 文件 policy_version 一致
+  - src/aiflow/routing.py:245 有效路由为 max(hits, key=ROUTE_ORDER.index)，按严重度取最大而非 priority
+  - AGENTS.md 升级清单：.github/workflows/**、.ai/policy/**、.ai/schemas/**、src/aiflow/**、.gitignore
+    与 .gitattributes、任务账本本身，以及任何有外部副作用或不可逆的动作
+  planned_actions:
+  - 在 src/aiflow/predicates.py 新增 path_matches_any 运算符（fnmatch glob 语义，作用于字符串列表字段）并同步
+    .ai/schemas/policy.schema.json 的 operator 枚举
+  - '在 .ai/policy/hard-rules.yaml 新增 HARD-REVIEW-GOVERNANCE-SURFACE，锚定 impact_scope，missing:
+    match（fail-closed）'
+  - 为 .ai/schemas/decision-unit.schema.json 的 impact_categories 枚举补 governance 取值
+  - 四个 .ai/policy/*.yaml 的 policy_version 同步提升到 2.3.0
+  - 补单元与集成测试：新运算符语义、新规则在四类治理路径上触发、impact_scope 缺失时 fail-closed、既有八条 HARD-* 命中结果不变
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - python -m pytest tests/unit/test_predicates.py tests/unit/test_routing.py -q
+  - python -m pytest tests/integration -q
+  - python -m pytest tests/acceptance -q
+  - python -m pytest -q
+  - python -m mypy src
+  - 对 41 个历史 task 重放分类，确认既有 route 结论无一被削弱
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: high
+  protections:
+    verified_backup: false
+    dry_run: false
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories: []
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: true
+    code_modified: true
+    interaction_scope: cross_module
+    regression_risk: true
+    error_detectability: low
+  verification_requirements:
+    acceptance_required: true
+    integration_required: true
+    targeted_mutation_required: true
+    independent_verifier_required: true
+repository_path_at_creation: D:/Repos/harness-model
+frozen_spec_sha256: d2c80e66129ccecbdcda8ca1ebd0b678c27f517e3ae5b08718737099a33bb5ba
+spec_frozen_at: '2026-09-04T15:49:28Z'
