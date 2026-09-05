@@ -1,0 +1,40 @@
+{
+  "base_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+  "branch": "claude/musing-dijkstra-a7c360",
+  "classification_input_sha256": "5372c6d3a57a2152e36869c46002d006056806486bb79849e171a05c41355afb",
+  "content": {
+    "allowed_scope": [
+      ".gitattributes"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "修复 .gitattributes 的 checkout 归一化缺口：现有规则只覆盖 .ai/tasks/*/historical-snapshots/**，导致 .ai/tasks/ 下其余任务证据文件在 core.autocrlf=true 的 Windows 检出为 CRLF，使按字节摘要校验的测试（tests/integration/test_acceptance_traceability.py::test_phase_two_historical_hashes_and_current_subject_match_records）在 Windows 必然失败。将 .ai/tasks/** 整体钉为 text eol=lf，并把 6 个二进制 .coverage 文件显式标记为 binary 以免被误当文本。不修改任何测试的期望摘要，不改写任何已提交 blob",
+        "impact_scope": [
+          ".gitattributes"
+        ],
+        "planned_actions": [
+          "在 .gitattributes 新增 `.ai/tasks/** text eol=lf`，覆盖全部任务账本与证据文件",
+          "紧随其后新增 `.ai/tasks/**/.coverage binary`，让 6 个 coverage SQLite 保持二进制，避免被误当文本改写或损坏",
+          "为两条规则补注释，说明「测试按字节摘要校验任务证据，故检出必须为 LF」的原因",
+          "先提交 .gitattributes 与本任务账本，再执行 git add --renormalize . 并要求 git diff --cached --stat 完全为空，证明零 blob 改写",
+          "用 git rm --cached -r . && git reset --hard 按新规则重新检出工作区（renormalize 只修索引，不刷新工作区）",
+          "在 Windows（core.autocrlf=true）跑 uv run --locked python -m pytest 全量，确认目标测试通过且相对基线无新增失败"
+        ]
+      }
+    ],
+    "goal": "修复 .gitattributes 的 checkout 归一化缺口：现有规则只覆盖 .ai/tasks/*/historical-snapshots/**，导致 .ai/tasks/ 下其余任务证据文件在 core.autocrlf=true 的 Windows 检出为 CRLF，使按字节摘要校验的测试（tests/integration/test_acceptance_traceability.py::test_phase_two_historical_hashes_and_current_subject_match_records）在 Windows 必然失败。将 .ai/tasks/** 整体钉为 text eol=lf，并把 6 个二进制 .coverage 文件显式标记为 binary 以免被误当文本。不修改任何测试的期望摘要，不改写任何已提交 blob",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "b5bec557b0853f52201b23a0136a4fea95276fe1a455814af72b220d550ffb19",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "fd7825d08a0720e93a67705de619ece53cc2c547be247de8243482152640a3f8",
+  "task_id": "TASK-0042"
+}
