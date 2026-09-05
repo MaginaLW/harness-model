@@ -171,11 +171,32 @@ fe4fa6c6  chore: add bootstrap auto mode                .ai/bootstrap-mode.yaml 
 
 ## 8. 未解决的张力（落地前必须先有结论）
 
-1. **REVIEW 会吞掉 ASK。** `ROUTE_ORDER = ('AUTO','ASK','REVIEW','BLOCK')`，
-   `max(['ASK','REVIEW'])` 为 `REVIEW`。治理面变更若同时 `business_direction_count >= 2`，
-   原本命中 `ROUTE-ASK-MULTIPLE-DIRECTIONS`，加了守卫后变 REVIEW —— **用户选择义务被静默
-   销毁**。当前聚合方式无法表达「既要 REVIEW 也要 ASK」。这是引擎的表达力缺口，不是本
-   守卫的实现细节，需单独决定：接受、改聚合语义、或把 ASK 义务移出 route 维度。
+1. **REVIEW 吞掉 ASK —— 已确认为既有缺陷，非本守卫引入。**
+   用真实引擎（`load_policy_bundle` + `route_decision_unit` + `classification_service._target`）
+   实测三个场景：
+
+   | 场景 | 单元路由 | 任务状态 | 命中规则 |
+   |---|---|---|---|
+   | 仅 `business_direction_count=2` | `ASK` | `WAITING_FOR_ASK` | `ROUTE-ASK-MULTIPLE-DIRECTIONS` |
+   | 同上 + `impact_categories=[ci]` | `REVIEW` | **`WAITING_FOR_SPEC_REVIEW`** | `HARD-REVIEW-CI-CD`，**`ROUTE-ASK-MULTIPLE-DIRECTIONS`** |
+   | 仅 `impact_categories=[ci]` | `REVIEW` | `WAITING_FOR_SPEC_REVIEW` | `HARD-REVIEW-CI-CD` |
+
+   第二行是关键：ASK 规则**确实命中了**（出现在 `matched_rules` 中），但
+   `routing.py:245` 的 `max` 把单元路由压成 REVIEW，`classification_service.py:74` 的
+   `any(entry.route == "ASK")` 因此看不到它 —— 该检查读的是**单元的有效路由**，不是命中
+   规则集合。**今天 `HARD-REVIEW-CI-CD` 就已经在静默丢弃 ASK 义务。**
+
+   因此这不是本守卫的设计缺陷，而是引擎既有缺陷：**任何 REVIEW 路由规则与 ASK 规则在
+   同一决策单元上共同命中时，用户选择义务都会消失**。本守卫会扩大该缺陷的暴露面
+   （治理面变更将更常触发 REVIEW），但不制造它。
+
+   账本实测：`business_direction_count >= 2` 的决策单元共 1 个（TASK-0034/DU-001），
+   且该单元同时触及治理面 —— 即历史上唯一的 ASK 用例正好落在碰撞条件上。样本量为 1，
+   不足以推断发生率。
+
+   修复方向（须单独立项，不在本守卫范围内）：让 `_target` 读 `matched_rules` 而非单元
+   有效路由，或把 ASK 义务移出 route 维度。**本守卫落地前应先记录该缺陷，落地时须在
+   验收中固定其行为，使其不因扩大暴露面而被遗忘。**
 2. **`missing` 策略无处安放。** `impact_scope` 是 schema 必填，`missing: match` 的
    fail-closed 分支**永不可达**；写了也只是装饰，不应作为验收条件。
 3. **`impact_categories` 的 `governance` 取值。** 若守卫锚定 `impact_scope`，该取值不被任何
