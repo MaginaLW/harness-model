@@ -18,7 +18,12 @@ CORE_PRINCIPLES = (
     "不得绕过任务状态、允许范围、所需批准或验证门",
     "不得自行降低分流或验证等级",
     "高风险动作必须单独获批",
-    "批准和证据必须绑定当前规格、Policy 与 `subject_commit`",
+    # The earlier wording asserted every approval binds subject_commit. It does
+    # not: freshness.py binds spec_approval to (base_commit, policy_sha256,
+    # spec_sha256) only, and pinning the false claim drove repeated spec
+    # approvals the engine never required. Pin the principle, not a field list.
+    "批准与证据按类型绑定不同的版本事实",
+    "只补 `Missing:` 列出的项",
     "不在 Agent 文件中复制规则表",
 )
 FORBIDDEN_RULE_COPIES = (
@@ -36,9 +41,10 @@ def test_agents_entry_has_complete_shared_principles_and_remains_brief() -> None
 
     assert all(principle in text for principle in CORE_PRINCIPLES)
     assert "python -m aiflow --help" in text
-    # 27 covers the maintenance-mode escalation list; the cap still keeps this
-    # file to conclusions, boundaries and pointers rather than rule tables.
-    assert len(text.splitlines()) <= 27
+    # 28 covers the maintenance-mode escalation list plus the decision-unit
+    # granularity rule; the cap still keeps this file to conclusions,
+    # boundaries and pointers rather than rule tables.
+    assert len(text.splitlines()) <= 28
     assert not any(copied_rule in text for copied_rule in FORBIDDEN_RULE_COPIES)
     assert not re.search(r"\b(?:ROUTE|VERIFY|PERMISSION)-[A-Z0-9-]+\b", text)
 
