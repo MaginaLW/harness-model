@@ -70,5 +70,21 @@
     "spec_sha256": "fd7825d08a0720e93a67705de619ece53cc2c547be247de8243482152640a3f8",
     "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
     "task_id": "TASK-0042"
+  },
+  {
+    "action_sha256": "e84f74996b5446adf36bf6b088194922a11e587623eff45a1c34b80de76544b5",
+    "actor": "human-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-05T10:44:56Z",
+    "base_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-05T22:44:56Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者在对话中明确授权：Push branch and open a PR。授权推送分支 claude/musing-dijkstra-a7c360 至 origin（tip b674c671）并针对 main 开一个 PR。push 属本任务 forbidden_actions，故单独取得版本绑定的单次 action 批准。边界见 conditions：只推该分支、禁止 force、禁止删除远端 ref、不合并、不改 main、不部署、只开一个 PR 且不合并，并需在 PR 中说明 merge readiness 为 reverification_required（HEAD 已超前于已验证 subject 91563b1）",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "fd7825d08a0720e93a67705de619ece53cc2c547be247de8243482152640a3f8",
+    "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
+    "task_id": "TASK-0042"
   }
 ]
