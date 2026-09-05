@@ -315,6 +315,62 @@ git grep -nF "Users\" -- docs
 四章按 B1 → B3 → B2 → B4 推进：先做只改 Policy 与 schema、语义影响可局部验证的部分，
 再做改动 `src/aiflow/**` 判定语义的部分。**四章全部触及升级清单，每章须走 AI Flow。**
 
+### 实测结论：基于路径的 AUTO 放宽在本仓库无收益（2026-09-05）
+
+在为 B1 寻找一条更窄的替代路径时（只放宽「`impact_scope` 完全落在 `docs/**`/`tests/**`
+内」的单元），实测结果否定了整条思路：
+
+| | |
+|---|---|
+| REVIEW 决策单元总数 | 30 |
+| `impact_scope` 全落在 `docs/**` + `tests/**` | 2 |
+| 其中属兜底 REVIEW（非 `HARD-*`） | 1 |
+| 且 `impact.level == low` | **0** |
+
+`_AUTO_GUARDS`（`routing.py:15`）强制每条 AUTO 规则的条件集必须是其超集，其中含
+`('impact.level','equals','low','error')`。唯一那个纯 docs/tests 的兜底 REVIEW 单元
+（TASK-0024/DU-001）声明的是 `medium`。因此一条合规的窄 AUTO 规则能转化的单元数为 **0**；
+即便忽略 `impact.level`，收益也只有 1/30。
+
+#### 原因是分类粒度，不是规则
+
+18 个非纯 docs/tests 的兜底 REVIEW 单元，其 `impact_scope` 普遍把安全路径与治理面路径
+**捆在同一个决策单元里**：
+
+```
+TASK-0005  .ai/schemas/review-context.schema.json, .ai/templates/...
+TASK-0008  .ai/schemas/verifier-context.schema.json, .ai/schemas/evidence.schema.json
+TASK-0010  README.md, docs/implementation/..., docs/superpowers/state/README.md
+```
+
+这与 M2（自指放大）同源：本仓库的工作就是构建治理系统，因而几乎每个变更都会触及治理面。
+由此得到一条比 M1–M5 更强的结论：
+
+> **任何基于路径的 AUTO 放宽在本仓库都不可能产生收益，因为分类的粒度单位（决策单元）
+> 本身就混合了安全与不安全的路径。**
+
+#### 数据指向的杠杆：决策单元粒度
+
+把一个 task 的文档改动与引擎改动拆成**两个决策单元**，前者可合法走 AUTO，后者走 REVIEW。
+这不需要修改引擎或 Policy —— 是任务分解的**实践**问题，成本远低于 B0/B1 的任何一版设计。
+
+**未验证的推断：** 现有 9 个 AUTO 单元全部声明 `low`，17 个兜底 REVIEW 全部声明 `medium`，
+提示作者对小而纯的单元确实倾向声明 `low`。但「拆分后作者是否会把文档单元声明为 `low`」
+现有数据无法回答，须实际试行若干 task 后再评估。
+
+#### 对 Part B 各章的影响（逐章，不笼统）
+
+| 章节 | 是否受影响 | 理由 |
+|---|---|---|
+| **B0**（治理面守卫） | **前提消失** | 它存在的唯一目的是作为 B1 的前置条件 |
+| **B1**（放宽 `impact.level`） | **前提消失** | 其收益依赖路径/影响级别维度的放宽，实测为 0 |
+| B2（批准绑范围） | 不受影响 | 针对 48/113 重复批准，来自 freshness 绑定，与路由无关 |
+| B3（action 批准分级） | 不受影响 | 针对 action 一次性券，与路由无关 |
+| B4（账本推进自动化） | 不受影响 | 针对 169/382 纯账本提交，与路由无关 |
+
+因此 **B0 与 B1 应当停止**，除非先解决决策单元粒度问题；B2、B3、B4 的实测依据独立成立，
+可各自单独推进。
+
 ### Chapter B0（新增）：治理面守卫 —— B1 的前置条件
 
 状态：`blocked`（2026-09-05）。TASK-0041 已开立并冻结规格，独立设计审核 REV-0001 结论为
