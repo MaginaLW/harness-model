@@ -1,0 +1,270 @@
+{
+  "base_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+  "branch": "claude/musing-dijkstra-a7c360",
+  "checks": [
+    {
+      "category": "contract",
+      "check_id": "contract",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m aiflow validate TASK-0042",
+      "duration_ms": 343,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/contract-001.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/contract-001.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    },
+    {
+      "category": "scope",
+      "check_id": "scope",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m aiflow scope TASK-0042",
+      "duration_ms": 469,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/scope-002.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/scope-002.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    },
+    {
+      "category": "ruff_check",
+      "check_id": "ruff_check",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m ruff check .",
+      "duration_ms": 500,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/ruff_check-003.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/ruff_check-003.stdout.log",
+      "timed_out": false,
+      "tool_version": "ruff:0.16.1"
+    },
+    {
+      "category": "ruff_format_check",
+      "check_id": "ruff_format_check",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m ruff format --check .",
+      "duration_ms": 140,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/ruff_format_check-004.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/ruff_format_check-004.stdout.log",
+      "timed_out": false,
+      "tool_version": "ruff:0.16.1"
+    },
+    {
+      "category": "smoke",
+      "check_id": "smoke",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m aiflow --help",
+      "duration_ms": 250,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/smoke-005.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/smoke-005.stdout.log",
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    },
+    {
+      "category": "unit_tests",
+      "check_id": "unit_tests",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m pytest tests/unit -q",
+      "duration_ms": 49281,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/unit_tests-006.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/unit_tests-006.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "regression_tests",
+      "check_id": "regression_tests",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m pytest -q",
+      "duration_ms": 436000,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/regression_tests-007.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/regression_tests-007.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "mypy",
+      "check_id": "mypy",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m mypy src",
+      "duration_ms": 1344,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/mypy-008.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/mypy-008.stdout.log",
+      "timed_out": false,
+      "tool_version": "mypy:1.20.2"
+    },
+    {
+      "category": "coverage_xml",
+      "check_id": "coverage_xml",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m pytest --cov=aiflow --cov-branch --cov-report=xml:D:/Repos/harness-model/.claude/worktrees/musing-dijkstra-a7c360/.ai/tasks/TASK-0042/logs/run-20260905T072544854262Z/coverage.xml",
+      "duration_ms": 583812,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/coverage_xml-009.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/coverage_xml-009.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "diff_coverage",
+      "check_id": "diff_coverage",
+      "command_summary": "diff-cover D:/Repos/harness-model/.claude/worktrees/musing-dijkstra-a7c360/.ai/tasks/TASK-0042/logs/run-20260905T072544854262Z/coverage.xml --compare-branch 0b97ae1b69396cec3a17106c12d11ca27a8b95da --fail-under 90",
+      "duration_ms": 1047,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/diff_coverage-010.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/diff_coverage-010.stdout.log",
+      "timed_out": false,
+      "tool_version": "diff-cover:9.7.2"
+    },
+    {
+      "category": "acceptance",
+      "check_id": "acceptance",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m pytest tests/acceptance -q",
+      "duration_ms": 1703,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/acceptance-011.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/acceptance-011.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "integration",
+      "check_id": "integration",
+      "command_summary": "D:\\Repos\\harness-model\\.claude\\worktrees\\musing-dijkstra-a7c360\\.venv\\Scripts\\python.exe -m pytest tests/integration -q",
+      "duration_ms": 377437,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": "logs/run-20260905T072544854262Z/integration-012.stderr.log",
+      "stdout_log_ref": "logs/run-20260905T072544854262Z/integration-012.stdout.log",
+      "timed_out": false,
+      "tool_version": "pytest:9.1.1"
+    },
+    {
+      "category": "targeted_mutation",
+      "check_id": "targeted_mutation",
+      "command_summary": "loader-validated targeted mutation evidence",
+      "duration_ms": 0,
+      "exit_code": 1,
+      "reason_code": "ACTION_APPROVAL_REQUIRED",
+      "required": true,
+      "status": "failed",
+      "stderr_log_ref": null,
+      "stdout_log_ref": null,
+      "timed_out": false,
+      "tool_version": "aiflow-mutation-evidence-v1"
+    },
+    {
+      "category": "independent_verifier",
+      "check_id": "independent_verifier",
+      "command_summary": "task-local implementer and verifier actor labels differ; external identity is not authenticated",
+      "duration_ms": 0,
+      "exit_code": 0,
+      "reason_code": null,
+      "required": true,
+      "status": "passed",
+      "stderr_log_ref": null,
+      "stdout_log_ref": null,
+      "timed_out": false,
+      "tool_version": "aiflow-local"
+    }
+  ],
+  "classification_input_sha256": "ccbdd40186fcfc149a7447daf0e59aff2f1f32f5f8189093ff425aee07e49c9f",
+  "conclusion": "failed",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "generated_at": "2026-09-05T07:49:57Z",
+  "mode": "local",
+  "phase": "pre_implementation_review",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "reproduce_command": [
+    "python",
+    "-m",
+    "aiflow",
+    "verify",
+    "TASK-0042",
+    "--actor",
+    "independent-verifier"
+  ],
+  "review_refs": {
+    "design": {
+      "context_sha256": "08f2768241c9fdff8c43322f1fcc867e0f0c72bff2367e90a70c4405a0a36a7c",
+      "review_id": "REV-0001"
+    }
+  },
+  "schema_version": "2.0",
+  "spec_sha256": "ab172857a06838aea49b6891dc3551cfeb2bd061e937730556389cbaabb4756c",
+  "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
+  "targeted_mutation": {
+    "evidence_ref": ".ai/tasks/TASK-0042/logs/MUTRUN-19700101T000000Z-0000000000000000/targeted-mutation/evidence.json",
+    "manifest_ref": ".ai/mutations/phase-02-critical-manifest.json",
+    "mutation_evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "results": [
+      {
+        "log_ref": null,
+        "mutation_id": "MUT-V2-001",
+        "outcome": "unverified"
+      },
+      {
+        "log_ref": null,
+        "mutation_id": "MUT-V2-002",
+        "outcome": "unverified"
+      },
+      {
+        "log_ref": null,
+        "mutation_id": "MUT-V2-003",
+        "outcome": "unverified"
+      },
+      {
+        "log_ref": null,
+        "mutation_id": "MUT-V2-004",
+        "outcome": "unverified"
+      },
+      {
+        "log_ref": null,
+        "mutation_id": "MUT-V2-005",
+        "outcome": "unverified"
+      }
+    ]
+  },
+  "task_id": "TASK-0042",
+  "unverified_scenarios": [
+    "check:targeted_mutation:ACTION_APPROVAL_REQUIRED"
+  ],
+  "verification_level": "V2",
+  "verification_snapshot_sha256": "c4038a7faec5fedd6118ecc7c71ed2636340162a2ce3b08f2f5602952d0c6bb1",
+  "verifier_actor": "independent-verifier",
+  "verifier_context_sha256": "01a195a1a6121fe7bfc615c36b83c03a3d4265fbd3d088fa1d416e6b1f6c7c31"
+}

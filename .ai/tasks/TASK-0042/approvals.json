@@ -11,5 +11,18 @@
     "spec_sha256": "ab172857a06838aea49b6891dc3551cfeb2bd061e937730556389cbaabb4756c",
     "subject_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
     "task_id": "TASK-0042"
+  },
+  {
+    "actor": "human-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-05T08:22:36Z",
+    "base_commit": "0b97ae1b69396cec3a17106c12d11ca27a8b95da",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者重新批准 spec（见 REV-0002 design review, APPROVE, 无 open 发现）。相对首次批准的变化仅为验证事实与权限声明：verification_requirements 四项全 true、permission_requirements 含 action_approval，spec 增补「验证等级」一节。技术方案与范围不变，仍限定 .ai/tasks/**。所有者明确指示 APPROVE targeted_mutation、维持 V2 不降级。风险接受依据不变：仅 6 个 .coverage 含 CR 且已由 binary 规则豁免，零 blob 改写，任务账本追加式要求得到满足；不得修改测试期望摘要",
+    "schema_version": "1.0",
+    "spec_sha256": "fd7825d08a0720e93a67705de619ece53cc2c547be247de8243482152640a3f8",
+    "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
+    "task_id": "TASK-0042"
   }
 ]

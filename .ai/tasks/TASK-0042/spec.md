@@ -91,6 +91,30 @@
 7. `git status --porcelain` 中不出现 `.coverage` 被修改。
 8. 最终 diff 只含 `.gitattributes`。
 
+## 验证等级
+
+验证等级为 **V2**，四项 V2 要求全部声明为 `true`，`permission_requirements` 含 `action_approval`。
+
+首次分类时我只声明了 `acceptance_required` 与 `integration_required`，未声明
+`targeted_mutation_required`，造成不可满足的组合：V2 的检查计划无条件包含 `targeted_mutation`，
+而 `mutation_evidence` 加载器只在决策单元同时满足
+`verification_requirements.targeted_mutation_required is True` 且 `permission_requirements` 含
+`action_approval`、并存在人类版本绑定的单次 action 批准时才接受该检查。第一次 V2 运行因此在
+14 项中通过 13 项，`targeted_mutation` 以 `ACTION_APPROVAL_REQUIRED` 失败。
+
+项目所有者的处置：维持 V2，并明确批准 `targeted_mutation` 的 action。据此把四项要求补齐为 `true`、
+补上 `action_approval` 权限，重新分类并重新取得 spec 批准，再以版本绑定的单次 action 批准执行
+`.ai/mutations/phase-02-critical-manifest.json` 的 `MUT-V2-001..005` 重放。
+
+`targeted_mutation` 变异的是 `src/aiflow/**`，本变更不含源码改动；该证据用于满足 V2 的固定闸口，
+不构成对 `.gitattributes` 改动本身的额外证明。对本修复起决定作用的证据是 `regression_tests`
+（`pytest -q` 全量，含 `tests/integration/test_acceptance_traceability.py`）与 `integration`。
+
+执行环境要求：`aiflow verify` 必须以 `uv run --locked` 启动，使 `sys.executable` 指向本工作树
+`.venv`。首次运行使用系统 Python，其中的 `aiflow` 是指向主检出的过期 editable 安装（0.1.0，
+本工作树声明 0.2.0），导致 `test_cli.py::test_package_metadata_matches_runtime_version` 等失败——
+与本变更无关的环境问题。
+
 ## 禁止动作
 
 `push`、`merge`、`deploy`、`delete`、`secret_export`、`paid_external_call`。
