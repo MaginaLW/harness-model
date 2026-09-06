@@ -754,6 +754,43 @@ chore(aiflow): approve TASK-0030 Linux CI spec
 **建议：B4 维持 `deferred`。** 若仍要推进，应只针对 `bind`/`record`/`close`/`sync` 四类，
 并在规格中写明可压缩面为 57%、中位收益为 1 个提交，不得以「44% 噪声」为立论。
 
+### B3 选项 A 已尝试并被否决：缺少身份认证时不可实现（2026-09-06）
+
+项目所有者选择了选项 A（补上拦截代码）。TASK-0043 据此开立并冻结规格，独立设计审核
+REV-0001 结论为 **`REJECT`**（四个视角：三个 `REQUEST_CHANGES`、一个 `REJECT`），
+8 条 open 发现。任务已 `BLOCKED`。
+
+#### 缺陷在构想，不在规格
+
+1. **被管控方可自行签发许可。** `approvals.json` 是工作树中的无签名文件；
+   `src/aiflow/approval.py:43` 的状态门映射中 `action` 为 `None`（无状态前置）；
+   `approve_task(..., actor: str)` 接受任意字符串。而
+   [阶段三进入输入](../../implementation/phase-03-entry-inputs.md) 明载
+   「actor 仍只是 task-local 标签，不是身份或模型认证」。因此任何 agent 都能
+   `approve --type action` 铸出批准再通过 wrapper —— **控制方与被控方同一，不构成控制。**
+2. **放行与 wrapper 自己的审计记录矛盾。**
+   `.ai/schemas/observation-decision.schema.json` 把 `execution_allowed` 钉死为
+   `{"const": false}`。wrapper 会先写下一条声明「不授权执行」的记录，再退出 0 表示放行。
+3. **核心谓词不可计算。** `canonical_action_sha256` 需要完整的规范化 action mapping，
+   而 wrapper 只有 `--action` 与 `--target`。三个视角独立指出：本仓库现存的三条 push/merge
+   批准，其摘要在该输入下永不可能匹配。
+4. **消费检查在生产中不可达。** `approval_is_current` 无消费检查；消费只实现于
+   `mutation_evidence.py:339` 且仅覆盖 `targeted_mutation_v2`。一张单次批准在 TTL 内可授权
+   无限次 push。
+
+另有：action 批准不携带动作身份（一张 `targeted_mutation_v2` 批准会授权 push/merge）；
+放行路径上 `WorkflowFacts` 只设 `action_allowed`，scope/state/classification 全部不生效；
+六个动作之外的任何 action 默认放行。
+
+#### 这说明 A/B 是一个假选择
+
+选项 A 的前提是「批准可被信任」，而该前提要求**身份认证**——`phase-03-entry-inputs.md`
+明确记载它尚不存在，且阶段三未进入。因此 A 在当前阶段不可实现，B（如实记录为流程约定）
+并非「较弱的选择」，而是**当前唯一诚实的选择**。
+
+若将来仍要使 push/merge 的批准要求可执行，执行点应在**服务端**（CI 或分支保护），
+它不依赖客户端 wrapper，也不依赖被管控方自签发的批准。这需要单独立项。
+
 ### 实测结论：B3 的决定点不是分级，而是要不要保留一条无人执行的规则（2026-09-06）
 
 M4 已证实：`push` 与 `merge` 的 action 批准**没有任何代码路径强制**——`aiflow` CLI 无

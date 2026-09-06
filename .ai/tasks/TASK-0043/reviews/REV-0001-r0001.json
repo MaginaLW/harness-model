@@ -1,0 +1,129 @@
+{
+  "context_sha256": "650065425253db07b808929d72a222e4479299ced39c4001d0258e3a6ea1e06c",
+  "findings": [
+    {
+      "evidence_refs": [
+        "approval.py:43 状态门映射中 action 为 None，即无状态前置",
+        "approve_task(..., actor: str) 接受任意字符串，无认证",
+        "docs/implementation/phase-03-entry-inputs.md 明载：actor 仍只是 task-local 标签，不是身份或模型认证",
+        "结论：agent 可自行 approve --type action 后通过 wrapper —— 控制方与被控方同一，不构成控制"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 43,
+        "path": "src/aiflow/approval.py"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "被管控方可自行签发许可：approvals.json 是工作树中的无签名文件，approve --type action 无状态门，actor 是自由字符串且无身份认证"
+    },
+    {
+      "evidence_refs": [
+        "observation-decision.schema.json: \"execution_allowed\": {\"const\": false}",
+        "wrapper 会先写下一条声明「不授权执行」的记录，再退出 0 表示放行，二者不自洽"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 1,
+        "path": ".ai/schemas/observation-decision.schema.json"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "放行与 wrapper 自己写下的审计记录相矛盾：observation decision 的 execution_allowed 被 schema 钉死为 false"
+    },
+    {
+      "evidence_refs": [
+        "canonical_action_sha256 需要完整的规范化 action mapping（action_type/target/parameter_summary/subject_commit/expires_at）",
+        "wrapper 的输入只有 --action 与 --target",
+        "三个视角独立指出：本仓库现存的 push/merge action 批准，其摘要在该输入下永不可能匹配"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 71,
+        "path": ".ai/tasks/TASK-0043/spec.md"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "规格的核心谓词不可计算：wrapper 只有 --action 与 --target，无法据此得出本次动作的 action_sha256"
+    },
+    {
+      "evidence_refs": [
+        "matching_approval 按 approval_type 匹配，approval_type 只有 spec/code/action 三值",
+        "同为 action 类型的不同动作之间无区分"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 295,
+        "path": "src/aiflow/approval.py"
+      },
+      "severity": "critical",
+      "status": "open",
+      "title": "action 批准不携带动作身份：一张 targeted_mutation_v2 的批准会授权 push 与 merge"
+    },
+    {
+      "evidence_refs": [
+        "approval.py:260-292 approval_is_current 从不查询任何已用集合",
+        "mutation_evidence.py:339 _used_action_digests 仅服务 targeted_mutation_v2",
+        "status_service.py:132 把 used_action_sha256s 硬编码为 ()",
+        "后果：一张单次批准在其 TTL 内可授权无限次 push"
+      ],
+      "finding_id": "RF-005",
+      "location": {
+        "line": 74,
+        "path": ".ai/tasks/TASK-0043/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "「批准已被消费」验收行在生产中不可达：approval_is_current 无消费检查，消费只实现于 mutation_evidence.py 且仅覆盖 targeted_mutation_v2"
+    },
+    {
+      "evidence_refs": [
+        "matching_approval/approval_is_current 均不满足摘要匹配与消费检查两项验收",
+        "唯一可行的实现点在 src/aiflow/**，被非目标 1 排除"
+      ],
+      "finding_id": "RF-006",
+      "location": {
+        "line": 25,
+        "path": ".ai/tasks/TASK-0043/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "规格「依据 3：所需函数均已存在」为假：缺失部分只存在于 src/aiflow/**，而非目标 1 禁止改动该路径 —— 任务在自身范围内不可实现"
+    },
+    {
+      "evidence_refs": [
+        "check_pre_command 构造的 WorkflowFacts 只传入 action_allowed 与 ACTION_CHECK 状态"
+      ],
+      "finding_id": "RF-007",
+      "location": {
+        "line": 71,
+        "path": "tools/hooks/pre_command.py"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "放行决定只取决于单一输入：WorkflowFacts 仅设置 action_allowed，scope、state、classification 等前置检查在放行路径上全部不生效"
+    },
+    {
+      "evidence_refs": [
+        "evaluate_action_permission 对未列名动作返回 allowed_automatically=True"
+      ],
+      "finding_id": "RF-008",
+      "location": {
+        "line": 52,
+        "path": "src/aiflow/policy.py"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "动作词汇表封闭于六个名称，之外的任何 action 默认放行，且不解析 task、不记录 observation、不查批准"
+    }
+  ],
+  "outcome": "REJECT",
+  "recorded_at": "2026-09-06T14:20:00Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-design-review-panel",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "四个独立视角：三个 REQUEST_CHANGES、一个 REJECT。核心缺陷不在规格而在构想：被管控的 agent 可以自行签发 action 批准（无状态门、无身份认证），因此控制方与被控方同一，不构成控制；放行还与 wrapper 自己写下的 execution_allowed=false 审计记录相矛盾；规格的核心谓词「摘要匹配本次动作」在 wrapper 的输入下不可计算；消费检查在生产中不可达。八条发现均由作者独立复核确认。结论：在缺少身份认证的前提下，把 wrapper 改为授权器不可实现。",
+  "task_id": "TASK-0043"
+}
