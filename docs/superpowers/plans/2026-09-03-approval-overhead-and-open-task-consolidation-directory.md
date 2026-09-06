@@ -53,6 +53,49 @@ task 内拆分决策单元**不改变任何审批**。即便拆成独立 task，
 48 条重复批准中 31 条（65%）源于实践而非引擎要求，其中 11 条（23%）可由规则 5 的更正直接
 消除；30 个兜底 REVIEW 中可由任何路径规则挽回的是 0 个，可由拆分挽回的批准次数亦为 0。
 
+### 当前状态与未完成事项（2026-09-06 收尾）
+
+#### 状态
+
+| | |
+|---|---|
+| 任务账本 | 34 `MERGED` / 7 `BLOCKED`（均带 reason code 与处置说明）/ 1 `APPROVED_FOR_MERGE` |
+| 本轮合并 PR | #14–#20、#22–#29 共 16 个；开着的 PR 为 0 |
+| 全量测试 | 1614 passed / 4 skipped（4 项为 Windows symlink capability skip） |
+| 分支 | `main` + 6 个有明确保留理由者；本轮开的 16 个工作分支已删除（本地与远端） |
+| 工作树 | 干净 |
+
+保留分支及理由：`backup/task-0033-work`（TASK-0032/0033 subject 的唯一留存位置，11 个
+未合并提交）；`pilot/auto-doc`、`pilot/ask-report`、`pilot/review-policy`、
+`pilot/block-dry-run`（[阶段一验收报告](../../implementation/phase-01-acceptance-report.md)
+按 base/subject 哈希引用为四试点证据）；`claude/unruffled-gates-41d3ec`（含 main 中不存在
+的 ASK 义务修复）。
+
+#### 未完成事项
+
+| 项 | 状态 | 归属 |
+|---|---|---|
+| **TASK-0028** | `APPROVED_FOR_MERGE`。收尾成本已精确测出（10 条 Gate 拒绝理由、须检出旧状态重放 + 2 次人类批准），三个选项与代价见 Chapter A2。当前维持选项 C。 | 项目所有者 |
+| **ASK 义务修复** | 分支 `claude/unruffled-gates-41d3ec` 上有 2 个未合并提交，含 `fix: keep the ASK obligation when a REVIEW rule co-matches the same unit`。**该修复不在 `main`。** | 另一会话 |
+| **`.gitignore` 未含 `.claude/worktrees/`** | 目前仅由本机 `.git/info/exclude` 排除，不随仓库分发；换机器或新克隆会把 worktree 副本暴露为未跟踪文件。`.gitignore` 在升级清单内，须走 AI Flow。 | 未立项 |
+| **`.claude/worktrees/musing-dijkstra-a7c360/`** | 分支与 worktree 注册已清除，但目录因 `Permission denied` 未能删除，残留在磁盘上。内容无损失（`e2a6973` 完全在 `main`）。 | 需手动清理 |
+| **Chapter B4** | `deferred`，附实测理由（可合并面 57%，中位收益 1 个提交）。 | 未立项 |
+
+#### 已记录但未修复的引擎缺陷
+
+本轮测量顺带定位、已写入文档但**未修复**的问题，均不属本目录范围，各自需要单独立项：
+
+1. `HARD-REVIEW-SECRETS-AUTH` 与 `HARD-REVIEW-CI-CD` 的条件为 `missing: no_match`，
+   而 `impact_categories` 非必填 —— 字段缺失时两条规则**静默失效**。
+2. `HARD-REVIEW-PRODUCTION-DATA-DELETE` 与 `HARD-REVIEW-DEPLOYMENT` 匹配 `planned_actions`
+   中的自由文本字面量，账本 41 个 task 中**命中 0 次**。
+3. `src/aiflow/freshness.py` 的 `action_approval` 分支**无生产调用方**；唯一构造
+   `used_action_sha256s` 的代码把它硬编码为 `()`。
+4. `evaluate_action_permission` 对六个具名动作之外的任何 action 返回
+   `allowed_automatically=True`，即**默认放行**。
+5. push/merge 的批准要求无任何代码路径强制 —— 已按选项 B 如实记录于
+   `AGENTS.md` 规则 4 与 [Hooks](../../operations/hooks.md)，非缺陷遗漏而是已登记的边界。
+
 ### 阅读顺序
 
 第 1 节的诊断与计数仍然成立且已独立复核。第 5 节的四个章节规格保留为**被否决设计的记录**，
