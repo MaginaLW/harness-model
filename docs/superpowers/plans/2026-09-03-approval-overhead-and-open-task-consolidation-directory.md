@@ -710,6 +710,68 @@ python -m aiflow validate <TASK_ID>
 - `freshness.py` 的 `action_approval` 分支已接上调用方，或已在代码与文档中显式标注为
   当前无生产调用方。
 
+### 实测结论：B4 的可合并面只有 57%，且中位收益是 1 个提交（2026-09-06）
+
+B4 的规格要求交付「方案与影响分析」。以下是该分析，基线 `d9675a3`。
+
+| | |
+|---|---|
+| 非 merge 提交总数 | 405 |
+| 触及 `.ai/tasks/` 的提交 | 234（纯账本 175 + 混合 59） |
+| 产生过纯账本提交的 task | 41 |
+| 纯账本提交（按 task 归属计） | 177 |
+| **每 task 中位数** | **2**（均值 4.3，被 4 个异常值 33/17/15/11 拉高） |
+
+每 task 的分布高度偏斜：41 个 task 中 **23 个（56%）只产生 1–2 个纯账本提交**，
+而 4 个返工型 task 贡献了 76 个（43%）。
+
+#### 「四步机械步骤」只覆盖 57%
+
+按 message 归类，`bind` / `record` / `close` / `sync` 四类机械步骤占 **102/177 = 57%**。
+其余 43% 的长尾是：
+
+```
+chore(TASK-0042): V2 verification passed and code approved
+chore(TASK-0042): reclassify at V2 with targeted mutation authorized
+chore(aiflow): block the two refuted design tasks
+chore(aiflow): open TASK-0041 for the governance surface guard
+chore(aiflow): approve TASK-0030 Linux CI spec
+```
+
+**这些是人类决策事件——批准、重新分类、阻塞、立项——不是机械步骤。**它们正是账本必须保留
+为独立可审计记录的内容，不应被合并。
+
+#### 结论
+
+1. B4 的「四步合一」对**中位 task 只减少 1 个提交**（2 → 1）。
+2. 它名义针对的 43% 账本噪声中，有 43% 本身不可合并，实际可压缩面是
+   `177 × 57% ≈ 102` 条，分散在 41 个 task 上。
+3. 收益集中在 4 个返工型 task —— 而返工的根因是验证失败与重新分类，不是提交方式。
+   压缩提交不会减少返工。
+4. 因此 B4 作为**仓库卫生**改进的收益远小于「44% 提交是噪声」这个数字的暗示，
+   作为**审批治理**则本就无效（其规格自述不改变任何审批点）。
+
+**建议：B4 维持 `deferred`。** 若仍要推进，应只针对 `bind`/`record`/`close`/`sync` 四类，
+并在规格中写明可压缩面为 57%、中位收益为 1 个提交，不得以「44% 噪声」为立论。
+
+### 实测结论：B3 的决定点不是分级，而是要不要保留一条无人执行的规则（2026-09-06）
+
+M4 已证实：`push` 与 `merge` 的 action 批准**没有任何代码路径强制**——`aiflow` CLI 无
+push/merge/deploy 子命令，`gate.py:531` 与 `status_service.py:211` 在计算批准新鲜度前
+显式跳过 `approval_type == "action"`，`freshness.py` 的 action 分支无生产调用方。账本佐证：
+AUTO 任务 TASK-0037（PR #8）与 TASK-0039（PR #12）的 `approvals.json` 均为 `[]`。
+
+因此 B3 原设计的「把 push/merge 从单次一批改为 task 级授权」并未解决真问题：**当前既不是
+一次一批，也不是 task 级——而是根本不检查。** 真正的决定点只有两个，且都属项目所有者：
+
+| 选项 | 含义 |
+|---|---|
+| A. 使其可执行 | 新增拦截 push/merge 的代码路径，届时再谈分级粒度 |
+| B. 承认其不可执行 | 在 Policy 与 `AGENTS.md` 中如实记录：push/merge 的批准要求是**流程约定**，由人类在 CLI 之外自觉遵守，系统不强制 |
+
+**建议：B3 维持 `deferred`**，直至上述选择做出。在此之前不应实施任何分级——给一条无人
+执行的规则做分级，只会增加它「看起来在生效」的假象。
+
 ### Chapter B4：账本推进自动化
 
 状态：`deferred`（2026-09-05）。实测依据（169/382 纯账本提交）独立成立，但本章规格自述
