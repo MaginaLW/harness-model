@@ -13,6 +13,52 @@ active Policy：`2.2.0`
 外部动作，也不改变阶段三的进入门。其中任何一项进入实施时，仍按 `AGENTS.md` 判断是否
 必须创建 AI Flow task。
 
+## 0. 结论（2026-09-05）
+
+**本目录的计划部分大半已被自身的实测否定。先读本节，再读下文。**
+
+| 部分 | 状态 |
+|---|---|
+| Part A（未完成任务收敛） | A1 `completed`、A3 `completed`、A2 `partial`（仅 TASK-0028 未收尾） |
+| Part B（审批开销治理） | **B0/B1/B2 停止，B3/B4 deferred —— 四个引擎/Policy 方案对减少审批的实测收益全部为 0** |
+
+### 唯一被证实能减少批准次数的改动：`AGENTS.md` 规则 5
+
+原规则称「批准和证据必须绑定当前规格、Policy 与 `subject_commit`」，对 `spec_approval`
+不成立（其绑定为 `(base_commit, policy_sha256, spec_sha256)`）。Agent 依此散文行事，
+造成 48 条重复批准中 **11 条（23%）系统从未要求过**。更正后要求以
+`aiflow status` 的 `Missing:` 为唯一权威。
+
+### 规则 8 的收益是解耦，不是减少批准（2026-09-06 更正）
+
+规则 8 最初写作「决策单元按风险面拆分」，并被当作第二项能减少审批的改动。**用引擎实测后
+该主张不成立：**
+
+| 场景 | 任务路由 | 状态 |
+|---|---|---|
+| 一个混合决策单元 | REVIEW | `WAITING_FOR_SPEC_REVIEW` |
+| **同一 task 内拆成 docs 单元 + 治理单元** | **REVIEW** | **`WAITING_FOR_SPEC_REVIEW`** |
+| 仅 docs 单元（独立 task） | AUTO | `READY_TO_IMPLEMENT` |
+
+任务路由取各单元的最严重值（`routing.py:267`），而 `_target` 用的是任务路由。因此同一
+task 内拆分决策单元**不改变任何审批**。即便拆成独立 task，批准**总数**也不变 —— 治理那半
+仍需 1 次 spec 与 1 次 code 批准，文档那半 0 次，合计与拆分前相同。真正改变的是文档改动
+不再排队等待治理评审，属**延迟与耦合**，不属批准次数。
+
+规则 8 已按此更正为「放进不同的 task」并明确其收益边界。
+
+### 一句话结论
+
+**审批开销的来源不是 Policy 太严，是一份写错的说明文档。**
+48 条重复批准中 31 条（65%）源于实践而非引擎要求，其中 11 条（23%）可由规则 5 的更正直接
+消除；30 个兜底 REVIEW 中可由任何路径规则挽回的是 0 个，可由拆分挽回的批准次数亦为 0。
+
+### 阅读顺序
+
+第 1 节的诊断与计数仍然成立且已独立复核。第 5 节的四个章节规格保留为**被否决设计的记录**，
+其中 B0 与 B1 另有独立设计审核（各 8 条 open 发现）。存活下来的设计结论在
+[分类期治理面守卫设计](../specs/2026-09-05-classification-time-governance-guard-design.md)。
+
 ## 1. 背景：实测到的问题
 
 项目的两个初始目标是「减少人类审批次数」和「提高 AI 完成的可靠度」。对 `.ai/tasks/`
@@ -99,6 +145,10 @@ scope、Ruff、format 与 smoke，不含任何测试。注意 85% 总覆盖率�
 `.github/workflows/ai-quality-gate.yml` 的 CI 步骤强制），但当前 Policy 中**验证强度
 换不到任何审批豁免**：
 审批与验证是两条并行相加的门，而不是「验证足够强则审批可减」。M1–M5 都是这一根因的表现。
+
+> **2026-09-05 修正：** 本节曾隐含「让验证强度换取审批豁免」即为解法，该方向已被实测否定
+> （Chapter B1 收益为 0）。根因描述本身成立，但可行的着力点是决策单元粒度与请求批准的
+> 实践，不是路由规则。见第 0 节。
 
 ## 2. 目标与非目标
 
@@ -226,7 +276,32 @@ supersede 类取值。因此「按被取代收尾」在机制上只能表达为
 再 block。**一个显式的 `SUPERSEDED` 终态是 B 系列之外值得单独考虑的改进**：当前把「工作被
 更好的重做取代」和「工作被外部条件卡住」压进同一个 `BLOCKED`，两者的运维含义并不相同。
 
-**TASK-0028 的收尾成本，是第 1 节问题的一个活样本。** 其 `status` 显示
+**TASK-0028 的收尾成本已精确测出（2026-09-05 复核）。** 在当前 `main`（`0b97ae1`）上实测：
+
+- `aiflow verify TASK-0028` → `Classification is stale`
+- `aiflow classify TASK-0028` → `Classification Git baseline does not match`
+- `aiflow gate TASK-0028` → `REJECT`，10 条理由：`GATE_REPOSITORY_CHANGED`、
+  `GATE_SCOPE_CHANGED`、`GATE_CLASSIFICATION_STALE`、`GATE_SPEC_APPROVAL_STALE`、
+  `GATE_EVIDENCE_STALE`、`GATE_V2_CONTEXT_STALE`、`GATE_V2_REVIEW_STALE`、
+  `GATE_V2_CHECKS_INCOMPLETE`、`GATE_V2_MUTATION_NOT_KILLED`、`GATE_CODE_APPROVAL_STALE`
+
+Gate 自述的恢复路径为
+`git checkout <recorded-branch>; aiflow verify; aiflow classify; aiflow approve --type spec;
+aiflow review; aiflow approve --type code`。即**从当前 `main` 无法推进**，必须检出
+300 余个提交之前的旧仓库状态重放，再取得两次人类批准。
+
+`aiflow close` 在机制上可绕过以上全部 —— `close_task` 只校验状态、`result`、
+`repository_id` 与 merge commit 存在，不查询 Gate，而该 task 的 subject `cb1e15b5`
+确实已在 `main`。**但 `README.md` 明确记录了项目所有者的立场：「阶段完成不把它伪写为当前
+merge-ready」。** 因此本目录不单方面执行 `close`；三个选项及其代价如下，须由项目所有者选择：
+
+| 选项 | 代价 | 代价说明 |
+|---|---|---|
+| A. 走完整重验 | 检出旧状态 + 完整 V2 + **2 次人类批准** | 为一个不产生任何代码改动的 task |
+| B. 直接 `close` | 0 | 但与 README 记录的所有者立场冲突，须先由所有者改变该立场 |
+| C. 维持现状 | 0 | 账本长期保留 1 个 `APPROVED_FOR_MERGE`，理由已记录在案 |
+
+以下保留原始描述，作为第 1 节问题的一个活样本。 其 `status` 显示
 `merge_readiness: reverification_required`、`Missing: reverification`，且
 classification／approvals／evidence 三者全部 `stale`。它是 REVIEW / V2 任务，诚实收尾需要：
 重新分类 → 重新冻结规格 → **人类 spec 批准** → 完整 V2 重验（实施目录记该串行成本可达
@@ -579,6 +654,11 @@ python -m aiflow gate <TASK_ID>
 
 ### Chapter B3：action 批准分级
 
+状态：`deferred`（2026-09-05）。实测依据独立成立，但 M4 已证实 push/merge 的 action 批准
+没有任何代码路径强制，其开销来自流程约定；本章因此**不针对人类批准次数**。若要推进，
+应先明确它的目标是收敛语义一致性而非减少审批。
+
+
 针对 M4。20 条 action 重复批准中 12 条的绑定字段与前一条完全相同。
 
 按 M4 的实测结论，本章的改造对象必须分两类，不能只改 schema：`push` 与 `merge` 目前只有
@@ -631,6 +711,11 @@ python -m aiflow validate <TASK_ID>
   当前无生产调用方。
 
 ### Chapter B4：账本推进自动化
+
+状态：`deferred`（2026-09-05）。实测依据（169/382 纯账本提交）独立成立，但本章规格自述
+「不改变任何审批点」——它减少的是提交噪声，**不是人类批准次数**。作为仓库卫生改进有效，
+作为审批治理无效。
+
 
 针对 M5。44.2% 的非 merge 提交只改动 `.ai/tasks/`。
 
