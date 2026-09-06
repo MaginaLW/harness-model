@@ -18,6 +18,36 @@ Run `python tools/hooks/pre_command.py --action ACTION --target TARGET [--task T
 
 The adapter accepts a structured canonical action and opaque `--target`, not a command line. It does not parse or interpret PowerShell, cmd, bash, aliases, pipes, redirection, quotes, wildcards, variable/command expansion, argv, stdin, environment, stdout, stderr, or credentials. It is neither a general command interceptor nor an OS sandbox.
 
+## What the high-risk action approval requirement is actually worth
+
+`.ai/policy/permissions.yaml` forbids `push`, `merge`, `deploy`, `delete`, `secret_export`
+and `paid_external_call` from running automatically, and requires a separate action
+approval for each. **No code path checks that requirement for `push` or `merge`.** Recorded
+so that no reader mistakes the Policy declaration for an enforced control:
+
+- The CLI has no `push`, `merge` or `deploy` subcommand. `close` is documented as recording
+  an externally completed merge, not performing one.
+- `src/aiflow/gate.py` and `src/aiflow/status_service.py` both skip `approval_type ==
+  "action"` when computing approval freshness, so the Gate never requires one.
+- `src/aiflow/freshness.py`'s `action_approval` branch has no production caller; the only
+  code that constructs `used_action_sha256s` hardcodes it to `()`.
+- The pre-command wrapper above denies these actions unconditionally. It is a denier, not an
+  authorizer, so it cannot let an approved push through and installing it would block every
+  push. `.git/hooks/` ships empty and the wrapper does not install itself.
+- The only action type whose single-use semantics are enforced in code is
+  `targeted_mutation_v2`, in `src/aiflow/mutation_evidence.py`.
+
+Consequently the approval requirement for `push` and `merge` is a **process convention
+observed by humans**, not a machine-checked control. Compliance is visible in the ledger
+after the fact, not prevented before it.
+
+Making it enforceable was attempted and rejected. TASK-0043's design review found that an
+`action` approval is mintable by the agent it would gate — `approvals.json` is an unsigned
+working-tree file, action approvals have no state gate, and `actor` is an unauthenticated
+free string — so a client-side authorizer would let the controlled party issue its own
+permission. Any future attempt has to enforce server side, in CI or branch protection, and
+needs identity that this phase does not have.
+
 ## `aiflow observe`
 
 The closed protocol is:
