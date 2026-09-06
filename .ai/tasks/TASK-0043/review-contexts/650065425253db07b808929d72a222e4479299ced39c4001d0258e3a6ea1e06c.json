@@ -1,0 +1,46 @@
+{
+  "base_commit": "106a3ec3d823760504fc40e6210b54da1b651d6e",
+  "branch": "feat/b3-enforceable-action-approval",
+  "classification_input_sha256": "432566b2f0780fb7d6e63f64a951804334da215f8191b80624968f1fc4b1836e",
+  "content": {
+    "allowed_scope": [
+      "tools/hooks/pre_command.py",
+      "docs/operations/hooks.md",
+      "tests/integration/test_tool_wrappers.py",
+      "tests/integration/test_observation_parity.py",
+      "docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "让 pre-command wrapper 在 task 持有有效 action 批准时放行 push/merge，使 Policy 中的 push/merge 批准要求从不可执行的流程约定变为可执行的拦截；wrapper 仍不消费批准、不执行命令、不自行安装，并按项目所有者的明确决定修改 docs/operations/hooks.md 中「不得把诊断结果转为许可」这一原则",
+        "impact_scope": [
+          "tools/hooks/pre_command.py",
+          "docs/operations/hooks.md",
+          "tests/integration/test_tool_wrappers.py",
+          "tests/integration/test_observation_parity.py",
+          "docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md"
+        ],
+        "planned_actions": [
+          "在 check_pre_command 中，当 Policy 不允许自动执行时，改为查询该 task 是否持有与本次动作 action_sha256 匹配且新鲜的 action 批准，据此决定 action_allowed",
+          "保持 wrapper 不消费批准、不执行命令、不自行安装；仍记录 observation",
+          "更新 docs/operations/hooks.md：明确 wrapper 在持有有效批准时可放行，同时保留其余 fail-closed 约束",
+          "补正向与负向测试：无批准仍拒；批准存在但 action_sha256 不匹配仍拒；批准过期仍拒；批准已被消费仍拒；批准新鲜且匹配才放行"
+        ]
+      }
+    ],
+    "goal": "让 pre-command wrapper 在 task 持有有效 action 批准时放行 push/merge，使 Policy 中的 push/merge 批准要求从不可执行的流程约定变为可执行的拦截；wrapper 仍不消费批准、不执行命令、不自行安装，并按项目所有者的明确决定修改 docs/operations/hooks.md 中「不得把诊断结果转为许可」这一原则",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "650065425253db07b808929d72a222e4479299ced39c4001d0258e3a6ea1e06c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "9c36a8cd23824737c8b6943c71dcbcfbf3ea834d4c2b79d1db0daa6077534fc6",
+  "task_id": "TASK-0043"
+}
