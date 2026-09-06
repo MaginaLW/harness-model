@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "5372c6d3a57a2152e36869c46002d006056806486bb79849e171a05c41355afb",
+  "action_type": "git_push_branch",
+  "target": "TASK-0042",
+  "parameter_summary": "Push branch claude/musing-dijkstra-a7c360 to origin (https://github.com/MaginaLW/harness-model.git) at tip b674c671b4164c50b2f976576da7cdac04b761c9 (three commits: 91563b1 the .gitattributes fix, 21ab3d7 and b674c67 the TASK-0042 ledger), then open one pull request against main. No merge, no force push, no ref deletion, no change to main, no deploy.",
+  "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
+  "conditions": [
+    "Push only refs/heads/claude/musing-dijkstra-a7c360 to origin, no other ref",
+    "Never use --force or --force-with-lease; never delete a remote ref",
+    "Do not merge, do not modify main, do not deploy",
+    "Open exactly one pull request against main and do not merge it",
+    "State in the pull request that merge readiness is reverification_required because HEAD is ahead of the verified subject 91563b1",
+    "Single use: this authorization covers one push and one pull-request creation"
+  ],
+  "expires_at": "2026-09-05T22:44:56Z",
+  "single_use": true
+}

@@ -1,0 +1,13 @@
+{
+  "context_sha256": "08f2768241c9fdff8c43322f1fcc867e0f0c72bff2367e90a70c4405a0a36a7c",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-09-05T06:39:39Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "human-owner",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "设计审核通过，无 open 发现。缺陷已复现且根因明确：.gitattributes 只覆盖 .ai/tasks/*/historical-snapshots/**，导致 test_acceptance_traceability.py:237 按字节摘要校验的两个 TASK-0028 证据文件在 core.autocrlf=true 的 Windows 上以 CRLF 检出。已核实测试钉住的摘要等于 blob 摘要（4fc5729e… / 3d420bb8…），错在检出规则而非测试期望，因此禁止改测试。零 blob 改写的安全性有穷尽证据：.ai 下 1027 个索引 blob 中仅 6 个含 CR，全部是 logs/**/.coverage，已由紧随其后的 binary 规则豁免；其余 987 个 blob 已是纯 LF，text eol=lf 对其为恒等操作，满足任务账本追加式、不得重写的要求。范围经所有者确认限定在 .ai/tasks/**：已逐一核查 .ai/tasks/ 之外 34 个文件无跨平台字节摘要依赖（mutation-runner/gate-parity/observation-parity 均为同次运行 before==after 自洽校验，test_contracts 对 .ai/repository-id 用 splitlines()），且 .ai/policy/** 与 .ai/schemas/** 本身在升级清单上，纳入会违反 AGENTS.md 规则 8 扩大本决策单元风险面。改动完全可逆，无外部副作用。改动前 Windows 全量基线为 1 failed / 1613 passed / 4 skipped，唯一失败即本缺陷，可作为无新增失败的对照。",
+  "task_id": "TASK-0042"
+}

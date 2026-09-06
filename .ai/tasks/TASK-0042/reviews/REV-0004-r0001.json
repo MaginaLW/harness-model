@@ -1,0 +1,13 @@
+{
+  "context_sha256": "e29eb7ac858dbe93ff53d55ceea2cd3c1dbd3cb9c6825d0b8a4baed9ea204a4f",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-09-05T10:43:28Z",
+  "review_id": "REV-0004",
+  "review_stage": "implementation",
+  "reviewer": "human-owner",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "实现审核通过，无 open 发现，见 review-package.md。本记录绑定重跑后的验证快照 7fd627cf…a0dd（REV-0003 绑定的是被覆盖的旧快照 9a8fc382…39eb9，故重记）。最终非账本改动只有 .gitattributes 两行：.ai/tasks/** text eol=lf，其后 .ai/tasks/**/.coverage binary -eol。测试的期望摘要一字未改——它们本就等于 blob 摘要，错的是检出规则。零 blob 改写有双重证据：只读预检遍历 .ai 全部 1027 个索引 blob，仅 6 个 .coverage 含 CR 且已被 binary 规则豁免；提交后 git add --renormalize . 的 staged diff 完全为空。重新检出后 git ls-files --eol .ai/tasks 为 934 w/lf + 60 空 + 6 -text，无 w/crlf；6 个 .coverage 仍以 SQLite format 3 开头且未被修改。功能证据：改动前 Windows 基线 1 failed/1613 passed/4 skipped，改动后 1614 passed/4 skipped，无新增失败；两个被摘要文件的工作副本摘要现等于 4fc5729e…823662 与 3d420bb8…6eff94。V2 验证 14/14 通过（subject 91563b1），targeted_mutation 的 MUT-V2-001..005 全部 killed 且变异源码全部还原，unverified_scenarios 为空，aiflow scope 通过。过程留档：第一次 targeted_mutation 授权被一次本应为 verify --finalize 的完整 verify 运行耗尽，所有者据此批准了第二次单次授权；两次重放结果一致，均为五个变异全部 killed。明确留档的未验证项：未在 core.autocrlf=input 或 macOS 上实机验证；其他贡献者既有 Windows 工作副本需自行 renormalize 或重新检出，该操作说明留待单独的低风险文档任务。",
+  "task_id": "TASK-0042"
+}

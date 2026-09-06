@@ -1,0 +1,19 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "5372c6d3a57a2152e36869c46002d006056806486bb79849e171a05c41355afb",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0042",
+  "parameter_summary": "Replay the immutable targeted-mutation manifest .ai/mutations/phase-02-critical-manifest.json (MUT-V2-001..MUT-V2-005) locally to satisfy the V2 targeted_mutation gate for TASK-0042. Each mutation is applied to its declared src/aiflow target and restored; evidence is written only under .ai/tasks/TASK-0042/; no push, merge, deploy, delete, credential export, paid call or network access is performed.",
+  "subject_commit": "91563b1fc68497ed42c6ff03bbeaaea144004ccc",
+  "conditions": [
+    "Run only under uv run --locked so sys.executable is this worktree's .venv",
+    "Mutate only targets declared in .ai/mutations/phase-02-critical-manifest.json",
+    "Restore every mutated source file; leave no source modification behind",
+    "Write evidence only under .ai/tasks/TASK-0042/",
+    "Do not push, merge, deploy, delete, export credentials, make paid calls or access the network",
+    "Do not modify any test's expected digest",
+    "Single use: this authorization is consumed by one verification run and must not be retried"
+  ],
+  "expires_at": "2026-09-05T20:49:36Z",
+  "single_use": true
+}

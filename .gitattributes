@@ -1,1 +1,12 @@
-.ai/tasks/*/historical-snapshots/** text eol=lf
+# Task-ledger evidence is verified by byte digest (for example
+# tests/integration/test_acceptance_traceability.py and
+# tests/e2e/test_phase_02_self_hosting_scenario.py hash these files with
+# read_bytes()). The pinned digests are the LF blob digests, so the checkout
+# must be LF on every platform; without this, core.autocrlf=true on Windows
+# checks the files out as CRLF and those tests fail for platform reasons alone.
+.ai/tasks/** text eol=lf
+
+# Coverage databases under the task logs are SQLite, not text. They must stay
+# binary so the rule above never rewrites or corrupts them. Keep this after the
+# rule above so it wins.
+.ai/tasks/**/.coverage binary -eol
