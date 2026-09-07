@@ -1,10 +1,10 @@
 {
   "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
   "change_reason": "unchanged",
-  "classification_input_sha256": "ca698b29a5b9c9e0ee34085f1587ec3d9200fcb248adc5dc2543e48d509bf086",
+  "classification_input_sha256": "81924cb11df8257f6097a24f2c006be6e3f1cd61226553448e95e93114a187c1",
   "classifications": [
     {
-      "classified_at": "2026-09-07T15:32:54Z",
+      "classified_at": "2026-09-07T16:14:03Z",
       "decision_unit_id": "DU-001",
       "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
       "explanations": [
@@ -19,8 +19,8 @@
           "rule_id": "ROUTE-DEFAULT-REVIEW"
         }
       ],
-      "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
-      "policy_version": "2.2.0",
+      "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+      "policy_version": "2.3.0",
       "route": "REVIEW",
       "rule_id": "ROUTE-DEFAULT-REVIEW",
       "verification_blocking_reasons": [],
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "classified_at": "2026-09-07T15:32:54Z",
+      "classified_at": "2026-09-07T16:14:03Z",
       "decision_unit_id": "DU-002",
       "explanation": "Secret or authentication changes require review.",
       "explanations": [
@@ -58,8 +58,8 @@
           "rule_id": "HARD-REVIEW-SECRETS-AUTH"
         }
       ],
-      "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
-      "policy_version": "2.2.0",
+      "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+      "policy_version": "2.3.0",
       "route": "REVIEW",
       "rule_id": "HARD-REVIEW-SECRETS-AUTH",
       "verification_blocking_reasons": [],
@@ -80,12 +80,12 @@
       ]
     }
   ],
-  "classified_at": "2026-09-07T15:32:54Z",
+  "classified_at": "2026-09-07T16:14:03Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V1",
-  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
-  "policy_version": "2.2.0",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "policy_version": "2.3.0",
   "schema_version": "1.0",
-  "subject_commit": "9f367af9d8fc3d5b28c3f171da455e79c18afc5a",
+  "subject_commit": "91af61c967d5001fec2c3550bb7dddd16b1c5b58",
   "task_id": "TASK-0047"
 }

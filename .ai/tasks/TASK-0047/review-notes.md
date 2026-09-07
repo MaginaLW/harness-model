@@ -14,3 +14,19 @@ CLI 已基于当前设计审查 REV-0079 为两个 REVIEW 单元分别记录该�
 Agent 将完成全部允许范围内的实现和检查，最后一次性切换已设计的 Policy 2.3.0；
 其后按实际 policy_changed、新鲜度、设计审查与当前规格批准条件恢复，不伪造新绑定。
 原规格、所有审查和初稿纠正记录保持可追溯。
+
+## 最终 Policy 绑定与有界配套遗漏
+
+原范围实现已经保存为检查点 `91af61c967d5001fec2c3550bb7dddd16b1c5b58`；
+Policy 一次升至 2.3.0，之后按真实 policy_changed、sync、resolution、classify 和 freeze
+进入 WAITING_FOR_SPEC_REVIEW。没有继续实施修订范围、重写旧批准或伪造新批准。
+
+全量诊断 1717 passed、4 failed，覆盖率 88.08%、diff coverage 100%；详情与失败原因为
+implementation-diagnostics.md。修订规格只增加三份必要测试路径，文件尚未修改；
+独立设计审查者已经核对最终 CLI context 并建议 APPROVE，CLI 记录为 REV-0080。
+
+当前冻结规格为 `a7957fd15d0ac357cca521d2134a8649bcfa3fededfc45b4e98d1a0664fa4205`。
+validate、scope 均通过，分类 fresh，status 唯一 Missing 为 spec_approval。
+旧 2.2.0 批准因真实 Policy/规格变化 stale，不要求用户为机械的 sync/resolve/freeze 再确认。
+只向所有者提交一次当前修订规格与三文件例外的组合决定，入口为 policy23-review-package.md。
+正式验证、实施审核、代码接受和任何外部动作仍是尚未完成且彼此独立的后续条件。
