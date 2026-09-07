@@ -37,7 +37,7 @@ allowed_scope:
 base_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
 branch: codex/risk-input-followups
 created_at: '2026-09-07T15:17:16Z'
-current_state: WAITING_FOR_SPEC_REVIEW
+current_state: IMPLEMENTING
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -47,13 +47,13 @@ decision_units:
     interaction_scope: cross_module
     mechanical: false
     regression_risk: true
+  controlled_actions: []
   decision_unit_id: DU-001
   external_side_effects: []
   goal: 新分类必须有明确风险字段，部署和生产数据删除采用受控动作类型且不丢失旧正向风险
   impact:
     level: medium
   impact_categories: []
-  controlled_actions: []
   impact_scope:
   - .ai/schemas/decision-unit.schema.json
   - .ai/policy/hard-rules.yaml
@@ -99,6 +99,7 @@ decision_units:
     interaction_scope: cross_module
     mechanical: false
     regression_risk: true
+  controlled_actions: []
   decision_unit_id: DU-002
   external_side_effects: []
   goal: 未知动作默认拒绝，只有 Policy 明列的 read 类别允许通过本地检查，不将通用批准接成执行放行
@@ -106,7 +107,6 @@ decision_units:
     level: medium
   impact_categories:
   - authentication
-  controlled_actions: []
   impact_scope:
   - .ai/policy/permissions.yaml
   - .ai/schemas/policy.schema.json
@@ -154,6 +154,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-07T16:14:04Z'
 subject_commit: 91af61c967d5001fec2c3550bb7dddd16b1c5b58
 task_id: TASK-0047
-updated_at: '2026-09-07T16:16:07Z'
+updated_at: '2026-09-07T16:20:33Z'
 worktree_dirty: false
 worktree_dirty_paths: []

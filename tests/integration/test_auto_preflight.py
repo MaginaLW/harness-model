@@ -104,6 +104,18 @@ def test_auto_begin_rejects_decision_facts_changed_after_classification(
     task["decision_units"][0]["planned_actions"] = ["changed after classification"]
     atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
     capsys.readouterr()
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    before = {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
 
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
-    assert "CLASSIFICATION_STALE" in capsys.readouterr().err
+    assert "Current classification is stale" in capsys.readouterr().err
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "READY_TO_IMPLEMENT"
+    assert {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    } == before

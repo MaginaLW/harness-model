@@ -30,3 +30,15 @@ validate、scope 均通过，分类 fresh，status 唯一 Missing 为 spec_appro
 旧 2.2.0 批准因真实 Policy/规格变化 stale，不要求用户为机械的 sync/resolve/freeze 再确认。
 只向所有者提交一次当前修订规格与三文件例外的组合决定，入口为 policy23-review-package.md。
 正式验证、实施审核、代码接受和任何外部动作仍是尚未完成且彼此独立的后续条件。
+
+## 当前修订获批与四项回归修复
+
+项目所有者随后明确回复“批准”，接受冻结修订规格
+`a7957fd15d0ac357cca521d2134a8649bcfa3fededfc45b4e98d1a0664fa4205`、
+Policy 2.3.0 绑定及三份必要测试同任务例外。CLI 在确认 Missing 仅 spec_approval 后，
+为两个 REVIEW 单元记录本次决定并 begin；不是两次人的请求，也不包含代码或外部动作批准。
+
+仅在三项真实分类/恢复用例内补局部风险事实，shared start/make_ready helper 原样保留；
+AUTO stale 用例同步更早的拒绝诊断，并增加完整 task 目录字节不变与状态不变断言。
+这三份文件的定向测试共 56 passed（28.37 秒），Ruff check/format 通过；前轮失败记录仍保留。
+接下来绑定测试修复后的真实 subject，执行正式完整 V1，不把该定向结果代替最终证据。

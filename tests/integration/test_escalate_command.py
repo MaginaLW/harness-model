@@ -15,7 +15,7 @@ from aiflow.escalation import (
     prepare_resolution,
     record_resolution,
 )
-from aiflow.storage import resolve_task_path
+from aiflow.storage import atomic_write_yaml, resolve_task_path
 from aiflow.task_service import load_task_record
 from tests.integration.test_begin_close_commands import create_repository, make_ready, start
 
@@ -203,6 +203,9 @@ def test_block_requires_bound_resolution_evidence_before_reclassification(
 ) -> None:
     repository = create_repository(tmp_path / "repository")
     start(repository, monkeypatch)
+    task = load_task_record(repository, "TASK-0001").task
+    task["decision_units"][0].update(impact_categories=[], controlled_actions=[])
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
     make_ready(repository, route="REVIEW")
     assert (
         main(
@@ -266,6 +269,9 @@ def test_resolution_classification_recovers_from_first_transition_failure(
 ) -> None:
     repository = create_repository(tmp_path / "repository")
     start(repository, monkeypatch)
+    task = load_task_record(repository, "TASK-0001").task
+    task["decision_units"][0].update(impact_categories=[], controlled_actions=[])
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
     make_ready(repository, route="REVIEW")
     escalate_task(
         repository,
