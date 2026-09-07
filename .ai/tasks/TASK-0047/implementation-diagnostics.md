@@ -57,3 +57,39 @@ Policy `2.3.0` SHA-256：
 新增拟议范围现精确为三份测试文件，规格修订保留了逐项原因与修改边界。
 尚待：本修订规格及三文件同任务例外的真实批准、修复这四项、正式完整验证、实施审核、
 代码批准和 Gate；远端发布动作仍未授权。
+
+## 已提交实现的首次正式 V1：失败证据
+
+前述三文件规格修订现已真实获批，四项失败均已修复；定向 56 passed（28.37 秒），
+本地提交 `1c286be3951b9083742a33fc2d111ae986d38407`。CLI sync 绑定该 subject 后，
+于 `2026-09-07T16:23:21Z` 开始正式完整 V1，`16:41:53Z` 结束为 **FAILED**。
+
+- contract、scope、Ruff check/format、smoke、mypy 均通过；unit tests 1115 passed。
+- 普通全量：1720 passed、1 failed，491.48 秒；覆盖率全量：1720 passed、1 failed，
+  592.76 秒。两轮均无 skipped；唯一失败是
+  `tests/e2e/test_clean_checkout.py::test_clean_clone_installs_and_runs_documented_safe_subset`。
+- 安装后真实 classify 返回 `Classification requires explicit risk inputs
+  (DU-001: controlled_actions)`。该样例已有 documentation 事实但漏写受控动作事实。
+- XML：行 6558/7226、分支 1963/2444，合计 8521/9670，即 **88.12%**。
+  diff coverage 为 36/36，即 **100%**。覆盖率数值达标不抵消测试退出失败，正式
+  coverage_xml check 仍为 failed；没有最终实施审核、代码批准或 Gate PASS。
+
+漏检原因属于 Agent 的配套盘点不足：前轮全量诊断运行于未提交实现树，clean-clone
+测试却安装当时已提交的旧 HEAD，所以该项通过不能证明新实现的安装行为。原诊断记录
+及其 hash 不改写；本节补充其有效性限制。正式提交态两轮测试已暴露相同真实失败。
+
+交叉只读审计确认：新增必要路径仅上述 e2e 与 `docs/operations/quickstart.md`；后者
+可复制 YAML 同样漏字段，且“缺事实均为 BLOCK”与当前 Policy 版本说明需要同步。
+其余 e2e 新分类来源复用四个已补齐的场景输入。未改动这两份未批准文件，未修改源码
+默认值、共享 helper、期望路由、安装机制、检查阈值或 skip/xfail。
+
+原始产物在 `logs/run-20260907T162321824527Z/`；正式 `evidence.json` 与 run 内副本
+一致。以下 SHA-256 保留本次失败绑定；后续新验证不得改写该 run 的原始证据：
+
+- evidence.json：`cf78889a20b8d06f681db38f0909f0f7b37df504b6c46ddf1c43a475b49162b9`
+- coverage.xml：`060b4af044fa78b28dc82832eb17bac859c26007a85528290e94ff3d1161a3b1`
+- regression_tests-007.stdout.log：`b553c32b1b08e72410189a9963bdbc902a728d57c425cbbfaf328f0143b973d7`
+- coverage_xml-009.stdout.log：`46024c23d8db2b3be6f0debc29c4ad7e4fcc44870bb04df358e3f9eb7a668e75`
+
+失败后 CLI 按真实 `spec_changed` 进入 ESCALATED，准备仅两文件的范围修订。
+既有批准和失败记录保留；规格修订获批前不继续实施，不能把它伪称独立 task-free 修复。

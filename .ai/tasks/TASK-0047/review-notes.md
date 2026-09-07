@@ -42,3 +42,28 @@ Policy 2.3.0 绑定及三份必要测试同任务例外。CLI 在确认 Missing 
 AUTO stale 用例同步更早的拒绝诊断，并增加完整 task 目录字节不变与状态不变断言。
 这三份文件的定向测试共 56 passed（28.37 秒），Ruff check/format 通过；前轮失败记录仍保留。
 接下来绑定测试修复后的真实 subject，执行正式完整 V1，不把该定向结果代替最终证据。
+
+## 提交态失败与两文件修订准备
+
+正式 V1 于 `2026-09-07T16:41:53Z` 结束为 FAILED，两轮均 1720 passed、1 failed。
+原三文件修复通过，新增唯一失败是安装后的 clean-clone 样例未写 controlled_actions。
+前次未提交诊断的 clone 安装的是旧 HEAD；这是 Agent 配套范围盘点不足，不是所有者
+缺信息，未把前轮诊断重新改成成功。失败 evidence、run 副本和日志/hash 均保留。
+
+源码和三个测试修复已做分工交叉技术复核，未发现阻断；这不能替代失败的正式验证或
+冒充绑定最终通过证据的 implementation review。没有记录 code/action 批准。
+
+只读排查确认新增必要范围为 tests/e2e/test_clean_checkout.py 与
+docs/operations/quickstart.md。CLI 从 FAILED 按 spec_changed 升级，追加有据 resolution、
+重新分类并冻结 spec `d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a`。
+Policy 保持 2.3.0，route/V 不变；两文件仍未修改，不以 task-free 绕过本任务允许范围。
+
+请求入口为 clean-clone-review-package.md。当前修订范围需所有者真实批准，原有批准
+均保留，不复制、不重写，也不将两 DU 记录误算成两次人的请求。下一次实现须在获批后
+进行，最终 clean-clone 与完整 V1 应覆盖实际提交态。
+
+独立审查者 Galileo 复算当前规格与失败 evidence hash、核对事件链及两文件零 diff 后，
+建议技术 APPROVE；CLI 已将其真实结论记录为 REV-0081，context 为
+`2dbe29d0461b0382cf23687eafc10e625312a0287329600cc93d191e1dc599e0`。
+validate 与 scope 通过，status 仅 Missing spec_approval。未录入新的人的批准、begin
+或 implementation review；两文件范围等待决定，未推送、合并或部署。

@@ -1,10 +1,10 @@
 {
   "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
   "change_reason": "unchanged",
-  "classification_input_sha256": "81924cb11df8257f6097a24f2c006be6e3f1cd61226553448e95e93114a187c1",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
   "classifications": [
     {
-      "classified_at": "2026-09-07T16:14:03Z",
+      "classified_at": "2026-09-07T16:43:56Z",
       "decision_unit_id": "DU-001",
       "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
       "explanations": [
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "classified_at": "2026-09-07T16:14:03Z",
+      "classified_at": "2026-09-07T16:43:56Z",
       "decision_unit_id": "DU-002",
       "explanation": "Secret or authentication changes require review.",
       "explanations": [
@@ -80,12 +80,12 @@
       ]
     }
   ],
-  "classified_at": "2026-09-07T16:14:03Z",
+  "classified_at": "2026-09-07T16:43:56Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V1",
   "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
   "policy_version": "2.3.0",
   "schema_version": "1.0",
-  "subject_commit": "91af61c967d5001fec2c3550bb7dddd16b1c5b58",
+  "subject_commit": "1c286be3951b9083742a33fc2d111ae986d38407",
   "task_id": "TASK-0047"
 }
