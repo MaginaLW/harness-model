@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-08T20:15:00Z",
+  "single_use": true,
+  "action_type": "merge",
+  "target": "The MaginaLW/harness-model ledger-only PR from codex/risk-input-closeout into main",
+  "parameter_summary": "Merge the single audit closeout PR once after its own required CI succeeds, with a normal merge commit matching the exact tested head; do not close TASK-0047 again or create a recursive closeout PR.",
+  "conditions": [
+    "This publishes only the actual merge record and delivery notes for the same owner-authorized implementation delivery.",
+    "The base is main and head codex/risk-input-closeout; all changed paths are inside .ai/tasks/TASK-0047, with no source, tests, Policy, Schema, CI, approval or frozen-spec change.",
+    "The required ai-quality-gate succeeds for the exact current PR head and GitHub reports MERGEABLE and CLEAN with required conversations resolved.",
+    "TASK-0047 validates as MERGED with the actual implementation merge; do not regenerate historical evidence or require another code approval.",
+    "No administrator bypass, force push, branch deletion, deployment, release, tag, protection change, third closeout PR or unrelated action."
+  ]
+}

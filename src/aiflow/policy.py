@@ -42,21 +42,24 @@ class ActionPermission:
 
 
 def evaluate_action_permission(bundle: PolicyBundle, action: str) -> ActionPermission:
-    """Evaluate one normalized action without performing it."""
+    """Evaluate one normalized action without performing it or consuming approval."""
     normalized = action.strip().casefold()
     if not normalized:
         raise PolicyError("Action category is required", code="POLICY_ACTION_INVALID")
     rules = bundle.documents["permissions.yaml"]["rules"]
     matching = [rule for rule in rules if str(rule["action"]).casefold() == normalized]
-    if not matching:
-        return ActionPermission(normalized, True)
-    rule = matching[0]
-    return ActionPermission(
-        normalized,
-        rule["effect"] != "deny_automatic",
-        str(rule["required_approval"]),
-        str(rule["id"]),
-    )
+    if matching:
+        rule = matching[0]
+        return ActionPermission(
+            normalized,
+            rule["effect"] != "deny_automatic",
+            str(rule["required_approval"]),
+            str(rule["id"]),
+        )
+    allowed = bundle.documents["permissions.yaml"].get("allowed_automatic_actions", [])
+    if isinstance(allowed, list) and normalized in allowed:
+        return ActionPermission(normalized, True, rule_id="PERMISSION-ALLOW-AUTOMATIC")
+    return ActionPermission(normalized, False, rule_id="PERMISSION-DEFAULT-DENY")
 
 
 def _is_within(path: Path, root: Path) -> bool:
@@ -183,8 +186,15 @@ def _validate_cross_file(documents: dict[str, dict[str, Any]]) -> str:
 
     permissions = documents["permissions.yaml"]
     forbidden = set(permissions["forbidden_automatic_actions"])
-    permission_actions = {rule["action"] for rule in permissions["rules"]}
-    if forbidden != permission_actions:
+    permission_rules = permissions["rules"]
+    permission_actions = {rule["action"] for rule in permission_rules}
+    allowed = permissions.get("allowed_automatic_actions", [])
+    if (
+        not isinstance(allowed, list)
+        or forbidden != permission_actions
+        or len(permission_actions) != len(permission_rules)
+        or forbidden.intersection(allowed)
+    ):
         raise PolicyError(
             "Every forbidden action must have exactly one permission rule",
             code="POLICY_PERMISSION_REFERENCE_INVALID",

@@ -13,7 +13,7 @@ import pytest
 from aiflow.cli import main
 from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.policy import load_policy_bundle
-from aiflow.storage import atomic_write_json
+from aiflow.storage import atomic_write_json, atomic_write_yaml, resolve_task_path
 from aiflow.task_service import (
     freeze_task,
     load_task_record,
@@ -454,6 +454,9 @@ def test_classify_records_durable_evidence_and_is_idempotent(
 ) -> None:
     repository = create_repository(tmp_path / "repository")
     start(repository, monkeypatch)
+    task = load_task_record(repository, "TASK-0001").task
+    task["decision_units"][0].update(impact_categories=[], controlled_actions=[])
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
 
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     first = load_task_record(repository, "TASK-0001")

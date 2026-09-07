@@ -11,7 +11,13 @@ import pytest
 import yaml
 
 from aiflow.errors import PolicyError
-from aiflow.policy import POLICY_FILES, _validate_cross_file, load_policy_bundle
+from aiflow.policy import (
+    POLICY_FILES,
+    PolicyBundle,
+    _validate_cross_file,
+    evaluate_action_permission,
+    load_policy_bundle,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_POLICY = PROJECT_ROOT / ".ai" / "policy"
@@ -53,14 +59,14 @@ def test_valid_policy_has_complete_stable_bundle() -> None:
     bundle = load_policy_bundle(PROJECT_ROOT)
 
     assert set(bundle.documents) == set(POLICY_FILES)
-    assert bundle.policy_version == "2.2.0"
+    assert bundle.policy_version == "2.3.0"
     assert len(bundle.sha256) == 64
     assert bundle.sha256 == load_policy_bundle(PROJECT_ROOT).sha256
 
 
 def test_active_policy_binds_exact_verification_time_budgets() -> None:
     documents = v2_documents()
-    assert {document["policy_version"] for document in documents.values()} == {"2.2.0"}
+    assert {document["policy_version"] for document in documents.values()} == {"2.3.0"}
 
     levels = documents["verification-levels.yaml"]["levels"]
     assert isinstance(levels, list)
@@ -127,7 +133,7 @@ def test_v1_must_preserve_the_semantic_v0_prefix() -> None:
 
 def test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras() -> None:
     documents = v2_documents()
-    assert _validate_cross_file(documents) == "2.2.0"
+    assert _validate_cross_file(documents) == "2.3.0"
 
     levels = documents["verification-levels.yaml"]["levels"]
     assert isinstance(levels, list)
@@ -270,6 +276,118 @@ def test_missing_permission_reference_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(PolicyError) as caught:
         load_policy_bundle(tmp_path, policy_directory=policy)
+
+    assert caught.value.code == "POLICY_PERMISSION_REFERENCE_INVALID"
+
+
+def test_permission_allowlist_is_explicit_and_legacy_policy_defaults_to_deny(
+    tmp_path: Path,
+) -> None:
+    documents = v2_documents()
+    for document in documents.values():
+        document["policy_version"] = "2.2.0"
+    permissions = documents["permissions.yaml"]
+    permissions.pop("allowed_automatic_actions", None)
+    assert _validate_cross_file(documents) == "2.2.0"
+    legacy = PolicyBundle(documents, "2.2.0", "a" * 64)
+    assert evaluate_action_permission(legacy, "read").allowed_automatically is False
+
+    permissions["allowed_automatic_actions"] = ["read"]
+    assert _validate_cross_file(documents) == "2.2.0"
+    explicit = PolicyBundle(documents, "2.2.0", "b" * 64)
+    assert evaluate_action_permission(explicit, " READ ").allowed_automatically is True
+    unknown = evaluate_action_permission(explicit, "notify")
+    assert unknown.allowed_automatically is False
+    assert unknown.rule_id == "PERMISSION-DEFAULT-DENY"
+
+    policy = copy_policy(tmp_path)
+    legacy_permissions = read(policy / "permissions.yaml")
+    legacy_permissions.pop("allowed_automatic_actions", None)
+    write(policy / "permissions.yaml", legacy_permissions)
+    loaded_legacy = load_policy_bundle(tmp_path, policy_directory=policy)
+    assert evaluate_action_permission(loaded_legacy, "read").allowed_automatically is False
+
+
+def test_permission_allowlist_rejects_unknown_overlap_and_cross_document_use(
+    tmp_path: Path,
+) -> None:
+    policy = copy_policy(tmp_path)
+    permissions = read(policy / "permissions.yaml")
+    permissions["allowed_automatic_actions"] = ["write"]
+    write(policy / "permissions.yaml", permissions)
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path, policy_directory=policy)
+    assert caught.value.code == "POLICY_SCHEMA_INVALID"
+
+    policy = copy_policy(tmp_path / "overlap")
+    permissions = read(policy / "permissions.yaml")
+    permissions["allowed_automatic_actions"] = ["push"]
+    write(policy / "permissions.yaml", permissions)
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path / "overlap", policy_directory=policy)
+    assert caught.value.code == "POLICY_SCHEMA_INVALID"
+
+    for filename in ("hard-rules.yaml", "routing.yaml", "verification-levels.yaml"):
+        policy = copy_policy(tmp_path / filename)
+        document = read(policy / filename)
+        document["allowed_automatic_actions"] = ["read"]
+        write(policy / filename, document)
+        with pytest.raises(PolicyError) as caught:
+            load_policy_bundle(tmp_path / filename, policy_directory=policy)
+        assert caught.value.code == "POLICY_SCHEMA_INVALID"
+
+
+def test_permission_lists_require_all_distinct_denies_and_allowlist_values(tmp_path: Path) -> None:
+    policy = copy_policy(tmp_path)
+    permissions = read(policy / "permissions.yaml")
+    permissions["forbidden_automatic_actions"] = permissions["forbidden_automatic_actions"][:-1]  # type: ignore[index]
+    write(policy / "permissions.yaml", permissions)
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path, policy_directory=policy)
+    assert caught.value.code == "POLICY_SCHEMA_INVALID"
+
+    policy = copy_policy(tmp_path / "missing-paired-deny")
+    permissions = read(policy / "permissions.yaml")
+    permissions["forbidden_automatic_actions"] = [
+        action
+        for action in permissions["forbidden_automatic_actions"]  # type: ignore[index]
+        if action != "push"
+    ]
+    permissions["rules"] = [
+        rule
+        for rule in permissions["rules"]
+        if rule["action"] != "push"  # type: ignore[index]
+    ]
+    write(policy / "permissions.yaml", permissions)
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path / "missing-paired-deny", policy_directory=policy)
+    assert caught.value.code == "POLICY_SCHEMA_INVALID"
+
+    policy = copy_policy(tmp_path / "duplicate-deny")
+    permissions = read(policy / "permissions.yaml")
+    forbidden = permissions["forbidden_automatic_actions"]
+    forbidden[-1] = forbidden[0]  # type: ignore[index]
+    write(policy / "permissions.yaml", permissions)
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path / "duplicate-deny", policy_directory=policy)
+    assert caught.value.code == "POLICY_SCHEMA_INVALID"
+
+    policy = copy_policy(tmp_path / "duplicate-allow")
+    permissions = read(policy / "permissions.yaml")
+    permissions["allowed_automatic_actions"] = ["read", "read"]
+    write(policy / "permissions.yaml", permissions)
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path / "duplicate-allow", policy_directory=policy)
+    assert caught.value.code == "POLICY_SCHEMA_INVALID"
+
+
+def test_permission_allowlist_may_not_overlap_denies_even_without_schema_loading() -> None:
+    documents = v2_documents()
+    permissions = documents["permissions.yaml"]
+    permissions["allowed_automatic_actions"] = ["push"]
+
+    with pytest.raises(PolicyError) as caught:
+        _validate_cross_file(documents)
 
     assert caught.value.code == "POLICY_PERMISSION_REFERENCE_INVALID"
 

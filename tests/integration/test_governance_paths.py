@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+import yaml
 from test_answer_command import _prepare_repository
 from test_approve_command import _evidence, _record_review, review_package
 from test_approve_command import _prepare as prepare_review
@@ -29,6 +31,8 @@ def _auto_unit(task_id: str) -> dict[str, object]:
         "goal": "bounded documentation edit",
         "inputs": [],
         "planned_actions": ["edit"],
+        "controlled_actions": [],
+        "impact_categories": [],
         "impact_scope": ["src/module.py"],
         "reversibility": "reversible",
         "verification_methods": ["pytest"],
@@ -168,6 +172,49 @@ def test_mixed_ask_review_requires_answer_then_spec_approval_before_begin(
     assert load_task_record(repository, "TASK-0001").task["current_state"] == "IMPLEMENTING"
 
 
+@pytest.mark.parametrize("staleness", ("policy", "controlled_actions"))
+def test_review_begin_rejects_stale_classification_before_writing(
+    tmp_path: Path, monkeypatch, capsys, staleness: str
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route="REVIEW", valid_approval=True)
+    task_directory = resolve_task_path(repository, "TASK-0001")
+
+    if staleness == "policy":
+        routing_path = repository / ".ai" / "policy" / "routing.yaml"
+        routing = yaml.safe_load(routing_path.read_text(encoding="utf-8"))
+        assert isinstance(routing, dict)
+        rules = routing["rules"]
+        assert isinstance(rules, list) and isinstance(rules[0], dict)
+        rules[0]["explanation"] = "Changed Policy requires a new classification."
+        atomic_write_yaml(routing_path, routing)
+    else:
+        task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+        task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+        assert isinstance(task, dict)
+        units = task["decision_units"]
+        assert isinstance(units, list) and isinstance(units[0], dict)
+        units[0]["controlled_actions"] = ["deploy"]
+        atomic_write_yaml(task_path, task)
+
+    before = {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
+
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
+    assert capsys.readouterr().err == "Current classification is stale\n"
+
+    assert {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    } == before
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "READY_TO_IMPLEMENT"
+
+
 def test_review_code_and_action_approvals_remain_independent(tmp_path: Path, monkeypatch) -> None:
     repository = prepare_review(tmp_path, monkeypatch, state="WAITING_FOR_FINAL_REVIEW")
     action_path = tmp_path / "action.json"
@@ -238,6 +285,11 @@ def test_block_path_records_resolution_and_reclassification_history(
 ) -> None:
     repository = create_repository(tmp_path / "repository")
     start(repository, monkeypatch)
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    task["decision_units"][0].update(impact_categories=[], controlled_actions=[])
+    atomic_write_yaml(task_path, task)
     make_ready(repository, route="REVIEW")
     assert (
         main(

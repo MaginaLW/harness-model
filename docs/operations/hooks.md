@@ -2,7 +2,7 @@
 
 These adapters call the executable AI Flow core. They provide earlier feedback; they do not replace CLI validation, CI Gate, repository branch protection, or explicit approval for external actions.
 
-All wrappers fail closed. They do not install themselves, consume an approval, execute a command, or turn a diagnostic result into permission.
+The supported high-risk checks and unknown pre-command categories fail closed. The wrappers do not install themselves, consume an approval, execute a command, or turn a diagnostic result into permission for a real external operation.
 
 ## Verification wrapper
 
@@ -14,9 +14,16 @@ Run `python tools/hooks/pre_commit.py --task TASK-ID` from a Git pre-commit inte
 
 ## Pre-command
 
-Run `python tools/hooks/pre_command.py --action ACTION --target TARGET [--task TASK-ID]` before a normalized external action. A blank target fails before Policy loading, task lookup, or observation construction. An action the active Policy permits automatically does not read `--task` or create an observation. For an active-Policy forbidden canonical high-risk action (`push`, `merge`, `deploy`, `delete`, `secret_export`, or `paid_external_call`), `--task` is optional only when exactly one non-`MERGED` task can be resolved; ambiguity, an invalid explicit task, target-contract failure, or stale binding fails closed. The wrapper records the structured observation through the shared service and then always returns denial (exit 2). It never consumes an action approval and never executes the action, including when an approval exists.
+Run `python tools/hooks/pre_command.py --action ACTION --target TARGET [--task TASK-ID]` before a normalized external action. A blank target fails before Policy loading, task lookup, or observation construction. Only an explicitly Policy-allowed `read` category passes without reading `--task` or creating an observation. Unknown categories return denial (exit 2) before task lookup or observation; blank categories are invalid input (exit 1). For an active-Policy forbidden canonical high-risk action (`push`, `merge`, `deploy`, `delete`, `secret_export`, or `paid_external_call`), `--task` is optional only when exactly one non-`MERGED` task can be resolved; ambiguity, an invalid explicit task, target-contract failure, or stale binding fails closed. The wrapper records the structured observation through the shared service and then always returns denial (exit 2). It never consumes an action approval and never executes the action, including when an approval exists.
 
 The adapter accepts a structured canonical action and opaque `--target`, not a command line. It does not parse or interpret PowerShell, cmd, bash, aliases, pipes, redirection, quotes, wildcards, variable/command expansion, argv, stdin, environment, stdout, stderr, or credentials. It is neither a general command interceptor nor an OS sandbox.
+
+Policy `2.3.0` explicitly lists `allowed_automatic_actions: [read]`. The evaluator now
+defaults to denial rather than treating an unmatched category as safe; older Policy
+bundles without that list remain readable but grant no implicit `read` allowance. This
+closes the local unknown-category gap documented before [TASK-0047](../../.ai/tasks/TASK-0047/spec.md).
+An allowed category still says nothing about the opaque target or a subsequent command;
+calling a category `read` cannot authenticate what an unrelated client really executes.
 
 ## What the high-risk action approval requirement is actually worth
 
@@ -31,6 +38,7 @@ so that no reader mistakes the Policy declaration for an enforced control:
   "action"` when computing approval freshness, so the Gate never requires one.
 - `src/aiflow/freshness.py`'s `action_approval` branch has no production caller; the only
   code that constructs `used_action_sha256s` hardcodes it to `()`.
+  It remains a non-executing compatibility helper, not an authorization consumer.
 - The pre-command wrapper above denies these actions unconditionally. It is a denier, not an
   authorizer, so it cannot let an approved push through and installing it would block every
   push. `.git/hooks/` ships empty and the wrapper does not install itself.
@@ -47,6 +55,12 @@ working-tree file, action approvals have no state gate, and `actor` is an unauth
 free string — so a client-side authorizer would let the controlled party issue its own
 permission. Any future attempt has to enforce server side, in CI or branch protection, and
 needs identity that this phase does not have.
+
+A future trusted executor would need server-verified human identity, exact repository,
+ref, head and action binding, expiry, atomic single-use consumption, immutable outcome
+receipts, and protection/required-CI rechecks immediately before its fixed operation.
+Those capabilities are not provided by this local refusal repair; no external executor
+or identity service is configured by it.
 
 ## `aiflow observe`
 

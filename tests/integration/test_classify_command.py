@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from test_begin_close_commands import create_repository, start
+from test_begin_close_commands import create_repository, run_git, start
 
 from aiflow.classification_service import _change_reason, _is_downgrade, _stable_input
 from aiflow.cli import main
@@ -31,6 +31,8 @@ def _unit(task_id: str, **changes: object) -> dict[str, object]:
         "verification_methods": ["pytest"],
         "external_side_effects": [],
         "permission_requirements": [],
+        "impact_categories": [],
+        "controlled_actions": [],
         "scope": {"clear": True},
         "impact": {"level": "low"},
         "protections": {"verified_backup": True, "dry_run": True},
@@ -175,6 +177,321 @@ def test_classify_same_identity_does_not_append_events(
 
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     assert len(load_task_record(repository, "TASK-0001").events) == count
+
+
+@pytest.mark.parametrize(
+    "missing_fields",
+    [("impact_categories",), ("controlled_actions",), ("impact_categories", "controlled_actions")],
+)
+def test_classify_requires_explicit_risk_inputs_without_writes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    missing_fields: tuple[str, ...],
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch)
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    unit = task["decision_units"][0]
+    assert isinstance(unit, dict)
+    for field in missing_fields:
+        unit.pop(field)
+    atomic_write_yaml(task_path, task)
+    paths = [
+        task_path,
+        resolve_task_path(repository, "TASK-0001", "events.jsonl"),
+        resolve_task_path(repository, "TASK-0001", "approvals.json"),
+    ]
+    before = {path: path.read_bytes() for path in paths}
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
+    output = capsys.readouterr().err
+    assert "Classification requires explicit risk inputs" in output
+    assert all(field in output for field in missing_fields)
+    assert {path: path.read_bytes() for path in paths} == before
+    assert not resolve_task_path(repository, "TASK-0001", "classification.json").exists()
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("impact_categories", None),
+        ("impact_categories", "ci"),
+        ("controlled_actions", None),
+        ("controlled_actions", "deploy"),
+        ("controlled_actions", ["unknown"]),
+        ("controlled_actions", ["deploy", "deploy"]),
+    ],
+)
+def test_classify_rejects_invalid_risk_inputs_without_writes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    field: str,
+    value: object,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch, **{field: value})
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    paths = [
+        task_path,
+        resolve_task_path(repository, "TASK-0001", "events.jsonl"),
+        resolve_task_path(repository, "TASK-0001", "approvals.json"),
+    ]
+    before = {path: path.read_bytes() for path in paths}
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
+    assert field in capsys.readouterr().err
+    assert {path: path.read_bytes() for path in paths} == before
+    assert not resolve_task_path(repository, "TASK-0001", "classification.json").exists()
+
+
+def test_legacy_same_identity_classification_remains_a_read_only_no_op(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch)
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    unit = task["decision_units"][0]
+    assert isinstance(unit, dict)
+    unit.pop("impact_categories")
+    unit.pop("controlled_actions")
+    # Simulate a durable classification emitted before risk facts became
+    # mandatory for new writes. It remains contract-valid and current by its
+    # own historic digest at the time classify is invoked.
+    atomic_write_yaml(task_path, task)
+    classification_path = resolve_task_path(repository, "TASK-0001", "classification.json")
+    classification = read_task_json(repository, "TASK-0001", "classification.json")
+    assert isinstance(classification, dict)
+    classification["classification_input_sha256"] = _stable_input(task, parse_decision_units(task))
+    classification_path.write_text(json.dumps(classification), encoding="utf-8")
+    before = {
+        task_path: task_path.read_bytes(),
+        classification_path: classification_path.read_bytes(),
+        resolve_task_path(repository, "TASK-0001", "events.jsonl"): resolve_task_path(
+            repository, "TASK-0001", "events.jsonl"
+        ).read_bytes(),
+    }
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    assert {path: path.read_bytes() for path in before} == before
+
+
+def test_classify_reports_every_missing_risk_fact_across_decision_units(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch)
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    first = task["decision_units"][0]
+    assert isinstance(first, dict)
+    second = _unit("TASK-0001")
+    second["decision_unit_id"] = "DU-002"
+    first.pop("impact_categories")
+    second.pop("controlled_actions")
+    task["decision_units"] = [first, second]
+    atomic_write_yaml(task_path, task)
+    before = {
+        task_path: task_path.read_bytes(),
+        resolve_task_path(repository, "TASK-0001", "events.jsonl"): resolve_task_path(
+            repository, "TASK-0001", "events.jsonl"
+        ).read_bytes(),
+    }
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
+    output = capsys.readouterr().err
+    assert "DU-001: impact_categories" in output
+    assert "DU-002: controlled_actions" in output
+    assert {path: path.read_bytes() for path in before} == before
+    assert not resolve_task_path(repository, "TASK-0001", "classification.json").exists()
+
+
+@pytest.mark.parametrize("stale_fact", ("policy", "controlled_actions", "head", "branch"))
+def test_pending_classification_rechecks_identity_and_risk_before_any_write(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    stale_fact: str,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch, external_side_effects=["credential_export"])
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    old = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(old, dict)
+
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    task["decision_units"] = [_unit("TASK-0001")]
+    atomic_write_yaml(task_path, task)
+    new_input = _stable_input(task, parse_decision_units(task))
+    policy = load_policy_bundle(repository)
+    record_task_event(
+        repository,
+        "TASK-0001",
+        event_type="resolution_recorded",
+        actor="reviewer",
+        payload={
+            "reason": "removed external transfer",
+            "evidence_refs": ["evidence-001"],
+            "previous_classification_input_sha256": old["classification_input_sha256"],
+            "previous_policy_sha256": old["policy_sha256"],
+            "manual_authorization": True,
+            "authorized_by": "reviewer",
+            "authorized_classification_input_sha256": new_input,
+            "authorized_policy_sha256": policy.sha256,
+        },
+    )
+    from aiflow import classification_service
+
+    original_resume = classification_service._resume_classification
+
+    def interrupt_resume(*_args: object, **_kwargs: object) -> dict[str, object]:
+        raise StorageError("simulated", code="STORAGE_WRITE_FAILED")
+
+    monkeypatch.setattr(classification_service, "_resume_classification", interrupt_resume)
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
+    monkeypatch.setattr(classification_service, "_resume_classification", original_resume)
+    pending_path = resolve_task_path(repository, "TASK-0001", "classification_pending.json")
+    assert pending_path.is_file()
+
+    if stale_fact == "policy":
+        routing = repository / ".ai" / "policy" / "routing.yaml"
+        routing.write_text(
+            routing.read_text(encoding="utf-8").replace("user choice.", "a user choice."),
+            encoding="utf-8",
+        )
+    elif stale_fact == "controlled_actions":
+        current = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+        assert isinstance(current, dict)
+        current_unit = current["decision_units"][0]
+        assert isinstance(current_unit, dict)
+        current_unit.pop("controlled_actions")
+        atomic_write_yaml(task_path, current)
+    elif stale_fact == "head":
+        (repository / "tracked.txt").write_text("changed\n", encoding="utf-8")
+        run_git(repository, "add", "tracked.txt")
+        run_git(
+            repository,
+            "-c",
+            "user.name=AI Flow Tests",
+            "-c",
+            "user.email=aiflow@example.invalid",
+            "commit",
+            "-m",
+            "drift",
+        )
+    else:
+        run_git(repository, "checkout", "-b", "other-branch")
+    paths = [
+        resolve_task_path(repository, "TASK-0001", name)
+        for name in (
+            "task.yaml",
+            "events.jsonl",
+            "classification.json",
+            "classification_pending.json",
+        )
+    ]
+    before = {path: path.read_bytes() for path in paths}
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
+    output = capsys.readouterr().err
+    expected = (
+        "Classification recovery identity changed"
+        if stale_fact == "policy"
+        else (
+            "Classification requires explicit risk inputs"
+            if stale_fact == "controlled_actions"
+            else "Classification Git baseline does not match"
+        )
+    )
+    assert expected in output
+    assert {path: path.read_bytes() for path in paths} == before
+
+
+def test_completed_pending_replay_allows_bound_recovery_and_only_cleans_marker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch, external_side_effects=["credential_export"])
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    old = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(old, dict)
+
+    (repository / "tracked.txt").write_text("advanced\n", encoding="utf-8")
+    run_git(repository, "add", "tracked.txt")
+    run_git(
+        repository,
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit",
+        "-m",
+        "advance subject",
+    )
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    task["subject_commit"] = run_git(repository, "rev-parse", "HEAD")
+    task["decision_units"] = [_unit("TASK-0001")]
+    atomic_write_yaml(task_path, task)
+    policy = load_policy_bundle(repository)
+    record_task_event(
+        repository,
+        "TASK-0001",
+        event_type="resolution_recorded",
+        actor="reviewer",
+        payload={
+            "reason": "removed external transfer",
+            "evidence_refs": ["evidence-001"],
+            "previous_classification_input_sha256": old["classification_input_sha256"],
+            "previous_policy_sha256": old["policy_sha256"],
+            "manual_authorization": True,
+            "authorized_by": "reviewer",
+            "authorized_classification_input_sha256": _stable_input(
+                task, parse_decision_units(task)
+            ),
+            "authorized_policy_sha256": policy.sha256,
+        },
+    )
+    original_unlink = Path.unlink
+
+    def interrupt_marker_cleanup(path: Path, *args: object, **kwargs: object) -> None:
+        if path.name == "classification_pending.json":
+            raise OSError("simulated cleanup interruption")
+        original_unlink(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "unlink", interrupt_marker_cleanup)
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
+    assert "Classification recovery marker remains" in capsys.readouterr().err
+    pending_path = resolve_task_path(repository, "TASK-0001", "classification_pending.json")
+    assert pending_path.is_file()
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "READY_TO_IMPLEMENT"
+    classification_path = resolve_task_path(repository, "TASK-0001", "classification.json")
+    events_path = resolve_task_path(repository, "TASK-0001", "events.jsonl")
+    before = {
+        classification_path: classification_path.read_bytes(),
+        events_path: events_path.read_bytes(),
+    }
+
+    monkeypatch.setattr(Path, "unlink", original_unlink)
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    assert not pending_path.exists()
+    assert {path: path.read_bytes() for path in before} == before
 
 
 def test_co_matched_ask_and_review_waits_for_the_user_choice(

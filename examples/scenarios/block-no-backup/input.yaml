@@ -6,6 +6,7 @@ inputs:
   - A broad live-file target set
 planned_actions:
   - overwrite_files
+controlled_actions: []
 impact_scope:
   - data/live/batch/**
 reversibility: irreversible

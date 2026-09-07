@@ -23,6 +23,7 @@ from aiflow.errors import (
     StateTransitionError,
     StorageError,
 )
+from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import (
     GitContext,
     VerificationGitAssessment,
@@ -792,6 +793,29 @@ def _require_ready_artifacts(repository_root: Path, task_id: str, record: TaskRe
             code="BEGIN_SPEC_CHANGED",
         )
     classification = _load_classification(repository_root, task_id)
+    units = parse_decision_units(record.task)
+    current_input, synchronized = current_classification_input_digest(
+        record.task, units, classification, record.events
+    )
+    bundle = load_policy_bundle(repository_root)
+    freshness = evaluate_freshness(
+        "classification",
+        classification,
+        {
+            "task_id": task_id,
+            "base_commit": record.task.get("base_commit"),
+            "subject_commit": record.task.get("subject_commit"),
+            "policy_sha256": bundle.sha256,
+            "classification_input_sha256": current_input,
+            "subject_synchronized": synchronized,
+        },
+    )
+    if freshness.status != "fresh":
+        raise ContractError(
+            "Current classification is stale",
+            code="BEGIN_CLASSIFICATION_STALE",
+            details={"failure_codes": freshness.reason_codes},
+        )
     entries = classification.get("classifications")
     if not isinstance(entries, list):
         raise ContractError(

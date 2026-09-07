@@ -63,10 +63,16 @@
     },
     "forbidden_automatic_actions": {
       "type": "array",
+      "minItems": 6,
       "uniqueItems": true,
       "items": {
         "enum": ["push", "merge", "deploy", "delete", "secret_export", "paid_external_call"]
       }
+    },
+    "allowed_automatic_actions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"const": "read"}
     }
   },
   "oneOf": [
@@ -82,7 +88,8 @@
         "anyOf": [
           {"required": ["default_route"]},
           {"required": ["levels"]},
-          {"required": ["forbidden_automatic_actions"]}
+          {"required": ["forbidden_automatic_actions"]},
+          {"required": ["allowed_automatic_actions"]}
         ]
       }
     },
@@ -97,7 +104,8 @@
       "not": {
         "anyOf": [
           {"required": ["levels"]},
-          {"required": ["forbidden_automatic_actions"]}
+          {"required": ["forbidden_automatic_actions"]},
+          {"required": ["allowed_automatic_actions"]}
         ]
       }
     },
@@ -114,7 +122,8 @@
         "anyOf": [
           {"required": ["rules"]},
           {"required": ["default_route"]},
-          {"required": ["forbidden_automatic_actions"]}
+          {"required": ["forbidden_automatic_actions"]},
+          {"required": ["allowed_automatic_actions"]}
         ]
       }
     },

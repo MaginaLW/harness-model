@@ -1,6 +1,7 @@
 schema_version: "1.0"
-policy_version: "2.2.0"
+policy_version: "2.3.0"
 policy_kind: permissions
+allowed_automatic_actions: [read]
 forbidden_automatic_actions:
   - push
   - merge

@@ -114,6 +114,10 @@ def test_start_creates_complete_contract_valid_task(
     assert task["allowed_scope"] == ["src/**", "tests/**"]
     assert set(task["forbidden_actions"]) == DEFAULT_FORBIDDEN | {"publish"}
     assert task["current_state"] == "NEW"
+    unit = task["decision_units"][0]
+    assert isinstance(unit, dict)
+    assert "impact_categories" not in unit
+    assert "controlled_actions" not in unit
     assert task["repository_path_at_creation"] == repository.resolve().as_posix()
 
     events = (task_directory / "events.jsonl").read_text(encoding="utf-8").splitlines()

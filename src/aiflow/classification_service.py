@@ -86,6 +86,35 @@ def _previous_identity(root: Path, task_id: str) -> Mapping[str, object] | None:
     return value if isinstance(value, Mapping) else None
 
 
+def _require_explicit_risk_facts(units: Sequence[Mapping[str, object]]) -> None:
+    """Require the two risk inputs before creating new classification evidence.
+
+    The decision-unit schema keeps both fields optional so historical records
+    remain readable. New routing, however, must never infer that an omitted
+    field means no risk.
+    """
+    missing: list[tuple[str, tuple[str, ...]]] = []
+    for unit in units:
+        fields = tuple(
+            field for field in ("impact_categories", "controlled_actions") if field not in unit
+        )
+        if fields:
+            identifier = unit.get("decision_unit_id")
+            missing.append((identifier if isinstance(identifier, str) else "<unknown>", fields))
+    if missing:
+        summary = "; ".join(f"{identifier}: {', '.join(fields)}" for identifier, fields in missing)
+        raise ContractError(
+            f"Classification requires explicit risk inputs ({summary})",
+            code="CLASSIFICATION_RISK_INPUTS_REQUIRED",
+            details={
+                "missing": [
+                    {"decision_unit_id": identifier, "fields": list(fields)}
+                    for identifier, fields in missing
+                ]
+            },
+        )
+
+
 def _resume_classification(
     repository_root: Path,
     task_id: str,
@@ -99,6 +128,11 @@ def _resume_classification(
         )
     require_valid_contract("classification", classification)
     record = read_task_record_strict(repository_root, task_id)
+    _require_baseline(
+        repository_root,
+        record.task,
+        recovery=marker.get("source_state") in {"BLOCKED", "ESCALATED"},
+    )
     resolution_sequence = marker.get("resolution_event_sequence")
     resolution_payload = marker.get("resolution_payload")
     if (
@@ -117,6 +151,25 @@ def _resume_classification(
             "Classification recovery resolution is stale",
             code="CLASSIFICATION_RESOLUTION_REQUIRED",
         )
+    units = parse_decision_units(record.task)
+    _require_explicit_risk_facts(units)
+    bundle = load_policy_bundle(repository_root)
+    identity = (
+        _stable_input(record.task, units),
+        bundle.sha256,
+        record.task.get("base_commit"),
+        record.task.get("subject_commit"),
+    )
+    if identity != (
+        classification.get("classification_input_sha256"),
+        classification.get("policy_sha256"),
+        classification.get("base_commit"),
+        classification.get("subject_commit"),
+    ):
+        raise StateTransitionError(
+            "Classification recovery identity changed",
+            code="CLASSIFICATION_RECOVERY_IDENTITY_MISMATCH",
+        )
     target_state = marker.get("target_state")
     if (
         record.task.get("current_state") == target_state
@@ -127,15 +180,6 @@ def _resume_classification(
             missing_ok=True
         )
         return dict(classification)
-    units = parse_decision_units(record.task)
-    bundle = load_policy_bundle(repository_root)
-    if _stable_input(record.task, units) != classification.get(
-        "classification_input_sha256"
-    ) or bundle.sha256 != classification.get("policy_sha256"):
-        raise StateTransitionError(
-            "Classification recovery identity changed",
-            code="CLASSIFICATION_RECOVERY_IDENTITY_MISMATCH",
-        )
     atomic_write_json(
         resolve_task_path(repository_root, task_id, "classification.json"), classification
     )
@@ -486,6 +530,7 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
         )
     ):
         return dict(previous)
+    _require_explicit_risk_facts(units)
     if state == "CLASSIFIED" and (
         previous is None
         or identity

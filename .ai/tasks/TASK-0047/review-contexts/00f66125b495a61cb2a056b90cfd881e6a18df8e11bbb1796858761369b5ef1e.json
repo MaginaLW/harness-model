@@ -1,0 +1,654 @@
+{
+  "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+  "branch": "codex/risk-input-followups",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/permissions.yaml",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/schemas/decision-unit.schema.json",
+      ".ai/schemas/policy.schema.json",
+      ".ai/templates/task.yaml",
+      "src/aiflow/decision_units.py",
+      "src/aiflow/classification_service.py",
+      "src/aiflow/policy.py",
+      "src/aiflow/task_service.py",
+      "tools/hooks/pre_command.py",
+      "tests/unit/test_decision_units.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_routing.py",
+      "tests/integration/test_classify_command.py",
+      "tests/integration/test_answer_command.py",
+      "tests/integration/test_start_command.py",
+      "tests/integration/test_begin_close_commands.py",
+      "tests/integration/test_escalate_command.py",
+      "tests/integration/test_auto_preflight.py",
+      "tests/integration/test_governance_paths.py",
+      "tests/integration/test_observation_escalation.py",
+      "tests/integration/test_observation_parity.py",
+      "tests/integration/test_tool_wrappers.py",
+      "tests/integration/test_templates_and_policy.py",
+      "tests/integration/test_golden_classification.py",
+      "tests/e2e/test_clean_checkout.py",
+      "tests/fixtures/routing/decision-table.json",
+      "examples/scenarios/auto-doc-edit/input.yaml",
+      "examples/scenarios/ask-conflict-strategy/input.yaml",
+      "examples/scenarios/review-workflow-change/input.yaml",
+      "examples/scenarios/block-no-backup/input.yaml",
+      "docs/operations/hooks.md",
+      "docs/operations/low-intervention.md",
+      "docs/operations/recovery.md",
+      "docs/operations/quickstart.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "新分类必须有明确风险字段，部署和生产数据删除采用受控动作类型且不丢失旧正向风险",
+        "impact_scope": [
+          ".ai/schemas/decision-unit.schema.json",
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/templates/task.yaml",
+          "src/aiflow/decision_units.py",
+          "src/aiflow/classification_service.py",
+          "src/aiflow/task_service.py"
+        ],
+        "planned_actions": [
+          "兼容扩展 controlled_actions 字段并在新分类写入前校验完整风险事实。",
+          "一次更新为 Policy 2.3.0，保留旧正向动作匹配、质量检查和所有阈值。",
+          "按既有升级流程处理本任务的 Policy 和分类输入绑定变化。"
+        ]
+      },
+      {
+        "decision_unit_id": "DU-002",
+        "goal": "未知动作默认拒绝，只有 Policy 明列的 read 类别允许通过本地检查，不将通用批准接成执行放行",
+        "impact_scope": [
+          ".ai/policy/permissions.yaml",
+          ".ai/schemas/policy.schema.json",
+          "src/aiflow/policy.py",
+          "tools/hooks/pre_command.py"
+        ],
+        "planned_actions": [
+          "在 Policy 中明列 read 允许集合并默认拒绝未识别动作，保持六项高风险拒绝规则。",
+          "未知动作在 Hook 解析任务或追加观察前直接拒绝，不能由本地批准改变结果。",
+          "完成受控本地边界和可信外部执行器要求的设计，不创建执行器或修改远端配置。"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/hard-rules.yaml",
+        ".ai/policy/permissions.yaml",
+        ".ai/policy/routing.yaml",
+        ".ai/policy/verification-levels.yaml",
+        ".ai/schemas/decision-unit.schema.json",
+        ".ai/schemas/policy.schema.json",
+        ".ai/tasks/TASK-0047/action-boundary-design.md",
+        ".ai/tasks/TASK-0047/approvals.json",
+        ".ai/tasks/TASK-0047/classification.json",
+        ".ai/tasks/TASK-0047/clean-clone-resolution.md",
+        ".ai/tasks/TASK-0047/clean-clone-review-package.md",
+        ".ai/tasks/TASK-0047/design-review-context-clean-clone.json",
+        ".ai/tasks/TASK-0047/design-review-context-final.json",
+        ".ai/tasks/TASK-0047/design-review-context-policy23.json",
+        ".ai/tasks/TASK-0047/design-review-context-r2.json",
+        ".ai/tasks/TASK-0047/design-review-context.json",
+        ".ai/tasks/TASK-0047/design-review-input-clean-clone.json",
+        ".ai/tasks/TASK-0047/design-review-input-final.json",
+        ".ai/tasks/TASK-0047/design-review-input-initial.json",
+        ".ai/tasks/TASK-0047/design-review-input-policy23.json",
+        ".ai/tasks/TASK-0047/events.jsonl",
+        ".ai/tasks/TASK-0047/evidence.json",
+        ".ai/tasks/TASK-0047/implementation-diagnostics.md",
+        ".ai/tasks/TASK-0047/policy23-resolution.md",
+        ".ai/tasks/TASK-0047/policy23-review-package.md",
+        ".ai/tasks/TASK-0047/review-contexts/2dbe29d0461b0382cf23687eafc10e625312a0287329600cc93d191e1dc599e0.json",
+        ".ai/tasks/TASK-0047/review-contexts/328e961b90ea343747f422cf819a43d21547d82a5693074b80eec7df625e886f.json",
+        ".ai/tasks/TASK-0047/review-contexts/ae766152f541a97e551e7cadc4520c8f1489e5a149dce68f8193474c0b7abe4d.json",
+        ".ai/tasks/TASK-0047/review-contexts/c75b05c590c05e8e8773806452bedf8e06fbf1e42f18a4eeecc51aced0c82b4c.json",
+        ".ai/tasks/TASK-0047/review-notes.md",
+        ".ai/tasks/TASK-0047/review-package.md",
+        ".ai/tasks/TASK-0047/reviews/REV-0078-r0001.json",
+        ".ai/tasks/TASK-0047/reviews/REV-0078-r0002.json",
+        ".ai/tasks/TASK-0047/reviews/REV-0078-r0003.json",
+        ".ai/tasks/TASK-0047/reviews/REV-0079-r0001.json",
+        ".ai/tasks/TASK-0047/reviews/REV-0080-r0001.json",
+        ".ai/tasks/TASK-0047/reviews/REV-0081-r0001.json",
+        ".ai/tasks/TASK-0047/scope-resolution-final.md",
+        ".ai/tasks/TASK-0047/scope-resolution.md",
+        ".ai/tasks/TASK-0047/spec.md",
+        ".ai/tasks/TASK-0047/task.yaml",
+        ".ai/templates/task.yaml",
+        "docs/operations/hooks.md",
+        "docs/operations/low-intervention.md",
+        "docs/operations/quickstart.md",
+        "docs/operations/recovery.md",
+        "examples/scenarios/ask-conflict-strategy/input.yaml",
+        "examples/scenarios/auto-doc-edit/input.yaml",
+        "examples/scenarios/block-no-backup/input.yaml",
+        "examples/scenarios/review-workflow-change/input.yaml",
+        "src/aiflow/classification_service.py",
+        "src/aiflow/policy.py",
+        "src/aiflow/task_service.py",
+        "tests/e2e/test_clean_checkout.py",
+        "tests/fixtures/routing/decision-table.json",
+        "tests/integration/test_answer_command.py",
+        "tests/integration/test_auto_preflight.py",
+        "tests/integration/test_begin_close_commands.py",
+        "tests/integration/test_classify_command.py",
+        "tests/integration/test_escalate_command.py",
+        "tests/integration/test_golden_classification.py",
+        "tests/integration/test_governance_paths.py",
+        "tests/integration/test_observation_escalation.py",
+        "tests/integration/test_start_command.py",
+        "tests/integration/test_templates_and_policy.py",
+        "tests/integration/test_tool_wrappers.py",
+        "tests/unit/test_decision_units.py",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_routing.py",
+        "tools/hooks/pre_command.py"
+      ],
+      "files": [
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 5,
+          "path": ".ai/policy/hard-rules.yaml"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/permissions.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/routing.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/decision-unit.schema.json"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 3,
+          "path": ".ai/schemas/policy.schema.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/action-boundary-design.md"
+        },
+        {
+          "additions": 80,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/approvals.json"
+        },
+        {
+          "additions": 91,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/classification.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/clean-clone-resolution.md"
+        },
+        {
+          "additions": 56,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/clean-clone-review-package.md"
+        },
+        {
+          "additions": 96,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-context-clean-clone.json"
+        },
+        {
+          "additions": 91,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-context-final.json"
+        },
+        {
+          "additions": 94,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-context-policy23.json"
+        },
+        {
+          "additions": 95,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-context-r2.json"
+        },
+        {
+          "additions": 78,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-context.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-input-clean-clone.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-input-final.json"
+        },
+        {
+          "additions": 27,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-input-initial.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/design-review-input-policy23.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/events.jsonl"
+        },
+        {
+          "additions": 171,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/evidence.json"
+        },
+        {
+          "additions": 95,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/implementation-diagnostics.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/policy23-resolution.md"
+        },
+        {
+          "additions": 69,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/policy23-review-package.md"
+        },
+        {
+          "additions": 96,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/review-contexts/2dbe29d0461b0382cf23687eafc10e625312a0287329600cc93d191e1dc599e0.json"
+        },
+        {
+          "additions": 91,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/review-contexts/328e961b90ea343747f422cf819a43d21547d82a5693074b80eec7df625e886f.json"
+        },
+        {
+          "additions": 94,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/review-contexts/ae766152f541a97e551e7cadc4520c8f1489e5a149dce68f8193474c0b7abe4d.json"
+        },
+        {
+          "additions": 78,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/review-contexts/c75b05c590c05e8e8773806452bedf8e06fbf1e42f18a4eeecc51aced0c82b4c.json"
+        },
+        {
+          "additions": 81,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/review-notes.md"
+        },
+        {
+          "additions": 77,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/review-package.md"
+        },
+        {
+          "additions": 42,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/reviews/REV-0078-r0001.json"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/reviews/REV-0078-r0002.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/reviews/REV-0078-r0003.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/reviews/REV-0079-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/reviews/REV-0080-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/reviews/REV-0081-r0001.json"
+        },
+        {
+          "additions": 21,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/scope-resolution-final.md"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/scope-resolution.md"
+        },
+        {
+          "additions": 166,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/spec.md"
+        },
+        {
+          "additions": 161,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0047/task.yaml"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 2,
+          "path": ".ai/templates/task.yaml"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/hooks.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/low-intervention.md"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 3,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "examples/scenarios/ask-conflict-strategy/input.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "examples/scenarios/auto-doc-edit/input.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "examples/scenarios/block-no-backup/input.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "examples/scenarios/review-workflow-change/input.yaml"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 9,
+          "path": "src/aiflow/classification_service.py"
+        },
+        {
+          "additions": 22,
+          "binary": false,
+          "deletions": 12,
+          "path": "src/aiflow/policy.py"
+        },
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/e2e/test_clean_checkout.py"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 11,
+          "path": "tests/fixtures/routing/decision-table.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_answer_command.py"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_auto_preflight.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_begin_close_commands.py"
+        },
+        {
+          "additions": 318,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_classify_command.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_escalate_command.py"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_golden_classification.py"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_governance_paths.py"
+        },
+        {
+          "additions": 111,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_observation_escalation.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_start_command.py"
+        },
+        {
+          "additions": 21,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_templates_and_policy.py"
+        },
+        {
+          "additions": 72,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_tool_wrappers.py"
+        },
+        {
+          "additions": 26,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_decision_units.py"
+        },
+        {
+          "additions": 122,
+          "binary": false,
+          "deletions": 4,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 78,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_routing.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "tools/hooks/pre_command.py"
+        }
+      ],
+      "totals": {
+        "additions": 3355,
+        "deletions": 60,
+        "files": 70
+      }
+    },
+    "goal": "补齐新分类的显式风险输入并收敛本地动作权限为默认拒绝，保留历史证据与真实外部授权边界",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0047",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "00f66125b495a61cb2a056b90cfd881e6a18df8e11bbb1796858761369b5ef1e",
+  "decision_unit_ids": [
+    "DU-001",
+    "DU-002"
+  ],
+  "evidence_sha256": "af344d6eefc22c7c9cba8f6776658c27dedff38718efa83c91a2fbd3aa378783",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "task_id": "TASK-0047"
+}

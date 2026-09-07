@@ -1,5 +1,5 @@
 schema_version: "1.0"
-policy_version: "2.2.0"
+policy_version: "2.3.0"
 policy_kind: hard_rules
 rules:
   - id: HARD-BLOCK-EXTERNAL-SENSITIVE
@@ -46,8 +46,12 @@ rules:
     priority: 800
     route: REVIEW
     explanation: Production data deletion requires review and a separate action approval.
-    match: all
+    match: any
     conditions:
+      - field: controlled_actions
+        operator: contains_any
+        value: [production_data_delete]
+        missing: error
       - field: planned_actions
         operator: contains_any
         value: [production_data_delete]
@@ -61,7 +65,7 @@ rules:
       - field: impact_categories
         operator: contains_any
         value: [secrets, authentication]
-        missing: no_match
+        missing: error
   - id: HARD-REVIEW-CI-CD
     priority: 780
     route: REVIEW
@@ -71,13 +75,17 @@ rules:
       - field: impact_categories
         operator: contains_any
         value: [ci, cd]
-        missing: no_match
+        missing: error
   - id: HARD-REVIEW-DEPLOYMENT
     priority: 770
     route: REVIEW
     explanation: Deployment changes require review.
-    match: all
+    match: any
     conditions:
+      - field: controlled_actions
+        operator: contains_any
+        value: [deploy]
+        missing: error
       - field: planned_actions
         operator: contains_any
         value: [deploy]

@@ -8,6 +8,7 @@ inputs:
   - Emitting both improves compatibility but increases maintenance.
 planned_actions:
   - select_conflict_report_format
+controlled_actions: []
 impact_scope:
   - src/aiflow/conflicts.py
   - docs/conflict-reports.md

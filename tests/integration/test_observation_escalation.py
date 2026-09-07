@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,7 @@ from aiflow.observation import parse_observation
 from aiflow.observation_decision import DecisionRoute, VerificationLevel
 from aiflow.observation_service import apply_observation
 from aiflow.policy import load_policy_bundle
+from aiflow.storage import atomic_write_json, read_task_json
 from aiflow.task_service import TaskRecord, TransitionResult, load_task_record
 from tools.hooks import pre_command, pre_commit
 
@@ -81,6 +83,58 @@ def _pre_command_events(repository: Path) -> list[dict[str, object]]:
         for event in load_task_record(repository, "TASK-0001").events
         if event["event_type"] in {"observation_recorded", "observation_refused"}
     ]
+
+
+def _task_files(task_directory: Path) -> dict[Path, bytes]:
+    return {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
+
+
+def _record_generic_action_approval(
+    repository: Path, tmp_path: Path, *, action: str, target: str, expires_at: str
+) -> None:
+    task = load_task_record(repository, "TASK-0001").task
+    action_path = tmp_path / "generic-action.json"
+    action_path.write_text(
+        json.dumps(
+            {
+                "decision_unit_id": "DU-001",
+                "action_type": action,
+                "target": target,
+                "parameter_summary": "a generic action approval that the Hook must not consume",
+                "subject_commit": task["subject_commit"],
+                "conditions": ["the task remains current"],
+                "expires_at": "2099-01-01T00:00:00Z",
+                "single_use": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert (
+        cli_main(
+            [
+                "approve",
+                "TASK-0001",
+                "--type",
+                "action",
+                "--actor",
+                "reviewer",
+                "--reason",
+                "generic action approval that does not authorize the Hook",
+                "--action-file",
+                str(action_path),
+            ]
+        )
+        == 0
+    )
+    if expires_at != "2099-01-01T00:00:00Z":
+        approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+        assert isinstance(approvals, list) and isinstance(approvals[-1], dict)
+        approvals[-1]["expires_at"] = expires_at
+        atomic_write_json(repository / ".ai" / "tasks" / "TASK-0001" / "approvals.json", approvals)
 
 
 def _assert_high_risk_refusal(repository: Path, *, action: str, target: str) -> dict[str, object]:
@@ -350,6 +404,63 @@ def test_real_pre_command_refuses_each_policy_denied_action_with_exact_binding(
     _assert_high_risk_refusal(repository, action=action, target=target)
     assert record.task["current_state"] == "IMPLEMENTING"
     assert not [event for event in record.events if event["event_type"] == "task_escalated"]
+
+
+@pytest.mark.parametrize(
+    ("action", "target"),
+    [
+        ("push", "origin/main"),
+        ("merge", "main"),
+        ("deploy", "production"),
+        ("delete", "release-archive"),
+        ("secret_export", "audit-bundle"),
+        ("paid_external_call", "provider-request"),
+    ],
+)
+@pytest.mark.parametrize("expires_at", ("2099-01-01T00:00:00Z", "2000-01-01T00:00:00Z"))
+def test_generic_action_approval_does_not_authorize_or_change_a_high_risk_refusal(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    action: str,
+    target: str,
+    expires_at: str,
+) -> None:
+    repository = _pre_command_repository_at_route(tmp_path, monkeypatch, route="REVIEW")
+    _record_generic_action_approval(
+        repository, tmp_path, action=action, target=target, expires_at=expires_at
+    )
+    approvals_path = repository / ".ai" / "tasks" / "TASK-0001" / "approvals.json"
+    approvals_before = approvals_path.read_bytes()
+
+    assert pre_command.main(["--task", "TASK-0001", "--action", action, "--target", target]) == 2
+
+    _assert_high_risk_refusal(repository, action=action, target=target)
+    assert approvals_path.read_bytes() == approvals_before
+
+
+def test_unknown_action_refusal_writes_no_task_or_observation_artifacts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _pre_command_repository_at_route(tmp_path, monkeypatch, route="REVIEW")
+    _record_generic_action_approval(
+        repository,
+        tmp_path,
+        action="notify",
+        target="opaque target",
+        expires_at="2099-01-01T00:00:00Z",
+    )
+    task_directory = repository / ".ai" / "tasks" / "TASK-0001"
+    before = _task_files(task_directory)
+
+    assert (
+        pre_command.main(
+            ["--task", "TASK-0001", "--action", " Notify ", "--target", "opaque target"]
+        )
+        == 2
+    )
+
+    assert _task_files(task_directory) == before
+    assert not _pre_command_events(repository)
 
 
 @pytest.mark.parametrize("route", ("AUTO", "ASK", "REVIEW", "BLOCK"))
