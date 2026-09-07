@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-07T15:38:28Z",
+    "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者明确回复批准，接受冻结规格 cc835f26a7434a511db85ad6c4afa3f9ce8ea090f6ed3d8b98b792b3f337df8a 及仅本任务精确必要测试、4个示例输入、3份边界说明与治理代码同任务交付的有界隔离例外；不包含代码批准或任何外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "cc835f26a7434a511db85ad6c4afa3f9ce8ea090f6ed3d8b98b792b3f337df8a",
+    "subject_commit": "9f367af9d8fc3d5b28c3f171da455e79c18afc5a",
+    "task_id": "TASK-0047"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-07T15:38:28Z",
+    "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+    "decision_unit_id": "DU-002",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "项目所有者明确回复批准，接受冻结规格 cc835f26a7434a511db85ad6c4afa3f9ce8ea090f6ed3d8b98b792b3f337df8a 及仅本任务精确必要测试、4个示例输入、3份边界说明与治理代码同任务交付的有界隔离例外；不包含代码批准或任何外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "cc835f26a7434a511db85ad6c4afa3f9ce8ea090f6ed3d8b98b792b3f337df8a",
+    "subject_commit": "9f367af9d8fc3d5b28c3f171da455e79c18afc5a",
+    "task_id": "TASK-0047"
+  }
+]
