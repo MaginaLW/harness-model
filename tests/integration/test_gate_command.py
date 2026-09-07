@@ -23,7 +23,7 @@ from aiflow.storage import (
     read_task_yaml,
     resolve_task_path,
 )
-from aiflow.task_service import load_task_record
+from aiflow.task_service import freeze_task, load_task_record, transition_task_record
 
 
 def _prepare_gate(
@@ -198,6 +198,105 @@ def test_review_gate_requires_code_approval_and_then_passes(
     )
     assert main(["gate", "TASK-0001", "--format", "json"]) == 0
     assert json.loads(capsys.readouterr().out.splitlines()[-1])["passed"] is True
+
+
+def test_gate_binds_co_matched_ask_to_its_decision_unit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An answer event for a pure REVIEW unit cannot satisfy the co-matched unit."""
+
+    def prepare(answered_unit: str, directory: str) -> Path:
+        repository = create_repository(tmp_path / directory)
+        start(repository, monkeypatch)
+        task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+        task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+        assert isinstance(task, dict)
+        co_matched = _auto_unit("TASK-0001")
+        co_matched.update({"business_direction_count": 2, "impact_categories": ["ci"]})
+        pure_review = _auto_unit("TASK-0001")
+        pure_review.update({"decision_unit_id": "DU-002", "impact_categories": ["ci"]})
+        task["decision_units"] = [co_matched, pure_review]
+        atomic_write_yaml(task_path, task)
+        assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+        classification = read_task_json(
+            repository, "TASK-0001", "classification.json", contract_name="classification"
+        )
+        assert isinstance(classification, dict)
+        assert {entry["decision_unit_id"] for entry in classification["classifications"]} == {
+            "DU-001",
+            "DU-002",
+        }
+        assert classification["classifications"][0]["route"] == "REVIEW"
+        assert any(
+            rule["route"] == "ASK" for rule in classification["classifications"][0]["matched_rules"]
+        )
+        freeze_task(repository, "TASK-0001", actor="specifier", allow_waiting_for_ask=True)
+        frozen = load_task_record(repository, "TASK-0001").task
+        transition_task_record(
+            repository,
+            "TASK-0001",
+            target_state="WAITING_FOR_SPEC_REVIEW",
+            event_type="ask_answered",
+            actor="fixture",
+            payload={
+                "options": {"decision_unit_id": answered_unit},
+                "specification_sha256": frozen["frozen_spec_sha256"],
+                "policy_sha256": classification["policy_sha256"],
+                "classification_input_sha256": classification["classification_input_sha256"],
+            },
+            satisfied_preconditions={"answer_recorded", "spec_frozen"},
+        )
+        return repository
+
+    prepare("DU-002", "wrong-answer")
+    capsys.readouterr()
+    assert main(["gate", "TASK-0001", "--format", "json"]) == 2
+    wrong_reasons = json.loads(capsys.readouterr().out)["reason_codes"]
+    assert "GATE_CLASSIFICATION_STALE" not in wrong_reasons
+    assert "GATE_ASK_UNANSWERED" in wrong_reasons
+
+    prepare("DU-001", "correct-answer")
+    capsys.readouterr()
+    assert main(["gate", "TASK-0001", "--format", "json"]) == 2
+    correct_reasons = json.loads(capsys.readouterr().out)["reason_codes"]
+    assert "GATE_CLASSIFICATION_STALE" not in correct_reasons
+    assert "GATE_ASK_UNANSWERED" not in correct_reasons
+
+
+@pytest.mark.parametrize("malformed", [[], None])
+def test_gate_rejects_malformed_persisted_matched_rules_without_writes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    malformed: object,
+) -> None:
+    repository = _prepare_gate(tmp_path, monkeypatch, review=True)
+    path = resolve_task_path(repository, "TASK-0001", "classification.json")
+    classification = read_task_json(repository, "TASK-0001", "classification.json")
+    assert isinstance(classification, dict)
+    entry = classification["classifications"][0]
+    if malformed is None:
+        entry.pop("matched_rules")
+    else:
+        entry["matched_rules"] = malformed
+    atomic_write_json(path, classification)
+    paths = [
+        resolve_task_path(repository, "TASK-0001", name)
+        for name in (
+            "task.yaml",
+            "events.jsonl",
+            "approvals.json",
+            "evidence.json",
+            "classification.json",
+        )
+    ]
+    before = {item: item.read_bytes() for item in paths}
+
+    capsys.readouterr()
+    assert main(["gate", "TASK-0001", "--format", "json"]) == 1
+    assert before == {item: item.read_bytes() for item in paths}
 
 
 def test_ci_gate_uses_external_attested_evidence_but_local_code_binding(
