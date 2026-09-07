@@ -1,0 +1,56 @@
+{
+  "base_commit": "924ac289ee42973fe85d299b6a31df08edac05fe",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "3b4ad804a167a468619820bd4e24e19ed145635ba75d9a7eead21e1c140c728d",
+  "classifications": [
+    {
+      "classified_at": "2026-09-07T04:35:15Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.",
+      "explanations": [
+        "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.",
+          "predicate_explanations": [
+            "scope.clear: equals -> true",
+            "impact.level: equals -> true",
+            "reversibility: in -> true",
+            "verification.automatic: equals -> true",
+            "external_side_effects: is_empty -> true"
+          ],
+          "priority": 100,
+          "route": "AUTO",
+          "rule_id": "ROUTE-AUTO-EXPLICIT-GUARDS"
+        }
+      ],
+      "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+      "policy_version": "2.2.0",
+      "route": "AUTO",
+      "rule_id": "ROUTE-AUTO-EXPLICIT-GUARDS",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-09-07T04:35:15Z",
+  "effective_route": "AUTO",
+  "effective_verification_level": "V1",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "policy_version": "2.2.0",
+  "schema_version": "1.0",
+  "subject_commit": "924ac289ee42973fe85d299b6a31df08edac05fe",
+  "task_id": "TASK-0044"
+}

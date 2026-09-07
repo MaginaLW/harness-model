@@ -186,6 +186,9 @@ def _approval_status(
     task_id: str,
     current: dict[str, object],
     evidence: dict[str, Any] | None,
+    *,
+    classification: dict[str, Any] | None,
+    state: str,
 ) -> str:
     path = resolve_task_path(repository_root, task_id, "approvals.json")
     if not path.is_file():
@@ -211,15 +214,37 @@ def _approval_status(
     relevant = [item for item in value if item.get("approval_type") != "action"]
     if not relevant:
         return "not_applicable"
-    reports = [
-        evaluate_freshness(
+    if classification is None:
+        return "stale"
+    review_ids = {
+        entry["decision_unit_id"]
+        for entry in classification["classifications"]
+        if entry["route"] == "REVIEW"
+    }
+    if not review_ids:
+        return "not_applicable"
+    required_types = {"spec"}
+    if state in {"WAITING_FOR_FINAL_REVIEW", "APPROVED_FOR_MERGE", "MERGED"}:
+        required_types.add("code")
+    current_approvals: dict[str, set[str]] = {kind: set() for kind in required_types}
+    for item in relevant:
+        kind = item["approval_type"]
+        if kind not in required_types:
+            continue
+        report = evaluate_freshness(
             "spec_approval" if item.get("approval_type") == "spec" else "code_approval",
             item,
             approval_facts,
         )
-        for item in relevant
-    ]
-    return "current" if all(report.status == "fresh" for report in reports) else "stale"
+        if report.status == "fresh":
+            current_approvals[kind].add(item["decision_unit_id"])
+    # History is append-only. Like Gate, require fresh coverage per unit/type,
+    # not freshness of records superseded by a later valid approval.
+    return (
+        "current"
+        if all(review_ids.issubset(covered) for covered in current_approvals.values())
+        else "stale"
+    )
 
 
 def _evidence_status(value: dict[str, Any] | None, current: dict[str, object]) -> str:
@@ -283,7 +308,14 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
     )
     evidence_value, evidence_invalid = _read_evidence(repository_root, task_id)
     evidence_status = "stale" if evidence_invalid else _evidence_status(evidence_value, current)
-    approval_status = _approval_status(repository_root, task_id, current, evidence_value)
+    approval_status = _approval_status(
+        repository_root,
+        task_id,
+        current,
+        evidence_value,
+        classification=classification,
+        state=state,
+    )
     merge_readiness = _merge_readiness(
         state=state,
         route=route,
