@@ -11,7 +11,7 @@ allowed_scope:
 base_commit: 47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2
 branch: codex/ask-obligation-repair
 created_at: '2026-09-07T13:44:03Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -89,6 +89,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-07T13:46:45Z'
 subject_commit: 41332307250675d6e5802d4a3cf2b8e086613184
 task_id: TASK-0046
-updated_at: '2026-09-07T14:45:14Z'
+updated_at: '2026-09-07T14:52:35Z'
 worktree_dirty: false
 worktree_dirty_paths: []
