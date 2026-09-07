@@ -1,0 +1,42 @@
+{
+  "context_sha256": "c75b05c590c05e8e8773806452bedf8e06fbf1e42f18a4eeecc51aced0c82b4c",
+  "findings": [
+    {
+      "evidence_refs": [
+        "spec.md",
+        "design-review-context.json"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 25,
+        "path": ".ai/tasks/TASK-0047/task.yaml"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "将测试和夹具目录 glob 收窄为精确必要文件"
+    },
+    {
+      "evidence_refs": [
+        "spec.md",
+        "task.yaml"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 69,
+        "path": ".ai/tasks/TASK-0047/spec.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "明确不可分割回归与独立安全工作的隔离及所需所有者例外"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-09-07T15:26:23Z",
+  "review_id": "REV-0078",
+  "review_stage": "design",
+  "reviewer": "audit-interventions",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "独立设计审查认可风险输入与默认拒绝机制，但当前测试目录 glob 过宽，且不可分割兼容测试与独立 task-free 的表述不一致；申请规格批准前必须收窄并明确隔离决定。",
+  "task_id": "TASK-0047"
+}

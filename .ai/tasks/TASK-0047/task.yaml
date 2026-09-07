@@ -1,0 +1,141 @@
+schema_version: '1.0'
+task_id: TASK-0047
+goal: 补齐新分类的显式风险输入并收敛本地动作权限为默认拒绝，保留历史证据与真实外部授权边界
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: codex/risk-input-followups
+base_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
+subject_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope:
+- .ai/policy/hard-rules.yaml
+- .ai/policy/routing.yaml
+- .ai/policy/permissions.yaml
+- .ai/policy/verification-levels.yaml
+- .ai/schemas/decision-unit.schema.json
+- .ai/schemas/policy.schema.json
+- .ai/templates/task.yaml
+- src/aiflow/decision_units.py
+- src/aiflow/classification_service.py
+- src/aiflow/policy.py
+- src/aiflow/task_service.py
+- tools/hooks/pre_command.py
+- tests/unit/**
+- tests/integration/**
+- tests/fixtures/**
+- tests/acceptance/test_phase_02_self_hosting.py
+- docs/operations/hooks.md
+- docs/operations/low-intervention.md
+- docs/operations/recovery.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: WAITING_FOR_SPEC_REVIEW
+created_at: '2026-09-07T15:17:16Z'
+updated_at: '2026-09-07T15:27:20Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0047
+  decision_unit_id: DU-001
+  goal: 新分类必须有明确风险字段，部署和生产数据删除采用受控动作类型且不丢失旧正向风险
+  inputs:
+  - 当前 impact_categories 可缺失，生产删除与部署只匹配 planned_actions 的精确字符串。
+  - 历史任务必须仍能读取，风险信息不完整不得自动变成人工审核请求。
+  planned_actions:
+  - 兼容扩展 controlled_actions 字段并在新分类写入前校验完整风险事实。
+  - 一次更新为 Policy 2.3.0，保留旧正向动作匹配、质量检查和所有阈值。
+  - 按既有升级流程处理本任务的 Policy 和分类输入绑定变化。
+  impact_scope:
+  - .ai/schemas/decision-unit.schema.json
+  - .ai/policy/hard-rules.yaml
+  - .ai/policy/routing.yaml
+  - .ai/policy/verification-levels.yaml
+  - .ai/templates/task.yaml
+  - src/aiflow/decision_units.py
+  - src/aiflow/classification_service.py
+  - src/aiflow/task_service.py
+  reversibility: reversible
+  verification_methods:
+  - 验证缺项零写、显式空数组保持原 AUTO 条件、受控和旧动作风险命中、历史只读与新鲜度。
+  - 按实际 CLI 判定运行完整验证和 85 percent 总覆盖率、90 percent diff coverage。
+  - 安全配套测试和文档作为独立 task-free 阶段；最终集成范围不用于降低治理分级。
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: medium
+  impact_categories: []
+  protections:
+    verified_backup: false
+    dry_run: false
+  verification:
+    automatic: true
+    tools_missing: false
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: true
+    code_modified: true
+    interaction_scope: cross_module
+    regression_risk: true
+    error_detectability: high
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
+- schema_version: '1.0'
+  task_id: TASK-0047
+  decision_unit_id: DU-002
+  goal: 未知动作默认拒绝，只有 Policy 明列的 read 类别允许通过本地检查，不将通用批准接成执行放行
+  inputs:
+  - evaluate_action_permission 的唯一生产消费者是 pre_command wrapper，未知类别当前默认允许。
+  - wrapper 不执行命令、不消费通用批准；可信外部执行器尚不存在，targeted mutation 有独立消费路径。
+  planned_actions:
+  - 在 Policy 中明列 read 允许集合并默认拒绝未识别动作，保持六项高风险拒绝规则。
+  - 未知动作在 Hook 解析任务或追加观察前直接拒绝，不能由本地批准改变结果。
+  - 完成受控本地边界和可信外部执行器要求的设计，不创建执行器或修改远端配置。
+  impact_scope:
+  - .ai/policy/permissions.yaml
+  - .ai/schemas/policy.schema.json
+  - src/aiflow/policy.py
+  - tools/hooks/pre_command.py
+  reversibility: reversible
+  verification_methods:
+  - 验证 read 显式允许、未知和六项高风险拒绝、畸形输入、无任务歧义和批准零消费。
+  - 验证既有 mutation 执行与消费保护未改变，完成独立设计和实施审查。
+  - 安全配套测试和文档独立 task-free 提交，不创建安全 DU 稀释当前治理风险。
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: medium
+  impact_categories:
+  - authentication
+  protections:
+    verified_backup: false
+    dry_run: false
+  verification:
+    automatic: true
+    tools_missing: false
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: true
+    code_modified: true
+    interaction_scope: cross_module
+    regression_risk: true
+    error_detectability: high
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
+frozen_spec_sha256: 75bfdb8de1220369efd179e04365e4df030ceed31a17b9405b59bc299891b2f9
+spec_frozen_at: '2026-09-07T15:23:14Z'

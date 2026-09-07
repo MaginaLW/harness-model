@@ -1,0 +1,91 @@
+{
+  "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "a80c67eb70e7f29057ef09d8e11ceb41f70f870481c4a53a4d0cd073a69446ef",
+  "classifications": [
+    {
+      "classified_at": "2026-09-07T15:23:14Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
+      "explanations": [
+        "Unmatched work remains REVIEW; there is no implicit AUTO fallback."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
+          "predicate_explanations": [],
+          "priority": 0,
+          "route": "REVIEW",
+          "rule_id": "ROUTE-DEFAULT-REVIEW"
+        }
+      ],
+      "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+      "policy_version": "2.2.0",
+      "route": "REVIEW",
+      "rule_id": "ROUTE-DEFAULT-REVIEW",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Cross-module interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-CROSS-MODULE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    },
+    {
+      "classified_at": "2026-09-07T15:23:14Z",
+      "decision_unit_id": "DU-002",
+      "explanation": "Secret or authentication changes require review.",
+      "explanations": [
+        "Secret or authentication changes require review."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Secret or authentication changes require review.",
+          "predicate_explanations": [
+            "impact_categories: contains_any -> true"
+          ],
+          "priority": 790,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-SECRETS-AUTH"
+        }
+      ],
+      "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+      "policy_version": "2.2.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-SECRETS-AUTH",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Cross-module interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-CROSS-MODULE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-09-07T15:23:14Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "policy_version": "2.2.0",
+  "schema_version": "1.0",
+  "subject_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+  "task_id": "TASK-0047"
+}
