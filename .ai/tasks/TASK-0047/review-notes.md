@@ -79,3 +79,31 @@ clean-clone 测试与 Quickstart 的必要配套例外。CLI 在确认唯一 Mis
 缺字段的零写错误与 BLOCK 的区别及 Policy 2.3.0 版本。源码、Policy、测试执行机制、
 既有断言和质量阈值均未修改。随后保存提交态再运行 clean-clone 和正式完整 V1；
 旧失败 evidence 与 run 继续保留，不把待运行验证提前写成成功。
+
+## 当前完整验证与剩余决定
+
+两文件修复提交 `c0b4cb62eb8754d9364433df6ba9948ffcf43fc2` 的提交态 clean-clone
+4 项通过，随后正式 V1 两轮完整测试各 1721 passed，总覆盖率 88.14%、diff 100%。
+10 项 required check 全通过，无 skipped/超时；详细证据和旧失败保留情况见
+implementation-diagnostics.md。验证期间没有改变实现或 Policy。
+
+当前 spec 仍为 d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a，
+无需重新请求。CLI 为 WAITING_FOR_FINAL_REVIEW，唯一 Missing 为 code_approval。
+Gate 尚不通过，仅因代码接受缺失及依赖它的 APPROVED_FOR_MERGE 状态尚未达到；
+不能把聚合 approvals stale 文案理解为现行 spec 批准失效，也不能提前声称 merge-ready。
+
+本任务截至此处实际有 3 次人的 spec 批准输入，对应 6 条 DU 绑定记录，没有 code/action
+批准。配套盘点遗漏及其追加范围决定都如实留痕；既有机械操作由 Agent 完成。
+没有真实人工分钟或成熟对照数据，不能把本轮测试通过或批准条数变化写成已证实减负。
+
+## 最终独立交叉实施审查
+
+Dalton 与 Galileo 分别核对实际实现和当前实施上下文后均给出 APPROVE、无 findings。
+Dalton 独立覆盖 Galileo 原实现的 DU-001；Galileo 独立覆盖 Dalton 原实现的 DU-002、
+共用 begin，以及主 Agent 的三测试和两文件配套。各自排除本人实现，联合覆盖全部实现。
+两位均核对最终 subject、spec、Policy、分类及 canonical/raw evidence；没有用设计
+审查或前轮失败证据冒充当前实施审核。CLI 已真实记录联合结论为 REV-0082。
+
+当前 context 为 `00f66125b495a61cb2a056b90cfd881e6a18df8e11bbb1796858761369b5ef1e`。
+review-package.md 已追加完整八节当前代码审核包，保留初始历史文字，不重写旧决定。
+接下来只请求人的当前 code 批准；取得后核对本地 Gate，仍不执行未授权外部动作。

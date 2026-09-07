@@ -39,7 +39,7 @@ allowed_scope:
 base_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
 branch: codex/risk-input-followups
 created_at: '2026-09-07T15:17:16Z'
-current_state: IMPLEMENTING
+current_state: WAITING_FOR_FINAL_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -154,8 +154,8 @@ goal: 补齐新分类的显式风险输入并收敛本地动作权限为默认�
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-09-07T16:43:57Z'
-subject_commit: 1c286be3951b9083742a33fc2d111ae986d38407
+subject_commit: c0b4cb62eb8754d9364433df6ba9948ffcf43fc2
 task_id: TASK-0047
-updated_at: '2026-09-07T16:52:54Z'
+updated_at: '2026-09-07T17:16:50Z'
 worktree_dirty: false
 worktree_dirty_paths: []

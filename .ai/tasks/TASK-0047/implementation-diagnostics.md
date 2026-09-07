@@ -93,3 +93,42 @@ Policy `2.3.0` SHA-256：
 
 失败后 CLI 按真实 `spec_changed` 进入 ESCALATED，准备仅两文件的范围修订。
 既有批准和失败记录保留；规格修订获批前不继续实施，不能把它伪称独立 task-free 修复。
+
+## 两文件修复后的正式完整 V1：通过
+
+所有者已真实批准两文件配套修订，CLI 记录该决定并 begin。实施只补 E2E 样例的一条
+显式风险事实和 Quickstart 的对应说明，提交为
+`c0b4cb62eb8754d9364433df6ba9948ffcf43fc2`；源码、Policy 和全部检查阈值未再改变。
+提交态 `pytest tests/e2e/test_clean_checkout.py -q` 为 **4 passed，22.91 秒**；
+Ruff check/format 与 whitespace 通过。首次 format 检查发现 patch 引起混合换行，
+已由项目 formatter 修正并复查通过，未改测试机制或断言。
+
+CLI sync 后于 `2026-09-07T16:54:31Z` 启动正式完整 V1，`17:13:36Z` 生成 **passed**
+证据，进入 WAITING_FOR_FINAL_REVIEW。实际结果：
+
+- 10 项 required check 全部 passed，退出码均为 0，无超时。
+- unit tests：1115 passed，23.88 秒；普通全量：1721 passed，486.71 秒；
+  覆盖率全量：1721 passed，631.59 秒。两轮均无 failed 或 skipped。
+- 总覆盖率：行 6559/7226、分支 1964/2444，合计 8523/9670，**88.14%**。
+- diff coverage：36/36 个可执行差异行，**100%**。独立核对 85% / 90% 门槛均满足。
+- contract、scope、Ruff check/format、smoke、mypy（41 个源码文件）均通过。
+  whitespace 对任务 base 到最终 subject 的 diff 另行检查通过。
+- 历史 TASK-0046 的 validate/status 仍可读，状态保持 MERGED，tracked 文件检查前后
+  SHA-256 均不变；本任务自 base 起只改变自己的账本，不重写旧任务。
+
+本次产物位于 `logs/run-20260907T165431292378Z/`，原失败 run 没有重写：
+
+- 当前 evidence.json 与新 run 副本的文件 SHA-256 均为
+  `612fee183d26bae77a5d78ce92c0f286c4691bee206388adc0ff854fdacf886a`。
+- 新 coverage.xml 的文件 SHA-256：
+  `e15aa20ade7e028221919dc7c0cd89592116d93288b8fc47d1d66e623dfebc03`。
+- 前次失败 run/evidence.json 仍为
+  `cf78889a20b8d06f681db38f0909f0f7b37df504b6c46ddf1c43a475b49162b9`。
+- 当前实施上下文的 canonical evidence digest 为
+  `af344d6eefc22c7c9cba8f6776658c27dedff38718efa83c91a2fbd3aa378783`，与原始文件
+  SHA-256 使用不同序列化，不混为同一种 hash。
+
+这些证据证明当前提交的本地验证通过，不证明远端 CI、部署或人工成本改善。当前
+status 仅 Missing code_approval；只读 Gate 的 GATE_STATE_INVALID 与
+GATE_CODE_APPROVAL_STALE 来自尚未代码批准及其状态条件，并非规格或证据失效。
+不按通用 Gate recovery 提示无理由重跑 verify，更不重复请求已有效的规格批准。
