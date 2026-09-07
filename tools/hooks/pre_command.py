@@ -49,7 +49,7 @@ def check_pre_command(
         raise ContractError("Action target is required", code="HOOK_TARGET_INVALID")
     policy = load_policy_bundle(root)
     permission = evaluate_action_permission(policy, action)
-    if not permission.allowed_automatically:
+    if not permission.allowed_automatically and permission.rule_id != "PERMISSION-DEFAULT-DENY":
         resolved = _resolve_task_id(root, task_id)
         record = read_task_record_strict(root, resolved)
         observation = parse_observation(

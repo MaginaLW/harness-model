@@ -55,6 +55,7 @@ def test_gauntlet_uses_cli_error_exit(monkeypatch: pytest.MonkeyPatch) -> None:
         ("secret_export", False),
         ("paid_external_call", False),
         ("read", True),
+        ("notify", False),
     ],
 )
 def test_pre_command_uses_core_permission_policy(
@@ -100,6 +101,77 @@ def test_pre_command_allowed_action_has_no_task_or_observation_side_effect(
 
     assert passed is True
     assert reasons == ()
+
+
+def test_pre_command_unknown_action_rejects_without_task_or_observation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        pre_command,
+        "_resolve_task_id",
+        lambda *_args: pytest.fail("unknown action must not resolve a task"),
+    )
+    monkeypatch.setattr(
+        pre_command,
+        "read_task_record_strict",
+        lambda *_args: pytest.fail("unknown action must not read a task"),
+    )
+    monkeypatch.setattr(
+        pre_command,
+        "apply_observation",
+        lambda *_args, **_kwargs: pytest.fail("unknown action must not apply an observation"),
+    )
+
+    passed, reasons = pre_command.check_pre_command(ROOT, " Notify ", "opaque target", "TASK-0001")
+
+    assert passed is False
+    assert reasons == ("ACTION_PERMISSION_DENIED",)
+
+
+def test_pre_command_unknown_action_main_uses_refusal_exit_without_task_access(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        pre_command,
+        "_resolve_task_id",
+        lambda *_args: pytest.fail("unknown action must not resolve a task"),
+    )
+    monkeypatch.setattr(
+        pre_command,
+        "read_task_record_strict",
+        lambda *_args: pytest.fail("unknown action must not read a task"),
+    )
+    monkeypatch.setattr(
+        pre_command,
+        "apply_observation",
+        lambda *_args, **_kwargs: pytest.fail("unknown action must not apply an observation"),
+    )
+    monkeypatch.chdir(ROOT)
+
+    assert pre_command.main(["--action", "notify", "--target", "opaque target"]) == 2
+
+
+def test_pre_command_empty_action_is_policy_error_before_task_access(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        pre_command,
+        "_resolve_task_id",
+        lambda *_args: pytest.fail("empty action must not resolve a task"),
+    )
+    monkeypatch.setattr(
+        pre_command,
+        "read_task_record_strict",
+        lambda *_args: pytest.fail("empty action must not read a task"),
+    )
+    monkeypatch.setattr(
+        pre_command,
+        "apply_observation",
+        lambda *_args, **_kwargs: pytest.fail("empty action must not apply an observation"),
+    )
+    monkeypatch.chdir(ROOT)
+
+    assert pre_command.main(["--action", "   ", "--target", "opaque target"]) == 1
 
 
 def test_pre_command_rejects_empty_target_before_policy_or_task(

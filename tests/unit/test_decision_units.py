@@ -76,3 +76,29 @@ def test_parse_decision_units_supports_narrowed_permission_vocabulary() -> None:
     with pytest.raises(PolicyError) as raised:
         parse_decision_units(_task(unit), declared_permissions=frozenset())
     assert raised.value.code == "DECISION_UNIT_PERMISSION_UNDECLARED"
+
+
+@pytest.mark.parametrize(
+    "controlled_actions",
+    [[], ["deploy"], ["production_data_delete", "deploy"]],
+)
+def test_parse_decision_units_accepts_optional_controlled_actions(
+    controlled_actions: list[str],
+) -> None:
+    unit = _unit()
+    unit["controlled_actions"] = controlled_actions
+    assert parse_decision_units(_task(unit))[0]["controlled_actions"] == controlled_actions
+
+
+@pytest.mark.parametrize(
+    "controlled_actions",
+    [["deploy", "deploy"], ["unknown"], "deploy"],
+)
+def test_parse_decision_units_rejects_invalid_controlled_actions(
+    controlled_actions: object,
+) -> None:
+    unit = _unit()
+    unit["controlled_actions"] = controlled_actions
+    with pytest.raises(PolicyError) as raised:
+        parse_decision_units(_task(unit))
+    assert raised.value.code == "DECISION_UNIT_SCHEMA_INVALID"

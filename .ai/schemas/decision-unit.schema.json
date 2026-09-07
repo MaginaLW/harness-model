@@ -80,6 +80,11 @@
                 ]
             }
         },
+        "controlled_actions": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"enum": ["production_data_delete", "deploy"]}
+        },
         "business_direction_count": {"type": "integer", "minimum": 1},
         "change_characteristics": {
             "type": "object",

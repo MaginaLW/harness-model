@@ -7,6 +7,7 @@ inputs:
   - Proposed required-check behavior
 planned_actions:
   - modify_ci_cd
+controlled_actions: []
 impact_scope:
   - .github/workflows/ai-quality-gate.yml
 reversibility: reversible

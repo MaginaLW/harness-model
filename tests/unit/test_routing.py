@@ -29,6 +29,7 @@ def _facts(*, automatic: bool, clear: bool, impact: str, directions: int) -> dic
         "scope": {"clear": clear},
         "impact": {"level": impact},
         "planned_actions": ["change"],
+        "controlled_actions": [],
         "impact_categories": [],
         "business_direction_count": directions,
     }
@@ -58,6 +59,7 @@ def test_all_hits_are_stable_and_effective_route_is_safety_ordered() -> None:
         "scope": {"clear": False},
         "impact": {"level": "medium"},
         "planned_actions": ["deploy"],
+        "controlled_actions": [],
         "impact_categories": ["ci"],
         "business_direction_count": 2,
     }
@@ -180,3 +182,79 @@ def test_ask_obligation_helper_defends_its_internal_input_boundary() -> None:
     assert entry_requires_ask(
         {"route": "REVIEW", "matched_rules": ["not-a-mapping", {"route": "ASK"}]}
     )
+
+
+@pytest.mark.parametrize(
+    ("action", "rule_id"),
+    [
+        ("production_data_delete", "HARD-REVIEW-PRODUCTION-DATA-DELETE"),
+        ("deploy", "HARD-REVIEW-DEPLOYMENT"),
+    ],
+)
+@pytest.mark.parametrize("field", ["controlled_actions", "planned_actions"])
+def test_explicit_and_legacy_action_risks_remain_review(
+    action: str, rule_id: str, field: str
+) -> None:
+    facts = _facts(automatic=True, clear=True, impact="low", directions=1)
+    facts[field] = [action]
+
+    decision = route_decision_unit(_unit("DU-001", facts), _bundle())
+
+    assert decision.route == "REVIEW"
+    assert rule_id in decision.matched_rule_ids
+
+
+def test_multiple_controlled_actions_keep_each_review_obligation() -> None:
+    facts = _facts(automatic=True, clear=True, impact="low", directions=1)
+    facts["controlled_actions"] = ["deploy", "production_data_delete"]
+
+    decision = route_decision_unit(_unit("DU-001", facts), _bundle())
+
+    assert decision.route == "REVIEW"
+    assert {
+        "HARD-REVIEW-DEPLOYMENT",
+        "HARD-REVIEW-PRODUCTION-DATA-DELETE",
+    } <= set(decision.matched_rule_ids)
+
+
+@pytest.mark.parametrize("field", ["impact_categories", "controlled_actions"])
+def test_incomplete_risk_facts_block_at_the_low_level_router(field: str) -> None:
+    facts = _facts(automatic=True, clear=True, impact="low", directions=1)
+    del facts[field]
+
+    decision = route_decision_unit(_unit("DU-001", facts), _bundle())
+
+    assert decision.route == "BLOCK"
+    assert decision.matched_rule_ids == ("ROUTING-PREDICATE_FIELD_MISSING",)
+
+
+@pytest.mark.parametrize("category", ["secrets", "authentication", "ci", "cd"])
+def test_each_declared_sensitive_impact_retains_review(category: str) -> None:
+    facts = _facts(automatic=True, clear=True, impact="low", directions=1)
+    facts["impact_categories"] = [category]
+
+    decision = route_decision_unit(_unit("DU-001", facts), _bundle())
+
+    assert decision.route == "REVIEW"
+
+
+def test_explicit_empty_risks_do_not_guess_actions_from_prose() -> None:
+    facts = _facts(automatic=True, clear=True, impact="low", directions=1)
+    facts["planned_actions"] = ["describe deploy production in a document"]
+
+    decision = route_decision_unit(_unit("DU-001", facts), _bundle())
+
+    assert decision.route == "AUTO"
+    assert not any(rule.startswith("HARD-REVIEW-") for rule in decision.matched_rule_ids)
+
+
+def test_risk_routing_preserves_each_decision_unit() -> None:
+    safe = _facts(automatic=True, clear=True, impact="low", directions=1)
+    risky = {**safe, "controlled_actions": ["deploy"]}
+
+    result = route_task(
+        {"decision_units": [_unit("DU-001", safe), _unit("DU-002", risky)]}, _bundle()
+    )
+
+    assert result.route == "REVIEW"
+    assert [unit.route for unit in result.unit_decisions] == ["AUTO", "REVIEW"]

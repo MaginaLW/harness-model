@@ -178,6 +178,8 @@ def policy_bundle_errors(bundle: PolicyBundle) -> list[str]:
     forbidden = set(bundle["permissions.yaml"].get("forbidden_automatic_actions", []))
     if forbidden != EXPECTED_FORBIDDEN_ACTIONS:
         errors.append("permissions: automatic forbidden action set is incomplete")
+    if bundle["permissions.yaml"].get("allowed_automatic_actions") != ["read"]:
+        errors.append("permissions: automatic allowlist must be the explicit read singleton")
 
     return sorted(set(errors))
 
@@ -197,6 +199,25 @@ def test_policy_files_parse_and_satisfy_all_invariants() -> None:
     assert policy_bundle_errors(bundle) == []
     assert all(isinstance(entry["priority"], int) for entry in _policy_entries(bundle))
     assert sorted((entry["priority"], entry["id"]) for entry in _policy_entries(bundle))
+
+
+def test_controlled_action_schema_vocabulary_matches_hard_rule_conditions() -> None:
+    schema = json.loads(
+        (REPOSITORY_ROOT / ".ai" / "schemas" / "decision-unit.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    schema_actions = set(schema["properties"]["controlled_actions"]["items"]["enum"])
+    hard_rules = load_policy_bundle()["hard-rules.yaml"]["rules"]
+    rule_actions = {
+        action
+        for rule in hard_rules
+        for condition in rule["conditions"]
+        if condition["field"] == "controlled_actions"
+        for action in condition["value"]
+    }
+
+    assert rule_actions == schema_actions
 
 
 def test_unknown_predicate_is_rejected() -> None:

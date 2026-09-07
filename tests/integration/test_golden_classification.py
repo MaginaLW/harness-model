@@ -16,6 +16,7 @@ from aiflow.classification_service import _stable_input, classify_task
 from aiflow.cli import main
 from aiflow.decision_units import parse_decision_units
 from aiflow.policy import load_policy_bundle
+from aiflow.status_service import summarize_task
 from aiflow.storage import (
     atomic_write_yaml,
     read_task_json,
@@ -167,6 +168,56 @@ def test_auto_facts_are_monotonic_under_risk_additions(
     restored = _scenario_unit("auto-doc-edit")
     classification, state = _classify_fresh(tmp_path / "restored", monkeypatch, restored)
     assert (classification["effective_route"], state) == ("AUTO", "READY_TO_IMPLEMENT")
+
+
+@pytest.mark.parametrize(
+    "actions", [["deploy"], ["production_data_delete"], ["deploy", "production_data_delete"]]
+)
+def test_controlled_actions_route_through_the_public_classification(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, actions: list[str]
+) -> None:
+    unit = _scenario_unit("auto-doc-edit")
+    unit["controlled_actions"] = actions
+
+    classification, state = _classify_fresh(tmp_path / "controlled", monkeypatch, unit)
+
+    assert (classification["effective_route"], state) == ("REVIEW", "WAITING_FOR_SPEC_REVIEW")
+    assert (
+        classification["effective_verification_level"]
+        == _expected("auto-doc-edit")["verification_level"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("controlled_actions", ["deploy"]), ("impact_categories", ["ci"])],
+)
+def test_risk_fact_changes_invalidate_existing_classification_without_status_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, field: str, value: list[str]
+) -> None:
+    repository = _repository(tmp_path / "freshness")
+    _prepare_task(repository, monkeypatch, _scenario_unit("auto-doc-edit"))
+    initial = classify_task(repository, TASK_ID, actor="golden")
+    assert summarize_task(repository, TASK_ID).classification == "fresh"
+
+    task = load_task_record(repository, TASK_ID).task
+    task["decision_units"][0][field] = value
+    assert _stable_input(task, parse_decision_units(task)) != initial["classification_input_sha256"]
+    atomic_write_yaml(resolve_task_path(repository, TASK_ID, "task.yaml"), task)
+    directory = repository / ".ai" / "tasks" / TASK_ID
+    before = {
+        path.relative_to(directory): path.read_bytes()
+        for path in directory.rglob("*")
+        if path.is_file()
+    }
+
+    assert summarize_task(repository, TASK_ID).classification == "stale"
+    assert main(["validate", TASK_ID]) == 0
+    assert {
+        path.relative_to(directory): path.read_bytes()
+        for path in directory.rglob("*")
+        if path.is_file()
+    } == before
 
 
 def test_auto_is_restored_after_bound_authorized_block_resolution(

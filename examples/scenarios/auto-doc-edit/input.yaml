@@ -6,6 +6,7 @@ inputs:
   - Existing Markdown documentation
 planned_actions:
   - edit_documentation
+controlled_actions: []
 impact_scope:
   - docs/guide.md
 reversibility: reversible

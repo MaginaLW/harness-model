@@ -74,6 +74,29 @@
   不扩大以上例外到无关测试/文档，也不改写历史 task、证据或历史 Policy 绑定断言。
   若所有者不接受此有界例外，停止在设计门并调整交付拆分，不能自行开始混合实现。
 
+### 实现盘点后的有界规格修订
+
+初始规格及其同任务例外已经所有者批准并执行；四份最终 Policy 现已一次性升级为
+`2.3.0`，本任务已按 `policy_changed` 升级。以上关于“当前按 2.2.0 审核”的描述属于
+初始阶段事实，不能代替本次实际 2.3.0 绑定及修订规格的批准。
+
+全量输入链检查发现原精确配套清单遗漏三份测试文件。本修订**请求将同任务必要配套
+例外仅扩展到以下三个文件**；在本修订获批前只列入拟议范围，不修改这些文件：
+
+- `tests/integration/test_begin_close_commands.py`：在直接分类草稿的用例内补明确风险
+  字段，保留原有真实 BLOCK 与持久化/no-op 断言，不把 shared start helper 改为默认无风险。
+- `tests/integration/test_escalate_command.py`：仅在两项实际重分类/中断恢复用例中补
+  case-local 风险事实，使测试仍检验 bound resolution、错误证据拒绝及恢复，而非止于缺字段。
+- `tests/integration/test_auto_preflight.py`：分类新鲜度现在在共用启动前置检查更早拒绝；
+  更新对应过期分类的诊断断言并保留退出失败与零写保护，不删除 AUTO preflight 的其他检查。
+
+`src/aiflow/task_service.py` 原已在允许范围；其中新增共用分类新鲜度检查，落实既有
+验收条件“旧分类不能在当前 Policy 下 begin”，不修改 spec/code/action 批准绑定。
+REVIEW 路线的风险事实变化拒绝已有新增回归，AUTO 的拒绝顺序变化需要上述断言同步。
+
+不扩大源码、示例、三份边界说明或外部动作范围；不降低路由/验证等级，不跳过、标记预期
+失败或伪造结果。诊断与最终验证明确分开，详见 implementation-diagnostics.md。
+
 ## 非目标
 
 - 不重开 TASK-0028、7 个历史 BLOCKED 任务、被否决的 B0–B2、已解释的 B3 或暂缓的 B4。

@@ -17,6 +17,9 @@ allowed_scope:
 - tests/integration/test_classify_command.py
 - tests/integration/test_answer_command.py
 - tests/integration/test_start_command.py
+- tests/integration/test_begin_close_commands.py
+- tests/integration/test_escalate_command.py
+- tests/integration/test_auto_preflight.py
 - tests/integration/test_governance_paths.py
 - tests/integration/test_observation_escalation.py
 - tests/integration/test_observation_parity.py
@@ -34,7 +37,7 @@ allowed_scope:
 base_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
 branch: codex/risk-input-followups
 created_at: '2026-09-07T15:17:16Z'
-current_state: IMPLEMENTING
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -50,6 +53,7 @@ decision_units:
   impact:
     level: medium
   impact_categories: []
+  controlled_actions: []
   impact_scope:
   - .ai/schemas/decision-unit.schema.json
   - .ai/policy/hard-rules.yaml
@@ -102,6 +106,7 @@ decision_units:
     level: medium
   impact_categories:
   - authentication
+  controlled_actions: []
   impact_scope:
   - .ai/policy/permissions.yaml
   - .ai/schemas/policy.schema.json
@@ -149,6 +154,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-07T15:32:54Z'
 subject_commit: 9f367af9d8fc3d5b28c3f171da455e79c18afc5a
 task_id: TASK-0047
-updated_at: '2026-09-07T15:38:28Z'
+updated_at: '2026-09-07T16:01:13Z'
 worktree_dirty: false
 worktree_dirty_paths: []

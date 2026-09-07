@@ -32,7 +32,7 @@
 - 可恢复操作：修复具体失败原因后运行 `python -m aiflow begin <TASK-ID> --actor <ACTOR> --reason "<FIX>"`，再执行全量 `verify`。
 - 禁止操作：不在没有 retry reason 时重试，不删除失败 run，不将定向 provisional 证据当作 final evidence。
 
-active Policy `2.2.0` 为 V1/V2 `regression_tests` 和 `coverage_xml` 分别提供 900 秒和 1200 秒。
+active Policy `2.3.0` 继续为 V1/V2 `regression_tests` 和 `coverage_xml` 分别提供 900 秒和 1200 秒。
 达到任一上限仍应保留为失败证据并诊断环境或性能原因；不得通过降为 V0、跳过 coverage、修改
 evidence 或重复碰运气来放行。若确需再次调整 Policy，必须建立或恢复有界 task，重新完成分类、
 规格审批、验证和 Gate。
@@ -54,6 +54,12 @@ evidence 或重复碰运气来放行。若确需再次调整 Policy，必须建�
 - 诊断：`status`、`validate` 或 `verify` 显示 Policy hash 不匹配；用 `git diff -- .ai/policy` 定位实际变化。
 - 可恢复操作：用 `escalate --reason-code policy_changed` 记录影响和下一步，重新 `classify`、`freeze`、必需批准和全量 `verify`。
 - 禁止操作：不恢复旧 Policy hash 来保留批准，不降低 route/V 等级，不复制 Policy 规则到脚本绕过重分类。
+
+2.3.0 起，新分类或实际重分类需要 Agent 显式补齐每个 DU 的 `impact_categories` 与
+`controlled_actions`。缺项错误会列出 DU/字段并保持零写；这不是新的人工审批条件。
+先核对真实风险再填枚举或 `[]`，不得把未知自动填成无风险。历史契约仍可读，原分类
+只在原身份完全相同时 no-op；Policy 更新后不能以旧分类或旧 pending marker 继续执行。
+有 pending 恢复时也必须先验证当前身份和完整事实，不删除 marker 来隐藏失败。
 
 ## REC-08 无法唯一解析任务
 
@@ -79,6 +85,11 @@ evidence 或重复碰运气来放行。若确需再次调整 Policy，必须建�
 - 可恢复操作：若 status/validate/scope、input contract 或 `dry-run` 暴露不一致，先修正当前 task、base、subject、Policy、classification 和 Git binding，再从当前事实重建新的 immutable input。不要改写既有 observation event 或 digest 来“刷新”它。仅在确需审计当前事实时，才以 `source: "cli"` 和非空 `--actor` 使用 `--mode apply`；它可能追加 task-local audit 或单调 escalation，但不执行所描述动作。
 - 退出语义：有效 observation 固定 exit 2 且 `execution_allowed: false`，是非授权结论，不能触发请求的命令或消费 action approval；exit 1 表示输入、contract、binding 或状态错误，必须先修复事实。不存在 exit 0 作为 observation 授权。`dry-run` 仅接受 `source: "cli"` 且禁止 actor，`ci` 仅接受 `source: "ci"` 且禁止 actor；后二者对完整 task 目录零写。
 - Hook 边界：对高风险 pre-command，Hook 只处理明确、受支持的 canonical action；Policy 禁止时即使审计已记录也固定拒绝，不消费 action approval、不执行命令。可选 `--task`、高风险 task 解析或 Hook 输入存在歧义时 fail closed。不要把它当作自由 shell 解析器、系统级安全沙箱或全客户端拦截：不解析 alias、pipe、redirection、quote、wildcard、变量/命令展开、argv、environment、stdin/stdout/stderr。Windows 覆盖与四个既有 symlink skips 不证明 Linux/macOS live Hook；未安装 Hook、IDE/GUI、remote Git 也不在已证实拦截范围。Hook/CLI/CI parity 仅适用于支持范围内的 decision semantic fields，不承诺 source digest、mode、ledger effect、event metadata、JSON bytes 或文案相同。
+- 未知动作：pre-command 默认拒绝（exit 2），不选择 task、不追加 observation、不读取或
+  消费 action 批准。空白参数值为错误（exit 1）；缺少必填 CLI 参数属于用法错误（exit 2）。
+  只有 Policy 明列的 read 可无任务
+  通过；旧 Policy 缺 allowlist 时也不隐式允许 read。不要把未知改成 read 或补本地批准
+  来绕过拒绝，应核实调用方是否支持该真实动作；通用可信外部执行器仍未实现。
 
 ## 结构化审核 stale 或不可批准
 

@@ -102,6 +102,7 @@ def _co_matched_unit() -> dict[str, object]:
         "goal": "bounded change",
         "inputs": [],
         "planned_actions": ["edit"],
+        "controlled_actions": [],
         "impact_scope": ["src/module.py"],
         "reversibility": "reversible",
         "verification_methods": ["pytest"],
