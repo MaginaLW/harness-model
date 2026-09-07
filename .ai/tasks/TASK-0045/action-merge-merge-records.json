@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "073a67fb6cf5068449720e28703ef22581f0ee7dfe663a40fe4fd98e1a0c9772",
+  "action_type": "merge",
+  "target": "The follow-up MaginaLW/harness-model PR from codex/maintenance-closeout into main containing only PR #31 task closure records and associated delivery notes",
+  "parameter_summary": "Complete the previously authorized branch delivery by merging its real post-merge accounting records once, with a normal merge commit and exact tested PR head; preserve branches.",
+  "subject_commit": "6c7b73ab2b190b5659179118d5d4eb6ff7f3772c",
+  "conditions": [
+    "The change contains only TASK-0044/TASK-0045 task-local closure/accounting records and docs/operations/maintenance-status.md relative to actual PR #31 merge 00d1838.",
+    "The follow-up PR's exact current head has completed the required ai-quality-gate successfully, with no quality threshold reduced.",
+    "GitHub reports the PR MERGEABLE and CLEAN with the expected base main and head codex/maintenance-closeout.",
+    "No administrator bypass, force push, deletion, deployment, tag, release, permissions change, or unrelated implementation is permitted."
+  ],
+  "expires_at": "2026-09-08T09:56:07Z",
+  "single_use": true
+}

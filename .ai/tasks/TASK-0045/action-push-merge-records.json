@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "073a67fb6cf5068449720e28703ef22581f0ee7dfe663a40fe4fd98e1a0c9772",
+  "action_type": "push",
+  "target": "origin refs/heads/codex/maintenance-closeout in MaginaLW/harness-model",
+  "parameter_summary": "Publish the same authorized delivery workflow's follow-up merge records and create their PR against main, without force; only TASK-0044/TASK-0045 ledger notes and docs/operations/maintenance-status.md may change from PR #31 merge 00d1838.",
+  "subject_commit": "6c7b73ab2b190b5659179118d5d4eb6ff7f3772c",
+  "conditions": [
+    "This is the mechanical post-merge accounting step of the project owner's already authorized branch delivery, not a new implementation or design authorization.",
+    "PR #31 is actually MERGED at 00d1838f23d1b02b02f5b4bc0eb64fe11a2504ed after required CI success, and that commit contains both task subjects and tested head 9a2d5ee457ea30dc766204fc97972b59dc8ff9be.",
+    "Both merge_recorded events are produced by aiflow close and point to that real merge commit; historical events and evidence remain intact.",
+    "Only the two task-local ledger directories and the maintenance status document differ from the actual PR #31 merge; task contracts and whitespace checks pass.",
+    "The push is a fast-forward update of this same branch; no source, tests, Policy, schema, CI, permissions, deletion, deployment, tag, release, or unrelated ref change is included."
+  ],
+  "expires_at": "2026-09-08T09:56:07Z",
+  "single_use": true
+}
