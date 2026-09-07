@@ -39,7 +39,7 @@ allowed_scope:
 base_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
 branch: codex/risk-input-followups
 created_at: '2026-09-07T15:17:16Z'
-current_state: WAITING_FOR_SPEC_REVIEW
+current_state: IMPLEMENTING
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -156,6 +156,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-07T16:43:57Z'
 subject_commit: 1c286be3951b9083742a33fc2d111ae986d38407
 task_id: TASK-0047
-updated_at: '2026-09-07T16:45:48Z'
+updated_at: '2026-09-07T16:52:54Z'
 worktree_dirty: false
 worktree_dirty_paths: []

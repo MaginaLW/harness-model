@@ -206,6 +206,7 @@ def test_clean_clone_installs_and_runs_documented_safe_subset(tmp_path: Path) ->
             "protections": {"verified_backup": True, "dry_run": True},
             "verification": {"automatic": True, "tools_missing": False},
             "impact_categories": ["documentation"],
+            "controlled_actions": [],
             "business_direction_count": 1,
             "change_characteristics": {
                 "mechanical": False,

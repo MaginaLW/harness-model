@@ -67,3 +67,15 @@ Policy 保持 2.3.0，route/V 不变；两文件仍未修改，不以 task-free 
 `2dbe29d0461b0382cf23687eafc10e625312a0287329600cc93d191e1dc599e0`。
 validate 与 scope 通过，status 仅 Missing spec_approval。未录入新的人的批准、begin
 或 implementation review；两文件范围等待决定，未推送、合并或部署。
+
+## 两文件修订获批与实现
+
+项目所有者再次明确回复“批准”，接受当前冻结规格
+`d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a`，仅增加
+clean-clone 测试与 Quickstart 的必要配套例外。CLI 在确认唯一 Missing 为 spec_approval
+后记录真实决定并 begin；该输入不包含代码批准或任何外部动作授权。
+
+测试仅在现有样例 unit.update 补 controlled_actions 空数组；Quickstart 同步显式事实、
+缺字段的零写错误与 BLOCK 的区别及 Policy 2.3.0 版本。源码、Policy、测试执行机制、
+既有断言和质量阈值均未修改。随后保存提交态再运行 clean-clone 和正式完整 V1；
+旧失败 evidence 与 run 继续保留，不把待运行验证提前写成成功。

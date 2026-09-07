@@ -50,5 +50,31 @@
     "spec_sha256": "a7957fd15d0ac357cca521d2134a8649bcfa3fededfc45b4e98d1a0664fa4205",
     "subject_commit": "91af61c967d5001fec2c3550bb7dddd16b1c5b58",
     "task_id": "TASK-0047"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-07T16:52:54Z",
+    "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "项目所有者明确回复批准，接受当前冻结规格 d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a，仅增加 clean-clone 测试与 Quickstart 两文件的必要配套同任务例外；不含代码批准、推送、合并、部署或其他外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a",
+    "subject_commit": "1c286be3951b9083742a33fc2d111ae986d38407",
+    "task_id": "TASK-0047"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-07T16:52:54Z",
+    "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+    "decision_unit_id": "DU-002",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "项目所有者明确回复批准，接受当前冻结规格 d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a，仅增加 clean-clone 测试与 Quickstart 两文件的必要配套同任务例外；不含代码批准、推送、合并、部署或其他外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a",
+    "subject_commit": "1c286be3951b9083742a33fc2d111ae986d38407",
+    "task_id": "TASK-0047"
   }
 ]

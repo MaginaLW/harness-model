@@ -127,7 +127,10 @@ python -m aiflow start \
   --forbid-action delete
 ```
 
-2. 在首次分类前，编辑 `.ai/tasks/<TASK-ID>/task.yaml` 的决策单元，补齐下列明确事实。当前 CLI 还没有专用的事实录入子命令；缺失任一必需事实时，Policy 会安全地转为 BLOCK。
+2. 在首次分类前，编辑 `.ai/tasks/<TASK-ID>/task.yaml` 的决策单元，补齐下列明确事实。
+当前 CLI 还没有专用的事实录入子命令；`impact_categories` 或 `controlled_actions`
+缺失时，classify 会在路由前列出缺项的 DU 与字段，且不写入任务或分类记录，由 Agent
+按已读事实补齐后重试，不自动转为人工审核。非法类型或枚举由契约拒绝。
 
 ```yaml
 scope: {clear: true}
@@ -135,6 +138,7 @@ impact: {level: low}
 protections: {verified_backup: true, dry_run: true}
 verification: {automatic: true, tools_missing: false}
 impact_categories: [documentation]
+controlled_actions: []
 business_direction_count: 1
 change_characteristics:
   mechanical: false
@@ -144,6 +148,9 @@ change_characteristics:
   regression_risk: false
   error_detectability: high
 ```
+
+这里的 `controlled_actions: []` 表示已确认本地文档示例不执行部署或生产数据删除，
+不是尚未评估风险时的默认值。
 
 3. 分类并查看只读状态。
 
@@ -157,7 +164,9 @@ python -m aiflow classify <TASK-ID> --actor quickstart
 python -m aiflow status <TASK-ID> --format json
 ```
 
-对上述低影响、可逆、无外部副作用的事实，预期 route 为 `AUTO`。若未补齐事实，预期为可解释的 `BLOCK`，应按 [恢复手册](recovery.md) 处理，不直接改写状态。
+对上述低影响、可逆、无外部副作用的完整事实，预期 route 为 `AUTO`。两风险字段缺失时，
+先处理上述零写输入错误；其他事实不足则按 Policy 分类，若得到可解释的 `BLOCK`，
+应按 [恢复手册](recovery.md) 处理，不直接改写状态。
 
 4. 运行 Gate 以观察具体缺失条件。因为示例没有实施、commit 或验证，这一步应返回非零退出码和 `passed: false`；这是正确的安全拒绝。
 
@@ -228,7 +237,7 @@ python -m aiflow verify <TASK-ID> --actor <VERIFIER> --finalize
 python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "local V2 evidence reviewed"
 ```
 
-active Policy `2.2.0` 下，默认 live V2 在完整 V1 prefix 后，依次执行确定性、离线的
+active Policy `2.3.0` 下，默认 live V2 在完整 V1 prefix 后，依次执行确定性、离线的
 `pytest tests/acceptance -q`、`pytest tests/integration -q`，以及由单独 action approval 绑定的
 targeted mutation；三项各自保留真实进程结果、日志与工具版本，independent Verifier 也必须与
 Implementer 使用不同的非空 task-local actor 标签。Chapter 11 的 acceptance、integration、
