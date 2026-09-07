@@ -11,5 +11,19 @@
     "spec_sha256": "ee3c75a267da95a792941947f19b70395d8d66d8dad644fd49a2118d74cc4ac5",
     "subject_commit": "47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2",
     "task_id": "TASK-0046"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-09-07T14:39:13Z",
+    "base_commit": "47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "24b6edebea8c1ed609e51347a9ac38a2cd8a46b55353330fcef6142e292b3f92",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Project owner explicitly approved the verified TASK-0046 implementation review package for subject 41332307250675d6e5802d4a3cf2b8e086613184. Accept the ASK obligation repair while preserving REVIEW, BLOCK, permission boundaries and existing quality gates. This code approval does not authorize push, merge or other external actions.",
+    "schema_version": "1.0",
+    "spec_sha256": "ee3c75a267da95a792941947f19b70395d8d66d8dad644fd49a2118d74cc4ac5",
+    "subject_commit": "41332307250675d6e5802d4a3cf2b8e086613184",
+    "task_id": "TASK-0046"
   }
 ]

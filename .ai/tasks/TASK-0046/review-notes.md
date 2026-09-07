@@ -76,3 +76,14 @@ Gate 返回 GATE_STATE_INVALID 与 GATE_CODE_APPROVAL_STALE，是等待代码批
 `24b6edebea8c1ed609e51347a9ac38a2cd8a46b55353330fcef6142e292b3f92`，并非格式化 JSON 文件
 字节的 SHA-256。重新运行 review context 与独立复算一致，没有改写证据来迁就另一口径。
 审查记录仅表示技术建议，不代替当前仍待取得的人类 code 批准。
+
+## 2026-09-07 代码批准与最终 Gate 补记
+
+项目所有者明确批准实现审核包。CLI 已在 14:39:13 UTC 记录 code 批准，绑定已验证的
+subject `41332307250675d6e5802d4a3cf2b8e086613184`、原规格和当前证据，并进入
+APPROVED_FOR_MERGE。随后实际 Gate 通过，reason_codes 与 recovery_argv 均为空；
+分类、批准和证据保持有效，无需重复规格批准或完整验证。
+
+本次仅追加批准及本任务记录，没有修改实现或既有证据。status 所示 external_merge
+是尚未发生的外部交付，不是新的内部代码审批缺项；不得据此直接记录 MERGED。
+代码批准不授权推送、创建远端 PR、合并或部署，这些动作仍未执行。
