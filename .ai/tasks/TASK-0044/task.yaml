@@ -4,7 +4,7 @@ goal: 修正只读 status 对历史批准的聚合：按当前 REVIEW 单元与�
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 branch: codex/reduce-human-intervention
 base_commit: 924ac289ee42973fe85d299b6a31df08edac05fe
-subject_commit: 924ac289ee42973fe85d299b6a31df08edac05fe
+subject_commit: b8cd477a1b7b96632df15b2b3cbf70d67066e6e9
 worktree_dirty: true
 worktree_dirty_paths:
 - tests/integration/test_status_command.py
@@ -18,9 +18,9 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 created_at: '2026-09-07T04:34:12Z'
-updated_at: '2026-09-07T04:35:26Z'
+updated_at: '2026-09-07T04:54:27Z'
 decision_units:
 - schema_version: '1.0'
   task_id: TASK-0044
