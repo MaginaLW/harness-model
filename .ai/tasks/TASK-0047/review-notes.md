@@ -107,3 +107,19 @@ Dalton 独立覆盖 Galileo 原实现的 DU-001；Galileo 独立覆盖 Dalton �
 当前 context 为 `00f66125b495a61cb2a056b90cfd881e6a18df8e11bbb1796858761369b5ef1e`。
 review-package.md 已追加完整八节当前代码审核包，保留初始历史文字，不重写旧决定。
 接下来只请求人的当前 code 批准；取得后核对本地 Gate，仍不执行未授权外部动作。
+
+## 代码接受与本地 Gate 通过
+
+项目所有者明确回复“批准”，接受当前代码审核包。开始前 status 唯一 Missing 为
+code_approval，工作树干净；CLI 于 `2026-09-07T20:10:18Z` 记录真实代码接受，绑定
+subject `c0b4cb62eb8754d9364433df6ba9948ffcf43fc2`、现行 spec/Policy、passed evidence
+及联合实施审核 REV-0082，进入 APPROVED_FOR_MERGE。
+
+随后只读 Gate 返回 passed=true，reason_codes 与 recovery_argv 均为空；分类 fresh、
+批准 current、证据 passed。本次没有实现变更，无理由重跑完整测试或重审规格。
+status 的 external_merge 是尚未发生的外部交付事实，不是缺少本地代码批准；其
+gate_required 提示不推翻已实跑的 Gate PASS，以 Gate 的确定性结果为准。
+
+本任务截至代码接受共 3 次 spec、1 次 code 的真实人类输入，分别映射 6 条和 2 条
+DU 批准记录；不存在 action 批准。旧失败 run、历史批准及审查均保留。
+本轮只保存本地收尾记录，不推送、合并、部署或修改外部系统；尚未合并，不调用 close。
