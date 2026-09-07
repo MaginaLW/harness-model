@@ -17,7 +17,13 @@ from aiflow.cli import main
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import ContractError, StateTransitionError, StorageError
 from aiflow.policy import load_policy_bundle
-from aiflow.storage import atomic_write_json, atomic_write_yaml, read_task_yaml, resolve_task_path
+from aiflow.storage import (
+    atomic_write_json,
+    atomic_write_yaml,
+    read_task_json,
+    read_task_yaml,
+    resolve_task_path,
+)
 from aiflow.task_service import load_task_record, specification_is_current, transition_task_record
 
 ANSWERED_AT = "2026-08-21T00:00:00Z"
@@ -85,6 +91,36 @@ def classification(*routes: str) -> dict[str, object]:
             {"decision_unit_id": f"DU-{index:03d}", "route": route}
             for index, route in enumerate(routes, start=1)
         ],
+    }
+
+
+def _co_matched_unit() -> dict[str, object]:
+    return {
+        "schema_version": "1.0",
+        "task_id": "TASK-0001",
+        "decision_unit_id": "DU-001",
+        "goal": "bounded change",
+        "inputs": [],
+        "planned_actions": ["edit"],
+        "impact_scope": ["src/module.py"],
+        "reversibility": "reversible",
+        "verification_methods": ["pytest"],
+        "external_side_effects": [],
+        "permission_requirements": [],
+        "scope": {"clear": True},
+        "impact": {"level": "low"},
+        "protections": {"verified_backup": True, "dry_run": True},
+        "verification": {"automatic": True, "tools_missing": False},
+        "change_characteristics": {
+            "mechanical": True,
+            "behavior_changed": False,
+            "code_modified": False,
+            "interaction_scope": "local",
+            "regression_risk": False,
+            "error_detectability": "high",
+        },
+        "business_direction_count": 2,
+        "impact_categories": ["ci"],
     }
 
 
@@ -167,6 +203,182 @@ def test_answer_rejects_invalid_selection_reason_or_state(
 
 def test_mixed_ask_review_remains_waiting_for_spec_review() -> None:
     assert target_state_after_answer(classification("ASK", "REVIEW")) == "WAITING_FOR_SPEC_REVIEW"
+
+
+def test_co_matched_ask_and_review_uses_real_classify_then_answer_lifecycle(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A REVIEW route still pauses for the ASK rule that co-matched its own unit."""
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    task["decision_units"] = [_co_matched_unit()]
+    atomic_write_yaml(task_path, task)
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    classification_document = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification_document, dict)
+    entry = classification_document["classifications"][0]
+    assert entry["route"] == classification_document["effective_route"] == "REVIEW"
+    assert {"ASK", "REVIEW"}.issubset({rule["route"] for rule in entry["matched_rules"]})
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "WAITING_FOR_ASK"
+
+    options_path = tmp_path / "options.json"
+    options_path.write_text(json.dumps(options(), ensure_ascii=False), encoding="utf-8")
+    assert (
+        main(
+            [
+                "answer",
+                "TASK-0001",
+                "--options-file",
+                str(options_path),
+                "--select",
+                "OPT-01",
+                "--actor",
+                "operator",
+                "--reason",
+                "choose the bounded direction",
+            ]
+        )
+        == 0
+    )
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["current_state"] == "WAITING_FOR_SPEC_REVIEW"
+    assert record.events[-1]["event_type"] == "ask_answered"
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
+
+    # Continue through the real REVIEW lifecycle: ASK never substitutes for either approval.
+    from test_approve_command import _record_review, review_package
+    from test_verify_command import _plan
+
+    from aiflow import verification_service
+
+    resolve_task_path(repository, "TASK-0001", "review-package.md").write_text(
+        review_package(), encoding="utf-8"
+    )
+    _record_review(repository, tmp_path, stage="design", review_id="REV-9046")
+    assert (
+        main(
+            [
+                "approve",
+                "TASK-0001",
+                "--type",
+                "spec",
+                "--actor",
+                "reviewer",
+                "--reason",
+                "current specification approved",
+            ]
+        )
+        == 0
+    )
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    capsys.readouterr()
+    assert main(["gate", "TASK-0001", "--format", "json"]) == 2
+    assert "GATE_CODE_APPROVAL_STALE" in json.loads(capsys.readouterr().out)["reason_codes"]
+    _record_review(repository, tmp_path, stage="implementation", review_id="REV-9047")
+    assert (
+        main(
+            [
+                "approve",
+                "TASK-0001",
+                "--type",
+                "code",
+                "--actor",
+                "reviewer",
+                "--reason",
+                "current implementation approved",
+            ]
+        )
+        == 0
+    )
+    assert main(["gate", "TASK-0001", "--format", "json"]) == 0
+    assert json.loads(capsys.readouterr().out.splitlines()[-1])["passed"] is True
+
+
+@pytest.mark.parametrize("malformed", [[], None])
+def test_answer_rejects_malformed_persisted_matched_rules_without_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, malformed: object
+) -> None:
+    repository, options_path = _prepare_repository(tmp_path, monkeypatch)
+    classification_path = resolve_task_path(repository, "TASK-0001", "classification.json")
+    document = read_task_json(repository, "TASK-0001", "classification.json")
+    assert isinstance(document, dict)
+    entry = document["classifications"][0]
+    if malformed is None:
+        entry.pop("matched_rules")
+    else:
+        entry["matched_rules"] = malformed
+    atomic_write_json(classification_path, document)
+    paths = [
+        resolve_task_path(repository, "TASK-0001", name)
+        for name in ("task.yaml", "events.jsonl", "classification.json", "spec.md")
+    ]
+    before = {path: path.read_bytes() for path in paths}
+
+    assert (
+        main(
+            [
+                "answer",
+                "TASK-0001",
+                "--options-file",
+                str(options_path),
+                "--select",
+                "OPT-01",
+                "--actor",
+                "operator",
+                "--reason",
+                "bounded choice",
+            ]
+        )
+        == 1
+    )
+    assert before == {path: path.read_bytes() for path in paths}
+    assert not resolve_task_path(repository, "TASK-0001", "decisions.md").exists()
+
+
+@pytest.mark.parametrize(
+    "document",
+    [
+        classification("ASK", "ASK"),
+        {
+            "task_id": "TASK-0001",
+            "classifications": [
+                {
+                    "decision_unit_id": "DU-001",
+                    "route": "REVIEW",
+                    "matched_rules": [{"route": "REVIEW"}, {"route": "ASK"}],
+                },
+                {
+                    "decision_unit_id": "DU-002",
+                    "route": "ASK",
+                    "matched_rules": [{"route": "ASK"}],
+                },
+            ],
+        },
+    ],
+)
+def test_answer_keeps_multiple_ask_decision_units_explicitly_unsupported(
+    document: dict[str, object],
+) -> None:
+    with pytest.raises(ContractError) as caught:
+        prepare_answer(
+            task_state="WAITING_FOR_ASK",
+            classification=document,
+            specification=specification(),
+            options_document=options(),
+            selected_option_id="OPT-01",
+            actor="operator",
+            reason="bounded choice",
+            answered_at=ANSWERED_AT,
+        )
+    assert caught.value.code == "ASK_DECISION_UNIT_COUNT_UNSUPPORTED"
 
 
 def test_repeated_answer_replaces_the_prior_frozen_decision_section() -> None:

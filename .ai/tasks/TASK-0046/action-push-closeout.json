@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "c4aca3c983f4683fb5b9b9dfc350a8458df7908ffeacb83b5380c562405411f8",
+  "action_type": "push",
+  "target": "origin refs/heads/codex/ask-obligation-closeout in MaginaLW/harness-model",
+  "parameter_summary": "After the approved implementation PR actually merges, push one ledger-only closeout branch and create its PR against main to publish TASK-0046's real merge record and delivery notes.",
+  "subject_commit": "41332307250675d6e5802d4a3cf2b8e086613184",
+  "conditions": [
+    "This is the mechanical audit closeout of the same explicitly authorized delivery, not a new implementation or a fresh code approval.",
+    "The implementation PR has merged into main after required CI success, and its tested head and TASK-0046 subject are ancestors of its actual merge commit.",
+    "The CLI has recorded that actual implementation merge using close; retain all historical events and evidence.",
+    "Relative to updated main, the closeout changes only TASK-0046 task state, appended events, delivery notes and the closeout PR description.",
+    "The worktree is clean, the remote closeout branch contains no unrelated work, and there is no force push, deletion, deployment, release, tag or protection change."
+  ],
+  "expires_at": "2026-09-08T14:45:00Z",
+  "single_use": true
+}

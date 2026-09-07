@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from aiflow.policy import PolicyBundle, load_policy_bundle
-from aiflow.routing import route_decision_unit, route_task
+from aiflow.routing import entry_requires_ask, route_decision_unit, route_task
 
 ROOT = Path(__file__).parents[2]
 
@@ -137,3 +137,46 @@ def test_task_aggregation_ignores_completed_units_without_overwriting_them() -> 
         assert result.route == case["expected_route"], case["id"]
         if case["id"] == "completed-unit-excluded":
             assert result.unit_decisions[0].route == "BLOCK"
+
+
+def _co_matched_entry() -> dict[str, object]:
+    facts = _facts(automatic=False, clear=False, impact="medium", directions=2)
+    facts["impact_categories"] = ["ci"]
+    return route_decision_unit(_unit("DU-001", facts), _bundle()).to_dict()
+
+
+def test_review_rule_does_not_erase_a_co_matched_ask_obligation() -> None:
+    entry = _co_matched_entry()
+
+    assert entry["route"] == "REVIEW"
+    assert {rule["rule_id"] for rule in entry["matched_rules"]} == {
+        "HARD-REVIEW-CI-CD",
+        "ROUTE-ASK-MULTIPLE-DIRECTIONS",
+    }
+    assert entry_requires_ask(entry) is True
+
+
+def test_ask_obligation_is_absent_without_a_matching_ask_rule() -> None:
+    facts = _facts(automatic=False, clear=False, impact="medium", directions=1)
+    facts["impact_categories"] = ["ci"]
+    entry = route_decision_unit(_unit("DU-001", facts), _bundle()).to_dict()
+
+    assert entry["route"] == "REVIEW"
+    assert entry_requires_ask(entry) is False
+
+
+def test_block_keeps_priority_over_a_co_matched_ask_obligation() -> None:
+    facts = _facts(automatic=False, clear=False, impact="medium", directions=2)
+    facts["external_side_effects"] = ["credential_export"]
+    entry = route_decision_unit(_unit("DU-001", facts), _bundle()).to_dict()
+
+    assert entry["route"] == "BLOCK"
+    assert entry_requires_ask(entry) is True
+
+
+def test_ask_obligation_helper_defends_its_internal_input_boundary() -> None:
+    assert entry_requires_ask({"route": "ASK", "matched_rules": "not-a-list"}) is True
+    assert entry_requires_ask({"route": "REVIEW", "matched_rules": "not-a-list"}) is False
+    assert entry_requires_ask(
+        {"route": "REVIEW", "matched_rules": ["not-a-mapping", {"route": "ASK"}]}
+    )

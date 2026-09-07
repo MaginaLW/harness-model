@@ -1,0 +1,54 @@
+{
+  "base_commit": "47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2",
+  "branch": "codex/ask-obligation-repair",
+  "classification_input_sha256": "c4aca3c983f4683fb5b9b9dfc350a8458df7908ffeacb83b5380c562405411f8",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/routing.py",
+      "src/aiflow/classification_service.py",
+      "src/aiflow/ask_service.py",
+      "src/aiflow/gate.py",
+      "tests/unit/test_routing.py",
+      "tests/integration/test_classify_command.py",
+      "tests/integration/test_answer_command.py",
+      "tests/integration/test_gate_command.py",
+      "docs/operations/low-intervention.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "恢复同一决策单元 REVIEW 与 ASK 共同命中时的方向选择义务，保留 REVIEW 审核和既有阻断优先级",
+        "impact_scope": [
+          "src/aiflow/routing.py",
+          "src/aiflow/classification_service.py",
+          "src/aiflow/ask_service.py",
+          "src/aiflow/gate.py",
+          "tests/unit/test_routing.py",
+          "tests/integration/test_classify_command.py",
+          "tests/integration/test_answer_command.py",
+          "tests/integration/test_gate_command.py",
+          "docs/operations/low-intervention.md"
+        ],
+        "planned_actions": [
+          "Derive the ASK obligation from validated matched_rules while preserving effective routing.",
+          "Apply that obligation consistently in classification, answering and Gate.",
+          "Detect lost ASK obligations during same-or-lower-route reclassification.",
+          "Verify the inseparable regression cases and document the corrected workflow."
+        ]
+      }
+    ],
+    "goal": "恢复同一决策单元 REVIEW 与 ASK 共同命中时的方向选择义务，保留 REVIEW 审核和既有阻断优先级",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "602ef41af710d85be5636ac3807d4b3571f5e7eab58eafd92cae23e3727a551b",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "ee3c75a267da95a792941947f19b70395d8d66d8dad644fd49a2118d74cc4ac5",
+  "task_id": "TASK-0046"
+}

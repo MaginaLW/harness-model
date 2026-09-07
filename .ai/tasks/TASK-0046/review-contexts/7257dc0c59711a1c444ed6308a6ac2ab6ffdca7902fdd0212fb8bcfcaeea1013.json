@@ -1,0 +1,248 @@
+{
+  "base_commit": "47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2",
+  "branch": "codex/ask-obligation-repair",
+  "classification_input_sha256": "c4aca3c983f4683fb5b9b9dfc350a8458df7908ffeacb83b5380c562405411f8",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/routing.py",
+      "src/aiflow/classification_service.py",
+      "src/aiflow/ask_service.py",
+      "src/aiflow/gate.py",
+      "tests/unit/test_routing.py",
+      "tests/integration/test_classify_command.py",
+      "tests/integration/test_answer_command.py",
+      "tests/integration/test_gate_command.py",
+      "docs/operations/low-intervention.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "恢复同一决策单元 REVIEW 与 ASK 共同命中时的方向选择义务，保留 REVIEW 审核和既有阻断优先级",
+        "impact_scope": [
+          "src/aiflow/routing.py",
+          "src/aiflow/classification_service.py",
+          "src/aiflow/ask_service.py",
+          "src/aiflow/gate.py",
+          "tests/unit/test_routing.py",
+          "tests/integration/test_classify_command.py",
+          "tests/integration/test_answer_command.py",
+          "tests/integration/test_gate_command.py",
+          "docs/operations/low-intervention.md"
+        ],
+        "planned_actions": [
+          "Derive the ASK obligation from validated matched_rules while preserving effective routing.",
+          "Apply that obligation consistently in classification, answering and Gate.",
+          "Detect lost ASK obligations during same-or-lower-route reclassification.",
+          "Verify the inseparable regression cases and document the corrected workflow."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0046/approvals.json",
+        ".ai/tasks/TASK-0046/classification.json",
+        ".ai/tasks/TASK-0046/design-review-input.json",
+        ".ai/tasks/TASK-0046/events.jsonl",
+        ".ai/tasks/TASK-0046/review-contexts/602ef41af710d85be5636ac3807d4b3571f5e7eab58eafd92cae23e3727a551b.json",
+        ".ai/tasks/TASK-0046/review-notes.md",
+        ".ai/tasks/TASK-0046/reviews/REV-0076-r0001.json",
+        ".ai/tasks/TASK-0046/spec.md",
+        ".ai/tasks/TASK-0046/task.yaml",
+        "docs/operations/low-intervention.md",
+        "src/aiflow/ask_service.py",
+        "src/aiflow/classification_service.py",
+        "src/aiflow/gate.py",
+        "src/aiflow/routing.py",
+        "tests/integration/test_answer_command.py",
+        "tests/integration/test_classify_command.py",
+        "tests/integration/test_gate_command.py",
+        "tests/unit/test_routing.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/classification.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/design-review-input.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/events.jsonl"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/review-contexts/602ef41af710d85be5636ac3807d4b3571f5e7eab58eafd92cae23e3727a551b.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/review-notes.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/reviews/REV-0076-r0001.json"
+        },
+        {
+          "additions": 68,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/spec.md"
+        },
+        {
+          "additions": 94,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0046/task.yaml"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/low-intervention.md"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 7,
+          "path": "src/aiflow/ask_service.py"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/classification_service.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/gate.py"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/routing.py"
+        },
+        {
+          "additions": 213,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_answer_command.py"
+        },
+        {
+          "additions": 246,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_classify_command.py"
+        },
+        {
+          "additions": 100,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_gate_command.py"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_routing.py"
+        }
+      ],
+      "totals": {
+        "additions": 1010,
+        "deletions": 15,
+        "files": 18
+      }
+    },
+    "goal": "恢复同一决策单元 REVIEW 与 ASK 共同命中时的方向选择义务，保留 REVIEW 审核和既有阻断优先级",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0046",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "7257dc0c59711a1c444ed6308a6ac2ab6ffdca7902fdd0212fb8bcfcaeea1013",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "24b6edebea8c1ed609e51347a9ac38a2cd8a46b55353330fcef6142e292b3f92",
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "ee3c75a267da95a792941947f19b70395d8d66d8dad644fd49a2118d74cc4ac5",
+  "subject_commit": "41332307250675d6e5802d4a3cf2b8e086613184",
+  "task_id": "TASK-0046"
+}

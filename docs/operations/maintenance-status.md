@@ -19,8 +19,8 @@
 - 本轮文档收尾：纠正状态说明中“bootstrap 标记不存在、每项变更必建 task”，
   修正处置目录顶层状态、B3 状态与 README 在途说明。
 
-盘点时的运行账本共有 43 个 task：34 MERGED / 7 BLOCKED / 2 APPROVED_FOR_MERGE，
-后两者是 TASK-0028 与 TASK-0044。后续新 task 会改变数量；用
+交付后固定快照 `8ee402d` 的运行账本共有 44 个 task：36 MERGED / 7 BLOCKED /
+1 APPROVED_FOR_MERGE，最后一项是保留原处置决定的 TASK-0028。后续新 task 会改变数量；用
 `python tools/analysis/approval_overhead.py --format text` 读取最新快照。
 
 ## 外部交付更新
@@ -32,17 +32,20 @@ Linux 全量 1634 passed，总覆盖率 87.80%，18 个可执行变更行全部�
 whitespace、Ruff、format、mypy 均通过。未绕过保护，未删除源分支。
 
 已核实合并提交包含 TASK-0044、0045 的 subject 与受检 PR head，并通过 CLI 为两个
-任务追加 `merge_recorded` / MERGED。本次后续账本交付只发布真实关闭记录和关联说明，
-仍须通过其自身的 required CI；不提前关闭未来工作，也不改写旧证据。
+任务追加 `merge_recorded` / MERGED。后续账本交付 [PR #32](https://github.com/MaginaLW/harness-model/pull/32)
+也已通过自身的 [required CI](https://github.com/MaginaLW/harness-model/actions/runs/34109822587)
+并合并为 `8ee402d`：1634 passed，总覆盖率 87.80%，没有新增可执行源码行。
+关闭记录已进入 main；不提前关闭未来工作，也不改写旧证据。
 
 ## 剩余工作与明确处置
 
 | 项目 | 当前证据与下一步 |
 |---|---|
-| 本轮交付 | 上轮修复、本轮文档与维护修复已通过 PR #31 合入 main；TASK-0044、0045 的真实关闭记录随本次后续账本交付发布，不再是待实现功能。 |
+| 本轮交付 | 上轮修复、本轮文档与维护修复已通过 PR #31 合入 main；TASK-0044、0045 的真实关闭记录已通过 PR #32 发布，不再是待实现功能。 |
 | 工作区忽略规则 | TASK-0045 的仓库级 `/.claude/worktrees/` 规则已随 PR #31 合入，新克隆可继承；仅忽略根目录下的 worktree 副本，保留 `.claude/skills/` 等配置可见。验证记录见该任务的 `evidence.json` 与核查补记。 |
 | ASK 义务修复 | `1033a46` 提供 4 个源码文件与对应测试的候选修复：同一单元同时命中 REVIEW 和 ASK 时不能丢失方向选择义务。当前源码仍按最终 route 找 ASK，问题存在。建议作为下一项独立任务重新移植并验证，不直接合并旧分支。 |
-| TASK-0028 历史收尾 | 代码已在 main，当前状态仍需重验，Gate 有 10 条拒绝理由。维持已有选项 C；仅在所有者选择重验或改变历史处置方式后推进，不用 `close` 绕过已记录的决定。 |
+| TASK-0028 历史收尾 | 代码已在 main，状态仍需重验；在 `8ee402d` 的 main 上实测 Gate 有 9 条拒绝理由，旧 10 条为另一历史快照，分支上下文会影响输出。维持已有选项 C；仅在所有者选择重验或改变历史处置方式后推进，不用 `close` 绕过已记录的决定。 |
+| 效果验证 | 已固定[交付后账本基线与观察方法](effect-observations.md)，但真实人工打断、耗时、返工工作量和缺陷率仍未知；尚未运行自动采集或实际效果对照。 |
 | 已登记的引擎缺口 | 见下节。属于后续风险控制设计/实现，不混入本次文档与目录忽略修复。 |
 
 ASK 候选所在的 `claude/unruffled-gates-41d3ec` 工作区仍被 Git 注册且干净，

@@ -1,0 +1,13 @@
+{
+  "context_sha256": "602ef41af710d85be5636ac3807d4b3571f5e7eab58eafd92cae23e3727a551b",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-09-07T13:58:10Z",
+  "review_id": "REV-0076",
+  "review_stage": "design",
+  "reviewer": "audit-interventions",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "独立设计审查：冻结规格、任务事实与审查说明一致。仅从通过既有契约验证的 matched_rules 恢复共同命中的 ASK 义务，不改变路由优先级、effective_route、HARD、权限或批准绑定。同级或更低路由丢失 ASK 才算降级，更高路由及 BLOCK 保持既有处理。验收覆盖 CLI 生命周期、决策单元绑定、REVIEW/BLOCK 保留、非法分类拒绝和现有 V1 门禁。审查说明已澄清 V1 是待执行计划，不迁入旧任务证据。",
+  "task_id": "TASK-0046"
+}

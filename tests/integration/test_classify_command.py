@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -54,6 +55,58 @@ def _prepare(repository: Path, monkeypatch: pytest.MonkeyPatch, **changes: objec
     assert isinstance(task, dict)
     task["decision_units"] = [_unit("TASK-0001", **changes)]
     atomic_write_yaml(task_path, task)
+
+
+def _ready_reclassification(
+    repository: Path,
+    *,
+    changes: dict[str, object],
+    escalation_route: str,
+) -> None:
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    assert (
+        main(
+            [
+                "escalate",
+                "TASK-0001",
+                "--to",
+                escalation_route,
+                "--reason-code",
+                "spec_changed",
+                "--impact",
+                "classification facts changed",
+                "--next-step",
+                "reclassify",
+                "--actor",
+                "classifier",
+            ]
+        )
+        == 0
+    )
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    task["decision_units"] = [_unit("TASK-0001", **changes)]
+    atomic_write_yaml(task_path, task)
+    evidence_path = resolve_task_path(repository, "TASK-0001", "resolution.md")
+    evidence_path.write_text("facts reassessed\n", encoding="utf-8")
+    assert (
+        main(
+            [
+                "resolve",
+                "TASK-0001",
+                "--condition",
+                "spec_changed",
+                "--evidence-ref",
+                "resolution.md",
+                "--reason",
+                "facts reassessed",
+                "--actor",
+                "reviewer",
+            ]
+        )
+        == 0
+    )
 
 
 @pytest.mark.parametrize(
@@ -122,6 +175,166 @@ def test_classify_same_identity_does_not_append_events(
 
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     assert len(load_task_record(repository, "TASK-0001").events) == count
+
+
+def test_co_matched_ask_and_review_waits_for_the_user_choice(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch, business_direction_count=2, impact_categories=["ci"])
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    entry = classification["classifications"][0]
+
+    assert classification["effective_route"] == "REVIEW"
+    assert entry["route"] == "REVIEW"
+    assert {rule["rule_id"] for rule in entry["matched_rules"]} >= {
+        "HARD-REVIEW-CI-CD",
+        "ROUTE-ASK-MULTIPLE-DIRECTIONS",
+    }
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["current_state"] == "WAITING_FOR_ASK"
+    assert [event["event_type"] for event in record.events] == [
+        "task_created",
+        "classification_recorded",
+        "ask_required",
+    ]
+
+
+def test_block_has_priority_over_a_co_matched_ask(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(
+        repository,
+        monkeypatch,
+        business_direction_count=2,
+        external_side_effects=["credential_export"],
+    )
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    record = load_task_record(repository, "TASK-0001")
+    assert record.task["current_state"] == "BLOCKED"
+    assert record.events[-1]["event_type"] == "classification_blocked"
+
+
+@pytest.mark.parametrize(
+    ("new_route", "new_rules"),
+    [
+        ("REVIEW", [{"route": "REVIEW"}]),
+        ("AUTO", [{"route": "AUTO"}]),
+    ],
+)
+def test_dropping_a_co_matched_ask_obligation_is_a_downgrade(
+    new_route: str, new_rules: list[dict[str, str]]
+) -> None:
+    previous = {
+        "effective_route": "REVIEW",
+        "effective_verification_level": "V0",
+        "classifications": [
+            {
+                "decision_unit_id": "DU-001",
+                "route": "REVIEW",
+                "verification_level": "V0",
+                "matched_rules": [{"route": "REVIEW"}, {"route": "ASK"}],
+            }
+        ],
+    }
+    entries = [
+        {
+            "decision_unit_id": "DU-001",
+            "route": new_route,
+            "verification_level": "V0",
+            "matched_rules": new_rules,
+        }
+    ]
+
+    assert _is_downgrade(previous, entries, effective_route=new_route, effective_level="V0")
+    assert _change_reason(previous, entries, route=new_route, level="V0") == "downgraded"
+
+
+def test_higher_route_can_remove_a_previous_ask_obligation() -> None:
+    previous = {
+        "effective_route": "REVIEW",
+        "effective_verification_level": "V0",
+        "classifications": [
+            {
+                "decision_unit_id": "DU-001",
+                "route": "REVIEW",
+                "verification_level": "V0",
+                "matched_rules": [{"route": "REVIEW"}, {"route": "ASK"}],
+            }
+        ],
+    }
+    entries = [
+        {
+            "decision_unit_id": "DU-001",
+            "route": "BLOCK",
+            "verification_level": "V0",
+            "matched_rules": [{"route": "BLOCK"}],
+        }
+    ]
+
+    assert not _is_downgrade(previous, entries, effective_route="BLOCK", effective_level="V0")
+    assert _change_reason(previous, entries, route="BLOCK", level="V0") == "upgraded"
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"impact_categories": ["ci"]},
+        {},
+    ],
+    ids=["same-review", "lower-auto"],
+)
+def test_cli_rejects_reclassification_that_drops_a_co_matched_ask(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    changes: dict[str, object],
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch, business_direction_count=2, impact_categories=["ci"])
+    _ready_reclassification(repository, changes=changes, escalation_route="REVIEW")
+    paths = [
+        resolve_task_path(repository, "TASK-0001", "task.yaml"),
+        resolve_task_path(repository, "TASK-0001", "events.jsonl"),
+        resolve_task_path(repository, "TASK-0001", "classification.json"),
+    ]
+    before = {path: path.read_bytes() for path in paths}
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
+    assert "complete authorized resolution record" in capsys.readouterr().err
+    assert {path: path.read_bytes() for path in paths} == before
+
+
+def test_cli_allows_higher_block_reclassification_without_carrying_old_ask(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch, business_direction_count=2, impact_categories=["ci"])
+    _ready_reclassification(
+        repository,
+        changes={"external_side_effects": ["credential_export"]},
+        escalation_route="BLOCK",
+    )
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    assert classification["effective_route"] == "BLOCK"
+    assert all(
+        rule["route"] != "ASK"
+        for entry in classification["classifications"]
+        for rule in entry["matched_rules"]
+    )
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "BLOCKED"
 
 
 def test_mixed_ask_review_waits_for_answer_before_spec_review(
@@ -412,6 +625,39 @@ def test_invalid_policy_does_not_write_classification_or_transition(
     record = load_task_record(repository, "TASK-0001")
     assert record.task["current_state"] == "NEW" and len(record.events) == 1
     assert not resolve_task_path(repository, "TASK-0001", "classification.json").exists()
+
+
+@pytest.mark.parametrize("invalid_case", ["missing", "not-a-list", "invalid-rule-route"])
+def test_invalid_persisted_matched_rules_do_not_write_task_state_or_events(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    invalid_case: str,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(repository, monkeypatch)
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+
+    classification_path = resolve_task_path(repository, "TASK-0001", "classification.json")
+    malformed = json.loads(classification_path.read_text(encoding="utf-8"))
+    entry = malformed["classifications"][0]
+    if invalid_case == "missing":
+        del entry["matched_rules"]
+    elif invalid_case == "not-a-list":
+        entry["matched_rules"] = "not-a-list"
+    else:
+        entry["matched_rules"][0]["route"] = "NOT-A-ROUTE"
+    classification_path.write_text(json.dumps(malformed), encoding="utf-8")
+    paths = [
+        resolve_task_path(repository, "TASK-0001", "task.yaml"),
+        resolve_task_path(repository, "TASK-0001", "events.jsonl"),
+        classification_path,
+    ]
+    before = {path: path.read_bytes() for path in paths}
+
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
+    assert "classification" in capsys.readouterr().err.lower()
+    assert {path: path.read_bytes() for path in paths} == before
 
 
 def test_second_transition_failure_recovers_from_classified_on_retry(

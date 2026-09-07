@@ -18,7 +18,7 @@ from aiflow.git_context import collect_git_context, commits_are_ancestral
 from aiflow.mutation_evidence import consume_targeted_mutation_evidence
 from aiflow.policy import load_policy_bundle
 from aiflow.review_service import latest_review_assessment
-from aiflow.routing import ROUTE_ORDER, route_task
+from aiflow.routing import ROUTE_ORDER, entry_requires_ask, route_task
 from aiflow.scope import (
     AutoPreflightFacts,
     assess_auto_scope,
@@ -540,7 +540,7 @@ def evaluate_gate(
     ask_ids = {
         str(entry["decision_unit_id"])
         for entry in entries
-        if isinstance(entry, Mapping) and entry.get("route") == "ASK"
+        if isinstance(entry, Mapping) and entry_requires_ask(entry)
     }
     review_ids = {
         str(entry["decision_unit_id"])
