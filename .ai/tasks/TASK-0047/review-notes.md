@@ -143,3 +143,31 @@ pre-command 对 push/merge 仍拒绝，不修改 forbidden_actions 或伪造消�
 远端 main 在核查时仍为 `2e00d786474feb6d06ae68e3a5607bb7a9f581e2`；严格 required
 ai-quality-gate、管理员保护、禁止强推和禁止删除均保留。当前维护模式的 CI 对精确
 PR head 执行完整质量检查，并非运行 TASK-0047 的远端 task Gate；本地 Gate 单独核对。
+
+## 2026-09-07 实际合并与关闭
+
+- [实现 PR #35](https://github.com/MaginaLW/harness-model/pull/35)。
+- 推送并受检的精确 head：`a98a9249a267156a06d64c7ca1267a6c36ed115e`。
+- [Required CI run 34159153420](https://github.com/MaginaLW/harness-model/actions/runs/34159153420)
+  成功：契约检查 105 passed；Linux 完整测试 1,721 passed（295.31 秒），总覆盖率
+  （含分支）88.04%，36 行可执行差异覆盖率 100%；Ruff、format、mypy、whitespace
+  均通过。维护模式下跳过的是 task 专属步骤，不是上述质量检查。
+- 合并前重新核对精确 head、base main、CLEAN / MERGEABLE，以及本地 TASK-0047
+  Gate PASS；独立只读复核确认无未处理评论，保护规则保持不变。
+- 使用普通 merge commit 与精确 head 匹配。GitHub 实际合并时间为
+  `2026-09-07T20:28:37Z`，merge commit 为
+  `0fa7d0523af89fdc7eb9cf80fd3dd4ee637e89ca`。
+- fetch 后分别验证已批准 subject 与受检 head 均为该 merge 的祖先，该 merge
+  已进入 origin/main。从更新后的 main 创建账本关闭分支，再用 CLI close 记录
+  实际实现 merge；事件 48 为 merge_recorded，任务进入 MERGED，Missing: none。
+
+实现 push 和 merge 两个一次性动作均已各执行一次，不复用；未强推、删除分支、
+部署或绕过保护。预先独立记录的 closeout 动作仅发布这一真实关闭事件、状态和说明，
+仍等待账本 PR 自身 required CI 后正常合并；不为账本 merge 再次调用 close，
+不递归创建第三个 PR。未伪造通用 action 消费 receipt。
+
+本轮交付前运行 begin/close 与 contracts 两组本地回归，共 109 passed（26.67 秒）；
+关闭后任务契约验证通过。相对实现 merge，关闭记录不修改源码、测试、Policy、Schema、
+CI、批准、冻结规格、分类及既有证据，仅更新 TASK-0047 的状态、追加事件与交付说明。
+以上 Linux 覆盖率不替换本地 Windows 正式 V1 的 88.14% 或原始证据；历史失败亦保留。
+实际人工审核耗时、同类任务对照和成熟缺陷观察仍没有可据此推断的效果结论。

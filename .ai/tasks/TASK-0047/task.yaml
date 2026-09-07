@@ -39,7 +39,7 @@ allowed_scope:
 base_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
 branch: codex/risk-input-followups
 created_at: '2026-09-07T15:17:16Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -156,6 +156,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-07T16:43:57Z'
 subject_commit: c0b4cb62eb8754d9364433df6ba9948ffcf43fc2
 task_id: TASK-0047
-updated_at: '2026-09-07T20:18:36Z'
+updated_at: '2026-09-07T20:28:58Z'
 worktree_dirty: false
 worktree_dirty_paths: []
