@@ -30,5 +30,37 @@
     "spec_sha256": "8074ea2df252c96659992fb3c8d0fb5021f44da699e164b08c06dd885d099c27",
     "subject_commit": "6c7b73ab2b190b5659179118d5d4eb6ff7f3772c",
     "task_id": "TASK-0045"
+  },
+  {
+    "action_sha256": "948ff1c4b5e418ef2fb65c5cfb370c0c48da57fc8cdde7691668d69d33c8a8e7",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-07T10:05:49Z",
+    "base_commit": "e97d29ff69f67131a62c804781a2ca849d0879e8",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-08T09:56:07Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Record the mechanical post-merge accounting push within the owner's authorized delivery of codex/maintenance-closeout; restricted to the actual PR #31 closure records and associated status notes, with no new implementation.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8074ea2df252c96659992fb3c8d0fb5021f44da699e164b08c06dd885d099c27",
+    "subject_commit": "6c7b73ab2b190b5659179118d5d4eb6ff7f3772c",
+    "task_id": "TASK-0045"
+  },
+  {
+    "action_sha256": "f7792f321f2d883a2ef138a1e11acbc11aad9f3e791b4d75f2b73f0d999d09db",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-07T10:05:49Z",
+    "base_commit": "e97d29ff69f67131a62c804781a2ca849d0879e8",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-08T09:56:07Z",
+    "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+    "reason": "Record the normal protected merge of this same authorized delivery's closure-accounting PR, conditional on its own exact-head required CI success; no new design or implementation is included.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8074ea2df252c96659992fb3c8d0fb5021f44da699e164b08c06dd885d099c27",
+    "subject_commit": "6c7b73ab2b190b5659179118d5d4eb6ff7f3772c",
+    "task_id": "TASK-0045"
   }
 ]

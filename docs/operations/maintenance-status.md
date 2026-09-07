@@ -1,6 +1,6 @@
 # 维护收尾与待办
 
-盘点日期：2026-09-07。工作基线为 `c9343c2`；远端 main 经只读查询仍为 `1f28583`，
+盘点日期：2026-09-07。盘点基线为 `c9343c2`；当时远端 main 经只读查询为 `1f28583`，
 当时开放 PR 和 issue 均为 0。本页是当前工作入口，不替代任务账本与 Gate；
 历史统计和决定保留在[原处置目录](../superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md)。
 
@@ -12,10 +12,10 @@
   为已否决/阻断的设计，保留历史记录，不为清零数量而重新开启。
 - 审批整改：B0–B2 停止，B3 已按“如实记录执行边界”解决，B4 暂缓。
   它们不是待自动执行的四章计划。
-- TASK-0044：历史批准聚合修复、低干预操作入口和只读统计工具已经本地交付。
-  其记录分支 `codex/reduce-human-intervention` 的 Gate 为 AUTO/V1 PASS；
+- TASK-0044：历史批准聚合修复、低干预操作入口和只读统计工具已随 PR #31 合入 main。
+  合并前其记录分支 `codex/reduce-human-intervention` 的 Gate 为 AUTO/V1 PASS；
   1630 passed / 4 平台 skip，总覆盖率 87.81%，变更覆盖率 100%。
-  当前只缺外部交付，不缺新的本地 spec/code 批准。
+  外部交付及真实合并记录见下节，不需要新的本地 spec/code 批准。
 - 本轮文档收尾：纠正状态说明中“bootstrap 标记不存在、每项变更必建 task”，
   修正处置目录顶层状态、B3 状态与 README 在途说明。
 
@@ -23,12 +23,24 @@
 后两者是 TASK-0028 与 TASK-0044。后续新 task 会改变数量；用
 `python tools/analysis/approval_overhead.py --format text` 读取最新快照。
 
+## 外部交付更新
+
+[PR #31](https://github.com/MaginaLW/harness-model/pull/31) 已于 2026-09-07 合入 main，
+合并提交为 `00d1838f23d1b02b02f5b4bc0eb64fe11a2504ed`。其精确 PR head `9a2d5ee`
+通过必需的 [ai-quality-gate](https://github.com/MaginaLW/harness-model/actions/runs/34108909215)：
+Linux 全量 1634 passed，总覆盖率 87.80%，18 个可执行变更行全部覆盖；
+whitespace、Ruff、format、mypy 均通过。未绕过保护，未删除源分支。
+
+已核实合并提交包含 TASK-0044、0045 的 subject 与受检 PR head，并通过 CLI 为两个
+任务追加 `merge_recorded` / MERGED。本次后续账本交付只发布真实关闭记录和关联说明，
+仍须通过其自身的 required CI；不提前关闭未来工作，也不改写旧证据。
+
 ## 剩余工作与明确处置
 
 | 项目 | 当前证据与下一步 |
 |---|---|
-| 当前本地交付 | TASK-0044 的三个提交尚未推送；本轮文档与维护修复在独立分支 `codex/maintenance-closeout` 准备。取得针对这次交付的 push/PR/merge 授权后，按平台 required check 完成集成；不得把本地 Gate 当作远端 CI 结果。 |
-| 工作区忽略规则 | TASK-0045 已补充仓库级 `/.claude/worktrees/` 规则，新克隆可继承；仅忽略根目录下的 worktree 副本，保留 `.claude/skills/` 等配置可见。最终验证记录见该任务的 `evidence.json` 与核查补记。 |
+| 本轮交付 | 上轮修复、本轮文档与维护修复已通过 PR #31 合入 main；TASK-0044、0045 的真实关闭记录随本次后续账本交付发布，不再是待实现功能。 |
+| 工作区忽略规则 | TASK-0045 的仓库级 `/.claude/worktrees/` 规则已随 PR #31 合入，新克隆可继承；仅忽略根目录下的 worktree 副本，保留 `.claude/skills/` 等配置可见。验证记录见该任务的 `evidence.json` 与核查补记。 |
 | ASK 义务修复 | `1033a46` 提供 4 个源码文件与对应测试的候选修复：同一单元同时命中 REVIEW 和 ASK 时不能丢失方向选择义务。当前源码仍按最终 route 找 ASK，问题存在。建议作为下一项独立任务重新移植并验证，不直接合并旧分支。 |
 | TASK-0028 历史收尾 | 代码已在 main，当前状态仍需重验，Gate 有 10 条拒绝理由。维持已有选项 C；仅在所有者选择重验或改变历史处置方式后推进，不用 `close` 绕过已记录的决定。 |
 | 已登记的引擎缺口 | 见下节。属于后续风险控制设计/实现，不混入本次文档与目录忽略修复。 |
@@ -61,10 +73,10 @@ HEAD 为 `6091b47`。其旧 TASK-0042 验证为 FAILED；main 的同号 task 是
 ## 重放入口
 
 - `python tools/analysis/approval_overhead.py --format text`：账本快照。
-- `python -m aiflow status TASK-0044` 与 `python -m aiflow gate TASK-0044 --format json`：
-  在其记录分支上复核本地交付；其他分支/HEAD 的结果不能直接套用。
+- `python -m aiflow status TASK-0044`：读取当前关闭状态；合并前 Gate 需在其历史记录
+  分支/版本上重放，不能将终态任务在后续 main 上的旧证据绑定当作新的待审核请求。
 - `python -m aiflow status TASK-0028` 与 `python -m aiflow gate TASK-0028 --format json`：历史阻断。
-- `python -m aiflow status TASK-0045` 与 `python -m aiflow gate TASK-0045 --format json`：
-  在 `codex/maintenance-closeout` 记录分支上核对本轮配置修复。
+- `python -m aiflow status TASK-0045`：读取本轮配置修复的关闭状态；合并前 Gate 事实
+  见该任务核查补记及其记录版本。
 - `git log main..claude/unruffled-gates-41d3ec --oneline`：ASK 候选提交。
 - 远端开放项、保护配置与分支位置会变化，交付前重新读取；本页的只读快照不是授权。

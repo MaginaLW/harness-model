@@ -61,3 +61,24 @@ diff-cover 时报告无匹配源码行；该空结果没有被用来证明累计
 不代表三个任务均已具备相同的新鲜度或外部授权。
 
 本轮未执行推送、合并、部署或远端 CI。保留所有既有工作区、分支、日志与证据。
+
+## 后续外部交付与关闭
+
+以上为本地验证阶段的历史记录。项目所有者随后明确回复授权，将同一收尾分支推送、
+创建 PR，并在 required CI 全绿后合并。推送与合并的动作记录各自通过 CLI 追加，
+不是新的 spec/code 审核，也不是由本地 actor 标签创造授权。
+
+- PR #31 head：`9a2d5ee457ea30dc766204fc97972b59dc8ff9be`。
+- Required CI run：`34108909215`，SUCCESS；Linux 1634 passed，总覆盖率 87.80%，
+  18 个可执行源码变更行覆盖率 100%；Ruff、format、mypy、whitespace 全部通过。
+- GitHub 实际合并时间：2026-09-07T10:03:08Z；merge commit：
+  `00d1838f23d1b02b02f5b4bc0eb64fe11a2504ed`。
+- 使用普通 merge commit 并匹配精确受检 head，未绕过保护、未删除分支。
+- fetch 后核实该 merge 已进入 origin/main，两个任务的 subject `b8cd477`、`6c7b73a`
+  及受检 PR head 均是该 merge 的祖先，随后由 CLI close 为两任务追加 MERGED 事件。
+- 后续发布仅包含真实关闭账本与交付说明，作为同次已授权交付的机械收尾；
+  使用单独的动作记录和必需 CI，不复用已使用的一次性 action 记录。
+- 关闭/契约/入口/追踪相关的 135 项定向测试通过，两个 task 的原事件前缀逐行一致，
+  仅分别追加 1 与 3 条事件；任务合同和 whitespace 通过。
+
+本补记不将合并后的 HEAD 当作原始 Gate 绑定版本，也不修改旧 evidence 来掩盖差异。
