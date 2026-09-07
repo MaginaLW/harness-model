@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "c4aca3c983f4683fb5b9b9dfc350a8458df7908ffeacb83b5380c562405411f8",
+  "action_type": "merge",
+  "target": "The MaginaLW/harness-model ledger-only pull request from codex/ask-obligation-closeout into main",
+  "parameter_summary": "Merge the single TASK-0046 audit closeout PR once after required CI success, using a normal merge commit and matching the exact tested head; do not close the already merged task again for this ledger PR.",
+  "subject_commit": "41332307250675d6e5802d4a3cf2b8e086613184",
+  "conditions": [
+    "This publishes only the real merge record and notes for the same owner-authorized implementation delivery.",
+    "The PR base is main and head is codex/ask-obligation-closeout; every changed path is within .ai/tasks/TASK-0046 and no source, tests, Policy, Schema, CI or permission change is present.",
+    "The required ai-quality-gate succeeds for the exact current PR head and GitHub reports the PR mergeable and clean.",
+    "TASK-0046 validates as MERGED with the original implementation PR merge commit; do not regenerate historical evidence or require another code approval.",
+    "Use no administrator bypass, force push, branch deletion, deployment, release, tag, permission change or unrelated external action."
+  ],
+  "expires_at": "2026-09-08T14:45:00Z",
+  "single_use": true
+}

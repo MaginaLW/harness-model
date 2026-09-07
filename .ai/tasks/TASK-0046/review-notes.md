@@ -87,3 +87,16 @@ APPROVED_FOR_MERGE。随后实际 Gate 通过，reason_codes 与 recovery_argv �
 本次仅追加批准及本任务记录，没有修改实现或既有证据。status 所示 external_merge
 是尚未发生的外部交付，不是新的内部代码审批缺项；不得据此直接记录 MERGED。
 代码批准不授权推送、创建远端 PR、合并或部署，这些动作仍未执行。
+
+## 2026-09-07 外部交付授权补记
+
+项目所有者随后明确回复“授权”，批准推送 codex/ask-obligation-repair、创建 PR，
+并在必需 CI 成功后合并到 main。本次新授权单独绑定 push 与 merge 动作，不从先前
+spec/code 批准推导，也不修改已冻结的实现事实；动作说明包含精确分支、版本和条件。
+远端核对确认 main 要求 ai-quality-gate、严格更新检查且保护适用于管理员，保持不变。
+不授权强推、删除分支、部署、修改权限或无关交付。实际执行和合并事实将在发生后追加。
+
+同次交付的机械收尾预先另列两个一次性动作：实现 PR 实际合并后，CLI close 记录其
+真实 merge commit，仅以 codex/ask-obligation-closeout 的账本 PR 发布关闭事实和
+交付说明，并等待该 PR 自身必需 CI 后正常合并。不为账本 PR 再关闭任务，不递归创建
+关闭记录 PR，不改变实现或已验证的历史证据。

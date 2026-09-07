@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "c4aca3c983f4683fb5b9b9dfc350a8458df7908ffeacb83b5380c562405411f8",
+  "action_type": "push",
+  "target": "origin refs/heads/codex/ask-obligation-repair in MaginaLW/harness-model",
+  "parameter_summary": "Push the reviewed branch through 6e4247d862841d9894569ef66f41ac9afae8976a plus its TASK-0046 authorization and PR-description records, set upstream without force, and create its pull request against main.",
+  "subject_commit": "41332307250675d6e5802d4a3cf2b8e086613184",
+  "conditions": [
+    "The project owner explicitly authorized pushing this branch, creating its PR, and merging only after required CI passes.",
+    "Only TASK-0046 delivery authorization, review notes and PR-description records may differ from reviewed head 6e4247d862841d9894569ef66f41ac9afae8976a before this push.",
+    "TASK-0046 Gate passes and the worktree is clean; the remote branch does not contain unrelated work.",
+    "No force push, branch deletion, deployment, release, tag, permission change, or unrelated ref update is authorized."
+  ],
+  "expires_at": "2026-09-08T14:45:00Z",
+  "single_use": true
+}
