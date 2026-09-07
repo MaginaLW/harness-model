@@ -18,8 +18,11 @@
   外部交付及真实合并记录见下节，不需要新的本地 spec/code 批准。
 - 本轮文档收尾：纠正状态说明中“bootstrap 标记不存在、每项变更必建 task”，
   修正处置目录顶层状态、B3 状态与 README 在途说明。
+- TASK-0046：ASK 义务修复已通过 PR #33 合入，关闭记录已通过 PR #34 发布；
+  REVIEW+ASK 先等待方向选择，再保留原 REVIEW 审核，BLOCK 优先级不变。
+  当前状态 MERGED，Missing / Next 均为 none，不需要重新批准或移植旧候选。
 
-交付后固定快照 `8ee402d` 的运行账本共有 44 个 task：36 MERGED / 7 BLOCKED /
+交付后固定快照 `2e00d78` 的运行账本共有 45 个 task：37 MERGED / 7 BLOCKED /
 1 APPROVED_FOR_MERGE，最后一项是保留原处置决定的 TASK-0028。后续新 task 会改变数量；用
 `python tools/analysis/approval_overhead.py --format text` 读取最新快照。
 
@@ -37,18 +40,25 @@ whitespace、Ruff、format、mypy 均通过。未绕过保护，未删除源分�
 并合并为 `8ee402d`：1634 passed，总覆盖率 87.80%，没有新增可执行源码行。
 关闭记录已进入 main；不提前关闭未来工作，也不改写旧证据。
 
+[PR #33](https://github.com/MaginaLW/harness-model/pull/33) 已合并为 `9baa0cb`，
+[PR #34](https://github.com/MaginaLW/harness-model/pull/34) 已合并为 `2e00d78`。
+精确受检 head 分别为 `deb05ad`、`e10c8a3`，两次 required CI 均成功：
+各 1657 项测试通过，总覆盖率 87.90%；实现有 19 个可执行差异行且全部覆盖，
+关闭记录没有新增可执行源码行。TASK-0046 仅对真实实现合并执行一次 close。
+重新只读查询时远端 main 为 `2e00d78`，开放 PR / issue 均为 0；这不是持续监控结果。
+
 ## 剩余工作与明确处置
 
 | 项目 | 当前证据与下一步 |
 |---|---|
 | 本轮交付 | 上轮修复、本轮文档与维护修复已通过 PR #31 合入 main；TASK-0044、0045 的真实关闭记录已通过 PR #32 发布，不再是待实现功能。 |
 | 工作区忽略规则 | TASK-0045 的仓库级 `/.claude/worktrees/` 规则已随 PR #31 合入，新克隆可继承；仅忽略根目录下的 worktree 副本，保留 `.claude/skills/` 等配置可见。验证记录见该任务的 `evidence.json` 与核查补记。 |
-| ASK 义务修复 | `1033a46` 提供 4 个源码文件与对应测试的候选修复：同一单元同时命中 REVIEW 和 ASK 时不能丢失方向选择义务。当前源码仍按最终 route 找 ASK，问题存在。建议作为下一项独立任务重新移植并验证，不直接合并旧分支。 |
+| ASK 义务修复 | 已由 TASK-0046 独立实现、完整验证并通过 PR #33、#34 交付；旧 `1033a46` 仅作为代码参考，没有复用旧任务批准或失败证据。 |
 | TASK-0028 历史收尾 | 代码已在 main，状态仍需重验；在 `8ee402d` 的 main 上实测 Gate 有 9 条拒绝理由，旧 10 条为另一历史快照，分支上下文会影响输出。维持已有选项 C；仅在所有者选择重验或改变历史处置方式后推进，不用 `close` 绕过已记录的决定。 |
-| 效果验证 | 已固定[交付后账本基线与观察方法](effect-observations.md)，但真实人工打断、耗时、返工工作量和缺陷率仍未知；尚未运行自动采集或实际效果对照。 |
+| 效果验证 | 已固定[基线、方法与首个真实观察](effect-observations.md)：TASK-0046 的可见决定请求为 3 组，对应 6 条批准记录；人类工作分钟、同类对照及成熟缺陷观察仍缺失，不宣称成本或缺陷率改善。没有自动采集。 |
 | 已登记的引擎缺口 | 见下节。属于后续风险控制设计/实现，不混入本次文档与目录忽略修复。 |
 
-ASK 候选所在的 `claude/unruffled-gates-41d3ec` 工作区仍被 Git 注册且干净，
+ASK 旧候选所在工作区仍被 Git 注册，盘点时干净且处于 detached 状态，
 HEAD 为 `6091b47`。其旧 TASK-0042 验证为 FAILED；main 的同号 task 是另一项
 `.gitattributes` 工作，已 MERGED。必须保留这一区别，不能复用批准、证据或直接搬入账本。
 
@@ -81,5 +91,6 @@ HEAD 为 `6091b47`。其旧 TASK-0042 验证为 FAILED；main 的同号 task 是
 - `python -m aiflow status TASK-0028` 与 `python -m aiflow gate TASK-0028 --format json`：历史阻断。
 - `python -m aiflow status TASK-0045`：读取本轮配置修复的关闭状态；合并前 Gate 事实
   见该任务核查补记及其记录版本。
-- `git log main..claude/unruffled-gates-41d3ec --oneline`：ASK 候选提交。
+- `python -m aiflow status TASK-0046`：读取已交付 ASK 修复的关闭状态。
+- `git log main..claude/unruffled-gates-41d3ec --oneline`：旧候选历史，不等于当前待实现清单。
 - 远端开放项、保护配置与分支位置会变化，交付前重新读取；本页的只读快照不是授权。
