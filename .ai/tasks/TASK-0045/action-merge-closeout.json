@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "073a67fb6cf5068449720e28703ef22581f0ee7dfe663a40fe4fd98e1a0c9772",
+  "action_type": "merge",
+  "target": "The MaginaLW/harness-model pull request from codex/maintenance-closeout into main",
+  "parameter_summary": "Merge this reviewed cumulative delivery once using a merge commit, preserving source commits and branches; require the exact tested PR head at merge time.",
+  "subject_commit": "6c7b73ab2b190b5659179118d5d4eb6ff7f3772c",
+  "conditions": [
+    "The project owner explicitly authorized this branch delivery and merge only after all required CI succeeds.",
+    "The PR head contains reviewed head 253786b11e890e01be51f3e9656077679f775e39 and only its TASK-0045 authorization ledger additions.",
+    "The required ai-quality-gate is completed successfully for the exact current PR head.",
+    "GitHub reports the PR mergeable and clean, with base main and head codex/maintenance-closeout.",
+    "TASK-0045 Gate passes on its recorded branch and TASK-0044 Gate passes on its preserved recorded branch.",
+    "Use normal protected merge, without administrator bypass, force push, branch deletion, deployment, tag, release, or other external changes."
+  ],
+  "expires_at": "2026-09-08T09:56:07Z",
+  "single_use": true
+}
