@@ -1,13 +1,4 @@
-schema_version: '1.0'
-task_id: TASK-0046
-goal: 恢复同一决策单元 REVIEW 与 ASK 共同命中时的方向选择义务，保留 REVIEW 审核和既有阻断优先级
-repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
-branch: codex/ask-obligation-repair
-base_commit: 47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2
-subject_commit: 47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2
-worktree_dirty: false
-worktree_dirty_paths: []
-allowed_scope: &id001
+allowed_scope:
 - src/aiflow/routing.py
 - src/aiflow/classification_service.py
 - src/aiflow/ask_service.py
@@ -17,21 +8,35 @@ allowed_scope: &id001
 - tests/integration/test_answer_command.py
 - tests/integration/test_gate_command.py
 - docs/operations/low-intervention.md
-forbidden_actions:
-- push
-- merge
-- deploy
-- delete
-- secret_export
-- paid_external_call
-current_state: WAITING_FOR_SPEC_REVIEW
+base_commit: 47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2
+branch: codex/ask-obligation-repair
 created_at: '2026-09-07T13:44:03Z'
-updated_at: '2026-09-07T13:46:45Z'
+current_state: IMPLEMENTING
 decision_units:
-- schema_version: '1.0'
-  task_id: TASK-0046
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
   decision_unit_id: DU-001
+  external_side_effects: []
   goal: 恢复同一决策单元 REVIEW 与 ASK 共同命中时的方向选择义务，保留 REVIEW 审核和既有阻断优先级
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/routing.py
+  - src/aiflow/classification_service.py
+  - src/aiflow/ask_service.py
+  - src/aiflow/gate.py
+  - tests/unit/test_routing.py
+  - tests/integration/test_classify_command.py
+  - tests/integration/test_answer_command.py
+  - tests/integration/test_gate_command.py
+  - docs/operations/low-intervention.md
   inputs:
   - Current classification, ASK answer and Gate collapse ASK obligations into the
     final route.
@@ -39,14 +44,24 @@ decision_units:
     route.
   - Candidate 1033a46 is a code reference only; its old TASK-0042 ledger and failed
     evidence are excluded.
+  permission_requirements: []
   planned_actions:
   - Derive the ASK obligation from validated matched_rules while preserving effective
     routing.
   - Apply that obligation consistently in classification, answering and Gate.
   - Detect lost ASK obligations during same-or-lower-route reclassification.
   - Verify the inseparable regression cases and document the corrected workflow.
-  impact_scope: *id001
+  protections:
+    dry_run: false
+    verified_backup: false
   reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0046
+  verification:
+    automatic: true
+    tools_missing: false
   verification_methods:
   - Exercise REVIEW plus ASK through the real classify, answer, review and Gate lifecycle.
   - Verify BLOCK priority, REVIEW-only behavior, multiple decision units and downgrade
@@ -55,31 +70,25 @@ decision_units:
     without writes.
   - Run full V1 and independently enforce 85 percent total and 90 percent diff coverage.
   - Run Ruff, format, mypy, whitespace and independent design and implementation review.
-  external_side_effects: []
-  permission_requirements: []
-  scope:
-    clear: true
-  impact:
-    level: medium
-  protections:
-    verified_backup: false
-    dry_run: false
-  verification:
-    automatic: true
-    tools_missing: false
-  impact_categories: []
-  business_direction_count: 1
-  change_characteristics:
-    mechanical: false
-    behavior_changed: true
-    code_modified: true
-    interaction_scope: cross_module
-    regression_risk: true
-    error_detectability: high
   verification_requirements:
     acceptance_required: false
+    independent_verifier_required: false
     integration_required: false
     targeted_mutation_required: false
-    independent_verifier_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
 frozen_spec_sha256: ee3c75a267da95a792941947f19b70395d8d66d8dad644fd49a2118d74cc4ac5
+goal: 恢复同一决策单元 REVIEW 与 ASK 共同命中时的方向选择义务，保留 REVIEW 审核和既有阻断优先级
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
 spec_frozen_at: '2026-09-07T13:46:45Z'
+subject_commit: 47b7de4e7a7d94d85ed93f24e0774c8ef3474ba2
+task_id: TASK-0046
+updated_at: '2026-09-07T13:58:49Z'
+worktree_dirty: false
+worktree_dirty_paths: []

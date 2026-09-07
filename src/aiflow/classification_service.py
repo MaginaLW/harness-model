@@ -13,7 +13,7 @@ from aiflow.decision_units import classification_input_digest, parse_decision_un
 from aiflow.errors import AiflowError, ContractError, StateTransitionError
 from aiflow.git_context import collect_git_context, commits_are_ancestral
 from aiflow.policy import load_policy_bundle
-from aiflow.routing import ROUTE_ORDER, route_task
+from aiflow.routing import ROUTE_ORDER, entry_requires_ask, route_task
 from aiflow.scope import matches_scope, normalize_repository_path
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import TaskRecord, read_task_record_strict, transition_task_record
@@ -71,7 +71,7 @@ def _target(
 ) -> tuple[str, str, set[str]]:
     if blocked or route == "BLOCK":
         return "BLOCKED", "classification_blocked", {"blocking_condition_recorded"}
-    if any(entry.get("route") == "ASK" for entry in entries):
+    if any(entry_requires_ask(entry) for entry in entries):
         return "WAITING_FOR_ASK", "ask_required", {"classification_route_selected"}
     if route == "REVIEW":
         return "WAITING_FOR_SPEC_REVIEW", "spec_review_required", {"classification_route_selected"}
@@ -330,8 +330,15 @@ def _is_downgrade(
         old = old_by_id.get(entry["decision_unit_id"])
         if not isinstance(old, Mapping):
             continue
+        route_index = ROUTE_ORDER.index(str(entry["route"]))
+        old_route_index = ROUTE_ORDER.index(str(old.get("route")))
+        # Losing ASK under an unchanged REVIEW route is otherwise invisible here.
+        # A higher route retains the existing upgrade behavior, including BLOCK.
+        ask_dropped = entry_requires_ask(old) and not entry_requires_ask(entry)
+        if ask_dropped and route_index <= old_route_index:
+            return True
         if (
-            ROUTE_ORDER.index(str(entry["route"])) < ROUTE_ORDER.index(str(old.get("route")))
+            route_index < old_route_index
             or entry["verification_level"] in VERIFICATION_LEVEL_ORDER
             and old.get("verification_level") in VERIFICATION_LEVEL_ORDER
             and VERIFICATION_LEVEL_ORDER.index(str(entry["verification_level"]))

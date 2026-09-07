@@ -246,6 +246,21 @@ def route_decision_unit(unit: Mapping[str, object], bundle: PolicyBundle) -> Rou
     return RouteDecision(identifier, effective, tuple(hits), tuple(hit.explanation for hit in hits))
 
 
+def entry_requires_ask(entry: Mapping[str, object]) -> bool:
+    """Read the ASK obligation from a validated classification entry.
+
+    REVIEW outranks ASK in the effective route, but does not discharge a co-matched
+    ASK rule. Production callers validate persisted classification contracts before
+    using this helper; it is not a substitute for rejecting malformed rule lists.
+    """
+    if entry.get("route") == "ASK":
+        return True
+    rules = entry.get("matched_rules")
+    if not isinstance(rules, list):
+        return False
+    return any(isinstance(rule, Mapping) and rule.get("route") == "ASK" for rule in rules)
+
+
 def _is_completed(unit: Mapping[str, object]) -> bool:
     return (
         unit.get("completed") is True

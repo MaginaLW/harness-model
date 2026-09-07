@@ -17,6 +17,7 @@ from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import ContractError, StateTransitionError, StorageError
 from aiflow.policy import load_policy_bundle
+from aiflow.routing import entry_requires_ask
 from aiflow.specification import SpecificationAssessment, validate_specification
 from aiflow.state import create_transition_event
 from aiflow.storage import atomic_write_json, atomic_write_text, read_task_json, resolve_task_path
@@ -75,13 +76,10 @@ def target_state_after_answer(classification: Mapping[str, object]) -> str:
     entries = classification.get("classifications")
     if not isinstance(entries, list):
         raise _invalid("Classification is invalid for an ASK answer", "ASK_CLASSIFICATION_INVALID")
-    routes = {
-        entry.get("route")
-        for entry in entries
-        if isinstance(entry, Mapping) and isinstance(entry.get("route"), str)
-    }
-    if "ASK" not in routes:
+    units = [entry for entry in entries if isinstance(entry, Mapping)]
+    if not any(entry_requires_ask(entry) for entry in units):
         raise _invalid("Classification does not contain an ASK decision", "ASK_ROUTE_MISSING")
+    routes = {entry.get("route") for entry in units if isinstance(entry.get("route"), str)}
     return "WAITING_FOR_SPEC_REVIEW" if "REVIEW" in routes else "READY_TO_IMPLEMENT"
 
 
@@ -183,7 +181,7 @@ def prepare_answer(
     entries = classification.get("classifications")
     assert isinstance(entries, list)
     ask_entries = [
-        entry for entry in entries if isinstance(entry, Mapping) and entry.get("route") == "ASK"
+        entry for entry in entries if isinstance(entry, Mapping) and entry_requires_ask(entry)
     ]
     if len(ask_entries) != 1:
         raise _invalid(
