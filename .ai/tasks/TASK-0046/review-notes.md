@@ -100,3 +100,28 @@ spec/code 批准推导，也不修改已冻结的实现事实；动作说明包�
 真实 merge commit，仅以 codex/ask-obligation-closeout 的账本 PR 发布关闭事实和
 交付说明，并等待该 PR 自身必需 CI 后正常合并。不为账本 PR 再关闭任务，不递归创建
 关闭记录 PR，不改变实现或已验证的历史证据。
+
+## 2026-09-07 实际合并与关闭
+
+- [实现 PR #33](https://github.com/MaginaLW/harness-model/pull/33)。
+- 推送并受检的精确 head：`deb05ade0ce29a3a85b6624c35578b5404c445e1`。
+- Required CI run `34134761236` 成功：Linux 1,657 项测试通过，总覆盖率（含分支）
+  87.90%，19 行可执行差异覆盖率 100%；Ruff、format、mypy、whitespace 均通过。
+- 合并前重新核对 PR 为 CLEAN / MERGEABLE，head 未变化，TASK-0046 Gate PASS。
+  使用普通 merge commit 和精确 head 匹配，没有管理员绕过、强推、删除分支或部署。
+- GitHub 实际合并时间：2026-09-07T14:52:09Z；merge commit：
+  `9baa0cb4f91faf88b2b09b8eb01734a1096d1f8e`。
+- fetch 后分别验证已批准 subject 与受检 head 都是该 merge 的祖先，且该 merge
+  已进入 origin/main，然后执行 CLI close，追加 merge_recorded 并进入 MERGED。
+  status 为 Missing: none；未手改状态或重新生成既有证据。
+
+action-push-delivery.json 与 action-merge-delivery.json 所记录的一次性动作已各执行一次，
+不复用。预先单独记录的 closeout 动作仅用于发布本次真实关闭事件、状态和说明；
+账本 PR 自身仍受必需 CI 约束，不为它再次调用 close 或创建递归的关闭记录。
+
+以上远端覆盖率属于本次 Linux CI，未用其数值替换原 Windows 本地证据的 87.98%。
+人工审核耗时、实际打断次数与缺陷逃逸仍没有可据此推断的真实结果。
+
+关闭记录的本地检查：begin/close 与 contracts 两组共 109 项测试通过，任务契约和
+whitespace 通过；相对实现 merge，源码、测试、Policy、Schema、CI、批准、规格、
+分类与既有证据均未改变。
