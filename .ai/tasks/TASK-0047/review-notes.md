@@ -123,3 +123,23 @@ gate_required 提示不推翻已实跑的 Gate PASS，以 Gate 的确定性结�
 本任务截至代码接受共 3 次 spec、1 次 code 的真实人类输入，分别映射 6 条和 2 条
 DU 批准记录；不存在 action 批准。旧失败 run、历史批准及审查均保留。
 本轮只保存本地收尾记录，不推送、合并、部署或修改外部系统；尚未合并，不调用 close。
+
+## 后续外部交付授权
+
+所有者在上述本地收尾后明确回复“授权”。本次将其用于已审核 TASK-0047 的正常推送、
+创建实现 PR、必需 CI 成功后正常合并，以及同次交付必要的一次 ledger-only 关闭回填。
+它不来自旧 spec/code 批准，不改变冻结实现，不包含具体部署、删除、强推、发布/tag、
+凭据导出、付费调用、权限或分支保护修改。部署没有明确目标，不执行。
+
+四份 action 文件分别限定实现 push/merge 与关闭回填 push/merge，均绑定当前 subject、
+明确目标分支、条件、期限及 single_use。关闭回填只发布实际实现 merge 的 CLI close
+记录与交付说明，须自身 required CI 成功；不复用实现动作，不再为账本 merge 调用 close，
+不递归创建第三个 PR。该第二步是同次授权交付的机械收尾，不是另一个实现项目。
+
+这些 action 批准仅是现有 CLI 的审计记录，不是可信身份认证或通用执行消费者，
+pre-command 对 push/merge 仍拒绝，不修改 forbidden_actions 或伪造消费 receipt。
+实际执行前由 Agent 核对当前 Gate、精确 PR head、required CI、保护与合并条件。
+
+远端 main 在核查时仍为 `2e00d786474feb6d06ae68e3a5607bb7a9f581e2`；严格 required
+ai-quality-gate、管理员保护、禁止强推和禁止删除均保留。当前维护模式的 CI 对精确
+PR head 执行完整质量检查，并非运行 TASK-0047 的远端 task Gate；本地 Gate 单独核对。

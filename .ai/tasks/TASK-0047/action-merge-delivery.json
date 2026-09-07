@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-08T20:15:00Z",
+  "single_use": true,
+  "action_type": "merge",
+  "target": "The MaginaLW/harness-model PR from codex/risk-input-followups into main",
+  "parameter_summary": "Merge this approved delivery once using a normal merge commit, preserving source commits and branches, and matching the exact CI-tested PR head.",
+  "conditions": [
+    "This is the same owner-authorized external delivery, not an authorization derived from spec or code approval.",
+    "The PR contains reviewed head fb79a39cdbd4be61a68e1f3d9ef78b462e805b3e plus only TASK-0047 authorization, delivery notes and PR-description records.",
+    "The required ai-quality-gate succeeds for the exact current PR head; GitHub reports base main, head codex/risk-input-followups, MERGEABLE and CLEAN, with required conversations resolved.",
+    "TASK-0047 Gate passes on its recorded branch immediately before merge; preserve main protection and strict required checks.",
+    "No administrator bypass, force push, branch deletion, deployment, release, tag, permission change or unrelated action."
+  ]
+}

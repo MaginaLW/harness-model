@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-08T20:15:00Z",
+  "single_use": true,
+  "action_type": "push",
+  "target": "origin refs/heads/codex/risk-input-closeout in MaginaLW/harness-model",
+  "parameter_summary": "After the implementation PR actually merges, publish one ledger-only closeout branch and PR to record TASK-0047's actual merge and close result as the mechanical completion of this same authorized delivery.",
+  "conditions": [
+    "This is limited to the mechanical audit closeout of this delivery, with no new implementation or broader external authority.",
+    "The implementation PR merged into main after exact-head required CI success; its tested head and subject are ancestors of the actual merge commit.",
+    "CLI close recorded the actual implementation merge; preserve all historical events, approvals and evidence.",
+    "Compared with updated main, every change is within .ai/tasks/TASK-0047 and only publishes task state, appended events, delivery notes and closeout PR description.",
+    "The worktree is clean and no unrelated remote work is overwritten; no force push, deletion, deployment, tag, release or protection change."
+  ]
+}
