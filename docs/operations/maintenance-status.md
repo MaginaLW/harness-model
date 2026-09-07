@@ -28,7 +28,7 @@
 | 项目 | 当前证据与下一步 |
 |---|---|
 | 当前本地交付 | TASK-0044 的三个提交尚未推送；本轮文档与维护修复在独立分支 `codex/maintenance-closeout` 准备。取得针对这次交付的 push/PR/merge 授权后，按平台 required check 完成集成；不得把本地 Gate 当作远端 CI 结果。 |
-| 工作区忽略规则 | `.claude/worktrees/` 仅由本机 exclude 排除，新克隆不能继承；本轮单独维护 task 补充仓库级忽略规则，验证记录以该 task 为准。应只忽略根目录下的 worktree 副本，保留 `.claude/skills/` 等配置可见。 |
+| 工作区忽略规则 | TASK-0045 已补充仓库级 `/.claude/worktrees/` 规则，新克隆可继承；仅忽略根目录下的 worktree 副本，保留 `.claude/skills/` 等配置可见。最终验证记录见该任务的 `evidence.json` 与核查补记。 |
 | ASK 义务修复 | `1033a46` 提供 4 个源码文件与对应测试的候选修复：同一单元同时命中 REVIEW 和 ASK 时不能丢失方向选择义务。当前源码仍按最终 route 找 ASK，问题存在。建议作为下一项独立任务重新移植并验证，不直接合并旧分支。 |
 | TASK-0028 历史收尾 | 代码已在 main，当前状态仍需重验，Gate 有 10 条拒绝理由。维持已有选项 C；仅在所有者选择重验或改变历史处置方式后推进，不用 `close` 绕过已记录的决定。 |
 | 已登记的引擎缺口 | 见下节。属于后续风险控制设计/实现，不混入本次文档与目录忽略修复。 |
@@ -61,8 +61,10 @@ HEAD 为 `6091b47`。其旧 TASK-0042 验证为 FAILED；main 的同号 task 是
 ## 重放入口
 
 - `python tools/analysis/approval_overhead.py --format text`：账本快照。
-- `python -m aiflow status TASK-0044` 与 `gate TASK-0044 --format json`：
+- `python -m aiflow status TASK-0044` 与 `python -m aiflow gate TASK-0044 --format json`：
   在其记录分支上复核本地交付；其他分支/HEAD 的结果不能直接套用。
-- `python -m aiflow status TASK-0028` 与 `gate TASK-0028 --format json`：历史阻断。
+- `python -m aiflow status TASK-0028` 与 `python -m aiflow gate TASK-0028 --format json`：历史阻断。
+- `python -m aiflow status TASK-0045` 与 `python -m aiflow gate TASK-0045 --format json`：
+  在 `codex/maintenance-closeout` 记录分支上核对本轮配置修复。
 - `git log main..claude/unruffled-gates-41d3ec --oneline`：ASK 候选提交。
 - 远端开放项、保护配置与分支位置会变化，交付前重新读取；本页的只读快照不是授权。
