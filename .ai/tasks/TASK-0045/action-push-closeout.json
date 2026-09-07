@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "073a67fb6cf5068449720e28703ef22581f0ee7dfe663a40fe4fd98e1a0c9772",
+  "action_type": "push",
+  "target": "origin refs/heads/codex/maintenance-closeout in MaginaLW/harness-model",
+  "parameter_summary": "Push the reviewed cumulative branch through 253786b11e890e01be51f3e9656077679f775e39 plus its TASK-0045 action-authorization ledger commit; set upstream without force and create a pull request against main.",
+  "subject_commit": "6c7b73ab2b190b5659179118d5d4eb6ff7f3772c",
+  "conditions": [
+    "The project owner explicitly replied authorization to the proposal to push this branch, create its PR, and merge after required CI passes.",
+    "Only TASK-0045 authorization records may differ from reviewed head 253786b11e890e01be51f3e9656077679f775e39 before this push.",
+    "TASK-0045 Gate passes on its recorded branch and TASK-0044 Gate passes on its preserved recorded branch.",
+    "The worktree is clean and the remote target branch does not already contain unrelated work.",
+    "No force push, deletion, deployment, tag, release, permission change, or unrelated ref update is authorized."
+  ],
+  "expires_at": "2026-09-08T09:56:07Z",
+  "single_use": true
+}

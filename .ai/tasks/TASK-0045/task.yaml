@@ -1,0 +1,73 @@
+allowed_scope:
+- .gitignore
+- docs/operations/maintenance-status.md
+base_commit: e97d29ff69f67131a62c804781a2ca849d0879e8
+branch: codex/maintenance-closeout
+created_at: '2026-09-07T06:12:39Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: local
+    mechanical: true
+    regression_risk: true
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: 补齐根目录 .claude/worktrees 的仓库级忽略规则，使新克隆不会误跟踪工作区副本，并记录维护收尾验证
+  impact:
+    level: low
+  impact_categories: []
+  impact_scope:
+  - .gitignore
+  - docs/operations/maintenance-status.md
+  inputs:
+  - The current gitignore omits the root .claude/worktrees directory.
+  - The shared local Git exclude covers worktrees but is not distributed in new clones.
+  - Registered worktrees contain retained unmerged work and must remain untouched.
+  permission_requirements: []
+  planned_actions:
+  - Add the anchored root worktree ignore pattern to the tracked gitignore.
+  - Check Git pattern provenance and negative paths, then record maintenance verification.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0045
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - git check-ignore --no-index -v must report the tracked .gitignore pattern for
+    root worktree paths.
+  - Root Claude skills and config plus nested non-root worktree paths must remain
+    visible.
+  - Run full active Policy verification, 85% total coverage, 90% diff coverage and
+    Gate.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 8074ea2df252c96659992fb3c8d0fb5021f44da699e164b08c06dd885d099c27
+goal: 补齐根目录 .claude/worktrees 的仓库级忽略规则，使新克隆不会误跟踪工作区副本，并记录维护收尾验证
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-07T06:14:09Z'
+subject_commit: 6c7b73ab2b190b5659179118d5d4eb6ff7f3772c
+task_id: TASK-0045
+updated_at: '2026-09-07T09:57:03Z'
+worktree_dirty: false
+worktree_dirty_paths: []

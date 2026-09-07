@@ -2,7 +2,9 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前治理模式：项目所有者已明确决定进入仓库维护模式并重建 bootstrap 标记，task-free 例外已启用。本次进入 PR 仍由目标分支当时缺失的标记触发正式路径；合并后的后续代码、配置、CI 或行为变更不再强制创建 AI Flow task。维护模式只解除任务账本的强制性：CI 质量门禁的每一项检查与阈值、`main` 分支保护、以及高风险动作必须单独获批的要求都不放松，AI Flow CLI 保持完全可用。进入维护模式不授权任何外部或破坏性动作；恢复强制模式只需删除标记文件。
+> 当前治理模式：仓库维护模式，task-free 例外已启用。日常变更先按 [AGENTS.md](AGENTS.md) 的升级清单判断是否需要 task；清单之外适用例外的工作由 Agent 连续完成并通过 CI。维护模式只解除任务账本的强制性：CI 质量门禁的每一项检查与阈值、`main` 分支保护、以及高风险动作必须单独获批的要求都不放松，AI Flow CLI 保持完全可用。进入维护模式不授权任何外部或破坏性动作；恢复强制模式须由项目所有者明确决定。
+
+项目同时追求可靠交付和减少人工介入。章节完成、测试通过证明的是已实现能力及其检查结果，尚不能证明真实任务中的人工时间或缺陷率下降。日常使用从[低干预工作方式](docs/operations/low-intervention.md)开始；用只读开销报告复算账本指标，区分机器步骤、必要决定与重复请求。
 
 > 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.2.0`。V1/V2 的完整回归和 coverage XML 检查分别使用 900 秒和 1200 秒上限，未减少检查或降低覆盖率门槛。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
@@ -28,7 +30,8 @@
 | [阶段二证据索引](docs/implementation/phase-02-evidence-index.md) | REVIEW/V2/CI/Gate 历史证据与当前回归基线的可重放边界 |
 | [阶段二验收报告](docs/implementation/phase-02-acceptance-report.md) | Chapter 13 exits、整库质量结果、Gate 与残余限制 |
 | [阶段三进入输入](docs/implementation/phase-03-entry-inputs.md) | 阶段二结束后的可审计输入和仍未满足的阶段三进入门；不构成授权 |
-| [审批开销治理与未完成任务收敛实施目录](docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md) | 当前唯一在途实施目录：账本审批开销的实测诊断、15 个未收尾 task 的终态，以及 Policy/批准/账本四章改造计划 |
+| [审批开销治理与未完成任务收敛实施目录](docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md) | 历史诊断与处置记录：A2 仅余 TASK-0028，B0–B2 停止、B3 已解决、B4 暂缓；不是待逐章启动的实施队列 |
+| [维护收尾与待办](docs/operations/maintenance-status.md) | 已完成项、当前交付、保留的历史任务与后续工程缺口；附可复核基线和下一步 |
 | [文档归档](docs/archive/README.md) | 章节 1–7 逐任务执行文档的归档位置、归档原则与原路径映射表 |
 | [资源感知多智能体调度设计](docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) | “编排顾问 + 确定性控制面”、整机资源租约、背压与恢复设计 |
 | [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |
@@ -36,6 +39,7 @@
 | [Agent 规则](AGENTS.md) | 所有 Agent 的简短常驻约束 |
 | [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口；共同治理规则以 Agent 规则为准 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
+| [低干预工作方式](docs/operations/low-intervention.md) | Agent 连续推进、必要人工决定的边界与可重跑的审批开销统计 |
 | [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence、证据保留与精确清理边界 |
 | [阶段一验收报告](docs/implementation/phase-01-acceptance-report.md) | 十二项验收、四试点、覆盖率、限制和风险接受 |
 | [Chapter 8 追踪](docs/implementation/chapter-08-structured-review.md) | 结构化设计/实现审核的任务状态和兼容性护栏 |
@@ -75,8 +79,8 @@ Chapters 1–7 按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-c
 仓库处于维护模式；以下步骤适用于本仓库后续代码、配置、CI 或行为变更。
 
 1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时，再阅读其 [平台适配入口](CLAUDE.md)。
-2. 先核对 [overall state](docs/superpowers/state/overall.yaml) 与当前 chapter state，再按对应阶段的设计和实施目录选择下一项工作。
-3. 变更无需强制创建 task，但仍须通过 CI 质量门禁；风险较高、需要留痕或需要人类决策的变更应主动走 AI Flow。
+2. 日常维护按具体问题与[低干预工作方式](docs/operations/low-intervention.md)推进；只有推进阶段路线时才核对 [overall state](docs/superpowers/state/overall.yaml) 与对应 chapter state，不为普通修复增加阶段进入审批。
+3. 升级清单中的变更须创建或恢复 task；清单之外适用维护模式例外的工作直接实施并通过 CI 质量门禁。需要人类决定或风险较高的变更仍应主动走 AI Flow。
 4. 使用 AI Flow 时，以已安装 CLI、active Policy 与当前 task ledger 的确定性结论为准，保留范围、决定、批准与验证证据；出现变化时升级，不自行降级或跳过 Gate。
 
 ## 运行期 observation 与 Hooks 的当前边界

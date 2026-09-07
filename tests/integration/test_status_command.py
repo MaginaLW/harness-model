@@ -11,11 +11,19 @@ from typing import Any
 
 import pytest
 import yaml
+from test_approve_command import _record_review, review_package
+from test_gate_command import _prepare_gate
 
 from aiflow import status_service
 from aiflow.cli import main
 from aiflow.state import TRANSITIONS, create_record_event, create_transition_event
-from aiflow.storage import atomic_write_json, atomic_write_text, atomic_write_yaml
+from aiflow.storage import (
+    atomic_write_json,
+    atomic_write_text,
+    atomic_write_yaml,
+    read_task_json,
+    resolve_task_path,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
@@ -299,6 +307,251 @@ def test_status_does_not_treat_unrequested_action_approval_as_stale(
     assert main(["status", "TASK-0001", "--format", "json"]) == 0
     summary = json.loads(capsys.readouterr().out)
     assert summary["approvals"] == "not_applicable"
+
+
+def _approve_current_review_implementation(
+    repository: Path,
+    tmp_path: Path,
+) -> None:
+    """Finish the real REVIEW lifecycle with a current implementation approval."""
+    resolve_task_path(repository, "TASK-0001", "review-package.md").write_text(
+        review_package(), encoding="utf-8"
+    )
+    _record_review(
+        repository,
+        tmp_path,
+        stage="implementation",
+        review_id="REV-9001",
+    )
+    assert (
+        main(
+            [
+                "approve",
+                "TASK-0001",
+                "--type",
+                "code",
+                "--actor",
+                "reviewer",
+                "--reason",
+                "implementation is current",
+            ]
+        )
+        == 0
+    )
+
+
+def test_status_uses_current_review_approvals_not_stale_history(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A replacement approval must restore status just as it restores Gate eligibility."""
+    repository = _prepare_gate(tmp_path, monkeypatch, review=True)
+    capsys.readouterr()
+    _approve_current_review_implementation(repository, tmp_path)
+    capsys.readouterr()
+
+    approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+    assert isinstance(approvals, list)
+    current_spec = next(item for item in approvals if item["approval_type"] == "spec")
+    current_code = next(item for item in approvals if item["approval_type"] == "code")
+    stale_spec = {**current_spec, "spec_sha256": "0" * 64}
+    stale_code = {**current_code, "evidence_sha256": "0" * 64}
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "approvals.json"),
+        [stale_spec, current_spec, stale_code, current_code],
+    )
+    tracked = [
+        resolve_task_path(repository, "TASK-0001", name)
+        for name in ("task.yaml", "events.jsonl", "approvals.json", "evidence.json")
+    ]
+    before = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in tracked}
+
+    assert main(["status", "TASK-0001", "--format", "json"]) == 0
+    status = json.loads(capsys.readouterr().out)
+    assert status["approvals"] == "current"
+    assert status["merge_readiness"] == "gate_required"
+    assert before == {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in tracked}
+
+    assert main(["gate", "TASK-0001", "--format", "json"]) == 0
+    assert json.loads(capsys.readouterr().out)["passed"] is True
+
+
+def _review_approval_status(
+    repository: Path,
+    *,
+    required_ids: list[str],
+    current_ids: set[tuple[str, str]],
+    state: str,
+) -> str:
+    """Evaluate real approval contracts against a compact REVIEW classification."""
+    bindings = {
+        "base_commit": "1" * 40,
+        "subject_commit": "2" * 40,
+        "policy_sha256": "b" * 64,
+        "spec_sha256": "a" * 64,
+    }
+    evidence = {"schema_version": "1.0", "conclusion": "passed", **bindings}
+    evidence_sha256 = status_service._artifact_digest(evidence)
+    current = {
+        "task_id": "TASK-0001",
+        **bindings,
+        "governance_only": True,
+        "evidence_sha256": evidence_sha256,
+        "evidence_current": True,
+    }
+    approvals: list[dict[str, object]] = []
+    for decision_unit_id, approval_type in current_ids:
+        approval: dict[str, object] = {
+            "schema_version": "1.0",
+            "task_id": "TASK-0001",
+            "decision_unit_id": decision_unit_id,
+            "approval_type": approval_type,
+            "actor": "reviewer",
+            "reason": "current approval",
+            "spec_sha256": current["spec_sha256"],
+            "policy_sha256": current["policy_sha256"],
+            "base_commit": current["base_commit"],
+            "subject_commit": current["subject_commit"],
+            "approved_at": "2026-08-20T14:00:00Z",
+        }
+        if approval_type == "code":
+            approval["evidence_sha256"] = evidence_sha256
+        approvals.append(approval)
+    task_directory = repository / ".ai" / "tasks" / "TASK-0001"
+    task_directory.mkdir(parents=True)
+    atomic_write_json(task_directory / "approvals.json", approvals)
+    classification = {
+        "classifications": [
+            {"decision_unit_id": decision_unit_id, "route": "REVIEW"}
+            for decision_unit_id in required_ids
+        ]
+    }
+    return status_service._approval_status(
+        repository,
+        "TASK-0001",
+        current,
+        evidence,
+        classification=classification,
+        state=state,
+    )
+
+
+@pytest.mark.parametrize(
+    ("current_ids", "state", "expected"),
+    [
+        (
+            {("DU-001", "spec"), ("DU-002", "spec")},
+            "READY_TO_IMPLEMENT",
+            "current",
+        ),
+        (
+            {("DU-001", "spec"), ("DU-002", "spec"), ("DU-001", "code")},
+            "IMPLEMENTING",
+            "current",
+        ),
+        (
+            {("DU-001", "spec"), ("DU-002", "spec"), ("DU-001", "code")},
+            "APPROVED_FOR_MERGE",
+            "stale",
+        ),
+        (
+            {("DU-001", "spec"), ("DU-001", "code"), ("DU-002", "code")},
+            "APPROVED_FOR_MERGE",
+            "stale",
+        ),
+        (
+            {
+                ("DU-001", "spec"),
+                ("DU-001", "code"),
+                ("DU-002", "spec"),
+                ("DU-002", "code"),
+            },
+            "APPROVED_FOR_MERGE",
+            "current",
+        ),
+    ],
+)
+def test_status_requires_current_approval_for_each_review_unit(
+    tmp_path: Path,
+    current_ids: set[tuple[str, str]],
+    state: str,
+    expected: str,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    assert (
+        _review_approval_status(
+            repository,
+            required_ids=["DU-001", "DU-002"],
+            current_ids=current_ids,
+            state=state,
+        )
+        == expected
+    )
+
+
+def test_status_and_gate_reject_when_no_current_code_approval(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A stale history record cannot substitute for the final code approval."""
+    repository = _prepare_gate(tmp_path, monkeypatch, review=True)
+    capsys.readouterr()
+    approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+    assert isinstance(approvals, list)
+    spec = next(item for item in approvals if item["approval_type"] == "spec")
+    stale_code = {
+        **spec,
+        "approval_type": "code",
+        "subject_commit": "0" * 40,
+        "evidence_sha256": "0" * 64,
+    }
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "approvals.json"), [spec, stale_code]
+    )
+
+    assert main(["status", "TASK-0001", "--format", "json"]) == 0
+    assert json.loads(capsys.readouterr().out)["approvals"] == "stale"
+    assert main(["gate", "TASK-0001", "--format", "json"]) == 2
+    assert "GATE_CODE_APPROVAL_STALE" in json.loads(capsys.readouterr().out)["reason_codes"]
+
+
+@pytest.mark.parametrize("approval", [None, {}])
+def test_status_cannot_infer_current_approval_without_valid_artifacts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    approval: dict[str, object] | None,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    directory = create_task(repository, "NEW")
+    if approval is None:
+        approval = json.loads(
+            (PROJECT_ROOT / "tests/fixtures/contracts/valid/approval.json").read_text(
+                encoding="utf-8"
+            )
+        )
+    atomic_write_json(directory / "approvals.json", [approval])
+    monkeypatch.chdir(repository)
+
+    assert main(["status", "TASK-0001", "--format", "json"]) == 0
+    assert json.loads(capsys.readouterr().out)["approvals"] == "stale"
+
+
+def test_status_does_not_require_old_review_approvals_for_non_review_work(
+    tmp_path: Path,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    assert (
+        _review_approval_status(
+            repository,
+            required_ids=[],
+            current_ids={("DU-001", "spec")},
+            state="IMPLEMENTING",
+        )
+        == "not_applicable"
+    )
 
 
 def test_status_rejects_corrupt_event_log(

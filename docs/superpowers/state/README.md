@@ -32,9 +32,11 @@
 
 当前仓库已有 `src/`、`.ai/tasks/`、可执行 Policy 与 `aiflow` CLI。AI Flow CLI 的确定性状态、验证、范围和 Gate 结论是运行时权威；人工状态文件只保留对实施目录和已核对运行时事实的辅助投影，不能覆盖、替代或伪造任务账本、批准或证据。
 
-项目所有者已明确结束自举，`.ai/bootstrap-mode.yaml` 有意不存在。后续代码、配置、CI 或
-行为变更必须创建或恢复 AI Flow task，并通过适用的审批、验证与 Gate。历史 state/evidence
-中的 `bootstrap_active` 只记录形成时事实，不是恢复 task-free 例外的开关。无论处于哪个历史
-阶段，本目录更新都不构成运行时批准，也不能覆盖 CLI、task ledger 或 Gate 的确定性结论。
+项目所有者已在结束早期自举后重新进入仓库维护模式，`.ai/bootstrap-mode.yaml` 当前为
+active。日常变更按 [AGENTS.md](../../../AGENTS.md) 的升级清单判断是否需要 AI Flow task；
+适用 task-free 例外的工作仍须通过质量门禁。历史 state/evidence 中的 `bootstrap_active`
+只记录形成时事实，不能用历史状态覆盖当前维护模式。未经所有者新的明确决定，不得移除
+标记或恢复强制 task 模式。本目录更新不构成运行时批准，也不能覆盖 CLI、task ledger
+或 Gate 的确定性结论。
 
 删除、推送、合并、部署、凭据、付费调用和其他高风险外部动作仍须单独批准；本状态初始化不授予任何此类权限。
