@@ -1,9 +1,9 @@
 # 审批开销治理与未完成任务收敛实施目录
 
-状态：`not_started`
+状态：历史处置目录；A2 仅余 TASK-0028，B0–B2 停止，B3 resolved，B4 deferred
 治理模式：仓库维护模式（`.ai/bootstrap-mode.yaml` 为 active）
 active Policy：`2.2.0`
-统计基线：`main` 提交 `3ce0e06`，账本全量 38 个 task
+历史统计基线：`main` 提交 `3ce0e06`，账本全量 38 个 task；当前盘点见[维护收尾与待办](../../operations/maintenance-status.md)
 归档说明：[文档归档](../../archive/README.md)
 
 后续核查：2026-09-07 发现 status 的历史批准聚合错误，且现有账本无法直接测量人类
@@ -23,7 +23,7 @@ active Policy：`2.2.0`
 | 部分 | 状态 |
 |---|---|
 | Part A（未完成任务收敛） | A1 `completed`、A3 `completed`、A2 `partial`（仅 TASK-0028 未收尾） |
-| Part B（审批开销治理） | **B0/B1/B2 停止，B3/B4 deferred —— 四个引擎/Policy 方案对减少审批的实测收益全部为 0** |
+| Part B（审批开销治理） | **B0/B1/B2 停止，B3 已按选项 B resolved，B4 deferred**；已否决方案的历史测量保留于对应章节 |
 
 ### 唯一被证实能减少批准次数的改动：`AGENTS.md` 规则 5
 
@@ -50,13 +50,13 @@ task 内拆分决策单元**不改变任何审批**。即便拆成独立 task，
 
 规则 8 已按此更正为「放进不同的 task」并明确其收益边界。
 
-### 一句话结论
+### 历史结论（已由第 9 节限定，不再作为唯一根因）
 
 **审批开销的来源不是 Policy 太严，是一份写错的说明文档。**
 48 条重复批准中 31 条（65%）源于实践而非引擎要求，其中 11 条（23%）可由规则 5 的更正直接
 消除；30 个兜底 REVIEW 中可由任何路径规则挽回的是 0 个，可由拆分挽回的批准次数亦为 0。
 
-### 当前状态与未完成事项（2026-09-06 收尾）
+### 2026-09-06 收尾快照（后续状态见维护收尾与待办）
 
 #### 状态
 
@@ -79,9 +79,9 @@ task 内拆分决策单元**不改变任何审批**。即便拆成独立 task，
 | 项 | 状态 | 归属 |
 |---|---|---|
 | **TASK-0028** | `APPROVED_FOR_MERGE`。收尾成本已精确测出（10 条 Gate 拒绝理由、须检出旧状态重放 + 2 次人类批准），三个选项与代价见 Chapter A2。当前维持选项 C。 | 项目所有者 |
-| **ASK 义务修复** | 分支 `claude/unruffled-gates-41d3ec` 上有 2 个未合并提交，含 `fix: keep the ASK obligation when a REVIEW rule co-matches the same unit`。**该修复不在 `main`。** | 另一会话 |
+| **ASK 义务修复** | `1033a46` 仍未进入 main。旧分支 TASK-0042 的验证为 FAILED，且与 main 同号的已 MERGED task 是不同工作；须以新 task 重新移植源码与测试，不能沿用旧账本。 | 后续工程项 |
 | **`.gitignore` 未含 `.claude/worktrees/`** | 目前仅由本机 `.git/info/exclude` 排除，不随仓库分发；换机器或新克隆会把 worktree 副本暴露为未跟踪文件。`.gitignore` 在升级清单内，须走 AI Flow。 | 未立项 |
-| **`.claude/worktrees/musing-dijkstra-a7c360/`** | 分支与 worktree 注册已清除，但目录因 `Permission denied` 未能删除，残留在磁盘上。内容无损失（`e2a6973` 完全在 `main`）。 | 需手动清理 |
+| **`.claude/worktrees/musing-dijkstra-a7c360/`** | 2026-09-07 只读复核：目录已不存在且未注册；无需再执行清理。此前 Permission denied 为历史状态。 | 已无残留 |
 | **Chapter B4** | `deferred`，附实测理由（可合并面 57%，中位收益 1 个提交）。 | 未立项 |
 
 #### 已记录但未修复的引擎缺陷
