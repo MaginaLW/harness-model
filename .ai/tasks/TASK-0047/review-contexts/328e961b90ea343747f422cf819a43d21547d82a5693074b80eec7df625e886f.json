@@ -1,0 +1,91 @@
+{
+  "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+  "branch": "codex/risk-input-followups",
+  "classification_input_sha256": "ca698b29a5b9c9e0ee34085f1587ec3d9200fcb248adc5dc2543e48d509bf086",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/permissions.yaml",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/schemas/decision-unit.schema.json",
+      ".ai/schemas/policy.schema.json",
+      ".ai/templates/task.yaml",
+      "src/aiflow/decision_units.py",
+      "src/aiflow/classification_service.py",
+      "src/aiflow/policy.py",
+      "src/aiflow/task_service.py",
+      "tools/hooks/pre_command.py",
+      "tests/unit/test_decision_units.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_routing.py",
+      "tests/integration/test_classify_command.py",
+      "tests/integration/test_answer_command.py",
+      "tests/integration/test_start_command.py",
+      "tests/integration/test_governance_paths.py",
+      "tests/integration/test_observation_escalation.py",
+      "tests/integration/test_observation_parity.py",
+      "tests/integration/test_tool_wrappers.py",
+      "tests/integration/test_templates_and_policy.py",
+      "tests/integration/test_golden_classification.py",
+      "tests/fixtures/routing/decision-table.json",
+      "examples/scenarios/auto-doc-edit/input.yaml",
+      "examples/scenarios/ask-conflict-strategy/input.yaml",
+      "examples/scenarios/review-workflow-change/input.yaml",
+      "examples/scenarios/block-no-backup/input.yaml",
+      "docs/operations/hooks.md",
+      "docs/operations/low-intervention.md",
+      "docs/operations/recovery.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "新分类必须有明确风险字段，部署和生产数据删除采用受控动作类型且不丢失旧正向风险",
+        "impact_scope": [
+          ".ai/schemas/decision-unit.schema.json",
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/templates/task.yaml",
+          "src/aiflow/decision_units.py",
+          "src/aiflow/classification_service.py",
+          "src/aiflow/task_service.py"
+        ],
+        "planned_actions": [
+          "兼容扩展 controlled_actions 字段并在新分类写入前校验完整风险事实。",
+          "一次更新为 Policy 2.3.0，保留旧正向动作匹配、质量检查和所有阈值。",
+          "按既有升级流程处理本任务的 Policy 和分类输入绑定变化。"
+        ]
+      },
+      {
+        "decision_unit_id": "DU-002",
+        "goal": "未知动作默认拒绝，只有 Policy 明列的 read 类别允许通过本地检查，不将通用批准接成执行放行",
+        "impact_scope": [
+          ".ai/policy/permissions.yaml",
+          ".ai/schemas/policy.schema.json",
+          "src/aiflow/policy.py",
+          "tools/hooks/pre_command.py"
+        ],
+        "planned_actions": [
+          "在 Policy 中明列 read 允许集合并默认拒绝未识别动作，保持六项高风险拒绝规则。",
+          "未知动作在 Hook 解析任务或追加观察前直接拒绝，不能由本地批准改变结果。",
+          "完成受控本地边界和可信外部执行器要求的设计，不创建执行器或修改远端配置。"
+        ]
+      }
+    ],
+    "goal": "补齐新分类的显式风险输入并收敛本地动作权限为默认拒绝，保留历史证据与真实外部授权边界",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "328e961b90ea343747f422cf819a43d21547d82a5693074b80eec7df625e886f",
+  "decision_unit_ids": [
+    "DU-001",
+    "DU-002"
+  ],
+  "policy_sha256": "1f684f4bf4bd2e3c28b7a04903628790f7be40f88a1dbf54587b09b90230267f",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "cc835f26a7434a511db85ad6c4afa3f9ce8ea090f6ed3d8b98b792b3f337df8a",
+  "task_id": "TASK-0047"
+}

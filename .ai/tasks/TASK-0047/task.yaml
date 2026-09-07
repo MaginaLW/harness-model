@@ -4,7 +4,7 @@ goal: 补齐新分类的显式风险输入并收敛本地动作权限为默认�
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 branch: codex/risk-input-followups
 base_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
-subject_commit: 426b80b37600d8cd9a1c129b4520bf242fead217
+subject_commit: 9f367af9d8fc3d5b28c3f171da455e79c18afc5a
 worktree_dirty: false
 worktree_dirty_paths: []
 allowed_scope:
@@ -20,10 +20,23 @@ allowed_scope:
 - src/aiflow/policy.py
 - src/aiflow/task_service.py
 - tools/hooks/pre_command.py
-- tests/unit/**
-- tests/integration/**
-- tests/fixtures/**
-- tests/acceptance/test_phase_02_self_hosting.py
+- tests/unit/test_decision_units.py
+- tests/unit/test_policy.py
+- tests/unit/test_routing.py
+- tests/integration/test_classify_command.py
+- tests/integration/test_answer_command.py
+- tests/integration/test_start_command.py
+- tests/integration/test_governance_paths.py
+- tests/integration/test_observation_escalation.py
+- tests/integration/test_observation_parity.py
+- tests/integration/test_tool_wrappers.py
+- tests/integration/test_templates_and_policy.py
+- tests/integration/test_golden_classification.py
+- tests/fixtures/routing/decision-table.json
+- examples/scenarios/auto-doc-edit/input.yaml
+- examples/scenarios/ask-conflict-strategy/input.yaml
+- examples/scenarios/review-workflow-change/input.yaml
+- examples/scenarios/block-no-backup/input.yaml
 - docs/operations/hooks.md
 - docs/operations/low-intervention.md
 - docs/operations/recovery.md
@@ -36,7 +49,7 @@ forbidden_actions:
 - paid_external_call
 current_state: WAITING_FOR_SPEC_REVIEW
 created_at: '2026-09-07T15:17:16Z'
-updated_at: '2026-09-07T15:27:20Z'
+updated_at: '2026-09-07T15:35:44Z'
 decision_units:
 - schema_version: '1.0'
   task_id: TASK-0047
@@ -62,7 +75,7 @@ decision_units:
   verification_methods:
   - 验证缺项零写、显式空数组保持原 AUTO 条件、受控和旧动作风险命中、历史只读与新鲜度。
   - 按实际 CLI 判定运行完整验证和 85 percent 总覆盖率、90 percent diff coverage。
-  - 安全配套测试和文档作为独立 task-free 阶段；最终集成范围不用于降低治理分级。
+  - 仅在所有者明确批准必要回归同任务例外后集成精确清单，独立效果文档不混入本 task。
   external_side_effects: []
   permission_requirements: []
   scope:
@@ -109,7 +122,7 @@ decision_units:
   verification_methods:
   - 验证 read 显式允许、未知和六项高风险拒绝、畸形输入、无任务歧义和批准零消费。
   - 验证既有 mutation 执行与消费保护未改变，完成独立设计和实施审查。
-  - 安全配套测试和文档独立 task-free 提交，不创建安全 DU 稀释当前治理风险。
+  - 必要回归和边界说明的同任务例外须所有者明确批准，不创建安全 DU 稀释当前治理风险。
   external_side_effects: []
   permission_requirements: []
   scope:
@@ -137,5 +150,5 @@ decision_units:
     integration_required: false
     targeted_mutation_required: false
     independent_verifier_required: false
-frozen_spec_sha256: 75bfdb8de1220369efd179e04365e4df030ceed31a17b9405b59bc299891b2f9
-spec_frozen_at: '2026-09-07T15:23:14Z'
+frozen_spec_sha256: cc835f26a7434a511db85ad6c4afa3f9ce8ea090f6ed3d8b98b792b3f337df8a
+spec_frozen_at: '2026-09-07T15:32:54Z'
