@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-09T10:37:00Z",
+  "single_use": true,
+  "action_type": "merge",
+  "target": "The MaginaLW/harness-model maintenance documentation and audit PR from codex/maintenance-status-sync into main",
+  "parameter_summary": "Normally merge this single newly authorized maintenance publication using a merge commit and --match-head-commit for the exact successful CI head; preserve source branches and existing task history.",
+  "conditions": [
+    "This merge is independently recorded for the owner's current completion request, not inferred from earlier spec/code approvals or the old cleanup authorization.",
+    "The PR contains d5010273d4fef36cbde69f91ee2c8c12fd8d68f9, the four reviewed task-free documentation changes and only TASK-0047 publication metadata. No new implementation, Policy, Schema, CI, frozen-spec or historical-evidence change is allowed.",
+    "GitHub reports OPEN, not draft, base main, head codex/maintenance-status-sync, MERGEABLE and CLEAN; required ai-quality-gate succeeds for the exact current head and all required conversations are resolved. Keep strict checks and administrator protection unchanged.",
+    "TASK-0047 remains valid and MERGED with its original implementation merge; this follow-up neither reruns close nor presents maintenance CI as a new task-specific Gate or evidence replacement.",
+    "Use no --admin or deletion option, no force push, deployment, tag, release, permission change, extra closeout PR or other unrelated external action."
+  ]
+}

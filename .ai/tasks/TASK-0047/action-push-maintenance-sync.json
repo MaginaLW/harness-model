@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-09T10:37:00Z",
+  "single_use": true,
+  "action_type": "push",
+  "target": "origin refs/heads/codex/maintenance-status-sync in MaginaLW/harness-model; one PR into main",
+  "parameter_summary": "Publish existing cleanup audit d5010273d4fef36cbde69f91ee2c8c12fd8d68f9 and task-free documentation update 9bec84e64b20e2520569df487acfcb159af0197b, plus only this delivery's TASK-0047 action approvals, notes and PR description, in one normal non-force push and PR.",
+  "conditions": [
+    "The owner newly requested completion of the recommended documentation, observation and audit publication follow-ups; this does not reuse the cleanup action that explicitly excluded audit publication or any consumed earlier delivery action.",
+    "Relative to main 65589dae574d7f33b448f78193697ff4524b0da1, changes are limited to the existing cleanup audit, README.md, docs/operations/maintenance-status.md, docs/operations/effect-observations.md, the historical consolidation directory's entry clarification, and TASK-0047 maintenance publication metadata. No source, tests, Policy, Schema, CI, bootstrap, historical evidence or frozen-spec change.",
+    "The worktree is clean and the branch has no unrelated remote work. Relevant local documentation/report/contracts checks pass, the task validates as MERGED, and independent review finds no blocking issue.",
+    "TASK-0028 keeps its existing option C; historical BLOCKED tasks are not reopened, phase three is not started, and absent effect measurements remain unknown or open.",
+    "No force push, deletion, deployment, release, tag, paid call, credential export, permission change or branch-protection bypass; no additional closeout PR or second close."
+  ]
+}

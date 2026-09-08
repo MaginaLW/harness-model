@@ -184,5 +184,37 @@
     "spec_sha256": "d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a",
     "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
     "task_id": "TASK-0047"
+  },
+  {
+    "action_sha256": "db72545a57cf5e455e0006a316eff4dd48f2126fac6db04f8e2193a74d0ac98c",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-08T10:41:20Z",
+    "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-09T10:37:00Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "所有者在明确列出文档同步、真实观察及清理审计发布建议后，要求按照建议完成这些待办；本次仅发布该维护包并在精确head required CI成功后正常合并，不复用旧授权，不包含部署、删除、历史任务重开或阶段三。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a",
+    "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+    "task_id": "TASK-0047"
+  },
+  {
+    "action_sha256": "425ea9ae02100692dc2956433aef18da57181c807a2e2fd97e759314c2e2bd56",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-08T10:41:21Z",
+    "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-09T10:37:00Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "所有者在明确列出文档同步、真实观察及清理审计发布建议后，要求按照建议完成这些待办；本次仅发布该维护包并在精确head required CI成功后正常合并，不复用旧授权，不包含部署、删除、历史任务重开或阶段三。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a",
+    "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+    "task_id": "TASK-0047"
   }
 ]
