@@ -4,6 +4,9 @@
 commit、push、merge、deploy 或任何外部动作。项目要求 Python 3.11 或更高版本；推荐使用
 仓库根目录已提交的 `uv.lock` 建立可复现环境，同时保留标准 `venv` + `pip` 回退路径。
 
+这里安装的是 harness-model 的完整克隆，不是任意项目的一键接入流程。若要用于 ZCode
+或已有业务仓库，先看[接入指南](adoption.md)，不要把本仓身份、账本和维护标记复制过去。
+
 <!-- required-path: pyproject.toml -->
 <!-- required-path: .ai/policy/routing.yaml -->
 <!-- required-path: tests/unit/test_specification.py -->

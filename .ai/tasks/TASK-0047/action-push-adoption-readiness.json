@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-09T12:00:00Z",
+  "single_use": true,
+  "action_type": "push",
+  "target": "origin refs/heads/codex/adoption-readiness in MaginaLW/harness-model; one PR into main",
+  "parameter_summary": "Publish task-free adoption preparation commit 5a9681ef1ce48f92d1b96abbf377cd79a7f183dc plus only this delivery's TASK-0047 action approvals, notes and PR description, in one normal non-force push and PR.",
+  "conditions": [
+    "The owner explicitly authorized this turn's push, PR and merge after checks; no earlier delivery authorization is reused.",
+    "Relative to main 765cfcb7d801519a2d87398ec7287eedbb8ac316, implementation is exactly the eight reviewed files in 5a9681ef1ce48f92d1b96abbf377cd79a7f183dc plus this action audit. No src/aiflow, Policy, Schema, workflow, bootstrap, frozen specification or historical evidence change.",
+    "The committed implementation passes the full local quality checks, standalone tool coverage and independent review. The worktree is clean, this task validates as MERGED, and no unrelated remote branch work is overwritten.",
+    "The new tool is a read-only inventory, not engine adoption or authorization. No target repository, ZCode account, global settings, model or paid-call configuration is modified.",
+    "No force push, deletion, deployment, release, tag, paid call, credential export, protection change, extra closeout PR or repeated close. Historical dispositions and phase-three/four boundaries stay unchanged."
+  ]
+}

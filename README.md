@@ -6,6 +6,10 @@
 
 项目同时追求可靠交付和减少人工介入。章节完成、测试通过证明的是已实现能力及其检查结果，尚不能证明真实任务中的人工时间或缺陷率下降。日常使用从[低干预工作方式](docs/operations/low-intervention.md)开始；用只读开销报告复算账本指标，区分机器步骤、必要决定与重复请求。
 
+准备应用到 ZCode、Codex 或其他项目时，从[接入指南](docs/operations/adoption.md)开始：
+先合并轻量规则、沿用目标质量检查，再决定是否需要完整引擎。当前不提供外仓一键安装，
+不要直接复制本仓 `.ai` 账本、身份、维护标记或模型配置。
+
 > 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.3.0`。V1/V2 的完整回归和 coverage XML 检查分别使用 900 秒和 1200 秒上限，未减少检查或降低覆盖率门槛。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
 ## 阶段一目标
@@ -39,6 +43,7 @@
 | [Agent 规则](AGENTS.md) | 所有 Agent 的简短常驻约束 |
 | [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口；共同治理规则以 Agent 规则为准 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
+| [接入现有 AI 工作流](docs/operations/adoption.md) | ZCode 首批试点、只读仓库盘点、可合并规则和分批推广；区分轻量接入与完整引擎缺口 |
 | [低干预工作方式](docs/operations/low-intervention.md) | Agent 连续推进、必要人工决定的边界与可重跑的审批开销统计 |
 | [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence、证据保留与精确清理边界 |
 | [阶段一验收报告](docs/implementation/phase-01-acceptance-report.md) | 十二项验收、四试点、覆盖率、限制和风险接受 |

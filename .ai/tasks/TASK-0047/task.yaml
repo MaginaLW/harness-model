@@ -156,6 +156,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-07T16:43:57Z'
 subject_commit: c0b4cb62eb8754d9364433df6ba9948ffcf43fc2
 task_id: TASK-0047
-updated_at: '2026-09-08T10:41:21Z'
+updated_at: '2026-09-08T11:26:21Z'
 worktree_dirty: false
 worktree_dirty_paths: []
