@@ -2,9 +2,13 @@
 
 状态：历史处置目录；A2 仅余 TASK-0028，B0–B2 停止，B3 resolved，B4 deferred
 治理模式：仓库维护模式（`.ai/bootstrap-mode.yaml` 为 active）
-active Policy：`2.2.0`
+历史处置时 active Policy：`2.2.0`
 历史统计基线：`main` 提交 `3ce0e06`，账本全量 38 个 task；当前盘点见[维护收尾与待办](../../operations/maintenance-status.md)
 归档说明：[文档归档](../../archive/README.md)
+
+2026-09-08 入口补记：上列 `2.2.0` 是本目录原处置快照的 Policy，现行 Policy 已由
+TASK-0047 升为 `2.3.0`；最新完成项及未实现边界见[维护收尾与待办](../../operations/maintenance-status.md)。
+不据此重写旧统计、决定、证据或重启 B0–B4。
 
 后续核查：2026-09-07 发现 status 的历史批准聚合错误，且现有账本无法直接测量人类
 打断次数与用时。第 0 节的排他性根因结论及第 1 节的目标达成表述须结合第 9 节限定阅读。

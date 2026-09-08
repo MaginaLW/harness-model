@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-09T04:08:00Z",
+  "single_use": true,
+  "action_type": "delete_merged_branch_refs",
+  "target": "MaginaLW/harness-model: five exact local refs and four exact origin refs listed in branch-cleanup.md",
+  "parameter_summary": "After the owner's separate branch-cleanup request, delete only local codex/ask-obligation-closeout=e10c8a37499c1bf504485478219975c0106e21a6, codex/ask-obligation-repair=deb05ade0ce29a3a85b6624c35578b5404c445e1, codex/reduce-human-intervention=c9343c2b948b2373ff34892e79fb85e0dc547a66, codex/risk-input-closeout=e8944602a2da6d253a1851a81701910d79cdadbb, codex/risk-input-followups=a98a9249a267156a06d64c7ca1267a6c36ed115e; delete the same origin refs except reduce-human-intervention, which has no origin ref. Remote operation is one atomic deletion push with exact expected-SHA leases and only empty-source deletion refspecs; local operations use git branch -d, never -D.",
+  "conditions": [
+    "This is new owner authorization from the explicit branch-cleanup request, not reuse of any previous push, merge or closeout approval. No new implementation or change to the closed task's frozen scope, approvals or evidence is authorized.",
+    "Immediately before deletion verify origin/main is 65589dae574d7f33b448f78193697ff4524b0da1, every exact target tip is its ancestor, and no target has an open PR or is checked out or pointed to by a registered worktree.",
+    "Require the source branch to remain main; worktree differences may only be this action, branch-cleanup.md and CLI-generated TASK-0047 action-approval deltas. Preserve all prior ledger bytes and immutable source/specification/evidence bindings.",
+    "Use one atomic remote push with four explicit expected-SHA leases to reject concurrent tip changes. No unconstrained --force, nonempty-source refspec, branch replacement, tag, protected-ref deletion or unrelated ref update is permitted; abort on changed facts or failure, with no automatic retry.",
+    "After the remote deletion succeeds, recheck each local tip and use git branch -d for only the five named local refs. Preserve main, backup/task-0033-work, all pilot branches, claude/unruffled-gates-41d3ec and codex/maintenance-closeout, and every worktree and filesystem path.",
+    "Each removed tip remains reachable from origin/main; branch-cleanup.md records exact name/SHA recovery mappings. Validate remaining refs and unchanged worktree registration after execution. Local audit commit is permitted, but no audit push, PR, merge, deployment, release, paid call or credential export is included."
+  ]
+}
