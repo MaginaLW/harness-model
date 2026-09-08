@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-08T16:00:00Z",
+  "single_use": true,
+  "action_type": "paid_external_call",
+  "target": "One new harness-model read-only pilot conversation in the already-running ZCode application, using its currently selected BigModel metered API / GLM-5.3-Flash model",
+  "parameter_summary": "The owner explicitly authorized this one read-only pilot call at the existing model's metered pricing. Submit one bounded prompt and allow only native file-reading needed for its one report; no retries, delegation, additional tasks, subscription or configuration changes.",
+  "conditions": [
+    "The owner replied with explicit authorization to the single-call question covering the current metered API, public repository rules only, no terminal, file writes, model delegation or automatic retry. This does not reuse any push, merge or historical code approval.",
+    "The pilot uses adoption content from main f633c036cc2a0394f7b1efb20efe4d91ba944255. TASK-0047 retains its original frozen subject and MERGED state; this action is only an append-only maintenance authorization audit, not reopened implementation or proof of a completed call.",
+    "Only AGENTS.md, docs/operations/low-intervention.md, docs/operations/adoption.md, examples/adoption/zcode-pilot-prompt.md, pyproject.toml and .github/workflows/ai-quality-gate.yml may be explicitly read for the report. No unrelated repositories, credentials, account settings, raw prior conversations or private content may be accessed or submitted.",
+    "ZCode must not execute terminals, shells, commands, scripts or tests, modify files or configuration, delegate to another model, start background work, or retry the request. If native read-only capabilities cannot establish a fact, report unknown and stop instead of using a command.",
+    "Do not change the existing model, account, permission mode or security/privacy settings. Do not approve any permission dialog. No push, merge, deletion, deployment, installation, credential export, new plan or follow-up paid request is authorized.",
+    "Separate automatically loaded instructions from files explicitly read during this pilot, list quality entry points as unexecuted, and do not claim full-engine adoption or measured reliability/efficiency from a single read-only report. The action is not a cost cap and does not promise a single underlying provider inference request."
+  ]
+}

@@ -248,5 +248,21 @@
     "spec_sha256": "d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a",
     "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
     "task_id": "TASK-0047"
+  },
+  {
+    "action_sha256": "76ab9c14496ccafd3a5348c27787ae06cbed0586f93e30b116a13d13009b75fe",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-08T11:55:39Z",
+    "base_commit": "426b80b37600d8cd9a1c129b4520bf242fead217",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-08T16:00:00Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly authorized this one bounded ZCode metered read-only pilot, without retries or configuration changes.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "d49fde7d808e11406328e7864992bd5351dc75011656fc2b7a983d821b10006a",
+    "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+    "task_id": "TASK-0047"
   }
 ]
