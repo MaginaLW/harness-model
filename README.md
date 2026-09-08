@@ -6,7 +6,7 @@
 
 项目同时追求可靠交付和减少人工介入。章节完成、测试通过证明的是已实现能力及其检查结果，尚不能证明真实任务中的人工时间或缺陷率下降。日常使用从[低干预工作方式](docs/operations/low-intervention.md)开始；用只读开销报告复算账本指标，区分机器步骤、必要决定与重复请求。
 
-> 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.2.0`。V1/V2 的完整回归和 coverage XML 检查分别使用 900 秒和 1200 秒上限，未减少检查或降低覆盖率门槛。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
+> 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.3.0`。V1/V2 的完整回归和 coverage XML 检查分别使用 900 秒和 1200 秒上限，未减少检查或降低覆盖率门槛。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
 
 ## 阶段一目标
 
