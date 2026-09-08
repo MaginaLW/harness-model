@@ -1,0 +1,19 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-09-08T16:00:00Z",
+  "single_use": true,
+  "action_type": "paid_external_call",
+  "target": "One harness-model documentation pilot request in ZCode using its existing BigModel metered API / GLM-5.3-Flash model",
+  "parameter_summary": "The owner separately authorized one metered documentation pilot, limited to syncing adoption.md and maintenance-status.md with the completed read-only observation. Independent review narrows the required edit to the existing AI-tool-adoption row of docs/operations/maintenance-status.md; adoption.md remains unchanged because its current boundary is still accurate.",
+  "conditions": [
+    "Submit at most one task request, with no retry, model delegation or follow-up paid request. Existing pricing applies; no exact cost cap or one-provider-inference guarantee is implied. The previous read-only single-use authorization is not reused.",
+    "The implementation baseline is 713a0a4f94c82862e6205afe20f54e78d83272e4, followed only by this new authorization audit. TASK-0047 remains MERGED with its original frozen subject, classification, specification and evidence; this is append-only maintenance action auditing, not a reopened implementation task.",
+    "Explicit reading is limited to AGENTS.md, docs/operations/low-intervention.md, docs/operations/maintenance-status.md, docs/operations/adoption.md and .ai/tasks/TASK-0047/zcode-readonly-pilot-observation.md. Do not access unrelated projects, account or global configuration, credentials, prior raw conversations or linked files.",
+    "Use native Read/Edit only. Perform at most one edit to the existing AI-tool-adoption table row in docs/operations/maintenance-status.md, then optionally reread that row and report. If native editing is unavailable, stop and report the limitation without using commands or another paid task.",
+    "Do not run terminal, shell, command-line, scripts, tests, Git, network search or background actions through ZCode. Do not change models, permissions, accounts, security/privacy settings, source code, CI, repository rules or task records. Do not create an AI Flow task, push, merge, delete, deploy or install anything.",
+    "Describe the completed bounded paid read-only smoke and link its committed observation while preserving the lack of real coding-delivery, full-engine adoption and measured efficiency evidence. Do not claim success of this documentation pilot before it actually completes.",
+    "The coordinating agent, not ZCode, performs local diff and quality checks, any necessary recoverable local correction, and local commits. No publication or permission-dialog acceptance is authorized. This record authorizes the external request but is not a consumption receipt."
+  ]
+}
