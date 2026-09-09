@@ -44,6 +44,7 @@
 | [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口；共同治理规则以 Agent 规则为准 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
 | [接入现有 AI 工作流](docs/operations/adoption.md) | ZCode 首批试点、只读仓库盘点、可合并规则和分批推广；区分轻量接入与完整引擎缺口 |
+| [ZCode 外仓试点反馈](docs/operations/zcode-adoption-feedback.md) | ai-agent-dotfiles 固定任务窗口的五项工程反馈、证据限制及已纳入的接入方法 |
 | [低干预工作方式](docs/operations/low-intervention.md) | Agent 连续推进、必要人工决定的边界与可重跑的审批开销统计 |
 | [模型选择与代理职责](docs/operations/model-selection.md) | UI 与运行时决定型号，职责不绑定模型代际；保留历史型号证据 |
 | [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence、证据保留与精确清理边界 |
