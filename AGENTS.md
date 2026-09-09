@@ -25,4 +25,4 @@ AI Flow CLI 保持完全可用，下述规则在使用它时仍然完整适用�
 
 启动：运行 `python -m aiflow --help`。维护模式下 task 不再是每次变更的前置条件；决定使用 AI Flow 时，为该变更创建或恢复 task 并按 CLI 状态推进。
 
-入口：[项目总览](README.md) · [Policy](.ai/policy/) · [模板](.ai/templates/) · [CLI](src/aiflow/cli.py) · [MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) · [实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)
+入口：[项目总览](README.md) · [Policy](.ai/policy/) · [模板](.ai/templates/) · [CLI](src/aiflow/cli.py) · [MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) · [实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md) · [外仓反馈闭环](docs/operations/feedback-loop.md)
