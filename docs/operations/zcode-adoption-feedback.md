@@ -36,6 +36,15 @@
 已纳入[接入指南](adoption.md#真实任务的执行与收尾)：格式/版本变更时核对生产端、
 注册的 Schema、测试与 CI 消费端；局部、全量、CI、发布分别绑定实际版本和结果。
 
+后续窗口结果（2026-09-10 核对）：不一致一直存活到 `45dd69f`，Validate 自 `2bef22b`
+起连续 8 次在同一断言失败（如 [run 34361240913](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/34361240913)），
+期间目标仓收尾记录曾写"Task 2 曾发现并修复"该漂移，与源码历史矛盾——`validate.yml`
+该断言在引入后仅变更过两次（升 2、升 3），升 3 即修复提交
+[`895c54f`](https://github.com/MaginaLW/ai-agent-dotfiles/commit/895c54f)，此前从未修复。
+修复前基于 `408da9a` 的 run 也复现同一失败，诊断闭环；目标仓接入文档的错误结论已在
+同窗口更正。该实例说明：反馈被记录、核对项被固化，不等于消费端已被修复；"已修复"
+类结论须绑定实际修复提交与当次验证结果。
+
 ### 2. 哈希不能替代可读取的验证摘要
 
 [Task 2 收尾](https://github.com/MaginaLW/ai-agent-dotfiles/blob/3a2ff6b7cfec62d28eb72aeaf6c14269eed947ab/STATUS.md#L2309)
