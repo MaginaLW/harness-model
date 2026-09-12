@@ -123,6 +123,12 @@ ai-agent-dotfiles 收尾记录曾误写"曾发现并修复"）。
 3. **审阅验证范围变化。** 对照本次与基线的测试发现范围，说明新增、停用、改名或移入
    非执行目录的检查，以及替代验证或恢复计划。套件数和“发现的全部通过”不能证明原有
    检查仍被执行；必需检查不得通过改名、搬目录或排除规则静默退出执行。
+验收断言不得绑定工具自身的本地化文案（例如 PowerShell 的参数绑定错误消息），
+   改用稳定的错误 ID 或项目自有 token 匹配；否则同一提交在不同系统语言的主机上会得出
+   不同的门禁结论，而且本地门禁可能在 CI 长期绿灯的情况下失效（实例来源：
+   ai-agent-dotfiles 的 unified run 在 zh-CN 主机上因 7 处 `missing mandatory parameters`/
+   `because it is null` 文案断言中止，CI 为 en-US 故此前一直未暴露，改为匹配
+   `MissingMandatoryParameter`/`ParameterArgumentValidationErrorNullNotAllowed` 后本地恢复通过）。
 4. **区分实际耗时与预算。** 收尾引用已有的实测耗时、配置超时上限和重跑原因，分别记录
    真实超时、环境问题、测试增长或实现修复；提高上限不表示执行更慢，也不证明优化有效。
    模型身份、费用、人时或失败原因无可靠来源时保留 `unknown`，不根据等待时长推算。
