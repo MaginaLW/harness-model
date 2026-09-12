@@ -36,6 +36,7 @@
 | [阶段三进入输入](docs/implementation/phase-03-entry-inputs.md) | 阶段二结束后的可审计输入和仍未满足的阶段三进入门；不构成授权 |
 | [审批开销治理与未完成任务收敛实施目录](docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md) | 历史诊断与处置记录：A2 仅余 TASK-0028，B0–B2 停止、B3 已解决、B4 暂缓；不是待逐章启动的实施队列 |
 | [维护收尾与待办](docs/operations/maintenance-status.md) | 已完成项、当前交付、保留的历史任务与后续工程缺口；附可复核基线和下一步 |
+| [ZCode 试点收尾与跨 Agent 协作执行目录](docs/superpowers/plans/2026-09-12-zcode-review-fix-execution.md) | 2026-09-12 核查：现有试点补证、最小交接设计、真实双工具闭环与条件性内核建设 |
 | [文档归档](docs/archive/README.md) | 章节 1–7 逐任务执行文档的归档位置、归档原则与原路径映射表 |
 | [资源感知多智能体调度设计](docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) | “编排顾问 + 确定性控制面”、整机资源租约、背压与恢复设计 |
 | [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |

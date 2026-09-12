@@ -77,8 +77,11 @@ ZCode 的执行模式还会影响确认次数：官方文档将“修改前询�
 
 | 项目 | 当前接入状态与后续入口 |
 |---|---|
-| `ai-agent-dotfiles` | 已接入轻量规则并观察到真实代码任务；固定窗口见 [ZCode 外仓试点反馈](zcode-adoption-feedback.md)。纳入统一[任务收尾反馈闭环](feedback-loop.md)，首次持久化闭环入口与回灌待目标 Agent 收尾后执行；实际应用版本以目标仓接入记录为准。 |
-| `r3s-VPS` | 已登记并纳入同一反馈闭环，复用目标仓已有 `AGENTS.md`，从 `README.md` 和 `docs/PROJECT_STATUS.md` 接手。2026-09-09 完成首次持久化：闭环规则已合入目标仓 `AGENTS.md`，接入记录（来源检出、应用版本 `b567dc3`、五项方法适配）见其 `docs/PROJECT_STATUS.md` 接入批次节。目标仓同日完成 R1 生产窗口（此前盘点时未提交的 `docs/R1_EXECUTION_SHEET.md` 修改已随其窗口批次提交），生产变更观察期进行中；首个真实反馈窗口的评估见下文收尾方法第 2 条。 |2026-09-10 第二个反馈窗口（grok/x.ai 访问失败修复批）：收尾方法第 1 条新增逐层配置核对与链路 canary 条款、第 2 条新增脱敏摘录节锚点+凭据断言条款。 |
+| `ai-agent-dotfiles` | 已接入并有多轮真实任务反馈；首次窗口见 [ZCode 外仓试点反馈](zcode-adoption-feedback.md)。2026-09-12 读取 `f54a4d6`，目标记录已应用 upstream `68f3dcb`，但 Task 6 Step 3 全量收尾结果仍待核实；从 `docs/ZCODE.md`、`STATUS.md` 与 active 记录接续。 |
+| `r3s-VPS` | 已持久化闭环入口并有 R1、grok/x.ai 后续窗口，形成下文非确定输出、逐层配置、脱敏摘录方法。2026-09-12 读取 `df6b001`，目标记录应用 upstream `3a0bb34`，本地 Strict 与生产记录不代替当前缺失的双通道 CI；`docs/PROJECT_STATUS.md` 与 manifest 有未提交修改。继续复用 `AGENTS.md`、`README.md` 和原状态入口。 |
+
+上述为只读快照；固定版本、证据强度与后续顺序见[执行目录](../superpowers/plans/2026-09-12-zcode-review-fix-execution.md)。
+两个项目的实时进度仍以各自记录为准，本次没有重跑其测试、访问 CI 原始日志或生产环境。
 
 `r3s-VPS` 已有低干预协作、模型与分工、独立审查、验证及证据规则，无须重复复制通用
 片段。首次使用[试点提示词](../../examples/adoption/zcode-pilot-prompt.md)确认实际读取的
@@ -220,10 +223,12 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 
 ## 当前收尾边界
 
-截至 2026-09-09，已提供规则片段、ZCode 试点提示词、只读盘点工具和回归测试，
+2026-09-09 初始快照：已提供规则片段、ZCode 试点提示词、只读盘点工具和回归测试，
 并已将轻量规则接入外仓 `ai-agent-dotfiles`，观察到后续真实代码任务。具体候选版本、
 验证限制与五项改进见 [ZCode 接入反馈](zcode-adoption-feedback.md)；本页将反馈纳入接入方法，
 不表示目标项目的缺陷已修复、完整 AI Flow 已安装、整链验收通过或效率改善已经得到证明。
-`r3s-VPS` 也已登记为后续 ZCode 试点，复用其已有项目规则，待真实任务产生观察结果。
+当时 `r3s-VPS` 已登记，仍待真实任务产生观察结果；这是初始边界。
+2026-09-12 更新：两个项目均已有后续反馈与版本回灌，当前缺项和下一步以本页
+[试点摘要](#已登记的外仓试点)及[执行目录](../superpowers/plans/2026-09-12-zcode-review-fix-execution.md)为准。
 后续继续在这些项目自然发生的工作中复用这些方法，尚未启动阶段三；其他历史处置继续按
 [维护收尾与待办](maintenance-status.md)保留，不为“无事可做”反复开启。
