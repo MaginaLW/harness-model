@@ -22,6 +22,12 @@
 
 ## 已完成
 
+2026-09-13 后续执行：[E1 核查、E2 设计与 Linux 候选准备](follow-up-preparation-2026-09-13.md)。
+dotfiles 历史 Step 3 的两个固定提交已取回 37/37 成功 CI，原本地日志缺失仍保留；
+私有试点在核查中已由另一任务推进 main，采用结果由其当前持有者核定。
+本轮完成 E2 最小 guided 设计与树外 Linux 候选，按所有者确认保持目标只读。
+E3 的双产品会话和逐项复核链仍不足，E4/E5 与阶段三/四未启动。以下旧快照保留观察时点。
+
 2026-09-13 凌晨收尾：[9 月 12 日新增计划的统一后续入口](../superpowers/plans/2026-09-12-plan-closeout-and-next-steps.md)。
 可信私有目标的 Windows runner 最小迁移已达 PILOT_PASS；完整 workflow 与 main 采用
 尚未完成，具体运行资料保留本机受限交付记录。后续先准备同仓 Linux 接入，再核对正式
