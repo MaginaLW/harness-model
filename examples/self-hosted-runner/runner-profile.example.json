@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "kind": "runner_profile",
+  "repository": {"github_id": 123456, "owner_name": "example/private-demo", "visibility": "private", "trust": "trusted"},
+  "runner": {
+    "id": 42, "profile_id": "synthetic-linux", "scope": "repository", "os": "Linux", "architecture": "X64",
+    "runner_version": "2.333.0", "privilege": "low", "isolated_workspace": true, "active_instances": 1,
+    "network_boundary_ref": "synthetic-private-network", "environment_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "code": {
+    "base_commit": "1111111111111111111111111111111111111111",
+    "subject_commit": "2222222222222222222222222222222222222222",
+    "checkout_commit": "2222222222222222222222222222222222222222",
+    "tree_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "dirty": false
+  },
+  "definition": {
+    "workflow_ref": ".github/workflows/offline.yml",
+    "workflow_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "check_set_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "dependency_lock_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "storage": {"work_root_ref": "runner-work", "cache_root_ref": "runner-cache", "temp_root_ref": "runner-temp", "retention_policy_ref": "retention-v1"},
+  "credential_mechanism_ref": "ephemeral-registration-reference",
+  "observation": {"id": "synthetic-observation-001", "observed_at": "2026-09-13T00:00:00Z"},
+  "run": {
+    "receipt_id": "synthetic-receipt-001", "source_kind": "github_api", "run_id": "1001", "job_id": "2001", "attempt": 1,
+    "observation_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "not_before": "2026-09-13T00:00:00Z", "not_after": "2026-09-13T00:10:00Z"
+  },
+  "required_checks": [{"id": "lint", "command_ref": "locked-lint-v1"}, {"id": "tests", "command_ref": "locked-tests-v1"}],
+  "required_artifacts": [{"path": "reports/checks.json", "sha256": "9999999999999999999999999999999999999999999999999999999999999999"}],
+  "association": null
+}
