@@ -22,6 +22,13 @@
 
 ## 已完成
 
+2026-09-13 凌晨收尾：[9 月 12 日新增计划的统一后续入口](../superpowers/plans/2026-09-12-plan-closeout-and-next-steps.md)。
+可信私有目标的 Windows runner 最小迁移已达 PILOT_PASS；完整 workflow 与 main 采用
+尚未完成，具体运行资料保留本机受限交付记录。后续先准备同仓 Linux 接入，再核对正式
+采用；跨 Agent 主线继续沿用 E1–E5，可独立开展最小设计。本轮仅做规划与文档收尾，
+不启动这些后续阶段。下段账本、外仓 dirty 状态和分支数据保留为 9 月 12 日较早核查快照，
+不替代接手时的实际读取，也不由新 CI 结果覆盖旧业务版本的验收。
+
 2026-09-12 当前执行入口：[ZCode 试点收尾与跨 Agent 协作执行目录](../superpowers/plans/2026-09-12-zcode-review-fix-execution.md)。
 本次重新核对账本仍为 46 tasks：38 MERGED / 7 BLOCKED / 1 APPROVED_FOR_MERGE；
 TASK-0028 仍需 reverification，继续保留选项 C。核查起点 `68f3dcb` 相对 main `f633c03`
