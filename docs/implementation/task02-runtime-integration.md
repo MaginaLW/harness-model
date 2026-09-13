@@ -1501,3 +1501,58 @@ DATA-READER-001 的两处反例均为 fixed_verified，无新增未解决 Findin
 `40923aa319cb96429d9638f28a9a28ff0047f9ddc6197133402a71e221ff29c0`。
 固定镜像 assembler、实际 admission、生产 registry/scope、父 birth/pump 和原 Linux
 验收仍待完成；本批未操作目标仓、guest、VM、服务或 CI，未填 implementation_result。
+
+## 固定入口前缀组装与首次退出前清理
+
+`runner-quiet-entry-assembler-v1-candidate` 实现纯字节 build_entry_prefix：只接受固定
+b7dc/a731/f2ab 三个原组件，不接受路径、role、callback 或生产启用参数。实际输出
+`entry-prefix.py.txt` 为 618,355 字节，摘要
+`992e1a3ca3af6cc6522d6a936c6fb43d04c172cc9608d941ca0802d740076d5d`。
+原 prelude 是 byte-zero 前缀；库和 reader 作为精确 bytes literal 嵌入并执行，解码
+字节不变。库装载到固定私有 ModuleType，入口自身 __name__ 不改；原库作为脚本运行
+的 SOURCE_LIBRARY_ONLY 拒绝保持，正常内部库装载不开放其生产门。
+
+准备行为实际预载 16 模块、核原私有模块实例、装载所需 time 接口，并在原入口
+namespace 安装 reader。成功仍为原 owner RAW3/4/5/6、没有 B1 ledger、reader NEW；
+不自动 transfer、不关闭6、不读 DATA，不输出 READY/ACK。完整未来模块图及目标
+stdlib/profile 尚未到位，按原设计应在这些前提满足后才移交。该前缀是后续完整
+child 组装可复用的部件，尚非可发行 child、PreparedSourceImage 或业务准入。
+
+独立 ENTRY-ASSEMBLY-001/P2 证明初稿仅在 fake_exit 抛出后才补做清理，首次 _exit
+调用时仍是 RAW3456；修复先对原 abort 做有限后备尝试，再走原 fail_and_exit。
+检查绑定第一次退出调用之前的 known 槽状态，不用模拟退出后的补救冒充真实收尾。
+ENTRY-ASSEMBLY-002/P2 证明首修未拒绝缺失或不可调用的 time 时钟接口及模块引用
+不一致；当前同一原模块/所需接口不匹配即失败。接口结构通过仍不认证真实时钟。
+原 b7dc 不改，早期两版及反例保留；两个缺陷均在组装层修复。
+
+当前 build-002 的作者 50 项宿主控制、非作者 44 项控制通过；后者为 38 项准备、碰撞、
+替换、编译/执行/导入、时钟接口及未知关闭控制，加 6 项首次退出清理入口控制。
+原失败与复验不相加；审查工具 SIM102 修订后的同源复跑也不加计数。完整 Ruff/format
+通过，生成前缀另以 .py stdin 文件名按原字节检查。宿主仍为 Windows Python 3.11.9，
+sys/posix/time 的实际运行控制使用明确模型，未验证 Linux、真实 FD 或目标 stdlib。
+
+根独立重建两种输入顺序，prefix 和 index 均逐字节相同；六段连续覆盖全部输出，
+原三个组件、16 模块的 256,579 字节和 107 处导入位置均一致，七类非法输入拒绝。
+旁置 artifact-index 为 19,687 字节，摘要
+`3569f315891507f61c0706b9ca5acc29b7a835f112a1b1161aa6d9074683e2e2`；另明确绑定
+原库 builder/loader/input table/preparation tool/build manifest 五层构建来源。
+index 含输出 SHA 和段范围，不嵌入 prefix；外置 receipt 再绑定 index、prefix 和
+构建工具，因此无自哈希环。它不是最终生产 source_manifest，也不能回写自身摘要
+到 prefix 后继续使用旧 index 或拿片段清单替代完整来源链。
+
+作者交付摘要 `9d13f4c946f4362aa49d1cb30015dc0f35af5ee589024981ea056d0e5aba1fb0`，
+78 文件、4,034,560 字节归档摘要
+`030ec9a2dbbce36fdd7672ef063780d8b77ee934557e8a772de035f644ad1928`，已逐项回读。
+独立审查回执摘要为
+`aecdaab61a05e1b7eb5c0d95dd1f124062878d25ee013cf2c4b9315c23895ef4`；两项 Finding
+均为 fixed_verified。245 文件、3,676,160 字节归档已逐项回读，manifest 摘要为
+`3a04d1b73a71f9cf0a55bd30c0d5d399cfe634b712f6021385864003176692f4`，归档摘要为
+`0ef99323e062db5e383fc5ec856445c4ec406ae5a0f05dbd98e55fc7c827ee92`。
+根重建审查另封存 40 文件、1,198,080 字节归档，manifest 摘要为
+`b3d80ba9a97af3f93f2a456dbfd7b4f1c5700d49a7f156a3150d2e276b55d051`，归档摘要为
+`6f190d0afc9f51e5880cb6cadcbc6f855a9e62a844e32131c67536d2c7bd5762`；文件与归档回读通过。
+该审查同时绑定先行 contract 的 34 文件封存包，manifest 摘要为
+`3d4b255cfef6f9a08bc48d59e5958593209f2ab428d85d3530194baec055d224`。
+
+完整镜像和实际来源准入、生产 registry/dispatcher、READY/ACK、父 birth/pump 与
+Linux/目标采用仍未完成。本批继续只读候选准备，未运行新的全仓 Gate 或记录实现完成。
