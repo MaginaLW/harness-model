@@ -695,3 +695,42 @@ Finding 均独立关闭，无新 Finding。核对了全部 103 文件与归档�
 worker birth、父协调器及原生集成尚未完成；本次没有 Linux 原生执行，协议输出
 的身份认证、operation readiness、checkpoint 接受和 permit 均为 false。
 完整 POSIX gate 的 124 失败、guest 不可用与目标仓只读未交接状态保持。
+
+## 根目录与窗口检查层完成宿主独立复验（12:36 UTC）
+
+`runner-quiet-root-window-guards-v2-candidate` 固定交付摘要为
+`163cffff376375ffb3efcccee26c0f1eead1a0d2c77b8d1107df68ab55d779c9`；
+26 文件、706,560 字节归档摘要为
+`bc368d615ef0b04a4d7fabb50417512f29828f4e74731834b705976737b9ddfb`。
+本层实现完整根目录祖先、固定挂载类型/设备、窗口目录、父保留 tuple5、RUN 锁路径、
+独立 holder 锁 FD 与固定临时文件检查。复用 B1 第二版的 FD 台账与 private open
+context；全部文件系统操作仅可放在固定 worker 或循环前准备阶段。
+
+第一版独立重跑 118 项宿主测试及 28 项补充运行时检查，无运行时 Finding；
+138 个建模调用位置的三类异常注入合计 414 次，包含在宿主测试中，不另加测试数。
+根审查与独立复现发现 `B2-TEST-001`：Linux 测试 fixture 尚未完整核验挂载与祖先，
+锁测试就先创建文件。实际 fixture/test 函数的内存模型调用序列证实错误设备下先
+CREATE、后 mount_type 拒绝；未执行真实 Linux。原失败探针摘要为
+`058e70235be8f47ea414b1bfad9d6f3c6b80b7757b0ce1963d022922dfeba828`。
+
+第二版仅将 native fixture 的 yield 包在已准入的 checked_root 内，并补宿主回归。
+运行时、B1 依赖及原宿主测试字节不变；原第一版完整交付、归档和 Finding 保留。
+固定第二版独立重跑 126 项宿主测试通过，6 项 Linux 测试跳过；28 项补充运行时
+检查和 13 项实际 fixture/test 函数的受控检查通过。错误设备、文件系统、祖先、
+根替换均在创建前拒绝；有效入口仍先准入再写，退出替换及三类取消异常按原要求
+拒绝或传播。该测试基础设施 Finding 已在固定第二版独立关闭，Ruff/format 通过。
+最终独立报告摘要为
+`ce740e91c47e686705095296ff0395ec488f96b3304144a81588eaed62a92e95`。
+
+本层不签发生产 grant、不验证实际 holder/boot/source，不实现 flock 获取、完整
+文件事务、worker birth 或 guardian。新打开的稳定 W 不等于父原先保留的 W；
+上层仍须将经核定的父身份明确传入比较，不能由当前 fstat 重建旧事实。
+原生内核、挂载、取消、时限及服务行为仍待当前 Linux 环境验证。
+
+14 kind 组合设计另发现输入闭合缺口。根对固定纯协议执行 32 项实际纯调用：
+14 个完整父上下文基线通过；11 kind 缺少保留上下文时拒绝；MAIN append/read 的
+root/W 新字段、bootstrap/prepare 的新 W ACK 对象均不在旧闭集内，pending 又要求
+完整 MAIN request。探针摘要为
+`28d7f802f2dfe8286b66fb5c941ba99035d2b42825d9ca23ebe4c654c3da0887`。
+这说明固定 worker 传输仍需明确的新版设计，不重开纯值协议已修复的问题，也不
+将本层复验算作接线完成。目标仓继续只读；本轮未启动 guest 或执行原生测试。
