@@ -654,3 +654,44 @@ close 入口失败复现；三项 Finding 全部独立关闭，无新 Finding。
 跨字段绑定，`QTX-001` 的旧源独立检查 42 项，其中 12 项实际错误匹配已保留；
 其修复及全部新编码最大值尚待固定源码独立复验。根目录/窗口检查层继续树外准备。
 当前 guest 不可用、完整 POSIX gate 为 124、目标仓只读且未交接的边界均保持。
+
+## 14 kind 纯事务协议完成独立复验（12:20 UTC）
+
+`runner-quiet-io-transaction-values-v1-candidate` 已固定请求、ACK、pending 与父侧
+保留上下文的纯值协议。交付摘要为
+`9dcf38b0b7b48fe013072f5aa71c22634102e5c34370f90f4876d63726a13d2e`；
+103 文件、2,252,800 字节归档摘要为
+`c19c56ecdb5030713c77594626a54e9a7b5afe353d3c17937886c0f553dd0104`。
+原 core 和 event shape 字节保持不变；本层不执行文件、进程、时钟或 guest 操作。
+
+根独立审查保留三个问题的旧源与实际错误匹配，并复验修复：
+
+- `QTX-001`：主动写的 guardian PID/start tick 必须与 lease 绑定；恢复读取与
+  emergency 保留新 holder 的纯值表达，仍不证明实际接管身份。
+- `QTX-002`：已接受 contract 的 started 读取不能通过矛盾的未绑定标志接受缺失。
+- `QTX-003`：MAIN prepare 必须从完整 lease 数据直接核对 armed 摘要，不能依赖
+  可省略的重复上下文才执行该检查。
+
+独立重跑固定源码的 335 项宿主纯测试全部通过，另执行 208 项独立检查；三项
+Finding 均独立关闭，无新 Finding。核对了全部 103 文件与归档、一次性比较状态、
+不可变父上下文、请求与 ACK 绑定、pending FD 值以及原 core 的 128 event 重放。
+最终独立报告摘要为
+`fc3c7076eabdc67b7bbfb59c86416c45614be3146a4cc947f7d7c36a7d9d7e28`。
+
+14 kind 在当前闭合字段域内的最大完整 argv 为 2,834 字节，ACK 含 LF 为
+3,016 字节，pending 含 LF 为 2,125 字节。已独立核对实际编码器、最长合法字段与
+定长摘要；这些是协议值域上界，不证明最大 4 MiB journal 可达或真实内核身份。
+原 4 KiB、64 KiB、4 MiB、128 event 及时间预算不变。经原存储逻辑复核的
+`DESIGN-AMENDMENT-001` 保留未 start 时 RUN emergency 的空 contract，以及
+部分 start 的恢复表达；不产生执行权限。单次 Exchange 的终结不能替代全局重放
+防护，父侧单调发行及有界保留仍待实现。
+
+冻结工具的两项 Ruff 风格问题另包修正，原协议交付未重写；独立验证精确差分、
+归一化 AST、上下文退出顺序及 Ruff/format。更正交付摘要为
+`966a4590c8fe2d6de522be8af91c0a1009c835f7c3ba7e8e5918c3489b059101`。
+修正后的冻结工具未执行，不将脚本审查当作重新生成交付的证据。
+
+根目录/窗口检查层已交作者候选，独立审查仍在进行。14 kind 文件事务组合、实际
+worker birth、父协调器及原生集成尚未完成；本次没有 Linux 原生执行，协议输出
+的身份认证、operation readiness、checkpoint 接受和 permit 均为 false。
+完整 POSIX gate 的 124 失败、guest 不可用与目标仓只读未交接状态保持。
