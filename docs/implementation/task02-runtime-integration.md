@@ -913,3 +913,39 @@ helper FINISH 后业务取消、成功后零文件 I/O 检查均通过。最终�
 组合实现。实际 FD/source/EOF、worker/C、跨事务恢复准入、全局 replay 与 Linux
 原生集成均未验证，recovery/operation/production 标记保持 false。目标仓只读及
 完整 POSIX gate 124 的既有边界不变，不能据本阶段填报完整 implementation_result。
+
+## RUN started 与初始 head 完成独立复验（14:57 UTC）
+
+剩余九写审计核对 22 份固定输入及 85 处源码位置，划为 RUN 初始化、MAIN 初始化、
+两卷创建、pending、append/mirror 五批；根核对 47 文件及归档不变，回执摘要为
+`078618cbb1cd6ebc34dae4bdf0bdeec95845106b9160d24363e54fe041777aa8`。
+这是静态顺序与缺口核定，不表示源码已执行。原实际启动顺序和 MAIN 数据屏障保持。
+
+首批 `runner-quiet-run-initialization-v1-candidate` 实现 `run_start_capsule` 及
+`run_initialize_head`，交付摘要为
+`80b2cff40c1f585ab2dfe15d470967e4fd24e6893c30b269d662747ef7d75119`；
+66 文件、1,720,320 字节归档摘要为
+`19cb8fb3936e32c66bfb9caefeb709732feba514974dcf42a9ab40e31c82e3e5`。
+运行时摘要为
+`665bb00617302fc7477b4a1f0f6f980e0456f3efb7edb8603af396cec3353c6a`。
+
+两项均核完整上下文、RUN root/W/lock 与 fresh armed；写 started 时要求 started/head/
+next 不存在，写 H0 时要求完整已接受 started 且 head/next 不存在。固定 B1 O_EXCL
+创建后完成文件与 W 同步、根/W/锁复核和全已知 FD 收尾，再比较完整 ACK。整个调用
+的尾部异常也终结 Exchange；不访问 MAIN，不由单项成功认定完整 start 或父 checkpoint。
+
+独立重跑 129 项宿主测试及 25 项补充控制通过，Ruff/format 通过，无新增 Finding。
+补充实测移除整个 MAIN 模型目录仍可成功、FINISH 后零文件 I/O、完整实际 armed、
+mandatory started、占用/next 与锁前后变化，以及 ACK 尾部取消和不可复用。
+独立报告摘要为
+`3768ea25012f847d84e95f25036ccbd48a713498789f45354c0fc5c7e52cb508`。
+290 个模型调用位置的三类异常共 870 次注入包含在六项 pytest 内，不另计测试数。
+
+作者首次完整运行的四项断言错误保留：独占 open 失败按冻结 B1 保持 open_unknown，
+坏业务对象按 storage_values 原异常传播。根观察器最初误要求 ACK 仅编码一次，忽略
+解码器的规范重编码；修正为所有编码观察均位于相同最终 I/O 计数，只复跑补充控制，
+原 129 项完整测试记录复用。上述修正均未改运行时或冻结依赖。
+
+MAIN contract/H0 两项的作者候选已通过 87 项宿主测试，独立审查尚未完成。有限状态
+防重放和新 holder MAIN 身份来源仍需设计；C、Linux 原生、实际目标交接与完整 Gate
+均未完成。当前仅七项 kind 完成独立宿主验证，不升级 production 或 implementation_result。
