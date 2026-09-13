@@ -1159,3 +1159,13 @@ stub dispatcher 不能成为生产入口。seal/fd-exec/真实 grant 仍须在�
 上验证。G3 独立闭集 codec/最大编码与 receiver 测试源码可以并行准备；这些树外工作
 不依赖目标仓交接。D 原生文件组合、E 双卷一次接受、F 真实 guardian/恢复、最终目标
 采用和采用后 CI、真实服务恢复及宿主重启后业务仍分别保留为待办。
+
+后续稳定指针已封存为 `remaining-c-through-f-plan-001/PLAN.md`，摘要
+`f8f25c72ba861bea5551602994c2b7a8c927355d73600bb8c61caed0a3482d04`；
+manifest 摘要为
+`fa9d145613828b9b4987af933a9fa71e5438b276112bd46f17ab41807c4e4fe1`。
+根回读 29 份文档/manifest 来源、14 处文段、12 项候选索引及 47 文件归档通过；
+报告来源固定为 `5e9776932a8dae2c29c380f762a1877d356a4749` 的实际 Git blob，
+不要求当前追加后的报告仍等于历史字节。首预检漂移及工具 lint 失败均保留。
+该清单明确 C1、后续 C/D、E/F 与 G3 的依赖和停止条件，只是准备指针；没有新增
+运行时实现、执行旧业务源、恢复 guest 或授权目标写入，也不构成 implementation_result。
