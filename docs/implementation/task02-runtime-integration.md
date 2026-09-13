@@ -326,3 +326,27 @@ QPOSIX-001 的修复由上述新执行验证；完整 gate 尚未执行。
 `stage9-native-diagnostics-002.tar` 为 399,360 字节，摘要
 `c96f6f14593143fe0d052aad40a0dce931ad5c7f51ffe2d7eff2535f45ba65da`。
 独立结论保存在 `stage9-native-verification-001`。目标仓继续只读，未注册 runner。
+
+## 后续候选与执行边界（08:53 UTC）
+
+完整历史 POSIX 启动脚本已绑定上述实际合同及八个运行时文件，独立 15 项检查
+通过；长传输包装只变更运行编号与脚本路径，原 gate 与全部期限不变。
+`guest-local-posix-v2-run-001` 已实际启动，完整终态及回读尚未核定。最终验收
+清单、14 个有序输出标记和回读脚本的 27 项独立检查保存在
+`local-posix-run-acceptance-001`。
+
+原候选 README 对九项 Windows 用例的措辞不准确：原 gate 按冻结 manifest 的
+`platform=windows` 排除它们，不输出九条 `BEHAVIOR_SKIP`，也不把它们计为 Linux
+通过。实际行为跳过按原始日志逐项保留；不得由平台排除数量补造日志或验收结果。
+启动包首份格式检查误记已由追加的 `delivery-v2.json` 更正，受审运行文件字节
+保持不变，原误记和失败 JUnit 均保留。
+
+持久化设计 v1 的独立审查发现 QPERSIST-DESIGN-001：已确认 guardian 死亡但旧
+文件 writer 卡住时，接口会连同有效 capsule 的恢复读取一起拒绝。设计 v2 将
+接管恢复与新建主卷 writer 分开；只有已独立绑定为纯文件 I/O 的旧 writer 才可
+使用此分支，且不读取卡住的主卷，主卷写入、新窗口和主动动作仍禁止。命令或
+服务 helper、Job、operations 的原恢复检查保持不变。
+
+原审查者已独立核对 22 项来源摘要、五文件归档和全部可逆修改，将该 Finding
+核定为设计层修复。同步存储模块尚在实施；异步接线、真实 guardian、静默窗口
+和恢复演练仍未完成，没有真实 lease、服务操作或 runner 注册。
