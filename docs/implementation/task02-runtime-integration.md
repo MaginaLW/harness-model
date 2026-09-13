@@ -1247,3 +1247,53 @@ C1-BIND-01 至 08、C/D/E/F、G2/G3 和 native 仍开放，未产生 implementat
 控制覆盖包/缓存原实例、装载前后碰撞及三类 compile 异常；最终 Ruff/format 通过。
 prepare_library 再次返回失败的原库不代表健康或 READY，其后 import/preload 仍拒绝。
 固定源码加载器不提供同进程反射沙箱或多线程原子性，只接受用于源码库准备。
+
+## 绑定引用与本地 claim 生命周期的首批实现
+
+`runner-quiet-binding-types-v1-candidate` 已实现独立的 `io_binding_types.py`，运行时
+摘要为 `f5c2a3442f67e3fbdfca57d70a27eae7397c3a2520d71bdd2712b593594f700c`；
+交付摘要为 `5ad5dd479bf4072452978d1c03534068097214620b636ce07add606dba623e09`，
+50 文件、1,566,720 字节归档摘要为
+`ec297df08242e4a9c2a62796c4bf02f383ca7fbf4f0a05006565a681a9478e89`。
+生产 ChildEntryState、CompleteDataRead、BoundFileInvocation 和 BoundDirectoryScope
+的构造、复制、反序列化及消费继续拒绝；正向行为限于明确独立的 SyntheticDomain。
+原 15 模块未改，新模块尚未纳入生产源码包，也没有重新创建最早 raw owner。
+
+一个测试域保存五个原对象引用，只有精确 kind、原 invocation 和全部相同实例才可
+FRESH→TAKEN 一次；14 行路由仍是固定目标描述，不是实际类注册或 dispatcher。
+当前 root/window 各最多一个 lexical scope，退出后不保留历史 scope/generation。
+同 FD 再开得到新的原 scope，旧句柄不能复活；失败或 unknown 保留当前有限槽，只
+允许原 scope 退出。模型 ledger FINISH 后禁止再开 scope，compare_started 先记
+模型 Exchange 终态，最后 FINISHED 仅表示本地纯 claim 形成，不能证明输出或父接受。
+
+根衔接实际使用冻结 codec.Exchange 和 B1.TransactionFDs 原实例，17 组原输入覆盖
+14 kind，另三类失败全部通过：close 未知、全部关闭但 ledger.failed、ACK 比较失败
+且 Exchange 已终态，均不能成功收尾。正向路径两次使用同一窗口 FD、撤销旧 scope、
+结束 B1 台账后才比较 ACK。模型不读写所引用对象的属性；检查由测试在外部执行，
+B1 close 被明确替换为模型记录，没有真实 FD 关闭、EOF、文件事务或生产绑定认证。
+根报告摘要为 `fb28555bd371b45513778ae710d1d6863d92706ae1eca4d6a74e3487724fb4bd`；
+19 文件、624,640 字节衔接归档摘要为
+`aba19881d63c0ccbcfc0508fef7030174d4df974b41daa5d2bea21d084407a75`。
+
+最终运行时与首稿仅折行不同，独立 AST 比较相同，17＋3 控制按最终字节重新执行。
+作者 89 项宿主测试包含 133 个已执行保护区源码行的 399 次异常注入；这不是额外
+399 个 pytest，也不证明任意字节码位置或 native 原子性。最终 Ruff/format/来源
+检查通过，23 份来源、三份输入归档和旧测试工具/格式失败均保留。
+
+域内单次规则不提供跨真实域注册：新建两个测试域仍可引用同一组外部对象。外部
+close 后重用同 FD 若未撤销旧 scope，本模型也不会自动发现；真实 B2/B1 consumer
+必须保留实际 active/owns、目录身份和 lexical 撤销检查。FINISHED 后的 ACK 输出
+失败由后续 Entry/C 单独记录，不能重新执行事务或据本地终态补签 parent accepted。
+
+独立审查按最终字节重跑原 89 项测试及额外 55 项消费者控制，全部通过，无新 Finding；
+其中覆盖五个值相等但不同的原引用、跨域/同 slots 重建、十四路重复 take、旧 scope
+与 FD 复用、错序及永久终态，并实际验证新测试域可复用同组引用这一范围限制。
+独立回执摘要为
+`aa328fae231c6451a1eae7fc0c7cb454bf851857da56a012a7cd06f067c080d9`；
+108 文件、6,031,360 字节审查归档摘要为
+`199c22fda71f8107b2173fb47cae4a656ad875ff062e393f4966be940b9c66eb`。
+原候选清单、归档和最终运行时逐字节回读，Ruff/format 通过；旧草稿控制与封存工具
+格式失败保留。下一批仍须另版实现十模块生产工厂、十九处内部构造及真实 scope
+接线，保留全部原检查；实际 producer、C/EOF/source、D/E/F、G2/G3 和 native 未完成。
+本仓此次仅追加记录并检查 diff；没有重跑或冒称新的全仓 Gate，没有目标采用、VM
+或服务动作，TASK-0048 仍缺 implementation_result。
