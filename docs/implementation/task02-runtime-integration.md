@@ -1122,3 +1122,40 @@ G2 纯编号与有限槽候选已交独立复验。真实 C/birth/source/FD/EOF/
 永久总序、Linux 原生、原 POSIX 124 的完整复验、服务窗口和目标仓交接仍未完成。
 TASK-0048 仍 IMPLEMENTING，classification fresh、approvals current，缺失
 implementation_result；本次没有补造该结果或推进账本。目标只读边界不变。
+
+## G2 编号与有限槽完成独立模型复验（16:21 UTC）
+
+`runner-quiet-domain-reservations-v1-candidate` 交付摘要为
+`4da2d720615d99d37802169fe4713753742971ab243e8c04c15970bfc9e409e9`；
+35 文件、604,160 字节归档摘要为
+`355f0c46cce917524fcd7fc2b249929525868844c57329d31df176346c354abf`。
+运行时摘要为
+`925acbd0de6d24f49a62916004e7b66a925fce9460b9f71e6513b823c9ef0069`。
+纯测试域使用一个 128 位计数器，0 为未发行哨兵；不可变状态一次发布 burned 与槽。
+MAIN 一次预留 M/R，R=M+1、gate=R；R 可以先退休，不能因此丢弃仍 live 的 M。
+最多两个 live 槽及一个 compound；原槽全退后可顺序发行新 RUN followup，原对象身份
+仍保留。剩一个号却申请双槽时整次停止，不部分发行、不退号或绕回。
+
+独立重跑 77 项模型测试及 33 项补充控制通过，含原 171 个实际源码行位置的 513 次
+异常注入；注入数不是额外 pytest 数，也不证明指令级原子性。补充控制涵盖完整 18 种
+synthetic 收尾组合、真 128 位边界、R 先退、followup、有界结构及同号对象重建拒绝。
+未知 child/FD/stream 保留槽并永久 halt，后来原槽得到完整模拟收尾也不能解除 halt。
+独立报告摘要为
+`42bb1c7d61170e2071f0de240bfa834d23efbb4149ec2c8785de16c58c8b91b3`；
+59 文件、1,372,160 字节复验归档摘要为
+`056c2b4bef0805119e9a898de4ad78a34422b4d5b263b885bef4dc1c1f0a3eeb`。
+根回读七份固定来源、三份来源归档、16 处文段、原包与独立包全部文件及测试日志通过；
+回执摘要为 `7afbad1245decf7f43b2926c7b462c252d00c3b2ebb81e9f105676ab97d1a4bb`。
+作者测试准备错误、独立准备工具归档字段错误均保留，运行时未由此修改，无新 Finding。
+
+这只是编号与原实例槽模型。SyntheticSettlement 全由测试调用者填写，既不观察 OS，
+也不认证真实域、来源或 EOF/reap；MAIN 与 followup 的业务对应、真实通道、完整
+Exchange/compound 事实及父 accepted 发布均未实现。公开构造器继续拒绝，全部权限
+属性 false；G2 整体、跨 holder 永久总序、C 与 G3 仍未完成。
+
+后续沿用原 C→D→E→F 顺序。C 是固定来源、出生和数据屏障，E 才是父协调：下一最小
+准备单元 C1 固定依赖闭包、确定性 source bundle 和入口接线设计；私有 test 工厂或
+stub dispatcher 不能成为生产入口。seal/fd-exec/真实 grant 仍须在重新核定的 Linux
+上验证。G3 独立闭集 codec/最大编码与 receiver 测试源码可以并行准备；这些树外工作
+不依赖目标仓交接。D 原生文件组合、E 双卷一次接受、F 真实 guardian/恢复、最终目标
+采用和采用后 CI、真实服务恢复及宿主重启后业务仍分别保留为待办。
