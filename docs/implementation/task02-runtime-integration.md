@@ -1746,3 +1746,69 @@ dispatcher、父 birth/pump、真实 Linux、runner/CI 采用及服务恢复/重
 本轮未发 READY、未读 DATA、未转移 RAW 所有权、未创建生产权限；目标仓保持只读。
 未填 implementation_result；CLI 仍为 IMPLEMENTING，classification fresh、approvals
 current、evidence not_available，不能将该观察组件的通过当作任务 02 完成或全仓 Gate。
+
+## 父侧固定源码 seal 与读回准备
+
+原 production binding 及 birth 设计要求父 C prepare 保留独立完整镜像摘要与只读 OFD，
+在 READY 后结合实际 post-exec 来源比对子进程的观察。该职责不能倒置为 child 自证，
+也不能用 pending.birth 的后续字段给当前 request/v3 补一个 expected SHA。
+
+`runner-quiet-source-image-prepare-v1-candidate` 以固定 992e、618,355 字节的入口 prefix
+实现这条资源链的候选算法。生成器核对原 assembler delivery、prefix、detached index
+与 build receipt，再将字节嵌入运行源码；这些原产物明确为不完整入口，本轮不执行其中
+程序。准备器不接 caller bytes、路径、FD、expected SHA 或认证开关；唯一预算输入为
+`(monotonic_ns, boottime_ns)` 顺序的原绝对截止时间，不自行生成新 TTL。参数形状正确
+不认证它来自实际 parent/holder 的原预算。
+
+算法创建本次唯一 memfd，按实际短写长度分段写全，加入四项 seal，再只通过本次原 FD
+的固定 proc 路径重新只读打开。新旧身份、size、status/descriptor flags、seals 与
+完整 positional 读回、真实 EOF 和固定摘要均须核对；原写 FD 确认关闭后才保留只读 FD。
+只读 FD 仍由原准备器持有并负责关闭，没有 child grant、exec 或所有权交接。
+
+独立审查复现 P2 `SOURCE-PREPARE-001`：首稿在 begin 核完原字节后，后续仍信任可变
+SIZE/SHA；把二者改为前 16,384 字节及其实际摘要，会只写入这个短文件，seal/只读 flags
+均正确、原写 FD 已关闭，却错误进入 PREPARED。该主反例没有伪造 readback；另一个
+对照显示错误 readback 在原 SHA 下被拒，但改变 SHA 后被接受。修复只在每次 `_borrow`
+校验固定长度和摘要的精确类型与字面值，未新增 expected 参数或放松 profile。
+
+最终运行源码 1,350,769 字节，摘要为
+`16ba414ce15339879f0dea5da1321688f739ee556e45f778b1e0495d6eef9e34`；其中嵌入的 prefix
+是数据。15,670 字节模板摘要为
+`9df1f7a25c39bcd3655c1ff4152650b508bfd62e17924a6e087c193fc8c068bf`，生成器摘要为
+`0e5db7c9090f7d00ace24ca6e2368175f230ce67ef5dddcc12cda5faa76eddc9`。根独立解码唯一
+bytes.fromhex 赋值，核得原 618,355 字节/992e；删除该赋值后其余 AST 与模板完全一致。
+实际运行源码接受完整 Ruff/format；模板的插入占位不被冒称为独立可执行或单独 lint
+通过。初稿到格式稿的模板、生成器及运行源码均确认 AST 不变，修复另保留版本。
+
+最终作者 `run-006` 122 项测试通过，3 项 pytest 内遍历的 276 个 I/O 异常位置已包含
+在总数中；独立 122 项为 114 项主控制加 8 项尾部/FD/关闭控制，分别记录，不累加复跑。
+两边均使用实际生成源码和真实 hashlib，文件及 FD 操作由各自隔离模型执行。
+唯一 P2 已 fixed_verified，无新增 Finding；原失败与修复前后源码继续保留。
+作者曾执行的 2 项失败回归、独立错误读回/真实截断反例、早期工具质量失败不被抹去。
+
+注册中断疑点的实际 trace 仅触发首个位置，此时新 FD0 被关闭；没有把未触发的第二次
+中断宣称为覆盖或缺陷。独立最终关闭控制另核到先标 CLOSING 后被取消时零次实际 close、
+保留 UNKNOWN 且不重试数字。这个结果不等于资源已释放，也不承诺任意连续中断可恢复。
+正常与失败调用的预算是 Python 层检查，不证明内核调用次数、硬时限或原生关闭延迟。
+
+最终作者 10 个工具、独立审查 9 个工具、实际运行源码及根复核/快照工具的完整
+Ruff/format 检查通过。作者 delivery 摘要为
+`d5dbfe9121ce568d7249ee472356f9d7b8bb6ec55b6a8c37695e5e040493838a`，108 文件及
+17,612,800 字节归档逐项回读通过，归档摘要为
+`f4bc93e11e5aceecce1a878b399c1a00f475ec12498fe6f65331a67edfb30aa5`。
+独立回执摘要为
+`a3b51c74a359b80c4a3033ececf86961e77cc79ee89a6592b05ac79d51d44cee`；183 文件及
+13,537,280 字节归档回读通过，manifest 摘要为
+`f602e43b1947c627823d63e6fb147507a7a5e7ee85a5b13725af0693a75dbe5e`，归档摘要为
+`26e8a507d7c004b3f9618008c74a7d07db4a2e0c9053aecfe254971a6ce1160b`。
+根复核封存三版模板/生成器/运行源码、格式与字面量比较、两包绑定及快照工具；29 文件、
+4,249,600 字节归档回读通过，manifest 摘要为
+`18e4a86f47dec907321442ccc831a24a5184859dc5f5817ee294073e9dec0970`，归档摘要为
+`fd69e19448a90ba9126e5a2d07f5d59e7745b41c0da64c48352ee11d44c0c8a8`。
+
+实际宿主仍为 Windows Python 3.11.9；模型与 py312 静态检查不认证 Linux memfd、
+procfs、解释器/stdlib 或真实父来源。完整 child 构建、PreparedSourceImage、父 birth/
+post-exec/READY 与 DATA 绑定均未完成。后续 admission 还须解决旧 f2ab reader 从 argv
+重新解码 request、另建 deadline tuple 且未续接入口最后时钟的接线缺口；本轮未改旧库。
+未运行 native、guest、服务、CI 或新的全仓 Gate，目标仓仍只读，未填 implementation_result；
+TASK-0048 继续 IMPLEMENTING，本批不构成任务 02、C/E/G3 或生产来源的完整验收。
