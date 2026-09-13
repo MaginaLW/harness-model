@@ -66,6 +66,11 @@ Linux pilot；当前 root fixture
 | `mask-contract-independent-review-001/002` | `MASK-DIAG-001` 的首异常掩盖后续挂载问题已由完整未过滤诊断检查修复并独立验证；v2 新发现固定脚本目录不一致、二次观测遗漏传播属性，均保留为待验证修复 | 诊断候选已运行；v1/v2 均未执行容器诊断或发放 permit |
 | `mask-contract-independent-review-003/004`、`guest-mask-v3-diagnostic-001` | 三项 Findings 已独立验证修复；v3 三个实际阶段完成并清理，最终因 `SecurityOpt` 不展示 mask 的表示差异而拒绝；实际完整挂载比较通过，原失败未改写 | 可以仅依赖 inspect 文字代替内核挂载证明 |
 | `guest-mask-v4-source-tests-001`、`guest-mask-v4-diagnostic-001` | v4 真实 Linux 49 项测试通过；81 秒实际诊断完整通过：单 owner 正常、共享和独立 socket 的外来 owner 均被两 shell 拒绝，合成业务 PID 的四类 FD 别名可见；真实屏障无 socket FD，完整诊断内核检查通过后未获 permit，原 60 秒等待超时退出 125；三个精确实例均清理完成 | 正式 adapter 已集成、完整 fixture 或 CI 已通过；诊断始终 `acceptance=false` |
+| `adapter-v6-independent-review-001`、`guest-live-candidate-tests-v6-001` | v6 固定源通过独立结构与源码核对；首轮真实 Linux 217 项通过、2 项测试失败，分别为子进程未就绪时 FD 消失、清理进程在存在性与状态读取之间消失；两项测试竞态保留为待验证修复 | 已通过完整 Linux 测试、真实 preauth 或 fixture |
+| `guest-v6-independent-native-tests-001` | 固定 v6 运行时代码的三个独立实际低权限对照通过：普通子进程仅取 FD 元数据，持 socket 与 FD 受保护的子进程分别被明确拒绝 | 三个独立对照可以覆盖整套测试或替代真实屏障证明 |
+| `adapter-v7-independent-review-001`、`guest-live-candidate-tests-v7-001` | v7 仅修正两处测试同步；独立确认全部运行时代码与 v6 同字节，真实 Linux 全部 219 项通过、无跳过，两项测试 Finding 验证修复 | 真实 preauth 或完整 fixture 已通过 |
+| `guest-live-preauth-v7-001`、`guest-preauth-v7-readback-001/002` | 新固定镜像和 v7 源的真实低权限 preauth 通过；完整内核、空只读精确 mask、监督进程双 FD 样本均验证，未发 permit 且精确清理完成；首版回读误依赖已被清理的 cidfile，修订按原 create 回执与内核 CID 交叉核实后完成独立回读 | 无许可预检能代替两个业务 fixture 或 CI |
+| `guest-root-fixture-v7-dash-001` | Dash 入口在发放 permit 前因两次 FD 证明不一致而拒绝，业务未启动；attach 退出 125，精确实例清理完成 | 业务 fixture 已运行，或可以移除跨观察的一致性检查 |
 | `i2-runner-storage-verification-002`、`guest-runner-storage-v2-001`、`guest-runner-storage-v2-repeat-002` | 独立复核及 29 项真实 shell 受控检查通过；专用 16 GiB runner 盘两次实际容量、owner 和挂载回读一致 | 重启持久性或 runner 已接单 |
 | `guest-lifecycle-tests-v2-001`、`guest-runner-install-only-v2-001`、`guest-runner-install-repeat-v2-002` | Linux 77 项测试通过；官方包完成安装，重复调用仅检查，文件匹配且本地未注册，无 Listener/Worker | 官方程序启动、注册、服务或远端身份验证 |
 | `i1-lifecycle-registration-review-001` | 固定注册 launcher 独立审查无 Finding，38 项受控检查通过，绑定 Linux 77 项结果 | 真凭据输入、实际注册或所有日志路径的保密性 |
@@ -78,6 +83,7 @@ Linux pilot；当前 root fixture
 | `guest-user-bus-array-diagnosis-v1-001` | 固定只读 D-Bus 属性查询确认 timer 两条单调计时项、空日历数组及 dbus socket 地址；禁用自动激活与交互授权的确切 Properties.Get 对照也返回明确空数组 | 已修改定时器、允许任意 D-Bus 方法或完成静默窗口 |
 | `quiet-collector-independent-review-002`、`guest-quiet-collector-v2-source-tests-001`、`guest-quiet-collector-v2-collect-001` | v2 数组修订经独立复核，真实 Linux 103 项测试通过；实采越过原 timer 失败点，在第 50 条查询因 Podman 单元的规范路径未被包数据库识别而拒绝 | 实采完整、默认激活源已获认可或账号已经静默 |
 | `guest-unit-package-alias-diagnosis-v1-001` | 只读实查确认该单元的两个路径具有相同设备、inode 和摘要；包数据库仅记录经 root 所有目录别名到达的路径，原规范路径查询失败被保留 | 可以忽略未知归属，或目录别名修订已实现并通过实采 |
+| `quiet-collector-independent-review-003`、`guest-quiet-collector-v3-source-tests-001`、`guest-quiet-collector-v3-collect-001` | v3 独立 17 项受控检查和 Linux 157 项测试通过；实采成功核对两个 Podman 单元的目录别名与包内容，在第 57 条查询因未实例化模板不接受运行属性查询而拒绝 | 模板可当作已停止实例、省略其来源盘点，或完整采集已通过 |
 | `posix-adoption-candidate/source-v1` | 完整树外 workflow 与 manifest 候选冻结，原 Windows 字节和 POSIX 检查集合保留；路径与最终提交尚未绑定 | 目标仓已采用、真实完整 POSIX 或采用后 CI |
 | `guest-posix-candidate-native-v1-001`、`guest-posix-candidate-native-v2-001` | 原 v1 完整 lint 揭示 shell 函数调用诊断；v2 最小修复后真实 Linux 40 项及完整 actionlint 通过，原失败保留 | 后发现的 Git 回调问题已由 v2 修复 |
 | `posix-candidate-review-001`、`posix-candidate-verification-002`、`guest-posix-candidate-native-v3-001` | v3 以不触发转换的固定 Git plumbing 与实际文件检查替代 status；独立复现并验证 fsmonitor/clean 回调修复，真实 Linux 78 项和完整 lint 通过；Windows、原检查集合及时限未变 | 最终提交已绑定、目标仓已采用或完整 CI 已运行 |
@@ -127,6 +133,10 @@ nonce、PID/start tick、证明摘要与清理回执匹配后，从已打开的 
 构建内与独立隔离实例各自通过全部 38 项原函数语义用例，原业务源、可信屏障和
 fixture 结果契约保持不变。mask v4 也取得完整真实诊断结果；两者仍须集成至新的
 正式 adapter，完成独立复核、真实 preauth 和两个完整业务 fixture，不能追认早期失败。
+
+正式 adapter v7 随后完成全套 Linux 验证及真实 preauth；首次 Dash 入口在 permit 前
+因 `supervisor_fds_changed_before_permit` 拒绝。当前只保留了第一份完整证明，尚不能
+判定具体差异字段；下一步用无许可诊断保留原两次观测，再按证据处理，原比较保持不变。
 
 POSIX 候选独立审查发现 `POSIX-BIND-001`：只读意图的 `git status` 仍可触发仓库配置的
 fsmonitor 或 clean filter。v3 拒绝外部 include、promisor/partial clone、替代对象库等
