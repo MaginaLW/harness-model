@@ -983,3 +983,49 @@ open_unknown，也不把已关闭 FD 数字重新认领为旧资源。受信任�
 继续树外准备。防重放提案已提交独立设计审查，未据域内 reserve 单调关闭跨 holder
 强序或 G3。实际 worker/C、Linux 原生、服务窗口和目标仓交接仍未完成；原完整
 POSIX gate 的 124 失败、目标只读及 implementation_result 缺失保持如实记录。
+
+## 两卷创建完成独立复验，防重放阶段歧义修正（15:27 UTC）
+
+`runner-quiet-window-creation-v1-candidate` 实现 `run_bootstrap` / `main_prepare`，
+交付摘要为
+`94d68ce58779deaad620131a7bd2cd42bcc4edbf8ead9db1b7d11378f8f59ae3`；
+68 文件、1,761,280 字节归档摘要为
+`e5ad66018b0a545a01e0ee320b97b2934a9b6879c8d81c50043a9180cdfda031`。
+运行时摘要为
+`55473d28fdfd51b407973cd52385d4d0cd77c480aa634b71ace63945f17740d4`，
+21 份固定输入与原来源逐字节复核，codec、B1/B2 和业务值源均不变。
+
+两项分别只访问 RUN 或 MAIN。创建 W 后、root fsync 前即保留目录身份，持续持有
+W FD 并在后续开目录和全部写入后复核；每个 B1 创建文件在原 FD 仍归台账时捕获
+九字段身份，跨目录同步和第二文件创建核对，拒绝以同内容新 inode 冒认已同步对象。
+RUN 创建 armed400 与空 emergency600；MAIN 要求 current 不存在，创建 current600
+与 W 内 lease400。全部 scope 与已知 FD 收尾后才返回含实际创建 W 身份的完整 ACK。
+任何异常终结整个尝试，保留部分状态，不自动删除、重试或认定父 ARMED。
+
+独立重跑 119 项宿主测试及 54 项补充控制通过，源与审查工具 Ruff/format 通过，
+无新增 Finding。补充覆盖隔离另一卷、FINISH 后零 I/O、同步/写入/关闭已产生效果后
+三类异常、同字节 inode 替换、实际子挂载替换、根变化、ACK 尾部取消及 128 次短写
+边界。独立报告摘要为
+`141217bb7f92ffb78b45b2778946679efa46f8c243c86da8eb7ced655a7000bc`。
+325 个模型调用位置的 975 次异常注入包含在六项 pytest 内，不另计测试数。作者首次
+完整运行有两项 fixture 误把 window_id 赋回原值，旧源与日志保留；修正只改测试。
+mkdir 至首次 stat 仍依赖可信独写根，以上结果不证明恶意特权并发下的创建身份。
+
+`transaction-replay-design-002` 冻结有限状态域内 reserve-and-burn 提案；manifest
+摘要为 `40db400a5a690fdba671bd84fc1a772285024b149ea0ab253d8ce80fe3b3c580`。
+所有 kind 共用不回绕的 128 位发行序列，失败消耗编号，耗尽停止；最多两个 live slot
+和一个 compound，未知 child/close/reap 不释放槽。MAIN M 与 RUN R=M+1 的预留允许
+RUN 先完成，不能用最大已完成编号拒绝仍被保留的 M。这是未实现的父协调约定。
+
+独立审查发现旧 v1 的 BORN→BOUND 混淆了请求形成前的观察与 READY 后的来源/FD
+核验。v2 明确 REQUEST_FIXED→CONTROL_SENT→POSTEXEC_BOUND：固定请求后发送
+唯一 control，完成 exec-error/READY EOF 和实际来源、最终 FD 核验后才构造 pending；
+MAIN 仍须等待 RUN 全收尾及自身 fresh 复核才释放 DATA。精确差分和旧证据全部保留，
+独立回执 `120ae47a1b107c90a9ede0bbe03defa7f37a9bc1a3afd51d9f9c14a8b10b8d4a`
+仅关闭 `G2-DESIGN-001` P3，没有运行时测试或整体 G2 验收。审查工具首轮格式失败
+及修正记录也保留；没有改业务来源或协议。
+
+现在 14 kind 中十一项完成独立宿主验证；pending 与 append/mirror 三项继续树外
+实现。跨 holder 永久数字总序、真实 worker/C、G3 新 holder MAIN 准入、Linux 原生、
+服务窗口、目标仓交接和完整 Gate 仍未完成。原 POSIX 124、目标只读与缺失
+implementation_result 不变，未将候选和设计审查升级为执行或生产验收。
