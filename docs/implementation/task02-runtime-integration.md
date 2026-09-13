@@ -17,9 +17,9 @@
 规格批准记录如实引用既有用户决定，没有声称用户在本轮重新逐项审核新文件，也不
 预先批准最终代码或具体高风险动作。当前 task 已按 CLI 从规格审核进入实现。
 
-目标仓在本轮存在其他写者的状态文档和 manifest 修改；随后已提交至 `dec409c2`，
-当次只读回读工作树干净，后续观察又出现相同两文件的并行修改。该提交尚未成为
-已执行的 Linux pilot；当前 root fixture
+目标仓的并行修改已从 `dec409c2` 推进至 `042fad44`；最近只读回读又看到 README、
+状态文档和 manifest 的未提交修改。保留该并行工作，不把此 HEAD 当成已执行的
+Linux pilot；当前 root fixture
 基线仍固定于 `cd02cb3c`。本次保留原工作树，在独立检出中准备后续候选，接入与采用前
 仍须重读版本和交接事实。公开托管 CI、生产设备、
 计费设置、个人凭据及其他仓库不在本单元改动范围。I5 和既有阶段三/四准入保持原边界。
@@ -51,12 +51,23 @@
 | `i2-adapter-fix-003`、`i2-adapter-verification-004`、`guest-live-candidate-tests-v4-002` | v4 按实际设备、类型、inode、CID 和容量验证必要挂载；独立复核通过，真实 Linux 163 项测试通过，无跳过 | 模拟的 mount 样本属于真实 v4 内核证明 |
 | `guest-live-preauth-v4-001`、`guest-live-preauth-v4-repeat-002` | 两次均在首次 3 秒启动查询超时；未采集内核、未发许可，精确清理完成；attach 完整性保持 unknown | 后续看见容器 running 可以追认预检成功 |
 | `i2-startup-diagnosis-001`、`i2-adapter-fix-004`、`guest-live-candidate-tests-v5-001` | v5 在原 20 秒总窗口内分配查询时间并拒绝超期返回；真实 Linux 171 项测试通过，无跳过 | 独立复核、真实 preauth 或 fixture 已完成 |
+| `i2-adapter-verification-005`、`guest-live-preauth-v5-001` | v5 启动期限修复经独立复核；真实 preauth 完成内核证明，未发 fixture 许可，精确清理完成 | 原业务 fixture 或完整 POSIX 成功 |
+| `guest-root-fixture-v5-dash-001` | Dash 真实执行约 43 秒，三个用例通过、`success_main_entry` 失败；原生退出 1，完整输出与精确清理均有回执 | 三个负例通过能代替正常业务成功 |
+| `fixture-output-observer-review-001`、`fixture-output-observer-verification-002` | 观察器的未完成发布和异常日志留存问题经独立验证修复；独立 Linux 15 项、完整绑定受控 12 项及作者 Linux 13 项通过 | 诊断器自身通过就是 fixture 通过 |
+| `guest-fixture-output-observer-v2-001`、`i2-live-fixture-diagnosis-002` | 对未改字节的 Dash 再次诊断，保留已删除文件的打开句柄并取得 5,726 字节原输出；26 个失败归为 22 个 AWK、2 个进程计数、2 个 listener 绑定项 | 所有失败已有正式修复；观察器仍标记 `acceptance=false` |
+| `guest-posix-tool-diagnosis-v1-001` | 真实无终端环境下 procps `ps w` 退出 1，BusyBox 对应 applet 退出 0；gawk 与 BusyBox awk 接收语法探针 | 替换工具后完整业务已通过 |
+| `guest-listener-probe-v2-repeat-002` | 原 listener 函数在同一存活合成服务上完成四个对照：监督进程 dumpable=1 时两 shell 通过，dumpable=0 时均在其 FD 读取失败 | 可以取消监督进程保护或隐藏任意业务进程 |
+| `guest-listener-probe-v4-001` | 仅在诊断容器额外 mask `/proc/1/fd` 后，四个单 owner 对照通过，两个其他 PID 独立 listener 对照仍退出 65；精确清理完成 | 新挂载合同、共享 socket/别名与真实屏障检查或正式 fixture 验收已经完成 |
 | `i2-runner-storage-verification-002`、`guest-runner-storage-v2-001`、`guest-runner-storage-v2-repeat-002` | 独立复核及 29 项真实 shell 受控检查通过；专用 16 GiB runner 盘两次实际容量、owner 和挂载回读一致 | 重启持久性或 runner 已接单 |
 | `guest-lifecycle-tests-v2-001`、`guest-runner-install-only-v2-001`、`guest-runner-install-repeat-v2-002` | Linux 77 项测试通过；官方包完成安装，重复调用仅检查，文件匹配且本地未注册，无 Listener/Worker | 官方程序启动、注册、服务或远端身份验证 |
 | `i1-lifecycle-registration-review-001` | 固定注册 launcher 独立审查无 Finding，38 项受控检查通过，绑定 Linux 77 项结果 | 真凭据输入、实际注册或所有日志路径的保密性 |
 | `guest-runner-token-free-v1-001`、`guest-low-uid-process-observer-v1-001` | 启动前进程可见性检查拒绝；root 与降权对照确认 user systemd / sd-pam 的 exe 对低权限 UID 不可读 | 注册预检通过；此项仍需实际静默窗口 |
 | `guest-runner-token-free-v2-001` | root 只读确认无 Runner 进程后，低权限账号检查库依赖并实际运行官方 `--version`，退出 0 且精确返回 2.337.0 | 注册预检或日志脱敏；生产 launcher 的可见性拒绝保持不变 |
+| `guest-canary-candidate-tests-v1-001`、`canary-independent-review-001` | canary 候选真实 Linux 53 项测试无跳过，独立受控 27 项通过；固定源审查无 Finding | 官方 configure 合成路径已执行或真实 token 安全已证明 |
+| `runner-quiet-window-candidate/source-v1` | 专用账号停启与恢复协议、纯观测校验器及 64 项合成测试已准备 | 输入布尔值是内核事实；root 采集、实际停启或恢复已执行 |
 | `posix-adoption-candidate/source-v1` | 完整树外 workflow 与 manifest 候选冻结，原 Windows 字节和 POSIX 检查集合保留；路径与最终提交尚未绑定 | 目标仓已采用、真实完整 POSIX 或采用后 CI |
+| `guest-posix-candidate-native-v1-001`、`guest-posix-candidate-native-v2-001` | 原 v1 完整 lint 揭示 shell 函数调用诊断；v2 最小修复后真实 Linux 40 项及完整 actionlint 通过，原失败保留 | 后发现的 Git 回调问题已由 v2 修复 |
+| `posix-candidate-review-001`、`posix-candidate-verification-002`、`guest-posix-candidate-native-v3-001` | v3 以不触发转换的固定 Git plumbing 与实际文件检查替代 status；独立复现并验证 fsmonitor/clean 回调修复，真实 Linux 78 项和完整 lint 通过；Windows、原检查集合及时限未变 | 最终提交已绑定、目标仓已采用或完整 CI 已运行 |
 
 镜像、源码归档、逐文件 manifest、解释器、运行时、seccomp 与配置各自有独立摘要。
 源、运行结果和模拟结果分开保管。镜像只读根、限定 tmpfs、专用存储、实际低权限映射、
@@ -83,7 +94,19 @@ v4 针对实际出现的标准字符设备、只读 per-CID 元数据和新建�
 `tmpfs size=0` 不作为零容量证明。v4 独立复核通过，但真实预检两次在启动查询的
 3 秒局部期限失败，其中一次低负载复测也重现；底层启动延迟原因尚未确定。
 v5 保持原 20 秒总期限与十次查询上限，增加查询返回后的期限检查，fixture 的
-600 秒期限及独立清理预算不变。每次拒绝均未执行 fixture，不能混入成功结果。
+600 秒期限及独立清理预算不变。上述启动阶段拒绝均未执行 fixture，与后续业务失败分开留存。
+
+v5 的真实 preauth 随后通过；原 Dash fixture 两次真实运行仍失败。只读观察器在完整
+nonce、PID/start tick、证明摘要与清理回执匹配后，从已打开的 `success.out` 取得原因。
+镜像中 mawk 的语法兼容性和 procps 无终端行为需独立修复；另一个最小真实对照确认
+受保护的监督进程 FD 会触发原 listener 函数拒绝。精确 PID 1 FD mask 目前只在诊断
+容器试验，正式 v5 合同仍会拒绝该新增挂载。新镜像与挂载合同须保持原保护和源检查，
+补齐真实语义、别名、其他 PID 及宿主观察证明后独立复核，才能再次运行正式 fixture。
+
+POSIX 候选独立审查发现 `POSIX-BIND-001`：只读意图的 `git status` 仍可触发仓库配置的
+fsmonitor 或 clean filter。v3 拒绝外部 include、promisor/partial clone、替代对象库等
+输入，读取固定索引与树并核对真实文件，不运行 status 或内容转换；原审查者已验证
+修复。该版本仍是以历史基线准备的树外候选，不能把回调修复视为新目标提交的采用。
 
 runner 官方包安装在独立有界卷，尚未配置或接单。注册 launcher 的静态独立审查不
 替代实际预检：当前低权限进程可见性检查会拒绝 user manager 的不可读身份。后续
@@ -96,5 +119,6 @@ runner 官方包安装在独立有界卷，尚未配置或接单。注册 launch
 
 当前未取得两个真实 fixture engine、完整 POSIX gate、Linux runner 注册/服务恢复、
 执行宿主重启后的业务、正式 pilot、同提交双 lane 或采用后 CI 的完整成功证据。
-下一步依次完成修复独立复核、真实 preauth、原 fixture 与完整验证，再按当次身份、
+下一步完成工具兼容性和监督进程 FD 隔离修复的真实验证与独立复核，重新取得两个
+原 fixture engine 及完整验证结果，再按当次身份、
 版本和空闲交接事实办理目标仓接入。没有满足这些条件时，任务整体保持未完成。
