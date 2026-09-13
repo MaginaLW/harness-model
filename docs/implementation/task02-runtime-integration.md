@@ -543,3 +543,32 @@ ACK 接受或服务恢复已经成立。
 没有建立写者交接或采用新提交。完整 POSIX gate 仍保留原 124；成功验收模板仍
 不可执行。下一步继续独立审查纯协议候选，并准备固定出生与文件检查映射；
 实际 MAIN/RUN worker、父方两阶段确认及 guardian 接线尚未完成。
+
+## 纯协议候选完成独立审查（10:45 UTC）
+
+`runner-quiet-io-protocol-v1-candidate` 完成纯数据协议及独立审查，无新增 Finding。
+交付摘要为 `c324a850d8cf8b6c044a078806fb2b211f6cca7c5b127ff1f5cf1c48eb8d9c9e`，
+运行时摘要为 `8d048c0b8eeab91c3720ea9d27647aa4c1d363dce9461e765500365858350109`。
+本版仅定义 `main_append_event` 和 `run_replace_head` 两种待核对的文件事务值。
+父方保留的 before/after 与数据被固定为字节；ACK 只与这些原始预期比较，不能
+反向构建可信链头。返回值始终未认证，不接受 checkpoint，不产生 permit。
+
+Windows 与 Linux 均为 149 项纯数据测试通过、无跳过；在 Linux 上运行并不将其
+变成真实管道或文件事务测试。独立审查另作 245 个实际方法检查，包括固定 core
+认可的 36 条合成事件链和 72 次 MAIN/RUN exchange，并验证严格 canonical、
+重复键/非有限数/bool、长度与 EOF 状态、错误 ACK、跨窗口/事务重放及可变引用。
+独立报告 `quiet-io-protocol-independent-review-001` 摘要为
+`4c4bdcd1459426f8985ec324081043038ad5d650d83ba9fe81e5f59a7d2a6c89`。
+
+实际最大完整请求对象为 1813 字节，连同固定 flag 和两个 NUL 的控制参数为
+1836 字节；完整 ACK 连同 LF 为 917 字节，均未放宽 4 KiB 限制。独立数据 framing
+保留 65536/65537 边界；65536 字节填充对象仅通过运输形状检查，仍被业务 schema
+拒绝。完整最大事件形状与真实 core 合法事件另列，不将填充对象称为合法事件。
+既有 core 与同步存储源未改变。
+
+Linux 原始流、149 项 JUnit、交付与 28 个源文件身份已保存于
+`io-protocol-v1-linux-tests-001.tar`，51,200 字节、7 个文件，摘要
+`c4b8b3f57fc91fa8b99da2099618e6b6ed11b79faf1285fdd2773a9fabd8d9ec`。
+该归档也已独立核对。固定进程创建、父方来源观察、实际 FD 分配、MAIN 请求屏障、
+pending、其余存储事务与真实耐久性均不在此版实现内。后续 worker 设计仍须解决
+这些具体接口，再经独立审查；两种纯协议通过不表示完整 worker 可执行。
