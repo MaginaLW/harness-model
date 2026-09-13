@@ -1169,3 +1169,37 @@ manifest 摘要为
 不要求当前追加后的报告仍等于历史字节。首预检漂移及工具 lint 失败均保留。
 该清单明确 C1、后续 C/D、E/F 与 G3 的依赖和停止条件，只是准备指针；没有新增
 运行时实现、执行旧业务源、恢复 guest 或授权目标写入，也不构成 implementation_result。
+
+## C1 源码库完成独立构建与隔离复验（17:00 UTC）
+
+`runner-quiet-source-bundle-v1-candidate` 固定上述串联包的 15 份应用模块，合计
+212,371 字节；其交付摘要为
+`b0417060bd5a3c88c514858c3ec54627f83d7025479e138e921ce90cf9208610`。
+排除测试脚手架和测量文件，保留空 vendor 包标记；原模块字节没有修改。活跃产物为
+`artifacts/build-002/source_library.py`，293,459 字节，摘要
+`60d5cff951ebb52fd320d0aed81491af4c53c179d80fbd2243c7647edf86f2d5`。
+独立核对原串联包 77 文件、候选 48 文件及两份完整归档，并以正序和逆序输入重新
+构建，结果逐字节相同。七项独立负例覆盖缺失、重复、混入测试、源码/loader 漂移、
+文本替代 bytes 和空包标记变化，均拒绝。外置 build manifest 绑定 builder、loader、
+输入表与产物；包内摘要不是自身来源认证，14 行目标表仍只是描述。
+
+32 项宿主测试独立重跑通过，候选与根复验工具的 Ruff/format 均通过。此前五个隔离
+子进程探针与直接执行拒绝记录已核对为同一最终包字节，未冒充为第二轮执行：15 个
+模块从单文件加载、17 组真实纯 codec 输入与原串联结果一致，包及延迟 event import
+使用同一实例；预先占名拒绝，开始装载后 compile/exec 中断保留部分实例并禁止重建。
+公开事务构造器仍拒绝，直接执行库文件非零退出，没有调用任何文件事务。
+
+独立复验报告摘要为
+`64ebc645790951a149ab75446d165319b0036d42703fbcc42f2e3cc774965caf`；
+31 文件、4,055,040 字节复验归档摘要为
+`0ec6bfb219273cb2f17f482d9ccca067bae64448a33e6945b463785e11ef4f22`。
+原调用者传 records 的 loader 草稿、旧 build 和检查失败均保留，不能选旧产物替代
+build-002。独立来源审计定位 86 处 import AST、11 个直接 stdlib 根及一个函数内
+event import；这些数量不覆盖 stdlib/extension 的完整依赖。被替换的宿主文件 API
+调用为零也不证明 importlib/native 完全无 I/O，当前结果仅属于 Windows CPython
+3.11.9，不替代目标 Linux 3.12、sealed source、fd-exec、READY 或真实 FD/EOF 认证。
+
+16:44 UTC 的新宿主元数据回读未发现 QEMU 进程或原端口监听，原因仍未知；没有联系
+guest、启动 VM 或沿用旧 boot 身份。C1 后续生产绑定设计另行独立审查；可发行 child、
+C/D/E/F、G2/G3、原 POSIX 124 的完整复验与目标采用仍未完成。TASK-0048 仍缺
+implementation_result，目标仓继续只读。
