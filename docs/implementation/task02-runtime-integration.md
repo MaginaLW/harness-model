@@ -1075,3 +1075,50 @@ next 原创建 FD 身份，拒绝同步及 rename 前后同内容的新 inode；
 核查，不能把单项通过相加当成真实父协调完成。G3 初次目录准入设计继续准备，G2
 发行器、真实 birth/FD/EOF/reap、双路共享预算、Linux 原生与旧 POSIX 124 的完整复验、
 服务窗口、目标仓交接及 implementation_result 仍未完成。目标只读和所有权限边界不变。
+
+## 十四类事务串联与 G3 设计独立审查（16:14 UTC）
+
+`fourteen-transactions-integration-001` 在每个场景的一份持久 MemoryFS 上实际调用
+七个冻结事务模块；manifest 摘要为
+`4fa2d6387fd5395c2ef4598387a66f9c245f7285aed259fb48f819a6ec1e6553`，
+77 文件、21,022,720 字节归档摘要为
+`1f7845eb9134661e8ec07fa0da0bad5ee522fc58c69c2351b04f9b81d86bccbf`。
+七份原包及其完整归档、20 份选定源码逐字节复核，共享六个业务依赖保持同一实例。
+read 阶段由模型 hook 拒绝修改；测试脚手架选择 creation 的可写 MemoryFS，原 read
+脚手架仍保留，没有声称两者相同。每次调用前固定唯一 synthetic parent Exchange，
+调用后只比较该实例；3/4/5 是模型 grant，实际传输和 EOF 来源未由此认证。
+
+独立重跑复现了与作者逐字节相同的两场景报告：成功 17 次调用覆盖 14 kind，失败
+场景第八次 MAIN initialize 在空 journal 已创建后停止，保留 open_unknown、无 ACK
+及未消费的父 Exchange，阻止后续 grant。两场景分别记录 2,869 与 1,342 次模型调用。
+另加六项独立控制：MAIN append 的 write 已产生效果、RUN mirror 的 rename 已产生
+效果后分别注入三类异常，均保留文件效果、终结 child Exchange 并停止推进。后者
+即使两卷 head 字节已相等也没有 ACK 或 accepted checkpoint，不能据磁盘相等补签成功。
+独立报告摘要为
+`631b85500475ff92a8ec6e6c860af57ebaa3fa689b2fca540a792fdef8fb98c8`；
+17 文件、22,108,160 字节复验归档摘要为
+`49367676e7b5e4f85598627ede47af2cfe708fef4428999cb8454f58573d7640`。
+运行、源码映射及独立工具 Ruff/format 五项通过；作者脚手架失败和根工具初稿闭包
+lint 失败另行保留。没有修改任何冻结业务源，也没有新增产品 Finding。
+
+G3 新 holder MAIN 初次目录准入提案的 DESIGN 摘要为
+`65dfac2dd03e6c488a1b6dbc44b0d338e1522120840fb8afef8a0306a0c2208b`；
+36 文件设计归档摘要为
+`bfa62f86b0f7aec9b96334f438932e9434f4bbd77a2b55087eebc34fd64d04d0`。
+独立核对 16 份原来源、七份归档、41 处源码/文段与 12 项要求，报告摘要为
+`ebfaf787b0f575d0a7a90289e0fe84a2bac6430666af5db2f6ac87dbc70e2d8c`。
+本次只认可继续独立 schema/宿主候选准备的设计方向，G3 仍 STOP：新目录 helper 的
+FD5 为 IPC，需要单独闭域 grant/schema；两个 SCM_RIGHTS 目录引用必须先隔离，再经
+真实来源、完整帧、EOF/exit/reap 与原 deadline 一次接收。父循环不执行 MAIN 探针或
+关闭来替代 helper；原子 native 接收登记、有限 unknown 台账和最坏延迟尚未证明。
+
+当前恢复域的首次目录身份不证明上一个 holder 的 inode 延续，活父的已有 tuple
+不得刷新。old_writer=None 也不证明从未发行 MAIN；真实 takeover、全部旧 MAIN 收尾
+与完整 RUN 事实缺失时仍禁止目录 helper 出生。新步骤共用原计数器、共享预算和
+原逻辑 deadline，不能在 helper 完成后重新获得 30 秒。A1–A8 实际机制/证据及 A9
+新增接线均未完成；Linux API 文档仅支持接口语义，不构成 native 验收。
+
+G2 纯编号与有限槽候选已交独立复验。真实 C/birth/source/FD/EOF/reap、跨 holder
+永久总序、Linux 原生、原 POSIX 124 的完整复验、服务窗口和目标仓交接仍未完成。
+TASK-0048 仍 IMPLEMENTING，classification fresh、approvals current，缺失
+implementation_result；本次没有补造该结果或推进账本。目标只读边界不变。
