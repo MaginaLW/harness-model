@@ -1297,3 +1297,67 @@ close 后重用同 FD 若未撤销旧 scope，本模型也不会自动发现；�
 接线，保留全部原检查；实际 producer、C/EOF/source、D/E/F、G2/G3 和 native 未完成。
 本仓此次仅追加记录并检查 diff；没有重跑或冒称新的全仓 Gate，没有目标采用、VM
 或服务动作，TASK-0048 仍缺 implementation_result。
+
+## 十模块文件消费者接线与异常收尾的另版验证
+
+`runner-quiet-file-binding-v1-candidate` 已完成七事务与 B1/B2/helper 共十模块的消费
+接线，新增 file context 接口另受审。运行库共 16 节点；原 codec/core/storage/event
+及空 package marker 五份字节不变，旧 source-library 的 15 节点包没有被替换。
+交付摘要为 `a5df0a0649c69475fb47c9a532d76abc997e19df253ce1e15cece821551084a1`；
+1,368 文件、30,146,560 字节归档摘要为
+`39f5fa69acfebb60d054586d68512209892aab27a4e698a19bb0e28d18d4a470`。
+
+七类保留旧测试接口，新增明确的 `_from_model` 消费同一 fresh Exchange；生产
+`_from_bound` 仍先在真实 producer 缺失处拒绝。共享初始化核固定十四路、精确预载类、
+原 guard/ledger/Exchange、MAIN/RUN、root 5、owned 3/4/5 与完整缓存字节；生产路径
+不调用测试工厂，不重建 Exchange，没有注册回调或允许开关。B2 生产 gate 位于字段
+读取及 fstat5 之前；后续代码保留父原 expected tuple，不以当前 stat 刷新授权基准。
+
+原十九处内部 `_for_test` 调用已替换为 lexical scope 消费。继承 root 5 与原
+checked_root 打开的内部 root FD 明确区分；root/window 当前登记在底层关闭前撤销。
+B1 保留原 active/owns/目录身份、九字段 StableRead 和创建 FD 捕获，四种固定 creator
+消费同一 scope。helper 在预检 scope 退出后另开自己的 scope，提前 FINISH 后仅做
+纯值及 ACK 工作。同号 FD 复用不复活已退出 scope；任意外部 close/regrant 与任意
+Python 私有字段修改不在该模型保证内，精确模块对象检查不构成来源认证或反射沙箱。
+
+独立实际反例修复包括：B3-BIND-001 的撤销异常覆盖主因、B3-BIND-002 的 helper
+构造漏 failed latch，以及 B3-BIND-003 的新 claim 入口异常未结束已接管 FD。
+公共 catch 现保留主因并用原 ledger.finish 收尾全部已知 FD，不重试 unknown。
+原回归另发现重复调用错误族被 BindingError 提前替换，已恢复原 ledger.active 顺序。
+三项 P2 均 fixed_verified；原反例、兼容失败、修订源码和工具失败全部保留。
+
+最终十组选定原测试 1,257 项通过，其中根执行的四包为 87/129/169/85，共 470 项；
+作者新增 90 项通过，源码行异常注入和 42 项入口异常控制包含在该数量内。
+原 17 成功、8 失败及六项部分写入后异常场景，在旧入口和新模型入口两路均通过；
+业务字段及 31 组模型调用记录与原基线完全相同。新模型工厂的 94 次调用均保留原
+Exchange，工厂内没有执行 prepare_exchange 本体。这些都是宿主模型记录，不是
+真实 syscall/FD、Linux 时限或父 accepted 的证明。
+根回归报告摘要为 `ed0d04979f8b6ccd5f3d11ac07ed83bb40bc38999103250ca60c8b531003acb0`；
+720 文件、27,299,840 字节归档摘要为
+`29dbe2419decf7631641b85dc41d8541ef8fd3e7ab67c668487bede6ef3a8baf`。
+
+清单补查发现另八项 MemoryFS 测试仍调用旧 native fixture 私有入口，原样执行均
+TypeError，不能把上述 1,257 项称作全部宿主测试。另版纯测试适配保持原八项断言
+字节及旧 B1 acquisition 函数体，限定精确 CreateFS、两条路径与 flags；八项及额外
+23 项控制通过，原真实 native fixture 没有迁移或执行。测试 helper 的全局后端仅
+用于顺序模型，不支持并发切换不同 FS。三个生成源的导入排序问题由独立质量续件
+修正生成步骤；旧主包保持冻结，不能宣称其所有历史生成文件都通过格式检查。
+`runner-quiet-host-fixture-v1-candidate` 交付摘要为
+`a3999aa3255b6fec8f8a93b8758760aebd4df090a5e593b4bf3b986d7a8792c8`；
+112 文件归档摘要为 `b5d4dd7602c7ea9bd528f701c44aed94c325fcc53c0aed22043593c5aff1f019`。
+续件三生成源与生成器在固定 cwd 的显式隔离 Ruff/format 下通过，16 份运行库源码字节不变。
+
+非作者审查完成 82 项消费者控制、90 项作者用例重跑、原/适配八场景完整调用比较、
+八项独立 acquisition 控制及续件 31 项重跑；各数量分列，不累加重复执行。原十五
+模块的直接 os 调用 AST 保留；根协作编写的四事务由该审查者独立复读，原业务调用
+顺序与全部原 p.need 谓词保序保留。根回归不冒充这四源的非作者代码审查。
+独立回执摘要为 `c8cfe083b65be60ef669ca02c280345835c2161c88930959e9f562546639ef59`；
+356 文件、37,918,720 字节归档摘要为
+`2c56b7ce4d7a6df27745d102d578dd7ea9c6a91849fed3eb8f8245393cf2dc29`。
+
+本批只读复查私有试点 HEAD 为 `aa283bde5e1b0aa99cd5ca1b1c817a069488099c`，有两项
+未提交改动，未建立交接；本机未见 QEMU 或预期端口监听，未联系 guest 或沿用旧 boot。
+只读记录摘要为 `1d6dcab01de6c37777119e034fdcd2234484966f3848c06bfa5fcf681351bfd0`。
+目标仓保持只读。本仓仅追加本记录，不重跑或宣称新的全仓 Gate；原质量阈值不变。
+真实 producer、raw owner/EOF/source/preload、可发行 child、C/D/E/F、G2/G3、原 Linux
+600 秒验收、目标采用及服务/重启回执仍未完成，TASK-0048 仍缺 implementation_result。
