@@ -1029,3 +1029,49 @@ MAIN 仍须等待 RUN 全收尾及自身 fresh 复核才释放 DATA。精确差�
 实现。跨 holder 永久数字总序、真实 worker/C、G3 新 holder MAIN 准入、Linux 原生、
 服务窗口、目标仓交接和完整 Gate 仍未完成。原 POSIX 124、目标只读与缺失
 implementation_result 不变，未将候选和设计审查升级为执行或生产验收。
+
+## pending 与 append/mirror 完成独立复验（15:44 UTC）
+
+`runner-quiet-pending-transaction-v1-candidate` 的交付摘要为
+`e6d0c4d62c7359948179cf7c9cdf8c1196f2c11f3cb02323b67b126c032e4499`；
+70 文件、2,713,600 字节归档摘要为
+`a722e5b05d4eacc24330c859a1cd81ca221ae0be8ff130ea251597ae5331f35b`。
+运行时摘要为
+`081fcfbee12ee363066f0064225cac31a982ec1c5aec09292c5b6337b8ea0aec`。
+`run_commit_pending` 核四阶段的 fresh armed、按阶段要求的 started/head、next absent
+和 RUN root/W/lock；首次提交前退出所有预检 scope，再调用会 FINISH 全台账的固定
+helper，返回后只做纯结果及 ACK。替换保留旧 pending StableRead 九字段，旧对象单独
+decode 并核父旧 SHA/域，不误用新 MAIN request；next 的实际创建 FD 身份跨同步和
+rename 核对。旧 MAIN 完整结算及新 MAIN 的数据释放仍由尚未实现的父 C 负责。
+
+独立重跑 188 项宿主测试及 51 项补充控制通过。四阶段 × 初次/替换共八条路径，
+1,892 个模型调用位置的 5,676 次异常注入包含在 24 项 pytest 内。独立报告摘要为
+`fdf4f8c917829540d851d9e13f4c37fe7def2e3c506c1f13eae10086d9274477`。
+23 份候选固定输入和另行核对的原 Store 共 24 份来源不变；原 Store 没有 pending
+方法，新增协调行为归本轮 B3。根补充控制最初将已经取上界的 start_tick 再加一，
+触发纯 codec 范围拒绝；保留该审查脚本/回执，改用域内不同值后只重跑补充控制，
+复用已绑定源码的 188 项全量结果。没有由此修改候选或删除失败记录。
+
+`runner-quiet-append-mirror-v1-candidate` 的交付摘要为
+`839cec0840f65bf645f635b074cc4c9aa984d73e3021119023610b0777d57642`；
+85 文件、2,078,720 字节归档摘要为
+`f839667452c37012edba543dcc0361f578275ec991b4b471e18421df564b5825`。
+运行时摘要为
+`2bad76f0b5102b7d51183d4f3e8e63ec81b2585c22e11b50ffbdbf1c51b6095f`。
+MAIN 实读 current/lease/contract、完整 journal/head，保留原读基线，实际重跑原
+`q.check` / `q.check_dispatch` 并核父 H/P、H0/T0 和完整 after，再 append 与替换 head。
+RUN mirror 重新核 armed/started/head/next，只访问 RUN。两项都保留旧 head 九字段和
+next 原创建 FD 身份，拒绝同步及 rename 前后同内容的新 inode；全 FD 收尾后才比较
+完整 ACK，尾部失败同样终结整个 Exchange。局部成功不更新父 accepted checkpoint。
+
+独立重跑 191 项宿主测试及 50 项补充控制通过；24 份固定输入逐字节复核，独立报告
+摘要为 `994cdb561f8f04a451791f65bc6c6710bc4307e99b6c6facc384c8690f2e2006`。
+330 个模型调用位置的 990 次异常注入包含在六项 pytest 内；作者新增的 51 项产生
+效果后取消控制已包含在 191 项中。作者首轮导入风格失败、后续 smoke/full 与新增
+控制记录均保留，运行时从 smoke 起未改。两批源及独立工具 Ruff/format 均通过，
+没有新增产品 Finding，未知 open/close 和部分文件仍保留，不做删除或自动重试。
+
+至此 14 kind 全部完成各自的独立宿主验证；同一模型文件系统上的完整阶段衔接另行
+核查，不能把单项通过相加当成真实父协调完成。G3 初次目录准入设计继续准备，G2
+发行器、真实 birth/FD/EOF/reap、双路共享预算、Linux 原生与旧 POSIX 124 的完整复验、
+服务窗口、目标仓交接及 implementation_result 仍未完成。目标只读和所有权限边界不变。
