@@ -949,3 +949,37 @@ mandatory started、占用/next 与锁前后变化，以及 ACK 尾部取消和�
 MAIN contract/H0 两项的作者候选已通过 87 项宿主测试，独立审查尚未完成。有限状态
 防重放和新 holder MAIN 身份来源仍需设计；C、Linux 原生、实际目标交接与完整 Gate
 均未完成。当前仅七项 kind 完成独立宿主验证，不升级 production 或 implementation_result。
+
+## MAIN contract 与初始 journal/head 完成独立复验（15:04 UTC）
+
+`runner-quiet-main-initialization-v1-candidate` 完成 `main_bind_contract` 与
+`main_initialize`，交付摘要为
+`e7a84b9de0ca6467491e4ab414d8e1597074c6de5c220983697362c87b1ef2ed`；
+56 文件、1,392,640 字节归档摘要为
+`d508bae7368e75a69441f7a800f040a97fc9da233d63490c711021202927cb70`。
+运行时摘要为
+`68f25df0effef5260fa453b2a2a5b0d7f7771f5779cbe5d1ef3ae35698ed7db3`，
+完整 codec、B1/B2、core/storage/event、模型及参考材料共 13 份输入逐字节固定。
+
+MAIN 实读 current/lease，初始化另实读完整 contract，与保留的上下文及 MAIN root/W
+身份严格核对。contract 拟值仍在 payload，context.contract 为 null；要求目标不存在
+后 O_EXCL 创建 0400 文件。H0 全字段绑定 sequence=bytes=0 和 contract chain，要求
+journal/head/next 全 absent，先空 journal600 后 head600。部分创建保留，不自动重试。
+所有文件和目录 scope 及已知 FD 完成后才生成、比较完整 ACK；整次调用覆盖尾部异常。
+
+独立审查在固定副本完整重跑 87 项宿主测试及 82 项补充控制通过，无新增 Finding。
+补充覆盖完整但不同的实读对象、同字节 inode 替换、读中消失、祖先/mount/子挂载、
+O_EXCL 竞争、128 次保守短写边界、产生效果后的取消、主次异常、FD 关闭后复用、
+尾部失败和未登记 root5 的已知清理。源与审查工具 Ruff/format 通过，原候选、依赖
+及归档前后不变。独立报告摘要为
+`dad294d1d074f91e302ce0124542d99eb1ef604e03628bbc02522863977ccfbd`。
+211 个模型调用位置的 633 次异常注入已包含在六项 pytest 内，不另计测试数。
+
+原 Store 的三个方法只核对 AST/文本。测试模型的确定结果不代替 B1 台账中的
+open_unknown，也不把已关闭 FD 数字重新认领为旧资源。受信任独写根仍是前提；
+本地 MAIN 成功不证明父 pending、真实来源、C 屏障、完整 start 或 operation permit。
+
+现在 14 kind 中九项完成独立宿主验证；两卷初次创建、pending、append/mirror 五项
+继续树外准备。防重放提案已提交独立设计审查，未据域内 reserve 单调关闭跨 holder
+强序或 G3。实际 worker/C、Linux 原生、服务窗口和目标仓交接仍未完成；原完整
+POSIX gate 的 124 失败、目标只读及 implementation_result 缺失保持如实记录。
