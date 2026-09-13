@@ -1610,3 +1610,71 @@ source4 的文件 ownership/profile、完整来源清单和解释器/stdlib。�
 镜像 SHA 等事实，stage35 输出 index 不能填补这项缺口。ChildEntryState、完整来源准入、
 生产 registry/dispatcher、父 birth/pump、真实 Linux 与目标采用继续未完成。
 本批未写目标仓或运行 guest、VM、服务、CI、新的全仓 Gate，未填 implementation_result。
+
+## 进程与 namespace 观察及 FD 表容量扫描
+
+`runner-quiet-proc-observer-v1-candidate` 新增同入口片段 `io_proc_observer.py.txt`。
+最终片段为 28,458 字节，摘要
+`d7ed0e5990340fa01dac4351dbbc8665a642afd494de588c3f735276f3441ac4`。
+唯一 `_ENTRY_PROC_OBSERVER.begin()/step()` 无调用者参数，只接续原 cbd8 观察器的
+OBSERVED 状态、原 request、两种绝对截止时间和最后配对时钟；不重启观察器或刷新预算。
+
+算法两轮读取自身与 guardian 的 stat/status/cgroup，以及 boot_id，核 PID、PPID、
+进程组、start tick、单线程、四项 UID/GID、固定 guardian unit 和 boot。guardian 控制
+只给 PID/tick，其 PPID/进程组只作跨轮稳定比较，不虚构额外控制字段。stat 的 comm
+可含空格、括号和换行，选定字段从末尾 comm 边界定位。文件上限分别为 stat/cgroup
+4096、status 8192、boot 37 字节，N+1 探测且必须取得真实 EOF；短读沿同一 FD 分段，
+EAGAIN 与其他读取异常立即失败，不继承 DATA pipe 的等待重试规则。
+
+十种固定 namespace 各比较自身与 guardian 的 dev/ino，并作第二轮复核，共 40 次
+固定 namespace stat。缺项即拒绝，不动态缩短清单。临时 proc 文件使用独立原 B1
+账本和 read 角色，FD0 是合法且正常的首次 open 结果，1..6 不得登记为临时资源。
+临时文件前后 fstat 和关闭均在该原账本中完成；原 RAW3456 仍无 ledger，reader NEW，
+没有 DATA/source4 内容读取、fstat5、业务事务、READY/ACK 或 transfer。
+
+每轮临时文件全关后，按自身 status 的 FDSize 逐槽 F_GETFD。FDSize 是已分配的表
+容量，不是当前打开数或 RLIMIT；每 step 至多一次 proc/FD 观察或临时 close，另有
+原配对时钟检查。扫描只保留递增索引和继承资源位图，不设静态容量捷径，不枚举目录或
+修改资源限制。只允许 1..6 存在且 descriptor flags 为 0；其余槽只有 EBADF 表示不存在。
+第二轮扫描后再固定读取一次自身 status、核身份和容量、取 EOF 并关闭，才完成临时
+账本并返回普通观察值。正常路径共 15 次临时打开与对应关闭，不增加第三轮扫描。
+
+PROC-OBSERVER-001/P2 的实际反例在第二轮扫描末将容量 64 改为 128 并添加 FD100，
+首稿仍按 64 返回 DONE；最终 status 回读修复该遗漏。PROC-OBSERVER-002/P2 的实际
+反例在 open 返回时替换临时账本引用，虽被后续身份检查拒绝，已知 FD0 却留在替代
+账本且未关闭；修订让获取、登记、读取和清理始终使用原账本。
+
+PROC-OBSERVER-003/P2 涵盖两个已执行的取消窗口：旧组合在原 B1 close 入口取消后
+可留下 finished 但仍 owned 的 FD0；中间修订在 closing 标记后、try 之前取消，又被
+后续 finish 关闭该数字。最终组合将标记与原 close 放在同一保护范围，清理前后均
+隔离 closing/owned 交集，保留首因并独立处理临时与 RAW 资源。未知关闭不重试；
+实际模型可能仍有 FD0、零次 close 和 closing 未知记录，这属于失败，不能称成功释放。
+原 B1、旧 prefix/library/entry observer/reader 字节均不改，初稿与失败记录继续保留。
+
+最终同源作者 120 项 pytest 与非作者 98 项独立控制通过。作者三项测试中的 36 次
+逐调用位置注入包含在 120 内；独立 98 为 85 项主控制加 13 项关闭/入口控制，旧反例和
+复跑不重复计数。三项 P2 均为 fixed_verified，无未解决 Finding。宿主为 Windows
+Python 3.11.9，实际调用使用明确 syscall 模型；py312 解析与质量检查不等于 Linux 执行。
+最终作者 10 份工具/测试、独立审查 10 份工具和根审查工具通过完整 Ruff/format；实际
+片段另以 .py stdin 文件名接受完整检查，未降低规则或忽略 E501。早期质量失败保留。
+
+作者 delivery 摘要为
+`4c866fbf6097608c30668a7562f8a263d63e448fc5be277bb41c75fa93ce8f52`，108 文件及
+3,174,400 字节归档已逐项回读；归档摘要为
+`606300b04ea758b45fc4873d4e4c3880c59ef3c66b19a2108f21fb67ae9f60df`。
+独立审查回执摘要为
+`6db2e54f8c795647957527833203f8de766b2c2d08a43fbe9567ad1e063260ed`；135 文件、
+1,986,560 字节归档均回读通过，manifest 摘要为
+`f54c587e1a6ec7304e008bd784d674603f3c68e8c02c0c5a95f9e63d0f566a54`，归档摘要为
+`fb91d18be06e66c2b3325fd31696e3074bcc72eca75ac6e945755ad71a9c4546`。
+根审查固定三版源码映射、来源核查、最终两包绑定及本阶段快照工具，25 文件、
+184,320 字节归档均回读通过，manifest 摘要为
+`d24708f9d337f1e2e6b8ae13af8703f6f3f925b1539965c96542fa6550d8f943`，归档摘要为
+`7442bcba4e0daddab84b04f8b540f28ce8cd3b3aae6e1673c7d8980be74fa199`。
+
+这些实际算法与宿主控制不认证 procfs、源镜像或目标 namespace/profile，也不证明
+多次观察的原子性、线程期间不变或持续 OFD 身份。最终 status 不能发现同容量内已扫
+位置的新 FD，或最终采样之后的变化。source4 内容/hash、完整镜像及解释器/stdlib
+来源、生产 ChildEntryState/registry/dispatcher、父 birth/pump、真实 Linux 与采用
+仍未完成。本批只读候选边界不变，未运行 guest、VM、服务、CI 或新的全仓 Gate，
+未写目标仓、未填 implementation_result；TASK-0048 继续 IMPLEMENTING。
