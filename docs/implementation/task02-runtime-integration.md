@@ -1879,3 +1879,52 @@ frame 或父准入；原两方法没有配对时钟，source 末时钟到 DATA �
 最终独立复验、完整 child/来源准入、PreparedSourceImage、CompleteDataRead、父 birth/
 READY/pump、真实 Linux 与 runner/CI、服务恢复及重启均未完成。目标仓保持只读，未运行
 native 或新的全仓 Gate，未填写 implementation_result；TASK-0048 继续 IMPLEMENTING。
+
+## READY 闭集帧与普通分块组装
+
+原 birth/binding 设计规定 FD6 唯一 READY、完整帧不超过 4096 字节、父观察真实 EOF 后
+再核 post-exec 来源，但没有给出 READY 的 schema 或字段表；旧 codec 的 operation_ready
+是状态属性，不是出生帧。因此本批新增明确版本的纯协议，不把新字段说成旧合同已有。
+
+`runner-quiet-ready-protocol-v1-candidate` 定义 `task02-quiet-io-ready/v1` 五个闭集字段：
+schema、request_sha256、worker、source_image_sha256、source_image_bytes。worker 沿原
+`identity(worker=True)`：PID/PGID 至少 2、start_tick 至少 1、PGID=PID，上界均为原
+MAX_NS；源码字节数为精确整数 1..MAX_NS。请求摘要字段约定引用完整 canonical request，
+codec 只核摘要形状；请求、源码摘要及长度的实际比较留给父侧。不新增 request/v3 字段，
+也不自行核定真实进程或源码身份。
+
+完整编码为 canonical JSON 加唯一 LF，4096 上限包含 LF。重复/额外键、坏类型、
+非规范编码、坏 UTF-8、尾随对象或内容均拒绝。最大合法编码实测 349 字节：四个整数
+取原 MAX_NS，两个摘要保持固定 64 字符，PGID=PID；没有为新帧增加预算。模块 1263 字节，
+摘要为 `179dabf661537d248342d810559510f468cd8d9da547dcb69bf45beaee3ef5d7`。
+
+`runner-quiet-ready-buffer-v1-candidate` 提供普通 `append(bytes)` / `finish_claim()`：
+每个非空精确 bytes 片段先核剩余容量再复制，累计不超过 4096；收到末尾 LF 仍只处于
+COLLECTING，显式完成后才一次返回普通 dict。非法输入、重复完成或解码失败保留首因。
+它不收 EOF 布尔，不读管道、不看时钟，也不产生权限；调用 finish_claim 不证明实际
+EOF。未来 collector 必须从原管道独立观察 EOF，并遵守原共享 16 KiB/100 ms、绝对
+截止及关闭记录。缓冲模块 2010 字节，摘要为
+`e86877a6d6550bcf21de0e3495ba125e1b22e406f872837bd10ae31ab242965b`。
+
+codec 作者 83 项普通序列化测试通过，17 组原合法 fixture 的 READY 可编码，原 request
+argv、transport、ACK 与 pending 编码前后逐字节相同；10 个新源码文件完整质量检查
+通过。根缓冲组件 89 项通过，覆盖 17 组请求的四种分块、单帧所有双段切分位置、类型、
+预算、截断/额外内容及一次完成；切分循环包含在测试数内，不另加总。6 个工具/测试
+文件与实际缓冲源码完整 Ruff/format 通过。根初次把 scenario.rows 误读为顶层 rows 的
+收集错误、初次风格失败与作者初次工具风格失败均保留；两个运行模块未因这些问题改写。
+
+独立工作仅核对原合同、新 schema 与两组件静态接口，不执行新组件，也不替代行为或
+Linux 验收。源码依赖仍为固定原 codec/core/storage/event 四份纯文件；没有加载 B1/B2
+或调用文件事务。旧 source bundle、入口 prefix 与 source-image preparer 没有重新接线。
+
+codec delivery 为 `41378002c35f9795a792420b2a608d87d33ea223235c5bdf0f6acf6d454e9ae7`，
+40 文件、1,423,360 字节归档；buffer delivery 为
+`8b1193392fb2f35a0f94f81b3c7cc571b6405260fc1fc035d6b9e3075fa5c454`，77 文件、
+1,105,920 字节归档。独立静态审查 manifest 为
+`c6b5aa24bae01bde6366efa7ae2ab54eeae2cc018372b5513b22a1976458fd9c`，63 文件、296,960
+字节归档；其 4 个自有工具质量检查通过。三包本地与归档逐项回读通过，阶段 41 快照
+绑定三包、本节提交、当前 CLI 状态与前一阶段快照，不将这些字节证明转成原生验收。
+
+实际 READY writer、原管道 collector/EOF、FD6 关闭、父 post-exec 比对和 DATA 放行仍待
+完成。阶段 40 的独立复验缺口继续保留。本轮未运行 native、guest、服务、runner/CI 或
+新的全仓 Gate；目标仓仍只读，未填 implementation_result，TASK-0048 继续 IMPLEMENTING。
