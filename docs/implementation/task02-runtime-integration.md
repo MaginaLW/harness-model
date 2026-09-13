@@ -1434,3 +1434,27 @@ B1.active 现拒绝失败账本，不重试任何 FD 关闭。
 真实 producer；后续生产 context/scope 必须另版实现，不能仅打开 require 门或借用 Synthetic。
 源码仍未内联入可发行镜像，admission、生产 registry/scope、DATA 真 EOF、父 birth/pump、
 C/D/E/F、G2/G3 与原 Linux 验收继续待完成。目标仓、guest、VM、服务与 CI 均未操作。
+
+## 冻结入口与模块库的宿主组合检查
+
+`entry-library-composition-root-001` 将上一阶段的精确 b7dc 入口和 a731 模块库放进同一
+显式测试 namespace，未改两个运行时源。每项使用新的 Windows Python 3.11.9 隔离进程，
+prelude 读取 fake sys/posix 与合成 3.12 profile；预载使用真实冻结的 16 模块，并核原
+owner、原 B1 class 和固定 3/4/5 移交。仅将该 B1 模块的本地 os 绑定到 fake provider，
+没有修改真实 os 或关闭宿主 FD。正常模型顺序为 close 6，再由原 B1 FINISH 关闭 3/4/5。
+
+16 项不同控制通过：正常移交 1 项、原库 SOURCE_LIBRARY_ONLY 拒绝 1 项、binding/B2
+预占碰撞 2 项，以及 stdlib import、quiet_core compile/exec、原 B1 constructor 四处
+分别注入 OSError/KeyboardInterrupt/SystemExit 的 12 项。异常保留同一首 primary，
+已知槽逐一清理且不重复关闭；库编译/执行失败保留原 partial module，禁止重试预载。
+第二 agent 只读检查后补强两项碰撞的精确首错误和原占位对象 identity，定点复验通过；
+原执行保留，复验不相加计数。两个审查工具的完整 Ruff/format 通过。
+
+这里在库失败后调用原 owner.fail_and_exit 的接线仍由测试提供，尚未写入生产入口；
+普通库测试 namespace 和合成平台也不能认证实际 argv、内建模块或源 FD。
+该结果只核既有片段的组合兼容性，不代表实现了 assembler、child 或新的生产发行者。
+57 文件、481,280 字节归档已逐项回读，manifest 摘要为
+`1501b17044d0d040e21ff274d3a2039104af569954dd5c20cbe1edc4f9f3e6bb`，归档摘要为
+`1c37baf38422961e16075fc9bd305eb16bf68550e3085e869118fbf9a7b5965c`。
+DATA reader 正另行实现；time 新预载依赖、真实 EOF、admission、生产 scope、父 birth/pump
+及原 Linux 验收仍未完成。本批没有目标仓写入、guest/VM/服务/CI 操作或新的全仓 Gate。
