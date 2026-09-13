@@ -875,3 +875,41 @@ v1 的早期通过结论已被后续审查取代，原 64 文件、归档和七�
 EOF 仍为调用者值；实际 worker/C、原生文件系统、共享时限与单调发行尚未验证。
 其余写事务、新 holder MAIN 恢复准入和完整 14 kind 组合仍待完成。未启动 VM、
 未接触目标仓，完整 POSIX gate 仍为 124，implementation_result 仍未具备。
+
+## 四项只读文件事务完成独立复验（14:33 UTC）
+
+`runner-quiet-read-transactions-v1-candidate` 已实现 MAIN history、RUN armed capsule、
+started capsule 与 head 四种读取。交付摘要为
+`c5d62373ea13ad8681e1e5da48c5e0d5832515d0ded99799acb96785d15b232e`；
+79 文件、2,467,840 字节归档摘要为
+`63b2c94c9810302198021eae038d232a2092cad2eb80aa53acffa2db2ce25ea4`。
+运行时摘要为
+`70af8d7040e9e90eceb9673d485224f6159cae4c9cd9f3de0e50e0784cdd2719`。
+
+MAIN 读取实际 current、lease、contract、完整 journal 与 head，并调用原 core 重放
+历史；再与保留的 parent head/prefix 核对。RUN 三项读取只访问 RUN，核对保留的
+root/W/lock 和新鲜 capsule，不访问 MAIN。允许的 started 缺失仅限显式未开始状态；
+读取中的缺失、身份变化、失败台账与业务校验错误均不能转换为正常 absence。
+读取完成及所有已知 FD 结束后才编码和比较完整 ACK，不宣称文件或目录发生同步。
+
+独立运行的 169 项宿主测试通过，Ruff/format 通过；根额外完成 86 项控制，另一
+审查完成 35 项尾部控制。根实际观察原 core 校验完整 128 个 event、378,943 字节
+历史，并拒绝实际文件、parent 承诺和语义历史错误。原 Store 的四个方法仅核对
+AST/文本映射，未执行原 Store，不将映射数量当作行为覆盖率。
+
+`B3-READ-001` 的旧反例在文件结束后的 ACK 异常中遗留未失败、未终结状态；固定
+版本将整次公开调用纳入失败处理，保留原异常并阻止重用。独立旧/新成对反例以及
+helper FINISH 后业务取消、成功后零文件 I/O 检查均通过。最终根审查摘要为
+`da1aa6144029c793e446ee6280696bf912f51e12a79d246b9c8bc2141da31394`；
+独立尾部审查摘要为
+`b486aad12ea53b8c22baf82cb68a94227b141e0dfc017f02a40b15ba62660c43`。
+
+根核验早期 60 秒超时、contract 夹具字段错误及核验工具风格/导入分组错误均保留；
+后续仅重跑受影响的补充控制或封存，完整测试日志与 XML 按原固定候选复用，不累计
+重试次数作为新增测试。最终封存 41 文件、7,895,040 字节审查归档，候选及独立尾部
+包逐项核验不变。上述核验工具错误没有导致候选源码变更。
+
+目前 14 kind 中四项读取和单项 emergency 完成宿主候选验证；其余九项写事务仍待
+组合实现。实际 FD/source/EOF、worker/C、跨事务恢复准入、全局 replay 与 Linux
+原生集成均未验证，recovery/operation/production 标记保持 false。目标仓只读及
+完整 POSIX gate 124 的既有边界不变，不能据本阶段填报完整 implementation_result。
