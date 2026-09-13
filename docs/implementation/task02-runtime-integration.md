@@ -813,3 +813,33 @@ MAIN root 的 dev/ino 关联、全重绑后的 nested 新字段类型及 FD alia
 事务进入树外实现准备。完整 14 kind 文件组合、实际 worker/C、单调发行、恢复准入
 与原生集成仍未完成。本阶段未启动 guest、未接触目标仓，完整 POSIX gate 的 124
 失败与目标仓只读交接边界保持；不据纯 codec 结果填报 implementation_result。
+
+## 固定文件 helper 完成独立复验（13:54 UTC）
+
+`runner-quiet-file-transaction-helpers-v1-candidate` 实现初次 pending 提交及可选 started
+读取，交付摘要为
+`c096321dd1a936b10a12a0d1ec79e2bf242ba345a0603d36312aa042a60fcb0f`；
+80 文件、1,505,280 字节归档摘要为
+`9addea4217c5abe6caa79b2030d629ed464ccbfd6b8e1604541e29cdc01fd014`。
+原 B1/B2 运行时字节不变；本层只处理固定文件与原始字节，不验证业务 capsule 或授权。
+
+根预审实证 `B3-HELPER-001`：创建并同步 next 后再认领路径当前 inode，会把同字节
+替换的新 inode 当作已经同步的文件。旧反例保留实际 fsync inode 113、错误回执 inode
+114，摘要为
+`30c79d52636748f7c1b289c7d0d062230d53c6f384046360a81be2cea9a74163`。
+修复从仍打开且归本事务所有的创建 FD 捕获完整九字段身份；B1 原 close/dirsync 后
+再核路径必须一致。后续替换、捕获取消、未知关闭均保留残留并拒绝成功回执。
+
+独立审查重跑 109 项宿主测试及 41 项补充控制通过，核对全部候选文件与归档不变，
+Ruff/format 通过，Finding 在固定源码上闭合。395 个建模调用位置的三类异常注入共
+1,185 次，包含在九项 pytest 中，不另计测试数。独立报告摘要为
+`138a7c153b2cf47bb72b3b8235da7b1b8afd0d87117fea5105ccff79bd1cc5ff`。
+
+初次 pending 保持 target/next 均不存在、固定 next 创建同步、目标缺失复核、rename、
+目录同步与最终稳定读取；普通 rename 的检查与替换不具备 NOREPLACE 原子语义，仍
+要求受信任的单写者。started 只有初始固定 stat 的允许缺失可返回 absence，读取中
+消失、早期 root/lock 错误、损坏内容和已失败台账不能转换为正常缺失或清除 latch。
+所有本事务已知 FD 结束后才返回文件观察；未知关闭不重试。
+
+四类只读事务与单 RUN emergency 事务继续树外实现。完整 14 kind 组合、worker/C、
+Linux 内核行为、时间预算与目标仓交接仍未完成；当前通过的 helper 不扩展这些边界。
