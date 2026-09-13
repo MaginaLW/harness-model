@@ -1458,3 +1458,46 @@ owner、原 B1 class 和固定 3/4/5 移交。仅将该 B1 模块的本地 os �
 `1c37baf38422961e16075fc9bd305eb16bf68550e3085e869118fbf9a7b5965c`。
 DATA reader 正另行实现；time 新预载依赖、真实 EOF、admission、生产 scope、父 birth/pump
 及原 Linux 验收仍未完成。本批没有目标仓写入、guest/VM/服务/CI 操作或新的全仓 Gate。
+
+## 固定 FD3 DATA reader 的实现与失败路径复验
+
+`runner-quiet-data-reader-v1-candidate` 新增同原入口 namespace 的实际源码片段
+`io_data_reader.py.txt`，11,021 字节，摘要为
+`f2ab255a9a7138752e4b75ba9491d96066a03fa5d6634fb66f3ea4f5b6a9b421`。
+begin 先消耗一次尝试，再严格解码 request/v3，并保留原 owner/ledger 与完整 transport
+承诺。固定 argv 是组件输入；格式正确不证明真实进程 argv、启动 flags 或控制来源。
+借用只认原 transferred 3/4/5 和本地已关闭的 READY6，不补造 READY 或父接受。
+
+step 每次至多一次 read(3)，上限 min(16KiB, N+1-used)，N 为完整 transport_bytes，
+并非 payload 的 data_bytes。EAGAIN 保留同一 buffer 和期限；读满 N 后仍须由原 read
+返回空 bytes，下一读最多探一字节。短 EOF、多余字节、错误类型、摘要或完整 codec
+检查失败均永久终结；成功也只允许一次取出普通 bytes，不发行 CompleteDataRead/Exchange。
+get_blocking(3) 拒绝阻塞模式，不改 flags、不触 FD5；瞬时 flags 和数字所有权仍不能
+证明原 OFD 的连续身份。原两种绝对截止时间在读取/EAGAIN、摘要/解析及 take 后复核，
+不新建 100ms 或 30s 预算。time 为新增的未来预载依赖，缺失即失败，无导入回落；
+既有 16 模块库预载通过不代表目标 time/解释器已核。
+
+独立 DATA-READER-001/P2 发现故障处理入口的一次中断会留下可读状态；进一步复现原
+owner.abort 调用点中断会留下 active 账本。修复在 begin/step/take 的调用边界增加
+有限后备失败登记和原 owner 清理，保留首 primary，不重复 unknown FD，不调用 B1 FINISH。
+原 d5c、首修 de36、作者 run-002 的 9 失败/93 通过及独立反例均保留；这些失败和复验
+不相加计数，也不宣称清理在无限重复中断下仍能完成。
+
+固定 f2ab 源的作者 102 项宿主控制通过。独立 72 项不同控制通过：51 项流/EOF/时钟
+控制，加 18 项三调用边界、两清理入口、三异常的组合，以及 3 项 unknown close 控制。
+65536/65537 字节边界样本只用于有界拒绝，未作为合法业务 transport 成功。
+完整 Ruff/format 通过，另以 .py stdin 文件名解析原 .txt 字节。全部运行于 Windows
+Python 3.11.9 与显式 fake sys/posix/time，实际使用原冻结 prelude、16 模块库及 codec；
+没有真实 FD3 EOF、Linux syscall/时钟或卷访问的验收结论。
+
+作者交付摘要 `6d33d5111301d2039b684f7ab4acfa5f3a92ab427c36244cb1865fe08e952c08`，
+49 文件、5,109,760 字节归档摘要
+`0fa3d6beccb87e84889cb5a05b7e65ef4d0bab8ba0147e6d9a27195cec706ef7`，已逐项回读。
+独立 `data-reader-entry-contract-review-001` 回执摘要为
+`34ac7f8f081e2f7cc4ab29181668a5c9e306ad9a533e32ab3e5ef85ffd479763`，
+DATA-READER-001 的两处反例均为 fixed_verified，无新增未解决 Finding。
+67 文件、2,201,600 字节归档已逐项回读；manifest 摘要为
+`b03c4fc04937b99556534a06e0705064d6d7229a1b3cee3e904ef092101baf6d`，归档摘要为
+`40923aa319cb96429d9638f28a9a28ff0047f9ddc6197133402a71e221ff29c0`。
+固定镜像 assembler、实际 admission、生产 registry/scope、父 birth/pump 和原 Linux
+验收仍待完成；本批未操作目标仓、guest、VM、服务或 CI，未填 implementation_result。
