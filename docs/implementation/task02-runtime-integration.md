@@ -1393,3 +1393,44 @@ build-002 与 build-003 库字节相同；生成工具 import 排序修订只更
 最早 raw-owner 片段正另行实现和独立审查，本库尚未接入它。真实 producer/admission/
 child、source4/真实 EOF/预载 profile、C/D/E/F、G2/G3 和 Linux 验收仍未完成。
 目标仓继续只读，本批未运行 guest、VM、服务、CI 或新的全仓 Gate，未填 implementation_result。
+
+## 最早继承 FD 所有权片段的实现与异常复验
+
+`runner-quiet-entry-prelude-v1-candidate` 新增实际可内联的 Python 源片段，以
+`io_entry_prelude.py.txt` 保存原 bytes，避免当作独立 child 运行或普通库导入。
+当前已复验源为 9,345 字节，摘要
+`b7dcb9781ef8746d76a7a6b22b18cbf58e0d24ceeca09266a0a30b49c221086b`。
+候选交付摘要为 `cf84ee14eec1296475fef1449531a1cf9cdaa9bc4b2cdbd82a3ff708ad42226d`；
+58 文件、788,480 字节归档摘要为
+`18ff3f1483e8f398eae8ba873af3daa428059676c84fb7f48e5db2146564adfc`，已逐项回读。
+片段仅依赖后续受核的内建 sys/posix，保存固定 3/4/5/6 单例 owner；不接受调用者 FD
+列表、class、callback 或启用布尔，不写 READY/ACK，不读取、打开或 stat 卷路径。
+真实解释器、内建模块与受信预载来源仍是未实现的外部前提，名称和类型检查不认证来源。
+
+移交在内部新建精确原 B1 的 fresh 空账本，按 3→4→5 先登记 TRANSFERRING，再 own，
+成功后 TRANSFERRED；6 独立保留。own 前后中断时核原账本归属，判定不明的槽不猜 close。
+每个 known 槽独立尝试收尾，先标关闭进度，unknown 不重试，也不因同号 FD 复用而重关。
+失败收尾不调用可能遍历归属不明槽的 bulk FINISH；原账本置 failed，正常事务的 FINISH
+仍由原 B1 生命周期完成。raw 关闭结果不能代替 stdout/stderr EOF、进程退出或父接受。
+
+独立反例证实并修复两个 P2：ENTRY-PRELUDE-001 的 posix 可用后初始化异常跳过清理，
+以及 ENTRY-PRELUDE-002 的终态登记中断阻断独立关闭、最终退出路径丢失最早主因。
+现有固定槽表可用时，class/owner 初始化失败有有限清理后固定非零退出；首受控状态或
+posix 尚不可用、清理无法推进等情形仍由真实父 C 保留 unknown，不宣称无限中断下必完成。
+追加定点检查还发现 B1.failed 单次登记中断后可保持 false；末尾只补内存登记，实际原
+B1.active 现拒绝失败账本，不重试任何 FD 关闭。
+
+作者 179 项宿主测试通过。非作者 77 项控制通过，另以定点观察核 failed/active 和单次
+关闭；不将重复执行相加。原 B1 own/close 算法与片段精确字节运行于显式 fake sys/posix
+模型，未调用真实 posix.close 或执行 Linux。完整 Ruff/format 通过，独立检查另以 Python
+源码 stdin 文件名解析 .txt 原字节；早期 E501 忽略记录不算最终完整质量通过。
+两个 P2 的最终独立状态均为 fixed_verified；回执摘要为
+`28910e965ec5bec0e94dc972167b50ab7132077e82ea292d5c4e241fd24a6f49`。
+独立审查 57 文件、798,720 字节归档摘要为
+`8e6e32999b79a570af8d867f985fb0dbf492b3308a1ceaa5c4a57e88b12580e0`，已逐项回读。
+最早两源、latch 反例及工具字符串/AST 检查误报均保留；最终源码未因工具修订而重跑冒计。
+下一依赖审计 `c1-next-implementation-review-001` 固定 19 文件，manifest 摘要为
+`47639d1bacfd798280887fec8f1d49e847dade934d509beadfb3559169fb60e2`，不以本片段代替
+真实 producer；后续生产 context/scope 必须另版实现，不能仅打开 require 门或借用 Synthetic。
+源码仍未内联入可发行镜像，admission、生产 registry/scope、DATA 真 EOF、父 birth/pump、
+C/D/E/F、G2/G3 与原 Linux 验收继续待完成。目标仓、guest、VM、服务与 CI 均未操作。
