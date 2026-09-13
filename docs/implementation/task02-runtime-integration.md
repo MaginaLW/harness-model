@@ -454,3 +454,20 @@ run worker 与父进程的可信链头各自承担不同检查，只有两份完
 这些观察支持累计耗时线索，不证明原运行中该子用例已经完成，也不改变完整
 gate 的 124。诊断记录摘要为
 `c89b09bb88b66778f1e783cdaea195c82ebbc6df1c5772be9882c9c53cfda8be`。
+
+## 接线设计审定与只读版本快照（09:49 UTC）
+
+`quiet-persistence-io-design-independent-review-001` 已完成上述接线设计的独立
+审查，无新增 Finding；记录摘要为
+`3b523dd5f309f93d6f3372f454a43753ce6c264f26307348d93491a1e4ecf48a`。
+新增 8 KiB 留证预算仅在设计层审定。完整合法 schema 的实际 4 KiB 编码、64 KiB
+数据运输、固定来源与 FD 分配、异步出生及真实循环时延仍是后续实现的验证义务。
+主卷 writer 未决时的独立 run emergency 属于明确的恢复特例，不能据此启动第二个
+主卷 writer；run writer 未决时同样禁止第二个 run writer。没有据此执行真实恢复。
+
+09:46:40 UTC 的目标仓只读快照显示 `main` 为
+`f0a9e118312cc298e213aea37f8321c4a46611ff`，当时工作树干净，两次 HEAD 相同；
+查询关闭 Git 可选锁。快照 `task0048-stage11-target-readonly-001` 摘要为
+`82db155fb0e216ec385de52b5a30089831e45c43d1a4eca14e44fdd4d693a959`。
+这不表示并行写者已完成交接，也不采用该提交作为已验证的 Linux subject。
+此前实际执行仍只绑定历史 `cd02cb3c`，目标仓继续保持只读。
