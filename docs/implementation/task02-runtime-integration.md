@@ -572,3 +572,44 @@ Linux 原始流、149 项 JUnit、交付与 28 个源文件身份已保存于
 该归档也已独立核对。固定进程创建、父方来源观察、实际 FD 分配、MAIN 请求屏障、
 pending、其余存储事务与真实耐久性均不在此版实现内。后续 worker 设计仍须解决
 这些具体接口，再经独立审查；两种纯协议通过不表示完整 worker 可执行。
+
+## Worker 设计审查与运行环境变化（11:23 UTC）
+
+`runner-quiet-io-worker-birth-design-v1-candidate` 已完成独立设计审查，无新增设计
+Finding。交付摘要为 `a5878a098916615970037662ca0693cdbe94e6ce9c547f02e91d65f11752a598`；
+9 文件归档为 112,640 字节，摘要
+`364d062a1df307a9323d8b08d3f51616e55835d9c2c780ed34f86bbca685a988`。
+审查核对 16 个固定输入、原存储全部 51 个方法、149 条检查索引与 26 项设计约束，
+并执行原 takeover 纯值的 3 个正例和 15 个拒绝反例。审查报告摘要为
+`1df25a6115187812a88635ea594f961ad3614ff68dab9fe63ffb967d2e690ce9`。
+
+新设计将 fork 后的实际身份观察、固定解释器与 sealed source、exec 后完整 FD
+复核、RUN pending 完成后唯一一次释放 MAIN 数据分开。原 RUN capsule/head/temp
+检查并入 pending 前置检查，MAIN 完成后的 RUN mirror 再次读取检查。MAIN 仍完整
+读取并重放 journal，父方提供完整 canonical+LF 历史字节的长度与 SHA；这项密码学
+承诺与 RUN 先建无动作存储的 bootstrap 顺序均作为显式设计差异审查。设计列出
+14 种固定事务，未实现出生、文件事务、父协调器或真实 guardian。
+
+`runner-quiet-io-reply-bounds-v1-candidate` 的完整 armed/started 单对象回复分别为
+3016/2433 字节，独立测量及 24 个拒绝反例通过；没有截断对象或增加结果管道。
+原文将 ACK 字段数量误写为 18，实际为 17，加 `object` 后共 18。该 P3
+`QREPLY-DOC-001` 以单独文档更正候选保存，未覆盖冻结源或改变算法、测试结果。
+更正后 README 摘要为
+`aae3bda904cdded6df412a19ff84824ab8cf2a2c7aa0576d9d53db2b77d1f447`。
+此测量只覆盖两个 capsule 回复，全部新 kind 的完整 argv、pending 和 ACK 最大值
+仍须在单元 A 的实际编码器中验证；原 4 KiB/64 KiB 和时间预算均未放宽。
+
+10:55:13 UTC 的宿主只读核查发现旧 QEMU PID、QEMU 进程名与本地 SSH 监听均
+不存在，停止原因未知。`task02-guest-unavailable-001` 摘要为
+`de4d1eced39abf832d1ebf8518743899a236a062ba1b329bd52ba308eb459f1a`。
+旧 Linux 测试保留为各自运行时刻的有效历史证据；旧 boot、进程和服务基线不能
+继续作为当前在线事实。未重启 VM、操作服务或尝试使用旧身份执行 guest 命令。
+
+10:57:32 UTC 的只读 `WHvGetCapability` 查询成功，报告 Windows hypervisor
+present；记录 `task02-whp-capability-001` 摘要为
+`0192b6ab288f48adf34bafc00dc72ee4dd83967e68c798f32189a3d91d35f449`。
+该 API 的能力查询语义见 [Microsoft 原始文档](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/funcs/whvgetcapability)。
+未创建 partition、启动 VM 或修改系统 feature，尚不证明 QEMU WHPX 可用或完整
+gate 性能。完整 POSIX gate 仍保留 124 失败，目标仓仍只读且无写者交接。
+后续先完成树外纯协议与文件 primitive；任何 Linux 实测需重新建立当前环境、
+boot、来源、挂载和适用执行边界，不能沿用旧在线快照。
