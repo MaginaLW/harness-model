@@ -1556,3 +1556,57 @@ index 含输出 SHA 和段范围，不嵌入 prefix；外置 receipt 再绑定 i
 
 完整镜像和实际来源准入、生产 registry/dispatcher、READY/ACK、父 birth/pump 与
 Linux/目标采用仍未完成。本批继续只读候选准备，未运行新的全仓 Gate 或记录实现完成。
+
+## 固定继承输入观察器与原实例校验
+
+`runner-quiet-entry-observer-v1-candidate` 新增同入口片段 `io_entry_observer.py.txt`。
+最终片段为 14,847 字节，摘要
+`cbd8fe30c1d56d1c2fe39266fc3037fa0a22d746b21810a8d18f775a26ca8929`。
+唯一 `_ENTRY_OBSERVER.observe_once()` 无外部参数，从解释器 orig_argv 取固定七项，
+先核类型、ASCII 和含 NUL 的 4KiB 总预算，再与实际三项 script argv 对照并交原 codec。
+它使用 request 中已有的两种绝对截止时间，不另起 30 秒或 100ms 窗口。
+
+实际算法检查四项 UID/GID 为 root，PID/PPID/PGID 与原请求对应；只对 FD3/4 做 fstat
+和 fcntl。FD3 为 FIFO、status=2048，FD4 为 regular、status=32768，二者 F_GETFD=0，
+source4 的 seal 精确为 15，dev/ino 不同。成功前再读身份和两 FD 的同组属性，变化即拒绝。
+正常返回的观察调用前后核原配对时钟，倒退、错误编号、等于或越过截止均失败；异常
+则立即保留首因并清理已知原始资源，不把错误清理时延或 guardian 预算写成已验证。
+
+首次观察前不可逆进入 OBSERVING，成功仅返回普通观察值并进入 OBSERVED；再次调用
+拒绝。成功仍为同一个 owner RAW3/4/5/6、无 B1 ledger、reader NEW，没有 DATA 读取、
+READY/ACK、事务、transfer 或 FD5 元数据访问。其失败路径复用原 owner 的有限清理，
+未知 close 不重试数字；非原始 receiver 的拒绝不能取得原 owner 的清理资格。
+
+独立 ENTRY-OBSERVER-001/P2 证明首稿接纳同类型模块替换，甚至替换 codec 后可放行
+错误解释器参数；错误 CLOCK_BOOTTIME 编号 0/1 也被真正传给模型调用并返回成功。
+修订绑定原库、codec、B2/B1、B2 持有的 fcntl 和原 time 引用，在观察期间反复核对，
+固定时钟编号 7。ENTRY-OBSERVER-002/P2 证明空伪造 receiver 遮蔽原异常，而复制字段的
+伪造 receiver 能关闭真正 RAW 资源；修订只允许原单例在公开操作失败时调用清理。
+首稿、实际反例和各次质量失败均保留，旧 prelude/library/reader/prefix 字节不改。
+
+最终同源作者 119 项测试和非作者 125 项控制通过，涵盖固定原请求、参数/元数据/身份
+拒绝、逐调用到期、模块替换、非原 receiver、清理入口取消及未知 close。失败初稿和
+修订复跑不相加；B904 修订只增加 `raise first from None`，保留首因并抑制次生异常链，
+最终片段仍重新验证。宿主为 Windows Python 3.11.9，实际 syscall 使用明确模型；
+生成片段另以 .py stdin 文件名接受完整 Ruff/format 检查，py312 解析不等于 Linux 执行。
+
+作者交付摘要 `4332149023db971ffb558fbcfa031af0d01836c92e6799be9500c393b2ead295`，
+67 文件、2,058,240 字节归档摘要
+`e7655540d64d6fa73595a5493238a090c1622edcb2ff99293bf2c8af012a1198`，已逐项回读。
+最终全部 10 份作者工具/测试源、6 份独立审查工具与根审查工具均通过完整 Ruff/format。
+独立审查回执摘要为
+`0b6a4aa78a3e66890d884ef47f2e60a3a8a9635970ba0d6ae5bffcd1aefd860b`，两项 P2 均为
+fixed_verified，无未解决 Finding。77 文件、1,781,760 字节审查归档已逐项回读，manifest
+摘要为 `e54c7be49f376d8a5e32cafc2f1c84e675ed82989bcfb494c120b3d4e48a81da`，归档摘要为
+`022bd5110f5c33f13337d3233ddd9ca56c1fa828eb84ec8fbb41909075eeb36a`。
+根审查另封存首稿与最终源码映射、接口核查和包绑定，12 文件、71,680 字节归档均回读
+通过；manifest 摘要为 `f0be85a34205bfeedf912ecf3feddc4c96669bf6febe2ec498eddfe30b143c94`，
+归档摘要为 `a00855c09c45064aae12a9631ab4205164a4b0c026051d87b80ad39891003281`。
+
+这里的严格 status/seal 值只是待目标核定的固定候选 profile，额外 seal 也会被拒绝，
+并非所有合法 Linux memfd 的通用规则。两次属性相同不证明原子观察或持续 OFD 身份；
+尚未读取进程 start tick、boot、namespace/cgroup、完整 FD 表或 source4 内容，也未核定
+source4 的文件 ownership/profile、完整来源清单和解释器/stdlib。控制帧本来不含完整
+镜像 SHA 等事实，stage35 输出 index 不能填补这项缺口。ChildEntryState、完整来源准入、
+生产 registry/dispatcher、父 birth/pump、真实 Linux 与目标采用继续未完成。
+本批未写目标仓或运行 guest、VM、服务、CI、新的全仓 Gate，未填 implementation_result。
