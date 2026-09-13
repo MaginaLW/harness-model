@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner-via-codex",
+    "approval_type": "spec",
+    "approved_at": "2026-09-13T00:28:56Z",
+    "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "依据用户已明确给定的原授权“授予充足的全权限，完成任务 02.”记录本规格的范围与风险接受。根会话当前goal已核实，设计独立审查确认冻结规格只是原单仓可信私有Linux、低权限隔离、受控串行交接及回退目标的细化，无新增业务方向。本记录衔接已有决定，不声称用户本轮重新逐项审阅过新文件，不预先批准最终代码、具体高风险动作、生产、费用或I5扩展；当前实例、版本、隔离与并发前提仍须实证。",
+    "schema_version": "1.0",
+    "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
+    "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "task_id": "TASK-0048"
+  }
+]
