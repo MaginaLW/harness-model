@@ -251,3 +251,32 @@ mypy 均通过，结束时工作树干净。该结果及逐命令回执保存在
 root-owned bare 仓的所有权检查而失败。修订使用精确旧提交、原 30 秒命令上限，
 由 root 仅拷入新 checkout 后核对并交给专用低权限账号；未修改全局 Git 信任设置。
 原失败保留，真实 fixture 结果也没有被重复用作这次完整 POSIX 检查的执行结果。
+
+## 后续核定（07:55 UTC）
+
+默认激活基线的独立复核完成，14 组检查覆盖完整 56 条 unit、165 加 11 条原生
+命令、9 个活动 socket、1 个 timer 与已知生成来源，无新增 Finding。包查询中
+原有的非零结果及对应目录别名证据均保留；该结论只审定历史盘点，不表示恢复
+实现、guardian 或静默窗口已经可用。
+
+private-bus 诊断 v1 的独立审查发现 QBUS-001：失败 Job 的最终观察失效时，状态
+保持 UNKNOWN，但暂存值会将原始 Job 结果误写为 done。v2 的单函数修复经 36 项
+独立检查确认，原失败回执不改。固定 v2 在 Linux 上 149 项测试全部通过，无跳过；
+实际 root 与 UID 1001 只读连接、短期 peer 绑定及固定属性查询均成功。
+
+| 真实诊断 | 原始结果 | 独立回读与限制 |
+| --- | --- | --- |
+| `guest-bus-v2-selftest-active-001` | 新 nonce 的 start Job done、服务 running；stop Job done，随后单元卸载 | 原生退出 0，精确 cgroup absent；只验证专用 sleep 测试服务 |
+| `guest-bus-v2-selftest-exec-fails-001` | 启动 Job done，服务以 exit-code/1/1 失败；stop Job done，但单元保留 failed | 原生退出 1；进程为 0、Job 为 0、cgroup absent，原诊断未接受为清理完成 |
+| `guest-bus-v2-selftest-job-timeout-001` | 原 create 保持 UNKNOWN，后续 JobRemoved 为 failed，Service.Result 为 timeout | 原生退出 1；stop Job done 后仍保留 failed 单元，进程与 cgroup 已清空 |
+
+`guest-bus-v2-selftest-readback-v1-001` 绑定三次完整原始流、原生退出及实际终态。
+Job 结果、服务结果、资源清理和保留的失败单元是不同事实；后续候选须分别记录，
+不能将旧 UNKNOWN 或失败执行改标通过。未发送既有服务修改、ResetFailed、取消
+Job 或注册方法。生产连接、guardian 和恢复演练仍未实现。
+
+历史 `cd02cb3c` 的完整本地 POSIX 候选已冻结：保留原 gate 的全部检查及期限，
+主机 127 项通过、8 项 Linux 专属测试待运行；原 gate 的六处变换可逐字节撤回。
+专用传输包装已独立复核，完整本地 gate、实际启动脚本审查及 Linux 验证仍待完成。
+证据卷的只读盘点确认约 52.6 MB 可用，无扩容；盘点包装首轮 JSON 序列化失败
+和修正后的真实结果分别留存。目标仓保持只读，尚未选择最终 CI 提交或接入。
