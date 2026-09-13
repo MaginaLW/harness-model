@@ -297,3 +297,32 @@ Job 或注册方法。生产连接、guardian 和恢复演练仍未实现。
 JobRemoved failed 与 Service timeout 的区别。修订只可对固定的两个负例分别
 记录资源清理和失败单元保留，原 JobTracker 终态与原始执行不得改写。三次服务
 诊断及合同失败的完整原始流已精确归档并回读摘要，后续成功必须来自新的执行。
+
+## 修复原生复验（08:28 UTC）
+
+private-bus v3 的独立复核以原始 v2 记录验证两个负例的精确条件，38 项检查通过；
+bus、身份与 JobTracker 实现保持不变。真实 Linux 227 项测试通过，无跳过。
+三个新 nonce 的实际诊断均退出 0，随后 root 独立回读完整流、原生退出、服务属性
+和精确 cgroup；原有 v2 失败记录未改。
+
+| 新诊断 | 保留的原始观察 | 新执行的独立回读 |
+| --- | --- | --- |
+| `guest-bus-v3-selftest-active-001` | create DONE、stop DONE_ABSENT | 单元 not-found，MainPID 为 0，cgroup absent |
+| `guest-bus-v3-selftest-exec-fails-001` | create FAILED、stop FAILED；两个 Job 的结果均为 done | exit-code/1/1 的 failed 单元保留，Job 和进程清空，cgroup absent |
+| `guest-bus-v3-selftest-job-timeout-001` | create UNKNOWN、stop FAILED；后续启动 Job 为 failed，服务结果为 timeout | timeout/2/15 的 failed 单元保留，Job 和进程清空，cgroup absent |
+
+QBUS-002、QBUS-003 的修复已由新的真实执行验证。负例的诊断通过表示观察与资源
+清理符合预期，并未将失败 Job 或 UNKNOWN 改成成功；没有 ResetFailed、既有服务
+操作或许可发放。生产 guardian、静默窗口及恢复演练仍待实施。
+
+历史 POSIX v2 仅为固定 ShellCheck 角色设置 19,420,144 字节读取上限，其余默认
+16 MiB 读取器与原 gate 检查、时限均保持不变。36 项独立检查和 Linux 163 项测试
+全部通过。`guest-local-posix-v2-contract-001` 实际完成工具摘要核验与合同准备，
+合同摘要为 `b089fcafb5e00d18530bff901bd0e3ab0f1c684b5b56dbadf41cb3abd9ed8c65`；
+低权限 `guest-local-posix-v2-source-check-001` 随后验证固定历史源码成功。
+QPOSIX-001 的修复由上述新执行验证；完整 gate 尚未执行。
+
+上述新诊断和 POSIX 准备的 31 份完整原始文件已精确归档、传回并逐项复核：
+`stage9-native-diagnostics-002.tar` 为 399,360 字节，摘要
+`c96f6f14593143fe0d052aad40a0dce931ad5c7f51ffe2d7eff2535f45ba65da`。
+独立结论保存在 `stage9-native-verification-001`。目标仓继续只读，未注册 runner。
