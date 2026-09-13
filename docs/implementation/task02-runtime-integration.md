@@ -1203,3 +1203,47 @@ event import；这些数量不覆盖 stdlib/extension 的完整依赖。被替�
 guest、启动 VM 或沿用旧 boot 身份。C1 后续生产绑定设计另行独立审查；可发行 child、
 C/D/E/F、G2/G3、原 POSIX 124 的完整复验与目标采用仍未完成。TASK-0048 仍缺
 implementation_result，目标仓继续只读。
+
+## C1 生产绑定设计完成独立方向审查
+
+`production-file-binding-design-001` 的 manifest 摘要为
+`97d7c102f27003d56be20a331caca43c0b17580958d3c18d9e9764a909bd0f79`，
+DESIGN 摘要为 `8dfea06f54d10805160fea6b46ae730463b82c077b3b561ef51655ec99b90e2d`。
+独立审查核对设计及四个上游包的全部文件/归档、23 份来源副本，并从 15 份原源码
+重算函数、导入、14 路目标与 19 处内部测试工厂。审查方向可接受，无新 Finding；
+这次只读 bytes/AST/text，没有运行原业务或作者工具，未来工厂行为仍未验证。
+
+具体差分为七事务及 B1/B2/helper 共十个模块另版，新增 binding types、admission、
+child 三个库模块，并另加最早内联 prelude。拟 18 个库节点不代表完整来源闭包，
+builder/loader/bootstrap、解释器及 stdlib/native profile 均须另行固定。真实 C
+来源缺失时生产构造仍拒绝，不能调用或改名旧 test 工厂形成可发行入口。
+
+设计把 SourceImage 与单 role AnchorGrant 分开，固定源码不授予 MAIN 准入。第一条
+Python 语句前的失败由父按实际 EOF/exit/reap/unknown 收束；最早 raw owner 先于
+loader/stdlib，随后把原 3/4/5 一次移交同一 B1 ledger，READY6 另行收尾。只有原 FD3
+读到真实 EOF 并完成全部验证后，精确工厂才唯一 FRESH→TAKEN，再允许 B2 fstat5。
+dispatcher 只查表，TAKEN 也拒绝第二次工厂调用，保留同一 child Exchange/ledger；
+父 Exchange 是父进程原实例，不与 child 混同。所有已知事务 FD 完成 FINISH 后才
+形成 claim/ACK，stdout/stderr EOF 与退出、reap 仍由 C 另观察，E 才能一次接受业务状态。
+
+实施时 helper 必须从同一 invocation 建立自己的新 lexical scope，不能复用已经
+退出的预检 W scope；started/initial pending helper 提前 FINISH 整个 ledger 的
+原顺序保留。十九处生产工厂替换仍须逐项保留原身份、文件顺序与异常边界，不能只
+搜索并替换方法名。目标 3.12 预载、真实 FD 观察、原 deadline 与共享预算仍未证明。
+
+独立 REVIEW 摘要为
+`be9ee9f12a1b0d1e16aa4340145e9d8657987543370571fc55323e7f36f9ebb8`；
+receipt 摘要为 `31a20530561d99c5615cfc5279fb0e3df2a9b4645af8120072b062ef668fd07c`，
+29 文件、4,229,120 字节归档摘要为
+`bfee81665e514f93ab65b6519f163c405503038c9346d7ea2e84cafbf0d63981`。
+最终静态、Ruff/format 通过，历史工具失败与行号订正记录保留。后续按 DIFF-SCOPE
+先做另版封闭绑定类型与拒绝接口，再做十模块工厂保真回归及固定入口/实际 C 观察；
+C1-BIND-01 至 08、C/D/E/F、G2/G3 和 native 仍开放，未产生 implementation_result。
+
+源码库另由非作者完成代码审查及 11 项非业务装载控制，无新 Finding；回执摘要为
+`05d7093a1f2efd63feab88487a9d4677a18b8643476ef92ddc18af104b31f196`，
+56 文件审查归档摘要为
+`2c418e2ffdba610f33256d10a56b4eaf51ff770f01e81d8aeaddc0a04bf36722`。
+控制覆盖包/缓存原实例、装载前后碰撞及三类 compile 异常；最终 Ruff/format 通过。
+prepare_library 再次返回失败的原库不代表健康或 READY，其后 import/preload 仍拒绝。
+固定源码加载器不提供同进程反射沙箱或多线程原子性，只接受用于源码库准备。
