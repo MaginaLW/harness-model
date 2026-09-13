@@ -1812,3 +1812,70 @@ post-exec/READY 与 DATA 绑定均未完成。后续 admission 还须解决旧 f
 重新解码 request、另建 deadline tuple 且未续接入口最后时钟的接线缺口；本轮未改旧库。
 未运行 native、guest、服务、CI 或新的全仓 Gate，目标仓仍只读，未填 implementation_result；
 TASK-0048 继续 IMPLEMENTING，本批不构成任务 02、C/E/G3 或生产来源的完整验收。
+
+## DATA 读取与原入口上下文接线
+
+`runner-quiet-data-reader-v2-candidate` 补齐上一阶段指出的接线缺口：`begin()` 不接 argv，
+不再次调用 decode_control_argv，也不重新生成 deadline。它继承原 entry/proc/source
+观察器共同持有的 request、deadline 对象与 source 最后时钟，使用自己的借用及配对时钟
+检查，不重新调用已经结束的观察器。固定 CLOCK_BOOTTIME 为精确整数 7；读取前后继续
+核对原对象、模块、工厂、账本类型及资源所有权。
+
+新 `runner-quiet-entry-assembler-v2-candidate` 从原 RAW prelude 的第零字节开始，顺序
+安装固定 library、新 reader 及原 cbd8/d7ed/a0b329 三个观察器。三个观察器安装后、任何
+观察开始前，固定无参调用 `_bind_loaded_observers_once()`，保存原实例与类引用。
+所有安装和绑定仍处于原有限清理 wrapper 内。安装结束时 RAW 未转移、观察器均为 NEW，
+没有发 READY 或读 DATA；它不是先执行旧 prefix 再替换旧 reader。
+
+读取保留 16 KiB 单次上限、64 KiB transport 上限、N+1 溢出检查、真实 EOF、原摘要及
+transport 解码。EAGAIN 11 返回 WAIT，其余可见异常失败；首因、有限清理、UNKNOWN 不按
+数字重试的边界保持。成功只返回普通 bytes，不生产 CompleteDataRead 或其他 registry
+权限。绑定 hook 只建立固定安装顺序下的引用边界，不认证安装前来源，也不证明任意可信
+root 私有状态改写下的防护。
+
+独立审查在新组装首稿 698994 上实际跑通正向链，并复现 P2 `DATA-V2-001`：7c26 在 DATA
+开始前仅将 owner ledger 与其 class 相互核对，没有再绑定原 B1 class；替代类及账本映射
+仍可返回完整 transport。作者自查补上原 class 引用比较，形成 4480，随后仅格式为 956f。
+独立代理之后被平台内容检查中止，材料按 PARTIAL 封存。最终 reader、新 prefix、该修复
+及独立工具完整质量检查尚未获得最终独立复验，不标作 fixed_verified。
+
+当前运行源码 21,744 字节，摘要为
+`956fe95a1af4186e4c47519067b1ca433f41f9f32cdda0bbb5c9c028e1f51504`。
+新完整组装 prefix 为 735,690 字节，摘要为
+`eb3ff1cb04b29e5fbf518586bfec21858d392ec5046c10d03ad118729bca1272`；这里的“完整组装”
+仅表示本次六个固定输入已接线，不表示完整 child。每次 build 独立保留六个原输入、
+builder 源码、detached index 与 receipt；初稿、失败和最终清单分别固定，不覆盖历史。
+
+作者 `run-004` 共 115 项通过：98 项接口与流控制，加 17 项直接执行新完整 prefix 的
+合法 transport 链；最终 14 个工具/测试文件及实际 reader 的完整 Ruff/format 通过。根的
+32 项构建契约测试检查闭输入、原字节、顺序与安装边界，工具及实际 prefix 的完整
+Ruff/format 通过。根另复用已保存的审查模型运行 17 种正向链，均返回原 transport，
+保持原 request/deadline 与已关闭的临时账本，DATA 阶段未重新解码控制请求。这 17 项
+是根执行审查者模型，不能替代独立审查；与作者测试分别记录，不累加成独立验收数量。
+
+原始独立包保留 74 文件、7,270,400 字节归档；manifest 摘要为
+`d768ca63c67170e07a8e46e97128235519ab0fc949f1fe15cb5d76c7355ab196`，归档摘要为
+`c5131077bf1d59017872f8886a2f48f9444f481e0fa673d96be2d37d7ca0149b`。
+根初次误录 reader 长度被闭输入检查拒绝，未产生 build；初次 wrapper 长行/F821 与工具
+格式失败、作者 fixture 错误、独立早期模型适配错误均保留。安装 alias 疑点未完成实验，
+不列为已复现 Finding。阶段 40 快照绑定最终候选包、PARTIAL 审查、根复核及本节提交。
+
+最终 reader delivery 为
+`365d887edbc10aef9a546cb465129e9196320b88f18cfc1c5382fa69ff302287`，90 文件；assembler
+delivery 为 `cc1da1178b767a9fe550eb1d7199d35c0642ec9f8d94aa0b1dcc763bb6a5b323`，134 文件。
+assembler `build-003` 固定全部六份最终输入 delivery，prefix 字节与已执行的 build-002
+相同；`run-003` 的 32 项及 8 文件工具质量、实际 prefix 质量均通过。其 index 把 reader
+实际 NEW 状态与已绑定观察器的布尔事实分开记录。根包 38 文件，manifest 为
+`a81039d9e5284e93f0380771ab1cbe0e68e0db2a624393988ba65c37243fda6d`；四包本地文件与
+归档逐项回读通过。根另核得 7c26 到 4480 只新增上述一项比较，4480 到 956f 的 AST
+完全一致；该静态比较不替代行为复验。
+
+模型显式调用原 owner 的 transfer_inputs/close_ready 后才开始 DATA。这不是实际 READY
+frame 或父准入；原两方法没有配对时钟，source 末时钟到 DATA 首时钟只提供前后观察，
+不证明 READY 期间逐操作预算或原生 FD 新鲜性。宿主仍为 Windows Python 3.11.9，使用
+真实 hashlib 与隔离 I/O 模型；py312 是静态检查目标。旧 source-image preparer 仍嵌入
+旧不完整 prefix，本轮没有将它静默改为新镜像。
+
+最终独立复验、完整 child/来源准入、PreparedSourceImage、CompleteDataRead、父 birth/
+READY/pump、真实 Linux 与 runner/CI、服务恢复及重启均未完成。目标仓保持只读，未运行
+native 或新的全仓 Gate，未填写 implementation_result；TASK-0048 继续 IMPLEMENTING。
