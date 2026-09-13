@@ -225,3 +225,29 @@ v7 原拒绝的具体差异原因仍为 unknown；后来的目标身份修订和
 它只检查输入事件和双时钟预算，不认证输入来源，也没有服务、进程或许可执行
 能力。真实 guardian、持久化、Job 生命周期、无 canary 恢复演练及原版 canary
 仍待实现和验证。未停止用户管理服务、修改默认激活配置或注册 Linux runner。
+
+## 后续核定（07:18 UTC）
+
+`d72c82f` 的独立干净检出完成全部原质量门：1,945 项完整测试、105 项合同检查，
+总分支覆盖率 88.35%、diff coverage 95.4%，锁文件、whitespace、Ruff、format、
+mypy 均通过，结束时工作树干净。该结果及逐命令回执保存在
+`task0048-stage7-quality-001`，不扩展真实业务或接入验收范围。
+
+采集器 v7 仅修正 pause 的完整 argv 匹配，原采集和进程收束代码保持不变。
+36 项独立检查、261 项真实 Linux 测试全部通过。新的完整只读采集及独立回读
+确认四类进程身份检查均通过，两次盘点一致；剩余缺项是默认启动源审查、真实
+窗口和恢复实现、当次采集交接及独立注册预检。
+
+| 新增证据 | 实际结果 | 当前边界 |
+| --- | --- | --- |
+| `guest-quiet-collector-v7-collect-001`、`guest-quiet-collector-v7-readback-001` | 428,476 字节完整记录和全部命令流摘要通过回读，pause 命令身份已匹配 | 仍为 `COLLECTED_FOR_REVIEW` |
+| `quiet-activation-baseline-review-001`、`guest-activation-supplement-v1-001`、`guest-activation-supplement-v1-readback-001` | 完整 56 条 unit 盘点后补齐 11 个固定只读查询、13 处端点元数据和 28 份包单元声明 | 9 个活动 socket 和 timer 均保留；未执行恢复 |
+| `guest-generated-activation-sources-v1-001`、`guest-generated-activation-compare-v2-001` | 两个生成单元的 root 包 desktop 来源、生成器身份与完整已知声明一致；原字符串直接比较失败及后续格式核对分开留存 | 未执行生成器、autostart 或默认单元；待独立基线复核 |
+| `guest-bus-dependencies-v1-001` | 核对 libsystemd、解释器和固定测试 payload 的 root 文件身份；两个 private socket 的实际 peer 分别匹配系统和用户 manager | 仅连接并读取 peer 凭据后关闭，未发送 bus 方法 |
+| `quiet-controller-core-independent-review-001`、`quiet-controller-core-independent-verification-002` | v1 的最终恢复正断言缺失与 JSON 指数溢出两项 Finding 均由 v2 最小修复；原审查者 65 项独立探针和 163 项原套件通过，无跳过 | 纯结构检查通过，不是实际 guardian 或恢复成功 |
+| `cd02-git-input-002`、`guest-cd02-git-resume-v3-001` | 真实历史 commit/tree 和浅快照完整性通过；独立 Linux checkout 的 155 文件逐字节匹配已有不可变源 | 仅供后续完整本地 POSIX 检查，未运行 gate、未修改目标仓 |
+
+历史 Git 输入准备曾因旧浅 clone 缺少对象、原生采集器预算不匹配和低权限读取
+root-owned bare 仓的所有权检查而失败。修订使用精确旧提交、原 30 秒命令上限，
+由 root 仅拷入新 checkout 后核对并交给专用低权限账号；未修改全局 Git 信任设置。
+原失败保留，真实 fixture 结果也没有被重复用作这次完整 POSIX 检查的执行结果。
