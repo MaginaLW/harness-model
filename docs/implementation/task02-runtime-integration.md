@@ -1678,3 +1678,71 @@ Python 3.11.9，实际调用使用明确 syscall 模型；py312 解析与质量�
 来源、生产 ChildEntryState/registry/dispatcher、父 birth/pump、真实 Linux 与采用
 仍未完成。本批只读候选边界不变，未运行 guest、VM、服务、CI 或新的全仓 Gate，
 未写目标仓、未填 implementation_result；TASK-0048 继续 IMPLEMENTING。
+
+## 固定 FD4 流式摘要观察
+
+`runner-quiet-source-observer-v1-candidate` 新增同入口 `io_source_observer.py.txt`，
+最终 15,092 字节，摘要
+`a0b329f5e8e700f9d2c2a736a4a2905b06702c75436bd2a475194ea5fb66a1d8`。
+唯一 `_ENTRY_SOURCE_OBSERVER.begin()/step()` 无参，要求原 d7ed 观察器 DONE、其原临时
+账本已完成且无失败/未知，原 RAW3456 无 ledger、reader NEW。它保留原 request、两种
+绝对截止时间和 d7ed 的最后时钟值，另续时钟链；不重启或调用已终态观察器的 helper。
+
+本次实际 fstat4 取得 regular、正数且在候选 signed 64-bit off_t 范围内的 size。
+F_GETFL、F_GETFD、seals 分别要求 32768、0、15；读前和读后同组属性必须相等。
+固定 `pread(4, min(16384, S+1-used), used)` 从偏移 0 分块，用原 codec 已预载的
+hashlib.sha256 流式更新，不缓存完整镜像，也不把 DATA 的 64KiB 限额当作镜像上限。
+每步最多一次 Python pread，另有摘要更新和时钟检查。短读按实际返回长度推进，
+精确 S 字节之后仍须真实 EOF；短 EOF、额外字节、坏返回值或摘要/读取异常均失败。
+
+成功只借用 FD4，不调用 open/dup/lseek/read 或接管/关闭它，也不复用已终结的临时账本。
+原 hash 模块、构造器、哈希对象和其他入口引用在配对时钟前后复核；末次 metadata、
+hexdigest、结果构造和时钟都在首因失败边界内。即使本观察器的 owner 别名被替换，
+失败仍清理捕获的原 RAW owner；foreign receiver 无清理资格，未知 close 不重试数字。
+
+这里的无重试指片段不会再次调用已抛出异常的 Python pread。CPython 3.12 的包装层
+可能在 Python 信号检查不抛异常时内部重试 kernel EINTR，并释放 GIL；hashlib 的较大
+更新也可能释放 GIL。因此模型中的一次 Python 调用不能证明一次内核调用、硬时限或
+无异步变化；Python 可见 EINTR/EAGAIN 仍立即保留首因失败。
+
+当前 request/v3 只有 source_manifest_sha256，完整 source_image_sha256 位于后续
+pending.birth；stage35 detached index 只标识未完成的 prefix。新组件不接受 expected
+SHA、不拿这些字段当作独立镜像预期，也不消费调用者保存的 cbd8 source4 结果字典。
+输出只是本轮 size/SHA/metadata 普通观察值，未把 FD4 认证为实际执行中的完整程序。
+
+作者最终 `run-002` 117 项测试通过，其中 3 项测试包含的 36 个异常注入位置不另加总。
+独立审查在最终源码上 93/93 通过，覆盖短读/EOF、超过 64KiB 的镜像、偏移不变、
+前后 metadata、原引用、构造/更新/摘要异常、末次时钟、foreign receiver 与未知关闭。
+模型实际顺序执行 992e+cbd8+d7ed 前缀，FD4 内容刻意使用不同的合成字节；真实 hashlib
+核对这些字节的摘要，不据此宣称它们就是执行镜像。d7ed 的 census 仍是 hash 之前的
+观察，未补齐 READY 前所需的新鲜核查。
+
+本轮未发现新的源码 Finding。独立初跑的 3 个失败来自审查断言误把单次 FD3 close
+失败后的所有 FD 都要求为 UNKNOWN；修正后分别保留 FD3 UNKNOWN 和 FD4/5/6 CLOSED。
+旧失败保留，后续同一矩阵的重复运行不累加。根保存初次可审源码 4ec9 与最终 a0b329，
+确认两者只格式变化、AST 相同；该静态复核不代替行为矩阵。审查者未作者新观察器，
+但曾作者旧冻结 library 依赖；本轮独立结论限于新组件，不是整个 prefix 的重新验收。
+
+作者最终 10 个工具、独立审查 8 个工具及实际 `.txt` 源码通过完整 Ruff/format 检查；
+根复核与快照工具也通过相应检查。实际运行仍是 Windows Python 3.11.9 和 syscall
+模型，py312 质量检查不构成 Linux Python 3.12 执行。未复跑行为未变的旧矩阵或全仓 Gate。
+
+作者 delivery 摘要为
+`1ac9e755f1a8f07ef12138477a74768447217b897dbecb2566ff8b46b767a804`，60 文件及
+2,324,480 字节归档逐项回读通过；归档摘要为
+`5213fdc2bcd3d1f8ec17e7408ffbee092c36d6181cdf29fd82a7fa2ebb1eab74`。
+独立审查回执摘要为
+`c6a20bc2a6973cbb2d64a7eb3ed5abde0305a1fefa161f91c79819aee82576e0`；111 文件、
+1,925,120 字节归档均回读通过，manifest 摘要为
+`09d28d8506f193831e8333711f02552f46c0894e9635ce6006480b1f31e03560`，归档摘要为
+`6d17faee7d0b24ae1a1571d498c559f02cc9a057efd95b156c60086bcbd4eebd`。
+根复核固定两版源码映射、格式比较、两包绑定和本阶段快照工具，19 文件及
+92,160 字节归档均回读通过，manifest 摘要为
+`e9fce16b0e6a746139aa6dc42864db62c3a1202d21d92e76bcf64e51257f65de`，归档摘要为
+`f40047a7afbe4130f43a1b6b40a75df932bee22dda1394801d4c75982386817d`。
+
+独立完整镜像摘要的生产与核对、解释器/stdlib 来源、新鲜入口核查、生产 registry/
+dispatcher、父 birth/pump、真实 Linux、runner/CI 采用及服务恢复/重启仍待完成。
+本轮未发 READY、未读 DATA、未转移 RAW 所有权、未创建生产权限；目标仓保持只读。
+未填 implementation_result；CLI 仍为 IMPLEMENTING，classification fresh、approvals
+current、evidence not_available，不能将该观察组件的通过当作任务 02 完成或全仓 Gate。
