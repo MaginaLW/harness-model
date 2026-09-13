@@ -843,3 +843,35 @@ Ruff/format 通过，Finding 在固定源码上闭合。395 个建模调用位�
 
 四类只读事务与单 RUN emergency 事务继续树外实现。完整 14 kind 组合、worker/C、
 Linux 内核行为、时间预算与目标仓交接仍未完成；当前通过的 helper 不扩展这些边界。
+
+## 单 RUN emergency 事务 v2 完成独立复验（14:24 UTC）
+
+`runner-quiet-emergency-transaction-v2-candidate` 完成固定 `run_emergency_append`
+组合，交付摘要为
+`7029266abb212a27384f8127c67043122532adeaaf5746079c415b76e261aabc`；
+92 文件、3,553,280 字节归档摘要为
+`ee9eae325e99c24f3ecc1f1bde4094073520ae56662d707e3c54cb1c9d38ade1`。
+运行时摘要为
+`26e786dfadcb09b93ca7567c6ef9251a75bd615799f6664e0a280a19e7052150`。
+
+事务复用固定 B1/B2、完整 codec 和原 emergency 历史校验，核对 RUN root/W/lock、
+完整旧链及 expected sequence/previous SHA；追加后同步文件和 W 目录，再核身份，
+所有已知事务 FD 结束后才生成并比较 ACK。不读取 capsule、head 或 MAIN，不由
+metadata 成功清除 guardian 失败 latch；部分写入及关闭不确定状态保留，失败不重试。
+
+独立审查发现并闭合两项问题。`B3-EMERGENCY-001` 将文件结束后的 ACK 处理异常
+纳入整次尝试的失败及终结状态。`B3-EMERGENCY-002` 证明 v1 可在未登记输入 FD
+的情况下返回关闭完成，部分反例还遗留实际打开的 FD；v2 在纯解码前新增固定 root
+FD 5 和已登记 FD 3/4/5 两项检查，只清理已知归属，不认领或关闭未登记 FD。
+v1 的早期通过结论已被后续审查取代，原 64 文件、归档和七项反例完整保留。
+
+固定 v2 独立重跑 85 项宿主测试与 67 项补充控制通过（既有 53 项及新增 14 项），
+11 项主体质量命令及新审查脚本 Ruff/format 通过；全部候选、历史包与审查包逐项
+核验不变，无新增 Finding。最终独立报告摘要为
+`fed41bcf3d721688e7cfb23761278312993723e843b4429651fbeda244429a1c`。
+137 个建模调用位置的三类异常共 411 次注入已包含在 pytest 中，不另计测试数。
+
+这仅闭合 test-bound 单项宿主组合。输入台账不证明真实 FD 类型或 source 身份，
+EOF 仍为调用者值；实际 worker/C、原生文件系统、共享时限与单调发行尚未验证。
+其余写事务、新 holder MAIN 恢复准入和完整 14 kind 组合仍待完成。未启动 VM、
+未接触目标仓，完整 POSIX gate 仍为 124，implementation_result 仍未具备。
