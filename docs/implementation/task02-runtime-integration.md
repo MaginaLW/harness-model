@@ -779,3 +779,37 @@ CHECK-MAP 的旧报告引用另包单处更正，原 35 文件未改。根核对
 仅有 capsule/pending 摘要时，MAIN root/W 的只读恢复准入另待核定；原 Store 并未
 要求跨 guardian 保留旧 inode，不能伪造这项历史要求。Linux 原生仍未执行，完整
 POSIX gate 仍为 124；目标仓保持只读，实际接单、服务与 CI 阶段均未推进。
+
+## 完整新版事务 codec 完成宿主独立复验（13:41 UTC）
+
+`runner-quiet-io-transaction-values-v2-candidate` 已实现 request/v3、transport/v1、
+pending/v2、写 ACK/v3 与读 ACK/v2 的完整严格编解码。交付摘要为
+`8434a3102d00c4ee9803f253c9f99a2045927bd3e3f9480dbe541dd6fc66b874`；
+67 文件、4,280,320 字节归档摘要为
+`9820315381f9658ced299d0c07ceeae478f7dbd8804c55afeb15d96cdb17df9a`。
+运行时摘要为
+`55216c71fb9b94a9c34e7b5861ce63f52b1932dbfb220cfada116c25d3d3cc4e`，
+原 quiet_core、storage_values、event_shape 三个依赖逐字节不变。
+
+完整 FD3 envelope 的 payload、context、transport 各自承诺与请求共同核对；新版外层及
+嵌套 MAIN request 不投影为旧 schema 后跳过字段。Exchange 保留四段不可变原始字节，
+先终结再验证；直接构造、组件错配、失败 ACK 与取消均不能重用该次 Exchange。
+`eof_complete=True` 仅是调用者的完整 EOF 声明，codec 本身没有观察内核 EOF。
+
+根独立核对全部交付文件与归档，重跑 665 项宿主测试，Ruff/format 通过；另执行
+455 项运行时检查与 177 项完整 pending/最大值检查。覆盖四个 pending 阶段、FD5 与
+MAIN root 的 dev/ino 关联、全重绑后的 nested 新字段类型及 FD alias、创建效果/设备
+与关闭状态、原三项 QTX 回归、39 个 event 分支和完整 128 event core 重放。
+独立报告摘要为
+`02910aa32dee608b63b0c8058ff8748abe53a4f370262aec9939b8d5f6198a6c`。
+
+实际新 codec 的最大值报告逐字节复现，摘要为
+`2623dc19dae8070ba9bbe7524ea1ab63e5a5883b105225d79a7f3b44ed82c0e9`。
+完整 transport/argv 含 NUL/ACK 含 LF/pending 含 LF 为 10,587/3,215/3,016/2,125 字节，
+最大 event 为 3,132 字节；这是闭合 wire 字段域，不证明实际内核身份或该最大历史
+可由 core 产生。所有身份认证、operation、checkpoint、permit、全局 replay 标记仍 false。
+
+固定文件 helper 已修复作者候选中的创建身份缺口，独立审查尚在进行；四类只读文件
+事务进入树外实现准备。完整 14 kind 文件组合、实际 worker/C、单调发行、恢复准入
+与原生集成仍未完成。本阶段未启动 guest、未接触目标仓，完整 POSIX gate 的 124
+失败与目标仓只读交接边界保持；不据纯 codec 结果填报 implementation_result。
