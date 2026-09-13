@@ -734,3 +734,48 @@ root/W 新字段、bootstrap/prepare 的新 W ACK 对象均不在旧闭集内，
 `28d7f802f2dfe8286b66fb5c941ba99035d2b42825d9ca23ebe4c654c3da0887`。
 这说明固定 worker 传输仍需明确的新版设计，不重开纯值协议已修复的问题，也不
 将本层复验算作接线完成。目标仓继续只读；本轮未启动 guest 或执行原生测试。
+
+## 14 kind 文件组合设计与传输修订完成独立审查（13:16 UTC）
+
+`runner-quiet-file-transactions-design-v1-candidate` 已固定 14 类事务的输入来源、
+原检查对应、读写顺序、失败残留与最后 ACK 条件。交付摘要为
+`56b82facaa4ecfe1782c4141e799a1cf602a42a3e2e233ab2a40944bf05de274`；
+35 文件、4,587,520 字节归档摘要为
+`69e7d2941baa7bd32036a8c495ffb6474684c3dbab71a2de404a48f3bcf0e038`。
+这是已审设计及纯测量模型，不是已实现的文件事务或生产 codec。
+
+修订采用 request/v3、transport/v1、pending/v2、写 ACK/v3 与读 ACK/v2。现有单 FD3
+承载完整 payload 与必需父上下文，整个 envelope 共用 64 KiB；payload 自身、完整
+transport、context 的长度或摘要分别绑定。MAIN append/read 补齐父 root/W 身份；
+pending 携带完整 MAIN request，并要求 FD5 的 dev/ino 值与该 MAIN root 一致，实际
+内核 FD 来源仍由 C 验证。仅 bootstrap/prepare 的成功 ACK 返回文件效果摘要与实际
+新 W tuple5 的完整对象；父在实核来源与完整结算后一次接收，失败不能更新 W。
+
+RUN mirror 保持原 2b 的 fresh capsules/head/temp 检查；完整 pending、MAIN request
+与实际结算的关联由父发行前核定，worker 不从摘要展开缺失的 birth/gate 事实。
+emergency 明确保留原仅依赖 RUN、父 lease/armed 与完整 emergency 链的能力，不因
+新加 capsule/head/MAIN 读取而堵死故障记录。允许的 started absence 只来自初始固定
+nofollow stat 的明确 ENOENT；B1 读取已 latch 后不能转换成正常 absence。
+
+独立审查核对全部 35 文件与归档，逐字节复现两份最终报告，执行 20 组正向检查、
+213 个拒绝反例与 39 个 event 分支；作者及独立审查工具 Ruff/format 通过。草稿的
+stale failure-after、outer/nested 新字段漏检、FD5 与 MAIN root 缺关联均保留旧反例，
+并在固定设计模型上关闭。独立报告摘要为
+`4987e60f0ca228be4539b789596e6a97ab3ac95cbaec8bc5e98b4274d0716600`。
+
+闭合字段域内最大完整 transport 为 10,587 字节，argv 含 NUL 为 3,215 字节，ACK
+含 LF 为 3,016 字节，pending 含 LF 为 2,125 字节。最大 event 为 3,132 字节，
+来自 39 个合法 shape 分支的完整枚举；不声称该组合可由真实 core history 或内核
+产生。MAIN/RUN 并存仍共享每 step 的 16 KiB/100 ms，等待期间不刷新原 30+1 秒及
+绝对 deadline。这些字节计算没有证明实际调度或一秒 guardian 循环。
+
+CHECK-MAP 的旧报告引用另包单处更正，原 35 文件未改。根核对精确差分与最终报告
+入口，更正独立回执摘要为
+`5d6073398f2bccafa78625e0faf85ce95e1243ae59bd3a3c47d2aca03f0fa20b`。
+51 个原方法与 162 个选定 AST 节点仅表示机械对应，不是行为覆盖率。
+
+后续实现先补完整新版 codec，并独立准备不依赖该 codec 的固定文件 helper；再验证
+14 kind 组合及 C 的实际 birth/FD/source/EOF/reap、单调发行和共享时限。新 holder
+仅有 capsule/pending 摘要时，MAIN root/W 的只读恢复准入另待核定；原 Store 并未
+要求跨 guardian 保留旧 inode，不能伪造这项历史要求。Linux 原生仍未执行，完整
+POSIX gate 仍为 124；目标仓保持只读，实际接单、服务与 CI 阶段均未推进。
