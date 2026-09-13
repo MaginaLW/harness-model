@@ -5,6 +5,13 @@
 [任务 02 执行目录](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)为准。
 它记录当次已取得的证据和未完成项，不替代 AI Flow 的验证、批准或 Gate。
 
+最新核定（06:51 UTC）：固定 `cd02cb3c` 的原版 root fixture 已由 v9 adapter 在
+真实 Linux 中完成 Dash 与 BusyBox ash 两套执行，均为四个用例通过、退出 0、
+无残留且精确清理完成。独立回读核对原五行输出、两份 FD 目标记录、内核证明和
+原生命令回执。此结果只覆盖该固定源码的 root fixture；完整 POSIX gate、最终
+目标提交、runner 接入与同提交双 lane 仍未完成。下文历史失败和当时待办保留，
+后续结果按版本追加。
+
 ## 版本和权限
 
 本仓通用工具固定于 `01cadafc1b5fc3c56298c79be61895737eefb6a8` 和
@@ -171,3 +178,50 @@ runner 官方包安装在独立有界卷，尚未配置或接单。注册 launch
 静默窗口采集器已越过数组、目录别名和未实例化模板三个实际失败点，当前系统表
 容量不足另行修订；原完整命令回执与每次失败均保留。控制器仍处于设计修订阶段，
 尚未停止账号管理服务、改变默认激活配置或执行官方 configure 合成 canary。
+
+## FD 目标验证与真实双引擎结果
+
+v8 实现保留受限 proc 链接和实际目标的 `O_PATH` 引用，将可重建的 proc 链接 inode
+与目标对象身份分开比较。通用挂载检查、socket 和权限拒绝、原屏障保护及 600 秒
+fixture 期限均保留。独立源码复核绑定完整归档；首轮 Linux 为 304 项通过、1 项
+测试失败：受保护进程在枚举 FD 时已拒绝，测试却要求后续 open 必须发生。原失败
+保留。另一个独立低权限真实对照证明，没有内容读取权限的目标仍能被观察器仅按
+元数据核对，且全部引用释放。
+
+v9 只修正上述测试假设并增加枚举先拒绝的反例。独立复核确认 v8 的全部运行时
+字节及 305 个测试标识保留；真实 Linux 306 项全部通过，无跳过。随后真实
+preauth 完成原内核检查与两份 FD 目标比较，未发放许可，精确实例已清理。
+
+| 证据 | 实际结果 | 验收范围 |
+| --- | --- | --- |
+| `adapter-v8-independent-review-001`、`guest-live-candidate-tests-v8-001` | 固定 v8 实现经源码复核；Linux 304 PASS、1 个测试假设失败 | 不追认失败为全套通过 |
+| `guest-v8-independent-native-test-001` | 内容读取被拒绝的实际低权限目标通过元数据观察及引用释放检查 | 独立单项运行时对照 |
+| `adapter-v9-independent-review-002`、`guest-live-candidate-tests-v9-001` | 只变测试；全部 306 项 Linux 测试通过，无跳过 | 固定候选的完整专项测试 |
+| `guest-live-preauth-v9-001`、`guest-preauth-v9-readback-001` | 原内核检查、两份完整 FD 目标记录和精确清理均通过，未发 permit | 无许可预检 |
+| `guest-root-fixture-v9-dash-001` | 原 Dash 四个用例全部通过，44.347 秒，退出 0，无残留，精确清理完成 | 固定 `cd02cb3c` 的 Dash root fixture |
+| `guest-root-fixture-v9-busybox-001` | 原 BusyBox ash 四个用例全部通过，44.366 秒，退出 0，无残留，精确清理完成 | 同一固定源码的 BusyBox ash root fixture |
+| `guest-fixture-v9-readback-001` | 两次不同 nonce 的完整证明、两份 FD 记录、原五行输出、命令流摘要和清理回执经独立回读一致 | 两套真实执行证据完整；`full_posix_gate=false` |
+
+v7 原拒绝的具体差异原因仍为 unknown；后来的目标身份修订和成功结果不能补写
+原先缺失的第二份记录。两套 fixture 也不能重标为目标仓后续提交或采用后 CI。
+
+## 静默窗口后续盘点
+
+采集器 v5 仅为系统单元表设置固定 512 行上限，其余输出、时间与用户单元上限
+不变；Linux 212 项通过。实际采集随后因 transient 目录时间戳变化拒绝。受控
+只读诊断确认，原 Podman 空列表查询会改变该目录时间戳，目录条目和摘要保持
+一致。v6 将这两项原查询移至第一次激活源盘点之前，保留完整目录元数据一致性
+比较；独立 28 项检查及真实 Linux 228 项通过。
+
+`guest-quiet-collector-v6-collect-001` 首次完成全部只读采集。独立回读绑定原
+428,507 字节记录和 165 条完整原生命令回执，两次激活源盘点与进程身份对一致。
+结果仍为 `COLLECTED_FOR_REVIEW`：pause 的精确命令行规则尚不匹配实际表示，
+默认激活源也仍待内容审查，不能进入静默窗口。固定 Podman 4.9.3 源码及一次
+只读现场对照确认 pause 的进程名与单参数 argv 表示不同；其他可执行文件、
+进程名、namespace 和 pidfile 绑定均保留，后续修订不得以宽泛前缀匹配替代。
+
+控制器 revision003 的剩余三项设计 Finding 已由原审查者关闭，31 项来源和
+独立算术检查完成。新的纯校验核心 v1 作者测试 131 项通过，尚待独立实现审查；
+它只检查输入事件和双时钟预算，不认证输入来源，也没有服务、进程或许可执行
+能力。真实 guardian、持久化、Job 生命周期、无 canary 恢复演练及原版 canary
+仍待实现和验证。未停止用户管理服务、修改默认激活配置或注册 Linux runner。
