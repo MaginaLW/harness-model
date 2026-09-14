@@ -2420,3 +2420,39 @@ HEAD/clean 另经读回确认，未重跑或改写原结果。两项缺陷的四
 阶段 47 快照及新 CLI；三份既有未跟踪计划保持原状。阶段 40 PARTIAL、Linux 实际
 准入及任务 02 剩余验收未关闭，
 未填 implementation_result，TASK-0048 继续 IMPLEMENTING。目标仍按用户要求只读候选。
+
+## 专用 Linux guest 获准启动与当前身份核查
+
+阶段 49 在用户明确回复“允许启动”后执行阶段 48 提案的第一步：启动既有专用
+guest，并只读核查当前身份。该回复未扩展为 native 测试、目标写入、runner 注册、
+CI、服务切换或宿主重启；原私有目标继续只读。启动本身写 guest 盘，已如实记录。
+
+启动器绑定原封存请求、QEMU/kernel/initrd/seed 摘要及新日志/PID 路径。实际 qcow2
+元数据揭示该增量盘仍依赖原基础镜像，故补核真实 backing 路径、原下载 SHA256 与
+无更深 backing。两盘以独占读句柄取得当次摘要，增量盘原 size/mtime 未变；这只是
+启动前占用采样，不称持久所有权。qemu-img check 未请求 repair，返回 0 且 check-errors
+为 0。不同实现者只读审查启动器和 host preflight 后未发现本限定动作需修订的问题。
+
+第二次核查确认无 QEMU/端口冲突、可用内存满足预备值，按原参数隐藏启动。初次 SSH
+探测在 guest 启动中发生 banner 超时，失败保留且未重启；第二次严格 host-key 探测
+退出 0。随后核对当前 QEMU PID/创建时间/路径及回环端口归属，通过既有专用 SSH 身份
+运行固定摘要的只读 inventory。Python 使用 -I -S -B；未读取或显示私钥内容。
+
+实际 inventory 退出 0、stderr 空、采集 errors 为空，耗时约 0.487 秒。新 boot 身份、
+Ubuntu 24.04.5 LTS、Python 3.12.3、dash 0.5.12、BusyBox 1.36.1、Podman 4.9.3 和
+crun 1.14.1 均已采样。ci-runner 本地 UID/GID 为 1001，只列 users/ci-runner 组；
+未检查 sudoers/NSS 或以该身份验证有效权限，不能认定低权限 runner 已验收。
+
+采集进程实际为 root、单线程，FD8 前后不存在；PID 不等于 PGID，且与 PID1 共用
+所列 namespace，根挂载为 rw ext4，NoNewPrivs/Seccomp 为 0，session cgroup 限额
+为 max。这是 guest 管理环境的观察；Python isolated 模式不等于 OS 沙箱，也不能
+将此次采样代入未来要求 PID=PGID 的 FD8 fixture。查询范围内仅见既有 network guard
+服务 active/exited，未返回已加载的 Linux runner unit；未核定全部注册和 activation。
+
+前后 Windows runner 服务字段一致，最后观察 VM 与回环监听仍存活。新增工具完成
+完整静态质量检查；inventory 作者只读核对实际输出与 SSH 回执，确认上述边界，未
+重跑采集或新增行为测试。树外 guest-start-identity-001 复制有限执行证据并封存；
+仍会变化的 serial/stdout/stderr/PID 仅保存当次样本，不把活动进程日志伪装成最终日志。
+阶段 49 快照绑定实际文档提交、封存包及阶段 48 快照；旧文件与三份未跟踪计划保留。
+13 项 native 仍为准备完成、执行 0；完整隔离、原 root fixture、runner/CI、服务恢复、
+宿主重启业务及其他原验收项尚未关闭，未填 implementation_result，任务 02 未完成。
