@@ -2077,3 +2077,79 @@ ACK/退出收束、PreparedSourceImage、CompleteDataRead、Linux/runner/CI、�
 重启仍未完成。独立审查者未实现本批两份 runtime，但曾实现部分旧依赖；没有重验
 全部历史内核或恢复阶段 40 实验。目标仓仍只读，未运行新的全仓 Gate，未填
 implementation_result；TASK-0048 继续 IMPLEMENTING。
+
+## 共享 pump v2 与 Linux fixture 源码准备
+
+阶段 44 新增树外 shared pump v2，接入阶段 43 原 ParentStepBudget；原 pump、预算与
+READY collector 冻结包不变。新 pump 为 22,964 字节，摘要
+`4f3b08cfc2c7742d83df5b88bbbd8c67545ed3c683b6d3104cf3bfb2f5eeca20`。
+输入初始 WAITING，保持输入管道；父用同一未结束预算明确 release 一次，保留原 bytes
+引用，不在步骤外复制 64 KiB。明确 release 空 bytes 与尚未 release 分开；这不改变
+业务 DATA 必须为 1..65536 字节的约束。模型 fixture setup 仍不证明生产 birth。
+
+两个 pump 与原 READY collector 在同一普通步骤合计传输 16,384 字节，共用一次父
+finish_step；共享时间超额控制使公共预算失败。零余额不 read(0)，实际读写返回先
+charge。原 child execution/complete 截止仍独立检查，不以更宽父截止延长。组件不
+自行结束预算。输出在父 tail 前固定为 immutable bytes，成功 tail 后只返回原引用，
+并继续核原 child/settle 截止；这是 opaque transport，未提供 ACK 接受或 DATA 准入。
+
+当前 FAILED 步骤只做有限的已知管道关闭。随后合法 OPEN 步骤可推进原失败任务的
+收束，必须接续上一实际 tail 与同一父 deadline 引用。首次接入合法预算的异常（包括
+abort/release 失败）立即以原预算 last_clock 固定保守的最多一秒 settle 截止，并受原
+complete 截止限制；后续步骤不续期。此结论限定为 _record 异常路径；根汇总 REVIEW.md
+中的 first legal failure 按此限定，普通 _fail(reason) 仍在随后的 _enter_settle 取时。
+owner、close、signal 或 reap 不明仍保留不明，不靠数字句柄重试冒充已清理。
+
+本批四项普通模型 Finding 均保留修复前实际报告，并完成独立修复复验：
+
+- SHARED-PUMP-001/P2：草稿 512e 允许超过 child execution 截止后 release，及前一次
+  read 跨截止后继续写 4 字节。最终迟到 release 保持 WAITING，跨截止后不写，只计已
+  实际读到的 13 字节。
+- SHARED-PUMP-002/P3：同一草稿首次迟到 tail snapshot 暂报空 failure，内部已记录
+  settle_deadline；输出原已拒绝。最终首个 snapshot 字段一致，tail 后取值无 I/O。
+- SHARED-PUMP-003/P2：c0c 将首次 settle 初始化推迟到下一步骤。最终 abort/release
+  在 (10,20) 失败即固定 (1000000010,1000000020)，后一步及实际 tail=(200,300) 不续期。
+- SHARED-PUMP-004/P2：作者控制发现 2e97 可能用 owner 观察的 KeyboardInterrupt
+  覆盖父已有 OSError。最终 abort/step、budget 和 tail 均保留原首因；owner 不明时
+  三个管道角色仍未关闭，没有用强制关闭伪造成功。
+
+作者 run-005 的 86 项模型测试通过；独立 32 项分为 25 项普通组合、3 项原 child 截止/
+snapshot、2 项首次 settle、2 项父首因控制。最初两项 smoke 已包含在 25 项内，旧轮次、
+trace、源码映射和质量复验不累加。最终独立 binding 为 6,137 字节，摘要
+`21c686936da26b40889fcafa7da7ce0ae2e394120f311673ee1417f279c5d1b5`。
+作者最终 10 份 Python 源、独立 11 个工具、根 3 个工具及快照 helper 均通过完整
+Ruff E,F,I,UP,B,SIM 与 format；实际 runtime 以 py312 静态目标检查。根逐项核实际
+JUnit、四组前后报告和来源绑定，未新增行为测试。原 pump 的前置类/函数 AST 不变，
+新 Pump AST 与提交模板一致；这些检查不构成整个历史内核的重新独立验收。
+
+另准备 15 项 Linux fixture 源码：适配原 13 项，新增等待后 release 与两个 pump 共用
+父预算两项。源码 16,122 字节，摘要
+`4a7d6e4f4b05a312b873286bab9a058806ad98763b33d10569991cdd593f7298`。
+七个原 helper/test 定义 AST 保持一致；stdin-closed 负例明确保留 BrokenPipeError 与
+失败 tail，再用合法 OPEN 步骤和原 settle tuple 等待 pump 自身证明 reap。wrapper
+清理本身不能使该断言通过。该接口修正仅经源码复核，没有 native 行为结果。
+
+15 项由 AST 中的 literal 参数表计数，未 import、collect 或执行，也未把 Windows
+SKIP 计为通过。最终四个准备工具与实际 fixture 完整质量检查通过。三成员 native
+bundle 仅包含上述新 pump、原 edbc 预算和 fixture；归档 51,200 字节，摘要
+`d5edb433aa88c35698e262d5ff3d7452dcae31824eead49cba445a525cb11eb5`，已逐成员回读。
+原 dummy READY 行只是测试 setup，未验证新的 native collector 或生产 birth。
+
+| 交付包 | 最终 manifest/delivery SHA256 | 文件数 / 归档字节数 |
+| --- | --- | --- |
+| Shared pump v2 | `2376cf390d452f8a8aebac03bb9736173a7290f2f6914b476ab584a4fbde2bbd` | 77 / 1,228,800 |
+| Native fixture v2 准备 | `77a44a046bd1cc9c7f46641db2b1e37b22f366aeaaaa9a3edf7e11a2ce077674` | 111 / 542,720 |
+| 独立普通集成审查 | `9762d79466b2355b6856478f51db08aa9d757544df3d917b61c6963ef743601e` | 232 / 2,058,240 |
+| 根证据汇总 | `606e4b02b3144bf24388ae5c98ea85359e6110892f6536b8f066a1722b8855fd` | 39 / 399,360 |
+
+四包列项文件与归档成员均完整回读，失败尝试及原源码快照保留。自动审批曾拒绝删除
+本轮 pump 的 Ruff cache，仅返回 blocked by policy；未换工具重试，三份缓存留在
+本地并明确排除于交付文件和归档，未读取内容。未读取或哈希旧 host-tests-001.xml。
+阶段 44 快照绑定本节实际提交、四份清单、阶段 43 快照与新 CLI 状态；要求 tracked
+文件与 HEAD 一致，既有三份未跟踪计划仅如实记录。
+
+本批仍在 Windows Python 3.11.9 的固定 fake I/O/时钟模型内，未触及目标仓或 Linux。
+实际 ParentBirthSlot、完整父调度器、post-exec/source 比对、pending/DATA 准入、完整
+child、PreparedSourceImage、CompleteDataRead、Linux 门禁、runner/CI、服务恢复与
+重启均未完成。旧 source-image preparer 未改指新前缀，阶段 40 PARTIAL 未关闭。
+未运行新的全仓 Gate，未填 implementation_result；TASK-0048 继续 IMPLEMENTING。
