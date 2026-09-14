@@ -2866,3 +2866,83 @@ WHPX 最终探针 14,069 字节，摘要
 POSIX 的退出 124 不变；TASK-0048 仍为 IMPLEMENTING、Missing implementation_result。
 下一步先核 CPU 兼容与停机前材料保留，再准备受控 guest 切换；未完成这些前置前，
 不把初始化成功当作新 Linux 环境或任务 02 验收完成。
+
+## WHPX 实际启动与阶段 57 收尾
+
+阶段 57 在既有传输与执行授权内推进：两名 sub-agent 分别准备 CPU/保留材料与
+冷启动方案并交叉审查；主会话依赖前置结果，串行完成有限保留、正常关机、冷备份、
+镜像检查和新启动。随后用户要求在最近节点收尾，本轮停在新 guest 启动及首次严格
+SSH 身份确认，不再启动后续 fixture。收尾由一名 sub-agent 封存材料，主会话记录
+待办和提交；这些工作相互独立，提交快照依赖封存和文档提交完成。
+
+使用 `-cpu host` 的无盘 WHPX 探针退出 0、0.187 秒，QMP 确认 host CPU 模型、
+暂停状态和正常 quit；stderr 保留同一 interrupt vector 0 警告。随后旧 guest 的
+观察确认 store/evidence 是持久 ext4 loop 卷，其 backing 位于系统盘；runtime
+为 64 MiB tmpfs。有限树共 17 项，其中 9 个常规文件总计 66 字节，均完整保留并
+回读，另 8 项是目录。两次元数据一致，但不证明整个 guest 或内核状态已保存，
+也不将锁文件字节视为锁状态。新 boot 不自动恢复旧 PID、锁或运行目录内容。
+
+在固定原 host/boot、重新观察原四个低 UID 基础设施进程及六项查询，并核定
+systemctl 字节后，仅发送一次正常 poweroff。SSH 与 systemctl 均退出 0；最终
+观察原 QEMU 与 listener 消失，串口到达 Power down，未强制终止。旧 QEMU 原生
+退出码仍为 null，未将进程消失改写为退出 0。关机终端记录摘要
+`3e57faa10db2afeb470d2df0cd22d82f85615249c8494b9b689679c6980882d0`。
+
+停机后以独占源句柄复制恢复磁盘，目标 CreateNew，源元数据前后稳定，目标完整
+回读与另行独立复核一致：4,783,931,392 字节，摘要
+`8e57f62e82a936e004175b85b7ecd6a4f4a428ae1d62c24a98644af1f301a62d`。
+恢复副本位于树外 `vm/recovery/stage57-before-whpx/`，没有执行恢复。原磁盘的
+两层 backing chain 与无修复参数的 qemu-img check 均退出 0，无已报错误、损坏
+或泄漏；固定基础盘、QEMU、kernel/initrd/seed 的摘要核验通过。独占冷读取句柄
+释放后到 QEMU 打开之间不宣称原子交接。启动后不再读取或 hash 运行中的原磁盘。
+
+新启动明确选择 q35、WHPX、cpu host、2 vCPU、4096 MiB，保留原 kernel/initrd、
+seed、系统盘和 noapic 参数，无 TCG 回退，未重启 host 或更改 Windows 功能。
+启动记录摘要 `e7e4295b2a7f52444cea657a842c6658377cd042688d1b20df1227d7df0d551e`。
+初始三秒日志为空不能解释为启动停滞；后续串口到达 cloud-init 完成和登录提示。
+首次严格 SSH **退出 0、0.656 秒**，stdout 242 字节，确认新 boot、原 Linux
+6.8.0-139-generic、x86_64 和两个在线 CPU；stdout 摘要
+`3d0c24ae64122d9bd1bf58f4697d8f88ebc8cf429e9213b0752efc9bf2aae405`。
+该查询使用 provisioning UID1000，不能替代 UID1001、sudo、挂载、源码或完整运行
+合同准入。收尾仅复核新 QEMU 原身份仍在，guest 保持运行，未再发起测试或重启。
+
+保留本轮过程缺陷：runtime 保留运输初次 Ruff E501/format 未通过，但后续命令仍
+执行了只读观察；实际源码留存，随后仅格式化并通过检查，前后 AST 一致。不得称
+该次执行前格式检查通过，也未重跑以替换原记录。冷启动独立复核曾把多 JSON
+观察记录误按单 JSON 解析，修正解析后核验通过；这不是原生执行失败。树外启动
+目录中名为 `%SystemDrive%` 的未知目录保留，未遍历或判定成因；封存排除它。
+运行中的 QEMU 日志只保存当时有限字节，不声称 EOF 或最终状态。旧禁止读取的
+XML 未读，三份既有未跟踪计划保留；目标仓、runner 服务和 CI 仍只读。
+
+### 后续待办与恢复顺序
+
+树外 `tools/stage57-handoff/NEXT-STEP.md` 是本节点恢复入口，记录新 PID/创建时间/
+boot、实际证据位置、恢复副本与原工具摘要。恢复时先重查身份，不能沿用旧 host
+guard，也不能直接重放本轮关机或冷启动脚本。按以下依赖继续：
+
+1. 串行重核 Git、最新阶段快照和 TASK-0048，再核当前 host/SSH/boot，最小派生
+   新绑定的 guard，保留全部身份断言。未知或变化先核定，不以历史状态代替当前值。
+2. 串行核新 boot 的 UID1001、组、sudo 禁止策略及三个独立挂载合同。fresh tmpfs
+   如缺已知 runroot/tmp 子目录，只在合同成立后按原所有权/权限创建；不恢复旧锁。
+3. 此时可用一名 sub-agent 并行只读审查请求与固定 source/runtime/v10/image/policy
+   摘要，主会话处理 readiness；执行仍串行。通过后先运行原 v3 verify-source，
+   再运行原 current-state fixture 单项，保留 **600 秒、kill-after 30 秒**、全部
+   原断言、原始双流、真实退出和完成 marker。若仍超时，按阶段 55 NEXT-STEP 准备
+   非验收的最小逐 case 观测副本，不延时、不删检查。
+4. 只有原单项通过，才开始一次未缩减完整 POSIX gate：fresh root 组件、所有检查
+   和 source-before/after，保留原 step/job 预算，不拼接历史 PASS。随后补齐必要
+   本仓质量验证及真实实施结果，按 CLI 当前输出推进账本。
+5. r3s-VPS 的并发处理交接仍待完成；目标仓继续只读候选。runner 注册、服务切换、
+   CI 触发、push 和采纳尚未执行，实际接入及任务 02 最终验收仍在后续范围。
+
+本轮未重跑本仓完整测试。阶段 55 完整 POSIX **退出 124** 不变，TASK-0048 仍为
+**IMPLEMENTING、Missing implementation_result**；用户要求的预算收尾不代表任务
+完成或技术阻塞，不补写成功结果，也不创建自动续跑。
+
+树外 `whpx-boot-001` 封存 200 文件，manifest 摘要
+`f917615c0d835efff4bdf1a8e5c1ac82ecb2da9ca65d82533c11f9f03f9a642a`；
+归档 819,200 字节，摘要
+`dde290db2228f684f6ade79fc57810d4f8fda41cf867cc490138b7aff31a16b8`，完整回读通过。
+恢复入口 NEXT-STEP 摘要
+`347bbe4cd341f8e0e1bad4aa54b25dadb49a53ce5dd16e8adfbfe12c715b5fbd`。
+阶段 57 快照绑定本次文档提交、封存包和阶段 56 快照；本轮只有该文档追加入库。
