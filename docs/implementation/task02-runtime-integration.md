@@ -2367,3 +2367,56 @@ HEAD 一致，三份原未跟踪计划保持原状。最终源码仅提供原 be
 post-exec/source/完整 FD 表、DATA 准入、完整 child、PreparedSourceImage、CompleteDataRead、
 G3 与 Linux/runner/CI/服务恢复/重启均未完成。目标仓仍只读，阶段 40 PARTIAL 不变，
 未运行新的全仓 Gate、未填 implementation_result；TASK-0048 继续 IMPLEMENTING。
+
+## 最小执行路径核对与 Linux native 准备收束
+
+阶段 48 对照原任务 02 建议稿、实施计划、TASK-0048 spec、阶段 47 记录及后续 C–F
+计划，重新核对剩余范围。原目标仍是一个可信私有试点；完整 Linux 隔离、原 dash/ash
+600 秒四用例/五行、真实 runner/job/checkout、采用与采用后 CI、服务恢复及重启业务
+证据均未完成。后续 C/E/F/G3 是已选实现路径的义务，不能据其设计文件将所有大型模块
+完成推成小规模平台实测的前置条件，也不能删去原准入要求。下一有限步骤收束为确定
+专用 guest 的当前身份及已有 native 测试，不再为累计模型 PASS 扩展新的框架候选。
+
+本仓固定提交 `e7fbe4d67bc4220d2eec54d7ea28a36c719699fd` 的独立干净 Windows
+检出完成九项质量命令：锁文件、锁定安装、105 项合同检查、1,945 项完整测试、diff
+coverage、whitespace、Ruff、format、mypy 全部退出 0，测试无失败或跳过。总覆盖率
+88.12%，保留 branch 测量与 85% 阈值。diff-cover 保持 90% 阈值，对固定 base
+`f633c036cc2a0394f7b1efb20efe4d91ba944255` 报告无可计量变更行，不声称数值达到
+90%。最终 HEAD 未变且检出干净；根逐命令日志摘要及 JUnit 计数读回通过。完整测试
+815.78 秒，未延长原 1200 秒命令限额。该结果属于此次文档提交之前的固定源码和
+Windows 环境，不是托管 Ubuntu CI、Linux fixture、正式 AI Flow Gate 或实现完成。
+
+新的只读采样显示私有目标当前 main 的 Windows job 七步骤成功，POSIX job 仍为
+零步骤失败；返回的原 Windows runner 在线且空闲。主机没有原 QEMU 或预期 SSH
+监听，原 PID 已不存在；Windows runner 服务运行，其进程路径本地不可读，身份仍
+unknown。分页、瞬时采样不证明所有实例状态、持续空闲或并行写者交接。首次 Windows
+PowerShell 5.1 采集被执行策略拒绝，失败保留；改用已配置的 PowerShell 7 完成采集，
+没有改变或绕过执行策略。未读取目标工作树、启动 VM、连接 guest 或改变服务。
+
+另封存固定 source preparer v2 的四项 Linux native 测试源码：完整 memfd 准备、
+只读写入拒绝、开始前已过期、取得 writer 后再次 begin 拒绝并关闭。实际读回、EOF、
+SHA、offset、metadata/seals 和已知关闭是未来测试的断言；只读写入 EBADF 只证明
+访问方向，不能独立证明 F_SEAL_WRITE。root 控制面 fixture 的真实/有效 UID/GID
+要求均为 0，不能作为低权限 runner 验收。嵌入的固定 prefix 只作数据，不执行。
+fixture 清理和组件自身关闭分开，UNKNOWN 不按数字重试；setup 截止不是原生产预算。
+
+新包 43 文件，delivery 摘要
+`ba52ed97f812d4ee42ef7030f8ff9b08c345bd88291cc84d201e761f95f8a340`；归档
+5,079,040 字节，摘要 `1704a5df585d6a024a9605852170efe8ba04907056ef065041416e0e98dfe3d3`。
+根完整回读新包和阶段 47 的 FD8 包全部文件/归档；三成员 memfd bundle 与七成员
+FD8 bundle 分别固定，合计 13 项仅准备，0 import/collect/execute。新 fixture 与
+实际 runtime 静态质量通过，首次工具 format 失败保留；这些不是 native 行为证据。
+
+树外 `completion-path-audit-001/NEXT-NATIVE-ENTRY.md` 与数据型入口请求固定下一
+阶段：使用专用 guest、现有严格 SSH 身份策略和全新日志/PID/回执路径，先启动后做
+只读身份核查；启动本身会写 guest 盘，明确不称只读动作。旧盘摘要和新 boot 身份
+仍 unknown，执行前须重核输入、占用和现场条件。该提案未包含 native 执行、目标写入、
+runner 注册、CI 触发、服务切换或宿主重启，也没有从当前空闲采样推导权限。
+
+本轮独立审查发现质量工具最终 HEAD/clean 原先未参与成功条件，及采集工具超时可能
+漏存部分输出/其他 GET。已修订未来工具并保存旧执行源码；本轮原质量报告的实际
+HEAD/clean 另经读回确认，未重跑或改写原结果。两项缺陷的四个反例经合成控制复现，修订后
+14 项控制通过，不接触网络或 guest。阶段 48 快照绑定本节实际提交、审计清单、
+阶段 47 快照及新 CLI；三份既有未跟踪计划保持原状。阶段 40 PARTIAL、Linux 实际
+准入及任务 02 剩余验收未关闭，
+未填 implementation_result，TASK-0048 继续 IMPLEMENTING。目标仍按用户要求只读候选。
