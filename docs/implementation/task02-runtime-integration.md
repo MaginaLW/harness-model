@@ -2456,3 +2456,44 @@ crun 1.14.1 均已采样。ci-runner 本地 UID/GID 为 1001，只列 users/ci-r
 阶段 49 快照绑定实际文档提交、封存包及阶段 48 快照；旧文件与三份未跟踪计划保留。
 13 项 native 仍为准备完成、执行 0；完整隔离、原 root fixture、runner/CI、服务恢复、
 宿主重启业务及其他原验收项尚未关闭，未填 implementation_result，任务 02 未完成。
+
+## Linux native 测试入口准备与封存
+
+阶段 50 延续已获准的只读核查，实际 profile 退出 0：guest 仍为阶段 49 的同次启动，
+kernel 为 6.8.0-139-generic、Python 为 3.12.3，发行版元数据显示 pytest 7.4.4；
+拟用的新输入和证据目录当时均不存在。该请求只读取身份、目录及文件元数据，未导入
+pytest。五个发行版文件摘要仅固定这些文件，不认证整个 pytest 安装，也不保证未来
+目录仍空闲。本阶段没有上传文件或写入 guest，原目标、runner 服务和 CI 继续只读。
+
+为原有九项 pipe/FD8 和四项 memfd 诊断准备固定入口。入口要求 root UID/GID、
+单线程、PID=PGID、指定 boot 身份与 FD8 空闲，并在 collection 和各 test setup
+重新检查；使用隔离 Python、干净的三个环境变量、固定参数及受限 pytest 插件。
+关闭默认捕获、缓存、logging、faulthandler 和 JUnit，避免入口额外占用 FD8。
+只有精确收集全部 13 项、13 项 call 均通过、所有报告阶段通过且退出 0 才能记录通过；
+skip、缺项、失败和超时均不能折算为通过。上述均是待执行入口的检查逻辑。
+
+诊断 supervisor 为子进程建立独立 session，限制日志并设置 120 秒软件预算；在回收
+直接子进程前完成原进程组操作。保留 zombie 的组存在观察不证明后代已全部清零，
+也未增加完整 cgroup/resource 隔离或生产 parent 预算。未来判定必须同时核对实际
+supervisor 退出 0、其通过回执以及全部 pytest 结果；该入口不是生产 guardian 验收。
+
+本地重新完整校验两份原 delivery，十个原测试输入未改变。新包为 2,631,680 字节，
+摘要 `7ec308e056d6b4fbc2eba706cc21ab8a626d875dbfce96603682e9f6506f5120`；
+清单摘要 `36b08222241d477b23e5b6a58a9acb132b38f7f6dfe53d024eb8e13e19bd2bed`
+必须由 host 独立传入，不能从 guest 清单自行推导预期值。清单固定 12 文件闭集，
+归档另含清单共 13 个普通成员；成员数量不作为测试运行数量。独立审查确认此前发现的
+外部摘要绑定与 pytest 环境问题已落实，且所有归档成员和最终入口逐字节一致。
+
+树外 native-entry-preparation-001 封存 52 文件，manifest 摘要
+`2970f6676c28301894ce00639dd02a6ab33daa638a70c6b2ebf25f9160cfea70`；
+归档 5,355,520 字节，摘要
+`f084aa7aa30b0c2269e646714033da10920c922cf315e67d98a40fdb6b09759c`。
+五个新增工具的十项最终静态检查通过，封存内容与归档完整回读通过；初始格式/静态
+问题及修订记录保留。真实 profile 的原始请求和结果单独保存，未改写为后续源码。
+本仓只追加本文档，沿用阶段 48 完整质量基线，不将文档静态检查称为新的完整测试。
+阶段 50 快照绑定实际提交、封存包、阶段 49 快照和 CLI 状态，三份既有未跟踪计划保留。
+
+执行这 13 项测试的授权问题仍待用户答复；“允许启动”未扩展为 native 执行。
+本阶段 native import/collect/execute 均为 0，尚未实现或执行传输安装步骤，未来须先
+重新核对身份和目录占用。未填 implementation_result，TASK-0048 继续 IMPLEMENTING，
+原隔离、root fixture、runner/CI、服务恢复与宿主重启等剩余验收继续未关闭。
