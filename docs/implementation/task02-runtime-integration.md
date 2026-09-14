@@ -2635,3 +2635,79 @@ Windows 功能或重启 VM。该查询可说明 API 报告的能力，不能替�
 阶段 53 快照绑定本次文档提交、封存包及阶段 52 快照。三份既有未跟踪计划保留，
 TASK-0048 继续 IMPLEMENTING，未填
 implementation_result；任务 02 未完成。
+
+## v10 就绪握手、Linux 全测试及两条 root fixture 实际通过
+
+阶段 54 按已批准的传输与执行范围，完成最小可信 READY 握手。并行准备使用两名
+sub-agent，分别负责发布端与接收端实现、测试和交叉审查；主会话负责固定交付包、
+运输、镜像及配置。固定来源后，安装、Linux 测试、镜像构建、配置、工具语义、
+preauth、Dash、BusyBox 及各自回收严格串行；最终再并行独立回读与下一入口差异定位。
+目标仓、runner 服务和 CI 继续只读，未注册、切换、推送或触发。
+
+发布端在初始化后，以 0600 独占临时文件完成写入和已知关闭，再原子发布六字段
+`ready.json`。接收端通过固定 procroot 路径读取，核单链接普通文件、UID/GID、
+大小、完整 EOF、稳定身份、engine/nonce/start_tick，并先关闭自己的临时 FD。
+只有 READY 完成后才进入原两次内核/FD 观察；tick 与两次观察相同，原 guard 关闭、
+同一 READY 再核后才可 permit。preauth 仍不发 permit。原 20 秒启动窗口、屏障
+60 秒及 fixture 600 秒预算不重置、不提高；FD 变化仍拒绝。新增 READY 不替代原
+source/interpreter、namespace、mount、cgroup、seccomp 或清理证明。
+
+本机完整 suite 为 358 PASS、16 项 Linux 专用 SKIP。最后一处测试输入路径改为
+包内固定旧源，仅复核受影响的 AST 单项；此前全套记录仍绑定当时字节。最终冻结包
+23 文件、317,440 字节，归档摘要
+`87b36caa95aa650a7e73d8b3cec3a6f441783a40e54332eeab3bc985dc2be1ee`。
+guest 安装全量核对后，以 UID/GID 1001 实际运行全部 374 项，11.62 秒，零失败、
+零错误、零跳过。完整 XML 57,350 字节，摘要
+`c4f557d960f1d3bdc592078d6e84d11ba72f62e186ba26fe06b8934d71eebdb1`；
+独立核对测试 nodeid 无缺项、重复或额外项。本机跳过未被算作 Linux 成功。
+
+首次构建前的 image inspect 因继承 SSH 的不可访问工作目录而被拒绝，尚未启动
+build。保留该失败及已写的新 context；第二次使用独占新 context，固定所有相关
+子进程 cwd，实际构建成功。镜像仅从固定 v4 增加新 barrier COPY，无 RUN、安装、
+联网拉取或入口改变。新 image ID 为
+`sha256:552f8d5d1af5f07bf08f64e6d7770441f2cbdb8ade489893222d0c198da5cd50`；
+新屏障摘要为 `1305cf24f8cdbb057c14716739553188cfc5f25ef6361c9a65ee5a3b52a0a36e`。
+新配置只改变 image_id/barrier_sha256，摘要
+`106f1023101837d9d1d881141c5742ea89aeb373560545bb9072018d7955f22c`。
+原 source、v9、配置和失败回执均保留。
+
+镜像内实读 barrier 为 root 所有、普通文件、0444、10,525 字节，内容摘要匹配。
+原工具语义脚本仅迁移唯一旧 barrier 输入摘要，规范化 AST 与原全部检查相同；
+执行源码摘要为 `a679be45c2711cad148d7b1ebd1dd83c6ec442115af6de95edc428ce8f58cf69`。
+原 38 项由 UID/GID 1001 的 rootless Podman 启动，在容器 UID 0、无网、只读 root、
+默认 seccomp 和空 hooks 条件下全部 MATCH；
+总 120 秒、单项 10 秒、attach 145 秒保持，330 秒运输外围容纳既有准备及精确清理。
+这项是工具语义检查，不计为业务 fixture 或完整 POSIX Gate。
+
+| 当前 v10 执行 | 实际结果 | 输出与清理 |
+| --- | --- | --- |
+| preauth-001 | PREAUTH_PROOF_COMPLETE；两次 FD/内核准入通过 | 无 permit、无 fixture；attach 125、drain 完成、精确 CID 清理 |
+| Dash-001 | PASS；27.626 秒；fixture/attach 退出 0 | 原四用例、205 字节五行；无超时、溢出、残留，清理完成 |
+| BusyBox-001 | PASS；28.240 秒；fixture/attach 退出 0 | 原四用例、205 字节五行；无超时、溢出、残留，清理完成 |
+
+三次 READY 分别为 159/159/166 字节，0600、UID/GID 1001；每次 nonce/start_tick
+与当次内核及两份 FD 记录绑定。两次 FD 集合均为 0/1/2，原比较通过；未忽略旧 FD 3，
+未覆盖阶段 53 BusyBox 拒绝，也未把此次成功当作完整启动竞态的唯一因果证明。
+每次仍只保存一份完整内核观察及两份 FD 记录，另加原 READY 和读取元数据。
+语义、preauth、Dash、BusyBox 分别回收 22/45/49/46 文件，共 162 文件、471,369
+字节。完整集合、长度/SHA、真实 EOF/stable、各命令两流、结果和清理链已由主核验
+复核；主核验结果摘要
+`37b500d6314bb9c0852ca227289c891f7573b732b7c064c73fc7163165116a89`。
+
+17 份运输、准备及核验 Python 工具及新增封存修订完整 Ruff/format 通过；运行源码 suite 和
+新增握手反例在上述 Linux 374 项中验证。未为文档追加重跑本仓全部质量矩阵，也不
+将树外 suite 当成本仓覆盖率或完整 POSIX Gate。下一步是将原完整本地入口绑定到
+固定 v10，再按原检查和预算取得新完整回执。原完整 POSIX 超时、受控 runner/job/
+attempt、目标采用及后续 CI、真实服务恢复和执行宿主重启业务仍未关闭；TASK-0048
+保持 IMPLEMENTING、Missing implementation_result，任务 02 未完成。
+
+独立实际复核无新增阻断，报告摘要
+`5a1600882af8cfeb0a70b8c5480f2b187e16c4348ddd1ad0920888334248e799`。
+首次封存遇到 pytest scratch 的 current 目录链接而停止，未生成 manifest；保留
+部分目录和失败说明。新封存仅排除三个明确的 pytest tmp 目录，源码、测试定义、
+原版本输入、源快照、JUnit、两流、审查和全部实际 guest 证据保留，未跟随链接。
+v10-barrier-ready-002 共 407 文件；manifest 摘要
+`a14cfbafcaf12f005ede18b41d67e887277e1aefaa46613f20fd3cea44fba954`，
+归档 5,048,320 字节，摘要
+`5257df329eb4adca2d7f769904cd620f4746dae2a792b7c53c367216e1c12be1`，完整回读通过。
+阶段 54 快照绑定该封存包、本次文档提交及阶段 53 快照；三份既有未跟踪计划保持。
