@@ -2300,3 +2300,70 @@ post-exec/source、pending/DATA 准入、完整 child、PreparedSourceImage、Co
 G3 与 Linux 实际验收仍未完成。旧 source-image preparer 未改指新前缀，阶段 40
 PARTIAL 未关闭。未运行新的全仓 Gate、未填 implementation_result；TASK-0048
 继续 IMPLEMENTING，不能据本批普通模型结果认定任务 02 完成。
+
+## 当前入口的源码准备器对齐与 FD8 native 测试准备
+
+阶段 47 另建 source-image preparer v2，封装阶段 42/46 已固定的 770,814 字节入口
+prefix，摘要仍为 `5ae8197f786e7a1af5d10e8ba7a41214e0556d207f4ea90a94b13da476ec65d2`。
+旧 v1 及其 992e 前缀不变。新生成源码 1,679,942 字节，摘要
+`0fcb173aca2a4c013888c4b0a421450a0932be80294c6e8b90b41c6a9b38f948`。
+嵌入入口只作为固定数据写入/读回普通模型文件，本轮不执行其中程序。
+
+根完整回读旧 preparer 的 108 文件/归档和当前 assembler 的 150 文件/归档，选取
+六份输入。新模板仅改变 globals、_borrow、begin 三处固定 size 和三处固定 SHA；
+旧 SOURCE-PREPARE-001 的字面量重核仍保留。生成器在每次构建重新核两份 delivery
+固定摘要、选中文件、prefix/index/build receipt 及旧模板/运行源码的固定摘要。
+独立解码唯一 bytes.fromhex 赋值，核原/新嵌入字节，再移除该赋值并归一六个常量，
+旧/新模板及旧/新生成源码四份算法 AST 完全相同。两次构建字节一致；最终加强输入
+绑定的生成器再次双构建，输出仍与原新源码相同，不更改接口或资源移交流程。
+
+首次准备工具误以为各有两处 size/SHA，严格断言失败；实际还有 begin 中第三处。
+原工具及失败记录保留，未生成或执行运行源码。随后构建因 inputs.json 尚未产生
+而失败，也明确记录。修正要求精确三处替换；已复制 reference 只在字节相同时复用，
+没有覆盖旧候选。该准备工具修正不被记作运行算法缺陷。
+
+新源码的七项普通控制通过：完整准备/关闭、997 字节短写与 1009 字节 positional
+读回、最后字节变化、提前 EOF、额外一字节、EOF 后原截止已到、只读关闭可见错误。
+完整模型观察保留新长度/完整 SHA、四 seal、只读独立 OFD/offset0、原写端已关与
+原 readonly slot 保管；负例分别拒绝并保留首因。最后关闭错误仍为 UNKNOWN，
+不重试数字、不称释放。根报告 1850 字节，摘要
+`76b4b627c92560a223e0edbbd09d98341691b6ae90cafe7ce324dfe6b4df42d7`。
+旧模型只改两处 fixture 路径；普通错误/读值/时钟通过原固定模型输入控制，未重跑
+旧对象/类/模块替换实验，旧作者或独立 122 项均不加入本批七项计数。
+
+另准备固定 e7c FD8 reader 的九项真实 Linux pipe 测试源码：完整 canonical 控制
+及 EOF、七字节分段且完整帧仍等 EOF、开放空 pipe EAGAIN 后 abort、截断 JSON、
+尾 LF、空 EOF、4028 非法 raw 待 EOF 后 codec 拒绝、4029/4096 运输超限。4028
+样本明确是非法 JSON，不声称存在该长度的合法请求；全组未使用第 4097 接收字节。
+未来 fixture 要求独立单线程且 PID=PGID、原 FD8 不存在；read 端原本为 8 时保留，
+writer 为 8 时先移至已知新 FD，再用 F_DUPFD_CLOEXEC 取得空闲 8，不覆盖既有 FD。
+
+请求的实际 PID/PPID/PGID与 setup 双钟仅属于未来 fixture 的输入来源，其他 tick/
+source 字段仍是声明。一次 40 秒绝对窗口保持不变，reader 独立遵守原 born 双轴
+小于 30 秒；不称真实 fork 前时钟或生产预算。wrapper 只清理本次已知资源，不能把
+UNKNOWN 按数字重试或把兜底关闭写成 reader 自身的成功关闭。七成员 bundle 含
+reader、四纯依赖、原控制模板及 fixture，不含执行入口；九项均未 import、collect
+或执行。根普通模型也没有真实 memfd、pipe、seal、procfs、fork/exec 操作。
+
+根六个 Python 工具/模型加实际阶段快照 helper、实际生成源码 stdin py312 完整
+Ruff/format 通过。native 准备工具及 exact fixture/reader 的六项质量命令通过；
+首轮工具 format 失败保留，fixture 首轮已通过。交叉审查由不同实现者完成：根编写
+v2 对齐，worker_birth_design 独立只读核六常量/字节/AST/七项原报告；后者编写
+native fixture，根独立核固定 FD8/所有权/窗口和九项源码。无必须修订项，未增加
+独立行为测试，不重新签发全部旧依赖接受。原先较广的 C 缺口审查未形成最终回执，
+已取消且未计入完成；本批回执明确记录实际交叉审查者与静态范围。
+
+| 交付包 | 最终 manifest/delivery SHA256 | 文件数 / 归档字节数 |
+| --- | --- | --- |
+| 固定入口 source preparer v2 | `b248a895d80943c8c1d02727a68d5dfdd994880df757fad8fd4e018964dfb26c` | 59 / 9,349,120 |
+| FD8 native fixture 准备 | `19c5f21ffb68226e1a431175555e84a7c8f761540640748cda0e473bb8c1c836` | 42 / 430,080 |
+| 交叉静态审查记录 | `0c4bfaf4112ddcbeb6d71684208cc485dbe99171060d6bc25088baf07d035822` | 31 / 317,440 |
+
+三包所有列项与闭合归档逐成员回读通过，无排除项；审查封存工具亦通过完整质量
+检查。阶段 47 快照绑定本节实际提交、三包清单、阶段 46 快照及新 CLI，tracked 与
+HEAD 一致，三份原未跟踪计划保持原状。最终源码仅提供原 begin/step/close；PREPARED
+观察不移交 FD。后续 C 仍需明确真实 source FD 与解释器的取得、保管和移交来源，
+不能从普通观察签发 grant。真实 pipe/birth、固定 bootstrap FD 布局及 fd-exec、
+post-exec/source/完整 FD 表、DATA 准入、完整 child、PreparedSourceImage、CompleteDataRead、
+G3 与 Linux/runner/CI/服务恢复/重启均未完成。目标仓仍只读，阶段 40 PARTIAL 不变，
+未运行新的全仓 Gate、未填 implementation_result；TASK-0048 继续 IMPLEMENTING。
