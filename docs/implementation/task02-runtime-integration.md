@@ -2002,3 +2002,78 @@ hashlib 与隔离 I/O/进程/时钟模型。旧 source-image preparer 仍嵌入�
 退出收束、PreparedSourceImage、CompleteDataRead、实际 Linux、runner/CI、服务恢复及
 重启仍待完成。未运行新的全仓 Gate，目标仓仍只读，未填 implementation_result；
 TASK-0048 继续 IMPLEMENTING。
+
+## 父步骤共享预算与 READY 接收候选
+
+本批新增树外 ParentStepBudget v1 与 READY collector v1，并用阶段 42 实际 sender
+输出完成一次独立普通模型组合。预算对象与接收算法已实现；父侧实际 pipe issuer、
+完整调度器和旧 pump 接线仍缺失。宿主模型结果不证明实际父 EOF 或来源准入。
+
+ParentStepBudget 保留原 deadline、前一步 tail 的 tuple 引用及原时钟函数。父同一步的
+所有组件共用 16,384 字节和 100 ms；实际返回字节先 charge，超额仍保留实际计数。
+monotonic 的 100 ms 边界可达，两项原绝对截止不可达；boottime 不改成新的 TTL。
+父最后调用一次 finish_step，即使步骤已失败也取末时钟，并保留此前组件首因。
+后一步必须接续原 tail 和同一 deadline；普通输入 tuple 本身不证明截止来源。
+
+collector 公共构造拒绝，只有明确的 _for_model 接受模型已拥有的父读端、原 FIFO
+dev/ino、预期五字段 claim 和 child deadline。它使用固定 os/fcntl/time 模型执行实际
+检查与读取算法；没有可选择的生产适配器。父读端 FD 独立持有，不固定为 child FD6；
+读取 flags 2048、descriptor flags 1 是本候选 profile，其中父 CLOEXEC=1 是新增假设，
+尚非 birth 事实。
+模型工厂接收已拥有 FD 后的参数失败清理属于模型 setup 边界，未冒充父步骤内操作。
+
+advance 单次最多一次正长度 read，长度受共享剩余额度及 4097 减累计字节限制。零
+额度返回 NEED_BUDGET，绝不以 read(0) 判 EOF；短读、LF、EAGAIN 均不能完成帧。
+返回字节先计费，再核延迟、超长及缓冲。仅模型 read 返回空、原读端已知关闭、原
+buffer 完成 canonical 解码和预期比对、child 时钟检查通过后，才等父共享步骤结束。
+take_claim 只在成功父 tail 后一次转移已准备的普通字典，不再解析、复制或执行 I/O。
+FIFO 身份不符或关闭异常保持 UNKNOWN，不按数字重试关闭。实际身份来源仍未认证。
+
+普通生命周期复核发现 READY-COLLECTOR-001/P2：草稿 fd58ed6b 在接收已结束预算时，
+advance 和 abort 仍会于父 tail 后 close(7)。独立修复前两项均复现，报告摘要为
+`ca82b184c920508820187b9751d1884b09317c6824fa3a4b83c1b87bfea5d5b5`。
+最终 422c9f2c 对这种调用只记录失败、保留 OWNED、无 I/O；合法新步骤可以仅清理，
+关闭一次并实际调用新 finish_step，保持首因。第三项覆盖前一步 FAILED 且 finished
+后的同类清理；三项均记录新 tail=(21,31)、FAILED/finished。最终报告摘要为
+`cdd0d45e78120e3d9b5357b032256ab994404d3a7b4b846914d397b6bc4d7ae0`。
+此 Finding 已在普通模型范围修复并独立复验，不关闭阶段 40 的 PARTIAL 审查。
+
+预算源码 5,867 字节，摘要
+`edbc23b8db030d31701b4a6ac13394f9b39e6f741b939b399aa369a31e2f0a57`；collector 为
+9,532 字节，摘要 `422c9f2ce197534ed163cae6c3bd9e44973d3829b2a5f491de4d898b00d59b36`。
+作者 41 项预算、91 项 collector 测试分别通过；独立普通检查 39 项通过，分为 9 项
+预算、26 项接收组合、3 项上述生命周期和 1 项实际 sender 组合。最终 binding 摘要
+`3fe4492a7ca04dcbb67324e6cc7d9cbefb2a8b271dbba1605d8a6d066aa5d1c5` 固定这四组；
+trace、export 准备、重复质量复验、旧轮次和作者测试不叠加到独立计数。
+
+实际 sender 组合在单独模型进程运行固定 5ae8197f 前缀、三原观察器和 141caf3b sender，
+写出 294 字节并关闭 child 6。另一模型域把原输出交给 parent 7，仅在 writer 已关且
+缓冲耗尽后返回空。预期 request 摘要/worker 来自独立保留的原请求，预期源码 SHA/
+长度来自本地固定前缀，未从接收帧反填。根重新计算 canonical 帧并核得实际输出一致；
+帧摘要为 `8a2324498faa14db503bd882d9211db2d954c44ab698fd65f45cd2449cd8622e`。
+这只是一次完整普通组合，未重跑旧 17 种请求矩阵，也未证明真实 child、管道或 EOF。
+
+预算最终 5 个工具/测试及 runtime、collector 最终 10 份 Python 源、独立 11 个工具
+均通过完整 Ruff/format；实际接收源码以 py312 静态目标检查通过。根 3 个汇总工具
+和实际快照工具通过完整规则；根核作者 JUnit、四组实际报告及执行/最终工具 AST，
+没有新增行为测试。旧失败、未选中的中间报告和原工具快照均保留。
+
+| 交付包 | 最终 manifest/delivery SHA256 | 文件数 / 归档字节数 |
+| --- | --- | --- |
+| Parent step budget v1 | `36b8a56257c0889ba8002cf68303a0dfaf5632045ac8b861ee1567d754a24f23` | 47 / 235,520 |
+| READY collector v1 | `3a081e712148e8ad43b57463a7607f48f8cb31c14518ed898210576d80000f49` | 62 / 1,382,400 |
+| 独立普通集成审查 | `6c4afb206478e1d40a03b0e17bf1ac8d790970354657f320e5e84af2179cead3` | 168 / 1,546,240 |
+| 根证据汇总 | `53e0e419a1a38513cdd10b10bfb507503a70c28762ef95280b8c7435b2602e61` | 44 / 358,400 |
+
+四包文件与归档成员均逐项回读。collector 冻结包独立指针路径误多了 evidence/；根
+pointer-correction.json 将原 720 字节指针绑定到正确的审查目录根 binding，原摘要
+3fe4492a 不变。作者归档保留四份既有 Ruff cache，它们不计为运行源码或测试。
+未改写任何冻结包。阶段 43 快照绑定本节提交、四份清单、阶段 42 快照和新 CLI 状态；
+要求 tracked 文件与 HEAD 一致，既有三份未跟踪计划文件仅如实记录。
+
+当前 Windows Python 3.11.9 使用固定 fake OS/fcntl/time 与真实 hashlib。接收器尚未
+接入实际 ParentBirthSlot 或旧 pump；父 post-exec/source 比对、DATA 放行、完整 child、
+ACK/退出收束、PreparedSourceImage、CompleteDataRead、Linux/runner/CI、服务恢复和
+重启仍未完成。独立审查者未实现本批两份 runtime，但曾实现部分旧依赖；没有重验
+全部历史内核或恢复阶段 40 实验。目标仓仍只读，未运行新的全仓 Gate，未填
+implementation_result；TASK-0048 继续 IMPLEMENTING。
