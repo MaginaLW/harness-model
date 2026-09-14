@@ -2226,3 +2226,77 @@ NUL。这是原见证的传输形状核对，不是新的闭域最大值证明�
 准入、完整 child、PreparedSourceImage、CompleteDataRead、G3、Linux 门禁及实际交接
 仍未完成。阶段 40 PARTIAL 不变；未运行新的全仓 Gate，未填 implementation_result，
 TASK-0048 继续 IMPLEMENTING。
+
+## 固定 bootstrap 控制接收与同请求 READY 字节桥
+
+阶段 46 新增树外固定 FD8 bootstrap 接收算法，源码 7,807 字节，摘要
+`e7c306a0ba855715077f6d6ad1f6bc0e4790a5d18f66e2246c84c13ddb905af0`。
+它只有明确普通模型入口，成功构造时接纳 FD8 是模型假设，不是真实 pipe/birth 发行。
+形状检查失败前未移交描述符；原调用方仍拥有它。候选不提供 argv/env/path 回调，
+不调用 fork/exec，也未接上完整 bootstrap 的描述符安排与解释器执行。
+
+每次 advance 最多一次正长度 read，申请量为 4096 减实际累计接收字节。实际正返回
+先登记 received_bytes，再做后置时钟检查。固定前六项 argv 含 NUL 为 67 字节，
+最后一项另计一个 NUL，因此合法原始控制帧最多 4028 字节；不加 LF/NUL 或 4097
+哨兵。读到 4028 后仍有 68 字节容量用于实际空返回 EOF；超限立即失败。EAGAIN
+为 WAIT，短读或已有合法 JSON 都不产生 EOF，其他可见错误不内循环重试。
+
+空返回后已知关闭 FD8，再由原 55216 codec 严格解码固定七项 argv；重复键、额外
+空白、尾随数据及非 canonical JSON 均由原解码器拒绝。请求 deadline 必须仍等于
+原窗口；候选保留原 fork 前 born 与原 deadline 引用，每次双轴时钟不回退、严格
+早于原截止，且各轴相对 born 均小于 30 秒。宽窗口和 MAX 值不被改写为新 TTL，
+1 秒收尾余量不用于准备或取用 argv。子接收器没有复制父预算；父侧写入仍由原
+16 KiB/100 ms 预算独立收费。本批时钟与 born 都是明确模型输入。
+
+BOOTSTRAP-CONTROL-001/P2 已在普通范围修复并独立复验。根静态发现准备后至
+take_argv 期间缺少进程值重核；独立在原 eae76 源分别改变 getpid/getppid/getpgid
+普通返回值，三项均仍取到原 argv。最终 take 再用原请求核对三个实际模型调用，
+与最初观察值比对，并做最新双轴时钟检查后才一次移交。三项修订后均拒绝，FD8
+保持此前已关闭一次，不重复关闭。旧/新反例报告摘要分别为
+`741561eaf3435ab464e03fc9c3f983a0977e929db611fe2747b1eb8c8168b637` 与
+`4d04ddef7ed789045401e06301b6fcf0fd57d9f10e3d3d19e17ff5eae909673b`。
+该结果不证明实际 exec、start_tick/boot/source 或完整进程身份认证。
+
+作者最终 run-003 为 92 项普通测试通过；独立最终 50 项由 47 项普通控制与 3 项
+take 值变化组成，smoke、旧失败和重跑不累加。独立 binding 为 2910 字节，摘要
+`56bb07c3384b3cea2faab58760205b3f1dba04de7b1343b794be391d38f44c92`。
+原未执行的窄 deadline 草稿、执行过的旧源和反例均保留，未重开阶段 40 实验。
+
+根另执行 1 条同请求普通字节链路：实际 6f ControlSender → 新 e7c bootstrap reader
+→ 原 5ae 固定入口及 141caf READY sender → 原 422 READY collector。原请求来自
+冻结 fixture；父侧实际写出的 1258 字节按片读回，重组完整 argv 1326 字节，入口的
+orig_argv 直接来自该接收结果。独立保存的原请求与进程/proc 期望保持不变，完整
+770,814 字节前缀执行普通 entry/proc/source 观察后实际生成 294 字节 READY。
+父期望由原请求和固定源码摘要/长度构造，没有从收到的 READY 反填期望。
+
+原控制及各组件 request SHA 均为
+`0be311d1508765306d73dac4b87c53c1bc84129b39b152bdfa8d143d046a6dd9`；
+实际 READY SHA 为 `8a2324498faa14db503bd882d9211db2d954c44ab698fd65f45cd2449cd8622e`。
+同一 ParentWorld 内两个父步骤分别计 1258 与 294 字节；第二步骤的原 deadline 与
+上一 tail 使用对象同一性断言。Windows 模型子进程位于第一个模型步骤结束后、
+第二个开始前；不把宿主编排计作生产调度器，也不称一个步骤覆盖 child 执行。
+两个模型 elapsed 均为 0，不证明真实耗时。READY 后只有 FD6 已关闭，345 ledger
+仍保留，DATA 为 NEW/0 字节；显式测试 disposal 单独记录，不当作生产完成。
+
+独立审查者只读核对根六份实际执行工具及控制、argv、入口、READY、disposal 和
+最终报告，没有重跑或增加行为测试。此桥关闭阶段 45 的不同请求普通字节关联缺口，
+不补 exec-error、真实 EOF、出生、exec 或授权。根报告 62,209 字节，摘要
+`cf8a28d678aec7bc164cb15f161a3d14d6df2059218838a4037d9efccdc23306`。
+作者 9 份 Python、独立 8 个工具及根 7 个工具与实际快照 helper 完整 Ruff/format
+通过；实际新 reader 另按 py312 静态目标检查。作者封存工具首次 E501 日志与源码
+保留；根预检查长行在首次桥运行前格式化，最终八源码 quality-001 全部通过。
+
+| 交付包 | 最终 manifest/delivery SHA256 | 文件数 / 归档字节数 |
+| --- | --- | --- |
+| Bootstrap control reader v1 | `2eec2e307a19e922629cdc6641a6370c3b3c293558d554ce0ce1d5ac609aa181` | 55 / 1,351,680 |
+| 独立普通集成审查 | `18f5fac5a29fe7625cf8250169456f69b6f961b3654cd45680a1d89b103c17fe` | 119 / 2,519,040 |
+| 根同请求字节桥与证据汇总 | `d8d9556a278593e5badeb4bafad17cbf5903ec67d8e9562f738db8e5b12e06d1` | 71 / 1,669,120 |
+
+三包全部文件及闭合归档逐成员回读通过，无排除项；原六个桥输入包也已完整回读。
+阶段 46 快照绑定本节实际提交、三包清单、阶段 45 快照与新 CLI，要求 tracked 与
+HEAD 一致，保留三份既有未跟踪计划。并发目标仓继续只读，未操作 guest/native、
+runner/CI、服务或重启。固定 reader 候选已补齐；实际 pipe/birth 发行、完整父调度、
+post-exec/source、pending/DATA 准入、完整 child、PreparedSourceImage、CompleteDataRead、
+G3 与 Linux 实际验收仍未完成。旧 source-image preparer 未改指新前缀，阶段 40
+PARTIAL 未关闭。未运行新的全仓 Gate、未填 implementation_result；TASK-0048
+继续 IMPLEMENTING，不能据本批普通模型结果认定任务 02 完成。
