@@ -1928,3 +1928,77 @@ codec delivery 为 `41378002c35f9795a792420b2a608d87d33ea223235c5bdf0f6acf6d454e
 实际 READY writer、原管道 collector/EOF、FD6 关闭、父 post-exec 比对和 DATA 放行仍待
 完成。阶段 40 的独立复验缺口继续保留。本轮未运行 native、guest、服务、runner/CI 或
 新的全仓 Gate；目标仓仍只读，未填 implementation_result，TASK-0048 继续 IMPLEMENTING。
+
+## READY 写出、关闭与 DATA 时钟接续
+
+本批补齐树外 READY sender 候选、DATA reader v3 和八输入 assembler v3。新完整前缀
+在宿主模型中依次执行原 entry/proc/source 观察，再由 sender 调用原 owner 的
+transfer_inputs，经固定 posix.write(6, ...) 写出 READY，再调用原 owner 的 close_ready，
+最后由 reader 读取 DATA；不再由模型代办转移和关闭。成功仅说明候选的普通 IPC 链
+跑通，不表示完整 child 或父侧准入。
+
+sender 固定原观察器、reader、library、codec、B1 与 READY module 引用。begin/step
+均无参；由原 source hasher 的摘要、实际长度、同一 request 的 canonical 摘要和 worker
+形成五字段 READY。转移后保留原方法返回的唯一账本；FD6 写前、写后核 FIFO 的
+mode/dev/ino、状态 flags 2049 与 descriptor flags 0。它不要求管道 st_size=0，也不从
+uid/gid/nlink 推导管道身份。完整帧仍最多 4096 字节，单次 write 最多 16 KiB；短写
+推进、EAGAIN 11 等待，其余可见错误和非法计数失败。已知关闭 6 后进入 SENT_CLOSED，
+原账本保留 3/4/5；关闭异常保持 UNKNOWN，不按数字重试或算作释放成功。
+
+sender 从 source 的原末时钟继续，在成功返回的观察、写入及原 transfer/close 调用
+前后检查原绝对截止和配对时钟；EAGAIN 等待前也检查，其余可见异常立即保留首因清理。
+reader v3 在固定安装时绑定原 sender，开始 DATA 时要求它已达
+SENT_CLOSED、同一 request/deadline、同一 transfer 返回账本，并继承 READY 最后时钟。
+原 source→READY→DATA 引用链分别核对，不复用终态观察器或 sender 的时钟方法。
+八处精确替换从冻结 v2 重建出实际 v3 字节；仅四个上下文方法改变，原时钟、DATA 循环、
+transport 提取及清理方法 AST 不变。公共 API、16 KiB/64 KiB、摘要和 EOF 条件不变。
+
+assembler 从 byte zero 安装 RAW prelude 和原 16 模块库，再安装新增私有 READY module、
+reader、三观察器、sender，最后一次绑定 reader。READY module 明确列入新 detached index，
+只依赖原预加载 codec；没有静默改写旧 library manifest。全部仍在原有限清理 wrapper
+内，安装结束保持 RAW、观察器及 sender 为 NEW，未观察、转移、写 READY 或读 DATA。
+三个 build 的执行前缀字节相同；build-003 固定全部八份最终输入 delivery。
+
+sender 源码为 18,019 字节，摘要
+`141caf3b421504a0feb7fafe559c4c45034a04e03b663f55fef19c8626d79c17`；reader 为 22,602 字节，
+摘要 `0ed86e82ff27db06136d1a192dd793e9d1b294289e0224ec693d3d41591c59a1`；新前缀为
+770,814 字节，摘要 `5ae8197f786e7a1af5d10e8ba7a41214e0556d207f4ea90a94b13da476ec65d2`。
+build-003 index 为 24,844 字节，摘要
+`d3d43a62339d5534e3c9477628601fda9e7ce52771800b65b458a4810a51f7bd`。
+
+作者 57 项普通 sender 测试通过；48 个固定调用前后异常场景已包含在其中六项内，不
+另加总。构建器 40 项契约测试通过。独立常规集成 42 项通过：17 个原 transport 请求，
+加 25 个短写、EAGAIN、非法返回、可见异常、截止、时钟与 DATA 边界。正常模型将
+实际输出与独立组装的 canonical JSON+LF 比较，17 帧均为 294 字节；核实际整前缀的
+SHA/长度、原 request/worker、仅关闭 6、保留原 3/4/5 账本及 15 次临时获取均已关闭。
+DATA 未重新解码控制请求，未调用终态 sender 时钟；后续模型销毁的关闭单独记录。
+
+独立时钟用例 source=(5,8)、READY=(20,30)、DATA=(21,31) 成功；DATA=(10,15) 虽晚于
+source，仍因早于 READY 而以 clock_reversed 拒绝。该用例补充普通时钟接续证据，不
+证明原生阻塞、调度、EINTR 重试或实际清理的硬时限。独立审查者未实现这三个新组件，
+但曾实现部分旧 library 依赖，因此本次只声明普通 IPC 集成审查，不声明整个历史前缀
+重新独立验收，也不补回或关闭阶段 40 的 PARTIAL 审查。
+
+作者 13 个新工具、reader 4 个工具、assembler 8 个工具/测试、独立审查 10 个工具均通过
+完整 Ruff/format；实际 reader/sender/prefix 以 py312 静态目标检查通过。根 3 个汇总工具
+及实际快照工具通过相同完整规则。根只回读和核对既有测试证据，没有再计一次行为测试。
+作者曾把两个时钟分开推进，独立首轮曾误以 348 字节分块必然短写 294 字节帧；这些
+fixture 错误、初次工具质量失败及其修正均保留，未列为运行源码 Finding。根对格式调整
+核得 AST 等价；最终清单固定实际执行源码和检查源码之间的关系。
+
+| 交付包 | 最终 manifest/delivery SHA256 | 文件数 / 归档字节数 |
+| --- | --- | --- |
+| READY sender v1 | `23bf536ffb874a6e39ebf5f88b797fc44b5cfc9faccec845a098af17fe1435df` | 74 / 2,938,880 |
+| DATA reader v3 | `cdd61417a3f9dba4cd3f8fcb0000c44ac70faa695c82852d1fadfe7e92e07474` | 51 / 460,800 |
+| Entry assembler v3 | `26be0e3af1a92eb9fb76141f4d511859181abec40fdf0821c80a3dcbdbbce74f` | 150 / 6,727,680 |
+| 独立普通集成审查 | `34ffa6bd96cade9ff7613afa9f6799d3c22d53d267be673cf0162798f5bbae9d` | 182 / 2,682,880 |
+| 根证据汇总 | `33297c12e9e63836d4b238139e3130e51fbcbafe18d73c5b61aeb4038ce65357` | 52 / 409,600 |
+
+五包本地文件及归档成员、全部八份输入包逐项回读通过。阶段 42 快照绑定这些交付、
+本节提交、当前 CLI 状态与阶段 41 快照。宿主仍为 Windows Python 3.11.9，使用真实
+hashlib 与隔离 I/O/进程/时钟模型。旧 source-image preparer 仍嵌入旧不完整前缀。
+
+真实 READY collector/EOF、父 post-exec 比对、来源准入与 DATA 放行、完整 child、ACK/
+退出收束、PreparedSourceImage、CompleteDataRead、实际 Linux、runner/CI、服务恢复及
+重启仍待完成。未运行新的全仓 Gate，目标仓仍只读，未填 implementation_result；
+TASK-0048 继续 IMPLEMENTING。
