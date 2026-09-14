@@ -2809,3 +2809,60 @@ IMPLEMENTING，Missing implementation_result；任务 02 未完成。
 归档 8,345,600 字节，摘要
 `1ff35baef2242e9426843a90d68abe6bac7a72558044ef54a175ee5df664bfe6`，完整回读通过。
 阶段 55 快照绑定本次文档提交、该封存包及阶段 54 快照；三份既有未跟踪计划保留。
+
+## 退出后的有限观察与 WHPX 初始化
+
+阶段 56 延续已授权的传输与执行。两名 sub-agent 并行准备结束状态观察和无磁盘
+WHPX 探针，并交叉审查；主会话复核固定输入，按“guest 观察 → host 探针 → 原始
+证据回读”的依赖串行执行。原 guest 未停止或重启，目标仓、runner 服务及 CI 继续只读。
+
+guest 请求固定为 18,343 字节，摘要
+`8083f0bf91f06674760d96b314838111b8c5413a04372ff1eda59774d8227a05`。
+当前 boot、原 Python/timeout、v10 adapter/合同和 Podman 依赖均匹配。请求只采集
+UID1001 的进程元数据、既有 system/user bus 的 ListJobs，以及固定 store/runroot
+的容器、Pod 和两个阶段 55 CID 状态。未读进程参数或环境；Podman 的逻辑查询可能
+更新运行时记账，不宣称 guest 零字节写入。观察逻辑 108 秒，每查询 8 秒、kill-after
+1 秒、捕获 10 秒及有限收尾；外围 120/10 秒、SSH 145 秒，host 前置另有 30 秒。
+这些是新诊断预算，原 fixture 600 秒与完整门禁预算保持不变。
+
+实际观察退出 0，无运输错误，含 host 前置用时 10.235 秒。stdout 14,262 字节，摘要
+`a5074396695bdd7832cbd7630b2adba6bd43b0fde17af2f20caa4342ad40d2a6`，stderr 空。
+两次各盘点 121 个 PID，均仅发现四个 UID1001 进程，身份配对一致、样本稳定、无
+unknown；可执行文件、comm 与 cgroup 符合用户 systemd、PAM、Podman pause 和
+用户 D-Bus 基础设施的特征。这是元数据解释，不是完整角色认证；两个采样点未发现
+该 UID 的 fixture 进程，也不能排除其他 UID 或采样间的活动。
+
+六个查询均完整回收双流，无超时、截断或收尾错误。system/user Jobs 均原生退出 0，
+返回精确空列表；容器及 Pod 列表为空。两个固定 CID 的 exists 均原生退出 1、两流
+为空，确认其不存在。原报告的 whole_guest_idle 仍为 null，不将有限观察升级为
+整台 guest 空闲证明，也不停止被观察到的基础设施进程。
+
+WHPX 最终探针 14,069 字节，摘要
+`00e344216e491632de3fee4b86b638c2eec348abeb47ef5d05f574f7260d8972`。
+它使用同一固定 QEMU、独占输出、干净环境及 no-user-config，明确选择 WHPX；
+没有磁盘、seed、网络转发或 TCG 回退，单 vCPU、256 MiB，CPU 保持暂停。总探针
+预算 20 秒、两流各 256 KiB，并为仅本次原 process handle 的有限收尾预留 2 秒。
+交叉审查修正了 reader 启动失败的记录及身份登记顺序，实际使用修正后的固定源码。
+
+实际探针 **退出 0、0.203 秒**，另计 host 前置 1.047 秒。原始 QMP 输入 198 字节，
+依次为 capabilities、status、cpus-fast 和 quit；返回 running=false/prelaunch，
+只有一个 cpu-index 0，模型为默认 qemu64。随后收到 host-qmp-quit 事件及 quit
+回复，完整双流 EOF，未使用 terminate，无 primary/secondary 失败。stdout 649
+字节；stderr 129 字节保留 `Ignoring request for interrupt vector 0` 警告。
+这证明无盘、暂停 CPU 的 WHPX 初始化和正常退出，不证明 Linux 指令执行、启动、
+性能或该默认 CPU 适合最终 guest；后续 CPU 选择仍需核定。
+
+主会话及另行回读复核原始输入、两流长度/SHA、六项查询、QMP 回复与真实退出。
+主核验还在探针后重新确认原 QEMU 身份和 SSH listener；结果 5,015 字节，摘要
+`0df5beb5b4ef36c6ed6327a6a779398890f20487ef89ffc93adede38fd12cff2`。
+结束状态另行回读者也是该观察器作者，WHPX 的交叉审查者不是探针作者；两者职责
+如实记录。五份本阶段 Python 工具的完整 Ruff/format 均通过，未重跑本仓完整测试。
+
+树外 `whpx-init-001` 封存 80 文件，manifest 摘要
+`8067c14088d13c836047f89a869301c87127c6a625dda653292da078d4bf1081`；
+归档 327,680 字节，摘要
+`4eb437fd39b1ab90f787029243ebcbe290d7bccfb61d976c62d8632713935ca7`，完整回读通过。
+阶段 56 快照绑定本次文档提交及阶段 55 快照，三份未跟踪计划保留。阶段 55 完整
+POSIX 的退出 124 不变；TASK-0048 仍为 IMPLEMENTING、Missing implementation_result。
+下一步先核 CPU 兼容与停机前材料保留，再准备受控 guest 切换；未完成这些前置前，
+不把初始化成功当作新 Linux 环境或任务 02 验收完成。
