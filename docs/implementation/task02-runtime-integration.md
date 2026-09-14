@@ -2153,3 +2153,76 @@ bundle 仅包含上述新 pump、原 edbc 预算和 fixture；归档 51,200 字�
 child、PreparedSourceImage、CompleteDataRead、Linux 门禁、runner/CI、服务恢复与
 重启均未完成。旧 source-image preparer 未改指新前缀，阶段 40 PARTIAL 未关闭。
 未运行新的全仓 Gate，未填 implementation_result；TASK-0048 继续 IMPLEMENTING。
+
+## Bootstrap-control 与 exec-error 父管道候选
+
+阶段 45 新增树外 ControlSender 与 ExecErrorCollector 实际算法，继续使用原 edbc 父
+预算、55216 事务协议、422 READY collector 与 4f3 shared pump。新源码 12,168 字节，
+摘要 `6f145ceaefe3867884a6037392a7939674c2685c353dedc04c4b744db473067e`。
+两条新管道仍只有明确模型入口，没有 fork/exec、管道发行器或 ParentBirthSlot。
+
+首次 control advance 在同一父步骤检查前后完成原 encode_control_argv、decode 和
+request deadline 比对；完整固定七项 argv 含各 NUL 不得超过 4096。仅发送最后一项
+原 canonical request bytes，无 LF/NUL、不新增 schema 或可选 argv/env/path。短写接续
+同一帧，零余额不 write；有效正返回先登记 bytes_sent，再 charge 与后置时钟检查。
+写全并已知关闭本父写端后等待父成功 tail，才一次取结果；这不证明 bootstrap 已读 EOF。
+
+exec-error 每次最多一次正长度 read，长度为 min(共享余额,4097)。实际返回先 charge，
+诊断最多留 4096 字节；非空数据立即永久失败，不解析为成功或等待后续 EOF 清错。
+4097 字节超限仍记录实际收费。只有正长度 read 返回空、原读端已知关闭及父 tail 成功，
+才提供普通 empty-EOF 结果；EAGAIN、LF、read(0) 均非 EOF，空 EOF 也不认证 exec。
+
+两类均保留原 child 截止及跨步原 tail/deadline 引用；已结束、错型或断链预算不执行
+组件 I/O。当前尚未结束的 FAILED 预算只允许保留首因后的有限已知关闭；合法后续
+cleanup 不恢复业务传输。close 异常保留
+UNKNOWN，不按数字重试。候选父 profile 为精确 FIFO dev/ino、读 2048/写 2049、
+CLOEXEC=1，尚非真实 birth 观察。model factory 参数失败尚未接纳 FD，原调用者继续
+拥有它；一般 fstat 异常不等于已观察到身份替换，明确身份错值才标 UNKNOWN。
+
+BIRTH-CHANNEL-001/P3 已在普通范围修复并独立复验。根静态发现、作者实际复现草稿
+8b46 的正 write 返回后，后置时钟失败会使 bytes_sent 保留旧值。独立修复前实际写
+1224、budget 计 1224、bytes_sent 却为 0；最终三者均为 1224。两版原本均 FAILED、
+已知 FD 关闭一次、保留原首因和 FAILED tail=(40,60)，没有成功结果。修订只补实际
+传输证据，不称旧版少计父预算或错误接受。作者原 1258 字节反例另保留，不混写数值。
+
+作者最终 run-003 为 103 项普通测试通过；独立 46 项通过，最初三项 smoke 与单点
+counter probe 已包含其中，不重复累加。独立 binding 为 2352 字节，摘要
+`cd8829c99d3808658560798408793455e9e08e8f098ead8872847437fea10c48`。
+五组件组合将 control 1240 字节、READY 285 字节与两个 pump 合计收费 16,384，共用
+一个成功父 tail；共同时间控制在 100000001 ns 失败。该组合的 control 与 READY
+request SHA 不同，只证明共享传输/预算，不证明同次出生身份与来源闭环。阶段 42/43
+的实际 sender 294 字节组合未重跑，不加到本批计数。
+
+根从原 67 文件 values 包和完整归档回读后，取四份未变纯源码及原最大值见证，用实际
+codec 复核 14 kind：完整 argv 与旧保存字节一致，并实际 encode/decode 往返。最大
+原始控制帧 3147 字节，完整 argv 3215 字节；固定前六项含 NUL 为 67，最后项另计一个
+NUL。这是原见证的传输形状核对，不是新的闭域最大值证明、真实 EOF 或 core replay。
+
+另准备 9 项 Linux 真实 pipe 测试源码：完整控制及 EOF、共享余量下的短写、背压、
+已结束预算与合法清理、空 error EOF、1/4096 非空 error、零预算不消费及 EAGAIN。
+源码未 import、collect 或执行；无 fork/exec，即使未来成功也不证明 exec 时 CLOEXEC
+或真实 birth。组件作者仅按实际 API 和失败 tail 做文本复核。八成员 native bundle
+固定新 channel、原 budget、四纯依赖、fixture 与原 control frame；163,840 字节，摘要
+`81eea7340902b7e1c9518b9e558ce757464e0c7dcaa498c22571db1e1a2c9336`，已逐成员回读。
+
+作者 9 份 Python 源、独立 9 个工具、native 准备工具与 fixture、根 5 个工具及实际
+快照 helper 均通过完整 Ruff E,F,I,UP,B,SIM/format；实际 channel/fixture 等当前源码
+按 py312 静态目标检查。原失败源、计数反例及质量失败保留。根首次 B007 和 helper
+长行修正后重新聚合，通过 quality-002；最终选择 aggregation-final 与 helper-v2，
+原聚合和 helper 仍保留。根未新增 channel 行为测试，14 个 codec 往返与 native 准备分列。
+
+| 交付包 | 最终 manifest/delivery SHA256 | 文件数 / 归档字节数 |
+| --- | --- | --- |
+| Birth channels v1 | `5a0d9073a0b74be8bab7e8af7001f55f26ef0e511aa7bc4b56cf3626d62b42f5` | 56 / 1,669,120 |
+| Native pipe fixture 准备 | `205c8df32c806a7deeeee6e237dcd7b20e5640bbdbf227117cbd9d03e599eac5` | 35 / 409,600 |
+| 独立普通集成审查 | `f5b1f60b4e4c70aa0096ba4b86b46da95b50cd99777ac3fe1dfc5ee84fb52a70` | 149 / 1,945,600 |
+| 根证据汇总 | `19e91b314c877026c5309172c07c112602db3fc47b04fed4c419478e29ae274b` | 89 / 1,781,760 |
+
+四包列项文件与归档均完整回读；本轮无缓存删除。阶段 45 快照绑定本节实际提交、
+四清单、阶段 44 快照及新 CLI，要求 tracked 与 HEAD 一致并保留三份既有未跟踪计划。
+本轮仍在 Windows 固定 fake OS/时钟模型内，没有目标仓、guest/native、runner、服务
+或重启动作。独立审查者未实现本批新 channel，但曾实现部分旧依赖，不重新签发全部
+历史内核接受。固定 bootstrap reader、完整父出生/调度/post-exec/source、pending/DATA
+准入、完整 child、PreparedSourceImage、CompleteDataRead、G3、Linux 门禁及实际交接
+仍未完成。阶段 40 PARTIAL 不变；未运行新的全仓 Gate，未填 implementation_result，
+TASK-0048 继续 IMPLEMENTING。
