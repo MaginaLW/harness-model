@@ -2578,3 +2578,60 @@ fixture、runner/CI、服务恢复与宿主重启等验收尚未完成。
 后续仅修正格式，未重建或重跑已成功的输入。阶段 52 快照绑定实际文档提交、封存包、
 阶段 51 快照和 CLI 状态；三份既有未跟踪计划保留。TASK-0048 继续 IMPLEMENTING，
 未填 implementation_result，任务 02 未宣称完成。
+
+## 当前 v9 低权限复核、Dash 通过及 BusyBox 启动前拒绝
+
+阶段 53 重新对照 TASK-0048 原规格与最终 v9 入口。原八项验收继续有效；完整
+C/E/F/G3 是选择 quiet 路线时的实现义务，不是原规格要求所有路线先完成的新引擎。
+本阶段复用既有固定 v9，未扩大到调度器或新的 quiet 实现。并行阶段启用两名
+sub-agent，分别准备只读采集/回收及独立审查，主会话核当前环境与执行入口；实际
+guest 捕获、preauth、Dash、BusyBox、回收严格串行，再并行复核结果和最小修复方案。
+原目标仓、runner 服务、CI 继续只读，没有注册、服务切换、推送、采用或触发。
+
+当前 boot 的只读捕获完成 178 项观察，无错误、缺项或截断。固定源码树另有
+178 个条目，其中 155 个文件与原 `cd02cb3c` 清单闭集、摘要一致；六个 v9 runtime、
+配置、manifest、运行时二进制及固定 seccomp 策略摘要匹配，hooks 为空；
+containers.conf 记录实际摘要，未在采集器中声明 expected SHA。三个卷归 UID 1001，
+为独立设备，容量分别为 4,143,677,440、67,108,864、58,675,200 字节，满足原上限。
+这仍是固定候选的当前环境观察，不代表目标仓 main 已采用，也不是低权限内核准入。
+
+首次执行前置检查取得有效 UID/EUID/GID/EGID 均 1001、附加组仅 100/1001，但账号
+自己的非交互 sudo 查询只返回需要密码，不能证明无 sudo 权限。入口据此停止，
+没有进入 adapter 或创建容器。保留 preauth-001 失败；随后 root 只读策略查询明确
+确认该账号不允许 sudo。修正前置检查，要求该确定拒绝句及有效身份均匹配，再使用
+新 preauth-002。原六个 runtime 与 shell entry 字节、原检查和预算不变。
+
+| 当前执行 | 实际结果 | 原范围内的结论 |
+| --- | --- | --- |
+| preauth-002 | PREAUTH_PROOF_COMPLETE；内核及两次 FD 证明通过；attach 125、完整 drain、精确清理 | 未发 permit、未运行业务 fixture |
+| Dash-001 | PASS；29.130 秒；fixture/attach/wait/inspect 均退出 0；无超时、溢出、残留 | 原四用例、205 字节五行输出与 600 秒预算通过 |
+| BusyBox-001 | REJECTED：`supervisor_fds_changed_before_permit`；attach 125、完整 drain、精确清理 | 在发 permit 前拒绝，不能计作 BusyBox fixture 已执行或通过 |
+
+BusyBox 两份完整 FD 记录属于同一 PID/start_tick：第一次只有 0/1/2，第二次新增
+FD 3；原 0/1/2 完全一致。新增目标为只读普通文件，8,273 字节，其链接目标文本
+摘要为 `132dad19278946c72a2a409208b5aa0f356fbba4789ec7536de5b49007c339aa`，
+与固定屏障脚本路径的摘要一致。这是路径文本摘要，不是内容摘要；记录支持本次
+FD 集合变化及保守拒绝，尚不能单凭它确证完整启动时序原因。现有 Running 观察
+不能证明 Python 屏障初始化已完成，后续最小修复聚焦可信就绪握手；不忽略 FD 3，
+不删除两次比较，不通过延长原预算或重复运行来替代修复。
+
+三次回收分别为 43/47/40 文件，共 130 文件、401,695 字节。主核验及独立回读确认
+完整 base64/长度/SHA/真实 EOF/stable、命令 stdout/stderr 摘要、nonce 绑定和清理
+链一致；Dash 原输出、结果 envelope、proof 与 tick 一致。每次保存一份完整内核
+观察和两份 FD 记录，未将两次内核采样宣称为两份已持久化完整内核文件。失败结果
+从原完整 stdout 最后 JSON 行提取，保留提取来源；未重跑或改写旧失败。
+
+宿主只读 WHP API 查询返回成功、HypervisorPresent 为真；未创建 partition、改变
+Windows 功能或重启 VM。该查询可说明 API 报告的能力，不能替代 QEMU 加速启动或
+性能验证；参见 [Microsoft WHvGetCapability](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/funcs/whvgetcapability)。
+原完整 POSIX 超时、BusyBox 当前拒绝、runner/CI、服务恢复及宿主重启验收仍未关闭。
+
+七份本阶段工具的最终完整 Ruff/format 检查通过；原已执行源码副本、初次格式问题
+和失败输出均保留，后续格式修正未重跑业务。树外 v9-current-reentry-001 封存实际
+证据、工具、独立回读和后续最小修复方案，共 239 文件；manifest 摘要
+`caa9f4649587c3e702cbad59ae48279d9d4d8d4e07ea8ed365b60c194a0f14fb`，
+归档 1,556,480 字节，摘要
+`3d62b13f6d70f80c7db4c337ef0f7d37071c52964911f4dd194390122a394402`，完整回读通过。
+阶段 53 快照绑定本次文档提交、封存包及阶段 52 快照。三份既有未跟踪计划保留，
+TASK-0048 继续 IMPLEMENTING，未填
+implementation_result；任务 02 未完成。
