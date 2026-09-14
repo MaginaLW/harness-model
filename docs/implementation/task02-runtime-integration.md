@@ -2711,3 +2711,101 @@ v10-barrier-ready-002 共 407 文件；manifest 摘要
 归档 5,048,320 字节，摘要
 `5257df329eb4adca2d7f769904cd620f4746dae2a792b7c53c367216e1c12be1`，完整回读通过。
 阶段 54 快照绑定该封存包、本次文档提交及阶段 53 快照；三份既有未跟踪计划保持。
+
+## v3 完整历史 POSIX 入口接续
+
+阶段 55 将原完整本地入口绑定到已核定的 v10 READY 运行时。并行准备启用两名
+sub-agent，分别负责最小候选迁移及运输/审查；主会话核对固定源码、交付包和实际
+环境。安装、Linux 测试、新合同生成、源码核验及完整门禁按依赖串行执行；运行期间
+两名 sub-agent 分别准备完整回收及独立核验。目标仓、runner 服务和 CI 继续只读。
+
+候选仅改变三个运行文件中的必要固定路径、版本及摘要，八文件运行集合不变；
+原 receipt 校验器、三个前置步骤及 binding fragment 保持字节一致。原 gate 的
+检查集合、45 个 shell 文件、17 个 shell fixture、五个 Python 文件、两份 Python
+测试、八个便携 PowerShell fixture 和平台声明保留。每 fixture 600 秒、步骤
+02/03/04/05 的 600/300/300/10800 秒、总任务 21600 秒及 kill-after 30 秒均未提高。
+旧完整 POSIX 的退出 124 和当时限制保持为独立历史记录。
+
+候选交付闭集 151 文件，归档 2,785,280 字节，摘要
+`e11f4a1023b7c2fffcca552b94b8f85b6bd99dddb6d4de91af643242fe2e9107`。
+主会话及独立审查逐项核候选、归档与交付清单；另固定实际运输的 27 文件输入，
+其中八个运行文件。运输归档 798,720 字节，摘要
+`651536eefc031366e1d829d9e86f1bd314134fc58039095ed839e3ade4fbce96`；
+manifest 摘要 `26fe6642d01627292de86d3557f8caf2295074faf39dab24df0e1c0fbbdeddfc`。
+安装使用独立 v3 目录，源码与运行文件均完整回读，root 所有、0444，目录 0555。
+
+本机原 163 项测试保留，155 PASS、八项仅非 Linux 条件的 SKIP。实际 guest 以
+UID/GID 1001、附加组 100/1001 运行全部 163 项，零失败、错误或跳过；XML 时长
+18.603 秒。完整 XML 22,159 字节，摘要
+`787ae8152b29eed15e1f3f1375be4512cd46554dc357d47ccac8bf3d672b5e26`，
+与运输原 stdout 中的 base64、测试计数及原 163 个唯一 nodeid 完全一致。
+这组验证属于本地入口源码测试，不能代替下面的完整业务执行。
+
+新合同由实际 guest 准备并独占写入，4,882 字节，摘要
+`1e97193c07fcb324d24c6e9bae7221c68a57c2457322d11603b4ba9a2ffbde15`。
+独立复原原 4,876 字节 `b089fcaf` 合同后逐字段核对：23 个键全部保留，恰好七个
+必要字段更新，21 项原 tool_files 摘要不变且实际逐项回读匹配。新合同绑定原
+`cd02cb3c` 的 155 文件来源、同一 checkout、固定 v10 adapter、READY barrier 与
+新镜像。执行前低权限源码核验退出 0，明确 `executed=false`。
+
+本次完整运行原生退出 **124**，运输未超时，用时 1,878.422 秒；步骤 02/03/04
+均退出 0，步骤 05 的原生文件及 JSON 均记录 124。最终 `result.json` 未生成，
+完整历史 POSIX Gate 仍为失败。组合日志确认 45 文件静态检查、17 个 shell fixture
+的双 engine、两份 Python 共 27 项及前五个便携 PowerShell fixture 通过；业务
+Python 零跳过。依据原固定执行顺序与最后的 secret-scan 成功行，停止位置指向第六个
+current-state fixture；本次没有单独的 PowerShell 进程或用例时点采样，不能确证
+具体超时用例、唯一原因，也不能把后续两个 fixture 计为已执行。
+
+| 本次完整运行内的新 root 组件 | 实际结果 | 证据范围 |
+| --- | --- | --- |
+| Dash | PASS，28.499 秒，fixture/attach 退出 0 | 新 nonce，原四用例/205 字节五行，精确 CID 清理完成 |
+| BusyBox ash | PASS，27.948 秒，fixture/attach 退出 0 | 另一新 nonce，原四用例/205 字节五行，精确 CID 清理完成 |
+
+两个组件均无超时、溢出、取消、剩余 PID 或残留路径。各自 READY 的六字段、0600
+单链接元数据、nonce/start_tick、两份仅 0/1/2 的 FD 观察与当次完整内核记录一致；
+每个组件 13 条原生命令及其两流、attach drain、终态 inspect 和精确 rm/不存在
+回读均匹配。仍只保存一份完整内核和一份初始 READY 原文，不宣称第二份完整内核或
+末次 READY 原文已独立落盘。两组件通过不能代替失败的完整门禁。
+
+实际行为限制另行保留：原清单仍声明九个 Windows 专用 fixture 排除；因本次没有
+最终结果文件，未把这些声明写成已完成的最终结果。secret-scan 原输出明确
+Git-index/reparse 部分为 `skipped-posix-lane`，非 Git 的 rg-ignore 用例为
+`dependency-missing`；两条 AWS hardening 行保留 `signal=skipped-host-signal`。
+runner-health fixture 标记 `synthetic=true isolation_verified=false`。这些限制不被
+各自 PASS 标记覆盖，也不计为真实 runner 隔离、服务恢复或全行为零跳过。
+
+执行后以相同固定请求及原预算再次进行低权限源码核验，退出 0，1,124 字节 stdout
+与执行前完全相同。独立只读回收保存本次 run 的 24 文件及两个组件各 49 文件，
+共 **122 文件、324,282 字节**；727,406 字节原始回收响应摘要为
+`50ebf12d2d84479bc9ffe6521bfff8eec22081d43875f03f816f647d3327c27f`。
+逐文件 base64、长度/SHA、真实 EOF/stable、闭集、14 个可信输入及末次整 run 回读
+全部核对。原 receipt 校验器重新验证两个组件；材料核验因缺 `result.json` 保持
+失败，回收成功不翻转原生 124。
+
+主会话另用专门的失败核验入口联结固定收集器、实际请求、boot、合同、manifest、
+原运行运输记录、完整回收和源码 after；未调用原成功专用核验入口。主核验结果
+17,797 字节，摘要
+`dfdf7821beb67705bd5e5267f49b5c72e7c26cd7e958aa5b245971c6353e1a8c`。
+两组件的精确清理已核，本收集器没有做 whole-guest 进程/Job 空闲盘点，不将其
+表述为完整 guest 已无剩余工作负载。
+
+最终 20 份本阶段 Python 工具及实际绑定的收集请求，完整 Ruff/format 均通过；
+初次 17 文件结果及新增失败核验前的源码快照保留。本次文档追加未重跑本仓完整
+质量矩阵，树外 Linux 163 项不替代本仓覆盖率或正式 V2。TASK-0048 继续
+IMPLEMENTING，Missing implementation_result；任务 02 未完成。
+
+后续先核对执行结束后的实际空闲状态，再做最小有界环境诊断。当前 QEMU 二进制
+只读 `-accel help` 退出 0，列出 TCG 与 WHPX；它仅证明编译支持。阶段 53 的 WHP
+能力查询也不能证明实际加速器初始化或 guest 性能。保留原 600 秒预算，先取得
+真实初始化证据再决定受控环境调整；本阶段未启动新加速器、重启 guest/宿主、修改
+目标仓或触发 CI，不以再次执行相同入口替代问题定位。
+
+独立执行复核确认上述失败和有限通过结果，报告摘要
+`a1c1b19f1c4edffaa2f0c3df7f46240531d1311226aa9fdab77157dd80db0ea2`；
+下一步最小诊断文件摘要
+`e9bccb2bd5c03fada412db5e76323211c49ba9fb829b9fc86b394717abc557c1`。
+树外 `local-posix-v3-001` 封存 386 文件，manifest 摘要
+`a9efac52b32429d978186abe74fcd9478561283c86f955a72d805ce5d10d3c14`；
+归档 8,345,600 字节，摘要
+`1ff35baef2242e9426843a90d68abe6bac7a72558044ef54a175ee5df664bfe6`，完整回读通过。
+阶段 55 快照绑定本次文档提交、该封存包及阶段 54 快照；三份既有未跟踪计划保留。
