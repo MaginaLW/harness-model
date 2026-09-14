@@ -2529,3 +2529,52 @@ collect 仅回收固定的两份日志及两份 JSON，检查大小、实际 EOF
 阶段 51 快照绑定本次文档提交、封存包和阶段 50 快照，三份既有未跟踪计划保留。
 本阶段 guest 操作 0，native import/collect/execute 仍为 0。执行授权问题尚待答复，
 TASK-0048 继续 IMPLEMENTING；任务 02 原有剩余验收及 implementation_result 未关闭。
+
+## 获准传输并完成 13 项 Linux native 诊断
+
+阶段 52 在用户明确回复“批准传输与执行”后，执行前述固定的九项 pipe/FD8 与四项
+memfd 诊断。该授权解除本次测试的等待；原目标仓、runner 服务和 CI 继续只读，未
+据此启动注册、服务切换、工作流采用/触发、推送或宿主重启。先并行核对准备包与验收
+条件，再串行 probe、stage、run、collect，最后由两名 sub-agent 分别复核执行证据链
+和精确测试结果，主会话完成综合核验及封存。
+
+第一次真实 probe 的 SSH 退出 0，但原证据 parent 为非 root 所有，路径状态 unknown，
+因此没有在该路径 stage 或运行测试。另一次只读 inspection 确认该 parent 的 UID/GID
+为 1001，候选新路径不存在且父目录为 root 所有。保留旧目录、所有权和内容，改用
+本次独立的 root 诊断目录；两份 entry 只替换固定输入/输出路径，十个原测试输入
+逐字节不变。独立审查确认 case、断言、清理、计时与结果判定均未改变。
+
+适配后的输入归档为 2,631,680 字节，摘要
+`770e0ee5773939add837860150609c106056e82bcf00c650a0b1e7d817683718`；
+清单为 3,174 字节，摘要
+`aadd58647c0cab8bf1b8521676531c627997baf2983b76bb6bc1c690052e701e`。
+新 probe 确认同次 boot 与两个新路径均满足条件。stage 实际验证归档及全部成员后
+独占创建输入/证据目录，完成 13 文件写入和完整回读；原封存包不改写。
+
+实际 run 的 SSH 退出 0，无观察超时或失败；pytest 输出 **13 passed in 1.39s**，
+supervisor 耗时约 2.723 秒，记录子进程退出 0、已 reap、原进程组已核对，errors
+和 signals 均为空。回收四个固定文件全部成功，stdout 165 字节、stderr 0 字节，
+与 supervisor 的 observed/saved 长度和真实 EOF 一致，无 overflow。
+
+主核验及独立原始证据复核确认精确 9+4 项，无遗漏、重复或额外项；每个 nodeid
+各有 setup/call/teardown 一条 passed，共 39 条。15 条过程样本及 initial 均满足
+指定 boot、root、单线程、PID=PGID、有效 PPID 与 FD8 空闲。最终进程检查未另写入
+样本数组，未把它算成第 16 条过程样本。四文件的传输字节、base64、长度、SHA 一致；
+11,996 字节 pytest-result 的摘要
+`c8082f5c74cdcace45b70f0293fe9a6287df89ba2461a1ef2687b22ae3fb08db`
+也与 stdout 中打印的结果摘要一致。
+
+组存在观察仍包含可能的保留 zombie，仅确认直接子进程回收，不证明全部后代归零。
+本次通过限定于实际 root/Linux/Python 3.12 下这 13 项平台诊断；4028 字节用例仍是
+畸形帧，只读写入 EBADF 仍不能独立证明 F_SEAL_WRITE，prefix 仍作为数据而非 child
+代码执行。完整 birth/exec/READY、生产 source grant、低权限隔离、原 dash/ash root
+fixture、runner/CI、服务恢复与宿主重启等验收尚未完成。
+
+树外 native-platform-tests-001 封存 143 文件，manifest 摘要
+`af4c5b55d4b2c1c4018919bbf2a40f0227f181c02ebc38ae9cb4c7c4749b420f`；
+归档 5,908,480 字节，摘要
+`ce06118e5ef404edad4e135d79582354a2232ef5f6e43921eee029b84bd6b4ce`，完整回读通过。
+九份工具/入口的十八项最终静态检查通过；构建器初始 E501 的实际源码与检查输出保留，
+后续仅修正格式，未重建或重跑已成功的输入。阶段 52 快照绑定实际文档提交、封存包、
+阶段 51 快照和 CLI 状态；三份既有未跟踪计划保留。TASK-0048 继续 IMPLEMENTING，
+未填 implementation_result，任务 02 未宣称完成。
