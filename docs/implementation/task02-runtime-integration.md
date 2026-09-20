@@ -5,6 +5,11 @@
 [任务 02 执行目录](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)为准。
 它记录当次已取得的证据和未完成项，不替代 AI Flow 的验证、批准或 Gate。
 
+2026-09-20 最新执行结果：见文末“阶段 58：恢复实例与固定历史源码完整 POSIX”。
+新 WHPX boot 上的原单项及一次未缩减完整 POSIX 已通过，覆盖固定 `cd02cb3c`，
+不覆盖目标当前 HEAD 或 CI。下文阶段 55 的退出 124 和阶段 57 的启动记录保留为历史；
+本任务仍未完成接入、采用和生命周期验收，不据此补写 implementation_result。
+
 当前结论（09:32 UTC）：完整历史 POSIX 执行已结束，原生退出 `124`，最终结果文件
 未生成，不能验收为通过。失败归档、两套 root 组件和执行后源码已实际回读；
 收尾采集未发现额外低权限进程、容器、Pod 或待处理 Job。同步持久化 v2 已通过
@@ -2946,3 +2951,83 @@ guard，也不能直接重放本轮关机或冷启动脚本。按以下依赖继
 恢复入口 NEXT-STEP 摘要
 `347bbe4cd341f8e0e1bad4aa54b25dadb49a53ce5dd16e8adfbfe12c715b5fbd`。
 阶段 57 快照绑定本次文档提交、封存包和阶段 56 快照；本轮只有该文档追加入库。
+
+
+## 阶段 58：恢复实例与固定历史源码完整 POSIX
+
+2026-09-20 所有者明确要求执行下一步。本轮沿阶段 57 接续本地恢复、readiness、原单项
+与完整 POSIX；外仓、runner 服务、CI 仍只读。恢复准备由一名 sub-agent 只读审查，
+随后并行准备 readiness 与证据回读；主会话串行启动、修复两个已知运行目录并执行。
+后续按需反馈文档工作单独提交，不混入本治理单元或其运行时范围。
+
+### 恢复与准入
+
+现场未发现 QEMU 或原 SSH listener；阶段 57 实例的退出方式与原生退出码未知。
+本轮没有重放旧关机/冷启动脚本，建立全新的 stage58 工具、输出与恢复副本。
+确认空间和内存后，以独占源句柄冷拷当前磁盘，源/目标摘要与元数据核对一致；
+保留旧 stage57 副本，不恢复旧盘、不覆盖历史输出。新副本 4,788,387,840 字节，
+原 base、QEMU、kernel/initrd/seed 摘要仍匹配。双层 qcow2 链及无修复参数的
+qemu-img check 通过；独占句柄释放到启动仍不宣称原子交接。
+
+新启动保持 q35/WHPX/host CPU、2 vCPU、4096 MiB、noapic、原 loopback SSH，
+无 TCG fallback。原始进程句柄绑定 PID/创建时间/EXE，严格 SSH 取得新的 boot，
+Linux 6.8.0-139-generic、x86_64、两个在线 CPU。启动回执摘要
+`3ba251a5c7d3f3cbe5ad56899cda5c78ff6027b81e3f6992ac238e208449e011`。
+
+首次 readiness 只因新 tmpfs 中缺少 runroot/tmp 两目录而拒绝；身份、组、sudo
+禁止策略及三卷合同均通过。重核同一新 boot 与完整前置后，降为 UID/GID1001，
+使用 nofollow 目录句柄仅创建两个 0700 目录，未恢复旧 PID/锁/socket/运行内容。
+独立第二次 readiness 退出 0；原 v3 verify-source 仅替换 BOOT，在原低权限路径
+执行退出 0，源、runtime、合同和 adapter 准入通过。
+
+### 原单项与完整执行
+
+原 current-state fixture 四项输入摘要不变，命令仍为 timeout 600 秒、kill-after
+30 秒的原 PowerShell fixture。新封装保留完整 root source_checks、降 UID/组、
+关闭附加 FD 和干净环境，执行前后调用原 verify-source。审查发现初版用完整
+stat_result 比较会受访问时间影响，执行前改为稳定元数据元组；旧候选未执行且保留。
+最终单项 **54.484 秒、原生退出 0**，原唯一 PASS marker 存在；原日志记载
+invalid_cases=70、hardlink=tested-pass、ps51=skip-non-windows。源码前后相同，
+无该进程组或新增 fixture 临时目录残留；12 份原件已回读核对。
+
+随后一次完整运行的实际 run_id 为 `95909287c8904ceda8bbb57d7edcc827`，
+完整 SSH 传输 **246.968 秒、退出 0**。这包含启动与运输开销，不冒充单 fixture
+耗时。Step 02/03/04/05 均原生退出 0；原内部预算 600/300/300/10800 秒和
+job 21600 秒、kill-after 30 秒保持，未拼接旧 PASS：
+
+- 清单保持 shell=45、shell fixtures=17、Python=5、Python tests=2、portable PowerShell=8。
+- 两套本次新 root fixture 各执行四用例，Dash 4.857 秒、BusyBox ash 4.640 秒，
+  原五行输出逐字节匹配；不同 nonce、内核与 FD 证明、真实退出和精确清理均核定。
+- Python 原两组 18/9 项均通过、零 skip；8 个 portable PowerShell fixture 全部走完。
+- 原最终 marker、四份 step 原生退出和结果文件一致；explicit_behavior_skips 为空。
+  原 fixture 内的平台限定说明保留，不升级为 Windows 专属路径已经验证。
+
+终态 collector 回读 run 25 文件/53,156 字节、Dash 49 文件/141,792 字节、
+BusyBox ash 49 文件/142,075 字节；原文件/目录上限、摘要、稳定读取、最终重读及
+原组件校验器均保留。随后重新执行原低 UID verify-source，前后双流逐字节一致。
+本地核验器连接实际 run、传输、原件、root 组件、markers、source-after 和新 boot，
+核定 **historical_cd02_local_only PASS**，不是正式任务 Gate。
+
+完整运行传输回执摘要
+`1f8f588f32aa70b150500e93588ba5738a004b961d4d70f52bb1baf397d2e41b`；
+source-after 回执摘要
+`1c620bb1bd533fd0819946a6616e75dce355a1ec7834920baa8d120d3baeea7f`；
+组合核验结果摘要
+`83db3db6044a55099ea10369d5a012c4e66d91dd59c8b2981fbeaa0208ebf666`。
+树外原件位于 stage58 各独占 evidence、stage58-single-fixture 与 stage58-collection
+工具目录；实际实例信息留树外，不将机器或密钥路径写入本仓。
+
+### 结论与下一边界
+
+阶段 55 的旧失败 124 不变，本次证明在新 WHPX boot 下固定历史 `cd02cb3c` 的
+完整本地 POSIX 能通过，不能仅据此认定旧失败只有一个原因，或量化性能/可靠度改善。
+执行未读运行磁盘、私钥正文或禁止的旧 host-tests-001.xml；准备 collector 的一次
+宽范围搜索意外匹配另一份 package/host-test-result.xml，未使用其结论，后续收窄
+文件清单。准备期格式检查失败已在执行前修正，不写成首次即通过。
+
+guest 保持运行供后续接手；原始运行日志只按有限时点保存，不把进程存活当生命周期
+验收。没有注册 runner、切换服务、触发 CI、push、修改目标工作树或启动生产操作。
+目标当前提交的重绑与验证、同 SHA 双 lane、main 采用、真实服务恢复/重启验收和外仓
+持有者交接仍缺失；TASK-0048 仍 IMPLEMENTING / Missing implementation_result。
+本轮执行记录先固定为候选提交，再在其干净检出运行原完整本仓质量门，结果保留树外
+阶段 58 质量回执；该软件验证不补签外仓 CI、任务 Gate 或阶段三/四。
