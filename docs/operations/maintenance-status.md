@@ -2,6 +2,12 @@
 
 ## 2026-09-20 当前核定
 
+2026-09-20 所有者决定：两个登记试点的[反馈与回灌](feedback-loop.md)，以及 VPS 连续
+回执整理，改为仅在有实质问题或用户明确请求时执行。无问题且无请求直接 no-op；
+普通完成、版本差异、登记上一笔 CI 不派生新提交和验证，不递归制造回执。
+原始证据与必要安全检查保留。下文 2026-09-09 的“每次收尾触发”决定作为历史保留，
+当前触发规则以本段及闭环指南为准。
+
 本轮从 `d40971a` 重新读取：当前分支为 `codex/self-hosted-runner-inventory`；
 账本是 **47 tasks：38 MERGED / 7 BLOCKED / 1 APPROVED_FOR_MERGE / 1 IMPLEMENTING**。
 TASK-0048 为 REVIEW/V2、`Missing: implementation_result`；TASK-0028 仍需重验，
