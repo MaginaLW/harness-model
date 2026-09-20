@@ -5,6 +5,11 @@
 [任务 02 执行目录](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)为准。
 它记录当次已取得的证据和未完成项，不替代 AI Flow 的验证、批准或 Gate。
 
+2026-09-21 最新执行结果：见文末“阶段 59：完成交接、当前源码验证与独立接入候选”。
+所有者已交接；固定 `39cc7ff` 的完整本地 POSIX 通过，新候选 `949fc60` 的双引擎
+root 组件与修复后的回执接口实际通过。本文固定时完整候选 Strict 仍在执行，结果待核，
+尚不据本地验证宣称 CI、采用或生命周期验收完成。以下阶段 58 及更早结论均为历史。
+
 2026-09-20 最新执行结果：见文末“阶段 58：恢复实例与固定历史源码完整 POSIX”。
 新 WHPX boot 上的原单项及一次未缩减完整 POSIX 已通过，覆盖固定 `cd02cb3c`，
 不覆盖目标当前 HEAD 或 CI。下文阶段 55 的退出 124 和阶段 57 的启动记录保留为历史；
@@ -3031,3 +3036,75 @@ guest 保持运行供后续接手；原始运行日志只按有限时点保存�
 持有者交接仍缺失；TASK-0048 仍 IMPLEMENTING / Missing implementation_result。
 本轮执行记录先固定为候选提交，再在其干净检出运行原完整本仓质量门，结果保留树外
 阶段 58 质量回执；该软件验证不补签外仓 CI、任务 Gate 或阶段三/四。
+
+## 阶段 59：完成交接、当前源码验证与独立接入候选
+
+2026-09-21 所有者明确说明原任务已结束并由本会话接手，目标仓的写者交接阻塞解除。
+目标原工作树的状态文档及 manifest 两份既有修改保留；本次 workflow 改造使用独立
+候选分支。准备阶段启用两名 sub-agent，分别负责绑定材料和独立审查；主会话串行
+处理实例恢复、安装及运行，并并行推进目标仓完整 Strict 与本仓记录。
+
+### 新实例与当前源码
+
+首次沿旧实例发起的身份请求在打开原进程句柄时失败，尚未进入 SSH；现场随后确认
+旧 QEMU 和 listener 已消失。原因及原生退出码仍未知。新恢复先独占冷拷，保存
+4,839,964,672 字节的新副本并核对摘要、磁盘链及只检查模式结果，不覆盖旧副本。
+审查在执行前发现辅助脚本仍引用上一阶段路径，修正后才启动；失败候选保留。
+新实例继续使用 WHPX、原受限卷和严格连接身份；readiness 仅补建新 tmpfs 中两个
+缺失目录，随后独立检查通过，未恢复旧 PID、锁或运行内容。
+
+本轮从目标已提交的 `39cc7ff1622740cf1d28f1ce3022cf4701df90a1` 直接导出 166 个
+Git 文件，165 项业务 manifest 全部匹配，不包含原工作树未提交字节。源码包摘要
+`a32f1404311a4c07d93c896d3be2129349def2f2bd94251f5e86cb072cb10696`。
+新路径重绑 source、合同、runtime 和 adapter；adapter 仅替换三个源码常量。
+低权限完整运行的 run_id 为 `2246970fd54e4c28b8f86faca263765c`，完整传输
+**279.906 秒、原生退出 0**，Step 02/03/04/05 全部退出 0，原时限不变。
+
+- 本次运行清单为 shell=48、shell fixtures=17、Python=7、Python tests=2、portable
+  PowerShell=8；两组 Python 共 27 项通过，无 skip，8 个 portable fixture 全部走完。
+- Dash 与 BusyBox ash 各执行四个 root 用例，分别 4.585 秒和 4.239 秒；各自五行
+  205 字节日志精确匹配，nonce、内核与 FD 证明、真实退出和清理结果通过。
+- 终态回读 run 25 文件/52,846 字节、Dash 49 文件/141,793 字节、BusyBox ash
+  46 文件/126,206 字节。文件数差异来自实际观测次数，不复用上一轮计数或 PASS。
+  运行前后源码双流一致；组合核验摘要
+  `2833315a0c6837869895deb25f03194994f07f980d314543c4cd6a55f542778c`。
+
+该结论是 **fixed_39cc_local_only PASS**。阶段 58 历史源码、当前 39cc 源码及下面
+的新接入提交分别绑定，不将其中一项升级为另一项的通过证据。
+
+### 接入候选与实际接口问题
+
+独立候选提交为 `949fc6036a95e5c1ed55c4d5d5f96793ba42670f`：增加可信私有
+Linux lane 的固定合同、工具与源码检查，保留 Windows 路径及原检查标准；同步
+actionlint 标签、使用说明和三个 manifest 摘要。checkout 前只核验私有仓所有者与
+低权限身份，源码与提交绑定在 checkout 后执行，不声称 checkout 前已经核验源码。
+本文固定时该提交的完整本地 Windows Strict 正独立执行，尚未取得最终退出回执；
+终态结果待核并留存树外，不能用已有 39cc Linux 结果代替。
+
+安装前主会话发现 generic CI checker 仍读取旧版 fixture 的 `result` 和
+`observed_exit_code` 字段，而 v10 实际回执使用 `fixture_exit`。独立审查复现
+两个真实回执均被旧 checker 拒绝；此前包完整性审查未覆盖这一接口缺口，已追加
+纠正记录并暂缓旧包安装。新候选仅修回执兼容与严格字段检查，通过实际 39cc 双引擎
+回执回放及失败变异测试后重新绑定合同；旧候选与失败证据均保留。
+
+修复共 53 项专项测试通过，仅改变 `check_receipt`；独立审查通过后新安装请求
+`install-ci-002` 实际退出 0。新合同摘要
+`675eb603c65076635798ab940ea07e2c266c9b792b0dfaff72a5ff02c202502c`，
+checker 摘要 `abf11dbc6bf2f72a280492a2f18316433c25d19f4ab09f7ce8504520097a1371`。
+新提交的实际低权限 source/runtime/adapter preflight 退出 0，随后两个新的 root
+fixture 各四用例通过，Dash 4.265 秒、BusyBox ash 4.207 秒；修复后的 generic
+checker 实际读取新回执通过，执行前后源码仍匹配。该次双引擎外层总预算为 1500 秒，
+adapter 各引擎内部 600 秒不变；这只验证新提交的 root 组件和回执接口，不冒充原
+workflow 的外层预算、完整 POSIX 或真实 GitHub event。没有伪造 event/run 环境。
+
+### 尚未取得的结果
+
+官方 runner 2.337.0 的已安装文件匹配，现场本地检查为 UNREGISTERED_LOCAL，
+无 Listener/Worker。只读 GitHub 观测仍只有原 Windows runner；这些是当次状态，
+不构成之后服务窗口的持续授权或空闲证明。本轮未注册 runner、切换服务、push、
+触发 CI 或修改生产设备。新候选的真实 GitHub event、同 SHA 双 lane、main 采用、
+服务恢复与重启验收仍需后续真实证据。
+
+TASK-0048 仍为 IMPLEMENTING / REVIEW V2 / Missing implementation_result；
+分类 fresh、批准 current 不代表实现完成。本阶段文档提交固定后执行本仓原完整质量门，
+其结果仅证明本仓软件检查，不补签目标 CI、生命周期验收或任务 Gate。
