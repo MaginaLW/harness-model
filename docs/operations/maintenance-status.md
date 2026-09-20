@@ -1,5 +1,22 @@
 # 维护收尾与待办
 
+## 2026-09-20 当前核定
+
+本轮从 `d40971a` 重新读取：当前分支为 `codex/self-hosted-runner-inventory`；
+账本是 **47 tasks：38 MERGED / 7 BLOCKED / 1 APPROVED_FOR_MERGE / 1 IMPLEMENTING**。
+TASK-0048 为 REVIEW/V2、`Missing: implementation_result`；TASK-0028 仍需重验，
+维持选项 C。下文 46 项及“没有实施中 task”属于历史快照，不再描述当前状态。
+
+本轮[ZCode 试点复盘与接续](zcode-retrospective-2026-09-20.md)已核对两个外仓当前
+检出、回灌记录及证据缺口；不把旧 CI、目标自述或方法采纳当成当前验收。
+任务 02 的最新已记录节点是 [WHPX 阶段 57](../implementation/task02-runtime-integration.md#whpx-实际启动与阶段-57-收尾)，
+已经记录真实 Linux 启动；“尚未安装 Linux”仅为早期准备结论。完整 POSIX 仍保留
+阶段 55 退出 124；新 boot 的低权限/挂载准入、原单项、完整门和接入仍须按该节点
+顺序推进。本轮没有重查 guest 现场，不把历史运行状态写成当前在线。
+
+本轮先完成只读复盘与本仓方法改进。外仓写入交接、真实双产品 E3、任务 02 实施结果
+及阶段三准入均未因此完成；三份既有未跟踪计划稿保留，不纳入本轮提交。
+
 首次盘点日期：2026-09-07。盘点基线为 `c9343c2`；当时远端 main 经只读查询为 `1f28583`，
 当时开放 PR 和 issue 均为 0。本页是当前工作入口，不替代任务账本与 Gate；
 历史统计和决定保留在[原处置目录](../superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md)。
