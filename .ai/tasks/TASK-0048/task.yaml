@@ -11,7 +11,7 @@ allowed_scope:
 base_commit: 44bda60199c4344220590aff30522022bf3c1064
 branch: codex/self-hosted-runner-inventory
 created_at: '2026-09-13T00:00:46Z'
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -120,7 +120,7 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-21T15:49:54Z'
 subject_commit: 968cc3c354b87671b7c3f8d60a2784ba06c90261
 task_id: TASK-0048
-updated_at: '2026-09-21T15:51:15Z'
+updated_at: '2026-09-21T17:11:49Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md

@@ -1,0 +1,15 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "2475d3f7eda889d08c758864733e39ab2a579664d242adb505f9ce3ff50a9924",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0048",
+  "parameter_summary": "One fixed five-mutation harness safeguard collection on the exact subject; at most five temporary worktrees; no external execution or policy change.",
+  "subject_commit": "968cc3c354b87671b7c3f8d60a2784ba06c90261",
+  "conditions": [
+    "Consume once on launch, failure or interruption; no automatic retry.",
+    "Preserve the original subject and collect baseline, mutant and cleanup evidence.",
+    "Only the five existing manifest safeguards; actual runner business evidence remains separate."
+  ],
+  "expires_at": "2026-09-21T17:51:52.883781+00:00",
+  "single_use": true
+}
