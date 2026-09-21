@@ -3234,3 +3234,23 @@ GitHub 随后回查确认私有仓库 `MaginaLW/r3s-VPS` 的 runner **22**：
 此检查点完成离线注册；Windows/Linux 串行接单切换、Linux CI、main 采用、重启与
 恢复后的业务 job 尚未据此通过，继续执行。Windows 服务操作采用正常 OS UAC 提权，
 不将项目授权解释为已取得管理员 token。TASK-0048 继续保持 IMPLEMENTING。
+
+### Windows 切换的 OS 提权结果
+
+正常 UAC 提权尝试返回“操作已被用户取消”，未得到进程 PID，也未产生服务操作
+脚本的执行 receipt。随后只读回查确认：Windows 原服务仍 Running/Auto、原进程
+未变，runner 21 online/idle；Linux runner 22 offline/idle。没有重复提权或绕过
+管理员边界。现场结果保存在树外 `stage60-windows-elevation-cancelled-001/receipt.json`。
+用户的项目授权仍有效；继续切换需要一次实际成功的 OS 管理员提权，随后重新核验
+空闲与两端状态。Linux CI 和后续生命周期仍未执行，不能将离线注册当作采用完成。
+
+### 注册检查点质量复验
+
+提交 `9f5686f52f2eb8c5189ac337142930bdbb2b0fce` 的独立 clean checkout 完成全部
+10 项检查：105 项 contract 检查与 1945 项完整测试通过，总覆盖率 88.12%，完整
+测试耗时 579.08 秒；Ruff、format、mypy、diff coverage、whitespace 及 clean status
+均通过。质量 receipt 摘要：
+`966a64a9b038da7a9e2f7c66011643422cdb0d5333d72ee93c12403f237a1fb2`。
+独立证据审查也确认 Stage60B/C 全部 10 个引用摘要与现场原件匹配，且未扩大完成
+声明；审查摘要 `628aa501514a975e65ae00ae8c77f326a95c70d65949e9c3ef670f7cf929a859`。
+本小节及 UAC 结果仅追加状态文档；完整测试绑定上述提交，不冒充 Linux job 验收。
