@@ -5,6 +5,12 @@
 [任务 02 执行目录](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)为准。
 它记录当次已取得的证据和未完成项，不替代 AI Flow 的验证、批准或 Gate。
 
+2026-09-21 当前入口：见文末 Stage 60D 及“正式治理关闭的当前缺口”。固定
+`949fc6036a95e5c1ed55c4d5d5f96793ba42670f` 已完成 pilot 双 lane、main 采用和
+main Linux 验证；真实 guest 重启后完整 Linux 业务验收通过。Linux 已停用且
+独立确认离线、无进程/容器残留，Windows 服务已恢复；main Windows 完整验证
+仍待结果。TASK-0048 尚非 Gate PASS；下方其他“最新/当前”均为历史时点记录。
+
 2026-09-21 最新执行结果：见文末“阶段 59：完成交接、当前源码验证与独立接入候选”。
 所有者已交接；固定 `39cc7ff` 的完整本地 POSIX 通过，新候选 `949fc60` 的双引擎
 root 组件与修复后的回执接口实际通过。本文固定时完整候选 Strict 仍在执行，结果待核，
@@ -3370,3 +3376,43 @@ runner 22 执行；main 的 Windows 排队作业保留，等待 Linux 完全停�
 mypy、whitespace；完整测试 729.88 秒，最终工作树干净。质量回执摘要
 `b69cf848c3b8b98c24e00a299114f36cd6d02b2ec175e0015fb55961c2e22cc7`。
 该完整测试绑定指定提交；后续追加的运行事实不伪称重新执行过相同测试。
+
+#### 重启后真实业务验收与最终串行交接
+
+新 BOOT 的 pilot attempt 3 Linux job `106367257688` 九个步骤全部成功，实际执行
+runner 22。独立收回本轮 98 份原件，两项实际 nonce 为
+`bbf52abfcf674681a638f83acb092eab`（dash）和
+`9c58904ad80141608c305c3e6c642e51`（BusyBox ash）；双读、哈希、schema、完整业务
+markers 与原 component 检查全部通过。结果摘要
+`fdf1befe2c1d35231c5ac0bcff8dbe79c51e79345822bc903ed12a4295329c1f`。
+该结果绑定新 BOOT、QEMU 出生身份、launch 与严格 SSH transport，构成实际重启后的
+业务验收；Windows 展示的沿用结果不算重启后 Windows 新执行。
+
+采集结束后以新 BOOT 绑定的受控动作停用 Linux 服务，实际 `inactive/dead`、
+`disabled`、MainPID/ControlPID 为零且无 Runner 残留，原 user manager 保持运行。
+main 的 Windows job `106362618978` 已由恢复后的 runner 21 接取，低权限、
+checkout 和工具检查成功，完整 Strict 仍在执行。
+
+最终独立只读核验确认 Linux unit `inactive/dead/disabled`，无 Listener/Worker，
+rootless containers/pods 为空，注册保留，user manager 798 未变；随后 GitHub 21/22
+均 offline/idle。独立回执摘要
+`17d3d77af45b6d88af90241b89f9f204b7b171d08e2d01ab80b178d8a1fdd001`。
+Windows Restore 通过真实系统提权执行，服务恢复 Running/Auto，原 delayed-auto
+启动设置已还原；服务 PID 25804 与 Listener 43600 的路径、SID 和父子关系通过，
+故障恢复配置前后完全一致。恢复回执摘要
+`f4f0873f4ac75a02c7cd6d16b8fab15dd9aaa8269308f6182c7067ec8d6689d6`；
+本地恢复与远端接单已确认，新 Windows Strict 终态另行核实。
+
+#### 正式治理关闭的当前缺口
+
+只读 CLI 审查确认 `implementation_result` 是状态提示，不是可手工补写的 schema
+字段。TASK-0048 仍为 IMPLEMENTING / REVIEW / V2；当前 scope 与 gate 不通过：
+原 base 到当前提交还包含其他工作的业务路径，不能归入本任务唯一报告范围。
+另有三个用户未跟踪计划文件，保持原状。CLI `sync` 只同步 subject，不提供迁移
+base/branch 的入口；不以扩大 allowed_scope 或重写历史消除差异。
+
+DU-001 的 targeted mutation 声明为 false，与 V2 当前必需的 mutation 合同不一致。
+即便后续正确执行，其固定五项 mutation 验证的是 harness 治理防线，不是 runner
+业务行为。当前没有伪造 mutation、最终 review/code approval 或 V2 finalize；
+也没有以历史完整质量结果冒充最终 subject 的正式验证。运维验收与此治理缺口分别
+记录，不能由真实 CI 成功推导 TASK-0048 Gate PASS。I5、其他仓推广和生产操作未启动。
