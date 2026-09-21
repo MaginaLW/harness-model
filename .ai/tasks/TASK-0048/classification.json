@@ -1,10 +1,10 @@
 {
   "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
   "change_reason": "unchanged",
-  "classification_input_sha256": "2f9dd6fcce07df14b6acf2a3a6214c50bb4eac709a03bebc443ff0a56e9d9b4b",
+  "classification_input_sha256": "2475d3f7eda889d08c758864733e39ab2a579664d242adb505f9ce3ff50a9924",
   "classifications": [
     {
-      "classified_at": "2026-09-21T15:45:43Z",
+      "classified_at": "2026-09-21T15:49:52Z",
       "decision_unit_id": "DU-001",
       "explanation": "Secret or authentication changes require review.",
       "explanations": [
@@ -61,12 +61,12 @@
       ]
     }
   ],
-  "classified_at": "2026-09-21T15:45:43Z",
+  "classified_at": "2026-09-21T15:49:52Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V2",
   "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
   "policy_version": "2.3.0",
   "schema_version": "2.0",
-  "subject_commit": "37beda8ce0f0d6decdcd5f84ab52b7f8f45cacf6",
+  "subject_commit": "968cc3c354b87671b7c3f8d60a2784ba06c90261",
   "task_id": "TASK-0048"
 }

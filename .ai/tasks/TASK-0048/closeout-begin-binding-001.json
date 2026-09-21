@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-0048",
+  "observed_at": "2026-09-21T15:49:51.620921+00:00",
+  "subject_commit": "968cc3c354b87671b7c3f8d60a2784ba06c90261",
+  "previous_spec_approval_subject": "37beda8ce0f0d6decdcd5f84ab52b7f8f45cacf6",
+  "observations": [
+    {
+      "command": "aiflow status TASK-0048",
+      "result": "READY_TO_IMPLEMENT; approvals current; Missing begin"
+    },
+    {
+      "command": "aiflow begin TASK-0048",
+      "result": "Required specification approval is missing or stale",
+      "source": "src/aiflow/task_service.py:_require_ready_artifacts additionally compares approval.subject_commit"
+    },
+    {
+      "command": "aiflow approve TASK-0048 --type spec",
+      "result": "Approval is not allowed in the current state",
+      "source": "src/aiflow/approval.py:_APPROVAL_STATES"
+    }
+  ],
+  "resolution": "Use explicit spec_changed escalation to clarify ordering. Refreeze and independently review; record existing delegated spec authority and begin on one unchanged subject. No Policy, CLI, schema or old record mutation; no fresh user decision implied.",
+  "future_issue": "Align begin spec binding with the authoritative freshness policy in a separately governed code change; not implemented in TASK-0048."
+}

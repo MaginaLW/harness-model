@@ -568,5 +568,18 @@
     "spec_sha256": "af003efadfbbb4d4c31e039d5c54b7b7a39590cd9fb87c7bdf984c324a54df8c",
     "subject_commit": "37beda8ce0f0d6decdcd5f84ab52b7f8f45cacf6",
     "task_id": "TASK-0048"
+  },
+  {
+    "actor": "project-owner-via-codex",
+    "approval_type": "spec",
+    "approved_at": "2026-09-21T15:51:08Z",
+    "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing owner delegation and explicit continuation cover the bounded governance closeout. Independent design review REV-0003 approved the exact integration scope, required V2 declaration and observed same-subject approve/begin ordering; the new record preserves prior rejected attempts and does not claim fresh human inspection or new external authority.",
+    "schema_version": "1.0",
+    "spec_sha256": "237f05013a5feebb27a4697e8df3f77519de060ec9dbb76eecccdd7c1e6d5545",
+    "subject_commit": "968cc3c354b87671b7c3f8d60a2784ba06c90261",
+    "task_id": "TASK-0048"
   }
 ]
