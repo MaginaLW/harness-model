@@ -3254,3 +3254,16 @@ GitHub 随后回查确认私有仓库 `MaginaLW/r3s-VPS` 的 runner **22**：
 独立证据审查也确认 Stage60B/C 全部 10 个引用摘要与现场原件匹配，且未扩大完成
 声明；审查摘要 `628aa501514a975e65ae00ae8c77f326a95c70d65949e9c3ef670f7cf929a859`。
 本小节及 UAC 结果仅追加状态文档；完整测试绑定上述提交，不冒充 Linux job 验收。
+
+### 再次授权后的下一阶段预检
+
+所有者再次授权后，重新核验 runner 22 的本地注册身份、无 Listener/Worker、
+空容器及四角色基线，结果通过。服务 install/start/stop 源码复核通过；外仓候选
+仍为 `949fc6036a95e5c1ed55c4d5d5f96793ba42670f` 且工作树干净，远端 pilot 未漂移，
+main 仍为 `39cc7ff1622740cf1d28f1ce3022cf4701df90a1`。同 SHA 的 Windows job 成功、
+POSIX job 仍排队；原外仓两处用户改动保留，没有执行采用或推送。
+
+第二次正常 UAC 提权再次返回“操作已被用户取消”，未启动管理员脚本。紧接着的
+只读回查仍为 Windows Running/Auto、runner 21 online/idle，runner 22 offline/idle。
+结果保存于树外 `stage60-windows-elevation-cancelled-002/receipt.json`，下一阶段
+仍阻塞于本机交互式管理员提权；没有把再次项目授权写成服务切换或 CI 完成。

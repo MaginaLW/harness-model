@@ -299,5 +299,21 @@
     "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
     "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
     "task_id": "TASK-0048"
+  },
+  {
+    "action_sha256": "ff84e17444b584285fc0f3b4a43c1ef693baba0015fc068bd27dc9ca81bdaac2",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-21T01:49:48Z",
+    "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-21T02:19:47.6931211+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Record renewed owner authorization to complete next-stage controlled handoff after prior OS UAC cancellation; Linux22 remains offline and Windows21 idle",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
+    "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "task_id": "TASK-0048"
   }
 ]
