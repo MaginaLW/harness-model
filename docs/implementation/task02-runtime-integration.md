@@ -3337,3 +3337,36 @@ push 将远端 main 从 `39cc7ff1622740cf1d28f1ce3022cf4701df90a1` 快速前移�
 原外仓工作区两处用户改动保留。实际 push 验证 run `35608851034` 已触发，Linux
 job `106362618755` 正在运行，Windows job `106362618978` 按串行窗口排队；采用后
 双 lane、重启后业务与最终 Windows 恢复尚未据此宣告完成。
+
+#### main Linux 验收与受控冷重启
+
+main Linux job `106362618755` 已完整成功。独立收回本轮实际 92 份原件（不固定复用
+前轮 98 的数量），两个实际 nonce 的所有文件名/字节双读、必要证明、完整 markers
+和原 component 校验通过；最终结果摘要
+`d0c5ad5be09f86f4b33b4a496bd7b5724f5ce4159e15c593f6208601dee7fde0`。
+首份派生标签不准确的本地结果保留，由 corrected `recovered-002` 明确替代；未重跑
+业务或重采原件。Windows 仍排队，尚不声称采用后整体 workflow 成功。
+
+冷重启 v2 入口经独立复核，先持有旧 QEMU 原 handle，再要求本次精确请求 hash、
+window、armed 后的 dispatcher 启动及唯一旧 BOOT intent；不将任意正常退出当作
+本次重启。真实 guest reboot 已提交，旧 handle 退出 0 后，完成两次全 QEMU/SSH
+端口 absence、独占冷态备份、同字节读回、固定不可变输入/backing 校验和只读镜像
+检查，再单次启动。原件与备份保留，不自动回滚或重试；运行中的磁盘未被读取。
+实际 argv 仅移除 `-no-reboot` 并改用新日志/pidfile，原输入与同一 guest 磁盘不变。
+
+新 QEMU PID `32316`、launch 摘要
+`698abba5e23ac70df96b804d417b046643abbf95355f22f69e6fd60eec86ff2a`；
+新 BOOT `3a61e674-1061-4621-b5f0-47c3ed08804c` 与旧 BOOT 不同。新只读 transport
+只重绑 launch 路径和摘要，原 SSH host-key、进程出生身份和端口 owner guard 保留。
+runner 22 自动恢复，MainPID 714、Listener 909、user manager 798；原 unit enabled、
+精确 UID/路径/cgroup、注册及包字节匹配，无 Worker。linger、runtime-dir 和 bus
+socket 元数据也通过；不以 socket 存在宣告业务通过。独立实际重启审查结果摘要
+`d71a8e78d05c7c81eb1a0addea8a098e0a07aab87a97af02b8b5ee71db020db2`。
+重启后单独重跑已完成的 pilot POSIX job，attempt 3 新 job `106367257688` 正在
+runner 22 执行；main 的 Windows 排队作业保留，等待 Linux 完全停用后串行恢复。
+
+本仓 `78df470cf233e626e0e008a6ebd3b8efe88bfc11` 干净检出的完整质量检查均通过：
+105 合同、1945 全量测试、总覆盖率 88.12%、90% diff coverage 阈值及 Ruff、format、
+mypy、whitespace；完整测试 729.88 秒，最终工作树干净。质量回执摘要
+`b69cf848c3b8b98c24e00a299114f36cd6d02b2ec175e0015fb55961c2e22cc7`。
+该完整测试绑定指定提交；后续追加的运行事实不伪称重新执行过相同测试。
