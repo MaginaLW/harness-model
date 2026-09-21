@@ -7,9 +7,10 @@
 
 2026-09-21 当前入口：见文末 Stage 60D 及“正式治理关闭的当前缺口”。固定
 `949fc6036a95e5c1ed55c4d5d5f96793ba42670f` 已完成 pilot 双 lane、main 采用和
-main Linux 验证；真实 guest 重启后完整 Linux 业务验收通过。Linux 已停用且
-独立确认离线、无进程/容器残留，Windows 服务已恢复；main Windows 完整验证
-仍待结果。TASK-0048 尚非 Gate PASS；下方其他“最新/当前”均为历史时点记录。
+main 双平台完整验证；真实 guest 重启后完整 Linux 业务验收通过。Linux 已停用且
+独立确认离线、无进程/容器残留，Windows 服务已恢复并完成新的完整 Strict。
+当前运维验收通过；TASK-0048 因 scope/V2 缺口尚非 Gate PASS。最终结果见文末
+“采用后双平台完成与运行收尾”；下方其他“最新/当前”均为历史时点记录。
 
 2026-09-21 最新执行结果：见文末“阶段 59：完成交接、当前源码验证与独立接入候选”。
 所有者已交接；固定 `39cc7ff` 的完整本地 POSIX 通过，新候选 `949fc60` 的双引擎
@@ -3444,3 +3445,28 @@ whitespace、依赖锁定及最终工作树检查通过。pytest 报告 839.86 �
 命令退出 0；不将其表述为测得 90% 或 100%。质量回执摘要
 `55f19b6123ffa77ba69bd9456f46519ddae8ff56e2a93603d1a65ddb4045c0e4`。
 这是指定提交的独立质量复验，不代替尚未建立的 TASK-0048 正式 V2 证据。
+
+
+#### 采用后双平台完成与运行收尾
+
+2026-09-21 15:08:25 UTC，main Windows job `106362618978` 实际完成，runner 21、
+固定 S、全部步骤 success；本次从 14:23:01 UTC 开始，历时 45 分 24 秒。
+公开完整日志核对 17 项 PowerShell fixture 全部执行且零跳过、58 份 Markdown、
+27 项 Python cases、源码 SHA256 快照复查、secret-scan assurance 及
+`PROJECT_VERIFICATION=PASS mode=offline strict=true` 完整结论。Windows 的
+BusyBox 行为 fixture 依平台合同跳过，未误记为执行；其真实双 engine 行为由已验
+Linux lane 证明。
+
+main run `35608851034` attempt 1 实际 completed/success：Linux job
+`106362618755` 与本次 Windows job 都对应
+`949fc6036a95e5c1ed55c4d5d5f96793ba42670f`。这次 Windows 是恢复后的新执行，
+不是 pilot rerun 显示的历史复用结果。CI 独立回执摘要
+`4ef668c7921e943b0952ea5f4a6d309caad200d4736271849269d008480b48c6`。
+
+最终重新读取远端 main 仍为 S，runner 21 online/idle、runner 22 offline/idle；
+Windows 原 delayed-auto 与故障恢复配置已恢复，Linux 注册及 guest 保留但 runner
+禁用，原件与失败历史保留。综合最终回执摘要
+`983fbdd60fb5f0121fe4a109f1adb5b72919cc6b1c72ccc3df5536ca5c8a6e2b`。
+本次主机/guest 运维验收、main 采用后双平台 CI 和串行恢复闭环已完成，监控进程
+已结束。TASK-0048 正式 Gate 仍受上述 scope/V2 缺口阻断，不宣告任务治理关闭，
+也不据此启动 I5、其他仓推广或生产操作。
