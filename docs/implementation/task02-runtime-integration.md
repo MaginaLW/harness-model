@@ -3108,3 +3108,51 @@ workflow 的外层预算、完整 POSIX 或真实 GitHub event。没有伪造 ev
 TASK-0048 仍为 IMPLEMENTING / REVIEW V2 / Missing implementation_result；
 分类 fresh、批准 current 不代表实现完成。本阶段文档提交固定后执行本仓原完整质量门，
 其结果仅证明本仓软件检查，不补签目标 CI、生命周期验收或任务 Gate。
+
+
+## 阶段 60A：真实 CI 启动与注册前恢复机制实证
+
+2026-09-21 所有者进一步明确“充分授权，你来完成”。具体外部动作仍按当次实例、
+源码和请求摘要分别记录 action；此授权不替代技术验收。阶段 59 的独立候选
+`949fc6036a95e5c1ed55c4d5d5f96793ba42670f` 完整本地 Windows Strict 已实际退出 0，
+耗时 2225.828 秒；本仓 `49d45d7cee9ecf76a5d59c8ff27ebcddf2e56690` 干净检出
+105 合同测试、1945 完整测试及全部质量检查通过，总覆盖率 88.12%。这些回执绑定各自
+原提交，不冒充后续提交或真实 CI 结果。
+
+本次只推送已审候选分支，目标 main 保持原提交。真实
+[CI run 35547201811](https://github.com/MaginaLW/r3s-VPS/actions/runs/35547201811)
+已由 push 触发并绑定同一候选 SHA；本段固定时 Windows 完整门禁仍执行中，Linux
+job 排队。Linux 尚未注册或启动 Listener；未因 Linux 准备工作停止忙碌的 Windows。
+
+### 实际失败与恢复
+
+原低权限注册检查仍保留。新的无令牌静默窗口先使用独立 PID1 服务与定时器验证恢复
+机制。首次惰性演练因同时停止 worker 与 recovery、退出钩子重启 recovery 而失败；
+修复为串行停止和真实 PID/Job/cgroup 回读后，定时器及 SIGKILL 两案例均通过。
+实际结果摘要 `94505ffd2150aada7a7b5d916ff5ded6304b3353ee53f26f2a30746a0b62712c`。
+
+静默窗口候选的首次只读预检发现固定 32 MiB 读取上限小于已固定 Podman 二进制，
+因此在任何服务动作前拒绝。新包只将两处上限改为 64 MiB，保持文件身份和摘要检查，
+实际只读预检随后通过。正常窗口之后实际停止用户管理器，但恢复过程暴露三个接口
+问题，均保留原失败并使用新审查补丁，不覆盖已安装版本：
+
+- 停止后 logind 的动态 User 对象消失，持久 linger 文件仍存在。恢复先严格核验停止
+  状态，再启动管理器并经官方接口重申既有 true 状态；实际确认管理器和 logind
+  进程身份未变、Linger=yes、Sessions 为空。
+- 独立临时卷仍保留 Podman alive 状态，但用户运行时目录被重建，缺少 pause 的 tmp
+  父目录。仅由原 UID 经固定父目录 FD 创建缺失的 tmp/0700，不改数据库或整树权限。
+- 恢复后的 pause transient scope 名称自然变化。仅将原 v7 身份检查认证的唯一新
+  pause scope 映射到原基线名称；其余 unit-file、服务状态、依赖、源码检查全部保留。
+
+最终实际四角色、配置及启动清单通过，原窗口锁释放、定时器 inactive/dead 且无 Job。
+完整恢复耗时 **806.023 秒**，在原 1200 秒上限内；终态回读摘要
+`5eba9317f541882ba2d0babbfda1d1be824ae3dcc65074471899bb721d53d0bb`。
+该窗口仍记为失败后恢复：原 process visibility 尚未执行，不能据恢复成功记成正常
+演练通过。原失败记录、补丁源码、动作授权及各次回读均保存在树外 stage60 独占目录。
+
+### 本次检查点边界
+
+已安装原版合成验证程序但尚未执行；没有获取注册令牌、注册 Linux runner、切换
+Windows/Linux 接单服务或操作生产设备。正常及异常静默演练、真实合成验证、注册、
+同 SHA 双 lane、main 采用及生命周期验收仍待完成。TASK-0048 保持 IMPLEMENTING，
+Missing implementation_result；此检查点不生成 Gate 或阶段三/四通过结论。
