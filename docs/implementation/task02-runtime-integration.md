@@ -3312,3 +3312,28 @@ cgroup。仅调用失败 POSIX job 的 rerun API；attempt 2 新 job `1063584274
 runner 22 接取，工具预检、yq、actionlint 均成功，已进入完整 POSIX gate。Windows
 成功结果由 GitHub 沿用（新显示 job ID `106358430073`，步骤仍为原执行时间），
 没有声称再次执行 Windows。此记录时完整 POSIX 结果、重启后业务及 main 采用仍待验收。
+
+#### 完整双 lane、服务恢复与 main 采用
+
+attempt 2 的 POSIX job `106358427430` 已成功，九个步骤全部成功；实际日志包含
+48 shell 静态检查、17 fixtures 双 shell、两个 Python 文件共 27 cases、八项
+PowerShell fixture 及最终精确快照复查。两项 root 组件实际 nonce 分别为
+`2904c249ae1347c087a75f62e3e02372`（dash）和
+`a2454ab30c6e4a408e87cc28caae179c`（BusyBox ash）。独立只读收集 98 份原件，
+双读、哈希、schema、启动/FD/内核授权、精确四用例日志和清理检查均通过；结果摘要
+`1a4816b3639ee51eb9428a7e4dd0ac78f3213d8be7a21875624b35b81ba35a64`。
+workflow 未公开 adapter 原始 JSON，兼容验证投影来自收回的真实 receipt；相等检查
+不冒充独立 stdout 佐证。bootstrap controlled-path marker 未公开，按固定源码和
+实际 inventory/最终 controlled-path 检查区分间接依据与直接日志。
+
+独立恢复复核确认真实 stop/start、Listener 身份变化及随后固定 S 的完整业务 job，
+服务恢复项通过；结果摘要
+`3e1d8a0be99a182697219260274bce63938e5e83a77058a7e2a9b57acc551c53`。
+该结论不代表 guest 重启。实际 QEMU 启动参数含 `-no-reboot`，且无 monitor/QMP，
+因此先准备受控退出后的冷启动入口，不能使用“原进程保持运行”的重连假设。
+
+同 SHA 双 lane 与原件验收后，重新核对远端 main/pilot 和干净候选；仅以非 force
+push 将远端 main 从 `39cc7ff1622740cf1d28f1ce3022cf4701df90a1` 快速前移到 S。
+原外仓工作区两处用户改动保留。实际 push 验证 run `35608851034` 已触发，Linux
+job `106362618755` 正在运行，Windows job `106362618978` 按串行窗口排队；采用后
+双 lane、重启后业务与最终 Windows 恢复尚未据此宣告完成。

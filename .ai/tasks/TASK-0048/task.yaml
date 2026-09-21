@@ -99,7 +99,7 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-13T00:05:14Z'
 subject_commit: 44bda60199c4344220590aff30522022bf3c1064
 task_id: TASK-0048
-updated_at: '2026-09-21T13:44:54Z'
+updated_at: '2026-09-21T13:56:37Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md

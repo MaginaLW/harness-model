@@ -459,5 +459,21 @@
     "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
     "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
     "task_id": "TASK-0048"
+  },
+  {
+    "action_sha256": "f2baa4e32c3d14a1acc6cf6e389602eb31d87b2e7ddd003f750d6a6bc3557d5c",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-21T13:56:37Z",
+    "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-21T14:01:35.167709+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing full next-stage authorization; verified same-S Windows/Linux success plus independently collected root evidence; exact non-force main fast-forward adoption and natural CI trigger",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
+    "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "task_id": "TASK-0048"
   }
 ]
