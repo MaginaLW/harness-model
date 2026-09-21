@@ -3156,3 +3156,40 @@ job 排队。Linux 尚未注册或启动 Listener；未因 Linux 准备工作停
 Windows/Linux 接单服务或操作生产设备。正常及异常静默演练、真实合成验证、注册、
 同 SHA 双 lane、main 采用及生命周期验收仍待完成。TASK-0048 保持 IMPLEMENTING，
 Missing implementation_result；此检查点不生成 Gate 或阶段三/四通过结论。
+
+## Stage 60B：真实 Windows CI 与静默恢复演练
+
+同一外仓提交 `949fc6036a95e5c1ed55c4d5d5f96793ba42670f` 的 Actions run
+`35547201811` 中，`windows-strict` job `106175121183` 已实际完成且 success；
+`posix-shells` job `106175121387` 仍待 Linux runner。该事实不是双 lane 全部通过。
+
+v3 normal003 的低权限原 helper 进程可见性检查通过，但两次原恢复在
+`activation_changed` 退出。独立应急恢复采集到具体差异：已退出的 Podman 命令留下
+短暂的 `podman-69087.scope transient -` unit-file 行；原服务、socket、timer 状态
+没有改变。保留原 activation hash，待该行自然消失后连续两次完整严格检查通过，
+659.705 秒内恢复并释放原窗口。v3 normal003 仍记录为失败后恢复，不计正常演练成功。
+终态回读摘要：`c51cff29c117cad27e913d5dd8a5b6d5ec826fa5a044c138f9127ab63fba9f30`。
+
+v4 仅增加实际差异记录及恢复末尾的有界稳定观察：只允许 `activation_changed`
+重试，接受窗口 15 秒、间隔 1 秒；需连续两次完整 activation 与四角色观察一致。
+其余错误直接失败，不忽略未知 scope，不改原基线、900/1200 秒预算或独立恢复机制。
+21 项主机测试及独立源码/包审查通过后，完成以下真实 guest 演练：
+
+| 演练 | 实际结果 | 从 arm 到 restored | 原始回读 SHA256 |
+| --- | --- | --- | --- |
+| normal004 | 原 helper 可见性 PASS，自动恢复四角色，lease 释放 | 7.90 秒 | `c80f78d0af353286684627997518ae4f510942fc40128440f4dbb64c4f75ef0c` |
+| fault002 | quiet 后控制器 SIGKILL，独立 PID1 自动恢复，lease 释放 | 7.16 秒 | `a030d63e040958e0f838fb569408a65eeb69a96d0ac3886eabe85147d40795e8` |
+
+fault002 另以实际 `Result=signal / ExecMainCode=2 / ExecMainStatus=9` 确认 SIGKILL，
+并重新执行严格 activation 与四角色检查；证据摘要
+`9b14f227ff147c829845421c58c6e7f3b38eaf6ce226a9aa9890ed9d5c3807a5`。
+两次恢复服务及独立定时器均 inactive/dead、无 Job；故障 work 的 failed 状态保留。
+
+仓库提交 `958e75964e3d73e8ca013b8caa33f786fc7efaeb` 的 clean-checkout 检查完成：
+105 项 contract 检查、1945 项完整测试通过，总覆盖率 88.12%；lock/sync、Ruff、
+format、mypy、90% diff coverage、whitespace 及工作树检查通过。此质量证据只绑定
+该提交，不推定之后的新提交已经完整复验。
+
+本检查点未申请真实注册令牌，未注册或启动 Linux runner，未切换 Windows 服务。
+真实官方合成检查、注册及同 SHA 双 lane、采用与生命周期验证继续进行；
+TASK-0048 保持 IMPLEMENTING，不据静默演练成功产生任务完成或 Gate PASS。
