@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "record_kind": "independent_technical_finding_reverification_not_formal_review_schema",
+  "task_id": "TASK-0048",
+  "actor": "codex-scope-closeout-independent-reviewer",
+  "reviewed_at": "2026-09-21T15:45:02.588731+00:00",
+  "previous_review": {
+    "ref": "closeout-integration-review-001.json",
+    "sha256": "e43bcedf46f7ab86188fdcdf3b889e1741a5bd151c6661e829f72c0eb8362098",
+    "preserved_unchanged": true
+  },
+  "original_attribution": {
+    "ref": "closeout-amendment-001.json",
+    "sha256": "a564207266143db0f654b0abc02f88251e510a64928877831ed16ae70565fc5b",
+    "subject_commit": "c44c04a09f0758c07343d6650cfd38cc5037720a",
+    "preserved_unchanged": true,
+    "meaning": "Original eight-path hashes remain the c44c04a observation; they are not overwritten by the subsequent documentation correction."
+  },
+  "finding_dispositions": [
+    {
+      "id": "SCOPE-CLOSEOUT-001",
+      "original_priority": "P2",
+      "status": "resolved_by_independent_reverification",
+      "path": "docs/operations/adoption.md",
+      "line": 133,
+      "current_sha256": "f66765e2975deb34ecc4276c8012b240fad06c2a5109c43bf1b88c4765059706",
+      "fix": "The rule now requires immediately saving and checking the gate own native exit status; output assertions are supplementary and cannot replace or override nonzero exit.",
+      "verification": "Read the exact two-line Git diff and surrounding paragraph. It removes the alternative-acceptance ambiguity while preserving the dated incident and original facts."
+    }
+  ],
+  "conclusion": "No remaining actionable finding in this bounded integration review after the correction. Original review and attribution records preserved.",
+  "constraints": [
+    "This is an append-only technical finding disposition, not formal review, owner approval, V2 verification or Gate PASS.",
+    "No quality execution performed for this text-only correction; the parent must run required repository checks on the final fixed subject.",
+    "The parent is separately updating and freezing the specification; this record does not certify a later spec or other future changes."
+  ]
+}

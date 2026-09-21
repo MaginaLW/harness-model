@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "record_kind": "independent_technical_integration_review_not_formal_review_schema",
+  "task_id": "TASK-0048",
+  "actor": "codex-scope-closeout-independent-reviewer",
+  "reviewed_at": "2026-09-21T15:43:56.927247+00:00",
+  "source": "Independent review by /root/scope_closeout of the full eight-path cumulative Git diff, current amendment, spec appendix and task mutation. No target system access or execution.",
+  "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+  "subject_commit": "c44c04a09f0758c07343d6650cfd38cc5037720a",
+  "digests": {
+    "amendment_sha256": "a564207266143db0f654b0abc02f88251e510a64928877831ed16ae70565fc5b",
+    "spec_sha256": "8aec65d9b6705e2b1145548319ef7c5aefc627a59b58755eca36abfd4e2153e5",
+    "task_yaml_sha256": "eb5810b78ef57734845cb31059fd967443bb340014719ae7f45cd8d7969907db",
+    "cumulative_eight_path_diff_sha256": "3106aea10495414a25317e7305bf832ed007e360a97d3a32f745dcc03b225064"
+  },
+  "verified_attribution": {
+    "eight_path_hashes_match": true,
+    "ten_commits_match_exact_ordered_git_history": true,
+    "original_spec_retained_as_prefix_normalizing_line_endings": true,
+    "path_digests": [
+      {
+        "path": "README.md",
+        "sha256": "ea7e1ed94028fc5eec3fc9fb42ef743ef2454dc5cbf50920bbda56b0e4e528dd"
+      },
+      {
+        "path": "docs/operations/adoption.md",
+        "sha256": "f1cdc2b6e54714b397107da8cc90f1dcbc786660ebf01390287da1d614013943"
+      },
+      {
+        "path": "docs/operations/feedback-loop.md",
+        "sha256": "f4edcf771469d0d9936965938238e3334623ff3ce180ff216f1376249fabeca6"
+      },
+      {
+        "path": "docs/operations/maintenance-status.md",
+        "sha256": "6136309d427ce2469bdb442c3040acf8c5345bc20aa202b21aa1f02ffc42db3e"
+      },
+      {
+        "path": "docs/operations/zcode-retrospective-2026-09-20.md",
+        "sha256": "719dee938c6017bc5a8de8e9ae53981d081a6125b4a2500c4aaad5c8171b07a5"
+      },
+      {
+        "path": "examples/adoption/project-rules.md",
+        "sha256": "ebb803a419e4a458ef1ab4eff4fe02f580ff90ad1413c7d27502896df02c17c4"
+      },
+      {
+        "path": "examples/adoption/zcode-feedback-loop-prompt.md",
+        "sha256": "4dc31bed431f79d509b8ffcd184717448cd891909bafdae3b9d887cc570faf00"
+      },
+      {
+        "path": "examples/adoption/zcode-pilot-prompt.md",
+        "sha256": "d62d522bf1c4a714616e67674bf3a06a35a23a99e96aeb5f6bedaed35b074f2e"
+      }
+    ]
+  },
+  "conclusion": "One medium-priority documentation-rule ambiguity requires disposition; amendment scope, original provenance, unchanged base, REVIEW/V2 and explicit mutation declaration are consistent. No additional defect found in remaining reviewed changes.",
+  "findings": [
+    {
+      "id": "SCOPE-CLOSEOUT-001",
+      "priority": "P2",
+      "path": "docs/operations/adoption.md",
+      "line": 133,
+      "title": "Require the gate process exit status even when output assertions pass",
+      "detail": "The instruction allows reading the gate exit code OR asserting its output text, despite the preceding rule requiring the gate own exit state. A gate can emit success text and subsequently exit nonzero; a passing text assertion can then recreate the false acceptance this paragraph is intended to prevent.",
+      "suggested_fix": "Require immediately capturing and checking the native gate exit code. Treat output assertions only as additional checks and explicitly state they cannot replace or override a nonzero exit. Keep the dated historical incident unchanged.",
+      "status": "open"
+    }
+  ],
+  "constraints": [
+    "Not an owner code approval, formal review record, V2 verifier result or Gate PASS.",
+    "Historical dated observations are reviewed for bounded claims and integration consistency; original external pilot artifacts were not independently re-executed or re-fetched here.",
+    "Current amendment supersedes only the single-report integration-scope clause; prior operational authority, history and original implementation provenance remain unchanged.",
+    "No policy, schema, runtime, quality thresholds or I5/production scope expanded.",
+    "Final frozen spec, fixed verification subject and current review context still require the normal CLI workflow."
+  ]
+}

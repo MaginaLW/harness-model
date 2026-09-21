@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-0048",
+  "amendment": "explicit_existing_documentation_integration_review_and_v2_declaration",
+  "previous_spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
+  "base_commit_preserved": "44bda60199c4344220590aff30522022bf3c1064",
+  "observed_subject": "c44c04a09f0758c07343d6650cfd38cc5037720a",
+  "paths": [
+    {
+      "path": "README.md",
+      "sha256": "ea7e1ed94028fc5eec3fc9fb42ef743ef2454dc5cbf50920bbda56b0e4e528dd"
+    },
+    {
+      "path": "docs/operations/adoption.md",
+      "sha256": "f1cdc2b6e54714b397107da8cc90f1dcbc786660ebf01390287da1d614013943"
+    },
+    {
+      "path": "docs/operations/feedback-loop.md",
+      "sha256": "f4edcf771469d0d9936965938238e3334623ff3ce180ff216f1376249fabeca6"
+    },
+    {
+      "path": "docs/operations/maintenance-status.md",
+      "sha256": "6136309d427ce2469bdb442c3040acf8c5345bc20aa202b21aa1f02ffc42db3e"
+    },
+    {
+      "path": "docs/operations/zcode-retrospective-2026-09-20.md",
+      "sha256": "719dee938c6017bc5a8de8e9ae53981d081a6125b4a2500c4aaad5c8171b07a5"
+    },
+    {
+      "path": "examples/adoption/project-rules.md",
+      "sha256": "ebb803a419e4a458ef1ab4eff4fe02f580ff90ad1413c7d27502896df02c17c4"
+    },
+    {
+      "path": "examples/adoption/zcode-feedback-loop-prompt.md",
+      "sha256": "4dc31bed431f79d509b8ffcd184717448cd891909bafdae3b9d887cc570faf00"
+    },
+    {
+      "path": "examples/adoption/zcode-pilot-prompt.md",
+      "sha256": "d62d522bf1c4a714616e67674bf3a06a35a23a99e96aeb5f6bedaed35b074f2e"
+    }
+  ],
+  "existing_commits": [
+    {
+      "commit": "44b6b03faa481b0f559c79bacfc994405bbd2be0",
+      "subject": "docs: record the verification-as-pinned-assertions method"
+    },
+    {
+      "commit": "194f294496b17b53c0348497d85c291a1614129e",
+      "subject": "docs: record the untested-branch and parameter-name-check methods"
+    },
+    {
+      "commit": "77989c21e5e819b2a80c2311e578c88dc0086779",
+      "subject": "docs: bind \"still red / unfinished\" conclusions to the run that produced them"
+    },
+    {
+      "commit": "ebc087244ce3dbe563295f43d0b40f4f7a54edab",
+      "subject": "docs: cap long verifications honestly, mark superseded claims, reproduce before re-pinning"
+    },
+    {
+      "commit": "08932325ece141302792e18f14439d5f2b7bc61d",
+      "subject": "docs: read gate exit codes from the gate, re-derive shared baselines on the integrated tree"
+    },
+    {
+      "commit": "3c83fa4e088d4162e22d785b8b74f8c0bf8b33d6",
+      "subject": "docs: take remote red-light evidence from the run's raw log, not the platform summary"
+    },
+    {
+      "commit": "7f0f4a7d7ffbee21bf725adda06077a18c911095",
+      "subject": "docs: check a single item's effective limit before diagnosing its timeout"
+    },
+    {
+      "commit": "d40971ae7a330431e9e44ea1c86d30e95ae07905",
+      "subject": "docs: separate the declared ceiling from the platform ceiling, and verify review claims"
+    },
+    {
+      "commit": "d87022a915e7a1b4d3c2cc0113f10379d9330fff",
+      "subject": "docs: reconcile current ZCode pilots and runner task status"
+    },
+    {
+      "commit": "4f1a939aaaf89f3434792153ee7b53eae15a0d66",
+      "subject": "docs: make pilot feedback and receipt follow-ups demand-driven"
+    }
+  ],
+  "attribution": "These existing documentation commits retain their original authorship and task-free provenance. The amendment authorizes cumulative integration review only; it does not reattribute their original implementation to TASK-0048.",
+  "authority": "The owner requested project status and ZCode trial review, delegated completion, and explicitly continued after the operational closeout and governance gaps were reported.",
+  "verification": "Keep REVIEW/V2 and all quality thresholds. Execute the fixed five harness safeguard mutations as regression evidence for specification acceptance item 8, never as runner isolation or business evidence.",
+  "unchanged_boundaries": [
+    "base and prior commits",
+    "Policy and schemas",
+    "external operational authority",
+    "I5 and production excluded",
+    "three user untracked plan files untouched"
+  ]
+}

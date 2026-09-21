@@ -1,9 +1,17 @@
 allowed_scope:
 - docs/implementation/task02-runtime-integration.md
+- README.md
+- docs/operations/adoption.md
+- docs/operations/feedback-loop.md
+- docs/operations/maintenance-status.md
+- docs/operations/zcode-retrospective-2026-09-20.md
+- examples/adoption/project-rules.md
+- examples/adoption/zcode-feedback-loop-prompt.md
+- examples/adoption/zcode-pilot-prompt.md
 base_commit: 44bda60199c4344220590aff30522022bf3c1064
 branch: codex/self-hosted-runner-inventory
 created_at: '2026-09-13T00:00:46Z'
-current_state: IMPLEMENTING
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -31,6 +39,14 @@ decision_units:
   - external_action
   impact_scope:
   - docs/implementation/task02-runtime-integration.md
+  - README.md
+  - docs/operations/adoption.md
+  - docs/operations/feedback-loop.md
+  - docs/operations/maintenance-status.md
+  - docs/operations/zcode-retrospective-2026-09-20.md
+  - examples/adoption/project-rules.md
+  - examples/adoption/zcode-feedback-loop-prompt.md
+  - examples/adoption/zcode-pilot-prompt.md
   inputs:
   - The task 02 plan and the owner's explicit authorization to complete it.
   - Frozen private target checkout, manifest and original required check definitions.
@@ -53,6 +69,9 @@ decision_units:
     job, runner and checkout observations.
   - Record actual lifecycle, cleanup and restart results without substituting simulated
     or historical evidence.
+  - Independently review the eight attributed pre-existing documentation increments
+    in the cumulative integration subject without changing their original implementation
+    ownership.
   protections:
     dry_run: false
     verified_backup: false
@@ -75,11 +94,13 @@ decision_units:
     its final manifest-bound changes.
   - Run the current harness quality gates, preserve old CLI contracts and append immutable
     operational evidence.
+  - Run the fixed five targeted harness safeguard mutations for acceptance item 8;
+    keep their claims separate from external runner acceptance.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
     integration_required: true
-    targeted_mutation_required: false
+    targeted_mutation_required: true
 forbidden_actions:
 - push
 - merge
@@ -97,9 +118,9 @@ goal: Record and verify the authorized private Linux runner integration, isolate
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-09-13T00:05:14Z'
-subject_commit: 44bda60199c4344220590aff30522022bf3c1064
+subject_commit: c44c04a09f0758c07343d6650cfd38cc5037720a
 task_id: TASK-0048
-updated_at: '2026-09-21T14:22:25Z'
+updated_at: '2026-09-21T15:42:55Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md

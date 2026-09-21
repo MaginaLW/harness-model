@@ -55,3 +55,38 @@ I1/I3 通用工具已在之前的独立提交固定，本 task 不把它们重�
 回退只针对精确核验的本次对象：空闲时恢复原 Windows 服务、停止本次 Linux 实例，
 恢复本次 workflow 路由差异。guest、失败日志、源快照与镜像摘要保留诊断；未知内容不
 清理。托管额度不足时不保证回退后 job 能执行。中止 Linux 接入不影响旧引擎使用。
+
+
+## 2026-09-21 治理收尾规格补充
+
+本节通过 `spec_changed` 同级升级重新核定，补充原“范围”中唯一报告路径的集成
+审查范围；原规格文字、base、已完成运维证据及既有提交归属保留。所有者在接入
+验收与正式治理缺口报告后明确继续，沿用其项目状态/ZCode 复盘与完整执行委托。
+
+以下八份既有文档增量纳入本次累计版本的独立集成审查，不追认其最初属于
+TASK-0048 实施，不改变其原 task-free 来源，也不允许改动额外业务或治理源码：
+独立审查发现的必要文档纠正可在这些精确路径内完成，并保留发现及修复复核记录。
+
+- `README.md`
+- `docs/operations/adoption.md`
+- `docs/operations/feedback-loop.md`
+- `docs/operations/maintenance-status.md`
+- `docs/operations/zcode-retrospective-2026-09-20.md`
+- `examples/adoption/project-rules.md`
+- `examples/adoption/zcode-feedback-loop-prompt.md`
+- `examples/adoption/zcode-pilot-prompt.md`
+
+精确十个既有提交、当前字节摘要及原规格摘要见
+[补充范围记录](closeout-amendment-001.json)。审查完整 base→subject 增量，
+对历史事实保留其当时版本限定；不得将历史待验收记为当前失败，或从方法采用
+推导业务/生产验收。文档中的按需反馈决定保留，普通完成不触发回灌或新外部动作。
+
+原验收第 8 项补充明确：按当前 V2 执行固定五项 harness 治理防线 mutation，
+验证必需检查集、独立 verifier、code approval、Gate 和 snapshot 防篡改。
+这些 mutation 必须真实运行并取得 killed 结果，只证明本仓治理回归，不证明
+Linux 隔离、服务恢复或目标业务；后者沿用各自实际原件，不能相互替代。
+
+本次保持 REVIEW/V2、全部原质量阈值、原 base 与追加式账本。新规格必须重新
+冻结、独立设计审查、办理已有委托的当前版本 spec 批准，再推进固定 subject 的
+完整验证、独立实现审查和 finalize。不得借此降级、跳过门禁、重写旧批准或
+启动 I5/生产/新外部操作。三个用户未跟踪计划不纳入范围，在原工作区保持不动。
