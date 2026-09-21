@@ -11,5 +11,21 @@
     "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
     "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
     "task_id": "TASK-0048"
+  },
+  {
+    "action_sha256": "72cc7c267ee0878a464c0d52f225f43257449013eeb6a72e417f2511f22202a6",
+    "actor": "project-owner-via-codex",
+    "approval_type": "action",
+    "approved_at": "2026-09-21T00:16:08Z",
+    "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-21T12:16:07.606443+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "用户在注册、受控服务与CI流程说明后明确回复“充分授权，你来完成。”；据此记录本次固定候选分支推送及其私有CI触发授权。外仓提交与完整Strict另行绑定；不宣称task Gate通过，不授权生产或秘密导出。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
+    "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "task_id": "TASK-0048"
   }
 ]
