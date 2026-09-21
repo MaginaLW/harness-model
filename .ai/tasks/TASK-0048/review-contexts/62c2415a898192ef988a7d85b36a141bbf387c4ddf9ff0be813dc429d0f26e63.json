@@ -1,0 +1,57 @@
+{
+  "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "2f9dd6fcce07df14b6acf2a3a6214c50bb4eac709a03bebc443ff0a56e9d9b4b",
+  "content": {
+    "allowed_scope": [
+      "docs/implementation/task02-runtime-integration.md",
+      "README.md",
+      "docs/operations/adoption.md",
+      "docs/operations/feedback-loop.md",
+      "docs/operations/maintenance-status.md",
+      "docs/operations/zcode-retrospective-2026-09-20.md",
+      "examples/adoption/project-rules.md",
+      "examples/adoption/zcode-feedback-loop-prompt.md",
+      "examples/adoption/zcode-pilot-prompt.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Record and verify the authorized private Linux runner integration, isolated execution and controlled Windows/Linux handoff for task 02; preserve all original quality checks and public hosted CI.",
+        "impact_scope": [
+          "docs/implementation/task02-runtime-integration.md",
+          "README.md",
+          "docs/operations/adoption.md",
+          "docs/operations/feedback-loop.md",
+          "docs/operations/maintenance-status.md",
+          "docs/operations/zcode-retrospective-2026-09-20.md",
+          "examples/adoption/project-rules.md",
+          "examples/adoption/zcode-feedback-loop-prompt.md",
+          "examples/adoption/zcode-pilot-prompt.md"
+        ],
+        "planned_actions": [
+          "Freeze the current private target, dependency inputs, operational window and rollback.",
+          "Verify the dedicated low-privilege Linux guest and rootless fixture environment against the original checks.",
+          "Register and exercise one explicitly scoped private Linux runner only after current readiness and action authority are verified.",
+          "Preserve at most one accepting runner instance during the Windows and Linux handoff.",
+          "Prepare a separately reviewed private workflow change and associate actual run, job, runner and checkout observations.",
+          "Record actual lifecycle, cleanup and restart results without substituting simulated or historical evidence.",
+          "Independently review the eight attributed pre-existing documentation increments in the cumulative integration subject without changing their original implementation ownership."
+        ]
+      }
+    ],
+    "goal": "Record and verify the authorized private Linux runner integration, isolated execution and controlled Windows/Linux handoff for task 02; preserve all original quality checks and public hosted CI.",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "62c2415a898192ef988a7d85b36a141bbf387c4ddf9ff0be813dc429d0f26e63",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "af003efadfbbb4d4c31e039d5c54b7b7a39590cd9fb87c7bdf984c324a54df8c",
+  "task_id": "TASK-0048"
+}

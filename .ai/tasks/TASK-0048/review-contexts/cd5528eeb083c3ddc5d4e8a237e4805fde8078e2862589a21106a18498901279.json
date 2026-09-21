@@ -1,0 +1,40 @@
+{
+  "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "1dc8f4abea4def33e4be617062da297e40bb17cdf32a78d74098e8e44f108852",
+  "content": {
+    "allowed_scope": [
+      "docs/implementation/task02-runtime-integration.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Record and verify the authorized private Linux runner integration, isolated execution and controlled Windows/Linux handoff for task 02; preserve all original quality checks and public hosted CI.",
+        "impact_scope": [
+          "docs/implementation/task02-runtime-integration.md"
+        ],
+        "planned_actions": [
+          "Freeze the current private target, dependency inputs, operational window and rollback.",
+          "Verify the dedicated low-privilege Linux guest and rootless fixture environment against the original checks.",
+          "Register and exercise one explicitly scoped private Linux runner only after current readiness and action authority are verified.",
+          "Preserve at most one accepting runner instance during the Windows and Linux handoff.",
+          "Prepare a separately reviewed private workflow change and associate actual run, job, runner and checkout observations.",
+          "Record actual lifecycle, cleanup and restart results without substituting simulated or historical evidence."
+        ]
+      }
+    ],
+    "goal": "Record and verify the authorized private Linux runner integration, isolated execution and controlled Windows/Linux handoff for task 02; preserve all original quality checks and public hosted CI.",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "cd5528eeb083c3ddc5d4e8a237e4805fde8078e2862589a21106a18498901279",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
+  "task_id": "TASK-0048"
+}

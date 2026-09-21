@@ -36,6 +36,9 @@
 | [阶段三进入输入](docs/implementation/phase-03-entry-inputs.md) | 阶段二结束后的可审计输入和仍未满足的阶段三进入门；不构成授权 |
 | [审批开销治理与未完成任务收敛实施目录](docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md) | 历史诊断与处置记录：A2 仅余 TASK-0028，B0–B2 停止、B3 已解决、B4 暂缓；不是待逐章启动的实施队列 |
 | [维护收尾与待办](docs/operations/maintenance-status.md) | 已完成项、当前交付、保留的历史任务与后续工程缺口；附可复核基线和下一步 |
+| [自托管执行基础设施](docs/operations/self-hosted-runners.md) | 私有 runner 接入与运维、只读健康检查、可选回执契约及任务 02 验收进度 |
+| [ZCode 试点收尾与跨 Agent 协作执行目录](docs/superpowers/plans/2026-09-12-zcode-review-fix-execution.md) | 2026-09-12 核查：现有试点补证、最小交接设计、真实双工具闭环与条件性内核建设 |
+| [2026-09-12 计划收尾与后续顺序](docs/superpowers/plans/2026-09-12-plan-closeout-and-next-steps.md) | 最小 runner 试点已收口；下一步同仓 Windows/Linux CI、正式采用，协作线复用 E1–E5 |
 | [文档归档](docs/archive/README.md) | 章节 1–7 逐任务执行文档的归档位置、归档原则与原路径映射表 |
 | [资源感知多智能体调度设计](docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) | “编排顾问 + 确定性控制面”、整机资源租约、背压与恢复设计 |
 | [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |
@@ -44,7 +47,10 @@
 | [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口；共同治理规则以 Agent 规则为准 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
 | [接入现有 AI 工作流](docs/operations/adoption.md) | ZCode 首批试点、只读仓库盘点、可合并规则和分批推广；区分轻量接入与完整引擎缺口 |
+| [ZCode 外仓试点反馈](docs/operations/zcode-adoption-feedback.md) | ai-agent-dotfiles 固定任务窗口的五项工程反馈、证据限制及已纳入的接入方法 |
+| [按需反馈与回灌](docs/operations/feedback-loop.md) | 已登记试点仅有实质问题或用户明确请求时执行；无问题无请求则 no-op，不因普通完成、版本差异或正常连续回执派生新提交验证 |
 | [低干预工作方式](docs/operations/low-intervention.md) | Agent 连续推进、必要人工决定的边界与可重跑的审批开销统计 |
+| [模型选择与代理职责](docs/operations/model-selection.md) | UI 与运行时决定型号，职责不绑定模型代际；保留历史型号证据 |
 | [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence、证据保留与精确清理边界 |
 | [阶段一验收报告](docs/implementation/phase-01-acceptance-report.md) | 十二项验收、四试点、覆盖率、限制和风险接受 |
 | [Chapter 8 追踪](docs/implementation/chapter-08-structured-review.md) | 结构化设计/实现审核的任务状态和兼容性护栏 |

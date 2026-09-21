@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "kind": "execution_receipt",
+  "receipt_id": "synthetic-receipt-001",
+  "repository": {"github_id": 123456, "owner_name": "example/private-demo", "visibility": "private", "trust": "trusted"},
+  "runner": {
+    "id": 42, "profile_id": "synthetic-linux", "scope": "repository", "os": "Linux", "architecture": "X64",
+    "runner_version": "2.333.0", "privilege": "low", "isolated_workspace": true, "active_instances": 1,
+    "network_boundary_ref": "synthetic-private-network", "environment_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "code": {
+    "base_commit": "1111111111111111111111111111111111111111",
+    "subject_commit": "2222222222222222222222222222222222222222",
+    "checkout_commit": "2222222222222222222222222222222222222222",
+    "tree_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "dirty": false
+  },
+  "definition": {
+    "workflow_ref": ".github/workflows/offline.yml",
+    "workflow_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "check_set_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "dependency_lock_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "source": {
+    "kind": "github_api", "run_id": "1001", "job_id": "2001", "attempt": 1,
+    "observation_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "observed_at": "2026-09-13T00:03:01Z"
+  },
+  "started_at": "2026-09-13T00:01:00Z", "finished_at": "2026-09-13T00:03:00Z", "result": "succeeded",
+  "checks": [
+    {"id": "lint", "command_ref": "locked-lint-v1", "status": "passed", "exit_code": 0},
+    {"id": "tests", "command_ref": "locked-tests-v1", "status": "passed", "exit_code": 0}
+  ],
+  "artifacts": [{"path": "reports/checks.json", "sha256": "9999999999999999999999999999999999999999999999999999999999999999"}],
+  "association": null
+}

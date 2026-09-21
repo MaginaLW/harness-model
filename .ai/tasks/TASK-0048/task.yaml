@@ -1,0 +1,128 @@
+allowed_scope:
+- docs/implementation/task02-runtime-integration.md
+- README.md
+- docs/operations/adoption.md
+- docs/operations/feedback-loop.md
+- docs/operations/maintenance-status.md
+- docs/operations/zcode-retrospective-2026-09-20.md
+- examples/adoption/project-rules.md
+- examples/adoption/zcode-feedback-loop-prompt.md
+- examples/adoption/zcode-pilot-prompt.md
+base_commit: 44bda60199c4344220590aff30522022bf3c1064
+branch: codex/self-hosted-runner-inventory
+created_at: '2026-09-13T00:00:46Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - private_runner_registration
+  - task_owned_guest_provisioning
+  - idle_runner_service_handoff
+  - private_ci_execution
+  goal: Record and verify the authorized private Linux runner integration, isolated
+    execution and controlled Windows/Linux handoff for task 02; preserve all original
+    quality checks and public hosted CI.
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  - authentication
+  - external_action
+  impact_scope:
+  - docs/implementation/task02-runtime-integration.md
+  - README.md
+  - docs/operations/adoption.md
+  - docs/operations/feedback-loop.md
+  - docs/operations/maintenance-status.md
+  - docs/operations/zcode-retrospective-2026-09-20.md
+  - examples/adoption/project-rules.md
+  - examples/adoption/zcode-feedback-loop-prompt.md
+  - examples/adoption/zcode-pilot-prompt.md
+  inputs:
+  - The task 02 plan and the owner's explicit authorization to complete it.
+  - Frozen private target checkout, manifest and original required check definitions.
+  - Dedicated low-privilege Linux runtime, task-owned storage and current private
+    Windows service observations.
+  - Repository impact_scope names tracked deliverables; external operational scope
+    and permissions remain explicit below and in the specification.
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Freeze the current private target, dependency inputs, operational window and rollback.
+  - Verify the dedicated low-privilege Linux guest and rootless fixture environment
+    against the original checks.
+  - Register and exercise one explicitly scoped private Linux runner only after current
+    readiness and action authority are verified.
+  - Preserve at most one accepting runner instance during the Windows and Linux handoff.
+  - Prepare a separately reviewed private workflow change and associate actual run,
+    job, runner and checkout observations.
+  - Record actual lifecycle, cleanup and restart results without substituting simulated
+    or historical evidence.
+  - Independently review the eight attributed pre-existing documentation increments
+    in the cumulative integration subject without changing their original implementation
+    ownership.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0048
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run the unchanged required POSIX fixtures with actual kernel isolation and original
+    600-second deadlines.
+  - Independently verify source identity, process lifetime, credentials canary, network
+    counters, filesystem budgets and cleanup.
+  - Read GitHub run, job, runner and complete step results for the fixed actual checkout
+    and current target.
+  - Re-run the private target full Offline Strict gate and independent review after
+    its final manifest-bound changes.
+  - Run the current harness quality gates, preserve old CLI contracts and append immutable
+    operational evidence.
+  - Run the fixed five targeted harness safeguard mutations for acceptance item 8;
+    keep their claims separate from external runner acceptance.
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- production-deploy
+- production-data-delete
+- billing-change
+frozen_spec_sha256: 237f05013a5feebb27a4697e8df3f77519de060ec9dbb76eecccdd7c1e6d5545
+goal: Record and verify the authorized private Linux runner integration, isolated
+  execution and controlled Windows/Linux handoff for task 02; preserve all original
+  quality checks and public hosted CI.
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-21T15:49:54Z'
+subject_commit: 968cc3c354b87671b7c3f8d60a2784ba06c90261
+task_id: TASK-0048
+updated_at: '2026-09-21T17:11:49Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md
+- docs/superpowers/plans/02_harness_model_self_hosted_runner_plan_2026-09-12.md
+- docs/superpowers/plans/2026-09-12-harness-model_cross-agent_review-fix_plan_2026-09-12.md

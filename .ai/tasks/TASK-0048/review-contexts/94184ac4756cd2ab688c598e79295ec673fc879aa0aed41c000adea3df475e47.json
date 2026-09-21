@@ -1,0 +1,288 @@
+{
+  "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "2475d3f7eda889d08c758864733e39ab2a579664d242adb505f9ce3ff50a9924",
+  "content": {
+    "allowed_scope": [
+      "docs/implementation/task02-runtime-integration.md",
+      "README.md",
+      "docs/operations/adoption.md",
+      "docs/operations/feedback-loop.md",
+      "docs/operations/maintenance-status.md",
+      "docs/operations/zcode-retrospective-2026-09-20.md",
+      "examples/adoption/project-rules.md",
+      "examples/adoption/zcode-feedback-loop-prompt.md",
+      "examples/adoption/zcode-pilot-prompt.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Record and verify the authorized private Linux runner integration, isolated execution and controlled Windows/Linux handoff for task 02; preserve all original quality checks and public hosted CI.",
+        "impact_scope": [
+          "docs/implementation/task02-runtime-integration.md",
+          "README.md",
+          "docs/operations/adoption.md",
+          "docs/operations/feedback-loop.md",
+          "docs/operations/maintenance-status.md",
+          "docs/operations/zcode-retrospective-2026-09-20.md",
+          "examples/adoption/project-rules.md",
+          "examples/adoption/zcode-feedback-loop-prompt.md",
+          "examples/adoption/zcode-pilot-prompt.md"
+        ],
+        "planned_actions": [
+          "Freeze the current private target, dependency inputs, operational window and rollback.",
+          "Verify the dedicated low-privilege Linux guest and rootless fixture environment against the original checks.",
+          "Register and exercise one explicitly scoped private Linux runner only after current readiness and action authority are verified.",
+          "Preserve at most one accepting runner instance during the Windows and Linux handoff.",
+          "Prepare a separately reviewed private workflow change and associate actual run, job, runner and checkout observations.",
+          "Record actual lifecycle, cleanup and restart results without substituting simulated or historical evidence.",
+          "Independently review the eight attributed pre-existing documentation increments in the cumulative integration subject without changing their original implementation ownership."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0048/approvals.json",
+        ".ai/tasks/TASK-0048/classification.json",
+        ".ai/tasks/TASK-0048/closeout-amendment-001.json",
+        ".ai/tasks/TASK-0048/closeout-integration-review-001.json",
+        ".ai/tasks/TASK-0048/closeout-integration-review-002.json",
+        ".ai/tasks/TASK-0048/events.jsonl",
+        ".ai/tasks/TASK-0048/review-contexts/62c2415a898192ef988a7d85b36a141bbf387c4ddf9ff0be813dc429d0f26e63.json",
+        ".ai/tasks/TASK-0048/review-contexts/cd5528eeb083c3ddc5d4e8a237e4805fde8078e2862589a21106a18498901279.json",
+        ".ai/tasks/TASK-0048/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0048/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0048/spec.md",
+        ".ai/tasks/TASK-0048/task.yaml",
+        "README.md",
+        "docs/implementation/task02-runtime-integration.md",
+        "docs/operations/adoption.md",
+        "docs/operations/feedback-loop.md",
+        "docs/operations/maintenance-status.md",
+        "docs/operations/zcode-retrospective-2026-09-20.md",
+        "examples/adoption/project-rules.md",
+        "examples/adoption/zcode-feedback-loop-prompt.md",
+        "examples/adoption/zcode-pilot-prompt.md"
+      ],
+      "files": [
+        {
+          "additions": 572,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/approvals.json"
+        },
+        {
+          "additions": 72,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/classification.json"
+        },
+        {
+          "additions": 94,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/closeout-amendment-001.json"
+        },
+        {
+          "additions": 75,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/closeout-integration-review-001.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/closeout-integration-review-002.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/events.jsonl"
+        },
+        {
+          "additions": 57,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/review-contexts/62c2415a898192ef988a7d85b36a141bbf387c4ddf9ff0be813dc429d0f26e63.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/review-contexts/cd5528eeb083c3ddc5d4e8a237e4805fde8078e2862589a21106a18498901279.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 92,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/spec.md"
+        },
+        {
+          "additions": 128,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0048/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "README.md"
+        },
+        {
+          "additions": 3497,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/implementation/task02-runtime-integration.md"
+        },
+        {
+          "additions": 101,
+          "binary": false,
+          "deletions": 5,
+          "path": "docs/operations/adoption.md"
+        },
+        {
+          "additions": 26,
+          "binary": false,
+          "deletions": 13,
+          "path": "docs/operations/feedback-loop.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 91,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/zcode-retrospective-2026-09-20.md"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 4,
+          "path": "examples/adoption/project-rules.md"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 9,
+          "path": "examples/adoption/zcode-feedback-loop-prompt.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "examples/adoption/zcode-pilot-prompt.md"
+        }
+      ],
+      "totals": {
+        "additions": 5005,
+        "deletions": 33,
+        "files": 21
+      }
+    },
+    "goal": "Record and verify the authorized private Linux runner integration, isolated execution and controlled Windows/Linux handoff for task 02; preserve all original quality checks and public hosted CI.",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0048",
+        "--actor",
+        "codex-v2-independent-verifier-stage61"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "94184ac4756cd2ab688c598e79295ec673fc879aa0aed41c000adea3df475e47",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "237f05013a5feebb27a4697e8df3f77519de060ec9dbb76eecccdd7c1e6d5545",
+  "subject_commit": "968cc3c354b87671b7c3f8d60a2784ba06c90261",
+  "task_id": "TASK-0048",
+  "verification_snapshot_sha256": "2f359e3b58e54a32ad4fcba79a377cfc2200f6a6a364ec30f595ce6342672889"
+}
