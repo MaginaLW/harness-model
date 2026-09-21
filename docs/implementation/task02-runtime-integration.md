@@ -9,8 +9,9 @@
 `949fc6036a95e5c1ed55c4d5d5f96793ba42670f` 已完成 pilot 双 lane、main 采用和
 main 双平台完整验证；真实 guest 重启后完整 Linux 业务验收通过。Linux 已停用且
 独立确认离线、无进程/容器残留，Windows 服务已恢复并完成新的完整 Strict。
-当前运维验收通过；TASK-0048 因 scope/V2 缺口尚非 Gate PASS。最终结果见文末
-“采用后双平台完成与运行收尾”；下方其他“最新/当前”均为历史时点记录。
+当前运维验收通过；正式治理收尾见文末阶段 61 与 TASK-0048 账本，最终结论以
+当前 CLI Gate 为准。运维结果见“采用后双平台完成与运行收尾”；下方其他
+“最新/当前”及 scope/V2 缺口描述均保留其历史时点含义。
 
 2026-09-21 最新执行结果：见文末“阶段 59：完成交接、当前源码验证与独立接入候选”。
 所有者已交接；固定 `39cc7ff` 的完整本地 POSIX 通过，新候选 `949fc60` 的双引擎
@@ -3470,3 +3471,27 @@ Windows 原 delayed-auto 与故障恢复配置已恢复，Linux 注册及 guest 
 本次主机/guest 运维验收、main 采用后双平台 CI 和串行恢复闭环已完成，监控进程
 已结束。TASK-0048 正式 Gate 仍受上述 scope/V2 缺口阻断，不宣告任务治理关闭，
 也不据此启动 I5、其他仓推广或生产操作。
+
+
+## 阶段 61：补充集成范围与正式 V2 收尾
+
+所有者在运维验收和治理缺口报告后明确继续。进一步核对现有 CLI 后，使用
+REVIEW→REVIEW 的 `spec_changed` 升级，而不是修改 base、历史或 Policy。
+八份已提交 ZCode 文档增量按精确路径纳入补充集成审查，十个原提交保留原始
+归属；记录见 TASK-0048 的 `closeout-amendment-001.json`。三个用户未跟踪计划
+保留原处，验证工作区不含这些原稿。
+
+独立审查发现一项 P2：方法文档中“退出码或断言输出”可能允许成功文本掩盖
+非零退出。已明确要求立即保存并检查门禁自身退出码，文本断言仅作附加检查。
+首次发现与修复复核分别保存在 `closeout-integration-review-001.json`、
+`closeout-integration-review-002.json`，前者未覆盖。规格和修复固定于
+`37beda8ce0f0d6decdcd5f84ab52b7f8f45cacf6`。
+
+CLI 已实际完成 scope-valid、升级条件 resolve、重新 classify 和 freeze，保持
+REVIEW/V2。原验收第 8 项现在明确执行固定五项 harness 治理防线 mutation，
+DU 声明同步补正为 required；mutation 只证明本仓防线，不替代先前真实 runner
+和业务原件。此段记录的是正式验证前的冻结点，不预报 V2/Gate 成功。
+
+后续验证结果须绑定新的最终 subject，依次保存完整 pre evidence、独立实现
+review、finalize 及当前版本批准。正式结论由任务账本和 CLI Gate 读取，不因
+补写本段而重跑外部 CI、服务切换、注册或反馈回灌；I5 和生产范围不变。

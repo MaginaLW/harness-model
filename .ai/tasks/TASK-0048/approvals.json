@@ -555,5 +555,18 @@
     "spec_sha256": "8bae283633957d6681fc197e3cb554554e569b67b5432dfb3f0229158754aea9",
     "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
     "task_id": "TASK-0048"
+  },
+  {
+    "actor": "project-owner-via-codex",
+    "approval_type": "spec",
+    "approved_at": "2026-09-21T15:47:36Z",
+    "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Record the existing owner delegation to complete the project status and ZCode review, renewed by continue after the operational closeout and governance gaps. The exact existing-document integration amendment and required V2 declaration received independent design review REV-0002; this records delegated scope authority, not a claim that the owner personally inspected the new artifact.",
+    "schema_version": "1.0",
+    "spec_sha256": "af003efadfbbb4d4c31e039d5c54b7b7a39590cd9fb87c7bdf984c324a54df8c",
+    "subject_commit": "37beda8ce0f0d6decdcd5f84ab52b7f8f45cacf6",
+    "task_id": "TASK-0048"
   }
 ]

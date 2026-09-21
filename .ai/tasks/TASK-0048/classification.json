@@ -1,10 +1,10 @@
 {
   "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
   "change_reason": "unchanged",
-  "classification_input_sha256": "1dc8f4abea4def33e4be617062da297e40bb17cdf32a78d74098e8e44f108852",
+  "classification_input_sha256": "2f9dd6fcce07df14b6acf2a3a6214c50bb4eac709a03bebc443ff0a56e9d9b4b",
   "classifications": [
     {
-      "classified_at": "2026-09-13T00:05:14Z",
+      "classified_at": "2026-09-21T15:45:43Z",
       "decision_unit_id": "DU-001",
       "explanation": "Secret or authentication changes require review.",
       "explanations": [
@@ -49,22 +49,24 @@
       "verification_explanations": [
         "Acceptance verification requires V2.",
         "Integration verification requires V2.",
+        "Targeted mutation verification requires V2.",
         "Independent verifier evidence requires V2."
       ],
       "verification_level": "V2",
       "verification_rule_ids": [
         "VERIFICATION-V2-ACCEPTANCE-REQUIRED",
         "VERIFICATION-V2-INTEGRATION-REQUIRED",
+        "VERIFICATION-V2-TARGETED-MUTATION-REQUIRED",
         "VERIFICATION-V2-INDEPENDENT-VERIFIER-REQUIRED"
       ]
     }
   ],
-  "classified_at": "2026-09-13T00:05:14Z",
+  "classified_at": "2026-09-21T15:45:43Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V2",
   "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
   "policy_version": "2.3.0",
   "schema_version": "2.0",
-  "subject_commit": "44bda60199c4344220590aff30522022bf3c1064",
+  "subject_commit": "37beda8ce0f0d6decdcd5f84ab52b7f8f45cacf6",
   "task_id": "TASK-0048"
 }
