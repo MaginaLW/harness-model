@@ -3292,3 +3292,23 @@ POSIX gate。只读现场确认拒绝项为普通非链接 `.git/config.worktree
 首轮 job 原始 API 摘要为
 `79b479c0660d2e05acf46221c0b7a16537d9277c1304ac6987bf94704862501b`。
 本阶段证明真实串行接单，不能据此宣告双 lane 通过、main 采用或生命周期验收。
+
+#### Checkout 惰性元数据修复与单 job 重跑
+
+固定 checkout 会留下未启用的 `config.worktree`。最小修复只将该普通文件纳入可选
+字节快照，区分缺失与空文件，并沿用前后快照一致性检查；所有 `extensions.*`、
+include、partial-clone、链接和其他禁止元数据规则保持不变。真实 Git 的六项回归
+全部通过、零跳过；独立审查再次执行通过。合同仅变更 `binding_sha256`。
+
+修复前 runner 22 已实际 stopped/disabled、无 Runner/Worker、空容器及四角色基线
+通过，两端 API 均 offline/idle。受控安装先将精确两份旧字节归档至任务专用 root
+只读目录，再逐一比较替换并回读；未更改 checkout、服务单元、工具版本或候选 S。
+新 helper 摘要 `e322ce27aaf713b703b758bdb9052a083bb4579a818f436dd9c9998fa98e9136`，
+新合同摘要 `e9246d396b0fe557d11d2808a2a9ce337494578868e07502115b682382f84c0b`，
+安装实际结果摘要 `3891305d0ea40eaf3c478709fcb0803615f862b325e3fe28d49f0a5c278e0baf`。
+
+随后 runner 22 重新启动，Listener PID 从 75240 变为 76230，仍为精确 UID/路径/unit
+cgroup。仅调用失败 POSIX job 的 rerun API；attempt 2 新 job `106358427430` 实际由
+runner 22 接取，工具预检、yq、actionlint 均成功，已进入完整 POSIX gate。Windows
+成功结果由 GitHub 沿用（新显示 job ID `106358430073`，步骤仍为原执行时间），
+没有声称再次执行 Windows。此记录时完整 POSIX 结果、重启后业务及 main 采用仍待验收。
