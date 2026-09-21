@@ -3267,3 +3267,28 @@ POSIX job 仍排队；原外仓两处用户改动保留，没有执行采用或�
 只读回查仍为 Windows Running/Auto、runner 21 online/idle，runner 22 offline/idle。
 结果保存于树外 `stage60-windows-elevation-cancelled-002/receipt.json`，下一阶段
 仍阻塞于本机交互式管理员提权；没有把再次项目授权写成服务切换或 CI 完成。
+
+### Stage60D：真实串行切换与首次 Linux CI
+
+所有者在桌面准备好后，正常 UAC 启动了管理员进程。初次进程未留下回执；添加
+仅记录预检失败的诊断派生脚本后，确认 PowerShell 自动将 JSON ISO 到期时间转换为
+DateTime，后续文化相关解析失败，且 Mutations 为空。固定使用 `-DateKind String`
+保留原 ISO 字符串，重新绑定脚本与单次 action；初始及每次服务命令前的到期检查
+均保留。独立复核确认该修复不改变授权时限。原失败尝试均保留。
+
+Windows 精确服务随后实际停止、禁用自启，无 Listener/Worker 残留，原恢复设置
+逐字保持；GitHub 确认 runner 21 offline/idle 后才安装并启动 Linux 固定服务单元。
+runner 22 实际 online，Listener 为 UID 1001、预期路径及精确 unit cgroup，用户
+manager 未更换。安装、启动回执摘要分别为
+`8d6add00ea3350a608bb2c2eabbd9003e77e9082cd959190c76eb0c057c51b38`、
+`6b7a425d4fbcf165be5256aa73123d769fffaf91b55f21ce158fd076568dac6f`；
+Windows 停止回执摘要为
+`83ecc1e6191676b44fd5d19ff2ba9da6bc09f6ca7c8318dbeee3801513a07e7c`。
+
+原排队 POSIX job `106175121387` 实际由 runner 22 接取，checkout 固定 S 后在工具
+预检失败：`POSIX_BINDING_REJECTED reason=unsupported_git_metadata`，尚未执行完整
+POSIX gate。只读现场确认拒绝项为普通非链接 `.git/config.worktree`；其余禁止元数据
+不存在，已安装 checker 摘要与固定合同一致。Git 本地配置键未启用 extensions。
+首轮 job 原始 API 摘要为
+`79b479c0660d2e05acf46221c0b7a16537d9277c1304ac6987bf94704862501b`。
+本阶段证明真实串行接单，不能据此宣告双 lane 通过、main 采用或生命周期验收。
