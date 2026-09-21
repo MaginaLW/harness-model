@@ -3193,3 +3193,44 @@ format、mypy、90% diff coverage、whitespace 及工作树检查通过。此质
 本检查点未申请真实注册令牌，未注册或启动 Linux runner，未切换 Windows 服务。
 真实官方合成检查、注册及同 SHA 双 lane、采用与生命周期验证继续进行；
 TASK-0048 保持 IMPLEMENTING，不据静默演练成功产生任务完成或 Gate PASS。
+
+## Stage 60C：合成验证通过与真实离线注册
+
+原版官方合成 canary 已实际执行，run ID `c27f67e883bc4862800bdcf4a6655126`。
+结果 `SYNTHETIC_FAILURE_PATH_MASKING_OBSERVED`：隔离配置 native exit 1 符合预期，
+version native exit 0；扫描 1 个文件、27127 字节，所有受检表示匹配数为 0，
+masking、环境移除和网络失败上下文均实际出现。原 helper/child native exit 0，
+清理完成，实际安装 manifest/tree 不变。完整窗口 34.710 秒内自动恢复并释放 lease。
+该测试只证明实际执行的合成失败路径，不扩展为对所有成功路径的泄漏保证。
+
+- 原始净化 canary receipt：`3971691bd4fd51847b16f2d7a27f831d42b88c30614a868b4cdc86998c7f94d0`。
+- 包含独立恢复的回读：`380096aa54d46b24a693121a8c23636203ea832faea7d99041687267371b4ec3`。
+
+真实注册准备的第一次操作 `835562d1420140a6b149e08d8786d638` 在获取 token 前失败。
+producer 明确记录 token_requested=false、registration_dispatched=false；控制器
+记录 BrokenPipeError，26.407 秒内恢复并释放 lease。现场 Unix socket 探针证实，
+正常 connect 更新 atime；旧的完整 stat 相等检查因此误拒绝。没有创建 `.runner`、
+凭据文件、原 helper slot 或 journal。过期 intent 经独立动作核验后在同目录 rename，
+保留原内容和 inode，不删除第一次尝试。失败回读摘要：
+`01146bbd3008e1376a1df74d1b32cda681a6edef8631abff99ce15ed20323b7d`。
+
+新不可变候选只将 socket 身份比较中的 atime 排除；dev/inode/owner/mode/link count、
+size、纳秒 mtime/ctime 及 SO_PEERCRED、argv、exe、cgroup、进程身份复查全部保留。
+另增固定诊断枚举，不导出原始日志。9 项协议测试、6 项构造器测试和最终 12 文件
+独立回读通过，原注册 helper 保持不变。
+
+新操作 `a87440b69320403badb1f22bc8a7d4cf` 使用新鲜仓库观测，通过认证 READY 后
+申请一次性注册令牌，并经匿名 stdin 调用原 helper。实际返回
+`CONFIGURED_LOCAL_PENDING_REMOTE_CONFIRMATION`、native exit 0、清理完成。
+GitHub 随后回查确认私有仓库 `MaginaLW/r3s-VPS` 的 runner **22**：
+`r3s-vps-linux-pilot-01`，Linux/X64/self-hosted/trusted-linux，offline、busy=false。
+没有启动 Listener。完整注册窗口 31.626 秒内自动恢复并释放 lease；work/recover/watch
+均 inactive。注册成功与恢复成功分别核验。
+
+- 最终包：`81a2109e536bb36ffd7c80df2ea2a558ac864238638dec1d678544d3fde1aa3a`。
+- 注册及恢复回读：`28627a5835ed05ca00a6dda56c107fc3a45cad27d743e727c43b44b27602f22f`。
+- GitHub runner 22 回查：`b4f3b93218eb7e80dc32f6dbe19e4dfa4f22943ec04fe6617a69c2989e0223dc`。
+
+此检查点完成离线注册；Windows/Linux 串行接单切换、Linux CI、main 采用、重启与
+恢复后的业务 job 尚未据此通过，继续执行。Windows 服务操作采用正常 OS UAC 提权，
+不将项目授权解释为已取得管理员 token。TASK-0048 继续保持 IMPLEMENTING。
