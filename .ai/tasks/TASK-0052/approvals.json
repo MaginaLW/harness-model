@@ -25,5 +25,53 @@
     "spec_sha256": "c71f0f6f4878de39732adc89a8f419bd0514c357130ef89af15f52785fcce041",
     "subject_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
     "task_id": "TASK-0052"
+  },
+  {
+    "action_sha256": "8d038109fde17c8bf724dba06a49883e40ac6dd4c6fc77f2dfd86f9565e53ad5",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-22T10:58:11Z",
+    "base_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-22T11:30:00Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Recorded from the current explicit owner approval and full authorization; operator checked this bounded action and current evidence.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "c71f0f6f4878de39732adc89a8f419bd0514c357130ef89af15f52785fcce041",
+    "subject_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+    "task_id": "TASK-0052"
+  },
+  {
+    "action_sha256": "ffba1cab511f8735aaa656d231c2182c9ef56fb431bf118e38e34ea2e4f40b08",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-22T10:58:20Z",
+    "base_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-22T11:30:00Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Recorded from the current explicit owner approval and full authorization; operator checked this bounded action and current evidence.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "c71f0f6f4878de39732adc89a8f419bd0514c357130ef89af15f52785fcce041",
+    "subject_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+    "task_id": "TASK-0052"
+  },
+  {
+    "action_sha256": "040a5493eae23a0ca7717d4120f15414757e217fe9966ccd47a213aa8492c750",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-22T11:08:46Z",
+    "base_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-22T11:30:00Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Recorded from the current explicit owner approval and full authorization; operator checked this bounded action and current evidence.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "c71f0f6f4878de39732adc89a8f419bd0514c357130ef89af15f52785fcce041",
+    "subject_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+    "task_id": "TASK-0052"
   }
 ]
