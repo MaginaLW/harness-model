@@ -41,5 +41,21 @@
     "spec_sha256": "61c5d9d70e995c9cdd9dafca7687b9d0524104d60a9aeeaee18b83e792b8d489",
     "subject_commit": "d05beb274290c90aad67f986efdaac49a4e0967b",
     "task_id": "TASK-0049"
+  },
+  {
+    "action_sha256": "8ac681ae3ea473d886dfb974acb9e77643d73f48efe9c3c73bdd0d12d0d321a3",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-22T06:11:46Z",
+    "base_commit": "10b13d17001b3decce17080bc3773fcfe8f5a8fc",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-22T06:41:46.599696+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Execute the owner already-authorized ordinary merge now that exact-head required CI run35693038600 passed and independent publication review confirmed protected CLEAN state.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "61c5d9d70e995c9cdd9dafca7687b9d0524104d60a9aeeaee18b83e792b8d489",
+    "subject_commit": "d05beb274290c90aad67f986efdaac49a4e0967b",
+    "task_id": "TASK-0049"
   }
 ]

@@ -1,0 +1,15 @@
+{
+  "decision_unit_id": "DU-001",
+  "action_type": "merge",
+  "target": "https://github.com/MaginaLW/harness-model/pull/40",
+  "parameter_summary": "Ordinary merge of exact PR head 9ab3ca44597f8c1345fd9daa57291e54f20db04e into current main 7dad5c0be700c0ba72ed4f33f8856148e3265825; required ai-quality-gate app 15368 job 106633896767/run 35693038600 is successful; preserve source branch.",
+  "subject_commit": "d05beb274290c90aad67f986efdaac49a4e0967b",
+  "conditions": [
+    "Existing owner explicit authorization covers ordinary merge after successful required CI.",
+    "PR head must remain 9ab3ca44597f8c1345fd9daa57291e54f20db04e.",
+    "Use branch protection normally; no admin bypass, squash, rebase or branch deletion.",
+    "Independently verify actual merged state and merge ancestry before task close."
+  ],
+  "expires_at": "2026-09-22T06:41:46.599696+00:00",
+  "single_use": true
+}
