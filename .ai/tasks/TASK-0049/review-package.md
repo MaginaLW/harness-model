@@ -37,6 +37,9 @@ code/action 的 subject、evidence 和消费约束没有改动。
 
 ## 证据
 
+已验证：以下本地结果已与固定提交及原始证据核对。
+未验证：新候选的远端 required CI 与实际发布尚未执行，不能由本地结果代替。
+
 旧源码新增用例实测 30 passed、3 failed，分别对应 subject-only、base stale、base
 missing。修复后同文件 33 passed；定向 Ruff/format 与累计 whitespace 检查通过。
 独立源码技术审查未发现问题。固定 subject 的完整 V1 十项检查全部 passed：单元
