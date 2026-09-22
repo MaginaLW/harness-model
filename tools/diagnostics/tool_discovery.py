@@ -40,15 +40,16 @@ def _windows_directory_is_local(value: str) -> bool:
 
 def _plain_path(path: Path, *, directory: bool) -> bool:
     """Reject links/reparse points at every component, including trusted roots."""
-    metadata = path.lstat()
+    # Inspect each ancestor before touching a descendant: lstat on the leaf alone
+    # follows parent junctions and could already contact a remote share.
+    for current in reversed((path, *path.parents)):
+        metadata = current.lstat()
+        if stat.S_ISLNK(metadata.st_mode) or getattr(metadata, "st_file_attributes", 0) & 0x400:
+            return False
     if directory != stat.S_ISDIR(metadata.st_mode):
         return False
     if not directory and not stat.S_ISREG(metadata.st_mode):
         return False
-    for current in (path, *path.parents):
-        metadata = current.lstat()
-        if stat.S_ISLNK(metadata.st_mode) or getattr(metadata, "st_file_attributes", 0) & 0x400:
-            return False
     return True
 
 

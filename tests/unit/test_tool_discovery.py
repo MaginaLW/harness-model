@@ -257,6 +257,35 @@ def test_symlink_and_reparse_metadata_are_rejected(
         assert report["tools"][1]["status"] == "unsafe_or_unreadable"
 
 
+def test_reparse_parent_is_rejected_before_reading_any_descendant(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    parent = tmp_path / "network_junction"
+    parent.mkdir()
+    leaf = parent / "git.exe"
+    calls: list[Path] = []
+    original = Path.lstat
+
+    def guarded(path: Path) -> Any:
+        calls.append(path)
+        if path == leaf:
+            pytest.fail("leaf metadata would follow the network junction")
+        metadata = original(path)
+        if path != parent:
+            return metadata
+
+        class Reparse:
+            st_mode = metadata.st_mode
+            st_file_attributes = 0x400
+
+        return Reparse()
+
+    monkeypatch.setattr(Path, "lstat", guarded)
+    assert subject._plain_path(leaf, directory=False) is False
+    assert calls == list(reversed((parent, *parent.parents)))
+    assert leaf not in calls
+
+
 @pytest.mark.parametrize(
     "error", [OSError("private"), ValueError("private"), subprocess.TimeoutExpired("private", 45)]
 )
