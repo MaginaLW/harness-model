@@ -150,6 +150,55 @@ def test_output_must_be_outside_source_roots_and_repository(
     assert not inputs["output"].exists()
 
 
+@pytest.mark.parametrize("worktree", [False, True])
+def test_external_sources_cannot_export_into_an_unrelated_repository(
+    inputs: dict[str, Path], worktree: bool
+) -> None:
+    external_task = inputs["output"].parent / "external-task-staging"
+    external_task.mkdir()
+    (external_task / "spec.md").write_bytes(b"external selected Git text\n")
+    inputs["task"] = external_task
+    unrelated = inputs["output"].parent / "unrelated-repository"
+    unrelated.mkdir()
+    if worktree:
+        (unrelated / ".git").write_text("gitdir: uninspected-private-target\n", encoding="utf-8")
+    else:
+        (unrelated / ".git").mkdir()
+    output_parent = unrelated / "nested"
+    output_parent.mkdir()
+    inputs["output"] = output_parent / "must-not-be-created.zip"
+    with pytest.raises(subject.BundleError, match="OUTPUT_MUST_BE_OUTSIDE"):
+        export(inputs)
+    assert list(output_parent.iterdir()) == []
+
+
+def test_git_marker_is_inspected_without_following_it(
+    inputs: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = inputs["output"].parent / "marker-link-repository"
+    repository.mkdir()
+    marker = repository / ".git"
+    try:
+        marker.symlink_to(repository / "nonexistent-target", target_is_directory=True)
+    except OSError:
+        pytest.skip("host cannot create symlinks")
+    original_stat = Path.stat
+
+    def never_follow_marker(path: Path, **kwargs: Any) -> Any:
+        if path == marker and kwargs.get("follow_symlinks", True):
+            pytest.fail("Git marker target was followed")
+        return original_stat(path, **kwargs)
+
+    monkeypatch.setattr(Path, "stat", never_follow_marker)
+    assert subject._has_git_marker(repository)
+    output = repository / "must-not-be-created.zip"
+    with pytest.raises(subject.BundleError, match="OUTPUT_MUST_BE_OUTSIDE"):
+        subject._output_path(output, [inputs["task"], inputs["raw"]])
+    # A source repository's marker is inspected by the same non-following helper.
+    assert subject._output_path(inputs["output"], [repository]) == inputs["output"]
+    assert not output.exists()
+
+
 def test_export_never_overwrites_an_existing_bundle(inputs: dict[str, Path]) -> None:
     inputs["output"].write_bytes(b"existing handoff")
     with pytest.raises(subject.BundleError, match="OUTPUT_EXISTS"):

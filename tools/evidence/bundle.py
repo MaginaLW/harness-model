@@ -167,6 +167,14 @@ def _signature(info: os.stat_result) -> tuple[int, int, int, int]:
     return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns
 
 
+def _has_git_marker(directory: Path) -> bool:
+    try:
+        (directory / ".git").lstat()
+    except FileNotFoundError:
+        return False
+    return True
+
+
 def _output_path(output: Path, roots: list[Path]) -> Path:
     _relative_path(output.name)
     output = Path(os.path.abspath(output))
@@ -174,8 +182,9 @@ def _output_path(output: Path, roots: list[Path]) -> Path:
     # Include Git worktree roots (a .git file) as well as ordinary repositories.
     prohibited = set(roots)
     for root in roots:
-        prohibited.update(parent for parent in (root, *root.parents) if (parent / ".git").exists())
-    if any(output.is_relative_to(root) for root in prohibited):
+        prohibited.update(parent for parent in (root, *root.parents) if _has_git_marker(parent))
+    output_in_repository = any(_has_git_marker(parent) for parent in output.parents)
+    if output_in_repository or any(output.is_relative_to(root) for root in prohibited):
         raise BundleError("OUTPUT_MUST_BE_OUTSIDE_SOURCE_AND_REPOSITORY")
     if output.exists() or output.is_symlink():
         raise BundleError("OUTPUT_EXISTS")
