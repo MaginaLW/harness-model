@@ -1,0 +1,38 @@
+{
+  "base_commit": "94b2a4f1b4cefb4c918c989d3c5ec41280e68cab",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "c2ac46a881357e6cc3be49dee3ca9bbea4ff9592bfaf768b4ef41fd568afe2ba",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0053/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish the completed E3 documentation and prior closeout records to the existing remote branch, without PR creation or merge",
+        "impact_scope": [
+          ".ai/tasks/TASK-0053/**"
+        ],
+        "planned_actions": [
+          "Review cumulative committed publication range and current repository protection.",
+          "Run current Policy-selected formal verification on committed task records.",
+          "push",
+          "Read back exact remote ref and append the actual action receipt."
+        ]
+      }
+    ],
+    "goal": "Publish the completed E3 documentation and prior closeout records to the existing remote branch, without PR creation or merge",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "1ad8dc4e36417b9027ba1c1bdea26ff2ede598e314f6074bf8f006ed011159f0",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "40dfbb63c906f058e151ce3846d6c524b14119aa926bd7dba51e477530ecf1ef",
+  "task_id": "TASK-0053"
+}

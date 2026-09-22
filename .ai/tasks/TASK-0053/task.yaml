@@ -1,0 +1,87 @@
+allowed_scope:
+- .ai/tasks/TASK-0053/**
+base_commit: 94b2a4f1b4cefb4c918c989d3c5ec41280e68cab
+branch: codex/self-hosted-runner-inventory
+created_at: '2026-09-22T13:23:58Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - push
+  goal: Publish the completed E3 documentation and prior closeout records to the existing
+    remote branch, without PR creation or merge
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0053/**
+  inputs:
+  - Owner explicitly requested closeout and push in the current message; no merge
+    or new E4 implementation requested.
+  - Fixed completed candidate 94b2a4f1b4cefb4c918c989d3c5ec41280e68cab; remote branch
+    head45a220f33cd0af4eda18f86896321f02bf8d62d8, main48bf777106b9fdfef1ddf83d3abc95859fb8e580.
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Review cumulative committed publication range and current repository protection.
+  - Run current Policy-selected formal verification on committed task records.
+  - push
+  - Read back exact remote ref and append the actual action receipt.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0053
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Complete Policy-selected verification and independent staged reviews.
+  - Preserve full tests, 85 percent overall coverage, 90 percent diff threshold, whitespace,
+    Ruff, format and mypy.
+  - Recheck exact remote predecessor and final committed head before an ordinary push;
+    verify the ref afterwards.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- force_push
+- branch_delete
+- bypass_branch_protection
+frozen_spec_sha256: 40dfbb63c906f058e151ce3846d6c524b14119aa926bd7dba51e477530ecf1ef
+goal: Publish the completed E3 documentation and prior closeout records to the existing
+  remote branch, without PR creation or merge
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-22T13:27:39Z'
+subject_commit: 94b2a4f1b4cefb4c918c989d3c5ec41280e68cab
+task_id: TASK-0053
+updated_at: '2026-09-22T13:31:20Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md
+- docs/superpowers/plans/02_harness_model_self_hosted_runner_plan_2026-09-12.md
+- docs/superpowers/plans/2026-09-12-harness-model_cross-agent_review-fix_plan_2026-09-12.md
