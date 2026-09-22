@@ -1,0 +1,203 @@
+{
+  "base_commit": "5ecde7164af91f166c13ce1953e3878961a45bff",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "44aad0b4b8fe97393ac5c164013bb664241c05bce6174304af6c6fcfd0d7eabe",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0050/**",
+      "docs/operations/local-tools-closeout-2026-09-22.md",
+      "docs/operations/maintenance-status.md",
+      "docs/operations/follow-up-backlog-2026-09-22.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish the reviewed local evidence and tool-discovery delivery through a governed protected PR and preserve the prior publication process deviation",
+        "impact_scope": [
+          ".ai/tasks/TASK-0050/**",
+          "docs/operations/local-tools-closeout-2026-09-22.md",
+          "docs/operations/maintenance-status.md",
+          "docs/operations/follow-up-backlog-2026-09-22.md"
+        ],
+        "planned_actions": [
+          "Prepare and verify append-only publication governance for the already-reviewed delivery.",
+          "push",
+          "Update PR42 with the exact reviewed publication candidate.",
+          "merge"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0050/approvals.json",
+        ".ai/tasks/TASK-0050/classification.json",
+        ".ai/tasks/TASK-0050/design-context-001.json",
+        ".ai/tasks/TASK-0050/design-review-input-001.json",
+        ".ai/tasks/TASK-0050/events.jsonl",
+        ".ai/tasks/TASK-0050/review-contexts/5913cac4c1b8ac496b8e176c9413cfcb2dac46eea5210bb99b81c538318763af.json",
+        ".ai/tasks/TASK-0050/review-package.md",
+        ".ai/tasks/TASK-0050/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0050/spec.md",
+        ".ai/tasks/TASK-0050/task.yaml",
+        "docs/operations/follow-up-backlog-2026-09-22.md",
+        "docs/operations/local-tools-closeout-2026-09-22.md",
+        "docs/operations/maintenance-status.md"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/approvals.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/classification.json"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/design-context-001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/design-review-input-001.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/events.jsonl"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/review-contexts/5913cac4c1b8ac496b8e176c9413cfcb2dac46eea5210bb99b81c538318763af.json"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/review-package.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 84,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/spec.md"
+        },
+        {
+          "additions": 97,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0050/task.yaml"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/follow-up-backlog-2026-09-22.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/local-tools-closeout-2026-09-22.md"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/maintenance-status.md"
+        }
+      ],
+      "totals": {
+        "additions": 445,
+        "deletions": 0,
+        "files": 13
+      }
+    },
+    "goal": "Publish the reviewed local evidence and tool-discovery delivery through a governed protected PR and preserve the prior publication process deviation",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0050",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "e3cbeafd5bff422b42e5f5d044c168975a306e3410e14f2cb716a9e57a811b7e",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "1fb55e5fe0b09487ba40af9ff88203722bf6875e13bcca24bc0e7ad423c5dea5",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "6b3660817d1c3d45cf92e78a3816f37fbd51aa7c27f218a3d9a90fb4f59ebf58",
+  "subject_commit": "2e01248908964860b95dbea540749096a2b1a025",
+  "task_id": "TASK-0050"
+}

@@ -1,0 +1,13 @@
+{
+  "context_sha256": "e3cbeafd5bff422b42e5f5d044c168975a306e3410e14f2cb716a9e57a811b7e",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-09-22T07:53:32Z",
+  "review_id": "REV-0003",
+  "review_stage": "implementation",
+  "reviewer": "/root/evidence_portability",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "独立核查固定 subject 2e01248908964860b95dbea540749096a2b1a025 的 TASK-0050 实施、实际 implementation context、正式 V1 原件及全部十项 required checks 的 stdout/stderr 日志。原始 evidence SHA256 为 6b4ec8b02704dddfe7f372038da4ed9703920e03315337d3fee13d6d6e3b3f55；context 中 evidence_sha256 是另行独立复算一致的 canonical JSON 摘要，不与原件字节摘要混用。重新只读构建的当前 context 与受审 context 完全一致，subject/base/spec/Policy/classification 绑定一致。十项 required checks 均 passed、exit 0、无超时，二十份日志齐全，stderr 均为空；单元 1465 passed，全量回归 2103 passed，覆盖率轮 2103 passed。正式核心 XML 独立复算为 (6557+1963)/(7225+2444)=88.116661%，高于 85%。本任务基线 5ecde716 至受检 subject 的十三文件仅为新任务治理材料和三个明列维护文档，正式 diff coverage 明示无可执行覆盖行，不能代替累计实现覆盖。此前另行审查的固定源码 5ecde7164af91f166c13ce1953e3878961a45bff，其 full-quality-002 干净检出七组检查均 exit 0、2103 passed；同时包含内核及两工具的 XML 独立复算总覆盖率 88.579710%，远端基线 aeaed582 至该源码的 467 个可执行差异行缺失 15 行，diff-cover 显示 96%，超过 90%。新增工具的 strict mypy、whitespace 与实际 Windows 空 PATH/缺项/错版检查保持各自证据边界。累计远端范围 aeaed582 至当前受检 subject 为二十一文件，即已审十一文件交付加新 TASK-0050 治理材料；没有更改生产内核、Policy、Schema、CI、忽略规则或旧任务记录，工具及测试相对已审源码未变。树外输入不能向任意仓库/worktree 导出、Git 标记不跟随链接、祖先 junction 先检查、原件字节/原子替换/ZIP 资源预算等修复均有既有回归与交叉审查。最新三文档已追加 2103/88.58/96 的准确窗口并保留 7702b7d 历史结果；43 材料移交包摘要与既有独立读回和修复后回执一致，不声称重建历史环境。当前 subject 后跟踪改动仅为 TASK-0050 事件、状态和审核包，事件为追加；当前执行检出没有主工作区的三份范围外用户草稿，未删除、搬移或绕过它们。首次 PR #42 及先前 PR #41 的发布流程遗漏如实保留，本任务仅前瞻治理后续动作。未发现未解决阻断问题。本记录仅为该固定候选的独立实施技术审查，不代替所有者 code/action 批准、Gate、最终精确 head 的 required CI/app 身份、保护与合并核验，也不构成 E3、外仓验收或可信执行身份认证。 本次 revision 2 仅追加审核包模板结构复核：审核目标、背景、代码地图、语义变更、风险、证据、明确审核问题和推荐结论八项均完整，validate_review_package 返回 valid=true、issues 为空、recommendation=APPROVE；既有正文、正式证据数值及未验证发布边界保留。先前 code 批准因审核包结构缺失被拒绝的问题已通过机械结构补全修正，本记录不声称 code 批准已经成功。原 revision 1 记录和输入保持原件；重新构建的 implementation context 仍完全相同，原始 evidence 摘要未变，未修改源码或重跑测试，无新增发现。 本次仅将同一已完成的格式复核结论改用新 review_id REV-0003、revision 1 登记；implementation-review-input-002.json 是未录入的格式复核输入，其 record 请求被 CLI 拒绝且未写入任务状态，不能将该输入视为已登记 review。前两份输入与已登记 REV-0002 revision 1 均保留，本次未重复验证或改变原技术结论。",
+  "task_id": "TASK-0050"
+}
