@@ -25,5 +25,37 @@
     "spec_sha256": "8b4590370490779969b97fa669f4c323050ea9c707d4a7d1539ffa0a27e82b0f",
     "subject_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
     "task_id": "TASK-0051"
+  },
+  {
+    "action_sha256": "54510e273fb0920490f2a69b65d207f42fec08feae271a0764b42b34d8b7079d",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-22T10:09:46Z",
+    "base_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-22T10:50:15Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Recorded from the current explicit owner approval and full authorization; operator checked this bounded action and current evidence.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8b4590370490779969b97fa669f4c323050ea9c707d4a7d1539ffa0a27e82b0f",
+    "subject_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
+    "task_id": "TASK-0051"
+  },
+  {
+    "action_sha256": "b91fbaf0a2937a4cda098d0eb64e7447eeed9b320d0a566da96eccdc686ca676",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-22T10:09:55Z",
+    "base_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-22T10:50:15Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Recorded from the current explicit owner approval and full authorization; operator checked this bounded action and current evidence.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8b4590370490779969b97fa669f4c323050ea9c707d4a7d1539ffa0a27e82b0f",
+    "subject_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
+    "task_id": "TASK-0051"
   }
 ]
