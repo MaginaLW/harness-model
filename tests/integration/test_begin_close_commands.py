@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import shutil
 import subprocess
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +14,8 @@ import pytest
 from aiflow.cli import main
 from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.policy import load_policy_bundle
-from aiflow.storage import atomic_write_json, atomic_write_yaml, resolve_task_path
+from aiflow.status_service import summarize_task
+from aiflow.storage import atomic_write_json, atomic_write_yaml, read_task_json, resolve_task_path
 from aiflow.task_service import (
     freeze_task,
     load_task_record,
@@ -160,6 +162,7 @@ def make_ready(
                 "reason": "spec is complete",
                 "spec_sha256": spec_sha,
                 "policy_sha256": policy_sha,
+                "base_commit": task["base_commit"],
                 "subject_commit": task["subject_commit"],
                 "approved_at": "2026-08-20T14:00:00Z",
             }
@@ -246,6 +249,140 @@ def test_begin_ready_task(
     record = load_task_record(repository, "TASK-0001")
     assert record.task["current_state"] == "IMPLEMENTING"
     assert record.events[-1]["event_type"] == "implementation_started"
+
+
+def test_begin_and_status_accept_spec_approval_after_subject_changes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route="REVIEW", valid_approval=True)
+    commit_all(repository, "record approved specification")
+    task = load_task_record(repository, "TASK-0001").task
+    task["subject_commit"] = run_git(repository, "rev-parse", "HEAD")
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
+    current_classification = read_task_json(repository, "TASK-0001", "classification.json")
+    current_classification["subject_commit"] = task["subject_commit"]
+    current_classification["classification_input_sha256"] = classification_input_digest(
+        task, parse_decision_units(task)
+    )
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "classification.json"),
+        current_classification,
+    )
+    approvals_path = resolve_task_path(repository, "TASK-0001", "approvals.json")
+    approvals_before = approvals_path.read_bytes()
+
+    summary = summarize_task(repository, "TASK-0001")
+    assert summary.classification == "fresh"
+    assert summary.approvals == "current"
+    assert summary.missing_conditions == ("begin",)
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "IMPLEMENTING"
+    assert approvals_path.read_bytes() == approvals_before
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        ("base_commit", "0" * 40),
+        ("policy_sha256", "0" * 64),
+        ("spec_sha256", "0" * 64),
+        ("base_commit", None),
+        ("policy_sha256", None),
+        ("spec_sha256", None),
+        ("approval_type", "code"),
+        ("decision_unit_id", "DU-999"),
+    ],
+)
+def test_begin_rejects_invalid_spec_approval_without_writes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    field: str,
+    replacement: str | None,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route="REVIEW", valid_approval=True)
+    approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+    if replacement is None:
+        approvals[0].pop(field)
+    else:
+        approvals[0][field] = replacement
+    atomic_write_json(resolve_task_path(repository, "TASK-0001", "approvals.json"), approvals)
+    task_directory = repository / ".ai" / "tasks" / "TASK-0001"
+    before = {path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()}
+
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
+    error = capsys.readouterr().err
+    if replacement is None and field in {"policy_sha256", "spec_sha256"}:
+        assert field in error
+    else:
+        assert "Required specification approval is missing or stale" in error
+    after = {path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()}
+    assert after == before
+
+
+@pytest.mark.parametrize("valid_first", [False, True])
+def test_begin_accepts_current_approval_among_stale_history(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    valid_first: bool,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route="REVIEW", valid_approval=True)
+    valid = read_task_json(repository, "TASK-0001", "approvals.json")[0]
+    stale = dict(valid, base_commit="0" * 40)
+    approvals = [valid, stale] if valid_first else [stale, valid]
+    path = resolve_task_path(repository, "TASK-0001", "approvals.json")
+    atomic_write_json(path, approvals)
+    before = path.read_bytes()
+
+    assert summarize_task(repository, "TASK-0001").approvals == "current"
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("approve_second", [False, True])
+def test_begin_requires_approval_for_each_review_unit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    approve_second: bool,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    task = load_task_record(repository, "TASK-0001").task
+    second = deepcopy(task["decision_units"][0])
+    second["decision_unit_id"] = "DU-002"
+    task["decision_units"].append(second)
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
+    make_ready(repository, route="REVIEW", valid_approval=True)
+    current_classification = read_task_json(repository, "TASK-0001", "classification.json")
+    second_classification = deepcopy(current_classification["classifications"][0])
+    second_classification["decision_unit_id"] = "DU-002"
+    current_classification["classifications"].append(second_classification)
+    atomic_write_json(
+        resolve_task_path(repository, "TASK-0001", "classification.json"),
+        current_classification,
+    )
+    if approve_second:
+        approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+        approvals.append(dict(approvals[0], decision_unit_id="DU-002"))
+        atomic_write_json(resolve_task_path(repository, "TASK-0001", "approvals.json"), approvals)
+    before = load_task_record(repository, "TASK-0001")
+
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == (0 if approve_second else 1)
+    after = load_task_record(repository, "TASK-0001")
+    if approve_second:
+        assert after.task["current_state"] == "IMPLEMENTING"
+        assert after.events[-1]["event_type"] == "implementation_started"
+    else:
+        assert "Required specification approval is missing or stale" in capsys.readouterr().err
+        assert after == before
 
 
 def test_begin_rejects_missing_frozen_spec(
