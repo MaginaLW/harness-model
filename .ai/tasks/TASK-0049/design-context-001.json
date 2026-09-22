@@ -1,0 +1,36 @@
+{
+  "base_commit": "10b13d17001b3decce17080bc3773fcfe8f5a8fc",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "9cfa932945b3ba663c3309ef232493062c465dc7bb1706db18ffe34b9d1bd7b2",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Align begin specification approval checks with authoritative freshness bindings while preserving approval and verification controls",
+        "impact_scope": [
+          "src/aiflow/task_service.py"
+        ],
+        "planned_actions": [
+          "Use the shared freshness evaluator in begin for each required REVIEW decision unit.",
+          "Preserve classification freshness, error codes, code/action approval bindings and all quality thresholds."
+        ]
+      }
+    ],
+    "goal": "Align begin specification approval checks with authoritative freshness bindings while preserving approval and verification controls",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "182de75e4148c17cda265b786ce8a9662ff4823cb801b8aed875362d926b811a",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "cf316b043a1dcc104eb4f8de97816f486982b2c148c20b4b37b448740dca41e4",
+  "task_id": "TASK-0049"
+}

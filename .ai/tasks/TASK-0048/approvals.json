@@ -643,5 +643,37 @@
     "spec_sha256": "237f05013a5feebb27a4697e8df3f77519de060ec9dbb76eecccdd7c1e6d5545",
     "subject_commit": "968cc3c354b87671b7c3f8d60a2784ba06c90261",
     "task_id": "TASK-0048"
+  },
+  {
+    "action_sha256": "1d37d9a26794b90c46f65e02528a5b6ae7f89c7d39361d3942cad9c47ee6bd03",
+    "actor": "project-owner-via-codex",
+    "approval_type": "action",
+    "approved_at": "2026-09-21T23:44:12Z",
+    "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-22T02:44:12.3716789+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly approved publication of fixed candidate 2dffdf0 containing 117 commits/64 files, PR creation, and ordinary merge after required CI passes; record the immediate bounded push/PR action.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "237f05013a5feebb27a4697e8df3f77519de060ec9dbb76eecccdd7c1e6d5545",
+    "subject_commit": "968cc3c354b87671b7c3f8d60a2784ba06c90261",
+    "task_id": "TASK-0048"
+  },
+  {
+    "action_sha256": "a4a95e2ca94700cb43753c87cd28a8dd394b819fe60eda08846994a822c69caa",
+    "actor": "project-owner-via-codex",
+    "approval_type": "action",
+    "approved_at": "2026-09-21T23:54:38Z",
+    "base_commit": "44bda60199c4344220590aff30522022bf3c1064",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-22T00:24:37.8981024+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly authorized ordinary merge of the fixed publication candidate after required CI passes. PR39 exact head2dff and basef633 now have successful required run35668963763, independently verified actual checks; preserve branch protection and history.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "237f05013a5feebb27a4697e8df3f77519de060ec9dbb76eecccdd7c1e6d5545",
+    "subject_commit": "968cc3c354b87671b7c3f8d60a2784ba06c90261",
+    "task_id": "TASK-0048"
   }
 ]

@@ -1,0 +1,77 @@
+allowed_scope:
+- src/aiflow/task_service.py
+- tests/integration/test_begin_close_commands.py
+base_commit: 10b13d17001b3decce17080bc3773fcfe8f5a8fc
+branch: codex/self-hosted-runner-inventory
+created_at: '2026-09-22T00:38:10Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Align begin specification approval checks with authoritative freshness bindings
+    while preserving approval and verification controls
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/task_service.py
+  inputs:
+  - TASK-0048 closeout-begin-binding-001.json reproduces status/begin disagreement.
+  - Authoritative spec_approval freshness binds base_commit, policy_sha256 and spec_sha256.
+  permission_requirements: []
+  planned_actions:
+  - Use the shared freshness evaluator in begin for each required REVIEW decision
+    unit.
+  - Preserve classification freshness, error codes, code/action approval bindings
+    and all quality thresholds.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0049
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run separately maintained regression tests for subject-only changes, stale or
+    missing base/policy/spec, approval type and decision-unit coverage.
+  - Run full pytest coverage, diff coverage, whitespace, Ruff, format and mypy before
+    code review.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 61c5d9d70e995c9cdd9dafca7687b9d0524104d60a9aeeaee18b83e792b8d489
+goal: Align begin specification approval checks with authoritative freshness bindings
+  while preserving approval and verification controls
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-22T04:35:32Z'
+subject_commit: d05beb274290c90aad67f986efdaac49a4e0967b
+task_id: TASK-0049
+updated_at: '2026-09-22T06:01:03Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md
+- docs/superpowers/plans/02_harness_model_self_hosted_runner_plan_2026-09-12.md
+- docs/superpowers/plans/2026-09-12-harness-model_cross-agent_review-fix_plan_2026-09-12.md

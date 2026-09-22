@@ -1,0 +1,15 @@
+{
+  "decision_unit_id": "DU-001",
+  "action_type": "push",
+  "target": "MaginaLW/harness-model:refs/heads/codex/self-hosted-runner-inventory",
+  "parameter_summary": "Publish approved f421084504178e50320c8156c2d4ee4c7d93bb4b plus only reviewed approval/governance records; create one PR into main. A history-only merge of the current main is allowed only if it introduces no business-tree changes. No force push or branch deletion.",
+  "subject_commit": "d05beb274290c90aad67f986efdaac49a4e0967b",
+  "conditions": [
+    "Owner explicitly approved and authorized publication in the current conversation.",
+    "Current local TASK-0049 Gate must pass.",
+    "Freeze actual publication head and compare cumulative scope against main before pushing.",
+    "Ordinary merge requires a separate current action record and successful required CI on the actual candidate."
+  ],
+  "expires_at": "2026-09-22T09:01:02.728577+00:00",
+  "single_use": true
+}

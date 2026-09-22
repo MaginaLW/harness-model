@@ -1,5 +1,24 @@
 # 维护收尾与待办
 
+## 2026-09-22 当前核定
+
+[PR #39](https://github.com/MaginaLW/harness-model/pull/39) 已通过 required CI 并合入
+main。TASK-0048 已在本地关闭为 `MERGED`、`Missing: none`；本地账本现在为
+**47 项：39 MERGED / 7 BLOCKED / 1 APPROVED_FOR_MERGE**。TASK-0028 仍需重验，
+维持选项 C；七项 BLOCKED 不自动恢复实施。
+
+核定时本地 head 为 `7eec053`、远端 main 为 `7dad5c0`。本地关闭记录尚未发布，
+不属于 PR #39 的受检候选 `2dffdf0`；远端账本仍是关闭前状态。真实发布与关闭依据见
+[TASK-0048 追加记录](../../.ai/tasks/TASK-0048/publication-closeout-001.md)。
+
+后续统一见[待完成项目清单](follow-up-backlog-2026-09-22.md)：本地收尾记录发布、
+已复现的 `begin` 批准绑定一致性缺陷、按需 E1 复核与真实 E3 双产品案例，以及满足
+条件后才选择的 E4 / I1–I5 / 阶段三四。E2 设计和本次同仓双平台采用已经完成。
+本次仅梳理记录，不启动新实施或发布；反馈仍执行无问题且无请求即 no-op。
+
+以下各日期段落保留历史观察，其中 TASK-0048 实施中、尚未注册 Linux 和早期统计
+不再描述当前状态；以本段及链接的最新清单为当前入口。
+
 ## 2026-09-20 当前核定
 
 2026-09-20 所有者决定：两个登记试点的[反馈与回灌](feedback-loop.md)，以及 VPS 连续
