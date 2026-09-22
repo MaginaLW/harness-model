@@ -1,5 +1,26 @@
 # 维护收尾与待办
 
+## 2026-09-22 PR #40 合并后追加核定
+
+[PR #40](https://github.com/MaginaLW/harness-model/pull/40) 已于
+2026-09-22 06:11:51 UTC 通过普通 merge 合入 main，合并提交为 `4399352`。
+精确受检 head 为 `9ab3ca4`；required `ai-quality-gate` 已通过，完整测试
+1958 项通过，Linux 总覆盖率 88.03%、差异覆盖率 100%，原质量阈值保持不变。
+
+旧待办 1（TASK-0048 关闭记录及后续文档发布）和 2（`begin` 与 spec approval
+新鲜度一致性缺陷）均已通过 PR #40 完成。TASK-0048 不重复关闭；TASK-0049
+已在核对真实合并、提交祖先及合并树后由 CLI 关闭为 `MERGED`、`Missing: none`。
+本地账本现在为 **48 项：40 MERGED / 7 BLOCKED / 1 APPROVED_FOR_MERGE**。
+详见 [TASK-0049 发布与关闭记录](../../.ai/tasks/TASK-0049/publication-closeout-001.md)。
+
+本轮 TASK-0049 关闭账本与这次入口更新仅保存于本地，未纳入 PR #40 受检 head，
+不声称远端 main 已包含这些后续记录，也不因追加回执派生新一轮发布。
+TASK-0028 维持选项 C，七项 BLOCKED 不自动恢复；E1 按需、E3 等待自然双产品案例，
+E4 / I1–I5 / 后续阶段继续保留原条件，详见[最新待办入口](follow-up-backlog-2026-09-22.md)。
+
+以下同日及更早段落保留原观察时点；其中“关闭记录尚未发布”和 `begin` 未修复
+已由本段更新，不再作为当前待办。
+
 ## 2026-09-22 当前核定
 
 [PR #39](https://github.com/MaginaLW/harness-model/pull/39) 已通过 required CI 并合入
