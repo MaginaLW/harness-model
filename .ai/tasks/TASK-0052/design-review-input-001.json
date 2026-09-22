@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0001",
+  "revision": 1,
+  "task_id": "TASK-0052",
+  "review_stage": "design",
+  "reviewer": "/root/evidence_portability",
+  "recorded_at": "2026-09-22T10:29:14Z",
+  "context_sha256": "56abeae5f451189a4613943bb635354dd9c1a27e6c3031661b85d7719ee041b2",
+  "outcome": "APPROVE",
+  "summary": "独立核对冻结规格、真实任务与分类以及当前设计上下文，只读重建 context 完全一致。固定基线 7b940bf67743673755ac872ed6ff32e9d1d87ca1 已将 Linux 合成盘符测试修复单独按维护模式提交，仅一个测试文件增加 6 行，原断言和案例保留；生产 tools/src 与 2393c67 完全一致。规格列出的远端 ae0e3d3 至固定基线累计路径与 Git 实际差异逐项一致，TASK-0052 内仅允许自身治理记录。TASK-0051 本地 V1 成功与精确旧 head 的 Linux CI 失败均保留：该次 3 failed、2233 passed、2 skipped，以及已发生 push 和 PR43 创建，不等于新候选验收或授权，旧任务保持 BLOCKED。修复已有 Windows 定向 156 passed 和 host-resolution sentinel 反例；这些不声称是 Linux 执行。旧生产来源 2238 Windows tests、综合覆盖率 88.8607%、diff 99% 仅绑定原来源，新的完整正式 V1、独立实施审查与精确最终 head 的 Linux required CI 均仍须完成。设计如实声明后续 push、更新现有 PR43 和普通 merge，须重新记录精确 target/head/base/参数及期限的单次动作批准，不能沿用旧任务批准；85% 总覆盖率、90% diff coverage、全部质量检查、spec/code 审批、Gate、app15368 身份和严格分支保护均未放宽，合并后实际父提交、树与来源祖先核对后才可关闭新任务。原用户草稿、旧任务及后续阶段边界保持。当前 APPROVE 仅为设计技术审查结论，不表示人类批准、正式验证、Gate、远端 CI 或外部动作已完成。",
+  "findings": []
+}

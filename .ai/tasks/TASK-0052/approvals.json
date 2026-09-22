@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-22T10:29:59Z",
+    "base_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Recorded from the current explicit owner approval and full authorization to continue until completion. Independently reviewed fixed-base continuation of PR43 after a safe test-only correction; preserve all failed evidence and require fresh full verification and each bounded external action approval.",
+    "schema_version": "1.0",
+    "spec_sha256": "c71f0f6f4878de39732adc89a8f419bd0514c357130ef89af15f52785fcce041",
+    "subject_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+    "task_id": "TASK-0052"
+  }
+]

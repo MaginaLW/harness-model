@@ -1,0 +1,84 @@
+allowed_scope:
+- .ai/tasks/TASK-0052/**
+base_commit: 7b940bf67743673755ac872ed6ff32e9d1d87ca1
+branch: codex/self-hosted-runner-inventory
+created_at: '2026-09-22T10:25:22Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - push
+  - pull_request_update
+  - merge
+  goal: Complete PR 43 after repairing its Linux synthetic-drive test fixture
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0052/**
+  inputs:
+  - 'Fixed safe-test revision and preserved failed TASK-0051: 7b940bf67743673755ac872ed6ff32e9d1d87ca1.'
+  - Existing PR43 remains open; main base ae0e3d3fb070d1fa00ff25b086d8a49e9d222db9.
+    Production tool/core blobs match quality source 2393c672e72d7f27fbfd8042e3ca51a99affadc2.
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Verify the new committed publication base.
+  - push
+  - Update PR43 body for the final tested scope.
+  - merge
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0052
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run complete formal V1 on a committed fixed subject; independently review the
+    cumulative remote changes.
+  - Retain full tests, 85 percent total and 90 percent diff coverage, Ruff, format,
+    mypy and whitespace; preserve separate optional-tool coverage with exact unchanged
+    production blobs.
+  - Require exact final-head successful Linux CI/app15368 and unchanged branch protection,
+    then verify actual merge parents/tree/ancestry before close.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- force_push
+- branch_delete
+- bypass_branch_protection
+frozen_spec_sha256: c71f0f6f4878de39732adc89a8f419bd0514c357130ef89af15f52785fcce041
+goal: Complete PR 43 after repairing its Linux synthetic-drive test fixture
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-22T10:25:23Z'
+subject_commit: 7b940bf67743673755ac872ed6ff32e9d1d87ca1
+task_id: TASK-0052
+updated_at: '2026-09-22T10:30:00Z'
+worktree_dirty: false
+worktree_dirty_paths: []

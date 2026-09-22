@@ -1,0 +1,38 @@
+{
+  "base_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "1ae4da93e5b5df234190d670e17e68d22259db72eef6107e5d9b794c730a2cf4",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0052/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Complete PR 43 after repairing its Linux synthetic-drive test fixture",
+        "impact_scope": [
+          ".ai/tasks/TASK-0052/**"
+        ],
+        "planned_actions": [
+          "Verify the new committed publication base.",
+          "push",
+          "Update PR43 body for the final tested scope.",
+          "merge"
+        ]
+      }
+    ],
+    "goal": "Complete PR 43 after repairing its Linux synthetic-drive test fixture",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "56abeae5f451189a4613943bb635354dd9c1a27e6c3031661b85d7719ee041b2",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "c71f0f6f4878de39732adc89a8f419bd0514c357130ef89af15f52785fcce041",
+  "task_id": "TASK-0052"
+}
