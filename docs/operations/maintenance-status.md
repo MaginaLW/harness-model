@@ -1,5 +1,19 @@
 # 维护收尾与待办
 
+## 2026-09-22 PR #42 合并与本轮关闭
+
+[PR #42](https://github.com/MaginaLW/harness-model/pull/42) 已于 08:06:49 UTC 合入 main
+（`ae0e3d3`）。最终 head `1d76edd` 的 required CI 通过：Linux 2102 passed、
+1 Windows-only skip、核心覆盖率 88.03%；本地含工具测试 2103 passed、总覆盖
+88.58%、累计差异覆盖 96%。TASK-0050 正式 V1、独立审查和本地 Gate 均通过，
+核对远端父提交、树及源码祖先后已关闭 MERGED、Missing: none。
+
+账本现为 49 项：41 MERGED / 7 BLOCKED / 1 APPROVED_FOR_MERGE。工具与本轮 E1
+诊断已发布；条件阶段、外仓交接和 TASK-0028 选项 C 保留。动作及关闭回执仅追加
+本地，不递归再发布；详见 [TASK-0050 关闭记录](../../.ai/tasks/TASK-0050/publication-closeout-001.md)。
+下文关于最终发布尚待执行的文字属于此前观察窗口，原文保留。
+
+
 ## 2026-09-22 最终源码与发布治理追加核定
 
 证据导出边界补充修复后，固定源码 `5ecde71` 在干净检出重新通过 **2103 项测试**，
