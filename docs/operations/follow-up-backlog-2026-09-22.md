@@ -1,5 +1,28 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-22 PR #43 后续工具交付
+
+[PR #43](https://github.com/MaginaLW/harness-model/pull/43) 已于 2026-09-22T11:08:56Z 普通合入 main
+（`48bf777`）。本轮完成 runner 本机路径与 PSDrive 绑定检查，
+以及显式证据选材预检；缺失日志、缺失原件和实质字节冲突均保留可见诊断。
+
+固定源码 `2393c67`：本地 **2238 passed**，含 Python 工具总覆盖 **88.86%**、
+累计差异覆盖 **99%**，七组质量检查通过。TASK-0052 正式 V1、独立实施审查、
+代码批准和本地 Gate 均通过；精确发布 head `45a220f` 的 required CI
+为 Linux **2236 passed / 2 Windows-only skips**、核心覆盖 **88.03%**。
+维护模式远端 Verify and Gate 跳过，本地正式验证单独保留，不混用覆盖范围。
+
+核对远端父提交、树与源码祖先后已关闭 TASK-0052：MERGED、Missing: none。
+账本共 **51 项：42 MERGED / 8 BLOCKED / 1 APPROVED_FOR_MERGE**。详细版本与动作依据见
+[TASK-0052 关闭记录](../../.ai/tasks/TASK-0052/publication-closeout-001.md)。
+本轮关闭记录仅本地追加，不递归发布；三个用户草稿及旧历史保留。
+
+E3 自然双产品案例、外仓安全交接、I1 其他生命周期及 E4/E5/I2–I5/阶段三四继续按
+既有条件推进；TASK-0028 保持选项 C，七项更早 BLOCKED 不自动恢复；新增 TASK-0051 为已被本任务接续的 CI 失败历史。
+本次首次 Linux CI 的 3 个失败来自合成 Windows 测试的宿主盘查询，保留为 TASK-0051
+失败记录；`7b940bf` 的 6 行 fixture 修复保持所有原断言，Task52 重新完成验证后发布。
+以下 PR #42 及更早段落是对应历史窗口，不作为当前待重复实施的队列。
+
 ## 2026-09-22 PR #42 合并与本轮关闭
 
 [PR #42](https://github.com/MaginaLW/harness-model/pull/42) 已于 08:06:49 UTC 合入 main
