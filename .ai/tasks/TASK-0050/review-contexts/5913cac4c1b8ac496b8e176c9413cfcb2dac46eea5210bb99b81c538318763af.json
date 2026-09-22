@@ -1,0 +1,44 @@
+{
+  "base_commit": "5ecde7164af91f166c13ce1953e3878961a45bff",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "44aad0b4b8fe97393ac5c164013bb664241c05bce6174304af6c6fcfd0d7eabe",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0050/**",
+      "docs/operations/local-tools-closeout-2026-09-22.md",
+      "docs/operations/maintenance-status.md",
+      "docs/operations/follow-up-backlog-2026-09-22.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish the reviewed local evidence and tool-discovery delivery through a governed protected PR and preserve the prior publication process deviation",
+        "impact_scope": [
+          ".ai/tasks/TASK-0050/**",
+          "docs/operations/local-tools-closeout-2026-09-22.md",
+          "docs/operations/maintenance-status.md",
+          "docs/operations/follow-up-backlog-2026-09-22.md"
+        ],
+        "planned_actions": [
+          "Prepare and verify append-only publication governance for the already-reviewed delivery.",
+          "push",
+          "Update PR42 with the exact reviewed publication candidate.",
+          "merge"
+        ]
+      }
+    ],
+    "goal": "Publish the reviewed local evidence and tool-discovery delivery through a governed protected PR and preserve the prior publication process deviation",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "5913cac4c1b8ac496b8e176c9413cfcb2dac46eea5210bb99b81c538318763af",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "6b3660817d1c3d45cf92e78a3816f37fbd51aa7c27f218a3d9a90fb4f59ebf58",
+  "task_id": "TASK-0050"
+}

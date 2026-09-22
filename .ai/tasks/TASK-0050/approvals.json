@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-22T07:17:52Z",
+    "base_commit": "5ecde7164af91f166c13ce1953e3878961a45bff",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Record the current owner instruction: full authorization and continued completion for two hours. Applies prospectively to this reviewed bounded publication specification; prior publication is not retroactively approved by this task.",
+    "schema_version": "1.0",
+    "spec_sha256": "6b3660817d1c3d45cf92e78a3816f37fbd51aa7c27f218a3d9a90fb4f59ebf58",
+    "subject_commit": "5ecde7164af91f166c13ce1953e3878961a45bff",
+    "task_id": "TASK-0050"
+  }
+]

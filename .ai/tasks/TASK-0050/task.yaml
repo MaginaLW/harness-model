@@ -1,0 +1,97 @@
+allowed_scope:
+- .ai/tasks/TASK-0050/**
+- docs/operations/local-tools-closeout-2026-09-22.md
+- docs/operations/maintenance-status.md
+- docs/operations/follow-up-backlog-2026-09-22.md
+base_commit: 5ecde7164af91f166c13ce1953e3878961a45bff
+branch: codex/self-hosted-runner-inventory
+created_at: '2026-09-22T07:10:42Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - push
+  - pull_request_update
+  - merge
+  goal: Publish the reviewed local evidence and tool-discovery delivery through a
+    governed protected PR and preserve the prior publication process deviation
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0050/**
+  - docs/operations/local-tools-closeout-2026-09-22.md
+  - docs/operations/maintenance-status.md
+  - docs/operations/follow-up-backlog-2026-09-22.md
+  inputs:
+  - Existing reviewed implementation subject 5ecde7164af91f166c13ce1953e3878961a45bff;
+    full-quality-002 verification is running independently.
+  - PR42 prior head 20a948c was explicitly owner-authorized and CI-passed, but pushed
+    before an AI Flow publication task existed.
+  - Remote publication base aeaed58272f90f1505fce3841d302f5be6317119; the complete
+    11-file delivery must remain independently scoped.
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Prepare and verify append-only publication governance for the already-reviewed
+    delivery.
+  - push
+  - Update PR42 with the exact reviewed publication candidate.
+  - merge
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0050
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run all CLI-required verification on a committed isolated subject.
+  - Retain complete 85 percent total and 90 percent diff coverage, Ruff, format, mypy
+    and whitespace checks for the delivery.
+  - Independently verify exact PR head, remote base, required-check app identity,
+    successful CI and merge tree/ancestry before closing.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- force_push
+- branch_delete
+- bypass_branch_protection
+frozen_spec_sha256: 6b3660817d1c3d45cf92e78a3816f37fbd51aa7c27f218a3d9a90fb4f59ebf58
+goal: Publish the reviewed local evidence and tool-discovery delivery through a governed
+  protected PR and preserve the prior publication process deviation
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-22T07:15:25Z'
+subject_commit: 5ecde7164af91f166c13ce1953e3878961a45bff
+task_id: TASK-0050
+updated_at: '2026-09-22T07:18:41Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md
+- docs/superpowers/plans/02_harness_model_self_hosted_runner_plan_2026-09-12.md
+- docs/superpowers/plans/2026-09-12-harness-model_cross-agent_review-fix_plan_2026-09-12.md
