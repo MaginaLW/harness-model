@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-22T04:36:41Z",
+    "base_commit": "10b13d17001b3decce17080bc3773fcfe8f5a8fc",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Record the owner explicit approval in this conversation of TASK-0049 repair and separately committed regression tests. The current reviewed clarification only declares the exact already-authorized test dependency for cumulative scope; it adds no implementation objective, risk or external action.",
+    "schema_version": "1.0",
+    "spec_sha256": "61c5d9d70e995c9cdd9dafca7687b9d0524104d60a9aeeaee18b83e792b8d489",
+    "subject_commit": "25f48e4eb1c7126eae13eff6a1abf55dfe527d0b",
+    "task_id": "TASK-0049"
+  }
+]

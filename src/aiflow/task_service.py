@@ -852,16 +852,19 @@ def _require_ready_artifacts(repository_root: Path, task_id: str, record: TaskRe
         raise StorageError(
             "Could not read frozen specification", code="BEGIN_SPEC_READ_FAILED"
         ) from error
-    subject_commit = record.task.get("subject_commit")
+    current_spec_binding = {
+        "task_id": task_id,
+        "base_commit": record.task.get("base_commit"),
+        "policy_sha256": bundle.sha256,
+        "spec_sha256": spec_sha,
+    }
     for entry in review_entries:
         decision_unit_id = entry.get("decision_unit_id")
-        policy_sha = entry.get("policy_sha256")
         if not any(
             approval.get("approval_type") == "spec"
             and approval.get("decision_unit_id") == decision_unit_id
-            and approval.get("spec_sha256") == spec_sha
-            and approval.get("policy_sha256") == policy_sha
-            and approval.get("subject_commit") == subject_commit
+            and evaluate_freshness("spec_approval", approval, current_spec_binding).status
+            == "fresh"
             for approval in approvals
         ):
             raise ContractError(

@@ -47,3 +47,12 @@ AUTO 路径及 code/action 的 subject、证据与消费绑定均保持既有语
 不同 agent 并行执行，最终由主 agent 汇总验证、处理 CLI 缺项并提交。
 尚未批准规格时不修改受控源码。回退使用后续有界修复提交，保留账本和证据。
 push/merge 等动作须对最终具体候选另行授权；本任务不包含真实外部执行。
+
+## 已授权回归测试的累计集成范围
+
+用户已批准上述回归测试及独立提交要求。CLI 检查整个 base→subject 差异，
+因此将 `tests/integration/test_begin_close_commands.py` 精确列入 allowed_scope，
+用于最终累计候选的集成审查；该测试仍按维护模式 task-free 单独实现和提交，
+不追认它为治理源码任务，不新增安全 DU 或降低 REVIEW/V1。源码修改范围仍只有
+`src/aiflow/task_service.py`，base 不变。此说明通过 spec_changed、重新分类、
+冻结和独立审查纳入当前绑定，原规格和历史记录由既有提交保留。

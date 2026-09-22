@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0001",
+  "revision": 1,
+  "task_id": "TASK-0049",
+  "review_stage": "design",
+  "reviewer": "/root/verify_path",
+  "recorded_at": "2026-09-22T04:33:38Z",
+  "context_sha256": "182de75e4148c17cda265b786ce8a9662ff4823cb801b8aed875362d926b811a",
+  "outcome": "APPROVE",
+  "summary": "独立核查冻结规格 cf316b043a1dcc104eb4f8de97816f486982b2c148c20b4b37b448740dca41e4、当前 design context、task_service._require_ready_artifacts 与 freshness.evaluate_freshness。既有 begin 错绑 subject 并漏检 base；规格要求共享 spec_approval 的 base/policy/spec 绑定、逐 REVIEW 单元有效批准覆盖，保留分类新鲜度与 BEGIN_APPROVAL_INVALID，设计与权威规则一致。REVIEW/V1 和全部质量阈值保持。安全测试须按规格独立 task-free 提交；当前精确 allowed_scope 尚不覆盖新增测试的累计差异，提交和最终验证前必须显式核定其集成审查路径并按既有版本失效流程处理，不能仅凭拆分提交豁免 scope，也不能改 base 保留旧批准。本记录批准修复设计，不代表后续范围核定已完成、owner spec/code/action 批准、实现验证或 Gate 通过。",
+  "findings": []
+}
