@@ -1,0 +1,224 @@
+{
+  "base_commit": "10b13d17001b3decce17080bc3773fcfe8f5a8fc",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "fec14bd2a71a0cfe46cd6bda9887df7ff780570af04b37e93cc75cd97531f0dc",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "tests/integration/test_begin_close_commands.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Align begin specification approval checks with authoritative freshness bindings while preserving approval and verification controls",
+        "impact_scope": [
+          "src/aiflow/task_service.py"
+        ],
+        "planned_actions": [
+          "Use the shared freshness evaluator in begin for each required REVIEW decision unit.",
+          "Preserve classification freshness, error codes, code/action approval bindings and all quality thresholds."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0049/approvals.json",
+        ".ai/tasks/TASK-0049/classification.json",
+        ".ai/tasks/TASK-0049/design-context-001.json",
+        ".ai/tasks/TASK-0049/design-context-002.json",
+        ".ai/tasks/TASK-0049/design-context-003.json",
+        ".ai/tasks/TASK-0049/design-context-004.json",
+        ".ai/tasks/TASK-0049/design-context-005.json",
+        ".ai/tasks/TASK-0049/design-review-input-001.json",
+        ".ai/tasks/TASK-0049/design-review-input-002.json",
+        ".ai/tasks/TASK-0049/events.jsonl",
+        ".ai/tasks/TASK-0049/preparation-review-001.md",
+        ".ai/tasks/TASK-0049/review-contexts/274f36a241c2abcf4c0c4a4cb36c1d709cc7d5305a4b9f4f10c8b102db801c4f.json",
+        ".ai/tasks/TASK-0049/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0049/spec.md",
+        ".ai/tasks/TASK-0049/task.yaml",
+        "src/aiflow/task_service.py",
+        "tests/integration/test_begin_close_commands.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/classification.json"
+        },
+        {
+          "additions": 36,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/design-context-001.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/design-context-002.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/design-context-003.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/design-context-004.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/design-context-005.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/design-review-input-001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/design-review-input-002.json"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/events.jsonl"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/preparation-review-001.md"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/review-contexts/274f36a241c2abcf4c0c4a4cb36c1d709cc7d5305a4b9f4f10c8b102db801c4f.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/spec.md"
+        },
+        {
+          "additions": 77,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0049/task.yaml"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 5,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 138,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_begin_close_commands.py"
+        }
+      ],
+      "totals": {
+        "additions": 657,
+        "deletions": 6,
+        "files": 17
+      }
+    },
+    "goal": "Align begin specification approval checks with authoritative freshness bindings while preserving approval and verification controls",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0049",
+        "--actor",
+        "codex-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "316b2fd0461d2aa4689c5a53cb551e5c5c5e331c4e85148d6de2b1a66bfc3f3f",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "741eb016d56d93c9f59ffba4e8ce3cd44e953d8898ba246b103cc7828904a03d",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "61c5d9d70e995c9cdd9dafca7687b9d0524104d60a9aeeaee18b83e792b8d489",
+  "subject_commit": "d05beb274290c90aad67f986efdaac49a4e0967b",
+  "task_id": "TASK-0049"
+}

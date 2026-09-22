@@ -4,7 +4,7 @@ allowed_scope:
 base_commit: 10b13d17001b3decce17080bc3773fcfe8f5a8fc
 branch: codex/self-hosted-runner-inventory
 created_at: '2026-09-22T00:38:10Z'
-current_state: IMPLEMENTING
+current_state: WAITING_FOR_FINAL_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -67,9 +67,9 @@ goal: Align begin specification approval checks with authoritative freshness bin
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-09-22T04:35:32Z'
-subject_commit: 25f48e4eb1c7126eae13eff6a1abf55dfe527d0b
+subject_commit: d05beb274290c90aad67f986efdaac49a4e0967b
 task_id: TASK-0049
-updated_at: '2026-09-22T04:36:41Z'
+updated_at: '2026-09-22T05:02:19Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md
