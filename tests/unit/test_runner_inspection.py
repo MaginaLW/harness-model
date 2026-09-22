@@ -789,10 +789,16 @@ def test_disk_probe_only_reads_the_confirmed_local_root(
 ) -> None:
     command = r"""
 $m = Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru
+function global:Join-Path { throw 'Synthetic Windows fixture must not resolve a host drive' }
 & $m {
     $script:IsWindows = $true
     $script:driveCalls = [Collections.Generic.List[string]]::new()
     $script:freeReads = 0
+    function Join-Path {
+        param([string]$Path, [string]$ChildPath)
+        # The fixture uses Windows syntax even when PowerShell runs on Linux.
+        return $Path.Replace('/', '\').TrimEnd('\') + '\' + $ChildPath
+    }
     function Get-CimInstance { @() }
     function Get-InspectionIdentity { @{} }
     function Get-InspectionPathState {
