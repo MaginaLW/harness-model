@@ -491,6 +491,7 @@ def inspect_path_with_metadata_spy(
     blocked_path: str = "",
     failure: str = "",
     windows: bool = True,
+    psdrive_root: str | None = None,
 ) -> dict[str, Any]:
     """Model metadata access without opening any test drive, share or device."""
     json_source = tmp_path / "plain.json"
@@ -502,11 +503,23 @@ $m = Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru
     $script:IsWindows = $script:probe.windows
     $script:metadataCalls = [Collections.Generic.List[string]]::new()
     $script:driveCalls = [Collections.Generic.List[string]]::new()
+    $script:psdriveCalls = [Collections.Generic.List[string]]::new()
     function Get-InspectionDriveType {
         param([string]$Root)
         $script:driveCalls.Add($Root)
         if ($script:probe.driveType -eq 'error') { throw 'synthetic_drive_error' }
         return $script:probe.driveType
+    }
+    function Get-PSDrive {
+        param([string]$Name, [string]$PSProvider, [string]$ErrorAction)
+        $script:psdriveCalls.Add("${Name}:$PSProvider")
+        if ($script:probe.psdriveRoot -eq '<missing>') { return @() }
+        if ($script:probe.psdriveRoot -eq '<error>') {
+            throw [System.Management.Automation.ItemNotFoundException]::new('drive missing')
+        }
+        $root = if ($null -eq $script:probe.psdriveRoot) { "${Name}:\" }
+            else { $script:probe.psdriveRoot }
+        [pscustomobject]@{ Root = $root }
     }
     function Get-Item {
         param([string]$LiteralPath, [switch]$Force, [string]$ErrorAction)
@@ -535,7 +548,8 @@ $m = Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru
     }
     else { $state = Get-InspectionPathState $script:probe.path }
     [pscustomobject]@{
-        state = $state; metadataCalls = @($script:metadataCalls); driveCalls = @($script:driveCalls)
+        state = $state; metadataCalls = @($script:metadataCalls)
+        driveCalls = @($script:driveCalls); psdriveCalls = @($script:psdriveCalls)
     } | ConvertTo-Json -Compress
 }
 """
@@ -550,6 +564,7 @@ $m = Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru
                 "blockedPath": blocked_path,
                 "failure": failure,
                 "windows": windows,
+                "psdriveRoot": psdrive_root,
                 "jsonSource": str(json_source),
             }
         ),
@@ -598,6 +613,7 @@ def test_windows_nonlocal_or_ambiguous_paths_never_reach_metadata(
     assert report["state"] == ("rejected" if operation == "json" else "unknown")
     assert report["metadataCalls"] == []
     assert report["driveCalls"] == []
+    assert report["psdriveCalls"] == []
 
 
 @pytest.mark.parametrize("operation", ["state", "json"])
@@ -611,6 +627,79 @@ def test_network_or_unconfirmed_drive_never_reaches_metadata(
     assert report["state"] == ("rejected" if operation == "json" else "unknown")
     assert report["metadataCalls"] == []
     assert report["driveCalls"] == ["Z:\\"]
+    assert report["psdriveCalls"] == []
+
+
+@pytest.mark.parametrize("operation", ["state", "json"])
+@pytest.mark.parametrize(
+    "alias", [r"D:\local-alias", r"\\never-contact.invalid\share", "", "<missing>", "<error>"]
+)
+def test_psdrive_alias_is_rejected_before_any_metadata(
+    pwsh: str, tmp_path: Path, operation: str, alias: str
+) -> None:
+    report = inspect_path_with_metadata_spy(
+        pwsh, tmp_path, r"C:\probe.json", operation=operation, psdrive_root=alias
+    )
+    assert report["state"] == ("rejected" if operation == "json" else "unknown")
+    assert report["metadataCalls"] == []
+    assert report["driveCalls"] == ["C:\\"]
+    assert report["psdriveCalls"] == ["C:FileSystem"]
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows process-local PSDrive binding")
+def test_real_process_local_psdrive_alias_cannot_redirect_json_reads(
+    pwsh: str, tmp_path: Path
+) -> None:
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text('{"synthetic":"must-not-be-read"}', encoding="utf-8")
+    command = r"""
+# Preload the cmdlets before replacing a drive in this short-lived process only.
+$null = ConvertTo-Json (ConvertFrom-Json '{}')
+$null = Get-Command Get-Item, Get-PSDrive, Remove-PSDrive, New-PSDrive
+$m = Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru
+$driveName = $env:INSPECTION_TEST_SYSTEM_DRIVE.Substring(0, 1)
+Set-Location $env:INSPECTION_TEST_ALIAS_ROOT
+Remove-PSDrive -Name $driveName -Force
+$null = New-PSDrive -Name $driveName -PSProvider FileSystem -Root $env:INSPECTION_TEST_ALIAS_ROOT
+& $m {
+    $script:metadataCalls = [Collections.Generic.List[string]]::new()
+    function Get-Item {
+        param([string]$LiteralPath, [switch]$Force, [string]$ErrorAction)
+        $script:metadataCalls.Add($LiteralPath)
+        Microsoft.PowerShell.Management\Get-Item -LiteralPath $LiteralPath -Force -ErrorAction Stop
+    }
+    $path = $env:INSPECTION_TEST_SYSTEM_DRIVE + '\receipt.json'
+    $state = Get-InspectionPathState $path
+    try { $null = Read-InspectionJson $path; $jsonRead = $true }
+    catch { $jsonRead = $false }
+    [pscustomobject]@{
+        state = $state; jsonRead = $jsonRead; metadataCalls = @($script:metadataCalls)
+        nativeDriveType = Get-InspectionDriveType ($env:INSPECTION_TEST_SYSTEM_DRIVE + '\')
+    } | ConvertTo-Json -Compress
+}
+"""
+    environment = os.environ.copy()
+    environment.update(
+        INSPECTION_TEST_MODULE=str(TOOLS / "RunnerInspection.psm1"),
+        INSPECTION_TEST_SYSTEM_DRIVE=os.environ.get("SystemDrive", "C:"),
+        INSPECTION_TEST_ALIAS_ROOT=str(tmp_path),
+    )
+    result = subprocess.run(
+        [pwsh, "-NoProfile", "-Command", command],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=15,
+        env=environment,
+    )
+    assert result.returncode == 0
+    assert not result.stderr
+    report = json.loads(result.stdout)
+    assert report["nativeDriveType"] in {2, 3, 5, 6}
+    assert report["state"] == "unknown"
+    assert report["jsonRead"] is False
+    assert report["metadataCalls"] == []
+    assert receipt.read_text(encoding="utf-8") == '{"synthetic":"must-not-be-read"}'
 
 
 @pytest.mark.parametrize("drive_type", [2, 3, 5, 6])
@@ -622,6 +711,7 @@ def test_plain_local_drive_is_inspected_from_root_to_leaf(
     )
     assert report["state"] == "present"
     assert report["driveCalls"] == ["C:\\"]
+    assert report["psdriveCalls"] == ["C:FileSystem"]
     assert report["metadataCalls"] == ["C:\\", r"C:\safe", r"C:\safe\probe.json"]
 
 

@@ -105,6 +105,15 @@ function Get-InspectionPathObservation {
                 }
             }
             if ((Get-InspectionDriveType $root) -notin @(2, 3, 5, 6)) { throw 'local_drive_required' }
+            # Get-Item resolves PSDrive names, while DriveInfo uses native OS drive
+            # names. Refuse a process-local alias before it can redirect metadata.
+            try {
+                $drive = @(Get-PSDrive -Name $root.Substring(0, 1) -PSProvider FileSystem -ErrorAction Stop)
+            } catch { throw 'native_drive_binding_required' }
+            if ($drive.Count -ne 1 -or
+                -not [StringComparer]::OrdinalIgnoreCase.Equals($drive[0].Root, $root)) {
+                throw 'native_drive_binding_required'
+            }
             $separator = '\'
         }
         else {
