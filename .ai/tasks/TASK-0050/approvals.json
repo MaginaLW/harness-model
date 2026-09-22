@@ -11,5 +11,19 @@
     "spec_sha256": "6b3660817d1c3d45cf92e78a3816f37fbd51aa7c27f218a3d9a90fb4f59ebf58",
     "subject_commit": "5ecde7164af91f166c13ce1953e3878961a45bff",
     "task_id": "TASK-0050"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "code",
+    "approved_at": "2026-09-22T07:54:29Z",
+    "base_commit": "5ecde7164af91f166c13ce1953e3878961a45bff",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "1fb55e5fe0b09487ba40af9ff88203722bf6875e13bcca24bc0e7ad423c5dea5",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Record standing owner full authorization to complete this bounded delivery, after independent implementation and package review and all formal V1 checks on the fixed subject passed. Exact action approval and final-head remote CI remain separate requirements.",
+    "schema_version": "1.0",
+    "spec_sha256": "6b3660817d1c3d45cf92e78a3816f37fbd51aa7c27f218a3d9a90fb4f59ebf58",
+    "subject_commit": "2e01248908964860b95dbea540749096a2b1a025",
+    "task_id": "TASK-0050"
   }
 ]
