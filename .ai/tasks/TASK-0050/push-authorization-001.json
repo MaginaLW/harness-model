@@ -1,0 +1,15 @@
+{
+  "decision_unit_id": "DU-001",
+  "subject_commit": "2e01248908964860b95dbea540749096a2b1a025",
+  "conditions": [
+    "Current owner full authorization covers this bounded prospective publication.",
+    "Local Gate must pass in the committed independent checkout.",
+    "Actual candidate and protected main base must match the independently frozen values.",
+    "Single-use operator-checked action; not trusted automatic consumption."
+  ],
+  "expires_at": "2026-09-22T08:15:27Z",
+  "single_use": true,
+  "action_type": "push",
+  "target": "MaginaLW/harness-model:refs/heads/codex/self-hosted-runner-inventory",
+  "parameter_summary": "Ordinary push of exact head 1d76edd244ed6191806e18bd7eb9b7633eda9b1d; remote base aeaed58272f90f1505fce3841d302f5be6317119; no force, branch deletion or other ref."
+}

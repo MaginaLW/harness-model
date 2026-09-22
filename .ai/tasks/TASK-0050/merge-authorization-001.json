@@ -1,0 +1,14 @@
+{
+  "decision_unit_id": "DU-001",
+  "action_type": "merge",
+  "target": "https://github.com/MaginaLW/harness-model/pull/42",
+  "parameter_summary": "Ordinary merge of exact head 1d76edd244ed6191806e18bd7eb9b7633eda9b1d into verified main aeaed58272f90f1505fce3841d302f5be6317119; successful required ai-quality-gate app15368 run35702171807/job106662523526. Preserve branch; no admin bypass.",
+  "subject_commit": "2e01248908964860b95dbea540749096a2b1a025",
+  "conditions": [
+    "Owner explicitly authorized continued completion in the current conversation.",
+    "Exact head and current protection must remain unchanged; use --match-head-commit.",
+    "Verify actual remote merge state, parents, tree and source ancestry before close."
+  ],
+  "expires_at": "2026-09-22T08:15:27Z",
+  "single_use": true
+}
