@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-22T09:41:14Z",
+    "base_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Recorded by the agent from the owner current instruction to continue the remaining work for two hours and earlier explicit approval and full authorization to complete it. The frozen bounded publication specification has independently passed design review; preserve all current quality, action and remote-merge prerequisites.",
+    "schema_version": "1.0",
+    "spec_sha256": "8b4590370490779969b97fa669f4c323050ea9c707d4a7d1539ffa0a27e82b0f",
+    "subject_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
+    "task_id": "TASK-0051"
+  }
+]

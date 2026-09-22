@@ -1,0 +1,86 @@
+allowed_scope:
+- .ai/tasks/TASK-0051/**
+base_commit: 8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6
+branch: codex/self-hosted-runner-inventory
+created_at: '2026-09-22T09:37:23Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - push
+  - pull_request_create
+  - merge
+  goal: Publish reviewed runner local-path hardening and evidence selection preflight
+    through a governed protected PR
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0051/**
+  inputs:
+  - Fixed task-free base 8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6; complete source
+    quality evidence is separately bound to 2393c672e72d7f27fbfd8042e3ca51a99affadc2,
+    with only a reviewed documentation clarification afterward.
+  - Actual remote base ae0e3d3fb070d1fa00ff25b086d8a49e9d222db9; cumulative publication
+    includes prior TASK-0050 closure records and the reviewed follow-up changes.
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Prepare and verify this publication task before any remote mutation.
+  - push
+  - Create a pull request for the exact reviewed candidate.
+  - merge
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0051
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run all CLI-required checks on a committed isolated subject.
+  - Preserve full tests, 85 percent total coverage, 90 percent diff coverage, Ruff,
+    format, mypy and whitespace; separately include all optional Python tools.
+  - Audit cumulative remote scope and exact required CI/app, branch protection, merge
+    parents/tree and source ancestry.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- force_push
+- branch_delete
+- bypass_branch_protection
+frozen_spec_sha256: 8b4590370490779969b97fa669f4c323050ea9c707d4a7d1539ffa0a27e82b0f
+goal: Publish reviewed runner local-path hardening and evidence selection preflight
+  through a governed protected PR
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-22T09:38:24Z'
+subject_commit: 8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6
+task_id: TASK-0051
+updated_at: '2026-09-22T09:41:14Z'
+worktree_dirty: false
+worktree_dirty_paths: []
