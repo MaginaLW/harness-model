@@ -61,3 +61,20 @@ PowerShell 行覆盖不由 Python XML 证明，其行为由真实 PowerShell 子
 
 APPROVE。已完成的设计和源码验证支持继续本任务；正式实施批准和每项实际外部动作
 仍须在其对应证据与当前 CLI 条件满足后执行，不由本推荐自动获得完成结论。
+
+## 正式 V1 追加事实
+
+正式 V1 于 2026-09-22T10:05:28Z 完成，十项 required checks 全部 passed / exit 0，
+无超时。单元 1600 passed，全量回归与覆盖率轮各
+2238 / 2238 passed；核心覆盖率独立复算
+88.1167%（8520/9669），任务内差异无可执行覆盖行。累计工具覆盖继续
+使用前述独立源码证据，不混用口径。
+
+正式 subject 与 base 均为 `8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6`，执行时已提交 HEAD 为
+`1e480afa1f5e0ea90f3709064d940df3c5029f7c`。CLI 按现有规则把此后仅 TASK-0051 治理文件的提交视为 attestation，
+因此保留原 subject；这不是未提交源码或手工改写绑定。完整范围和工作区由正式 scope
+检查及单独累计范围审查核对。原始 evidence SHA256 为
+`a8344c31b77d1dc172f10e33f7eaaa1db7b81e952e43b4e61de2daaf0cae1b3d`，二十份原始 stdout/stderr 日志保留。
+
+上文“未验证”的正式 V1 项现由此实测结果更新；本包追加时实施技术审查、code/action
+批准、Gate、最终远端 CI 及合并仍须各自完成。其他场景与条件阶段边界不变。
