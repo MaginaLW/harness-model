@@ -1,0 +1,104 @@
+{
+  "base_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "1ae4da93e5b5df234190d670e17e68d22259db72eef6107e5d9b794c730a2cf4",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0052/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Complete PR 43 after repairing its Linux synthetic-drive test fixture",
+        "impact_scope": [
+          ".ai/tasks/TASK-0052/**"
+        ],
+        "planned_actions": [
+          "Verify the new committed publication base.",
+          "push",
+          "Update PR43 body for the final tested scope.",
+          "merge"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [],
+      "files": [],
+      "totals": {
+        "additions": 0,
+        "deletions": 0,
+        "files": 0
+      }
+    },
+    "goal": "Complete PR 43 after repairing its Linux synthetic-drive test fixture",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0052",
+        "--actor",
+        "agent"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "a110106c3176411348d620256997825f4cabd5effe3122a76e9f1207e63f8294",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "37d0b9806a4030e6b0da8c34150a50358432ad19fdeebaf1d1adc7e7dab8d213",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "c71f0f6f4878de39732adc89a8f419bd0514c357130ef89af15f52785fcce041",
+  "subject_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+  "task_id": "TASK-0052"
+}

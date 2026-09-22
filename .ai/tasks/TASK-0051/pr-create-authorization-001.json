@@ -1,0 +1,15 @@
+{
+  "decision_unit_id": "DU-001",
+  "subject_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
+  "conditions": [
+    "Current owner explicitly approved and fully authorized continued completion in this conversation.",
+    "Operator must match the current passing local Gate, exact committed candidate, remote base and unchanged protection.",
+    "Single-use operator record; generic Gate and wrapper do not provide trusted action consumption.",
+    "Create only this reviewed pull request; do not send unrelated messages or edit other PRs."
+  ],
+  "expires_at": "2026-09-22T10:50:15Z",
+  "single_use": true,
+  "action_type": "pull_request_create",
+  "target": "MaginaLW/harness-model:main",
+  "parameter_summary": "Create one pull request from codex/self-hosted-runner-inventory at exact head 587dcb05160578f7487d79e29f43fb24a9880081 to main at ae0e3d3fb070d1fa00ff25b086d8a49e9d222db9; title Harden runner local-path checks and add evidence selection preflight; body SHA256 a40256f13dc9dfa1da43840bb5cc17815ddc823f56ec1b828d9b3d03febd6425."
+}

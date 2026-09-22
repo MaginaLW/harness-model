@@ -1,0 +1,38 @@
+{
+  "base_commit": "8bdbcc07052fe7210a9d8fe7b4f6a240ad7a66f6",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "065c319b6b199cf2956bcc905aab07a3fbfcc6e3d99688652f85fdaff25f11a7",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0051/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish reviewed runner local-path hardening and evidence selection preflight through a governed protected PR",
+        "impact_scope": [
+          ".ai/tasks/TASK-0051/**"
+        ],
+        "planned_actions": [
+          "Prepare and verify this publication task before any remote mutation.",
+          "push",
+          "Create a pull request for the exact reviewed candidate.",
+          "merge"
+        ]
+      }
+    ],
+    "goal": "Publish reviewed runner local-path hardening and evidence selection preflight through a governed protected PR",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "8e2218a624ae7028d92f3fb51878d3c5f6d96e096f450b930fea086ac9061f2d",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "8b4590370490779969b97fa669f4c323050ea9c707d4a7d1539ffa0a27e82b0f",
+  "task_id": "TASK-0051"
+}

@@ -1,0 +1,15 @@
+{
+  "decision_unit_id": "DU-001",
+  "subject_commit": "2e01248908964860b95dbea540749096a2b1a025",
+  "conditions": [
+    "Current owner full authorization covers this bounded prospective publication.",
+    "Local Gate must pass in the committed independent checkout.",
+    "Actual candidate and protected main base must match the independently frozen values.",
+    "Single-use operator-checked action; not trusted automatic consumption."
+  ],
+  "expires_at": "2026-09-22T08:15:27Z",
+  "single_use": true,
+  "action_type": "pull_request_update",
+  "target": "https://github.com/MaginaLW/harness-model/pull/42",
+  "parameter_summary": "Update only PR42 body from reviewed content SHA256 4e741befb35b70b36e89e73d917ff94ee766dedac8f050678a9d3b72a5b14890; retain title and base; remote head must equal 1d76edd244ed6191806e18bd7eb9b7633eda9b1d."
+}

@@ -82,3 +82,73 @@ ZIP 内只有 `manifest.json` 和按两种来源标签分组的文件。manifest
 `source_authenticated: false` 和 `governance_effect: "none"`。
 
 定向验证：`python -m pytest tests/unit/test_evidence_bundle.py -q`。
+
+## 可选的选材预检
+
+导出前可用 `tools/evidence/selection_review.py` 检查明确声明的证据与文本映射。它使用
+同一份 selection，另需一份 request；没有自动寻找 evidence、递归收集日志或补选功能。
+在仓库根运行下面的模块命令，所有输入均为本地已有文件，工具只输出 JSON，不写文件。
+
+```json
+{
+  "version": 1,
+  "evidence": [
+    {"path": "checkout/.ai/tasks/TASK-0050/evidence.json",
+     "task_root": "checkout/.ai/tasks/TASK-0050"}
+  ],
+  "pairs": [
+    {"producer_path": "events.jsonl", "staged_path": "events.jsonl",
+     "original_path": "producer-originals/events.jsonl"}
+  ]
+}
+```
+
+```powershell
+python -m tools.evidence.selection_review `
+  --task-dir "<HANDOFF_ROOT>/git-text" `
+  --raw-dir "<HANDOFF_ROOT>/runtime-originals" `
+  --selection "<HANDOFF_ROOT>/selection.json" `
+  --request "<HANDOFF_ROOT>/selection-review-request.json" `
+  --producer-dir "<EXECUTION_CHECKOUT>/.ai/tasks/TASK-0050"
+```
+
+request 版本固定为 `1`，只允许示例字段；重复 JSON 键、重复映射与不安全路径均拒绝。
+`evidence` 与 `pairs` 可单独为空，但合计至少一项。前者的 `path`、`task_root` 均相对
+`--raw-dir`；`path` 必须是 `task_root` 的直接子文件，根目录本身用空字符串表示。
+只解析 `schema_version: "1.0"` 的 evidence `checks` 日志引用，不代替完整 evidence Schema
+验证，也不根据检查的 `status` 推断执行成功。每个 check 的 stdout/stderr 引用须是
+`logs/` 下的安全相对路径，证据及其全部引用日志都必须以 `runtime-original` 明确入选。
+已入选的引用文件会实际读取；缺选时连该文件的元数据也不读取，缺失或 null 引用单独报告。
+
+`producer_path` 相对显式的 `--producer-dir`，`staged_path` 相对 `--task-dir` 且必须
+以 `git-text` 入选；`original_path` 相对 `--raw-dir` 且必须以 `runtime-original` 入选。
+无 pairs 时可省略 producer 根。每一对报告如下，结果按 request 的数组顺序对应，
+只含原因码和数量，不打印正文、输入根或相对文件名：
+
+| comparison | 含义 |
+| --- | --- |
+| `RAW_IDENTICAL` | producer 与 staged 的原始字节摘要及长度相同 |
+| `CRLF_ONLY` | 原始字节不同，仅将 CRLF 字节对替换为 LF 后相同 |
+| `CONTENT_CONFLICT` | 上述两种比较均不相同，须人工解决 |
+| `MISSING_PRODUCER` / `MISSING_STAGED` | 明确映射的文件缺失 |
+| `STAGED_NOT_SELECTED` | 暂存文件未入选；不读取它或对应 producer |
+
+比较流式处理跨块 CRLF，保留裸 CR，不做编码解码或其他文本转换；`CRLF_ONLY` 也不证明
+文件是有效文本。原始字节完全相同时可将 `original_path` 设为 null；否则必须显式保留
+producer 原件。指定的原件与 producer 须原始 SHA256 和长度均匹配（`MATCHED`），
+即使仅 CRLF 不同也不能以 LF 副本代替。缺少映射、缺选、文件缺失或摘要不符分别报告
+`ORIGINAL_NOT_MAPPED`、`ORIGINAL_NOT_SELECTED`、`MISSING_ORIGINAL`、`ORIGINAL_MISMATCH`。
+工具不复制、不覆盖、不修复冲突，不删除或整理历史材料。
+
+`CONSISTENT`（退出 `0`）只表示本次明确映射的一致性；存在缺项或冲突时为 `INCOMPLETE`
+（退出 `1`），输入或读取错误为 `ERROR`（退出 `1`），参数错误退出 `2`。`selected_files`
+是 selection 的条目数，**不是已验证文件数**；未被映射引用的入选文件不会读取，选择
+范围是否充分仍由操作者核定。预检也不校验已有 ZIP；导出及接收方仍使用 bundle 校验。
+字节比较不证明 Git blob/提交、生成者身份、日志真实性、环境可复现或 Gate 通过。
+
+输入路径复用 bundle 的本地盘、符号链接及 reparse point 拒绝规则。JSON 单份上限
+4 MiB、单文件 512 MiB、累计实际读取 2 GiB；映射合计及跨 evidence 的 check 合计均
+不超过 10,000。读取时检查文件标识、大小与修改时间，缓存复用也检查当前文件状态；
+须保持输入静止，这些检查不构成对恶意并发修改的文件系统隔离。
+
+定向验证：`python -m pytest tests/unit/test_evidence_selection_review.py -q`。

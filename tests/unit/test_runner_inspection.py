@@ -481,6 +481,380 @@ def test_real_path_metadata_distinguishes_missing_from_wrong_type(
     )
 
 
+def inspect_path_with_metadata_spy(
+    pwsh: str,
+    tmp_path: Path,
+    path: str,
+    *,
+    operation: str = "state",
+    drive_type: int | str = 3,
+    blocked_path: str = "",
+    failure: str = "",
+    windows: bool = True,
+    psdrive_root: str | None = None,
+) -> dict[str, Any]:
+    """Model metadata access without opening any test drive, share or device."""
+    json_source = tmp_path / "plain.json"
+    json_source.write_text('{"synthetic":true}', encoding="utf-8")
+    command = r"""
+$m = Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru
+& $m {
+    $script:probe = ConvertFrom-Json $env:INSPECTION_TEST_PATH_PROBE -AsHashtable
+    $script:IsWindows = $script:probe.windows
+    $script:metadataCalls = [Collections.Generic.List[string]]::new()
+    $script:driveCalls = [Collections.Generic.List[string]]::new()
+    $script:psdriveCalls = [Collections.Generic.List[string]]::new()
+    function Get-InspectionDriveType {
+        param([string]$Root)
+        $script:driveCalls.Add($Root)
+        if ($script:probe.driveType -eq 'error') { throw 'synthetic_drive_error' }
+        return $script:probe.driveType
+    }
+    function Get-PSDrive {
+        param([string]$Name, [string]$PSProvider, [string]$ErrorAction)
+        $script:psdriveCalls.Add("${Name}:$PSProvider")
+        if ($script:probe.psdriveRoot -eq '<missing>') { return @() }
+        if ($script:probe.psdriveRoot -eq '<error>') {
+            throw [System.Management.Automation.ItemNotFoundException]::new('drive missing')
+        }
+        $root = if ($null -eq $script:probe.psdriveRoot) { "${Name}:\" }
+            else { $script:probe.psdriveRoot }
+        [pscustomobject]@{ Root = $root }
+    }
+    function Get-Item {
+        param([string]$LiteralPath, [switch]$Force, [string]$ErrorAction)
+        $script:metadataCalls.Add($LiteralPath)
+        $attributes = [IO.FileAttributes]::Normal
+        $container = $LiteralPath -cne $script:probe.path
+        if ($LiteralPath -ceq $script:probe.blockedPath) {
+            switch ($script:probe.failure) {
+                'reparse' { $attributes = [IO.FileAttributes]::ReparsePoint }
+                'access_denied' { throw [UnauthorizedAccessException]::new('synthetic') }
+                'not_found' {
+                    throw [System.Management.Automation.ItemNotFoundException]::new('synthetic')
+                }
+                'unknown' { throw [IO.IOException]::new('synthetic') }
+                'wrong_type' { $container = $false }
+            }
+        }
+        [pscustomobject]@{
+            PSIsContainer = $container; Attributes = $attributes; Directory = $null
+            Length = 18; FullName = $script:probe.jsonSource
+        }
+    }
+    if ($script:probe.operation -eq 'json') {
+        try { $null = Read-InspectionJson $script:probe.path; $state = 'accepted' }
+        catch { $state = 'rejected' }
+    }
+    else { $state = Get-InspectionPathState $script:probe.path }
+    [pscustomobject]@{
+        state = $state; metadataCalls = @($script:metadataCalls)
+        driveCalls = @($script:driveCalls); psdriveCalls = @($script:psdriveCalls)
+    } | ConvertTo-Json -Compress
+}
+"""
+    environment = os.environ.copy()
+    environment.update(
+        INSPECTION_TEST_MODULE=str(TOOLS / "RunnerInspection.psm1"),
+        INSPECTION_TEST_PATH_PROBE=json.dumps(
+            {
+                "path": path,
+                "operation": operation,
+                "driveType": drive_type,
+                "blockedPath": blocked_path,
+                "failure": failure,
+                "windows": windows,
+                "psdriveRoot": psdrive_root,
+                "jsonSource": str(json_source),
+            }
+        ),
+    )
+    result = subprocess.run(
+        [pwsh, "-NoProfile", "-Command", command],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=15,
+        env=environment,
+    )
+    assert result.returncode == 0
+    assert not result.stderr
+    report: dict[str, Any] = json.loads(result.stdout)
+    return report
+
+
+@pytest.mark.parametrize("operation", ["state", "json"])
+@pytest.mark.parametrize(
+    "path",
+    [
+        r"\\never-contact.invalid\share\probe.json",
+        "//never-contact.invalid/share/probe.json",
+        r"\\?\C:\safe\probe.json",
+        r"\\.\C:\safe\probe.json",
+        r"FileSystem::C:\safe\probe.json",
+        r"Registry::HKEY_LOCAL_MACHINE\probe",
+        "Env:PATH",
+        "C:probe.json",
+        r"\safe\probe.json",
+        r"C:\safe\parent\..\probe.json",
+        r"C:\safe\NUL.txt",
+        r"C:\safe\CONIN$",
+        r"C:\safe\CONOUT$",
+        "C:\\safe\\COM\u00b9.txt",
+        "C:\\safe\\LPT\u00b2",
+        r"C:\safe\probe.json:stream",
+        r"C:\safe.\probe.json",
+    ],
+)
+def test_windows_nonlocal_or_ambiguous_paths_never_reach_metadata(
+    pwsh: str, tmp_path: Path, path: str, operation: str
+) -> None:
+    report = inspect_path_with_metadata_spy(pwsh, tmp_path, path, operation=operation)
+    assert report["state"] == ("rejected" if operation == "json" else "unknown")
+    assert report["metadataCalls"] == []
+    assert report["driveCalls"] == []
+    assert report["psdriveCalls"] == []
+
+
+@pytest.mark.parametrize("operation", ["state", "json"])
+@pytest.mark.parametrize("drive_type", [0, 1, 4, 99, "error"])
+def test_network_or_unconfirmed_drive_never_reaches_metadata(
+    pwsh: str, tmp_path: Path, operation: str, drive_type: int | str
+) -> None:
+    report = inspect_path_with_metadata_spy(
+        pwsh, tmp_path, r"Z:\safe\probe.json", operation=operation, drive_type=drive_type
+    )
+    assert report["state"] == ("rejected" if operation == "json" else "unknown")
+    assert report["metadataCalls"] == []
+    assert report["driveCalls"] == ["Z:\\"]
+    assert report["psdriveCalls"] == []
+
+
+@pytest.mark.parametrize("operation", ["state", "json"])
+@pytest.mark.parametrize(
+    "alias", [r"D:\local-alias", r"\\never-contact.invalid\share", "", "<missing>", "<error>"]
+)
+def test_psdrive_alias_is_rejected_before_any_metadata(
+    pwsh: str, tmp_path: Path, operation: str, alias: str
+) -> None:
+    report = inspect_path_with_metadata_spy(
+        pwsh, tmp_path, r"C:\probe.json", operation=operation, psdrive_root=alias
+    )
+    assert report["state"] == ("rejected" if operation == "json" else "unknown")
+    assert report["metadataCalls"] == []
+    assert report["driveCalls"] == ["C:\\"]
+    assert report["psdriveCalls"] == ["C:FileSystem"]
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows process-local PSDrive binding")
+def test_real_process_local_psdrive_alias_cannot_redirect_json_reads(
+    pwsh: str, tmp_path: Path
+) -> None:
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text('{"synthetic":"must-not-be-read"}', encoding="utf-8")
+    command = r"""
+# Preload the cmdlets before replacing a drive in this short-lived process only.
+$null = ConvertTo-Json (ConvertFrom-Json '{}')
+$null = Get-Command Get-Item, Get-PSDrive, Remove-PSDrive, New-PSDrive
+$m = Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru
+$driveName = $env:INSPECTION_TEST_SYSTEM_DRIVE.Substring(0, 1)
+Set-Location $env:INSPECTION_TEST_ALIAS_ROOT
+Remove-PSDrive -Name $driveName -Force
+$null = New-PSDrive -Name $driveName -PSProvider FileSystem -Root $env:INSPECTION_TEST_ALIAS_ROOT
+& $m {
+    $script:metadataCalls = [Collections.Generic.List[string]]::new()
+    function Get-Item {
+        param([string]$LiteralPath, [switch]$Force, [string]$ErrorAction)
+        $script:metadataCalls.Add($LiteralPath)
+        Microsoft.PowerShell.Management\Get-Item -LiteralPath $LiteralPath -Force -ErrorAction Stop
+    }
+    $path = $env:INSPECTION_TEST_SYSTEM_DRIVE + '\receipt.json'
+    $state = Get-InspectionPathState $path
+    try { $null = Read-InspectionJson $path; $jsonRead = $true }
+    catch { $jsonRead = $false }
+    [pscustomobject]@{
+        state = $state; jsonRead = $jsonRead; metadataCalls = @($script:metadataCalls)
+        nativeDriveType = Get-InspectionDriveType ($env:INSPECTION_TEST_SYSTEM_DRIVE + '\')
+    } | ConvertTo-Json -Compress
+}
+"""
+    environment = os.environ.copy()
+    environment.update(
+        INSPECTION_TEST_MODULE=str(TOOLS / "RunnerInspection.psm1"),
+        INSPECTION_TEST_SYSTEM_DRIVE=os.environ.get("SystemDrive", "C:"),
+        INSPECTION_TEST_ALIAS_ROOT=str(tmp_path),
+    )
+    result = subprocess.run(
+        [pwsh, "-NoProfile", "-Command", command],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=15,
+        env=environment,
+    )
+    assert result.returncode == 0
+    assert not result.stderr
+    report = json.loads(result.stdout)
+    assert report["nativeDriveType"] in {2, 3, 5, 6}
+    assert report["state"] == "unknown"
+    assert report["jsonRead"] is False
+    assert report["metadataCalls"] == []
+    assert receipt.read_text(encoding="utf-8") == '{"synthetic":"must-not-be-read"}'
+
+
+@pytest.mark.parametrize("drive_type", [2, 3, 5, 6])
+def test_plain_local_drive_is_inspected_from_root_to_leaf(
+    pwsh: str, tmp_path: Path, drive_type: int
+) -> None:
+    report = inspect_path_with_metadata_spy(
+        pwsh, tmp_path, r"C:\safe\probe.json", drive_type=drive_type
+    )
+    assert report["state"] == "present"
+    assert report["driveCalls"] == ["C:\\"]
+    assert report["psdriveCalls"] == ["C:FileSystem"]
+    assert report["metadataCalls"] == ["C:\\", r"C:\safe", r"C:\safe\probe.json"]
+
+
+@pytest.mark.parametrize("operation", ["state", "json"])
+@pytest.mark.parametrize("blocked_index", [0, 1, 2])
+def test_reparse_component_stops_before_any_child_or_json_read(
+    pwsh: str, tmp_path: Path, operation: str, blocked_index: int
+) -> None:
+    paths = ["C:\\", r"C:\junction", r"C:\junction\probe.json"]
+    report = inspect_path_with_metadata_spy(
+        pwsh,
+        tmp_path,
+        paths[-1],
+        operation=operation,
+        blocked_path=paths[blocked_index],
+        failure="reparse",
+    )
+    assert report["state"] == ("rejected" if operation == "json" else "reparse")
+    assert report["metadataCalls"] == paths[: blocked_index + 1]
+
+
+@pytest.mark.parametrize("failure", ["access_denied", "not_found", "unknown", "wrong_type"])
+def test_parent_failure_keeps_classification_and_never_reads_leaf(
+    pwsh: str, tmp_path: Path, failure: str
+) -> None:
+    report = inspect_path_with_metadata_spy(
+        pwsh,
+        tmp_path,
+        r"C:\parent\probe.json",
+        blocked_path=r"C:\parent",
+        failure=failure,
+    )
+    assert report["state"] == failure
+    assert report["metadataCalls"] == ["C:\\", r"C:\parent"]
+
+
+@pytest.mark.parametrize("operation", ["state", "json"])
+def test_posix_plain_files_and_reparse_ancestors_keep_fixture_compatibility(
+    pwsh: str, tmp_path: Path, operation: str
+) -> None:
+    path = "/synthetic/probe.json"
+    plain = inspect_path_with_metadata_spy(pwsh, tmp_path, path, operation=operation, windows=False)
+    assert plain["state"] == ("accepted" if operation == "json" else "present")
+    assert plain["metadataCalls"] == ["/", "/synthetic", path]
+    assert plain["driveCalls"] == []
+    linked = inspect_path_with_metadata_spy(
+        pwsh,
+        tmp_path,
+        path,
+        operation=operation,
+        blocked_path="/synthetic",
+        failure="reparse",
+        windows=False,
+    )
+    assert linked["state"] == ("rejected" if operation == "json" else "reparse")
+    assert linked["metadataCalls"] == ["/", "/synthetic"]
+
+
+@pytest.mark.parametrize(
+    ("root_state", "root_path", "drive_root"),
+    [
+        ("present", r"C:\synthetic", "C:\\"),
+        ("present", "C:/synthetic", "C:\\"),
+        ("present", r"C:\synthetic", "Z:\\"),
+        ("not_found", r"C:\synthetic", "C:\\"),
+        ("access_denied", r"C:\synthetic", "C:\\"),
+        ("reparse", r"C:\synthetic", "C:\\"),
+        ("wrong_type", r"C:\synthetic", "C:\\"),
+        ("unknown", r"\\never-contact.invalid\share\root", "Z:\\"),
+        ("unknown", r"Z:\mapped-root", "Z:\\"),
+    ],
+)
+def test_disk_probe_only_reads_the_confirmed_local_root(
+    pwsh: str, root_state: str, root_path: str, drive_root: str
+) -> None:
+    command = r"""
+$m = Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru
+function global:Join-Path { throw 'Synthetic Windows fixture must not resolve a host drive' }
+& $m {
+    $script:IsWindows = $true
+    $script:driveCalls = [Collections.Generic.List[string]]::new()
+    $script:freeReads = 0
+    function Join-Path {
+        param([string]$Path, [string]$ChildPath)
+        # The fixture uses Windows syntax even when PowerShell runs on Linux.
+        return $Path.Replace('/', '\').TrimEnd('\') + '\' + $ChildPath
+    }
+    function Get-CimInstance { @() }
+    function Get-InspectionIdentity { @{} }
+    function Get-InspectionPathState {
+        param([string]$Path, [bool]$RequireDirectory)
+        if ($RequireDirectory) { return $env:INSPECTION_TEST_ROOT_STATE }
+        return 'not_found'
+    }
+    function Get-PSDrive {
+        param([string]$Name, [string]$PSProvider, [string]$ErrorAction)
+        $script:driveCalls.Add("${Name}:$PSProvider")
+        $drive = [pscustomobject]@{ Root = $env:INSPECTION_TEST_DRIVE_ROOT }
+        $drive | Add-Member -MemberType ScriptProperty -Name Free -Value {
+            $script:freeReads++; return 4096
+        }
+        return $drive
+    }
+    $facts = Get-InspectionObservations @{
+        runnerRoot = $env:INSPECTION_TEST_ROOT_PATH; requiredTools = @()
+    } $false
+    [pscustomobject]@{
+        disk = $facts.disk; driveCalls = @($script:driveCalls); freeReads = $script:freeReads
+    } | ConvertTo-Json -Compress
+}
+"""
+    environment = os.environ.copy()
+    environment.update(
+        INSPECTION_TEST_MODULE=str(TOOLS / "RunnerInspection.psm1"),
+        INSPECTION_TEST_ROOT_STATE=root_state,
+        INSPECTION_TEST_ROOT_PATH=root_path,
+        INSPECTION_TEST_DRIVE_ROOT=drive_root,
+    )
+    result = subprocess.run(
+        [pwsh, "-NoProfile", "-Command", command],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=15,
+        env=environment,
+    )
+    assert result.returncode == 0
+    assert not result.stderr
+    report = json.loads(result.stdout)
+    if root_state == "present":
+        assert report["driveCalls"] == ["C:FileSystem"]
+        if drive_root == "C:\\":
+            assert report["disk"] == {"status": "observed", "freeBytes": 4096}
+            assert report["freeReads"] > 0
+        else:
+            assert report["disk"] == {"status": "unknown", "freeBytes": 0}
+            assert report["freeReads"] == 0
+    else:
+        assert report["driveCalls"] == []
+        assert report["freeReads"] == 0
+        assert report["disk"] == {"status": "unknown", "freeBytes": 0}
+
+
 def native_probe_child(pwsh: str, code: str) -> subprocess.Popen[str]:
     command = (
         "$m=Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru; "
@@ -515,7 +889,7 @@ def windows_process_alive(pid: int) -> bool:
     if not handle:
         return False
     try:
-        return kernel.WaitForSingleObject(handle, 0) == 258
+        return bool(kernel.WaitForSingleObject(handle, 0) == 258)
     finally:
         kernel.CloseHandle(handle)
 
@@ -654,7 +1028,9 @@ def test_live_collector_reads_fixed_nonsecret_registration_file(
     profile_file.write_text(json.dumps(profile))
     command = (
         "$m=Import-Module $env:INSPECTION_TEST_MODULE -Force -PassThru; "
-        "& $m { $p=Read-InspectionProfile $env:INSPECTION_TEST_PROFILE; "
+        "& $m { function Get-CimInstance { @() }; "
+        "function Get-InspectionIdentity { @{} }; "
+        "$p=Read-InspectionProfile $env:INSPECTION_TEST_PROFILE; "
         "(Get-InspectionObservations $p $false).registration } | ConvertTo-Json -Compress"
     )
     environment = os.environ.copy()
