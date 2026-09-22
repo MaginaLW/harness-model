@@ -33,7 +33,7 @@ profile 使用 UTF-8 JSON，最多 256 KiB，只接受以下字段。真实路�
 
 服务和进程来自 `Get-CimInstance` 的限定查询，仅检查 runner 服务、RunnerService、Listener 和 Worker；不输出或收集任意进程命令行。选定服务的二进制路径及服务/Listener 的实际 ExecutablePath 必须分别与唯一根下的 `bin/RunnerService.exe`、`bin/Runner.Listener.exe` 匹配，且实际文件及祖先无 reparse。带参数或无法明确解析的服务二进制配置保留未确认。
 
-根路径使用带异常分类的实际元数据读取；访问被拒保留 `access_denied/unknown`，不将 `Test-Path=false` 当作未安装。仅从固定 `.runner` 普通文件读取非秘密的 `agentId` 和 `gitHubUrl`，建立本地实例、仓库名称及 repository scope 的观察。缺失、错误实例、错误仓库、组织级 URL、不可读或重解析文件不能由 profile 声明补值；绝不读取 `.credentials*`。再与 API 实际 repo ID/full_name、runner ID 相连，防止把另一个在线实例和本地服务拼为健康。只有根已确认为普通本地目录时才按该盘符定向调用 `Get-PSDrive`，不枚举其他盘；工具来自明确路径的真实 `--version` 退出码和严格版本行。
+根路径使用带异常分类的实际元数据读取；访问被拒保留 `access_denied/unknown`，不将 `Test-Path=false` 当作未安装。仅从固定 `.runner` 普通文件读取非秘密的 `agentId` 和 `gitHubUrl`，建立本地实例、仓库名称及 repository scope 的观察。缺失、错误实例、错误仓库、组织级 URL、不可读或重解析文件不能由 profile 声明补值；绝不读取 `.credentials*`。再与 API 实际 repo ID/full_name、runner ID 相连，防止把另一个在线实例和本地服务拼为健康。路径预检通过定向 `Get-PSDrive` 读取所选盘的 `Root` 以核对原生盘符绑定；只有根已确认为普通本地目录后才读取该盘的 `Free` 磁盘余量，不枚举其他盘；工具来自明确路径的真实 `--version` 退出码和严格版本行。
 
 profile / fixture JSON、runner 根、注册文件和可执行文件共用路径检查。Windows 在读取任何路径元数据前拒绝 UNC、设备命名空间、PowerShell provider 路径、盘符相对路径、父级跳转及含糊的设备/流别名；随后只接受 DriveType 已确认的本地固定盘、可移动盘、光盘或 RAM 盘，网络盘和未知盘保留未确认。还须确认当前 PowerShell FileSystem 盘的 Root 与同名系统盘根相同，拒绝进程内指向别处的 PSDrive 别名，再开始元数据读取。每层元数据从盘根走向叶子，遇到 reparse 立即停止，绝不先读取其子项再向上检查。POSIX 普通路径供合成回归使用，同样逐级拒绝链接，不启用真实 Windows collector。路径检查与后续读取/执行之间仍可能发生文件系统变化；这不是抵御恶意并发替换的隔离机制，JSON 的长度预检也不是并发增长下的硬读取预算。
 
