@@ -3,9 +3,10 @@ $ErrorActionPreference = 'Stop'
 
 function Read-InspectionJson {
     param([string]$Path)
-    $item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
-    if ($item.PSIsContainer -or $item.Length -gt 262144 -or
-        ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'invalid_input' }
+    $observation = Get-InspectionPathObservation $Path
+    if ($observation.status -ne 'present') { throw 'invalid_input' }
+    $item = $observation.item
+    if ($item.Length -gt 262144) { throw 'invalid_input' }
     $text = [IO.File]::ReadAllText($item.FullName, [Text.UTF8Encoding]::new($false, $true))
     $value = ConvertFrom-Json -InputObject $text -AsHashtable -Depth 20
     if ($value -isnot [System.Collections.IDictionary]) { throw 'invalid_input' }
@@ -70,24 +71,89 @@ function Read-InspectionProfile {
     return $value
 }
 
-function Get-InspectionPathState {
+function Get-InspectionDriveType {
+    param([string]$Root)
+    # DriveType uses the drive root, without opening a file on a mapped share.
+    return [int][IO.DriveInfo]::new($Root).DriveType
+}
+
+function Get-InspectionPathObservation {
     param([string]$Path, [bool]$RequireDirectory = $false)
     try {
-        $item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
-        if ($item.PSIsContainer -ne $RequireDirectory) { return 'wrong_type' }
-        $cursor = $item
-        while ($null -ne $cursor) {
-            if ($cursor.Attributes -band [IO.FileAttributes]::ReparsePoint) { return 'reparse' }
-            $cursor = if ($cursor -is [IO.DirectoryInfo]) { $cursor.Parent } else { $cursor.Directory }
+        if ([string]::IsNullOrWhiteSpace($Path) -or $Path -match '[\x00-\x1f]') {
+            throw 'invalid_path'
         }
-        return 'present'
+        if ($IsWindows) {
+            # Reject UNC, device and provider paths before any metadata access. A
+            # relative JSON input remains relative to the current local filesystem.
+            if ($Path -notmatch '\A[A-Za-z]:[\\/]') {
+                if ($Path -match '\A[\\/]|:') { throw 'local_path_required' }
+                $location = Get-Location
+                if ($location.Provider.Name -cne 'FileSystem') { throw 'local_path_required' }
+                $Path = $location.ProviderPath.TrimEnd('\', '/') + '\' + $Path
+            }
+            $Path = $Path.Replace('/', '\')
+            if ($Path -notmatch '\A[A-Za-z]:\\' -or $Path.Substring(2) -match '[<>:"|?*]') {
+                throw 'local_path_required'
+            }
+            $root = $Path.Substring(0, 3)
+            $parts = @($Path.Substring(3).Split('\', [StringSplitOptions]::RemoveEmptyEntries))
+            foreach ($part in $parts) {
+                if ($part -eq '..' -or ($part -ne '.' -and ($part -match '[. ]\z' -or
+                    $part -match '\A(?:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|(?:COM|LPT)[1-9\u00b9\u00b2\u00b3])(?:\.|\z)'))) {
+                    throw 'invalid_path'
+                }
+            }
+            if ((Get-InspectionDriveType $root) -notin @(2, 3, 5, 6)) { throw 'local_drive_required' }
+            $separator = '\'
+        }
+        else {
+            # POSIX paths are needed by synthetic PowerShell tests; no live native
+            # collection is enabled on these platforms.
+            if ($Path.Contains(':') -or $Path.StartsWith('\')) { throw 'local_path_required' }
+            if (-not $Path.StartsWith('/')) {
+                $location = Get-Location
+                if ($location.Provider.Name -cne 'FileSystem') { throw 'local_path_required' }
+                $Path = $location.ProviderPath.TrimEnd('/') + '/' + $Path
+            }
+            $root = '/'
+            $parts = @($Path.Substring(1).Split('/', [StringSplitOptions]::RemoveEmptyEntries))
+            if ('..' -cin $parts) { throw 'invalid_path' }
+            $separator = '/'
+        }
+        $paths = [Collections.Generic.List[string]]::new()
+        $paths.Add($root)
+        $current = $root.TrimEnd($separator)
+        foreach ($part in $parts) {
+            if ($part -eq '.') { continue }
+            $current += $separator + $part
+            $paths.Add($current)
+        }
+        for ($index = 0; $index -lt $paths.Count; $index++) {
+            # Inspect each parent before touching a child. Reading leaf metadata
+            # first would already follow a junction, potentially onto a network.
+            $item = Get-Item -LiteralPath $paths[$index] -Force -ErrorAction Stop
+            if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+                return @{ status = 'reparse'; item = $null }
+            }
+            if ($index -lt $paths.Count - 1 -and -not $item.PSIsContainer) {
+                return @{ status = 'wrong_type'; item = $null }
+            }
+        }
+        if ($item.PSIsContainer -ne $RequireDirectory) { return @{ status = 'wrong_type'; item = $null } }
+        return @{ status = 'present'; item = $item }
     }
-    catch [UnauthorizedAccessException] { return 'access_denied' }
-    catch [System.Management.Automation.ItemNotFoundException] { return 'not_found' }
+    catch [UnauthorizedAccessException] { return @{ status = 'access_denied'; item = $null } }
+    catch [System.Management.Automation.ItemNotFoundException] { return @{ status = 'not_found'; item = $null } }
     catch {
-        if ($_.CategoryInfo.Category -eq 'PermissionDenied') { return 'access_denied' }
-        return 'unknown'
+        if ($_.CategoryInfo.Category -eq 'PermissionDenied') { return @{ status = 'access_denied'; item = $null } }
+        return @{ status = 'unknown'; item = $null }
     }
+}
+
+function Get-InspectionPathState {
+    param([string]$Path, [bool]$RequireDirectory = $false)
+    return (Get-InspectionPathObservation $Path $RequireDirectory).status
 }
 
 function Invoke-InspectionNative {
@@ -342,13 +408,15 @@ function Get-InspectionObservations {
             } catch { $facts.registration.status = 'invalid_output' }
         }
     }
-    try {
-        $root = [IO.Path]::GetPathRoot($Profile.runnerRoot)
-        $drive = Get-PSDrive -PSProvider FileSystem -ErrorAction Stop | Where-Object { $_.Root -eq $root }
-        if (@($drive).Count -eq 1 -and $null -ne $drive.Free) {
-            $facts.disk = @{ status = 'observed'; freeBytes = [long]$drive.Free }
-        }
-    } catch { }
+    if ($facts.runnerRoot.status -eq 'present') {
+        try {
+            $root = $Profile.runnerRoot.Replace('/', '\').Substring(0, 3)
+            $drive = @(Get-PSDrive -Name $root.Substring(0, 1) -PSProvider FileSystem -ErrorAction Stop)
+            if ($drive.Count -eq 1 -and $drive[0].Root -eq $root -and $null -ne $drive[0].Free) {
+                $facts.disk = @{ status = 'observed'; freeBytes = [long]$drive[0].Free }
+            }
+        } catch { }
+    }
     foreach ($tool in $Profile.requiredTools) {
         $probe = Invoke-InspectionNative $tool.path @('--version')
         $version = ''
