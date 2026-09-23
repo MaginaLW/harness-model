@@ -59,7 +59,7 @@ contract registry。它不是 `review-record` 2.0，不迁移旧记录，不复�
 | 来源 | product=ZCode、不含鉴权的来源定位、报告版本/原始字节 SHA256、取得方式 | 无法公开的定位用私有保管标识；不存访问凭据；声明不等于身份认证 |
 | 完成状态 | completed / incomplete / tool_unavailable / timeout、实际覆盖及未审范围 | completed 且 findings=[] 才可表达完成零问题；非 completed 必须保留未完成原因 |
 | 外部问题 | 原问题 ID、标题、受审文件/行、原始优先级或 unknown、报告内证据定位 | F1/F2 原值保留；不自动改为 RF 编号或把 P1 猜成 high |
-| 映射建议 | 可选的现有 task/review/revision/finding 复合引用，或待映射标记 | 不按标题/行号自动合并；跨 review 或 revision 的同号 RF 不等价 |
+| 映射建议 | 可选的现有 task/review/revision/finding 复合引用，或待映射标记 | 不按标题/行号自动合并；跨 review 的同号 RF 不等价；同一 review 的 finding 可跨 revision 延续，但引用须固定 revision，不得用其他版本替代 |
 | 复核表述 | 原始处置/复核结论及其来源引用 | verified/resolved 自述不能升级为现行 evidence 或可批准 Review |
 
 `target_context` 是字段投影，不是完整旧 review-context 的替代对象；其摘要须引用现有
