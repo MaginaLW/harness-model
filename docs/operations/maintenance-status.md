@@ -1,5 +1,15 @@
 # 维护收尾与待办
 
+## 2026-09-23 CI 修复收尾，E4 启动前材料就绪
+
+dotfiles 修复已推送到 `codex/ci-regressions-e4-preflight`，固定 `3b835f1` 的
+[CI run 35873759132](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/35873759132)
+四个 job 全部 success，42 套件全部通过，无失败或套件超时。
+详细修补、失败历史及证据摘要见[收尾记录](e4-preflight-closeout-2026-09-23.md)。
+已完成[启动前规格](../superpowers/specs/2026-09-23-zcode-report-import-preflight.md)；
+下一阶段才固定基线、建立 E4.1 治理 task、分类/冻结/设计审查并按 CLI 准入 begin。
+本轮 E4 未启动；主仓准备与关闭文档仅本地提交。下方各窗口作为历史保留。
+
 ## 2026-09-23 消费动作已选定，E4 停在启动前
 
 所有者选择“将 ZCode 审查报告校验并导入既有 AI Flow 任务”。

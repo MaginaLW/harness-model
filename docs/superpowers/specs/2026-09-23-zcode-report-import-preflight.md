@@ -134,10 +134,10 @@ C1–C4 属 E4.1；I1–I7 属后继 E4.2，不把未实现场景计为通过。
 
 - 已有：E2、真实 E3 最小文档案例、现行边界的 19 项回归与六个表示探针、所有者明确选择的消费动作。
 - 已准备：最小 E4.1 范围、契约字段和未知值边界、后继导入协议、正负验收矩阵。
-- 待本 goal 的 CI 修复收尾：两项 dotfiles 测试失败的 RED/GREEN、固定候选完整检查、独立复核和实际结果记录。
+- 已完成 CI 修复收尾：两项 dotfiles 测试失败的 RED/GREEN、独立复核和记录；固定 `3b835f1` 的自然 CI 四个 job 成功、42 套件全过，见[收尾记录](../../operations/e4-preflight-closeout-2026-09-23.md)。
 - 真正开始 E4 时才执行：固定当时基线，创建独立治理 task，完成 CLI 分类/规格冻结、设计审查及其实际 Missing 项，然后 begin。
 - 本轮停止在启动前材料；不调用 E4 begin，不修改 src/aiflow、Schema、Policy 或旧账本。
 
-现有 dotfiles disposable-identity lab 的 setup/tool-cache ACL 缺陷属于该项目发布候选
-的独立拒绝原因。修复 CI 测试不能把它改判为生产接受，也不要求在本 E4 准备中修复或
+此前 dotfiles disposable-identity lab 的 setup/tool-cache ACL 缺陷属于当时发布候选
+的独立拒绝原因。该项目后续生产修补另计；修复 CI 测试不能把历史拒绝改判为生产接受，也不要求在本 E4 准备中修复或
 绕过它。E4 导入协议本身不依赖对真实 live home 的部署验收。
