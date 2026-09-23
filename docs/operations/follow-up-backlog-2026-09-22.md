@@ -1,5 +1,17 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-23 E4 进入前核查
+
+E3 最小真实双产品案例及两仓推送已完成，发布范围见
+[TASK-0053 回执](../../.ai/tasks/TASK-0053/publication-closeout-001.md)。本轮只读原件、
+离线表示边界复现和 19 项现有 review 回归通过；未找到该案例被内核接口阻断的证据，
+因此尚不选定 E4.1 的代码范围。详见[核查与后续入口](e4-gap-assessment-2026-09-23.md)。
+
+dotfiles 固定 `51044a55` 的自然 CI run `35733693990` 已结束为 failure：42 套件中
+40 passed、2 failed、0 suite timeout。两项实际失败分别是 root-claims-registry 内部
+子进程 15 秒期限和 sync 的 released-policy dry-run 断言，底层原因仍待复现；它们不
+构成 E4 缺口。新窗口不改写下方历史，也不把已完成 E3 再列为待造样本。
+
 ## 2026-09-22 dotfiles 归因修订已应用
 
 dotfiles 两处 CI 规则冲突及既有更正记录中的提交归因已修正，本地提交为
