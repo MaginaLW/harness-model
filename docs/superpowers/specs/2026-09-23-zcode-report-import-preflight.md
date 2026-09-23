@@ -36,6 +36,18 @@ contract registry。它不是 `review-record` 2.0，不迁移旧记录，不复�
 在新 AI Flow task 冻结前从当时 HEAD 重新取得。本准备阶段不创建虚假的冻结批准或
 把预计 REVIEW/V1 当作 CLI 已分类事实。
 
+在 `6dfde7b` 上已核对的最小落点如下；这只是实施范围输入，尚未创建这些文件或注册项。
+
+| 单元 | 拟修改文件 | 交付边界 |
+| --- | --- | --- |
+| 治理实现 | 新 `.ai/schemas/external-review.schema.json`；`src/aiflow/contracts.py` 的 `SCHEMA_FILES` 一项登记 | 现行 Draft 2020-12 本地 registry 支持独立名称；不改旧契约语义 |
+| 安全测试与样例 | `tests/unit/test_contracts.py`；`tests/fixtures/contracts/valid/external-review.json`；invalid 目录的 `external-review.extra.json`、`external-review.invalid.json`、`external-review.missing.json` | 对齐现有固定 fixture 收集规则；其余状态/边界从合成样例参数化 |
+
+登记后只可通过现有 Python 契约 API 校验；现行 `aiflow validate TASK-ID` 不会因此获得
+外部报告导入能力。未来先串行冻结字段、分类和设计；获准后主 agent 负责治理两文件，
+计划启用 1 名 sub-agent 负责安全测试五文件，独占写入。测试执行依赖 Schema/登记就位，
+最后串行集成、完整验证和审查。治理与安全单元的流程拆分不减少任何所需批准。
+
 建议的 Schema 1.0 输入由操作者从原报告核定并填写，不自动解析任意 Markdown，
 不从措辞猜测严重度、完成状态、模型或身份。字段族如下：
 
@@ -45,10 +57,16 @@ contract registry。它不是 `review-record` 2.0，不迁移旧记录，不复�
 | 目标 | target_context：task_id、repository_id、review_stage、base、subject（implementation）、context_sha256 | 从目标现行 context 核对；design 不添加虚假的 subject/evidence |
 | 原件受审对象 | source_subject：原报告实际受审仓库标识、阶段、base、subject 及事实出处 | 与 target_context 分开；经操作者核定的原件事实参与比较，缺失或 unknown 不得进入通过校验的记录 |
 | 来源 | product=ZCode、不含鉴权的来源定位、报告版本/原始字节 SHA256、取得方式 | 无法公开的定位用私有保管标识；不存访问凭据；声明不等于身份认证 |
-| 完成状态 | completed / incomplete / tool_unavailable / timeout、实际覆盖及未审范围 | completed 且 findings=[] 才可表达完成零问题；其余保留未完成原因 |
+| 完成状态 | completed / incomplete / tool_unavailable / timeout、实际覆盖及未审范围 | completed 且 findings=[] 才可表达完成零问题；非 completed 必须保留未完成原因 |
 | 外部问题 | 原问题 ID、标题、受审文件/行、原始优先级或 unknown、报告内证据定位 | F1/F2 原值保留；不自动改为 RF 编号或把 P1 猜成 high |
-| 映射建议 | 可选的现有 task/review/finding 复合引用，或待映射标记 | 不按标题/行号自动合并；跨 review 的同号 RF 不等价 |
+| 映射建议 | 可选的现有 task/review/revision/finding 复合引用，或待映射标记 | 不按标题/行号自动合并；跨 review 或 revision 的同号 RF 不等价 |
 | 复核表述 | 原始处置/复核结论及其来源引用 | verified/resolved 自述不能升级为现行 evidence 或可批准 Review |
+
+`target_context` 是字段投影，不是完整旧 review-context 的替代对象；其摘要须引用现有
+完整 context 的规范化摘要，而不是 envelope 或原始 JSON 文件的字节摘要。envelope 1.0
+不限制目标 context 只能为 1.0。两处受审对象均按阶段处理 subject：design 不强造，
+implementation 必须固定；字段冻结时沿用 `base_commit` / `subject_commit` 名称。
+Schema 合法只证明格式；原件摘要、当前 context 和来源/目标事实一致性由 E4.2 校验。
 
 模型身份、费用和独立性认证可为 unknown；它们不阻止原始来源附属材料被校验保管，
 但也不会被填充成虚假已认证事实。不明严重度允许作为原始待映射值保留，禁止据此
