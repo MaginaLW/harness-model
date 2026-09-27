@@ -1,5 +1,12 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-27 dotfiles 修复线集成核定
+
+`codex/ci-regressions-e4-preflight@3b835f1` 已通过[合并提交 `68ef2ec`](https://github.com/MaginaLW/ai-agent-dotfiles/commit/68ef2ecedca3e9071178dcab8b805cecdafbba53)
+进入 dotfiles `main`。[`main@6c814f1` 的完整 Validate](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/36303730680)
+四个 job 均成功；[外仓整合记录](https://github.com/MaginaLW/ai-agent-dotfiles/blob/6c814f18e981edfa1cad7185915ed7c177857bc0/status/active/live-safety-hardening.md#L4121-L4149)
+保留了分支来源。下方 2026-09-23 的“分叉、待集成”与独立工作线是历史快照，不再重复集成。
+
 ## 2026-09-23 后续计划与统一接手入口
 
 收尾已完成，[后续工作计划](../superpowers/plans/2026-09-23-e4-follow-up-work-plan.md)

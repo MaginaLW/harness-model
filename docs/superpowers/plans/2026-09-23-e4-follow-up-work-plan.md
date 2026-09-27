@@ -4,6 +4,12 @@
 [启动前规格](../specs/2026-09-23-zcode-report-import-preflight.md)为入口；
 本文件安排顺序、职责和验收，具体契约语义仍由规格维护。
 
+> 2026-09-27 更新：dotfiles `codex/ci-regressions-e4-preflight@3b835f1` 已通过
+> [合并提交 `68ef2ec`](https://github.com/MaginaLW/ai-agent-dotfiles/commit/68ef2ecedca3e9071178dcab8b805cecdafbba53)
+> 进入 `main`；[`main@6c814f1` 的完整 Validate](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/36303730680)
+> 四个 job 均成功。下方 2026-09-23 的分叉基线与 dotfiles 独立集成工作包保留为历史快照，
+> 不再重复集成；来源见[外仓整合记录](https://github.com/MaginaLW/ai-agent-dotfiles/blob/6c814f18e981edfa1cad7185915ed7c177857bc0/status/active/live-safety-hardening.md#L4121-L4149)。
+
 ## 1. 本次交接基线
 
 2026-09-23 的只读核对如下；执行后续任务时重新取得当时基线。
