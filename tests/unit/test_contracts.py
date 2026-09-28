@@ -421,8 +421,8 @@ def test_external_review_source_claims_cannot_be_formal_review_fields() -> None:
     value["outcome"] = "APPROVE"
     value["findings"][0]["severity"] = "high"
     errors = validate_contract("external-review", value)
-    assert any(error.startswith("/outcome:") for error in errors)
-    assert any(error.startswith("/findings/0/severity:") for error in errors)
+    assert "/: contract constraint failed (additionalProperties)" in errors
+    assert "/findings/0: contract constraint failed (additionalProperties)" in errors
 
 
 def test_external_review_suggested_mapping_requires_a_task_binding() -> None:
@@ -593,18 +593,25 @@ def test_external_review_exact_patterns_reject_a_trailing_line_feed(
 
 
 @pytest.mark.parametrize(
-    ("parent_keys", "expected_location"),
+    ("parent_keys", "expected_location", "expected_constraint"),
     [
-        ((), "/:"),
-        (("source_subject", "confirmation"), "/source_subject/confirmation:"),
+        ((), "/:", "additionalProperties"),
+        (
+            ("source_subject", "confirmation"),
+            "/source_subject/confirmation:",
+            "additionalProperties",
+        ),
+        (("source_subject", "repository"), "/source_subject/repository:", "oneOf"),
+        (("source", "location"), "/source/location:", "oneOf"),
+        (("findings", 0, "mapping"), "/findings/0/mapping:", "oneOf"),
     ],
-    ids=["root", "nested"],
+    ids=["root", "confirmation", "repository", "source-location", "finding-mapping"],
 )
 def test_external_review_error_does_not_echo_sensitive_unknown_key(
-    parent_keys: tuple[str, ...], expected_location: str
+    parent_keys: tuple[str | int, ...], expected_location: str, expected_constraint: str
 ) -> None:
-    value = valid_fixture("external-review")
-    parent = value
+    value = _external_review_with_finding()
+    parent: Any = value
     for key in parent_keys:
         parent = parent[key]
     parent["credential=TOP_SECRET_VALUE"] = "SECOND_SECRET_VALUE"
@@ -613,7 +620,7 @@ def test_external_review_error_does_not_echo_sensitive_unknown_key(
     if "TOP_SECRET_VALUE" in "\n".join(errors) or "SECOND_SECRET_VALUE" in "\n".join(errors):
         pytest.fail("external-review diagnostics echoed a synthetic credential")
     assert all(error.startswith(expected_location) for error in errors)
-    assert any("additionalProperties" in error for error in errors)
+    assert any(expected_constraint in error for error in errors)
 
 
 def test_legacy_contract_keeps_unknown_field_name_in_diagnostic() -> None:
@@ -667,25 +674,32 @@ def test_external_review_requires_source_and_its_subject(missing: str) -> None:
 
 
 @pytest.mark.parametrize(
-    ("path", "expected_pointer"),
+    ("path", "expected_pointer", "expected_constraint"),
     [
-        (("target_context", "untrusted"), "/target_context/untrusted:"),
+        (("target_context", "untrusted"), "/target_context:", "additionalProperties"),
         (
             ("source_subject", "confirmation", "untrusted"),
-            "/source_subject/confirmation/untrusted:",
+            "/source_subject/confirmation:",
+            "additionalProperties",
         ),
-        (("source", "location", "untrusted"), "/source/location:"),
-        (("completion", "untrusted"), "/completion/untrusted:"),
-        (("findings", 0, "untrusted"), "/findings/0/untrusted:"),
-        (("findings", 0, "location", "untrusted"), "/findings/0/location/untrusted:"),
+        (("source", "location", "untrusted"), "/source/location:", "oneOf"),
+        (("completion", "untrusted"), "/completion:", "additionalProperties"),
+        (("findings", 0, "untrusted"), "/findings/0:", "additionalProperties"),
+        (
+            ("findings", 0, "location", "untrusted"),
+            "/findings/0/location:",
+            "additionalProperties",
+        ),
     ],
 )
 def test_external_review_closes_nested_objects(
-    path: tuple[str | int, ...], expected_pointer: str
+    path: tuple[str | int, ...], expected_pointer: str, expected_constraint: str
 ) -> None:
     value = _external_review_with(path, "SUPER_SECRET_VALUE")
     errors = validate_contract("external-review", value)
-    assert any(error.startswith(expected_pointer) for error in errors)
+    assert any(
+        error.startswith(expected_pointer) and expected_constraint in error for error in errors
+    )
     assert "SUPER_SECRET_VALUE" not in "\n".join(errors)
 
 
