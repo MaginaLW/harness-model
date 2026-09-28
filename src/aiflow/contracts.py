@@ -118,7 +118,11 @@ def _safe_schema_errors(
         if error.validator == "required":
             errors.extend(_required_errors(error))
         elif error.validator == "additionalProperties":
-            errors.extend(_additional_property_errors(error))
+            if contract_name == "external-review":
+                pointer = _pointer(list(error.absolute_path))
+                errors.append(f"{pointer}: contract constraint failed (additionalProperties)")
+            else:
+                errors.extend(_additional_property_errors(error))
         else:
             pointer = _pointer(list(error.absolute_path))
             errors.append(f"{pointer}: contract constraint failed ({error.validator})")
