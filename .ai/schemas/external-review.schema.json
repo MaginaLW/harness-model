@@ -27,11 +27,11 @@
     }
   },
   "$defs": {
-    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$", "maxLength": 128},
-    "review_id": {"type": "string", "pattern": "^REV-[0-9]{4,}$", "maxLength": 128},
-    "finding_id": {"type": "string", "pattern": "^RF-[0-9]{3,}$", "maxLength": 128},
-    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}(?![\\s\\S])", "maxLength": 128},
+    "review_id": {"type": "string", "pattern": "^REV-[0-9]{4,}(?![\\s\\S])", "maxLength": 128},
+    "finding_id": {"type": "string", "pattern": "^RF-[0-9]{3,}(?![\\s\\S])", "maxLength": 128},
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}(?![\\s\\S])"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}(?![\\s\\S])"},
     "repository_id": {"type": "string", "format": "uuid", "maxLength": 128},
     "review_stage": {"enum": ["design", "implementation"]},
     "source_subject": {
@@ -99,12 +99,12 @@
             "locator": {
               "type": "string",
               "maxLength": 1024,
-              "pattern": "^https://[A-Za-z0-9.-]+/[A-Za-z0-9._~/%-]+$"
+              "pattern": "^https://[A-Za-z0-9.-]+/[A-Za-z0-9._~/%-]+(?![\\s\\S])"
             },
             "mapping_record_id": {
               "type": "string",
               "maxLength": 128,
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(?![\\s\\S])"
             }
           }
         }
@@ -136,7 +136,7 @@
         "report_version": {
           "type": "string",
           "maxLength": 128,
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(?![\\s\\S])"
         },
         "raw_sha256": {"$ref": "#/$defs/sha256"},
         "acquisition_method": {"enum": ["exported", "provided"]},
@@ -154,7 +154,7 @@
             "value": {
               "type": "string",
               "maxLength": 1024,
-              "pattern": "^https://[A-Za-z0-9.-]+/[A-Za-z0-9._~/%-]+$"
+              "pattern": "^https://[A-Za-z0-9.-]+/[A-Za-z0-9._~/%-]+(?![\\s\\S])"
             }
           }
         },
@@ -167,7 +167,7 @@
             "value": {
               "type": "string",
               "maxLength": 128,
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(?![\\s\\S])"
             }
           }
         }
@@ -185,9 +185,11 @@
       },
       "allOf": [
         {
-          "if": {"properties": {"status": {"const": "completed"}}, "required": ["status"]},
-          "then": {"not": {"required": ["reason"]}},
-          "else": {"required": ["reason"]}
+          "if": {
+            "properties": {"status": {"enum": ["incomplete", "tool_unavailable", "timeout"]}},
+            "required": ["status"]
+          },
+          "then": {"required": ["reason"]}
         }
       ]
     },
