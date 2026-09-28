@@ -31,6 +31,7 @@ CONTRACT_NAMES = {
     "decision-unit",
     "event",
     "evidence",
+    "external-review",
     "mutation-evidence",
     "observation",
     "observation-decision",
@@ -337,3 +338,266 @@ def test_v2_selection_facts_are_optional_but_complete_when_present() -> None:
 
     del unit["verification_requirements"]["independent_verifier_required"]
     assert validate_contract("decision-unit", unit)
+
+
+def _external_review_with_finding() -> dict[str, Any]:
+    value = valid_fixture("external-review")
+    value["completion"] = {
+        "status": "incomplete",
+        "reviewed_scope": ["docs/example.md"],
+        "unreviewed_scope": ["src/unreviewed.py"],
+        "reason": "fixture review stopped",
+    }
+    value["findings"] = [
+        {
+            "source_finding_id": "F1",
+            "title": "Synthetic source finding",
+            "location": {"path": "docs/example.md", "line": 3},
+            "source_priority": "P1",
+            "evidence_refs": ["report:line:12"],
+            "mapping": {"status": "pending"},
+            "description": "Original report text",
+            "source_disposition": "fixed",
+            "source_verification": "verified",
+        }
+    ]
+    return value
+
+
+def _external_review_with(path: tuple[str | int, ...], replacement: object) -> dict[str, Any]:
+    value = _external_review_with_finding()
+    target: Any = value
+    for part in path[:-1]:
+        target = target[part]
+    target[path[-1]] = replacement
+    return value
+
+
+def test_external_review_distinguishes_completed_zero_findings_and_source_findings() -> None:
+    completed = valid_fixture("external-review")
+    assert completed["completion"]["status"] == "completed"
+    assert completed["findings"] == []
+    assert validate_contract("external-review", completed) == []
+
+    with_finding = _external_review_with_finding()
+    original = deepcopy(with_finding)
+    assert validate_contract("external-review", with_finding) == []
+    assert with_finding == original
+    assert with_finding["findings"][0]["source_priority"] == "P1"
+    assert with_finding["findings"][0]["source_finding_id"] == "F1"
+    assert with_finding["findings"][0]["source_verification"] == "verified"
+    assert "review_id" not in with_finding and "outcome" not in with_finding
+
+    with_finding["findings"][0]["source_priority"] = "unknown"
+    with_finding["findings"][0]["mapping"] = {
+        "status": "suggested",
+        "task_id": "TASK-0001",
+        "review_id": "REV-0001",
+        "revision": 1,
+        "finding_id": "RF-001",
+    }
+    assert validate_contract("external-review", with_finding) == []
+
+
+def test_external_review_source_claims_cannot_be_formal_review_fields() -> None:
+    value = _external_review_with_finding()
+    value["outcome"] = "APPROVE"
+    value["findings"][0]["severity"] = "high"
+    errors = validate_contract("external-review", value)
+    assert any(error.startswith("/outcome:") for error in errors)
+    assert any(error.startswith("/findings/0/severity:") for error in errors)
+
+
+def test_external_review_suggested_mapping_requires_a_task_binding() -> None:
+    value = _external_review_with_finding()
+    value["findings"][0]["mapping"] = {
+        "status": "suggested",
+        "review_id": "REV-0001",
+        "revision": 1,
+        "finding_id": "RF-001",
+    }
+    assert any(
+        error.startswith("/findings/0/mapping:")
+        for error in validate_contract("external-review", value)
+    )
+
+
+def test_external_review_source_repository_locator_requires_a_mapping_reference() -> None:
+    value = valid_fixture("external-review")
+    value["source_subject"]["repository"] = {
+        "kind": "repository_locator",
+        "locator": "https://github.com/example/repository",
+        "mapping_record_id": "synthetic-mapping-001",
+    }
+    assert validate_contract("external-review", value) == []
+
+    del value["source_subject"]["repository"]["mapping_record_id"]
+    assert any(
+        error.startswith("/source_subject/repository:")
+        for error in validate_contract("external-review", value)
+    )
+
+
+@pytest.mark.parametrize("status", ["incomplete", "tool_unavailable", "timeout"])
+def test_external_review_unfinished_status_requires_a_reason(status: str) -> None:
+    value = _external_review_with_finding()
+    value["completion"]["status"] = status
+    assert validate_contract("external-review", value) == []
+
+    del value["completion"]["reason"]
+    assert any(
+        error.startswith("/completion/reason:")
+        for error in validate_contract("external-review", value)
+    )
+
+
+@pytest.mark.parametrize("section", ["target_context", "source_subject"])
+def test_external_review_subject_is_conditioned_on_each_independent_stage(section: str) -> None:
+    design = valid_fixture("external-review")
+    implementation = deepcopy(design)
+    implementation[section]["review_stage"] = "implementation"
+    implementation[section]["subject_commit"] = "2" * 40
+    assert validate_contract("external-review", implementation) == []
+
+    del implementation[section]["subject_commit"]
+    assert any(
+        error.startswith(f"/{section}/subject_commit:")
+        for error in validate_contract("external-review", implementation)
+    )
+
+    design[section]["subject_commit"] = "2" * 40
+    assert any(
+        error.startswith(f"/{section}:") or error.startswith(f"/{section}/subject_commit:")
+        for error in validate_contract("external-review", design)
+    )
+
+
+@pytest.mark.parametrize("missing", ["source", "source_subject"])
+def test_external_review_requires_source_and_its_subject(missing: str) -> None:
+    value = valid_fixture("external-review")
+    del value[missing]
+    assert any(
+        error.startswith(f"/{missing}:") for error in validate_contract("external-review", value)
+    )
+
+
+@pytest.mark.parametrize(
+    ("path", "expected_pointer"),
+    [
+        (("target_context", "untrusted"), "/target_context/untrusted:"),
+        (
+            ("source_subject", "confirmation", "untrusted"),
+            "/source_subject/confirmation/untrusted:",
+        ),
+        (("source", "location", "untrusted"), "/source/location:"),
+        (("completion", "untrusted"), "/completion/untrusted:"),
+        (("findings", 0, "untrusted"), "/findings/0/untrusted:"),
+        (("findings", 0, "location", "untrusted"), "/findings/0/location/untrusted:"),
+    ],
+)
+def test_external_review_closes_nested_objects(
+    path: tuple[str | int, ...], expected_pointer: str
+) -> None:
+    value = _external_review_with(path, "SUPER_SECRET_VALUE")
+    errors = validate_contract("external-review", value)
+    assert any(error.startswith(expected_pointer) for error in errors)
+    assert "SUPER_SECRET_VALUE" not in "\n".join(errors)
+
+
+@pytest.mark.parametrize(
+    ("path", "replacement", "expected_pointer", "constraint"),
+    [
+        (
+            ("findings",),
+            [_external_review_with_finding()["findings"][0]] * 201,
+            "/findings:",
+            "maxItems",
+        ),
+        (
+            ("findings", 0, "evidence_refs"),
+            [f"ref:{i}" for i in range(33)],
+            "/findings/0/evidence_refs:",
+            "maxItems",
+        ),
+        (
+            ("source_subject", "confirmation", "fact_refs"),
+            [f"ref:{i}" for i in range(17)],
+            "/source_subject/confirmation/fact_refs:",
+            "maxItems",
+        ),
+        (
+            ("completion", "reviewed_scope"),
+            [f"path:{i}" for i in range(65)],
+            "/completion/reviewed_scope:",
+            "maxItems",
+        ),
+        (
+            ("completion", "unreviewed_scope"),
+            [f"path:{i}" for i in range(65)],
+            "/completion/unreviewed_scope:",
+            "maxItems",
+        ),
+        (("completion", "reason"), "x" * 8193, "/completion/reason:", "maxLength"),
+        (("findings", 0, "title"), "x" * 513, "/findings/0/title:", "maxLength"),
+        (("findings", 0, "description"), "x" * 8193, "/findings/0/description:", "maxLength"),
+        (
+            ("findings", 0, "source_disposition"),
+            "x" * 8193,
+            "/findings/0/source_disposition:",
+            "maxLength",
+        ),
+        (
+            ("findings", 0, "source_verification"),
+            "x" * 8193,
+            "/findings/0/source_verification:",
+            "maxLength",
+        ),
+        (
+            ("findings", 0, "evidence_refs"),
+            ["x" * 513],
+            "/findings/0/evidence_refs/0:",
+            "maxLength",
+        ),
+        (
+            ("source_subject", "confirmation", "fact_refs"),
+            ["x" * 513],
+            "/source_subject/confirmation/fact_refs/0:",
+            "maxLength",
+        ),
+        (
+            ("completion", "reviewed_scope"),
+            ["x" * 513],
+            "/completion/reviewed_scope/0:",
+            "maxLength",
+        ),
+    ],
+)
+def test_external_review_rejects_bounded_collections_and_text(
+    path: tuple[str | int, ...], replacement: object, expected_pointer: str, constraint: str
+) -> None:
+    value = _external_review_with(path, replacement)
+    errors = validate_contract("external-review", value)
+    assert any(
+        error.startswith(expected_pointer) and f"({constraint})" in error for error in errors
+    )
+
+
+def test_external_review_accepts_exact_text_and_collection_limits() -> None:
+    value = _external_review_with_finding()
+    value["completion"]["reason"] = "x" * 8192
+    value["completion"]["reviewed_scope"] = [f"path:{i}" for i in range(64)]
+    value["completion"]["unreviewed_scope"] = [f"other:{i}" for i in range(64)]
+    value["source_subject"]["confirmation"]["fact_refs"] = [f"ref:{i}" for i in range(16)]
+    finding = value["findings"][0]
+    finding["title"] = "x" * 512
+    finding["description"] = "x" * 8192
+    finding["source_disposition"] = "x" * 8192
+    finding["source_verification"] = "x" * 8192
+    finding["evidence_refs"] = [f"ref:{i}" for i in range(32)]
+    assert validate_contract("external-review", value) == []
+
+    short_finding = _external_review_with_finding()["findings"][0]
+    value["findings"] = [
+        {**deepcopy(short_finding), "source_finding_id": f"F{i}"} for i in range(200)
+    ]
+    assert validate_contract("external-review", value) == []
