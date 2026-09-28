@@ -399,6 +399,23 @@ def test_external_review_distinguishes_completed_zero_findings_and_source_findin
     assert validate_contract("external-review", with_finding) == []
 
 
+def test_external_review_accepts_completed_report_with_findings() -> None:
+    value = _external_review_with_finding()
+    value["completion"] = {
+        "status": "completed",
+        "reviewed_scope": ["docs/example.md"],
+        "unreviewed_scope": [],
+    }
+    assert value["findings"]
+    assert validate_contract("external-review", value) == []
+
+
+def test_external_review_completed_report_may_include_a_bounded_reason() -> None:
+    value = valid_fixture("external-review")
+    value["completion"]["reason"] = "Completed within the declared review scope"
+    assert validate_contract("external-review", value) == []
+
+
 def test_external_review_source_claims_cannot_be_formal_review_fields() -> None:
     value = _external_review_with_finding()
     value["outcome"] = "APPROVE"
@@ -436,6 +453,174 @@ def test_external_review_source_repository_locator_requires_a_mapping_reference(
         error.startswith("/source_subject/repository:")
         for error in validate_contract("external-review", value)
     )
+
+
+def test_external_review_confirmation_requires_a_fact_reference() -> None:
+    value = valid_fixture("external-review")
+    value["source_subject"]["confirmation"]["fact_refs"] = []
+    assert any(
+        error.startswith("/source_subject/confirmation/fact_refs:") and "(minItems)" in error
+        for error in validate_contract("external-review", value)
+    )
+
+
+def test_external_review_accepts_exact_identifier_and_locator_limits() -> None:
+    value = _external_review_with_finding()
+    value["target_context"]["task_id"] = "TASK-" + "1" * 123
+    value["source_subject"]["confirmation"]["checked_by_label"] = "c" * 128
+    value["source_subject"]["repository"] = {
+        "kind": "repository_locator",
+        "locator": "https://github.com/" + "r" * (1024 - len("https://github.com/")),
+        "mapping_record_id": "m" * 128,
+    }
+    value["source"]["report_version"] = "v" * 128
+    value["source"]["location"] = {
+        "kind": "https_url",
+        "value": "https://example.com/" + "u" * (1024 - len("https://example.com/")),
+    }
+    finding = value["findings"][0]
+    finding["source_finding_id"] = "F" * 128
+    finding["source_priority"] = "P" * 128
+    finding["location"]["path"] = "p" * 1024
+    assert validate_contract("external-review", value) == []
+
+    paths = [
+        (("target_context", "task_id"), "/target_context/task_id:", "1"),
+        (
+            ("source_subject", "confirmation", "checked_by_label"),
+            "/source_subject/confirmation/checked_by_label:",
+            "x",
+        ),
+        (("source_subject", "repository", "locator"), "/source_subject/repository:", "x"),
+        (("source_subject", "repository", "mapping_record_id"), "/source_subject/repository:", "x"),
+        (("source", "report_version"), "/source/report_version:", "x"),
+        (("source", "location", "value"), "/source/location:", "x"),
+        (("findings", 0, "source_finding_id"), "/findings/0/source_finding_id:", "x"),
+        (("findings", 0, "source_priority"), "/findings/0/source_priority:", "x"),
+        (("findings", 0, "location", "path"), "/findings/0/location/path:", "x"),
+    ]
+    for path, pointer, suffix in paths:
+        invalid = deepcopy(value)
+        target: Any = invalid
+        for part in path[:-1]:
+            target = target[part]
+        target[path[-1]] += suffix
+        assert any(
+            error.startswith(pointer) for error in validate_contract("external-review", invalid)
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "path", "good", "pointer"),
+    [
+        ("task", ("target_context", "task_id"), "TASK-0001", "/target_context/task_id:"),
+        (
+            "mapping_task",
+            ("findings", 0, "mapping", "task_id"),
+            "TASK-0001",
+            "/findings/0/mapping:",
+        ),
+        ("review", ("findings", 0, "mapping", "review_id"), "REV-0001", "/findings/0/mapping:"),
+        ("finding", ("findings", 0, "mapping", "finding_id"), "RF-001", "/findings/0/mapping:"),
+        ("commit", ("target_context", "base_commit"), "1" * 40, "/target_context/base_commit:"),
+        ("sha", ("target_context", "context_sha256"), "a" * 64, "/target_context/context_sha256:"),
+        (
+            "repo_locator",
+            ("source_subject", "repository", "locator"),
+            "https://github.com/example/repo",
+            "/source_subject/repository:",
+        ),
+        (
+            "mapping_token",
+            ("source_subject", "repository", "mapping_record_id"),
+            "map-001",
+            "/source_subject/repository:",
+        ),
+        ("report_token", ("source", "report_version"), "synthetic-1", "/source/report_version:"),
+        (
+            "archive_token",
+            ("source", "location", "value"),
+            "synthetic-review-001",
+            "/source/location:",
+        ),
+        (
+            "https_locator",
+            ("source", "location", "value"),
+            "https://example.com/report",
+            "/source/location:",
+        ),
+    ],
+    ids=[
+        "task",
+        "mapping-task",
+        "review",
+        "finding",
+        "commit",
+        "sha",
+        "repository-locator",
+        "mapping-token",
+        "report-token",
+        "archive-token",
+        "https-locator",
+    ],
+)
+def test_external_review_exact_patterns_reject_a_trailing_line_feed(
+    field: str, path: tuple[str | int, ...], good: str, pointer: str
+) -> None:
+    value = _external_review_with_finding()
+    value["findings"][0]["mapping"] = {
+        "status": "suggested",
+        "task_id": "TASK-0001",
+        "review_id": "REV-0001",
+        "revision": 1,
+        "finding_id": "RF-001",
+    }
+    value["source_subject"]["repository"] = {
+        "kind": "repository_locator",
+        "locator": "https://github.com/example/repo",
+        "mapping_record_id": "map-001",
+    }
+    if field == "https_locator":
+        value["source"]["location"]["kind"] = "https_url"
+    target: Any = value
+    for part in path[:-1]:
+        target = target[part]
+    target[path[-1]] = good
+    assert validate_contract("external-review", value) == []
+
+    target[path[-1]] = good + "\n"
+    assert any(error.startswith(pointer) for error in validate_contract("external-review", value))
+
+
+@pytest.mark.parametrize(
+    ("parent_keys", "expected_location"),
+    [
+        ((), "/:"),
+        (("source_subject", "confirmation"), "/source_subject/confirmation:"),
+    ],
+    ids=["root", "nested"],
+)
+def test_external_review_error_does_not_echo_sensitive_unknown_key(
+    parent_keys: tuple[str, ...], expected_location: str
+) -> None:
+    value = valid_fixture("external-review")
+    parent = value
+    for key in parent_keys:
+        parent = parent[key]
+    parent["credential=TOP_SECRET_VALUE"] = "SECOND_SECRET_VALUE"
+    errors = validate_contract("external-review", value)
+    assert errors
+    if "TOP_SECRET_VALUE" in "\n".join(errors) or "SECOND_SECRET_VALUE" in "\n".join(errors):
+        pytest.fail("external-review diagnostics echoed a synthetic credential")
+    assert all(error.startswith(expected_location) for error in errors)
+    assert any("additionalProperties" in error for error in errors)
+
+
+def test_legacy_contract_keeps_unknown_field_name_in_diagnostic() -> None:
+    value = load_json(INVALID_ROOT / "observation.extra.json")
+    errors = validate_contract("observation", value)
+    assert "/summary/credentials: unexpected property" in errors
+    assert "SUPER_SECRET_VALUE" not in "\n".join(errors)
 
 
 @pytest.mark.parametrize("status", ["incomplete", "tool_unavailable", "timeout"])
