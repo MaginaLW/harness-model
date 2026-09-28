@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-27T23:51:48Z",
+    "base_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner replied '批准' to the concrete TASK-0054 E4.1 frozen-spec approval request after independent design review REV-0003. This approves the current external-review 1.0 contract and compatibility scope only; E4.2, push and merge remain separate.",
+    "schema_version": "1.0",
+    "spec_sha256": "3defc7ebbb210590ee8c86f1c44a80bd402eb6e0881343bff299d957e48f7b9c",
+    "subject_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
+    "task_id": "TASK-0054"
+  }
+]

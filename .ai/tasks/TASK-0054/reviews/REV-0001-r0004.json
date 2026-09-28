@@ -1,0 +1,71 @@
+{
+  "context_sha256": "0937c5c07059af29b823d9aa1cb13ff4d5340f97151ec05cd8e0ca6d1486d7dc",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0054/spec.md:28",
+        "docs/superpowers/specs/2026-09-23-zcode-report-import-preflight.md:58"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 28,
+        "path": ".ai/tasks/TASK-0054/spec.md"
+      },
+      "resolution": {
+        "actor": "codex",
+        "reason": "Frozen spec now requires source_subject.review_stage and applies source-stage-specific subject rules.",
+        "resolved_at": "2026-09-27T23:33:27Z"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Source review stage is absent"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0054/spec.md:48",
+        ".ai/tasks/TASK-0054/spec.md:61"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 48,
+        "path": ".ai/tasks/TASK-0054/spec.md"
+      },
+      "resolution": {
+        "actor": "codex",
+        "reason": "Frozen spec now caps fact refs at 16, scope arrays at 64, evidence refs at 32, and each item length.",
+        "resolved_at": "2026-09-27T23:33:27Z"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "Decoded-object arrays lack explicit item limits"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0054/spec.md:41",
+        "docs/superpowers/specs/2026-09-23-zcode-report-import-preflight.md:62"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 41,
+        "path": ".ai/tasks/TASK-0054/spec.md"
+      },
+      "resolution": {
+        "actor": "codex",
+        "reason": "Frozen spec now requires mapping.task_id plus REV/RF/revision constraints and defers actual target matching to E4.2.",
+        "resolved_at": "2026-09-27T23:33:28Z"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "Suggested finding mapping omits its task binding"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-09-27T23:33:28Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "/root/e4_readiness",
+  "revision": 4,
+  "schema_version": "1.0",
+  "summary": "Independent frozen-spec review found three contract gaps. Add a separate source review stage and stage-specific subject rule, bound every collection accepted from an already-decoded envelope, and bind suggested mapping to the target task. This is design feedback only; no implementation or approval is claimed.",
+  "task_id": "TASK-0054"
+}

@@ -1,0 +1,84 @@
+allowed_scope:
+- .ai/schemas/external-review.schema.json
+- src/aiflow/contracts.py
+- tests/unit/test_contracts.py
+- tests/fixtures/contracts/valid/external-review.json
+- tests/fixtures/contracts/invalid/external-review.*.json
+base_commit: e8e59e2b4112249c4c85c9a0eb1d510bacd9e597
+branch: codex/e4-external-review-contract
+created_at: '2026-09-27T15:46:20Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Add a bounded external ZCode review envelope contract and compatibility checks
+    for E4.1
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - .ai/schemas/external-review.schema.json
+  - src/aiflow/contracts.py
+  - tests/unit/test_contracts.py
+  - tests/fixtures/contracts/valid/external-review.json
+  - tests/fixtures/contracts/invalid/external-review.*.json
+  inputs:
+  - The owner selected validation and guided import of ZCode review reports into existing
+    AI Flow tasks.
+  - The E4 preflight specification separates E4.1 contract validation from E4.2 preflight
+    and writing.
+  permission_requirements: []
+  planned_actions:
+  - Add a closed external-review 1.0 schema for a source report envelope with separate
+    target and source subjects.
+  - Register only the new contract name in the existing schema registry.
+  - Add synthetic valid and invalid fixtures and bounded contract regression tests
+    as task-free safety checks.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0054
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Check the new valid, invalid, and boundary fixtures and the existing contract
+    matrix.
+  - Run all Policy-required tests, coverage, whitespace, Ruff, format, mypy, staged
+    review, and Gate checks.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 3defc7ebbb210590ee8c86f1c44a80bd402eb6e0881343bff299d957e48f7b9c
+goal: Add a bounded external ZCode review envelope contract and compatibility checks
+  for E4.1
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-27T23:35:16Z'
+subject_commit: a66d2522173ecd1259ae8e951141c45f10cbbddb
+task_id: TASK-0054
+updated_at: '2026-09-28T13:19:26Z'
+worktree_dirty: false
+worktree_dirty_paths: []

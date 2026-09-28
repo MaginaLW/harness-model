@@ -1,0 +1,45 @@
+{
+  "base_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
+  "branch": "codex/e4-external-review-contract",
+  "classification_input_sha256": "9fd61244495cb6ccaf82ac80e7d9e7671e977bb5daa6002ae67ef648eb8dd72f",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/external-review.schema.json",
+      "src/aiflow/contracts.py",
+      "tests/unit/test_contracts.py",
+      "tests/fixtures/contracts/valid/external-review.json",
+      "tests/fixtures/contracts/invalid/external-review.*.json"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add a bounded external ZCode review envelope contract and compatibility checks for E4.1",
+        "impact_scope": [
+          ".ai/schemas/external-review.schema.json",
+          "src/aiflow/contracts.py",
+          "tests/unit/test_contracts.py",
+          "tests/fixtures/contracts/valid/external-review.json",
+          "tests/fixtures/contracts/invalid/external-review.*.json"
+        ],
+        "planned_actions": [
+          "Add a closed external-review 1.0 schema for a source report envelope with separate target and source subjects.",
+          "Register only the new contract name in the existing schema registry.",
+          "Add synthetic valid and invalid fixtures and bounded contract regression tests as task-free safety checks."
+        ]
+      }
+    ],
+    "goal": "Add a bounded external ZCode review envelope contract and compatibility checks for E4.1",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "173c8e49c9c619b6c1b7ba4dc054a72eca15e575ec2a0a4fa5c5ca1c331cb042",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "0d861f94b990b699ddfd739342e2b818a67b2a3cffa70c95f2c330d27bcca291",
+  "task_id": "TASK-0054"
+}
