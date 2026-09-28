@@ -11,7 +11,8 @@
 
 基线为 `e8e59e2b4112249c4c85c9a0eb1d510bacd9e597`。治理实现只新增
 `.ai/schemas/external-review.schema.json`，并在 `src/aiflow/contracts.py` 的
-`SCHEMA_FILES` 增加一个 `external-review` 登记。安全测试与合成 fixture 由维护模式
+`SCHEMA_FILES` 增加一个 `external-review` 登记，同时只为该新契约屏蔽未知字段名的
+诊断回显，保留已知父对象的错误位置；既有契约的诊断行为保持不变。安全测试与合成 fixture 由维护模式
 task-free 独立实现、提交，但为累计 base→subject 的 CLI 范围检查列入本 task 的
 `allowed_scope`：`tests/unit/test_contracts.py`、`tests/fixtures/contracts/valid/external-review.json`
 和 `tests/fixtures/contracts/invalid/external-review.{extra,invalid,missing}.json`。
@@ -90,7 +91,12 @@ SHA/来源事实出处，均由 E4.2 在写入前比较。Schema 合法只说明
 3. C3：原始 `P1`/`unknown`、`F1` 与 `verified` 能以附属来源数据保存；
    不改变现行严重度、Finding ID 或审查结论。
 4. C4：现有契约 fixture 与 CLI 回归照旧通过；旧 Schema 字节及决定保持不变。
-5. 固定候选后执行 Policy 要求的完整测试、总覆盖率至少 85%、差异覆盖率至少 90%、
+5. C5：新契约的根及嵌套对象带有含敏感字样的未知字段名时，诊断只指出已知的
+   父对象位置和约束，不回显该字段名或其中的值。普通对象的直接拒绝可报告
+   `additionalProperties`；`source_subject.repository`、`source.location`、
+   `findings[].mapping` 三类判别对象可报告父位置的 `oneOf` 约束。
+   安全测试分别覆盖根、普通嵌套与这三类判别对象；既有契约的错误定位行为不变。
+6. 固定候选后执行 Policy 要求的完整测试、总覆盖率至少 85%、差异覆盖率至少 90%、
    whitespace、Ruff、format、mypy、正式独立审查及 Gate。以实际 CLI 结果记录。
 
 ## 非目标
@@ -109,7 +115,9 @@ task 附属记录写入、真实报告正例验收、fix attempt 编排或 E4.3/
 ## 错误行为
 
 未知 schema version/字段、缺失来源或对象、错误类型及越界输入必须拒绝；
-失败诊断不回显敏感输入。已解析对象的契约通过不能当作原始字节、真实性或匹配验证。
+失败诊断不回显敏感输入，包括未知字段名。`external-review` 的未知字段错误定位到
+已知父对象；判别对象可报告 `oneOf`，直接额外字段错误报告 `additionalProperties`。
+既有契约的诊断不变。已解析对象的契约通过不能当作原始字节、真实性或匹配验证。
 设计审查与实际所需规格批准完成前不得 `begin` 或改动上述治理实现；
 检查失败保留证据并修复，不降低质量门或覆盖率阈值。
 
@@ -120,7 +128,7 @@ task 附属记录写入、真实报告正例验收、fix attempt 编排或 E4.3/
 
 ## 执行顺序与文件归属
 
-主 agent 串行完成分类、规格冻结、设计审查反馈和 CLI 准入；批准后独占 Schema 与
-registry。1 名 sub-agent 独占上述五份安全测试/fixture；字段冻结后开始，测试与
+主 agent 串行完成分类、规格冻结、设计审查反馈和 CLI 准入；批准后独占 Schema、
+registry 与新契约专用诊断。1 名 sub-agent 独占上述五份安全测试/fixture；字段冻结后开始，测试与
 治理实现分别提交。候选固定后，2 名独立只读 reviewer 分别检查来源/边界和兼容/
 覆盖，主 agent 串行执行完整验证、处理实际缺项并提交。E4.2 另建治理 task。

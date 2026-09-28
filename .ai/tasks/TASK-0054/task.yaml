@@ -7,7 +7,7 @@ allowed_scope:
 base_commit: e8e59e2b4112249c4c85c9a0eb1d510bacd9e597
 branch: codex/e4-external-review-contract
 created_at: '2026-09-27T15:46:20Z'
-current_state: IMPLEMENTING
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -40,7 +40,8 @@ decision_units:
   planned_actions:
   - Add a closed external-review 1.0 schema for a source report envelope with separate
     target and source subjects.
-  - Register only the new contract name in the existing schema registry.
+  - Register the new contract name and suppress unknown-property-name echo only for
+    the external-review contract, preserving existing contract diagnostics.
   - Add synthetic valid and invalid fixtures and bounded contract regression tests
     as task-free safety checks.
   protections:
@@ -57,6 +58,8 @@ decision_units:
   verification_methods:
   - Check the new valid, invalid, and boundary fixtures and the existing contract
     matrix.
+  - Check root, ordinary nested and oneOf-discriminated sensitive unknown-key redaction
+    for the new contract and unchanged diagnostics for existing contracts.
   - Run all Policy-required tests, coverage, whitespace, Ruff, format, mypy, staged
     review, and Gate checks.
   verification_requirements:
@@ -71,14 +74,14 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 3defc7ebbb210590ee8c86f1c44a80bd402eb6e0881343bff299d957e48f7b9c
+frozen_spec_sha256: a33255cab106812063d671dd0d8981b440c30120e4fa9e3f140e4a77d1ee154e
 goal: Add a bounded external ZCode review envelope contract and compatibility checks
   for E4.1
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-09-27T23:35:16Z'
-subject_commit: a66d2522173ecd1259ae8e951141c45f10cbbddb
+spec_frozen_at: '2026-09-28T13:39:15Z'
+subject_commit: df6e9577fd6110a79c85a4bf01e035f4955a45e3
 task_id: TASK-0054
-updated_at: '2026-09-28T13:19:26Z'
+updated_at: '2026-09-28T13:41:01Z'
 worktree_dirty: false
 worktree_dirty_paths: []
