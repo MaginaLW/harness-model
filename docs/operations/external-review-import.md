@@ -34,6 +34,11 @@ record 重读原件、envelope、mapping、当前任务及版本事实；变化�
 新版本只追加，引用原链头；版本字符串不是排序依据。变更来源定位符声明新的来源
 系列，工具不认证报告身份或识别定位符别名。
 
+历史 import 的 suggested Finding 同样须引用本 task 的精确 Review、revision 和
+Finding，并与该 import 保存的目标 context 一致。有效旧 context 可继续作为版本链
+基础；正式引用缺失、错配或损坏会拒绝追加。预检摘要也绑定这些历史 Review/context
+的原始字节，引用变化后须重新预检，不把旧引用提升为当前正式审核。
+
 成功返回 `recorded`，只新增 `.ai/tasks/<TASK-ID>/external-reviews/` 中的不可变
 import，不复制原件、不改 task/events/formal Review/approval/evidence，也不改 Git index。
 原件、运行日志和私有路径继续按其保管等级保存。附属记录会形成真实 Git 变更；

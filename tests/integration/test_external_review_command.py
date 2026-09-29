@@ -731,6 +731,211 @@ def test_exact_existing_composite_finding_reference_is_read_only(case: Case) -> 
     assert tree_snapshot(case.tasks) == before
 
 
+@pytest.fixture(scope="module")
+def historical_finding_baselines(
+    tmp_path_factory: pytest.TempPathFactory, baseline_cases: dict[tuple[bool, bool], Case]
+) -> dict[bool, Case]:
+    """Seed genuine native Review/first writer once; every test clones its complete Git tree."""
+    result: dict[bool, Case] = {}
+    for implementation in (False, True):
+        baseline = copy_case(
+            tmp_path_factory.mktemp("historical-finding-baseline"),
+            baseline_cases[(implementation, False)],
+        )
+        add_formal_review(baseline)
+        assert baseline.record()["status"] == "recorded"
+        result[implementation] = baseline
+    return result
+
+
+@pytest.fixture
+def historical_case(tmp_path: Path, historical_finding_baselines: dict[bool, Case]) -> Case:
+    return copy_case(tmp_path, historical_finding_baselines[False])
+
+
+def historical_attachment(case: Case) -> tuple[Path, bytes, dict[str, Any]]:
+    paths = list((case.task / "external-reviews").rglob("*.json"))
+    assert len(paths) == 1
+    raw = paths[0].read_bytes()
+    value = json.loads(raw)
+    require_valid_contract("external-review-import", value)
+    return paths[0], raw, value
+
+
+@pytest.mark.parametrize("operation", ["preflight", "record"])
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "mapping-task",
+        "mapping-review",
+        "mapping-revision",
+        "mapping-finding",
+        "formal-review-id",
+        "formal-revision",
+        "formal-finding",
+        "context-stage",
+        "context-base",
+        "context-subject",
+        "context-repository",
+        "context-task",
+        "target-digest",
+        "missing-context",
+    ],
+)
+def test_historical_suggested_finding_requires_exact_valid_formal_binding(
+    tmp_path: Path,
+    historical_finding_baselines: dict[bool, Case],
+    corruption: str,
+    operation: str,
+) -> None:
+    case = copy_case(tmp_path, historical_finding_baselines[corruption == "context-subject"])
+    saved_path, _saved_bytes, saved = historical_attachment(case)
+    case.envelope["findings"] = []
+    case.envelope["source"]["report_version"] = "synthetic-next-version"
+    case.save()
+    review_path = case.task / "reviews/REV-0001-r0001.json"
+    review = json.loads(review_path.read_text())
+    context_path = case.task / f"review-contexts/{review['context_sha256']}.json"
+    archived = json.loads(context_path.read_text())
+    validate_review_record(review, archived)
+    mapping = saved["envelope"]["findings"][0]["mapping"]
+    expected_code = "EXTERNAL_REVIEW_FINDING_MISMATCH"
+    if corruption.startswith("mapping-"):
+        field, value = {
+            "mapping-task": ("task_id", "TASK-9999"),
+            "mapping-review": ("review_id", "REV-9999"),
+            "mapping-revision": ("revision", 9999),
+            "mapping-finding": ("finding_id", "RF-999"),
+        }[corruption]
+        mapping[field] = value
+        if corruption in {"mapping-review", "mapping-revision"}:
+            expected_code = "EXTERNAL_REVIEW_INPUT_UNREADABLE"
+    elif corruption.startswith("formal-"):
+        if corruption == "formal-review-id":
+            review["review_id"] = "REV-9999"
+        elif corruption == "formal-revision":
+            review["revision"] = 9999
+        else:
+            review["findings"][0]["finding_id"] = "RF-999"
+        validate_review_record(review, archived)
+        atomic_write_json(review_path, review)
+    elif corruption == "target-digest":
+        saved["envelope"]["target_context"]["context_sha256"] = "f" * 64
+    elif corruption == "missing-context":
+        # Remove only the exact synthetic archive owned by this isolated case.
+        context_path.unlink()
+        expected_code = "EXTERNAL_REVIEW_INPUT_UNREADABLE"
+    else:
+        if corruption == "context-stage":
+            archived.update(review_stage="implementation", subject_commit="f" * 40)
+            archived["evidence_sha256"] = "e" * 64
+            review["review_stage"] = "implementation"
+        elif corruption == "context-base":
+            archived["base_commit"] = "f" * 40
+        elif corruption == "context-subject":
+            archived["subject_commit"] = "f" * 40
+        elif corruption == "context-repository":
+            archived["repository_id"] = "223e4567-e89b-42d3-a456-426614174000"
+        else:
+            archived["task_id"] = "TASK-9999"
+            review["task_id"] = "TASK-9999"
+        archived["context_sha256"] = digest(
+            {key: value for key, value in archived.items() if key != "context_sha256"}
+        )
+        review["context_sha256"] = archived["context_sha256"]
+        # Each altered Review/archive remains internally valid; only its saved target differs.
+        validate_review_record(review, archived)
+        atomic_write_json(
+            case.task / f"review-contexts/{archived['context_sha256']}.json", archived
+        )
+        atomic_write_json(review_path, review)
+        saved["envelope"]["target_context"]["context_sha256"] = archived["context_sha256"]
+    saved["input_sha256"] = digest(
+        {"envelope": saved["envelope"], "repository_mapping": saved["repository_mapping"]}
+    )
+    require_valid_contract("external-review-import", saved)
+    atomic_write_json(saved_path, saved)
+    index = (case.root / ".git/index").read_bytes()
+    # A syntactically valid token must not let writer skip its historical-reference check.
+    error = rejected_without_writes(case, operation, token="f" * 64)
+    assert error.code == expected_code
+    assert (case.root / ".git/index").read_bytes() == index
+
+
+def freeze_new_context_without_old_mapping(case: Case) -> None:
+    (case.task / "spec.md").write_text(
+        SPECIFICATION + "\nAdditional synthetic acceptance: retain historical Finding binding.\n",
+        encoding="utf-8",
+    )
+    freeze_task(case.root, TASK_ID, actor="synthetic-specifier")
+    current = dict(build_review_context(case.root, TASK_ID, "design"))
+    assert current["context_sha256"] != case.context["context_sha256"]
+    case.context = current
+    case.envelope["target_context"]["context_sha256"] = current["context_sha256"]
+    case.envelope["findings"] = []
+    case.envelope["source"]["report_version"] = "synthetic-new-context-version"
+    case.save()
+
+
+def test_historical_suggested_finding_retains_valid_old_context_when_new_context_appends(
+    historical_case: Case,
+) -> None:
+    case = historical_case
+    first_path, first_bytes, first_value = historical_attachment(case)
+    old_context_hash = case.context["context_sha256"]
+    review_path = case.task / "reviews/REV-0001-r0001.json"
+    context_path = case.task / f"review-contexts/{old_context_hash}.json"
+    review_bytes, context_bytes = review_path.read_bytes(), context_path.read_bytes()
+    freeze_new_context_without_old_mapping(case)
+    index = (case.root / ".git/index").read_bytes()
+    before = tree_snapshot(case.tasks)
+    prepared = case.preflight()
+    assert prepared["status"] == "ready"
+    assert tree_snapshot(case.tasks) == before
+    second = case.record(prepared["preflight_sha256"])
+    assert second["status"] == "recorded"
+    appended = json.loads((case.root / second["record_path"]).read_bytes())
+    assert appended["previous_record_sha256"] == digest(first_value)
+    assert (
+        appended["envelope"]["target_context"]["context_sha256"] == case.context["context_sha256"]
+    )
+    assert first_value["envelope"]["target_context"]["context_sha256"] == old_context_hash
+    assert first_path.read_bytes() == first_bytes
+    assert review_path.read_bytes() == review_bytes
+    assert context_path.read_bytes() == context_bytes
+    validate_review_record(json.loads(review_bytes), json.loads(context_bytes))
+    after = tree_snapshot(case.tasks)
+    assert all(after[name] == value for name, value in before.items())
+    assert (case.root / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize("artifact", ["formal-review", "review-context"])
+def test_historical_finding_reference_byte_drift_invalidates_preflight_token(
+    historical_case: Case, artifact: str
+) -> None:
+    case = historical_case
+    saved_path, saved_bytes, _saved = historical_attachment(case)
+    review_path = case.task / "reviews/REV-0001-r0001.json"
+    review = json.loads(review_path.read_bytes())
+    context_path = case.task / f"review-contexts/{review['context_sha256']}.json"
+    freeze_new_context_without_old_mapping(case)
+    token = case.preflight()["preflight_sha256"]
+    path = review_path if artifact == "formal-review" else context_path
+    original_bytes = path.read_bytes()
+    original = json.loads(original_bytes)
+    path.write_text(json.dumps(original, ensure_ascii=False, indent=4) + "\n\n", encoding="utf-8")
+    assert path.read_bytes() != original_bytes
+    assert json.loads(path.read_bytes()) == original
+    validate_review_record(
+        json.loads(review_path.read_bytes()), json.loads(context_path.read_bytes())
+    )
+    index = (case.root / ".git/index").read_bytes()
+    error = rejected_without_writes(case, "record", token)
+    assert error.code == "EXTERNAL_REVIEW_PREFLIGHT_STALE"
+    assert saved_path.read_bytes() == saved_bytes
+    assert (case.root / ".git/index").read_bytes() == index
+
+
 @pytest.mark.parametrize(
     "field,value",
     [
