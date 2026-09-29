@@ -49,7 +49,8 @@ decision_units:
     recording, separate from formal Review and Gate.
   - The E4 preflight specification requires source-target matching, zero-write refusal,
     full-input replay equality and append-only versions.
-  permission_requirements: []
+  permission_requirements:
+  - action_approval
   planned_actions:
   - Add bounded local envelope, raw report and repository-mapping readers with safe
     diagnostics.
@@ -81,7 +82,7 @@ decision_units:
     acceptance_required: true
     independent_verifier_required: true
     integration_required: true
-    targeted_mutation_required: false
+    targeted_mutation_required: true
 forbidden_actions:
 - push
 - merge

@@ -24,6 +24,8 @@ SCHEMA_FILES = {
     "event": "event.schema.json",
     "evidence": "evidence.schema.json",
     "external-review": "external-review.schema.json",
+    "external-review-import": "external-review-import.schema.json",
+    "external-review-repository-mapping": "external-review-repository-mapping.schema.json",
     "mutation-evidence": "mutation-evidence.schema.json",
     "mutation-manifest": "mutation-manifest.schema.json",
     "observation": "observation.schema.json",
@@ -118,7 +120,11 @@ def _safe_schema_errors(
         if error.validator == "required":
             errors.extend(_required_errors(error))
         elif error.validator == "additionalProperties":
-            if contract_name == "external-review":
+            if contract_name in {
+                "external-review",
+                "external-review-import",
+                "external-review-repository-mapping",
+            }:
                 pointer = _pointer(list(error.absolute_path))
                 errors.append(f"{pointer}: contract constraint failed (additionalProperties)")
             else:

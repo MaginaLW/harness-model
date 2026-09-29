@@ -121,6 +121,18 @@ def build_parser() -> ArgumentParser:
     review_show.add_argument("task_id")
     review_show.add_argument("--stage", choices=["design", "implementation"])
     review_show.add_argument("--format", choices=["text", "json"], default="text")
+    external = subparsers.add_parser(
+        "external-review", help="preflight or explicitly record a local external report"
+    )
+    external_commands = external.add_subparsers(dest="external_command", required=True)
+    for operation in ("preflight", "record"):
+        external_operation = external_commands.add_parser(operation)
+        external_operation.add_argument("task_id")
+        external_operation.add_argument("--envelope", required=True, type=Path)
+        external_operation.add_argument("--report", required=True, type=Path)
+        external_operation.add_argument("--repository-mapping", type=Path)
+        if operation == "record":
+            external_operation.add_argument("--expected-preflight-sha256", required=True)
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
@@ -303,6 +315,43 @@ def main(argv: Sequence[str] | None = None) -> int:
                             f"{record['review_id']} r{int(record['revision']):04d} "
                             f"{record['review_stage']} {record['outcome']}"
                         )
+        elif arguments.command == "external-review":
+            from aiflow.external_review import preflight_external_review, record_external_review
+
+            if arguments.external_command == "preflight":
+                external_result = preflight_external_review(
+                    Path.cwd(),
+                    arguments.task_id,
+                    arguments.envelope,
+                    arguments.report,
+                    repository_mapping_path=arguments.repository_mapping,
+                )
+            else:
+                external_result = record_external_review(
+                    Path.cwd(),
+                    arguments.task_id,
+                    arguments.envelope,
+                    arguments.report,
+                    repository_mapping_path=arguments.repository_mapping,
+                    expected_preflight_sha256=arguments.expected_preflight_sha256,
+                )
+            try:
+                print(json.dumps(external_result, ensure_ascii=False, sort_keys=True))
+            except OSError:
+                # The record may already be committed; never imply zero-write refusal.
+                try:
+                    print(
+                        json.dumps(
+                            {
+                                "status": "delivery_failed",
+                                "reason_codes": ["EXTERNAL_REVIEW_OUTPUT_FAILED"],
+                            }
+                        ),
+                        file=sys.stderr,
+                    )
+                except OSError:
+                    pass
+                return 1
         elif arguments.command == "status":
             summary = summarize_task(Path.cwd(), arguments.task_id)
             print(summary.to_json() if arguments.format == "json" else summary.to_text())
@@ -362,6 +411,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(f"{arguments.task_id} {assessment.subject_commit}")
     except AiflowError as error:
-        print(error.message, file=sys.stderr)
+        if arguments.command == "external-review":
+            print(
+                json.dumps({"status": "rejected", "reason_codes": [error.code]}),
+                file=sys.stderr,
+            )
+        else:
+            print(error.message, file=sys.stderr)
         return 1
     return 0
