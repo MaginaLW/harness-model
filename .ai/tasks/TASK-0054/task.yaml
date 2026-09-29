@@ -7,7 +7,7 @@ allowed_scope:
 base_commit: e8e59e2b4112249c4c85c9a0eb1d510bacd9e597
 branch: codex/e4-external-review-contract
 created_at: '2026-09-27T15:46:20Z'
-current_state: WAITING_FOR_SPEC_REVIEW
+current_state: WAITING_FOR_FINAL_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -80,8 +80,8 @@ goal: Add a bounded external ZCode review envelope contract and compatibility ch
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-09-28T13:39:15Z'
-subject_commit: df6e9577fd6110a79c85a4bf01e035f4955a45e3
+subject_commit: 23793f7071da20437b4e05b81512da85a277c958
 task_id: TASK-0054
-updated_at: '2026-09-28T13:41:01Z'
+updated_at: '2026-09-29T00:12:32Z'
 worktree_dirty: false
 worktree_dirty_paths: []

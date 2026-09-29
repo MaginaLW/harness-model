@@ -11,5 +11,18 @@
     "spec_sha256": "3defc7ebbb210590ee8c86f1c44a80bd402eb6e0881343bff299d957e48f7b9c",
     "subject_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
     "task_id": "TASK-0054"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-28T13:42:23Z",
+    "base_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly approved the current TASK-0054 amended E4.1 spec SHA-256 a33255cab106812063d671dd0d8981b440c30120e4fa9e3f140e4a77d1ee154e after independent design review REV-0005; approval is limited to contract-specific diagnostic redaction.",
+    "schema_version": "1.0",
+    "spec_sha256": "a33255cab106812063d671dd0d8981b440c30120e4fa9e3f140e4a77d1ee154e",
+    "subject_commit": "df6e9577fd6110a79c85a4bf01e035f4955a45e3",
+    "task_id": "TASK-0054"
   }
 ]
