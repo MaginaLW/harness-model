@@ -1,0 +1,91 @@
+schema_version: '1.0'
+task_id: TASK-0055
+goal: Add guided external ZCode report preflight and immutable attachment recording
+  for existing AI Flow tasks
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: codex/e4-report-import
+base_commit: fd560d9f12d28ef6ff155f6f46764d6c588d0f30
+subject_commit: fd560d9f12d28ef6ff155f6f46764d6c588d0f30
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope: &id001
+- src/aiflow/external_review.py
+- src/aiflow/cli.py
+- src/aiflow/contracts.py
+- .ai/schemas/external-review-import.schema.json
+- .ai/schemas/external-review-repository-mapping.schema.json
+- tests/unit/test_external_review.py
+- tests/integration/test_external_review_command.py
+- tests/unit/test_contracts.py
+- tests/fixtures/contracts/valid/external-review-*.json
+- tests/fixtures/contracts/invalid/external-review-*.*.json
+- docs/operations/external-review-import.md
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+current_state: WAITING_FOR_SPEC_REVIEW
+created_at: '2026-09-29T20:11:24Z'
+updated_at: '2026-09-29T20:23:59Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0055
+  decision_unit_id: DU-001
+  goal: Add guided external ZCode report preflight and immutable attachment recording
+    for existing AI Flow tasks
+  inputs:
+  - E4.1 TASK-0054 has a locally approved bounded envelope contract at fd560d9.
+  - The selected follow-up is guided local report preflight and immutable attachment
+    recording, separate from formal Review and Gate.
+  - The E4 preflight specification requires source-target matching, zero-write refusal,
+    full-input replay equality and append-only versions.
+  planned_actions:
+  - Add bounded local envelope, raw report and repository-mapping readers with safe
+    diagnostics.
+  - Compare current governed target context and independently declared source subject
+    without network calls or report execution.
+  - Add read-only preflight and explicit record CLI commands with revalidation, drift
+    tokens and create-only immutable publication.
+  - Register two new closed attachment and repository-mapping contracts without changing
+    existing formal contracts.
+  impact_scope: *id001
+  reversibility: reversible
+  verification_methods:
+  - Run synthetic I1-I7, concurrency, interrupted-publication and unchanged-formal-artifact
+    regression checks.
+  - Run complete Policy-required verification, coverage, whitespace, Ruff, format
+    and mypy.
+  - Obtain independent design and implementation reviews and formal V2 acceptance,
+    integration and independent verification.
+  external_side_effects: []
+  permission_requirements: []
+  scope:
+    clear: true
+  impact:
+    level: medium
+  impact_categories: []
+  controlled_actions: []
+  protections:
+    verified_backup: false
+    dry_run: false
+  verification:
+    automatic: true
+    tools_missing: false
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: true
+    code_modified: true
+    interaction_scope: cross_file
+    regression_risk: true
+    error_detectability: high
+  verification_requirements:
+    acceptance_required: true
+    integration_required: true
+    targeted_mutation_required: false
+    independent_verifier_required: true
+frozen_spec_sha256: 957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9
+spec_frozen_at: '2026-09-29T20:22:21Z'
