@@ -492,7 +492,12 @@ def _read_only_checkout(root: Path) -> tuple[GitContext, tuple[str, ...]]:
 
 
 def _current_target(
-    root: Path, task_id: str, envelope: Mapping[str, Any], ignored: set[str]
+    root: Path,
+    task_id: str,
+    envelope: Mapping[str, Any],
+    ignored: set[str],
+    *,
+    unchanged_context: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     record = read_task_record_strict(root, task_id)
     task = record.task
@@ -536,7 +541,14 @@ def _current_target(
         (*attestation, *dirty_paths), task_id=task_id, repository_root=root
     ).passed:
         raise _invalid("GIT_BINDING_STALE")
-    context = dict(build_review_context(root, task_id, stage))
+    context = (
+        dict(build_review_context(root, task_id, stage))
+        if unchanged_context is None
+        else unchanged_context
+    )
+    policy_sha = load_policy_bundle(root).sha256
+    if context["policy_sha256"] != policy_sha:
+        raise _invalid("INPUT_CHANGED")
     spec_bytes = _read_bounded_file(_task_path(root, task_id, "spec.md"), MAX_RECORD_BYTES)
     spec_sha = specification_digest(spec_bytes.decode("utf-8"))
     if spec_sha != task.get("frozen_spec_sha256") or context["spec_sha256"] != spec_sha:
@@ -581,7 +593,7 @@ def _current_target(
         "head": git.head,
         "attestation": list(attestation),
         "dirty_paths": sorted(dirty_paths),
-        "policy_sha256": load_policy_bundle(root).sha256,
+        "policy_sha256": policy_sha,
     }
     return context, git_binding
 
@@ -788,7 +800,14 @@ def _prepare_external_review(
             "external-review-import", candidate, root / ".ai/schemas"
         ):
             raise _invalid("CONTRACT_INVALID")
-        repeated_context, repeated_git = _current_target(root, task_id, envelope, ignored_names)
+        if task_binding != _snapshot_task_files(root, task_id):
+            raise _invalid("INPUT_CHANGED")
+        # Only the pure context calculation is reused inside this fresh preparation.
+        # Its complete task inputs are byte-bound before and after the second read;
+        # Git, Policy, strict task state, freshness and referenced artifacts are reread.
+        repeated_context, repeated_git = _current_target(
+            root, task_id, envelope, ignored_names, unchanged_context=context
+        )
         if (
             task_binding != _snapshot_task_files(root, task_id)
             or context != repeated_context
