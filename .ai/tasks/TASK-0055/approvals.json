@@ -56,5 +56,21 @@
     "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
     "subject_commit": "59bba106ad56530d39cbce3885cb8206381b7ea8",
     "task_id": "TASK-0055"
+  },
+  {
+    "action_sha256": "170615598559c5d3afbbe0a5317282c8be562d46596777c5cbcf54d980d794d0",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-29T22:25:13Z",
+    "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-30T02:25:12Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "The unchanged approved frozen specification requires complete local V2 verification. Bind the third single-use canonical five-safeguard mutation action to the compatibility-tested batched identity subject; preserve both prior attempts, and authorize no network, provider, device or publication.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
+    "subject_commit": "28d5184e02dc9b4dee0cc6df942000ad34f8b611",
+    "task_id": "TASK-0055"
   }
 ]
