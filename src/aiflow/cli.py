@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import io
 import json
 import sys
 from argparse import ArgumentParser
 from collections.abc import Sequence
+from contextlib import redirect_stderr
 from pathlib import Path
 
 from aiflow import __version__
@@ -181,7 +183,30 @@ def build_parser() -> ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the root command without exposing unfinished business subcommands."""
     try:
-        arguments = build_parser().parse_args(argv)
+        parser = build_parser()
+        raw_arguments = list(sys.argv[1:] if argv is None else argv)
+        if raw_arguments[:1] == ["external-review"]:
+            try:
+                # argparse diagnostics can contain arbitrary supplied tokens.
+                with redirect_stderr(io.StringIO()):
+                    arguments = parser.parse_args(raw_arguments)
+            except SystemExit as error:
+                if error.code not in {None, 0}:
+                    try:
+                        print(
+                            json.dumps(
+                                {
+                                    "status": "rejected",
+                                    "reason_codes": ["EXTERNAL_REVIEW_ARGUMENT_INVALID"],
+                                }
+                            ),
+                            file=sys.stderr,
+                        )
+                    except OSError:
+                        pass
+                raise
+        else:
+            arguments = parser.parse_args(raw_arguments)
         if arguments.command == "start":
             if arguments.recover is not None:
                 if arguments.objective is not None or arguments.allow or arguments.forbid_action:
@@ -412,10 +437,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"{arguments.task_id} {assessment.subject_commit}")
     except AiflowError as error:
         if arguments.command == "external-review":
-            print(
-                json.dumps({"status": "rejected", "reason_codes": [error.code]}),
-                file=sys.stderr,
-            )
+            try:
+                print(
+                    json.dumps({"status": "rejected", "reason_codes": [error.code]}),
+                    file=sys.stderr,
+                )
+            except OSError:
+                pass
         else:
             print(error.message, file=sys.stderr)
         return 1
