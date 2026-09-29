@@ -72,5 +72,21 @@
     "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
     "subject_commit": "28d5184e02dc9b4dee0cc6df942000ad34f8b611",
     "task_id": "TASK-0055"
+  },
+  {
+    "action_sha256": "82b040704d11ef0ed426f6e4f4283e674983a6590b876a84fd6312ce05cf0c2b",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-29T22:49:19Z",
+    "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-30T02:49:18Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "The unchanged approved frozen specification requires complete local V2 verification. Bind the fourth single-use canonical mutation action to the repaired historical-binding subject after preserved prior interruptions; this grants no provider, device, network, publication or new phase.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
+    "subject_commit": "835701786550eeea79c27b68337c7de0bd59b3a1",
+    "task_id": "TASK-0055"
   }
 ]
