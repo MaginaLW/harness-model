@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-29T20:26:56Z",
+    "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly approved the frozen TASK-0055 E4.2 specification 957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9 and authorized push and merge in the current conversation. Spec approval covers bounded local implementation and V2 validation; publication authorization is recorded separately against its eventual exact candidate.",
+    "schema_version": "1.0",
+    "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
+    "subject_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+    "task_id": "TASK-0055"
+  }
+]
