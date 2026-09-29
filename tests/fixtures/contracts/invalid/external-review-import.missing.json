@@ -1,0 +1,7 @@
+{
+  "kind": "external-review-import",
+  "schema_version": "1.0",
+  "source_key_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "input_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "repository_mapping": null
+}

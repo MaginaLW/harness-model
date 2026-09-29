@@ -32,6 +32,8 @@ CONTRACT_NAMES = {
     "event",
     "evidence",
     "external-review",
+    "external-review-import",
+    "external-review-repository-mapping",
     "mutation-evidence",
     "observation",
     "observation-decision",
@@ -628,6 +630,52 @@ def test_legacy_contract_keeps_unknown_field_name_in_diagnostic() -> None:
     errors = validate_contract("observation", value)
     assert "/summary/credentials: unexpected property" in errors
     assert "SUPER_SECRET_VALUE" not in "\n".join(errors)
+
+
+@pytest.mark.parametrize(
+    ("contract_name", "parent_keys"),
+    [
+        ("external-review-import", ()),
+        ("external-review-import", ("envelope",)),
+        ("external-review-import", ("envelope", "source_subject", "confirmation")),
+        ("external-review-import", ("envelope", "source", "location")),
+        ("external-review-repository-mapping", ()),
+        ("external-review-repository-mapping", ("confirmation",)),
+    ],
+)
+def test_import_contracts_hide_sensitive_unknown_keys_at_every_level(
+    contract_name: str, parent_keys: tuple[str, ...]
+) -> None:
+    value = valid_fixture(contract_name)
+    parent: Any = value
+    for key in parent_keys:
+        parent = parent[key]
+    parent["credential=SYNTHETIC_UNKNOWN_KEY_SECRET"] = "SYNTHETIC_UNKNOWN_VALUE_SECRET"
+    first = validate_contract(contract_name, value)
+    assert first and first == validate_contract(contract_name, value)
+    rendered = "\n".join(first)
+    assert "SYNTHETIC_UNKNOWN_KEY_SECRET" not in rendered
+    assert "SYNTHETIC_UNKNOWN_VALUE_SECRET" not in rendered
+
+
+@pytest.mark.parametrize("field", ["source_key_sha256", "input_sha256", "previous_record_sha256"])
+@pytest.mark.parametrize("value", ["a" * 63, "a" * 64 + "\n", "g" * 64])
+def test_import_digest_fields_reject_noncanonical_values(field: str, value: str) -> None:
+    candidate = valid_fixture("external-review-import")
+    candidate[field] = value
+    assert validate_contract("external-review-import", candidate)
+
+
+def test_import_contract_reuses_envelope_and_mapping_boundaries() -> None:
+    candidate = valid_fixture("external-review-import")
+    candidate["repository_mapping"] = valid_fixture("external-review-repository-mapping")
+    candidate["previous_record_sha256"] = "e" * 64
+    assert validate_contract("external-review-import", candidate) == []
+    candidate["repository_mapping"]["confirmation"]["method"] = "automatic_trust"
+    assert validate_contract("external-review-import", candidate)
+    candidate["repository_mapping"] = None
+    candidate["envelope"]["target_context"]["review_stage"] = "implementation"
+    assert validate_contract("external-review-import", candidate)
 
 
 @pytest.mark.parametrize("status", ["incomplete", "tool_unavailable", "timeout"])
