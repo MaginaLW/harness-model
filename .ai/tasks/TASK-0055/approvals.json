@@ -11,5 +11,34 @@
     "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
     "subject_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
     "task_id": "TASK-0055"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-29T21:24:30Z",
+    "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Reapply the owner's existing approval of unchanged frozen specification 957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9 after specification-derived V2 declaration alignment and fresh independent REV-0003. The CLI reports the existing spec decision current; no new human decision, behavior, scope or Policy change is inferred.",
+    "schema_version": "1.0",
+    "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
+    "subject_commit": "8526db074b41071ebd03de4ca13ae25bf7316baa",
+    "task_id": "TASK-0055"
+  },
+  {
+    "action_sha256": "2b24ad784b08af7732fc9336af32645b24e0d75827d521998852e7e48d546142",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-29T21:24:32Z",
+    "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-30T01:19:20Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "The owner's approved frozen TASK-0055 specification authorizes complete local Policy-required V2 verification, including the existing five-safeguard targeted mutation runner. Record its separate exact-subject single-use local action binding; this authorizes no provider, device, network, publication or phase expansion.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
+    "subject_commit": "8526db074b41071ebd03de4ca13ae25bf7316baa",
+    "task_id": "TASK-0055"
   }
 ]
