@@ -284,3 +284,33 @@ def test_cli_early_domain_errors_are_safe(
     assert secret_path not in captured.err
     assert SYNTHETIC_SECRET not in captured.err
     assert "Traceback" not in captured.err
+
+
+@pytest.mark.parametrize(
+    "identity",
+    [
+        "{root}\n",
+        "{root}\n{head}\nmain\nextra\n",
+        "{root}\ninvalid-head\nmain\n",
+        "{root}\n{head}\n\n",
+        "{root}\n{head}\nmain branch\n",
+        "{root}\n{head}\nmain\x00branch\n",
+        "{root}\n{head}\nmain\x7fbranch\n",
+        "{root}/wrong\n{head}\nmain\n",
+    ],
+)
+def test_checkout_rejects_invalid_git_identity_before_status(
+    tmp_path: Path, identity: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls = []
+
+    def identity_only(root: Path, *arguments: str) -> bytes:
+        calls.append(arguments)
+        assert len(calls) == 1
+        return identity.format(root=root.as_posix(), head="a" * 40).encode()
+
+    monkeypatch.setattr(external_review, "_read_only_git", identity_only)
+    with pytest.raises(ContractError) as caught:
+        external_review._read_only_checkout(tmp_path)
+    assert_safe_error(caught.value, "EXTERNAL_REVIEW_GIT_BINDING_STALE")
+    assert len(calls) == 1

@@ -471,14 +471,29 @@ def _read_only_git(root: Path, *arguments: str) -> bytes:
 
 
 def _read_only_checkout(root: Path) -> tuple[GitContext, tuple[str, ...]]:
-    actual_root = Path(_read_only_git(root, "rev-parse", "--show-toplevel").decode().strip())
-    if actual_root.resolve() != root:
+    # rev-parse preserves Git's canonical, disambiguated short branch name.
+    checkout = _read_only_git(
+        root, "rev-parse", "--show-toplevel", "HEAD", "--abbrev-ref=loose", "HEAD"
+    )
+    lines = checkout.removesuffix(b"\n").split(b"\n")
+    if len(lines) not in {2, 3}:
+        raise _invalid("GIT_BINDING_STALE")
+    actual_root = Path(lines[0].decode().strip())
+    head = lines[1].decode().strip()
+    branch = lines[2].decode().strip() if len(lines) == 3 else "HEAD"
+    if branch == "HEAD":
+        # Ambiguous raw refs named HEAD can suppress rev-parse's abbreviation.
+        # Preserve the previous symbolic-ref result; detached HEAD still fails.
+        branch = _read_only_git(root, "symbolic-ref", "--short", "-q", "HEAD").decode().strip()
+    if (
+        actual_root.resolve() != root
+        or HEAD_PATTERN.fullmatch(head) is None
+        or not branch
+        or _CONTROL.search(branch)
+        or " " in branch
+    ):
         raise _invalid("GIT_BINDING_STALE")
     _assert_no_links(root / ".ai/repository-id")
-    head = _read_only_git(root, "rev-parse", "HEAD").decode().strip()
-    if HEAD_PATTERN.fullmatch(head) is None:
-        raise _invalid("GIT_BINDING_STALE")
-    branch = _read_only_git(root, "symbolic-ref", "--short", "-q", "HEAD").decode().strip()
     dirty = tuple(
         sorted(
             _status_paths(

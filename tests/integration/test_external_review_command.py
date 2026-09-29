@@ -67,7 +67,7 @@ SPECIFICATION = """# Task Specification
 
 def git(root: Path, *arguments: str) -> str:
     result = subprocess.run(
-        ["git", *arguments], cwd=root, capture_output=True, check=True, text=True, timeout=10
+        ["git", *arguments], cwd=root, capture_output=True, check=True, encoding="utf-8", timeout=10
     )
     return result.stdout.rstrip("\r\n")
 
@@ -353,6 +353,68 @@ def test_preflight_binds_real_git_frozen_task_without_writing(
     assert tree_snapshot(case.tasks) == before
     assert (case.root / ".git/index").read_bytes() == index
     assert not (case.task / "review-contexts").exists()
+
+
+@pytest.mark.parametrize(
+    ("branch", "collision_depth", "warn_ambiguous"),
+    [
+        ("codex/plain", 0, True),
+        ("codex/collision", 1, True),
+        ("codex/collision", 2, True),
+        ("codex/collision", 1, False),
+        ("codex/collision", 2, False),
+        ("codex/x\u00a0y", 0, True),
+        ("codex/x\u2003y", 0, True),
+        ("codex/x\u2028y", 0, True),
+    ],
+)
+def test_read_only_checkout_preserves_git_canonical_branch_identity(
+    case: Case, branch: str, collision_depth: int, warn_ambiguous: bool
+) -> None:
+    git(case.root, "branch", "-m", branch)
+    git(case.root, "config", "core.warnAmbiguousRefs", str(warn_ambiguous).lower())
+    if collision_depth:
+        git(case.root, "tag", branch)
+    if collision_depth > 1:
+        git(case.root, "tag", "heads/" + branch)
+    expected_branch = git(case.root, "symbolic-ref", "--short", "-q", "HEAD")
+    expected_head = git(case.root, "rev-parse", "HEAD")
+    before = tree_snapshot(case.tasks)
+    index = (case.root / ".git/index").read_bytes()
+    context, dirty = external_review._read_only_checkout(case.root)
+    assert context.branch == expected_branch
+    assert context.head == expected_head
+    assert context.repository_id == REPOSITORY_ID
+    assert dirty == () and not context.worktree_dirty
+    assert tree_snapshot(case.tasks) == before
+    assert (case.root / ".git/index").read_bytes() == index
+
+
+@pytest.mark.parametrize("ref_namespace", ["heads", "tags"])
+def test_read_only_checkout_preserves_raw_head_ref_ambiguity(
+    case: Case, ref_namespace: str
+) -> None:
+    git(case.root, "update-ref", f"refs/{ref_namespace}/HEAD", "HEAD")
+    if ref_namespace == "heads":
+        git(case.root, "symbolic-ref", "HEAD", "refs/heads/HEAD")
+    expected_branch = git(case.root, "symbolic-ref", "--short", "-q", "HEAD")
+    expected_head = git(case.root, "rev-parse", "HEAD")
+    before = tree_snapshot(case.tasks)
+    index = (case.root / ".git/index").read_bytes()
+    context, dirty = external_review._read_only_checkout(case.root)
+    assert context.branch == expected_branch
+    assert context.head == expected_head
+    assert dirty == ()
+    assert tree_snapshot(case.tasks) == before
+    assert (case.root / ".git/index").read_bytes() == index
+
+
+def test_detached_head_preflight_is_rejected_without_task_or_index_writes(case: Case) -> None:
+    git(case.root, "checkout", "--detach", "HEAD")
+    index = (case.root / ".git/index").read_bytes()
+    error = rejected_without_writes(case)
+    assert error.code == "EXTERNAL_REVIEW_GIT_BINDING_STALE"
+    assert (case.root / ".git/index").read_bytes() == index
 
 
 def test_manual_locator_mapping_resolves_uuid_without_guessing(case: Case) -> None:
