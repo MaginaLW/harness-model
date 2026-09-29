@@ -1,5 +1,31 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-30 最新核定与实际待办
+
+本轮实际 CLI 确认 `TASK-0048` 为 `MERGED`、`Missing: none`。同仓 Windows/Linux
+接入、同 SHA 双 lane、main 采用、真实 guest 重启后业务、串行恢复、正式 V2 与
+治理关闭均已完成；见[任务 02 执行目录](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)
+和[发布关闭记录](../../.ai/tasks/TASK-0048/publication-closeout-001.md)。注册、CI 和
+关闭不重新列为待办，历史运行回执不证明当前 guest 或 runner 在线。
+
+E4.1 `TASK-0054` 已完成契约实现和本地治理验收，保存于
+`codex/e4-external-review-contract@fd560d9`，实现 subject 为 `23793f7`。
+本轮恢复该分支检出后实际 `validate` 通过，`status` 为 `APPROVED_FOR_MERGE`、
+`Missing: external_merge`，批准为 `current`、证据为 `passed`，`gate` 为 PASS。
+下方“E4 未启动”和“下一项为 E4.1”均为历史快照，不重复其准入与实现。
+
+已提交 V1 审核包记录单元 1656 passed、全量回归与覆盖率重跑各 2294 passed、
+总覆盖率 88.12%、可统计差异覆盖率 100%；本轮仅恢复检出并核对 CLI，没有重跑
+这些检查。旧忽略目录中的原始日志是否可恢复尚未确认，不从本次 CLI 结论推导
+完整原件已恢复或远端 CI 已通过。
+
+当前主线为 E4.2 的独立治理规格与设计准入：本轮在 `codex/e4-report-import`
+准备 `TASK-0055`，按[后续工作计划](../superpowers/plans/2026-09-23-e4-follow-up-work-plan.md)
+固定加载、来源/目标核对与不可变记录边界；实际实现须满足该任务的 CLI 准入。
+E4.1 推送、合并及新增外部动作另需授权。I1 其余生命周期、I2 更多目标、E5、I5
+和阶段三/四保持原条件，不自动扩仓或进入下一阶段。
+三份未跟踪用户草稿和阶段 61 的旧 index 保留；下方历史记录不改写或删除。
+
 ## 2026-09-27 dotfiles 修复线集成核定
 
 `codex/ci-regressions-e4-preflight@3b835f1` 已通过[合并提交 `68ef2ec`](https://github.com/MaginaLW/ai-agent-dotfiles/commit/68ef2ecedca3e9071178dcab8b805cecdafbba53)
