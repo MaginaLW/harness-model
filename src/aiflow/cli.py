@@ -182,10 +182,11 @@ def build_parser() -> ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the root command without exposing unfinished business subcommands."""
+    raw_arguments = list(sys.argv[1:] if argv is None else argv)
+    external_review_command = raw_arguments[:1] == ["external-review"]
     try:
         parser = build_parser()
-        raw_arguments = list(sys.argv[1:] if argv is None else argv)
-        if raw_arguments[:1] == ["external-review"]:
+        if external_review_command:
             try:
                 # argparse diagnostics can contain arbitrary supplied tokens.
                 with redirect_stderr(io.StringIO()):
@@ -436,7 +437,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(f"{arguments.task_id} {assessment.subject_commit}")
     except AiflowError as error:
-        if arguments.command == "external-review":
+        if external_review_command:
             try:
                 print(
                     json.dumps({"status": "rejected", "reason_codes": [error.code]}),

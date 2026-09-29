@@ -9,8 +9,8 @@ from typing import Any
 
 import pytest
 
-from aiflow import external_review
-from aiflow.errors import ContractError
+from aiflow import cli, external_review
+from aiflow.errors import ContractError, StorageError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SYNTHETIC_SECRET = "SYNTHETIC_UNIT_INPUT_SECRET"
@@ -242,3 +242,45 @@ def test_encoded_or_sensitive_url_boundaries_refuse_without_git(reference: str) 
     with pytest.raises(ContractError) as caught:
         external_review._https_reference(reference)
     assert_safe_error(caught.value, "EXTERNAL_REVIEW_REFERENCE_INVALID")
+
+
+@pytest.mark.parametrize("failure_stage", ["build", "parse"])
+@pytest.mark.parametrize("broken_stderr", [False, True])
+def test_cli_early_domain_errors_are_safe(
+    failure_stage: str,
+    broken_stderr: bool,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    secret_path = r"C:\synthetic\SYNTHETIC_UNIT_INPUT_SECRET\report.json"
+
+    def fail(*_args: object, **_kwargs: object) -> Any:
+        raise StorageError(secret_path, details={"secret": SYNTHETIC_SECRET})
+
+    class FailingParser:
+        parse_args = staticmethod(fail)
+
+    monkeypatch.setattr(cli, "build_parser", fail if failure_stage == "build" else FailingParser)
+    if broken_stderr:
+        original_print = print
+
+        def print_with_closed_stderr(*args: object, **kwargs: Any) -> None:
+            if kwargs.get("file") is cli.sys.stderr:
+                raise BrokenPipeError(secret_path)
+            original_print(*args, **kwargs)
+
+        monkeypatch.setattr("builtins.print", print_with_closed_stderr)
+
+    assert cli.main(["external-review", "preflight", secret_path]) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    if broken_stderr:
+        assert captured.err == ""
+    else:
+        assert json.loads(captured.err) == {
+            "status": "rejected",
+            "reason_codes": ["STORAGE_ERROR"],
+        }
+    assert secret_path not in captured.err
+    assert SYNTHETIC_SECRET not in captured.err
+    assert "Traceback" not in captured.err
