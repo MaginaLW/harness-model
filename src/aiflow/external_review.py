@@ -639,7 +639,7 @@ def _finding_reference_bindings(
         )
         referenced = _load_json_bytes(raw_context, "review-context", root)
         validate_review_record(review, referenced)
-        if referenced != context or not any(
+        if any(referenced.get(name) != value for name, value in context.items()) or not any(
             item["finding_id"] == mapping["finding_id"] for item in review["findings"]
         ):
             raise _invalid("FINDING_MISMATCH")
@@ -710,6 +710,11 @@ def _load_series_history(
             "raw_sha256": _bytes_sha256(raw),
             "record_sha256": digest,
             "previous_record_sha256": value.get("previous_record_sha256"),
+            # Archived references bind their saved target, which can precede the
+            # current context. Their bytes remain part of the drift token.
+            "finding_references": _finding_reference_bindings(
+                root, task_id, saved_envelope, saved_envelope["target_context"]
+            ),
         }
         if path.name == f"{version_key}.json":
             existing = value
