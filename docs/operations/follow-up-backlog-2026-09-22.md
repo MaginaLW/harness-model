@@ -1,5 +1,14 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-01 完整被动诊断后的待办
+
+当前候选完整 integration 私有诊断为 854 passed / 1 原 FIFO skip / 818.91 秒，
+actual exit 0；855 个 ID 逐阶段完整，新 53 项全通过，源码/旧材料/refs 未变，
+资源已交回。原 600 秒失败仍有效，Task56 未获 Gate、action005 未启动。
+现需测量具体残余成本、选择最小修订并完整原生重验；静态 Git 入口方案和
+构建选项不等于性能收益。Task55/57 与 F 进入条件保持；便携诊断为
+`integration-passive-diagnostic-007.md`，不替代 `runtime-prerequisite-failure-006.md`。
+
 ## 2026-10-01 文件身份兼容修复后的实际待办
 
 最新 TASK-0056 source `e3790a4` / frozen spec `2cefeedd` 已完成准入和最小

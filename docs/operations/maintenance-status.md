@@ -1,5 +1,16 @@
 # 维护收尾与待办
 
+## 2026-10-01 当前候选的完整被动耗时诊断
+
+固定 source `e3790a4` 的原完整 integration 私有诊断已 actual exit 0：
+854 passed / 1 原 FIFO skip / 818.91 秒，无外层超时。855 个收集 ID 逐阶段
+完整相符，新 53 项均全阶段通过；源码、旧证据、HEAD/status/common refs 未变，
+已知自有进程全部结束并交回。36 模块阶段和 818.164 秒，其中 external-review
+217.340、verify 136.797、新 fixture 55.662 秒；这些不是内部成本或根因证明。
+原 integration600 失败保持，较长诊断不替代门禁；未启动 action005/完整 V2。
+依据为 `integration-passive-diagnostic-007.md`。下一步测量具体剩余成本再决定
+最小修订；不因不同来源构建标记、Git wrapper 静态分析而宣称运行时更快。
+
 ## 2026-10-01 文件身份修复与运行时前置检查
 
 TASK-0056 已按最新冻结规格 `2cefeedd` 重新准入，REV-0006/r1、spec approval
