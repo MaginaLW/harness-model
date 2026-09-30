@@ -654,3 +654,199 @@ def test_replaced_base_has_new_owner(
     helpers.create_repository(base / "second")
     assert token.hits == 0 and not token.contains(base / "second")
     assert snapshot(previous / "b") == pristine
+
+
+def _synthetic_windows_git_pair(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[Path, Path, Path]:
+    from types import SimpleNamespace
+
+    prefix = tmp_path / "portable"
+    wrapper = prefix / "cmd/git.exe"
+    core = prefix / "mingw64/bin/git.exe"
+    template = prefix / "mingw64/share/git-core/templates"
+    wrapper.parent.mkdir(parents=True)
+    core.parent.mkdir(parents=True)
+    template.mkdir(parents=True)
+    wrapper.write_bytes(b"synthetic wrapper bytes")
+    core.write_bytes(b"synthetic core bytes")
+    # Only the fixture module sees this facade. pathlib and global os.name
+    # retain the actual host platform; no synthetic executable is launched.
+    monkeypatch.setattr(fixture, "os", SimpleNamespace(name="nt"))
+    return wrapper, core, template
+
+
+@pytest.mark.parametrize("endpoint", ["cmd", "core"])
+def test_windows_git_pair_layout_and_live_bytes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, endpoint: str
+) -> None:
+    from types import SimpleNamespace
+
+    wrapper, core, template = _synthetic_windows_git_pair(tmp_path, monkeypatch)
+    selected = wrapper if endpoint == "cmd" else core
+    assert fixture._template_for(wrapper) == template == fixture._template_for(core)
+    initial = fixture._git_fact(selected)
+    assert {Path(path) for path, _ in initial} == {wrapper, core}
+    wrapper.write_bytes(b"changed wrapper bytes")
+    wrapper_changed = fixture._git_fact(selected)
+    assert wrapper_changed != initial
+    core.write_bytes(b"changed core bytes")
+    both_changed = fixture._git_fact(selected)
+    assert both_changed != wrapper_changed
+
+    # Exercise both live mode facts without changing process umask or relying
+    # on Windows chmod to expose POSIX permission bits. This is a pure fact
+    # seam, not a qualified warm copy or an alteration of global OS semantics.
+    original_lstat = Path.lstat
+    for changed_path in (wrapper, core):
+
+        def changed_mode(path: Path, *, mode_path: Path = changed_path) -> object:
+            metadata = original_lstat(path)
+            if path == mode_path:
+                return SimpleNamespace(
+                    st_mode=metadata.st_mode ^ stat.S_IWUSR,
+                    st_file_attributes=getattr(metadata, "st_file_attributes", 0),
+                )
+            return metadata
+
+        with monkeypatch.context() as scoped:
+            scoped.setattr(Path, "lstat", changed_mode)
+            assert fixture._git_fact(selected) != both_changed
+
+
+@pytest.mark.parametrize("layout", ["wrong-basename", "ucrt64", "generic-bin"])
+def test_windows_git_pair_unknown_layout_is_ineligible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, layout: str
+) -> None:
+    wrapper, _, _ = _synthetic_windows_git_pair(tmp_path, monkeypatch)
+    prefix = wrapper.parent.parent
+    relative = {
+        "wrong-basename": "mingw64/bin/not-git.exe",
+        "ucrt64": "ucrt64/bin/git.exe",
+        "generic-bin": "bin/git.exe",
+    }[layout]
+    selected = prefix / relative
+    selected.parent.mkdir(parents=True, exist_ok=True)
+    selected.write_bytes(b"synthetic unsupported executable")
+    for operation in (fixture._template_for, fixture._git_fact):
+        with pytest.raises(fixture._Ineligible) as rejected:
+            operation(selected)
+        assert rejected.value.reason == fixture.IneligibleReason.GIT_LAYOUT
+
+
+@pytest.mark.parametrize("endpoint", ["cmd", "core"])
+def test_windows_git_pair_missing_counterpart_is_ineligible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, endpoint: str
+) -> None:
+    wrapper, core, _ = _synthetic_windows_git_pair(tmp_path, monkeypatch)
+    selected, counterpart = (wrapper, core) if endpoint == "cmd" else (core, wrapper)
+    counterpart.unlink()
+    # Preserve the existing missing ordinary file failure; optional
+    # qualification, rather than this fact reader, owns cold fallback.
+    with pytest.raises(FileNotFoundError):
+        fixture._git_fact(selected)
+
+
+def test_windows_git_pair_missing_template_is_ineligible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _, core, template = _synthetic_windows_git_pair(tmp_path, monkeypatch)
+    template.rmdir()
+    with pytest.raises(fixture._Ineligible) as rejected:
+        fixture._template_for(core)
+    assert rejected.value.reason == fixture.IneligibleReason.GIT_LAYOUT
+
+
+@pytest.mark.parametrize("unsafe_part", ["wrapper", "core-parent", "template"])
+def test_windows_git_pair_reparse_metadata_is_ineligible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unsafe_part: str
+) -> None:
+    from types import SimpleNamespace
+
+    wrapper, core, template = _synthetic_windows_git_pair(tmp_path, monkeypatch)
+    unsafe = {"wrapper": wrapper, "core-parent": core.parent, "template": template}[unsafe_part]
+    original_lstat = Path.lstat
+
+    def reparse_lstat(path: Path) -> object:
+        metadata = original_lstat(path)
+        if path == unsafe:
+            return SimpleNamespace(
+                st_mode=metadata.st_mode,
+                st_file_attributes=getattr(metadata, "st_file_attributes", 0) | 0x400,
+            )
+        return metadata
+
+    # Reach the real ordinary/reparse guard using one metadata seam. This
+    # proves the Windows flag branch, not an actual junction or full owner
+    # qualification; _standard_io correctly disallows warm copies under it.
+    monkeypatch.setattr(Path, "lstat", reparse_lstat)
+    with pytest.raises(fixture._Ineligible):
+        if unsafe_part == "template":
+            fixture._template_for(core)
+        else:
+            fixture._git_fact(core)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows full mingw64 endpoint qualification")
+def test_real_mingw64_endpoint_qualifies_and_warms(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    locator = shutil.which("git")
+    assert locator is not None
+    actual = Path(locator).absolute()
+    if actual.name.lower() == "git.exe" and actual.parent.name.lower() == "cmd":
+        prefix = actual.parent.parent
+    elif (
+        actual.name.lower() == "git.exe"
+        and actual.parent.name.lower() == "bin"
+        and actual.parent.parent.name.lower() == "mingw64"
+    ):
+        prefix = actual.parents[2]
+    else:
+        # The existing seed proves original-builder success and task-free
+        # initialization before its five explicit portable reason skips.
+        seed(tmp_path, owner)
+        pytest.fail("An unsupported Windows endpoint unexpectedly qualified")
+
+    wrapper = prefix / "cmd/git.exe"
+    core = prefix / "mingw64/bin/git.exe"
+    assert wrapper.is_file() and core.is_file()
+    original_path = os.environ.get("PATH", "")
+    monkeypatch.setenv("PATH", str(core.parent) + os.pathsep + original_path)
+    assert Path(shutil.which("git") or "").absolute() == core
+    original = helpers.create_repository(tmp_path / "seed")
+    assert not (original / ".ai/tasks").exists()
+    assert helpers.run_git(original, "log", "-1", "--format=%s") == "initial"
+    assert not owner.disabled and owner.cold == 1 and owner.hits == 0
+    assert owner.snapshot is not None and owner.qualification is not None
+    qualification = owner.qualification
+    assert qualification.git == core
+    assert qualification.template == prefix / "mingw64/share/git-core/templates"
+    assert {Path(path) for path, _ in fixture._git_fact(core)} == {wrapper, core}
+
+    # The actual direct Git reports system attributes; no config/attributes
+    # check or inactive proof is replaced. Present ordinary standard files
+    # must remain in the live file binding and absent ones in absence facts.
+    for attribute in fixture._var_paths(helpers.run_git, original, "GIT_ATTR_SYSTEM"):
+        assert attribute.absolute() in {
+            prefix / "etc/gitattributes",
+            prefix / "mingw64/etc/gitattributes",
+        }
+        if attribute.exists():
+            assert attribute in qualification.files
+        else:
+            assert attribute in qualification.attributes
+
+    pristine = snapshot(owner.snapshot)
+    copied = helpers.create_repository(tmp_path / "direct-copy")
+    assert owner.hits == 1 and owner.cold == 1 and not owner.disabled
+    assert not (copied / ".ai/tasks").exists()
+    assert snapshot(copied) == pristine == snapshot(original)
+    assert snapshot(owner.snapshot) == pristine
+    for path in (path for path in copied.rglob("*") if path.is_file()):
+        relative = path.relative_to(copied)
+        entities = [path, owner.snapshot / relative, original / relative]
+        identities = {(entity.stat().st_dev, entity.stat().st_ino) for entity in entities}
+        assert len(identities) == 3
+        assert all(entity.stat().st_nlink == 1 for entity in entities)
+    assert not (copied / ".git/objects/info/alternates").exists()

@@ -144,8 +144,14 @@ def _standard_io() -> bool:
 
 def _template_for(git: Path) -> Path:
     # Only proven conventional layouts qualify; all other installations go cold.
-    if os.name == "nt" and git.name.lower() == "git.exe" and git.parent.name.lower() == "cmd":
-        template = git.parent.parent / "mingw64" / "share" / "git-core" / "templates"
+    if os.name == "nt" and git.name.lower() == "git.exe":
+        if git.parent.name.lower() == "cmd":
+            prefix = git.parent.parent
+        elif git.parent.name.lower() == "bin" and git.parent.parent.name.lower() == "mingw64":
+            prefix = git.parents[2]
+        else:
+            raise _Ineligible(IneligibleReason.GIT_LAYOUT)
+        template = prefix / "mingw64" / "share" / "git-core" / "templates"
     elif sys.platform.startswith("linux") and git == Path("/usr/bin/git"):
         template = Path("/usr/share/git-core/templates")
     else:
@@ -160,8 +166,16 @@ def _template_for(git: Path) -> Path:
 
 def _git_fact(git: Path) -> object:
     files = [git]
-    if os.name == "nt" and git.parent.name.lower() == "cmd":
-        files.append(git.parent.parent / "mingw64/bin/git.exe")
+    if os.name == "nt":
+        if git.name.lower() != "git.exe":
+            raise _Ineligible(IneligibleReason.GIT_LAYOUT)
+        if git.parent.name.lower() == "cmd":
+            prefix = git.parent.parent
+        elif git.parent.name.lower() == "bin" and git.parent.parent.name.lower() == "mingw64":
+            prefix = git.parents[2]
+        else:
+            raise _Ineligible(IneligibleReason.GIT_LAYOUT)
+        files = list(dict.fromkeys((git, prefix / "cmd/git.exe", prefix / "mingw64/bin/git.exe")))
     if any(not stat.S_ISREG(_ordinary(path).st_mode) for path in files):
         raise _Ineligible()
     return [[str(path), _path_fact(path)] for path in files]
@@ -313,6 +327,7 @@ def _qualify(
     # Check ordinary spelling before resolve: a symlink executable must go cold.
     _ordinary(git)
     template = _template_for(git)
+    windows_prefix = template.parents[3] if os.name == "nt" else None
     _template_fact(template, repository)
     _no_attributes(repository)
     if any(not path.name.endswith(".sample") for path in (repository / ".git/hooks").iterdir()):
@@ -348,11 +363,11 @@ def _qualify(
             absent_system.append(attribute)
         elif (
             os.name == "nt"
-            and git.parent.name.lower() == "cmd"
+            and windows_prefix is not None
             and attribute.absolute()
             in {
-                git.parent.parent / "etc/gitattributes",
-                git.parent.parent / "mingw64/etc/gitattributes",
+                windows_prefix / "etc/gitattributes",
+                windows_prefix / "mingw64/etc/gitattributes",
             }
             and fact[0] == "file"
         ):
