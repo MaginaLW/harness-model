@@ -1,5 +1,16 @@
 # 维护收尾与待办
 
+## 2026-10-01 复制对照完成，准备有界并发设计
+
+10组/20次isolated复制实际exit0，101文件逐份bytes/mode/mtime及实体隔离通过。
+原median47.12235ms、私有4线程34.77265ms，10组均快；known资源已交回。
+真实taskkill helper exit128保留，不称清理成功；输入前后相等，历史未知仍unknown。
+便携记录为`.ai/tasks/TASK-0056/parallel-copy-cost-diagnostic-016.md`。
+2名sub-agent并行提出实现建议和独立预审，root准备新的spec_changed准入。
+拟只优化当前owner的warm snapshot复制：按原DFS批次drain后递归及copystat，
+保留DirEntry、失败聚合、实际partial及无retry；原型尚非获准实现。
+候选实际完整warm成本与原600仍待验证，原门禁及55、发布、F条件保持。
+
 ## 2026-10-01 读取对照无一致改善，转测复制成本
 
 20原函数/20私有binary调用实际exit0，输入相等、known资源已交回。
