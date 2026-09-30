@@ -1,5 +1,18 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-30 夹具候选的原期限检查后待办
+
+源码 `097f9af` 已固定，完整守卫短测实际有二十次 warm hit，但独立原
+integration 仍在 600156ms 超时。pytest exit unknown、driver exit 1，无
+terminal summary；原 skip 身份及最终 53 项全集完成均 unknown。源码/HEAD
+与旧证据未变，资源已交回。该检查不是第五轮 V2；action005 尚未创建。
+
+当前先核查全套真实 session owner 使用和剩余成本，并只准备隔离 3.13 比较；
+不机械重试完整 V2。正式基线仍 3.11，原断言、选择器、期限、MINENV 与全部
+门禁保持；任何新修订先按原生重新准入。TASK-0056 Review/finalize/批准/Gate
+→ TASK-0055 实际依赖接入和完整 Gate → TASK-0057 required CI/已授权发布
+仍是串行依赖。匹配的真实报告 F 仍未在已搜索范围找到。
+
 ## 2026-09-30 夹具修订准入后的实际待办
 
 完整 profile 分析和独立原环境初始仓库短测已结束；短测退出 0、无超时，

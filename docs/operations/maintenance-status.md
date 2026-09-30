@@ -1,5 +1,22 @@
 # 维护收尾与待办
 
+## 2026-09-30 固定夹具候选的原集成期限检查
+
+初始夹具已实现并固定源码 `097f9af92a4c9bbad35378f34b3d5d48dd143b01`；
+原测试 AST、原 builder 主体、期限与断言均保持。完整守卫短测的二十次 warm
+均值为 0.113194 秒，原 builder 为 0.373655 秒，但该收益没有证明全集通过。
+独立原 integration 检查 `run-20260930T144431946840Z` 实际超时：600156ms、
+RUNNER_TIMEOUT、pytest exit unknown，driver exit 1。源码/HEAD/旧证据前后
+相同，自有进程已退出并交回。partial 有 783 dot 和 1 skip，无 summary，
+不能确认 skip 身份或最终 53 项全部完成。此为 prerequisite，不是第五轮 V2。
+
+未创建或消耗 action005、未启动完整 V2、未进行正式实现 Review/finalize/代码
+批准或 Gate PASS。TASK-0056 仍 IMPLEMENTING，旧四轮 FAILED 保留。当前
+并行 2 名 sub-agent：一个核查整套真实 owner 使用和剩余成本，另一个只准备
+隔离 Python 3.13 比较；后者不是原生运行时切换或验证通过。正式基线仍 3.11，
+范围或运行时变化仍须重新准入。TASK-0055/0057 与 F 的进入条件保持。
+便携依据为源分支 `fixture-integration-prerequisite-failure-005.md`。
+
 ## 2026-09-30 初始测试仓库夹具修订准入
 
 完整 integration profile 的函数分析已完成。Schema 文件实际读取与检查保持
