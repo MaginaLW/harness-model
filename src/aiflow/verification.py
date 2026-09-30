@@ -7,13 +7,18 @@ import shutil
 import sys
 import tempfile
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from importlib.util import find_spec
 from pathlib import Path
 from typing import Literal
 
 from aiflow.errors import ContractError
 from aiflow.policy import PolicyBundle
+from aiflow.verification_temporary import (
+    PytestTemporaryLayout,
+    plan_pytest_temporary,
+    validate_pytest_temp_root,
+)
 
 V0_CHECK_IDS = ("contract", "scope", "ruff_check", "ruff_format_check", "smoke")
 V1_EXTRA_CHECK_IDS = ("unit_tests", "regression_tests", "mypy", "coverage_xml", "diff_coverage")
@@ -31,6 +36,9 @@ ALLOWED_VARIABLES = frozenset(
 ALLOWED_PARSERS = frozenset({"exit_zero", "pytest", "coverage_xml", "diff_cover"})
 _VARIABLE_PATTERN = re.compile(r"\{([^{}]+)\}")
 _RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+PYTEST_CHECK_IDS = frozenset(
+    {"unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"}
+)
 
 
 @dataclass(frozen=True)
@@ -44,6 +52,7 @@ class VerificationContext:
     python: str
     run_id: str
     ci_run_dir: Path | None = None
+    pytest_temp_root: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -85,6 +94,7 @@ class VerificationPlan:
     blocking_reasons: tuple[str, ...]
     unverified_check_ids: tuple[str, ...]
     comparison_subject: str
+    pytest_temporary: PytestTemporaryLayout | None = None
 
     @property
     def valid(self) -> bool:
@@ -466,6 +476,40 @@ def parse_verification_plan(
             blocking.append(f"VERIFICATION_TOOL_MISSING:{check.check_id}")
         else:
             unverified.append(check.check_id)
+    temporary: PytestTemporaryLayout | None = None
+    if context.pytest_temp_root is not None:
+        parent = validate_pytest_temp_root(context.pytest_temp_root)
+        pytest_executions = tuple(
+            item for item in executions if set(item.check_ids) & PYTEST_CHECK_IDS
+        )
+        if pytest_executions:
+            if any(
+                item.argv[1:3] != ("-m", "pytest")
+                or any(arg.startswith("--basetemp") for arg in item.argv)
+                or not set(item.check_ids) <= PYTEST_CHECK_IDS
+                for item in pytest_executions
+            ):
+                raise ContractError(
+                    "Pytest temporary execution is invalid", code="VERIFICATION_COMMAND_INVALID"
+                )
+            temporary = plan_pytest_temporary(
+                parent,
+                context.task_id,
+                context.run_id,
+                tuple(item.execution_id for item in pytest_executions),
+            )
+            argv_by_check: dict[str, tuple[str, ...]] = {}
+            updated: list[VerificationExecution] = []
+            for item in executions:
+                leaf = temporary.leaves.get(item.execution_id)
+                if leaf is not None:
+                    item = replace(item, argv=(*item.argv, f"--basetemp={leaf.as_posix()}"))
+                    argv_by_check.update(dict.fromkeys(item.check_ids, item.argv))
+                updated.append(item)
+            executions = tuple(updated)
+            checks = tuple(
+                replace(item, argv=argv_by_check.get(item.check_id, item.argv)) for item in checks
+            )
     return VerificationPlan(
         level,
         run_dir,
@@ -474,6 +518,7 @@ def parse_verification_plan(
         tuple(sorted(blocking)),
         tuple(sorted(unverified)),
         context.subject_commit,
+        temporary,
     )
 
 

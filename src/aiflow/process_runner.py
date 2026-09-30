@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import re
 import shutil
@@ -17,10 +19,12 @@ from time import monotonic
 from aiflow.errors import ContractError
 from aiflow.redaction import redact_command_summary, redact_text
 from aiflow.verification import (
+    PYTEST_CHECK_IDS,
     VerificationCheck,
     VerificationExecution,
     parse_check_result,
 )
+from aiflow.verification_temporary import PytestTemporaryLayout, validate_pytest_temporary
 
 _CHECK_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
 
@@ -144,6 +148,7 @@ def run_execution(
     sequence: int,
     sensitive_values: Sequence[str] = (),
     extra_redaction_patterns: Sequence[str] = (),
+    pytest_temporary: PytestTemporaryLayout | None = None,
 ) -> tuple[ProcessResult, ...]:
     """Execute a deduplicated argv once and return one parsed result per evidence category."""
     if not execution.check_ids or len(set(execution.check_ids)) != len(execution.check_ids):
@@ -170,6 +175,12 @@ def run_execution(
     real_cwd = execution.cwd.resolve()
     if not cwd_root.is_dir() or not real_cwd.is_dir() or not _within(real_cwd, cwd_root):
         raise ContractError("Verification working directory is invalid", code="RUNNER_CWD_INVALID")
+    if pytest_temporary is not None and set(execution.check_ids) & PYTEST_CHECK_IDS:
+        if not set(execution.check_ids) <= PYTEST_CHECK_IDS:
+            raise ContractError(
+                "Pytest execution categories are invalid", code="RUNNER_EXECUTION_INVALID"
+            )
+        validate_pytest_temporary(pytest_temporary, execution.execution_id, execution.argv)
     directory = _validate_run_dir(run_dir, allowed_run_root)
     environment = _environment(selected[0], directory)
     if any(check.environment != selected[0].environment for check in selected):
@@ -254,6 +265,9 @@ def run_execution(
     summary = redact_command_summary(
         execution.argv, sensitive_values=sensitive_values, extra_patterns=extra_redaction_patterns
     )
+    if pytest_temporary is not None and set(execution.check_ids) & PYTEST_CHECK_IDS:
+        encoded_argv = json.dumps(argv, ensure_ascii=True, separators=(",", ":")).encode("utf-8")
+        summary += f" [pytest-argv-sha256:{hashlib.sha256(encoded_argv).hexdigest()}]"
     for check in selected:
         parsed = (
             parse_check_result(

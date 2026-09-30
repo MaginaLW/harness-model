@@ -166,6 +166,11 @@ def build_parser() -> ArgumentParser:
     verify.add_argument("--ci", action="store_true")
     verify.add_argument("--ci-run-dir", type=Path)
     verify.add_argument("--output", type=Path)
+    verify.add_argument(
+        "--pytest-temp-root",
+        type=Path,
+        help="existing ordinary local directory outside Git repositories for pytest fixtures",
+    )
     gate = subparsers.add_parser("gate", help="evaluate the read-only merge gate")
     gate.add_argument("task_id")
     gate.add_argument("--evidence", type=Path)
@@ -415,6 +420,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 finalize=arguments.finalize,
                 abandon=arguments.abandon,
                 reason=arguments.reason,
+                pytest_temp_root=getattr(arguments, "pytest_temp_root", None),
             )
             print(
                 f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}"
