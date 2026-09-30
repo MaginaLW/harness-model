@@ -26,7 +26,7 @@ allowed_scope:
 base_commit: ef92b795da729566870ff4878f100a4ffe319db5
 branch: codex/e4-verification-control
 created_at: '2026-09-30T02:11:18Z'
-current_state: ESCALATED
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -166,13 +166,13 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 2cefeedd6fb99f26b0e7562ff4fc57f5b1beadab0b397802455b04af14f673a1
+frozen_spec_sha256: b589852985fea26583efe09009aefe710465625ffac14609213c5d1caf3c1d70
 goal: Add explicit run-owned external pytest temporary roots for governed verification
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-09-30T15:32:21Z'
-subject_commit: e3790a43bf51b976816a8eaf8770789c7f90a1f2
+spec_frozen_at: '2026-09-30T17:59:58Z'
+subject_commit: 87f4c0495e4e1d3697dcadc8437b5abaf42886d6
 task_id: TASK-0056
-updated_at: '2026-09-30T17:49:05Z'
+updated_at: '2026-09-30T17:59:58Z'
 worktree_dirty: false
 worktree_dirty_paths: []
