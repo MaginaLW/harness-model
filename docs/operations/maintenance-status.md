@@ -1,5 +1,21 @@
 # 维护收尾与待办
 
+## 2026-10-01 直接入口前置结果与原期限失败
+
+固定 source `98b5db7` / own HEAD `d0199e4` / frozen spec `b5898529…` 的独立
+前置实际完成：新增窄测试12/12、完整fixture65/65（零跳过）、原external-review
+187 passed/1 原POSIX FIFO跳过，分别1.82s/47.38s/142.17s，全部实际exit0。
+原完整integration实际collect867，在原EXEC-012/600秒期限600183ms超时；
+没有summary或原pytest退出码，不把91%部分进度记为完整通过。原件和known-owned
+终态证明已保留，source/原AST/旧证据/refs/index/topology前后相等，资源已交回。
+TASK-0056仍IMPLEMENTING；action005与第五完整V2未启动，313正式选择条件仍失败。
+便携结果为源分支 `.ai/tasks/TASK-0056/direct-endpoint-prerequisites-009.md`，
+记录提交 `3b54586`。不重跑相同失败候选、不调整预算或质量门禁。
+接下来仅对已安装锁定314.7与当前已修复源做原external188私有诊断对照；当前
+规格允许非formal诊断，正式314需新规格准入、设计Review及原完整前置，不能凭
+旧未修复失败时长推断收益。两名sub-agent并行负责独立诊断与只读runtime/发布
+准备，测试资源串行。TASK55/57、CI311和真实F匹配原件的进入条件均保持。
+
 ## 2026-10-01 直接入口规格准入已完成
 
 TASK-0056 当前为 IMPLEMENTING。冻结规格 `b5898529…` 已完成真实独立设计
