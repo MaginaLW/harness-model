@@ -1,5 +1,55 @@
 # 维护收尾与待办
 
+## 2026-09-30 第四轮终态与完整集成诊断
+
+私有完整 integration profile 已实际完成：802 项中 801 passed / 1 原 FIFO skip，
+851.34 秒、pytest exit 0、外层无超时；固定 fcecddd 与源码 SHA 前后相同，
+自有进程已退出并交回。首次私有 wrapper 因启动 sys.path 差异出现 collection
+失败，原件保留；仅恢复原模块启动的 CWD 路径语义后完成上述第二次采集。
+带 profiler 的诊断时间不视为原 600 秒检查通过；函数成本分析仍待完成。
+
+TASK-0056 完整 `run-20260930T112131331525Z` 于 12:04:40Z 实际结束为
+FAILED，14 项 required checks 中 13 passed；唯一失败是 integration 原
+600 秒期限超时，actual exit null / timed_out true / 600140ms。Native Gate
+实际 exit 1、REJECT。失败账本提交 `fcecddda33b8ebb7e24ef7d782f14d9c2aa2de48`；
+源码 subject 仍为 `38648440f5a862edd5a7dccfb55a60aae4f6757e`。
+
+完整 regression 为 2707 passed / 1 既有 FIFO skip、857.61 秒；coverage
+同样完整通过，总覆盖率 88.9574%、diff coverage 97%；unit 1869 passed、
+acceptance 9 passed。五项 mutation baseline 0 / mutant 1 / killed，无超时，
+`main_tree_unchanged` true；这些通过不能替代 integration 或正式 finalize。
+原证据/归档 SHA `4d2c8f05e9fc4b73ea61a8836b11b8069cdd34a4b7acf573faf513a08d2848bc`。
+24 份非 null 引用、snapshot/context、旧证据和回执均经独立核验；自有进程
+已退出并交回资源。action004 已消耗，不复用；未进行本轮实现 Review/finalize/code approval。
+
+partial integration 仅有 745 个结果标记，无 F/E 或最终 summary，末尾位置
+不证明单例或模块根因。下一阶段由 1 名 sub-agent 测量固定源码的完整原
+integration selector，另一名只读研究独立初始 fixture 基线；主 agent 维护状态。
+较长私有采集窗口仅为诊断，原 Policy 600 秒、所有阈值、选择器和 MINENV
+不变。诊断→修复准入/实现→fresh action 与完整 V2→实际 Gate 串行。
+TASK-0055 准入、TASK-0057 发布和条件 F 均未越过各自进入条件。
+
+## 2026-09-30 11:21Z 第四轮完整 V2 启动时记录
+
+TASK-0056 纯 YAML 解码复用已完成独立设计 Review、原生 spec approval/begin，
+生产和安全测试分别提交。固定源码 subject 为
+`38648440f5a862edd5a7dccfb55a60aae4f6757e`；准入 HEAD
+`36efe4cc7cc85ccd368c2df065cd4e99f0963b9f` 仅追加本 task 账本。
+70 项相关 unit 测试通过，Ruff、format、44 源码 mypy、validate 和 whitespace 通过。
+
+完整原 external-review 模块对照为 187 passed / 1 既有 FIFO skip，187.05 秒、
+退出 0。此前相同方法为 200.15 秒；独立的单次非同时观察少 13.10 秒，不能认定
+整体因果或预测 V2。safe YAML 解析次数从 3586 降到 87，698 次 Policy 加载及
+9872 次契约/registry 检查保持；Git 等成本存在变化与累积重叠。
+
+fresh action004 已实际批准；最终独立 preflight 返回 ready，完整默认 14 项
+原生 V2 于 `2026-09-30T11:21:30Z` 启动，run
+`run-20260930T112131331525Z`。原 3.11、MINENV、预算、阈值和五项 mutation 不变。
+启动时仍在运行，无完整结论、正式实现 Review/finalize 或 Gate PASS；前三轮失败
+及已消费动作保留。依据为源分支 `verification-retry-003.md`。
+源码/账本冻结，独立 worker 负责完整验证；另一 sub-agent 只读准备 TASK-0055
+后续准入。F 匹配原件在限定搜索中未找到，后续发布仍依实际源 Gate 和 required CI。
+
 ## 2026-09-30 诊断完成与解析复用重新准入
 
 第三轮完整 V2 的 FAILED 和两项原预算超时保留。独立 Python 3.11 完整

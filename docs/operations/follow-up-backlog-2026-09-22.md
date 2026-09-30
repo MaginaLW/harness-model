@@ -1,5 +1,36 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-30 第四轮 FAILED 后的实际待办
+
+完整私有 integration profile 已完成 801 passed / 1 原 skip，851.34 秒、exit 0，
+固定源码前后不变。当前分析函数成本，再选修复；该较长诊断不替代原生预算检查。
+
+TASK-0056 run004 终态为 13 PASS / 1 FAIL；唯一 integration 在原 600 秒
+期限超时、exit null、600140ms。原生 Gate 1、REJECT。完整 regression
+2707 passed / 1 skip、857.61 秒，完整覆盖率 88.9574%、diff 97%，五项
+mutation 全 killed；局部通过不补齐失败必需检查。失败记录及 action004
+消费回执保留，源码 subject `38648440f5a862edd5a7dccfb55a60aae4f6757e` 不变。
+
+当前先量出完整原 integration 的 setup/call/teardown 成本；两个 sub-agent
+分别负责实际测量和只读 fixture 方案，主 agent 整理可追溯状态。不得根据
+末尾进度判根因，不缓存 production freshness/Git/Schema 验证结论，不缩减
+选择器或增加 Policy 预算。修复后需新批准回执及全部原生 V2/Gate。
+TASK-0055 依赖接入与两项候选修正仍待 TASK-0056 实际 Gate；随后才进行
+TASK-0057 固定候选 CI/已授权发布。F 仍缺本地搜索范围内匹配的真实原件。
+
+## 2026-09-30 11:21Z 第四轮启动时待办记录
+
+纯解码复用已完成准入、实现和分阶段提交；源码 subject `38648440f5a862edd5a7dccfb55a60aae4f6757e`。
+70 项相关 unit 测试通过；完整原模块对照为 187 passed / 1 既有 FIFO skip，
+187.05 秒，退出 0。safe YAML 调用从 3586 降到 87，契约和 Git 调用数保持。
+这是单次非同时的诊断观察，不替代完整 V2 或预测原期限检查通过。
+
+fresh action004 和独立最终 preflight 完成，默认全部原生 V2 已启动：
+`run-20260930T112131331525Z`。启动时等待实际完整结果，再完成独立 Review、
+finalize、代码批准/Gate；旧三轮 FAILED 和回执保留。TASK-0055 依赖接入及
+候选修正仅只读准备，实际 TASK-0056 Gate 后才重新准入。F 原件条件仍未满足，
+最终 TASK-0057 发布仍须固定候选 required CI 与独立远端核验。
+
 ## 2026-09-30 诊断后的实际待办
 
 完整 Python 3.11 external-review 诊断结束为 187 passed / 1 既有 FIFO skip，

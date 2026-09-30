@@ -1,5 +1,46 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-09-30 第四轮失败后的集成测量阶段
+
+第二次私有采集恢复原模块启动路径语义，完整原 802 integration cases 结束为
+801 passed / 1 skip，851.34 秒、actual exit 0/no timeout；源码前后相同，
+资源已交回。首次 collection 失败保留。函数成本结论→具体方案→准入/实现
+仍待推进；此诊断成功不改变原 600 秒正式检查 FAILED 的结论。
+
+run004 完整终态 FAILED13/14；integration 原 600 秒超时是唯一失败。
+完整 regression 2707 passed / 1 skip、857.61 秒，coverage 88.9574%、
+diff 97%，五项 mutation 均 killed；Native Gate 实际 REJECT，不进行正式
+implementation Review/finalize。失败账本提交 fcecddd，源码 subject 3864844
+保持；原日志、归档、三份旧回执及新 consumed action004 追加保留。
+
+本阶段并行 2 名 sub-agent：一名独占完整原 integration 私有 profile 与
+durations/只读 phase hook，记录真实开始、退出、raw 和资源交回；另一名
+只读研究共享初始 fixture 的隔离、当前输入可见性与 Git 语义。主 agent
+维护状态文档，不并发额外测试或改变固定源码/refs。私有较长采集窗口用于
+获得完整分布，不能称作通过正式 600 秒检查。所有选择器、预算、阈值和
+MINENV 保持。测量结论→必要重新准入→修复实现→固定候选→新完整 V2→
+Review/finalize/批准/Gate 串行；方案没有实际测量依据前不实施优化。
+
+TASK-0055 原 FAILED/spec/source 未变，依赖与 transport/Windows metadata
+方案仅准备；TASK-0057 和真实输入 F 仍按既有条件进入。早先 E4.1 收尾
+fe599c3 祖先只在文档分支，未来发布必须保留该线及实际 gated source 的完整关系。
+
+## 2026-09-30 11:21Z 第四轮启动时计划记录
+
+Task56 实际独立设计 Review/spec approval/begin 后，纯解码生产实现与安全
+测试分别提交，固定源码 subject `38648440f5a862edd5a7dccfb55a60aae4f6757e`。
+相关 unit 为 70 passed；完整原模块 profile 为 187 passed / 1 既有 FIFO skip、
+187.05 秒。重复 safe YAML 调用减少、契约与 Git 调用数不变；整体时间为单次
+非同时观察，不能据此认定原超时根因或完整 V2 通过。
+
+fresh action004/独立最终准入完成，完整默认 14 项 V2 实际于 11:21:30Z 启动，
+run `run-20260930T112131331525Z`。本阶段并行 2 名 sub-agent：未参与实现者
+执行独立完整原生验证，另一名只读准备 TASK-0055 依赖和候选边界；主 agent
+维护便携状态与统一审查材料。仅一组资源密集测试，source/ref/ledger 冻结。
+预算、阈值、原 3.11 和 MINENV 保持。实际完整结果→Review/finalize/批准/Gate
+串行，之后 TASK-0055 重新准入与完整 Gate，再 TASK-0057 required CI/发布。
+F 匹配原件的输入条件保留；旧失败、规格与回执完整保留。
+
 ## 2026-09-30 解析复用准入与报告搜索核定
 
 完整 3.11 模块诊断实际完成（187 passed / 1 既有 FIFO skip，200.15 秒），
