@@ -56,5 +56,21 @@
     "spec_sha256": "0a2f502b9310411d71e6502e871a00e5d1cf600dca7b4ebcbb27f414a4ff1751",
     "subject_commit": "a8936669e67f1008269e4fb17800c27c26aef4c0",
     "task_id": "TASK-0056"
+  },
+  {
+    "action_sha256": "72cd2c312ce3a3d1b2939fd9cf3d50f9c0d3dec933c5e716433c6da09abc07e8",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-30T08:38:04Z",
+    "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-30T12:27:59Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Record the owner direct goal authorization and sufficient approvals for current TODO completion. Bind fresh single-use action003 to committed diagnosed fixture candidate 4f0288b after independent actual core subject, scope, spec, classification, Policy, runtime and preserved-receipt checks; the independent verifier must complete final native plan and approval metadata preflight before execution. All prior failures and quality gates remain intact.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "0a2f502b9310411d71e6502e871a00e5d1cf600dca7b4ebcbb27f414a4ff1751",
+    "subject_commit": "4f0288b4afb608412f984fa9078b7b0692fa0e6f",
+    "task_id": "TASK-0056"
   }
 ]
