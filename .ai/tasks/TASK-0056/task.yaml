@@ -26,7 +26,7 @@ allowed_scope:
 base_commit: ef92b795da729566870ff4878f100a4ffe319db5
 branch: codex/e4-verification-control
 created_at: '2026-09-30T02:11:18Z'
-current_state: IMPLEMENTING
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -91,6 +91,11 @@ decision_units:
     actually passed at 818.91s. Current forty-call paired endpoint observation motivates
     only a narrow direct full-distribution candidate. Python 3.13 raw function timing
     anomalies remain unknown and do not support production optimization.
+  - The untouched direct candidate still exceeded integration600; a private complete
+    durations run passed866 with one original skip at639.96s. Ten isolated success
+    copy pairs motivate a bounded ordered warm-copy design, not fullwarm or native
+    PASS. Added eligibility reads and parallel abort/audit timing differences are
+    explicit in the new specification; old failures remain immutable.
   permission_requirements:
   - action_approval
   planned_actions:
@@ -119,6 +124,12 @@ decision_units:
     guard. Safety fixture/test changes are a separate task-free unit. Runtime computed
     PATH changes honestly; production environment algorithm and Git context/transport
     are untouched.
+  - Use bounded four-worker consecutive-file batches only for the current qualified
+    owner warm snapshot. Preserve actual DirEntry and DFS errors, drain before
+    recursion/directory metadata and on every abort, retain actual partials without
+    retry, and keep the original serial path before copying for unsupported inputs
+    or known custom bindings. This safety fixture implementation is a separate
+    task-free unit; no production or Policy behavior changes are added.
   protections:
     dry_run: false
     verified_backup: false
@@ -154,6 +165,11 @@ decision_units:
     modules and full unchanged integration600 under the newly bound actual environment
     before a fresh native V2. Preserve CI Python 3.11, all fourteen checks/five mutations,
     original deadlines/selectors/assertions, thresholds and formal independent reviews/Gate.
+  - Verify readonly directory metadata, physical independence, pre-copy eligibility,
+    OS/shutil aggregation and deterministic abort priority, actual thread drain and
+    retained partials. Measure the actual full warm implementation including all
+    eligibility costs and unchanged guards before original fixture/external-review
+    and integration600 prerequisites; preserve all65 existing fixture cases/ASTs.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
@@ -173,6 +189,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-30T17:59:58Z'
 subject_commit: 98b5db7c7643f579619fcc00703e3a5f9044f1b3
 task_id: TASK-0056
-updated_at: '2026-09-30T18:46:36Z'
+updated_at: '2026-09-30T23:12:09Z'
 worktree_dirty: false
 worktree_dirty_paths: []
