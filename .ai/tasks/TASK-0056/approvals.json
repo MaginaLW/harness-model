@@ -140,5 +140,18 @@
     "spec_sha256": "b589852985fea26583efe09009aefe710465625ffac14609213c5d1caf3c1d70",
     "subject_commit": "87f4c0495e4e1d3697dcadc8437b5abaf42886d6",
     "task_id": "TASK-0056"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-30T23:30:10Z",
+    "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Direct owner instructions authorize completion of current TODO tasks with full permissions and approvals, including push and merge. Record that delegated authorization for frozen992b927ce833a8fa9876c7e278d024eca7903763621ea84391c2ad4c09f6916c after actual independent REV0008: bounded ordered warm-snapshot copying, explicit extra qualification/audit and same-batch partial semantics, all live guards and original prerequisites/deadlines/quality gates. Rule8 safe work is separately committed; publication still requires its separate exact action binding from the existing authorization.",
+    "schema_version": "1.0",
+    "spec_sha256": "992b927ce833a8fa9876c7e278d024eca7903763621ea84391c2ad4c09f6916c",
+    "subject_commit": "f7d598fca29b5fae710e9b8b641ed044f4923107",
+    "task_id": "TASK-0056"
   }
 ]
