@@ -1,5 +1,32 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-30 E4.2 第五轮原生 V2 后的实际待办
+
+E4.2 当前实现已在 `codex/e4-report-import`，`TASK-0055` 固定源码 subject 为
+`eb4c49a4ff77ca07f210fceae707495c8dece8be`，验证准入 HEAD 为
+`12b8e76e195e6f13772d3d692b80fca06422d31f`。第五轮完整原生 V2 已结束为
+**FAILED**，14 项必需检查中 9 项通过，当前待办为完成失败定位与完整必需验证。
+
+unit、regression、coverage XML、integration 分别实际超时 300406、900203、
+1200328、600172 毫秒，四项 `exit_code` 均为 `null`。diff coverage 因缺少
+coverage XML 退出 1；总覆盖率及差异覆盖率为 `unknown`。9 项 acceptance 用例
+通过、5 项 targeted mutations 全部 killed，均不能代替完整 V2 的通过结论。
+unit 部分日志的两项失败在限定诊断中 2 passed、12.64 秒、退出 0，未复现原失败；
+原因仍为 `unknown`，不以限定诊断注销原失败或补作正式通过证据。
+
+源码及任务账本保留在既有忽略目录 `.claude/worktrees/e4-verification-disk`。
+原始文档检出没有 `TASK-0055` 账本；失败摘要提交后，便携读取入口为：
+
+```text
+git show codex/e4-report-import:.ai/tasks/TASK-0055/verification-failure-005.md
+```
+
+所有者的推送、合并授权已给出且仍有效，动作尚未执行。失败的 V2 阻止发布；后续
+依次完成完整验证、匹配的独立实现审查与实际 Gate，不重复请求动作授权，也不提前
+请求代码批准。不降低 Policy 预算、质量阈值或检查范围，原失败原因仍待定位。
+E4.3/E4.4、provider、I1 其余生命周期、I2 更多目标、E5、I5 和阶段三/四
+保持原条件；三份用户草稿、阶段 61 旧 index 及下方所有历史窗口保持原样。
+
 ## 2026-09-30 最新核定与实际待办
 
 本轮实际 CLI 确认 `TASK-0048` 为 `MERGED`、`Missing: none`。同仓 Windows/Linux
