@@ -12,7 +12,7 @@ allowed_scope:
 base_commit: ef92b795da729566870ff4878f100a4ffe319db5
 branch: codex/e4-verification-control
 created_at: '2026-09-30T02:11:18Z'
-current_state: IMPLEMENTING
+current_state: FAILED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -88,8 +88,8 @@ goal: Add explicit run-owned external pytest temporary roots for governed verifi
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-09-30T03:06:28Z'
-subject_commit: ef92b795da729566870ff4878f100a4ffe319db5
+subject_commit: 659f61cb4245112d75b119b103821bb06bae69ce
 task_id: TASK-0056
-updated_at: '2026-09-30T03:12:38Z'
+updated_at: '2026-09-30T05:24:13Z'
 worktree_dirty: false
 worktree_dirty_paths: []

@@ -11,5 +11,21 @@
     "spec_sha256": "ce99472dd171f31697288d2153e12865c5c1a111a033f5135d4333d0462adddf",
     "subject_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
     "task_id": "TASK-0056"
+  },
+  {
+    "action_sha256": "7c185e24995f728cb55fd48ccee2d60757a6318f35730e19c589e56483d25f33",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-30T04:30:40Z",
+    "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-30T08:30:39Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly established the goal and authorized all required approvals for current TODO completion; authorize this exact local single-use V2 mutation candidate after independent preflight, preserving every quality gate and prior receipt.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "ce99472dd171f31697288d2153e12865c5c1a111a033f5135d4333d0462adddf",
+    "subject_commit": "659f61cb4245112d75b119b103821bb06bae69ce",
+    "task_id": "TASK-0056"
   }
 ]
