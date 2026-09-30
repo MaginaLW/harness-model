@@ -88,5 +88,21 @@
     "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
     "subject_commit": "835701786550eeea79c27b68337c7de0bd59b3a1",
     "task_id": "TASK-0055"
+  },
+  {
+    "action_sha256": "e1a64fc542d424fccca61d7c28135ce8d71c5dfd19e885106903c0b027614d6a",
+    "actor": "owner",
+    "approval_type": "action",
+    "approved_at": "2026-09-30T00:13:11Z",
+    "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-09-30T04:12:03Z",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "The unchanged owner-approved frozen specification requires complete local V2 verification. Bind the fifth single-use canonical mutation action to the isolated-test-setup candidate after the preserved complete failed run; this grants no provider, device, network, publication or new phase.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
+    "subject_commit": "eb4c49a4ff77ca07f210fceae707495c8dece8be",
+    "task_id": "TASK-0055"
   }
 ]
