@@ -1,5 +1,29 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-09-30 初始仓库夹具修订实施阶段
+
+完整 profile 的成本分析和独立原环境复制短测已完成；局部原创建均值
+0.36051 秒、完整独立复制加三目录当前指纹均值 0.05784 秒，actual exit 0。
+完整资格成本与原 600 秒预算内完成能力仍待实测；四轮 FAILED 不改变。
+
+实际 native `spec_changed` resolve/classify/freeze、独立 REV-0005/r1
+APPROVE、当前 owner spec approval 和 begin 已完成，TASK-0056 为
+IMPLEMENTING / REVIEW / V2。冻结规格 SHA
+`3a782321645c40b71cf4921a7322872bf45285bf009218edb3e1d4d9310c53ce`，
+准入账本 `c99998571a117a5b071c03cc9caa0e47efe8395d`。
+旧 frozen e3fc 规格另存 `spec-design-004.md`；旧失败/批准/回执保留。
+
+并行启用 2 名 sub-agent：一名独占三个新 fixture utility/验收文件及旧
+builder 薄接入，另一名保持作者独立、准备审查与原环境验证；主 agent
+整理文档/账本、复核原断言和统一提交。原第一目标 builder 成功后才可保存
+私有初始 snapshot，warm 复用须当前完整输入资格且实体独立；原异常/partial、
+真实后续治理、原选择器/MINENV/预算/阈值不变。
+
+串行验收：有效专项→固定候选→完整原 integration 600 秒检查→fresh action005
+及全部原生 V2→正式 Review/finalize/代码批准/Gate→TASK-0055 重新准入及 Gate
+→TASK-0057 fixed candidate required CI 与已授权推送合并、独立远端核验。
+当前未声称实现或验证通过；F 在限定搜索内未找到目标匹配原件，仍不进入。
+
 ## 2026-09-30 第四轮失败后的集成测量阶段
 
 第二次私有采集恢复原模块启动路径语义，完整原 802 integration cases 结束为

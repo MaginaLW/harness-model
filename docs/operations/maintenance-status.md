@@ -1,5 +1,31 @@
 # 维护收尾与待办
 
+## 2026-09-30 初始测试仓库夹具修订准入
+
+完整 integration profile 的函数分析已完成。Schema 文件实际读取与检查保持
+必要；Git 等累积时间重叠、双导入 helper 的 profile 标签存在合并边界，不能
+据此相加或认定超时根因。另一个独立原环境短测实际 exit 0、无超时：二十次
+原初始仓库创建平均 0.36051 秒，完整物理复制加当前三目录指纹平均 0.05784 秒；
+二副本的工作区、index、commit 修改互不污染且不影响 seed。这个局部测量尚未
+包含完整资格守卫，不证明原 600 秒检查或完整 V2 通过。
+
+TASK-0056 已按 `spec_changed` 原生重新分类并冻结为 REVIEW/V2，当前规格
+SHA `3a782321645c40b71cf4921a7322872bf45285bf009218edb3e1d4d9310c53ce`。
+实际独立 REV-0005/r1 为 APPROVE、无 finding；所有者既有授权下的当前 spec
+approval 和 begin 已完成，状态 IMPLEMENTING。准入账本提交
+`c99998571a117a5b071c03cc9caa0e47efe8395d`；旧 e3fc 规格保存为
+`spec-design-004.md`，四轮 FAILED、原证据与已消耗动作全部保留。
+
+本阶段仅新增三个测试 utility/验收路径并薄接入共享 builder：第一份仍由原
+真实 builder 在原目标成功建成后才保存 session 私有初始副本；每次检查当前
+源、配置、模板和相关环境，未知或不安全资格走原流程，物理 Git 实体独立。
+原异常/partial、全部原断言与之后真实治理保持。并行 2 名 sub-agent 分别
+独占测试夹具实施和独立审查/验证准备，主 agent 管理文档、账本与统一提交。
+实施→固定候选→完整原 integration 600 秒检查→fresh action005 和全部原生
+V2→正式 Review/finalize/批准/Gate 串行；当前未记录实现或验证通过。
+TASK-0055 仍待真实依赖 Gate，TASK-0057 发布仍待两源 Gate 与 required CI；
+搜索范围内尚无匹配 F 的真实原件，不调用 provider 或用错目标报告补齐。
+
 ## 2026-09-30 第四轮终态与完整集成诊断
 
 私有完整 integration profile 已实际完成：802 项中 801 passed / 1 原 FIFO skip，
