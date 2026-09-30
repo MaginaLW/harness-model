@@ -1,5 +1,15 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-01 Schema 读取成本已短测
+
+20原函数/20独立分解调用实际exit0、输入前后相等、known资源已交回。
+原whole median1.25015ms；分解每18项的readUTF8 median0.72270ms，JSON0.24435ms。
+分解开销未知，不合计medians或外推原600；便携记录为
+`.ai/tasks/TASK-0056/schema-phase-cost-diagnostic-014.md`。
+下一步2名sub-agent准备及独立审查仅成功域的binary UTF8读取私有对照，执行串行。
+保持全部18当前读取及JSON/Resource顺序；原型缺正式兼容守卫，未选择生产实现。
+并发复制原型也未运行，readonly目录提前copystat风险阻止直接替换；原门禁保持。
+
 ## 2026-10-01 定向成本诊断已完成
 
 两个完整原生命周期用例实际2 passed/12.30s、exit0，输入前后相等，known资源已交回。
