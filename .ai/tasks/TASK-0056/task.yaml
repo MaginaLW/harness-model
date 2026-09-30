@@ -26,7 +26,7 @@ allowed_scope:
 base_commit: ef92b795da729566870ff4878f100a4ffe319db5
 branch: codex/e4-verification-control
 created_at: '2026-09-30T02:11:18Z'
-current_state: ESCALATED
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -125,11 +125,11 @@ decision_units:
     PATH changes honestly; production environment algorithm and Git context/transport
     are untouched.
   - Use bounded four-worker consecutive-file batches only for the current qualified
-    owner warm snapshot. Preserve actual DirEntry and DFS errors, drain before
-    recursion/directory metadata and on every abort, retain actual partials without
-    retry, and keep the original serial path before copying for unsupported inputs
-    or known custom bindings. This safety fixture implementation is a separate
-    task-free unit; no production or Policy behavior changes are added.
+    owner warm snapshot. Preserve actual DirEntry and DFS errors, drain before recursion/directory
+    metadata and on every abort, retain actual partials without retry, and keep the
+    original serial path before copying for unsupported inputs or known custom bindings.
+    This safety fixture implementation is a separate task-free unit; no production
+    or Policy behavior changes are added.
   protections:
     dry_run: false
     verified_backup: false
@@ -167,9 +167,9 @@ decision_units:
     original deadlines/selectors/assertions, thresholds and formal independent reviews/Gate.
   - Verify readonly directory metadata, physical independence, pre-copy eligibility,
     OS/shutil aggregation and deterministic abort priority, actual thread drain and
-    retained partials. Measure the actual full warm implementation including all
-    eligibility costs and unchanged guards before original fixture/external-review
-    and integration600 prerequisites; preserve all65 existing fixture cases/ASTs.
+    retained partials. Measure the actual full warm implementation including all eligibility
+    costs and unchanged guards before original fixture/external-review and integration600
+    prerequisites; preserve all65 existing fixture cases/ASTs.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
@@ -182,13 +182,13 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: b589852985fea26583efe09009aefe710465625ffac14609213c5d1caf3c1d70
+frozen_spec_sha256: 992b927ce833a8fa9876c7e278d024eca7903763621ea84391c2ad4c09f6916c
 goal: Add explicit run-owned external pytest temporary roots for governed verification
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-09-30T17:59:58Z'
-subject_commit: 98b5db7c7643f579619fcc00703e3a5f9044f1b3
+spec_frozen_at: '2026-09-30T23:20:05Z'
+subject_commit: f7d598fca29b5fae710e9b8b641ed044f4923107
 task_id: TASK-0056
-updated_at: '2026-09-30T23:12:09Z'
+updated_at: '2026-09-30T23:20:05Z'
 worktree_dirty: false
 worktree_dirty_paths: []
