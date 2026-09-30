@@ -266,12 +266,17 @@ def copy_case(tmp_path: Path, baseline: Case) -> Case:
     shutil.copytree(baseline.root, root)
     report = tmp_path / "synthetic-report.bin"
     report.write_bytes(baseline.report_path.read_bytes())
+    mapping = None
+    if baseline.mapping_path is not None:
+        mapping = tmp_path / "synthetic-mapping.json"
+        mapping.write_bytes(baseline.mapping_path.read_bytes())
     result = Case(
         root,
         tmp_path / "synthetic-envelope.json",
         report,
         deepcopy(baseline.envelope),
         deepcopy(baseline.context),
+        mapping,
     )
     result.save()
     return result
@@ -316,6 +321,29 @@ def use_locator(case: Case) -> dict[str, Any]:
     atomic_write_json(case.mapping_path, mapping)
     case.save()
     return mapping
+
+
+@pytest.fixture(scope="module")
+def recorded_baselines(
+    tmp_path_factory: pytest.TempPathFactory, baseline_cases: dict[tuple[bool, bool], Case]
+) -> dict[bool, Case]:
+    """Record genuine first imports once; tests clone the complete uncommitted Git tree."""
+    result: dict[bool, Case] = {}
+    for locator in (False, True):
+        baseline = copy_case(
+            tmp_path_factory.mktemp("recorded-baseline"), baseline_cases[(False, False)]
+        )
+        if locator:
+            use_locator(baseline)
+        token = baseline.preflight()["preflight_sha256"]
+        assert baseline.record(token)["status"] == "recorded"
+        result[locator] = baseline
+    return result
+
+
+@pytest.fixture
+def recorded_case(tmp_path: Path, recorded_baselines: dict[bool, Case]) -> Case:
+    return copy_case(tmp_path, recorded_baselines[False])
 
 
 def source_finding() -> dict[str, Any]:
@@ -1042,11 +1070,13 @@ def test_record_first_version_replay_and_whitespace_no_op_preserve_old_bytes(cas
 
 
 @pytest.mark.parametrize("change", ["raw", "confirmation", "scope", "finding", "mapping"])
-def test_same_version_content_conflict_never_overwrites(case: Case, change: str) -> None:
+def test_same_version_content_conflict_never_overwrites(
+    tmp_path: Path, recorded_baselines: dict[bool, Case], change: str
+) -> None:
+    case = copy_case(tmp_path, recorded_baselines[change == "mapping"])
+    path, original, _value = historical_attachment(case)
     if change == "mapping":
-        mapping = use_locator(case)
-    first = case.record()
-    original = (case.root / first["record_path"]).read_bytes()
+        mapping = json.loads(case.mapping_path.read_text())
     if change == "raw":
         case.report_path.write_bytes(b"different synthetic raw bytes")
         case.envelope["source"]["raw_sha256"] = hashlib.sha256(
@@ -1065,13 +1095,13 @@ def test_same_version_content_conflict_never_overwrites(case: Case, change: str)
         atomic_write_json(case.mapping_path, mapping)
     case.save()
     rejected_without_writes(case)
-    assert (case.root / first["record_path"]).read_bytes() == original
+    assert path.read_bytes() == original
 
 
-def test_new_version_chain_and_old_version_replay_never_change_head(case: Case) -> None:
+def test_new_version_chain_and_old_version_replay_never_change_head(recorded_case: Case) -> None:
+    case = recorded_case
     first_envelope = deepcopy(case.envelope)
-    first = case.record()
-    first_value = json.loads((case.root / first["record_path"]).read_text())
+    _path, _raw, first_value = historical_attachment(case)
     case.envelope["source"]["report_version"] = "synthetic-2"
     case.save()
     second = case.record()
@@ -1089,10 +1119,9 @@ def test_new_version_chain_and_old_version_replay_never_change_head(case: Case) 
     assert third_value["previous_record_sha256"] == digest(second_value)
 
 
-def test_tampered_existing_record_is_not_a_valid_chain_base(case: Case) -> None:
-    first = case.record()
-    path = case.root / first["record_path"]
-    value = json.loads(path.read_text())
+def test_tampered_existing_record_is_not_a_valid_chain_base(recorded_case: Case) -> None:
+    case = recorded_case
+    path, _raw, value = historical_attachment(case)
     value["input_sha256"] = "f" * 64
     atomic_write_json(path, value)
     case.envelope["source"]["report_version"] = "synthetic-2"
@@ -1418,9 +1447,9 @@ def test_preflight_rechecks_input_after_task_binding_observation(
     rejected_without_writes(case)
 
 
-def test_existing_chain_fork_is_refused_without_repair(case: Case) -> None:
-    first = case.record()
-    first_value = json.loads((case.root / first["record_path"]).read_text())
+def test_existing_chain_fork_is_refused_without_repair(recorded_case: Case) -> None:
+    case = recorded_case
+    _path, _raw, first_value = historical_attachment(case)
     case.envelope["source"]["report_version"] = "synthetic-2"
     case.save()
     second = case.record()
@@ -1436,10 +1465,9 @@ def test_existing_chain_fork_is_refused_without_repair(case: Case) -> None:
     rejected_without_writes(case)
 
 
-def test_missing_previous_record_is_refused_as_chain_corruption(case: Case) -> None:
-    first = case.record()
-    path = case.root / first["record_path"]
-    value = json.loads(path.read_text())
+def test_missing_previous_record_is_refused_as_chain_corruption(recorded_case: Case) -> None:
+    case = recorded_case
+    path, _raw, value = historical_attachment(case)
     value["previous_record_sha256"] = "f" * 64
     atomic_write_json(path, value)
     case.envelope["source"]["report_version"] = "synthetic-2"
@@ -1630,12 +1658,21 @@ def test_fresh_multiple_decision_units_in_reverse_order_share_governance_semanti
 
 @pytest.mark.parametrize("implementation,field", [(False, "base_commit"), (True, "subject_commit")])
 def test_historical_record_source_and_target_must_agree_even_with_recomputed_input_digest(
-    tmp_path: Path, baseline_cases: dict[tuple[bool, bool], Case], implementation: bool, field: str
+    tmp_path: Path,
+    baseline_cases: dict[tuple[bool, bool], Case],
+    request: pytest.FixtureRequest,
+    implementation: bool,
+    field: str,
 ) -> None:
-    case = copy_case(tmp_path, baseline_cases[(implementation, False)])
-    first = case.record()
-    path = case.root / first["record_path"]
-    saved = json.loads(path.read_text())
+    if implementation:
+        case = copy_case(tmp_path, baseline_cases[(True, False)])
+        first = case.record()
+        path = case.root / first["record_path"]
+        saved = json.loads(path.read_text())
+    else:
+        recorded = request.getfixturevalue("recorded_baselines")
+        case = copy_case(tmp_path, recorded[False])
+        path, _raw, saved = historical_attachment(case)
     saved["envelope"]["source_subject"][field] = "f" * 40
     saved["input_sha256"] = digest({"envelope": saved["envelope"], "repository_mapping": None})
     atomic_write_json(path, saved)
