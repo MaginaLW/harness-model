@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-30T03:12:28Z",
+    "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Record the owner direct authorization to establish the persistent goal, complete current TODOs with sufficient permissions and approvals, and use sub-agents. This approval binds the actually frozen corrected TASK-0056 specification after independent REV-0002 APPROVE; all Policy checks, budgets and thresholds remain mandatory. Publication remains separately bound to its completed candidate.",
+    "schema_version": "1.0",
+    "spec_sha256": "ce99472dd171f31697288d2153e12865c5c1a111a033f5135d4333d0462adddf",
+    "subject_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+    "task_id": "TASK-0056"
+  }
+]

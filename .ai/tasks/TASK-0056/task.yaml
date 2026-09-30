@@ -1,0 +1,95 @@
+allowed_scope:
+- src/aiflow/verification_temporary.py
+- src/aiflow/verification.py
+- src/aiflow/verification_service.py
+- src/aiflow/process_runner.py
+- src/aiflow/cli.py
+- tests/unit/test_verification_temporary.py
+- tests/unit/test_verification_plan.py
+- tests/unit/test_process_runner.py
+- tests/integration/test_verify_command.py
+- docs/operations/pytest-temporary-roots.md
+base_commit: ef92b795da729566870ff4878f100a4ffe319db5
+branch: codex/e4-verification-control
+created_at: '2026-09-30T02:11:18Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Add explicit run-owned external pytest temporary roots for governed verification
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/verification_temporary.py
+  - src/aiflow/verification.py
+  - src/aiflow/verification_service.py
+  - src/aiflow/process_runner.py
+  - src/aiflow/cli.py
+  - tests/unit/test_verification_temporary.py
+  - tests/unit/test_verification_plan.py
+  - tests/unit/test_process_runner.py
+  - tests/integration/test_verify_command.py
+  - docs/operations/pytest-temporary-roots.md
+  inputs:
+  - TASK-0055 fifth full native V2 failed with pytest deadline failures; its preserved
+    source and evidence are the baseline.
+  - A pytest basetemp within the repository would change non-Git fixture semantics.
+  - The owner explicitly authorized current TODO completion, necessary approvals,
+    push and merge; this implementation task retains separate publication.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Add an explicit optional external pytest temporary root with independent ordinary-path
+    and run-ownership guards.
+  - Append fixed owned basetemp arguments after unchanged Policy validation and preserve
+    execution evidence and finalization context.
+  - Retain existing environment, selectors, budgets, thresholds and default behavior.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0056
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Exercise default and opt-in plans, CLI, native process execution and zero-write
+    unsafe-path refusal.
+  - Run complete Policy-required V2 with independent verifier and targeted mutation;
+    preserve failures.
+  - Obtain independent design and implementation review, current approvals and Gate.
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: ce99472dd171f31697288d2153e12865c5c1a111a033f5135d4333d0462adddf
+goal: Add explicit run-owned external pytest temporary roots for governed verification
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-30T03:06:28Z'
+subject_commit: ef92b795da729566870ff4878f100a4ffe319db5
+task_id: TASK-0056
+updated_at: '2026-09-30T03:12:38Z'
+worktree_dirty: false
+worktree_dirty_paths: []
