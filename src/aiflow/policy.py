@@ -12,6 +12,7 @@ from typing import Any
 import yaml
 
 from aiflow.contracts import validate_contract
+from aiflow.document_parsing import load_yaml_text
 from aiflow.errors import PolicyError
 
 POLICY_FILES: Mapping[str, str] = {
@@ -112,7 +113,7 @@ def _load_document(root: Path, filename: str, expected_kind: str) -> dict[str, A
             details={"filename": filename},
         )
     try:
-        value = yaml.safe_load(path.read_text(encoding="utf-8"))
+        value = load_yaml_text(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, yaml.YAMLError) as error:
         raise PolicyError(
             "Could not read or parse Policy file",
