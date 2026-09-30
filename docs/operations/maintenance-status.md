@@ -1,5 +1,18 @@
 # 维护收尾与待办
 
+## 2026-10-01 当前成本短测与诊断方向
+
+两个串行私有短测均实际exit0、输入前后相等且known-owned资源已交回。
+Schema原函数100次median1.6873ms；fixture20次真实warm全部命中，median88.7757ms，
+单次source扫描median4.9492ms。类别重叠，不据此推算完整600或声明候选收益。
+fixture晚期taskkill实际128不算cleanup成功；三个已知实体的实际终态支持释放。
+证据见源分支`.ai/tasks/TASK-0056/current-cost-diagnostics-011.md`、记录`98f219b`。
+暂不选择改变瞬态观测时机的singlewarm方案，也不实施Schema缓存。
+下一步独立核对builtin pytest per-test耗时报告诊断的边界，定位实际长用例；
+新增报告选项和私有诊断预算明确不替代原native600，旧失败、action005/V2/Gate缺项保留。
+2名sub-agent分别负责私有运行准备与独立边界审查，主agent记录，重活串行。
+后续修复仍须明确准入；原测试断言、14项检查/5项mutation及85%/90%保持。
+
 ## 2026-10-01 现有 3.14 原期限诊断失败
 
 固定 source `98b5db7` / frozen `b5898529` 的现有 3.14.7/core 私有比较完成：
