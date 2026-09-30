@@ -26,7 +26,7 @@ allowed_scope:
 base_commit: ef92b795da729566870ff4878f100a4ffe319db5
 branch: codex/e4-verification-control
 created_at: '2026-09-30T02:11:18Z'
-current_state: IMPLEMENTING
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -87,6 +87,10 @@ decision_units:
   - The unchanged fixed fixture integration prerequisite timed out at 600156ms. Actual
     locked Python 3.13.15 and prior 3.14.7 probes show path/handle ctime mismatch
     on the same ordinary 127-character, 1305-byte file while birthtime agrees.
+  - The metadata-fixed canonical integration600 timed out; a complete passive diagnostic
+    actually passed at 818.91s. Current forty-call paired endpoint observation motivates
+    only a narrow direct full-distribution candidate. Python 3.13 raw function timing
+    anomalies remain unknown and do not support production optimization.
   permission_requirements:
   - action_approval
   planned_actions:
@@ -110,6 +114,11 @@ decision_units:
     fallback; retain POSIX ctime and every current identity, double-read, raw-byte
     and path guard. Supporting tests and documentation are a separate task-free safety
     maintenance unit, retained in cumulative validation scope.
+  - Qualify only the complete existing Windows mingw64/bin Git endpoint in the session-private
+    test fixture, live-binding both core/wrapper and preserving every source/config/template/attributes/owner/cold/error
+    guard. Safety fixture/test changes are a separate task-free unit. Runtime computed
+    PATH changes honestly; production environment algorithm and Git context/transport
+    are untouched.
   protections:
     dry_run: false
     verified_backup: false
@@ -141,6 +150,10 @@ decision_units:
     full original external-review module and original integration600 comparison before
     selecting exact 3.13.15 for a fresh complete default V2. Preserve CI Python 3.11
     and all existing checks, deadlines, selectors, thresholds and mutation safeguards.
+  - Require real supported Windows direct qualification, complete original fixture/external-review
+    modules and full unchanged integration600 under the newly bound actual environment
+    before a fresh native V2. Preserve CI Python 3.11, all fourteen checks/five mutations,
+    original deadlines/selectors/assertions, thresholds and formal independent reviews/Gate.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
@@ -160,6 +173,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-30T15:32:21Z'
 subject_commit: e3790a43bf51b976816a8eaf8770789c7f90a1f2
 task_id: TASK-0056
-updated_at: '2026-09-30T15:46:52Z'
+updated_at: '2026-09-30T17:49:05Z'
 worktree_dirty: false
 worktree_dirty_paths: []
