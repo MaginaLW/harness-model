@@ -7,7 +7,7 @@
 ## 范围
 
 基线 ef92b795da729566870ff4878f100a4ffe319db5，分支 codex/e4-verification-control。
-允许 src/aiflow/verification_temporary.py、verification.py、verification_service.py、process_runner.py、cli.py；tests/unit/test_verification_temporary.py、test_verification_plan.py、test_process_runner.py；tests/integration/test_verify_command.py、test_external_review_command.py、test_begin_close_commands.py；docs/operations/pytest-temporary-roots.md，以及本 task 自有治理记录。安全测试和文档单独提交，生产治理实现走完整 AI Flow。
+允许 src/aiflow/verification_temporary.py、verification.py、verification_service.py、process_runner.py、cli.py；tests/unit/test_verification_temporary.py、test_verification_plan.py、test_process_runner.py；tests/integration/test_verify_command.py；docs/operations/pytest-temporary-roots.md，以及本 task 自有治理记录。安全测试和文档单独提交，生产治理实现走完整 AI Flow。
 
 CLI：python -m aiflow verify TASK-ID [--pytest-temp-root DIRECTORY]。父目录必须预先存在，是绝对本地普通目录；其自身和每个祖先不得为 symlink、junction 或 reparse。拒绝位于任何带 .git 文件或目录标记的仓库/工作树内，包括祖先仓库；对每个祖先用不跟随链接的元数据查询保守拒绝 HEAD 标记与 objects 或 commondir 标记共存的裸仓库结构。原有 MINENV 不包含 GIT_DIR 等仓库发现环境。Windows 在元数据访问前拒绝 UNC、设备命名空间、ADS、保留设备名、控制字符、尾随点/空格和非本地支持盘类型；不改变系统配置或环境白名单。
 
@@ -42,11 +42,3 @@ CLI：python -m aiflow verify TASK-ID [--pytest-temp-root DIRECTORY]。父目录
 ## 回滚
 
 使用正常 Git revert 恢复本 task 生产和安全提交，保留规格、批准、事件、Review、日志和证据历史。外部临时目录不自动删除，已有源树和其他任务保持原状。不得重写旧 TASK-0055 的证据或静默更换其 base。
-
-## 失败诊断后的测试夹具兼容修订
-
-第二轮完整 V2 保留为 FAILED。原用例实测确认普通 Windows 物理 I/O 在 261 字符复制路径和 260 字符原子临时文件名处失败；缩短普通外部父目录没有解决所有测试文件。只在 external-review 测试夹具的复制、历史记录检查和损坏样例写入中使用兼容 Windows 的物理路径表示，逻辑 Case.root、服务参数、任务地址、真实 Git、owned temp 及全部业务断言保持原值。不得把 fixture 移出本轮独占叶或修改生产 storage 来隐式扩大本 task。
-
-原 verify-command 模块还实测阻塞在测试 Git helper 的 Windows timeout 清理：原 10 秒期限过后 kill() 后的无期限 communicate() 等待读管道线程。该测试 helper 可在超时前保留直接进程及其后代的所有权，按平台终止该自有树并有界回收；保持原 Git argv、cwd、capture、UTF-8、check 与 10 秒命令期限，不改 production runner、MINENV、Policy 或预算。初始 Git 超时的实际原因仍 unknown；有界清理只修复已观察的测试清理阻塞，不声称提升性能。
-
-验收增加：在原 native 最小环境和真实 TASK/run/EXEC 深度内复跑原失败用例、完整 external-review 与 verify-command 模块；Windows 超时清理须用真实自有后代复核，不伪造退出码或删掉断言。随后仍执行全部原生 V2、独立实现 Review、finalize、代码批准和 Gate。单例或模块结果不替代完整验证。

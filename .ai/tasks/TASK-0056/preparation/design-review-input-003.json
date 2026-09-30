@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0003",
+  "revision": 1,
+  "task_id": "TASK-0056",
+  "review_stage": "design",
+  "reviewer": "e4-temp-design-independent-reviewer-003",
+  "recorded_at": "2026-09-30T07:52:10Z",
+  "context_sha256": "9eb3cba1d801da4b28b9df10c6432f150916bd2953c746b6e12351387848ebd7",
+  "outcome": "APPROVE",
+  "findings": [],
+  "summary": "Independent design review of amended frozen spec 0a2f502b9310411d71e6502e871a00e5d1cf600dca7b4ebcbb27f414a4ff1751, native rebuilt design context 9eb3cba1d801da4b28b9df10c6432f150916bd2953c746b6e12351387848ebd7 and design amendment 002. The added scope is limited to test-owned Windows physical filesystem representation in external-review fixtures and owned Git process-tree timeout cleanup in the integration-test helper. Logical Case.root, service arguments, task addressing, real Git, run-owned fixture leaf containment, historical bytes and every original business assertion remain unchanged; production storage is outside this correction. Git helper behavior retains original argv/cwd, captured UTF-8 output, checked nonzero exits and the original 10-second command limit. Windows tree termination and POSIX owned-group termination must retain direct-process and descendant ownership, avoid reused or unowned PIDs, and bound both termination and output-drain cleanup; failed ownership or cleanup cannot become a fabricated successful result. The existing production default argv, selectors, MINENV/environment whitelist, Policy, verification budgets, mandatory checks and 85/90 percent gates remain unchanged. Preserved complete run002 remains FAILED. Physical-path diagnostics support the narrow test I/O repair. The observed module stack confirms Windows subprocess timeout cleanup waiting after kill, while the original Git timeout cause and exact pipe-holding descendant remain unknown. Passing isolated real-pytest cases does not establish passing modules or suites. Acceptance still requires original failed cases and both complete affected modules at actual native environment/run-owned depth, a real owned descendant with inherited pipes for timeout cleanup, then complete independent native V2, implementation Review, finalize, current code approval and Gate. No blocking design issue found. This approves only the amended design; this reviewer has not authored production/tests, implemented the repair, recorded a canonical Review, granted approval, finalized verification or published changes."
+}
