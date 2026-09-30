@@ -96,3 +96,12 @@ Schema 和 Policy 语义验证；返回值隔离与内容漂移必须有独立�
 属性；查询失败或非空直接回落。其当前完整 bytes 及其他源/config/template 输入
 每次仍实际读取并绑定，变化即回落；global/worktree/info/template 属性仍须不存在。
 首次私有查询证明 36 个初始路径无生效属性，但不是完整夹具或 V2 验收通过。
+
+Windows 完整 Git 分发的直接 `mingw64/bin/git.exe` 入口正在按独立规格重新准入。
+候选仅用于本机验证工具选择，不修改生产 Git context 或 transport。夹具仍需当前
+实际证明完整模板、配置来源、无生效属性和独立副本资格；两执行文件 bytes/mode
+都参与 live 输入，未知布局、缺失或不安全对应文件保持 cold 回落。
+runner 的最小环境算法不改，但选中的 Git parent 改变会改变实际 PATH；必须保存
+新的精确工具/源码/环境绑定。40 次相同只读 argv 的配对输出一致且多数更快，仅为
+候选证据。所有支持用例、原完整 integration600 和正式 V2/Gate 尚须实际通过，
+不得用诊断子集或异常 profiler 时间代替完整门禁；CI Python 3.11 保持原值。
