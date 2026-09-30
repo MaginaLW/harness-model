@@ -127,5 +127,18 @@
     "spec_sha256": "2cefeedd6fb99f26b0e7562ff4fc57f5b1beadab0b397802455b04af14f673a1",
     "subject_commit": "cd1d071d07e95af3ee3f9c4c4a23c60132b56138",
     "task_id": "TASK-0056"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-30T18:33:26Z",
+    "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Direct owner instructions authorize completion of current TODO tasks with full permissions and approvals, including push and merge. This spec approval applies to frozen b589852985fea26583efe09009aefe710465625ffac14609213c5d1caf3c1d70 after actual independent REV-0007: exact same-package direct Git fixture admission, actual changed computed PATH, all live safety guards, unchanged full prerequisites and deadlines, all quality gates, and Rule 8 separate safety commits. Publication remains a separate exact action record from the existing authorization.",
+    "schema_version": "1.0",
+    "spec_sha256": "b589852985fea26583efe09009aefe710465625ffac14609213c5d1caf3c1d70",
+    "subject_commit": "87f4c0495e4e1d3697dcadc8437b5abaf42886d6",
+    "task_id": "TASK-0056"
   }
 ]
