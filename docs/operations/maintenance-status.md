@@ -1,5 +1,27 @@
 # 维护收尾与待办
 
+## 2026-10-01 文件身份修复与运行时前置检查
+
+TASK-0056 已按最新冻结规格 `2cefeedd` 重新准入，REV-0006/r1、spec approval
+与 begin 完成。治理实现仅改 Windows 文件身份第五分量：可用 birthtime_ns，
+仅属性缺失回退 ctime_ns；POSIX 和其余读取守卫保持。测试与普通说明为独立
+task-free 安全提交，当前 source `e3790a4`、自有账本 head `3e691bd`。
+19 项安全测试在锁定 3.11.9、3.13.15、3.14.7 均实际通过，无 skip；3.13 的
+原完整 external-review 模块为 187 passed / 1 既有 FIFO skip / 177.93 秒。
+
+随后原 integration600 实际失败：`run-20260930T160128817732Z`，600188ms、
+RUNNER_TIMEOUT、pytest exit unknown，driver/launcher exit 1。partial 无
+terminal summary，不能推定末尾 53 项或 skip 身份。源码、HEAD、common refs
+与八份旧证据摘要未变，自有进程已结束并交回；数值 PID 复用未被当作自有进程。
+尚未满足正式选择 3.13 的条件，action005 与第五轮完整 V2 均未启动。
+便携依据为源分支 `runtime-prerequisite-failure-006.md`，所有历史失败保留。
+
+下一步串行准备只记录阶段耗时的完整选择器诊断，再按实际瓶颈决定修订；原
+600 秒门禁保持。并行 2 名 sub-agent：独立 verifier 负责诊断，另一名准备
+Task55 transport 安全测试和只读性能分析；主 agent 保留证据、同步状态。
+Task56 完整 V2/Review/finalize/批准/Gate → Task55 准入及自身 Gate → Task57
+required CI/已授权发布仍串行。真实 F 原件未在搜索范围找到，不扩大 provider 阶段。
+
 ## 2026-09-30 固定夹具候选的原集成期限检查
 
 初始夹具已实现并固定源码 `097f9af92a4c9bbad35378f34b3d5d48dd143b01`；

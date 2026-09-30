@@ -1,5 +1,21 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-01 文件身份兼容修复后的实际待办
+
+最新 TASK-0056 source `e3790a4` / frozen spec `2cefeedd` 已完成准入和最小
+Windows 创建身份修复。19 项安全测试在 3.11/3.13/3.14 均 passed、零 skip；
+3.13 原完整 external-review 为 187 passed / 1 既有 skip / 177.93 秒。
+同候选原 integration600 仍超时 600188ms，pytest exit unknown、无 summary，
+不能确认整套结果或最终 53 项；原件保留、旧证据未变、资源已交回。
+action005/完整 V2 未启动，正式 runtime 选择条件未满足，Task56 仍 IMPLEMENTING。
+
+下一步仅用完整选择器的被动阶段计时定位当前成本，不以诊断替代 600 秒门禁。
+并行 2 名 sub-agent 分别负责独立诊断与未来 Task55 transport 安全准备/性能
+分析，主 agent 保存失败和统一记录。Task56 完整验证及 Gate → Task55 接入
+真实获 Gate 依赖、只新增 transport 并完成自身 Gate → Task57 exact-head CI
+及已授权推送合并保持串行；不重复实施已在 Task56 的 metadata 修复。
+匹配报告 F 在已搜索范围仍 unknown。详见便携 `runtime-prerequisite-failure-006.md`。
+
 ## 2026-09-30 夹具候选的原期限检查后待办
 
 源码 `097f9af` 已固定，完整守卫短测实际有二十次 warm hit，但独立原

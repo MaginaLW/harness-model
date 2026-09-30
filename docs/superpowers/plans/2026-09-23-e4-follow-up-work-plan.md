@@ -1,5 +1,22 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-01 元数据兼容前置结果及耗时诊断
+
+Task56 最新 spec `2cefeedd` 的原生重新准入、独立 REV-0006/r1、当前 spec
+approval/begin 已完成。source `e3790a4` 的 Windows 创建身份修复及独立安全
+单元已固定：19 项 metadata 在 3.11.9/3.13.15/3.14.7 全通过且无 skip，原完整
+external-review 模块在 3.13 为 187 passed / 1 既有 FIFO skip / 177.93 秒。
+后续原 integration600 于 600188ms 超时，pytest exit unknown、无终态 summary；
+不推定未结束用例根因或末尾 53 项通过。源码/旧证据未变，资源已交回。
+
+action005 和完整 V2 尚未启动，正式选择 3.13 的条件尚未满足。先开展原完整
+选择器的被动阶段计时，记录真实模块/用例成本；诊断期限独立，不改变原生
+600 秒质量门。并行 2 名 sub-agent：独立 verifier 负责计时与证据；另一名
+准备未来 Task55 transport 测试及只读成本分析。主 agent 独占账本、说明和
+整合；修订准入、实施、固定候选、原预算检查、完整 V2/Review/finalize/批准/
+Gate 均串行。Task55 继承实际获 Gate 的 metadata 修复，只新增 transport；
+Task57 与 F 保持既有进入条件，三份用户原稿和所有历史证据保持。
+
 ## 2026-09-30 固定夹具候选的集成前置结果
 
 固定 subject `097f9af92a4c9bbad35378f34b3d5d48dd143b01` 的完整守卫短测
