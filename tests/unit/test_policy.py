@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -21,6 +22,55 @@ from aiflow.policy import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_POLICY = PROJECT_ROOT / ".ai" / "policy"
+
+
+def test_repeated_policy_load_reads_equal_size_content_with_restored_mtime(tmp_path: Path) -> None:
+    directory = copy_policy(tmp_path)
+    first = load_policy_bundle(tmp_path, policy_directory=directory)
+    first.documents["routing.yaml"]["policy_version"] = "caller mutation"
+    assert load_policy_bundle(tmp_path, policy_directory=directory).sha256 == first.sha256
+    path = directory / "routing.yaml"
+    before = path.stat()
+    original = path.read_text(encoding="utf-8")
+    changed = original.replace("2.3.0", "2.3.1")
+    assert len(changed) == len(original) and changed != original
+    path.write_text(changed, encoding="utf-8")
+    os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path, policy_directory=directory)
+    assert caught.value.code == "POLICY_VERSION_MISMATCH"
+
+
+@pytest.mark.parametrize("replacement", [None, "items: ["])
+def test_warm_policy_cache_does_not_hide_deleted_or_corrupt_files(
+    tmp_path: Path, replacement: str | None
+) -> None:
+    directory = copy_policy(tmp_path)
+    load_policy_bundle(tmp_path, policy_directory=directory)
+    path = directory / "routing.yaml"
+    if replacement is None:
+        path.unlink()
+        expected = "POLICY_FILE_MISSING"
+    else:
+        path.write_text(replacement, encoding="utf-8")
+        expected = "POLICY_READ_FAILED"
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path, policy_directory=directory)
+    assert caught.value.code == expected
+
+
+def test_warm_policy_cache_still_validates_the_current_schema(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    directory = copy_policy(tmp_path)
+    schemas = tmp_path / ".ai" / "schemas"
+    shutil.copytree(PROJECT_ROOT / ".ai" / "schemas", schemas)
+    monkeypatch.chdir(tmp_path)
+    load_policy_bundle(tmp_path, policy_directory=directory)
+    (schemas / "policy.schema.json").write_text(json.dumps({"not": {}}), encoding="utf-8")
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path, policy_directory=directory)
+    assert caught.value.code == "POLICY_SCHEMA_INVALID"
 
 
 def copy_policy(tmp_path: Path) -> Path:
