@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
+from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import Barrier
@@ -19,7 +22,8 @@ from aiflow.cli import build_parser, main
 from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.errors import ContractError, StorageError
 from aiflow.mutation_manifest import load_mutation_manifest
-from aiflow.review_service import ReviewAssessment
+from aiflow.policy import load_policy_bundle
+from aiflow.review_service import ReviewAssessment, build_review_context
 from aiflow.storage import (
     atomic_write_json,
     atomic_write_yaml,
@@ -32,8 +36,10 @@ from aiflow.verification import (
     VerificationContext,
     VerificationExecution,
     VerificationPlan,
+    parse_verification_plan,
 )
 from aiflow.verification_service import VerifyResult
+from aiflow.verifier_service import build_verifier_context
 
 
 def _mutation_artifact(outcome: str = "killed", task_id: str = "TASK-0001") -> dict[str, object]:
@@ -2430,3 +2436,324 @@ def test_abandon_rejects_other_verification_modes(
     for conflicting in (["--check", "smoke"], ["--finalize"]):
         with pytest.raises(SystemExit):
             parser.parse_args(["verify", "TASK-0001", "--abandon", *conflicting])
+
+
+def test_verify_cli_passes_explicit_pytest_root_and_supports_legacy_namespace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    received: list[dict[str, object]] = []
+
+    def verify_only(*_args: object, **kwargs: object) -> VerifyResult:
+        received.append(kwargs)
+        return VerifyResult("TASK-0001", "passed", "VERIFIED", Path("evidence.json"), ())
+
+    monkeypatch.setattr(cli, "verify_task", verify_only)
+    assert (
+        main(["verify", "TASK-0001", "--actor", "verifier", "--pytest-temp-root", str(tmp_path)])
+        == 0
+    )
+    assert received[-1]["pytest_temp_root"] == tmp_path
+    legacy = build_parser().parse_args(["verify", "TASK-0001", "--actor", "verifier"])
+    delattr(legacy, "pytest_temp_root")
+
+    class LegacyParser:
+        def parse_args(self, _argv: object) -> object:
+            return legacy
+
+    monkeypatch.setattr(cli, "build_parser", LegacyParser)
+    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    assert received[-1]["pytest_temp_root"] is None
+
+
+@pytest.fixture
+def system_ci_run_dir() -> Iterator[Path]:
+    """Use the real OS temp provider even when pytest has an external basetemp."""
+    with tempfile.TemporaryDirectory(prefix="aiflow-ci-") as directory:
+        run_directory = Path(directory) / "ci-run"
+        run_directory.mkdir()
+        yield run_directory
+
+
+@pytest.mark.parametrize(
+    "mode",
+    ["finalize", "abandon"],
+)
+def test_pytest_root_conflicting_modes_reject_before_task_load_or_directory_creation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+
+    def unexpected(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("conflicting modes must fail before loading or creating a run")
+
+    monkeypatch.setattr(verification_service, "load_task_record", unexpected)
+    monkeypatch.setattr(verification_service, "read_task_record_strict", unexpected)
+    monkeypatch.setattr(verification_service, "validate_pytest_temp_root", unexpected)
+    monkeypatch.setattr(verification_service, "create_pytest_temporary", unexpected)
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            tmp_path,
+            "TASK-0001",
+            actor="verifier",
+            pytest_temp_root=parent,
+            **{mode: True},
+        )
+    assert caught.value.code == "VERIFY_PYTEST_TEMP_ARGUMENT_INVALID"
+    assert list(parent.iterdir()) == []
+
+
+def test_invalid_pytest_root_rejects_before_recovering_task_loader(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def unexpected(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("unsafe root must fail before loading the task")
+
+    monkeypatch.setattr(verification_service, "load_task_record", unexpected)
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            tmp_path, "TASK-0001", actor="verifier", pytest_temp_root=Path("relative-root")
+        )
+    assert caught.value.code == "PYTEST_TEMP_ROOT_INVALID"
+    assert not (tmp_path / "relative-root").exists()
+
+
+@pytest.mark.parametrize("selection", ["smoke", "missing_pytest"])
+def test_selected_plan_without_runnable_pytest_never_creates_temporary_container(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, selection: str
+) -> None:
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    parsed = parse_verification_plan(
+        load_policy_bundle(Path(__file__).resolve().parents[2]),
+        VerificationContext(
+            Path.cwd(),
+            "TASK-0001",
+            "a" * 40,
+            "b" * 40,
+            sys.executable,
+            "run-001",
+            pytest_temp_root=parent,
+        ),
+        level="V1",
+        tool_available=lambda _argv: True,
+    )
+    if selection == "smoke":
+        selected = verification_service._selected_plan(parsed, ("smoke",))
+    else:
+        selected = verification_service._selected_plan(parsed, ("unit_tests",))
+        selected = replace(selected, blocking_reasons=("VERIFICATION_TOOL_MISSING:unit_tests",))
+    calls: list[str] = []
+
+    def unexpected(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("no runnable pytest means no external directory allocation")
+
+    def no_process(
+        execution: VerificationExecution, *_args: object, **_kwargs: object
+    ) -> tuple[object, ...]:
+        calls.append(execution.execution_id)
+        return ()
+
+    monkeypatch.setattr(verification_service, "create_pytest_temporary", unexpected)
+    monkeypatch.setattr(verification_service, "run_execution", no_process)
+    assert verification_service._execute_plan(Path.cwd(), selected) == []
+    assert len(calls) == (1 if selection == "smoke" else 0)
+    assert list(parent.iterdir()) == []
+
+
+@pytest.mark.parametrize("ci_mode", [False, True])
+def test_runtime_container_conflict_preserves_data_and_only_local_task_enters_failed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, ci_mode: bool, system_ci_run_dir: Path
+) -> None:
+    repository = _prepare(tmp_path, monkeypatch)
+    if ci_mode:
+        assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    before = {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
+    sentinel: list[Path] = []
+
+    def conflicting_plan(
+        bundle: object, context: VerificationContext, *, level: str
+    ) -> VerificationPlan:
+        parsed = parse_verification_plan(
+            bundle, context, level=level, tool_available=lambda _argv: True
+        )
+        assert parsed.pytest_temporary is not None
+        parsed.pytest_temporary.container.mkdir()
+        original = parsed.pytest_temporary.container / "preserve.txt"
+        original.write_bytes(b"existing container must survive\r\n")
+        sentinel.append(original)
+        return parsed
+
+    def unexpected(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("a conflicting container must never start a process")
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", conflicting_plan)
+    monkeypatch.setattr(verification_service, "run_execution", unexpected)
+    extra: dict[str, object] = {}
+    if ci_mode:
+        run_directory = system_ci_run_dir
+        extra = {"ci": True, "ci_run_dir": run_directory, "output": run_directory / "evidence.json"}
+    with pytest.raises(ContractError) as caught:
+        verification_service.verify_task(
+            repository,
+            "TASK-0001",
+            actor="verifier",
+            check_ids=("unit_tests",),
+            pytest_temp_root=parent,
+            **extra,
+        )
+    assert caught.value.code == "PYTEST_TEMP_DIRECTORY_CONFLICT"
+    assert sentinel[0].read_bytes() == b"existing container must survive\r\n"
+    if ci_mode:
+        assert before == {
+            path.relative_to(task_directory): path.read_bytes()
+            for path in task_directory.rglob("*")
+            if path.is_file()
+        }
+    else:
+        record = load_task_record(repository, "TASK-0001")
+        assert record.task["current_state"] == "FAILED"
+        assert record.events[-1]["event_type"] == "verification_failed"
+        assert record.events[-1]["payload"]["reason_code"] == caught.value.code
+
+
+@pytest.mark.parametrize("ci_mode", [False, True])
+def test_real_pytest_uses_owned_leaf_and_non_git_fixture_with_stable_context(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, ci_mode: bool, system_ci_run_dir: Path
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    tests = repository / "tests" / "unit"
+    tests.mkdir(parents=True)
+    (tests / "test_temporary_probe.py").write_text(
+        "from pathlib import Path\n"
+        "import subprocess\n"
+        "def test_owned_non_git_fixture(tmp_path, pytestconfig):\n"
+        "    base = Path(pytestconfig.getoption('basetemp')).resolve()\n"
+        "    assert tmp_path.resolve().is_relative_to(base)\n"
+        "    result = subprocess.run(['git', 'rev-parse', '--is-inside-work-tree'], "
+        "cwd=tmp_path, capture_output=True, timeout=10)\n"
+        "    assert result.returncode != 0\n",
+        encoding="utf-8",
+    )
+    commit_all(repository, "add the real temporary-directory probe before task baseline")
+    start(repository, monkeypatch)
+    make_ready(repository)
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    if ci_mode:
+        monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
+        assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    before_context = build_verifier_context(repository, "TASK-0001")
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    before = {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
+    planned: list[VerificationPlan] = []
+
+    def native_plan(
+        bundle: object, context: VerificationContext, *, level: str
+    ) -> VerificationPlan:
+        parsed = parse_verification_plan(
+            bundle, context, level=level, tool_available=lambda _argv: True
+        )
+        planned.append(parsed)
+        return parsed
+
+    monkeypatch.setattr(verification_service, "parse_verification_plan", native_plan)
+    arguments = ["verify", "TASK-0001", "--check", "unit_tests", "--pytest-temp-root", str(parent)]
+    if ci_mode:
+        run_directory = system_ci_run_dir
+        output = run_directory / "evidence.json"
+        arguments.extend(["--ci", "--ci-run-dir", str(run_directory), "--output", str(output)])
+    else:
+        output = task_directory / "evidence.json"
+        arguments.extend(["--actor", "verifier"])
+    assert main(arguments) == 0
+    evidence = json.loads(output.read_text(encoding="utf-8"))
+    checked = next(item for item in evidence["checks"] if item["check_id"] == "unit_tests")
+    assert checked["status"] == "passed"
+    assert checked["exit_code"] == 0
+    assert checked["timed_out"] is False
+    layout = planned[0].pytest_temporary
+    assert layout is not None
+    selected_execution = next(
+        item for item in planned[0].executions if "unit_tests" in item.check_ids
+    )
+    leaf = layout.leaves[selected_execution.execution_id]
+    assert leaf.is_dir()
+    assert list(leaf.glob("test_owned_non_git_fixture*"))
+    assert f"--basetemp={leaf.as_posix()}" in checked["command_summary"]
+    assert evidence["reproduce_command"][-2:] == ["--pytest-temp-root", "${PYTEST_TEMP_ROOT}"]
+    assert build_verifier_context(repository, "TASK-0001") == before_context
+    assert str(parent) not in json.dumps(before_context)
+    if ci_mode:
+        assert evidence["mode"] == "ci"
+        assert before == {
+            path.relative_to(task_directory): path.read_bytes()
+            for path in task_directory.rglob("*")
+            if path.is_file()
+        }
+
+
+def test_finalize_after_explicit_root_remains_a_non_execution_mode(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: dict[str, object] = {}
+
+    def finalize_only(*_args: object, **kwargs: object) -> VerifyResult:
+        captured.update(kwargs)
+        return VerifyResult("TASK-0001", "passed", "VERIFIED", tmp_path / "evidence.json", ())
+
+    def unexpected(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("finalize must not validate a runtime root or allocate a layout")
+
+    monkeypatch.setattr(verification_service, "_finalize_v2_task", finalize_only)
+    monkeypatch.setattr(verification_service, "validate_pytest_temp_root", unexpected)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", unexpected)
+    monkeypatch.setattr(verification_service, "create_pytest_temporary", unexpected)
+    assert (
+        verification_service.verify_task(
+            tmp_path, "TASK-0001", actor="verifier", finalize=True
+        ).state
+        == "VERIFIED"
+    )
+    assert "pytest_temp_root" not in captured
+
+
+def test_actual_implementation_review_context_has_portable_pytest_recipe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Exercise the real context consumer with the existing short runner seam."""
+    repository = _prepare(tmp_path, monkeypatch)
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    assert (
+        main(
+            [
+                "verify",
+                "TASK-0001",
+                "--actor",
+                "verifier",
+                "--pytest-temp-root",
+                str(parent),
+            ]
+        )
+        == 0
+    )
+    context = build_review_context(repository, "TASK-0001", "implementation")
+    recipe = context["content"]["verification_summary"]["reproduce_command"]
+    assert recipe[-2:] == ["--pytest-temp-root", "${PYTEST_TEMP_ROOT}"]
+    encoded = json.dumps(context)
+    assert json.dumps(str(parent.resolve()))[1:-1] not in encoded
+    assert parent.resolve().as_posix() not in encoded
+    assert list(parent.iterdir()) == []

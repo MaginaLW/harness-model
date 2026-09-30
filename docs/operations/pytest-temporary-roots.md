@@ -1,0 +1,42 @@
+# 显式 pytest 临时目录
+
+原生 `verify` 可将 pytest fixture 临时目录放在预先准备的仓库外父目录中：
+
+```text
+python -m aiflow verify TASK-ID --actor VERIFIER --pytest-temp-root <absolute-local-directory>
+```
+
+父目录必须已存在，位于本地支持的磁盘，是普通目录。其祖先不能包含 `.git`
+标记；也保守拒绝 `HEAD` 与 `objects` 或 `commondir` 共存的裸仓库结构。符号链接、
+junction、reparse、UNC、设备路径、ADS、保留设备名及其他不安全路径会被拒绝。
+守卫先检查输入路径及祖先，再核对解析后的物理路径及全部祖先，并绑定目录身份；
+计划和执行使用已检查的物理父目录，避免盘符别名隐藏仓库祖先。
+参数检查不创建目录，不能与 `--finalize` 或 `--abandon` 同时使用。
+
+计划解析保持只读。执行需要 pytest 时，原子创建新的
+`aiflow-pytest-TASK-ID-RUN-ID` 容器，每个去重 execution 使用独占的
+`pytest-EXEC-ID` 叶目录。pytest 在启动后创建该叶；守卫在启动前重新核对父目录和
+容器的身份、命令与叶目录不存在这一事实。容器冲突、已有叶或可检测漂移会拒绝启动，
+保留已有内容。执行期失败在本地记录原生 `FAILED`；CI 保持任务账本只读。
+这些检查不提供抵御同用户恶意并发路径替换的 OS 沙箱。
+
+只有 `unit_tests`、`regression_tests`、`coverage_xml`、`acceptance` 和
+`integration` 的原生 pytest 命令，在完整 Policy 校验之后追加固定 `--basetemp`。
+默认调用不分配外部目录、不改变命令。测试选择器、超时、环境白名单、覆盖率阈值、
+其他检查及 mutation 工作树位置继续遵循原 Policy。没有选中的 pytest 执行时，
+不创建容器。该选项改变临时文件位置，不能证明超时原因或保证性能提升。
+
+CI 可显式使用同一选项，同时仍须提供原有 `--ci-run-dir`、`--output` 并遵守它们的
+路径约束。运行证据记录实际命令、检查摘要及重现参数；其中的本机绝对路径只保存在
+私有、被忽略的运行材料中。便携报告使用占位符，不把原始运行证据直接提交。
+重现命令中的 `${PYTEST_TEMP_ROOT}` 必须由操作者替换成已验证的普通本地父目录；
+原生 Review 会引用这条便携命令，实际执行路径仍由私有检查摘要和完整证据 snapshot
+绑定。为保持原有脱敏，使用新选项的 pytest 摘要还记录 `pytest-argv-sha256`：
+对实际交给进程的最终 argv 数组，以 ASCII 转义、无额外空格的 JSON 编码为 UTF-8，
+再计算 SHA-256。即使目录名触发脱敏，也可核对具体执行；该摘要不认证程序字节或
+外部身份。默认执行和其他检查不增加此标签。占位符不设置或扩展进程环境白名单。
+verifier context 不包含这个运行参数，完整 V2 后的 `verify --finalize` 无需传入它。
+本地验证不替代固定 PR head 的 required CI。
+
+工具不会清理外部父目录或旧运行目录。需要保留空间时，由操作者按精确目录清单
+另行处理；不能把父目录、日志目录或已有 pytest 叶作为新的 `--basetemp` 使用。
