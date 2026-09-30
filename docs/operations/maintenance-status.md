@@ -1,5 +1,17 @@
 # 维护收尾与待办
 
+## 2026-09-30 TASK-0056 候选固定
+
+TASK-0056 独立设计复审通过后，原生 spec approval 和 begin 已完成。
+显式外部 pytest 临时目录实现与安全测试分阶段提交，固定候选为
+`659f61cb4245112d75b119b103821bb06bae69ce`，原生 sync 已绑定该 subject。
+守卫覆盖输入及物理祖先、裸仓库、身份漂移和独占新叶；pytest 摘要追加实际 argv
+的规范 SHA-256，保持脱敏。独立预审未发现剩余阻塞项。
+78 项守卫专项、3 项真实 runner/默认兼容用例通过，Ruff、format、43 个源码的
+mypy、原生 validate 和 whitespace 检查通过；局部结果不替代完整 V2。
+已交未参与实现的 sub-agent 完成全部原生 V2；当前没有完整通过、正式实现 Review、
+code approval 或 Gate PASS。先取得真实 Gate，再按下方顺序接入 TASK-0055。
+
 ## 2026-09-30 持续 goal 与临时目录治理准入
 
 所有者已设立持续 goal，授权完成当前进入条件满足的待办及必要批准、推送合并，
