@@ -1,10 +1,10 @@
 {
   "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
   "change_reason": "unchanged",
-  "classification_input_sha256": "548fecc1ea87840b24cea291671ccd2261c7b9b194260b1587b45afe75b212b3",
+  "classification_input_sha256": "fcbb661519e8c8b902753331bb109cb22635cb203fab5af9ae4e3db9084ca023",
   "classifications": [
     {
-      "classified_at": "2026-09-30T10:47:50Z",
+      "classified_at": "2026-09-30T13:15:13Z",
       "decision_unit_id": "DU-001",
       "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
       "explanations": [
@@ -39,12 +39,12 @@
       ]
     }
   ],
-  "classified_at": "2026-09-30T10:47:50Z",
+  "classified_at": "2026-09-30T13:15:13Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V2",
   "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
   "policy_version": "2.3.0",
   "schema_version": "2.0",
-  "subject_commit": "596a1b37b343f16d83ab4ae5a8eaa6de15a678cd",
+  "subject_commit": "32b52535810d989092b7ab4f71abd552ee98d095",
   "task_id": "TASK-0056"
 }

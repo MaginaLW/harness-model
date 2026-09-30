@@ -101,5 +101,18 @@
     "spec_sha256": "e3fcf4e6c3f13aef834d71be2e10b4947098311e383b5bb100bdf74d183ddd85",
     "subject_commit": "38648440f5a862edd5a7dccfb55a60aae4f6757e",
     "task_id": "TASK-0056"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-30T13:26:26Z",
+    "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "The owner directly authorized current TODO completion and necessary approvals. Approve the actual frozen initial-fixture amendment 3a782321645c40b71cf4921a7322872bf45285bf009218edb3e1d4d9310c53ce after independent REV-0005/r1, retaining current input qualification, all original assertions, full V2 gates and separate publication.",
+    "schema_version": "1.0",
+    "spec_sha256": "3a782321645c40b71cf4921a7322872bf45285bf009218edb3e1d4d9310c53ce",
+    "subject_commit": "32b52535810d989092b7ab4f71abd552ee98d095",
+    "task_id": "TASK-0056"
   }
 ]

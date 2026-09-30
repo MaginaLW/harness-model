@@ -62,19 +62,3 @@ CLI：python -m aiflow verify TASK-ID [--pytest-temp-root DIRECTORY]。父目录
 新增必要边界验证：等长文本修改并恢复原 mtime 仍读取新值；缓存命中后文件删除、越界路径、损坏 YAML、当前 Schema 和跨 Policy 约束仍拒绝；返回值深层修改隔离；alias/cycle、标准 YAML 日期等值保持；解析失败重复出现而不缓存；超限和容量驱逐；解析器/配置变化与不支持的自定义值回退。根 agent 独占生产与测试实现；并行 2 个 sub-agent 分别负责只读性能/测试设计审计与原生准入/独立 design Review，均不参与实现。统一提交、完整 V2、正式 implementation Review、finalize、代码批准和 Gate 串行。真实模块对照测量在完整验证前完成；微基准不替代模块性能或原生 V2。
 
 Python 3.14 隔离比较保留失败，不用于本轮正式 V2；不在本 task 修订 E4 报告文件身份代码。正式基线保持 Python 3.11。旧 frozen 0a2f specification、所有失败、批准、Review、回执和日志保持可追溯，不复用已消耗 action003。若完整验证仍失败，保留失败并定位证据；不通过提高期限、缩减选择器或削弱门禁收尾。
-
-## 第四轮失败后的初始测试仓库复用修订
-
-完整 run004 保留为 FAILED：十三项通过，integration 实际 600140 毫秒超时、退出码 unknown；原 action004 已消耗。完整私有诊断为 801 passed/1 既有 FIFO skipped/851.34 秒、实际退出 0，但含 profiler 且外层诊断期限不同，不能视作原 600 秒检查通过。独立短测二十次原初始仓库创建均值 0.36051 秒，完整独立 copy2 加三目录当前指纹均值 0.05784 秒；完整资格守卫成本尚待实测，不能保证本优化使原检查通过。
-
-新增允许 tests/integration/repository_fixture.py、conftest.py、test_repository_fixture.py；仅对既有 test_begin_close_commands.py 的 create_repository 做薄接入。原十二个使用模块的全部测试语句和业务断言不删除、不缩减；原真实 Git、原 10 秒命令期限、UTF-8/capture/check、有归属清理和之后的 start/classify/freeze/verify 等实际流程保持。
-
-pytest session/worker 内部 owner 使用 tmp_path_factory 分配短名普通私有目录，位于本次原 EXEC 叶；两种既有 helper 导入名共享 canonical utility 的 owner。非 pytest 调用、不同 session/worker/run/EXEC 不共享。每次仍先原 path.mkdir，保持已存在目标和缺失父目录的失败次序。第一份仓库仍在原目标逐句执行真实 init、当前三目录复制、固定 repository-id/tracked.txt、add/commit；完整成功且未 start、未返回前，才可保存其 pristine snapshot。原 builder 失败保留原异常和 partial，不发布 baseline；可选 snapshot 发布失败禁用复用、仍返回原成功仓库。
-
-每次命中前实际读取当前 schemas/policy/templates 全部条目名、类型、mode 和 bytes，并绑定项目源、repository-id、标准 builder/helper 身份、Git 实体和相关环境、session/EXEC 身份。当前配置 origins 及可能新出现的配置/attributes、已证明默认模板的 bytes/absence/type/mode 同样 live 检查；不用 mtime、HEAD 或旧摘要代替当前内容。配置初次查询只在内存处理 names/origins 和资格，不输出未知配置名、值、路径或异常内容；必要查询遵守原 owned helper 期限。不能完整证明资格、源读异常、unknown/path-sensitive config、include/includeIf、活跃 hook/filter、signing、特殊对象/refs、模板覆盖、GIT_* 或 monkeypatch 时走原 builder。允许明确证明对本无网络、无 attributes 的初始流程无效的标准系统配置，不能泛放行未知键；未证明的平台模板位置仍回落，不修改环境或 Git 配置来提升命中率。
-
-合格命中将 snapshot 的全部普通 Git/工作区文件物理 copy2 到刚创建的目标，index/objects/refs/logs/config 与工作区实体独立；禁止 hardlink、alternates、linked worktree、symlink/junction 或跨运行共享。初始 OID 可相同，之后的当前 Git 与治理判断仍逐例真实执行。命中 copy 失败直接保留异常与 partial，不清理或混入 builder 重试；输入变化回落原 builder，不修改既有 snapshot。baseline 不包含 task/events/批准/Review/context 或治理结论，也不缓存生产 Git、Schema、Policy 校验或 freshness。
-
-必要新增验收覆盖：原 mkdir/init/add/commit/source-copy 失败与 partial；可选发布失败、命中复制失败；无 owner/双导入/session 隔离；实体 bytes 与 index/objects/refs/工作区互不污染；当前源增删改、等长修改与恢复 mtime、配置/模板/活跃 hook 漂移、unsafe/unknown config 和 helper monkeypatch 回落；包含合成秘密的配置不得进入输出。原真实 owned-child 超时用例继续执行，原选择器、MINENV、Policy、预算和阈值不变。先验证完整资格实际命中及完整原 integration，再执行新单次 action 对应的全部原生 V2；局部 probe 不替代完整验证。
-
-本阶段启用 2 个 sub-agent：一个独占这四个测试文件的夹具实现和必要验收，另一个只读独立 design/implementation 审查并承担完整原生 verifier，不参与实施。主 agent 独占规格、治理、文档、整合与提交；准入、接口、统一提交、完整 V2、Review、finalize、批准和 Gate 串行。保留 spec-design-004.md 中旧 frozen e3fc 规格及四轮失败、旧 Review、批准、回执和全部日志。推送合并仍另行发布绑定，不在本实现 task 执行。

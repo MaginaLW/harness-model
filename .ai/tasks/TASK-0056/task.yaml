@@ -17,10 +17,13 @@ allowed_scope:
 - tests/unit/test_document_parsing.py
 - tests/unit/test_policy.py
 - tests/unit/test_storage.py
+- tests/integration/repository_fixture.py
+- tests/integration/conftest.py
+- tests/integration/test_repository_fixture.py
 base_commit: ef92b795da729566870ff4878f100a4ffe319db5
 branch: codex/e4-verification-control
 created_at: '2026-09-30T02:11:18Z'
-current_state: FAILED
+current_state: IMPLEMENTING
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -56,6 +59,9 @@ decision_units:
   - tests/unit/test_document_parsing.py
   - tests/unit/test_policy.py
   - tests/unit/test_storage.py
+  - tests/integration/repository_fixture.py
+  - tests/integration/conftest.py
+  - tests/integration/test_repository_fixture.py
   inputs:
   - TASK-0055 fifth full native V2 failed with pytest deadline failures; its preserved
     source and evidence are the baseline.
@@ -68,6 +74,10 @@ decision_units:
   - Preserved third full V2 has two deadline failures; an independently completed
     Python 3.11 profile measures repeated safe YAML decoding, without proving the
     original timeout cause.
+  - Preserved fourth full V2 passes thirteen checks but integration exceeds its unchanged
+    600-second deadline. A complete diagnostic and isolated initial-repo copying benchmark
+    identify a test-fixture optimization candidate, not a full V2 pass or proof of
+    timeout cause.
   permission_requirements:
   - action_approval
   planned_actions:
@@ -82,6 +92,10 @@ decision_units:
   - Reuse only bounded content-keyed pure YAML decoding with independent return values,
     fresh actual file reads and all unchanged schema, semantic, identity and freshness
     validation.
+  - Reuse only a session-private pristine initial test repository after the original
+    real builder succeeds at its original target; physically copy independent Git
+    files after current complete input eligibility, preserving cold fallback, partial
+    failure behavior, all original assertions and subsequent real governance.
   protections:
     dry_run: false
     verified_backup: false
@@ -106,6 +120,9 @@ decision_units:
     files, live schema and semantic errors, deep result isolation, aliases/cycles,
     size/capacity bounds and parser/custom-value fallback; measure the complete unchanged
     module before full V2.
+  - Verify session ownership, both helper imports, independent Git objects/index/refs,
+    source/config/template drift, unsafe inputs and original builder/copy error behavior;
+    measure the complete original integration selection before full V2.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
@@ -118,13 +135,13 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: e3fcf4e6c3f13aef834d71be2e10b4947098311e383b5bb100bdf74d183ddd85
+frozen_spec_sha256: 3a782321645c40b71cf4921a7322872bf45285bf009218edb3e1d4d9310c53ce
 goal: Add explicit run-owned external pytest temporary roots for governed verification
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-09-30T10:47:52Z'
-subject_commit: 38648440f5a862edd5a7dccfb55a60aae4f6757e
+spec_frozen_at: '2026-09-30T13:15:15Z'
+subject_commit: 32b52535810d989092b7ab4f71abd552ee98d095
 task_id: TASK-0056
-updated_at: '2026-09-30T12:04:40Z'
+updated_at: '2026-09-30T13:26:28Z'
 worktree_dirty: false
 worktree_dirty_paths: []
