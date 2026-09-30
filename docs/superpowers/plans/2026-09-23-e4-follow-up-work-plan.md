@@ -1,5 +1,25 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-09-30 TASK-0056 首轮完整 V2 失败与限定诊断
+
+固定源码 `659f61cb4245112d75b119b103821bb06bae69ce` 的完整原生 V2 已于
+`2026-09-30T05:24:13Z` 结束为 FAILED，14 项中 9 项通过、5 项失败，Gate REJECT。
+unit 完整结果为 40 failed / 1798 passed；regression、coverage 与 integration
+实际超时，diff coverage 缺少 XML，总覆盖率与差异覆盖率仍 unknown。
+5 项固定 mutation 全部 killed，action001 已消费，不能复用。
+
+便携失败记录已小步提交，可读取
+`git show codex/e4-verification-control:.ai/tasks/TASK-0056/verification-failure-001.md`。
+原始证据、24 个非空日志引用与 snapshot 已独立核验；辅助 audit r1 的路径解析错误
+保留，r2 明确修正，原生 evidence 未修改。实现 Review、finalize 和发布尚未进行。
+
+本阶段并行启用 2 名 sub-agent：一名用不变的原测试与原 native 进程环境，对照
+长、短外部父目录；另一名完成隔离 Python/Git 的锁定依赖与实际工具入口核验。
+主 agent 统一失败账本。长路径写入错误和 PowerShell 期限失败目前只是观察聚类，
+不作为已证实根因。后续完整重跑须使用 fresh exact-subject action，再串行完成
+TASK-0056 Gate、TASK-0055 依赖重新准入及验证、TASK-0057 发布和远端核验。
+现有 goal 与推送合并授权继续有效，门禁及历史材料全部保留。
+
 ## 2026-09-30 固定候选与验证阶段
 
 TASK-0056 设计复审、spec approval、begin 和分阶段实现提交已完成，固定候选为
