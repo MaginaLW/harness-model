@@ -1,5 +1,19 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-01 现有 3.14 原期限诊断失败
+
+固定 source `98b5db7` / frozen `b5898529` 的现有 3.14.7/core 私有比较完成：
+原 external188 为 187 passed/1 原 FIFO skip/145.87s、实际 exit0；原 integration
+完整 collect867，但原 EXEC-012/600 秒在 600162ms 超时，没有完整 summary。
+源码/原 AST/旧证据/refs/index/topology 前后相等，known-owned 终态核验已交回；
+taskkill 实际255及未观察后代的限制如实保留。便携原件为源分支
+`.ai/tasks/TASK-0056/runtime314-diagnostic-010.md`，记录提交 `3d2cbd1`。
+不正式选择 3.14，不重复同候选600；action005/第五原生V2和Gate仍未完成。
+下一步先短测真实夹具的当前读取、snapshot、copy与warm成本；任何一次完整
+warm扫描候选必须明确重新准入、保留所有当前安全检查和旧用例，不声称与旧
+瞬态故障观测时机严格等价。2名sub-agent并行独立边界审查与短测准备，执行串行。
+Schema Registry共享尚无安全隔离证明，不实施；原期限/85%/90%及下游条件保持。
+
 ## 2026-10-01 直接入口前置结果与原期限失败
 
 固定 source `98b5db7` / own HEAD `d0199e4` / frozen spec `b5898529…` 的独立
