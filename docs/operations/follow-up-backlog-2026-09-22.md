@@ -27,6 +27,13 @@ git show codex/e4-report-import:.ai/tasks/TASK-0055/verification-failure-005.md
 E4.3/E4.4、provider、I1 其余生命周期、I2 更多目标、E5、I5 和阶段三/四
 保持原条件；三份用户草稿、阶段 61 旧 index 及下方所有历史窗口保持原样。
 
+证据可迁移性的进入条件因本次换检出已满足，本轮第五次运行的私有移交现已完成：
+100 个显式选定文件经导出及独立 ZIP 校验，全部条目的大小与 SHA-256 匹配；
+23 组 producer/Git 文本映射一致，原始 CRLF 与 Git LF 分别保存。通用工具未扩展，
+旧日志缺失仍保持 unknown。详见便携记录
+`git show codex/e4-report-import:.ai/tasks/TASK-0055/evidence-handoff-005.md`。
+该移交不补作 V2 PASS；当前资源观察没有支持新一轮重试，原因定位与完整验证仍待完成。
+
 ## 2026-09-30 最新核定与实际待办
 
 本轮实际 CLI 确认 `TASK-0048` 为 `MERGED`、`Missing: none`。同仓 Windows/Linux
