@@ -20,6 +20,9 @@ allowed_scope:
 - tests/integration/repository_fixture.py
 - tests/integration/conftest.py
 - tests/integration/test_repository_fixture.py
+- src/aiflow/external_review.py
+- tests/unit/test_external_review_metadata.py
+- docs/operations/external-review-import.md
 base_commit: ef92b795da729566870ff4878f100a4ffe319db5
 branch: codex/e4-verification-control
 created_at: '2026-09-30T02:11:18Z'
@@ -62,6 +65,9 @@ decision_units:
   - tests/integration/repository_fixture.py
   - tests/integration/conftest.py
   - tests/integration/test_repository_fixture.py
+  - src/aiflow/external_review.py
+  - tests/unit/test_external_review_metadata.py
+  - docs/operations/external-review-import.md
   inputs:
   - TASK-0055 fifth full native V2 failed with pytest deadline failures; its preserved
     source and evidence are the baseline.
@@ -78,6 +84,9 @@ decision_units:
     600-second deadline. A complete diagnostic and isolated initial-repo copying benchmark
     identify a test-fixture optimization candidate, not a full V2 pass or proof of
     timeout cause.
+  - The unchanged fixed fixture integration prerequisite timed out at 600156ms. Actual
+    locked Python 3.13.15 and prior 3.14.7 probes show path/handle ctime mismatch
+    on the same ordinary 127-character, 1305-byte file while birthtime agrees.
   permission_requirements:
   - action_approval
   planned_actions:
@@ -96,6 +105,11 @@ decision_units:
     real builder succeeds at its original target; physically copy independent Git
     files after current complete input eligibility, preserving cold fallback, partial
     failure behavior, all original assertions and subsequent real governance.
+  - Change only external_review metadata identity Windows creation-time selection
+    to available st_birthtime_ns, including zero, with legacy attribute-absence st_ctime_ns
+    fallback; retain POSIX ctime and every current identity, double-read, raw-byte
+    and path guard. Supporting tests and documentation are a separate task-free safety
+    maintenance unit, retained in cumulative validation scope.
   protections:
     dry_run: false
     verified_backup: false
@@ -123,6 +137,10 @@ decision_units:
   - Verify session ownership, both helper imports, independent Git objects/index/refs,
     source/config/template drift, unsafe inputs and original builder/copy error behavior;
     measure the complete original integration selection before full V2.
+  - Run exact locked Python 3.11, 3.13 and 3.14 metadata safety cases; require current
+    full original external-review module and original integration600 comparison before
+    selecting exact 3.13.15 for a fresh complete default V2. Preserve CI Python 3.11
+    and all existing checks, deadlines, selectors, thresholds and mutation safeguards.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
@@ -135,13 +153,13 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 3a782321645c40b71cf4921a7322872bf45285bf009218edb3e1d4d9310c53ce
+frozen_spec_sha256: 2cefeedd6fb99f26b0e7562ff4fc57f5b1beadab0b397802455b04af14f673a1
 goal: Add explicit run-owned external pytest temporary roots for governed verification
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-09-30T13:15:15Z'
-subject_commit: 097f9af92a4c9bbad35378f34b3d5d48dd143b01
+spec_frozen_at: '2026-09-30T15:32:21Z'
+subject_commit: cd1d071d07e95af3ee3f9c4c4a23c60132b56138
 task_id: TASK-0056
-updated_at: '2026-09-30T14:41:36Z'
+updated_at: '2026-09-30T15:38:36Z'
 worktree_dirty: false
 worktree_dirty_paths: []
