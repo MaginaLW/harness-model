@@ -21,7 +21,7 @@ CLI：python -m aiflow verify TASK-ID [--pytest-temp-root DIRECTORY]。父目录
 
 ## 非目标
 
-不修改 .ai/policy 配置、Schema、workflow、阈值、预算、测试选择器、MINENV、任务状态机、mutation 行为或 E4 报告导入代码。不采用仓库内 basetemp、junction、fake home、隐式环境 hook，不停止无归属进程，不修改 Defender、ACL、系统临时目录或全局工具。不自动启动 E4.3/E4.4、provider 或后续业务阶段；TASK-0055 的依赖集成与重新准入另行显式记录。
+不修改 Policy、Schema、workflow、阈值、预算、测试选择器、MINENV、任务状态机、mutation 行为或 E4 报告导入代码。不采用仓库内 basetemp、junction、fake home、隐式环境 hook，不停止无归属进程，不修改 Defender、ACL、系统临时目录或全局工具。不自动启动 E4.3/E4.4、provider 或后续业务阶段；TASK-0055 的依赖集成与重新准入另行显式记录。
 
 ## 验收条件
 
@@ -50,15 +50,3 @@ CLI：python -m aiflow verify TASK-ID [--pytest-temp-root DIRECTORY]。父目录
 原 verify-command 模块还实测阻塞在测试 Git helper 的 Windows timeout 清理：原 10 秒期限过后 kill() 后的无期限 communicate() 等待读管道线程。该测试 helper 可在超时前保留直接进程及其后代的所有权，按平台终止该自有树并有界回收；保持原 Git argv、cwd、capture、UTF-8、check 与 10 秒命令期限，不改 production runner、MINENV、Policy 或预算。初始 Git 超时的实际原因仍 unknown；有界清理只修复已观察的测试清理阻塞，不声称提升性能。
 
 验收增加：在原 native 最小环境和真实 TASK/run/EXEC 深度内复跑原失败用例、完整 external-review 与 verify-command 模块；Windows 超时清理须用真实自有后代复核，不伪造退出码或删掉断言。随后仍执行全部原生 V2、独立实现 Review、finalize、代码批准和 Gate。单例或模块结果不替代完整验证。
-
-## 第三轮失败后的纯解析复用修订
-
-完整 run003 仍为 FAILED，regression/integration 分别超出既有 900/600 秒期限；完整覆盖率执行通过不替代它们。相同 3.11 基线的独立完整 external-review 诊断实际 187 passed/1 既有 FIFO skipped/200.15 秒，测得 3586 次 safe_load 累积 36.92 秒；累积时间可能重叠，不证明原超时原因。
-
-范围增加 src/aiflow/document_parsing.py、policy.py、storage.py；tests/unit/test_document_parsing.py、test_policy.py、test_storage.py。只复用纯 YAML 解码，不缓存任何文件读取、路径或身份检查、Schema 验证、Policy 交叉语义验证、规范摘要、新鲜度、任务状态或批准结论。policy/storage 每次仍通过原路径流程实际读取当前 UTF-8 文本；键绑定完整当前文本，不用文件名、mtime、大小或摘要作为内容替代。Schema/current Policy 文件及所有原阈值、命令、选择器、预算和 MINENV 不变。
-
-解析结果缓存最多 64 项，单项文本最多 16384 字符；超过限制直接原 safe_load。缓存只保留可安全复制的标准 SafeLoader 值，每次返回独立副本，保留单次值内部的 YAML alias 关系与循环。不能让调用者修改影响另一次读取或其他仓库。原异常不缓存，不把解析失败变成功；解析器或其配置变化须绕过已有缓存。自定义值不能共享；复制不支持时回到本次原解析，不改变原错误行为。此缓存不写磁盘，不改变 Loader、进程环境或系统配置。
-
-新增必要边界验证：等长文本修改并恢复原 mtime 仍读取新值；缓存命中后文件删除、越界路径、损坏 YAML、当前 Schema 和跨 Policy 约束仍拒绝；返回值深层修改隔离；alias/cycle、标准 YAML 日期等值保持；解析失败重复出现而不缓存；超限和容量驱逐；解析器/配置变化与不支持的自定义值回退。根 agent 独占生产与测试实现；并行 2 个 sub-agent 分别负责只读性能/测试设计审计与原生准入/独立 design Review，均不参与实现。统一提交、完整 V2、正式 implementation Review、finalize、代码批准和 Gate 串行。真实模块对照测量在完整验证前完成；微基准不替代模块性能或原生 V2。
-
-Python 3.14 隔离比较保留失败，不用于本轮正式 V2；不在本 task 修订 E4 报告文件身份代码。正式基线保持 Python 3.11。旧 frozen 0a2f specification、所有失败、批准、Review、回执和日志保持可追溯，不复用已消耗 action003。若完整验证仍失败，保留失败并定位证据；不通过提高期限、缩减选择器或削弱门禁收尾。

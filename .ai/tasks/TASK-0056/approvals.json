@@ -72,5 +72,18 @@
     "spec_sha256": "0a2f502b9310411d71e6502e871a00e5d1cf600dca7b4ebcbb27f414a4ff1751",
     "subject_commit": "4f0288b4afb608412f984fa9078b7b0692fa0e6f",
     "task_id": "TASK-0056"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-30T10:52:16Z",
+    "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "The owner directly authorized completion of current TODOs and necessary approvals. Approve the actual frozen pure-decoding amendment e3fcf4e6c3f13aef834d71be2e10b4947098311e383b5bb100bdf74d183ddd85 after independent REV-0004/r1, retaining all full V2 gates and separate publication.",
+    "schema_version": "1.0",
+    "spec_sha256": "e3fcf4e6c3f13aef834d71be2e10b4947098311e383b5bb100bdf74d183ddd85",
+    "subject_commit": "596a1b37b343f16d83ab4ae5a8eaa6de15a678cd",
+    "task_id": "TASK-0056"
   }
 ]

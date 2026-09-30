@@ -11,10 +11,16 @@ allowed_scope:
 - docs/operations/pytest-temporary-roots.md
 - tests/integration/test_external_review_command.py
 - tests/integration/test_begin_close_commands.py
+- src/aiflow/document_parsing.py
+- src/aiflow/policy.py
+- src/aiflow/storage.py
+- tests/unit/test_document_parsing.py
+- tests/unit/test_policy.py
+- tests/unit/test_storage.py
 base_commit: ef92b795da729566870ff4878f100a4ffe319db5
 branch: codex/e4-verification-control
 created_at: '2026-09-30T02:11:18Z'
-current_state: FAILED
+current_state: IMPLEMENTING
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -44,6 +50,12 @@ decision_units:
   - docs/operations/pytest-temporary-roots.md
   - tests/integration/test_external_review_command.py
   - tests/integration/test_begin_close_commands.py
+  - src/aiflow/document_parsing.py
+  - src/aiflow/policy.py
+  - src/aiflow/storage.py
+  - tests/unit/test_document_parsing.py
+  - tests/unit/test_policy.py
+  - tests/unit/test_storage.py
   inputs:
   - TASK-0055 fifth full native V2 failed with pytest deadline failures; its preserved
     source and evidence are the baseline.
@@ -53,6 +65,9 @@ decision_units:
   - Preserved second full V2 and original-assertion diagnostics confirm Windows fixture
     physical-path failures and an unbounded Git-helper timeout cleanup; command timeout
     cause remains unknown.
+  - Preserved third full V2 has two deadline failures; an independently completed
+    Python 3.11 profile measures repeated safe YAML decoding, without proving the
+    original timeout cause.
   permission_requirements:
   - action_approval
   planned_actions:
@@ -64,6 +79,9 @@ decision_units:
   - Repair only test-side Windows physical I/O and owned Git process-tree timeout
     cleanup while retaining logical fixture roots, original assertions, command deadlines
     and production environment.
+  - Reuse only bounded content-keyed pure YAML decoding with independent return values,
+    fresh actual file reads and all unchanged schema, semantic, identity and freshness
+    validation.
   protections:
     dry_run: false
     verified_backup: false
@@ -84,6 +102,10 @@ decision_units:
   - Reproduce original failing cases and complete both affected integration modules
     under the actual native minimal environment and run-owned leaf depth before complete
     V2.
+  - Verify content drift despite equal size and restored mtime, missing/unsafe/corrupt
+    files, live schema and semantic errors, deep result isolation, aliases/cycles,
+    size/capacity bounds and parser/custom-value fallback; measure the complete unchanged
+    module before full V2.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
@@ -96,13 +118,13 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 0a2f502b9310411d71e6502e871a00e5d1cf600dca7b4ebcbb27f414a4ff1751
+frozen_spec_sha256: e3fcf4e6c3f13aef834d71be2e10b4947098311e383b5bb100bdf74d183ddd85
 goal: Add explicit run-owned external pytest temporary roots for governed verification
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-09-30T07:45:37Z'
-subject_commit: 4f0288b4afb608412f984fa9078b7b0692fa0e6f
+spec_frozen_at: '2026-09-30T10:47:52Z'
+subject_commit: 596a1b37b343f16d83ab4ae5a8eaa6de15a678cd
 task_id: TASK-0056
-updated_at: '2026-09-30T09:27:22Z'
+updated_at: '2026-09-30T10:52:18Z'
 worktree_dirty: false
 worktree_dirty_paths: []
