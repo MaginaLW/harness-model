@@ -7,7 +7,6 @@ import hashlib
 import json
 import os
 import shutil
-import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import dataclass
@@ -66,10 +65,7 @@ SPECIFICATION = """# Task Specification
 
 
 def git(root: Path, *arguments: str) -> str:
-    result = subprocess.run(
-        ["git", *arguments], cwd=root, capture_output=True, check=True, encoding="utf-8", timeout=10
-    )
-    return result.stdout.rstrip("\r\n")
+    return run_git(root, *arguments)
 
 
 def commit(root: Path, message: str) -> str:
@@ -97,9 +93,21 @@ def digest(value: object) -> str:
     return hashlib.sha256(canonical(value)).hexdigest()
 
 
+def physical_path(path: Path) -> Path:
+    """Use Win32 file I/O names without changing logical fixture or service paths."""
+    if os.name != "nt":
+        return path
+    absolute = str(path.absolute())
+    if absolute.startswith("\\\\?\\"):
+        return path
+    if absolute.startswith("\\\\"):
+        return Path("\\\\?\\UNC\\" + absolute[2:])
+    return Path("\\\\?\\" + absolute)
+
+
 def tree_snapshot(root: Path) -> dict[str, bytes | None]:
     """Include empty directories as well as every byte under the full task root."""
-    physical_root = Path("\\\\?\\" + str(root)) if os.name == "nt" else root
+    physical_root = physical_path(root)
     return {
         path.relative_to(physical_root).as_posix(): None if path.is_dir() else path.read_bytes()
         for path in sorted(physical_root.rglob("*"))
@@ -263,7 +271,7 @@ def baseline_cases(tmp_path_factory: pytest.TempPathFactory) -> dict[tuple[bool,
 
 def copy_case(tmp_path: Path, baseline: Case) -> Case:
     root = tmp_path.parent / f"r{next(_ROOT_COUNTER)}"
-    shutil.copytree(baseline.root, root)
+    shutil.copytree(physical_path(baseline.root), physical_path(root))
     report = tmp_path / "synthetic-report.bin"
     report.write_bytes(baseline.report_path.read_bytes())
     mapping = None
@@ -782,7 +790,7 @@ def historical_case(tmp_path: Path, historical_finding_baselines: dict[bool, Cas
 
 
 def historical_attachment(case: Case) -> tuple[Path, bytes, dict[str, Any]]:
-    paths = list((case.task / "external-reviews").rglob("*.json"))
+    paths = list(physical_path(case.task / "external-reviews").rglob("*.json"))
     assert len(paths) == 1
     raw = paths[0].read_bytes()
     value = json.loads(raw)
@@ -922,7 +930,7 @@ def test_historical_suggested_finding_retains_valid_old_context_when_new_context
     assert tree_snapshot(case.tasks) == before
     second = case.record(prepared["preflight_sha256"])
     assert second["status"] == "recorded"
-    appended = json.loads((case.root / second["record_path"]).read_bytes())
+    appended = json.loads((physical_path(case.root / second["record_path"])).read_bytes())
     assert appended["previous_record_sha256"] == digest(first_value)
     assert (
         appended["envelope"]["target_context"]["context_sha256"] == case.context["context_sha256"]
@@ -1042,7 +1050,7 @@ def test_record_keeps_incomplete_source_meaning_without_executing_text(
     before = tree_snapshot(case.tasks)
     result = case.record()
     assert result["status"] == "recorded"
-    attachment = json.loads((case.root / result["record_path"]).read_text())
+    attachment = json.loads((physical_path(case.root / result["record_path"])).read_text())
     assert attachment["envelope"] == case.envelope
     assert not marker.exists()
     after = tree_snapshot(case.tasks)
@@ -1052,7 +1060,7 @@ def test_record_keeps_incomplete_source_meaning_without_executing_text(
 def test_record_first_version_replay_and_whitespace_no_op_preserve_old_bytes(case: Case) -> None:
     before = tree_snapshot(case.tasks)
     first = case.record()
-    path = case.root / first["record_path"]
+    path = physical_path(case.root / first["record_path"])
     original = path.read_bytes()
     candidate = json.loads(original)
     require_valid_contract("external-review-import", candidate)
@@ -1064,7 +1072,7 @@ def test_record_first_version_replay_and_whitespace_no_op_preserve_old_bytes(cas
     case.envelope_path.write_text(json.dumps(case.envelope, indent=4), encoding="utf-8")
     assert case.record()["status"] == "no_op"
     assert path.read_bytes() == original
-    assert len(list((case.task / "external-reviews").rglob("*.json"))) == 1
+    assert len(list(physical_path(case.task / "external-reviews").rglob("*.json"))) == 1
     after = tree_snapshot(case.tasks)
     assert all(after[name] == content for name, content in before.items())
 
@@ -1105,7 +1113,7 @@ def test_new_version_chain_and_old_version_replay_never_change_head(recorded_cas
     case.envelope["source"]["report_version"] = "synthetic-2"
     case.save()
     second = case.record()
-    second_value = json.loads((case.root / second["record_path"]).read_text())
+    second_value = json.loads((physical_path(case.root / second["record_path"])).read_text())
     assert second_value["previous_record_sha256"] == digest(first_value)
     before = tree_snapshot(case.tasks)
     case.envelope = first_envelope
@@ -1115,7 +1123,7 @@ def test_new_version_chain_and_old_version_replay_never_change_head(recorded_cas
     case.envelope["source"]["report_version"] = "synthetic-3"
     case.save()
     third = case.record()
-    third_value = json.loads((case.root / third["record_path"]).read_text())
+    third_value = json.loads((physical_path(case.root / third["record_path"])).read_text())
     assert third_value["previous_record_sha256"] == digest(second_value)
 
 
@@ -1266,7 +1274,7 @@ def test_postcommit_cleanup_failure_reports_committed_record_and_keeps_it(
     result = case.record()
     assert result["status"] == "recorded"
     assert result["reason_codes"] == ["EXTERNAL_REVIEW_COMMITTED_CLEANUP_REQUIRED"]
-    target = case.root / result["record_path"]
+    target = physical_path(case.root / result["record_path"])
     original = target.read_bytes()
     before = tree_snapshot(case.tasks)
     assert case.preflight()["status"] == "cleanup_required"
@@ -1290,7 +1298,7 @@ def test_competing_same_version_never_overwrites_and_can_replay(case: Case) -> N
     assert successful
     assert sum(result["status"] == "recorded" for result in successful) == 1
     assert all(result["status"] in {"recorded", "no_op"} for result in successful)
-    records = list((case.task / "external-reviews").rglob("*.json"))
+    records = list(physical_path(case.task / "external-reviews").rglob("*.json"))
     assert len(records) == 1
     assert json.loads(records[0].read_text())["envelope"] == case.envelope
     assert case.record()["status"] == "no_op"
@@ -1453,13 +1461,15 @@ def test_existing_chain_fork_is_refused_without_repair(recorded_case: Case) -> N
     case.envelope["source"]["report_version"] = "synthetic-2"
     case.save()
     second = case.record()
-    second_value = json.loads((case.root / second["record_path"]).read_text())
+    second_value = json.loads((physical_path(case.root / second["record_path"])).read_text())
     fork = deepcopy(second_value)
     fork["envelope"]["source"]["report_version"] = "synthetic-fork"
     fork["input_sha256"] = digest({"envelope": fork["envelope"], "repository_mapping": None})
     fork["previous_record_sha256"] = digest(first_value)
     fork_version = hashlib.sha256(b"synthetic-fork").hexdigest()
-    atomic_write_json((case.root / second["record_path"]).with_name(fork_version + ".json"), fork)
+    atomic_write_json(
+        (physical_path(case.root / second["record_path"])).with_name(fork_version + ".json"), fork
+    )
     case.envelope["source"]["report_version"] = "synthetic-3"
     case.save()
     rejected_without_writes(case)
@@ -1598,16 +1608,16 @@ def test_competing_inputs_share_guard_and_cannot_fork_or_overwrite(
     assert len(winners) == 1
     winner_index, winner = winners[0]
     assert winner["status"] == "recorded"
-    target = case.root / winner["record_path"]
+    target = physical_path(case.root / winner["record_path"])
     original = target.read_bytes()
     assert json.loads(original)["envelope"] == choices[winner_index].envelope
-    assert len(list((case.task / "external-reviews").rglob("*.json"))) == 1
+    assert len(list(physical_path(case.task / "external-reviews").rglob("*.json"))) == 1
     loser = choices[1 - winner_index]
     if different_version:
         second = loser.record()
-        saved = json.loads((case.root / second["record_path"]).read_text())
+        saved = json.loads((physical_path(case.root / second["record_path"])).read_text())
         assert saved["previous_record_sha256"] == digest(json.loads(original))
-        assert len(list((case.task / "external-reviews").rglob("*.json"))) == 2
+        assert len(list(physical_path(case.task / "external-reviews").rglob("*.json"))) == 2
     else:
         rejected_without_writes(loser)
     assert target.read_bytes() == original
@@ -1667,7 +1677,7 @@ def test_historical_record_source_and_target_must_agree_even_with_recomputed_inp
     if implementation:
         case = copy_case(tmp_path, baseline_cases[(True, False)])
         first = case.record()
-        path = case.root / first["record_path"]
+        path = physical_path(case.root / first["record_path"])
         saved = json.loads(path.read_text())
     else:
         recorded = request.getfixturevalue("recorded_baselines")
@@ -1700,10 +1710,7 @@ def test_json_numeric_overflow_and_unpaired_surrogate_are_safe_refusals(
 
 
 def snapshot(root: Path) -> dict[str, bytes | None]:
-    return {
-        path.relative_to(root).as_posix(): None if path.is_dir() else path.read_bytes()
-        for path in sorted(root.rglob("*"))
-    }
+    return tree_snapshot(root)
 
 
 def prepare_inputs(
@@ -1783,7 +1790,7 @@ def test_cli_preflight_record_and_replay_preserve_formal_artifacts(
     assert main(arguments("record", source, raw, preflight["preflight_sha256"])) == 0
     recorded = json.loads(capsys.readouterr().out)
     assert recorded["status"] == "recorded"
-    record_path = repository / recorded["record_path"]
+    record_path = physical_path(repository / recorded["record_path"])
     original = record_path.read_bytes()
     after = snapshot(task_root)
     assert all(after[name] == value for name, value in before.items())
@@ -1867,7 +1874,7 @@ def test_cli_stdout_failure_after_commit_retains_record_and_read_only_recovery(
     captured = capsys.readouterr()
     assert "EXTERNAL_REVIEW_OUTPUT_FAILED" in captured.err
     assert str(source) not in captured.err
-    path = repository / preflight["record_path"]
+    path = physical_path(repository / preflight["record_path"])
     original = path.read_bytes()
     before = snapshot(repository / ".ai/tasks")
     assert (
@@ -1936,7 +1943,7 @@ def test_cli_both_output_streams_failing_after_commit_preserves_durable_record(
     assert main(arguments("record", source, raw, preflight["preflight_sha256"])) == 1
     assert attempts == 2
     assert capsys.readouterr().out == ""
-    target = repository / preflight["record_path"]
+    target = physical_path(repository / preflight["record_path"])
     original = target.read_bytes()
     before = snapshot(repository / ".ai/tasks")
     assert external_review.preflight_external_review(repository, TASK_ID, source, raw)[

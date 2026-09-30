@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import shutil
+import signal
 import subprocess
+import sys
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -26,16 +29,103 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
 
 
-def run_git(repository: Path, *arguments: str) -> str:
-    result = subprocess.run(
-        ["git", *arguments],
+def _run_fixture_command(repository: Path, argv: list[str]) -> str:
+    """Retain the fixture deadline while killing owned children before draining pipes."""
+    process = subprocess.Popen(
+        argv,
         cwd=repository,
-        capture_output=True,
-        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         encoding="utf-8",
-        timeout=10,
+        start_new_session=os.name != "nt",
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
     )
-    return result.stdout.rstrip("\r\n")
+    drained = False
+    try:
+        try:
+            stdout, stderr = process.communicate(timeout=10)
+            drained = True
+        except subprocess.TimeoutExpired as original:
+            if os.name == "nt" and process.poll() is None:
+                taskkill = Path(os.environ["SystemRoot"]) / "System32" / "taskkill.exe"
+                try:
+                    subprocess.run(
+                        [str(taskkill), "/PID", str(process.pid), "/T", "/F"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        check=False,
+                        timeout=5,
+                    )
+                except (OSError, subprocess.TimeoutExpired):
+                    pass
+            elif os.name != "nt":
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            if process.poll() is None:
+                process.kill()
+            try:
+                stdout, stderr = process.communicate(timeout=5)
+                drained = True
+            except subprocess.TimeoutExpired:
+                # Closing a pipe with a live reader can itself block. Preserve
+                # the command timeout rather than entering another unbounded wait.
+                raise original from None
+            raise subprocess.TimeoutExpired(argv, 10, output=stdout, stderr=stderr) from original
+    finally:
+        if drained:
+            assert process.stdout is not None and process.stderr is not None
+            process.stdout.close()
+            process.stderr.close()
+    if process.returncode:
+        raise subprocess.CalledProcessError(process.returncode, argv, output=stdout, stderr=stderr)
+    return stdout.rstrip("\r\n")
+
+
+def run_git(repository: Path, *arguments: str) -> str:
+    return _run_fixture_command(repository, ["git", *arguments])
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows timeout cleanup with inherited child pipes")
+def test_fixture_command_timeout_terminates_real_pipe_holding_child(tmp_path: Path) -> None:
+    import ctypes
+    import time
+    from ctypes import wintypes
+
+    pid_file = tmp_path / "owned-child.pid"
+    child = (
+        "import os, pathlib, sys, time; "
+        "pathlib.Path(sys.argv[1]).write_text(str(os.getpid())); time.sleep(60)"
+    )
+    parent = (
+        "import subprocess, sys, time; "
+        "subprocess.Popen([sys.executable, '-c', sys.argv[1], sys.argv[2]], "
+        "stdout=sys.stdout, stderr=sys.stderr); time.sleep(60)"
+    )
+    started = time.monotonic()
+    with pytest.raises(subprocess.TimeoutExpired) as caught:
+        _run_fixture_command(tmp_path, [sys.executable, "-c", parent, child, str(pid_file)])
+    assert caught.value.timeout == 10
+    assert time.monotonic() - started < 30
+    child_pid = int(pid_file.read_text())
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+    kernel.GetExitCodeProcess.restype = wintypes.BOOL
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.CloseHandle.restype = wintypes.BOOL
+    handle = kernel.OpenProcess(0x1000, False, child_pid)
+    if handle:
+        try:
+            exit_code = wintypes.DWORD()
+            assert kernel.GetExitCodeProcess(handle, ctypes.byref(exit_code))
+            assert exit_code.value != 259  # STILL_ACTIVE
+        finally:
+            assert kernel.CloseHandle(handle)
+    else:
+        assert ctypes.get_last_error() == 87  # PID no longer exists
 
 
 def commit_all(repository: Path, message: str) -> None:
