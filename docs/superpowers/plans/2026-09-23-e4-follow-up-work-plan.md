@@ -1,5 +1,30 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-09-30 TASK-0056 修正准入与第三轮完整验证计划
+
+第二轮完整 V2 保留 FAILED（10/14 通过）、Gate REJECT；unit 为 1838 passed，
+regression、coverage、integration 实际超时，diff coverage 缺少 XML，覆盖率
+unknown。action002 已消费。失败与原件见源分支 `verification-failure-002.md`。
+独立诊断后，修正规格已完成原生分类、冻结、设计 Review、spec approval 和 begin。
+新候选 `4f0288b4afb608412f984fa9078b7b0692fa0e6f` 修复测试侧物理 I/O 与
+拥有明确进程归属的 Git 超时清理；初始 Git 超时原因仍 unknown。
+
+保持原断言和 native 环境的四个完整专项分别为 34、81、187、28 项通过，
+外部审查另有 1 项原有 POSIX FIFO skip；真实 Windows 继承管道子进程用例通过。
+首次外部审查诊断在 93% 被外层诊断期限终止，无完整结论；原始部分日志保留。
+后续完整专项的通过不替代完整 V2、覆盖率或 Gate。详见 `verification-retry-002.md`。
+
+本阶段并行启用 2 名 sub-agent：未参与实现者准备并运行原生独立 V2；另一位
+未参与实现者只读审查全部实现及保留证据，待完整结果和当前 context 后产正式
+implementation Review。主 agent 统一批准绑定、账本和文档；完整测试运行期间
+源码及 refs 冻结，不并发执行争用资源的测试。
+
+后续阶段串行依赖为 TASK-0056 Gate → TASK-0055 依赖范围修订、重新准入、
+完整 V2 与 Gate → TASK-0057 完整候选审查、发布 Gate、固定 PR head required CI、
+推送合并与独立远端核验。每阶段准入和动作绑定串行；独立审查/只读准备阶段
+最多启用 2 名 sub-agent，避免相同文件写入冲突。原预算、阈值、Policy 不变。
+真实 F 的匹配原件仍未取得；条件阶段与 provider 不因充分授权而自动满足输入条件。
+
 ## 2026-09-30 TASK-0056 首轮完整 V2 失败与限定诊断
 
 固定源码 `659f61cb4245112d75b119b103821bb06bae69ce` 的完整原生 V2 已于

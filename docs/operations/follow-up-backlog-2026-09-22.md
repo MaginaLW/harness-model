@@ -1,5 +1,24 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-30 TASK-0056 修复后的实际待办
+
+第二轮完整 V2 仍 FAILED（10/14 通过）：unit 1838 passed，三项完整集合
+超时，diff coverage 缺少 XML，覆盖率 unknown。action002 已消费、Gate REJECT，
+原始失败与账本不覆盖。长路径测试 I/O 和 Git 超时后的管道清理已诊断并在
+修正规格下重新准入；初始 Git 超时原因仍 unknown。
+
+新修复候选 `4f0288b4afb608412f984fa9078b7b0692fa0e6f` 已提交、同步。
+共享夹具、验证命令、外部审查和 E2E 完整专项分别 34、81、187、28 项通过；
+外部审查另有 1 项原有 POSIX FIFO skip。原业务断言和全部门禁保持现值。
+当前待完成第三轮完整原生 V2、独立实现 Review、finalize、代码批准与 Gate。
+两名 sub-agent 分别承担独立 verifier 与审查，主 agent 统一账本与交付。
+
+串行依赖保持 TASK-0056 Gate → TASK-0055 依赖重新准入与完整 V2/Gate →
+TASK-0057 累积候选审查、required CI 和已获授权的推送合并。真实导入 F 仍缺
+匹配的原件与来源/目标绑定，不能以 synthetic 或错目标报告代替。
+便携依据见源分支 `verification-failure-002.md`、`verification-retry-002.md`。
+下方历史窗口保留，专项结果不注销原完整失败或提前形成发布通过结论。
+
 ## 2026-09-30 TASK-0056 固定候选的实际待办
 
 设计复审、spec approval、begin 及实现提交已完成，当前候选为

@@ -1,5 +1,28 @@
 # 维护收尾与待办
 
+## 2026-09-30 TASK-0056 第二轮失败后的修复候选
+
+第二轮完整原生 V2 保留 FAILED：14 项中 10 项通过、4 项失败；unit 为
+1838 passed，regression、coverage 与 integration 实际超时，diff coverage
+因缺少 XML 退出 1。总覆盖率和差异覆盖率仍 unknown，Gate REJECT。
+action002 已消费；原始日志、receipt、snapshot 和失败摘要均保留。
+
+独立诊断定位到 Windows 测试夹具的长路径物理 I/O，以及 Git 命令超时后
+没有期限的管道清理等待；最初 Git 超时原因仍 unknown。修正规格已经原生
+重新准入，设计 Review、spec approval 和 begin 完成。新源码候选为
+`4f0288b4afb608412f984fa9078b7b0692fa0e6f`，仅修复获准的两份测试夹具。
+原逻辑路径、业务断言、命令期限、生产环境和 Policy 门禁保持现值。
+
+四组独立完整专项通过：共享 Git 夹具 34 passed、验证命令 81 passed、
+外部审查 187 passed / 1 原有 POSIX FIFO skip、E2E 28 passed。
+真实 Windows 子进程继承管道的超时清理用例亦通过。这些结果支持第三轮
+完整原生 V2 准入，不构成完整 V2 或 Gate PASS。当前由两名 sub-agent
+分别执行独立 verifier 准入与实现审查；正式 Review 等待完整验证证据。
+先完成 TASK-0056 Gate，再重新准入 TASK-0055，最后以 TASK-0057 完成
+固定候选 required CI 与已获授权的推送合并。真实报告 F 的匹配输入仍待取得。
+便携摘要见源分支的 `verification-failure-002.md` 和 `verification-retry-002.md`；
+下方历史核定、用户草稿及无关工作树保持原样。
+
 ## 2026-09-30 TASK-0056 候选固定
 
 TASK-0056 独立设计复审通过后，原生 spec approval 和 begin 已完成。
