@@ -24,6 +24,7 @@ from aiflow.task_service import (
     load_task_record,
     transition_task_record,
 )
+from tests.integration.repository_fixture import populate_or_copy
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
@@ -142,8 +143,7 @@ def commit_all(repository: Path, message: str) -> None:
     )
 
 
-def create_repository(path: Path) -> Path:
-    path.mkdir()
+def _populate_repository(path: Path) -> Path:
     run_git(path, "init", "-b", "main")
     ai_root = path / ".ai"
     ai_root.mkdir()
@@ -163,6 +163,27 @@ def create_repository(path: Path) -> Path:
         "initial",
     )
     return path
+
+
+_STANDARD_RUN_GIT = run_git
+_STANDARD_COMMAND = _run_fixture_command
+_STANDARD_POPULATE = _populate_repository
+
+
+def create_repository(path: Path) -> Path:
+    path.mkdir()
+    return populate_or_copy(
+        path,
+        project_root=PROJECT_ROOT,
+        repository_id=REPOSITORY_ID,
+        populate=_populate_repository,
+        run_git=run_git,
+        standard_helpers=(
+            run_git is _STANDARD_RUN_GIT
+            and _run_fixture_command is _STANDARD_COMMAND
+            and _populate_repository is _STANDARD_POPULATE
+        ),
+    )
 
 
 def start(repository: Path, monkeypatch: pytest.MonkeyPatch) -> None:
