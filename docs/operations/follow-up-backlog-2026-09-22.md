@@ -1,5 +1,18 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-09-30 第三轮 V2 后的实际待办
+
+TASK-0056 第三轮完整原生 V2 为 FAILED（12/14 通过）；regression 900 秒、
+integration 600 秒均实际超时。完整 coverage 为 2676 passed / 1 原有 FIFO skip，
+合并覆盖率 88.8278%、diff coverage 95%，unit 1838 passed，acceptance 9 passed。
+质量阈值通过不注销两项超时；Gate REJECT，action003 已消费，旧记录完整保留。
+
+当前待办为定位完整集合的耗时热点、基于事实修正或选择合适的隔离验证运行时，
+然后新 preflight/单次动作、完整原生 V2、独立 Review、finalize、代码批准和 Gate。
+启用 2 名 sub-agent，分别承担诊断与独立审计；资源密集测试串行，源树运行时冻结。
+随后才重新准入 TASK-0055，再由 TASK-0057 完成累积候选 required CI 与已授权
+推送合并。F 仍须匹配真实报告输入。便携依据：`verification-failure-003.md`。
+
 ## 2026-09-30 TASK-0056 修复后的实际待办
 
 第二轮完整 V2 仍 FAILED（10/14 通过）：unit 1838 passed，三项完整集合

@@ -1,5 +1,21 @@
 # 维护收尾与待办
 
+## 2026-09-30 TASK-0056 第三轮完整验证核定
+
+第三轮完整原生 V2 在候选 `4f0288b4afb608412f984fa9078b7b0692fa0e6f`
+结束为 FAILED：12/14 通过，regression 与 integration 分别超过原 900 秒和
+600 秒期限。完整 coverage 集合实际 2676 passed / 1 原有 POSIX FIFO skip，
+合并覆盖率 88.8278%，diff coverage 打印 95%；unit 1838 passed，acceptance
+9 passed。两项超时仍无完整 summary，不能据部分输出声称通过，Gate REJECT。
+action003 已消费，所有失败、日志与 receipt 保留；尚无正式实现 Review/finalize。
+
+当前先核定并提交失败记录，再用 2 名 sub-agent 分别定位耗时热点和独立审计
+诊断边界；主 agent 同步维护便携证据。诊断保持完整断言和原 Policy，不能替代
+原生验证。重试须有诊断依据、新 preflight 与单次动作。后续仍依 TASK-0056
+Gate → TASK-0055 重新准入及 Gate → TASK-0057 required CI、已授权推送合并。
+真实报告 F 的匹配原件仍未取得。见源分支 `verification-failure-003.md`；下方
+历次核定保留，新结果不追改历史证据。
+
 ## 2026-09-30 TASK-0056 第二轮失败后的修复候选
 
 第二轮完整原生 V2 保留 FAILED：14 项中 10 项通过、4 项失败；unit 为

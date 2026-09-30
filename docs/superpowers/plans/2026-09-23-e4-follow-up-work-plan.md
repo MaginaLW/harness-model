@@ -1,5 +1,24 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-09-30 第三轮完整 V2 结果与诊断阶段
+
+候选 `4f0288b4afb608412f984fa9078b7b0692fa0e6f` 第三轮原生 V2 结束 FAILED，
+12/14 检查通过；regression 与 integration 超时，原 900/600 秒预算保持现值。
+完整 coverage 实际 2676 passed / 1 原有 POSIX FIFO skip，合并覆盖率 88.8278%、
+diff coverage 95%；unit 1838 passed，acceptance 9 passed。Gate REJECT，
+action003 已消费；没有正式 implementation Review 或 finalize。所有旧证据保留。
+
+先串行提交本轮失败账本及便携核定。诊断阶段并行启用 2 名 sub-agent：一名以
+完整模块、原断言和 native MINENV 收集私有性能证据，另一名只读核查其方案、
+输出和治理边界。主 agent 统一证据与后续决策；资源密集验证不得并发，运行期间
+冻结源码与 refs。profiling 属诊断，不形成 V2 PASS；尚未确定超时根因，不能先
+按猜测加入缓存或放宽预算。诊断后再冻结具体修正或验证运行时并完成新 preflight、
+单次动作及完整 V2。Review/finalize/批准/Gate 串行依赖真实完整结果。
+
+TASK-0056 Gate 后才推进 TASK-0055 的依赖和新增修正重新准入；最终由
+TASK-0057 绑定累积候选、required CI 与推送合并。F 输入仍缺，条件阶段不自动
+启动。便携结果见源分支 `verification-failure-003.md`，下方历史计划保持原样。
+
 ## 2026-09-30 TASK-0056 修正准入与第三轮完整验证计划
 
 第二轮完整 V2 保留 FAILED（10/14 通过）、Gate REJECT；unit 为 1838 passed，
