@@ -154,12 +154,15 @@ def _task_path(root: Path, task_id: str, relative: str = "") -> Path:
 
 
 def _metadata_identity(metadata: os.stat_result) -> tuple[int, int, int, int, int]:
+    creation_or_change_ns = metadata.st_ctime_ns
+    if os.name == "nt":
+        creation_or_change_ns = getattr(metadata, "st_birthtime_ns", creation_or_change_ns)
     return (
         metadata.st_dev,
         metadata.st_ino,
         metadata.st_size,
         metadata.st_mtime_ns,
-        metadata.st_ctime_ns,
+        creation_or_change_ns,
     )
 
 
