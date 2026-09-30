@@ -1,5 +1,18 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-01 直接入口候选的下一步
+
+40次Git只读配对与2次status实际exit0、raw一致、inputs未变，配对中位收益
+13.4795ms只是候选证据。194项完整模块subset全部通过；cProfile的9 entry/
+49 edge有inline>total异常，函数耗时归属全unknown。资源交回、原600失败保持。
+
+Task56最新冻结 `b5898529` 仍REVIEW/V2。先完成独立设计审查和当前批准/begin，
+再仅改两个现有安全测试路径的完整mingw64资格；固定候选在新实际PATH绑定下
+需真实direct warm、原完整fixture/external-review及integration600通过，随后
+fresh action005/完整V2/Review/finalize/代码批准/Gate。两名sub-agent并行设计
+审查与测试准备，heavy验证与下游Task55/57串行；所有门槛、原assertions保持。
+源记录 `endpoint-and-profile-diagnostics-008.md`；F保持本机已搜索范围未找到。
+
 ## 2026-10-01 完整被动诊断后的待办
 
 当前候选完整 integration 私有诊断为 854 passed / 1 原 FIFO skip / 818.91 秒，

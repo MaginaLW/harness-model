@@ -1,5 +1,22 @@
 # 维护收尾与待办
 
+## 2026-10-01 直接入口候选与剖析计时边界
+
+原source `e3790a4` 的40次只读Git入口配对查询及2次status守卫全部exit0；
+输出bytes一致，源码/refs/index未变，配对差值中位13.4795ms、19/20正值。
+这只是单argv的候选收益，不证明完整语义等价或integration600通过。
+四完整模块实际194 passed/367.30s/exit0，逐ID三阶段完整；原始cProfile
+出现9 entry/49 edge的inline>total，全部函数成本归属unknown，不用于生产修复。
+已知自有进程退出，资源交回；原600失败及全部历史原件保持。
+
+Task56已重新分类REVIEW/V2并冻结精确直接mingw64夹具/runtime候选，最新spec
+`b5898529`；当前subject `87f4c04`，仅增加安全说明，夹具实现尚未开始。
+MINENV算法不改，但实际所选Git parent/PATH改变必须新绑定；原53用例、完整
+原选择器与600秒、14 checks/5 mutations和85%/90%门槛保持。独立设计审查
+与安全测试准备由2名sub-agent并行，root串行准入/固定源码/验证/统一提交。
+依据为源分支 `endpoint-and-profile-diagnostics-008.md` 和 `design-amendment-006.md`。
+Task55/57仍待实际Gate，真实F原件在已搜索范围未找到，不扩大provider阶段。
+
 ## 2026-10-01 当前候选的完整被动耗时诊断
 
 固定 source `e3790a4` 的原完整 integration 私有诊断已 actual exit 0：

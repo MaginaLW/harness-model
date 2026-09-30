@@ -1,5 +1,20 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-01 直接入口候选重新准入
+
+40个只读Git配对调用/2个status守卫实际exit0，配对差值中位13.4795ms；单argv
+测量不等于完整入口等价或600秒PASS。四完整模块194passed/exit0，但原始profile
+9 entry/49 edge有inline>total，全部函数成本归属unknown。计数/原件保留、资源
+交回；完整855诊断和原600失败分开，不以subset替代门禁。
+
+最新spec `b5898529` 已实际重新分类/冻结REVIEW/V2，夹具实施尚未开始；已保留
+旧冻结原件和诊断008。并行2名sub-agent负责独立设计审查及两个既有路径的
+安全测试准备，root独占治理。当前最小候选只支持现完整mingw64直接入口并
+live绑定cmd/core；全部模板/config/attrs/source/env/owner/partial守卫保持。
+实际PATH变化需新绑定。准入/begin→安全整合固定commit→完整原模块与600秒
+→原生V2/正式审查/Gate→Task55自身准入及Gate→Task57 exact CI/发布串行。
+全部原选择器/期限/85%/90%与CI3.11保持，真实F仍未在已搜索范围找到。
+
 ## 2026-10-01 完整被动诊断终态
 
 原完整 integration 已收齐实际结果：854 passed / 1 原 FIFO skip / 818.91 秒，
