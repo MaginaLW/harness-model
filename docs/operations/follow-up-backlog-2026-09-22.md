@@ -1,5 +1,14 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-01 有界复制设计已准入，安全实现进行中
+
+新冻结spec992b927c经真实独立REV-0008/r1 APPROVE，原生spec approval/begin已exit0。
+TASK-0056为IMPLEMENTING/REVIEW/V2，scope仍24；旧B589原件保存为spec-design-007.md。
+2名sub-agent分别实施仅_copy_snapshot/新增private helpers/EOF tests，及只读独立验证准备。
+原65cases和其余旧function/assertion AST保留；治理和安全提交分开。
+固定候选完整warm成本、完整模块与原integration600后串行全V2/Review/Gate。
+当前未有新性能或门禁PASS，action005与55、发布、F进入条件保持。
+
 ## 2026-10-01 复制对照完成，准备有界并发设计
 
 10组/20次isolated复制实际exit0，101文件逐份bytes/mode/mtime及实体隔离通过。
