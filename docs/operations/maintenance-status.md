@@ -1,5 +1,18 @@
 # 维护收尾与待办
 
+## 2026-10-02 PR #44 已创建，准确提交 required CI 失败，修复进行中
+
+累计发布实际使用 TASK-0058（REVIEW/V1），源码S715496d、发布P a2894ac3；完整原生10/10检查、非作者累计Design/Implementation APPROVE、代码批准及准确P Gate已通过。
+普通推送首次180秒超时的原件和后代历史UNKNOWN保留；独立核对已知后代当前缺席后，单独新action采用仅命令局部GH凭据协议，实际exit0并回读准确P。
+PR [#44](https://github.com/MaginaLW/harness-model/pull/44) 实际创建、已附加；headP/base48bf777及正文原件完全匹配，创建前严格main保护/app15368只读核对保持原设置。
+准确P的required run36883821312/check110441969044在2026-10-01T15:34:30Z真实FAILURE：34 failed、2905 passed、5 skipped，663.40秒；失败全在test_repository_fixture资格检查。
+含branch总覆盖率88.92%已达85%，但pytest exit1使累计diff90、whitespace、Ruff、format、mypy尚未执行。未合并、未做远端合并证明、未关闭任务。
+当前最窄诊断范围是fixture的_qualify在check-attr之前；Linux模板mode差异有受控反例，真实CI唯一底层原因仍UNKNOWN，需实际定位和最小安全修复。
+2名sub-agent分别负责fixture诊断/最小候选和非作者独立核对；主agent保留实际失败治理、按新源码准入/原必需验证/Gate，再串行精确推送、完整required CI、保护合并与证明。
+真实动作与失败记录见[Task58追加原件](../../.ai/tasks/TASK-0058/required-ci-failure-001.md)；其后本地治理提交66595bd尚未发布，不能说P包含动作后记录。
+Task53按真实push-only完成记录保持名义APPROVED_FOR_MERGE，不为本次PR误作MERGED；Task28选项C及历史BLOCKED保持。
+F仍缺目标匹配真实ZCode原报告；有界本机搜索没有正向结果，其他条件阶段沿用原进入条件。
+
 ## 2026-10-01 TASK-0057 修复与完整 Gate 通过，进入累计发布
 
 独立累计审查发现的解析缓存 P2 已由新 TASK-0057 修复；生产提交4bcedba、安全测试与说明提交afff062分开保留。
