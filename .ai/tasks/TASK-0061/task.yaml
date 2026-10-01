@@ -1,0 +1,100 @@
+allowed_scope:
+- .ai/tasks/TASK-0061/**
+base_commit: 508cf73d10be4cdd2ca4409e706fe68ead10a69d
+branch: codex/e4-cumulative-delivery
+created_at: '2026-10-01T20:36:02Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - git_remote_push
+  - github_pull_request_update
+  - protected_main_merge
+  goal: Publish cumulative E4 delivery with owned Git system qualification through
+    exact-head CI and protected merge
+  impact:
+    level: high
+  impact_categories:
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0061/**
+  inputs:
+  - Fixed source 508cf73d10be4cdd2ca4409e706fe68ead10a69d contains original gated54/55/56/57,
+    all three failed publishers58/59/60 and their actual CI failure histories, task-free
+    reference/home fixes and owned-system repair9191a646.
+  - Actual final3 source hashes c7d1c3f82c738d7c8d7b81c3fbffe8c0ec22be7da4de8820dd0f6a02d8b5218c
+    / ea1beba55b6144145a05933a31b45fec09d95f0f6a6003334036446d52b65316 / fe0d704ab6c5e86f2fc9919416cad6b677bac56b20367c6371001c02f2fa7ee9;
+    author194 modules and independent8 real probes passed, original93 named AST/guards
+    preserved and two Findings resolved.
+  - Focused Windows evidence never substitutes for every new original native selected
+    check or complete exact-head Linux CI; old193/20/6 candidates and all failures
+    remain distinct.
+  - Current read-only remote snapshot proves B48bf777, feature predecessor f402bd7,
+    PR44OPEN ownrepo/literalrefs and unchanged strict app15368 protection; refresh
+    before each external action.
+  - Owner explicitly authorized eligible pending work, necessary approvals, push and
+    merge; bind fresh exact single-use actions without reasking.
+  - Preserve53 push-only and58/59/60 failed frozen/nominal histories; future success
+    cannot native-close them MERGED. Close only54/55/56/57 and actual61 after protected
+    merge and independent actual remote proof.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Create and verify only this new publisher own governance on fixed sourceS.
+  - Ordinary non-force fast-forward push of exact Q replacing freshly reread predecessor
+    on existing feature ref.
+  - Update existing PR44 title/body using independently reviewed exact bytes; do not
+    create a duplicate PR.
+  - Require every unchanged ai-quality-gate check on exact Q then ordinary expected-head
+    protected merge.
+  - Independent actual remote proof before fetching M and applicable native close54/55/56/57/61;
+    preserve53/58/59/60 nominal states with truthful separate local postaction records.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0061
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run every original native check selected by actual classification without altered
+    selectors, budgets, thresholds or MINENV.
+  - Actual author-independent cumulative design and implementation Review cover remoteB..sourceS
+    and source/task Gates; own empty business diff does not replace cumulative source
+    review.
+  - Observe complete exact-head required Linux CI and independently verify external
+    action receipts, merge parents/tree and source/closure ancestry.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: bee8810306940cfe43ea553095d95c0c4a43ac8f4916be9103f2798b2ac898c7
+goal: Publish cumulative E4 delivery with owned Git system qualification through exact-head
+  CI and protected merge
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-01T20:39:55Z'
+subject_commit: 508cf73d10be4cdd2ca4409e706fe68ead10a69d
+task_id: TASK-0061
+updated_at: '2026-10-01T20:57:28Z'
+worktree_dirty: false
+worktree_dirty_paths: []
