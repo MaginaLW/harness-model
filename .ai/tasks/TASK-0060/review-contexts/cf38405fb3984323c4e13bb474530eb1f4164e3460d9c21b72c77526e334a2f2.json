@@ -1,0 +1,107 @@
+{
+  "base_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
+  "branch": "codex/e4-cumulative-delivery",
+  "classification_input_sha256": "ade24b06885ddef388018983582422bb5ad632c85b53f61c230a9b385d8bc352",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0060/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish cumulative E4 delivery with reviewed private fixture environment through exact-head CI and protected merge",
+        "impact_scope": [
+          ".ai/tasks/TASK-0060/**"
+        ],
+        "planned_actions": [
+          "Create and verify only this new publisher own governance on fixed sourceS.",
+          "Ordinary non-force fast-forward push of exact Q replacing freshly reread predecessor on existing feature ref.",
+          "Update existing PR44 title/body using independently reviewed exact bytes; do not create a duplicate PR.",
+          "Require every unchanged ai-quality-gate check on exact Q then ordinary expected-head protected merge.",
+          "Independent actual remote proof before fetching M and applicable native close54/55/56/57 and this publisher; preserve53/58/59 nominal states with truthful separate local postaction records."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [],
+      "files": [],
+      "totals": {
+        "additions": 0,
+        "deletions": 0,
+        "files": 0
+      }
+    },
+    "goal": "Publish cumulative E4 delivery with reviewed private fixture environment through exact-head CI and protected merge",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0060",
+        "--actor",
+        "e4-publication-governance-root",
+        "--pytest-temp-root",
+        "${PYTEST_TEMP_ROOT}"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "cf38405fb3984323c4e13bb474530eb1f4164e3460d9c21b72c77526e334a2f2",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "8677ba1fb3fe2733f3cb352dd48890936b649af907504a20922d90ed2d5467f9",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "40e9a11bcde495aba09e91a35b3037e7d5f1569f1ccf114941ef16cd38a9a8cf",
+  "subject_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
+  "task_id": "TASK-0060"
+}

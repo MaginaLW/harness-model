@@ -11,5 +11,19 @@
     "spec_sha256": "40e9a11bcde495aba09e91a35b3037e7d5f1569f1ccf114941ef16cd38a9a8cf",
     "subject_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
     "task_id": "TASK-0060"
+  },
+  {
+    "actor": "owner-authorized-root",
+    "approval_type": "code",
+    "approved_at": "2026-10-01T19:27:27Z",
+    "base_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "8677ba1fb3fe2733f3cb352dd48890936b649af907504a20922d90ed2d5467f9",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing explicit owner authorization covers completion and necessary approvals; current fixed source S, all original native V1 checks, actual independent Design and Implementation APPROVE and exact native-valid packet are verified. Remote CI and merge remain required.",
+    "schema_version": "1.0",
+    "spec_sha256": "40e9a11bcde495aba09e91a35b3037e7d5f1569f1ccf114941ef16cd38a9a8cf",
+    "subject_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
+    "task_id": "TASK-0060"
   }
 ]
