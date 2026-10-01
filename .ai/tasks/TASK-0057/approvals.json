@@ -27,5 +27,19 @@
     "spec_sha256": "fe6466059ee91d7074c5040bda161d0e4e87226579241804cb71cef87441ec4e",
     "subject_commit": "afff0629a2f68184a3b0e388af4ed5dc08a995e0",
     "task_id": "TASK-0057"
+  },
+  {
+    "actor": "e4-governance-owner-authorized-root",
+    "approval_type": "code",
+    "approved_at": "2026-10-01T13:20:13Z",
+    "base_commit": "46a78b44ec02a0681528f567e313fe88e109b4d9",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "152f13600a0fdfea081eddeb3fef3d870aa5d35279627dcd60358356f49e7efc",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly authorized TODO completion and necessary approvals. Actual afff062 passed original full V2 14 checks and five fixed mutations, independent REV-0002 APPROVE and same-verifier single finalization; root verified original native archives and deterministically formatted valid Review packet without substantive changes. Separate push and merge require current exact publication actions.",
+    "schema_version": "1.0",
+    "spec_sha256": "fe6466059ee91d7074c5040bda161d0e4e87226579241804cb71cef87441ec4e",
+    "subject_commit": "afff0629a2f68184a3b0e388af4ed5dc08a995e0",
+    "task_id": "TASK-0057"
   }
 ]
