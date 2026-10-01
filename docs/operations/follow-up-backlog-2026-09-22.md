@@ -1,5 +1,18 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-02 TASK-0060 准确 Q CI 再次失败，先诊断系统配置
+
+TASK-0060 的固定S14d80213已完成全部原生10/10检查、独立Design/Implementation APPROVE和准确Q Gate；Qf402bd7ab1fbe6c6415117817d3adb0ec62899ac实际普通推送并更新既有PR44，字节回读一致。
+准确Q required run36914902620/attempt1/check110546355233 app15368真实FAILURE：16 failed、2928 passed、36 skipped，612.84秒；原14个CONFIG阻挡用例及新增环境隔离正向、GIT_ENV反例仍在参考init前失败。
+含branch总覆盖率88.92%达到85%，pytest exit1使累计diff90、whitespace、Ruff、format、mypy均未执行；Windows完整验证与专项对照不替代Linux整链CI。
+主agent实际4cf52b/0重算独立操作手回全部115件及18只读GET终态，确认准确Q/app/run/attempt/event/path/PR44真实失败；原始job log97740字节SHA2569393b35785447ea57680bc929b6785b0d80645c452bd8672530a85607f3a49cd保持。
+Task60真实动作、批准事件、调用次数和失败说明已单独提交1fbf1bc；这些是post-Q本地治理，未包含于远端Q。原Task60冻结规格、Review、验证和名义APPROVED_FOR_MERGE状态保持，不用未来CI成功将58/59/60 native close MERGED。
+当前Linux有效配置key/来源及唯一失败分支仍UNKNOWN；准确镜像安装脚本提供系统配置候选，须真实Git受控对照和独立审查，禁止猜测原因、扩大配置白名单、跳过原断言或放宽门禁。
+并行阶段启用2个sub-agent：作者定位最小受控测试环境修复，非作者核对镜像证据与资格守卫；主agent复核历史证据及统一阶段提交。源码冻结、完整原生验证、发布、准确CI、保护合并、独立证明及close串行，依赖修复审查通过。
+未合并、未执行实际M证明、未fetchM或关闭源任务；修复超出Task60 own scope，安全源码独立提交后须真实分配新publisher，完整执行全部原选定检查及准确head整链CI。最终适用close仅54/55/56/57和新publisher；53仍push-only。
+F经有界本机及相关PR只读搜索仍缺目标匹配真实ZCode原件，不声称全局无报告；条件后继阶段、Task28及历史BLOCKED保持，未调用provider或付费接口。
+
+
 ## 2026-10-02 夹具私有测试环境修复已提交，准备新发布验证
 
 安全测试提交b3a26da66915b9371dc52af296ead4f297b5748e只修改test_repository_fixture.py；其模块owner依赖私有HOME/XDG并移除继承GIT_*，保持系统配置和原配置、环境、模板及metadata资格守卫。
