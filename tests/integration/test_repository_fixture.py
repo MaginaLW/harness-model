@@ -67,7 +67,7 @@ def _qualification_diagnostic(repository: Path, owner: fixture.RepositoryOwner) 
 def _private_git_environment(
     tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch
 ) -> Path:
-    """Give qualification tests a private profile while keeping system Git inputs."""
+    """Use owned profile/system inputs; keep unknown-input guards and parent restoration."""
     home = tmp_path_factory.mktemp("git-home")
     xdg = home / "xdg"
     xdg.mkdir()
@@ -76,6 +76,14 @@ def _private_git_environment(
     for name in tuple(os.environ):
         if name.upper().startswith("GIT_"):
             monkeypatch.delitem(os.environ, name)
+    # Mapping-only seams have no owner proof and therefore install no context.
+    if type(tmp_path_factory) is pytest.TempPathFactory:
+        scope = fixture.RepositoryOwner(tmp_path_factory, tmp_path_factory.getbasetemp())
+        directory = tmp_path_factory.mktemp("git-system")
+        system = directory / "config"
+        system.write_bytes(b"")
+        context = fixture._PrivateGitContext.create(scope, system)
+        monkeypatch.setattr(fixture, "_private_git_context", context)
     return home
 
 
@@ -2516,3 +2524,292 @@ def test_private_environment_handles_case_sensitive_mapping(
                 "OTHER": "unchanged-value",
             }
         assert environment == original
+
+
+def test_private_system_context_reaches_every_git_command(
+    tmp_path: Path, owner: fixture.RepositoryOwner
+) -> None:
+    import sys
+
+    context = fixture._private_git_context
+    assert context is not None and context.system.read_bytes() == b""
+    parent = dict(os.environ)
+    observed: list[tuple[list[str], dict[str, str] | None]] = []
+    previous = sys.getprofile()
+
+    def observe(frame: object, event: str, argument: object) -> None:
+        from types import FrameType
+
+        assert isinstance(frame, FrameType)
+        if event == "call" and frame.f_code is helpers._run_fixture_command.__code__:
+            observed.append((frame.f_locals["argv"], frame.f_locals["env"]))
+
+    try:
+        sys.setprofile(observe)
+        original = helpers.create_repository(tmp_path / "first")
+        assert owner.qualification is not None and owner.snapshot is not None
+        assert context.system in owner.qualification.files
+        assert helpers.run_git(original, "var", "GIT_CONFIG_SYSTEM").replace("\\", "/") == (
+            str(context.system).replace("\\", "/")
+        )
+        copied = helpers.create_repository(tmp_path / "second")
+        (copied / "tracked.txt").write_text("changed\n")
+        helpers.commit_all(copied, "changed")
+    finally:
+        sys.setprofile(previous)
+    assert owner.cold == 1 and owner.hits == 1
+    assert dict(os.environ) == parent
+    assert observed and all(argv[0] == "git" for argv, _ in observed)
+    assert all(
+        environment is not None
+        and environment["GIT_CONFIG_SYSTEM"] == str(context.system)
+        and {key: value for key, value in environment.items() if key != "GIT_CONFIG_SYSTEM"}
+        == parent
+        for _, environment in observed
+    )
+    commands = []
+    for argv, _ in observed:
+        arguments = argv[1:]
+        while arguments[0] == "-c":
+            arguments = arguments[2:]
+        commands.append(arguments[0])
+    assert commands.count("init") == 2
+    assert {"init", "add", "commit", "config", "var", "status", "check-attr"} <= set(commands)
+
+
+@pytest.mark.parametrize("change", ["bytes", "mode", "inode", "context", "owner", "factory"])
+def test_private_system_context_drift_cannot_reuse_snapshot(
+    tmp_path: Path,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+    change: str,
+) -> None:
+    seed(tmp_path, owner)
+    context = fixture._private_git_context
+    assert context is not None and owner.qualification is not None
+    assert owner.snapshot is not None
+    pristine = snapshot(owner.snapshot)
+    token = owner
+    initial_mode = stat.S_IMODE(context.system.stat().st_mode)
+    try:
+        if change == "bytes":
+            context.system.write_bytes(b"[core]\n\tautocrlf = false\n")
+        elif change == "mode":
+            context.system.chmod(0o444 if initial_mode & stat.S_IWUSR else 0o666)
+            assert stat.S_IMODE(context.system.stat().st_mode) != initial_mode
+        elif change == "inode":
+            replacement = context.system.with_name("replacement")
+            replacement.write_bytes(context.system.read_bytes())
+            old_identity = (context.system.stat().st_dev, context.system.stat().st_ino)
+            replacement.replace(context.system)
+            assert (context.system.stat().st_dev, context.system.stat().st_ino) != old_identity
+        elif change == "context":
+            monkeypatch.setattr(
+                fixture,
+                "_private_git_context",
+                fixture._PrivateGitContext.create(context.scope, context.system),
+            )
+        elif change == "owner":
+            token = fixture.RepositoryOwner(owner.factory, owner.basetemp)
+            token.snapshot = owner.snapshot
+            token.snapshot_sha256 = owner.snapshot_sha256
+            token.qualification = owner.qualification
+            monkeypatch.setattr(fixture, "_owner", token)
+        else:
+
+            class Factory:
+                def getbasetemp(self) -> Path:
+                    return owner.basetemp
+
+            monkeypatch.setattr(owner, "factory", Factory())
+        with pytest.raises(fixture._Ineligible, match="INPUT_CHANGED"):
+            owner.qualification.current(helpers.PROJECT_ROOT, helpers.REPOSITORY_ID)
+        result = helpers.create_repository(tmp_path / "cold")
+        assert token.hits == 0 and helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+        assert snapshot(owner.snapshot) == pristine
+    finally:
+        context.system.chmod(initial_mode)
+
+
+@pytest.mark.parametrize("change", ["missing", "directory", "hardlink"])
+def test_private_system_context_unsafe_input_fails_without_host_fallback(
+    tmp_path: Path, owner: fixture.RepositoryOwner, change: str
+) -> None:
+    seed(tmp_path, owner)
+    context = fixture._private_git_context
+    assert context is not None
+    context.system.unlink()
+    if change == "directory":
+        context.system.mkdir()
+    elif change == "hardlink":
+        other = context.system.with_name("other")
+        other.write_bytes(b"")
+        context.system.hardlink_to(other)
+    with pytest.raises((fixture._Ineligible, FileNotFoundError)):
+        helpers.create_repository(tmp_path / "rejected")
+    assert owner.hits == 0 and not (tmp_path / "rejected/.git").exists()
+
+
+def test_private_system_unknown_configuration_remains_rejected(
+    tmp_path: Path, owner: fixture.RepositoryOwner
+) -> None:
+    context = fixture._private_git_context
+    assert context is not None
+    context.system.write_bytes(b"[safe]\n\tdirectory = *\n")
+    repository = helpers.create_repository(tmp_path / "unknown")
+    assert owner.disabled and owner.reason is fixture.IneligibleReason.CONFIGURATION
+    assert owner.snapshot is None and owner.qualification is None and owner.hits == 0
+    assert helpers.run_git(repository, "config", "--name-only", "--get-regexp", "^safe\\.") == (
+        "safe.directory"
+    )
+
+
+def test_private_system_preserves_parent_override_and_original_rejection(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    parent_system = tmp_path / "parent-config"
+    parent_system.write_bytes(b"[safe]\n\tdirectory = *\n")
+    monkeypatch.setenv("GIT_CONFIG_SYSTEM", str(parent_system))
+    environment = fixture.git_child_environment(tmp_path)
+    assert environment is not None and environment["GIT_CONFIG_SYSTEM"] == str(parent_system)
+    with pytest.raises(fixture._Ineligible, match="GIT_ENVIRONMENT_OVERRIDE"):
+        fixture._environment_fact()
+    repository = helpers.create_repository(tmp_path / "parent")
+    assert owner.hits == 0 and owner.snapshot is None
+    assert helpers.run_git(repository, "config", "--name-only", "--get-regexp", "^safe\\.") == (
+        "safe.directory"
+    )
+
+
+def test_private_system_binder_replacement_remains_cold(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seed(tmp_path, owner)
+    assert owner.qualification is not None
+    calls: list[Path] = []
+    original = fixture.git_child_environment
+
+    def replacement(repository: Path) -> dict[str, str] | None:
+        calls.append(repository)
+        return original(repository)
+
+    monkeypatch.setattr(fixture, "git_child_environment", replacement)
+    assert not fixture._standard_io()
+    with pytest.raises(fixture._Ineligible, match="INPUT_CHANGED"):
+        owner.qualification.current(helpers.PROJECT_ROOT, helpers.REPOSITORY_ID)
+    result = helpers.create_repository(tmp_path / "cold")
+    assert calls and owner.hits == 0
+    assert helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+
+
+@pytest.mark.parametrize("change", ["constant", "code"])
+def test_private_system_fact_replacement_remains_cold(
+    tmp_path: Path,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+    change: str,
+) -> None:
+    seed(tmp_path, owner)
+    assert owner.qualification is not None
+    original = fixture._git_context_fact
+    captured = original()
+    if change == "constant":
+        # Do not delegate into the original fact's internal standard check.
+        monkeypatch.setattr(fixture, "_git_context_fact", lambda: captured)
+    else:
+
+        def forbidden() -> object:
+            raise AssertionError("Changed fact code must never certify current inputs")
+
+        monkeypatch.setattr(original, "__code__", forbidden.__code__)
+    assert not fixture._standard_io()
+    with pytest.raises(fixture._Ineligible, match="INPUT_CHANGED"):
+        owner.qualification.current(helpers.PROJECT_ROOT, helpers.REPOSITORY_ID)
+    result = helpers.create_repository(tmp_path / "cold")
+    assert owner.hits == 0 and helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+
+
+def test_private_system_does_not_change_default_foreign_or_non_git_commands(
+    tmp_path: Path,
+    tmp_path_factory: pytest.TempPathFactory,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import sys
+
+    context = fixture._private_git_context
+    assert context is not None
+    assert fixture.git_child_environment(tmp_path) is not None
+    with monkeypatch.context() as scoped:
+        scoped.setattr(fixture, "_owner", None)
+        assert fixture.git_child_environment(tmp_path) is None
+    foreign_base = tmp_path_factory.mktemp("foreign")
+    foreign = fixture.RepositoryOwner(owner.factory, foreign_base)
+    with monkeypatch.context() as scoped:
+        scoped.setattr(fixture, "_owner", foreign)
+        assert fixture.git_child_environment(tmp_path) is None
+    with monkeypatch.context() as scoped:
+        scoped.setattr(fixture, "_private_git_context", None)
+        assert fixture.git_child_environment(tmp_path) is None
+    assert (
+        helpers._run_fixture_command(
+            tmp_path, [sys.executable, "-c", "import os; print('GIT_CONFIG_SYSTEM' in os.environ)"]
+        )
+        == "False"
+    )
+    assert dict(os.environ).get("GIT_CONFIG_SYSTEM") is None
+
+
+def test_private_system_replaced_owner_root_never_selects_context(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    base = tmp_path / "owned-root"
+    base.mkdir()
+
+    class Factory:
+        def getbasetemp(self) -> Path:
+            return base
+
+    from typing import cast
+
+    token = fixture.RepositoryOwner(cast(pytest.TempPathFactory, Factory()), base)
+    monkeypatch.setattr(fixture, "_owner", token)
+    assert fixture.git_child_environment(base) is not None
+    assert fixture.git_child_environment(tmp_path) is None
+    base.rename(tmp_path / "original-root")
+    base.mkdir()
+    assert not token.contains(base)
+    assert fixture.git_child_environment(base) is None
+    repository = helpers.create_repository(base / "cold")
+    assert token.snapshot is None and token.hits == 0
+    assert helpers.run_git(repository, "log", "-1", "--format=%s") == "initial"
+
+
+@pytest.mark.parametrize("failure", [False, True])
+def test_private_system_context_normal_and_exception_restoration(
+    tmp_path: Path, tmp_path_factory: pytest.TempPathFactory, failure: bool
+) -> None:
+    previous_context = fixture._private_git_context
+    previous_owner = fixture._owner
+    parent = dict(os.environ)
+    holder: list[fixture._PrivateGitContext] = []
+    try:
+        with pytest.MonkeyPatch.context() as isolated:
+            home = _private_git_environment.__wrapped__(tmp_path_factory, isolated)
+            scoped_owner = owner.__wrapped__(tmp_path_factory, isolated, home)
+            token = next(scoped_owner)
+            try:
+                context = fixture._private_git_context
+                assert context is not None and context is not previous_context
+                holder.append(context)
+                helpers.create_repository(tmp_path / "owned")
+                assert token.qualification is not None and token.snapshot is not None
+                if failure:
+                    raise RuntimeError("owned test failure")
+            finally:
+                scoped_owner.close()
+    except RuntimeError as error:
+        assert failure and str(error) == "owned test failure"
+    assert len(holder) == 1 and holder[0].system.read_bytes() == b""
+    assert fixture._private_git_context is previous_context and fixture._owner is previous_owner
+    assert dict(os.environ) == parent

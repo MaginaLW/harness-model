@@ -183,6 +183,10 @@ def _standard_io() -> bool:
         and Path.write_text is _WRITE_TEXT
         and Path.mkdir is _MKDIR
         and subprocess.Popen is _POPEN
+        and git_child_environment is _GIT_CHILD_ENVIRONMENT
+        and git_child_environment.__code__ is _GIT_CHILD_ENVIRONMENT_CODE
+        and _git_context_fact is _GIT_CONTEXT_FACT
+        and _git_context_fact.__code__ is _GIT_CONTEXT_FACT_CODE
     )
 
 
@@ -389,8 +393,11 @@ class _Qualification:
     template: Path
     git: Path
     inputs_sha256: str
+    context_binding: _GitContextBinding | None = None
 
     def current(self, project_root: Path, repository_id: str) -> str:
+        if not _standard_io():
+            raise _Ineligible(IneligibleReason.INPUT_CHANGED)
         locator = shutil.which("git")
         if locator is None or Path(locator).absolute() != self.git:
             raise _Ineligible()
@@ -403,6 +410,11 @@ class _Qualification:
                 repository_id,
                 _source_fact(project_root),
                 _environment_fact(),
+                (
+                    self.context_binding.current()
+                    if self.context_binding is not None
+                    else _git_context_fact()
+                ),
                 str(self.git),
                 _git_fact(self.git),
                 [[str(path), _path_fact(path)] for path in self.files],
@@ -494,6 +506,7 @@ def _qualify(
         template,
         git,
         "",
+        _GitContextBinding.capture(owner),
     )
     if run_git(repository, "status", "--porcelain=v1"):
         raise _Ineligible()
@@ -539,7 +552,14 @@ def _qualify(
         raise _Ineligible(IneligibleReason.INPUT_CHANGED)
     if not owner.contains(reference) or _digest(_path_fact(reference)) != reference_fact:
         raise _Ineligible(IneligibleReason.INPUT_CHANGED)
-    return _Qualification(qualification.files, qualification.attributes, template, git, current)
+    return _Qualification(
+        qualification.files,
+        qualification.attributes,
+        template,
+        git,
+        current,
+        qualification.context_binding,
+    )
 
 
 @dataclass
@@ -585,7 +605,127 @@ class RepositoryOwner:
             return False
 
 
+@dataclass(frozen=True, eq=False)
+class _PrivateGitContext:
+    """A pytest-owned system input, shared only by owners within its private root."""
+
+    scope: RepositoryOwner
+    factory: pytest.TempPathFactory
+    root: Path
+    system: Path
+    initial_fact: object
+
+    @classmethod
+    def create(cls, scope: RepositoryOwner, system: Path) -> _PrivateGitContext:
+        if not scope.contains(system) or system.read_bytes() != b"":
+            raise _Ineligible()
+        context = cls(scope, scope.factory, scope.basetemp, system.absolute(), None)
+        return cls(scope, scope.factory, scope.basetemp, system.absolute(), context.file_fact())
+
+    def matches(self, token: RepositoryOwner | None, repository: Path) -> bool:
+        return (
+            token is not None
+            and token.basetemp.absolute().is_relative_to(self.root.absolute())
+            and repository.absolute().is_relative_to(token.basetemp.absolute())
+            and self.scope.contains(token.basetemp)
+            and token.contains(repository)
+        )
+
+    def file_fact(self) -> object:
+        if (
+            self.scope.factory is not self.factory
+            or self.scope.basetemp != self.root
+            or not self.scope.contains(self.system)
+        ):
+            raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+        metadata = _ordinary(self.system)
+        if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1:
+            raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+        ancestors = []
+        for path in (self.system.parent, *self.system.parent.parents):
+            item = _ordinary(path)
+            ancestors.append([str(path), item.st_dev, item.st_ino, stat.S_IMODE(item.st_mode)])
+            if path == self.root:
+                break
+        return [metadata.st_dev, metadata.st_ino, _path_fact(self.system), ancestors]
+
+
 _owner: RepositoryOwner | None = None
+_private_git_context: _PrivateGitContext | None = None
+
+
+def git_child_environment(repository: Path) -> dict[str, str] | None:
+    """Select the actual owned system file without changing the parent environment."""
+    context = _private_git_context
+    if context is None or not context.matches(_owner, repository):
+        return None
+    # Unsafe/missing inputs fail explicitly. Ordinary changed bytes still reach
+    # cold Git at the fixed path; qualification separately rejects their drift.
+    context.file_fact()
+    environment = dict(os.environ)
+    if not any(name.upper() == "GIT_CONFIG_SYSTEM" for name in environment):
+        environment["GIT_CONFIG_SYSTEM"] = str(context.system)
+    return environment
+
+
+_GIT_CHILD_ENVIRONMENT = git_child_environment
+_GIT_CHILD_ENVIRONMENT_CODE = git_child_environment.__code__
+
+
+def _git_context_fact() -> object:
+    if not _standard_io():
+        raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+    token = _owner
+    context = _private_git_context
+    if token is None or context is None or not context.matches(token, token.basetemp):
+        return None
+    current = context.file_fact()
+    if current != context.initial_fact:
+        raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+    environment = git_child_environment(token.basetemp)
+    assert environment is not None
+    return [
+        id(context),
+        id(token),
+        id(token.factory),
+        str(token.basetemp),
+        token.basetemp_identity,
+        current,
+        _digest({key: value for key, value in environment.items() if key != "PYTEST_CURRENT_TEST"}),
+    ]
+
+
+_GIT_CONTEXT_FACT = _git_context_fact
+_GIT_CONTEXT_FACT_CODE = _git_context_fact.__code__
+
+
+@dataclass(frozen=True, eq=False)
+class _GitContextBinding:
+    owner: RepositoryOwner
+    factory: pytest.TempPathFactory
+    root: Path
+    context: _PrivateGitContext | None
+
+    @classmethod
+    def capture(cls, owner: RepositoryOwner) -> _GitContextBinding:
+        context = _private_git_context
+        if context is not None and not context.matches(owner, owner.basetemp):
+            context = None
+        return cls(owner, owner.factory, owner.basetemp, context)
+
+    def current(self) -> object:
+        context = _private_git_context
+        if context is not None and not context.matches(_owner, self.root):
+            context = None
+        if (
+            _owner is not self.owner
+            or self.owner.factory is not self.factory
+            or self.owner.basetemp != self.root
+            or not self.owner.contains(self.root)
+            or context is not self.context
+        ):
+            raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+        return _git_context_fact()
 
 
 def register_owner(factory: pytest.TempPathFactory) -> RepositoryOwner:

@@ -24,6 +24,7 @@ from aiflow.task_service import (
     load_task_record,
     transition_task_record,
 )
+from tests.integration import repository_fixture
 from tests.integration.repository_fixture import populate_or_copy
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -75,11 +76,14 @@ def _cleanup_fixture_process(process: subprocess.Popen[str]) -> tuple[str, str] 
         return None
 
 
-def _run_fixture_command(repository: Path, argv: list[str]) -> str:
+def _run_fixture_command(
+    repository: Path, argv: list[str], *, env: dict[str, str] | None = None
+) -> str:
     """Retain the fixture deadline and clean up every successfully spawned command."""
     process: subprocess.Popen[str] | None = None
     drained = False
     streams_closed = False
+    options: dict[str, Any] = {} if env is None else {"env": env}
     try:
         process = subprocess.Popen(
             argv,
@@ -89,6 +93,7 @@ def _run_fixture_command(repository: Path, argv: list[str]) -> str:
             encoding="utf-8",
             start_new_session=os.name != "nt",
             creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
+            **options,
         )
         stdout, stderr = process.communicate(timeout=10)
         drained = True
@@ -127,7 +132,9 @@ def _run_fixture_command(repository: Path, argv: list[str]) -> str:
 
 
 def run_git(repository: Path, *arguments: str) -> str:
-    return _run_fixture_command(repository, ["git", *arguments])
+    return _run_fixture_command(
+        repository, ["git", *arguments], env=repository_fixture.git_child_environment(repository)
+    )
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Windows timeout cleanup with inherited child pipes")
