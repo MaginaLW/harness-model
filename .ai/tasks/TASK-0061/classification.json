@@ -1,0 +1,52 @@
+{
+  "base_commit": "508cf73d10be4cdd2ca4409e706fe68ead10a69d",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "da5df41196009f3a866caf9c50d78e7a401da599bec973696dba46e1c4cd9f84",
+  "classifications": [
+    {
+      "classified_at": "2026-10-01T20:39:54Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "A real external action requires review and separate action approval.",
+      "explanations": [
+        "A real external action requires review and separate action approval."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "A real external action requires review and separate action approval.",
+          "predicate_explanations": [
+            "external_side_effects: not_equals -> true"
+          ],
+          "priority": 760,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-REAL-EXTERNAL-ACTION"
+        }
+      ],
+      "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+      "policy_version": "2.3.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-REAL-EXTERNAL-ACTION",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Cross-module interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CROSS-MODULE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-10-01T20:39:54Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "policy_version": "2.3.0",
+  "schema_version": "1.0",
+  "subject_commit": "508cf73d10be4cdd2ca4409e706fe68ead10a69d",
+  "task_id": "TASK-0061"
+}

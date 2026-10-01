@@ -1,0 +1,107 @@
+{
+  "base_commit": "993a9a0619577117417d80de96e73aa18270b464",
+  "branch": "codex/e4-cumulative-delivery",
+  "classification_input_sha256": "bc32da5ef182bdd836c0c072807154ee0aba6ed990536eaa5d011edc8340bf99",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0062/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish cumulative E4 delivery after owned Git maintenance isolation through exact-head CI and protected merge",
+        "impact_scope": [
+          ".ai/tasks/TASK-0062/**"
+        ],
+        "planned_actions": [
+          "Admit and genuinely verify only own publisher governance on fixedS, with actual nonauthor cumulative Design/Implementation and unchanged original10V1.",
+          "Ordinary non-force fast-forward exact Q push replacing fresh literal predecessor, with verified actual origin pushURL and command-local GH credential protocol.",
+          "Independently review literal title/body then update existing PR44 only under separate fresh action.",
+          "Require complete unchanged exact-Q app15368 quality chain,85overall/90cumulative diff/whitespace/Ruff/format/mypy before ordinary expected-head protected merge.",
+          "Independent exactM/B/Q/orderedparents/tree/ancestry/exclusion proof before fetchM and legitimate native close54/55/56/57/62; retain push-only53 and failed58/59/60/61 dispositions and separate local governedG/Primary integration."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [],
+      "files": [],
+      "totals": {
+        "additions": 0,
+        "deletions": 0,
+        "files": 0
+      }
+    },
+    "goal": "Publish cumulative E4 delivery after owned Git maintenance isolation through exact-head CI and protected merge",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0062",
+        "--actor",
+        "e4-publication-governance-root",
+        "--pytest-temp-root",
+        "${PYTEST_TEMP_ROOT}"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "3ef153e8d0f0925aa9d51ed367141763eea1640a64d15c2484823d923504077c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "614c1b35883a4d24e87b9137a270a40e038ab7dc3a561af4986967d1e3da15ba",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "559f4f716a7ac8192a0afbe11dc9960ec18ee196f9ba5f99d68cd572dda4313e",
+  "subject_commit": "993a9a0619577117417d80de96e73aa18270b464",
+  "task_id": "TASK-0062"
+}

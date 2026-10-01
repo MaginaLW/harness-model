@@ -1,0 +1,107 @@
+{
+  "base_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+  "branch": "codex/e4-cumulative-delivery",
+  "classification_input_sha256": "4174954c2dc48598083ee4fa45d34ff78136ecb0b38006f1c82c47164adf1828",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0058/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish the fully gated cumulative E4 source and preserved records through exact-head required CI and protected merge",
+        "impact_scope": [
+          ".ai/tasks/TASK-0058/**"
+        ],
+        "planned_actions": [
+          "Create and verify only the new publisher own governance records on final combined sourceS.",
+          "Perform an ordinary non-force remote push of exact ledger candidateP under a fresh single-use action.",
+          "Create one PR with exact head/base and reviewed body bytes; attach actual PR to this chat.",
+          "Require unchanged strict ai-quality-gate app15368 and complete exact-P successful CI, then perform protected merge with expected head under fresh action.",
+          "Independently verify remote MERGED/base/head/main/parents/tree and source/closure ancestry before append-only native closeout."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [],
+      "files": [],
+      "totals": {
+        "additions": 0,
+        "deletions": 0,
+        "files": 0
+      }
+    },
+    "goal": "Publish the fully gated cumulative E4 source and preserved records through exact-head required CI and protected merge",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0058",
+        "--actor",
+        "e4-publication-governance-root",
+        "--pytest-temp-root",
+        "${PYTEST_TEMP_ROOT}"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "bfd1aa51d0cefe9d63852f8b33d7c741bc6626be7bc01411d823cbc4a889e4d9",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "8c43c4318124b45fdc58a38964bf2ff46f14e83e0f7327318a5c2dcfad0fb49d",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
+  "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+  "task_id": "TASK-0058"
+}

@@ -1,0 +1,14 @@
+{
+  "decision_unit_id": "DU-001",
+  "subject_commit": "94b2a4f1b4cefb4c918c989d3c5ec41280e68cab",
+  "conditions": [
+    "Current owner explicitly requested closeout and push of the completed work in this conversation.",
+    "Match the passing local Gate, independently reviewed committed candidate, remote predecessor, target and unchanged protection immediately before execution.",
+    "Single-use operator execution record; generic Gate and wrapper do not provide trusted atomic action consumption."
+  ],
+  "expires_at": "2026-09-22T14:31:58Z",
+  "single_use": true,
+  "action_type": "push",
+  "target": "MaginaLW/harness-model:refs/heads/codex/self-hosted-runner-inventory",
+  "parameter_summary": "Ordinary fast-forward push to https://github.com/MaginaLW/harness-model.git of exact committed head a8bfdf0d00d90371baca287e8310908555dc9d66 to refs/heads/codex/self-hosted-runner-inventory; current remote predecessor 45a220f33cd0af4eda18f86896321f02bf8d62d8 and main baseline 48bf777106b9fdfef1ddf83d3abc95859fb8e580. No force, deletion, PR mutation, main merge or E4 implementation."
+}

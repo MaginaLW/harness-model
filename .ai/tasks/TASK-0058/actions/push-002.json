@@ -1,0 +1,18 @@
+{
+  "action_type": "git_remote_push",
+  "target": "https://github.com/MaginaLW/harness-model.git#refs/heads/codex/e4-cumulative-delivery",
+  "parameter_summary": "{\"base\":\"48bf777106b9fdfef1ddf83d3abc95859fb8e580\",\"command_input_sha256\":\"54455acb7e6d22c89be765a626f9308b22f733eece87ee484037fbc9a30f81b2\",\"credential_helper_exe_sha256\":\"a1701e3c806a805981554ace7df04812772c6449bdcfd1a77675013d97786401\",\"credential_protocol\":\"command-local cleared helper list followed by verified GH auth git-credential; no global credential changes or credential output\",\"gate_stdout_sha256\":\"0a4382b6b4d283ebefebe8c0c2afa068e980b4209d8a257b950cd9fbc3b9be87\",\"git_exe_sha256\":\"1a0043555d254618f2d56c936c3d9a1fbfb878bc878416a133c346bc7835eda9\",\"operation\":\"ordinary non-force push of exact P to literal feature ref\",\"predecessor\":\"VERIFIED_ABSENT\",\"prior_failed_attempt_receipt_sha256\":\"ebcd975b92d9bd0f0d67ea44fc3e621f0890985c250d016808df8f09b3939b81\",\"publication_head\":\"a2894ac3e4c7f00cba9fa2851fed6b2a004d47ed\",\"readonly_receipts\":{\"push2-pre-main-001\":\"93e6b7003fe8baa2d31ad8fe7c42bdb9b0658c489dea04f8ce9b18c110e69fc0\",\"push2-pre-matching-ref-001\":\"ab98134261626710edc9274cf07cafc05bc8da59c7b9283875f21fcf00100be2\",\"push2-pre-open-prs-001\":\"f4b96c9810799b61c8f16ee2db923409f0ba03eff6417d3a48463db74eeab977\",\"push2-pre-protection-001\":\"42473e7e6bdec52443980923a69289cc37b0fd991e330f2fde0774531be467c2\",\"push2-pre-repo-001\":\"23379f9e9306802ccae8d55d1820a2cf9318c08c6581a7413c231bf4438dbeca\"},\"repo\":\"MaginaLW/harness-model\",\"source\":\"715496d1b26c285089f0205309ce1f5b57f6b8ca\"}",
+  "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "4174954c2dc48598083ee4fa45d34ff78136ecb0b38006f1c82c47164adf1828",
+  "conditions": [
+    "Existing explicit human authorization binds this distinct action once; original timed-out action was used and is not reused.",
+    "Fresh complete matching-refs success positively verifies absent literal feature; current mainB/full strict protection/repo merge settings and no open PR remain unchanged.",
+    "Fixed sourceS/publicationP/bytes and actual exact-P Gate retained; no source/Policy/quality threshold change.",
+    "Exact private command input hash binds command-local verified GH credential protocol; no global helper mutation, credential printing/export, force, deletion, admin bypass or provider invocation.",
+    "Only execute after original hung owned transport has been diagnosed and no capable owned transport remains; preserve unknown historical terminals and cleanup receipts.",
+    "Read actual exit and exact remote-P before PR; original timeout never counts as successful push."
+  ],
+  "expires_at": "2026-10-01T15:35:43.276562+00:00",
+  "single_use": true
+}

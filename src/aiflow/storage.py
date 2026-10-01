@@ -13,6 +13,7 @@ from typing import Any
 import yaml
 
 from aiflow.contracts import require_valid_contract
+from aiflow.document_parsing import load_yaml_text
 from aiflow.errors import ContractError, StorageError
 
 TASK_ID_PATTERN = re.compile(r"^TASK-(?P<number>[0-9]{4,})$")
@@ -252,7 +253,7 @@ def read_task_yaml(
     """Read YAML from a safe task path and immediately validate its contract."""
     path = resolve_task_path(repository_root, task_id, relative_path)
     try:
-        value = yaml.safe_load(_read_text(path))
+        value = load_yaml_text(_read_text(path))
     except yaml.YAMLError as error:
         raise StorageError(
             "Could not parse YAML task document",

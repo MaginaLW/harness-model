@@ -1,0 +1,15 @@
+{
+  "decision_unit_id": "DU-001",
+  "subject_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+  "conditions": [
+    "Current owner explicitly approved and fully authorized continued completion in this conversation.",
+    "Operator must match the current passing local Gate, exact committed candidate, remote base and unchanged protection.",
+    "Single-use operator record; generic Gate and wrapper do not provide trusted action consumption.",
+    "Recheck the exact PR head/base, current required check and protection before merge; verify actual merge parents, tree and ancestry before closing."
+  ],
+  "expires_at": "2026-09-22T11:30:00Z",
+  "single_use": true,
+  "action_type": "merge",
+  "target": "https://github.com/MaginaLW/harness-model/pull/43",
+  "parameter_summary": "Ordinary merge of exact head 45a220f33cd0af4eda18f86896321f02bf8d62d8 into verified main ae0e3d3fb070d1fa00ff25b086d8a49e9d222db9; required ai-quality-gate app15368 run 35718869675, job/check 106716773595 succeeded. Preserve branch; no admin bypass."
+}

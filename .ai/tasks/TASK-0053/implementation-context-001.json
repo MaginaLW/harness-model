@@ -1,0 +1,104 @@
+{
+  "base_commit": "94b2a4f1b4cefb4c918c989d3c5ec41280e68cab",
+  "branch": "codex/self-hosted-runner-inventory",
+  "classification_input_sha256": "c2ac46a881357e6cc3be49dee3ca9bbea4ff9592bfaf768b4ef41fd568afe2ba",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0053/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish the completed E3 documentation and prior closeout records to the existing remote branch, without PR creation or merge",
+        "impact_scope": [
+          ".ai/tasks/TASK-0053/**"
+        ],
+        "planned_actions": [
+          "Review cumulative committed publication range and current repository protection.",
+          "Run current Policy-selected formal verification on committed task records.",
+          "push",
+          "Read back exact remote ref and append the actual action receipt."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [],
+      "files": [],
+      "totals": {
+        "additions": 0,
+        "deletions": 0,
+        "files": 0
+      }
+    },
+    "goal": "Publish the completed E3 documentation and prior closeout records to the existing remote branch, without PR creation or merge",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0053",
+        "--actor",
+        "agent"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "8a069b4cadbd2638d846ca9c7c23fbf02451375de66132ee4174f3f17293c630",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "ef1697362d7de35d9a3e50404ba8fd6a48e57f6a0defaeeb7f311a9e433f35a7",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "40dfbb63c906f058e151ce3846d6c524b14119aa926bd7dba51e477530ecf1ef",
+  "subject_commit": "94b2a4f1b4cefb4c918c989d3c5ec41280e68cab",
+  "task_id": "TASK-0053"
+}

@@ -1,0 +1,29 @@
+{
+  "operation": "existing PR44 exact reviewed title/body update",
+  "task_id": "TASK-0059",
+  "action_ref": "actions/pr-update-003.json",
+  "action_file_sha256": "9248695a2bf79bc58dc49d56bc51ec4b1c517214e2b85470e5c0418579bb4884",
+  "used_count": 1,
+  "actual_native_exit": 0,
+  "outer_timed_out": false,
+  "retained_identity_confirmed": true,
+  "retained_handle_closed": true,
+  "retained_process_end": {
+    "popen_pid": 36244,
+    "retained_handle_actual_pid": 36244,
+    "pid_matches": true,
+    "times_query_succeeded": true,
+    "creation_filetime_100ns": 134353502200562575,
+    "exit_filetime_100ns": 134353502242254192,
+    "actual_exit": 0
+  },
+  "external_receipt_sha256": "e80f97c7ee69f5804b28f23ccd902055d4cd7628eb22310086112b1f30ca0e61",
+  "finished_at": "2026-10-01T17:43:44.233106+00:00",
+  "readback_receipt_sha256": "41b71d026bea12a7dbb4c1b0415a7f1ada5e9182b12da74c2f5a5076a16b1272",
+  "publication_Q": "a2654bdf5c6ba02f2a5e1633d090e3b0d1cf583e",
+  "base_B": "48bf777106b9fdfef1ddf83d3abc95859fb8e580",
+  "title": "feat: import external reviews and harden native verification",
+  "body_sha256": "e5e953384c8b41a5b71b1e1b06f2dac64504c8745470e165d43e1c51bd8090c0",
+  "title_body_head_base_readback_exact": true,
+  "native_single_use_enforcement": "not implemented; operator records exactly one actual invocation"
+}

@@ -1,0 +1,35 @@
+# 有界快照复制的安全源码固定与静态预审
+
+安全源码及说明已独立提交4c8952b9cb19e4c2487189ed3a3cf4268aca2e82，治理另行提交。
+原F7源码、旧阻断草稿和全部失败证据仍保留。当前规格992、24项范围、原65用例、
+4workers/256提交与全部原门禁未变；未collect、pytest、测量、默认V2、推送或合并。
+
+实际固定源码SHA256：
+- repository_fixture.py：26af47db7d7c7caae0a04da63541b5e37e00282593364ac505c04e115633c7cb。
+- test_repository_fixture.py：eed438e4583bf165fa7df3d099da1e7d148625047ffe6bd151b50e3c4538ef03。
+
+作者静态报告${RUNTIME_ROOT}/parallel-copy-implementation-002/final-004/static-report.json，
+SHA77cb0f2f3632b05a8e27602142308a6ac9003cf502f43ffd1499c43dff9e482c；
+完整diff SHA215e1dee0c61ccacf2f6cccc48103595d1c4acec1879c4fcc53140d97db0bef0。
+Ruff/format/compile/旧AST/diff-check实际通过；target mypy仍为原有object-index的exit1，
+src44此前通过且本单元未改src，本次未重复。19新函数静态预计32用例、预计97总数，
+实际collection仍unknown，未新增skip，不能写作运行通过。
+
+未写源码的独立sub-agent完整核对固定字节、冻结992、实际stdlib协议及新增断言，
+结论NO_REMAINING_STATIC_BLOCKER_FOR_FIXED_CANDIDATE_VERIFICATION，findings空。
+报告${RUNTIME_ROOT}/parallel-copy-final-admission-preparation-001/final-source-pre-review-004.json，
+SHA1b10398b874655e9c349810d4b0e7c30594d9946ea9670ab3cd61d048aee9f41。
+该报告只关闭静态阻断，不是原生ImplementationReview、运行GO、性能或V2/Gate通过。
+
+实际start前保留Thread/body event/原handle，标准worker继续复用；未登记worker由
+独立归属等待并真实join。3.11中断join后unknown不能被Done/is_alive清除，由原owned
+外层回收；3.13只用原handle终态。未知native-start不猜未启动。shutdown本身可重入，
+首cleanup错误跨重入保留，原walk/逻辑worker失败优先。子进程身份查询纳入统一finally。
+新验收对held真实worker先证明caller未返回，再释放并观察实际delegated join；unknown
+child只使用retained本次进程回收。3.13 legacy facade与未制造native资源耗尽的范围明确。
+
+源码后原生sync/status/scope/validate均实际exit0；subject已为4c8952b，
+IMPLEMENTING / REVIEW / V2，classification fresh、approval current，Missing仅implementation_result。
+候选完整warm与原前置脚本尚未绑定或执行。下一步先实际fresh receipt与唯一GO，
+固定候选检查串行，原integration600真实PASS后才新action005及完整默认V2。
+55、发布与F条件保持；旧600失败与旧action消费保持，未启动provider或后续阶段。

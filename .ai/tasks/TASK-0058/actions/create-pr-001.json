@@ -1,0 +1,17 @@
+{
+  "action_type": "github_pull_request_create",
+  "target": "https://github.com/MaginaLW/harness-model/pulls",
+  "parameter_summary": "{\"actual_readonly_receipts\":{\"pr-pre-main-001\":\"fef88f8a729b3ad81bd64caf9d95e8d0872de8f526d4ea352468e68bb8ba7af3\",\"pr-pre-matching-ref-001\":\"72451b690ae19182026139401c70a6a783aeb3e755fb461ce4937a83905bcb50\",\"pr-pre-open-prs-001\":\"3ab27638fc27e0394ea1d126c1d75249c66e5b91d54dd6a2c98ad322283410ad\",\"pr-pre-protection-001\":\"c3471e7f841304e84eedf799e7b5f1d271b6a9057f46cc5a7eb87e3202a45e40\",\"pr-pre-repo-001\":\"a80805cd1c648321efedfa43fb8b219f13d40300ed3c51e33f444d9909340402\"},\"actual_successful_push_receipt_sha256\":\"168c326e1bfc784aa24413dee5a3075c2730866bf4b1cea9cbe03e5564c677b3\",\"base_ref\":\"main\",\"base_sha\":\"48bf777106b9fdfef1ddf83d3abc95859fb8e580\",\"body_sha256\":\"6d15971c3af99ec91eab207ab367b567b9d9a6f93869e165787ee5282ac5b140\",\"command_input_sha256\":\"d21f7c8919b4a03584e70207f0292c11ac60ea9fc33898315ece03f01034ccd7\",\"head_ref\":\"codex/e4-cumulative-delivery\",\"head_sha\":\"a2894ac3e4c7f00cba9fa2851fed6b2a004d47ed\",\"independent_body_review_handback_sha256\":\"910ecbe0c86321b5e27da5a65727b3ffcbcc5979bba2b8c86d8f8135f0035e6d\",\"repository\":\"MaginaLW/harness-model\",\"source\":\"715496d1b26c285089f0205309ce1f5b57f6b8ca\",\"title\":\"feat: import external reviews and harden native verification\"}",
+  "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "4174954c2dc48598083ee4fa45d34ff78136ecb0b38006f1c82c47164adf1828",
+  "conditions": [
+    "Existing explicit owner push/merge and completion authorization binds one PR creation with exact repository/head/base/title/body bytes.",
+    "Actual successful ordinary push and independent API exactP feature readback; mainB/full strict protection/merge settings unchanged and actual open PRs empty.",
+    "Explicit --head/--base/--repo and --body-file; no implicit push, fork, reviewer request, comment, duplicate PR or branch deletion.",
+    "Real body independently reviewed and byte hash fixed; accurate local validation, pending exact-P Linux CI and genuine-report F remain explicit.",
+    "Immediately attach actual created PR; complete exact-P app15368 required CI and fresh merge authority before protected merge."
+  ],
+  "expires_at": "2026-10-01T15:42:39.095708+00:00",
+  "single_use": true
+}

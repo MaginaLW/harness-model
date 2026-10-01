@@ -1,0 +1,55 @@
+{
+  "context_sha256": "f297b1369fb15b048f389bbfb3a7687f0a2c712c89dc6b67dacd06de4f4a722d",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0056/spec.md:12",
+        ".ai/tasks/TASK-0056/spec.md:29",
+        "tools/analysis/repository_readiness.py:182",
+        "tests/integration/test_repository_readiness.py:241",
+        "src/aiflow/process_runner.py:75"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 12,
+        "path": ".ai/tasks/TASK-0056/spec.md"
+      },
+      "resolution": {
+        "actor": "e4-temp-design-reviewer",
+        "reason": "Independently rereviewed amended frozen specification adds no-follow conservative bare repository marker refusal; original specification preserved",
+        "resolved_at": "2026-09-30T03:11:21Z"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "The external-parent rule checks only ancestor .git markers and therefore does not establish that the parent is outside a bare repository. A bare repository can have HEAD and objects/commondir without a .git marker; fixture Git discovery can then differ from the required non-repository semantics. Reject bare-repository structures without following their marker paths and explicitly cover bare roots and descendants, while retaining the existing minimal environment without GIT_DIR."
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0056/spec.md:14",
+        ".ai/tasks/TASK-0056/spec.md:30",
+        ".ai/tasks/TASK-0056/spec.md:40",
+        "src/aiflow/verification_service.py:958",
+        "src/aiflow/verification_service.py:994",
+        "src/aiflow/verification_service.py:1006",
+        "src/aiflow/verification_service.py:1007"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 30,
+        "path": ".ai/tasks/TASK-0056/spec.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Acceptance condition 3 promises zero writes for both initial invalid inputs and execution-time identity/leaf conflicts, but the proposed container creation and prelaunch guard occur after native subject sync, verifier-context saving and the VERIFYING transition. Late drift cannot erase those prior writes, and an uncaught guard error can leave VERIFYING without a terminal failure. Require initial parameter/container checks before writes; separately require late create/drift rejection before pytest launch, preservation of old contents and necessary current-run failure records, with service handling guard errors through a native FAILED transition."
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-09-30T03:11:21Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "e4-temp-design-reviewer",
+  "revision": 2,
+  "schema_version": "1.0",
+  "summary": "Independent design review of frozen spec 978cc68691f8ca65110def4ba455adc111eefeb24abc2b1b8ed88207e0c9c0d5, native regenerated context, task/classification bindings, and existing CLI, plan, process runner, verifier/evidence/finalization interfaces. The optional external-root approach can preserve unchanged Policy validation, default argv/environment, deduplication and evidence snapshot binding without adding runtime values to verifier context. Two design gaps require refreezing: bare repository discovery and the distinction between initial zero-write refusals and execution-time drift/failure recording. Reviewer has not implemented production or tests. No proposed implementation, bare-repository reproduction or complete V2 was executed; this is a design recommendation only.",
+  "task_id": "TASK-0056"
+}

@@ -1,0 +1,99 @@
+allowed_scope:
+- src/aiflow/document_parsing.py
+- tests/unit/test_document_parsing.py
+- docs/operations/pytest-temporary-roots.md
+- .ai/tasks/TASK-0057/**
+base_commit: 46a78b44ec02a0681528f567e313fe88e109b4d9
+branch: codex/e4-cumulative-delivery
+created_at: '2026-10-01T10:19:35Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Preserve current YAML decoding semantics when recognized SafeLoader dispatch
+    changes, with conservative finite cache qualification
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/document_parsing.py
+  - tests/unit/test_document_parsing.py
+  - docs/operations/pytest-temporary-roots.md
+  - .ai/tasks/TASK-0057/**
+  inputs:
+  - Actual cumulative source46a78b4 retains Task55 post-commit Gatec810fd2, Task56
+    Gate80515e6 and historical closure fe599c3; all foreign Task56 106 blobs remain
+    intact.
+  - Independent CUMULATIVE-P2-001 preparation and root reproduction show cached YAML
+    differing from current safe_load after Loader method changes or parser-module
+    global dispatch replacement.
+  - Existing owner authorization covers TODO completion, necessary approvals and eventual
+    push/merge; this corrective source task does not itself publish or waive any quality
+    checks.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Add only a bounded precompiled recognized-standard parser dispatch qualification
+    to the existing pure YAML decoding cache.
+  - Preserve original cache bounds, fresh file/schema/policy/freshness work, current
+    parser fallback and every original named test/assertion; append meaningful drift
+    and unknown-state regression cases.
+  - Keep production/governance and task-free tests/documentation in separate scoped
+    commits.
+  - Run complete original native V2 with actual independent verifier, five unchanged
+    fixed mutations, independent reviews, current approvals and post-commit Gate before
+    separate publication.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0057
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Reproduce both actual stale-result counterexamples and verify bypass after method/MRO/namespace/function/global/dependency/member/configuration
+    changes; verify side effects and errors match the current parser.
+  - Verify standard warm cache hits, independent returned graphs and all original
+    text/graph/capacity/error/file/schema/Policy behavior; preserve original named
+    tests and assertions and add no skip.
+  - Measure actual qualification cost honestly, then require all original Policy V2
+    tests, coverage, deadlines, selectors, mutation and independent verifier checks
+    without overrides.
+  - Obtain actual author-independent design and implementation Review, same-verifier
+    finalize, current code approval, Gate and exact governance-commit Gate.
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: fe6466059ee91d7074c5040bda161d0e4e87226579241804cb71cef87441ec4e
+goal: Preserve current YAML decoding semantics when recognized SafeLoader dispatch
+  changes, with conservative finite cache qualification
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-01T10:30:35Z'
+subject_commit: afff0629a2f68184a3b0e388af4ed5dc08a995e0
+task_id: TASK-0057
+updated_at: '2026-10-01T13:20:14Z'
+worktree_dirty: false
+worktree_dirty_paths: []

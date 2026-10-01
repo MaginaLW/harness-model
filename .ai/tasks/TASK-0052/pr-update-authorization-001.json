@@ -1,0 +1,14 @@
+{
+  "decision_unit_id": "DU-001",
+  "subject_commit": "7b940bf67743673755ac872ed6ff32e9d1d87ca1",
+  "conditions": [
+    "Current owner explicitly approved and fully authorized continued completion in this conversation.",
+    "Operator must match the current passing local Gate, exact committed candidate, remote base and unchanged protection.",
+    "Single-use operator record; generic Gate and wrapper do not provide trusted action consumption."
+  ],
+  "expires_at": "2026-09-22T11:30:00Z",
+  "single_use": true,
+  "action_type": "pull_request_update",
+  "target": "https://github.com/MaginaLW/harness-model/pull/43",
+  "parameter_summary": "Update only PR43 body for exact head 45a220f33cd0af4eda18f86896321f02bf8d62d8 and main ae0e3d3fb070d1fa00ff25b086d8a49e9d222db9; complete replacement body SHA256 90778f2da64c178b27cd115068fdc20fb7a4e7ddf85538e19c85e935ec662460; preserve title, target branch and source branch."
+}

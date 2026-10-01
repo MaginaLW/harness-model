@@ -1,0 +1,29 @@
+# 线程归属修复短案的实施方向接受
+
+此记录追加在017的独立阻断之后，只接受修复方向，不是原生ImplementationReview、
+implementation result、测试、完整warm成本、V2或Gate通过。
+
+当前task实查仍为IMPLEMENTING / REVIEW / V2，classification fresh、approval current，
+Missing仅为implementation_result。冻结规格992b927ce833a8fa9876c7e278d024eca7903763621ea84391c2ad4c09f6916c，
+当前subject仍为f7d598fca29b5fae710e9b8b641ed044f4923107。24项范围、旧65断言、
+原4workers/256提交、所有原期限与门禁均保持。未知私有协议在目标复制前回落serial。
+
+root与未写源码的独立sub-agent均完整读取实际修订短案：
+${RUNTIME_ROOT}/parallel-copy-worker-ownership-design-001/design-002.md，SHA256
+2674ed6a4c17ddb219bf0b2c969bdde3fed25484246cb159b21d057fdcd7f573。
+独立结论为短案可实施，无剩余设计阻断；修复属于992已有必要私有helper与终态契约，
+该结论不替代后续独立源码复核和运行证据，也不是外部ZCode报告。
+
+修复在每次start前保留实际owned Thread，包装实际stdlib worker而不改全局绑定。
+worker_done只证明worker主体结束；正常join实际返回才构成该路径的线程终态。
+3.11最终join被BaseException中断后，若无独立终态依据则latch unknown，不靠后续
+join/is_alive/Done清除；保持原异常与partial，待原owned外层实际回收，不新增线程期限。
+3.13只允许同一retained实际handle提供独立终态，未知协议亦保持未完成。
+已attempted start的否定证明只允许识别真实标准native-create调用的Exception清理，
+并核对本次Thread与协议；任意异常、缺少pool登记或ident均不证明未启动。
+
+2名sub-agent分别修复两安全文件和只读验收准备；root独占治理/文档/统一提交。
+仅repository_fixture.py与test_repository_fixture.py已下达实施GO；旧阻断草稿的完整字节、
+989旧案、267修订短案和全部历史失败证据保留。尚未collect、pytest、测量或提交新源码。
+独立源码复核后固定候选，完整warm与各原前置检查串行；原integration600实际通过后，
+才可进入新的完整原生V2。后继55、发布与F的条件不变，未新建action005、推送或合并。

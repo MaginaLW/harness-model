@@ -1,0 +1,50 @@
+{
+  "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "cfcc4b48f9f099c182a954bf7206ff484b116c3b2e1557b66df95bdc563b58e8",
+  "classifications": [
+    {
+      "classified_at": "2026-10-01T08:39:18Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
+      "explanations": [
+        "Unmatched work remains REVIEW; there is no implicit AUTO fallback."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Unmatched work remains REVIEW; there is no implicit AUTO fallback.",
+          "predicate_explanations": [],
+          "priority": 0,
+          "route": "REVIEW",
+          "rule_id": "ROUTE-DEFAULT-REVIEW"
+        }
+      ],
+      "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+      "policy_version": "2.3.0",
+      "route": "REVIEW",
+      "rule_id": "ROUTE-DEFAULT-REVIEW",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Acceptance verification requires V2.",
+        "Integration verification requires V2.",
+        "Targeted mutation verification requires V2.",
+        "Independent verifier evidence requires V2."
+      ],
+      "verification_level": "V2",
+      "verification_rule_ids": [
+        "VERIFICATION-V2-ACCEPTANCE-REQUIRED",
+        "VERIFICATION-V2-INTEGRATION-REQUIRED",
+        "VERIFICATION-V2-TARGETED-MUTATION-REQUIRED",
+        "VERIFICATION-V2-INDEPENDENT-VERIFIER-REQUIRED"
+      ]
+    }
+  ],
+  "classified_at": "2026-10-01T08:39:18Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V2",
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "policy_version": "2.3.0",
+  "schema_version": "2.0",
+  "subject_commit": "b46dd7c3a3f9699c08db71a7e7695c076baffbed",
+  "task_id": "TASK-0055"
+}
