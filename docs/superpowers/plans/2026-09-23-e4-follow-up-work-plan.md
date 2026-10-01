@@ -1,5 +1,19 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-02 owner 私有系统配置修复完成，进入新发布验证
+
+安全提交9191a646a12c3ea2891303f28c223d0e787ae56e仅修改3个test-only文件；真实原run_git和bounded Popen统一选用owner私有空系统配置，父环境不写GIT_CONFIG_SYSTEM，默认、未拥有cwd及foreign路径继承原输入，non-Git命令不变。
+资格事实同时绑定当前owner/factory/root/context、实际子环境和普通配置文件dev/inode/完整字节与mode；配置漂移保持固定冷读取路径，选中输入缺失或不安全时明确失败。同字节换文件、移交旧资格、更换context及可信fact函数/代码替换不能暖命中。
+最终候选两个完整模块真实865896/0：194 passed、0 skipped、100.67秒；夹具152及helper42。新增10个named测试、19个参数实例；原71+22 named测试完整AST、原断言/skip、owner/seed、配置和环境守卫、allowlist、线程/复制及进程清理逻辑保持，Ruff/format/whitespace/mypy44真实通过。
+独立02663a/0在最终3hash上8项真实Git反例通过；两项实质Finding均已复现并修复，正常和异常teardown、system对照、同字节inode及owner/context变化、无所有权路由已核验。主agent22bc8a/0重算作者123件，15119f/0重算非作者66件并核实际retained退出0/closed；e2f750/0另核原93 named AST及守卫。
+固定SHA256：repository_fixture.py c7d1c3f82c738d7c8d7b81c3fbffe8c0ec22be7da4de8820dd0f6a02d8b5218c；test_begin_close_commands.py ea1beba55b6144145a05933a31b45fec09d95f0f6a6003334036446d52b65316；test_repository_fixture.py fe0d704ab6c5e86f2fc9919416cad6b677bac56b20367c6371001c02f2fa7ee9。
+[准确镜像安装脚本](https://raw.githubusercontent.com/actions/runner-images/ubuntu24/20260927.320/images/ubuntu/scripts/build/install-git.sh)与真实受控Git对照证明system safe.directory是充分的unsupported输入候选；主agent52f7ba/0复核37件独立诊断。未直接观察失败Linux runner有效key或唯一根因，仍UNKNOWN；专项Windows成功不替代新准确head Linux整链CI。
+原三次准确CI失败、观察测试首轮错误、旧193/20中间候选与事实入口反例均原样保留，不冒充最终验收。58/59/60冻结历史及名义状态不改，未来新CI成功不将它们native close MERGED；53保持push-only。
+下一步真实分配新publisher并冻结实际S，执行全部原选定V1检查、非作者Design/Implementation Review、批准与准确Q Gate，随后普通推送/PR44更新、完整准确CI、保护合并和独立M证明；之后才close54/55/56/57及新publisher并整合主检出。
+并行阶段启用2个sub-agent：非作者累计代码/治理审查与独立操作审计；主agent负责统一提交和准入。源码冻结、完整验证、Gate、外部动作、完整CI、证明/close串行，不在冻结期修改source/runtime/refs/index/topology。
+此阶段未再次推送、合并、执行Mproof或close；F有界搜索仍缺目标匹配真实ZCode原件，条件阶段、Task28及历史BLOCKED保持，无provider或付费调用。
+
+
 ## 2026-10-02 TASK-0060 准确 Q CI 再次失败，先诊断系统配置
 
 TASK-0060 的固定S14d80213已完成全部原生10/10检查、独立Design/Implementation APPROVE和准确Q Gate；Qf402bd7ab1fbe6c6415117817d3adb0ec62899ac实际普通推送并更新既有PR44，字节回读一致。
