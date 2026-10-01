@@ -1,5 +1,20 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-02 夹具参考 Git 初始化修复，专项验证通过
+
+测试夹具不再假定安装模板与 Git 初始化目标的权限完全相同；在所有原配置、环境、Git、模板、attributes、current/pristine 守卫通过后，执行一次 owner 私有空目录参考初始化。
+源模板完整 mode/bytes/types/names 继续绑定；源到两个初始化目标的 types/names/bytes 完整匹配，两个目标之间仍核对全部 metadata，包括 mode。
+原 cold/hit、warm 不重新 init、snapshot/target-mode、线程和复制行为保持；未知、输入漂移及 partial 失败仍冷回退，异常诊断只输出固定类型与可信代码行。
+固定两文件 SHA256 为 repository_fixture.py 9fca08f11b9c528dcc725c9be0b19be2d91b8d3b983b65c7194c8933082713ff，test_repository_fixture.py e8790190b12ffdb476bf349f2c7eb547a3da909216dc80b9785df5eea818dbb1。
+原生同形 MINENV 专项实际 061bd0/0：128 passed、0 skipped、55.02 秒；Ruff 与 format-check 通过。实际新增13个 named 测试、31个参数实例，原55个 named 测试及 thread/copy/parallel AST 保留。
+首次 full-env 专项受宿主 unsupported configuration 遮挡，真实失败原件保留；未修改全局配置、守卫、原断言或 skip。该宿主结果与真实 Ubuntu 唯一根因不等同。
+独立实际 diff/AST 与9项私有反例通过，无未解决 Finding；共同污染、实际 mode 差异、未知异常回调及异常链均核对。原44文件 mypy 通过；额外311运行因旧 checkout 绑定被排除，不作为本实现兼容性验收。
+2名 sub-agent 分别负责实现与独立审查，主 agent 负责统一阶段提交及串行发布；新 publisher 准入、完整原生检查和新准确 head CI仍待执行。
+修复测试/状态文件先按维护模式独立安全提交；随后真实分配新的 publisher task，重新冻结、Review、执行全部原选定验证、批准和准确提交 Gate，再更新既有 PR44。
+Task58 原 P a2894ac3 的 required CI FAILURE 保留；其 own scope 不覆盖新测试字节，不同步旧 subject、不复用旧验证、不 close MERGED。新任务承接后追加实际指针，旧 P 失败不能由新 Q 成功改写。
+Task53 按 push-only 规格保持原名义状态及完成记录；Task28 和历史 BLOCKED 保持。最终适用任务只有在完整准确 Q CI、保护合并及独立远端证明后才 native close。
+此阶段未再次推送、未合并、未做实际 M 证明；F 仍缺目标匹配真实 ZCode 原件，条件后继阶段保持进入条件。
+
 ## 2026-10-02 PR #44 已创建，准确提交 required CI 失败，修复进行中
 
 累计发布实际使用 TASK-0058（REVIEW/V1），源码S715496d、发布P a2894ac3；完整原生10/10检查、非作者累计Design/Implementation APPROVE、代码批准及准确P Gate已通过。
