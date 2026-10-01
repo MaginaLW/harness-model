@@ -1,5 +1,18 @@
 # 维护收尾与待办
 
+## 2026-10-02 TASK-0059 已推送，准确 Q CI 配置守卫失败，继续修复
+
+新 publisher TASK-0059 已完成真实 REVIEW/V1 准入、全部原生10/10检查、独立 Design/Implementation APPROVE、代码批准与准确 Q Gate。
+固定源码S6c28ca6、本次完整回归/覆盖率各2974 passed及1原FIFO skip；最终发布Q a2654bdf5c6ba02f2a5e1633d090e3b0d1cf583e已普通推送并回读，既有PR44标题/正文独立审查及字节回读一致。
+准确Q的required run36901129804/check110500282851 app15368真实FAILURE：14 failed、2925 passed、36 skipped，608.39秒；四个原有用例与十个新增实例均在原UNSUPPORTED_CONFIGURATION守卫被阻挡，尚未进入参考init；原31warm skip保持。
+含branch总覆盖率88.92%已达85%，但pytest exit1使累计diff90、whitespace、Ruff、format、mypy未执行。主agent另做累计whitespace实际exit0，该本地结果不替代CI。
+实际Ubuntu有效配置触发key/branch仍待有界诊断；checkout日志中的safe.directory设置不足以证明唯一根因。两个sub-agent分别负责最小实现诊断与非作者独立复核，不放宽原守卫、断言、skip或门禁。
+真实动作、未执行的参数绑定错误批准和准确Q失败已追加至Task59并单独提交b5dd05f；这些是post-Q本地治理，不能说已包含于Q。
+修复超出Task59 own scope，须独立安全源码提交，再真实准入新publisher、执行全部原选定检查及准确head完整CI。旧58/P与59/Q失败原件保留，未来成功不使它们native close MERGED；53仍按push-only名义状态及完成记录保持。
+未合并、未做M远端证明、未关闭源任务54/55/56/57；后继串行为准确推送、PR更新、完整required CI、保护合并、独立证明、fetchM与适用任务close及本地主检出整合。
+F仍缺匹配真实ZCode原件；有界本机搜索与相关PR只读补查无正向结果（PR44审查/评论、PR39/43审查均为空），不据此宣称全局无报告。条件阶段、Task28及历史BLOCKED保持，不调用provider或付费接口。
+
+
 ## 2026-10-02 夹具参考 Git 初始化修复，专项验证通过
 
 测试夹具不再假定安装模板与 Git 初始化目标的权限完全相同；在所有原配置、环境、Git、模板、attributes、current/pristine 守卫通过后，执行一次 owner 私有空目录参考初始化。
