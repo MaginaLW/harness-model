@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import json
 import os
 import shutil
 import stat
@@ -14,6 +15,52 @@ import pytest
 
 from tests.integration import repository_fixture as fixture
 from tests.integration import test_begin_close_commands as helpers
+
+_QUALIFICATION_DIAGNOSTIC_CODES = (
+    (fixture._qualify.__code__, "_qualify"),
+    (fixture._template_reference.__code__, "_template_reference"),
+    (fixture._template_fact.__code__, "_template_fact"),
+    (fixture._ordinary.__code__, "_ordinary"),
+    (fixture._path_fact.__code__, "_path_fact"),
+    (fixture._parse_config.__code__, "_parse_config"),
+    (fixture._var_paths.__code__, "_var_paths"),
+    (fixture._Qualification.current.__code__, "_Qualification.current"),
+)
+
+
+def _qualification_diagnostic(repository: Path, owner: fixture.RepositoryOwner) -> str:
+    """Report fixed trusted sites, never exception text, locals, paths or values."""
+    try:
+        fixture._qualify(
+            repository,
+            helpers.PROJECT_ROOT,
+            helpers.REPOSITORY_ID,
+            helpers.run_git,
+            owner=owner,
+        )
+    except Exception as error:
+        known_types = (
+            (fixture._Ineligible, "_Ineligible"),
+            (subprocess.CalledProcessError, "CalledProcessError"),
+            (subprocess.TimeoutExpired, "TimeoutExpired"),
+            (FileNotFoundError, "FileNotFoundError"),
+            (PermissionError, "PermissionError"),
+            (OSError, "OSError"),
+            (RuntimeError, "RuntimeError"),
+            (ValueError, "ValueError"),
+            (TypeError, "TypeError"),
+        )
+        label = next((name for kind, name in known_types if type(error) is kind), None)
+        sites = []
+        if label is not None:
+            traceback = BaseException.__getattribute__(error, "__traceback__")
+            while traceback is not None:
+                for code, name in _QUALIFICATION_DIAGNOSTIC_CODES:
+                    if traceback.tb_frame.f_code is code:
+                        sites.append({"function": name, "line": traceback.tb_lineno})
+                traceback = traceback.tb_next
+        return json.dumps({"type": label or "OTHER_EXCEPTION", "sites": sites}, sort_keys=True)
+    return "DIRECT_RECHECK_PASSED"
 
 
 @pytest.fixture
@@ -42,6 +89,9 @@ def seed(tmp_path: Path, owner: fixture.RepositoryOwner) -> Path:
         fixture.IneligibleReason.GIT_ENVIRONMENT,
     }:
         pytest.skip(f"Warm copy is inapplicable: {owner.reason.value}")
+    if owner.disabled and owner.reason is fixture.IneligibleReason.QUALIFICATION_FAILED:
+        diagnostic = _qualification_diagnostic(repository, owner)
+        pytest.fail(f"Unexpected warm qualification failure: {diagnostic}", pytrace=False)
     assert owner.snapshot is not None and owner.qualification is not None
     assert not owner.disabled and owner.cold == 1 and owner.hits == 0
     assert not (owner.snapshot / ".ai/tasks").exists()
@@ -1985,3 +2035,354 @@ def test_parallel_shutdown_reentry_keeps_first_cleanup_and_drains_actual_worker(
     assert copies == ["f000"]
     assert (target / "f000").read_bytes() == (source / "f000").read_bytes()
     _assert_parallel_pools_ended(pools)
+
+
+def _reference_populate(
+    target: Path,
+    run_git: fixture.Git,
+    populate: fixture.Populate = helpers._populate_repository,
+) -> Path:
+    target.mkdir()
+    return fixture.populate_or_copy(
+        target,
+        project_root=helpers.PROJECT_ROOT,
+        repository_id=helpers.REPOSITORY_ID,
+        populate=populate,
+        run_git=run_git,
+        standard_helpers=True,
+    )
+
+
+def test_reference_init_once_and_no_warm_init(
+    tmp_path: Path, owner: fixture.RepositoryOwner
+) -> None:
+    references: list[Path] = []
+
+    def observe(path: Path, *arguments: str) -> str:
+        if arguments == ("init", "-b", "main"):
+            assert owner.contains(path) and path.parent == owner.basetemp
+            assert not list(path.iterdir())
+            references.append(path)
+        return helpers.run_git(path, *arguments)
+
+    original = _reference_populate(tmp_path / "first", observe)
+    assert len(references) == 1
+    reference = references[0]
+    assert reference not in {original, owner.snapshot, helpers.PROJECT_ROOT}
+    assert not (reference / ".ai").exists()
+    assert owner.snapshot is not None and owner.qualification is not None
+    assert owner.cold == 1 and owner.hits == 0 and not owner.disabled
+    initial = snapshot(original)
+    copied = _reference_populate(tmp_path / "second", observe)
+    assert len(references) == 1 and owner.cold == 1 and owner.hits == 1
+    assert snapshot(copied) == initial == snapshot(owner.snapshot)
+    assert helpers.run_git(copied, "log", "-1", "--format=%s") == "initial"
+
+
+def _private_template(tmp_path: Path) -> Path:
+    template = tmp_path / "template"
+    for directory in ("branches", "hooks", "info"):
+        (template / directory).mkdir(parents=True)
+    (template / "description").write_bytes(b"private description\n")
+    (template / "hooks/private.sample").write_bytes(b"private sample\n")
+    (template / "info/exclude").write_bytes(b"# private inactive comment\n")
+    return template
+
+
+def _initialized_template_targets(tmp_path: Path, template: Path) -> tuple[Path, Path]:
+    targets = (tmp_path / "seed", tmp_path / "reference")
+    for target in targets:
+        target.mkdir()
+        helpers.run_git(target, "init", "-b", "main", f"--template={template}")
+    return targets
+
+
+def test_reference_accepts_actual_git_modes_and_binds_source_modes(tmp_path: Path) -> None:
+    template = _private_template(tmp_path)
+    source = template / "hooks/private.sample"
+    source.chmod(stat.S_IREAD)
+    before = fixture._template_fact(template)
+    repository, reference = _initialized_template_targets(tmp_path, template)
+    assert fixture._template_fact(template, repository, reference) == before
+    assert fixture._path_fact(source) != fixture._path_fact(
+        repository / ".git/hooks/private.sample"
+    )
+    with pytest.raises(fixture._Ineligible):
+        fixture._template_fact(template, repository)
+    source.chmod(stat.S_IREAD | stat.S_IWRITE)
+    assert fixture._template_fact(template) != before
+
+
+@pytest.mark.parametrize("damage", ["bytes", "extra", "missing", "type"])
+def test_reference_and_seed_common_corruption_is_rejected(tmp_path: Path, damage: str) -> None:
+    template = _private_template(tmp_path)
+    repository, reference = _initialized_template_targets(tmp_path, template)
+    for target in (repository, reference):
+        sample = target / ".git/hooks/private.sample"
+        if damage == "bytes":
+            sample.write_bytes(b"same wrong bytes\n")
+        elif damage == "extra":
+            (sample.parent / "extra.sample").write_bytes(b"same extra\n")
+        elif damage == "missing":
+            sample.unlink()
+        else:
+            sample.unlink()
+            sample.mkdir()
+    assert fixture._path_fact(repository / ".git/hooks") == fixture._path_fact(
+        reference / ".git/hooks"
+    )
+    with pytest.raises(fixture._Ineligible):
+        fixture._template_fact(template, repository, reference)
+
+
+@pytest.mark.parametrize("damage", ["bytes", "mode", "missing", "extra", "active"])
+def test_reference_damage_preserves_original_cold_success(
+    tmp_path: Path, owner: fixture.RepositoryOwner, damage: str
+) -> None:
+    references: list[Path] = []
+
+    def corrupt(path: Path, *arguments: str) -> str:
+        result = helpers.run_git(path, *arguments)
+        if arguments == ("init", "-b", "main"):
+            references.append(path)
+            description = path / ".git/description"
+            if damage == "bytes":
+                description.write_bytes(b"corrupted reference\n")
+            elif damage == "mode":
+                old = description.stat().st_mode
+                description.chmod(stat.S_IREAD)
+                assert description.stat().st_mode != old
+            elif damage == "missing":
+                description.unlink()
+            elif damage == "extra":
+                (path / ".git/hooks/extra.sample").write_bytes(b"extra\n")
+            else:
+                (path / ".git/hooks/post-checkout").write_bytes(b"active\n")
+        return result
+
+    result = _reference_populate(tmp_path / "first", corrupt)
+    assert len(references) == 1 and references[0].is_dir()
+    assert owner.disabled and owner.reason is fixture.IneligibleReason.QUALIFICATION_FAILED
+    assert owner.snapshot is None and owner.qualification is None
+    assert owner.cold == 1 and owner.hits == 0
+    assert helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+    _reference_populate(tmp_path / "second", corrupt)
+    assert len(references) == 1 and owner.hits == 0
+
+
+@pytest.mark.parametrize(
+    "key", ["init.templateDir", "core.sharedRepository", "include.path", "unknown.setting"]
+)
+def test_unknown_configuration_precedes_reference_init(
+    tmp_path: Path, owner: fixture.RepositoryOwner, key: str
+) -> None:
+    references: list[Path] = []
+
+    def configure(path: Path) -> Path:
+        result = helpers._populate_repository(path)
+        helpers.run_git(path, "config", key, "private-invalid-value")
+        return result
+
+    def observe(path: Path, *arguments: str) -> str:
+        if arguments == ("init", "-b", "main"):
+            references.append(path)
+        return helpers.run_git(path, *arguments)
+
+    result = _reference_populate(tmp_path / "first", observe, configure)
+    assert not references
+    assert owner.disabled and owner.reason is fixture.IneligibleReason.CONFIGURATION
+    assert owner.snapshot is None and owner.hits == 0 and owner.cold == 1
+    assert helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+
+
+def test_attributes_precede_reference_init(tmp_path: Path, owner: fixture.RepositoryOwner) -> None:
+    references: list[Path] = []
+
+    def configure(path: Path) -> Path:
+        result = helpers._populate_repository(path)
+        (path / ".git/info/attributes").write_bytes(b"tracked.txt text\n")
+        return result
+
+    def observe(path: Path, *arguments: str) -> str:
+        if arguments == ("init", "-b", "main"):
+            references.append(path)
+        return helpers.run_git(path, *arguments)
+
+    result = _reference_populate(tmp_path / "first", observe, configure)
+    assert not references
+    assert owner.disabled and owner.reason is fixture.IneligibleReason.ATTRIBUTES
+    assert owner.snapshot is None and owner.hits == 0
+    assert helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+
+
+@pytest.mark.parametrize(
+    "location", ["existing", "occupied", "seed", "project", "nested", "outside"]
+)
+def test_reference_allocation_unsafe_paths_never_init(
+    tmp_path: Path,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+    location: str,
+) -> None:
+    target = tmp_path / "seed"
+    existing = owner.factory.mktemp("existing-reference")
+    original_mktemp = owner.factory.mktemp
+    calls: list[Path] = []
+
+    def allocate(prefix: str, **kwargs: object) -> Path:
+        assert prefix == "q"
+        if location == "existing":
+            return existing
+        if location == "occupied":
+            candidate = original_mktemp("occupied-reference")
+            (candidate / "sentinel").write_bytes(b"keep\n")
+            return candidate
+        if location == "seed":
+            return target
+        if location == "project":
+            return helpers.PROJECT_ROOT
+        if location == "nested":
+            candidate = target / "nested"
+            candidate.mkdir()
+            return candidate
+        return owner.basetemp.parent
+
+    def observe(path: Path, *arguments: str) -> str:
+        if arguments == ("init", "-b", "main"):
+            calls.append(path)
+        return helpers.run_git(path, *arguments)
+
+    monkeypatch.setattr(owner.factory, "mktemp", allocate)
+    result = _reference_populate(target, observe)
+    assert not calls and existing.is_dir()
+    assert owner.disabled and owner.snapshot is None and owner.hits == 0
+    assert helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+
+
+@pytest.mark.parametrize("change", ["source", "config", "environment"])
+def test_reference_init_input_drift_is_not_published(
+    tmp_path: Path,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+    change: str,
+) -> None:
+    project = source_copy(tmp_path, monkeypatch)
+    target = tmp_path / "seed"
+    references: list[Path] = []
+
+    def drift(path: Path, *arguments: str) -> str:
+        result = helpers.run_git(path, *arguments)
+        if arguments == ("init", "-b", "main"):
+            references.append(path)
+            if change == "source":
+                source = next(
+                    path for path in (project / ".ai/policy").rglob("*") if path.is_file()
+                )
+                source.write_bytes(source.read_bytes() + b"\n")
+            elif change == "config":
+                config = target / ".git/config"
+                config.write_bytes(config.read_bytes() + b"\n# changed during reference init\n")
+            else:
+                monkeypatch.setenv("AIFLOW_REFERENCE_TEST", "changed")
+        return result
+
+    result = _reference_populate(target, drift)
+    assert len(references) == 1 and references[0].is_dir()
+    assert owner.disabled and owner.reason is fixture.IneligibleReason.INPUT_CHANGED
+    assert owner.snapshot is None and owner.hits == 0 and owner.cold == 1
+    assert helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+
+
+def test_reference_init_failure_keeps_partial_and_cold_result(
+    tmp_path: Path, owner: fixture.RepositoryOwner, capsys: pytest.CaptureFixture[str]
+) -> None:
+    references: list[Path] = []
+    secret = "private-reference-error-not-for-diagnostics"
+
+    def fail(path: Path, *arguments: str) -> str:
+        result = helpers.run_git(path, *arguments)
+        if arguments == ("init", "-b", "main"):
+            references.append(path)
+            raise RuntimeError(secret)
+        return result
+
+    result = _reference_populate(tmp_path / "seed", fail)
+    assert len(references) == 1 and (references[0] / ".git").is_dir()
+    assert owner.disabled and owner.reason is fixture.IneligibleReason.QUALIFICATION_FAILED
+    assert owner.snapshot is None and owner.cold == 1 and owner.hits == 0
+    assert helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+    captured = capsys.readouterr()
+    assert secret not in captured.out + captured.err
+
+
+def test_qualification_diagnostic_excludes_unknown_callbacks_and_private_text(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    callbacks: list[str] = []
+
+    class PrivateError(RuntimeError):
+        def __str__(self) -> str:
+            callbacks.append("str")
+            return "private secret"
+
+        def __repr__(self) -> str:
+            callbacks.append("repr")
+            return "private secret"
+
+    def fail(*args: object, **kwargs: object) -> None:
+        raise PrivateError("private secret")
+
+    monkeypatch.setattr(fixture, "_qualify", fail)
+    assert json.loads(_qualification_diagnostic(tmp_path, owner)) == {
+        "type": "OTHER_EXCEPTION",
+        "sites": [],
+    }
+    assert not callbacks
+
+
+def test_qualification_diagnostic_only_trusted_function_and_line(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fail(git: Path) -> Path:
+        raise fixture._Ineligible()
+
+    monkeypatch.setattr(fixture, "_template_for", fail)
+    diagnostic = json.loads(_qualification_diagnostic(tmp_path, owner))
+    assert diagnostic["type"] == "_Ineligible"
+    assert len(diagnostic["sites"]) == 1
+    site = diagnostic["sites"][0]
+    assert set(site) == {"function", "line"}
+    assert site["function"] == "_qualify" and type(site["line"]) is int
+
+
+@pytest.mark.parametrize("error", [KeyboardInterrupt(), SystemExit()])
+def test_qualification_diagnostic_preserves_control_interruptions(
+    tmp_path: Path,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+    error: BaseException,
+) -> None:
+    def fail(*args: object, **kwargs: object) -> None:
+        raise error
+
+    monkeypatch.setattr(fixture, "_qualify", fail)
+    with pytest.raises(type(error)) as caught:
+        _qualification_diagnostic(tmp_path, owner)
+    assert caught.value is error
+
+
+def test_seed_qualification_failure_still_fails_after_successful_recheck(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def create(path: Path) -> Path:
+        path.mkdir()
+        result = helpers._populate_repository(path)
+        owner.disabled = True
+        owner.reason = fixture.IneligibleReason.QUALIFICATION_FAILED
+        return result
+
+    monkeypatch.setattr(helpers, "create_repository", create)
+    monkeypatch.setattr(fixture, "_qualify", lambda *args, **kwargs: object())
+    with pytest.raises(pytest.fail.Exception, match="DIRECT_RECHECK_PASSED"):
+        seed(tmp_path, owner)
+    assert owner.snapshot is None and owner.qualification is None

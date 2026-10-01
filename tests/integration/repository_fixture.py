@@ -225,7 +225,18 @@ def _git_fact(git: Path) -> object:
     return [[str(path), _path_fact(path)] for path in files]
 
 
-def _template_fact(template: Path, repository: Path | None = None) -> str:
+def _template_payload(fact: Any) -> Any:
+    """Project only modes out of internally generated ordinary path facts."""
+    if fact[0] == "directory":
+        return ["directory", [[name, _template_payload(child)] for name, child in fact[2]]]
+    if fact[0] == "file":
+        return ["file", fact[2]]
+    return fact
+
+
+def _template_fact(
+    template: Path, repository: Path | None = None, reference: Path | None = None
+) -> str:
     if not stat.S_ISDIR(_ordinary(template).st_mode):
         raise _Ineligible()
     for root in template.iterdir():
@@ -248,13 +259,19 @@ def _template_fact(template: Path, repository: Path | None = None) -> str:
                     for line in source.read_bytes().splitlines()
                 ):
                     raise _Ineligible(IneligibleReason.TEMPLATE)
-            if repository is not None and _path_fact(source) != _path_fact(
+            expected = source if reference is None else reference / ".git" / relative
+            if repository is not None and _path_fact(expected) != _path_fact(
                 repository / ".git" / relative
             ):
                 raise _Ineligible()
     if repository is not None:
-        for name in ("branches", "hooks", "info"):
-            expected = template / name
+        for name in ("description", "branches", "hooks", "info"):
+            if reference is not None:
+                source_payload = _template_payload(_path_fact(template / name))
+                for target in (repository, reference):
+                    if source_payload != _template_payload(_path_fact(target / ".git" / name)):
+                        raise _Ineligible()
+            expected = (template if reference is None else reference / ".git") / name
             actual = repository / ".git" / name
             expected_names = (
                 {path.name for path in expected.iterdir()} if expected.is_dir() else set()
@@ -267,6 +284,40 @@ def _template_fact(template: Path, repository: Path | None = None) -> str:
                 # not a portable reason to silently skip warm-path assertions.
                 raise _Ineligible()
     return _digest(_path_fact(template))
+
+
+def _template_reference(
+    owner: RepositoryOwner, repository: Path, project_root: Path, run_git: Git
+) -> Path:
+    """Initialize one fresh owner-private metadata reference after qualification."""
+    if not owner.contains(repository):
+        raise _Ineligible()
+    existing = {path.name for path in owner.basetemp.iterdir()}
+    reference = owner.factory.mktemp("q")
+    if type(reference) is not type(owner.basetemp):
+        raise _Ineligible()
+    if (
+        reference.parent != owner.basetemp
+        or reference.name in existing
+        or not owner.contains(reference)
+        or any(reference.iterdir())
+    ):
+        raise _Ineligible()
+    protected = [repository, project_root]
+    if owner.snapshot is not None:
+        protected.append(owner.snapshot)
+    for path in protected:
+        if reference.absolute().is_relative_to(path.absolute()) or path.absolute().is_relative_to(
+            reference.absolute()
+        ):
+            raise _Ineligible()
+    metadata = _ordinary(reference)
+    identity = (metadata.st_dev, metadata.st_ino)
+    run_git(reference, "init", "-b", "main")
+    metadata = _ordinary(reference)
+    if not owner.contains(reference) or (metadata.st_dev, metadata.st_ino) != identity:
+        raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+    return reference
 
 
 def _parse_config(raw: str, *, values: bool) -> list[tuple[str, str, str, str]]:
@@ -362,7 +413,12 @@ class _Qualification:
 
 
 def _qualify(
-    repository: Path, project_root: Path, repository_id: str, run_git: Git
+    repository: Path,
+    project_root: Path,
+    repository_id: str,
+    run_git: Git,
+    *,
+    owner: RepositoryOwner,
 ) -> _Qualification:
     executable = shutil.which("git")
     if executable is None:
@@ -372,7 +428,7 @@ def _qualify(
     _ordinary(git)
     template = _template_for(git)
     windows_prefix = template.parents[3] if os.name == "nt" else None
-    _template_fact(template, repository)
+    _template_fact(template)
     _no_attributes(repository)
     if any(not path.name.endswith(".sample") for path in (repository / ".git/hooks").iterdir()):
         raise _Ineligible()
@@ -467,6 +523,21 @@ def _qualify(
     if qualification.current(project_root, repository_id) != current:
         raise _Ineligible(IneligibleReason.INPUT_CHANGED)
     if _digest(_path_fact(repository)) != pristine:
+        raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+    reference = _template_reference(owner, repository, project_root, run_git)
+    reference_fact = _digest(_path_fact(reference))
+    if qualification.current(project_root, repository_id) != current:
+        raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+    if _digest(_path_fact(repository)) != pristine:
+        raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+    # Git creates template modes through its own copy rules and current umask;
+    # bind the source completely, then compare the actual initialized output.
+    _template_fact(template, repository, reference)
+    if qualification.current(project_root, repository_id) != current:
+        raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+    if _digest(_path_fact(repository)) != pristine:
+        raise _Ineligible(IneligibleReason.INPUT_CHANGED)
+    if not owner.contains(reference) or _digest(_path_fact(reference)) != reference_fact:
         raise _Ineligible(IneligibleReason.INPUT_CHANGED)
     return _Qualification(qualification.files, qualification.attributes, template, git, current)
 
@@ -572,7 +643,7 @@ def populate_or_copy(
         return result
     stage = IneligibleReason.QUALIFICATION_FAILED
     try:
-        qualification = _qualify(path, project_root, repository_id, run_git)
+        qualification = _qualify(path, project_root, repository_id, run_git, owner=token)
         if _source_fact(project_root) != sources:
             raise _Ineligible(IneligibleReason.INPUT_CHANGED)
         snapshot = token.factory.mktemp("b")
