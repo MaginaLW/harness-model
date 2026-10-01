@@ -1,0 +1,18 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0056",
+  "parameter_summary": "Run the unchanged five-safeguard canonical V2 mutation manifest on the admitted complete temporary-root, parsing and metadata candidate after its current fixed-source original prerequisites passed.",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "365b5f52294b6fb528012f3bcff322294933d788d5eb6b35b7df35e5d6f279f6",
+  "subject_commit": "113ecddd90a4c0e4f51cd7d7cea64700cf12736c",
+  "expires_at": "2026-10-01T07:15:00Z",
+  "single_use": true,
+  "conditions": [
+    "Use only .ai/mutations/phase-02-critical-manifest.json and its five unchanged fixed mutations in owned disposable detached worktrees.",
+    "Revalidate exact subject 113ecddd90a4c0e4f51cd7d7cea64700cf12736c, current classification, frozen spec 992b927ce833a8fa9876c7e278d024eca7903763621ea84391c2ad4c09f6916c and Policy d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1 before execution.",
+    "Preserve all four prior FAILED native runs, frozen specifications, Reviews, consumed action001 through action004 receipts, original600 failures and fixture96/1 raw evidence.",
+    "Use the exact locked Python 3.13.15 standard-GIL runtime and complete mingw64/bin Git endpoint, validated ordinary external parent and unchanged complete default 14-check/12-execution V2 plan, original deadlines, selectors, MINENV and 85/90 coverage thresholds; CI remains Python 3.11.",
+    "This fresh action005 follows actual REV-0008/r1, current spec approval and source implementation, current cold1/warm10 measurement and narrow12/fixture97/external188/originalintegration899 prerequisites. Original integration600 actually passed 898 with one original FIFO skip in 576.91s; independent current preflight must verify all immutable bindings and known resource handbacks without claiming historical unobserved descendants are known.",
+    "Bind source subject separately from own-ledger attestation HEAD; no prior-action reuse, provider, remote publication or automatic successor stage. Full native results, independent implementation Review, finalize, code approval and Gate remain required."
+  ]
+}
