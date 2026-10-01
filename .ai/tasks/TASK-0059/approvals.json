@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner-authorized-root",
+    "approval_type": "spec",
+    "approved_at": "2026-10-01T16:54:03Z",
+    "base_commit": "6c28ca605bec9c4dfeaf7ff7c7de8a6d4207d06a",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Bind the existing explicit owner authorization for eligible completion, necessary approvals, push and merge to current frozen TASK-0059 spec cd3a5cc45c1e5c3b90d0f3daccf7396b2c7def6083b1a9072ec135731a026ec3 and actual independent Design APPROVE; preserve all selected checks and exact-head protected publication conditions.",
+    "schema_version": "1.0",
+    "spec_sha256": "cd3a5cc45c1e5c3b90d0f3daccf7396b2c7def6083b1a9072ec135731a026ec3",
+    "subject_commit": "6c28ca605bec9c4dfeaf7ff7c7de8a6d4207d06a",
+    "task_id": "TASK-0059"
+  }
+]

@@ -1,0 +1,95 @@
+allowed_scope:
+- .ai/tasks/TASK-0059/**
+base_commit: 6c28ca605bec9c4dfeaf7ff7c7de8a6d4207d06a
+branch: codex/e4-cumulative-delivery
+created_at: '2026-10-01T16:42:24Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - git_remote_push
+  - github_pull_request_update
+  - protected_main_merge
+  goal: Publish the cumulative E4 delivery and reviewed fixture reference-init repair
+    through exact-head required CI and protected merge
+  impact:
+    level: high
+  impact_categories:
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0059/**
+  inputs:
+  - Actual fixed source S6c28ca6 contains original gated Task54/55/56/57, original
+    Task58 P and real failed-CI/action records, plus task-free fixture repair55fd26b
+    and status6c28ca6.
+  - Actual source-independent fixture review with 128 focused passes and nine independent
+    counterexamples; no new complete publisher V1 or exact-head Linux CI is claimed.
+  - Existing PR44 head and remote feature predecessor are old P a2894ac3e4c7f00cba9fa2851fed6b2a004d47ed
+    at last read; refresh repo/ref/main/protection before each actual action.
+  - Human explicitly authorized eligible pending work, necessary approvals, push and
+    merge; bind each fresh exact single-use action without reasking.
+  - Original Task58 exact-P CI FAILURE must remain; retain its nominal state and append
+    supersession/real M ancestry only after proof, never native-close58 as if old
+    P CI passed. Task53 remains push-only.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Create and verify only this new publisher own governance on fixed sourceS.
+  - Ordinary non-force fast-forward push of exact Q replacing freshly reread predecessor
+    on existing feature ref.
+  - Update existing PR44 title/body using independently reviewed exact bytes; do not
+    create a duplicate PR.
+  - Require every unchanged ai-quality-gate check on exact Q then ordinary expected-head
+    protected merge.
+  - Independent actual remote proof before fetching M and applicable native close54/55/56/57
+    and this publisher; preserve53/58 nominal states with truthful separate local
+    postaction records.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0059
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run every original native check selected by actual classification without altered
+    selectors, budgets, thresholds or MINENV.
+  - Actual author-independent cumulative design and implementation Review cover remoteB..sourceS
+    and source/task Gates; own empty business diff does not replace cumulative source
+    review.
+  - Observe complete exact-head required Linux CI and independently verify external
+    action receipts, merge parents/tree and source/closure ancestry.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: cd3a5cc45c1e5c3b90d0f3daccf7396b2c7def6083b1a9072ec135731a026ec3
+goal: Publish the cumulative E4 delivery and reviewed fixture reference-init repair
+  through exact-head required CI and protected merge
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-01T16:46:01Z'
+subject_commit: 6c28ca605bec9c4dfeaf7ff7c7de8a6d4207d06a
+task_id: TASK-0059
+updated_at: '2026-10-01T16:54:04Z'
+worktree_dirty: false
+worktree_dirty_paths: []
