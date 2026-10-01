@@ -185,6 +185,8 @@ def _standard_io() -> bool:
         and subprocess.Popen is _POPEN
         and git_child_environment is _GIT_CHILD_ENVIRONMENT
         and git_child_environment.__code__ is _GIT_CHILD_ENVIRONMENT_CODE
+        and git_child_arguments is _GIT_CHILD_ARGUMENTS
+        and git_child_arguments.__code__ is _GIT_CHILD_ARGUMENTS_CODE
         and _git_context_fact is _GIT_CONTEXT_FACT
         and _git_context_fact.__code__ is _GIT_CONTEXT_FACT_CODE
     )
@@ -670,6 +672,31 @@ def git_child_environment(repository: Path) -> dict[str, str] | None:
 
 _GIT_CHILD_ENVIRONMENT = git_child_environment
 _GIT_CHILD_ENVIRONMENT_CODE = git_child_environment.__code__
+
+
+def git_child_arguments(repository: Path, arguments: tuple[str, ...]) -> tuple[str, ...]:
+    """Keep owned fixture commits from asynchronously changing initialized templates."""
+    context = _private_git_context
+    if context is None or not context.matches(_owner, repository):
+        return arguments
+    context.file_fact()
+    # The fixture's commit helpers use only separated global -c pairs. Leave
+    # other global option forms untouched rather than guessing their command.
+    position = 0
+    while position + 1 < len(arguments) and arguments[position] == "-c":
+        position += 2
+    if position < len(arguments) and arguments[position] == "commit":
+        return (
+            *arguments[:position],
+            "-c",
+            "maintenance.auto=false",
+            *arguments[position:],
+        )
+    return arguments
+
+
+_GIT_CHILD_ARGUMENTS = git_child_arguments
+_GIT_CHILD_ARGUMENTS_CODE = git_child_arguments.__code__
 
 
 def _git_context_fact() -> object:

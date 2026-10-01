@@ -133,7 +133,9 @@ def _run_fixture_command(
 
 def run_git(repository: Path, *arguments: str) -> str:
     return _run_fixture_command(
-        repository, ["git", *arguments], env=repository_fixture.git_child_environment(repository)
+        repository,
+        ["git", *repository_fixture.git_child_arguments(repository, arguments)],
+        env=repository_fixture.git_child_environment(repository),
     )
 
 

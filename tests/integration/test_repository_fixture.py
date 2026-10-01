@@ -2813,3 +2813,169 @@ def test_private_system_context_normal_and_exception_restoration(
     assert len(holder) == 1 and holder[0].system.read_bytes() == b""
     assert fixture._private_git_context is previous_context and fixture._owner is previous_owner
     assert dict(os.environ) == parent
+
+
+def test_owned_commit_blocks_real_automatic_maintenance(
+    tmp_path: Path, owner: fixture.RepositoryOwner
+) -> None:
+    # These two distinct blobs hash into Git's fixed approximate-count shard.
+    # Force the long-supported gc task synchronously, independent of the Git
+    # version's default maintenance strategy or random commit identity.
+    arguments = (
+        "-c",
+        "maintenance.auto=true",
+        "-c",
+        "maintenance.gc.enabled=true",
+        "-c",
+        "maintenance.geometric-repack.enabled=false",
+        "-c",
+        "maintenance.autoDetach=false",
+        "-c",
+        "gc.autoDetach=false",
+        "-c",
+        "gc.auto=1",
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit",
+        "-m",
+        "controlled maintenance",
+    )
+    parent = dict(os.environ)
+    repositories = []
+    for controlled in (False, True):
+        repository = tmp_path / ("controlled" if controlled else "baseline")
+        repository.mkdir()
+        helpers.run_git(repository, "init", "-b", "main")
+        for number in (136, 697):
+            (repository / f"object-{number}").write_bytes(
+                f"owned-maintenance-object-{number}\n".encode()
+            )
+        helpers.run_git(repository, "add", ".")
+        assert len(tuple((repository / ".git/objects/17").iterdir())) == 2
+        if controlled:
+            helpers.run_git(repository, *arguments)
+        else:
+            helpers._run_fixture_command(
+                repository,
+                ["git", *arguments],
+                env=fixture.git_child_environment(repository),
+            )
+        assert helpers.run_git(repository, "log", "-1", "--format=%s") == ("controlled maintenance")
+        configuration = helpers.run_git(repository, "config", "--name-only", "--list")
+        assert "maintenance." not in configuration and "gc.auto" not in configuration
+        repositories.append(repository)
+    baseline, controlled = repositories
+    assert (baseline / ".git/info/refs").is_file()
+    assert (baseline / ".git/objects/info/packs").is_file()
+    assert tuple((baseline / ".git/objects/pack").glob("*.pack"))
+    assert not (controlled / ".git/info/refs").exists()
+    assert not (controlled / ".git/objects/info/packs").exists()
+    assert not tuple((controlled / ".git/objects/pack").glob("*.pack"))
+    assert len(tuple((controlled / ".git/objects/17").iterdir())) == 2
+    assert dict(os.environ) == parent and owner.hits == 0
+
+
+@pytest.mark.parametrize("scope", ["owned", "default", "foreign", "no_context", "other_global"])
+def test_commit_maintenance_control_routes_only_owned_known_commands(
+    tmp_path: Path,
+    tmp_path_factory: pytest.TempPathFactory,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+    scope: str,
+) -> None:
+    import sys
+    from types import FrameType
+
+    repository = seed(tmp_path, owner)
+    (repository / "tracked.txt").write_text("changed\n")
+    helpers.run_git(repository, "add", "tracked.txt")
+    arguments = ("-c", "maintenance.auto=true", "commit", "--dry-run")
+    observed: list[tuple[list[str], dict[str, str] | None]] = []
+    previous = sys.getprofile()
+    parent = dict(os.environ)
+
+    def observe(frame: object, event: str, argument: object) -> None:
+        assert isinstance(frame, FrameType)
+        if event == "call" and frame.f_code is helpers._run_fixture_command.__code__:
+            observed.append((frame.f_locals["argv"], frame.f_locals["env"]))
+
+    with monkeypatch.context() as scoped:
+        if scope == "default":
+            scoped.setattr(fixture, "_owner", None)
+        elif scope == "foreign":
+            foreign = fixture.RepositoryOwner(owner.factory, tmp_path_factory.mktemp("foreign"))
+            scoped.setattr(fixture, "_owner", foreign)
+        elif scope == "no_context":
+            scoped.setattr(fixture, "_private_git_context", None)
+        elif scope == "other_global":
+            arguments = ("--no-optional-locks", *arguments)
+        expected_environment = fixture.git_child_environment(repository)
+        try:
+            sys.setprofile(observe)
+            helpers.run_git(repository, *arguments)
+            query = ("-c", "maintenance.auto=true", "config", "--get", "maintenance.auto")
+            assert helpers.run_git(repository, *query) == "true"
+        finally:
+            sys.setprofile(previous)
+    expected_arguments = list(arguments)
+    if scope == "owned":
+        expected_arguments[2:2] = ["-c", "maintenance.auto=false"]
+    assert observed == [
+        (["git", *expected_arguments], expected_environment),
+        (["git", *query], expected_environment),
+    ]
+    assert dict(os.environ) == parent
+
+
+@pytest.mark.parametrize("change", ["identity", "code"])
+def test_commit_argument_dispatch_replacement_cannot_certify_current(
+    tmp_path: Path,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+    change: str,
+) -> None:
+    seed(tmp_path, owner)
+    assert owner.qualification is not None
+    original = fixture.git_child_arguments
+
+    def untouched(repository: Path, arguments: tuple[str, ...]) -> tuple[str, ...]:
+        return arguments
+
+    if change == "identity":
+        monkeypatch.setattr(fixture, "git_child_arguments", untouched)
+    else:
+        monkeypatch.setattr(original, "__code__", untouched.__code__)
+    assert not fixture._standard_io()
+    with pytest.raises(fixture._Ineligible, match="INPUT_CHANGED"):
+        owner.qualification.current(helpers.PROJECT_ROOT, helpers.REPOSITORY_ID)
+    repository = helpers.create_repository(tmp_path / "cold")
+    assert owner.hits == 0 and helpers.run_git(repository, "log", "-1", "--format=%s") == "initial"
+
+
+@pytest.mark.parametrize("change", ["configuration", "template"])
+def test_commit_control_keeps_unknown_configuration_and_template_rejected(
+    tmp_path: Path, owner: fixture.RepositoryOwner, change: str
+) -> None:
+    def configure(path: Path) -> Path:
+        repository = helpers._populate_repository(path)
+        if change == "configuration":
+            helpers.run_git(path, "config", "maintenance.auto", "false")
+        else:
+            (path / ".git/info/refs").write_bytes(b"unexpected template name\n")
+        return repository
+
+    repository = _reference_populate(tmp_path / "rejected", helpers.run_git, configure)
+    reason = (
+        fixture.IneligibleReason.CONFIGURATION
+        if change == "configuration"
+        else fixture.IneligibleReason.QUALIFICATION_FAILED
+    )
+    assert owner.disabled and owner.reason is reason
+    assert owner.snapshot is None and owner.qualification is None and owner.hits == 0
+    assert owner.cold == 1
+    if change == "configuration":
+        assert helpers.run_git(repository, "config", "--get", "maintenance.auto") == "false"
+    else:
+        assert (repository / ".git/info/refs").read_bytes() == b"unexpected template name\n"
