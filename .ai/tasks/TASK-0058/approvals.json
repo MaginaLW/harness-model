@@ -11,5 +11,19 @@
     "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
     "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
     "task_id": "TASK-0058"
+  },
+  {
+    "actor": "e4-governance-owner-authorized-root",
+    "approval_type": "code",
+    "approved_at": "2026-10-01T15:01:15Z",
+    "base_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "8c43c4318124b45fdc58a38964bf2ff46f14e83e0f7327318a5c2dcfad0fb49d",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing explicit owner authorization; actual cumulative independent REV-0002 APPROVE context bfd1aa51 and original full V1 native exit0; actual35 reviewer artifacts rehashed and valid byte-exact review package. Required exact-P Linux CI and protected merge proof remain separate mandatory conditions.",
+    "schema_version": "1.0",
+    "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
+    "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "task_id": "TASK-0058"
   }
 ]
