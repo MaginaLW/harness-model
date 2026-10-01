@@ -6,7 +6,12 @@ import builtins
 import hashlib
 import json
 import os
+import select
 import shutil
+import signal
+import subprocess
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import dataclass
@@ -1951,3 +1956,340 @@ def test_cli_both_output_streams_failing_after_commit_preserves_durable_record(
     ] == ("already_recorded")
     assert target.read_bytes() == original
     assert snapshot(repository / ".ai/tasks") == before
+
+
+GIT_IDENTITY_ARGV = [
+    "git",
+    "--no-optional-locks",
+    "rev-parse",
+    "--show-toplevel",
+    "HEAD",
+    "--abbrev-ref=loose",
+    "HEAD",
+]
+
+
+def transport_snapshot(case: Case) -> dict[str, Any]:
+    """Observe every task, empty directory, index/lock and all original input bytes."""
+    paths = [
+        case.root / ".git" / "index",
+        case.root / ".git" / "index.lock",
+        case.envelope_path,
+        case.report_path,
+    ]
+    if case.mapping_path is not None:
+        paths.append(case.mapping_path)
+    return {
+        "tasks": tree_snapshot(case.tasks),
+        "inputs_and_index": {
+            str(path): path.read_bytes() if path.exists() else None for path in paths
+        },
+    }
+
+
+def assert_transport_refusal(
+    case: Case, before: dict[str, Any], operation: str, token: str | None
+) -> ContractError:
+    with pytest.raises(ContractError) as caught:
+        case.record(token) if operation == "record" else case.preflight()
+    assert caught.value.code == "EXTERNAL_REVIEW_GIT_BINDING_STALE"
+    rendered = json.dumps(caught.value.to_dict())
+    for sensitive in (
+        SYNTHETIC_SECRET,
+        str(case.root),
+        str(case.envelope_path),
+        str(case.report_path),
+        str(case.mapping_path),
+    ):
+        assert sensitive not in rendered
+    assert transport_snapshot(case) == before
+    return caught.value
+
+
+@pytest.mark.parametrize(
+    "operation,identity_call", [("preflight", 1), ("record", 1), ("record", 3), ("record", 5)]
+)
+def test_public_git_transport_spawn_failure_restores_every_task_index_and_input(
+    case: Case, operation: str, identity_call: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    use_locator(case)
+    token = case.preflight()["preflight_sha256"] if operation == "record" else None
+    before = transport_snapshot(case)
+    real_popen = subprocess.Popen
+    calls = 0
+    failure = OSError(f"synthetic spawn {SYNTHETIC_SECRET} {case.root}")
+
+    def spawn(argv: list[str], **options: Any) -> subprocess.Popen[bytes]:
+        nonlocal calls
+        if argv == GIT_IDENTITY_ARGV:
+            calls += 1
+            if calls == identity_call:
+                assert options["cwd"] == case.root
+                raise failure
+        return real_popen(argv, **options)
+
+    monkeypatch.setattr(subprocess, "Popen", spawn)
+    caught = assert_transport_refusal(case, before, operation, token)
+    assert caught.__cause__ is failure
+    assert calls == identity_call  # Earlier preparations still execute real Git/freshness.
+
+
+class RetainedPipeChild:
+    """A Windows process handle or Linux pidfd owns this synthetic child's identity."""
+
+    def __init__(self, pid: int) -> None:
+        self.pid = pid
+        self.closed = False
+        if os.name == "nt":
+            import ctypes
+            from ctypes import wintypes
+
+            self.kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+            self.kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+            self.kernel.OpenProcess.restype = wintypes.HANDLE
+            self.kernel.GetProcessId.argtypes = [wintypes.HANDLE]
+            self.kernel.GetProcessId.restype = wintypes.DWORD
+            self.kernel.GetProcessTimes.argtypes = [wintypes.HANDLE] + [
+                ctypes.POINTER(wintypes.FILETIME)
+            ] * 4
+            self.kernel.GetProcessTimes.restype = wintypes.BOOL
+            self.kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+            self.kernel.WaitForSingleObject.restype = wintypes.DWORD
+            self.kernel.GetExitCodeProcess.argtypes = [
+                wintypes.HANDLE,
+                ctypes.POINTER(wintypes.DWORD),
+            ]
+            self.kernel.GetExitCodeProcess.restype = wintypes.BOOL
+            self.kernel.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+            self.kernel.TerminateProcess.restype = wintypes.BOOL
+            self.kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+            self.kernel.CloseHandle.restype = wintypes.BOOL
+            # SYNCHRONIZE | QUERY_LIMITED_INFORMATION | TERMINATE, before parent release.
+            self.handle = self.kernel.OpenProcess(0x00101001, False, pid)
+            assert self.handle, "The synthetic child must be retained while its parent is alive"
+            self.creation = self.identity()
+        else:
+            # Linux is the native POSIX CI target; do not infer death from PID disappearance.
+            assert sys.platform.startswith("linux") and hasattr(os, "pidfd_open")
+            before = self.linux_birth()
+            self.handle = os.pidfd_open(pid)
+            try:
+                info = Path(f"/proc/self/fdinfo/{self.handle}").read_text()
+                assert f"Pid:\t{pid}\n" in info
+                assert before == self.linux_birth()
+                self.creation = (pid, before)
+            except BaseException:
+                os.close(self.handle)
+                raise
+
+    def linux_birth(self) -> int:
+        # Field 22 follows the final ')' in the executable-name field.
+        value = Path(f"/proc/{self.pid}/stat").read_text()
+        assert int(value.split(" ", 1)[0]) == self.pid
+        return int(value.rsplit(")", 1)[1].split()[19])
+
+    def identity(self) -> tuple[int, int]:
+        assert not self.closed
+        if os.name != "nt":
+            return self.creation
+        import ctypes
+        from ctypes import wintypes
+
+        created, exited, kernel_time, user_time = (wintypes.FILETIME() for _ in range(4))
+        assert self.kernel.GetProcessId(self.handle) == self.pid
+        assert self.kernel.GetProcessTimes(
+            self.handle,
+            ctypes.byref(created),
+            ctypes.byref(exited),
+            ctypes.byref(kernel_time),
+            ctypes.byref(user_time),
+        )
+        return self.pid, (created.dwHighDateTime << 32) | created.dwLowDateTime
+
+    def terminal(self, timeout: float) -> bool:
+        assert not self.closed
+        if os.name == "nt":
+            import ctypes
+            from ctypes import wintypes
+
+            result = self.kernel.WaitForSingleObject(self.handle, int(timeout * 1000))
+            assert result in {0, 258}
+            if result == 258:
+                return False
+            code = wintypes.DWORD()
+            assert self.kernel.GetExitCodeProcess(self.handle, ctypes.byref(code))
+            assert code.value != 259
+            assert self.identity() == self.creation
+            return True
+        poller = select.poll()
+        poller.register(self.handle, select.POLLIN)
+        return bool(poller.poll(int(timeout * 1000)))
+
+    def kill(self) -> None:
+        assert not self.closed
+        if self.terminal(0):
+            return
+        if os.name == "nt":
+            assert self.kernel.TerminateProcess(self.handle, 99)
+        else:
+            signal.pidfd_send_signal(self.handle, signal.SIGKILL)
+
+    def close(self) -> None:
+        if not self.closed:
+            if os.name == "nt":
+                assert self.kernel.CloseHandle(self.handle)
+            else:
+                os.close(self.handle)
+            self.closed = True
+
+
+def direct_process_identity(process: subprocess.Popen[bytes]) -> tuple[int, int]:
+    if os.name != "nt":
+        value = Path(f"/proc/{process.pid}/stat").read_text()
+        return process.pid, int(value.rsplit(")", 1)[1].split()[19])
+    import ctypes
+    from ctypes import wintypes
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.GetProcessId.argtypes = [wintypes.HANDLE]
+    kernel.GetProcessId.restype = wintypes.DWORD
+    kernel.GetProcessTimes.argtypes = [wintypes.HANDLE] + [ctypes.POINTER(wintypes.FILETIME)] * 4
+    kernel.GetProcessTimes.restype = wintypes.BOOL
+    handle = wintypes.HANDLE(int(process._handle))
+    created, exited, kernel_time, user_time = (wintypes.FILETIME() for _ in range(4))
+    assert kernel.GetProcessId(handle) == process.pid
+    assert kernel.GetProcessTimes(
+        handle,
+        ctypes.byref(created),
+        ctypes.byref(exited),
+        ctypes.byref(kernel_time),
+        ctypes.byref(user_time),
+    )
+    return process.pid, (created.dwHighDateTime << 32) | created.dwLowDateTime
+
+
+@pytest.mark.parametrize("exited_parent", [False, True], ids=["preflight-live", "record-exited"])
+def test_public_git_transport_refuses_real_inherited_pipes_with_owned_finally_cleanup(
+    case: Case, tmp_path: Path, exited_parent: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    use_locator(case)
+    operation = "record" if exited_parent else "preflight"
+    token = case.preflight()["preflight_sha256"] if exited_parent else None
+    before = transport_snapshot(case)
+    base_executable = getattr(sys, "_base_executable", None)
+    assert isinstance(base_executable, str) and Path(base_executable).is_file()
+    runtime = tmp_path / "owned-pipe-runtime"
+    runtime.mkdir()
+    ready, release, stop = (runtime / name for name in ("child.pid", "parent-release", "stop"))
+    child_script = """import os, pathlib, sys, time
+ready, stop = map(pathlib.Path, sys.argv[1:])
+ready.write_text(str(os.getpid()))
+print('SYNTHETIC_EXTERNAL_REVIEW_SECRET', flush=True)
+print('SYNTHETIC_EXTERNAL_REVIEW_SECRET', file=sys.stderr, flush=True)
+deadline = time.monotonic() + 45
+while not stop.exists() and time.monotonic() < deadline:
+    time.sleep(0.01)
+"""
+    parent_script = """import pathlib, subprocess, sys, time
+child_script, ready, release, stop, exited = sys.argv[1:]
+child = subprocess.Popen([sys.executable, '-c', child_script, ready, stop])
+deadline = time.monotonic() + 45
+while time.monotonic() < deadline and not pathlib.Path(stop).exists():
+    if exited == '1' and pathlib.Path(release).exists():
+        break
+    time.sleep(0.01)
+"""
+    argv = [
+        base_executable,
+        "-c",
+        parent_script,
+        child_script,
+        str(ready),
+        str(release),
+        str(stop),
+        "1" if exited_parent else "0",
+    ]
+    real_popen = subprocess.Popen
+    parents: list[subprocess.Popen[bytes]] = []
+    children: list[RetainedPipeChild] = []
+    identities: list[tuple[int, int]] = []
+    identity_calls = 0
+    target_call = 3 if exited_parent else 1  # Exited-parent refusal occurs after the guard fsync.
+    helper_calls: list[list[str]] = []
+
+    def spawn(command: list[str], **options: Any) -> subprocess.Popen[bytes]:
+        nonlocal identity_calls
+        if command == GIT_IDENTITY_ARGV:
+            identity_calls += 1
+            if identity_calls == target_call:
+                assert options["cwd"] == case.root
+                assert options["stdout"] == options["stderr"] == subprocess.PIPE
+                assert "stdin" not in options and "text" not in options
+                assert "encoding" not in options
+                assert options["env"]["GIT_OPTIONAL_LOCKS"] == "0"
+                assert options["start_new_session"] == (os.name != "nt")
+                parent = real_popen(argv, **options)
+                parents.append(parent)  # Retain before any later assertion may fail.
+                identities.append(direct_process_identity(parent))
+                deadline = time.monotonic() + 5
+                while not ready.exists() and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                assert ready.exists()
+                child = RetainedPipeChild(int(ready.read_text()))
+                children.append(child)
+                assert not child.terminal(0)
+                if exited_parent:
+                    release.write_text("release")
+                    assert parent.wait(timeout=5) == 0
+                    assert parent.poll() == 0
+                    assert not child.terminal(0)
+                else:
+                    assert parent.poll() is None
+                return parent
+        if command and Path(command[0]).name.lower() == "taskkill.exe":
+            helper_calls.append(command)
+        return real_popen(command, **options)
+
+    started = time.monotonic()
+    try:
+        monkeypatch.setattr(subprocess, "Popen", spawn)
+        caught = assert_transport_refusal(case, before, operation, token)
+        assert isinstance(caught.__cause__, subprocess.TimeoutExpired)
+        assert caught.__cause__.timeout == 10
+        assert identity_calls == target_call
+        assert len(parents) == len(children) == len(identities) == 1
+        parent, child = parents[0], children[0]
+        assert parent.poll() is not None
+        assert parent.wait(timeout=0) == parent.returncode
+        assert child.identity() == child.creation
+        if os.name == "nt":
+            assert direct_process_identity(parent) == identities[0]
+        if exited_parent:
+            # An already-orphaned pipe holder is outside production's termination guarantee.
+            assert not child.terminal(0)
+            assert helper_calls == []
+        else:
+            assert child.terminal(5), "The live owned parent's pipe holder must actually exit"
+            if os.name == "nt":
+                assert len(helper_calls) == 1
+                assert helper_calls[0][1:] == ["/PID", str(parent.pid), "/T", "/F"]
+        assert 10 <= time.monotonic() - started < 40
+    finally:
+        # Only this test's stop path and retained handles are used, never process enumeration.
+        stop.write_text("stop")
+        for child in children:
+            try:
+                if not child.terminal(5):
+                    child.kill()
+                assert child.terminal(5)
+            finally:
+                child.close()
+        for parent in parents:
+            if parent.poll() is None:
+                parent.kill()
+            parent.wait(timeout=5)
+            parent.communicate(timeout=5)
+            for stream in (parent.stdout, parent.stderr):
+                if stream is not None:
+                    stream.close()
+    assert transport_snapshot(case) == before

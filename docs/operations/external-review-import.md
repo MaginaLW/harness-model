@@ -60,3 +60,15 @@ Windows 创建身份兼容修订约定：运行时提供 `st_birthtime_ns` 时�
 （包括合法零值），旧运行时仅在属性缺失时回退 `st_ctime_ns`；POSIX 保留
 `st_ctime_ns`。dev/ino/size/mtime、两次当前有界读取、原始 bytes 比较和路径
 守卫继续执行，未变的原子发布输入与等长替换/读间改写都须实际验证。
+
+只读 Git 查询保留原每次 10 秒通信期限。启动失败、超时和运行中的 I/O 错误仍以
+固定 `EXTERNAL_REVIEW_GIT_BINDING_STALE` 拒绝；部分输出不能变成成功结果。成功启动
+后的异常会清理本次拥有的子进程，KeyboardInterrupt、SystemExit 和意外异常保留原义。
+正常安全拒绝仍清理本次 writer 临时材料；突然中断的 guard/temp 保留原有恢复边界。
+
+清理只使用本次 retained 进程：Windows 在父进程仍存活时尝试其进程树，POSIX 只对
+未回收的本次父进程所属 session 发信号，已退出的父进程不按数值 PID/group 追杀。
+随后只做一次有界的直接进程清理和 5 秒 drain；未 drain 的 PIPE 不强行关闭。
+Windows 配置等待项之和最多 21 秒，已退出父进程及 POSIX 为 15 秒，含原 10 秒期限；
+这是等待项之和，不是整体预检的 wall-clock 上界。进程创建、调度、逃逸或已 orphan 的
+未 retained 后代仍有边界；不保证全树释放，不执行全局进程搜索或未知 PID 清理。
