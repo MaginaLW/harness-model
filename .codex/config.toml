@@ -1,6 +1,6 @@
 # Model and reasoning choices belong to the user and current runtime.
 # Keep project model overrides unset; see docs/operations/model-selection.md.
+# Inherit the concurrency limit from the user's global configuration.
 
 [agents]
 enabled = true
-max_concurrent_threads_per_session = 2
