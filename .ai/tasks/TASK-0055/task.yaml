@@ -10,10 +10,31 @@ allowed_scope:
 - tests/fixtures/contracts/valid/external-review-*.json
 - tests/fixtures/contracts/invalid/external-review-*.*.json
 - docs/operations/external-review-import.md
+- src/aiflow/verification_temporary.py
+- src/aiflow/verification.py
+- src/aiflow/verification_service.py
+- src/aiflow/process_runner.py
+- tests/unit/test_verification_temporary.py
+- tests/unit/test_verification_plan.py
+- tests/unit/test_process_runner.py
+- tests/integration/test_verify_command.py
+- docs/operations/pytest-temporary-roots.md
+- tests/integration/test_begin_close_commands.py
+- src/aiflow/document_parsing.py
+- src/aiflow/policy.py
+- src/aiflow/storage.py
+- tests/unit/test_document_parsing.py
+- tests/unit/test_policy.py
+- tests/unit/test_storage.py
+- tests/integration/repository_fixture.py
+- tests/integration/conftest.py
+- tests/integration/test_repository_fixture.py
+- tests/unit/test_external_review_metadata.py
+- .ai/tasks/TASK-0056/**
 base_commit: fd560d9f12d28ef6ff155f6f46764d6c588d0f30
 branch: codex/e4-report-import
 created_at: '2026-09-29T20:11:24Z'
-current_state: FAILED
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -43,12 +64,38 @@ decision_units:
   - tests/fixtures/contracts/valid/external-review-*.json
   - tests/fixtures/contracts/invalid/external-review-*.*.json
   - docs/operations/external-review-import.md
+  - src/aiflow/verification_temporary.py
+  - src/aiflow/verification.py
+  - src/aiflow/verification_service.py
+  - src/aiflow/process_runner.py
+  - tests/unit/test_verification_temporary.py
+  - tests/unit/test_verification_plan.py
+  - tests/unit/test_process_runner.py
+  - tests/integration/test_verify_command.py
+  - docs/operations/pytest-temporary-roots.md
+  - tests/integration/test_begin_close_commands.py
+  - src/aiflow/document_parsing.py
+  - src/aiflow/policy.py
+  - src/aiflow/storage.py
+  - tests/unit/test_document_parsing.py
+  - tests/unit/test_policy.py
+  - tests/unit/test_storage.py
+  - tests/integration/repository_fixture.py
+  - tests/integration/conftest.py
+  - tests/integration/test_repository_fixture.py
+  - tests/unit/test_external_review_metadata.py
+  - .ai/tasks/TASK-0056/**
   inputs:
   - E4.1 TASK-0054 has a locally approved bounded envelope contract at fd560d9.
   - The selected follow-up is guided local report preflight and immutable attachment
     recording, separate from formal Review and Gate.
   - The E4 preflight specification requires source-target matching, zero-write refusal,
     full-input replay equality and append-only versions.
+  - Actual TASK-0056 source9dca04dc18e1551dc86987eb594f84f9d37b47ad and gated governance80515e6032d9e8e90193f857730f957345150457
+    imported ff-only; full base-to-import187paths and106foreign tracked blobs are
+    recorded.
+  - Locked Python3.13.15 runtime now loads this Disk checkout; TASK-0056 verification
+    is dependency evidence only and does not replace this task own complete verification.
   permission_requirements:
   - action_approval
   planned_actions:
@@ -60,6 +107,11 @@ decision_units:
     tokens and create-only immutable publication.
   - Register two new closed attachment and repository-mapping contracts without changing
     existing formal contracts.
+  - Replace only importer read-only Git transport with owned Popen/group/session and
+    bounded exception cleanup, preserving binary argv/cwd/inherited stdin/local optional-lock
+    environment and communicate10.
+  - Preserve writer interruption contract and historical failures; commit safety tests
+    and operation documentation separately under maintenance mode.
   protections:
     dry_run: false
     verified_backup: false
@@ -78,6 +130,12 @@ decision_units:
     and mypy.
   - Obtain independent design and implementation reviews and formal V2 acceptance,
     integration and independent verification.
+  - Retain original I1-I8 and all existing assertions; add two actual ten-second inherited-pipe
+    public cases, fast cleanup faults and token-after identity phases1/3/5 with full
+    task/index/input zero-write snapshots.
+  - Run own complete original Policy V2 on own fixed subject/HEAD with original14checks/5mutations/deadlines,
+    independent Review and verifier, same verifier finalize, current code approval
+    and Gate.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
@@ -98,6 +156,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-09-29T21:18:07Z'
 subject_commit: eb4c49a4ff77ca07f210fceae707495c8dece8be
 task_id: TASK-0055
-updated_at: '2026-09-30T01:07:11Z'
+updated_at: '2026-10-01T07:43:14Z'
 worktree_dirty: false
 worktree_dirty_paths: []
