@@ -1,0 +1,9 @@
+{
+  "task_id": "TASK-0059",
+  "action_ref": "actions/pr-update-002.json",
+  "used_count": 0,
+  "status": "NOT_EXECUTED_BINDING_ERROR",
+  "reason": "Root caught wrong title in parameter_summary before any external invocation; original approved file retained and never reused.",
+  "replacement_action_ref": "actions/pr-update-003.json",
+  "recorded_at": "2026-10-01T17:43:30.945581+00:00"
+}

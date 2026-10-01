@@ -1,0 +1,17 @@
+{
+  "action_type": "github_pull_request_update",
+  "target": "https://github.com/MaginaLW/harness-model/pull/44",
+  "parameter_summary": "{\"base\":\"48bf777106b9fdfef1ddf83d3abc95859fb8e580\",\"base_ref\":\"main\",\"body_review_sha256\":\"e44b129c01906a2cb0e48075b8e0e5bcd788e100709e5db59953f104d66b0150\",\"body_sha256\":\"e5e953384c8b41a5b71b1e1b06f2dac64504c8745470e165d43e1c51bd8090c0\",\"command_input_sha256\":\"82f33de38afd204619b898a10251af2b98909d61e5adaf881fa21a27815425b0\",\"head_ref\":\"codex/e4-cumulative-delivery\",\"operation\":\"update existing PR title/body only\",\"pr\":44,\"pre_execution_binding_correction\":\"Prior approved action002 had incorrect parameter-summary title, discovered before external invocation; preserve unused action and bind a fresh003.\",\"publication_head\":\"a2654bdf5c6ba02f2a5e1633d090e3b0d1cf583e\",\"readonly_receipts\":{\"main\":\"618ce2b39c68bc1ff80c56f4ca2f8bcf8b2653baef250ed25a0a9e61da88e18f\",\"pr\":\"7888cad16e16ddbf5c167714753c40d0d6b8e852a8ae930f8f3998770865157b\",\"protection\":\"c5cf748df29da97c04fd9b540be512631ff1474f31a37bb8866c01d9953a7105\",\"ref\":\"3ecd87b3a4b428ee7d1cd977f0b70e046aeddd09d82c2a831d0d4ad8f24fa842\",\"repo\":\"54972bc072bad8ae18e74a50a8d94434ea4c82615a902e20b64f31a1dec9c341\"},\"repo\":\"MaginaLW/harness-model\",\"title\":\"feat: import external reviews and harden native verification\"}",
+  "subject_commit": "6c28ca605bec9c4dfeaf7ff7c7de8a6d4207d06a",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "df51a266e6c71af280b443fae24d3d98ae9f986633b0b756f0b7aee35dc202d5",
+  "conditions": [
+    "Existing explicit owner authority binds this concrete separately approved action once.",
+    "Fresh current mainB/strict protection/repo/exactremoteQ/openPR44 and successful push readback verified.",
+    "Actual independent reviewer approved exact literal title and body bytes; no base/head change, duplicate PR or reviewer requests.",
+    "No merge, force, deployment, deletion or credential export is part of this update.",
+    "Read back exact title/body/Q/B after actual operation."
+  ],
+  "expires_at": "2026-10-01T17:58:30.945138+00:00",
+  "single_use": true
+}
