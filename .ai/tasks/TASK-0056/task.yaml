@@ -187,8 +187,8 @@ goal: Add explicit run-owned external pytest temporary roots for governed verifi
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-09-30T23:20:05Z'
-subject_commit: f7d598fca29b5fae710e9b8b641ed044f4923107
+subject_commit: 4c8952b9cb19e4c2487189ed3a3cf4268aca2e82
 task_id: TASK-0056
-updated_at: '2026-09-30T23:30:12Z'
+updated_at: '2026-10-01T01:09:52Z'
 worktree_dirty: false
 worktree_dirty_paths: []
