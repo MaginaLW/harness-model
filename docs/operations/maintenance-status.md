@@ -1,5 +1,516 @@
 # 维护收尾与待办
 
+## 2026-10-01 修复后完整 V2 与最终 Gate 通过
+
+TASK-0056 当前源码 9dca04d 完成默认原生 V2：14/14 检查、5/5 fixed mutation，全程保留原预算与检查。
+regression/coverage 各 2831 passed + 1 原 FIFO skip；XML line coverage 91.42%、diff coverage 97%。
+完整 integration600 为 906 passed + 1 原 FIFO skip，545.48 秒，原生与工具均实际退出 0。
+RF-001 已由原独立 reviewer 在 REV-0009/r2 追加解决；旧拒绝原件保留，新的 REV-0010/r1 为 APPROVE。
+同一独立 verifier 单次 finalize 实际退出 0，证据 phase=final；14 checks、5 mutations、snapshot/context 未变。
+代码批准已登记，状态 APPROVED_FOR_MERGE；治理提交 80515e6 后 Gate 实际 exit0、passed=true。
+记录见 TASK-0056 的 native-v2-current-source-passed-026.md 与 native-v2-final-review-gate-027.md。
+原 40 件归档、全部 24 源码与九件旧失败/消费记录已核对；已知句柄与输出资源交回，历史未观测后代 UNKNOWN。
+TASK-0055 工作树已 ff-only 导入准确已 Gate 依赖 80515e6；自身新准入、transport 修复与完整 V2/Gate 仍待完成。
+随后累计发布须独立冻结候选、required exact-head CI、已授权 push/merge 与远端状态/父节点/树/祖先核验。
+有界本机查找未发现匹配真实 ZCode 报告，F 缺输入；此阶段未推送合并或调用 provider。
+
+## 2026-10-01 修复后四阶段前置通过，完整 V2 待执行
+
+当前源码 9dca04d 在核验 HEAD 9ba0f8b 完成原四阶段：12 narrow、97 fixture、187 external + 1 原 FIFO skip。
+集成实际 collect 907 unique，原 867 与新增 8 均保留；906 passed + 1 原 FIFO skip，529.81 秒退出 0。
+runner 实际 530119 ms，满足原 600000 ms；完整前后快照相等，87 retained 句柄及 launcher driver 退出 0。
+已知资源已交回；未 retained engine 退出与历史未观测后代 UNKNOWN。
+首次集成实例未保存退出结果，保留 UNKNOWN；其唯一快照差异为 refs 摘要，原因未确认。
+复验使用逐字节原脚本和原预算，三个已通过阶段保留原件复用，未削弱完整快照断言。
+当前 D cold1/warm10 中位 67.5486 ms；这不代表直接观测并发选择或因果加速。
+治理 4bb8a60 追加记录 025 和已原生批准的单次 action006；原规格批准有效，RF-001 仍 open。
+新源码完整 14 项 V2、独立 implementation Review/finalize/code approval/Gate 尚未完成；旧 V2 仅属旧源码证据。
+随后依次为 TASK-0055 重新准入与自身完整 Gate、TASK-0057 required CI/已授权发布及远端核验。
+本机有界查找未发现匹配真实报告，F 缺输入；未推送合并或调用 provider。
+
+## 2026-10-01 原生 V2 通过，源码审查要求修复
+
+TASK-0056 的 113ecdd 候选实际完成原生 14/14 检查及 5/5 mutation；
+总覆盖率 91.42%、diff coverage 97%，原 integration600 实际 898 passed + 1 原 FIFO skip，555.97 秒。
+本轮 snapshot 4076be51、完整原件与 40 件归档均已核对；已知资源退出，未观测历史后代 UNKNOWN。
+独立源码审查 RF-001 指出 Git fixture helper 在启动后的非超时异常分支缺少原有直接子进程清理。
+安全修复 9dca04d 已提交；完整 begin/close 模块在原 MINENV 下 42 passed、28.16 秒，无跳过或超时。
+治理 9ba0f8b 保存正式 REV-0009 拒绝记录及新源码绑定；状态仍 WAITING_FOR_FINAL_REVIEW。
+原规格批准有效；新源码的完整前置与 V2、重新审查仍待执行，旧 RF-001 保持 open。
+修复已提交，新源码仍须完整验证和新的 implementation Review；本轮未 finalize/code approval/Gate。
+单次 action005 已实际消费；旧通过证据保持，不代表修复后候选已通过。
+本机有界查找未发现匹配真实报告，F 缺输入；TASK-0055、发布及后续阶段依原进入条件。
+
+## 2026-10-01 完整前置通过，原生 V2 待执行
+
+候选 113ecdd 在核验 HEAD 1158a08 完成原四阶段：12 narrow、97 fixture、187 external + 1 原 FIFO skip。
+完整集成实际 collect 899 unique、原 867 全保留；898 passed + 1 原 FIFO skip，576.91 秒退出 0。
+runner 实际 577173 ms，满足原 600000 ms；源码前后一致，已知资源交回，历史未观测后代 UNKNOWN。
+本候选 D cold1/warm10 中位 73.8351 ms；旧 96/1 和历次 600 失败保留，旧瞬态原因仍 UNKNOWN。
+治理提交 0ae0199 追加 TASK-0056 记录 022，并绑定新的单次 action005；原 action 不复用。
+此为前置 PASS；尚缺完整原生 V2、正式 Review/finalize/code approval/Gate，未推送合并。
+TASK-0055 自身准入、发布及匹配真实报告 F 的进入条件保持。
+
+## 2026-10-01 新测试输入已固定，动态验证待执行
+
+安全提交 113ecdd 仅向新增 256 文件用例加 9 行：固定并回读两目录时间，检查源未变。
+helper、原 65 用例、精确 metadata 与线程断言及原预算均保持；独立静态预审通过。
+治理提交 1158a08 后原生 status/scope/validate 实际 0，fresh/current，仍缺 implementation_result。
+旧 fixture 96/1 失败和单次串行 258 项等值对照保留；旧瞬态未复现，原因 UNKNOWN。
+记录见 TASK-0056 的 parallel-copy-test-input-stabilization-021.md；新候选 warm/前置检查待执行。
+尚无新 integration600、V2 或 Gate 通过；TASK-0055、发布和匹配真实报告 F 仍依原条件。
+
+## 2026-10-01 warm 与端点验证完成，fixture 新用例失败
+
+固定 4c8952b 候选实际完成 D/C 各 10 次完整 warm，中位数 73.61/102.24 ms，选择 D。
+端点组实际 12/12 通过；完整 fixture 实际 collect 97，原 65 全保留，96 通过、1 失败。
+失败是新增 256 文件用例的 child 目录 mtime 精确等值，差约 20 ms；原因待诊断。
+原 240 秒内 51.32 秒退出 1，无超时；四 worker、线程归零、256 次复制断言先已通过。
+源码与旧证据守卫一致，已知资源已交回；历史未观测子孙仍 UNKNOWN，未重试或改断言。
+失败与实际测量追加至 TASK-0056 记录 020；external、原 600、action005、V2 尚未启动。
+TASK-0055、推送合并与真实报告 F 保留原进入条件；当前不记为 Gate 或任务完成。
+
+## 2026-10-01 有界复制候选已固定，实际验证待运行
+
+安全源码独立提交4c8952b，治理收尾949c53e；native sync/status/scope/validate均exit0。
+当前IMPLEMENTING/REVIEW/V2、classification fresh、approval current，仍缺implementation_result。
+固定26af/eed源码经独立004预审，无剩余静态阻断；原65保持，新增静态预计32尚未collect。
+线程归属、unknown终态、child回收和shutdown首失败重入已核；此不是运行/V2/Gate PASS。
+完整warm与前置脚本须绑定当前实际receipt后串行执行；原600/55/发布/F条件保持。
+
+## 2026-10-01 线程归属修复短案已接受，实施进行中
+
+root与独立sub-agent实际核对修订短案2674ed6a，无剩余设计阻断；仍在冻结992范围。
+修复须start前保留actual worker、Done后真实join；3.11中断join未知终态交原外层回收。
+2名sub-agent并行实施两安全文件和只读完整warm准备；root负责治理、文档和统一提交。
+此为方向接受，不是源码、测试或门禁PASS；新草稿须独立源码复核后固定候选。
+旧阻断字节与失败证据保留；完整warm/原600/V2/55/发布/F进入条件均保持。
+
+## 2026-10-01 并发复制草稿被独立预审阻断，修复启动归属
+
+未提交的两文件草稿通过静态格式/语法/旧AST核对，但启动后、pool登记前中断可漏等worker。
+独立PC-STATIC-001与实际3.11 join证明限制已追加到`parallel-copy-startup-review-diagnostic-017.md`。
+旧草稿完整字节和报告保留；新增15函数/预计25cases仍未collect或执行，不是运行通过。
+2名sub-agent并行准备局部owned线程修复短案与独立审查，root独占治理/文档/统一提交。
+该终态修复属于冻结992既有契约；未知私有协议须复制前serial，不改原4/256和全部门禁。
+完整warm D/C草稿与前置脚本尚未绑定/运行；旧600失败、action005/55/发布/F条件不变。
+
+## 2026-10-01 有界复制设计已准入，安全实现进行中
+
+新冻结spec992b927c经真实独立REV-0008/r1 APPROVE，原生spec approval/begin已exit0。
+TASK-0056为IMPLEMENTING/REVIEW/V2，scope仍24；旧B589原件保存为spec-design-007.md。
+2名sub-agent分别实施仅_copy_snapshot/新增private helpers/EOF tests，及只读独立验证准备。
+原65cases和其余旧function/assertion AST保留；治理和安全提交分开。
+固定候选完整warm成本、完整模块与原integration600后串行全V2/Review/Gate。
+当前未有新性能或门禁PASS，action005与55、发布、F进入条件保持。
+
+## 2026-10-01 复制对照完成，准备有界并发设计
+
+10组/20次isolated复制实际exit0，101文件逐份bytes/mode/mtime及实体隔离通过。
+原median47.12235ms、私有4线程34.77265ms，10组均快；known资源已交回。
+真实taskkill helper exit128保留，不称清理成功；输入前后相等，历史未知仍unknown。
+便携记录为`.ai/tasks/TASK-0056/parallel-copy-cost-diagnostic-016.md`。
+2名sub-agent并行提出实现建议和独立预审，root准备新的spec_changed准入。
+拟只优化当前owner的warm snapshot复制：按原DFS批次drain后递归及copystat，
+保留DirEntry、失败聚合、实际partial及无retry；原型尚非获准实现。
+候选实际完整warm成本与原600仍待验证，原门禁及55、发布、F条件保持。
+
+## 2026-10-01 读取对照无一致改善，转测复制成本
+
+20原函数/20私有binary调用实际exit0，输入相等、known资源已交回。
+原median1.18330ms、私有median1.19145ms，配对10快/10慢，无一致改善。
+不选择binary生产改动；记录为`.ai/tasks/TASK-0056/binary-reader-cost-diagnostic-015.md`。
+下一步2名sub-agent分别准备、独立审查四线程物理复制私有成功域对照，执行串行。
+仅稳定普通可写目录、至多256文件；比较isolated copy，计入启动、drain及目录元数据。
+复制原型改变错误/部分结果顺序，readonly目录风险未解决，尚未选为生产实现。
+原600仍FAILED，原14项/5 mutation/85%/90%及55、发布进入条件保持。
+
+## 2026-10-01 Schema 读取成本已短测
+
+20原函数/20独立分解调用实际exit0、输入前后相等、known资源已交回。
+原whole median1.25015ms；分解每18项的readUTF8 median0.72270ms，JSON0.24435ms。
+分解开销未知，不合计medians或外推原600；便携记录为
+`.ai/tasks/TASK-0056/schema-phase-cost-diagnostic-014.md`。
+下一步2名sub-agent准备及独立审查仅成功域的binary UTF8读取私有对照，执行串行。
+保持全部18当前读取及JSON/Resource顺序；原型缺正式兼容守卫，未选择生产实现。
+并发复制原型也未运行，readonly目录提前copystat风险阻止直接替换；原门禁保持。
+
+## 2026-10-01 定向成本诊断已完成
+
+两个完整原生命周期用例实际2 passed/12.30s、exit0，输入前后相等，known资源已交回。
+样本内Registry1105次完整调用累计2.3318896s；YAML解码约0.084s，225 hit/27 miss，
+无超限文本。观察包装开销未知，数据不外推867或原600；旧失败仍保留。
+源分支便携记录为`.ai/tasks/TASK-0056/lifecycle-cost-diagnostic-013.md`。
+下一步2名sub-agent并行准备和独立核对Schema原语分解微测，实际执行串行；
+保持18项当前读取、JSON/Resource构造和原错误顺序，不共享mutable Registry。
+尚未选择生产优化，原14项/5 mutation/85%/90%及后继55、发布进入条件保持。
+
+## 2026-10-01 完整耗时诊断与定向成本测量
+
+固定现有 source98b5db7 / B589 的私有完整诊断实际完成：collect867，
+866 passed、1 既有 FIFO skip、639.96s，pytest/driver/launcher 实际 exit0。
+输入与原断言前后相等，known-owned 资源已交回；未知历史后代仍未知。
+耗时仍超过原600，不能替代原生V2；便携证据见源分支
+`.ai/tasks/TASK-0056/integration-durations-diagnostic-012.md`，记录 `b024366`。
+最长10.65s的真实管道超时测试及原10s要求保留，其他慢阶段分散于治理生命周期。
+下一步只准备两个原生命周期用例的有包装成本诊断，私有100s；
+2名sub-agent分工准备与独立审查，主agent记录和整合，实际重活串行。
+观察包装的身份和开销变化须明示，不从两个用例推算完整867或600收益。
+未选择singlewarm、Schema缓存或CParser；后续实现仍须明确重新准入。
+action005/完整V2/独立Review/Gate及后继55/发布条件仍未完成，85%/90%保持。
+
+## 2026-10-01 当前成本短测与诊断方向
+
+两个串行私有短测均实际exit0、输入前后相等且known-owned资源已交回。
+Schema原函数100次median1.6873ms；fixture20次真实warm全部命中，median88.7757ms，
+单次source扫描median4.9492ms。类别重叠，不据此推算完整600或声明候选收益。
+fixture晚期taskkill实际128不算cleanup成功；三个已知实体的实际终态支持释放。
+证据见源分支`.ai/tasks/TASK-0056/current-cost-diagnostics-011.md`、记录`98f219b`。
+暂不选择改变瞬态观测时机的singlewarm方案，也不实施Schema缓存。
+下一步独立核对builtin pytest per-test耗时报告诊断的边界，定位实际长用例；
+新增报告选项和私有诊断预算明确不替代原native600，旧失败、action005/V2/Gate缺项保留。
+2名sub-agent分别负责私有运行准备与独立边界审查，主agent记录，重活串行。
+后续修复仍须明确准入；原测试断言、14项检查/5项mutation及85%/90%保持。
+
+## 2026-10-01 现有 3.14 原期限诊断失败
+
+固定 source `98b5db7` / frozen `b5898529` 的现有 3.14.7/core 私有比较完成：
+原 external188 为 187 passed/1 原 FIFO skip/145.87s、实际 exit0；原 integration
+完整 collect867，但原 EXEC-012/600 秒在 600162ms 超时，没有完整 summary。
+源码/原 AST/旧证据/refs/index/topology 前后相等，known-owned 终态核验已交回；
+taskkill 实际255及未观察后代的限制如实保留。便携原件为源分支
+`.ai/tasks/TASK-0056/runtime314-diagnostic-010.md`，记录提交 `3d2cbd1`。
+不正式选择 3.14，不重复同候选600；action005/第五原生V2和Gate仍未完成。
+下一步先短测真实夹具的当前读取、snapshot、copy与warm成本；任何一次完整
+warm扫描候选必须明确重新准入、保留所有当前安全检查和旧用例，不声称与旧
+瞬态故障观测时机严格等价。2名sub-agent并行独立边界审查与短测准备，执行串行。
+Schema Registry共享尚无安全隔离证明，不实施；原期限/85%/90%及下游条件保持。
+
+## 2026-10-01 直接入口前置结果与原期限失败
+
+固定 source `98b5db7` / own HEAD `d0199e4` / frozen spec `b5898529…` 的独立
+前置实际完成：新增窄测试12/12、完整fixture65/65（零跳过）、原external-review
+187 passed/1 原POSIX FIFO跳过，分别1.82s/47.38s/142.17s，全部实际exit0。
+原完整integration实际collect867，在原EXEC-012/600秒期限600183ms超时；
+没有summary或原pytest退出码，不把91%部分进度记为完整通过。原件和known-owned
+终态证明已保留，source/原AST/旧证据/refs/index/topology前后相等，资源已交回。
+TASK-0056仍IMPLEMENTING；action005与第五完整V2未启动，313正式选择条件仍失败。
+便携结果为源分支 `.ai/tasks/TASK-0056/direct-endpoint-prerequisites-009.md`，
+记录提交 `3b54586`。不重跑相同失败候选、不调整预算或质量门禁。
+接下来仅对已安装锁定314.7与当前已修复源做原external188私有诊断对照；当前
+规格允许非formal诊断，正式314需新规格准入、设计Review及原完整前置，不能凭
+旧未修复失败时长推断收益。两名sub-agent并行负责独立诊断与只读runtime/发布
+准备，测试资源串行。TASK55/57、CI311和真实F匹配原件的进入条件均保持。
+
+## 2026-10-01 直接入口规格准入已完成
+
+TASK-0056 当前为 IMPLEMENTING。冻结规格 `b5898529…` 已完成真实独立设计
+审查 REV-0007/r1（APPROVE，无 Findings）、按所有者既有充分授权的 spec
+批准和原生 begin；准入账本提交为 `eceb23d`。保留全部旧规格、失败与消费回执。
+本阶段并行启用 2 名 sub-agent：一名仅实施三处 fixture 工具函数及追加测试，
+另一名准备未参与实现的独立验收；主 agent 统一提交。固定候选后，窄用例、完整
+fixture、原 external-review 和完整 integration600 串行执行；实际全部前置通过
+后才进入新的完整 V2。原选择器、期限、覆盖率、CI 和发布进入条件保持。
+按所有者要求的限定报告搜索已结束，未找到目标匹配的 harness-model 原件；
+实际找到的 dotfiles 历史报告不能替代正向 F。未启动 provider 或 F 导入。
+
+## 2026-10-01 直接入口候选与剖析计时边界
+
+原source `e3790a4` 的40次只读Git入口配对查询及2次status守卫全部exit0；
+输出bytes一致，源码/refs/index未变，配对差值中位13.4795ms、19/20正值。
+这只是单argv的候选收益，不证明完整语义等价或integration600通过。
+四完整模块实际194 passed/367.30s/exit0，逐ID三阶段完整；原始cProfile
+出现9 entry/49 edge的inline>total，全部函数成本归属unknown，不用于生产修复。
+已知自有进程退出，资源交回；原600失败及全部历史原件保持。
+
+Task56已重新分类REVIEW/V2并冻结精确直接mingw64夹具/runtime候选，最新spec
+`b5898529`；当前subject `87f4c04`，仅增加安全说明，夹具实现尚未开始。
+MINENV算法不改，但实际所选Git parent/PATH改变必须新绑定；原53用例、完整
+原选择器与600秒、14 checks/5 mutations和85%/90%门槛保持。独立设计审查
+与安全测试准备由2名sub-agent并行，root串行准入/固定源码/验证/统一提交。
+依据为源分支 `endpoint-and-profile-diagnostics-008.md` 和 `design-amendment-006.md`。
+Task55/57仍待实际Gate，真实F原件在已搜索范围未找到，不扩大provider阶段。
+
+## 2026-10-01 当前候选的完整被动耗时诊断
+
+固定 source `e3790a4` 的原完整 integration 私有诊断已 actual exit 0：
+854 passed / 1 原 FIFO skip / 818.91 秒，无外层超时。855 个收集 ID 逐阶段
+完整相符，新 53 项均全阶段通过；源码、旧证据、HEAD/status/common refs 未变，
+已知自有进程全部结束并交回。36 模块阶段和 818.164 秒，其中 external-review
+217.340、verify 136.797、新 fixture 55.662 秒；这些不是内部成本或根因证明。
+原 integration600 失败保持，较长诊断不替代门禁；未启动 action005/完整 V2。
+依据为 `integration-passive-diagnostic-007.md`。下一步测量具体剩余成本再决定
+最小修订；不因不同来源构建标记、Git wrapper 静态分析而宣称运行时更快。
+
+## 2026-10-01 文件身份修复与运行时前置检查
+
+TASK-0056 已按最新冻结规格 `2cefeedd` 重新准入，REV-0006/r1、spec approval
+与 begin 完成。治理实现仅改 Windows 文件身份第五分量：可用 birthtime_ns，
+仅属性缺失回退 ctime_ns；POSIX 和其余读取守卫保持。测试与普通说明为独立
+task-free 安全提交，当前 source `e3790a4`、自有账本 head `3e691bd`。
+19 项安全测试在锁定 3.11.9、3.13.15、3.14.7 均实际通过，无 skip；3.13 的
+原完整 external-review 模块为 187 passed / 1 既有 FIFO skip / 177.93 秒。
+
+随后原 integration600 实际失败：`run-20260930T160128817732Z`，600188ms、
+RUNNER_TIMEOUT、pytest exit unknown，driver/launcher exit 1。partial 无
+terminal summary，不能推定末尾 53 项或 skip 身份。源码、HEAD、common refs
+与八份旧证据摘要未变，自有进程已结束并交回；数值 PID 复用未被当作自有进程。
+尚未满足正式选择 3.13 的条件，action005 与第五轮完整 V2 均未启动。
+便携依据为源分支 `runtime-prerequisite-failure-006.md`，所有历史失败保留。
+
+下一步串行准备只记录阶段耗时的完整选择器诊断，再按实际瓶颈决定修订；原
+600 秒门禁保持。并行 2 名 sub-agent：独立 verifier 负责诊断，另一名准备
+Task55 transport 安全测试和只读性能分析；主 agent 保留证据、同步状态。
+Task56 完整 V2/Review/finalize/批准/Gate → Task55 准入及自身 Gate → Task57
+required CI/已授权发布仍串行。真实 F 原件未在搜索范围找到，不扩大 provider 阶段。
+
+## 2026-09-30 固定夹具候选的原集成期限检查
+
+初始夹具已实现并固定源码 `097f9af92a4c9bbad35378f34b3d5d48dd143b01`；
+原测试 AST、原 builder 主体、期限与断言均保持。完整守卫短测的二十次 warm
+均值为 0.113194 秒，原 builder 为 0.373655 秒，但该收益没有证明全集通过。
+独立原 integration 检查 `run-20260930T144431946840Z` 实际超时：600156ms、
+RUNNER_TIMEOUT、pytest exit unknown，driver exit 1。源码/HEAD/旧证据前后
+相同，自有进程已退出并交回。partial 有 783 dot 和 1 skip，无 summary，
+不能确认 skip 身份或最终 53 项全部完成。此为 prerequisite，不是第五轮 V2。
+
+未创建或消耗 action005、未启动完整 V2、未进行正式实现 Review/finalize/代码
+批准或 Gate PASS。TASK-0056 仍 IMPLEMENTING，旧四轮 FAILED 保留。当前
+并行 2 名 sub-agent：一个核查整套真实 owner 使用和剩余成本，另一个只准备
+隔离 Python 3.13 比较；后者不是原生运行时切换或验证通过。正式基线仍 3.11，
+范围或运行时变化仍须重新准入。TASK-0055/0057 与 F 的进入条件保持。
+便携依据为源分支 `fixture-integration-prerequisite-failure-005.md`。
+
+## 2026-09-30 初始测试仓库夹具修订准入
+
+完整 integration profile 的函数分析已完成。Schema 文件实际读取与检查保持
+必要；Git 等累积时间重叠、双导入 helper 的 profile 标签存在合并边界，不能
+据此相加或认定超时根因。另一个独立原环境短测实际 exit 0、无超时：二十次
+原初始仓库创建平均 0.36051 秒，完整物理复制加当前三目录指纹平均 0.05784 秒；
+二副本的工作区、index、commit 修改互不污染且不影响 seed。这个局部测量尚未
+包含完整资格守卫，不证明原 600 秒检查或完整 V2 通过。
+
+TASK-0056 已按 `spec_changed` 原生重新分类并冻结为 REVIEW/V2，当前规格
+SHA `3a782321645c40b71cf4921a7322872bf45285bf009218edb3e1d4d9310c53ce`。
+实际独立 REV-0005/r1 为 APPROVE、无 finding；所有者既有授权下的当前 spec
+approval 和 begin 已完成，状态 IMPLEMENTING。准入账本提交
+`c99998571a117a5b071c03cc9caa0e47efe8395d`；旧 e3fc 规格保存为
+`spec-design-004.md`，四轮 FAILED、原证据与已消耗动作全部保留。
+
+本阶段仅新增三个测试 utility/验收路径并薄接入共享 builder：第一份仍由原
+真实 builder 在原目标成功建成后才保存 session 私有初始副本；每次检查当前
+源、配置、模板和相关环境，未知或不安全资格走原流程，物理 Git 实体独立。
+原异常/partial、全部原断言与之后真实治理保持。并行 2 名 sub-agent 分别
+独占测试夹具实施和独立审查/验证准备，主 agent 管理文档、账本与统一提交。
+实施→固定候选→完整原 integration 600 秒检查→fresh action005 和全部原生
+V2→正式 Review/finalize/批准/Gate 串行；当前未记录实现或验证通过。
+TASK-0055 仍待真实依赖 Gate，TASK-0057 发布仍待两源 Gate 与 required CI；
+搜索范围内尚无匹配 F 的真实原件，不调用 provider 或用错目标报告补齐。
+
+## 2026-09-30 第四轮终态与完整集成诊断
+
+私有完整 integration profile 已实际完成：802 项中 801 passed / 1 原 FIFO skip，
+851.34 秒、pytest exit 0、外层无超时；固定 fcecddd 与源码 SHA 前后相同，
+自有进程已退出并交回。首次私有 wrapper 因启动 sys.path 差异出现 collection
+失败，原件保留；仅恢复原模块启动的 CWD 路径语义后完成上述第二次采集。
+带 profiler 的诊断时间不视为原 600 秒检查通过；函数成本分析仍待完成。
+
+TASK-0056 完整 `run-20260930T112131331525Z` 于 12:04:40Z 实际结束为
+FAILED，14 项 required checks 中 13 passed；唯一失败是 integration 原
+600 秒期限超时，actual exit null / timed_out true / 600140ms。Native Gate
+实际 exit 1、REJECT。失败账本提交 `fcecddda33b8ebb7e24ef7d782f14d9c2aa2de48`；
+源码 subject 仍为 `38648440f5a862edd5a7dccfb55a60aae4f6757e`。
+
+完整 regression 为 2707 passed / 1 既有 FIFO skip、857.61 秒；coverage
+同样完整通过，总覆盖率 88.9574%、diff coverage 97%；unit 1869 passed、
+acceptance 9 passed。五项 mutation baseline 0 / mutant 1 / killed，无超时，
+`main_tree_unchanged` true；这些通过不能替代 integration 或正式 finalize。
+原证据/归档 SHA `4d2c8f05e9fc4b73ea61a8836b11b8069cdd34a4b7acf573faf513a08d2848bc`。
+24 份非 null 引用、snapshot/context、旧证据和回执均经独立核验；自有进程
+已退出并交回资源。action004 已消耗，不复用；未进行本轮实现 Review/finalize/code approval。
+
+partial integration 仅有 745 个结果标记，无 F/E 或最终 summary，末尾位置
+不证明单例或模块根因。下一阶段由 1 名 sub-agent 测量固定源码的完整原
+integration selector，另一名只读研究独立初始 fixture 基线；主 agent 维护状态。
+较长私有采集窗口仅为诊断，原 Policy 600 秒、所有阈值、选择器和 MINENV
+不变。诊断→修复准入/实现→fresh action 与完整 V2→实际 Gate 串行。
+TASK-0055 准入、TASK-0057 发布和条件 F 均未越过各自进入条件。
+
+## 2026-09-30 11:21Z 第四轮完整 V2 启动时记录
+
+TASK-0056 纯 YAML 解码复用已完成独立设计 Review、原生 spec approval/begin，
+生产和安全测试分别提交。固定源码 subject 为
+`38648440f5a862edd5a7dccfb55a60aae4f6757e`；准入 HEAD
+`36efe4cc7cc85ccd368c2df065cd4e99f0963b9f` 仅追加本 task 账本。
+70 项相关 unit 测试通过，Ruff、format、44 源码 mypy、validate 和 whitespace 通过。
+
+完整原 external-review 模块对照为 187 passed / 1 既有 FIFO skip，187.05 秒、
+退出 0。此前相同方法为 200.15 秒；独立的单次非同时观察少 13.10 秒，不能认定
+整体因果或预测 V2。safe YAML 解析次数从 3586 降到 87，698 次 Policy 加载及
+9872 次契约/registry 检查保持；Git 等成本存在变化与累积重叠。
+
+fresh action004 已实际批准；最终独立 preflight 返回 ready，完整默认 14 项
+原生 V2 于 `2026-09-30T11:21:30Z` 启动，run
+`run-20260930T112131331525Z`。原 3.11、MINENV、预算、阈值和五项 mutation 不变。
+启动时仍在运行，无完整结论、正式实现 Review/finalize 或 Gate PASS；前三轮失败
+及已消费动作保留。依据为源分支 `verification-retry-003.md`。
+源码/账本冻结，独立 worker 负责完整验证；另一 sub-agent 只读准备 TASK-0055
+后续准入。F 匹配原件在限定搜索中未找到，后续发布仍依实际源 Gate 和 required CI。
+
+## 2026-09-30 诊断完成与解析复用重新准入
+
+第三轮完整 V2 的 FAILED 和两项原预算超时保留。独立 Python 3.11 完整
+external-review 诊断实际 187 passed / 1 既有 FIFO skip，200.15 秒；分析测得
+3586 次 safe YAML 解析累积 36.92 秒。时间存在重叠，不认定原超时根因。
+隔离 Python 3.14 完整比较失败（46 failed / 101 passed / 1 skipped / 40 errors），
+不用于正式 V2，不以失败执行时间宣称加速。正式验证继续使用原 3.11 基线。
+
+TASK-0056 已对纯文本解析复用扩大必要依赖范围，原生重新分类、冻结为
+REVIEW/V2，正在独立设计审查；旧冻结规格和失败证据保留。方案仅复用有界
+纯 YAML 解码，每次仍实际读取文件、执行路径/Schema/Policy 验证并隔离返回值。
+生产优化尚未实现，新完整重试尚未启动；全部门禁、预算与环境保持现值。
+
+按所有者指示搜索现有 ZCode 报告：仓库、相邻 pilot artifacts、只读任务索引和
+常用文档目录中未找到匹配当前 harness-model 目标的原件。找到的真实历史
+dotfiles 报告 SHA `80e9ebd7de1891a214075741a88abd134518195ceee6edcfd927855ac6e77ecd`
+属于另一仓库，不充作 F 正向输入；历史 UI 观察记录不能恢复缺失原件。
+这只是已搜索范围的结论，不证明全局不存在。未调用 provider 或启动 F 导入。
+
+并行 2 名 sub-agent 分别核查解析收益/隔离边界与原生准入/独立设计；主 agent
+实施并统一提交。完整 V2、Review/Gate、TASK-0055 重新准入及 TASK-0057
+required CI 与已授权推送合并继续串行依赖，下方历次核定保持。
+
+## 2026-09-30 TASK-0056 第三轮完整验证核定
+
+第三轮完整原生 V2 在候选 `4f0288b4afb608412f984fa9078b7b0692fa0e6f`
+结束为 FAILED：12/14 通过，regression 与 integration 分别超过原 900 秒和
+600 秒期限。完整 coverage 集合实际 2676 passed / 1 原有 POSIX FIFO skip，
+合并覆盖率 88.8278%，diff coverage 打印 95%；unit 1838 passed，acceptance
+9 passed。两项超时仍无完整 summary，不能据部分输出声称通过，Gate REJECT。
+action003 已消费，所有失败、日志与 receipt 保留；尚无正式实现 Review/finalize。
+
+当前先核定并提交失败记录，再用 2 名 sub-agent 分别定位耗时热点和独立审计
+诊断边界；主 agent 同步维护便携证据。诊断保持完整断言和原 Policy，不能替代
+原生验证。重试须有诊断依据、新 preflight 与单次动作。后续仍依 TASK-0056
+Gate → TASK-0055 重新准入及 Gate → TASK-0057 required CI、已授权推送合并。
+真实报告 F 的匹配原件仍未取得。见源分支 `verification-failure-003.md`；下方
+历次核定保留，新结果不追改历史证据。
+
+## 2026-09-30 TASK-0056 第二轮失败后的修复候选
+
+第二轮完整原生 V2 保留 FAILED：14 项中 10 项通过、4 项失败；unit 为
+1838 passed，regression、coverage 与 integration 实际超时，diff coverage
+因缺少 XML 退出 1。总覆盖率和差异覆盖率仍 unknown，Gate REJECT。
+action002 已消费；原始日志、receipt、snapshot 和失败摘要均保留。
+
+独立诊断定位到 Windows 测试夹具的长路径物理 I/O，以及 Git 命令超时后
+没有期限的管道清理等待；最初 Git 超时原因仍 unknown。修正规格已经原生
+重新准入，设计 Review、spec approval 和 begin 完成。新源码候选为
+`4f0288b4afb608412f984fa9078b7b0692fa0e6f`，仅修复获准的两份测试夹具。
+原逻辑路径、业务断言、命令期限、生产环境和 Policy 门禁保持现值。
+
+四组独立完整专项通过：共享 Git 夹具 34 passed、验证命令 81 passed、
+外部审查 187 passed / 1 原有 POSIX FIFO skip、E2E 28 passed。
+真实 Windows 子进程继承管道的超时清理用例亦通过。这些结果支持第三轮
+完整原生 V2 准入，不构成完整 V2 或 Gate PASS。当前由两名 sub-agent
+分别执行独立 verifier 准入与实现审查；正式 Review 等待完整验证证据。
+先完成 TASK-0056 Gate，再重新准入 TASK-0055，最后以 TASK-0057 完成
+固定候选 required CI 与已获授权的推送合并。真实报告 F 的匹配输入仍待取得。
+便携摘要见源分支的 `verification-failure-002.md` 和 `verification-retry-002.md`；
+下方历史核定、用户草稿及无关工作树保持原样。
+
+## 2026-09-30 TASK-0056 候选固定
+
+TASK-0056 独立设计复审通过后，原生 spec approval 和 begin 已完成。
+显式外部 pytest 临时目录实现与安全测试分阶段提交，固定候选为
+`659f61cb4245112d75b119b103821bb06bae69ce`，原生 sync 已绑定该 subject。
+守卫覆盖输入及物理祖先、裸仓库、身份漂移和独占新叶；pytest 摘要追加实际 argv
+的规范 SHA-256，保持脱敏。独立预审未发现剩余阻塞项。
+78 项守卫专项、3 项真实 runner/默认兼容用例通过，Ruff、format、43 个源码的
+mypy、原生 validate 和 whitespace 检查通过；局部结果不替代完整 V2。
+已交未参与实现的 sub-agent 完成全部原生 V2；当前没有完整通过、正式实现 Review、
+code approval 或 Gate PASS。先取得真实 Gate，再按下方顺序接入 TASK-0055。
+
+## 2026-09-30 持续 goal 与临时目录治理准入
+
+所有者已设立持续 goal，授权完成当前进入条件满足的待办及必要批准、推送合并，
+并要求充分使用 sub-agent。TASK-0055 第五轮失败与原始证据仍保留。
+新 TASK-0056 在 `codex/e4-verification-control` 独立准入显式仓库外
+`--pytest-temp-root`；原生分类为 REVIEW/V2，规格已冻结，设计复审进行中。
+初次独立设计审查要求补充裸仓库拒绝及执行期漂移的原生失败记录，两项已纳入
+重新冻结规格，原快照与 Review 保留。尚无实现或验证通过结论。
+默认行为、Policy、阈值、时限、环境及选择器保持现值；临时目录迁移不能证明
+既有超时原因或性能改善。先完成 TASK-0056 独立验证和 Gate，再显式修订
+TASK-0055 的依赖范围、重新准入并完成完整 V2。发布 task 顺延为 TASK-0057；
+只有实际源 Gate、发布 Gate 和固定候选 required CI 均通过才执行合并。
+
+## 2026-09-30 E4.2 第五轮原生 V2 核定（FAILED）
+
+E4.2 已在 `codex/e4-report-import` 完成当前实现，`TASK-0055` 固定源码 subject 为
+`eb4c49a4ff77ca07f210fceae707495c8dece8be`，本次验证准入 HEAD 为
+`12b8e76e195e6f13772d3d692b80fca06422d31f`。第五轮完整原生 V2 已结束，
+结论为 **FAILED**：14 项必需检查中 9 项通过，尚不能形成发布 Gate PASS。
+
+unit、regression、coverage XML、integration 分别在 300406、900203、1200328、
+600172 毫秒实际超时，均无进程退出码（`exit_code: null`）。diff coverage 因缺少
+coverage XML 退出 1；总覆盖率与差异覆盖率均为 `unknown`，不能据此宣称达到阈值。
+9 项 acceptance 用例通过，5 项 targeted mutations 全部 killed；这些通过项保留原义，
+不替代失败的完整 V2。
+
+unit 部分日志出现的两项失败，在限定诊断中 2 passed、12.64 秒、退出 0。
+这未复现原失败，原因仍为 `unknown`；限定诊断不覆盖完整运行，也不改变 V2 结论。
+当前接续为定位失败并完成完整必需验证，不降低预算、阈值或检查范围。
+
+源码与任务账本保留于既有忽略目录 `.claude/worktrees/e4-verification-disk`。
+本原始文档检出不含 `TASK-0055` 账本；失败摘要提交后，可在仓库中便携读取：
+
+```text
+git show codex/e4-report-import:.ai/tasks/TASK-0055/verification-failure-005.md
+```
+
+所有者已明确授权推送、合并，授权仍有效，动作尚未执行。当前失败阻止发布；先完成
+完整 V2、匹配的独立实现审查与实际 Gate，不重复请求动作授权或提前请求代码批准。
+下方较早核定窗口与历史记录完整保留；E4.3/E4.4、provider、I1 其余生命周期、
+I2 更多目标、E5、I5 与阶段三/四保持原进入条件。三份用户草稿和阶段 61 旧 index 保留。
+
+本轮随后完成第五次运行的私有证据移交：显式选择 100 文件，导出与独立 ZIP
+校验均退出 0，全部条目的大小及 SHA-256 匹配；23 组 producer/Git 文本映射一致，
+其中 10 组仅 CRLF/LF 不同，原件分别保留。移交不恢复环境，也不产生 Gate。
+便携记录为 `git show codex/e4-report-import:.ai/tasks/TASK-0055/evidence-handoff-005.md`。
+TASK-0055 仍 FAILED；当前资源观察没有支持新一轮重试，失败原因尚未确认。
+
+## 2026-09-30 最新核定与接续入口
+
+本轮实际读取 CLI，`TASK-0048` 为 `MERGED`、`Missing: none`。其同仓 Windows/Linux
+接入、同 SHA 双 lane、main 采用、真实 guest 重启后业务、串行恢复与正式治理关闭
+均已完成；见[任务 02 执行目录](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)
+和[发布关闭记录](../../.ai/tasks/TASK-0048/publication-closeout-001.md)。不重复注册、
+运行 CI 或关闭该任务；历史运行状态不作为当前 guest 或 runner 在线证明。
+
+E4.1 已由 `TASK-0054` 完成契约实现与本地治理验收，保存于
+`codex/e4-external-review-contract@fd560d9`，实现 subject 为 `23793f7`。
+本轮恢复该分支检出后实际 `validate` 通过，`status` 为 `APPROVED_FOR_MERGE`、
+`Missing: external_merge`，批准为 `current`、证据为 `passed`，`gate` 为 PASS。
+旧入口中的“E4 未启动”和“E4.1 待准入”保留其历史时点，不再描述当前接续顺序。
+
+该分支已提交的 V1 审核包记录单元 1656 passed、全量回归与覆盖率重跑各 2294 passed、
+总覆盖率 88.12%、可统计差异覆盖率 100%；这些是历史受审版本的结果，本轮没有重跑。
+旧忽略目录中的原始日志是否可恢复尚未确认；本次 CLI 通过不替代日志恢复或远端 CI。
+
+下一步为 E4.2 独立治理规格与设计准入，本轮在 `codex/e4-report-import` 准备
+`TASK-0055`；按[后续工作计划](../superpowers/plans/2026-09-23-e4-follow-up-work-plan.md)
+串行核定原件加载、来源/目标匹配与记录边界，再依实际 CLI 缺项进入实现。
+推送、合并与新增外部动作仍需单独授权。I1 其余生命周期、I2 更多目标、E5、I5 与
+阶段三/四保留原进入条件；三份未跟踪用户草稿及阶段 61 的旧 index 保持原样。
+下方历史窗口完整保留，以本段和当前任务账本确定实际进度。
+
+## 2026-09-27 dotfiles 修复线集成核定
+
+`codex/ci-regressions-e4-preflight@3b835f1` 已通过[合并提交 `68ef2ec`](https://github.com/MaginaLW/ai-agent-dotfiles/commit/68ef2ecedca3e9071178dcab8b805cecdafbba53)
+进入 dotfiles `main`。[`main@6c814f1` 的完整 Validate](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/36303730680)
+四个 job 均成功；[外仓整合记录](https://github.com/MaginaLW/ai-agent-dotfiles/blob/6c814f18e981edfa1cad7185915ed7c177857bc0/status/active/live-safety-hardening.md#L4121-L4149)
+保留了分支来源。下方 2026-09-23 的“分叉、待集成”与独立工作线是历史快照，不再重复集成。
+
 ## 2026-09-23 后续计划与统一接手入口
 
 收尾已完成，[后续工作计划](../superpowers/plans/2026-09-23-e4-follow-up-work-plan.md)

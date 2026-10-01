@@ -1,5 +1,17 @@
 # 任务 02：私有 Linux 执行接入记录
 
+## 2026-09-30 最新核定与当前入口
+
+本轮实际 CLI 确认 `TASK-0048` 为 `MERGED`、`Missing: none`。
+本次同仓 Windows/Linux 接入、同 SHA 双 lane、main 采用、真实 guest 重启后完整
+Linux 业务、串行恢复、正式 V2、独立审查、Gate 与实际合并均已完成；当前结论见
+[任务 02 执行目录](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)
+和[发布关闭记录](../../.ai/tasks/TASK-0048/publication-closeout-001.md)。不重复注册、
+执行 CI 或关闭该任务，也不从历史运行结果推导 guest 或 runner 当前在线。
+I1 其余复用、I2 更多目标与 I5 的后继条件沿用执行目录，不以本次范围完成声明
+I0–I5 全部完成。下方 `IN_PROGRESS`、阶段 61 冻结点与治理缺口均保留其历史时点，
+实际接续以本段和当前任务账本为准。
+
 日期：2026-09-13。整体状态：`IN_PROGRESS`。本报告由 `TASK-0048` 记录，范围与
 验收以[冻结规格](../../.ai/tasks/TASK-0048/spec.md)及
 [任务 02 执行目录](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)为准。
