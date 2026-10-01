@@ -1,5 +1,17 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-02 最新核定：owned commit 自动维护输入已隔离，完整新发布验证待执行
+
+- 最窄 task-free 测试修复已独立审查并提交 `e8b2f5d21fb3d1f3ff34b90c387e02769d2f1765`，只改三份测试文件：fixture SHA `279661c9d28ab94121c3d2b2f7dc15b75c6028c0849ae96cc9a0428ef9088ebd`、helper SHA `b1d40bc4feedace0f8a1b48e7920cdeee82eb5506607165452e7f61ae756e443`、test SHA `719b4f727b27369237f134a0377ac01c12a774624080e09bb4b5cbe282dc18d6`。仅真实匹配的 owned private context、可识别 leading separated `-c` 后的 commit 在最后一个 global 参数位置插入临时 `maintenance.auto=false`；不写 host/repo 配置。default、foreign、noncommit、未知 global 形式的 argv 保持原样，原环境 binder 不变。
+- 新 argv binder 的函数 object/code 纳入原 `_standard_io` 顺序检查，原 direct-current entry、qualification、模板 types/names/bytes/modes、配置允许表、父环境拒绝、owner、seed、assertions/skips、copy/thread 与10秒清理完整 AST 保留。本轮固定源码全部旧103个 named tests（fixture81/helper22）完整 AST 不变，新增4个 named/10个 cases；不放宽 unknown-input 或 warm eligibility。
+- 作者最终 `a091e4/0` 实际两完整相关 modules **204 passed / 0 skip /119.66s**，10新增 cases、Ruff/format、mypy44、whitespace 均实际0/retained closed。作者两组受控对照合计18条真实 Git 命令0/closed；Git `2.55.0.windows.3` 默认策略的两个 object17 输入会产生 pack/info/refs，owned commit 的最后 false 则保持 loose、不生成 refs/packs。control 未持久化；标准 git init 创建 `.git/config` 属正常初始化。
+- 非作者 `9ced01/0` 真实独立对照9条 Git0/closed，7个首轮成功反例加1个仅修正私有 CONFIG 期望的参数通过；原私有首轮1退出与全部原件保留，不声称单轮8项通过。额外 info/refs、未知 system config 仍冷拒绝，dispatch object/code 漂移 direct-current 拒绝且不命中；normal/error 恢复保持。保护 tracked1964/runtime225/Gitpair/refs/index/topology/HEAD 前后完全一致。Root `28415b/0` 复核作者286件、`8961c6/0` 复核独立66件、`76ec78/0` 核实保护原件字节全等、`3ce7d1/0` 验证103旧 AST；真实 staged whitespace `ee855b/0`。
+- [Git v2.55.0 commit 源码](https://github.com/git/git/blob/v2.55.0/builtin/commit.c) 与 [自动维护源码](https://github.com/git/git/blob/v2.55.0/builtin/gc.c) 支持 commit 自动维护及 command-local false 的控制点；官方12原件 HTTP200/哈希已核。历史失败 seed 的生成进程、维护前 object17 数量与唯一因果仍 **UNKNOWN**，受控对照不伪装为历史进程 trace，也不预测下一 Linux 结果。
+- TASK-0061 全原生9通过/回归1失败及随后覆盖率轮成功保持原始 FAILED 结论；其35原件/20logrefs、独立45件归档已由 Root `a95d7e/0` 复核。53 push-only、58/59/60 三次准确 CI 失败与61本地失败分别保留，不用未来成功 native-close。新发布任务待实际分配，须固定新的累计源码、真实 Design/Implementation 审核、原有10项3150/3450/MINENV验证、准确Q Gate及完整 Linux required CI（85 overall/90 cumulative diff/whitespace/Ruff/format/mypy）才可 protected merge，再独立证明 M 后闭54/55/56/57与成功新发布任务。
+- 最新5个显式只读 GET `633e8b/13d969/15da90/2977ad/8961e1` 均实际0/retainedclosed；Root `fe0b22/0` 复核31件 snapshot：B仍 `48bf777106b9fdfef1ddf83d3abc95859fb8e580`、feature仍 `f402bd7ab1fbe6c6415117817d3adb0ec62899ac`、PR44 OPEN/non-draft/unmerged、strict required app15368/enforce-admins完整保护不变。此 snapshot 不是 action 批准、CI 成功或 M 证明；每次远端写入仍另核新鲜事实与一次性参数。
+- 两名 sub-agent 继续并行非作者累计审查/独立 operation 审计；Source admission、native、准确Q Gate、push、PR字节审核、完整CI、protected merge、证明/fetch/close/本地接回按依赖串行。主工作区17196、本地524配置与三份用户草稿保留，524不能发布。真实匹配 ZCode 原报告 F 在既定本地及相关PR搜索边界仍缺失；付费/provider与条件未满足的后续阶段不启动。
+
+
 ## 2026-10-02 最新核定：TASK-0061 完整原生验证失败，发布仍暂停
 
 - 固定源码 `508cf73d10be4cdd2ca4409e706fe68ead10a69d`、规格准入提交 `b17e3879b5a1e5a95510a70bbce91ddf868e6d28` 的原有 10 项 V1 已全部真实执行；`fbda31/0` 的 CLI 退出 0 表示记录完成，原生任务与 evidence 真实结论为 **FAILED**，不能据此发布。
