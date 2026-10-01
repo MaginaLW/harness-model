@@ -1,5 +1,19 @@
 # 维护收尾与待办
 
+## 2026-10-01 修复后完整 V2 与最终 Gate 通过
+
+TASK-0056 当前源码 9dca04d 完成默认原生 V2：14/14 检查、5/5 fixed mutation，全程保留原预算与检查。
+regression/coverage 各 2831 passed + 1 原 FIFO skip；XML line coverage 91.42%、diff coverage 97%。
+完整 integration600 为 906 passed + 1 原 FIFO skip，545.48 秒，原生与工具均实际退出 0。
+RF-001 已由原独立 reviewer 在 REV-0009/r2 追加解决；旧拒绝原件保留，新的 REV-0010/r1 为 APPROVE。
+同一独立 verifier 单次 finalize 实际退出 0，证据 phase=final；14 checks、5 mutations、snapshot/context 未变。
+代码批准已登记，状态 APPROVED_FOR_MERGE；治理提交 80515e6 后 Gate 实际 exit0、passed=true。
+记录见 TASK-0056 的 native-v2-current-source-passed-026.md 与 native-v2-final-review-gate-027.md。
+原 40 件归档、全部 24 源码与九件旧失败/消费记录已核对；已知句柄与输出资源交回，历史未观测后代 UNKNOWN。
+TASK-0055 工作树已 ff-only 导入准确已 Gate 依赖 80515e6；自身新准入、transport 修复与完整 V2/Gate 仍待完成。
+随后累计发布须独立冻结候选、required exact-head CI、已授权 push/merge 与远端状态/父节点/树/祖先核验。
+有界本机查找未发现匹配真实 ZCode 报告，F 缺输入；此阶段未推送合并或调用 provider。
+
 ## 2026-10-01 修复后四阶段前置通过，完整 V2 待执行
 
 当前源码 9dca04d 在核验 HEAD 9ba0f8b 完成原四阶段：12 narrow、97 fixture、187 external + 1 原 FIFO skip。
