@@ -6,6 +6,9 @@ TASK-0056 的 113ecdd 候选实际完成原生 14/14 检查及 5/5 mutation；
 总覆盖率 91.42%、diff coverage 97%，原 integration600 实际 898 passed + 1 原 FIFO skip，555.97 秒。
 本轮 snapshot 4076be51、完整原件与 40 件归档均已核对；已知资源退出，未观测历史后代 UNKNOWN。
 独立源码审查 RF-001 指出 Git fixture helper 在启动后的非超时异常分支缺少原有直接子进程清理。
+安全修复 9dca04d 已提交；完整 begin/close 模块在原 MINENV 下 42 passed、28.16 秒，无跳过或超时。
+治理 9ba0f8b 保存正式 REV-0009 拒绝记录及新源码绑定；状态仍 WAITING_FOR_FINAL_REVIEW。
+原规格批准有效；新源码的完整前置与 V2、重新审查仍待执行，旧 RF-001 保持 open。
 因此仍须修复、验证新源码和取得新的 implementation Review；本轮未 finalize/code approval/Gate。
 单次 action005 已实际消费；旧通过证据保持，不代表修复后候选已通过。
 本机有界查找未发现匹配真实报告，F 缺输入；TASK-0055、发布及后续阶段依原进入条件。
