@@ -34,7 +34,7 @@ allowed_scope:
 base_commit: fd560d9f12d28ef6ff155f6f46764d6c588d0f30
 branch: codex/e4-report-import
 created_at: '2026-09-29T20:11:24Z'
-current_state: IMPLEMENTING
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -96,6 +96,9 @@ decision_units:
     recorded.
   - Locked Python3.13.15 runtime now loads this Disk checkout; TASK-0056 verification
     is dependency evidence only and does not replace this task own complete verification.
+  - Actual additional Linux-platform mypy failed with four Windows-only attribute
+    errors across44sourcefiles; importer full two-module Windows run passed305with
+    one original skip, retained as focused evidence only.
   permission_requirements:
   - action_approval
   planned_actions:
@@ -112,6 +115,9 @@ decision_units:
     environment and communicate10.
   - Preserve writer interruption contract and historical failures; commit safety tests
     and operation documentation separately under maintenance mode.
+  - After same-route spec_changed admission, replace only four Windows API lookup
+    expressions with no-default getattr in external_review.py and verification_temporary.py;
+    preserve actual values, guards, paths and transport semantics.
   protections:
     dry_run: false
     verified_backup: false
@@ -136,6 +142,9 @@ decision_units:
   - Run own complete original Policy V2 on own fixed subject/HEAD with original14checks/5mutations/deadlines,
     independent Review and verifier, same verifier finalize, current code approval
     and Gate.
+  - Run full Windows mypy and additional Linux-platform static mypy plus meaningful
+    existing importer/temp-root unit regression; keep own original complete V2 and
+    exact-head Linux CI required.
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
@@ -156,6 +165,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-01T07:44:50Z'
 subject_commit: 31cc21492a679f4873d96c6172210617a64ea2ca
 task_id: TASK-0055
-updated_at: '2026-10-01T08:03:35Z'
+updated_at: '2026-10-01T08:37:11Z'
 worktree_dirty: false
 worktree_dirty_paths: []
