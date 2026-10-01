@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "e4-governance-owner-authorized-root",
+    "approval_type": "spec",
+    "approved_at": "2026-10-01T14:07:31Z",
+    "base_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing explicit owner authorization covers requested eligible pending work, necessary approvals, push and merge. Actual cumulative independent Design REV-0001 APPROVE covers exact B48bf777 through S715496d; current frozen spec1ada72d2 and native REVIEW/V1 selected checks, strict required CI, exact fresh actions and independent remote proof remain mandatory.",
+    "schema_version": "1.0",
+    "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
+    "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "task_id": "TASK-0058"
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "base_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+  "branch": "codex/e4-cumulative-delivery",
+  "classification_input_sha256": "4174954c2dc48598083ee4fa45d34ff78136ecb0b38006f1c82c47164adf1828",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0058/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish the fully gated cumulative E4 source and preserved records through exact-head required CI and protected merge",
+        "impact_scope": [
+          ".ai/tasks/TASK-0058/**"
+        ],
+        "planned_actions": [
+          "Create and verify only the new publisher own governance records on final combined sourceS.",
+          "Perform an ordinary non-force remote push of exact ledger candidateP under a fresh single-use action.",
+          "Create one PR with exact head/base and reviewed body bytes; attach actual PR to this chat.",
+          "Require unchanged strict ai-quality-gate app15368 and complete exact-P successful CI, then perform protected merge with expected head under fresh action.",
+          "Independently verify remote MERGED/base/head/main/parents/tree and source/closure ancestry before append-only native closeout."
+        ]
+      }
+    ],
+    "goal": "Publish the fully gated cumulative E4 source and preserved records through exact-head required CI and protected merge",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "903c74b47c00b7f2ecba1ff45edf8992b216eadc53aa1482feabb2672eb4da2a",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
+  "task_id": "TASK-0058"
+}

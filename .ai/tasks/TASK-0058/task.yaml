@@ -1,0 +1,92 @@
+allowed_scope:
+- .ai/tasks/TASK-0058/**
+base_commit: 715496d1b26c285089f0205309ce1f5b57f6b8ca
+branch: codex/e4-cumulative-delivery
+created_at: '2026-10-01T13:26:00Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - git_remote_push
+  - github_pull_request_create
+  - protected_main_merge
+  goal: Publish the fully gated cumulative E4 source and preserved records through
+    exact-head required CI and protected merge
+  impact:
+    level: high
+  impact_categories:
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0058/**
+  inputs:
+  - Actual source S715496d includes gated TASK-0054/55/56/57, Task57 governance6fa7658
+    and separately committed latest status documentation; native source tasks retain
+    their exact own subjects and historical evidence.
+  - Live readonly main B48bf777 and strict ai-quality-gate app15368/enforce-admins
+    unchanged at latest snapshot; recheck each actual external action.
+  - Human explicitly authorized TODO completion, necessary approvals, push and merge.
+    Each actual operation still has a fresh exact single-use binding.
+  - Historical closeout fe599c3 is retained; unrelated52474d9 excluded; foreign Task56
+    all106 blobs must remain intact.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Create and verify only the new publisher own governance records on final combined
+    sourceS.
+  - Perform an ordinary non-force remote push of exact ledger candidateP under a fresh
+    single-use action.
+  - Create one PR with exact head/base and reviewed body bytes; attach actual PR to
+    this chat.
+  - Require unchanged strict ai-quality-gate app15368 and complete exact-P successful
+    CI, then perform protected merge with expected head under fresh action.
+  - Independently verify remote MERGED/base/head/main/parents/tree and source/closure
+    ancestry before append-only native closeout.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0058
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run every original native check selected by actual classification without altered
+    selectors, budgets, thresholds or MINENV.
+  - Actual author-independent cumulative design and implementation Review cover remoteB..sourceS
+    and source/task Gates; own empty business diff does not replace cumulative source
+    review.
+  - Observe complete exact-head required Linux CI and independently verify external
+    action receipts, merge parents/tree and source/closure ancestry.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8
+goal: Publish the fully gated cumulative E4 source and preserved records through exact-head
+  required CI and protected merge
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-01T13:28:22Z'
+subject_commit: 715496d1b26c285089f0205309ce1f5b57f6b8ca
+task_id: TASK-0058
+updated_at: '2026-10-01T14:07:38Z'
+worktree_dirty: false
+worktree_dirty_paths: []
