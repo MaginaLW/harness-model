@@ -1,0 +1,19 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0056",
+  "parameter_summary": "Run the unchanged five-safeguard canonical V2 mutation manifest on the current fixture-cleanup repair after its actual fixed-source original prerequisites passed.",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "365b5f52294b6fb528012f3bcff322294933d788d5eb6b35b7df35e5d6f279f6",
+  "subject_commit": "9dca04dc18e1551dc86987eb594f84f9d37b47ad",
+  "expires_at": "2026-10-01T08:30:00Z",
+  "single_use": true,
+  "conditions": [
+    "Use only .ai/mutations/phase-02-critical-manifest.json and its five unchanged fixed mutations in owned disposable detached worktrees.",
+    "Revalidate exact subject 9dca04dc18e1551dc86987eb594f84f9d37b47ad, current classification, frozen spec 992b927ce833a8fa9876c7e278d024eca7903763621ea84391c2ad4c09f6916c and Policy d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1 before execution.",
+    "Preserve all four prior FAILED native runs, the fifth old-source passed V2, REV-0009 REQUEST_CHANGES and open RF-001, old frozen specifications and Reviews, all consumed action001 through action005 receipts, original600 failures, fixture96/1 and the interrupted prerequisite006 original instance with UNKNOWN exits.",
+    "Use the exact locked Python 3.13.15 standard-GIL runtime and complete mingw64/bin Git endpoint, validated ordinary external parent and unchanged complete default 14-check/12-execution V2 plan, original deadlines, selectors, two-key MINENV and 85/90 coverage thresholds; CI remains Python 3.11.",
+    "This fresh action006 follows current REV-0008/r1 and valid spec approval, the committed repair, actual complete begin-close42 validation, current cold1/warm10 measurement and narrow12/fixture97/external188/originalintegration907 prerequisites. Original integration600 actually passed 906 with one original FIFO skip in 529.81s; independent preflight must verify current bindings and known resource handbacks without claiming unretained engines or historical descendants are known.",
+    "The first prerequisite006 integration instance has no durable terminal receipt and remains UNKNOWN. Its recorded source/runtime/index/head were preserved, with a refs digest change of unknown cause. A separate same-source original-budget instance passed with its complete before-after snapshot equal; no original snapshot assertion or selector was weakened.",
+    "Bind source subject separately from own-ledger attestation HEAD; no prior-action reuse, provider, remote publication or automatic successor stage. Fresh full native results, independent current implementation Review, finalize, code approval and Gate remain required."
+  ]
+}
