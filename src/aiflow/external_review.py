@@ -12,6 +12,7 @@ import math
 import os
 import re
 import secrets
+import signal
 import stat
 import subprocess
 from collections.abc import Mapping, Sequence
@@ -455,22 +456,93 @@ def _snapshot_task_files(root: Path, task_id: str) -> dict[str, str | None]:
     return result
 
 
-def _read_only_git(root: Path, *arguments: str) -> bytes:
-    """Disable optional index refresh for each invocation without global environment edits."""
+def _cleanup_read_only_git(process: subprocess.Popen[bytes]) -> tuple[bytes, bytes] | None:
+    """Bound owned cleanup waits without replacing the initiating exception."""
+    if os.name == "nt":
+        try:
+            if process.poll() is None:
+                taskkill = Path(os.environ["SystemRoot"]) / "System32" / "taskkill.exe"
+                helper = subprocess.Popen(
+                    [str(taskkill), "/PID", str(process.pid), "/T", "/F"],
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                )
+                try:
+                    helper.wait(timeout=5)
+                except BaseException:
+                    try:
+                        helper.kill()
+                    except BaseException:
+                        pass
+                    try:
+                        helper.wait(timeout=1)
+                    except BaseException:
+                        pass
+        except BaseException:
+            pass
+    else:
+        try:
+            # A reaped parent's numeric group may already belong to another process.
+            if process.poll() is None:
+                kill_group = getattr(os, "killpg")
+                kill_signal = getattr(signal, "SIGKILL")
+                kill_group(process.pid, kill_signal)
+        except BaseException:
+            pass
     try:
-        result = subprocess.run(
+        process.kill()
+    except BaseException:
+        pass
+    try:
+        return process.communicate(timeout=5)
+    except BaseException:
+        return None
+
+
+def _read_only_git(root: Path, *arguments: str) -> bytes:
+    """Read binary Git output with a local environment and owned bounded cleanup."""
+    process: subprocess.Popen[bytes] | None = None
+    drained = False
+    streams_closed = False
+    try:
+        process = subprocess.Popen(
             ["git", "--no-optional-locks", *arguments],
             cwd=root,
             env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
-            capture_output=True,
-            check=False,
-            timeout=10,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            start_new_session=os.name != "nt",
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
         )
-        if result.returncode != 0:
+        stdout, _stderr = process.communicate(timeout=10)
+        drained = True
+        for stream in (process.stdout, process.stderr):
+            if stream is not None:
+                stream.close()
+        streams_closed = True
+        if process.returncode != 0:
             raise _invalid("GIT_BINDING_STALE")
-        return result.stdout
-    except (OSError, subprocess.TimeoutExpired) as error:
-        raise _invalid("GIT_BINDING_STALE") from error
+        return stdout
+    except BaseException as original:
+        if process is not None and not drained:
+            try:
+                drained = _cleanup_read_only_git(process) is not None
+            except BaseException:
+                pass
+        if isinstance(original, (OSError, subprocess.TimeoutExpired)):
+            raise _invalid("GIT_BINDING_STALE") from original
+        raise
+    finally:
+        if drained and not streams_closed and process is not None:
+            # Undrained Windows readers can retain a stream lock: do not close them.
+            for stream in (process.stdout, process.stderr):
+                if stream is not None:
+                    try:
+                        stream.close()
+                    except BaseException:
+                        pass
 
 
 def _read_only_checkout(root: Path) -> tuple[GitContext, tuple[str, ...]]:
