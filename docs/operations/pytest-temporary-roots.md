@@ -135,3 +135,21 @@ worker主体结束，正常返回/抛错前仍须真实join。3.11最终join中�
 实际start前归属、未登记worker join、未知终态、子进程回收与shutdown重入均已核对；
 首cleanup失败保留在本次复制状态，旧65用例保持。新增静态预计32用例尚未collect或
 执行；该预审不构成原生ImplementationReview、完整warm、原600、V2或Gate通过。
+
+
+TASK-0057 另行准入了解析缓存资格修复：原有方法身份与四张注册表比较不足以
+发现同一 SafeLoader 方法覆盖或 constructor 模块实际全局 dispatch 改变。
+冻结设计要求一次编译有限标准 dispatch 清单，核对完整 Loader MRO、类 namespace、
+函数 code/default/closure 与实际引用的 globals/builtins，并绑定有限标准依赖成员及
+可支持的可变配置内容。资格本身最多 4096 个对象、深度 64；未知、自定义、循环、
+超限或检查异常绕过缓存，调用当前 safe_load，保留其值、调用副作用与异常。
+
+标准 Hashable 的普通 lookup memo 变化不属于解析器配置漂移；自身 virtual
+registration 改变须回退，与其他 ABC 的无关注册不混为一谈。此有限资格仅识别
+可观察的标准配置，不认证任意 Python 或解释器篡改，也不提供全局配置并发变化的
+原子保证。原 64 项、16384 字符与返回图限制、隔离复制和当前文件/Schema/Policy
+验证仍保持；没有新增 CLI 开关或较弱的验证期限、选择器、覆盖率与 mutation。
+
+上述为实际已批准规格的边界。设计 Review 和私有探针均不代表源实现、完整 V2、
+准确 head 的 required CI 或累计发布通过；当前任务的实际验证与 Gate 另见其账本。
+私有微基准记录了资格检查开销，不能推断每种文本或完整测试均加速。
