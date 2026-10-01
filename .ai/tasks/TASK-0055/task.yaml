@@ -163,8 +163,8 @@ goal: Add guided external ZCode report preflight and immutable attachment record
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-10-01T08:39:20Z'
-subject_commit: b46dd7c3a3f9699c08db71a7e7695c076baffbed
+subject_commit: 2e6f69f3f820d1a72989c8e70d8daff70ba9f2db
 task_id: TASK-0055
-updated_at: '2026-10-01T08:48:30Z'
+updated_at: '2026-10-01T08:50:48Z'
 worktree_dirty: false
 worktree_dirty_paths: []
