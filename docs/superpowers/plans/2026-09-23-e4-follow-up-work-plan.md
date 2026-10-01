@@ -1,5 +1,16 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-02 最新核定：TASK-0061 完整原生验证失败，发布仍暂停
+
+- 固定源码 `508cf73d10be4cdd2ca4409e706fe68ead10a69d`、规格准入提交 `b17e3879b5a1e5a95510a70bbce91ddf868e6d28` 的原有 10 项 V1 已全部真实执行；`fbda31/0` 的 CLI 退出 0 表示记录完成，原生任务与 evidence 真实结论为 **FAILED**，不能据此发布。
+- 回归测试实际 `1 failed / 2997 passed / 1` 既有 Windows FIFO 跳过，720.40 秒；单元 1994 项通过。独立覆盖率轮实际 `2998 passed / 1` 同一既有跳过，848.06 秒，XML 行 `7856/8588=91.48%`、分支 `2517/3060=82.25%`；后轮成功不抹去前轮失败。其余原有检查通过，预算、选择器、MINENV 和阈值未调整。
+- `test_private_system_context_drift_cannot_reuse_snapshot[factory]` 在初次 seed 资格检查、factory 修改前失败。可信位置 `_qualify:548 -> _template_fact:277` 比较投影后的类型、名称与字节；现场 seed `.git/info` 多一个普通 `refs` 文件（57 字节，SHA `26ce8b7a0e476b303b8f35537af85731c247b474eeaf30dc2523ef173da88b15`），其余模板文件字节与模式相同。非作者与作者分别只读确认，Root `d2b19d/0` 复核独立三件诊断原件；模式差异和 factory 修改不能解释该失败。
+- 同一现场有 pack、reverse index、multi-pack-index 与 server-info，支持自动维护候选；实际生成进程、触发条件与唯一根因仍为 **UNKNOWN**。先研究真实 Git commit 的自动维护控制点，再做最窄 task-free 维护修复；不放宽模板比较、配置允许表、原断言或跳过条件。
+- 实际 retained35744、creation134353619377042605/exit134353636332839767、launcher0/closed/no timeout；外部 tracked1952、runtime225、Git pair、refs/index/topology 的冻结前后完全一致。失败证据和20日志引用已随 `16d3373` 原样入历史，详见 `.ai/tasks/TASK-0061/native-validation-failed-001.md`。TASK-0061 未实现审核、代码批准、Gate 或任何远端写入，不能由未来成功闭为 MERGED。
+- 远端仍为原第三次失败 head `f402bd7ab1fbe6c6415117817d3adb0ec62899ac`，PR44 未合并；TASK-0058/59/60 的三个准确 CI 失败记录与 TASK-0061 本地失败各自保留。后续新固定源码须有新的真实发布准入、全原生验证、非作者审核、准确 Q Gate、完整 required CI 和 protected merge/独立远端证明。54/55/56/57 与成功的新发布任务才可在实际证明后闭账；53 仍 push-only。
+- 两名 sub-agent 并行：作者只修三份测试文件、核真实 Git 输入，非作者独立归档失败与审核新候选；Root 负责治理、文档、统一提交和串行发布。主工作区历史、本地配置与三份用户草稿继续保留；真实匹配 ZCode 原报告 F 在既定搜索边界仍缺失，不进入付费 provider 或未满足条件的后续阶段。
+
+
 ## 2026-10-02 owner 私有系统配置修复完成，进入新发布验证
 
 安全提交9191a646a12c3ea2891303f28c223d0e787ae56e仅修改3个test-only文件；真实原run_git和bounded Popen统一选用owner私有空系统配置，父环境不写GIT_CONFIG_SYSTEM，默认、未拥有cwd及foreign路径继承原输入，non-Git命令不变。
