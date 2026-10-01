@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner-authorized-root",
+    "approval_type": "spec",
+    "approved_at": "2026-10-01T22:15:30Z",
+    "base_commit": "993a9a0619577117417d80de96e73aa18270b464",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing direct owner instructions authorize completion of eligible TODOs and necessary approvals; actual current frozen Task62 spec and source993 independently reviewed REV-0001 APPROVE. This spec approval does not replace separately bound future push/PR-update/merge actions or required checks.",
+    "schema_version": "1.0",
+    "spec_sha256": "559f4f716a7ac8192a0afbe11dc9960ec18ee196f9ba5f99d68cd572dda4313e",
+    "subject_commit": "993a9a0619577117417d80de96e73aa18270b464",
+    "task_id": "TASK-0062"
+  }
+]

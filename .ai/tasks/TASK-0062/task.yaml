@@ -1,0 +1,106 @@
+allowed_scope:
+- .ai/tasks/TASK-0062/**
+base_commit: 993a9a0619577117417d80de96e73aa18270b464
+branch: codex/e4-cumulative-delivery
+created_at: '2026-10-01T21:52:02Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - git_remote_push
+  - github_pull_request_update
+  - protected_main_merge
+  goal: Publish cumulative E4 delivery after owned Git maintenance isolation through
+    exact-head CI and protected merge
+  impact:
+    level: high
+  impact_categories:
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0062/**
+  inputs:
+  - Fixed cumulative source993a9a0619577117417d80de96e73aa18270b464 preserves original
+    source/Gov54/55/56/57, three actually published failed-CI attempts58/59/60, actual
+    local native failed publisher61, historical source/closure and task-free fixture
+    repairs.
+  - Latest test-only repair e8b2f5d21fb3d1f3ff34b90c387e02769d2f1765 has exact physical
+    fixture279661c9d28ab94121c3d2b2f7dc15b75c6028c0849ae96cc9a0428ef9088ebd/helperb1d40bc4feedace0f8a1b48e7920cdeee82eb5506607165452e7f61ae756e443/test719b4f727b27369237f134a0377ac01c12a774624080e09bb4b5cbe282dc18d6.
+    Author204 full-related tests0skip and actual independent7 plus corrected1 probes;103
+    old named AST and original qualification guards intact.
+  - Owned recognized commit only receives final command-local maintenance.auto=false;
+    default/foreign/noncommit/unknown syntax and original env/config/template/current/owner/thread/copy/cleanup
+    remain. Actual default2.55 controlled probes explain a sufficient automatic-maintenance
+    side effect, not historical generating PID/unique cause.
+  - 'Actual Task61 full10 evidence FAILED: nine checks passed, regression1/2997pass/1FIFO720.40;
+    coverage0/2998pass/1FIFO848.06 and launcher0 do not erase failure. Preserve35originals/20logs/45independentarchive,
+    Task61 FAILED, original source/spec/Design/evidence.'
+  - Current31-artifact5GET snapshot proves B48bf777/predecessorf402/PR44OPEN/strict
+    app15368 protection unchanged; refresh before any actual remote write. No action
+    approval, new Q CI or merge proof is inferred.
+  - Existing direct owner authorization covers eligible work, required approvals,push/merge;
+    bind exact concrete single-use actions without reasking. Neverclose53/58/59/60/61/28
+    from future success; legitimate closes only54/55/56/57 and successful62 after
+    actual protected merge and independent remote proof.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Admit and genuinely verify only own publisher governance on fixedS, with actual
+    nonauthor cumulative Design/Implementation and unchanged original10V1.
+  - Ordinary non-force fast-forward exact Q push replacing fresh literal predecessor,
+    with verified actual origin pushURL and command-local GH credential protocol.
+  - Independently review literal title/body then update existing PR44 only under separate
+    fresh action.
+  - Require complete unchanged exact-Q app15368 quality chain,85overall/90cumulative
+    diff/whitespace/Ruff/format/mypy before ordinary expected-head protected merge.
+  - Independent exactM/B/Q/orderedparents/tree/ancestry/exclusion proof before fetchM
+    and legitimate native close54/55/56/57/62; retain push-only53 and failed58/59/60/61
+    dispositions and separate local governedG/Primary integration.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0062
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run every original native check selected by actual classification without altered
+    selectors, budgets, thresholds or MINENV.
+  - Actual author-independent cumulative design and implementation Review cover remoteB..sourceS
+    and source/task Gates; own empty business diff does not replace cumulative source
+    review.
+  - Observe complete exact-head required Linux CI and independently verify external
+    action receipts, merge parents/tree and source/closure ancestry.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 559f4f716a7ac8192a0afbe11dc9960ec18ee196f9ba5f99d68cd572dda4313e
+goal: Publish cumulative E4 delivery after owned Git maintenance isolation through
+  exact-head CI and protected merge
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-01T22:01:57Z'
+subject_commit: 993a9a0619577117417d80de96e73aa18270b464
+task_id: TASK-0062
+updated_at: '2026-10-01T22:15:31Z'
+worktree_dirty: false
+worktree_dirty_paths: []
