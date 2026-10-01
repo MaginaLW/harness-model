@@ -92,8 +92,8 @@ goal: Preserve current YAML decoding semantics when recognized SafeLoader dispat
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-10-01T10:30:35Z'
-subject_commit: 46a78b44ec02a0681528f567e313fe88e109b4d9
+subject_commit: afff0629a2f68184a3b0e388af4ed5dc08a995e0
 task_id: TASK-0057
-updated_at: '2026-10-01T10:47:45Z'
+updated_at: '2026-10-01T11:52:10Z'
 worktree_dirty: false
 worktree_dirty_paths: []
