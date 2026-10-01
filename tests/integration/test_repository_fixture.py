@@ -64,8 +64,26 @@ def _qualification_diagnostic(repository: Path, owner: fixture.RepositoryOwner) 
 
 
 @pytest.fixture
-def owner(
+def _private_git_environment(
     tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch
+) -> Path:
+    """Give qualification tests a private profile while keeping system Git inputs."""
+    home = tmp_path_factory.mktemp("git-home")
+    xdg = home / "xdg"
+    xdg.mkdir()
+    monkeypatch.setitem(os.environ, "HOME", str(home))
+    monkeypatch.setitem(os.environ, "XDG_CONFIG_HOME", str(xdg))
+    for name in tuple(os.environ):
+        if name.upper().startswith("GIT_"):
+            monkeypatch.delitem(os.environ, name)
+    return home
+
+
+@pytest.fixture
+def owner(
+    tmp_path_factory: pytest.TempPathFactory,
+    monkeypatch: pytest.MonkeyPatch,
+    _private_git_environment: Path,
 ) -> Iterator[fixture.RepositoryOwner]:
     # Do not overwrite or lose the integration session owner after this test.
     previous = fixture._owner
@@ -2386,3 +2404,115 @@ def test_seed_qualification_failure_still_fails_after_successful_recheck(
     with pytest.raises(pytest.fail.Exception, match="DIRECT_RECHECK_PASSED"):
         seed(tmp_path, owner)
     assert owner.snapshot is None and owner.qualification is None
+
+
+def test_private_environment_isolates_and_restores_host_inputs(
+    tmp_path: Path, tmp_path_factory: pytest.TempPathFactory
+) -> None:
+    previous_owner = fixture._owner
+    original_environment = dict(os.environ)
+    host_home = tmp_path / "host-profile"
+    host_home.mkdir()
+    host_xdg = host_home / "xdg"
+    host_xdg.mkdir()
+    host_config = host_home / ".gitconfig"
+    config_bytes = b"[user]\n\tname = private-host-user\n"
+    host_config.write_bytes(config_bytes)
+    with pytest.MonkeyPatch.context() as host:
+        host.setenv("HOME", str(host_home))
+        host.setenv("XDG_CONFIG_HOME", str(host_xdg))
+        host.setenv("GIT_CONFIG_COUNT", "0")
+        polluted_environment = dict(os.environ)
+        with pytest.MonkeyPatch.context() as isolated:
+            home = _private_git_environment.__wrapped__(tmp_path_factory, isolated)
+            assert home.parent == tmp_path_factory.getbasetemp() and home != host_home
+            assert list(home.iterdir()) == [home / "xdg"]
+            assert not list((home / "xdg").iterdir())
+            assert os.environ["HOME"] == str(home)
+            assert os.environ["XDG_CONFIG_HOME"] == str(home / "xdg")
+            assert not any(name.upper().startswith("GIT_") for name in os.environ)
+            scoped_owner = owner.__wrapped__(tmp_path_factory, isolated, home)
+            token = next(scoped_owner)
+            references: list[Path] = []
+
+            def observe(path: Path, *arguments: str) -> str:
+                if arguments == ("init", "-b", "main"):
+                    references.append(path)
+                return helpers.run_git(path, *arguments)
+
+            try:
+                original = _reference_populate(tmp_path / "isolated-first", observe)
+                assert not token.disabled and token.snapshot is not None
+                assert token.qualification is not None and len(references) == 1
+                copied = _reference_populate(tmp_path / "isolated-second", observe)
+                assert token.cold == 1 and token.hits == 1 and len(references) == 1
+                assert snapshot(original) == snapshot(copied) == snapshot(token.snapshot)
+            finally:
+                scoped_owner.close()
+            assert fixture._owner is previous_owner
+        assert dict(os.environ) == polluted_environment
+    assert dict(os.environ) == original_environment
+    assert fixture._owner is previous_owner and host_config.read_bytes() == config_bytes
+
+
+@pytest.mark.parametrize("change", ["home_config", "xdg_config", "git_environment"])
+def test_private_environment_keeps_unknown_input_guards(
+    tmp_path: Path,
+    owner: fixture.RepositoryOwner,
+    monkeypatch: pytest.MonkeyPatch,
+    change: str,
+) -> None:
+    if change == "git_environment":
+        monkeypatch.setenv("GIT_CONFIG_COUNT", "0")
+        reason = fixture.IneligibleReason.GIT_ENVIRONMENT
+    else:
+        home = Path(os.environ["HOME"])
+        assert owner.contains(home)
+        if change == "home_config":
+            configuration = home / ".gitconfig"
+        else:
+            directory = Path(os.environ["XDG_CONFIG_HOME"]) / "git"
+            directory.mkdir()
+            configuration = directory / "config"
+        configuration.write_bytes(b"[user]\n\tname = private-unsupported-user\n")
+        reason = fixture.IneligibleReason.CONFIGURATION
+    references: list[Path] = []
+
+    def observe(path: Path, *arguments: str) -> str:
+        if arguments == ("init", "-b", "main"):
+            references.append(path)
+        return helpers.run_git(path, *arguments)
+
+    result = _reference_populate(tmp_path / "rejected", observe)
+    assert not references and owner.disabled and owner.reason is reason
+    assert owner.snapshot is None and owner.qualification is None
+    assert owner.cold == 1 and owner.hits == 0
+    assert helpers.run_git(result, "log", "-1", "--format=%s") == "initial"
+
+
+def test_private_environment_handles_case_sensitive_mapping(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> None:
+    from types import SimpleNamespace
+
+    # A dictionary retains POSIX key spelling even on a Windows test host.
+    environment = {
+        "HOME": "outside-profile",
+        "XDG_CONFIG_HOME": "outside-xdg",
+        "git_config_count": "0",
+        "GiT_PaGeR": "private-pager",
+        "PATH": "unchanged-path",
+        "OTHER": "unchanged-value",
+    }
+    original = environment.copy()
+    with pytest.MonkeyPatch.context() as view:
+        view.setitem(globals(), "os", SimpleNamespace(environ=environment))
+        with pytest.MonkeyPatch.context() as isolated:
+            home = _private_git_environment.__wrapped__(tmp_path_factory, isolated)
+            assert environment == {
+                "HOME": str(home),
+                "XDG_CONFIG_HOME": str(home / "xdg"),
+                "PATH": "unchanged-path",
+                "OTHER": "unchanged-value",
+            }
+        assert environment == original
