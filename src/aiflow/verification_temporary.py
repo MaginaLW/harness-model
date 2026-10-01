@@ -63,7 +63,7 @@ def _ordinary_component(value: str) -> bool:
 def _drive_type(path: Path) -> int:
     import ctypes
 
-    return int(ctypes.windll.kernel32.GetDriveTypeW(str(path.anchor)))
+    return int(getattr(ctypes, "windll").kernel32.GetDriveTypeW(str(path.anchor)))
 
 
 def _ordinary_absolute_path(path: Path) -> Path:

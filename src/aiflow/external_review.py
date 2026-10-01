@@ -123,7 +123,7 @@ def _lexical_path(path: Path) -> Path:
         import ctypes
 
         absolute = Path(os.path.abspath(raw))
-        drive_type = ctypes.windll.kernel32.GetDriveTypeW(str(absolute.anchor))
+        drive_type = getattr(ctypes, "windll").kernel32.GetDriveTypeW(str(absolute.anchor))
         if drive_type not in {2, 3, 5, 6}:
             raise _invalid("PATH_INVALID")
     return Path(os.path.abspath(raw))
@@ -467,7 +467,7 @@ def _cleanup_read_only_git(process: subprocess.Popen[bytes]) -> tuple[bytes, byt
                     stdin=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
-                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW"),
                 )
                 try:
                     helper.wait(timeout=5)
@@ -514,7 +514,7 @@ def _read_only_git(root: Path, *arguments: str) -> bytes:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             start_new_session=os.name != "nt",
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
+            creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP") if os.name == "nt" else 0,
         )
         stdout, _stderr = process.communicate(timeout=10)
         drained = True
