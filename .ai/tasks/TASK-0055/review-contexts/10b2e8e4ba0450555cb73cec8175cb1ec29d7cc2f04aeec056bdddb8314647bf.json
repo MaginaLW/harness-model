@@ -1,0 +1,1575 @@
+{
+  "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+  "branch": "codex/e4-report-import",
+  "classification_input_sha256": "cfcc4b48f9f099c182a954bf7206ff484b116c3b2e1557b66df95bdc563b58e8",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/external_review.py",
+      "src/aiflow/cli.py",
+      "src/aiflow/contracts.py",
+      ".ai/schemas/external-review-import.schema.json",
+      ".ai/schemas/external-review-repository-mapping.schema.json",
+      "tests/unit/test_external_review.py",
+      "tests/integration/test_external_review_command.py",
+      "tests/unit/test_contracts.py",
+      "tests/fixtures/contracts/valid/external-review-*.json",
+      "tests/fixtures/contracts/invalid/external-review-*.*.json",
+      "docs/operations/external-review-import.md",
+      "src/aiflow/verification_temporary.py",
+      "src/aiflow/verification.py",
+      "src/aiflow/verification_service.py",
+      "src/aiflow/process_runner.py",
+      "tests/unit/test_verification_temporary.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/unit/test_process_runner.py",
+      "tests/integration/test_verify_command.py",
+      "docs/operations/pytest-temporary-roots.md",
+      "tests/integration/test_begin_close_commands.py",
+      "src/aiflow/document_parsing.py",
+      "src/aiflow/policy.py",
+      "src/aiflow/storage.py",
+      "tests/unit/test_document_parsing.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_storage.py",
+      "tests/integration/repository_fixture.py",
+      "tests/integration/conftest.py",
+      "tests/integration/test_repository_fixture.py",
+      "tests/unit/test_external_review_metadata.py",
+      ".ai/tasks/TASK-0056/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add guided external ZCode report preflight and immutable attachment recording for existing AI Flow tasks",
+        "impact_scope": [
+          "src/aiflow/external_review.py",
+          "src/aiflow/cli.py",
+          "src/aiflow/contracts.py",
+          ".ai/schemas/external-review-import.schema.json",
+          ".ai/schemas/external-review-repository-mapping.schema.json",
+          "tests/unit/test_external_review.py",
+          "tests/integration/test_external_review_command.py",
+          "tests/unit/test_contracts.py",
+          "tests/fixtures/contracts/valid/external-review-*.json",
+          "tests/fixtures/contracts/invalid/external-review-*.*.json",
+          "docs/operations/external-review-import.md",
+          "src/aiflow/verification_temporary.py",
+          "src/aiflow/verification.py",
+          "src/aiflow/verification_service.py",
+          "src/aiflow/process_runner.py",
+          "tests/unit/test_verification_temporary.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/unit/test_process_runner.py",
+          "tests/integration/test_verify_command.py",
+          "docs/operations/pytest-temporary-roots.md",
+          "tests/integration/test_begin_close_commands.py",
+          "src/aiflow/document_parsing.py",
+          "src/aiflow/policy.py",
+          "src/aiflow/storage.py",
+          "tests/unit/test_document_parsing.py",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_storage.py",
+          "tests/integration/repository_fixture.py",
+          "tests/integration/conftest.py",
+          "tests/integration/test_repository_fixture.py",
+          "tests/unit/test_external_review_metadata.py",
+          ".ai/tasks/TASK-0056/**"
+        ],
+        "planned_actions": [
+          "Add bounded local envelope, raw report and repository-mapping readers with safe diagnostics.",
+          "Compare current governed target context and independently declared source subject without network calls or report execution.",
+          "Add read-only preflight and explicit record CLI commands with revalidation, drift tokens and create-only immutable publication.",
+          "Register two new closed attachment and repository-mapping contracts without changing existing formal contracts.",
+          "Replace only importer read-only Git transport with owned Popen/group/session and bounded exception cleanup, preserving binary argv/cwd/inherited stdin/local optional-lock environment and communicate10.",
+          "Preserve writer interruption contract and historical failures; commit safety tests and operation documentation separately under maintenance mode.",
+          "After same-route spec_changed admission, replace only four Windows API lookup expressions with no-default getattr in external_review.py and verification_temporary.py; preserve actual values, guards, paths and transport semantics."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/external-review-import.schema.json",
+        ".ai/schemas/external-review-repository-mapping.schema.json",
+        ".ai/tasks/TASK-0055/action-use-82b040704d11ef0ed426f6e4f4283e674983a6590b876a84fd6312ce05cf0c2b.md",
+        ".ai/tasks/TASK-0055/action-use-e1a64fc542d424fccca61d7c28135ce8d71c5dfd19e885106903c0b027614d6a.md",
+        ".ai/tasks/TASK-0055/action-v2-targeted-mutation-001.json",
+        ".ai/tasks/TASK-0055/action-v2-targeted-mutation-002.json",
+        ".ai/tasks/TASK-0055/action-v2-targeted-mutation-003.json",
+        ".ai/tasks/TASK-0055/action-v2-targeted-mutation-004.json",
+        ".ai/tasks/TASK-0055/action-v2-targeted-mutation-005.json",
+        ".ai/tasks/TASK-0055/approvals.json",
+        ".ai/tasks/TASK-0055/classification.json",
+        ".ai/tasks/TASK-0055/dependency-task56-git-blobs-001.txt",
+        ".ai/tasks/TASK-0055/design-admission-001.md",
+        ".ai/tasks/TASK-0055/design-amendment-001.md",
+        ".ai/tasks/TASK-0055/design-amendment-002.md",
+        ".ai/tasks/TASK-0055/design-context-001.json",
+        ".ai/tasks/TASK-0055/design-context-002.json",
+        ".ai/tasks/TASK-0055/design-context-003.json",
+        ".ai/tasks/TASK-0055/design-context-004.json",
+        ".ai/tasks/TASK-0055/design-review-input-001.json",
+        ".ai/tasks/TASK-0055/design-review-input-002.json",
+        ".ai/tasks/TASK-0055/design-review-input-003.json",
+        ".ai/tasks/TASK-0055/events.jsonl",
+        ".ai/tasks/TASK-0055/evidence-handoff-005.md",
+        ".ai/tasks/TASK-0055/platform-design-entry-002.md",
+        ".ai/tasks/TASK-0055/re-admission-entry-001.md",
+        ".ai/tasks/TASK-0055/review-contexts/0cb395c89df07d4dbdcb3b9d967a822ad1915710a00e2ddcc665025d0d1a136f.json",
+        ".ai/tasks/TASK-0055/review-contexts/1c63c6766d02b4f6f01caf86ca70339183f92ff648643e8fe182dd23ef0f1d6b.json",
+        ".ai/tasks/TASK-0055/review-contexts/2cb9bc65f3ceefa13e3c8dbb6ec88bd51a87de7c266558bb072ba1ba65062eae.json",
+        ".ai/tasks/TASK-0055/review-contexts/4f369f00969ff411fc88ed6bc80233d49a5268013180ccc238eac335125f3e1d.json",
+        ".ai/tasks/TASK-0055/review-contexts/db6d30ba8e36db772e206d86cd2fef4652420d77177de9c2561e43670b115e92.json",
+        ".ai/tasks/TASK-0055/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0055/reviews/REV-0001-r0002.json",
+        ".ai/tasks/TASK-0055/reviews/REV-0001-r0003.json",
+        ".ai/tasks/TASK-0055/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0055/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0055/reviews/REV-0004-r0001.json",
+        ".ai/tasks/TASK-0055/reviews/REV-0005-r0001.json",
+        ".ai/tasks/TASK-0055/spec-snapshots/spec-001.md",
+        ".ai/tasks/TASK-0055/spec-snapshots/spec-002.md",
+        ".ai/tasks/TASK-0055/spec-snapshots/spec-003.md",
+        ".ai/tasks/TASK-0055/spec.md",
+        ".ai/tasks/TASK-0055/task.yaml",
+        ".ai/tasks/TASK-0055/verification-admission-001.md",
+        ".ai/tasks/TASK-0055/verification-failure-004.md",
+        ".ai/tasks/TASK-0055/verification-failure-005.md",
+        ".ai/tasks/TASK-0055/verification-interruption-002.md",
+        ".ai/tasks/TASK-0055/verification-interruption-003.md",
+        ".ai/tasks/TASK-0055/verification-retry-001.md",
+        ".ai/tasks/TASK-0055/verification-retry-003.md",
+        ".ai/tasks/TASK-0055/verification-retry-004.md",
+        ".ai/tasks/TASK-0055/verification-retry-005.md",
+        ".ai/tasks/TASK-0055/verifier-contexts/34690bfc78649da69dbe6e0f1deea7258c8cb8720d3b66eccf8bfc0fd4df1630.json",
+        ".ai/tasks/TASK-0055/verifier-contexts/39ee327b3f0dd1c3774c511355a3049838fb0759539be0177263069f88467a99.json",
+        ".ai/tasks/TASK-0055/verifier-contexts/42e5a55f935839a9ced82fe51de82e6726d780dc4d775bfa668a6ae443c96bb1.json",
+        ".ai/tasks/TASK-0055/verifier-contexts/5fe7f31a6879f4de5bad8575e06cf3443f27dcfdc53ace906c0cf4b34bca2987.json",
+        ".ai/tasks/TASK-0055/verifier-contexts/79df845b8b2118a7607f61cb740b63b9284b24becd40da461d3854a75f48f7c2.json",
+        ".ai/tasks/TASK-0056/action-use-3e51fbd288bd9bc7f0cbb5478bfcd0e82dc31a41e7b0a9b8c9ce24605fba9629.md",
+        ".ai/tasks/TASK-0056/action-use-72cd2c312ce3a3d1b2939fd9cf3d50f9c0d3dec933c5e716433c6da09abc07e8.md",
+        ".ai/tasks/TASK-0056/action-use-7c185e24995f728cb55fd48ccee2d60757a6318f35730e19c589e56483d25f33.md",
+        ".ai/tasks/TASK-0056/action-use-824d783a2bf0fce82b053e5ac330b9886f8d3924b5cdee3515c59586a1636019.md",
+        ".ai/tasks/TASK-0056/action-use-837674124a8da1874968998e295a201b321fbb47cee20356a24abc142ed9d4dd.md",
+        ".ai/tasks/TASK-0056/action-use-b1e35fc69bd138767e611a67d1334130f96ffa4eebc4caafa38bfe1c938b0c27.md",
+        ".ai/tasks/TASK-0056/action-v2-targeted-mutation-001.json",
+        ".ai/tasks/TASK-0056/action-v2-targeted-mutation-002.json",
+        ".ai/tasks/TASK-0056/action-v2-targeted-mutation-003.json",
+        ".ai/tasks/TASK-0056/action-v2-targeted-mutation-004.json",
+        ".ai/tasks/TASK-0056/action-v2-targeted-mutation-005.json",
+        ".ai/tasks/TASK-0056/action-v2-targeted-mutation-006.json",
+        ".ai/tasks/TASK-0056/approvals.json",
+        ".ai/tasks/TASK-0056/binary-reader-cost-diagnostic-015.md",
+        ".ai/tasks/TASK-0056/classification.json",
+        ".ai/tasks/TASK-0056/current-cost-diagnostics-011.md",
+        ".ai/tasks/TASK-0056/design-amendment-001.md",
+        ".ai/tasks/TASK-0056/design-amendment-002.md",
+        ".ai/tasks/TASK-0056/design-amendment-003.md",
+        ".ai/tasks/TASK-0056/design-amendment-004.md",
+        ".ai/tasks/TASK-0056/design-amendment-005.md",
+        ".ai/tasks/TASK-0056/design-amendment-006.md",
+        ".ai/tasks/TASK-0056/design-amendment-007.md",
+        ".ai/tasks/TASK-0056/direct-endpoint-prerequisites-009.md",
+        ".ai/tasks/TASK-0056/endpoint-and-profile-diagnostics-008.md",
+        ".ai/tasks/TASK-0056/events.jsonl",
+        ".ai/tasks/TASK-0056/export-placement-001.md",
+        ".ai/tasks/TASK-0056/fixture-cleanup-current-prerequisites-passed-025.md",
+        ".ai/tasks/TASK-0056/fixture-cleanup-repair-validated-024.md",
+        ".ai/tasks/TASK-0056/fixture-implementation-005.md",
+        ".ai/tasks/TASK-0056/fixture-integration-prerequisite-failure-005.md",
+        ".ai/tasks/TASK-0056/implementation-finding-001.md",
+        ".ai/tasks/TASK-0056/integration-durations-diagnostic-012.md",
+        ".ai/tasks/TASK-0056/integration-passive-diagnostic-007.md",
+        ".ai/tasks/TASK-0056/lifecycle-cost-diagnostic-013.md",
+        ".ai/tasks/TASK-0056/metadata-implementation-006.md",
+        ".ai/tasks/TASK-0056/native-v2-current-source-passed-026.md",
+        ".ai/tasks/TASK-0056/native-v2-final-review-gate-027.md",
+        ".ai/tasks/TASK-0056/native-v2-passed-review-changes-023.md",
+        ".ai/tasks/TASK-0056/parallel-copy-cost-diagnostic-016.md",
+        ".ai/tasks/TASK-0056/parallel-copy-implementation-019.md",
+        ".ai/tasks/TASK-0056/parallel-copy-ownership-plan-acceptance-018.md",
+        ".ai/tasks/TASK-0056/parallel-copy-prerequisite-failure-020.md",
+        ".ai/tasks/TASK-0056/parallel-copy-prerequisites-passed-022.md",
+        ".ai/tasks/TASK-0056/parallel-copy-startup-review-diagnostic-017.md",
+        ".ai/tasks/TASK-0056/parallel-copy-test-input-stabilization-021.md",
+        ".ai/tasks/TASK-0056/portable-reproduction-001.md",
+        ".ai/tasks/TASK-0056/preparation/context-design-001.json",
+        ".ai/tasks/TASK-0056/preparation/context-design-002.json",
+        ".ai/tasks/TASK-0056/preparation/context-design-003.json",
+        ".ai/tasks/TASK-0056/preparation/context-design-007.json",
+        ".ai/tasks/TASK-0056/preparation/context-design-008.json",
+        ".ai/tasks/TASK-0056/preparation/design-review-input-001.json",
+        ".ai/tasks/TASK-0056/preparation/design-review-input-002.json",
+        ".ai/tasks/TASK-0056/preparation/design-review-input-003.json",
+        ".ai/tasks/TASK-0056/preparation/design-review-input-007.json",
+        ".ai/tasks/TASK-0056/preparation/design-review-input-008.json",
+        ".ai/tasks/TASK-0056/review-contexts/000a894359c24eb9ba19609939aa4b58d0a0877cf6ae088bba4d4128985ab2e1.json",
+        ".ai/tasks/TASK-0056/review-contexts/56d71328dcf0e153c00dbc70b6128b893ad52806ba58484917850e1abf715458.json",
+        ".ai/tasks/TASK-0056/review-contexts/6bb1dde030ecf2ccd6bf2f1c1af73a4a5a3ce21112c4235be6c7190c71c22dad.json",
+        ".ai/tasks/TASK-0056/review-contexts/708ec0ca7e97f6f58688ef28f4eae631d5f84798637eb3cba4a73a189469fbee.json",
+        ".ai/tasks/TASK-0056/review-contexts/9eb3cba1d801da4b28b9df10c6432f150916bd2953c746b6e12351387848ebd7.json",
+        ".ai/tasks/TASK-0056/review-contexts/c1bbd71cb08c832bf9c21844f85cf897018cb91740d7ffb0a4a01c56fc930d38.json",
+        ".ai/tasks/TASK-0056/review-contexts/c6f79f9bf7a40f3c5c675f4206e34fd801a53d2334f7fb6aebe8b87b875f8508.json",
+        ".ai/tasks/TASK-0056/review-contexts/cba2b62e0f40f2d852badd54863ed4f1e27868563c62552ddd7b3d5417a3b04c.json",
+        ".ai/tasks/TASK-0056/review-contexts/d648288382379be6cfb21afe49a6bc9249c1f5403992fd3c5477f1688ef9e2b7.json",
+        ".ai/tasks/TASK-0056/review-contexts/f297b1369fb15b048f389bbfb3a7687f0a2c712c89dc6b67dacd06de4f4a722d.json",
+        ".ai/tasks/TASK-0056/review-package.md",
+        ".ai/tasks/TASK-0056/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0001-r0002.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0001-r0003.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0004-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0005-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0006-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0007-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0008-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0009-r0001.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0009-r0002.json",
+        ".ai/tasks/TASK-0056/reviews/REV-0010-r0001.json",
+        ".ai/tasks/TASK-0056/runtime-prerequisite-failure-006.md",
+        ".ai/tasks/TASK-0056/runtime314-diagnostic-010.md",
+        ".ai/tasks/TASK-0056/schema-phase-cost-diagnostic-014.md",
+        ".ai/tasks/TASK-0056/spec-design-001.md",
+        ".ai/tasks/TASK-0056/spec-design-002.md",
+        ".ai/tasks/TASK-0056/spec-design-003.md",
+        ".ai/tasks/TASK-0056/spec-design-004.md",
+        ".ai/tasks/TASK-0056/spec-design-005.md",
+        ".ai/tasks/TASK-0056/spec-design-006.md",
+        ".ai/tasks/TASK-0056/spec-design-007.md",
+        ".ai/tasks/TASK-0056/spec.md",
+        ".ai/tasks/TASK-0056/task.yaml",
+        ".ai/tasks/TASK-0056/verification-failure-001.md",
+        ".ai/tasks/TASK-0056/verification-failure-002.md",
+        ".ai/tasks/TASK-0056/verification-failure-003.md",
+        ".ai/tasks/TASK-0056/verification-failure-004.md",
+        ".ai/tasks/TASK-0056/verification-retry-001.md",
+        ".ai/tasks/TASK-0056/verification-retry-002.md",
+        ".ai/tasks/TASK-0056/verification-retry-003.md",
+        ".ai/tasks/TASK-0056/verifier-contexts/0f387db1d830820d04a90530edd98c4da9e1e3807dca3e12e81ebadd62477fb9.json",
+        ".ai/tasks/TASK-0056/verifier-contexts/164aeaa4b0f901ee9f9e1aff1b2b4f95eb9c81a692f3a22fc2eb1b317f2dbc54.json",
+        ".ai/tasks/TASK-0056/verifier-contexts/479b8885afd1f57c42f1bb731d8bfe3addd963b86a714a9c0914c6c632bca25d.json",
+        ".ai/tasks/TASK-0056/verifier-contexts/7551afe52c8eacc5f41582969e538678f90a1b41f7ecb2ec06e4440d816d5fb6.json",
+        ".ai/tasks/TASK-0056/verifier-contexts/8a4db7cd53daf142bd29592755639184b2aae4cdc80559bcba47a752fbb163c8.json",
+        ".ai/tasks/TASK-0056/verifier-contexts/bc219ede3636f454d72066ad6f6a7e99fa54af19d63a892c6d03740ff065519c.json",
+        "docs/operations/external-review-import.md",
+        "docs/operations/pytest-temporary-roots.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/contracts.py",
+        "src/aiflow/document_parsing.py",
+        "src/aiflow/external_review.py",
+        "src/aiflow/policy.py",
+        "src/aiflow/process_runner.py",
+        "src/aiflow/storage.py",
+        "src/aiflow/verification.py",
+        "src/aiflow/verification_service.py",
+        "src/aiflow/verification_temporary.py",
+        "tests/fixtures/contracts/invalid/external-review-import.extra.json",
+        "tests/fixtures/contracts/invalid/external-review-import.invalid.json",
+        "tests/fixtures/contracts/invalid/external-review-import.missing.json",
+        "tests/fixtures/contracts/invalid/external-review-repository-mapping.extra.json",
+        "tests/fixtures/contracts/invalid/external-review-repository-mapping.invalid.json",
+        "tests/fixtures/contracts/invalid/external-review-repository-mapping.missing.json",
+        "tests/fixtures/contracts/valid/external-review-import.json",
+        "tests/fixtures/contracts/valid/external-review-repository-mapping.json",
+        "tests/integration/conftest.py",
+        "tests/integration/repository_fixture.py",
+        "tests/integration/test_begin_close_commands.py",
+        "tests/integration/test_external_review_command.py",
+        "tests/integration/test_repository_fixture.py",
+        "tests/integration/test_verify_command.py",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_document_parsing.py",
+        "tests/unit/test_external_review.py",
+        "tests/unit/test_external_review_metadata.py",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_process_runner.py",
+        "tests/unit/test_storage.py",
+        "tests/unit/test_verification_plan.py",
+        "tests/unit/test_verification_temporary.py"
+      ],
+      "files": [
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/external-review-import.schema.json"
+        },
+        {
+          "additions": 74,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/external-review-repository-mapping.schema.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/action-use-82b040704d11ef0ed426f6e4f4283e674983a6590b876a84fd6312ce05cf0c2b.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/action-use-e1a64fc542d424fccca61d7c28135ce8d71c5dfd19e885106903c0b027614d6a.md"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/action-v2-targeted-mutation-001.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/action-v2-targeted-mutation-002.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/action-v2-targeted-mutation-003.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/action-v2-targeted-mutation-004.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/action-v2-targeted-mutation-005.json"
+        },
+        {
+          "additions": 134,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/approvals.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/classification.json"
+        },
+        {
+          "additions": 106,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/dependency-task56-git-blobs-001.txt"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-admission-001.md"
+        },
+        {
+          "additions": 59,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-amendment-001.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-amendment-002.md"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-context-001.json"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-context-002.json"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-context-003.json"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-context-004.json"
+        },
+        {
+          "additions": 42,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-review-input-001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-review-input-002.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/design-review-input-003.json"
+        },
+        {
+          "additions": 63,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/events.jsonl"
+        },
+        {
+          "additions": 80,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/evidence-handoff-005.md"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/platform-design-entry-002.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/re-admission-entry-001.md"
+        },
+        {
+          "additions": 103,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/review-contexts/0cb395c89df07d4dbdcb3b9d967a822ad1915710a00e2ddcc665025d0d1a136f.json"
+        },
+        {
+          "additions": 102,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/review-contexts/1c63c6766d02b4f6f01caf86ca70339183f92ff648643e8fe182dd23ef0f1d6b.json"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/review-contexts/2cb9bc65f3ceefa13e3c8dbb6ec88bd51a87de7c266558bb072ba1ba65062eae.json"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/review-contexts/4f369f00969ff411fc88ed6bc80233d49a5268013180ccc238eac335125f3e1d.json"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/review-contexts/db6d30ba8e36db772e206d86cd2fef4652420d77177de9c2561e43670b115e92.json"
+        },
+        {
+          "additions": 42,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/reviews/REV-0001-r0002.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/reviews/REV-0001-r0003.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/reviews/REV-0004-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/reviews/REV-0005-r0001.json"
+        },
+        {
+          "additions": 174,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/spec-snapshots/spec-001.md"
+        },
+        {
+          "additions": 181,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/spec-snapshots/spec-002.md"
+        },
+        {
+          "additions": 240,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/spec-snapshots/spec-003.md"
+        },
+        {
+          "additions": 267,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/spec.md"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/task.yaml"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-admission-001.md"
+        },
+        {
+          "additions": 53,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-failure-004.md"
+        },
+        {
+          "additions": 119,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-failure-005.md"
+        },
+        {
+          "additions": 29,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-interruption-002.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-interruption-003.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-retry-001.md"
+        },
+        {
+          "additions": 26,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-retry-003.md"
+        },
+        {
+          "additions": 32,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-retry-004.md"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verification-retry-005.md"
+        },
+        {
+          "additions": 120,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verifier-contexts/34690bfc78649da69dbe6e0f1deea7258c8cb8720d3b66eccf8bfc0fd4df1630.json"
+        },
+        {
+          "additions": 124,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verifier-contexts/39ee327b3f0dd1c3774c511355a3049838fb0759539be0177263069f88467a99.json"
+        },
+        {
+          "additions": 110,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verifier-contexts/42e5a55f935839a9ced82fe51de82e6726d780dc4d775bfa668a6ae443c96bb1.json"
+        },
+        {
+          "additions": 129,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verifier-contexts/5fe7f31a6879f4de5bad8575e06cf3443f27dcfdc53ace906c0cf4b34bca2987.json"
+        },
+        {
+          "additions": 115,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0055/verifier-contexts/79df845b8b2118a7607f61cb740b63b9284b24becd40da461d3854a75f48f7c2.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-use-3e51fbd288bd9bc7f0cbb5478bfcd0e82dc31a41e7b0a9b8c9ce24605fba9629.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-use-72cd2c312ce3a3d1b2939fd9cf3d50f9c0d3dec933c5e716433c6da09abc07e8.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-use-7c185e24995f728cb55fd48ccee2d60757a6318f35730e19c589e56483d25f33.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-use-824d783a2bf0fce82b053e5ac330b9886f8d3924b5cdee3515c59586a1636019.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-use-837674124a8da1874968998e295a201b321fbb47cee20356a24abc142ed9d4dd.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-use-b1e35fc69bd138767e611a67d1334130f96ffa4eebc4caafa38bfe1c938b0c27.md"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-v2-targeted-mutation-001.json"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-v2-targeted-mutation-002.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-v2-targeted-mutation-003.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-v2-targeted-mutation-004.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-v2-targeted-mutation-005.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/action-v2-targeted-mutation-006.json"
+        },
+        {
+          "additions": 203,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/approvals.json"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/binary-reader-cost-diagnostic-015.md"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/classification.json"
+        },
+        {
+          "additions": 84,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/current-cost-diagnostics-011.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/design-amendment-001.md"
+        },
+        {
+          "additions": 29,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/design-amendment-002.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/design-amendment-003.md"
+        },
+        {
+          "additions": 36,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/design-amendment-004.md"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/design-amendment-005.md"
+        },
+        {
+          "additions": 49,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/design-amendment-006.md"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/design-amendment-007.md"
+        },
+        {
+          "additions": 75,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/direct-endpoint-prerequisites-009.md"
+        },
+        {
+          "additions": 70,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/endpoint-and-profile-diagnostics-008.md"
+        },
+        {
+          "additions": 112,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/events.jsonl"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/export-placement-001.md"
+        },
+        {
+          "additions": 72,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/fixture-cleanup-current-prerequisites-passed-025.md"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/fixture-cleanup-repair-validated-024.md"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/fixture-implementation-005.md"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/fixture-integration-prerequisite-failure-005.md"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/implementation-finding-001.md"
+        },
+        {
+          "additions": 45,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/integration-durations-diagnostic-012.md"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/integration-passive-diagnostic-007.md"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/lifecycle-cost-diagnostic-013.md"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/metadata-implementation-006.md"
+        },
+        {
+          "additions": 82,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/native-v2-current-source-passed-026.md"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/native-v2-final-review-gate-027.md"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/native-v2-passed-review-changes-023.md"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/parallel-copy-cost-diagnostic-016.md"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/parallel-copy-implementation-019.md"
+        },
+        {
+          "additions": 29,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/parallel-copy-ownership-plan-acceptance-018.md"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/parallel-copy-prerequisite-failure-020.md"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/parallel-copy-prerequisites-passed-022.md"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/parallel-copy-startup-review-diagnostic-017.md"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/parallel-copy-test-input-stabilization-021.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/portable-reproduction-001.md"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/context-design-001.json"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/context-design-002.json"
+        },
+        {
+          "additions": 60,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/context-design-003.json"
+        },
+        {
+          "additions": 88,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/context-design-007.json"
+        },
+        {
+          "additions": 89,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/context-design-008.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/design-review-input-001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/design-review-input-002.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/design-review-input-003.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/design-review-input-007.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/preparation/design-review-input-008.json"
+        },
+        {
+          "additions": 89,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/000a894359c24eb9ba19609939aa4b58d0a0877cf6ae088bba4d4128985ab2e1.json"
+        },
+        {
+          "additions": 88,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/56d71328dcf0e153c00dbc70b6128b893ad52806ba58484917850e1abf715458.json"
+        },
+        {
+          "additions": 952,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/6bb1dde030ecf2ccd6bf2f1c1af73a4a5a3ce21112c4235be6c7190c71c22dad.json"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/708ec0ca7e97f6f58688ef28f4eae631d5f84798637eb3cba4a73a189469fbee.json"
+        },
+        {
+          "additions": 60,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/9eb3cba1d801da4b28b9df10c6432f150916bd2953c746b6e12351387848ebd7.json"
+        },
+        {
+          "additions": 87,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/c1bbd71cb08c832bf9c21844f85cf897018cb91740d7ffb0a4a01c56fc930d38.json"
+        },
+        {
+          "additions": 80,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/c6f79f9bf7a40f3c5c675f4206e34fd801a53d2334f7fb6aebe8b87b875f8508.json"
+        },
+        {
+          "additions": 73,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/cba2b62e0f40f2d852badd54863ed4f1e27868563c62552ddd7b3d5417a3b04c.json"
+        },
+        {
+          "additions": 1008,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/d648288382379be6cfb21afe49a6bc9249c1f5403992fd3c5477f1688ef9e2b7.json"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-contexts/f297b1369fb15b048f389bbfb3a7687f0a2c712c89dc6b67dacd06de4f4a722d.json"
+        },
+        {
+          "additions": 130,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/review-package.md"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0001-r0002.json"
+        },
+        {
+          "additions": 60,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0001-r0003.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0004-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0005-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0006-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0007-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0008-r0001.json"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0009-r0001.json"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0009-r0002.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/reviews/REV-0010-r0001.json"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/runtime-prerequisite-failure-006.md"
+        },
+        {
+          "additions": 85,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/runtime314-diagnostic-010.md"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/schema-phase-cost-diagnostic-014.md"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/spec-design-001.md"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/spec-design-002.md"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/spec-design-003.md"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/spec-design-004.md"
+        },
+        {
+          "additions": 80,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/spec-design-005.md"
+        },
+        {
+          "additions": 120,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/spec-design-006.md"
+        },
+        {
+          "additions": 159,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/spec-design-007.md"
+        },
+        {
+          "additions": 228,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/spec.md"
+        },
+        {
+          "additions": 194,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/task.yaml"
+        },
+        {
+          "additions": 81,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verification-failure-001.md"
+        },
+        {
+          "additions": 85,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verification-failure-002.md"
+        },
+        {
+          "additions": 79,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verification-failure-003.md"
+        },
+        {
+          "additions": 85,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verification-failure-004.md"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verification-retry-001.md"
+        },
+        {
+          "additions": 61,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verification-retry-002.md"
+        },
+        {
+          "additions": 65,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verification-retry-003.md"
+        },
+        {
+          "additions": 185,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verifier-contexts/0f387db1d830820d04a90530edd98c4da9e1e3807dca3e12e81ebadd62477fb9.json"
+        },
+        {
+          "additions": 130,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verifier-contexts/164aeaa4b0f901ee9f9e1aff1b2b4f95eb9c81a692f3a22fc2eb1b317f2dbc54.json"
+        },
+        {
+          "additions": 95,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verifier-contexts/479b8885afd1f57c42f1bb731d8bfe3addd963b86a714a9c0914c6c632bca25d.json"
+        },
+        {
+          "additions": 109,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verifier-contexts/7551afe52c8eacc5f41582969e538678f90a1b41f7ecb2ec06e4440d816d5fb6.json"
+        },
+        {
+          "additions": 90,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verifier-contexts/8a4db7cd53daf142bd29592755639184b2aae4cdc80559bcba47a752fbb163c8.json"
+        },
+        {
+          "additions": 193,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0056/verifier-contexts/bc219ede3636f454d72066ad6f6a7e99fa54af19d63a892c6d03740ff065519c.json"
+        },
+        {
+          "additions": 74,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/external-review-import.md"
+        },
+        {
+          "additions": 137,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/pytest-temporary-roots.md"
+        },
+        {
+          "additions": 92,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 117,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/document_parsing.py"
+        },
+        {
+          "additions": 1156,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/external_review.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/policy.py"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/process_runner.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/storage.py"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/verification_service.py"
+        },
+        {
+          "additions": 321,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/verification_temporary.py"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/external-review-import.extra.json"
+        },
+        {
+          "additions": 53,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/external-review-import.invalid.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/external-review-import.missing.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/external-review-repository-mapping.extra.json"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/external-review-repository-mapping.invalid.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/invalid/external-review-repository-mapping.missing.json"
+        },
+        {
+          "additions": 53,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/valid/external-review-import.json"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/contracts/valid/external-review-repository-mapping.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/conftest.py"
+        },
+        {
+          "additions": 1152,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/repository_fixture.py"
+        },
+        {
+          "additions": 501,
+          "binary": false,
+          "deletions": 10,
+          "path": "tests/integration/test_begin_close_commands.py"
+        },
+        {
+          "additions": 2295,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_external_review_command.py"
+        },
+        {
+          "additions": 1987,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_repository_fixture.py"
+        },
+        {
+          "additions": 328,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_verify_command.py"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 240,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_document_parsing.py"
+        },
+        {
+          "additions": 663,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_external_review.py"
+        },
+        {
+          "additions": 249,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_external_review_metadata.py"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 248,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_process_runner.py"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_storage.py"
+        },
+        {
+          "additions": 192,
+          "binary": false,
+          "deletions": 9,
+          "path": "tests/unit/test_verification_plan.py"
+        },
+        {
+          "additions": 647,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_verification_temporary.py"
+        }
+      ],
+      "totals": {
+        "additions": 22559,
+        "deletions": 27,
+        "files": 198
+      }
+    },
+    "goal": "Add guided external ZCode report preflight and immutable attachment recording for existing AI Flow tasks",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0055",
+        "--actor",
+        "task55-independent-native-verifier-current",
+        "--pytest-temp-root",
+        "${PYTEST_TEMP_ROOT}"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "10b2e8e4ba0450555cb73cec8175cb1ec29d7cc2f04aeec056bdddb8314647bf",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "b5cf71ea6040ea2e3bc1d145cf44b0861a0206861561e2d76442ab9641f1d19f",
+  "subject_commit": "2e6f69f3f820d1a72989c8e70d8daff70ba9f2db",
+  "task_id": "TASK-0055",
+  "verification_snapshot_sha256": "643b5497a98edab947e02a719ea619d881dbdb33d57f70815624d43830ffe839"
+}
