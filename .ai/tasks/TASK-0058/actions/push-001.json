@@ -1,0 +1,17 @@
+{
+  "action_type": "git_remote_push",
+  "target": "https://github.com/MaginaLW/harness-model.git#refs/heads/codex/e4-cumulative-delivery",
+  "parameter_summary": "{\"argv\":[\"push\",\"origin\",\"a2894ac3e4c7f00cba9fa2851fed6b2a004d47ed:refs/heads/codex/e4-cumulative-delivery\"],\"base\":\"48bf777106b9fdfef1ddf83d3abc95859fb8e580\",\"gate_stdout_sha256\":\"0a4382b6b4d283ebefebe8c0c2afa068e980b4209d8a257b950cd9fbc3b9be87\",\"predecessor\":\"VERIFIED_ABSENT\",\"publication_head\":\"a2894ac3e4c7f00cba9fa2851fed6b2a004d47ed\",\"readonly_receipts\":{\"push-pre-main-001\":\"b2f5c296e1976a04f0b8ed4870d799443e3b686c073df2ee13d39508f5abf5f1\",\"push-pre-open-prs-001\":\"6f2849423728c578f121298b28533b25498ab71510bad0cb02c83ca734473692\",\"push-pre-protection-001\":\"41868b8907ff5c8b73bce0f344e08f24e4f358a81bfda1bb3e5d5ee9f4b85457\",\"push-pre-refs-001\":\"318260d1a0f460bdc3c9687abedc0a9e6c1bd6547402bbfc080f318fddb37c31\",\"push-pre-repo-001\":\"728699df9e36966e7b8cdd2a3d4d6e06cb957475ddb272fe6fdff6e7200c0db6\"},\"repo\":\"MaginaLW/harness-model\",\"source\":\"715496d1b26c285089f0205309ce1f5b57f6b8ca\"}",
+  "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "4174954c2dc48598083ee4fa45d34ff78136ecb0b38006f1c82c47164adf1828",
+  "conditions": [
+    "Human explicitly authorized necessary approvals, push and merge; root binds that authority, once, to exact P/B/repository/ref/argv.",
+    "Remote main B and full strict app15368/enforce-admin protection unchanged; feature ref positively absent via complete ls-remote success; no open PR at actual pre-push snapshot.",
+    "Native Task58 Gate on P passed; complete source/Gov ancestry included and unrelated524 excluded.",
+    "Ordinary non-force push only; no deletion, implicit push, admin bypass, credential export, provider call or automatic merge.",
+    "Actual exit and remote exact-P readback required; no CLI or wrapper success substitutes independent postmerge proof."
+  ],
+  "expires_at": "2026-10-01T15:26:16.411789+00:00",
+  "single_use": true
+}

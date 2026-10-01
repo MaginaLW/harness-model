@@ -25,5 +25,53 @@
     "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
     "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
     "task_id": "TASK-0058"
+  },
+  {
+    "action_sha256": "cd968ddcbe1467ee543e0f70bb820c09660d91ae74706ba94ca325445e166a18",
+    "actor": "e4-governance-owner-authorized-root",
+    "approval_type": "action",
+    "approved_at": "2026-10-01T15:06:27Z",
+    "base_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-01T15:26:16.411789+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Bind existing explicit human push authorization once to P a2894ac3, B48bf777, literal repository/ref, proven absent predecessor, native exact-P Gate and unchanged current protection; ordinary non-force exact argv only.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
+    "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "task_id": "TASK-0058"
+  },
+  {
+    "action_sha256": "688555e8c2aa1ae8e98ea61c7c4a4f23dabaadb477cff00eb2c81b74bd6b3a07",
+    "actor": "e4-governance-owner-authorized-root",
+    "approval_type": "action",
+    "approved_at": "2026-10-01T15:16:35Z",
+    "base_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-01T15:35:43.276562+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Separately bind existing owner push authority to unchanged exact P/B/ref and fresh proven-absent predecessor after original actual timeout. Command-local verified GH credential protocol only, fixed private command hash; execute only after owned hung transport cleanup, no global credential mutation or original-action reuse.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
+    "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "task_id": "TASK-0058"
+  },
+  {
+    "action_sha256": "2ebbac7f666b635617fa615a31c0d77248bb6147320b734e844661ac342138fa",
+    "actor": "e4-governance-owner-authorized-root",
+    "approval_type": "action",
+    "approved_at": "2026-10-01T15:22:56Z",
+    "base_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-01T15:42:39.095708+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Bind existing owner authorization once to explicit PR creation: exact repo/head a2894ac3/base48bf777, current strict protection and no open PR, reviewed body SHA6d15971c and fixed command hash. Ordinary push succeeded with exact remote readback; no implicit push, fork or reviewer messaging.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "1ada72d229f66c85fdc5632f8ee6094834878329ee323cd6775002f9dc2325b8",
+    "subject_commit": "715496d1b26c285089f0205309ce1f5b57f6b8ca",
+    "task_id": "TASK-0058"
   }
 ]
