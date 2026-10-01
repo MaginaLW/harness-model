@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dis
 import hashlib
 import json
 import os
@@ -9,11 +10,16 @@ import shutil
 import stat
 import subprocess
 import sys
+import threading
+import weakref
 from collections.abc import Callable
+from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import thread as futures_thread
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING
+from types import BuiltinFunctionType, TracebackType
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     import pytest
@@ -28,6 +34,44 @@ _WRITE_TEXT = Path.write_text
 _MKDIR = Path.mkdir
 _POPEN = subprocess.Popen
 _SOURCE_DIRECTORIES = ("schemas", "policy", "templates")
+_COPYSTAT = shutil.copystat
+_SCANDIR = os.scandir
+_MAKEDIRS = os.makedirs
+_AUDIT = sys.audit
+_EXECUTOR = ThreadPoolExecutor
+_EXECUTOR_INIT = ThreadPoolExecutor.__init__
+_EXECUTOR_SUBMIT = ThreadPoolExecutor.submit
+_EXECUTOR_SHUTDOWN = ThreadPoolExecutor.shutdown
+_EXECUTOR_ADJUST = ThreadPoolExecutor._adjust_thread_count
+_THREAD = threading.Thread
+_THREAD_START = threading.Thread.start
+_THREAD_JOIN = threading.Thread.join
+_THREAD_INIT = threading.Thread.__init__
+_THREAD_RUN = threading.Thread.run
+_THREAD_BOOTSTRAP = getattr(threading.Thread, "_bootstrap")
+_THREAD_BOOTSTRAP_INNER = getattr(threading.Thread, "_bootstrap_inner")
+_EVENT = threading.Event
+_EVENT_WAIT = threading.Event.wait
+_EVENT_SET = threading.Event.set
+_EVENT_IS_SET = threading.Event.is_set
+_NATIVE_START_NAME = (
+    "_start_joinable_thread" if sys.version_info[:2] == (3, 13) else "_start_new_thread"
+)
+_NATIVE_START = getattr(threading, _NATIVE_START_NAME, None)
+_SET_SENTINEL = getattr(threading, "_set_sentinel", None)
+_LIMBO_LOCK = getattr(threading, "_active_limbo_lock")
+_POOL_WORKER: Any = getattr(futures_thread, "_worker")
+_POOL_THREAD_QUEUES = getattr(futures_thread, "_threads_queues")
+_WEAKREF = weakref.ref
+_THREAD_HANDLE = getattr(threading, "_ThreadHandle", None)
+_HANDLE_JOIN: Any = getattr(_THREAD_HANDLE, "join", None)
+_HANDLE_IS_DONE: Any = getattr(_THREAD_HANDLE, "is_done", None)
+_FUTURE_RESULT = Future.result
+_FUTURE_EXCEPTION = Future.exception
+_FUTURE_DONE = Future.done
+_FUTURE_CANCELLED = Future.cancelled
+_PARALLEL_FILE_LIMIT = 256
+_PARALLEL_WORKERS = 4
 _BOOLEAN_KEYS = {
     "core.symlinks",
     "core.fscache",
@@ -556,5 +600,553 @@ def populate_or_copy(
 
 
 def _copy_snapshot(source: Path, target: Path) -> Path:
-    shutil.copytree(source, target, copy_function=shutil.copy2, dirs_exist_ok=True, symlinks=False)
+    try:
+        parallel = _parallel_copy_eligible(source, target)
+    except Exception:
+        # Optional prewrite reads may fail; preserve the original serial copy.
+        # KeyboardInterrupt and other BaseException values are not eligibility.
+        parallel = False
+    if parallel:
+        _parallel_copy_snapshot(source, target)
+    else:
+        shutil.copytree(
+            source, target, copy_function=shutil.copy2, dirs_exist_ok=True, symlinks=False
+        )
     return target
+
+
+def _parallel_bindings_known() -> bool:
+    return (
+        _standard_io()
+        and shutil.copystat is _COPYSTAT
+        and os.scandir is _SCANDIR
+        and os.makedirs is _MAKEDIRS
+        and sys.audit is _AUDIT
+        and ThreadPoolExecutor is _EXECUTOR
+        and ThreadPoolExecutor.__init__ is _EXECUTOR_INIT
+        and ThreadPoolExecutor.submit is _EXECUTOR_SUBMIT
+        and ThreadPoolExecutor.shutdown is _EXECUTOR_SHUTDOWN
+        and ThreadPoolExecutor._adjust_thread_count is _EXECUTOR_ADJUST
+        and threading.Thread is _THREAD
+        and threading.Thread.start is _THREAD_START
+        and threading.Thread.join is _THREAD_JOIN
+        and Future.result is _FUTURE_RESULT
+        and Future.exception is _FUTURE_EXCEPTION
+        and Future.done is _FUTURE_DONE
+        and Future.cancelled is _FUTURE_CANCELLED
+        and _owned_protocol_known()
+    )
+
+
+def _parallel_entry_metadata(entry: os.DirEntry[str]) -> os.stat_result:
+    metadata = entry.stat(follow_symlinks=False)
+    if (
+        stat.S_ISLNK(metadata.st_mode)
+        or getattr(metadata, "st_file_attributes", 0) & 0x400
+        or not (stat.S_ISDIR(metadata.st_mode) or stat.S_ISREG(metadata.st_mode))
+    ):
+        raise RuntimeError("REPOSITORY_FIXTURE_COPY_UNSAFE")
+    return metadata
+
+
+def _parallel_tree_count(source: Path) -> int:
+    if not stat.S_ISDIR(_ordinary(source).st_mode):
+        raise _Ineligible()
+    with os.scandir(source) as iterator:
+        entries = list(iterator)
+    count = 0
+    for entry in entries:
+        metadata = _parallel_entry_metadata(entry)
+        if stat.S_ISDIR(metadata.st_mode):
+            count += _parallel_tree_count(Path(entry.path))
+        else:
+            count += 1
+        if count > _PARALLEL_FILE_LIMIT:
+            return count
+    return count
+
+
+def _parallel_copy_eligible(source: Path, target: Path) -> bool:
+    token = _owner
+    if (
+        token is None
+        or token.disabled
+        or token.snapshot != source
+        or token.qualification is None
+        or not _parallel_bindings_known()
+        or not token.contains(source)
+        or not token.contains(target)
+    ):
+        return False
+    for path in (source, target):
+        for ancestor in reversed(path.absolute().parents):
+            _ordinary(ancestor)
+        if not stat.S_ISDIR(_ordinary(path).st_mode):
+            return False
+    with os.scandir(target) as iterator:
+        if next(iterator, None) is not None:
+            return False
+    return _parallel_tree_count(source) <= _PARALLEL_FILE_LIMIT
+
+
+@dataclass
+class _CopyFailure:
+    error: BaseException
+    traceback: TracebackType | None
+
+    def reraise(self) -> None:
+        raise self.error.with_traceback(self.traceback)
+
+
+def _owned_native_call_offsets() -> tuple[int, ...]:
+    """Recognize the supported standard start's actual native-create call."""
+    offsets = []
+    native_loaded = False
+    for instruction in dis.get_instructions(_THREAD_START):
+        if instruction.opname == "LOAD_GLOBAL" and instruction.argval == _NATIVE_START_NAME:
+            native_loaded = True
+        elif native_loaded and instruction.opname in {"CALL", "CALL_KW"}:
+            offsets.append(instruction.offset)
+            native_loaded = False
+    return tuple(offsets)
+
+
+def _owned_protocol_known() -> bool:
+    # Only these actual stdlib protocols were reviewed. Unknown implementations
+    # select the original serial builder before any destination write.
+    return (
+        sys.version_info[:2] in {(3, 11), (3, 13)}
+        and sys.implementation.name == "cpython"
+        and threading.Thread is _THREAD
+        and threading.Thread.__init__ is _THREAD_INIT
+        and threading.Thread.start is _THREAD_START
+        and threading.Thread.join is _THREAD_JOIN
+        and threading.Thread.run is _THREAD_RUN
+        and getattr(threading.Thread, "_bootstrap", None) is _THREAD_BOOTSTRAP
+        and getattr(threading.Thread, "_bootstrap_inner", None) is _THREAD_BOOTSTRAP_INNER
+        and threading.Event is _EVENT
+        and threading.Event.wait is _EVENT_WAIT
+        and threading.Event.set is _EVENT_SET
+        and threading.Event.is_set is _EVENT_IS_SET
+        and getattr(threading, "_active_limbo_lock", None) is _LIMBO_LOCK
+        and getattr(threading, _NATIVE_START_NAME, None) is _NATIVE_START
+        and type(_NATIVE_START) is BuiltinFunctionType
+        and getattr(_NATIVE_START, "__module__", None) == "_thread"
+        and getattr(threading, "_set_sentinel", None) is _SET_SENTINEL
+        and getattr(futures_thread, "_worker", None) is _POOL_WORKER
+        and getattr(getattr(_POOL_WORKER, "__code__", None), "co_argcount", None) == 4
+        and getattr(futures_thread, "_threads_queues", None) is _POOL_THREAD_QUEUES
+        and weakref.ref is _WEAKREF
+        and len(_owned_native_call_offsets()) == 1
+        and (
+            sys.version_info[:2] == (3, 11)
+            or (
+                getattr(threading, "_ThreadHandle", None) is _THREAD_HANDLE
+                and getattr(_THREAD_HANDLE, "join", None) is _HANDLE_JOIN
+                and getattr(_THREAD_HANDLE, "is_done", None) is _HANDLE_IS_DONE
+            )
+        )
+    )
+
+
+@dataclass
+class _OwnedWorker:
+    thread: Any
+    worker_done: threading.Event
+    handle: Any
+    start_attempted: bool = False
+    not_started: bool = False
+    terminal: bool = False
+    terminal_unknown: bool = False
+    startup_failure: _CopyFailure | None = None
+    native_create_eligible: bool = False
+    cleanup_failure: _CopyFailure | None = None
+
+
+def _owned_native_creation_failed(record: _OwnedWorker, error: BaseException) -> bool:
+    """Do not infer non-start from an arbitrary exception or an absent limbo entry."""
+    thread = record.thread
+    if (
+        not isinstance(error, Exception)
+        or not record.native_create_eligible
+        or not _owned_protocol_known()
+        or type(thread) is not _THREAD
+        or type(getattr(thread, "_started")) is not _EVENT
+        or not getattr(thread, "_initialized")
+        or getattr(getattr(thread, "_bootstrap"), "__func__", None) is not _THREAD_BOOTSTRAP
+        or getattr(thread, "_started").is_set()
+        or thread.ident is not None
+    ):
+        return False
+    offsets = _owned_native_call_offsets()
+    traceback = error.__traceback__
+    while traceback is not None:
+        if traceback.tb_frame.f_code is _THREAD_START.__code__ and traceback.tb_lasti in offsets:
+            # Under the recognized, unchanged native primitive, this is the
+            # native-create Exception branch whose standard except cleanup
+            # removed this exact fresh Thread from limbo. Other call sites,
+            # custom creators and BaseException cannot authorize this proof.
+            with _LIMBO_LOCK:
+                return thread not in getattr(threading, "_limbo")
+        traceback = traceback.tb_next
+    return False
+
+
+def _owned_worker_body(record: _OwnedWorker, arguments: tuple[Any, Any, Any, Any]) -> None:
+    try:
+        _POOL_WORKER(*arguments)
+    finally:
+        # BODY completion only. Bootstrap/native teardown still follows.
+        record.worker_done.set()
+
+
+class _OwnedCopyExecutor(ThreadPoolExecutor):
+    """Retain every actual Thread before start, including failed registration."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.owned_workers: list[_OwnedWorker] = []
+
+    def _adjust_thread_count(self) -> None:
+        if self._idle_semaphore.acquire(timeout=0):
+            return
+
+        def weakref_callback(_: object, work_queue: Any = self._work_queue) -> None:
+            work_queue.put(None)
+
+        number = len(self.owned_workers)
+        if number >= self._max_workers:
+            return
+        arguments = (
+            weakref.ref(self, weakref_callback),
+            self._work_queue,
+            self._initializer,
+            self._initargs,
+        )
+        done = threading.Event()
+        # The closure is not run until start; its record is retained first.
+        thread: Any = threading.Thread(
+            name=f"{self._thread_name_prefix or self}_{number}",
+            target=lambda: _owned_worker_body(record, arguments),
+        )
+        record = _OwnedWorker(thread, done, getattr(thread, "_handle", None))
+        self.owned_workers.append(record)
+        try:
+            record.native_create_eligible = (
+                _owned_protocol_known()
+                and type(thread) is _THREAD
+                and type(getattr(thread, "_started", None)) is _EVENT
+                and getattr(getattr(thread, "_bootstrap"), "__func__", None) is _THREAD_BOOTSTRAP
+                and not getattr(thread, "_started").is_set()
+                and thread.ident is None
+            )
+            record.start_attempted = True
+            thread.start()
+        except BaseException as error:
+            record.startup_failure = _CopyFailure(error, error.__traceback__)
+            try:
+                record.not_started = _owned_native_creation_failed(record, error)
+            except BaseException:
+                # The original startup exception remains selected; missing
+                # negative proof leaves ownership unresolved, never guessed.
+                pass
+            raise
+        cast(Any, self._threads).add(thread)
+        _POOL_THREAD_QUEUES[thread] = self._work_queue
+
+
+def _owned_hold_unknown(record: _OwnedWorker) -> None:
+    record.terminal_unknown = True
+    unresolved = threading.Event()
+    while True:
+        try:
+            unresolved.wait()
+        except BaseException:
+            # No native terminal evidence exists here. Preserve actual partial
+            # and the selected exception until the original outer process
+            # deadline recovers this owned process. No thread deadline is added.
+            continue
+
+
+def _owned_finish_worker(record: _OwnedWorker) -> _CopyFailure | None:
+    if record.terminal_unknown:
+        _owned_hold_unknown(record)
+    if record.terminal:
+        return record.cleanup_failure
+    if not record.start_attempted or record.not_started:
+        record.terminal = True
+        return None
+    while True:
+        try:
+            record.thread._started.wait()
+            record.worker_done.wait()
+            break
+        except BaseException as error:
+            if record.cleanup_failure is None:
+                record.cleanup_failure = _CopyFailure(error, error.__traceback__)
+    try:
+        if sys.version_info[:2] == (3, 13) and record.thread._handle is not record.handle:
+            _owned_hold_unknown(record)
+        record.thread.join()
+        record.terminal = True
+    except BaseException as error:
+        if record.cleanup_failure is None:
+            record.cleanup_failure = _CopyFailure(error, error.__traceback__)
+        if (
+            sys.version_info[:2] != (3, 13)
+            or record.handle is None
+            or type(record.handle) is not _THREAD_HANDLE
+            or getattr(type(record.handle), "join", None) is not _HANDLE_JOIN
+            or getattr(type(record.handle), "is_done", None) is not _HANDLE_IS_DONE
+        ):
+            # 3.11 join may release the still-live sentinel and falsely _stop
+            # the Thread. Later join/is_alive/Done can never clear this latch.
+            _owned_hold_unknown(record)
+        while True:
+            try:
+                _HANDLE_JOIN(record.handle)
+                if _HANDLE_IS_DONE(record.handle):
+                    record.terminal = True
+                    break
+            except BaseException:
+                # Wait the retained real handle, preserving the first failure.
+                continue
+    return record.cleanup_failure
+
+
+@dataclass
+class _CopyJob:
+    entry: os.DirEntry[str]
+    source_name: str
+    target_name: str
+    future: Future[None] | None = None
+    failure: _CopyFailure | None = None
+    consumed: bool = False
+
+
+@dataclass
+class _ParallelCopy:
+    executor: _OwnedCopyExecutor
+    copy_file: Callable[[os.DirEntry[str], str], object]
+    jobs: list[_CopyJob] = field(default_factory=list)
+    submission_failed: bool = False
+    cleanup_failure: _CopyFailure | None = None
+
+
+def _parallel_file_job(job: _CopyJob, copy_file: Callable[[os.DirEntry[str], str], object]) -> None:
+    try:
+        copy_file(job.entry, job.target_name)
+    except BaseException as error:
+        # Keep the original object, including a worker BaseException, while the
+        # coordinator completes every submitted job before logical attribution.
+        if job.failure is None:
+            job.failure = _CopyFailure(error, error.__traceback__)
+
+
+def _parallel_append_error(
+    errors: list[tuple[object, object, str]],
+    error: BaseException,
+    source: object,
+    target: object,
+) -> None:
+    # Error subclasses OSError: list expansion must win over an OS triple.
+    if isinstance(error, shutil.Error):
+        errors.extend(error.args[0])
+    elif isinstance(error, OSError):
+        errors.append((source, target, str(error)))
+    else:
+        raise error
+
+
+def _parallel_complete_batch(
+    pending: list[_CopyJob], errors: list[tuple[object, object, str]]
+) -> tuple[_CopyFailure | None, _CopyFailure | None]:
+    interruption = None
+    for job in pending:
+        if job.future is None:
+            continue
+        while True:
+            try:
+                job.future.result()
+                break
+            except BaseException as error:
+                # File exceptions are normally stored by the job wrapper. A
+                # Future's own stored failure is distinct from an interruption
+                # delivered to the coordinator while result() is waiting.
+                if interruption is None:
+                    interruption = _CopyFailure(error, error.__traceback__)
+                try:
+                    cancelled = job.future.cancelled()
+                    stored = job.future.exception() if job.future.done() and not cancelled else None
+                except BaseException:
+                    # result() already supplied the selected interruption. A
+                    # later metadata observation must not replace that object.
+                    continue
+                if cancelled or stored is not None:
+                    if job.failure is None:
+                        original = error if cancelled else stored
+                        assert original is not None
+                        job.failure = _CopyFailure(original, original.__traceback__)
+                    if interruption.error is (error if cancelled else stored):
+                        interruption = None
+                    break
+    failure = None
+    try:
+        for job in pending:
+            if job.failure is not None:
+                try:
+                    _parallel_append_error(
+                        errors, job.failure.error, job.source_name, job.target_name
+                    )
+                except BaseException as error:
+                    failure = _CopyFailure(error, error.__traceback__)
+                    break
+    finally:
+        for job in pending:
+            job.consumed = True
+        pending.clear()
+    return failure, interruption
+
+
+def _parallel_drain_batch(
+    pending: list[_CopyJob], errors: list[tuple[object, object, str]]
+) -> None:
+    failure, interruption = _parallel_complete_batch(pending, errors)
+    if failure is not None:
+        failure.reraise()
+    if interruption is not None:
+        interruption.reraise()
+
+
+def _parallel_copy_directory(
+    source: Path | os.DirEntry[str], target: Path | str, state: _ParallelCopy
+) -> None:
+    sys.audit("shutil.copytree", source, target)
+    if not stat.S_ISDIR(_ordinary(Path(os.fspath(source))).st_mode):
+        raise RuntimeError("REPOSITORY_FIXTURE_COPY_UNSAFE")
+    with os.scandir(source) as iterator:
+        entries = list(iterator)
+    os.makedirs(target, exist_ok=True)
+    if not stat.S_ISDIR(_ordinary(Path(target)).st_mode):
+        raise RuntimeError("REPOSITORY_FIXTURE_COPY_UNSAFE")
+    errors: list[tuple[object, object, str]] = []
+    pending: list[_CopyJob] = []
+    for entry in entries:
+        try:
+            source_name = os.path.join(source, entry.name)
+            target_name = os.path.join(target, entry.name)
+        except BaseException:
+            _parallel_drain_batch(pending, errors)
+            raise
+        try:
+            metadata = _parallel_entry_metadata(entry)
+            if stat.S_ISDIR(metadata.st_mode):
+                _parallel_drain_batch(pending, errors)
+                _parallel_copy_directory(entry, target_name, state)
+                continue
+        except BaseException as error:
+            _parallel_drain_batch(pending, errors)
+            _parallel_append_error(errors, error, source_name, target_name)
+            continue
+        if len(state.jobs) >= _PARALLEL_FILE_LIMIT:
+            _parallel_drain_batch(pending, errors)
+            raise RuntimeError("REPOSITORY_FIXTURE_COPY_LIMIT")
+        job = _CopyJob(entry, source_name, target_name)
+        # Retain the slot before submit: standard submit queues its WorkItem
+        # before attempting to start a thread and may then return no Future.
+        state.jobs.append(job)
+        try:
+            job.future = state.executor.submit(_parallel_file_job, job, state.copy_file)
+        except BaseException as error:
+            state.submission_failed = True
+            job.failure = _CopyFailure(error, error.__traceback__)
+            job.consumed = True
+            _parallel_drain_batch(pending, errors)
+            # Executor submission is a coordinator failure, not a file-copy OS
+            # triple. Keep its exact object; final shutdown also joins a queued
+            # job which an existing worker may already have started.
+            raise
+        pending.append(job)
+    _parallel_drain_batch(pending, errors)
+    try:
+        shutil.copystat(source, target)
+    except OSError as error:
+        if getattr(error, "winerror", None) is None:
+            errors.append((source, target, str(error)))
+    if errors:
+        raise shutil.Error(errors)
+
+
+def _parallel_shutdown(state: _ParallelCopy) -> _CopyFailure | None:
+    while True:
+        try:
+            # Publish the sentinel/cancel only still-pending jobs. Standard
+            # shutdown's _threads set misses a start-before-registration fault.
+            state.executor.shutdown(wait=False, cancel_futures=state.submission_failed)
+            break
+        except BaseException as error:
+            if state.cleanup_failure is None:
+                state.cleanup_failure = _CopyFailure(error, error.__traceback__)
+    index = 0
+    while index < len(state.executor.owned_workers):
+        try:
+            worker_failure = _owned_finish_worker(state.executor.owned_workers[index])
+        except BaseException as error:
+            if state.cleanup_failure is None:
+                state.cleanup_failure = _CopyFailure(error, error.__traceback__)
+            # An interruption between ownership observations must not skip an
+            # actual worker. Unknown/latching branches remain incomplete.
+            continue
+        if state.cleanup_failure is None:
+            state.cleanup_failure = worker_failure
+        index += 1
+    return state.cleanup_failure
+
+
+def _parallel_copy_snapshot(
+    source: Path,
+    target: Path,
+    *,
+    copy_file: Callable[[os.DirEntry[str], str], object] | None = None,
+    executor_factory: Callable[..., _OwnedCopyExecutor] | None = None,
+) -> None:
+    """Private algorithm seams do not bypass public warm eligibility."""
+    factory = _OwnedCopyExecutor if executor_factory is None else executor_factory
+    state = _ParallelCopy(
+        factory(max_workers=_PARALLEL_WORKERS, thread_name_prefix="aiflow-copy"),
+        shutil.copy2 if copy_file is None else copy_file,
+    )
+    failure = None
+    try:
+        _parallel_copy_directory(source, target, state)
+    except BaseException as error:
+        failure = _CopyFailure(error, error.__traceback__)
+    while True:
+        try:
+            _parallel_shutdown(state)
+            break
+        except BaseException as error:
+            if state.cleanup_failure is None:
+                state.cleanup_failure = _CopyFailure(error, error.__traceback__)
+            # The helper's loop/record bookkeeping can itself be interrupted.
+            # Resolved records are reentrant; unresolved/latching records still
+            # require actual terminal evidence or original outer recovery.
+    shutdown_failure = state.cleanup_failure
+    # Normally batches were consumed by the walker. An unexpected coordinator
+    # failure may leave earlier slots: after shutdown, their logical fatal wins
+    # over that later failure, while their OS list does not mask it.
+    try:
+        remaining = [job for job in state.jobs if not job.consumed]
+        earlier_failure, late_interruption = _parallel_complete_batch(remaining, [])
+    except BaseException as error:
+        # Workers already joined. A later final-drain observation must not
+        # replace the selected walk/shutdown failure or become false success.
+        if failure is None:
+            failure = shutdown_failure or _CopyFailure(error, error.__traceback__)
+    else:
+        if earlier_failure is not None:
+            failure = earlier_failure
+        if failure is None:
+            failure = shutdown_failure or late_interruption
+    if failure is not None:
+        failure.reraise()

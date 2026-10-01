@@ -850,3 +850,1129 @@ def test_real_mingw64_endpoint_qualifies_and_warms(
         assert len(identities) == 3
         assert all(entity.stat().st_nlink == 1 for entity in entities)
     assert not (copied / ".git/objects/info/alternates").exists()
+
+
+def _parallel_tree(tmp_path: Path, count: int = 3) -> tuple[Path, Path]:
+    source, target = tmp_path / "s", tmp_path / "d"
+    source.mkdir()
+    target.mkdir()
+    for number in range(count):
+        (source / f"f{number:03}").write_bytes(f"original {number}\n".encode())
+    return source, target
+
+
+def _parallel_pool_factory(pools: list[object]) -> object:
+    from concurrent.futures import ThreadPoolExecutor
+
+    def create(**options: object) -> ThreadPoolExecutor:
+        pool = fixture._OwnedCopyExecutor(**options)
+        pools.append(pool)
+        return pool
+
+    return create
+
+
+def _assert_parallel_pools_ended(pools: list[object]) -> None:
+    assert len(pools) == 1
+    assert pools[0]._max_workers == 4
+    assert all(not thread.is_alive() for thread in pools[0]._threads)
+    for record in pools[0].owned_workers:
+        assert record.terminal and not record.terminal_unknown
+        if record.start_attempted and not record.not_started:
+            assert record.worker_done.is_set()
+            assert not record.thread.is_alive()
+
+
+def _parallel_metadata(root: Path) -> dict[Path, tuple[int, int, bytes | None]]:
+    return {
+        path.relative_to(root): (
+            stat.S_IMODE(path.stat().st_mode),
+            path.stat().st_mtime_ns,
+            path.read_bytes() if path.is_file() else None,
+        )
+        for path in (root, *root.rglob("*"))
+    }
+
+
+def test_parallel_owner_warm_and_first_publication_serial(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    selected: list[tuple[Path, Path]] = []
+    original_parallel = fixture._parallel_copy_snapshot
+
+    def observe(source: Path, target: Path) -> None:
+        assert owner.snapshot == source
+        selected.append((source, target))
+        original_parallel(source, target)
+
+    monkeypatch.setattr(fixture, "_parallel_copy_snapshot", observe)
+    original = seed(tmp_path, owner)
+    assert selected == []
+    assert owner.snapshot is not None
+    pristine = snapshot(owner.snapshot)
+    result = helpers.create_repository(tmp_path / "warm")
+    assert selected == [(owner.snapshot, result)]
+    assert owner.cold == 1 and owner.hits == 1 and not owner.disabled
+    assert snapshot(original) == pristine == snapshot(owner.snapshot) == snapshot(result)
+    for path in result.rglob("*"):
+        if path.is_file():
+            counterpart = owner.snapshot / path.relative_to(result)
+            assert (path.stat().st_dev, path.stat().st_ino) != (
+                counterpart.stat().st_dev,
+                counterpart.stat().st_ino,
+            )
+            assert path.stat().st_nlink == 1
+
+
+def test_parallel_readonly_nested_metadata_and_real_direntry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source, target = _parallel_tree(tmp_path, 1)
+    child = source / "child"
+    child.mkdir()
+    (child / "payload").write_bytes(b"nested payload")
+    timestamp = 1_650_000_000_123_456_700
+    for path in (source, *source.rglob("*")):
+        os.utime(path, ns=(timestamp, timestamp))
+    child.chmod(stat.S_IREAD if os.name == "nt" else 0o555)
+    expected = _parallel_metadata(source)
+    copied: list[str] = []
+    metadata_order: list[str] = []
+    original_copy2, original_copystat = shutil.copy2, shutil.copystat
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        assert isinstance(entry, os.DirEntry)
+        result = original_copy2(entry, destination)
+        copied.append(entry.name)
+        return result
+
+    def copy_stat(src: object, dst: object, **options: object) -> None:
+        if Path(os.fspath(src)).is_dir():
+            if Path(os.fspath(src)) == child:
+                assert "payload" in copied
+            if Path(os.fspath(src)) == source:
+                assert metadata_order == ["child"]
+            metadata_order.append(Path(os.fspath(src)).name)
+        original_copystat(src, dst, **options)
+
+    pools: list[object] = []
+    monkeypatch.setattr(fixture.shutil, "copystat", copy_stat)
+    try:
+        fixture._parallel_copy_snapshot(
+            source, target, copy_file=copy_file, executor_factory=_parallel_pool_factory(pools)
+        )
+        assert _parallel_metadata(target) == expected == _parallel_metadata(source)
+        assert sorted(copied) == ["f000", "payload"]
+        _assert_parallel_pools_ended(pools)
+    finally:
+        for path in (child, target / "child"):
+            if path.exists():
+                path.chmod(stat.S_IREAD | stat.S_IWRITE if os.name == "nt" else 0o755)
+
+
+def test_parallel_custom_bindings_select_original_serial_before_write(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
+    seed(tmp_path, owner)
+    assert owner.snapshot is not None
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Parallel must not be selected")
+
+    bindings = [
+        (fixture.shutil, "copy2"),
+        (fixture.shutil, "copystat"),
+        (fixture.os, "scandir"),
+        (fixture.os, "makedirs"),
+        (fixture.sys, "audit"),
+        (fixture, "ThreadPoolExecutor"),
+        (ThreadPoolExecutor, "submit"),
+        (ThreadPoolExecutor, "shutdown"),
+        (threading.Thread, "start"),
+        (threading.Thread, "join"),
+    ]
+    for number, (container, name) in enumerate(bindings):
+        actual = getattr(container, name)
+
+        def delegated(*args: object, original: object = actual, **kwargs: object) -> object:
+            return original(*args, **kwargs)
+
+        target = tmp_path / f"c{number}"
+        target.mkdir()
+        with monkeypatch.context() as scoped:
+            scoped.setattr(container, name, delegated)
+            scoped.setattr(fixture, "_parallel_copy_snapshot", forbidden)
+            assert not fixture._parallel_copy_eligible(owner.snapshot, target)
+            assert fixture._copy_snapshot(owner.snapshot, target) == target
+        assert snapshot(target) == snapshot(owner.snapshot)
+
+
+def test_parallel_shape_limit_and_eligibility_failures_fall_back_before_write(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seed(tmp_path, owner)
+    assert owner.snapshot is not None
+    source = owner.snapshot
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Parallel must not be selected")
+
+    monkeypatch.setattr(fixture, "_parallel_copy_snapshot", forbidden)
+    occupied = tmp_path / "occupied"
+    occupied.mkdir()
+    (occupied / "extra").write_bytes(b"keep existing")
+    assert not fixture._parallel_copy_eligible(source, occupied)
+    fixture._copy_snapshot(source, occupied)
+    assert (occupied / "extra").read_bytes() == b"keep existing"
+    assert (occupied / "tracked.txt").read_bytes() == (source / "tracked.txt").read_bytes()
+
+    # A private selection negative, not fabricated current warm qualification:
+    # the original immutable-snapshot digest guard would reject these edits.
+    extra_files = [source / f"extra{number:03}" for number in range(257)]
+    try:
+        for path in extra_files:
+            path.write_bytes(b"over the parallel bound")
+        oversized = tmp_path / "oversized"
+        oversized.mkdir()
+        assert not fixture._parallel_copy_eligible(source, oversized)
+        fixture._copy_snapshot(source, oversized)
+        assert (oversized / "extra256").read_bytes() == b"over the parallel bound"
+    finally:
+        for path in extra_files:
+            path.unlink()
+
+    def read_failure(path: Path) -> int:
+        raise RuntimeError("synthetic eligibility read failure")
+
+    with monkeypatch.context() as scoped:
+        scoped.setattr(fixture, "_parallel_tree_count", read_failure)
+        target = tmp_path / "read-fallback"
+        target.mkdir()
+        assert fixture._copy_snapshot(source, target) == target
+        assert snapshot(target) == snapshot(source)
+
+    interruption = KeyboardInterrupt("synthetic eligibility interruption")
+
+    def interrupted(path: Path) -> int:
+        raise interruption
+
+    target = tmp_path / "interrupted"
+    target.mkdir()
+    with monkeypatch.context() as scoped:
+        scoped.setattr(fixture, "_parallel_tree_count", interrupted)
+        with pytest.raises(KeyboardInterrupt) as raised:
+            fixture._copy_snapshot(source, target)
+    assert raised.value is interruption and list(target.iterdir()) == []
+
+
+def test_parallel_four_workers_and_256_total_real_copies(tmp_path: Path) -> None:
+    import threading
+
+    source, target = _parallel_tree(tmp_path, 128)
+    child = source / "child"
+    child.mkdir()
+    for number in range(128):
+        (child / f"g{number:03}").write_bytes(b"child")
+    lock, four_running, release = threading.Lock(), threading.Event(), threading.Event()
+    active = maximum = copies = 0
+    observer_errors: list[str] = []
+
+    def release_workers() -> None:
+        if not four_running.wait(5):
+            observer_errors.append("Four actual workers did not enter")
+        release.set()
+
+    observer = threading.Thread(target=release_workers, name="fixture-copy-release")
+    observer.start()
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        nonlocal active, maximum, copies
+        with lock:
+            active += 1
+            maximum = max(maximum, active)
+            if active == 4:
+                four_running.set()
+        try:
+            assert release.wait(5)
+            result = shutil.copy2(entry, destination)
+            with lock:
+                copies += 1
+            return result
+        finally:
+            with lock:
+                active -= 1
+
+    pools: list[object] = []
+    try:
+        fixture._parallel_copy_snapshot(
+            source, target, copy_file=copy_file, executor_factory=_parallel_pool_factory(pools)
+        )
+    finally:
+        release.set()
+        observer.join(5)
+    assert not observer.is_alive() and observer_errors == []
+    assert maximum == 4 and active == 0 and copies == 256
+    assert _parallel_metadata(source) == _parallel_metadata(target)
+    _assert_parallel_pools_ended(pools)
+
+
+def test_parallel_runtime_bound_fails_without_recopy_or_cleanup(tmp_path: Path) -> None:
+    source, target = _parallel_tree(tmp_path, 257)
+    pools: list[object] = []
+    with pytest.raises(RuntimeError, match="^REPOSITORY_FIXTURE_COPY_LIMIT$"):
+        fixture._parallel_copy_snapshot(
+            source, target, executor_factory=_parallel_pool_factory(pools)
+        )
+    actual_files = list(target.iterdir())
+    assert len(actual_files) == 256
+    assert all(path.read_bytes() == (source / path.name).read_bytes() for path in actual_files)
+    _assert_parallel_pools_ended(pools)
+
+
+def test_parallel_mixed_os_and_shutil_errors_keep_dfs_shape(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source, target = _parallel_tree(tmp_path, 2)
+    child = source / "child"
+    child.mkdir()
+    (child / "nested").write_bytes(b"nested")
+    original_copystat = shutil.copystat
+    expected: list[tuple[str, str, str]] = []
+
+    def expected_directory(src: Path, dst: Path) -> None:
+        with os.scandir(src) as iterator:
+            entries = list(iterator)
+        for entry in entries:
+            left, right = str(src / entry.name), str(dst / entry.name)
+            if entry.is_dir():
+                expected_directory(Path(entry.path), Path(right))
+            elif entry.name == "f001":
+                expected.extend([(left, right, "first nested"), (left, right, "second nested")])
+            else:
+                expected.append((left, right, "synthetic file OS failure"))
+        expected.append((str(src), str(dst), "synthetic directory OS failure"))
+
+    expected_directory(source, target)
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        if entry.name == "f001":
+            raise shutil.Error(
+                [
+                    (entry.path, destination, "first nested"),
+                    (entry.path, destination, "second nested"),
+                ]
+            )
+        raise OSError("synthetic file OS failure")
+
+    def copy_stat(src: object, dst: object, **options: object) -> None:
+        if Path(os.fspath(src)).is_dir():
+            raise OSError("synthetic directory OS failure")
+        original_copystat(src, dst, **options)
+
+    pools: list[object] = []
+    monkeypatch.setattr(fixture.shutil, "copystat", copy_stat)
+    with pytest.raises(shutil.Error) as raised:
+        fixture._parallel_copy_snapshot(
+            source, target, copy_file=copy_file, executor_factory=_parallel_pool_factory(pools)
+        )
+    actual = raised.value.args[0]
+    assert [
+        (os.fspath(left), os.fspath(right), message) for left, right, message in actual
+    ] == expected
+    assert isinstance(actual[-1][0], Path) and actual[-1][0] == source
+    child_metadata = next(item for item in actual if os.fspath(item[0]) == str(child))
+    assert isinstance(child_metadata[0], os.DirEntry) and isinstance(child_metadata[1], str)
+    _assert_parallel_pools_ended(pools)
+
+
+@pytest.mark.parametrize("winerror", [None, 0, 5])
+def test_parallel_directory_metadata_original_winerror_rule(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, winerror: int | None
+) -> None:
+    source, target = _parallel_tree(tmp_path, 1)
+    original_copystat = shutil.copystat
+    failure = OSError("synthetic directory metadata failure")
+    if winerror is not None:
+        failure.winerror = winerror
+
+    def copy_stat(src: object, dst: object, **options: object) -> None:
+        if os.fspath(src) == str(source):
+            raise failure
+        original_copystat(src, dst, **options)
+
+    pools: list[object] = []
+    monkeypatch.setattr(fixture.shutil, "copystat", copy_stat)
+    if winerror is None:
+        with pytest.raises(shutil.Error) as raised:
+            fixture._parallel_copy_snapshot(
+                source, target, executor_factory=_parallel_pool_factory(pools)
+            )
+        assert raised.value.args[0] == [(source, target, str(failure))]
+    else:
+        fixture._parallel_copy_snapshot(
+            source, target, executor_factory=_parallel_pool_factory(pools)
+        )
+    assert (target / "f000").read_bytes() == (source / "f000").read_bytes()
+    _assert_parallel_pools_ended(pools)
+
+
+@pytest.mark.parametrize("base_exception", [False, True])
+def test_parallel_reverse_completion_first_fatal_identity_and_actual_partial(
+    tmp_path: Path, base_exception: bool
+) -> None:
+    import threading
+
+    source, target = _parallel_tree(tmp_path, 2)
+    with os.scandir(source) as iterator:
+        order = [entry.name for entry in iterator]
+    second_done = threading.Event()
+    original = KeyboardInterrupt("first") if base_exception else RuntimeError("first")
+    later = ValueError("later")
+    completion: list[str] = []
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        if entry.name == order[0]:
+            assert second_done.wait(5)
+            completion.append(entry.name)
+            raise original
+        shutil.copy2(entry, destination)
+        completion.append(entry.name)
+        second_done.set()
+        raise later
+
+    pools: list[object] = []
+    with pytest.raises(type(original)) as raised:
+        fixture._parallel_copy_snapshot(
+            source, target, copy_file=copy_file, executor_factory=_parallel_pool_factory(pools)
+        )
+    assert raised.value is original and raised.value.args == original.args
+    assert completion == [order[1], order[0]]
+    assert not (target / order[0]).exists()
+    assert (target / order[1]).read_bytes() == (source / order[1]).read_bytes()
+    _assert_parallel_pools_ended(pools)
+
+
+def test_parallel_malformed_shutil_error_expansion_is_logical_abort(tmp_path: Path) -> None:
+    source, target = _parallel_tree(tmp_path, 2)
+    with os.scandir(source) as iterator:
+        order = [entry.name for entry in iterator]
+    later = RuntimeError("later worker")
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        if entry.name == order[0]:
+            raise shutil.Error(None)
+        shutil.copy2(entry, destination)
+        raise later
+
+    pools: list[object] = []
+    with pytest.raises(TypeError) as raised:
+        fixture._parallel_copy_snapshot(
+            source, target, copy_file=copy_file, executor_factory=_parallel_pool_factory(pools)
+        )
+    assert raised.value is not later
+    assert (target / order[1]).read_bytes() == (source / order[1]).read_bytes()
+    _assert_parallel_pools_ended(pools)
+
+
+@pytest.mark.parametrize("stage", ["submit", "classification"])
+@pytest.mark.parametrize("earlier_fatal", [False, True])
+def test_parallel_later_coordinator_error_drains_prior_job_and_preserves_priority(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, stage: str, earlier_fatal: bool
+) -> None:
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
+    source, target = _parallel_tree(tmp_path, 2)
+    with os.scandir(source) as iterator:
+        order = [entry.name for entry in iterator]
+    first_running, fault_seen, release = threading.Event(), threading.Event(), threading.Event()
+    first_error, coordinator_error = RuntimeError("earlier worker"), ValueError("later coordinator")
+    observer_errors: list[str] = []
+
+    def release_worker() -> None:
+        if not fault_seen.wait(5):
+            observer_errors.append("Coordinator fault was not reached")
+        release.set()
+
+    observer = threading.Thread(target=release_worker, name="fixture-copy-release")
+    observer.start()
+
+    def fail_coordinator() -> None:
+        assert first_running.wait(5)
+        assert not release.is_set()
+        fault_seen.set()
+        raise coordinator_error
+
+    class SubmissionFault(fixture._OwnedCopyExecutor):
+        submissions = 0
+
+        def submit(self, *args: object, **kwargs: object) -> object:
+            self.submissions += 1
+            if self.submissions == 2 and stage == "submit":
+                fail_coordinator()
+            return super().submit(*args, **kwargs)
+
+    original_metadata = fixture._parallel_entry_metadata
+
+    def classify(entry: os.DirEntry[str]) -> os.stat_result:
+        if stage == "classification" and entry.name == order[1]:
+            fail_coordinator()
+        return original_metadata(entry)
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        assert entry.name == order[0]
+        first_running.set()
+        assert release.wait(5)
+        if earlier_fatal:
+            raise first_error
+        return shutil.copy2(entry, destination)
+
+    pools: list[object] = []
+
+    def create(**options: object) -> ThreadPoolExecutor:
+        pool = SubmissionFault(**options)
+        pools.append(pool)
+        return pool
+
+    monkeypatch.setattr(fixture, "_parallel_entry_metadata", classify)
+    expected = first_error if earlier_fatal else coordinator_error
+    try:
+        with pytest.raises(type(expected)) as raised:
+            fixture._parallel_copy_snapshot(
+                source, target, copy_file=copy_file, executor_factory=create
+            )
+        assert raised.value is expected
+        assert not (target / order[1]).exists()
+        assert (target / order[0]).exists() is not earlier_fatal
+    finally:
+        release.set()
+        observer.join(5)
+    assert observer_errors == [] and not observer.is_alive()
+    _assert_parallel_pools_ended(pools)
+
+
+@pytest.mark.parametrize("earlier_fatal", [False, True])
+def test_parallel_real_submit_start_failure_joins_queued_and_running_work(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, earlier_fatal: bool
+) -> None:
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
+    source, target = _parallel_tree(tmp_path, 3)
+    with os.scandir(source) as iterator:
+        order = [entry.name for entry in iterator]
+    first_running, second_running = threading.Event(), threading.Event()
+    start_failed, release = threading.Event(), threading.Event()
+    first_error = KeyboardInterrupt("earlier actual worker")
+    startup_error = KeyboardInterrupt("Thread.start failure after actual native startup")
+    original_start, original_join = threading.Thread.start, threading.Thread.join
+    attempts = 0
+    returned = threading.Event()
+    failures: list[BaseException] = []
+    joined: list[threading.Thread] = []
+    copy_attempts: list[str] = []
+    lock = threading.Lock()
+
+    def start(thread: threading.Thread) -> None:
+        nonlocal attempts
+        if thread.name.startswith("aiflow-copy"):
+            attempts += 1
+            if attempts == 2:
+                assert first_running.wait(5)
+                original_start(thread)
+                assert second_running.wait(5)
+                start_failed.set()
+                raise startup_error
+        original_start(thread)
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        with lock:
+            copy_attempts.append(entry.name)
+        if entry.name == order[0]:
+            first_running.set()
+            assert release.wait(5)
+            if earlier_fatal:
+                raise first_error
+        elif entry.name == order[1]:
+            second_running.set()
+            assert release.wait(5)
+        return shutil.copy2(entry, destination)
+
+    pools: list[object] = []
+    monkeypatch.setattr(threading.Thread, "start", start)
+
+    def join(thread: threading.Thread, *args: object, **kwargs: object) -> None:
+        original_join(thread, *args, **kwargs)
+        if thread.name.startswith("aiflow-copy"):
+            assert release.is_set()
+            joined.append(thread)  # actual delegated join returned after release
+
+    monkeypatch.setattr(threading.Thread, "join", join)
+
+    def call() -> None:
+        try:
+            fixture._parallel_copy_snapshot(
+                source, target, copy_file=copy_file, executor_factory=_parallel_pool_factory(pools)
+            )
+        except BaseException as error:
+            failures.append(error)
+        finally:
+            returned.set()
+
+    caller = threading.Thread(target=call, name="fixture-copy-caller")
+    caller.start()
+    expected = first_error if earlier_fatal else startup_error
+    try:
+        assert start_failed.wait(5) and second_running.is_set()
+        assert len(pools[0].owned_workers) == 2
+        assert pools[0].owned_workers[1].thread not in pools[0]._threads
+        assert not returned.wait(0.02)  # second unregistered actual worker is still held
+    finally:
+        release.set()
+        caller.join(5)
+    assert not caller.is_alive() and returned.is_set()
+    assert len(failures) == 1 and failures[0] is expected and failures[0].args == expected.args
+    assert attempts == 2
+    assert pools[0].owned_workers[1].startup_failure.error is startup_error
+    assert not (target / order[2]).exists()
+    assert (target / order[0]).exists() is not earlier_fatal
+    assert (target / order[1]).read_bytes() == (source / order[1]).read_bytes()
+    assert sorted(copy_attempts) == sorted(order[:2])
+    assert set(joined) == {record.thread for record in pools[0].owned_workers}
+    assert isinstance(pools[0], ThreadPoolExecutor)
+    _assert_parallel_pools_ended(pools)
+
+
+@pytest.mark.parametrize("observation", ["done", "exception"])
+def test_parallel_wait_interruption_not_masked_by_observation_or_shutdown(
+    tmp_path: Path, observation: str
+) -> None:
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
+    source, target = _parallel_tree(tmp_path, 1)
+    release, observation_failed = threading.Event(), threading.Event()
+    original = KeyboardInterrupt("first result interruption")
+    later = KeyboardInterrupt("later observation interruption")
+    shutdown_error = ValueError("later shutdown error")
+    observer_errors: list[str] = []
+
+    def release_worker() -> None:
+        if not observation_failed.wait(5):
+            observer_errors.append("Future observation fault was not reached")
+        release.set()
+
+    observer = threading.Thread(target=release_worker, name="fixture-copy-release")
+    observer.start()
+
+    class ObservationFault(fixture._OwnedCopyExecutor):
+        def submit(self, *args: object, **kwargs: object) -> object:
+            future = super().submit(*args, **kwargs)
+            result, done, exception = future.result, future.done, future.exception
+            injected_result = injected_observation = False
+
+            def observe_result(*values: object, **options: object) -> object:
+                nonlocal injected_result
+                if not injected_result:
+                    injected_result = True
+                    if observation == "exception":
+                        # Wait the real job so real done() reaches exception();
+                        # the diagnostic does not fake completed state.
+                        release.set()
+                        result(*values, **options)
+                    raise original
+                return result(*values, **options)
+
+            def observe_done() -> bool:
+                nonlocal injected_observation
+                if observation == "done" and not injected_observation:
+                    injected_observation = True
+                    observation_failed.set()
+                    raise later
+                return done()
+
+            def observe_exception(*values: object, **options: object) -> object:
+                nonlocal injected_observation
+                if observation == "exception" and not injected_observation:
+                    injected_observation = True
+                    observation_failed.set()
+                    raise later
+                return exception(*values, **options)
+
+            future.result, future.done, future.exception = (
+                observe_result,
+                observe_done,
+                observe_exception,
+            )
+            return future
+
+        def shutdown(self, *args: object, **kwargs: object) -> None:
+            first = not getattr(self, "injected_shutdown", False)
+            self.injected_shutdown = True
+            super().shutdown(*args, **kwargs)
+            if first:
+                raise shutdown_error
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        assert release.wait(5)
+        return shutil.copy2(entry, destination)
+
+    pools: list[object] = []
+
+    def create(**options: object) -> ThreadPoolExecutor:
+        pool = ObservationFault(**options)
+        pools.append(pool)
+        return pool
+
+    try:
+        with pytest.raises(KeyboardInterrupt) as raised:
+            fixture._parallel_copy_snapshot(
+                source, target, copy_file=copy_file, executor_factory=create
+            )
+        assert raised.value is original and raised.value.args == original.args
+        assert (target / "f000").read_bytes() == (source / "f000").read_bytes()
+        assert observation_failed.is_set()
+    finally:
+        release.set()
+        observer.join(5)
+    assert observer_errors == [] and not observer.is_alive()
+    _assert_parallel_pools_ended(pools)
+
+
+@pytest.mark.parametrize("primary_failure", [False, True])
+def test_parallel_final_drain_observation_preserves_failure_or_fails_success(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, primary_failure: bool
+) -> None:
+    source, target = _parallel_tree(tmp_path, 1)
+    original, late = RuntimeError("original worker"), KeyboardInterrupt("final drain observation")
+    actual_complete = fixture._parallel_complete_batch
+
+    def complete(pending: object, errors: object) -> object:
+        if not pending:
+            raise late
+        return actual_complete(pending, errors)
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        if primary_failure:
+            raise original
+        return shutil.copy2(entry, destination)
+
+    pools: list[object] = []
+    monkeypatch.setattr(fixture, "_parallel_complete_batch", complete)
+    expected = original if primary_failure else late
+    with pytest.raises(type(expected)) as raised:
+        fixture._parallel_copy_snapshot(
+            source, target, copy_file=copy_file, executor_factory=_parallel_pool_factory(pools)
+        )
+    assert raised.value is expected
+    assert (target / "f000").exists() is not primary_failure
+    _assert_parallel_pools_ended(pools)
+
+
+@pytest.mark.parametrize("base_exception", [False, True])
+def test_parallel_blocked_running_job_must_end_before_error_returns(
+    tmp_path: Path, base_exception: bool
+) -> None:
+    import threading
+
+    source, target = _parallel_tree(tmp_path, 2)
+    with os.scandir(source) as iterator:
+        order = [entry.name for entry in iterator]
+    running, fault_seen, release, returned = (
+        threading.Event(),
+        threading.Event(),
+        threading.Event(),
+        threading.Event(),
+    )
+    original = KeyboardInterrupt("later worker") if base_exception else RuntimeError("later worker")
+    actual_errors: list[BaseException] = []
+    returned_after_release: list[bool] = []
+    pools: list[object] = []
+
+    def copy_file(entry: os.DirEntry[str], destination: str) -> object:
+        if entry.name == order[0]:
+            running.set()
+            assert release.wait(5)
+            return shutil.copy2(entry, destination)
+        assert running.wait(5)
+        fault_seen.set()
+        raise original
+
+    def invoke() -> None:
+        try:
+            fixture._parallel_copy_snapshot(
+                source, target, copy_file=copy_file, executor_factory=_parallel_pool_factory(pools)
+            )
+        except BaseException as error:
+            actual_errors.append(error)
+        finally:
+            returned_after_release.append(release.is_set())
+            returned.set()
+
+    caller = threading.Thread(target=invoke, name="fixture-copy-caller")
+    caller.start()
+    try:
+        assert running.wait(5) and fault_seen.wait(5)
+        assert not returned.wait(0.02)
+    finally:
+        release.set()
+        caller.join(5)
+    assert not caller.is_alive() and returned.is_set()
+    assert actual_errors == [original] and actual_errors[0] is original
+    assert returned_after_release == [True]
+    assert (target / order[0]).read_bytes() == (source / order[0]).read_bytes()
+    assert not (target / order[1]).exists()
+    _assert_parallel_pools_ended(pools)
+
+
+@pytest.mark.parametrize("fault", ["arbitrary", "custom-native", "custom-bootstrap"])
+def test_parallel_start_failure_needs_exact_native_creation_proof(
+    monkeypatch: pytest.MonkeyPatch, fault: str
+) -> None:
+    import threading
+
+    thread = threading.Thread(target=lambda: None)
+    record = fixture._OwnedWorker(thread, threading.Event(), getattr(thread, "_handle", None))
+    # No attempted call occurred. This narrow negative is independently known.
+    assert fixture._owned_finish_worker(record) is None
+    assert record.terminal and not record.worker_done.is_set()
+    record.terminal = False
+    record.start_attempted = True
+    record.native_create_eligible = True
+    error = RuntimeError("synthetic native-create failure")
+    if fault == "arbitrary":
+        assert not fixture._owned_native_creation_failed(record, error)
+        return
+    if fault == "custom-bootstrap":
+        thread._bootstrap = None
+    else:
+
+        def failed_native(*args: object, **kwargs: object) -> None:
+            raise error
+
+        monkeypatch.setattr(fixture.threading, fixture._NATIVE_START_NAME, failed_native)
+    # Exercise the real standard start's native CALL/except cleanup. A custom
+    # native creator or bootstrap is deliberately not eligible negative proof;
+    # no host resource exhaustion or real native-create failure is manufactured.
+    with pytest.raises(Exception) as raised:
+        fixture._THREAD_START(thread)
+    assert not thread._started.is_set() and thread.ident is None
+    with fixture._LIMBO_LOCK:
+        assert thread not in threading._limbo
+    assert not fixture._owned_native_creation_failed(record, raised.value)
+
+
+def test_parallel_unknown_worker_protocol_selects_serial_before_write(
+    tmp_path: Path, owner: fixture.RepositoryOwner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seed(tmp_path, owner)
+    assert owner.snapshot is not None
+    original_worker = fixture.futures_thread._worker
+
+    def worker(*args: object) -> None:
+        original_worker(*args)
+
+    monkeypatch.setattr(fixture.futures_thread, "_worker", worker)
+    target = tmp_path / "unknown-worker"
+    target.mkdir()
+    assert not fixture._parallel_copy_eligible(owner.snapshot, target)
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Unknown worker must use the original serial copy")
+
+    monkeypatch.setattr(fixture, "_parallel_copy_snapshot", forbidden)
+    fixture._copy_snapshot(owner.snapshot, target)
+    assert snapshot(target) == snapshot(owner.snapshot)
+
+
+def _parallel_owned_child(tmp_path: Path, scenario: str) -> dict[str, object]:
+    import ctypes
+    import json
+    import subprocess
+    import sys
+    import textwrap
+    import time
+
+    code = textwrap.dedent(
+        """
+        import json, pathlib, shutil, sys, threading, time
+        sys.path.insert(0, sys.argv[1])
+        import repository_fixture as fixture
+        root, scenario = pathlib.Path(sys.argv[2]), sys.argv[3]
+        source, target = root / 'child-source', root / 'child-target'
+        source.mkdir(); target.mkdir(); (source / 'file').write_bytes(b'owned input')
+        ready, request, result = root / 'ready.json', root / 'resolve', root / 'result.json'
+        pools = []
+        original_start, original_join = threading.Thread.start, threading.Thread.join
+        native_version = tuple(sys.version_info[:2])
+        original_error = KeyboardInterrupt('owned synthetic interruption')
+        def factory(**options):
+            pool = fixture._OwnedCopyExecutor(**options); pools.append(pool); return pool
+        if scenario == 'resolve':
+            actual_finish = fixture._owned_finish_worker
+            def finish(record):
+                if not record.thread._started.is_set():
+                    ready.write_text(json.dumps({'stage': 'unknown-start',
+                        'runtime': native_version,
+                        'worker_done': record.worker_done.is_set()}), encoding='utf-8')
+                return actual_finish(record)
+            fixture._owned_finish_worker = finish
+            def start(thread):
+                if thread.name.startswith('aiflow-copy'):
+                    raise original_error
+                original_start(thread)
+            def resolve():
+                deadline = time.monotonic() + 5
+                while not request.exists() and time.monotonic() < deadline:
+                    time.sleep(.005)
+                assert request.exists()
+                record = pools[0].owned_workers[0]
+                # Actual start of the same retained Thread; no fake Event/flags.
+                original_start(record.thread)
+            resolver = threading.Thread(target=resolve, name='owned-resolution')
+            resolver.start()
+            threading.Thread.start = start
+            try:
+                fixture._parallel_copy_snapshot(source, target, executor_factory=factory)
+            except BaseException as error:
+                assert error is original_error and error.args == original_error.args
+            else:
+                raise AssertionError('Startup failure must not become success')
+            finally:
+                original_join(resolver, 5)
+            assert not resolver.is_alive()
+            record = pools[0].owned_workers[0]
+            assert record.terminal and not record.terminal_unknown and record.worker_done.is_set()
+            assert record.thread not in pools[0]._threads and not record.thread.is_alive()
+            assert list(target.iterdir()) == []  # truthful cancellation before actual start
+            result.write_text(json.dumps({'stage': 'native-joined', 'same_error': True,
+                'actual_version': native_version, 'worker_done': True,
+                'terminal': True}), encoding='utf-8')
+        else:
+            # Current 3.13 runs this conservative 3.11 branch via a module-only
+            # facade. On CI3.11 the actual legacy protocol is used. This fault
+            # does not claim to reproduce CPython's sentinel-lock bug.
+            class LegacyFacade:
+                version_info = (3, 11)
+                def __getattr__(self, name): return getattr(sys, name)
+            fixture.sys = LegacyFacade()
+            actual_body, actual_hold = fixture._owned_worker_body, fixture._owned_hold_unknown
+            never = threading.Event()
+            def body(record, arguments):
+                actual_body(record, arguments)
+                never.wait()  # BODY done, actual owned native Thread still live
+            fixture._owned_worker_body = body
+            def join(thread, *args, **kwargs):
+                if thread.name.startswith('aiflow-copy'): raise original_error
+                return original_join(thread, *args, **kwargs)
+            threading.Thread.join = join
+            def unknown(record):
+                record.terminal_unknown = True
+                assert record.cleanup_failure.error is original_error
+                assert record.worker_done.is_set() and record.thread.is_alive()
+                ready.write_text(json.dumps({'stage': 'terminal-unknown', 'worker_done': True,
+                    'terminal': False, 'terminal_unknown': True, 'actual_version': native_version,
+                    'legacy_facade': native_version != (3, 11)}), encoding='utf-8')
+                actual_hold(record)
+            fixture._owned_hold_unknown = unknown
+            fixture._parallel_copy_snapshot(source, target, executor_factory=factory)
+            raise AssertionError('Unknown native terminal must not return')
+        """
+    )
+    stdout, stderr = tmp_path / "child.stdout.raw", tmp_path / "child.stderr.raw"
+    ready, result = tmp_path / "ready.json", tmp_path / "result.json"
+    flags = (
+        subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+    )
+    with stdout.open("xb") as out, stderr.open("xb") as err:
+        child = subprocess.Popen(
+            [sys.executable, "-B", "-c", code, str(Path(__file__).parent), str(tmp_path), scenario],
+            cwd=Path(__file__).resolve().parents[2],
+            stdin=subprocess.DEVNULL,
+            stdout=out,
+            stderr=err,
+            creationflags=flags,
+            start_new_session=os.name != "nt",
+        )
+
+        def identity() -> tuple[int, int] | None:
+            if os.name != "nt":
+                return None  # direct unreaped child ownership, never numeric-PID guessing
+            from ctypes import wintypes
+
+            kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+            kernel.GetProcessId.argtypes = [wintypes.HANDLE]
+            kernel.GetProcessId.restype = wintypes.DWORD
+            kernel.GetProcessTimes.argtypes = [wintypes.HANDLE] + [
+                ctypes.POINTER(wintypes.FILETIME)
+            ] * 4
+            kernel.GetProcessTimes.restype = wintypes.BOOL
+            times = [wintypes.FILETIME() for _ in range(4)]
+            handle = wintypes.HANDLE(int(child._handle))
+            assert kernel.GetProcessId(handle) == child.pid
+            assert kernel.GetProcessTimes(handle, *(ctypes.byref(value) for value in times))
+            return child.pid, (times[0].dwHighDateTime << 32) | times[0].dwLowDateTime
+
+        retained_identity = None
+        identity_captured = False
+        actual_exit = None
+        try:
+            # Popen succeeded: identity observation is also inside owned
+            # recovery, so an observation failure cannot leave this child live.
+            retained_identity = identity()
+            identity_captured = True
+            deadline = time.monotonic() + 5
+            while not ready.exists() and child.poll() is None and time.monotonic() < deadline:
+                time.sleep(0.005)
+            assert ready.exists(), "Owned child did not reach the expected ownership boundary"
+            facts = json.loads(ready.read_text(encoding="utf-8"))
+            # This observation bound is not a production copy/Git/600 deadline.
+            with pytest.raises(subprocess.TimeoutExpired):
+                child.wait(timeout=0.05)
+            assert not result.exists()
+            if scenario == "resolve":
+                assert facts["stage"] == "unknown-start" and facts["worker_done"] is False
+                (tmp_path / "resolve").write_bytes(b"actual-start")
+                actual_exit = child.wait(timeout=5)
+                assert actual_exit == 0
+                facts = json.loads(result.read_text(encoding="utf-8"))
+                assert facts["same_error"] and facts["terminal"] and facts["worker_done"]
+            else:
+                assert facts["stage"] == "terminal-unknown"
+                assert facts["terminal_unknown"] and not facts["terminal"]
+                assert facts["worker_done"]
+        finally:
+            # Only this retained child, including its owned native threads. It
+            # launches no processes; no global enumeration, taskkill or PID kill.
+            if child.poll() is None:
+                child.kill()
+            actual_exit = child.wait(timeout=5)
+            assert child.poll() == actual_exit
+            identity_matches = None
+            if identity_captured:
+                try:
+                    identity_matches = identity() == retained_identity
+                except Exception:
+                    identity_matches = False
+            (tmp_path / "owned-terminal.json").write_text(
+                json.dumps(
+                    {
+                        "retained_identity": retained_identity,
+                        "identity_captured": identity_captured,
+                        "identity_matches": identity_matches,
+                        "actual_exit": actual_exit,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            if identity_captured:
+                assert identity_matches is True
+    assert actual_exit == 0 if scenario == "resolve" else actual_exit != 0
+    return facts
+
+
+@pytest.mark.parametrize("scenario", ["resolve", "legacy-unknown"])
+def test_parallel_unknown_start_resolution_and_legacy_join_have_owned_outer_recovery(
+    tmp_path: Path, scenario: str
+) -> None:
+    facts = _parallel_owned_child(tmp_path, scenario)
+    assert facts["stage"] == ("native-joined" if scenario == "resolve" else "terminal-unknown")
+
+
+def test_parallel_shutdown_reentry_keeps_first_cleanup_and_drains_actual_worker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import threading
+
+    source, target = _parallel_tree(tmp_path, 1)
+    running, bookkeeping_fault, release, returned = (
+        threading.Event(),
+        threading.Event(),
+        threading.Event(),
+        threading.Event(),
+    )
+    original = RuntimeError("selected walk failure")
+    first, second = (
+        KeyboardInterrupt("first shutdown failure"),
+        KeyboardInterrupt("later loop failure"),
+    )
+    failures: list[BaseException] = []
+    states: list[object] = []
+    pools: list[object] = []
+    copies: list[str] = []
+
+    class Records(list):
+        armed = False
+        interrupted = False
+
+        def __len__(self) -> int:
+            if self.armed and not self.interrupted:
+                self.interrupted = True
+                assert states[0].cleanup_failure.error is first
+                bookkeeping_fault.set()
+                raise second  # actual helper loop condition, outside its inner try
+            return super().__len__()
+
+    class ShutdownFault(fixture._OwnedCopyExecutor):
+        injected = False
+
+        def shutdown(self, *args: object, **kwargs: object) -> None:
+            super().shutdown(*args, **kwargs)
+            if not self.injected:
+                self.injected = True
+                self.owned_workers.armed = True
+                raise first
+
+    def factory(**options: object) -> object:
+        pool = ShutdownFault(**options)
+        pool.owned_workers = Records()
+        pools.append(pool)
+        return pool
+
+    def held_copy(entry: os.DirEntry[str], destination: str) -> object:
+        running.set()
+        assert release.wait(5)
+        copies.append(entry.name)
+        return shutil.copy2(entry, destination)
+
+    def interrupted_walk(src: object, dst: object, state: object) -> None:
+        # A private coordinator fault while a real retained job is running.
+        # It does not change the public walker or any original test assertion.
+        states.append(state)
+        with os.scandir(source) as iterator:
+            entry = next(iterator)
+        job = fixture._CopyJob(entry, str(source / entry.name), str(target / entry.name))
+        state.jobs.append(job)
+        job.future = state.executor.submit(fixture._parallel_file_job, job, state.copy_file)
+        assert running.wait(5)
+        raise original
+
+    monkeypatch.setattr(fixture, "_parallel_copy_directory", interrupted_walk)
+
+    def call() -> None:
+        try:
+            fixture._parallel_copy_snapshot(
+                source, target, copy_file=held_copy, executor_factory=factory
+            )
+        except BaseException as error:
+            failures.append(error)
+        finally:
+            returned.set()
+
+    caller = threading.Thread(target=call, name="fixture-shutdown-caller")
+    caller.start()
+    try:
+        assert bookkeeping_fault.wait(5) and running.is_set()
+        assert not returned.wait(0.02)  # still-owned actual job has not drained
+    finally:
+        release.set()
+        caller.join(5)
+    assert not caller.is_alive() and returned.is_set()
+    assert len(failures) == 1 and failures[0] is original
+    assert states[0].cleanup_failure.error is first
+    assert copies == ["f000"]
+    assert (target / "f000").read_bytes() == (source / "f000").read_bytes()
+    _assert_parallel_pools_ended(pools)
