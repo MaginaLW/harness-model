@@ -3,7 +3,7 @@ allowed_scope:
 base_commit: 993a9a0619577117417d80de96e73aa18270b464
 branch: codex/e4-cumulative-delivery
 created_at: '2026-10-01T21:52:02Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -101,6 +101,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-01T22:01:57Z'
 subject_commit: 993a9a0619577117417d80de96e73aa18270b464
 task_id: TASK-0062
-updated_at: '2026-10-01T23:07:27Z'
+updated_at: '2026-10-01T23:56:10Z'
 worktree_dirty: false
 worktree_dirty_paths: []

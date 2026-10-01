@@ -1,0 +1,41 @@
+{
+  "operation": "ordinary protected exact-Q PR44 merge",
+  "used_count": 1,
+  "task_id": "TASK-0062",
+  "action_ref": "actions/merge-001.json",
+  "action_file_sha256": "9b538497596f774dcf7d6d8806d507c351f4abb3ec3ef455b860c91e7f5df61f",
+  "publication_Q": "f5707ff178b760bb0215c7d5cb773cc4d06c75d6",
+  "base_B": "48bf777106b9fdfef1ddf83d3abc95859fb8e580",
+  "actual_merge_M": "db3efabab562971aef1a6eb1317b679d42eeadb9",
+  "actual_tool": "740978/0",
+  "native_action_approval_tool": "9ef54c/0",
+  "native_action_approval_receipt_sha256": "9d97c8ef385725992fb27cf56f0a13b97f4df42a1c0a96c3a99ba743ac5cdc43",
+  "actual_native_exit": 0,
+  "outer_timed_out": false,
+  "retained_identity_confirmed": true,
+  "retained_handle_closed": true,
+  "retained_process_end": {
+    "popen_pid": 37328,
+    "retained_handle_actual_pid": 37328,
+    "pid_matches": true,
+    "times_query_succeeded": true,
+    "creation_filetime_100ns": 134353713648933817,
+    "exit_filetime_100ns": 134353713719243479,
+    "actual_exit": 0
+  },
+  "external_receipt_sha256": "b42673a5ac70efb3e68be34792446661b68d6192336a0cd2a9bb56e9786d624d",
+  "finished_at": "2026-10-01T23:36:11.931296+00:00",
+  "root_PR_main_readback": true,
+  "root_readback_tool": "debe68/0",
+  "readonly_receipts": {
+    "pr": "223705d0a5711b2870f51560500cc86ee9b845b3ef83de1fc3799b9dbea0d335",
+    "main": "24ce2d1604b49192f3ef2f8152d00f3cfb03da0934762ba6e43c4e5ea12778cd"
+  },
+  "immediate_before_invocation_receipts": {
+    "main": "c2329e79e3b64d729ae7512e3c416589b9f5799e0b1a8f31f12a8f7ed12b9c97",
+    "ref": "f4eac3fc38c4799c167fe018f456d06f8fd81f37cf28e2f8f9c14a9f4f6382c8",
+    "protection": "7bdf872659e00d1450b797950f2d6bd72dbdac09eb7dc7ad5732d7a0d6ef2001"
+  },
+  "independent_postmerge_proof_pending_at_record": true,
+  "native_single_use_enforcement": "not implemented; operator records exactly one actual invocation"
+}

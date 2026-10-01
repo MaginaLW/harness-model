@@ -1,0 +1,17 @@
+{
+  "action_type": "git_remote_push",
+  "target": "https://github.com/MaginaLW/harness-model.git#refs/heads/codex/e4-cumulative-delivery",
+  "parameter_summary": "{\"base\":\"48bf777106b9fdfef1ddf83d3abc95859fb8e580\",\"command_input_sha256\":\"211246e2628d87e1bffaf950daa7d65ad82784c14591a2efec09034599743bf9\",\"credential_protocol\":\"command-local cleared helpers then verified GH auth git-credential; no config mutation or credential output\",\"exclude_implicit_tag_push\":true,\"gate_stdout_sha256\":\"c4b7cc0ecb39095ad67f038dd09a1ad4d19d68acb07ac81d5bf0c1d964707366\",\"operation\":\"ordinary non-force fast-forward exact Q to existing literal feature ref\",\"predecessor\":\"f402bd7ab1fbe6c6415117817d3adb0ec62899ac\",\"publication_head\":\"f5707ff178b760bb0215c7d5cb773cc4d06c75d6\",\"readonly_receipts\":{\"main\":\"036000cefd78c7b14ed44112ba4e83cc2a9fc9b36ffb3f6c00ea7865450a3e70\",\"pr\":\"7cfdd0efae0e11a75abb27c0a296dd61e913b615053aab1be273c09ca7178892\",\"protection\":\"fd205661279e8dbc7aa69f7c2b207d4a32b542d24635e6cc8942534146be399e\",\"ref\":\"eb7779b3d7a6fd11354752c1b827aeed9397d238e68d9478c6bafa7d3d64906e\",\"repo\":\"eabc6d406d3b6d788cae4e1d5627a31287aca2b84d8ed6d693742ce7ccf0c798\"},\"repo\":\"MaginaLW/harness-model\",\"source\":\"993a9a0619577117417d80de96e73aa18270b464\"}",
+  "subject_commit": "993a9a0619577117417d80de96e73aa18270b464",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "bc32da5ef182bdd836c0c072807154ee0aba6ed990536eaa5d011edc8340bf99",
+  "conditions": [
+    "Existing explicit owner authority binds this concrete action once.",
+    "Fresh repository/mainB/strict protection/openPR44/exact predecessor and local fast-forward ancestry are positively verified.",
+    "Exact Q native Gate passed; source and thresholds remain unchanged.",
+    "No force,deletion,admin bypass,provider call,global credential mutation or credential export.",
+    "Actual push exit and remote-Q readback required before PR update."
+  ],
+  "expires_at": "2026-10-01T23:28:13.592613+00:00",
+  "single_use": true
+}
