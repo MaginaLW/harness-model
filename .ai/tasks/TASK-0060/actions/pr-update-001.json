@@ -1,0 +1,17 @@
+{
+  "action_type": "github_pull_request_update",
+  "target": "https://github.com/MaginaLW/harness-model/pull/44",
+  "parameter_summary": "{\"base\":\"48bf777106b9fdfef1ddf83d3abc95859fb8e580\",\"base_ref\":\"main\",\"body_review_sha256\":\"4d05765f060b4e8999e74363eea2a6c2eabceba156f7c140376d3ba1e41491be\",\"body_sha256\":\"dbcb3cddcb62fa356d5f23fc7526fbcd999c0c26ee1c61dec44f5d4737aaa066\",\"command_input_sha256\":\"4dd36c50f48586710c0e812885f0d2f499544e643382f988949db733812d7813\",\"head_ref\":\"codex/e4-cumulative-delivery\",\"operation\":\"update existing PR title/body only\",\"pr\":44,\"publication_head\":\"f402bd7ab1fbe6c6415117817d3adb0ec62899ac\",\"readonly_receipts\":{\"main\":\"d43a7c0bd1030a2a44169be9680af459f9c92ee022b6622bfaafecd1b34143f3\",\"pr\":\"4f99fe4914fa0f134abc35923dbb7c9b52ef8ecc1faadda0daba5ff319680139\",\"protection\":\"8e89b8969c4527f3d9e9b91a0a54653cf2690e3562f0cbef9b0336f62d7825a9\",\"ref\":\"55685bd510dcdfc9c5624be4914c6a17f1f25406a7ea965572d3372ee423c22f\",\"repo\":\"d47dec2af543b75052da0df1a44ae940b7e48240e250b18f9054fad6e0b0eb29\"},\"repo\":\"MaginaLW/harness-model\",\"title\":\"feat: import external reviews and harden native verification\"}",
+  "subject_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "ade24b06885ddef388018983582422bb5ad632c85b53f61c230a9b385d8bc352",
+  "conditions": [
+    "Existing explicit owner authority binds this concrete separately approved action once.",
+    "Fresh current mainB/strict protection/repo/exactremoteQ/openPR44 and successful push readback verified.",
+    "Actual independent reviewer approved exact literal title and body bytes; no base/head change, duplicate PR or reviewer requests.",
+    "No merge, force, deployment, deletion or credential export is part of this update.",
+    "Read back exact title/body/Q/B after actual operation."
+  ],
+  "expires_at": "2026-10-01T19:52:39.636384+00:00",
+  "single_use": true
+}

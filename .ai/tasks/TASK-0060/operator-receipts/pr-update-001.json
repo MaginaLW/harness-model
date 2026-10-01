@@ -1,0 +1,30 @@
+{
+  "operation": "existing PR44 exact title/body update",
+  "task_id": "TASK-0060",
+  "action_ref": "actions/pr-update-001.json",
+  "action_file_sha256": "734cc31ab13ed866a2e55608fc94faf4cecddfe34d609594f45f2ee6852dd123",
+  "used_count": 1,
+  "publication_Q": "f402bd7ab1fbe6c6415117817d3adb0ec62899ac",
+  "base_B": "48bf777106b9fdfef1ddf83d3abc95859fb8e580",
+  "body_sha256": "dbcb3cddcb62fa356d5f23fc7526fbcd999c0c26ee1c61dec44f5d4737aaa066",
+  "body_review_sha256": "4d05765f060b4e8999e74363eea2a6c2eabceba156f7c140376d3ba1e41491be",
+  "literal_title": "feat: import external reviews and harden native verification",
+  "actual_native_exit": 0,
+  "outer_timed_out": false,
+  "retained_identity_confirmed": true,
+  "retained_handle_closed": true,
+  "retained_process_end": {
+    "popen_pid": 36248,
+    "retained_handle_actual_pid": 36248,
+    "pid_matches": true,
+    "times_query_succeeded": true,
+    "creation_filetime_100ns": 134353570601602208,
+    "exit_filetime_100ns": 134353570630861847,
+    "actual_exit": 0
+  },
+  "external_receipt_sha256": "fdb9bc52789cfa9e4ee191a41f6afef58477755fb4d76a23fbd4f81a2c0671cb",
+  "readback_receipt_sha256": "d3772c4b05408d57e2c8eaaee1e26462f65fc9ad94ac69a1d9aee3f4c9e904ea",
+  "finished_at": "2026-10-01T19:37:43.094347+00:00",
+  "exact_title_body_Q_B_readback": true,
+  "native_single_use_enforcement": "not implemented; operator records exactly one actual invocation"
+}
