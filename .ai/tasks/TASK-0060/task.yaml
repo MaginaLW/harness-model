@@ -1,0 +1,98 @@
+allowed_scope:
+- .ai/tasks/TASK-0060/**
+base_commit: 14d80213cd10b656cb82197ecaca9b929720050b
+branch: codex/e4-cumulative-delivery
+created_at: '2026-10-01T18:32:41Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - git_remote_push
+  - github_pull_request_update
+  - protected_main_merge
+  goal: Publish cumulative E4 delivery with reviewed private fixture environment through
+    exact-head CI and protected merge
+  impact:
+    level: high
+  impact_categories:
+  - external_action
+  impact_scope:
+  - .ai/tasks/TASK-0060/**
+  inputs:
+  - Fixed source 14d80213cd10b656cb82197ecaca9b929720050b contains original gated
+    Task54/55/56/57, failed publishers58/59 with actual failed exact-head CI records,
+    source fixture reference repair55fd26b, private test environment repairb3a26da
+    and additive status14d8021.
+  - Actual source-independent review confirms final source hashes, original68 named
+    test full AST, normal and minimal environment133 focused passes each and two independent
+    teardown probes; complete new publisher V1 and exact-head Linux CI are still required.
+  - Existing PR44 remote predecessor is a2654bdf5c6ba02f2a5e1633d090e3b0d1cf583e at
+    last read; refresh all actual repo/ref/main/protection/PR facts before every external
+    action.
+  - Owner explicitly authorized eligible pending work, necessary approvals, push and
+    merge; bind fresh exact single-use actions without reasking.
+  - Preserve failed publisher58/59 frozen history and nominal states; no native-close58/59
+    based on future CI success. Task53 remains push-only; close only54/55/56/57 and
+    new60 after actual independent remote proof.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Create and verify only this new publisher own governance on fixed sourceS.
+  - Ordinary non-force fast-forward push of exact Q replacing freshly reread predecessor
+    on existing feature ref.
+  - Update existing PR44 title/body using independently reviewed exact bytes; do not
+    create a duplicate PR.
+  - Require every unchanged ai-quality-gate check on exact Q then ordinary expected-head
+    protected merge.
+  - Independent actual remote proof before fetching M and applicable native close54/55/56/57
+    and this publisher; preserve53/58/59 nominal states with truthful separate local
+    postaction records.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0060
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run every original native check selected by actual classification without altered
+    selectors, budgets, thresholds or MINENV.
+  - Actual author-independent cumulative design and implementation Review cover remoteB..sourceS
+    and source/task Gates; own empty business diff does not replace cumulative source
+    review.
+  - Observe complete exact-head required Linux CI and independently verify external
+    action receipts, merge parents/tree and source/closure ancestry.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 40e9a11bcde495aba09e91a35b3037e7d5f1569f1ccf114941ef16cd38a9a8cf
+goal: Publish cumulative E4 delivery with reviewed private fixture environment through
+  exact-head CI and protected merge
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-01T18:34:37Z'
+subject_commit: 14d80213cd10b656cb82197ecaca9b929720050b
+task_id: TASK-0060
+updated_at: '2026-10-01T18:42:51Z'
+worktree_dirty: false
+worktree_dirty_paths: []

@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner-authorized-root",
+    "approval_type": "spec",
+    "approved_at": "2026-10-01T18:42:50Z",
+    "base_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing explicit owner completion and publication authorization binds current frozen spec40e9a11bcde495aba09e91a35b3037e7d5f1569f1ccf114941ef16cd38a9a8cf and actual nonauthor Design APPROVE; preserve all original selected checks, exact-head CI and protected merge with independent proof conditions.",
+    "schema_version": "1.0",
+    "spec_sha256": "40e9a11bcde495aba09e91a35b3037e7d5f1569f1ccf114941ef16cd38a9a8cf",
+    "subject_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
+    "task_id": "TASK-0060"
+  }
+]
