@@ -104,5 +104,18 @@
     "spec_sha256": "957685c8b21d7b1fe2ce69d3e4d1f0319db2f344b5dc3b3cb1cd5dfb620a74f9",
     "subject_commit": "eb4c49a4ff77ca07f210fceae707495c8dece8be",
     "task_id": "TASK-0055"
+  },
+  {
+    "actor": "e4-governance-owner-authorized-root",
+    "approval_type": "spec",
+    "approved_at": "2026-10-01T08:03:34Z",
+    "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly authorized complete TODO goal and all necessary approvals, including later separately bound push/merge. Approve actual frozen3c014d67a353f93c22377aff85584532a397cc41fd5cbb0cec4ff6e6b75d7e88 after actual independent REV-0004. Scope32 and exact gated80515e6 dependency, bounded owned Git cleanup, original writer interruption boundary, real ten-second pipe cases, Rule8 safety separation and own full V2/current Gate remain required. No provider or real-report acceptance claimed.",
+    "schema_version": "1.0",
+    "spec_sha256": "3c014d67a353f93c22377aff85584532a397cc41fd5cbb0cec4ff6e6b75d7e88",
+    "subject_commit": "31cc21492a679f4873d96c6172210617a64ea2ca",
+    "task_id": "TASK-0055"
   }
 ]
