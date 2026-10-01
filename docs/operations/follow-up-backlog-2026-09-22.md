@@ -1,5 +1,13 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-01 有界复制候选已固定，实际验证待运行
+
+安全源码独立提交4c8952b，治理收尾949c53e；native sync/status/scope/validate均exit0。
+当前IMPLEMENTING/REVIEW/V2、classification fresh、approval current，仍缺implementation_result。
+固定26af/eed源码经独立004预审，无剩余静态阻断；原65保持，新增静态预计32尚未collect。
+线程归属、unknown终态、child回收和shutdown首失败重入已核；此不是运行/V2/Gate PASS。
+完整warm与前置脚本须绑定当前实际receipt后串行执行；原600/55/发布/F条件保持。
+
 ## 2026-10-01 线程归属修复短案已接受，实施进行中
 
 root与独立sub-agent实际核对修订短案2674ed6a，无剩余设计阻断；仍在冻结992范围。
