@@ -1076,6 +1076,14 @@ def test_parallel_four_workers_and_256_total_real_copies(tmp_path: Path) -> None
     child.mkdir()
     for number in range(128):
         (child / f"g{number:03}").write_bytes(b"child")
+    # Establish exact directory times before copytree's DirEntry metadata is read.
+    for directory, timestamp in (
+        (source, 1_650_000_000_123_456_700),
+        (child, 1_650_000_000_123_457_700),
+    ):
+        os.utime(directory, ns=(timestamp, timestamp))
+        assert directory.stat().st_mtime_ns == timestamp
+    expected = _parallel_metadata(source)
     lock, four_running, release = threading.Lock(), threading.Event(), threading.Event()
     active = maximum = copies = 0
     observer_errors: list[str] = []
@@ -1115,6 +1123,7 @@ def test_parallel_four_workers_and_256_total_real_copies(tmp_path: Path) -> None
         observer.join(5)
     assert not observer.is_alive() and observer_errors == []
     assert maximum == 4 and active == 0 and copies == 256
+    assert _parallel_metadata(source) == expected
     assert _parallel_metadata(source) == _parallel_metadata(target)
     _assert_parallel_pools_ended(pools)
 
