@@ -1,5 +1,19 @@
 # 维护收尾与待办
 
+## 2026-10-01 修复后四阶段前置通过，完整 V2 待执行
+
+当前源码 9dca04d 在核验 HEAD 9ba0f8b 完成原四阶段：12 narrow、97 fixture、187 external + 1 原 FIFO skip。
+集成实际 collect 907 unique，原 867 与新增 8 均保留；906 passed + 1 原 FIFO skip，529.81 秒退出 0。
+runner 实际 530119 ms，满足原 600000 ms；完整前后快照相等，87 retained 句柄及 launcher driver 退出 0。
+已知资源已交回；未 retained engine 退出与历史未观测后代 UNKNOWN。
+首次集成实例未保存退出结果，保留 UNKNOWN；其唯一快照差异为 refs 摘要，原因未确认。
+复验使用逐字节原脚本和原预算，三个已通过阶段保留原件复用，未削弱完整快照断言。
+当前 D cold1/warm10 中位 67.5486 ms；这不代表直接观测并发选择或因果加速。
+治理 4bb8a60 追加记录 025 和已原生批准的单次 action006；原规格批准有效，RF-001 仍 open。
+新源码完整 14 项 V2、独立 implementation Review/finalize/code approval/Gate 尚未完成；旧 V2 仅属旧源码证据。
+随后依次为 TASK-0055 重新准入与自身完整 Gate、TASK-0057 required CI/已授权发布及远端核验。
+本机有界查找未发现匹配真实报告，F 缺输入；未推送合并或调用 provider。
+
 ## 2026-10-01 原生 V2 通过，源码审查要求修复
 
 TASK-0056 的 113ecdd 候选实际完成原生 14/14 检查及 5/5 mutation；
@@ -9,7 +23,7 @@ TASK-0056 的 113ecdd 候选实际完成原生 14/14 检查及 5/5 mutation；
 安全修复 9dca04d 已提交；完整 begin/close 模块在原 MINENV 下 42 passed、28.16 秒，无跳过或超时。
 治理 9ba0f8b 保存正式 REV-0009 拒绝记录及新源码绑定；状态仍 WAITING_FOR_FINAL_REVIEW。
 原规格批准有效；新源码的完整前置与 V2、重新审查仍待执行，旧 RF-001 保持 open。
-因此仍须修复、验证新源码和取得新的 implementation Review；本轮未 finalize/code approval/Gate。
+修复已提交，新源码仍须完整验证和新的 implementation Review；本轮未 finalize/code approval/Gate。
 单次 action005 已实际消费；旧通过证据保持，不代表修复后候选已通过。
 本机有界查找未发现匹配真实报告，F 缺输入；TASK-0055、发布及后续阶段依原进入条件。
 
