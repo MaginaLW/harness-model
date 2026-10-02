@@ -1,5 +1,16 @@
 # 维护收尾与待办
 
+## 2026-10-02 最新核定：E4 已保护合并，五项任务已闭账
+
+- [PR #44](https://github.com/MaginaLW/harness-model/pull/44) 已实际合并；固定源码 S `993a9a0619577117417d80de96e73aa18270b464`，发布 Q `f5707ff178b760bb0215c7d5cb773cc4d06c75d6`，远端合并 M `db3efabab562971aef1a6eb1317b679d42eeadb9`。独立核验及主 agent 复核确认 M 有序父提交为 `[48bf777106b9fdfef1ddf83d3abc95859fb8e580, Q]`、M/Q 树一致、所需源码及历史祖先完整、本地配置提交 `52474d93101d387ccca853debbe6fdcc7f565c8d` 未发布；保护未降低。
+- TASK-0062 原有 10 项 Windows V1 全部通过：单元 1994 项通过，回归和覆盖率轮各 3008 项通过、仅各保留同一既有 Windows FIFO 跳过。独立 Design/Implementation Review、批准及准确 Q Gate 完成；预算、选择器、MINENV、断言与阈值保持。
+- [准确 Q 的 required CI](https://github.com/MaginaLW/harness-model/actions/runs/36939643115)（attempt 1、check/job `110627914984`、app `15368`）完整 SUCCESS：Linux 合约 185 项通过，完整测试 3004 项通过、5 项既有平台跳过；总覆盖率 88.92%≥85%，累计 diff coverage 94%≥90%，whitespace、Ruff、format（605 文件）、mypy（44 文件）通过。whitespace 依据原连续 `bash -e` 脚本后续成功及整步成功作顺序推断，并非独立子进程凭据。
+- 原固定证明的 111 项正向事实与唯一 association MISMATCH/STOP 保留；经非作者审查并实际执行的窄增量正向绑定合并前后同一不可变 run/check-suite/job/attempt，另用 60 次实际比较证明 20 个历史祖先在 S/Q/M 中。COMPOSITE_PROVEN 已复核；合并后空关联数组的原因仍 UNKNOWN，不以缺项作为正向证据。
+- 证明和复核后才实际 fetch M、核对本地对象并 fast-forward，再将 TASK-0054/0055/0056/0057/0062 各原生 close 一次为 MERGED、merge_commit=M，五份记录校验通过。本地追加治理提交 `84029ccabf6ea607c748c233615e6f0b8d53f407`，见 [TASK-0062 closeout](../../.ai/tasks/TASK-0062/closeout-001.md)。post-Q 记录不冒充属于已发布 Q/M，不递归发布。
+- TASK-0053 保持 push-only；0058/0059/0060 的准确 CI 失败、0061 的本地 FAILED 与所有原件保持，不由本次成功改为 MERGED。主工作区普通本地合并保留既有历史、两份配置及三份用户草稿；最终整合由独立非作者审计，本地提交不推送。
+- 既定本机及相关 PR 有界只读搜索未找到目标匹配真实 ZCode 原报告；F 仍缺原件，真实导入验收未执行，不声称全局无报告或以 synthetic 替代。I1/I2/E5/I5、Phase 3/4、TASK-0028 Option C 等条件阶段未启动，也未启动 provider/付费执行。
+- 最终并行 2 个 sub-agent：非作者审计实际主工作区整合，源码作者仅独立于发布操作者核对 operation 记录；主 agent 负责三份权威文档、统一提交及串行本地合并。以下历史全文保留。
+
 ## 2026-10-02 最新核定：owned commit 自动维护输入已隔离，完整新发布验证待执行
 
 - 最窄 task-free 测试修复已独立审查并提交 `e8b2f5d21fb3d1f3ff34b90c387e02769d2f1765`，只改三份测试文件：fixture SHA `279661c9d28ab94121c3d2b2f7dc15b75c6028c0849ae96cc9a0428ef9088ebd`、helper SHA `b1d40bc4feedace0f8a1b48e7920cdeee82eb5506607165452e7f61ae756e443`、test SHA `719b4f727b27369237f134a0377ac01c12a774624080e09bb4b5cbe282dc18d6`。仅真实匹配的 owned private context、可识别 leading separated `-c` 后的 commit 在最后一个 global 参数位置插入临时 `maintenance.auto=false`；不写 host/repo 配置。default、foreign、noncommit、未知 global 形式的 argv 保持原样，原环境 binder 不变。

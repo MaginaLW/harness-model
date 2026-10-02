@@ -1,5 +1,15 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-02 最新核定：E4 实际交付完成，F 仍待真实报告
+
+- 固定 S `993a9a0619577117417d80de96e73aa18270b464`、发布 Q `f5707ff178b760bb0215c7d5cb773cc4d06c75d6` 经 [PR #44](https://github.com/MaginaLW/harness-model/pull/44) 保护合并为 M `db3efabab562971aef1a6eb1317b679d42eeadb9`。实际独立核验及主 agent 复核 M 有序父提交 `[48bf777106b9fdfef1ddf83d3abc95859fb8e580, Q]`、M/Q 等树、完整来源历史及本地配置提交524排除；保护和质量阈值保持。
+- TASK-0062 原十项 Windows V1 全通过：单元1994、回归及覆盖率轮各3008通过，分别仅保留同一既有Windows FIFO跳过；独立Design/Implementation审核、批准、准确Q Gate完成。完整 [required CI](https://github.com/MaginaLW/harness-model/actions/runs/36939643115) run36939643115/attempt1/check110627914984/app15368 SUCCESS：合约185，Linux完整测试3004通过/5既有平台跳过，总覆盖率88.92%≥85%、累计diff94%≥90%、whitespace/Ruff/format605/mypy44通过。whitespace依据原连续 `bash -e` 脚本及整步成功作顺序推断。
+- 原固定证明唯一 association MISMATCH/STOP 不改写；非作者审查后的窄增量实际正向绑定合并前后同一不可变run/check-suite/job/attempt，另完成20个历史祖先在S/Q/M中的60次实际比较；其余原111项正向事实保持。复合结论 COMPOSITE_PROVEN 已复核，关联数组变化原因 UNKNOWN。
+- 证明后才实际 fetch M、核本地对象并fast-forward，TASK-0054/0055/0056/0057/0062各原生close一次为MERGED、merge_commit=M，随后五份记录校验通过。本地追加治理提交 `84029ccabf6ea607c748c233615e6f0b8d53f407`，见 [TASK-0062 closeout](../../../.ai/tasks/TASK-0062/closeout-001.md)。post-Q记录不冒充属于Q/M、不递归发布；普通本地整合保留原历史、两份配置及三份用户草稿，最终事实另由独立非作者审计。
+- 53保持push-only，58/59/60三次准确CI失败与61实际FAILED保留原状态及全部原件，本次成功不替历史失败闭账。I1/I2/E5/I5、Phase3/4、TASK-0028 Option C等条件阶段不启动。
+- F仍缺目标匹配真实ZCode原报告：既定本地及相关PR有界只读搜索已完成且无匹配，不声称全局无报告，未执行真实导入验收、不以synthetic替代、不启动provider或付费调用。
+- 最终并行2个sub-agent：非作者审计实际主工作区整合，源码作者仅独立于发布操作者核对operation记录；主agent负责三份文档、统一提交及依赖串行的本地合并。以下历史全文保留。
+
 ## 2026-10-02 最新核定：owned commit 自动维护输入已隔离，完整新发布验证待执行
 
 - 最窄 task-free 测试修复已独立审查并提交 `e8b2f5d21fb3d1f3ff34b90c387e02769d2f1765`，只改三份测试文件：fixture SHA `279661c9d28ab94121c3d2b2f7dc15b75c6028c0849ae96cc9a0428ef9088ebd`、helper SHA `b1d40bc4feedace0f8a1b48e7920cdeee82eb5506607165452e7f61ae756e443`、test SHA `719b4f727b27369237f134a0377ac01c12a774624080e09bb4b5cbe282dc18d6`。仅真实匹配的 owned private context、可识别 leading separated `-c` 后的 commit 在最后一个 global 参数位置插入临时 `maintenance.auto=false`；不写 host/repo 配置。default、foreign、noncommit、未知 global 形式的 argv 保持原样，原环境 binder 不变。

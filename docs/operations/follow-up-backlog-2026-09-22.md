@@ -1,5 +1,15 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-02 最新核定：E4 交付与五项闭账完成，F 缺真实原件
+
+- [PR #44](https://github.com/MaginaLW/harness-model/pull/44) 已保护合并：固定 S `993a9a0619577117417d80de96e73aa18270b464`，发布 Q `f5707ff178b760bb0215c7d5cb773cc4d06c75d6`，远端 M `db3efabab562971aef1a6eb1317b679d42eeadb9`。M 有序父提交 `[48bf777106b9fdfef1ddf83d3abc95859fb8e580, Q]`、M/Q 等树、完整来源历史及本地配置提交524排除已独立实际证明并由主 agent 复核。
+- TASK-0062 原有 Windows V1 十项、独立审核、批准、准确 Q Gate 全通过：单元1994，回归和覆盖率轮各3008通过、各保留同一既有FIFO跳过。[required CI run36939643115](https://github.com/MaginaLW/harness-model/actions/runs/36939643115)/attempt1/check110627914984/app15368 完整 SUCCESS：合约185，Linux测试3004通过/5既有平台跳过；总覆盖率88.92%≥85%、累计diff94%≥90%、whitespace/Ruff/format605/mypy44通过。whitespace依据原连续 `bash -e` 脚本及整步成功作顺序推断。
+- 原固定证明 association STOP 保留；窄增量实际正向绑定合并前后同一不可变run/check-suite/job/attempt，另以60次实际比较证明20个补充祖先在S/Q/M中，其余原111项正向事实保持。复合结论 COMPOSITE_PROVEN 已复核，关联数组变化原因 UNKNOWN。
+- 证明后实际 fetch/核对/fast-forward M，再将 TASK-0054/0055/0056/0057/0062 各原生关闭一次为 MERGED、merge_commit=M，五份记录校验通过。本地追加治理提交 `84029ccabf6ea607c748c233615e6f0b8d53f407`，见 [closeout](../../.ai/tasks/TASK-0062/closeout-001.md)；post-Q记录不属于已发布Q/M、不递归推送。主工作区普通本地合并保留原历史、两份配置和三份草稿，最终整合另作独立审计。
+- TASK-0053仍push-only，0058/0059/0060三次准确CI失败与0061实际FAILED保留原状态及所有原件，不被本次成功覆盖。当前可进入且获准的E4交付已完成。
+- F：既定本机及相关PR有界搜索未找到目标匹配真实ZCode原件，真实导入验收未执行，不宣称全局无报告或用synthetic替代。I1/I2/E5/I5、Phase3/4、TASK-0028 Option C等条件阶段仍待原条件，未启动provider/付费执行。
+- 最终并行2个sub-agent分别负责非作者实际整合审计与独立operation审计；主agent串行更新权威文档、提交及本地合并。以下历史全文保留。
+
 ## 2026-10-02 最新核定：owned commit 自动维护输入已隔离，完整新发布验证待执行
 
 - 最窄 task-free 测试修复已独立审查并提交 `e8b2f5d21fb3d1f3ff34b90c387e02769d2f1765`，只改三份测试文件：fixture SHA `279661c9d28ab94121c3d2b2f7dc15b75c6028c0849ae96cc9a0428ef9088ebd`、helper SHA `b1d40bc4feedace0f8a1b48e7920cdeee82eb5506607165452e7f61ae756e443`、test SHA `719b4f727b27369237f134a0377ac01c12a774624080e09bb4b5cbe282dc18d6`。仅真实匹配的 owned private context、可识别 leading separated `-c` 后的 commit 在最后一个 global 参数位置插入临时 `maintenance.auto=false`；不写 host/repo 配置。default、foreign、noncommit、未知 global 形式的 argv 保持原样，原环境 binder 不变。
