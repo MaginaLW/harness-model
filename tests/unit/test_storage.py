@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -18,6 +19,57 @@ from aiflow.storage import (
     reserve_task_id,
     resolve_task_path,
 )
+
+
+def test_yaml_reads_current_equal_size_text_despite_restored_mtime(tmp_path: Path) -> None:
+    task = tmp_path / ".ai" / "tasks" / "TASK-0001"
+    task.mkdir(parents=True)
+    path = task / "value.yaml"
+    path.write_text("x: [original]\n", encoding="utf-8")
+    first = read_task_yaml(tmp_path, "TASK-0001", "value.yaml")
+    first["x"].append("caller mutation")
+    assert read_task_yaml(tmp_path, "TASK-0001", "value.yaml") == {"x": ["original"]}
+    before = path.stat()
+    path.write_text("x: [modified]\n", encoding="utf-8")
+    os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+    assert path.stat().st_size == before.st_size
+    assert read_task_yaml(tmp_path, "TASK-0001", "value.yaml") == {"x": ["modified"]}
+
+
+def test_warm_yaml_cache_preserves_missing_corrupt_and_escape_errors(tmp_path: Path) -> None:
+    task = tmp_path / ".ai" / "tasks" / "TASK-0001"
+    task.mkdir(parents=True)
+    path = task / "value.yaml"
+    path.write_text("x: 1", encoding="utf-8")
+    read_task_yaml(tmp_path, "TASK-0001", "value.yaml")
+    with pytest.raises(StorageError) as escape:
+        read_task_yaml(tmp_path, "TASK-0001", "../value.yaml")
+    assert escape.value.code == "STORAGE_PATH_ESCAPE"
+    path.unlink()
+    with pytest.raises(StorageError) as missing:
+        read_task_yaml(tmp_path, "TASK-0001", "value.yaml")
+    assert missing.value.code == "STORAGE_READ_FAILED"
+    path.write_text("items: [", encoding="utf-8")
+    with pytest.raises(StorageError) as corrupt:
+        read_task_yaml(tmp_path, "TASK-0001", "value.yaml")
+    assert corrupt.value.code == "STORAGE_PARSE_FAILED"
+
+
+def test_warm_yaml_cache_keeps_current_contract_validation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = Path(__file__).resolve().parents[2]
+    schemas = tmp_path / ".ai" / "schemas"
+    shutil.copytree(source / ".ai" / "schemas", schemas)
+    task = tmp_path / ".ai" / "tasks" / "TASK-0001"
+    task.mkdir(parents=True)
+    shutil.copyfile(source / ".ai" / "policy" / "permissions.yaml", task / "value.yaml")
+    monkeypatch.chdir(tmp_path)
+    read_task_yaml(tmp_path, "TASK-0001", "value.yaml", contract_name="policy")
+    (schemas / "policy.schema.json").write_text(json.dumps({"not": {}}), encoding="utf-8")
+    with pytest.raises(ContractError) as caught:
+        read_task_yaml(tmp_path, "TASK-0001", "value.yaml", contract_name="policy")
+    assert caught.value.code == "CONTRACT_VALIDATION_FAILED"
 
 
 def test_domain_error_has_stable_machine_representation() -> None:

@@ -1,0 +1,194 @@
+allowed_scope:
+- src/aiflow/verification_temporary.py
+- src/aiflow/verification.py
+- src/aiflow/verification_service.py
+- src/aiflow/process_runner.py
+- src/aiflow/cli.py
+- tests/unit/test_verification_temporary.py
+- tests/unit/test_verification_plan.py
+- tests/unit/test_process_runner.py
+- tests/integration/test_verify_command.py
+- docs/operations/pytest-temporary-roots.md
+- tests/integration/test_external_review_command.py
+- tests/integration/test_begin_close_commands.py
+- src/aiflow/document_parsing.py
+- src/aiflow/policy.py
+- src/aiflow/storage.py
+- tests/unit/test_document_parsing.py
+- tests/unit/test_policy.py
+- tests/unit/test_storage.py
+- tests/integration/repository_fixture.py
+- tests/integration/conftest.py
+- tests/integration/test_repository_fixture.py
+- src/aiflow/external_review.py
+- tests/unit/test_external_review_metadata.py
+- docs/operations/external-review-import.md
+base_commit: ef92b795da729566870ff4878f100a4ffe319db5
+branch: codex/e4-verification-control
+created_at: '2026-09-30T02:11:18Z'
+current_state: MERGED
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Add explicit run-owned external pytest temporary roots for governed verification
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/verification_temporary.py
+  - src/aiflow/verification.py
+  - src/aiflow/verification_service.py
+  - src/aiflow/process_runner.py
+  - src/aiflow/cli.py
+  - tests/unit/test_verification_temporary.py
+  - tests/unit/test_verification_plan.py
+  - tests/unit/test_process_runner.py
+  - tests/integration/test_verify_command.py
+  - docs/operations/pytest-temporary-roots.md
+  - tests/integration/test_external_review_command.py
+  - tests/integration/test_begin_close_commands.py
+  - src/aiflow/document_parsing.py
+  - src/aiflow/policy.py
+  - src/aiflow/storage.py
+  - tests/unit/test_document_parsing.py
+  - tests/unit/test_policy.py
+  - tests/unit/test_storage.py
+  - tests/integration/repository_fixture.py
+  - tests/integration/conftest.py
+  - tests/integration/test_repository_fixture.py
+  - src/aiflow/external_review.py
+  - tests/unit/test_external_review_metadata.py
+  - docs/operations/external-review-import.md
+  inputs:
+  - TASK-0055 fifth full native V2 failed with pytest deadline failures; its preserved
+    source and evidence are the baseline.
+  - A pytest basetemp within the repository would change non-Git fixture semantics.
+  - The owner explicitly authorized current TODO completion, necessary approvals,
+    push and merge; this implementation task retains separate publication.
+  - Preserved second full V2 and original-assertion diagnostics confirm Windows fixture
+    physical-path failures and an unbounded Git-helper timeout cleanup; command timeout
+    cause remains unknown.
+  - Preserved third full V2 has two deadline failures; an independently completed
+    Python 3.11 profile measures repeated safe YAML decoding, without proving the
+    original timeout cause.
+  - Preserved fourth full V2 passes thirteen checks but integration exceeds its unchanged
+    600-second deadline. A complete diagnostic and isolated initial-repo copying benchmark
+    identify a test-fixture optimization candidate, not a full V2 pass or proof of
+    timeout cause.
+  - The unchanged fixed fixture integration prerequisite timed out at 600156ms. Actual
+    locked Python 3.13.15 and prior 3.14.7 probes show path/handle ctime mismatch
+    on the same ordinary 127-character, 1305-byte file while birthtime agrees.
+  - The metadata-fixed canonical integration600 timed out; a complete passive diagnostic
+    actually passed at 818.91s. Current forty-call paired endpoint observation motivates
+    only a narrow direct full-distribution candidate. Python 3.13 raw function timing
+    anomalies remain unknown and do not support production optimization.
+  - The untouched direct candidate still exceeded integration600; a private complete
+    durations run passed866 with one original skip at639.96s. Ten isolated success
+    copy pairs motivate a bounded ordered warm-copy design, not fullwarm or native
+    PASS. Added eligibility reads and parallel abort/audit timing differences are
+    explicit in the new specification; old failures remain immutable.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Add an explicit optional external pytest temporary root with independent ordinary-path
+    and run-ownership guards.
+  - Append fixed owned basetemp arguments after unchanged Policy validation and preserve
+    execution evidence and finalization context.
+  - Retain existing environment, selectors, budgets, thresholds and default behavior.
+  - Repair only test-side Windows physical I/O and owned Git process-tree timeout
+    cleanup while retaining logical fixture roots, original assertions, command deadlines
+    and production environment.
+  - Reuse only bounded content-keyed pure YAML decoding with independent return values,
+    fresh actual file reads and all unchanged schema, semantic, identity and freshness
+    validation.
+  - Reuse only a session-private pristine initial test repository after the original
+    real builder succeeds at its original target; physically copy independent Git
+    files after current complete input eligibility, preserving cold fallback, partial
+    failure behavior, all original assertions and subsequent real governance.
+  - Change only external_review metadata identity Windows creation-time selection
+    to available st_birthtime_ns, including zero, with legacy attribute-absence st_ctime_ns
+    fallback; retain POSIX ctime and every current identity, double-read, raw-byte
+    and path guard. Supporting tests and documentation are a separate task-free safety
+    maintenance unit, retained in cumulative validation scope.
+  - Qualify only the complete existing Windows mingw64/bin Git endpoint in the session-private
+    test fixture, live-binding both core/wrapper and preserving every source/config/template/attributes/owner/cold/error
+    guard. Safety fixture/test changes are a separate task-free unit. Runtime computed
+    PATH changes honestly; production environment algorithm and Git context/transport
+    are untouched.
+  - Use bounded four-worker consecutive-file batches only for the current qualified
+    owner warm snapshot. Preserve actual DirEntry and DFS errors, drain before recursion/directory
+    metadata and on every abort, retain actual partials without retry, and keep the
+    original serial path before copying for unsupported inputs or known custom bindings.
+    This safety fixture implementation is a separate task-free unit; no production
+    or Policy behavior changes are added.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0056
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Exercise default and opt-in plans, CLI, native process execution and zero-write
+    unsafe-path refusal.
+  - Run complete Policy-required V2 with independent verifier and targeted mutation;
+    preserve failures.
+  - Obtain independent design and implementation review, current approvals and Gate.
+  - Reproduce original failing cases and complete both affected integration modules
+    under the actual native minimal environment and run-owned leaf depth before complete
+    V2.
+  - Verify content drift despite equal size and restored mtime, missing/unsafe/corrupt
+    files, live schema and semantic errors, deep result isolation, aliases/cycles,
+    size/capacity bounds and parser/custom-value fallback; measure the complete unchanged
+    module before full V2.
+  - Verify session ownership, both helper imports, independent Git objects/index/refs,
+    source/config/template drift, unsafe inputs and original builder/copy error behavior;
+    measure the complete original integration selection before full V2.
+  - Run exact locked Python 3.11, 3.13 and 3.14 metadata safety cases; require current
+    full original external-review module and original integration600 comparison before
+    selecting exact 3.13.15 for a fresh complete default V2. Preserve CI Python 3.11
+    and all existing checks, deadlines, selectors, thresholds and mutation safeguards.
+  - Require real supported Windows direct qualification, complete original fixture/external-review
+    modules and full unchanged integration600 under the newly bound actual environment
+    before a fresh native V2. Preserve CI Python 3.11, all fourteen checks/five mutations,
+    original deadlines/selectors/assertions, thresholds and formal independent reviews/Gate.
+  - Verify readonly directory metadata, physical independence, pre-copy eligibility,
+    OS/shutil aggregation and deterministic abort priority, actual thread drain and
+    retained partials. Measure the actual full warm implementation including all eligibility
+    costs and unchanged guards before original fixture/external-review and integration600
+    prerequisites; preserve all65 existing fixture cases/ASTs.
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 992b927ce833a8fa9876c7e278d024eca7903763621ea84391c2ad4c09f6916c
+goal: Add explicit run-owned external pytest temporary roots for governed verification
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-09-30T23:20:05Z'
+subject_commit: 9dca04dc18e1551dc86987eb594f84f9d37b47ad
+task_id: TASK-0056
+updated_at: '2026-10-01T23:56:09Z'
+worktree_dirty: false
+worktree_dirty_paths: []

@@ -1,0 +1,17 @@
+{
+  "action_type": "github_pull_request_update",
+  "target": "https://github.com/MaginaLW/harness-model/pull/44",
+  "parameter_summary": "{\"base\":\"48bf777106b9fdfef1ddf83d3abc95859fb8e580\",\"base_ref\":\"main\",\"body_review_sha256\":\"8796fc573d1a00f6b7ac5688eb357da306215ccc0f84a7c88af23f911c7e07b3\",\"body_sha256\":\"d2d5d9b6dedbca7d436c450c9475e57831835fa4fb1ab5ab61eb28f4caef771c\",\"command_input_sha256\":\"cb72f95f6cef11c7f868e91bb43f901232544bfa6f829c5eb58779ebdfd490bb\",\"head_ref\":\"codex/e4-cumulative-delivery\",\"operation\":\"update existing PR title/body only\",\"pr\":44,\"publication_head\":\"f5707ff178b760bb0215c7d5cb773cc4d06c75d6\",\"push_receipt_sha256\":\"15c9bf6069123c355dedad23c5edcb91ca16513422381f4dca92d30677007df7\",\"readonly_receipts\":{\"main\":\"7de2b7daed3fc7382f99e410c89867b12ee7b5c689f81aecbf2d164d3b3461e4\",\"pr\":\"b47a0bf65176167dd1b8cf6cc8003c7608204f3a26a7b16c3ed00b811a59a136\",\"protection\":\"868383dec97a8a435446a2d7c1cbad2e9cc72b56c0685285f147e64e840ca815\",\"ref\":\"24992f1ae54825a23f64e11d58b5d9cf5900ce2a43712743b5b5abb52cc843b8\",\"repo\":\"ca0d69222043c6bcf33c9851620b3e51067e34f43da263eeca3d7385efd35de3\"},\"repo\":\"MaginaLW/harness-model\",\"source\":\"993a9a0619577117417d80de96e73aa18270b464\",\"title\":\"feat: import external reviews and harden native verification\"}",
+  "subject_commit": "993a9a0619577117417d80de96e73aa18270b464",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "bc32da5ef182bdd836c0c072807154ee0aba6ed990536eaa5d011edc8340bf99",
+  "conditions": [
+    "Existing explicit owner authorization binds this concrete action once.",
+    "Fresh exactB/Q/strict protection/ownrepo/openliteralPR44 and actual ordinary push0/readback verified.",
+    "Actual source-nonauthor approves exact literal title/body; no new PR, reviewer messages or base/head change.",
+    "Complete accurate-Q original CI and separately authorized protected merge remain required.",
+    "Read back exact UTF8 title/body/Q/B after actual invocation."
+  ],
+  "expires_at": "2026-10-01T23:29:48.956269+00:00",
+  "single_use": true
+}

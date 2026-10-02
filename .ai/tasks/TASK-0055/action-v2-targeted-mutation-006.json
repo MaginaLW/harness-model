@@ -1,0 +1,16 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0055",
+  "parameter_summary": "Execute the original canonical five fixed safeguard mutations locally for own complete TASK-0055 V2 on the exact current source, in owned disposable detached worktrees with original selectors and budgets; no provider, network, paid call, push, PR or merge.",
+  "subject_commit": "2e6f69f3f820d1a72989c8e70d8daff70ba9f2db",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "cfcc4b48f9f099c182a954bf7206ff484b116c3b2e1557b66df95bdc563b58e8",
+  "conditions": [
+    "Current owner-approved specification b5cf71ea6040ea2e3bc1d145cf44b0861a0206861561e2d76442ab9641f1d19f and unchanged Policy d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1 require the complete original V2 on own source 2e6f69f3f820d1a72989c8e70d8daff70ba9f2db.",
+    "Use only original .ai/mutations/phase-02-critical-manifest.json SHA256 c7df2f0549822ed527d5712acb425adbc9dab90c72016abb482c1ef18e8bf50a with all five unchanged fixed mutations, original baseline/mutant selectors and 60-second budgets.",
+    "Require fresh current classification, actual independent verifier and current single-use approval; freeze shared source/refs/topology/runtime during the native run except native-owned ledger and owned disposable mutation worktrees restored before handback. Preserve all historical failures, consumed actions, old specifications/reviews and all106 foreign TASK-0056 tracked blobs.",
+    "Record actual raw streams, native and tool terminal exits, mutation consumption and protected before/after equality; unknown descendants remain unknown, and dependency passes do not replace this task own verification."
+  ],
+  "expires_at": "2026-10-01T12:50:48Z",
+  "single_use": true
+}

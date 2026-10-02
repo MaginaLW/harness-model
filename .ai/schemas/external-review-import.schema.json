@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/external-review-import.schema.json",
+  "title": "AI Flow immutable external review attachment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "schema_version",
+    "source_key_sha256",
+    "input_sha256",
+    "envelope",
+    "repository_mapping"
+  ],
+  "properties": {
+    "kind": {
+      "const": "external-review-import"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "source_key_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "input_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "envelope": {
+      "$ref": "https://aiflow.local/schemas/external-review.schema.json"
+    },
+    "repository_mapping": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "https://aiflow.local/schemas/external-review-repository-mapping.schema.json"
+        }
+      ]
+    },
+    "previous_record_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+    }
+  }
+}

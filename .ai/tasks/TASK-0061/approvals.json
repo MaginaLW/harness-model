@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "owner-authorized-root",
+    "approval_type": "spec",
+    "approved_at": "2026-10-01T20:57:19Z",
+    "base_commit": "508cf73d10be4cdd2ca4409e706fe68ead10a69d",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing direct owner authorization to complete eligible TODOs with required approvals, push and merge; exact frozen TASK-0061 spec bee8810306940cfe43ea553095d95c0c4a43ac8f4916be9103f2798b2ac898c7 independently approved by actual nonauthor REV-0001/r1; no check waiver, conditional expansion or reuse of consumed publication actions.",
+    "schema_version": "1.0",
+    "spec_sha256": "bee8810306940cfe43ea553095d95c0c4a43ac8f4916be9103f2798b2ac898c7",
+    "subject_commit": "508cf73d10be4cdd2ca4409e706fe68ead10a69d",
+    "task_id": "TASK-0061"
+  }
+]

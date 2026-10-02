@@ -1,0 +1,16 @@
+{
+  "kind": "external-review-repository-mapping",
+  "schema_version": "1.0",
+  "mapping_record_id": "synthetic-map-001",
+  "locator": "https://example.invalid/synthetic/repository",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "confirmation": {
+    "checked_by_label": "fixture-operator",
+    "checked_at": "2026-09-27T00:00:00Z",
+    "method": "manual_report_git_check",
+    "fact_refs": [
+      "report:subject-header",
+      "git:base-commit"
+    ]
+  }
+}

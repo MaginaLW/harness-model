@@ -1,0 +1,46 @@
+# Review Package
+
+## 审核目标
+
+对 TASK-0062 的真实 B..S 累计实现与本轮完整原生 V1 作独立实施审查。Reviewer publication-cumulative-independent-reviewer 未参与源码、测试、冻结 spec 或 Policy 编写。B=48bf777106b9fdfef1ddf83d3abc95859fb8e580，S=993a9a0619577117417d80de96e73aa18270b464，验证准入 H=93674e94d260b54efcab7c16ba4345b077be80ee；实施 context=3ef153e8d0f0925aa9d51ed367141763eea1640a64d15c2484823d923504077c。
+
+## 背景
+
+原生分类 REVIEW/V1，own scope 仅 .ai/tasks/TASK-0062/**。冻结 spec559f4f716a7ac8192a0afbe11dc9960ec18ee196f9ba5f99d68cd572dda4313e、classification inputbc32da5ef182bdd836c0c072807154ee0aba6ed990536eaa5d011edc8340bf99、Policy d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1 保持。真实 Design REV-0001/r1 与 spec approval/begin 已完成；本次使用新完整 native evidence，不复用旧失败轮次为通过证据。
+
+## 代码地图
+
+当前 379 项累计 map0713dfd9e35f41f4d32fc7166c51e3fa854eac6130e359f82b43dece5a850762 与真实 B..S name-status 原件一致。361 个此前审查的 Git modes/types/blobs 保持，6 项为三份追加式 authority docs 与三个 test-only 修复文件，12 项新 Task61 记录保留其准入和 FAILED 事实。累计范围包括外部报告 envelope/import、临时 pytest 根、bounded process runner、有限 YAML 资格/缓存/返回图隔离及真实 fixture 优化；own S..H 空业务 diff 不是累计审查范围。源54/55/56/57 的真实 Gate、fe599 历史闭环和全部失败祖先保留；foreign56 原106 Git headers/blobs 完全一致，524 仍非 S 祖先。
+
+## 语义变更
+
+外部报告仍 fail-closed、文本不执行，原 report/source identity 与 metadata 不可变，replay/no-op 冲突和受控 Git transport 所有权、原始异常优先及有界清理保持。有限 SafeLoader MRO/类 namespace/function code 资格、独立对象/depth/cycle预算和未知配置 fallback 保持，不承诺任意 Python 篡改认证。临时根身份、禁止仓库路径、owner/cleanup、原 guards 与 graph isolation 未减弱。
+
+最新 e8b2f5d21fb3d1f3ff34b90c387e02769d2f1765 仅改三个测试文件。实际 owned context/cwd 中，识别 separated leading global -c 后的 commit 才追加最后 command-local maintenance.auto=false；default/foreign/unowned/noncommit/未知 global forms 返回原 argv，无持久配置或父环境修改。argv binder identity/code 在原标准 dispatch 中检查，direct current 首部原 guard 保持。source 对两个 Git target 的 types/names/bytes 比较和 reference 对 seed 全 metadata/mode 比较、config allowlist、parent GIT_* 守卫、owner/seed/assertions/skips/copy/thread/Popen cleanup 保留。
+
+物理 SHA fixture279661c9d28ab94121c3d2b2f7dc15b75c6028c0849ae96cc9a0428ef9088ebd/helperb1d40bc4feedace0f8a1b48e7920cdeee82eb5506607165452e7f61ae756e443/test719b4f727b27369237f134a0377ac01c12a774624080e09bb4b5cbe282dc18d6 与独立审查候选相同；物理 CRLF 与固定 S Git LF 分别绑定。103 个 S508 原 named tests 完整 AST 仍相同。作者204专项通过；实际非作者7个首轮成功及1个仅纠正私有 CONFIG 期望后通过保留各自真实终态，没有单轮8-pass claim。
+
+## 风险
+
+58/59/60 的准确发布头 CI FAILURE 和61的完整原生 FAILED 各自不可被未来成功替换；61 regression1 仍存在，launcher0/后续coverage0 不改变结论。旧 seed info/refs 可解释 types/names/bytes 不匹配，真实生成者、premaintenance shard count 和唯一历史原因 UNKNOWN。默认 Git2.55 controlled 对照只证明自动维护可发生及 owned false 可阻断。
+
+最终 Q、exact-Q Gate、完整 Linux85总/90累计diff与其余 quality、保护 merge M 和独立 proof 未完成。仅54/55/56/57及成功62在真实 M/B/Q/ordered parents/tree/ancestry 证明后可 native-close；53 push-only，58–61 和28不得如此 close。后续 G 与 Q/M 分开，Primary17196、本地524及用户草稿必须保留，524不得发布。匹配真实报告 F 仍缺；provider/paid/conditional 后继不扩张。
+
+## 证据
+
+已验证：本轮日志目录 logs/run-20261001T221711280460Z，V1 evidence raw3824ad5bd083ffc59c58e18263200cdb2f16d441bda3b22515a8cd6c776f33a3/canonical614c1b35883a4d24e87b9137a270a40e038ab7dc3a561af4986967d1e3da15ba，全部10个 required checks 实际 passed/exit0/no timeout，20个日志引用和35件原件逐 byte/hash 归档。真实 native PID39864/create134353666308588869/exit134353684095708751/actual0/identity confirmed/retained closed；completed raw5f594291fbf4253fbbcb14212529ab05ecfd022d72d67973b15c11121c3afbff。stdout 明确 WAITING_FOR_FINAL_REVIEW passed，结论不依赖 launcher0。V1 没有 V2 phase/snapshot/reviewrefs/finalize 字段。
+
+已验证：unit1994/124.36s；regression3008 passed、1个原 FIFO skip/748.41s；coverage 同3008/1/902.82s，XML7857/8588 lines=91.49%、2518/3060 branches=82.29%。Ruff、format603files、mypy44、contract/scope/smoke均真实通过。diff-cover actual0且无可统计覆盖代码，限于 own S..ledger。原10checks/3150 native合计/3450仅外层、selectors/MINENV/85+90 未改。保护1964个 outside-own tracked、225 runtime、Git pair、refs/index/topology 在原 before/after 和审查时 current 全部相等；当前379路径、103 AST、foreign56原106及全部正 ancestry 重新绑定。
+
+未验证：最终 Q/code approval/Gate、准确 Q 全套 Linux CI 和累计90 diff、fresh remote B/PR/protection、protected merge M、独立 remote proof/fetch/close、后续 G/Primary 接回、真实目标匹配报告 F。历史失败头和61 FAILED 保留；本次 Windows native 通过不预测未来准确 Linux CI。
+
+## 审核问题
+
+- 是否检查真实10项 required/status/exit/timed_out及20日志，而非借 launcher0、旧 run 或 coverage 轮？是，实际全部 passed0/noTO。
+- 实施 context、原始日志、覆盖率、retained PID/time/exit与35归档是否绑定当前 S/H？是，原生 context 与 current build 一致，保护 facts 当前仍相等。
+- owned commit 是否仅最窄路由变化，原103 AST、guard/default/foreign/unknown 回退仍保持？是，固定字节和此前实际独立反例相符，本轮完整 native 通过。
+- 是否将本次批准误作准确 Q Linux CI/M/F 或58–61失败的完成？否，这些限制明确保留。
+
+## 推荐结论
+
+APPROVE。本次真实非作者累计 Implementation Review 在固定 S、当前 context 与新完整 V1 上无未解决实质 Finding。随后仍须原生 code approval、最终 Q Gate、完整准确 Q required CI、fresh action绑定和独立 M proof；本结论不替代任何后续门禁或缺失事实。

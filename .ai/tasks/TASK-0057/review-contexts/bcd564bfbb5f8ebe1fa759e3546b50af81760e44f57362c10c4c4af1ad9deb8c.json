@@ -1,0 +1,214 @@
+{
+  "base_commit": "46a78b44ec02a0681528f567e313fe88e109b4d9",
+  "branch": "codex/e4-cumulative-delivery",
+  "classification_input_sha256": "c50403931596eb387d60ed38182a9421ebc711d0b3d9e3799253b244f98d00a3",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/document_parsing.py",
+      "tests/unit/test_document_parsing.py",
+      "docs/operations/pytest-temporary-roots.md",
+      ".ai/tasks/TASK-0057/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Preserve current YAML decoding semantics when recognized SafeLoader dispatch changes, with conservative finite cache qualification",
+        "impact_scope": [
+          "src/aiflow/document_parsing.py",
+          "tests/unit/test_document_parsing.py",
+          "docs/operations/pytest-temporary-roots.md",
+          ".ai/tasks/TASK-0057/**"
+        ],
+        "planned_actions": [
+          "Add only a bounded precompiled recognized-standard parser dispatch qualification to the existing pure YAML decoding cache.",
+          "Preserve original cache bounds, fresh file/schema/policy/freshness work, current parser fallback and every original named test/assertion; append meaningful drift and unknown-state regression cases.",
+          "Keep production/governance and task-free tests/documentation in separate scoped commits.",
+          "Run complete original native V2 with actual independent verifier, five unchanged fixed mutations, independent reviews, current approvals and post-commit Gate before separate publication."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0057/admission-input-001.md",
+        ".ai/tasks/TASK-0057/approvals.json",
+        ".ai/tasks/TASK-0057/classification.json",
+        ".ai/tasks/TASK-0057/design-admission-001.md",
+        ".ai/tasks/TASK-0057/events.jsonl",
+        ".ai/tasks/TASK-0057/review-contexts/8e93b5c56d2226ab028e64efa14652bb0391b3560f96cd139e2f404af7d33299.json",
+        ".ai/tasks/TASK-0057/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0057/spec.md",
+        ".ai/tasks/TASK-0057/task.yaml",
+        "docs/operations/pytest-temporary-roots.md",
+        "src/aiflow/document_parsing.py",
+        "tests/unit/test_document_parsing.py"
+      ],
+      "files": [
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/admission-input-001.md"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/approvals.json"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/classification.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/design-admission-001.md"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/events.jsonl"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/review-contexts/8e93b5c56d2226ab028e64efa14652bb0391b3560f96cd139e2f404af7d33299.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/spec.md"
+        },
+        {
+          "additions": 99,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0057/task.yaml"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/pytest-temporary-roots.md"
+        },
+        {
+          "additions": 562,
+          "binary": false,
+          "deletions": 33,
+          "path": "src/aiflow/document_parsing.py"
+        },
+        {
+          "additions": 630,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_document_parsing.py"
+        }
+      ],
+      "totals": {
+        "additions": 1498,
+        "deletions": 33,
+        "files": 12
+      }
+    },
+    "goal": "Preserve current YAML decoding semantics when recognized SafeLoader dispatch changes, with conservative finite cache qualification",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0057",
+        "--actor",
+        "task57-independent-reviewer-verifier",
+        "--pytest-temp-root",
+        "${PYTEST_TEMP_ROOT}"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "bcd564bfbb5f8ebe1fa759e3546b50af81760e44f57362c10c4c4af1ad9deb8c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "fe6466059ee91d7074c5040bda161d0e4e87226579241804cb71cef87441ec4e",
+  "subject_commit": "afff0629a2f68184a3b0e388af4ed5dc08a995e0",
+  "task_id": "TASK-0057",
+  "verification_snapshot_sha256": "32ce9ec0a5d65e5759b31144bfe188d4cd8d4f2348b3cdd2fc95d79a41ee52d0"
+}

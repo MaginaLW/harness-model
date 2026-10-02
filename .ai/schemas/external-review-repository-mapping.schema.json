@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/external-review-repository-mapping.schema.json",
+  "title": "AI Flow external review repository mapping",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "schema_version",
+    "mapping_record_id",
+    "locator",
+    "repository_id",
+    "confirmation"
+  ],
+  "properties": {
+    "kind": {
+      "const": "external-review-repository-mapping"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "mapping_record_id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(?![\\s\\S])"
+    },
+    "locator": {
+      "type": "string",
+      "maxLength": 1024,
+      "pattern": "^https://[A-Za-z0-9.-]+/[A-Za-z0-9._~/%-]+(?![\\s\\S])"
+    },
+    "repository_id": {
+      "type": "string",
+      "format": "uuid",
+      "maxLength": 128
+    },
+    "confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checked_by_label",
+        "checked_at",
+        "method",
+        "fact_refs"
+      ],
+      "properties": {
+        "checked_by_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "checked_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        },
+        "method": {
+          "const": "manual_report_git_check"
+        },
+        "fact_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0056",
+  "parameter_summary": "Run the unchanged fixed five-safeguard canonical V2 mutation manifest on the admitted bounded YAML decoding candidate in owned disposable detached worktrees.",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "548fecc1ea87840b24cea291671ccd2261c7b9b194260b1587b45afe75b212b3",
+  "subject_commit": "38648440f5a862edd5a7dccfb55a60aae4f6757e",
+  "expires_at": "2026-09-30T15:15:00Z",
+  "single_use": true,
+  "conditions": [
+    "Use only .ai/mutations/phase-02-critical-manifest.json and its five unchanged fixed mutations.",
+    "Revalidate the exact committed subject, current classification, frozen spec e3fcf4e6c3f13aef834d71be2e10b4947098311e383b5bb100bdf74d183ddd85 and Policy d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1.",
+    "Preserve all three prior FAILED runs, their raw evidence, frozen specifications, Reviews and consumed action001/action002/action003 receipts.",
+    "Use the actual independently checked locked Python 3.11 runtime, validated ordinary parent and unchanged complete default fourteen-check V2 plan. Retain every command deadline, selector, environment whitelist, coverage threshold and mutation safeguard.",
+    "This new action004 follows actual design amendment003 admission, REV-0004/r1, current specification approval and committed implementation. The complete unchanged external-review module comparison is diagnostic only and does not replace full V2. Final independent current preflight is required before execution.",
+    "Bind the native source subject separately from the actual own-ledger attestation HEAD; no reuse of a prior action, no Python 3.14 substitution, no provider or remote publication in this run."
+  ]
+}

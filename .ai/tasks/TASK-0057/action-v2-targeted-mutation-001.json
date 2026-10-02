@@ -1,0 +1,16 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0057",
+  "parameter_summary": "Execute the original complete Task57 V2 and its five fixed safeguard mutations on the actual current source in owned disposable detached worktrees, with unchanged selectors and budgets.",
+  "subject_commit": "afff0629a2f68184a3b0e388af4ed5dc08a995e0",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "c50403931596eb387d60ed38182a9421ebc711d0b3d9e3799253b244f98d00a3",
+  "conditions": [
+    "Bind owner-approved specification fe6466059ee91d7074c5040bda161d0e4e87226579241804cb71cef87441ec4e and unchanged Policy d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1 to actual source afff0629a2f68184a3b0e388af4ed5dc08a995e0.",
+    "Use only original .ai/mutations/phase-02-critical-manifest.json SHA256 c7df2f0549822ed527d5712acb425adbc9dab90c72016abb482c1ef18e8bf50a, all five fixed mutations, original baseline/mutant selectors and 60-second budgets. Preserve every selected original check, deadline, MINENV and 85/90 coverage threshold.",
+    "Use actual author-independent task57-independent-reviewer-verifier; fresh preflight precedes a separate full-run GO. Freeze source, refs, topology and runtime during execution except native-owned task ledger and owned disposable mutation worktrees restored before handback. Preserve all historical failures, old records and all foreign task blobs.",
+    "Retain actual raw streams, native and tool terminal exits, mutation consumption and protected before/after equality. Unknown descendant states remain unknown. This local action performs no provider, device, paid call, push, PR, merge or deployment; independent formal Review, same-verifier finalize, code approval and Gate remain required."
+  ],
+  "expires_at": "2026-10-01T15:55:00Z",
+  "single_use": true
+}

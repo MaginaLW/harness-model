@@ -1,0 +1,15 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0056",
+  "parameter_summary": "Run the fixed five-safeguard canonical V2 mutation manifest locally on the exact task subject in disposable detached worktrees; no provider, network, device, push or merge.",
+  "subject_commit": "659f61cb4245112d75b119b103821bb06bae69ce",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "02ece1fd9a7d40ccf42bf4de625eeeeb89571b6a6de7e98445eb63d11286d01f",
+  "conditions": [
+    "Use only .ai/mutations/phase-02-critical-manifest.json and its five fixed mutations.",
+    "Revalidate the exact subject and classification, frozen spec ce99472dd171f31697288d2153e12865c5c1a111a033f5135d4333d0462adddf and Policy d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1 before execution.",
+    "Preserve all prior run artifacts and receipts; retain actual exit codes and original local logs."
+  ],
+  "expires_at": "2026-09-30T08:30:39Z",
+  "single_use": true
+}

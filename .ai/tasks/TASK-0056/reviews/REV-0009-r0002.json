@@ -1,0 +1,35 @@
+{
+  "context_sha256": "6bb1dde030ecf2ccd6bf2f1c1af73a4a5a3ce21112c4235be6c7190c71c22dad",
+  "findings": [
+    {
+      "evidence_refs": [
+        "tests/integration/test_begin_close_commands.py:33-84",
+        ".ai/tasks/TASK-0056/spec.md:50",
+        ".ai/tasks/TASK-0056/spec.md:70",
+        ".ai/tasks/TASK-0056/logs/run-20261001T034050926490Z/evidence.json"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 46,
+        "path": "tests/integration/test_begin_close_commands.py"
+      },
+      "resolution": {
+        "actor": "e4-cumulative-independent-reviewer-recovery",
+        "reason": "独立累积实施审查确认 source 9dca04dc18e1551dc86987eb594f84f9d37b47ad、snapshot 6a71bbf1c66efcf7c5addf96a0a522e2147c694214f7109d117005044303e046 修复 RF-001：成功Popen后尚未drained的首次BaseException实际进入retained owned cleanup；原异常对象及args用bare raise保留，secondary cleanup失败不覆盖首次异常，原argv/cwd/UTF-8/capture/check/communicate10和有界helper/direct/drain回收保留。真实after-spawn KeyboardInterrupt case使用实际CPython base executable和保留Popen，在test fallback cleanup之前断言原异常identity/args、ready PID与实际handle PID/creation一致、poll终态及wait0、communicate10/5。当前完整helper模块42passed，fresh native V2-006全部14required checks在原预算内实际exit0/no timeout，5原固定mutations killed；40原件、24源码、9旧材料及当前context/snapshot独立复算一致，旧另26函数AST完整保留。建议解决具体直接进程回收回退，保留旧r1/outcome/context及所有历史失败；未保留engine退出证据、exited-parent未知后代和全局进程不存在仍UNKNOWN，不作未知PID清理或全局终态声明。",
+        "resolved_at": "2026-10-01T07:13:15Z"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "成功spawn后非超时异常跳过原直接子进程清理；须保持首次异常并有界回收实际retained进程，再验证新subject"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-10-01T07:13:15Z",
+  "review_id": "REV-0009",
+  "review_stage": "implementation",
+  "reviewer": "e4-task56-independent-implementation-reviewer",
+  "revision": 2,
+  "schema_version": "1.0",
+  "summary": "独立审查 base 至 subject 的累计24个源码、测试和文档路径，并核对当前原生V2证据、14项必需检查、5个killed mutation和verification snapshot。旧源码成功spawn后的非超时异常没有保留原直接子进程清理，违反冻结规格的helper兼容及owned cleanup要求，RF-001为medium open，须修复并对新subject实际验证后重新审查。现有测试全通过不覆盖此回退；私有004仅获静态准入，尚未实际执行，不视为RF-001已解决。未保留后代仍为unknown，不作全树终态声明。",
+  "task_id": "TASK-0056"
+}

@@ -1,0 +1,3 @@
+# TASK-0056 design amendment 001
+
+REV-0001 RF-001 requires conservative bare-repository marker refusal as well as .git ancestry checks. RF-002 requires distinguishing initial argument rejection without writes from execution-time drift with preserved native failure records. The original frozen specification is preserved verbatim in spec-design-001.md and its original design context and Review remain immutable. No source, Policy, threshold, selector, budget or environment change occurred during this correction. Plan parsing creates no directories; execution guard errors must transition to FAILED before returning an error.

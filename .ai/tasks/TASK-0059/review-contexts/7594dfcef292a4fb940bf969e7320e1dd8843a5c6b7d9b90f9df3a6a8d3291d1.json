@@ -1,0 +1,39 @@
+{
+  "base_commit": "6c28ca605bec9c4dfeaf7ff7c7de8a6d4207d06a",
+  "branch": "codex/e4-cumulative-delivery",
+  "classification_input_sha256": "df51a266e6c71af280b443fae24d3d98ae9f986633b0b756f0b7aee35dc202d5",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0059/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Publish the cumulative E4 delivery and reviewed fixture reference-init repair through exact-head required CI and protected merge",
+        "impact_scope": [
+          ".ai/tasks/TASK-0059/**"
+        ],
+        "planned_actions": [
+          "Create and verify only this new publisher own governance on fixed sourceS.",
+          "Ordinary non-force fast-forward push of exact Q replacing freshly reread predecessor on existing feature ref.",
+          "Update existing PR44 title/body using independently reviewed exact bytes; do not create a duplicate PR.",
+          "Require every unchanged ai-quality-gate check on exact Q then ordinary expected-head protected merge.",
+          "Independent actual remote proof before fetching M and applicable native close54/55/56/57 and this publisher; preserve53/58 nominal states with truthful separate local postaction records."
+        ]
+      }
+    ],
+    "goal": "Publish the cumulative E4 delivery and reviewed fixture reference-init repair through exact-head required CI and protected merge",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "7594dfcef292a4fb940bf969e7320e1dd8843a5c6b7d9b90f9df3a6a8d3291d1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "cd3a5cc45c1e5c3b90d0f3daccf7396b2c7def6083b1a9072ec135731a026ec3",
+  "task_id": "TASK-0059"
+}

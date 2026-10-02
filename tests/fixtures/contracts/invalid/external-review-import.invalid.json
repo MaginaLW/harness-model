@@ -1,0 +1,53 @@
+{
+  "kind": "external-review-import",
+  "schema_version": "1.0",
+  "source_key_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "input_sha256": "invalid-synthetic",
+  "envelope": {
+    "kind": "external-review",
+    "schema_version": "1.0",
+    "target_context": {
+      "task_id": "TASK-0001",
+      "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+      "review_stage": "design",
+      "base_commit": "1111111111111111111111111111111111111111",
+      "context_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "source_subject": {
+      "repository": {
+        "kind": "aiflow_repository_id",
+        "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8"
+      },
+      "review_stage": "design",
+      "base_commit": "1111111111111111111111111111111111111111",
+      "confirmation": {
+        "checked_by_label": "fixture-operator",
+        "checked_at": "2026-09-27T00:00:00Z",
+        "method": "manual_report_git_check",
+        "fact_refs": [
+          "report:subject-header",
+          "git:base-commit"
+        ]
+      }
+    },
+    "source": {
+      "product": "ZCode",
+      "report_version": "synthetic-1",
+      "raw_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "acquisition_method": "provided",
+      "location": {
+        "kind": "private_archive_id",
+        "value": "synthetic-review-001"
+      }
+    },
+    "completion": {
+      "status": "completed",
+      "reviewed_scope": [
+        "docs/example.md"
+      ],
+      "unreviewed_scope": []
+    },
+    "findings": []
+  },
+  "repository_mapping": null
+}

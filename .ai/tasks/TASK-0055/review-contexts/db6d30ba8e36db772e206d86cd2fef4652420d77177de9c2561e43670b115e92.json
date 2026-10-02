@@ -1,0 +1,58 @@
+{
+  "base_commit": "fd560d9f12d28ef6ff155f6f46764d6c588d0f30",
+  "branch": "codex/e4-report-import",
+  "classification_input_sha256": "5c4d5af49cf630d448b44a219ccaa451bf0fb1936db127b4369689712b3e6009",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/external_review.py",
+      "src/aiflow/cli.py",
+      "src/aiflow/contracts.py",
+      ".ai/schemas/external-review-import.schema.json",
+      ".ai/schemas/external-review-repository-mapping.schema.json",
+      "tests/unit/test_external_review.py",
+      "tests/integration/test_external_review_command.py",
+      "tests/unit/test_contracts.py",
+      "tests/fixtures/contracts/valid/external-review-*.json",
+      "tests/fixtures/contracts/invalid/external-review-*.*.json",
+      "docs/operations/external-review-import.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add guided external ZCode report preflight and immutable attachment recording for existing AI Flow tasks",
+        "impact_scope": [
+          "src/aiflow/external_review.py",
+          "src/aiflow/cli.py",
+          "src/aiflow/contracts.py",
+          ".ai/schemas/external-review-import.schema.json",
+          ".ai/schemas/external-review-repository-mapping.schema.json",
+          "tests/unit/test_external_review.py",
+          "tests/integration/test_external_review_command.py",
+          "tests/unit/test_contracts.py",
+          "tests/fixtures/contracts/valid/external-review-*.json",
+          "tests/fixtures/contracts/invalid/external-review-*.*.json",
+          "docs/operations/external-review-import.md"
+        ],
+        "planned_actions": [
+          "Add bounded local envelope, raw report and repository-mapping readers with safe diagnostics.",
+          "Compare current governed target context and independently declared source subject without network calls or report execution.",
+          "Add read-only preflight and explicit record CLI commands with revalidation, drift tokens and create-only immutable publication.",
+          "Register two new closed attachment and repository-mapping contracts without changing existing formal contracts."
+        ]
+      }
+    ],
+    "goal": "Add guided external ZCode report preflight and immutable attachment recording for existing AI Flow tasks",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "db6d30ba8e36db772e206d86cd2fef4652420d77177de9c2561e43670b115e92",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "1c327a7ea5fbb9b26a64d481d4951c883761a11cb040760810b4c0c5b73cb2b0",
+  "task_id": "TASK-0055"
+}

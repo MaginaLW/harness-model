@@ -6,14 +6,17 @@ import json
 import sys
 import tempfile
 from copy import deepcopy
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
+from aiflow import verification_service
 from aiflow.errors import ContractError
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.verification import (
     VerificationContext,
+    VerificationPlan,
     _required_ids,
     parse_check_result,
     parse_verification_plan,
@@ -246,15 +249,15 @@ def test_ci_requires_existing_os_temporary_directory(tmp_path: Path) -> None:
 
 
 def test_ci_accepts_strict_existing_temporary_descendant(tmp_path: Path) -> None:
-    run_dir = tmp_path / "ci-run"
-    run_dir.mkdir()
-    parsed = parse_verification_plan(
-        load_policy_bundle(ROOT),
-        context(tmp_path, ci_run_dir=run_dir),
-        level="V0",
-        tool_available=lambda _argv: True,
-    )
-    assert parsed.run_dir == run_dir.resolve()
+    with tempfile.TemporaryDirectory(prefix="aiflow-plan-ci-") as directory:
+        run_dir = Path(directory)
+        parsed = parse_verification_plan(
+            load_policy_bundle(ROOT),
+            context(tmp_path, ci_run_dir=run_dir),
+            level="V0",
+            tool_available=lambda _argv: True,
+        )
+        assert parsed.run_dir == run_dir.resolve()
 
 
 def test_ci_uses_python_temp_root_not_runner_like_sibling(
@@ -490,6 +493,186 @@ def test_parse_does_not_create_coverage_files_in_repository_root(tmp_path: Path)
     before = (coverage.exists(), xml.exists())
     plan("V1", tmp_path)
     assert (coverage.exists(), xml.exists()) == before
+
+
+def test_optional_pytest_layout_preserves_legacy_positional_construction(tmp_path: Path) -> None:
+    legacy_context = VerificationContext(
+        ROOT, "TASK-0001", "a" * 40, "b" * 40, sys.executable, "run"
+    )
+    legacy_plan = VerificationPlan("V0", tmp_path, (), (), (), (), "b" * 40)
+
+    assert legacy_context.pytest_temp_root is None
+    assert legacy_plan.pytest_temporary is None
+    assert plan("V1", tmp_path).pytest_temporary is None
+
+
+@pytest.mark.parametrize("level", ["V1", "V2"])
+def test_explicit_pytest_root_changes_only_native_pytest_argv(tmp_path: Path, level: str) -> None:
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    bundle = load_policy_bundle(ROOT)
+    baseline = parse_verification_plan(
+        bundle, context(tmp_path), level=level, tool_available=lambda _argv: True
+    )
+    parsed = parse_verification_plan(
+        bundle,
+        context(tmp_path, pytest_temp_root=parent),
+        level=level,
+        tool_available=lambda _argv: True,
+    )
+    temporary = parsed.pytest_temporary
+    assert temporary is not None
+    assert temporary.parent == parent.resolve()
+    assert temporary.container.name == "aiflow-pytest-TASK-0001-run-001"
+    assert not temporary.container.exists()
+    assert list(parent.iterdir()) == []
+    native_ids = {"unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"}
+    before = {check.check_id: check for check in baseline.checks}
+    executions = {execution.execution_id: execution for execution in baseline.executions}
+    by_id = {check.check_id: check for check in parsed.checks}
+    eligible = 0
+    for execution in parsed.executions:
+        original = executions[execution.execution_id]
+        if set(execution.check_ids) & native_ids:
+            eligible += 1
+            leaf = temporary.leaves[execution.execution_id]
+            assert leaf == temporary.container / f"pytest-{execution.execution_id}"
+            assert execution.argv == (*original.argv, f"--basetemp={leaf.as_posix()}")
+            assert sum(argument.startswith("--basetemp=") for argument in execution.argv) == 1
+            assert not leaf.exists()
+            assert replace(execution, argv=original.argv) == original
+        else:
+            assert execution == original
+        for check_id in execution.check_ids:
+            assert by_id[check_id].argv == execution.argv
+    assert len(temporary.leaves) == eligible == (3 if level == "V1" else 5)
+    for check in parsed.checks:
+        assert replace(check, argv=before[check.check_id].argv) == before[check.check_id]
+    assert parsed.run_dir == baseline.run_dir
+    assert parsed.blocking_reasons == baseline.blocking_reasons
+    assert parsed.unverified_check_ids == baseline.unverified_check_ids
+    assert parsed.comparison_subject == baseline.comparison_subject
+
+
+def test_pytest_layout_planning_never_creates_directories(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+
+    def unexpected(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("plan parsing must not create directories")
+
+    monkeypatch.setattr(Path, "mkdir", unexpected)
+    parsed = parse_verification_plan(
+        load_policy_bundle(ROOT),
+        context(tmp_path, pytest_temp_root=parent),
+        level="V2",
+        tool_available=lambda _argv: True,
+    )
+    assert parsed.pytest_temporary is not None
+    assert list(parent.iterdir()) == []
+
+
+def test_v0_validates_explicit_pytest_root_without_allocating_layout(tmp_path: Path) -> None:
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    parsed = parse_verification_plan(
+        load_policy_bundle(ROOT),
+        context(tmp_path, pytest_temp_root=parent),
+        level="V0",
+        tool_available=lambda _argv: True,
+    )
+    assert parsed.pytest_temporary is None
+    assert parsed.checks == plan("V0", tmp_path).checks
+    assert list(parent.iterdir()) == []
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            load_policy_bundle(ROOT),
+            context(tmp_path, pytest_temp_root=parent / "missing"),
+            level="V0",
+            tool_available=lambda _argv: True,
+        )
+    assert caught.value.code == "PYTEST_TEMP_ROOT_INVALID"
+
+
+def test_deduplicated_pytest_checks_share_one_owned_leaf(tmp_path: Path) -> None:
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    bundle = bundle_copy()
+    unit = next(item for item in checks(bundle, "V1") if item["id"] == "unit_tests")
+    regression = next(item for item in checks(bundle, "V1") if item["id"] == "regression_tests")
+    regression["command"] = deepcopy(unit["command"])
+    parsed = parse_verification_plan(
+        bundle,
+        context(tmp_path, pytest_temp_root=parent),
+        level="V1",
+        tool_available=lambda _argv: True,
+    )
+    grouped = next(item for item in parsed.executions if "unit_tests" in item.check_ids)
+    assert grouped.check_ids == ("unit_tests", "regression_tests")
+    assert parsed.pytest_temporary is not None
+    assert len(parsed.pytest_temporary.leaves) == 2
+    by_id = {item.check_id: item for item in parsed.checks}
+    assert by_id["unit_tests"].argv == by_id["regression_tests"].argv == grouped.argv
+    assert grouped.timeout_seconds == 900
+    selected = verification_service._selected_plan(parsed, ("unit_tests",))
+    assert selected.pytest_temporary is parsed.pytest_temporary
+    assert selected.executions[0].argv == grouped.argv
+    assert selected.executions[0].timeout_seconds == 300
+    empty = verification_service._empty_plan(parsed)
+    assert empty.pytest_temporary is parsed.pytest_temporary
+    assert empty.executions == ()
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        ["{python}", "-m", "pytest", "tests/unit", "--basetemp=elsewhere"],
+        ["{python}", "-m", "pytest", "tests/unit", "--basetemp", "elsewhere"],
+        ["{python}", "-m", "aiflow", "--help"],
+    ],
+)
+def test_explicit_layout_rejects_preexisting_basetemp_or_non_pytest_command(
+    tmp_path: Path, command: list[str]
+) -> None:
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    bundle = bundle_copy()
+    unit = next(item for item in checks(bundle, "V1") if item["id"] == "unit_tests")
+    unit["command"] = command
+    with pytest.raises(ContractError):
+        parse_verification_plan(
+            bundle,
+            context(tmp_path, pytest_temp_root=parent),
+            level="V1",
+            tool_available=lambda _argv: True,
+        )
+    assert list(parent.iterdir()) == []
+
+
+def test_original_policy_validation_precedes_pytest_layout_planning(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    parent = tmp_path / "pytest-parent"
+    parent.mkdir()
+    bundle = v2_bundle()
+    acceptance = next(item for item in checks(bundle, "V2") if item["id"] == "acceptance")
+    acceptance["command"] = ["{python}", "-m", "pytest", "tests/unit", "-q"]
+
+    def unexpected(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("invalid Policy must fail before temporary layout planning")
+
+    monkeypatch.setattr("aiflow.verification.plan_pytest_temporary", unexpected)
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle,
+            context(tmp_path, pytest_temp_root=parent),
+            level="V2",
+            tool_available=lambda _argv: True,
+        )
+    assert caught.value.code == "VERIFICATION_COMMAND_INVALID"
+    assert list(parent.iterdir()) == []
 
 
 def test_diff_coverage_threshold_and_missing_xml_are_deterministic(tmp_path: Path) -> None:

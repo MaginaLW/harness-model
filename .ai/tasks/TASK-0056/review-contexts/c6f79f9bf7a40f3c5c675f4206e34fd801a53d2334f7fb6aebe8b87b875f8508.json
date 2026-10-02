@@ -1,0 +1,80 @@
+{
+  "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+  "branch": "codex/e4-verification-control",
+  "classification_input_sha256": "fcbb661519e8c8b902753331bb109cb22635cb203fab5af9ae4e3db9084ca023",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/verification_temporary.py",
+      "src/aiflow/verification.py",
+      "src/aiflow/verification_service.py",
+      "src/aiflow/process_runner.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_verification_temporary.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/unit/test_process_runner.py",
+      "tests/integration/test_verify_command.py",
+      "docs/operations/pytest-temporary-roots.md",
+      "tests/integration/test_external_review_command.py",
+      "tests/integration/test_begin_close_commands.py",
+      "src/aiflow/document_parsing.py",
+      "src/aiflow/policy.py",
+      "src/aiflow/storage.py",
+      "tests/unit/test_document_parsing.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_storage.py",
+      "tests/integration/repository_fixture.py",
+      "tests/integration/conftest.py",
+      "tests/integration/test_repository_fixture.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add explicit run-owned external pytest temporary roots for governed verification",
+        "impact_scope": [
+          "src/aiflow/verification_temporary.py",
+          "src/aiflow/verification.py",
+          "src/aiflow/verification_service.py",
+          "src/aiflow/process_runner.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_verification_temporary.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/unit/test_process_runner.py",
+          "tests/integration/test_verify_command.py",
+          "docs/operations/pytest-temporary-roots.md",
+          "tests/integration/test_external_review_command.py",
+          "tests/integration/test_begin_close_commands.py",
+          "src/aiflow/document_parsing.py",
+          "src/aiflow/policy.py",
+          "src/aiflow/storage.py",
+          "tests/unit/test_document_parsing.py",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_storage.py",
+          "tests/integration/repository_fixture.py",
+          "tests/integration/conftest.py",
+          "tests/integration/test_repository_fixture.py"
+        ],
+        "planned_actions": [
+          "Add an explicit optional external pytest temporary root with independent ordinary-path and run-ownership guards.",
+          "Append fixed owned basetemp arguments after unchanged Policy validation and preserve execution evidence and finalization context.",
+          "Retain existing environment, selectors, budgets, thresholds and default behavior.",
+          "Repair only test-side Windows physical I/O and owned Git process-tree timeout cleanup while retaining logical fixture roots, original assertions, command deadlines and production environment.",
+          "Reuse only bounded content-keyed pure YAML decoding with independent return values, fresh actual file reads and all unchanged schema, semantic, identity and freshness validation.",
+          "Reuse only a session-private pristine initial test repository after the original real builder succeeds at its original target; physically copy independent Git files after current complete input eligibility, preserving cold fallback, partial failure behavior, all original assertions and subsequent real governance."
+        ]
+      }
+    ],
+    "goal": "Add explicit run-owned external pytest temporary roots for governed verification",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "c6f79f9bf7a40f3c5c675f4206e34fd801a53d2334f7fb6aebe8b87b875f8508",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "3a782321645c40b71cf4921a7322872bf45285bf009218edb3e1d4d9310c53ce",
+  "task_id": "TASK-0056"
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0001",
+  "revision": 1,
+  "task_id": "TASK-0054",
+  "review_stage": "design",
+  "reviewer": "/root/e4_readiness",
+  "recorded_at": "2026-09-27T23:31:56Z",
+  "context_sha256": "0937c5c07059af29b823d9aa1cb13ff4d5340f97151ec05cd8e0ca6d1486d7dc",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "Independent frozen-spec review found three contract gaps. Add a separate source review stage and stage-specific subject rule, bound every collection accepted from an already-decoded envelope, and bind suggested mapping to the target task. This is design feedback only; no implementation or approval is claimed.",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "title": "Source review stage is absent",
+      "location": {"path": ".ai/tasks/TASK-0054/spec.md", "line": 28},
+      "evidence_refs": [".ai/tasks/TASK-0054/spec.md:28", "docs/superpowers/specs/2026-09-23-zcode-report-import-preflight.md:58"],
+      "status": "open"
+    },
+    {
+      "finding_id": "RF-002",
+      "severity": "medium",
+      "title": "Decoded-object arrays lack explicit item limits",
+      "location": {"path": ".ai/tasks/TASK-0054/spec.md", "line": 48},
+      "evidence_refs": [".ai/tasks/TASK-0054/spec.md:48", ".ai/tasks/TASK-0054/spec.md:61"],
+      "status": "open"
+    },
+    {
+      "finding_id": "RF-003",
+      "severity": "medium",
+      "title": "Suggested finding mapping omits its task binding",
+      "location": {"path": ".ai/tasks/TASK-0054/spec.md", "line": 41},
+      "evidence_refs": [".ai/tasks/TASK-0054/spec.md:41", "docs/superpowers/specs/2026-09-23-zcode-report-import-preflight.md:62"],
+      "status": "open"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-27T23:51:48Z",
+    "base_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner replied '批准' to the concrete TASK-0054 E4.1 frozen-spec approval request after independent design review REV-0003. This approves the current external-review 1.0 contract and compatibility scope only; E4.2, push and merge remain separate.",
+    "schema_version": "1.0",
+    "spec_sha256": "3defc7ebbb210590ee8c86f1c44a80bd402eb6e0881343bff299d957e48f7b9c",
+    "subject_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
+    "task_id": "TASK-0054"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "spec",
+    "approved_at": "2026-09-28T13:42:23Z",
+    "base_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly approved the current TASK-0054 amended E4.1 spec SHA-256 a33255cab106812063d671dd0d8981b440c30120e4fa9e3f140e4a77d1ee154e after independent design review REV-0005; approval is limited to contract-specific diagnostic redaction.",
+    "schema_version": "1.0",
+    "spec_sha256": "a33255cab106812063d671dd0d8981b440c30120e4fa9e3f140e4a77d1ee154e",
+    "subject_commit": "df6e9577fd6110a79c85a4bf01e035f4955a45e3",
+    "task_id": "TASK-0054"
+  },
+  {
+    "actor": "owner",
+    "approval_type": "code",
+    "approved_at": "2026-09-29T00:13:28Z",
+    "base_commit": "e8e59e2b4112249c4c85c9a0eb1d510bacd9e597",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "8a259b71d27c70763178cc929301626004047ec0a05f565e474b4e888c4e8e6b",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Owner explicitly approved the fixed TASK-0054 implementation subject 23793f7071da20437b4e05b81512da85a277c958 after passing local V1 evidence, review package and independent implementation reviews REV-0006 and REV-0007. This is code approval only; push and merge require separate authorization.",
+    "schema_version": "1.0",
+    "spec_sha256": "a33255cab106812063d671dd0d8981b440c30120e4fa9e3f140e4a77d1ee154e",
+    "subject_commit": "23793f7071da20437b4e05b81512da85a277c958",
+    "task_id": "TASK-0054"
+  }
+]

@@ -1,0 +1,9 @@
+# Additional platform API admission - actual entry
+
+At source b46dd7c3a3f9699c08db71a7e7695c076baffbed, native sync/resolution/classify/freeze admitted specification b5cf71ea6040ea2e3bc1d145cf44b0861a0206861561e2d76442ab9641f1d19f, classification cfcc4b48f9f099c182a954bf7206ff484b116c3b2e1557b66df95bdc563b58e8, unchanged REVIEW/V2.
+Actual author-independent REV-0005/r1 APPROVE/no Findings was recorded as event61, context0cb395c89df07d4dbdcb3b9d967a822ad1915710a00e2ddcc665025d0d1a136f.
+Owner-delegated current spec approval followed native status Missing spec_approval; root then began implementation. Existing direct human authorization covers the necessary approval.
+The earlier phrase13handbackentries means twelve mapped raw captures plus one handback original, thirteen hashed evidence files total. The map has twelve entries. Root independently matched all twelve and the handback SHA25626f448c22815c1fadba87d563f1f28b8d7115a7a4becebbcaeb4ec261ce4f2d0; the focused Windows result remains305passed/one original FIFO skip, not full V2.
+Initial evidence-ref resolution used a repository-relative path where the CLI requires a task-relative reference and failed; the missing classify actor and blocked premature freeze also failed without governance writes. Their original private stdout/stderr/exit captures remain preserved. Corrected task-relative resolution and actor-bearing classify/freeze succeeded in the required sequence.
+The independent reviewer initial count assertion likewise failed before recording and is preserved. No source implementation preceded this actual new begin.
+Four-expression implementation, full Windows/additional Linux static checks, own complete V2, implementation Review/finalize/code/Gate and publication remain pending at this entry. Real F input remains missing.

@@ -1,0 +1,7 @@
+{
+  "kind": "external-review-repository-mapping",
+  "schema_version": "1.0",
+  "mapping_record_id": "synthetic-map-001",
+  "locator": "https://example.invalid/synthetic/repository",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8"
+}

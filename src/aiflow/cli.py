@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import io
 import json
 import sys
 from argparse import ArgumentParser
 from collections.abc import Sequence
+from contextlib import redirect_stderr
 from pathlib import Path
 
 from aiflow import __version__
@@ -121,6 +123,18 @@ def build_parser() -> ArgumentParser:
     review_show.add_argument("task_id")
     review_show.add_argument("--stage", choices=["design", "implementation"])
     review_show.add_argument("--format", choices=["text", "json"], default="text")
+    external = subparsers.add_parser(
+        "external-review", help="preflight or explicitly record a local external report"
+    )
+    external_commands = external.add_subparsers(dest="external_command", required=True)
+    for operation in ("preflight", "record"):
+        external_operation = external_commands.add_parser(operation)
+        external_operation.add_argument("task_id")
+        external_operation.add_argument("--envelope", required=True, type=Path)
+        external_operation.add_argument("--report", required=True, type=Path)
+        external_operation.add_argument("--repository-mapping", type=Path)
+        if operation == "record":
+            external_operation.add_argument("--expected-preflight-sha256", required=True)
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
@@ -152,6 +166,11 @@ def build_parser() -> ArgumentParser:
     verify.add_argument("--ci", action="store_true")
     verify.add_argument("--ci-run-dir", type=Path)
     verify.add_argument("--output", type=Path)
+    verify.add_argument(
+        "--pytest-temp-root",
+        type=Path,
+        help="existing ordinary local directory outside Git repositories for pytest fixtures",
+    )
     gate = subparsers.add_parser("gate", help="evaluate the read-only merge gate")
     gate.add_argument("task_id")
     gate.add_argument("--evidence", type=Path)
@@ -168,8 +187,32 @@ def build_parser() -> ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the root command without exposing unfinished business subcommands."""
+    raw_arguments = list(sys.argv[1:] if argv is None else argv)
+    external_review_command = raw_arguments[:1] == ["external-review"]
     try:
-        arguments = build_parser().parse_args(argv)
+        parser = build_parser()
+        if external_review_command:
+            try:
+                # argparse diagnostics can contain arbitrary supplied tokens.
+                with redirect_stderr(io.StringIO()):
+                    arguments = parser.parse_args(raw_arguments)
+            except SystemExit as error:
+                if error.code not in {None, 0}:
+                    try:
+                        print(
+                            json.dumps(
+                                {
+                                    "status": "rejected",
+                                    "reason_codes": ["EXTERNAL_REVIEW_ARGUMENT_INVALID"],
+                                }
+                            ),
+                            file=sys.stderr,
+                        )
+                    except OSError:
+                        pass
+                raise
+        else:
+            arguments = parser.parse_args(raw_arguments)
         if arguments.command == "start":
             if arguments.recover is not None:
                 if arguments.objective is not None or arguments.allow or arguments.forbid_action:
@@ -303,6 +346,43 @@ def main(argv: Sequence[str] | None = None) -> int:
                             f"{record['review_id']} r{int(record['revision']):04d} "
                             f"{record['review_stage']} {record['outcome']}"
                         )
+        elif arguments.command == "external-review":
+            from aiflow.external_review import preflight_external_review, record_external_review
+
+            if arguments.external_command == "preflight":
+                external_result = preflight_external_review(
+                    Path.cwd(),
+                    arguments.task_id,
+                    arguments.envelope,
+                    arguments.report,
+                    repository_mapping_path=arguments.repository_mapping,
+                )
+            else:
+                external_result = record_external_review(
+                    Path.cwd(),
+                    arguments.task_id,
+                    arguments.envelope,
+                    arguments.report,
+                    repository_mapping_path=arguments.repository_mapping,
+                    expected_preflight_sha256=arguments.expected_preflight_sha256,
+                )
+            try:
+                print(json.dumps(external_result, ensure_ascii=False, sort_keys=True))
+            except OSError:
+                # The record may already be committed; never imply zero-write refusal.
+                try:
+                    print(
+                        json.dumps(
+                            {
+                                "status": "delivery_failed",
+                                "reason_codes": ["EXTERNAL_REVIEW_OUTPUT_FAILED"],
+                            }
+                        ),
+                        file=sys.stderr,
+                    )
+                except OSError:
+                    pass
+                return 1
         elif arguments.command == "status":
             summary = summarize_task(Path.cwd(), arguments.task_id)
             print(summary.to_json() if arguments.format == "json" else summary.to_text())
@@ -340,6 +420,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 finalize=arguments.finalize,
                 abandon=arguments.abandon,
                 reason=arguments.reason,
+                pytest_temp_root=getattr(arguments, "pytest_temp_root", None),
             )
             print(
                 f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}"
@@ -362,6 +443,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(f"{arguments.task_id} {assessment.subject_commit}")
     except AiflowError as error:
-        print(error.message, file=sys.stderr)
+        if external_review_command:
+            try:
+                print(
+                    json.dumps({"status": "rejected", "reason_codes": [error.code]}),
+                    file=sys.stderr,
+                )
+            except OSError:
+                pass
+        else:
+            print(error.message, file=sys.stderr)
         return 1
     return 0

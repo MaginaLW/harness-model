@@ -1,0 +1,55 @@
+{
+  "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+  "branch": "codex/e4-verification-control",
+  "classification_input_sha256": "02ece1fd9a7d40ccf42bf4de625eeeeb89571b6a6de7e98445eb63d11286d01f",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/verification_temporary.py",
+      "src/aiflow/verification.py",
+      "src/aiflow/verification_service.py",
+      "src/aiflow/process_runner.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_verification_temporary.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/unit/test_process_runner.py",
+      "tests/integration/test_verify_command.py",
+      "docs/operations/pytest-temporary-roots.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add explicit run-owned external pytest temporary roots for governed verification",
+        "impact_scope": [
+          "src/aiflow/verification_temporary.py",
+          "src/aiflow/verification.py",
+          "src/aiflow/verification_service.py",
+          "src/aiflow/process_runner.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_verification_temporary.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/unit/test_process_runner.py",
+          "tests/integration/test_verify_command.py",
+          "docs/operations/pytest-temporary-roots.md"
+        ],
+        "planned_actions": [
+          "Add an explicit optional external pytest temporary root with independent ordinary-path and run-ownership guards.",
+          "Append fixed owned basetemp arguments after unchanged Policy validation and preserve execution evidence and finalization context.",
+          "Retain existing environment, selectors, budgets, thresholds and default behavior."
+        ]
+      }
+    ],
+    "goal": "Add explicit run-owned external pytest temporary roots for governed verification",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "f297b1369fb15b048f389bbfb3a7687f0a2c712c89dc6b67dacd06de4f4a722d",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "978cc68691f8ca65110def4ba455adc111eefeb24abc2b1b8ed88207e0c9c0d5",
+  "task_id": "TASK-0056"
+}

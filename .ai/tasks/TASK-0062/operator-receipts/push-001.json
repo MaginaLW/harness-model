@@ -1,0 +1,40 @@
+{
+  "operation": "ordinary exact-Q fast-forward push",
+  "used_count": 1,
+  "task_id": "TASK-0062",
+  "action_ref": "actions/push-001.json",
+  "action_file_sha256": "fb4b719f0c32c0ea654817928dedc1e39baff84f1bb8b5554fcc44673b575a3a",
+  "publication_Q": "f5707ff178b760bb0215c7d5cb773cc4d06c75d6",
+  "source_S": "993a9a0619577117417d80de96e73aa18270b464",
+  "base_B": "48bf777106b9fdfef1ddf83d3abc95859fb8e580",
+  "actual_tool": "6c5ee9/0",
+  "native_action_approval_tool": "d51bac/0",
+  "native_action_approval_receipt_sha256": "de56079ca1c7f6f1aad17c27120100c1f5390b63b41fcbe9ac7b454236ff921a",
+  "actual_native_exit": 0,
+  "outer_timed_out": false,
+  "retained_identity_confirmed": true,
+  "retained_handle_closed": true,
+  "retained_process_end": {
+    "popen_pid": 28660,
+    "retained_handle_actual_pid": 28660,
+    "pid_matches": true,
+    "times_query_succeeded": true,
+    "creation_filetime_100ns": 134353700152232077,
+    "exit_filetime_100ns": 134353700185216063,
+    "actual_exit": 0
+  },
+  "external_receipt_sha256": "15c9bf6069123c355dedad23c5edcb91ca16513422381f4dca92d30677007df7",
+  "finished_at": "2026-10-01T23:13:38.528842+00:00",
+  "native_single_use_enforcement": "not implemented; operator records exactly one actual invocation",
+  "predecessor": "f402bd7ab1fbe6c6415117817d3adb0ec62899ac",
+  "remote_exact_Q_readback": true,
+  "readonly_receipts": {
+    "repo": "ca0d69222043c6bcf33c9851620b3e51067e34f43da263eeca3d7385efd35de3",
+    "main": "7de2b7daed3fc7382f99e410c89867b12ee7b5c689f81aecbf2d164d3b3461e4",
+    "protection": "868383dec97a8a435446a2d7c1cbad2e9cc72b56c0685285f147e64e840ca815",
+    "ref": "24992f1ae54825a23f64e11d58b5d9cf5900ce2a43712743b5b5abb52cc843b8",
+    "pr": "b47a0bf65176167dd1b8cf6cc8003c7608204f3a26a7b16c3ed00b811a59a136"
+  },
+  "root_readback_tool": "9e827d/0",
+  "implicit_tags_excluded": true
+}

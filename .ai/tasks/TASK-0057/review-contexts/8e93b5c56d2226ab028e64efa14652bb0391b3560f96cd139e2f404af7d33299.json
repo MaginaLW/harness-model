@@ -1,0 +1,44 @@
+{
+  "base_commit": "46a78b44ec02a0681528f567e313fe88e109b4d9",
+  "branch": "codex/e4-cumulative-delivery",
+  "classification_input_sha256": "c50403931596eb387d60ed38182a9421ebc711d0b3d9e3799253b244f98d00a3",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/document_parsing.py",
+      "tests/unit/test_document_parsing.py",
+      "docs/operations/pytest-temporary-roots.md",
+      ".ai/tasks/TASK-0057/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Preserve current YAML decoding semantics when recognized SafeLoader dispatch changes, with conservative finite cache qualification",
+        "impact_scope": [
+          "src/aiflow/document_parsing.py",
+          "tests/unit/test_document_parsing.py",
+          "docs/operations/pytest-temporary-roots.md",
+          ".ai/tasks/TASK-0057/**"
+        ],
+        "planned_actions": [
+          "Add only a bounded precompiled recognized-standard parser dispatch qualification to the existing pure YAML decoding cache.",
+          "Preserve original cache bounds, fresh file/schema/policy/freshness work, current parser fallback and every original named test/assertion; append meaningful drift and unknown-state regression cases.",
+          "Keep production/governance and task-free tests/documentation in separate scoped commits.",
+          "Run complete original native V2 with actual independent verifier, five unchanged fixed mutations, independent reviews, current approvals and post-commit Gate before separate publication."
+        ]
+      }
+    ],
+    "goal": "Preserve current YAML decoding semantics when recognized SafeLoader dispatch changes, with conservative finite cache qualification",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "8e93b5c56d2226ab028e64efa14652bb0391b3560f96cd139e2f404af7d33299",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "fe6466059ee91d7074c5040bda161d0e4e87226579241804cb71cef87441ec4e",
+  "task_id": "TASK-0057"
+}

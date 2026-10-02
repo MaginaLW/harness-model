@@ -1,0 +1,17 @@
+{
+  "action_type": "git_remote_push",
+  "target": "https://github.com/MaginaLW/harness-model.git#refs/heads/codex/e4-cumulative-delivery",
+  "parameter_summary": "{\"base\":\"48bf777106b9fdfef1ddf83d3abc95859fb8e580\",\"command_input_sha256\":\"eeec6df7f66d6dc6c4cbc9c9f02b204f6c1ca0aeb2e67e33c0896e7771bcb27a\",\"credential_protocol\":\"command-local cleared helpers then verified GH auth git-credential; no config mutation or credential output\",\"gate_stdout_sha256\":\"76f2456bf246786a29b03d5d27facc07c42c8d5748565edc8d83df3bcd2a2032\",\"operation\":\"ordinary non-force fast-forward exact Q to existing literal feature ref\",\"predecessor\":\"a2654bdf5c6ba02f2a5e1633d090e3b0d1cf583e\",\"publication_head\":\"f402bd7ab1fbe6c6415117817d3adb0ec62899ac\",\"readonly_receipts\":{\"main\":\"ec5a317e3ed06ad75e563b30023fbd64b7414637a7d2318a4767acfec9b4b224\",\"pr\":\"abecb36e67f78c9aa5fb5d1e644574920447f101fa60a97bbe51e67c699298e7\",\"protection\":\"f57547c63ea4982aac7023b846b30f10ebb9fe12cd169e045a710c4762d3fb9b\",\"ref\":\"c14f0d0d41e9c6dfb0cea31b6d502cfa5e427f8641256d555a5c9340cd25072e\",\"repo\":\"63d2005d941ba0ae223c5e522d5f3bd8c586875967269284cd6e5da1232ad3c2\"},\"repo\":\"MaginaLW/harness-model\",\"source\":\"14d80213cd10b656cb82197ecaca9b929720050b\"}",
+  "subject_commit": "14d80213cd10b656cb82197ecaca9b929720050b",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "ade24b06885ddef388018983582422bb5ad632c85b53f61c230a9b385d8bc352",
+  "conditions": [
+    "Existing explicit human authorization binds this concrete action once.",
+    "Current repository/mainB/strict protection/PR44/exact predecessor and local fast-forward ancestry are positively verified.",
+    "Exact Q native Gate passed; source and thresholds remain unchanged.",
+    "No force, deletion, admin bypass, provider call, global credential mutation or credential export.",
+    "Actual push exit and remote-Q readback are required before PR update."
+  ],
+  "expires_at": "2026-10-01T19:45:45.621838+00:00",
+  "single_use": true
+}

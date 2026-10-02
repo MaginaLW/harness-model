@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0004",
+  "revision": 1,
+  "task_id": "TASK-0054",
+  "review_stage": "design",
+  "reviewer": "/root/contract_boundary_review",
+  "recorded_at": "2026-09-28T13:37:35Z",
+  "context_sha256": "1684ba5a80dc8e0f61c4170471c96c8120e54a61aa58f81dc4d6d9b2c4d0736a",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "Independent read-only design review found one ambiguity in C5. Unknown keys inside oneOf discriminated objects currently produce a safe parent-level oneOf constraint, while the amendment describes an unexpected-property diagnostic. Clarify which result is accepted and cover these nested objects in safety tests. The Schema corrections and REVIEW/V1 classification are otherwise sound. The prior owner approval does not cover this amended spec.",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "medium",
+      "title": "C5 omits oneOf nested unknown-field diagnostics",
+      "location": {"path": ".ai/tasks/TASK-0054/spec.md", "line": 94},
+      "evidence_refs": [
+        ".ai/tasks/TASK-0054/diagnostic-amendment-001.md:8",
+        ".ai/tasks/TASK-0054/spec.md:94",
+        "tests/unit/test_contracts.py:595"
+      ],
+      "status": "open"
+    }
+  ]
+}

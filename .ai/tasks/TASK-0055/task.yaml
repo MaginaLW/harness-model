@@ -1,0 +1,170 @@
+allowed_scope:
+- src/aiflow/external_review.py
+- src/aiflow/cli.py
+- src/aiflow/contracts.py
+- .ai/schemas/external-review-import.schema.json
+- .ai/schemas/external-review-repository-mapping.schema.json
+- tests/unit/test_external_review.py
+- tests/integration/test_external_review_command.py
+- tests/unit/test_contracts.py
+- tests/fixtures/contracts/valid/external-review-*.json
+- tests/fixtures/contracts/invalid/external-review-*.*.json
+- docs/operations/external-review-import.md
+- src/aiflow/verification_temporary.py
+- src/aiflow/verification.py
+- src/aiflow/verification_service.py
+- src/aiflow/process_runner.py
+- tests/unit/test_verification_temporary.py
+- tests/unit/test_verification_plan.py
+- tests/unit/test_process_runner.py
+- tests/integration/test_verify_command.py
+- docs/operations/pytest-temporary-roots.md
+- tests/integration/test_begin_close_commands.py
+- src/aiflow/document_parsing.py
+- src/aiflow/policy.py
+- src/aiflow/storage.py
+- tests/unit/test_document_parsing.py
+- tests/unit/test_policy.py
+- tests/unit/test_storage.py
+- tests/integration/repository_fixture.py
+- tests/integration/conftest.py
+- tests/integration/test_repository_fixture.py
+- tests/unit/test_external_review_metadata.py
+- .ai/tasks/TASK-0056/**
+base_commit: fd560d9f12d28ef6ff155f6f46764d6c588d0f30
+branch: codex/e4-report-import
+created_at: '2026-09-29T20:11:24Z'
+current_state: MERGED
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Add guided external ZCode report preflight and immutable attachment recording
+    for existing AI Flow tasks
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/external_review.py
+  - src/aiflow/cli.py
+  - src/aiflow/contracts.py
+  - .ai/schemas/external-review-import.schema.json
+  - .ai/schemas/external-review-repository-mapping.schema.json
+  - tests/unit/test_external_review.py
+  - tests/integration/test_external_review_command.py
+  - tests/unit/test_contracts.py
+  - tests/fixtures/contracts/valid/external-review-*.json
+  - tests/fixtures/contracts/invalid/external-review-*.*.json
+  - docs/operations/external-review-import.md
+  - src/aiflow/verification_temporary.py
+  - src/aiflow/verification.py
+  - src/aiflow/verification_service.py
+  - src/aiflow/process_runner.py
+  - tests/unit/test_verification_temporary.py
+  - tests/unit/test_verification_plan.py
+  - tests/unit/test_process_runner.py
+  - tests/integration/test_verify_command.py
+  - docs/operations/pytest-temporary-roots.md
+  - tests/integration/test_begin_close_commands.py
+  - src/aiflow/document_parsing.py
+  - src/aiflow/policy.py
+  - src/aiflow/storage.py
+  - tests/unit/test_document_parsing.py
+  - tests/unit/test_policy.py
+  - tests/unit/test_storage.py
+  - tests/integration/repository_fixture.py
+  - tests/integration/conftest.py
+  - tests/integration/test_repository_fixture.py
+  - tests/unit/test_external_review_metadata.py
+  - .ai/tasks/TASK-0056/**
+  inputs:
+  - E4.1 TASK-0054 has a locally approved bounded envelope contract at fd560d9.
+  - The selected follow-up is guided local report preflight and immutable attachment
+    recording, separate from formal Review and Gate.
+  - The E4 preflight specification requires source-target matching, zero-write refusal,
+    full-input replay equality and append-only versions.
+  - Actual TASK-0056 source9dca04dc18e1551dc86987eb594f84f9d37b47ad and gated governance80515e6032d9e8e90193f857730f957345150457
+    imported ff-only; full base-to-import187paths and106foreign tracked blobs are
+    recorded.
+  - Locked Python3.13.15 runtime now loads this Disk checkout; TASK-0056 verification
+    is dependency evidence only and does not replace this task own complete verification.
+  - Actual additional Linux-platform mypy failed with four Windows-only attribute
+    errors across44sourcefiles; importer full two-module Windows run passed305with
+    one original skip, retained as focused evidence only.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Add bounded local envelope, raw report and repository-mapping readers with safe
+    diagnostics.
+  - Compare current governed target context and independently declared source subject
+    without network calls or report execution.
+  - Add read-only preflight and explicit record CLI commands with revalidation, drift
+    tokens and create-only immutable publication.
+  - Register two new closed attachment and repository-mapping contracts without changing
+    existing formal contracts.
+  - Replace only importer read-only Git transport with owned Popen/group/session and
+    bounded exception cleanup, preserving binary argv/cwd/inherited stdin/local optional-lock
+    environment and communicate10.
+  - Preserve writer interruption contract and historical failures; commit safety tests
+    and operation documentation separately under maintenance mode.
+  - After same-route spec_changed admission, replace only four Windows API lookup
+    expressions with no-default getattr in external_review.py and verification_temporary.py;
+    preserve actual values, guards, paths and transport semantics.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0055
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Run synthetic I1-I7, concurrency, interrupted-publication and unchanged-formal-artifact
+    regression checks.
+  - Run complete Policy-required verification, coverage, whitespace, Ruff, format
+    and mypy.
+  - Obtain independent design and implementation reviews and formal V2 acceptance,
+    integration and independent verification.
+  - Retain original I1-I8 and all existing assertions; add two actual ten-second inherited-pipe
+    public cases, fast cleanup faults and token-after identity phases1/3/5 with full
+    task/index/input zero-write snapshots.
+  - Run own complete original Policy V2 on own fixed subject/HEAD with original14checks/5mutations/deadlines,
+    independent Review and verifier, same verifier finalize, current code approval
+    and Gate.
+  - Run full Windows mypy and additional Linux-platform static mypy plus meaningful
+    existing importer/temp-root unit regression; keep own original complete V2 and
+    exact-head Linux CI required.
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: b5cf71ea6040ea2e3bc1d145cf44b0861a0206861561e2d76442ab9641f1d19f
+goal: Add guided external ZCode report preflight and immutable attachment recording
+  for existing AI Flow tasks
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-01T08:39:20Z'
+subject_commit: 2e6f69f3f820d1a72989c8e70d8daff70ba9f2db
+task_id: TASK-0055
+updated_at: '2026-10-01T23:56:08Z'
+worktree_dirty: false
+worktree_dirty_paths: []

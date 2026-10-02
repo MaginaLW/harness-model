@@ -1,0 +1,34 @@
+{
+  "operation": "ordinary exact-Q fast-forward push",
+  "used_count": 1,
+  "task_id": "TASK-0060",
+  "action_ref": "actions/push-001.json",
+  "action_file_sha256": "c66060ee391b71abb04f4d1a2bc032f48c41b351440208df5cc261cd2af067ad",
+  "publication_Q": "f402bd7ab1fbe6c6415117817d3adb0ec62899ac",
+  "base_B": "48bf777106b9fdfef1ddf83d3abc95859fb8e580",
+  "predecessor": "a2654bdf5c6ba02f2a5e1633d090e3b0d1cf583e",
+  "actual_native_exit": 0,
+  "outer_timed_out": false,
+  "retained_identity_confirmed": true,
+  "retained_handle_closed": true,
+  "retained_process_end": {
+    "popen_pid": 27160,
+    "retained_handle_actual_pid": 27160,
+    "pid_matches": true,
+    "times_query_succeeded": true,
+    "creation_filetime_100ns": 134353566746417007,
+    "exit_filetime_100ns": 134353566775610576,
+    "actual_exit": 0
+  },
+  "external_receipt_sha256": "14ea585c23f455aa64a1f3fcf194a83eda4a865c673aa011f9aadb469feccaca",
+  "finished_at": "2026-10-01T19:31:17.567309+00:00",
+  "remote_exact_Q_readback": true,
+  "readonly_receipts": {
+    "repo": "d47dec2af543b75052da0df1a44ae940b7e48240e250b18f9054fad6e0b0eb29",
+    "main": "d43a7c0bd1030a2a44169be9680af459f9c92ee022b6622bfaafecd1b34143f3",
+    "protection": "8e89b8969c4527f3d9e9b91a0a54653cf2690e3562f0cbef9b0336f62d7825a9",
+    "ref": "55685bd510dcdfc9c5624be4914c6a17f1f25406a7ea965572d3372ee423c22f",
+    "pr": "4f99fe4914fa0f134abc35923dbb7c9b52ef8ecc1faadda0daba5ff319680139"
+  },
+  "native_single_use_enforcement": "not implemented; operator records exactly one actual invocation"
+}

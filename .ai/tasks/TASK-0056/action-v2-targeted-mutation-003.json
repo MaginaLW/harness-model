@@ -1,0 +1,17 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0056",
+  "parameter_summary": "Run the fixed five-safeguard canonical V2 mutation manifest locally on the exact corrected task subject in disposable detached worktrees.",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "3ff499e3ffef2a27fd7ae96295ee17cc450e2a4de43d1f153f409d5ad6540e9e",
+  "subject_commit": "4f0288b4afb608412f984fa9078b7b0692fa0e6f",
+  "expires_at": "2026-09-30T12:27:59Z",
+  "single_use": true,
+  "conditions": [
+    "Use only .ai/mutations/phase-02-critical-manifest.json and its five fixed mutations.",
+    "Revalidate the actual committed subject, current classification, frozen spec 0a2f502b9310411d71e6502e871a00e5d1cf600dca7b4ebcbb27f414a4ff1751 and Policy d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1.",
+    "Preserve all prior failed runs, original raw artifacts and consumed action001/action002 receipts.",
+    "Use the independently checked locked runtime, independently validated ordinary short parent and unchanged complete default V2 plan. No change to selectors, command deadlines, environment whitelist, coverage thresholds or mutation manifest.",
+    "This fresh action003 follows admitted fixture correction 002, preserved failed run001/run002 and consumed action001/action002. Independent current preflight is required before execution; incomplete diagnostic logs remain preserved."
+  ]
+}

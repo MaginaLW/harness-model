@@ -1,5 +1,118 @@
 # 维护收尾与待办
 
+## 2026-10-02 最新核定：E4 已保护合并，五项任务已闭账
+
+- [PR #44](https://github.com/MaginaLW/harness-model/pull/44) 已实际合并；固定源码 S `993a9a0619577117417d80de96e73aa18270b464`，发布 Q `f5707ff178b760bb0215c7d5cb773cc4d06c75d6`，远端合并 M `db3efabab562971aef1a6eb1317b679d42eeadb9`。独立核验及主 agent 复核确认 M 有序父提交为 `[48bf777106b9fdfef1ddf83d3abc95859fb8e580, Q]`、M/Q 树一致、所需源码及历史祖先完整、本地配置提交 `52474d93101d387ccca853debbe6fdcc7f565c8d` 未发布；保护未降低。
+- TASK-0062 原有 10 项 Windows V1 全部通过：单元 1994 项通过，回归和覆盖率轮各 3008 项通过、仅各保留同一既有 Windows FIFO 跳过。独立 Design/Implementation Review、批准及准确 Q Gate 完成；预算、选择器、MINENV、断言与阈值保持。
+- [准确 Q 的 required CI](https://github.com/MaginaLW/harness-model/actions/runs/36939643115)（attempt 1、check/job `110627914984`、app `15368`）完整 SUCCESS：Linux 合约 185 项通过，完整测试 3004 项通过、5 项既有平台跳过；总覆盖率 88.92%≥85%，累计 diff coverage 94%≥90%，whitespace、Ruff、format（605 文件）、mypy（44 文件）通过。whitespace 依据原连续 `bash -e` 脚本后续成功及整步成功作顺序推断，并非独立子进程凭据。
+- 原固定证明的 111 项正向事实与唯一 association MISMATCH/STOP 保留；经非作者审查并实际执行的窄增量正向绑定合并前后同一不可变 run/check-suite/job/attempt，另用 60 次实际比较证明 20 个历史祖先在 S/Q/M 中。COMPOSITE_PROVEN 已复核；合并后空关联数组的原因仍 UNKNOWN，不以缺项作为正向证据。
+- 证明和复核后才实际 fetch M、核对本地对象并 fast-forward，再将 TASK-0054/0055/0056/0057/0062 各原生 close 一次为 MERGED、merge_commit=M，五份记录校验通过。本地追加治理提交 `84029ccabf6ea607c748c233615e6f0b8d53f407`，见 [TASK-0062 closeout](../../.ai/tasks/TASK-0062/closeout-001.md)。post-Q 记录不冒充属于已发布 Q/M，不递归发布。
+- TASK-0053 保持 push-only；0058/0059/0060 的准确 CI 失败、0061 的本地 FAILED 与所有原件保持，不由本次成功改为 MERGED。主工作区普通本地合并保留既有历史、两份配置及三份用户草稿；最终整合由独立非作者审计，本地提交不推送。
+- 既定本机及相关 PR 有界只读搜索未找到目标匹配真实 ZCode 原报告；F 仍缺原件，真实导入验收未执行，不声称全局无报告或以 synthetic 替代。I1/I2/E5/I5、Phase 3/4、TASK-0028 Option C 等条件阶段未启动，也未启动 provider/付费执行。
+- 最终并行 2 个 sub-agent：非作者审计实际主工作区整合，源码作者仅独立于发布操作者核对 operation 记录；主 agent 负责三份权威文档、统一提交及串行本地合并。以下历史全文保留。
+
+## 2026-10-02 最新核定：owned commit 自动维护输入已隔离，完整新发布验证待执行
+
+- 最窄 task-free 测试修复已独立审查并提交 `e8b2f5d21fb3d1f3ff34b90c387e02769d2f1765`，只改三份测试文件：fixture SHA `279661c9d28ab94121c3d2b2f7dc15b75c6028c0849ae96cc9a0428ef9088ebd`、helper SHA `b1d40bc4feedace0f8a1b48e7920cdeee82eb5506607165452e7f61ae756e443`、test SHA `719b4f727b27369237f134a0377ac01c12a774624080e09bb4b5cbe282dc18d6`。仅真实匹配的 owned private context、可识别 leading separated `-c` 后的 commit 在最后一个 global 参数位置插入临时 `maintenance.auto=false`；不写 host/repo 配置。default、foreign、noncommit、未知 global 形式的 argv 保持原样，原环境 binder 不变。
+- 新 argv binder 的函数 object/code 纳入原 `_standard_io` 顺序检查，原 direct-current entry、qualification、模板 types/names/bytes/modes、配置允许表、父环境拒绝、owner、seed、assertions/skips、copy/thread 与10秒清理完整 AST 保留。本轮固定源码全部旧103个 named tests（fixture81/helper22）完整 AST 不变，新增4个 named/10个 cases；不放宽 unknown-input 或 warm eligibility。
+- 作者最终 `a091e4/0` 实际两完整相关 modules **204 passed / 0 skip /119.66s**，10新增 cases、Ruff/format、mypy44、whitespace 均实际0/retained closed。作者两组受控对照合计18条真实 Git 命令0/closed；Git `2.55.0.windows.3` 默认策略的两个 object17 输入会产生 pack/info/refs，owned commit 的最后 false 则保持 loose、不生成 refs/packs。control 未持久化；标准 git init 创建 `.git/config` 属正常初始化。
+- 非作者 `9ced01/0` 真实独立对照9条 Git0/closed，7个首轮成功反例加1个仅修正私有 CONFIG 期望的参数通过；原私有首轮1退出与全部原件保留，不声称单轮8项通过。额外 info/refs、未知 system config 仍冷拒绝，dispatch object/code 漂移 direct-current 拒绝且不命中；normal/error 恢复保持。保护 tracked1964/runtime225/Gitpair/refs/index/topology/HEAD 前后完全一致。Root `28415b/0` 复核作者286件、`8961c6/0` 复核独立66件、`76ec78/0` 核实保护原件字节全等、`3ce7d1/0` 验证103旧 AST；真实 staged whitespace `ee855b/0`。
+- [Git v2.55.0 commit 源码](https://github.com/git/git/blob/v2.55.0/builtin/commit.c) 与 [自动维护源码](https://github.com/git/git/blob/v2.55.0/builtin/gc.c) 支持 commit 自动维护及 command-local false 的控制点；官方12原件 HTTP200/哈希已核。历史失败 seed 的生成进程、维护前 object17 数量与唯一因果仍 **UNKNOWN**，受控对照不伪装为历史进程 trace，也不预测下一 Linux 结果。
+- TASK-0061 全原生9通过/回归1失败及随后覆盖率轮成功保持原始 FAILED 结论；其35原件/20logrefs、独立45件归档已由 Root `a95d7e/0` 复核。53 push-only、58/59/60 三次准确 CI 失败与61本地失败分别保留，不用未来成功 native-close。新发布任务待实际分配，须固定新的累计源码、真实 Design/Implementation 审核、原有10项3150/3450/MINENV验证、准确Q Gate及完整 Linux required CI（85 overall/90 cumulative diff/whitespace/Ruff/format/mypy）才可 protected merge，再独立证明 M 后闭54/55/56/57与成功新发布任务。
+- 最新5个显式只读 GET `633e8b/13d969/15da90/2977ad/8961e1` 均实际0/retainedclosed；Root `fe0b22/0` 复核31件 snapshot：B仍 `48bf777106b9fdfef1ddf83d3abc95859fb8e580`、feature仍 `f402bd7ab1fbe6c6415117817d3adb0ec62899ac`、PR44 OPEN/non-draft/unmerged、strict required app15368/enforce-admins完整保护不变。此 snapshot 不是 action 批准、CI 成功或 M 证明；每次远端写入仍另核新鲜事实与一次性参数。
+- 两名 sub-agent 继续并行非作者累计审查/独立 operation 审计；Source admission、native、准确Q Gate、push、PR字节审核、完整CI、protected merge、证明/fetch/close/本地接回按依赖串行。主工作区17196、本地524配置与三份用户草稿保留，524不能发布。真实匹配 ZCode 原报告 F 在既定本地及相关PR搜索边界仍缺失；付费/provider与条件未满足的后续阶段不启动。
+
+
+## 2026-10-02 最新核定：TASK-0061 完整原生验证失败，发布仍暂停
+
+- 固定源码 `508cf73d10be4cdd2ca4409e706fe68ead10a69d`、规格准入提交 `b17e3879b5a1e5a95510a70bbce91ddf868e6d28` 的原有 10 项 V1 已全部真实执行；`fbda31/0` 的 CLI 退出 0 表示记录完成，原生任务与 evidence 真实结论为 **FAILED**，不能据此发布。
+- 回归测试实际 `1 failed / 2997 passed / 1` 既有 Windows FIFO 跳过，720.40 秒；单元 1994 项通过。独立覆盖率轮实际 `2998 passed / 1` 同一既有跳过，848.06 秒，XML 行 `7856/8588=91.48%`、分支 `2517/3060=82.25%`；后轮成功不抹去前轮失败。其余原有检查通过，预算、选择器、MINENV 和阈值未调整。
+- `test_private_system_context_drift_cannot_reuse_snapshot[factory]` 在初次 seed 资格检查、factory 修改前失败。可信位置 `_qualify:548 -> _template_fact:277` 比较投影后的类型、名称与字节；现场 seed `.git/info` 多一个普通 `refs` 文件（57 字节，SHA `26ce8b7a0e476b303b8f35537af85731c247b474eeaf30dc2523ef173da88b15`），其余模板文件字节与模式相同。非作者与作者分别只读确认，Root `d2b19d/0` 复核独立三件诊断原件；模式差异和 factory 修改不能解释该失败。
+- 同一现场有 pack、reverse index、multi-pack-index 与 server-info，支持自动维护候选；实际生成进程、触发条件与唯一根因仍为 **UNKNOWN**。先研究真实 Git commit 的自动维护控制点，再做最窄 task-free 维护修复；不放宽模板比较、配置允许表、原断言或跳过条件。
+- 实际 retained35744、creation134353619377042605/exit134353636332839767、launcher0/closed/no timeout；外部 tracked1952、runtime225、Git pair、refs/index/topology 的冻结前后完全一致。失败证据和20日志引用已随 `16d3373` 原样入历史，详见 `.ai/tasks/TASK-0061/native-validation-failed-001.md`。TASK-0061 未实现审核、代码批准、Gate 或任何远端写入，不能由未来成功闭为 MERGED。
+- 远端仍为原第三次失败 head `f402bd7ab1fbe6c6415117817d3adb0ec62899ac`，PR44 未合并；TASK-0058/59/60 的三个准确 CI 失败记录与 TASK-0061 本地失败各自保留。后续新固定源码须有新的真实发布准入、全原生验证、非作者审核、准确 Q Gate、完整 required CI 和 protected merge/独立远端证明。54/55/56/57 与成功的新发布任务才可在实际证明后闭账；53 仍 push-only。
+- 两名 sub-agent 并行：作者只修三份测试文件、核真实 Git 输入，非作者独立归档失败与审核新候选；Root 负责治理、文档、统一提交和串行发布。主工作区历史、本地配置与三份用户草稿继续保留；真实匹配 ZCode 原报告 F 在既定搜索边界仍缺失，不进入付费 provider 或未满足条件的后续阶段。
+
+
+## 2026-10-02 owner 私有系统配置修复完成，进入新发布验证
+
+安全提交9191a646a12c3ea2891303f28c223d0e787ae56e仅修改3个test-only文件；真实原run_git和bounded Popen统一选用owner私有空系统配置，父环境不写GIT_CONFIG_SYSTEM，默认、未拥有cwd及foreign路径继承原输入，non-Git命令不变。
+资格事实同时绑定当前owner/factory/root/context、实际子环境和普通配置文件dev/inode/完整字节与mode；配置漂移保持固定冷读取路径，选中输入缺失或不安全时明确失败。同字节换文件、移交旧资格、更换context及可信fact函数/代码替换不能暖命中。
+最终候选两个完整模块真实865896/0：194 passed、0 skipped、100.67秒；夹具152及helper42。新增10个named测试、19个参数实例；原71+22 named测试完整AST、原断言/skip、owner/seed、配置和环境守卫、allowlist、线程/复制及进程清理逻辑保持，Ruff/format/whitespace/mypy44真实通过。
+独立02663a/0在最终3hash上8项真实Git反例通过；两项实质Finding均已复现并修复，正常和异常teardown、system对照、同字节inode及owner/context变化、无所有权路由已核验。主agent22bc8a/0重算作者123件，15119f/0重算非作者66件并核实际retained退出0/closed；e2f750/0另核原93 named AST及守卫。
+固定SHA256：repository_fixture.py c7d1c3f82c738d7c8d7b81c3fbffe8c0ec22be7da4de8820dd0f6a02d8b5218c；test_begin_close_commands.py ea1beba55b6144145a05933a31b45fec09d95f0f6a6003334036446d52b65316；test_repository_fixture.py fe0d704ab6c5e86f2fc9919416cad6b677bac56b20367c6371001c02f2fa7ee9。
+[准确镜像安装脚本](https://raw.githubusercontent.com/actions/runner-images/ubuntu24/20260927.320/images/ubuntu/scripts/build/install-git.sh)与真实受控Git对照证明system safe.directory是充分的unsupported输入候选；主agent52f7ba/0复核37件独立诊断。未直接观察失败Linux runner有效key或唯一根因，仍UNKNOWN；专项Windows成功不替代新准确head Linux整链CI。
+原三次准确CI失败、观察测试首轮错误、旧193/20中间候选与事实入口反例均原样保留，不冒充最终验收。58/59/60冻结历史及名义状态不改，未来新CI成功不将它们native close MERGED；53保持push-only。
+下一步真实分配新publisher并冻结实际S，执行全部原选定V1检查、非作者Design/Implementation Review、批准与准确Q Gate，随后普通推送/PR44更新、完整准确CI、保护合并和独立M证明；之后才close54/55/56/57及新publisher并整合主检出。
+并行阶段启用2个sub-agent：非作者累计代码/治理审查与独立操作审计；主agent负责统一提交和准入。源码冻结、完整验证、Gate、外部动作、完整CI、证明/close串行，不在冻结期修改source/runtime/refs/index/topology。
+此阶段未再次推送、合并、执行Mproof或close；F有界搜索仍缺目标匹配真实ZCode原件，条件阶段、Task28及历史BLOCKED保持，无provider或付费调用。
+
+
+## 2026-10-02 TASK-0060 准确 Q CI 再次失败，先诊断系统配置
+
+TASK-0060 的固定S14d80213已完成全部原生10/10检查、独立Design/Implementation APPROVE和准确Q Gate；Qf402bd7ab1fbe6c6415117817d3adb0ec62899ac实际普通推送并更新既有PR44，字节回读一致。
+准确Q required run36914902620/attempt1/check110546355233 app15368真实FAILURE：16 failed、2928 passed、36 skipped，612.84秒；原14个CONFIG阻挡用例及新增环境隔离正向、GIT_ENV反例仍在参考init前失败。
+含branch总覆盖率88.92%达到85%，pytest exit1使累计diff90、whitespace、Ruff、format、mypy均未执行；Windows完整验证与专项对照不替代Linux整链CI。
+主agent实际4cf52b/0重算独立操作手回全部115件及18只读GET终态，确认准确Q/app/run/attempt/event/path/PR44真实失败；原始job log97740字节SHA2569393b35785447ea57680bc929b6785b0d80645c452bd8672530a85607f3a49cd保持。
+Task60真实动作、批准事件、调用次数和失败说明已单独提交1fbf1bc；这些是post-Q本地治理，未包含于远端Q。原Task60冻结规格、Review、验证和名义APPROVED_FOR_MERGE状态保持，不用未来CI成功将58/59/60 native close MERGED。
+当前Linux有效配置key/来源及唯一失败分支仍UNKNOWN；准确镜像安装脚本提供系统配置候选，须真实Git受控对照和独立审查，禁止猜测原因、扩大配置白名单、跳过原断言或放宽门禁。
+并行阶段启用2个sub-agent：作者定位最小受控测试环境修复，非作者核对镜像证据与资格守卫；主agent复核历史证据及统一阶段提交。源码冻结、完整原生验证、发布、准确CI、保护合并、独立证明及close串行，依赖修复审查通过。
+未合并、未执行实际M证明、未fetchM或关闭源任务；修复超出Task60 own scope，安全源码独立提交后须真实分配新publisher，完整执行全部原选定检查及准确head整链CI。最终适用close仅54/55/56/57和新publisher；53仍push-only。
+F经有界本机及相关PR只读搜索仍缺目标匹配真实ZCode原件，不声称全局无报告；条件后继阶段、Task28及历史BLOCKED保持，未调用provider或付费接口。
+
+
+## 2026-10-02 夹具私有测试环境修复已提交，准备新发布验证
+
+安全测试提交b3a26da66915b9371dc52af296ead4f297b5748e只修改test_repository_fixture.py；其模块owner依赖私有HOME/XDG并移除继承GIT_*，保持系统配置和原配置、环境、模板及metadata资格守卫。
+实际正常环境989081/0与原生同形最小环境5d3d69/0各133 passed、0 skipped；新增3个named测试及5个实例，原68个named测试的完整AST、断言、skip及owner原body保留。
+实际Ruff、format、whitespace、mypy44通过；独立正常退出与注入body异常两项真实参考init/warm探针89b7b5/0证明环境、原owner全部字段及宿主配置字节恢复，最终无未解决Finding。
+实现文件repository_fixture.py固定9fca08f11b9c528dcc725c9be0b19be2d91b8d3b983b65c7194c8933082713ff未变；测试固定d80cfff00740bf312f76922e2fd01a4cac91f9551951529df3968af198af1a03。大小写字典反例不冒充真实Linux执行，Ubuntu实际触发key仍UNKNOWN。
+原132通过的中间版本、两次真实准确head CI失败及全部诊断原件保持；当前专项成功不替代新publisher的完整原生验证或准确head Linux required CI。
+新publisher须真实分配、冻结、独立Review及完整原选定检查；58与59保留失败发布名义状态，未来适用native close仅54/55/56/57及新publisher，53保持push-only。
+此阶段未再次推送或合并；2个sub-agent分别独立代码治理审查与操作审计，源码冻结、验证、提交、推送、PR更新、完整CI、保护合并、独立证明与close串行。
+F经有界本机及相关PR只读搜索仍无目标匹配真实原件；条件后继阶段、Task28和历史BLOCKED保持原进入条件。
+
+## 2026-10-02 TASK-0059 已推送，准确 Q CI 配置守卫失败，继续修复
+
+新 publisher TASK-0059 已完成真实 REVIEW/V1 准入、全部原生10/10检查、独立 Design/Implementation APPROVE、代码批准与准确 Q Gate。
+固定源码S6c28ca6、本次完整回归/覆盖率各2974 passed及1原FIFO skip；最终发布Q a2654bdf5c6ba02f2a5e1633d090e3b0d1cf583e已普通推送并回读，既有PR44标题/正文独立审查及字节回读一致。
+准确Q的required run36901129804/check110500282851 app15368真实FAILURE：14 failed、2925 passed、36 skipped，608.39秒；四个原有用例与十个新增实例均在原UNSUPPORTED_CONFIGURATION守卫被阻挡，尚未进入参考init；原31warm skip保持。
+含branch总覆盖率88.92%已达85%，但pytest exit1使累计diff90、whitespace、Ruff、format、mypy未执行。主agent另做累计whitespace实际exit0，该本地结果不替代CI。
+实际Ubuntu有效配置触发key/branch仍待有界诊断；checkout日志中的safe.directory设置不足以证明唯一根因。两个sub-agent分别负责最小实现诊断与非作者独立复核，不放宽原守卫、断言、skip或门禁。
+真实动作、未执行的参数绑定错误批准和准确Q失败已追加至Task59并单独提交b5dd05f；这些是post-Q本地治理，不能说已包含于Q。
+修复超出Task59 own scope，须独立安全源码提交，再真实准入新publisher、执行全部原选定检查及准确head完整CI。旧58/P与59/Q失败原件保留，未来成功不使它们native close MERGED；53仍按push-only名义状态及完成记录保持。
+未合并、未做M远端证明、未关闭源任务54/55/56/57；后继串行为准确推送、PR更新、完整required CI、保护合并、独立证明、fetchM与适用任务close及本地主检出整合。
+F仍缺匹配真实ZCode原件；有界本机搜索与相关PR只读补查无正向结果（PR44审查/评论、PR39/43审查均为空），不据此宣称全局无报告。条件阶段、Task28及历史BLOCKED保持，不调用provider或付费接口。
+
+
+## 2026-10-02 夹具参考 Git 初始化修复，专项验证通过
+
+测试夹具不再假定安装模板与 Git 初始化目标的权限完全相同；在所有原配置、环境、Git、模板、attributes、current/pristine 守卫通过后，执行一次 owner 私有空目录参考初始化。
+源模板完整 mode/bytes/types/names 继续绑定；源到两个初始化目标的 types/names/bytes 完整匹配，两个目标之间仍核对全部 metadata，包括 mode。
+原 cold/hit、warm 不重新 init、snapshot/target-mode、线程和复制行为保持；未知、输入漂移及 partial 失败仍冷回退，异常诊断只输出固定类型与可信代码行。
+固定两文件 SHA256 为 repository_fixture.py 9fca08f11b9c528dcc725c9be0b19be2d91b8d3b983b65c7194c8933082713ff，test_repository_fixture.py e8790190b12ffdb476bf349f2c7eb547a3da909216dc80b9785df5eea818dbb1。
+原生同形 MINENV 专项实际 061bd0/0：128 passed、0 skipped、55.02 秒；Ruff 与 format-check 通过。实际新增13个 named 测试、31个参数实例，原55个 named 测试及 thread/copy/parallel AST 保留。
+首次 full-env 专项受宿主 unsupported configuration 遮挡，真实失败原件保留；未修改全局配置、守卫、原断言或 skip。该宿主结果与真实 Ubuntu 唯一根因不等同。
+独立实际 diff/AST 与9项私有反例通过，无未解决 Finding；共同污染、实际 mode 差异、未知异常回调及异常链均核对。原44文件 mypy 通过；额外311运行因旧 checkout 绑定被排除，不作为本实现兼容性验收。
+2名 sub-agent 分别负责实现与独立审查，主 agent 负责统一阶段提交及串行发布；新 publisher 准入、完整原生检查和新准确 head CI仍待执行。
+修复测试/状态文件先按维护模式独立安全提交；随后真实分配新的 publisher task，重新冻结、Review、执行全部原选定验证、批准和准确提交 Gate，再更新既有 PR44。
+Task58 原 P a2894ac3 的 required CI FAILURE 保留；其 own scope 不覆盖新测试字节，不同步旧 subject、不复用旧验证、不 close MERGED。新任务承接后追加实际指针，旧 P 失败不能由新 Q 成功改写。
+Task53 按 push-only 规格保持原名义状态及完成记录；Task28 和历史 BLOCKED 保持。最终适用任务只有在完整准确 Q CI、保护合并及独立远端证明后才 native close。
+此阶段未再次推送、未合并、未做实际 M 证明；F 仍缺目标匹配真实 ZCode 原件，条件后继阶段保持进入条件。
+
+## 2026-10-02 PR #44 已创建，准确提交 required CI 失败，修复进行中
+
+累计发布实际使用 TASK-0058（REVIEW/V1），源码S715496d、发布P a2894ac3；完整原生10/10检查、非作者累计Design/Implementation APPROVE、代码批准及准确P Gate已通过。
+普通推送首次180秒超时的原件和后代历史UNKNOWN保留；独立核对已知后代当前缺席后，单独新action采用仅命令局部GH凭据协议，实际exit0并回读准确P。
+PR [#44](https://github.com/MaginaLW/harness-model/pull/44) 实际创建、已附加；headP/base48bf777及正文原件完全匹配，创建前严格main保护/app15368只读核对保持原设置。
+准确P的required run36883821312/check110441969044在2026-10-01T15:34:30Z真实FAILURE：34 failed、2905 passed、5 skipped，663.40秒；失败全在test_repository_fixture资格检查。
+含branch总覆盖率88.92%已达85%，但pytest exit1使累计diff90、whitespace、Ruff、format、mypy尚未执行。未合并、未做远端合并证明、未关闭任务。
+当前最窄诊断范围是fixture的_qualify在check-attr之前；Linux模板mode差异有受控反例，真实CI唯一底层原因仍UNKNOWN，需实际定位和最小安全修复。
+2名sub-agent分别负责fixture诊断/最小候选和非作者独立核对；主agent保留实际失败治理、按新源码准入/原必需验证/Gate，再串行精确推送、完整required CI、保护合并与证明。
+真实动作与失败记录见[Task58追加原件](../../.ai/tasks/TASK-0058/required-ci-failure-001.md)；其后本地治理提交66595bd尚未发布，不能说P包含动作后记录。
+Task53按真实push-only完成记录保持名义APPROVED_FOR_MERGE，不为本次PR误作MERGED；Task28选项C及历史BLOCKED保持。
+F仍缺目标匹配真实ZCode原报告；有界本机搜索没有正向结果，其他条件阶段沿用原进入条件。
+
 ## 2026-10-01 TASK-0057 修复与完整 Gate 通过，进入累计发布
 
 独立累计审查发现的解析缓存 P2 已由新 TASK-0057 修复；生产提交4bcedba、安全测试与说明提交afff062分开保留。

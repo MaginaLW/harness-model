@@ -1,0 +1,73 @@
+{
+  "base_commit": "ef92b795da729566870ff4878f100a4ffe319db5",
+  "branch": "codex/e4-verification-control",
+  "classification_input_sha256": "548fecc1ea87840b24cea291671ccd2261c7b9b194260b1587b45afe75b212b3",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/verification_temporary.py",
+      "src/aiflow/verification.py",
+      "src/aiflow/verification_service.py",
+      "src/aiflow/process_runner.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_verification_temporary.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/unit/test_process_runner.py",
+      "tests/integration/test_verify_command.py",
+      "docs/operations/pytest-temporary-roots.md",
+      "tests/integration/test_external_review_command.py",
+      "tests/integration/test_begin_close_commands.py",
+      "src/aiflow/document_parsing.py",
+      "src/aiflow/policy.py",
+      "src/aiflow/storage.py",
+      "tests/unit/test_document_parsing.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_storage.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add explicit run-owned external pytest temporary roots for governed verification",
+        "impact_scope": [
+          "src/aiflow/verification_temporary.py",
+          "src/aiflow/verification.py",
+          "src/aiflow/verification_service.py",
+          "src/aiflow/process_runner.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_verification_temporary.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/unit/test_process_runner.py",
+          "tests/integration/test_verify_command.py",
+          "docs/operations/pytest-temporary-roots.md",
+          "tests/integration/test_external_review_command.py",
+          "tests/integration/test_begin_close_commands.py",
+          "src/aiflow/document_parsing.py",
+          "src/aiflow/policy.py",
+          "src/aiflow/storage.py",
+          "tests/unit/test_document_parsing.py",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_storage.py"
+        ],
+        "planned_actions": [
+          "Add an explicit optional external pytest temporary root with independent ordinary-path and run-ownership guards.",
+          "Append fixed owned basetemp arguments after unchanged Policy validation and preserve execution evidence and finalization context.",
+          "Retain existing environment, selectors, budgets, thresholds and default behavior.",
+          "Repair only test-side Windows physical I/O and owned Git process-tree timeout cleanup while retaining logical fixture roots, original assertions, command deadlines and production environment.",
+          "Reuse only bounded content-keyed pure YAML decoding with independent return values, fresh actual file reads and all unchanged schema, semantic, identity and freshness validation."
+        ]
+      }
+    ],
+    "goal": "Add explicit run-owned external pytest temporary roots for governed verification",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "cba2b62e0f40f2d852badd54863ed4f1e27868563c62552ddd7b3d5417a3b04c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "e3fcf4e6c3f13aef834d71be2e10b4947098311e383b5bb100bdf74d183ddd85",
+  "task_id": "TASK-0056"
+}
