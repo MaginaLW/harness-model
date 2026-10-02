@@ -51,3 +51,12 @@ task/branch/repository/base/context 由实际 CLI 分配，分类、验证等级
 恢复采用停止消费、保留记录和追加更正，不删失败或重写导入；需要源码修复则另开治理 task。
 历史 synthetic 不作为本轮实际验收。当前[准备核定](zcode-report-recovery-2026-10-03.md)已完成，
 native 准入及正式冻结状态以后续 CLI 回读为准；匹配真实原件未取得，实际导入未执行。
+
+## 本轮准备状态
+
+新隔离目标 TASK-0063、分支 `codex/f-real-import-acceptance` 已按实际 CLI 建立、
+分类 REVIEW/V2、冻结和独立设计审核；WAITING_FOR_SPEC_REVIEW、Missing spec_approval。
+复制规格的链接修正后重新冻结，原版本保留；准确 spec/context/提示词及验证来源见
+[最新交接](zcode-report-recovery-2026-10-03.md#本地验证与新目标准备)。
+已准备具体匹配报告获取方案；人类规格批准和一次新付费获取须分别批准，尚未执行。
+本轮主检出完整质量通过不替代新任务实际导入或其原生 V2/Review/Gate/close。

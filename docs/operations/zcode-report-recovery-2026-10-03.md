@@ -102,3 +102,36 @@ Sol/max 与 Sol/high 漂移保留历史；[当前型号规则](model-selection.m
 任一固定值，其余门不因此解除。可并行准备样本/V3/度量提案，方向决定、冻结和准入串行。
 未定阈值、身份和费用保留未知，不补造充分性或改善结论。历史任务、失败、批准、配置及
 三份用户草稿保留，本轮记录仅本地。
+
+## 本地验证与新目标准备
+
+文档候选 `3d6528284bc6e867def4fc8139ef67a41544ae48`、比较基线 `ed4b3e7`：
+完整 pytest+branch coverage 在 2026-10-03 00:41:37–01:00:44 +08 实际 exit 0，
+3008 passed、1 skipped（Windows 无 POSIX FIFO），89.05% 总覆盖率达到 85%。
+`diff-cover --fail-under=90` exit 0、差异无可覆盖行；whitespace exit 0。
+前置 contracts 185 passed，lock check、Ruff、format（615 files）、mypy（44 source files）通过。
+私有 stdout/stderr、coverage XML、命令/真实退出/时间回执保存在同一运行材料目录，
+测试未改本地已有 coverage 文件。本节及最新交接只是结果追加，不再变更执行代码。
+这些是本地主检出验证，不替代新任务原生 V2 或远端 required CI。
+
+新隔离分支 `codex/f-real-import-acceptance` 从该候选创建，native start 分配 TASK-0063。
+准入先修正本任务自身记录范围，native classify 为 REVIEW/V2；独立技术设计审查 APPROVE，
+当前 WAITING_FOR_SPEC_REVIEW，Missing 只有 spec_approval。复制规格的一个相对链接
+修正后重新 freeze；先前冻结字节保存为 `preparation/spec-frozen-001.md`，旧 context/Review
+保留，新 context 保存为 `preparation/design-context-002.json`。一次重新 classify 因
+Git baseline 不同拒绝；decision unit 未改变，既有 classification 仍 fresh，freeze/status
+成功，不改 baseline 或降低路由。当前 spec SHA256：
+`070b364c23837dade0a91d7c8e6a7a10e2bc7bbcbfb298b296744ce59c35968d`；context：
+`2bfa873bda2125336b48b7181ba2a7de1ca568aac435b21af0d1ec4a67fcd605`。
+
+具体新 ZCode 提示词与独立付费获取方案的 revision 002 已保存为私有材料，绑定该目标，
+只读、最多一次初始发送、无自动重试/其他 worker/账户模型权限变更；提示词 SHA256：
+`c2f846d3913ce80fccb61801a5b160ff1a112ce10a0007a632025ac921fdf640`。
+原生规格批准不是该外部动作批准，两项均尚未取得，未发送新会话或执行 F preflight/record。
+原生 V2/Review/Gate 和真实发布/close 仍是后续步骤。
+
+补充只读 runners GET 窗口 2026-10-03 00:50:53.235389–00:50:54.632693 +08：
+r3s-VPS Linux runner 22 offline、Windows runner 21 online，两者 busy=false。
+626 bytes、SHA256 `ec141fe40d976726083d5ce3c2e600018dc185ba083d898620f6fada34541a37`，
+实际 exit 0，独立重算与回执一致。在线窗口不证明取消原因，也不替代准确 SHA 的完整 CI；
+未恢复主机、重跑 CI 或新增远端发布。

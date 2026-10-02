@@ -1,5 +1,12 @@
 # 维护收尾与待办
 
+## 2026-10-03 最终交接：本地质量通过，F 新目标准备完成
+
+- 文档候选 `3d65282` 的完整本地检查通过：3008 passed/1 POSIX FIFO skip，总覆盖率 89.05%；90% diff 门执行成功（文档差异无可覆盖行），contracts 185 passed、lock/Ruff/format/mypy/whitespace 通过。具体来源与限制见[回收记录](zcode-report-recovery-2026-10-03.md#本地验证与新目标准备)。这不是 TASK-0063 的原生 V2 验收或远端 CI。
+- 新隔离分支 `codex/f-real-import-acceptance` 的 TASK-0063 已分类 REVIEW/V2、冻结并完成独立设计技术审查；当前 WAITING_FOR_SPEC_REVIEW，CLI 只缺 spec_approval。冻结链接修正的原版本及旧 context/Review 保留。
+- 新匹配报告提示词和独立获取方案已具体准备，未授权/未发送。人类规格批准与一次新 ZCode 付费只读审查须分别批准；F 实际导入及后续原生验收待此依赖。
+- r3s runner API 窗口显示 Linux 22 offline、Windows 21 online，均 busy=false；恢复和重跑须进入目标项目单独准入，完整双通道结果仍缺。其余条件路线及本地发布边界保持。
+
 ## 2026-10-03 接续：报告回收与证据复核完成
 
 - [回收核定](zcode-report-recovery-2026-10-03.md)：ZN-01/03/04 完整终稿附勘误；ZN-02 实际取消/无终稿。独立门评估补齐，原记录保留，未重发。
