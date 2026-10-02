@@ -6,6 +6,7 @@
 - 6 名 sub-agent 并行核调用入口、准入、来源、导入边界、完整 V2 和独立一致性。执行前发现原 DU 缺 action_approval/targeted_mutation_required，已在隔离分支更正，保持14项完整V2及阈值；原记录与失败均保留。
 - 隔离候选 `f59aa2544701bc4e00644fd291e16b97314c41a6` 已由真实文档更正和 native sync 固定；实际 new_permissions 升级后为 BLOCKED，Missing block_resolution。恢复 REVIEW/V2 和单次固定五项本地变异的具体提案已独立复核，等待新增授权；不重复请求仍 current 的规格批准。
 - 原始 native 字节因任务树强制 LF 改写直接 ZIP，失败试存保留；canonical ASCII base64 档案从 Git blob 解码后七项大小/哈希全部一致。隔离 editable 环境 MINENV 导入正确，工具计划齐备；这不是 V2 已通过。
+- 私有实际导入验收脚本的输出路径防护缺口已修正，两位非作者静态复核均 APPROVE；版本 SHA256 `00e91e44fada2cdfae657489eba79a72adc750bad670fbd945d8157f9bcb7a14`，原版本保留。完整任务树字节快照及 create-only/no-op/stale-token 逻辑保留，脚本尚未执行；静态复核不替代真实验收。
 - F 实际导入、V2/action 消费及新付费发送均未执行。本轮仅本地；原外仓/条件阶段/发布边界保持。具体[待办定位](follow-up-backlog-2026-09-22.md)及[执行说明](f-real-import-acceptance-2026-10-03.md)追加保留历史。
 
 ## 2026-10-03 最终交接：本地质量通过，F 新目标准备完成
