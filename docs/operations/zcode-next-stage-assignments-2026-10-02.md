@@ -1,5 +1,24 @@
 # ZCode 下阶段任务安排：2026-10-02
 
+## 收尾回读：四会话均 completed，报告待审核
+
+取证时刻 **2026-10-02 23:36:11 Singapore（15:36:11.329625 UTC）**。
+独立只读元数据核对确认以下四个既有 ID、当前项目归属与 archived=0，索引状态均 completed。
+只在源 DB/WAL 的稳定副本查询六个元数据字段，复制前后源哈希一致；未读取报告、重发或新建会话。
+
+| 工作包 | 项目 | 实际会话 ID | 收尾索引状态 |
+| --- | --- | --- | --- |
+| ZN-01：F 准备 | harness-model | `sess_a4f8e128-e510-4a96-94f9-2ededcc717d7` | completed |
+| ZN-02：E5/I5 进入门 | harness-model | `sess_2db709cb-d466-4881-b09e-33beaf1bf9ea` | completed |
+| ZN-03：试点/I2 | ai-agent-dotfiles | `sess_6a7aad63-be2c-4aa2-8004-fd8b69836c70` | completed |
+| ZN-04：双通道/I2 | r3s-VPS | `sess_bff4e119-950a-4508-9138-05479d3a6f4e` | completed |
+
+本快照不认证报告内容、执行合规、provider 身份或正式验收；四份报告回收、来源/版本核定、
+内容审核列入[下次待办](follow-up-backlog-2026-09-22.md)，F 与条件阶段的启动门保持。
+私有取证文件位于 `<RUNTIME_ROOT>/zcode-next-phase-metadata-audit-001/closeout-snapshot-001/`；
+handback SHA256 `2a3163871ffa9c1ce3d21bb7413cf49c18ea74bb9dba59b8a32d01ac6a82c8b7`，
+只读执行真实 exit 0。下面发送时的状态、锁屏记录与原提示词全文保留，不能当作目前状态。
+
 ## 最新回读：四项已实际分配
 
 桌面解锁后四项已通过 ZCode 官方界面各提交一次，独立项目/任务索引审计确认归属正确。

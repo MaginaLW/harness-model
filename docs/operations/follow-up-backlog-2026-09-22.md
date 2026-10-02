@@ -1,5 +1,23 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-02 收尾核定与下次待办
+
+本轮 E4 交付/闭账、后继启动条件记录和四项 ZCode 任务分配已完成。
+23:36:11 Singapore 的只读索引快照显示四会话均 completed，项目归属正确；
+报告尚未回收和审核，不能由状态标签推出执行合规或阶段验收。详见[任务收尾回读](zcode-next-stage-assignments-2026-10-02.md)。
+
+| 待办 | 下次具体动作 | 前置与完成条件 |
+| --- | --- | --- |
+| 1. 回收四份报告 | 按 ZN-01–04 的既有会话 ID 获取原报告，保留来源、受审版本、取证时间；逐项核只读边界和 PROVEN/PARTIAL/MISSING/UNKNOWN | 回收现有会话，不重发提示词；有内容/来源证据并完成独立复核后才能记录报告验收，缺项保持 UNKNOWN |
+| 2. F 真实导入验收 | 先准入新的合法 native 目标并冻结 scope/context，再取得准确匹配的真实原件；零写 preflight → expected-hash record → 追加/no-op/拒绝边界 → 目标原生收尾 | 按[启动条件](next-stage-start-conditions-2026-10-02.md)核 repository/stage/base/context 和 implementation subject；本轮准备报告不作为 F 原件，不向已 MERGED 或失败历史目标导入 |
+| 3. 两个外仓证据收尾 | 分别核 ai-agent-dotfiles、r3s-VPS 报告与实际 source/window、原问题、各目标适用的完整 CI（需双通道时核同 SHA 整链）、dirty/发布边界 | 无实质新缺口可 no_op；有缺口则在目标项目独立选择范围、准入和验证，不由只读报告自动触发修复、CI 重跑或扩仓 |
+| 4. 条件路线待决 | 整理 I1/I2 的实际需求；E5 将引擎/provider/可信执行分开；I5/Phase 3 保留样本/隐私偏差、真实 V3 沙箱回退、版本化度量缺项；Phase 4 保留退出及协调需求 | 每项以启动条件和实际准入为准；未满足不实施，不用少量历史样本补造阈值、评分或改善结论 |
+| 5. 本地记录发布安排 | 需要远端发布时，单独冻结新的干净候选、base/head、累计范围与适用动作参数，完成审核、原必需检查、准确 required CI 和远端证明 | post-Q 闭账、本轮任务分配与收尾记录仍仅本地；不直接推送含本地配置 524 的主检出，不复用 PR #44 的旧批准/CI，不递归发布记录 |
+| 6. 历史保留 | 保持 0053 push-only、0058–0060 准确 CI 失败、0061 FAILED、0028 Option C 和七项 BLOCKED 的既定处置 | 已 MERGED 的 0054–0057/0062 保持；不重开、补关、改写失败或把历史挂起数量当新增开发量 |
+
+下次先回收/审核报告，再按真实缺口选择一个可验收单元；实施进入门仍是[独立启动条件](next-stage-start-conditions-2026-10-02.md)，
+本次收尾不启动后继实施。本轮两个 sub-agent 并行只读核元数据与待办，主 agent 串行编辑、验证和本地提交；历史全文保留。
+
 ## 2026-10-02 最新接续：准备任务已交 ZCode
 
 - 四项准备已实际归入 harness-model（两项）、ai-agent-dotfiles、当前 r3s-VPS；[任务回读](zcode-next-stage-assignments-2026-10-02.md)记录新会话 ID 与 16:33 Singapore 应用状态快照，旧完成会话未重启。
