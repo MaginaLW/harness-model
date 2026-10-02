@@ -1,5 +1,10 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-02 最新接续：准备任务已交 ZCode
+
+- 四项准备已实际归入 harness-model（两项）、ai-agent-dotfiles、当前 r3s-VPS；[任务回读](zcode-next-stage-assignments-2026-10-02.md)记录新会话 ID 与 16:33 Singapore 应用状态快照，旧完成会话未重启。
+- [启动条件](next-stage-start-conditions-2026-10-02.md)逐项保持，准备报告不自动解除 F、I1/I2、E5/I5 或 Phase 3/4 的缺项。锁屏未提交为旧快照，下面历史全文保留。
+
 ## 2026-10-02 接续核定：下一阶段有明确启动门
 
 - 后继逐项条件以[启动条件](next-stage-start-conditions-2026-10-02.md)为准，缺项保留，不自动启动 F 导入、I1/I2 实施、E5、I5 或 Phase 3/4。

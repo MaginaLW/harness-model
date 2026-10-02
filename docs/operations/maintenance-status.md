@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-02 最新接续：四项 ZCode 任务已分配
+
+- harness-model 的 F 准备、E5/I5 进入门评估，以及 ai-agent-dotfiles、r3s-VPS 各自的试点/I2 核对已通过官方 UI 提交，四个真实 ID/项目关联已独立核定；[最新任务回读](zcode-next-stage-assignments-2026-10-02.md)保留准确状态快照。
+- [下阶段启动条件](next-stage-start-conditions-2026-10-02.md)保持；报告索引 completed 不等于 F 导入、Phase 3/4 或扩仓验收。先前锁屏未提交记录为历史快照，不再是当前阻塞。
+- 本轮只有一次新调用批准与四次初始发送，各项没有重发；3 名 sub-agent 分别只读核审计、元数据和记录，主 agent 串行写入/提交。本地记录未新增远端发布，历史全文保留。
+
 ## 2026-10-02 接续核定：明确进入门与 ZCode 准备任务
 
 - [启动条件](next-stage-start-conditions-2026-10-02.md)明确 F 合法新目标与匹配真实原件、I1/I2 实际需求、E5 三方向分离、I5/Phase 3 三门以及 Phase 4 退出/协调证据。
