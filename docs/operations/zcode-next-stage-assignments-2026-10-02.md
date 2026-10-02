@@ -1,5 +1,12 @@
 # ZCode 下阶段任务安排：2026-10-02
 
+## 2026-10-03 报告回收核定
+
+按既有 ID 回收，未重发。ZN-01/03/04 有 finish=stop 完整终稿；ZN-02 为
+model_request_cancelled、assistant 无最终 text/tool，completed 索引不能推导报告完成。
+三份主体准备内容附勘误接受；F/I2/条件阶段进入门保持。来源、终稿哈希、实际工具
+边界和源码/准确 CI 补证见[核定](zcode-report-recovery-2026-10-03.md)。下面快照及提示词全文保留。
+
 ## 收尾回读：四会话均 completed，报告待审核
 
 取证时刻 **2026-10-02 23:36:11 Singapore（15:36:11.329625 UTC）**。

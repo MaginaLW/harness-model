@@ -1,5 +1,11 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-03 接续：报告回收与 F 具体验收规格
+
+- [回收核定](../../operations/zcode-report-recovery-2026-10-03.md)完成三份终稿审核及 ZN-02 取消/无报告核查；原件、失败、索引历史保留，未重发。
+- dotfiles 当前准确 SHA 完整 CI 成功；r3s Windows 成功、POSIX 0 步取消，双通道缺项保持。条件门独立评估完成，未启动后继实施。
+- [F 规格](../../operations/f-real-import-acceptance-2026-10-03.md)按新 design 目标准入/冻结/真实报告/预检/消费/收尾串行；3 名 sub-agent 只读审查 F/外仓/条件门，主 agent 独占写入及验证。
+
 ## 2026-10-02 收尾交接：下次从报告回收与待办入口接续
 
 - E4 交付/闭账及四项任务分配已经完成。最新[ZCode 收尾快照](../../operations/zcode-next-stage-assignments-2026-10-02.md)为四会话 completed；报告内容仍待回收/审核，不重发或从历史 A 重开实现。
