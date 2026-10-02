@@ -1,5 +1,20 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-03 新授权后的最新接续
+
+原冻结规格和一次新 ZCode 只读审查已获明确批准，native 规格批准已记录并仍 current。
+6 名 sub-agent 并行复核查出完整 V2 的 DU 声明遗漏：既有固定五项变异要求
+`action_approval` 和 `targeted_mutation_required=true`，原 []/false 无合法完整通过路径。
+已在隔离目标更正并固定候选 `f59aa25`，spec 字节、Policy、14项V2和阈值不变。
+
+TASK-0063 当前实际 BLOCKED，Missing block_resolution；恢复原 REVIEW/V2 与精确候选
+的单次本地变异已准备具体提案，需新增真实授权。已有规格/单次源审查批准保留，
+不以付费批准代替 mutation 或恢复批准。原件调用和实际导入均尚未执行。
+批准后串行为 native resolve/reclassify → 新 design context/独立审查 → 一次原件获取 →
+真实导入与反例 → 固定候选完整 V2/独立审查/Gate；真实发布/close 仍另依原条件。
+
+修正、原始字节档案和执行前置见[F 说明](f-real-import-acceptance-2026-10-03.md#完整-v2-的固定执行前置)。
+
 ## 2026-10-03 最终待办定位
 
 回收、外仓取证、条件门核定和本地质量检查已完成。F 的新隔离目标 TASK-0063 已冻结，

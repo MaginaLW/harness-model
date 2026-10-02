@@ -60,3 +60,34 @@ native 准入及正式冻结状态以后续 CLI 回读为准；匹配真实原�
 [最新交接](zcode-report-recovery-2026-10-03.md#本地验证与新目标准备)。
 已准备具体匹配报告获取方案；人类规格批准和一次新付费获取须分别批准，尚未执行。
 本轮主检出完整质量通过不替代新任务实际导入或其原生 V2/Review/Gate/close。
+
+## 完整 V2 的固定执行前置
+
+本任务的 acceptance/integration/independent verifier 要求触发完整 V2。原生 V2 固定
+要求当前候选的定向变异证据，文档任务没有豁免；DU-001 因此必须声明
+`permission_requirements: [action_approval]` 和 `targeted_mutation_required: true`。
+这两项是现有完整 V2 的执行前置声明，不授权具体动作，不降低验证等级。
+冻结规格、既有批准、旧分类/context/Review 和失败记录全部保留；新 classification 输入
+必须重新核定 design context 与独立审查。已有规格批准是否仍 current 以 native 为准。
+
+变异仅通过既有 `targeted_mutation_v2` 入口，使用未改的
+`.ai/mutations/phase-02-critical-manifest.json` 和 `src/aiflow/mutation_runner.py`，
+执行固定五项 safeguard 的 baseline/mutant detectors。动作单独绑定精确 subject、
+DU-001、classification SHA、参数、有效期及 single_use；实际消费前另有真实人类批准。
+运行器仅创建自己的临时 detached worktree/scratch，只清理本次创建的精确临时路径；
+清理失败保留原生失败结果，不扩大清单。不删除历史、未知内容、源项目或用户草稿。
+失败/中断也保留一次消费回执，不自动重跑。
+
+完整 V2 的所有 14 项必需检查、原预算与选择器、85% 总覆盖率和90% diff 门保持。
+使用隔离检出自己的 editable 环境，先验证 MINENV 子进程加载本检出源码；不修改
+MINENV 或 Policy。完整验证后对同一 run coverage 数据追加85%检查及真实 whitespace。
+独立 verifier/implementation Review/finalize/code approval/Gate 仍分别办理。
+
+本轮执行前核对发现原 DU 的两项声明缺失；付费发送和变异均未执行。真实权限升级
+按 native `new_permissions` 保留 BLOCK 记录，恢复原 REVIEW/V2 另需版本绑定授权，
+不以虚假规格变化跳过恢复门，也不重复请求 native 仍判 current 的规格批准。
+
+原批准/native 字节的恢复依据为本任务 `preparation/v2-reconciliation-001/` 中的
+`source-bytes-base64.json`，解码后逐成员核 SHA；松散文本仅供阅读。任务树强制 LF
+会改写直接 ZIP，首次 ZIP 试存保留为失败记录，不用于恢复；ASCII base64 封装保存
+原字节，不改 gitattributes 或绕过过滤。封装只保留本次更正所需七项，不扩大备份范围。

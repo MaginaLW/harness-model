@@ -1,5 +1,13 @@
 # 维护收尾与待办
 
+## 2026-10-03 后续审批与 V2 更正准备
+
+- 项目所有者已批准 TASK-0063 原冻结规格和一次新 ZCode 只读付费审查；native spec approval 已记录，原 spec/base/Policy 及批准仍 current，尚未发送新会话。
+- 6 名 sub-agent 并行核调用入口、准入、来源、导入边界、完整 V2 和独立一致性。执行前发现原 DU 缺 action_approval/targeted_mutation_required，已在隔离分支更正，保持14项完整V2及阈值；原记录与失败均保留。
+- 隔离候选 `f59aa2544701bc4e00644fd291e16b97314c41a6` 已由真实文档更正和 native sync 固定；实际 new_permissions 升级后为 BLOCKED，Missing block_resolution。恢复 REVIEW/V2 和单次固定五项本地变异的具体提案已独立复核，等待新增授权；不重复请求仍 current 的规格批准。
+- 原始 native 字节因任务树强制 LF 改写直接 ZIP，失败试存保留；canonical ASCII base64 档案从 Git blob 解码后七项大小/哈希全部一致。隔离 editable 环境 MINENV 导入正确，工具计划齐备；这不是 V2 已通过。
+- F 实际导入、V2/action 消费及新付费发送均未执行。本轮仅本地；原外仓/条件阶段/发布边界保持。具体[待办定位](follow-up-backlog-2026-09-22.md)及[执行说明](f-real-import-acceptance-2026-10-03.md)追加保留历史。
+
 ## 2026-10-03 最终交接：本地质量通过，F 新目标准备完成
 
 - 文档候选 `3d65282` 的完整本地检查通过：3008 passed/1 POSIX FIFO skip，总覆盖率 89.05%；90% diff 门执行成功（文档差异无可覆盖行），contracts 185 passed、lock/Ruff/format/mypy/whitespace 通过。具体来源与限制见[回收记录](zcode-report-recovery-2026-10-03.md#本地验证与新目标准备)。这不是 TASK-0063 的原生 V2 验收或远端 CI。
