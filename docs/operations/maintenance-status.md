@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-02 接续核定：明确进入门与 ZCode 准备任务
+
+- [启动条件](next-stage-start-conditions-2026-10-02.md)明确 F 合法新目标与匹配真实原件、I1/I2 实际需求、E5 三方向分离、I5/Phase 3 三门以及 Phase 4 退出/协调证据。
+- 四项只读准备分别放在 harness-model（两项）、ai-agent-dotfiles、r3s-VPS；提示词与实际提交回读见[任务安排](zcode-next-stage-assignments-2026-10-02.md)。准备完成不等于 F 验收、扩仓或 Phase 3 实施。
+- E4 交付/闭账保持。历史全文保留，旧未交付快照与“从 A 开始”不作为本轮启动指令。
+
 ## 2026-10-02 最新核定：E4 已保护合并，五项任务已闭账
 
 - [PR #44](https://github.com/MaginaLW/harness-model/pull/44) 已实际合并；固定源码 S `993a9a0619577117417d80de96e73aa18270b464`，发布 Q `f5707ff178b760bb0215c7d5cb773cc4d06c75d6`，远端合并 M `db3efabab562971aef1a6eb1317b679d42eeadb9`。独立核验及主 agent 复核确认 M 有序父提交为 `[48bf777106b9fdfef1ddf83d3abc95859fb8e580, Q]`、M/Q 树一致、所需源码及历史祖先完整、本地配置提交 `52474d93101d387ccca853debbe6fdcc7f565c8d` 未发布；保护未降低。

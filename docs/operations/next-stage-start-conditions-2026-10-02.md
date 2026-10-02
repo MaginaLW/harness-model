@@ -1,0 +1,62 @@
+# 下阶段启动条件：2026-10-02
+
+E4 已通过 PR #44 交付，TASK-0054/0055/0056/0057/0062 已在真实远端证明后关闭。
+本页补充后继进入门，不重开已交付实现。现在可启动四项 ZCode **只读准备任务**，
+详见[任务安排](zcode-next-stage-assignments-2026-10-02.md)；准备完成不等于实施门已满足。
+
+## 逐项启动门
+
+| 阶段 | 当前可开展 | 实施启动前必须齐备 | 缺项时处置 |
+| --- | --- | --- | --- |
+| F：真实报告导入验收 | 原件/绑定缺项核对和合法新目标准入方案 | 新的真实 native 目标、合法状态及冻结范围；准确匹配的真实未改 ZCode 原件；当前 context、来源/受审版本证据；受控输入及消费动作 | 不向 MERGED/FAILED 历史目标导入，不用 synthetic 替代 |
+| I1：安装/更新/恢复复用 | 从真实使用或故障需求整理缺口 | 明确工具/生命周期范围、幂等和不重复注册、不覆盖凭据、不扩大 ACL、可执行恢复、验证和授权 | 无实际需求则保留；本次不另造 harness-env 工作 |
+| I2：扩仓/平台 | 两个既有试点分别核对证据 | 每次选一个实际可信目标；权限/平台、检查等价性、准确候选完整 CI、可执行回退及目标项目准入 | 试点核对不等于新增接入完成，不自动扩到所有仓库 |
+| E5 | 分别评估引擎采用、provider、可信执行 | 三个方向各自的实际需求/范围/授权；引擎的目标兼容验证；provider 的 adapter、身份/费用/数据边界；可信执行的身份根、服务授权/原子消费、固定参数、凭据托管、审计/恢复 | 不从 runner 接入、本地 actor/approval 推断完整能力 |
+| I5 / Phase 3 | 进入门证据矩阵和冻结方案提案 | 下节三门齐备，并另行准入设计、Policy 影响评估、实施目录和验证矩阵 | 仍 not_started，不采集新费用/私密数据，不实现 V3、模型路由、信任评分或调度 |
+| Phase 4 | 整理真实协调需求 | Phase 1–3 接口稳定、Phase 3 真实退出证据；量化多仓/平台/模型协调成本；真实暂停/恢复和集中审批需求；独立规格与准入 | 不启动队列、锁、租约、调度器或跨主机服务 |
+
+## F：必须串行取得的证据
+
+1. 协调者通过原生 CLI 准入**新目标**，明确 repository/stage/base/allowed scope，分类、冻结规格并生成当前 context。
+   design 仅接受 `WAITING_FOR_SPEC_REVIEW` / `READY_TO_IMPLEMENT`；implementation 仅接受
+   `VERIFYING` / `VERIFIED` / `WAITING_FOR_FINAL_REVIEW` / `APPROVED_FOR_MERGE`，且 evidence 新鲜通过。
+   不向 MERGED 0054–0057/0062 或失败发布任务套用旧报告。
+2. 目标准入后才安排匹配的真实报告，保留原始字节与实际来源证据。source 的 stage/base
+   （implementation 还包括 subject）须与 target 相等；target 的 task/repository/stage/base/context
+   （implementation 还包括 subject）须与当前 native context 相等。design 不添加 subject。
+   source 仓库 UUID 或经核定的精确 locator mapping 必须对应 target repository_id。
+   SHA 只绑定字节；真实会话、provider/model/version、受审版本按实际来源核定，不能改旧 task ID/context/source subject 凑匹配。
+   provider/model/version 无法核实则 UNKNOWN；导入器不认证外部身份。
+3. 按[导入接口](external-review-import.md)对受控输入执行零写 preflight，确认实际
+   `ready` / `already_recorded` / `cleanup_required`；record 携带本轮 `--expected-preflight-sha256`，重读全部输入、目标和历史。
+   路径、大小、严格 JSON、repository mapping、漂移和恢复继续遵守现有合约。
+4. 退出记录应有真实来源、准确目标、实际 preflight/record、不可变追加、相同完整输入 no-op，
+   以及版本冲突/漂移/错误目标零写拒绝证据。新反例按新目标冻结验收范围执行，不用历史 synthetic 冒充本次执行。
+   中断先核真实状态，不盲删或重试。原件/私有日志留受控运行材料，不提交机器路径、用户名或凭据。
+5. 导入不自动产生正式 Review/Finding/批准或改变 Gate；正式审核、原生验证与关闭仍走目标流程。
+
+当前缺合法新目标及其匹配真实原件；既定有界搜索未找到现成匹配报告，不表示全局无报告。
+本轮准备任务不创建目标，也不作为 F 的目标匹配原件。
+
+## I5 / Phase 3：三个进入门
+
+1. **冻结样本规则并证明充分。** 数量或可判定充分性规则、任务/角色分层、保留期、隐私、访问、偏差检查均明确，
+   按规则核对真实样本。未定阈值列待决，不自行补数。
+2. **批准真实 V3 用例和边界。** 指定实际高风险任务、资产、故障、受控沙箱、dry-run、损失边界、备份、
+   可执行回滚目标、逐动作批准点、退出验收标准及拟采集证据。真实 V3/回滚执行证据在准入实施后形成，
+   用作 Phase 3 退出验收；既有 V2/定向变异/Hook/元数据不能代替 V3。
+3. **冻结版本化度量合同。** 费用/调用来源、返工归因、review 缺陷严重度、工具失败分类、任务/角色/模型身份事实、
+   缺失值、脱敏/访问/保留规则统一。可现在提合同草案，真实采集另行准入；不能先执行未准入 Phase 3 来补进入门。
+
+以[阶段三输入](../implementation/phase-03-entry-inputs.md)与原生 Policy 判定为准。提案不等于阈值已冻结、
+模型身份已认证或能力/效率/可靠度改善；进入实施和高风险执行仍需对应准入与实际授权。
+
+## 分工与保留边界
+
+- 本轮主 agent 独占两份新记录和三个权威入口；2 名原生 sub-agent 分别只读核启动门和 ZCode 项目/任务元数据。
+  编辑、复核、提交与各次 UI 发送串行。四项 ZCode 准备任务可并行，只在自己项目的会话输出，无共享文件写入；它们是外部 worker。
+- F 准入 → 报告 → preflight → record → 原生收尾串行，一目标一写入者。E5/I5 准备与试点核对不依赖 F 完成；
+  后续实施再按独立模块、容量和文件归属确定并发。
+- 0053 push-only，0058–0060 准确 CI 失败，0061 FAILED，0028 Option C 和七项历史 BLOCKED 处置保持，历史全文保留。
+  本页不授权删除、部署、扩仓、改账户/模型/权限或自动重试。
+- E4 post-Q 闭账及本地整合记录仍只在本地，不因任务安排宣称已发布到远端。

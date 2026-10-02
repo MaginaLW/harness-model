@@ -1,5 +1,11 @@
 # E4 启动前交接与后续工作计划
 
+## 2026-10-02 接续计划：只读准备先行，实施按进入门
+
+- E4 已交付，后继按[启动条件](../../operations/next-stage-start-conditions-2026-10-02.md)逐项准入；不从历史 A 重开，不向已 MERGED 目标导入。
+- [ZCode 四项任务](../../operations/zcode-next-stage-assignments-2026-10-02.md)只输出各项目会话报告，可并行；主 agent 串行记录/提交/分配，2 名原生 sub-agent 只读核条件与项目元数据。
+- F 新目标 → 匹配真实报告 → preflight → record → 原生收尾串行；E5/I5 与外仓证据准备独立，不以 F 完成为前置。未来实施另定独占文件/并发，历史全文保留。
+
 ## 2026-10-02 最新核定：E4 实际交付完成，F 仍待真实报告
 
 - 固定 S `993a9a0619577117417d80de96e73aa18270b464`、发布 Q `f5707ff178b760bb0215c7d5cb773cc4d06c75d6` 经 [PR #44](https://github.com/MaginaLW/harness-model/pull/44) 保护合并为 M `db3efabab562971aef1a6eb1317b679d42eeadb9`。实际独立核验及主 agent 复核 M 有序父提交 `[48bf777106b9fdfef1ddf83d3abc95859fb8e580, Q]`、M/Q 等树、完整来源历史及本地配置提交524排除；保护和质量阈值保持。
