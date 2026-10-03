@@ -1,6 +1,62 @@
 # ZCode 准备报告回收与独立核定：2026-10-03
 
-## 2026-10-03 当前核定：TASK-0064 精确恢复与独立设计复审完成
+## 2026-10-04 当前核定：TASK-0064 原生 FAILED/SPENT 原件已保留
+
+分支 `codex/git-context-read-protocol` 的 TASK-0064 一次完整原生 V2 run
+`run-20261003T153150710903Z` 已结束。CLI 命令 exit 0 不代表验证通过：实际 conclusion
+为 failed，14 项中 11 通过、3 失败，当前 FAILED / REVIEW / V2。source subject 仍是
+`50777d648765a935c265e2d12e292d325fabeb1f`，source SHA256
+`c7d00dddecb8f06a8059c3a1f74b01d554bd14b6be610d3bc1db5ac0705b0755` 不变；当前 observed HEAD
+`ef5943b29514ad1d13121023610bf4c2c4dcb408` 为诊断摘要治理提交。失败、消费回执及原 V2
+便携摘要阶段提交 `4de35cc5af62c38619afb3a0cd7117fedcb94301` 保留，源码候选未改变。
+
+- regression：900301ms，RUNNER_TIMEOUT，完整 pytest 计数 UNKNOWN。
+- coverage：1118810ms，exit 1，3036 passed、1 skipped、1 failed；节点
+  `tests/unit/test_process_runner.py::test_timeout_kills_child_process_tree` 的 child sentinel 断言失败。
+- integration：600434ms，RUNNER_TIMEOUT，完整 pytest 计数 UNKNOWN。
+- unit：2010 passed；同 run supplemental overall85 显示 89%，原 coverage 数据 SHA256
+  `d78082f8dcd7c1cefbb0da704409c8d75f9cba416d278bc872e93222fa6b697d` 前后不变；原生 diff
+  为 33 changed executable lines / 0 missing / 100%。这些通过项不覆盖三项失败。
+
+精确 action `dd1502a97b726e3b8f8b027a146b5ae730695a625f03700378c62ac6ad91bf22`
+已由真实所有者批准记录为 event 17，event 19 消费，event 20 记录验证失败。mutation run
+`MUTRUN-20261003T161743Z-deb1a5e1387441f0` 的五项 canonical mutation 均 killed，action
+现为 SPENT，不可复用或自动重跑。detector stdout/stderr 为 DEVNULL，保留真实 baseline/
+mutant 退出码、timeout 与派生结果元数据，不能据缺失的原始流独立定位断言；
+main_tree_unchanged 不等于全业务字节或每条路径清理的证明，不追加清理或补造证据。
+
+上述分支/提交内 `.ai/tasks/TASK-0064/preparation/v2-terminal-summary-001.json` 是便携摘要，
+6255 字节，SHA256 `1ce2f591cdfd68e2b9b98a9a027194648ccf1ea938232c61ce3de79b01504c96`。
+原生 `evidence.json` 为 11978 字节，raw SHA256
+`075d18f5cd317c3077431fb22183e4faf0893eae025dc0ed73e5a704432dd583`；它含本机解释器、
+coverage 与夹具绝对路径，原字节保留本地 untracked 和私有 raw archive，不入库。
+便携摘要不是替代原生 evidence；独立核查结果与原件留存引用见该摘要。
+
+CLI classification fresh、approvals current、evidence stale，Missing 为
+`retry_reason_or_escalation`。implementation Review、finalize、code approval 和 Gate 未完成；
+14 项检查、预算、85%/90% 阈值保持。sentinel 记录证明写入发生，不证明 child 在 runner
+返回后仍存活；原始 taskkill 返回码、流和时序未留存，失败根因为 UNKNOWN。
+
+后续一次隔离观测诊断保持原测试、源码、断言、1/5 秒限制与 2/10/3 秒时序，原失败 node
+实际 1 passed / 4.19 秒 / rc 0。taskkill 原调用 rc 0、157.7557ms，stdout 348 字节含 4 条
+SUCCESS；本次 sentinel 不存在，未出现 fallback parent.kill 事件，脚本指定保护目录
+实际字节前后相同。实际 pytest 调用/attempt 均为一次，retry 为零，未查询事后进程存活。
+私有诊断原件 `task0064-process-timeout-controlled-diagnostic-001/run-001/diagnostic.json`
+SHA256 `39bb036617d718a4917babefcb76b909d23e65d225812294e74e3869fecc32a2`。
+该单次诊断 PASS 不改写旧 native FAILED/SPENT，不确定旧失败根因，也不证明完整 V2 通过。
+
+该分支提交 `ef5943b` 已追加 `.ai/tasks/TASK-0064/preparation/process-timeout-diagnostic-summary-001.json`，
+4831 字节，SHA256 `fb26a637bcb4a74ad953977a8b647bcebe11243fa3a0b607f8b6e98613813020`。
+六项私有原件的字节/哈希引用均已重算匹配；独立诊断审计为 21060 字节，SHA256
+`2177f5f1f50bd475700fd0bfc0574d002db77dd06cb0f0b566c90f56f53f415c`。SUCCESS 输出不等于
+独立事后存活测量，观测也可能改变时序；保护范围不包含整个主工作区业务树的字节证明。
+
+TASK-0063 仍 BLOCKED；旧付费来源仍只绑定 `070b364c`/`165c5dc2` 原窗口，6 项 pending、
+3 条勘误、旧 FAILED 原件与已消费 action 保持，不重标新 context 或复用。TASK-0064 不
+代表 F 验收，也不授予新付费、push 或 merge 权限。下方未批准及 false 标志完整保留
+历史准备时点，当前以真实追加 events 17–20 和失败原件为准。
+
+## 2026-10-03 历史窗口：TASK-0064 精确恢复与独立设计复审完成
 
 分支 `codex/git-context-read-protocol` 的 TASK-0064 已按真实所有者授权完成
 `new_permissions` resolve/classify。event 11记录人类精确授权，events 12–13恢复

@@ -1,6 +1,18 @@
 # 维护收尾与待办
 
-## 2026-10-03 当前核定：TASK-0064 恢复完成，单次变异仍待批准
+## 2026-10-04 当前核定：TASK-0064 完整 V2 为 FAILED，单次 action 已 SPENT
+
+- 分支 `codex/git-context-read-protocol` 的 TASK-0064 已完成一次完整原生 V2，run `run-20261003T153150710903Z` 的实际终态为 **FAILED，11/14 通过**。当前 observed HEAD 为诊断便携摘要提交 `ef5943b29514ad1d13121023610bf4c2c4dcb408`；失败/消费证据阶段提交为 `4de35cc5af62c38619afb3a0cd7117fedcb94301`。源码 subject 仍为 `50777d648765a935c265e2d12e292d325fabeb1f`，源码 c7 字节不变。
+- 三项失败保留：regression 在 900301ms 超时，完整计数 UNKNOWN；coverage 在 1118810ms 以 exit 1 结束，3036 passed、1 skipped、1 failed，失败节点为 `tests/unit/test_process_runner.py::test_timeout_kills_child_process_tree`；integration 在 600434ms 超时，完整计数 UNKNOWN。unit 为 2010 passed。
+- 同 run 的 supplemental overall85 报告为 89%，coverage 数据前后 SHA256 相同；原生 diff 为 33 条 changed executable lines、0 missing、100%。这些通过项不覆盖失败测试，也不形成完整 V2 通过结论；14 项检查、原预算和 85%/90% 阈值保持。
+- action `dd1502a97b726e3b8f8b027a146b5ae730695a625f03700378c62ac6ad91bf22` 已由 event 17 真实批准、event 19 消费，五项 canonical mutation 为 killed；event 20 记录原生验证失败。该单次 action 现为 **SPENT，不可复用或自动重跑**；detector 原始流为 DEVNULL，保留的是实际退出码、timeout 与派生结果元数据。
+- CLI 当前为 FAILED / REVIEW / V2，classification fresh、approvals current、evidence stale，Missing 为 `retry_reason_or_escalation`。implementation Review、finalize、code approval 和 Gate 尚未完成；原失败根因为 UNKNOWN。
+- 后续一次隔离观测诊断保持原测试、源码、断言和全部时限，原失败 node 实际 1 passed / 4.19 秒 / rc 0。taskkill 原调用 rc 0、157.7557ms，stdout 348 字节含 4 条 SUCCESS；本次 sentinel 不存在，未出现 fallback parent.kill 事件，脚本指定保护目录实际字节前后相同。未查询事后进程存活，也未重跑；只记本次诊断 PASS，不消除旧原生失败、不确定旧根因、不证明完整 V2 通过。
+- 诊断便携摘要已追加到上述分支提交 `ef5943b` 的 `.ai/tasks/TASK-0064/preparation/process-timeout-diagnostic-summary-001.json`，4831 字节，SHA256 `fb26a637bcb4a74ad953977a8b647bcebe11243fa3a0b607f8b6e98613813020`；六项私有原件引用均已重算核对，独立审计只确认本次诊断与留存边界。
+- 上述分支/提交的 `.ai/tasks/TASK-0064/preparation/v2-terminal-summary-001.json` 是已提交便携摘要，SHA256 `1ce2f591cdfd68e2b9b98a9a027194648ccf1ea938232c61ce3de79b01504c96`。原生 evidence 含本机绝对路径，按原字节留在本地 untracked 与私有归档，不入库；便携摘要不替代原生原件。
+- TASK-0063 仍 BLOCKED；原付费来源只属于旧 `070b364c`/`165c5dc2` 窗口，旧失败和已消费 action 不改写、不复用。TASK-0064 的结果不代表 F 验收，也不产生新付费、push 或 merge 权限。下方“动作未批准”及 false 标志均是历史准备窗口，当前以追加 events 17–20 为准。
+
+## 2026-10-03 历史窗口：TASK-0064 恢复完成，单次变异仍待批准
 
 - 分支 `codex/git-context-read-protocol` 的 TASK-0064 已获精确恢复授权，原生 events 11–13 完成 `new_permissions` resolve/classify，新分类输入 `588bbb4bc50aa04aa114b8cf3d290de124dd40f13f199a8e40434508958e0490`。源码 subject 仍为 `50777d648765a935c265e2d12e292d325fabeb1f`，base `1fea002`、spec `203bc36e`、源码14748字节及全部V2预算/阈值保持。
 - 新 design context `a4545a40c7199b9a2bae1b91a162bb91f894aa06ea887f9fcba1680e3b1e0841` 经真实独立审查，REV-0003 r1 为 APPROVE、findings为空，已原生 record。沿用仍有效的原规格批准完成机械状态转换，随后 begin；实际状态为 IMPLEMENTING / REVIEW / V2。

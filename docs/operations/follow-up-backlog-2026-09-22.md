@@ -1,6 +1,42 @@
 # 后续待完成项目：2026-09-22 核定
 
-## 2026-10-03 当前依赖：TASK-0064 已恢复，单次动作与完整V2待执行
+## 2026-10-04 当前依赖：单次隔离诊断 PASS，TASK-0064 原生失败仍待处理
+
+分支 `codex/git-context-read-protocol` 的 TASK-0064 完整原生 V2 run
+`run-20261003T153150710903Z` 已真实结束为 FAILED，11/14 通过。source subject 仍为
+`50777d648765a935c265e2d12e292d325fabeb1f`；当前 observed HEAD
+`ef5943b29514ad1d13121023610bf4c2c4dcb408` 为诊断便携摘要提交；失败/消费证据阶段提交
+`4de35cc5af62c38619afb3a0cd7117fedcb94301` 保留，源码 c7 字节不变。
+
+regression 900301ms timeout、integration 600434ms timeout，均无完整计数；coverage
+1118810ms exit 1，3036 passed / 1 skipped / 1 failed，失败节点为
+`tests/unit/test_process_runner.py::test_timeout_kills_child_process_tree`。unit 2010 passed；
+同 run supplemental overall85 为 89% 且 coverage 数据 SHA256 不变，原生 diff 33/0/100%。
+这些通过项不替代三项失败；原 14 项检查、预算、85%/90% 门禁不变。
+
+精确单次 action `dd1502a97b726e3b8f8b027a146b5ae730695a625f03700378c62ac6ad91bf22`
+已在 event 17 获真实批准、event 19 消费，五项 mutation killed，但当前 action 为 SPENT，
+不可复用或自动重跑。CLI 为 FAILED / REVIEW / V2，classification fresh、approvals current、
+evidence stale，Missing 为 `retry_reason_or_escalation`；implementation Review、finalize、
+code approval/Gate 均未完成。
+
+后续一次隔离诊断保持原测试、源码、断言与时限，原 node 实际 1 passed / 4.19 秒 / rc 0；
+taskkill rc 0、157.7557ms，stdout 348 字节含 4 条 SUCCESS。本次 sentinel 不存在，未出现
+fallback parent.kill 事件，脚本指定保护目录实际字节相同。未查询事后进程存活，无重跑；
+只记本次诊断 PASS，旧原生失败不消除，旧根因仍 UNKNOWN，也不证明完整 V2 通过。
+该分支提交 `ef5943b` 已追加诊断便携摘要
+`.ai/tasks/TASK-0064/preparation/process-timeout-diagnostic-summary-001.json`，4831 字节，SHA256
+`fb26a637bcb4a74ad953977a8b647bcebe11243fa3a0b607f8b6e98613813020`，六项私有引用已核对。
+下一依赖仍是按实际证据和 CLI 缺项确定合法恢复范围及候选；若再次完整 V2，需其实际
+候选的新具体单次 action 批准。失败阶段提交内便携摘要
+`.ai/tasks/TASK-0064/preparation/v2-terminal-summary-001.json` 的 SHA256 为
+`1ce2f591cdfd68e2b9b98a9a027194648ccf1ea938232c61ce3de79b01504c96`；原生 evidence
+含本机绝对路径，原字节留在本地 untracked/私有归档，不入库、不以摘要替代原件。
+
+TASK-0063 仍 BLOCKED，旧付费来源和旧 action 不可复用，不以 TASK-0064 冒充 F 完成；
+没有新付费、push 或 merge 权限。下方未批准/false 标志保留原准备时点，当前追加事件为准。
+
+## 2026-10-03 历史依赖：TASK-0064 已恢复，单次动作与完整V2待执行
 
 TASK-0064 在分支 `codex/git-context-read-protocol` 已按真实授权完成 `new_permissions`
 resolve/classify，新input `588bbb4bc50aa04aa114b8cf3d290de124dd40f13f199a8e40434508958e0490`。
