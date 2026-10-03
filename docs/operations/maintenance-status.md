@@ -1,5 +1,14 @@
 # 维护收尾与待办
 
+## 2026-10-03 完整 V2 首次失败，测试维护修复已提交
+
+- 真实导入及反例封存证据已由两名独立 sub-agent 核定通过：33条命令、旧 token 零写拒绝、首次单份创建、重复 no-op、20次反例拒绝及全任务树原字节比较均符合预期。来源仍只绑定原冻结 context `165c5dc2`，不自动覆盖后来的测试改动。
+- 完整原生 V2 仅执行一次，run `run-20261003T001416071827Z` 的实际结论为 **FAILED：14项中10通过、4失败**。unit 为1993 passed/1 failed；regression 和 coverage_xml 各2999 passed/2 failed/7 errors/1 skip；integration 达600秒原预算后超时。CLI退出0只表示记录完成，不是验证通过。
+- 五项定向变异均有 baseline exit 0、mutant exit 1/killed 的原生元数据，原单次 action `13812c7f` 已消费；但批准附加的 detector 原始 stdout/stderr 条件未满足：现行 runner 将其接入 DEVNULL，不能恢复或补造。原动作不可复用；未来动作须明确重新决定这项证据期望，或另行准入 runner 改造。
+- 已封存原失败的75份任务原件（1695658字节），逐份核对原字节；原事件和日志保留。随后实际 `scope_expanded → BLOCK`。三份测试维护修复独立提交 `d8af0cc377925a343fe47d32753154a7aae16f18`：UUID测试只复制标记文件，两份临时clone在checkout前设置clone-local `core.longpaths=true`。局部三模块187 passed，Ruff/format/whitespace通过；首次临时父目录缺失的局部检查错误另保留。
+- 同一失败运行的覆盖数据独立只读复算约89.07%≥85%，diff门为无可覆盖行的合法结果；这不覆盖原 coverage_xml 失败，也不将完整 V2 改为通过。另一次五用例诊断5 passed/9.05秒，缓存因四个系统键名未获准而禁用；该新诊断不能回填首次运行的缓存状态，完整integration超时尚未证明解决。
+- 当前 TASK-0063 为 BLOCKED。并行核测试缓存的最小维护候选和原件一致性；主 agent 串行整合、检查、提交，随后才准备准确新范围/规格/subject及单次动作提案。尚无新的F验证、implementation Review/finalize/code approval/Gate或发布授权。以下各窗口按时间保留历史。
+
 ## 2026-10-03 匹配来源与导入边界已实际执行
 
 - 隔离 TASK-0063 的一次新来源审查完成；终稿为 15810 字节、SHA256 `b29e335a03021ef6d13e5b36e1031dcdf7d8d4b20df21576b2988c97882b5355`。独立核定实际请求→终稿关联、八次完整 Read 和当前冻结绑定；持久化文本原件不代表传输原字节或身份认证。

@@ -1,5 +1,39 @@
 # ZCode 准备报告回收与独立核定：2026-10-03
 
+## TASK-0063 首次完整 V2 与失败原件
+
+真实来源及导入封存证据已完成两路独立核定。唯一完整原生 V2 run
+`run-20261003T001416071827Z` 于 `2026-10-03T00:14:16.071827Z` 开始，
+生成证据时刻为 `2026-10-03T00:54:43Z`，实际 **FAILED**：14项中10通过、4失败。
+unit 1993 passed/1 failed；regression及coverage_xml各2999 passed/2 failed/7 errors/1 skip；
+integration在原600秒预算后 `RUNNER_TIMEOUT`，没有完整pytest结论。原证据路径
+`.ai/tasks/TASK-0063/logs/run-20261003T001416071827Z/evidence.json`；CLI退出0表示结果已记录。
+
+原五项mutation的baseline为0、mutant为1且killed；manifest和runner绑定未改变。
+action canonical digest `13812c7f836fa3d87d34268ef239c562aec5d3f0299bb7cdae71862d7b7a5124`
+已真实消费。现行 `src/aiflow/mutation_runner.py` 的检测子进程stdout/stderr接入DEVNULL，
+因此该批准额外要求的detector原始流未留存。此处保留未满足条件；元数据不能替代原始流，
+不得复用旧动作或伪造。producer报告main_tree_unchanged；独立观察未见遗留的注册变异
+worktree，原HEAD不变；这些观察不等同逐临时路径清理或整棵业务树全部原字节的独立证明。
+
+封存原75份任务原件共1695658字节，私有逐份副本和便携base64档案均核对原字节；
+`.ai/tasks/TASK-0063/preparation/v2-failure-recovery-001/` 保存便携档案、清单及失败摘要，
+原日志、事件和单次消费回执仍在原路径。只读同run覆盖数据复算约89.07%≥85%，
+diff coverage为无可覆盖行的合法结果，不能覆写coverage_xml失败或完整V2结论。
+
+原冻结范围不含必要测试修复，已真实 `scope_expanded → BLOCK` 后单独进行维护。
+测试提交 `d8af0cc377925a343fe47d32753154a7aae16f18` 仅修改三份测试文件：UUID标记
+定点复制、两份临时clone-local长路径设置。必要三模块187 passed/36.66秒及静态检查通过。
+首次局部检查因新临时父目录未创建而发生setup errors，原件保留；修正的是临时执行准备。
+另一次仅五用例诊断5 passed/9.05秒，资格检查因四个系统配置键名禁用当次缓存，
+五次原构建累计1.305秒。首次V2没有记录session cache遥测，原因及完整超时修复仍待核定，
+不把当次诊断填作旧run事实。
+
+当前BLOCKED；更大维护候选、准确新规格/分类/subject、恢复及新单次动作仍在准备。
+旧来源只属于下面的原冻结context；Gate不依赖重复external-review导入，后续收尾无需新付费来源。
+尚未进行新F验证、implementation Review/finalize/code approval/Gate或推送、合并、部署。
+以下来源窗口完整保留。
+
 ## TASK-0063 新的匹配来源与导入边界
 
 此前四项准备报告不作为本次匹配原件。本次面向已冻结的新隔离目标，另有真实所有者
