@@ -1,5 +1,34 @@
 # ZCode 准备报告回收与独立核定：2026-10-03
 
+## TASK-0063 后续维护：真实缓存资格通过，全量仍TIMEOUT
+
+安全测试维护提交 `f04e8654e92d2d89284e11a39d40e8869e511eee` 限定四个精确inactive
+Git键名，新增13个有意义反例；helper模块175 passed/117.73秒。新五例探针于
+`2026-10-03T01:48:43Z` 开始，5 passed/9.51秒，真实资格成功、cold=1、hit依次0→4。
+原始41件探针材料的manifest SHA256为
+`755da076e9d9d7267d154059c237fc31f99f1539e92166c256ec0fdf39ccdca8`。
+该探针不替代完整integration或原生F。
+
+随后一次普通维护检查于 `2026-10-03T01:58:04.042580Z` 启动原完整
+`tests/integration -q`，环境仅PATH/SYSTEMROOT，600秒执行预算与单次10秒cleanup grace，
+无筛选、profile、观察插件或重试。实际TIMEOUT/exit124；执行599999ms，含cleanup600001ms。
+stdout1073字节，SHA256 `6ef318a164110602964e53495972d15043aad31d355da9b2dbf7728ac463c6a1`；
+stderr0字节。输出停于94%之后，没有完整summary、collected nodeids或最终数量；
+producer的默认零值不解释为零通过、零失败或零跳过。
+原始process-result SHA256 `b864887ce54e78ee590a08da3f921c6a954f29c1319959505329fa37b1aacb8a`；
+terminal manifest SHA256 `618fa0f3241a8023978b80956affcbcc9090562ccc6589a904a27e99db3060c9`。
+
+2258份受保护文件、47个目录及索引在实际内存原字节/types/modes比较中相同，
+HEAD保持上述维护提交。owned Job活跃进程0、已reap/close；没有清理目录或改写原件。
+末尾用例临近截止仍写入，支持累计预算耗尽的推断；首尾initial reflog相同支持缓存复用，
+尚无整套永久禁用或具体deadlock证据。此运行未采集cache遥测，不回填中段hit/miss。
+
+私有原件位于 `<RUNTIME_ROOT>/harness-model-followup-20261003-001/` 的
+`task0063-cache-maintenance-integration-001/`；便携摘要追加到隔离TASK-0063自己的
+`preparation/v2-failure-recovery-001/maintenance-timeout-summary-001.json`。
+当前只测量私有schema解析复用原型，生产源码不变；未生成pass projection或采用新恢复规格。
+原F的FAILED/BLOCKED和spent action保持，以下原始执行窗口完整保留。
+
 ## TASK-0063 首次完整 V2 与失败原件
 
 真实来源及导入封存证据已完成两路独立核定。唯一完整原生 V2 run
