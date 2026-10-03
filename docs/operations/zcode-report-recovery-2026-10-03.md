@@ -1,6 +1,38 @@
 # ZCode 准备报告回收与独立核定：2026-10-03
 
-## 2026-10-03 当前核定：TASK-0064 源码阶段与新的权限缺项
+## 2026-10-03 当前核定：TASK-0064 精确恢复与独立设计复审完成
+
+分支 `codex/git-context-read-protocol` 的 TASK-0064 已按真实所有者授权完成
+`new_permissions` resolve/classify。event 11记录人类精确授权，events 12–13恢复
+REVIEW/V2并要求新设计审查；实际分类input为
+`588bbb4bc50aa04aa114b8cf3d290de124dd40f13f199a8e40434508958e0490`。
+source subject仍为 `50777d648765a935c265e2d12e292d325fabeb1f`，base
+`1fea00217533b01a7b9908f053ccaca43571f6f8` 和spec `203bc36e`保持；实际源码14748字节，
+SHA256 `c7d00dddecb8f06a8059c3a1f74b01d554bd14b6be610d3bc1db5ac0705b0755` 未改变。
+
+新design context `a4545a40c7199b9a2bae1b91a162bb91f894aa06ea887f9fcba1680e3b1e0841`
+由真实独立reviewer `subagent/import_acceptance_audit` 审查，REV-0003 r1
+APPROVE/findings为空，event 14原生记录。event 15沿用仍有效的原spec批准完成机械
+状态转换，event 16 begin；不把它解释为新增人类规格或mutation决定。
+只读核对当前原件及CLI status为 IMPLEMENTING / REVIEW / V2、classification fresh、
+approvals current、Missing仅 `implementation_result`，validate/scope通过。自身恢复记录已提交
+`5627d32b5298cb8161d74f2affe38b1c6769bfde`，observed HEAD为该提交；相对source subject
+仅增加12个自身任务治理路径，源码c7字节不变。新记录通过上述分支、任务与提交定位。
+
+精确单次action `dd1502a97b726e3b8f8b027a146b5ae730695a625f03700378c62ac6ad91bf22`
+仍未批准、执行或消费。任务内请求 `preparation/mutation-action-request-001.md` 已由
+`v2_consistency_review` 和 `cache_patch_review` 独立纯读核定PASS，下一依赖为精确单次
+Action批准 → 完整原生V2。完整V2未运行，85%总覆盖率、90%diff、final Review及code
+approval/Gate仍待完成，原14项检查、预算和阈值保持。恢复/设计Review/spec批准均不
+授予mutation权限。原恢复提案的 `owner_recovery_authorized: false` 保存历史准备时点，
+当前恢复授权由追加event 11证明；`targeted_mutation_approved: false` 仍反映当前事实。
+
+TASK-0063仍BLOCKED；旧付费报告仍只属于 `070b364c`/`165c5dc2` 原窗口，6项pending、
+3条勘误、FAILED原件及已消费action不改写、不复用。局部测量不证明旧600秒超时解决，
+TASK-0064恢复不代表F完成，也不授予新付费、push或merge权限。以下BLOCKED与旧提案
+false标志均保留历史，不以准备快照覆盖实际追加事件。
+
+## 2026-10-03 历史窗口：TASK-0064 源码阶段与新的权限缺项
 
 独立治理任务 TASK-0064 位于分支 `codex/git-context-read-protocol`，源码阶段提交
 `50777d648765a935c265e2d12e292d325fabeb1f`。原冻结规格

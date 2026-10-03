@@ -1,6 +1,14 @@
 # 维护收尾与待办
 
-## 2026-10-03 当前核定：TASK-0064 源码阶段完成，恢复尚未授权
+## 2026-10-03 当前核定：TASK-0064 恢复完成，单次变异仍待批准
+
+- 分支 `codex/git-context-read-protocol` 的 TASK-0064 已获精确恢复授权，原生 events 11–13 完成 `new_permissions` resolve/classify，新分类输入 `588bbb4bc50aa04aa114b8cf3d290de124dd40f13f199a8e40434508958e0490`。源码 subject 仍为 `50777d648765a935c265e2d12e292d325fabeb1f`，base `1fea002`、spec `203bc36e`、源码14748字节及全部V2预算/阈值保持。
+- 新 design context `a4545a40c7199b9a2bae1b91a162bb91f894aa06ea887f9fcba1680e3b1e0841` 经真实独立审查，REV-0003 r1 为 APPROVE、findings为空，已原生 record。沿用仍有效的原规格批准完成机械状态转换，随后 begin；实际状态为 IMPLEMENTING / REVIEW / V2。
+- 只读核对 events、approvals、Review 和 status：classification fresh、approvals current、Missing为 `implementation_result`；validate/scope通过。批准记录仅含spec，恢复和设计审查不授权mutation。自身恢复记录已提交 `5627d32b5298cb8161d74f2affe38b1c6769bfde`，当前 observed HEAD为该提交；相对源码subject仅增加12个自身任务治理路径，源码c7字节不变，不代表完整V2或Gate通过。
+- 精确单次 action `dd1502a97b726e3b8f8b027a146b5ae730695a625f03700378c62ac6ad91bf22` 仍未批准、执行或消费。任务内请求 `preparation/mutation-action-request-001.md` 已由 `v2_consistency_review` 和 `cache_patch_review` 独立纯读核定PASS；下一依赖为精确单次Action批准 → 完整原生V2及正式收尾。600秒integration预算、14项完整检查、85%总覆盖率和90%diff门不变，旧超时未证明解决。
+- 原提案的 `owner_recovery_authorized: false` 保留为准备快照，当前恢复授权由后续event 11记录；`targeted_mutation_approved: false` 仍符合未批准事实。TASK-0063仍BLOCKED，旧付费来源和已消费action不可复用；没有新付费、push或merge权限。以下BLOCKED与旧提案窗口保留历史。
+
+## 2026-10-03 历史窗口：TASK-0064 源码阶段完成，恢复待批准
 
 - 独立治理分支 `codex/git-context-read-protocol` 的 TASK-0064 已获人类规格批准并原生 begin；规格 `203bc36e9f663198b4c7b7079d0ddf1a609736f13ec5a21c7831ec0857b345a6` 仍 current。源码阶段提交 `50777d648765a935c265e2d12e292d325fabeb1f`，实际源码14748字节，与独立核定的 preview003 完全一致；该源码尚未合入 main 或 F 分支。
 - 源码阶段局部检查实际30 passed/4.19秒，Ruff check/format、mypy（44 source files）、working/staged/committed diff check 全部通过；native sync 和范围检查通过。这些结果不替代完整原生 V2、85%总覆盖率或90% diff coverage。
