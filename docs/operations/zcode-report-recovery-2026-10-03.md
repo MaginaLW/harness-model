@@ -1,5 +1,32 @@
 # ZCode 准备报告回收与独立核定：2026-10-03
 
+## TASK-0063 追加诊断：全量未完成，治理源码另行准备
+
+单次observer诊断使用原 `tests/integration -q` 和600秒执行预算，实际执行600004ms、
+cleanup1ms，仍TIMEOUT。991 collected、762 started、761完整三阶段结果（760 passed、
+1 skipped）；最后case只有setup，229个未启动，完整最终计数与未发出的call仍UNKNOWN。
+它改变pytest启动方式，不证明普通运行等价。逐case报告与模块汇总仅描述已观察部分，
+支持累计预算消耗；唯一根因及observer开销未核定。
+
+独立审计重算3047行、991个case状态和43个文件哈希，受保护源码及两个index的运行窗口
+实际字节相同，owned Job active=0、parent已回收、handle已关闭。F分支提交 `166fe31`
+追加 `preparation/v2-failure-recovery-001/timing-diagnostic-summary-001.json`，不改旧任务记录。
+
+正常分支新鲜Git元数据合并的小基准30次旧调用4.869785秒/120进程，新调用2.484744秒/60进程；
+真实12场景及13模拟校准仅覆盖私有原型，不认证最终候选或整套600秒收益。001夹具设置失败保留。
+独立Git源码审查进一步发现unborn/dangling HEAD与同名tag的身份反例，最终候选要求HEAD字段
+触发一次完整legacy回退；detached也走回退，不能直接映射DETACHED。读取顺序、回退额外查询
+和错误/竞态窗口是实质协议变化，正独立准备治理任务，生产源码未采用。
+TASK-0063仍BLOCKED、原生V2仍FAILED、旧action仍spent；原付费来源及批准不成为新源码权限。
+
+新治理任务实际分配TASK-0064，分支 `codex/git-context-read-protocol`；先提交安全测试
+`1fea00217533b01a7b9908f053ccaca43571f6f8`（旧14+新16用例，30 passed/6.80秒，27原断言保留），
+再以该native base创建仅允许 `src/aiflow/git_context.py` 与本任务目录的REVIEW/V2任务。
+原生冻结spec `203bc36e9f663198b4c7b7079d0ddf1a609736f13ec5a21c7831ec0857b345a6`，
+当前design context `24f2115a1f2cdc945d01dd6dca53cd90470648a7de960c0bcdfd8f1b120f2beb`；
+非作者Design Review 001 APPROVE已原生记录，实际status为WAITING_FOR_SPEC_REVIEW，
+classification fresh、Missing仅 `spec_approval`。没有begin、源码修改、原生新V2或新action。
+
 ## TASK-0063 后续维护：真实缓存资格通过，全量仍TIMEOUT
 
 安全测试维护提交 `f04e8654e92d2d89284e11a39d40e8869e511eee` 限定四个精确inactive

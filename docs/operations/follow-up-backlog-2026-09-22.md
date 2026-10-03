@@ -1,5 +1,18 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-03 当前依赖：源码查询优化须独立准入
+
+单次case耗时观察诊断在原600秒执行预算耗尽；991 collected中仅761个case有完整报告，
+另1个只有setup、229个未启动，整套最终结果仍UNKNOWN/TIMEOUT。独立审计接受诊断证据，
+F分支 `166fe31` 追加便携摘要；不把observer运行当成普通全量检查或原生V2通过。
+新鲜Git查询合并已有正常分支小基准，但不能外推整套收益；HEAD身份反例已要求原读取流程回退。
+安全测试先形成独立基线，再创建治理源码任务并核实际Missing；TASK-0063仍BLOCKED，
+旧action已消费，新F/变异执行未启动，所有原门禁、预算及条件路线继续保留。
+
+独立分支 `codex/git-context-read-protocol` 已在安全测试基线 `1fea002` 创建TASK-0064，
+实际REVIEW/V2、Design Review 001 APPROVE、规格已冻结；当前Missing仅 `spec_approval`。
+新规格明确metadata先于ID、HEAD结果回退及额外10秒query timeout项；未begin或采用源码。
+
 ## 2026-10-03 当前依赖：全量integration预算尚未满足
 
 缓存兼容维护已提交 `f04e865`：四个精确inactive键名及13个反例，helper模块175 passed。

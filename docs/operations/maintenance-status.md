@@ -1,5 +1,13 @@
 # 维护收尾与待办
 
+## 2026-10-03 耗时诊断封存，源码优化另行准备
+
+- 单次完整integration耗时观察诊断仍在原600秒执行预算终止：991 collected、762 started，761份完整结果（760 passed、1 skipped），另1例只有setup、229例未开始；整套最终计数仍UNKNOWN。observer改变了启动方式，不替代普通检查或原生F。
+- 独立审计重算逐case、模块与文件哈希；原始材料已在私有runtime封存，便携摘要随F分支提交 `166fe31` 追加留存。TASK-0063保持BLOCKED，原V2仍FAILED，旧action已消费。
+- 新鲜Git查询合并的小基准显示正常分支30次调用从4.87秒降到2.48秒、Git进程120降到60；它不证明整套600秒收益。独立审查发现HEAD引用身份反例，候选已要求完整legacy回退，不把HEAD字段直接认作DETACHED。
+- 已建独立性能工作区；安全契约测试先在旧源码基线上验证，治理源码只在独立task完成准入后采用。读取顺序、回退额外查询及竞态窗口确有变化，须由新规格明确接受；生产源码尚未改动。
+- 安全测试提交 `1fea002` 实际30 passed/6.80秒、保留27个原断言；以它为native base创建TASK-0064，REVIEW/V2、独立Design Review 001 APPROVE已记录。规格 `203bc36e` 已冻结，当前WAITING_FOR_SPEC_REVIEW、classification fresh、Missing仅 `spec_approval`；源码尚未begin。
+
 ## 2026-10-03 缓存兼容修复完成，全量维护检查仍超时
 
 - 测试维护提交 `f04e8654e92d2d89284e11a39d40e8869e511eee` 仅接纳四个精确 inactive Git 配置键名，并补充13个兼容、字节漂移与未知键反例；原守卫、选择器、断言和预算保持。helper 模块175 passed，Ruff/format/whitespace通过。
