@@ -1,6 +1,29 @@
 # 后续待完成项目：2026-09-22 核定
 
-## 2026-10-03 当前依赖：源码查询优化须独立准入
+## 2026-10-03 当前依赖：TASK-0064 源码已提交，精确恢复与完整验证待执行
+
+独立分支 `codex/git-context-read-protocol` 的 TASK-0064 已真实批准规格并原生 begin，
+源码提交 `50777d648765a935c265e2d12e292d325fabeb1f`。实际源码14748字节，与preview003一致；
+30 passed/4.19秒、Ruff check/format、mypy44、三类diff check及native sync/scope检查通过。
+synthetic002 的37项完整traces通过；synthetic001 实际执行35/计划37，34通过/1失败与
+检查脚本还原 `__code__` 的失败原件保留。real002 的15场景/33对/390 Git命令/1170项raw记录通过，
+包括两个HEAD同名tag的P2场景正确branch和5次查询；健康分支10对中位数
+112.8176→58.38445ms只描述局部测量，不将原600秒TIMEOUT改为已解决。
+
+随后 event 10 实际 `new_permissions → BLOCK`，TASK-0064现为BLOCKED，DU仅增加 `[action_approval]`；
+源码subject/HEAD仍为上述提交，pending task记录未提交，classification stale。
+规格 `203bc36e` 的人类批准仍 current，Missing为 `block_resolution`，stable input摘要前缀 `588bbb4b`。
+下一依赖为具体恢复及精确动作材料独立核定 → 真实恢复与所需动作批准 →
+完整原生V2（含单次canonical mutation）→ final Review/实际缺项批准/code Gate。
+精确恢复提案与独立单次action草案已生成但未提交，当前仅请求 `block_resolution` 恢复授权；
+action草案未请求、未批准，mutation/action执行、完整V2、85%/90%与正式收尾均未完成。
+不重复请求仍 current 的规格批准。
+
+TASK-0063仍BLOCKED，旧来源/FAILED/已消费action及原始detector流缺项保留，
+不以TASK-0064的局部结果冒充F完成；没有新付费、push或merge授权。
+以下章节按原观察时点保留，历史正文的“当前”不覆盖本节。
+
+## 2026-10-03 历史依赖：源码查询优化初次准入
 
 单次case耗时观察诊断在原600秒执行预算耗尽；991 collected中仅761个case有完整报告，
 另1个只有setup、229个未启动，整套最终结果仍UNKNOWN/TIMEOUT。独立审计接受诊断证据，
@@ -10,8 +33,8 @@ F分支 `166fe31` 追加便携摘要；不把observer运行当成普通全量检
 旧action已消费，新F/变异执行未启动，所有原门禁、预算及条件路线继续保留。
 
 独立分支 `codex/git-context-read-protocol` 已在安全测试基线 `1fea002` 创建TASK-0064，
-实际REVIEW/V2、Design Review 001 APPROVE、规格已冻结；当前Missing仅 `spec_approval`。
-新规格明确metadata先于ID、HEAD结果回退及额外10秒query timeout项；未begin或采用源码。
+实际REVIEW/V2、Design Review 001 APPROVE、规格已冻结；当时Missing仅 `spec_approval`。
+新规格明确metadata先于ID、HEAD结果回退及额外10秒query timeout项；当时未begin或采用源码。
 
 ## 2026-10-03 当前依赖：全量integration预算尚未满足
 

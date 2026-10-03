@@ -1,6 +1,34 @@
 # ZCode 准备报告回收与独立核定：2026-10-03
 
-## TASK-0063 追加诊断：全量未完成，治理源码另行准备
+## 2026-10-03 当前核定：TASK-0064 源码阶段与新的权限缺项
+
+独立治理任务 TASK-0064 位于分支 `codex/git-context-read-protocol`，源码阶段提交
+`50777d648765a935c265e2d12e292d325fabeb1f`。原冻结规格
+`203bc36e9f663198b4c7b7079d0ddf1a609736f13ec5a21c7831ec0857b345a6`
+已获真实人类批准并原生 begin，仍 current；实际源码14748字节，与preview003核定字节一致。
+通过分支、任务及提交定位这些记录；main 尚无本任务文件，源码未合入 main 或 F 分支。
+
+源码阶段30 passed/4.19秒，Ruff check/format、mypy44及working/staged/committed diff check
+均通过，native sync与scope检查通过。synthetic002 的37项和完整traces通过；synthetic001
+保留实际执行35/计划37、34通过/1失败的原结果，检查脚本还原 `__code__` 的失败不抹去。
+real002 实际15场景、33对比较、390条Git命令及1170项raw记录通过；两个真实HEAD同名tag
+的P2场景均核到正确branch，并走5次查询的完整回退。健康分支10对调用的中位数
+112.8176→58.38445ms仅为正常路径局部结果，不证明旧600秒超时修复或整套收益。
+
+随后原生 event 10 执行 `new_permissions → BLOCK`，TASK-0064现为BLOCKED，DU权限需求仅由 `[]` 增加到
+`[action_approval]`。源码subject/HEAD仍为上述提交，pending task记录未提交；classification
+stale、规格批准仍 current，实际Missing为 `block_resolution`，stable input摘要前缀 `588bbb4b`。
+精确恢复提案与独立单次action草案已生成但未提交；当前仅请求 `block_resolution` 恢复授权，
+action草案未请求、未批准。canonical mutation/action执行、完整V2、
+85%总覆盖率、90%diff coverage、final Review及code approval/Gate均未完成。
+后续按实际Missing与新鲜绑定补齐，不重复请求仍 current 的规格批准。
+
+TASK-0063仍BLOCKED；其原来源只绑定 `070b364c`/`165c5dc2` 历史窗口，6项pending观察、
+3条勘误、FAILED V2、已消费action及原始detector流未满足条件全部保持。
+TASK-0064的局部结果不代替F验收，不增加付费调用、push或merge权限。
+下文按原观察时点保留，历史正文的“当前”不覆盖本节。
+
+## TASK-0063 历史诊断窗口：全量未完成，治理源码另行准备
 
 单次observer诊断使用原 `tests/integration -q` 和600秒执行预算，实际执行600004ms、
 cleanup1ms，仍TIMEOUT。991 collected、762 started、761完整三阶段结果（760 passed、
@@ -16,16 +44,16 @@ cleanup1ms，仍TIMEOUT。991 collected、762 started、761完整三阶段结果
 真实12场景及13模拟校准仅覆盖私有原型，不认证最终候选或整套600秒收益。001夹具设置失败保留。
 独立Git源码审查进一步发现unborn/dangling HEAD与同名tag的身份反例，最终候选要求HEAD字段
 触发一次完整legacy回退；detached也走回退，不能直接映射DETACHED。读取顺序、回退额外查询
-和错误/竞态窗口是实质协议变化，正独立准备治理任务，生产源码未采用。
+和错误/竞态窗口是实质协议变化，当时正独立准备治理任务，生产源码未采用。
 TASK-0063仍BLOCKED、原生V2仍FAILED、旧action仍spent；原付费来源及批准不成为新源码权限。
 
 新治理任务实际分配TASK-0064，分支 `codex/git-context-read-protocol`；先提交安全测试
 `1fea00217533b01a7b9908f053ccaca43571f6f8`（旧14+新16用例，30 passed/6.80秒，27原断言保留），
 再以该native base创建仅允许 `src/aiflow/git_context.py` 与本任务目录的REVIEW/V2任务。
 原生冻结spec `203bc36e9f663198b4c7b7079d0ddf1a609736f13ec5a21c7831ec0857b345a6`，
-当前design context `24f2115a1f2cdc945d01dd6dca53cd90470648a7de960c0bcdfd8f1b120f2beb`；
-非作者Design Review 001 APPROVE已原生记录，实际status为WAITING_FOR_SPEC_REVIEW，
-classification fresh、Missing仅 `spec_approval`。没有begin、源码修改、原生新V2或新action。
+当时design context `24f2115a1f2cdc945d01dd6dca53cd90470648a7de960c0bcdfd8f1b120f2beb`；
+非作者Design Review 001 APPROVE已原生记录，当时status为WAITING_FOR_SPEC_REVIEW，
+classification fresh、Missing仅 `spec_approval`。当时没有begin、源码修改、原生新V2或新action。
 
 ## TASK-0063 后续维护：真实缓存资格通过，全量仍TIMEOUT
 

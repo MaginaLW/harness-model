@@ -1,12 +1,21 @@
 # 维护收尾与待办
 
-## 2026-10-03 耗时诊断封存，源码优化另行准备
+## 2026-10-03 当前核定：TASK-0064 源码阶段完成，恢复尚未授权
+
+- 独立治理分支 `codex/git-context-read-protocol` 的 TASK-0064 已获人类规格批准并原生 begin；规格 `203bc36e9f663198b4c7b7079d0ddf1a609736f13ec5a21c7831ec0857b345a6` 仍 current。源码阶段提交 `50777d648765a935c265e2d12e292d325fabeb1f`，实际源码14748字节，与独立核定的 preview003 完全一致；该源码尚未合入 main 或 F 分支。
+- 源码阶段局部检查实际30 passed/4.19秒，Ruff check/format、mypy（44 source files）、working/staged/committed diff check 全部通过；native sync 和范围检查通过。这些结果不替代完整原生 V2、85%总覆盖率或90% diff coverage。
+- synthetic002 的37项及完整 traces 全部通过；synthetic001 实际执行35/计划37，34通过/1失败及检查脚本还原 `__code__` 的失败保留。real002 实际15场景、33对比较、390条Git命令及1170项raw记录通过；两个真实HEAD同名tag的P2场景均保持正确branch、各走5次查询。10对健康分支调用的中位数112.8176→58.38445ms仅为正常路径局部测量，不证明原600秒超时已解决。
+- 随后 TASK-0064 原生 `new_permissions → BLOCK`（event 10），现为 BLOCKED，仅将 DU 权限需求由 `[]` 改为 `[action_approval]`。源码 subject/HEAD 仍是上述 `50777d6`，pending task记录未提交；classification stale、规格批准仍 current，CLI Missing 为 `block_resolution`，新stable input摘要前缀为 `588bbb4b`。
+- 精确恢复提案及独立的单次action草案已生成，保持未提交以满足恢复时HEAD必须等于subject的原生条件。当前仅请求 `block_resolution` 恢复授权；action草案明确未请求、未批准。canonical mutation/action执行、完整V2、覆盖率双门、final Review 和 code approval/Gate 均未完成。不重复请求仍 current 的规格批准。
+- TASK-0063 仍 BLOCKED，原来源、FAILED V2、已消费action及未满足的原始detector流条件保持。TASK-0064 不代表 F 已完成，也不产生新付费、push或merge权限。以下既有章节保留原观察时点，历史正文的“当前”不覆盖本节。
+
+## 2026-10-03 历史窗口：耗时诊断封存与 TASK-0064 初次准入
 
 - 单次完整integration耗时观察诊断仍在原600秒执行预算终止：991 collected、762 started，761份完整结果（760 passed、1 skipped），另1例只有setup、229例未开始；整套最终计数仍UNKNOWN。observer改变了启动方式，不替代普通检查或原生F。
 - 独立审计重算逐case、模块与文件哈希；原始材料已在私有runtime封存，便携摘要随F分支提交 `166fe31` 追加留存。TASK-0063保持BLOCKED，原V2仍FAILED，旧action已消费。
 - 新鲜Git查询合并的小基准显示正常分支30次调用从4.87秒降到2.48秒、Git进程120降到60；它不证明整套600秒收益。独立审查发现HEAD引用身份反例，候选已要求完整legacy回退，不把HEAD字段直接认作DETACHED。
-- 已建独立性能工作区；安全契约测试先在旧源码基线上验证，治理源码只在独立task完成准入后采用。读取顺序、回退额外查询及竞态窗口确有变化，须由新规格明确接受；生产源码尚未改动。
-- 安全测试提交 `1fea002` 实际30 passed/6.80秒、保留27个原断言；以它为native base创建TASK-0064，REVIEW/V2、独立Design Review 001 APPROVE已记录。规格 `203bc36e` 已冻结，当前WAITING_FOR_SPEC_REVIEW、classification fresh、Missing仅 `spec_approval`；源码尚未begin。
+- 当时已建独立性能工作区；安全契约测试先在旧源码基线上验证，治理源码只在独立task完成准入后采用。读取顺序、回退额外查询及竞态窗口确有变化，须由新规格明确接受；当时生产源码尚未改动。
+- 安全测试提交 `1fea002` 实际30 passed/6.80秒、保留27个原断言；以它为native base创建TASK-0064，REVIEW/V2、独立Design Review 001 APPROVE已记录。规格 `203bc36e` 已冻结，当时WAITING_FOR_SPEC_REVIEW、classification fresh、Missing仅 `spec_approval`；当时源码尚未begin。
 
 ## 2026-10-03 缓存兼容修复完成，全量维护检查仍超时
 
