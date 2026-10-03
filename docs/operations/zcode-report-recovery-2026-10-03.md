@@ -1,5 +1,51 @@
 # ZCode 准备报告回收与独立核定：2026-10-03
 
+## TASK-0063 新的匹配来源与导入边界
+
+此前四项准备报告不作为本次匹配原件。本次面向已冻结的新隔离目标，另有真实所有者
+规格批准、一次初始来源发送批准、精确恢复及本地单次变异批准；批准按类型分别记录。
+分支 `codex/f-real-import-acceptance`，业务候选 `f59aa2544701bc4e00644fd291e16b97314c41a6`，
+spec SHA256 `070b364c23837dade0a91d7c8e6a7a10e2bc7bbcbfb298b296744ce59c35968d`，
+design context SHA256 `165c5dc259714f91b575b9be295d91ca6a8d33aab411815adf273c7ce9e0e745`。
+
+实际来源 SID `sess_a03fad08-dee6-44dd-9c07-1de9bffa0713`；唯一完成终稿为15810 UTF-8字节，
+SHA256 `b29e335a03021ef6d13e5b36e1031dcdf7d8d4b20df21576b2988c97882b5355`。
+原件定义为原生保存 final text 的精确 UTF-8 提取，不添加换行、BOM、规范化或过程拼接；
+独立从保存行重建后逐字节相同。实际序列0→5和 final parent 指向唯一真实请求，
+八次原生 Read 全部 completed、无错误/截断；没有保存的 shell/write/worker/API工具调用。
+AGENTS 会话交付仅为源报告自述，未见显式 Read，不宣称九份文件均由工具读取。
+保存的会话版本 `0.16.9`、模型标签 `GLM-5.3` 仅为实际来源元数据，
+provider/model/reviewer 身份认证与传输原字节均为 UNKNOWN，不将一次发送当作一次 inference 或费用封顶。
+
+请求2263字节 SHA256 `59bcc77dd2bbd9bff1c1aac4a29743bbe13630cd3ea32ae7938ca2a9e09613ee`；
+实际保存输入2262字节 SHA256 `e6c218d830153bc69cef54b3e05a2e25ad359858d7868191c87f0b135939e85d`。
+唯一差异是末尾 LF 缺失，原因 UNKNOWN；首次精确字节检查因此停止。原快照/导出/失败保留，
+只用已有行作一次离线完成，实际字节和原始失败分别记录，没有源快照重试或重新发送。
+
+envelope 的 source/target repository UUID、design/base/context 与当前 native 逐字段核定，
+design 不含 subject；内部另核 base→业务 subject→自身治理 HEAD。六项原观察标题及内容
+逐字保留、mapping 全为 pending，不自动生成或解决正式 Finding。三条独立勘误为：
+旧准备报告排除条款不适用于本次新匹配报告；DU 的本地变异 action approval 不代表付费来源批准；
+重复 no_op 实际在创建 guard/temp 之前返回。原报告原文不改。
+首版 envelope 的证据 fragment 引用在静态审查中被拒绝，未实际 preflight；
+仅改成合法 logical reference 并另存第二版，原版保留。最终 envelope 文件 SHA256
+`f1385ff40c1e1b953a3104acbdd5172d76f0f8acb51b81c53cc42bd4039116e5`，两路独立审核通过。
+
+实际首次 ready 检查点后，另一真实设计审查形成 REV-0004 r0001，由原生 record 追加。
+context 和合法状态保持，旧 token `7ef6aef2` 以 `EXTERNAL_REVIEW_PREFLIGHT_STALE` 零写拒绝；
+新 ready token `d555dccb` 才首次创建唯一 import，重复 `already_recorded/no_op` 零写。
+十组 repository/stage/base/context/task/raw hash/同来源同版本冲突反例各执行两操作，
+实际原因码匹配，共20次全树零写拒绝。33条命令于 `2026-10-03T00:04:12.547535Z` 封存完成；
+比较覆盖完整任务树目录和缓存原字节，事件原前缀保存，未以任意文件追加模拟漂移。
+
+私有材料继续位于 `<RUNTIME_ROOT>/harness-model-followup-20261003-001/`，
+本次 archive ID 为 `TASK0063-ZCODE-DESIGN-003` 与 `TASK0063-REAL-IMPORT-RUN-001`；
+完整采集、失败、离线派生、原件、envelope、whole-tree byte cache 和回执不入库。
+封存证据正独立复核，完整 V2、五项动作消费、implementation Review/finalize/code approval/Gate
+尚未完成。下面是既有准备报告核定，不能覆盖本次实际执行窗口。
+
+## 既有四项准备报告核定
+
 四个指定会话已完成回收核查。ZN-01/03/04 有完整终稿，主体接受并附勘误；ZN-02
 消息实际取消、无最终报告。独立审查补齐条件门评估，不冒充 ZN-02 交付。F 仍需新目标
 及其后取得的匹配真实报告。本仓核查基线为 `ed4b3e7a57d785b57670eed47170944e3532a832`。
