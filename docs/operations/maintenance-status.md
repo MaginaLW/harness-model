@@ -1,5 +1,14 @@
 # 维护收尾与待办
 
+## 2026-10-05 历史成本离线分区完成
+
+独立修订后的 offline caller 002 已唯一执行，exit 0、180867600 ns，root 独立前后
+35 输入 bytes/SHA256 匹配。旧完整 profile 的 subprocess.run 8,571 次已完整分区，
+GitContext 5,769、external-review 1,270、scope 764、混合标签 1、其他 767；原件和
+递归残差保留。当前 c7 查询拓扑已变，旧成本不作为新候选节省量或完整预算通过。
+详见[预算实际结果](verification-budget-decision-2026-10-04.md#历史-profile-离线分区的实际结果2026-10-05)。
+生产源码仍冻结；真实 Windows 资格及原生完整 V2 尚未完成，持续目标保持 active。
+
 ## 2026-10-05 实施与只读复核
 
 TASK-0065 两处生产源码已提交 `e64f6aa`，三处安全测试单独提交 `4f23e5c`；native

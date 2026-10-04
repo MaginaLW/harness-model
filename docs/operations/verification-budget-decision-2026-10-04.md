@@ -5,6 +5,7 @@
 后续独立新绑定 002 已完成并经非作者终态审计；结果不支持这两种表示继续生产化。
 001 的 launcher 失败保留，不改 binding 或补写其 result。完整预算仍未解决，下一步
 读取已有完整 raw profile 的直接 caller 分区，区分 legacy 与已实施 c7 的成本，不重跑 suite。
+该离线分区现已实际完成；历史计数可核对，当前 c7 的完整 suite 成本仍未测得。
 
 ## 已核对的失败与未知项
 
@@ -143,6 +144,54 @@ hash，未保存before原字节及具体metadata值。独立审计另核当前26
 同父目录的 `schema-representation-cost-002-independent-terminal-review-001.json`
 raw SHA256 为 `ae5a737c23d62354b6d77fc9f09af019f207a14505b3625f78ac2eb06786dc1e`。
 当前停止该表示方向，原 NO_GO、001 未执行与002实际结果各自保留。
+
+## 历史 profile 离线分区的实际结果（2026-10-05）
+
+原 offline 准备 001 未执行，独立静审拒绝了 caller tuple 次序错误及 guard 缺口；
+四个输入和 NO_GO 原件保留。独立新版本 002 修正 caller total/index0、primitive/index1，
+保留 raw tuple 和递归残差；两个版本没有重绑或覆盖。
+
+002 经非作者静审后，root 仅一次以固定 `-I -S -B` 启动，exit 0，实际结论为
+`OFFLINE_INVENTORY_COMPLETE`，分析耗时 180867600 ns。脚本无 business import，
+audit 记录 child/network attempts 均 0；这仅为解释器内观察，不证明宿主全局进程状态。
+脚本 35 项 before/after 均相等，root 独立启动前及终态再次核对 35 项 bytes/SHA256
+相等，binding 保持；原 profile、当前来源与准备文件未改。没有新 profile 或 suite 运行。
+
+原完整 profile 的 `subprocess.run` 8,571 次调用按直接 caller 完整分区如下：
+
+| 历史 caller 家族 | total / primitive calls |
+| --- | ---: |
+| GitContext 的 `_run_git`、`_read_branch`、`_is_ancestor` | 5,769 / 5,769 |
+| external-review Git wrapper | 1,270 / 1,270 |
+| scope Git wrapper | 764 / 764 |
+| fixture Git / Python timeout 的合并标签 | 1 / 1 |
+| 其他或 argv 未知 | 767 / 767 |
+
+合计与 callee 的 total/primitive 均相等。Popen constructor 9,732、communicate 9,734、
+CreateProcess 9,732 的 direct caller total/primitive 也分别对账为零残差。
+递归 copytree 的 total 13,570 完整对账，但 caller primitive 合计 1,718 与 callee
+primitive 1,178 相差 540；原递归语义/标签限制保留，不强制归零或虚构额外调用。
+
+这些记录属于历史 source。当前 c7 已有正常两查询及明确 fallback，外部审查 wrapper
+也发生来源变化；AST 比较只证明 main/c7 某函数语法是否相同，历史 byte identity 仍
+UNKNOWN。不能将旧 5,769 次和旧累计耗时当作当前 c7 成本，也不能把主线程 communicate
+等待称作 child CPU、把嵌套累计耗时相加、把 fixture 合并标签全称 Python 启动。
+两份五用例记录的 CreateProcess 146→143 保留为各自小窗口，不外推完整预算 PASS。
+
+原件为 `${RUNTIME_ROOT}/harness-model-backlog-20261004-001/` 内：
+
+| 原件 | Raw SHA256 |
+| --- | --- |
+| `budget-next-diagnostic-preparation-002/result.json` | `99e3f2fa81f36e1edc6e72cb8ffde6aa87c3fdca2f1128fa15cb12188ee1632b` |
+| `budget-next-diagnostic-preparation-002/run-claim.json` | `9fa57526b5dc5c2591619e4cfa744c5d9f94da29d9a7ef7146a994dc34269e56` |
+| `budget-next-diagnostic-preparation-002/binding.json` | `a45f28598ffa5e56bb924b5777f226023f250d57fbb1b5d02b61df1a2d1e2d8c` |
+| `budget-next-diagnostic-static-review-002.json` | `64a6d896bac373a7b23769ee41198cc10e211479fb63df88d1b039a8bb94d025` |
+| `budget-next-root-execution-002/terminal.json` | `243d29eaa1e131df4e520bac5380a9d2c32e3c99a6dfca2ddb938f537e27c626` |
+
+stdout 为 28 bytes 的完成 marker，stderr 为零 bytes，均在实际终态后独占保存。20 秒
+是合作式期限，不承诺抢占同步解析。一次 claim 已消费，不重跑该诊断。下一步以固定
+生产候选的实际资格及原生全套结果核定预算；若失败需要新优化，另定范围和准入，
+不再次提出已实施的 Git batching / fixture copy，也不采用已拒绝的 schema cache。
 
 ## 后续完整验收边界
 
