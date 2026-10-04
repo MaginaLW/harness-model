@@ -1,5 +1,17 @@
 # 维护收尾与待办
 
+## 2026-10-04 收尾：交接与待办已记录
+
+私有修复阶段已完成并在 `bf7ae55` 留下技术记录；本次只读复核候选与原始证据哈希仍匹配。
+TASK-0064 仍 FAILED / REVIEW / V2，Missing `retry_reason_or_escalation`；TASK-0063 仍
+BLOCKED / REVIEW / V2，Missing `block_resolution`。两者 approvals current、evidence stale，
+旧失败与 SPENT action 保留，生产未采纳、完整 V2 未重跑。
+
+下次先准备 Windows 候选的具体生产治理设计和安全测试基线，同时保留完整预算问题、F
+恢复、外仓双通道/实际应用、条件路线和远端发布的独立依赖。逐项动作及完成条件见
+[收尾与下次待办](follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)。
+本轮仅追加交接文档并本地提交，三份用户计划草稿保留；不启动后继实施或发布。
+
 ## 2026-10-04 当前核定：私有 Windows 候选 qualification 完成，生产仍未准入
 
 - 本轮显式私有修复授权下，封存候选执行了一次 qualification，实际 **9 passed / 10.37 秒 / rc 0**：5 项真实 Windows 案例、4 项 safe mock。独立终态审计已封存，结论为 `CONFIRMED_PRIVATE_QUALIFICATION_ONLY`，无数据阻断；确认范围仅为本次私有 qualification，不是 native 验收或生产批准。候选、审计哈希和后续提纲见[私有超时修复记录](windows-private-timeout-repair-2026-10-04.md)。

@@ -1,5 +1,36 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-04 收尾核定与下次待办
+
+本轮私有修复候选、单次 qualification 和两轮独立核对已收尾；技术记录已提交 `bf7ae55`。
+收尾时主要候选、bundle、原始 run 和独立审计的哈希仍与封存值一致，结果保持
+9 passed / 10.37 秒（5 项真实 Windows、4 项 safe mock），仅具私有 qualification 资格。
+[结果、证据定位和限制](windows-private-timeout-repair-2026-10-04.md)保留生产化依据。
+
+本次只读 native status 核定：TASK-0064 为 FAILED / REVIEW / V2，Missing
+`retry_reason_or_escalation`；TASK-0063 为 BLOCKED / REVIEW / V2，Missing
+`block_resolution`。两者 classification fresh、approvals current、evidence stale；既有有效
+批准无需重复索取。performance HEAD `ef5943b29514ad1d13121023610bf4c2c4dcb408`、F HEAD
+`166fe313b379e7a844eb9bb667cf92932d4010a8` 保持，原失败和已消费 action 均不改写。
+
+| 待办 | 下次具体动作 | 依赖与完成条件 |
+| --- | --- | --- |
+| 1. Windows 私有候选生产化设计 | 明确 Python/Windows、线程和嵌套 Job 支持范围、Popen 位置参数/flags 校验、真实 cleanup 失败的 UNKNOWN/资源保留/回执语义及 crash/orphan 边界；形成具体设计和安全测试基线 | ProcessRunner/helper 不在 TASK-0064 scope 内；生产改动另建精确治理 Task，完成实际准入后实施。4 项 mock 不替代 OS 异常证据；本轮未启动该设计 |
+| 2. TASK-0064 与完整验证预算 | 定位 regression/integration 的实际超时，再选择合法候选、依赖和基线；contracts/schema 解析复用仅是未采纳的备选原型，需独立测量和核定 | 处理实际 Missing 的恢复或承接，完整 V2 另备该候选的新具体单次 action；保留全部 14 项、原预算和 85%/90%。私有 9 项通过不证明旧原因或完整预算问题已解决 |
+| 3. F / TASK-0063 恢复与验收 | 明确 scope 和依赖后准备真实 block resolution；若需要新基线则按真实目标准入，不能改旧 base 或借 TASK-0064 批准吸收其源码 | F 仍 BLOCKED；旧 FAILED、已消费 action、未满足的原 detector streams 条件保留。若选择新真实导入，取得匹配新冻结 context 的原件并走 preflight → record；若仅原 F 历史窗口的原生收尾，旧来源只作历史证据，不重标为新 context。原生验收按实际准入和绑定，已消费 action 不复用，私有结果不替代 F |
+| 4. r3s 完整双通道与外仓实际应用 | 有真实需求时在目标项目独立准入，恢复 POSIX 并取得准确 SHA 的完整双通道结果；dotfiles 实际 Apply/部署另行选择与授权 | 依据 2026-10-03 历史窗口：r3s Windows 成功、POSIX 0 步取消，runner offline 也是历史快照；dotfiles 当时完整 CI 已成功。收尾未重新查询外仓/主机，不自动重跑、修业务或扩仓 |
+| 5. I1 / I2 后继需求 | 选择尚未覆盖的生命周期或新的可信目标，先形成实际需求和独立准入材料 | 未选择的新需求保持待决；恢复 POSIX 不等于完成 I2 扩仓，既有方法回灌 no-op 保持 |
+| 6. E5、I5 / Phase 3、Phase 4 | E5 将引擎采用、provider、可信执行分别设计；Phase 3 补样本/隐私偏差、真实 V3 沙箱回滚和版本化度量合同；Phase 4 先核退出条件及协调需求 | 按[独立启动条件](next-stage-start-conditions-2026-10-02.md)逐项准入；缺失仍为缺失，不用历史少量样本补造阈值/评分，不启动 provider、训练、调度或跨主机服务 |
+| 7. 本地记录的远端发布 | 若决定发布，冻结新干净候选的累计 scope/base/head，完成相应审核、准确 required CI 和远端证明 | 当前记录仍仅本地；不直接发布包含配置 524 的主检出，不复用 PR #44 旧批准/CI，push/merge/部署按具体动作独立授权 |
+
+ZN-02 取消且无终稿的回收核查已经完成，取消原因 UNKNOWN；不把缺稿变成自动重发或补造
+报告的待办。E4 交付、已 MERGED 闭账及旧 push-only/失败/Option C/BLOCKED 处置保持，
+不重新列作开发任务。外仓与条件路线均引用原文档时点，本轮未刷新其线上状态。
+
+本轮三个 sub-agent 分别只读核候选原件、native 状态及其余待办；主 agent 串行追加记录和
+本地提交。三份未跟踪的用户计划草稿保留；本次收尾不启动新的实现、测试、retry、付费调用
+或发布。以下既有记录完整保留，历史章节的“当前”以各自核定时点解释。
+
 ## 2026-10-04 当前依赖：私有 qualification 完成，生产治理提案尚未准入
 
 本轮显式授权的私有 Windows 修复候选只执行了一次 qualification，实际 9 passed / 10.37 秒 /
