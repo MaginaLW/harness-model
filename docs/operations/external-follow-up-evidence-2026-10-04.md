@@ -1,5 +1,35 @@
 # 外仓后继证据与剩余依赖：2026-10-04
 
+## 2026-10-05 本地晨间只读刷新
+
+新查询窗口为 UTC `2026-10-04T23:02:08.0985444Z–23:06:09.9473006Z`，18 个 GET，
+各原始 body/stdout/stderr、exit、HTTP error 与哈希保留。查询非原子快照；本节不替代
+I1 冷启动前两次 fresh host gate。树外 leaf 为
+`${RUNTIME_ROOT}/harness-model-backlog-20261004-001/external-current-read-002`。
+`current-summary.json` SHA256
+`978c5d5bb77b5a3ca4ec7ad03d15ab761b8982ab45447971492aeac179b0e4ca`，
+`manifest.json` SHA256
+`9517d2f23bd670af665d5ef9219ce872fe46a69835609cce44c81dbfd7d246f0`；89 个原件摘要匹配。
+
+- r3s 两端 main 仍为 `9e1b538c6acdcb8fde410172ebf1dff4485e6ffb`，本地现场 clean；
+  自然 push run `37177002687` attempt1 未变。Windows job/check `111361608550`
+  completed/success、七 steps success；POSIX `111361608389` queued/null、runner0、
+  steps 空。其 API started_at 不是实际执行证据。22 offline/idle，21 online/idle。
+- dotfiles 两端 main 仍为 `ac8e4854b50592a1216acce7f0d08b718478e25a`，本地现场 clean；
+  run `37109686458` attempt1 的四 jobs/checks、29 steps 全 completed/success。完整 CI
+  不证明实际 Apply、接管或部署；本窗口未执行这些动作。
+- r3s protection/rulesets 仍各 403，配置未知；dotfiles protection 404 明示未保护，
+  rulesets 为空。三条失败原始响应均保留，未当作成功或空配置。
+- 宿主 QEMU 名称查询空，Worker 名称查询空。精确 Windows21 服务 Running/Auto、
+  service PID2152，可见 Listener PID5604/parent2152；两进程 executable path 均 null，
+  token/SID 未核。按可见路径过滤的 matching_listener_count0 不代表 Listener 不存在。
+  guest BOOT、guest 服务、transport、WHPX、image chain/check 和 cold-copy 仍未执行。
+
+未产生新 CI run 或 VM/SSH/服务动作。I1 草案的独立边界预审为 NO_GO_FOR_EXECUTION：
+须补 native Task/单次 action、可执行消费 wrapper、opened final path/volume/file identity、
+receipt 祖先、copy→image→launch 守卫和绝对绑定 SSH。原草案及 review 原件保留，后继
+准备写入新独占 runtime 目录；实际批准和执行均未发生。
+
 本记录刷新[待办第 4、5 项](follow-up-backlog-2026-09-22.md)的事实窗口，沿用
 [下阶段启动条件](next-stage-start-conditions-2026-10-02.md)。它是只读核查结果，不是
 runner 恢复、CI 重跑、Apply、部署或扩仓执行单；原历史失败、取消与准入边界保留。

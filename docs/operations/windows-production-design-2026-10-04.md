@@ -1,5 +1,19 @@
 # Windows 超时处理生产设计提案：2026-10-04
 
+## 2026-10-05 已实现的本地阶段
+
+两 src 已提交 `e64f6aa`，三 tests 独立提交 `4f23e5c`，native subject 为 `4f23e5c`。
+owned backend 使用公开 Kernel32 API、八个 active+retained 原子槽位和单次 suspended
+创建/assign/readers/resume；共享五秒 cleanup deadline 在后续 native 调用前检查。
+timeout wait/query 未知及 close 失败保留原 owner，正常 accounting 查询失败仅记录
+诊断并保留原正常结果；内部 reader RuntimeError 形成结构化执行失败，audit 原异常保持。
+
+独立 root 111 个 pure fake 测试通过/0.58 秒，局部 Ruff/format/strict mypy/whitespace
+通过；五文件固定，原断言、真实 timeout 节点及原时序保持。sync 和本地证据已提交
+`8aefd27`，仍为 IMPLEMENTING。源码与 mock 控制流已验证，真实 Windows 资格和完整 V2
+尚未运行。console stdin 等价仍未测；无 crash-atomic 创建/KOC，own inheritance lock
+只隔离本模块调用。独立 outer 的关闭再试和 deadline 缺口须在资格执行前修正。
+
 本提案承接[私有候选及其限制](windows-private-timeout-repair-2026-10-04.md)。原封存两份
 candidate SHA256 已重新核对一致。本轮设计与安全测试基线已完成，所有者批准冻结规格后
 已原生 begin，生产实现正在独立治理工作区推进，尚未完成完整验收。

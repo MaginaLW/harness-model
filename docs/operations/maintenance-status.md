@@ -1,5 +1,24 @@
 # 维护收尾与待办
 
+## 2026-10-05 实施与只读复核
+
+TASK-0065 两处生产源码已提交 `e64f6aa`，三处安全测试单独提交 `4f23e5c`；native
+sync 将 subject 绑定到 `4f23e5c`，分类 fresh、已有规格批准 current，仍为 IMPLEMENTING。
+独立 root 检查为 111 个纯 fake 测试通过/0.58 秒，Ruff、format、两处源码 strict mypy
+和 whitespace 通过。原 timeout 节点及 1/5/2/10/3 秒时序不变；没有运行该真实节点。
+本地证据及 sync 记录已提交 `8aefd27`。回读时间戳的类型比较错误原件保留，独立追加
+诊断确认五文件的原始长度、哈希、时间戳均相同，未重跑测试。
+
+真实 Windows qualification 的独立 outer 草案预审发现 close 自动再试及 deadline
+判定缺口，正在新树外版本修复；Python 3.13 隔离依赖环境已实际安装并通过 pip check。
+这些不替代真实资格、完整 14 项 V2、单次 mutation 批准、正式 Review/finalize/code/Gate。
+
+外仓在 UTC `2026-10-04T23:02:08Z–23:06:10Z` 重新只读核实：两个 main SHA 未变且本地
+干净；dotfiles 四 job/check、29 steps 全 success；r3s Windows 七 steps success，
+POSIX 仍 queued/0 steps，22 offline/idle、21 online/idle。服务运行且可见 Listener，
+但 executable path/token/SID 身份仍未知。I1 冷启动请求未通过独立边界预审，正在补
+完整身份守卫和单次消费实现；没有 VM/SSH/服务动作。持续目标保持 active。
+
 ## 2026-10-04 新执行窗口：持续目标启动，安全基线已提交
 
 所有者要求读取待办、设立完成目标并授权必要工作；持续目标已设立为 active。

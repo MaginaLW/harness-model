@@ -11,6 +11,17 @@
 `block_resolution`。两者 classification fresh、approvals current、evidence stale。
 TASK-0064 未跟踪的原生 `evidence.json` 保留，不移动、不入库；原失败及 SPENT action 不改写。
 
+截至本地 2026-10-05，TASK-0065 已有源码提交 `e64f6aa`、独立测试提交 `4f23e5c`
+及 sync/本地证据提交 `8aefd27`。root 独立 111 个纯 fake 测试/0.58 秒、Ruff、format、
+两源码 strict mypy 和 whitespace 通过，五文件固定字节保持。真实资格尚未执行，
+独立 outer 预审的关闭再试与 deadline 缺口正在新版本修复，完整 V2/动作批准仍未完成。
+回读类型错误原件及另立诊断均保留，不重写检查输出。
+
+并行追加的独立工作为 **3 名 sub-agent**：offline 诊断静审、I1 边界静审、外仓实时
+只读刷新；与原五个职责分离、没有共享写入。静审结束后，原 Windows 作者改为独占
+I1 新请求实现树外目录，原资格作者独占新的可执行资格 controller 目录，独立 reviewer
+只读冻结草案。所有 OS 资格须先完成 outer 审查/自资格，VM 高风险动作须待具体批准。
+
 ## 执行顺序与完成条件
 
 | 项目 | 本轮工作及完成条件 | 当前状态 |
