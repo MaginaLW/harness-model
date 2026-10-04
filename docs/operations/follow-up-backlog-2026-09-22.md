@@ -1,5 +1,30 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-04 新执行窗口：目标已设立，七项待办正在推进
+
+本次所有者授权必要工作并要求完成待办，持续目标为 active。具体执行与完成条件见
+[本轮执行文件](backlog-execution-2026-10-04.md)。安全fake基线已提交且经独立检查；
+初期TASK-0065准入至规格审核时生产尚未begin。七份准备文档已完成独立技术核查；
+这不是新治理Task的正式Design Review，也不是生产或原生验收。
+
+随后TASK-0065首轮正式Review要求修订，三项finding原样保留；公共Win32 backend新规格
+当时已经spec_changed重新准入并冻结，新context独立审查中，Missing `spec_approval`。
+新schema微测静态PASS但唯一launcher失败，绑定worktree业务目录当前不可用，未测量、
+无速度结论、未重试；原F/性能refs仍在，正在核封存原件。r3s新窗口Windows success、
+POSIXqueued/0 steps；Linux离线符合既有主动停用约定，受控恢复接单材料正在核查。
+
+后续实际结果：新context已独立APPROVE并原生记录，准备提交`1d4731c`；所有者明确
+回复“批准”后native spec approve/begin及提交`01949da`完成，TASK-0065当前
+IMPLEMENTING / REVIEW / V2、approvals current，Missing `implementation_result`。
+两src/三test独占并行实施，资格/成本分区/审查矩阵另行准备。新微测002已实际完成并
+独立核证，但收益不足不采用；原 F 的75文件及 TASK-0064 的61个native文件原字节可恢复，
+不重写FAILED/SPENT。I1隔离冷启动具体草案已备，尚未批准或执行，I2新目标仍未选。
+
+Windows支持范围和真实错误资源语义、完整验证预算、F合法承接、外仓实际恢复/Apply、
+后继方向与干净发布逐项处理。旧schema/deepcopy候选NO_GO不重复；旧FAILED/SPENT
+不改写、不复用。准备文档和安全基线的完成不将下面七项生产/验收/发布标为完成。
+下方原收尾核定及其他历史章节完整保留。
+
 ## 2026-10-04 收尾核定与下次待办
 
 本轮私有修复候选、单次 qualification 和两轮独立核对已收尾；技术记录已提交 `bf7ae55`。

@@ -1,5 +1,41 @@
 # 维护收尾与待办
 
+## 2026-10-04 新执行窗口：持续目标启动，安全基线已提交
+
+所有者要求读取待办、设立完成目标并授权必要工作；持续目标已设立为 active。
+[本轮执行文件](backlog-execution-2026-10-04.md)覆盖当前七项待办及并行/串行依赖。
+原收尾章节仍为历史窗口，不限制本轮已授权的准备和常规本地推进。
+
+- 安全维护基线 `d4f72ac`（治理工作区同内容提交 `ab07bcd`）新增一个 fake-only
+  ProcessRunner 契约测试模块；作者20 passed，独立20 passed/1.40秒，静态检查通过。
+  原生产源码/原tests未改，无skip，无真实子进程或OS清理资格结论。
+- 独立 TASK-0065 已在真实干净 base `ab07bcd` 创建、分类并冻结为 REVIEW/V2，
+  正式独立Design Review REV-0002 APPROVE已记录，准备提交`1d4731c`；所有者随后
+  明确批准规格，native approve/begin和提交`01949da`完成。当前IMPLEMENTING、
+  classification fresh/approvals current，Missing `implementation_result`。
+  首轮三项 finding 保留；新规格经 spec_changed 重新准入，采用公共 Win32 backend、
+  12 字段和 8 个 active+retained 原子槽位，不按 patch/build/未测缩小支持。生产实施中。
+  base继承的GitContext候选并不消除旧TASK-0064 FAILED。
+- [预算决策](verification-budget-decision-2026-10-04.md)核实原schema/deepcopy实验为
+  NO_GO；新纯schema微测两名 reviewer 静态PASS，唯一launcher因绑定workspace不可用
+  失败。脚本未启动，无计时/result/guard，未换解释器或重试，完整V2仍未重跑。
+  新绑定002已实测并独立复核，局部paired收益不足，不继续两种表示生产化；原结果/
+  guard限度/cold事件字段问题保留。完整预算下一步为已有profile的offline caller分区。
+- [F承接方案](f-successor-decision-2026-10-04.md)确认五test路径范围冲突及
+  HEAD/subject不同，不能直接恢复旧F后吸收新源码；历史导入33命令保持已执行。
+- [外仓现场核定](external-follow-up-evidence-2026-10-04.md)已更新新SHA和准确CI窗口；
+  dotfiles完整CI成功，r3s新窗口Windows success/POSIXqueued且Linuxrunner离线；既有
+  约定主动停用Linux服务，正在核对受控交接材料，不能直接判定为故障。
+  [后续进入门提案](phase-entry-proposals-2026-10-04.md)与
+  [干净发布包](publication-package-2026-10-04.md)已形成，实施和发布尚未完成。
+
+初读的旧 TASK-0064 FAILED/Missing `retry_reason_or_escalation`、TASK-0063 BLOCKED/Missing
+`block_resolution` 保持；后续发现原性能业务目录不存在、F业务目录为空，Git注册清单
+不再列出两者，原分支refs仍在，原因UNKNOWN。封存资产已独立匹配：F 的75文件、
+TASK-0064 的61个native文件及所列审计原件可恢复；ACL/admin/cache等仍未知，不把旧路径当现存证据。
+SPENT动作及三个用户未跟踪计划保留。全量预算、85%/90%
+与main保护不放松；具体高风险动作仍在可审查材料及实际授权后推进。
+
 ## 2026-10-04 收尾：交接与待办已记录
 
 私有修复阶段已完成并在 `bf7ae55` 留下技术记录；本次只读复核候选与原始证据哈希仍匹配。
