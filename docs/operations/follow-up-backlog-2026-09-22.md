@@ -1,6 +1,32 @@
 # 后续待完成项目：2026-09-22 核定
 
-## 2026-10-04 当前依赖：单次隔离诊断 PASS，TASK-0064 原生失败仍待处理
+## 2026-10-04 当前依赖：私有 qualification 完成，生产治理提案尚未准入
+
+本轮显式授权的私有 Windows 修复候选只执行了一次 qualification，实际 9 passed / 10.37 秒 /
+rc 0，其中 5 项真实 Windows、4 项 safe mock；独立终态审计已封存，结论为
+`CONFIRMED_PRIVATE_QUALIFICATION_ONLY`，无数据阻断，非 native 验收或生产批准。实际方案为自有 Job、
+suspended assign/resume 和 per-instance FunctionType 私有代理，无 global patch、无 kill-on-close。
+两个真实 timeout 的自有 active count 为 0，parent/drain/threads/handles 的完成记录明确；
+normal zero/nonzero 保持原 status，normal live-child release active 2 后自然完成、不 kill。
+故障 mock 不当作 OS 证据，terminate/drain 故障保留 errors、retained handles/未验证状态。
+
+outer supervisor 实际 11.128385 秒、cleanup CONFIRMED、无 survivor cleanup；396 个指定保护
+entry（333 file、61 directory、2 absent）的字节/目录状态及身份一致，原 test/source 与原时序保持。manifest 排除的 6 个 `__pycache__`
+目录、整个 main 业务树及 host temp 未采集完整证明；受控 Popen 调用、CPython 3.13.15 绑定及外部 crash/orphan 限制
+见[私有超时修复记录](windows-private-timeout-repair-2026-10-04.md)，不扩称通用安全 sandbox。
+
+下一依赖为具体生产治理设计准备（尚未启动），再按具体候选进入新的治理 Task：先解决可独立验证的
+测试安全阶段/真实基线，声明 ProcessRunner 和实际 helper 精确路径，完成 classify/freeze、
+独立 Design Review、实际 Missing 的规格决定及 begin。后续完整 V2 需新候选的精确单次 action；
+当前只是可审阅提纲，未新建 Task、改生产、恢复旧 Task 或 V2 retry，也未重试旧 blocked proposal。
+
+qualification guard 窗口观察到 primary HEAD `1ff6e964f7f0944176c420ca55a57b885272f325`、
+performance worktree HEAD `ef5943b29514ad1d13121023610bf4c2c4dcb408`，source GitContext c7 保持。TASK-0064 仍
+FAILED / REVIEW / V2，Missing `retry_reason_or_escalation`，action SPENT；F 仍 BLOCKED。
+私有测试不消除旧 native 失败、不确定旧原因、不代替正式完整 V2/Gate。原 14 项、预算、
+85%/90%、旧 paid source/action 和新付费/push/merge 权限边界均保持。以下为历史窗口。
+
+## 2026-10-04 历史依赖：单次隔离诊断 PASS，TASK-0064 原生失败仍待处理
 
 分支 `codex/git-context-read-protocol` 的 TASK-0064 完整原生 V2 run
 `run-20261003T153150710903Z` 已真实结束为 FAILED，11/14 通过。source subject 仍为

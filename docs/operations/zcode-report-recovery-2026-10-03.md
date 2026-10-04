@@ -1,6 +1,50 @@
 # ZCode 准备报告回收与独立核定：2026-10-03
 
-## 2026-10-04 当前核定：TASK-0064 原生 FAILED/SPENT 原件已保留
+## 2026-10-04 当前核定：私有 Job 候选一次 qualification 与独立私有核定完成
+
+本轮私有修复授权仅覆盖候选与单次自有进程 qualification。实际 run 为
+`harness/run-8e27688a33d945a69a57511711a84ba6`，9 passed / 10.37 秒 / rc 0；5 项真实
+Windows 与 4 项 safe mock 分开记录。独立终态审计已封存，结论为
+`CONFIRMED_PRIVATE_QUALIFICATION_ONLY`，无数据阻断，非 native 验收或生产批准。
+详见[私有超时修复记录](windows-private-timeout-repair-2026-10-04.md)。
+
+独立审计相对引用为 `ownaudit/import-acceptance-terminal-audit-001.json`，23171 字节，SHA256
+`89a3ba3daf6b151f76372ed8d363c582c3fee829242663e86b92f169017fc8a9`；只核定本次私有
+qualification 与原件/恢复边界，没有创建 native Review、event 或 approval。
+
+私有目录以 basename `harness-model-private-repair-20261004-001` 定位。实际 helper
+`candidate/windows_owned_job.py` 为 25735 字节，SHA256
+`02e81bbf3878fb1ed581bf7ca14eb560a97bef4f57b514b462ea233ec211d2ef`；runner
+`candidate/process_runner_private.py` 为 12799 字节，SHA256
+`43456426d0083e875c0db41e0eafbab29efa7023177f7e5aac6e043e9e07903b`。
+sealed bundle 为 3933 字节，SHA256 `a17bc5c1900907f2f0138f419cb3bff80dfd1ed284ebb201d71eab26497c95f1`。
+原始文件留私有目录；不把含本机路径的候选 receipt、bundle 或 raw JSON 直接入库。
+
+实际方案无 global patch/kill-on-close；两个真实 timeout 的自有 active 0、parent signaled、
+drain/threads complete、handles closed 有记录。normal zero/nonzero 结果保持；normal live-child
+release 的 active 2 是实际 accounting 记录，其后自然结束，不误写为超时清理失败或两条
+独立存活进程证明。四项 mock 只覆盖控制流，terminate/drain 故障的 errors、retained handles
+和未验证状态保留，不能被 9 项 pytest PASS 改写为全部 OS 清理成功。
+
+outer 11.128385 秒，self-owned active 0、parent reaped、handles closed、cleanup CONFIRMED、
+supervisor pass，无额外 survivor cleanup。396 个指定保护 entry（333 file、61 directory、2 absent）的实际 bytes/目录状态/identity 一致，
+raw-before 留存；manifest 排除的 6 个 `__pycache__` 目录、whole main 与 host temp 完整字节证明未采集。
+child 原件的 `collection_binding_preserved_function`、`original_function_preserved`、
+`original_run_execution_binding_restored`、`original_test_bytes_unchanged`、
+`public_result_fields_unchanged`、`public_run_execution_signature_unchanged`、`hooks_restored`
+均为 true：原测试函数/字节保留，隔离 qualification 临时使用私有 runner 绑定后已恢复。
+这不等于生产 runner 已修复。
+
+qualification guard 窗口观察到 primary HEAD `1ff6e964f7f0944176c420ca55a57b885272f325`、
+performance worktree HEAD `ef5943b29514ad1d13121023610bf4c2c4dcb408`。TASK-0064 仍 FAILED / REVIEW / V2、Missing `retry_reason_or_escalation`，action SPENT；
+F 仍 BLOCKED，GitContext c7/source S507 保持。旧失败根因 UNKNOWN；本轮不是原生 V2、
+新 Task、生产实现或旧任务恢复，没有重试旧 blocked proposal。下一依赖是具体生产治理设计
+准备（尚未启动）；生产须独立治理 Task 的
+实际 scope/helper 路径、规格、独立 Design Review、Missing 批准与后续新 action/完整验证。
+受控位置参数、CPython 3.13.15 与 crash/orphan 限制见新记录；不扩称安全 sandbox、旧失败
+已解决或有新 paid/push/merge 权限。下方所有原件和历史结论保持。
+
+## 2026-10-04 历史窗口：TASK-0064 原生 FAILED/SPENT 原件已保留
 
 分支 `codex/git-context-read-protocol` 的 TASK-0064 一次完整原生 V2 run
 `run-20261003T153150710903Z` 已结束。CLI 命令 exit 0 不代表验证通过：实际 conclusion

@@ -1,6 +1,15 @@
 # 维护收尾与待办
 
-## 2026-10-04 当前核定：TASK-0064 完整 V2 为 FAILED，单次 action 已 SPENT
+## 2026-10-04 当前核定：私有 Windows 候选 qualification 完成，生产仍未准入
+
+- 本轮显式私有修复授权下，封存候选执行了一次 qualification，实际 **9 passed / 10.37 秒 / rc 0**：5 项真实 Windows 案例、4 项 safe mock。独立终态审计已封存，结论为 `CONFIRMED_PRIVATE_QUALIFICATION_ONLY`，无数据阻断；确认范围仅为本次私有 qualification，不是 native 验收或生产批准。候选、审计哈希和后续提纲见[私有超时修复记录](windows-private-timeout-repair-2026-10-04.md)。
+- 实际候选使用自有 Win32 Job、suspended create → assign → resume，以及 per-instance FunctionType 私有代理；没有共享全局 patch，也不设置 kill-on-close。两个真实 timeout 记录 active 0、parent signaled、drain/threads complete、owned handles closed；正常 zero/nonzero 保持原结果，正常 live-child 在 release 记录 active 2 后自然结束，无额外 kill。
+- 4 项故障 mock 只验证控制流，不是 OS 故障/清理证据；terminate/drain 故障保留 errors、retained handles 和未验证清理状态，不能说所有清理成功。outer supervisor 实际 11.128385 秒、自有 Job active 0、parent reaped、handles closed、cleanup CONFIRMED，无额外 survivor cleanup。
+- 脚本指定保护集合为 396 个 entry（333 file、61 directory、2 absent），字节/目录状态及身份前后相同，raw-before 已私有留存；manifest 实际排除 6 个 `__pycache__` 目录，这些目录、整个 main 业务树和 host temp 的完整证明未采集。原 test/source 与 1/5/2/10/3 秒时序不变，public signature/result fields 及隔离绑定恢复字段为 true。只覆盖绑定 CPython 3.13.15 的受控调用，不是通用安全 sandbox 或外部 crash 的 orphan 保证。
+- qualification guard 窗口观察到 primary HEAD 为 `1ff6e964f7f0944176c420ca55a57b885272f325`、performance worktree HEAD 为 `ef5943b29514ad1d13121023610bf4c2c4dcb408`；这是该窗口的版本事实，GitContext c7 字节未变。TASK-0064 仍 FAILED / REVIEW / V2、Missing `retry_reason_or_escalation`，action SPENT；F 仍 BLOCKED。本轮不消除旧失败，不确定旧根因，不代表生产 ProcessRunner 修复或完整 V2 通过。
+- 下一依赖为具体生产治理设计准备（尚未启动）：后续生产改动须另建治理 Task，确定真实 source/helper 精确 scope、测试安全基线、规格与独立 Design Review，按实际 Missing 取得所需批准后才能 begin；正式完整验证另需新候选的具体单次 action。当前未新建 Task、未改生产、未恢复旧 Task、未重跑 V2，也未重试旧 blocked proposal。原检查/预算/85%/90% 和付费、push、merge 边界保持。下方原核定完整保留历史。
+
+## 2026-10-04 历史窗口：TASK-0064 完整 V2 为 FAILED，单次 action 已 SPENT
 
 - 分支 `codex/git-context-read-protocol` 的 TASK-0064 已完成一次完整原生 V2，run `run-20261003T153150710903Z` 的实际终态为 **FAILED，11/14 通过**。当前 observed HEAD 为诊断便携摘要提交 `ef5943b29514ad1d13121023610bf4c2c4dcb408`；失败/消费证据阶段提交为 `4de35cc5af62c38619afb3a0cd7117fedcb94301`。源码 subject 仍为 `50777d648765a935c265e2d12e292d325fabeb1f`，源码 c7 字节不变。
 - 三项失败保留：regression 在 900301ms 超时，完整计数 UNKNOWN；coverage 在 1118810ms 以 exit 1 结束，3036 passed、1 skipped、1 failed，失败节点为 `tests/unit/test_process_runner.py::test_timeout_kills_child_process_tree`；integration 在 600434ms 超时，完整计数 UNKNOWN。unit 为 2010 passed。
