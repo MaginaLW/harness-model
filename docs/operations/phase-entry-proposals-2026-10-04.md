@@ -1,5 +1,20 @@
 # 后继阶段需求与合同提案：2026-10-04
 
+## 2026-10-06 I1 原生当前状态补充
+
+TASK-0066 的既有 cold BOOT spec 已获批准。当前实际工具 `a12fd9` status 返回
+IMPLEMENTING / REVIEW / V2，Missing `implementation_result`，classification
+fresh、approvals current、evidence not_available；账本 HEAD `e549500`，工作区
+clean。下文“WAITING_FOR_SPEC_REVIEW / Missing spec_approval”是早期窗口事实，
+不构成当前再次申请规格批准的理由。
+
+该批准不填补尚未具备的真实 admission/action、wrapper 出生及资源关闭能力。
+原 POSIX attempt cancelled 使其自然 CI 路径不可用，不撤销同范围 BOOT 规格；
+runner/服务/新 CI 路径、超出 OwnTask 的 NativeGit 源码 seam、I2/E5 新目标与
+Phase 3/4 进入仍须各自明确范围和前置条件。目前没有 cold copy、VM、SSH、
+服务或新 CI 执行，也没有完整 V2。原提案、失败和已消费动作按各自窗口保留。
+详见[当前权威队列](follow-up-backlog-2026-09-22.md#2026-10-06-当前核定原生实施状态与局部结果边界)。
+
 ## 2026-10-05 取消范围核查已完成
 
 同范围 TASK-0066 cold BOOT spec 不因 cancelled 自动撤销；009 没有 CI

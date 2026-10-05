@@ -1,5 +1,29 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-06 当前核定：原生实施状态与局部结果边界
+
+当前工作区只读 native status 分别由工具 `d430aa`、`a12fd9` 返回 0：
+TASK-0065、TASK-0066 均为 IMPLEMENTING / REVIEW / V2，Missing
+`implementation_result`，classification fresh、approvals current。0065 的旧 evidence
+为 stale，0066 evidence 为 not_available；0065 仅有本任务旧 evidence 未跟踪，
+0066 clean。既有规格批准无需重复申请，尚未取得完整实施或验收结果。
+
+007 三节点九阶段完成及新的限定后处理 exit 0 已有实际回执和独立读回；原冻结
+consumer exit 1 保留，局部结果不能替代完整 V2、总覆盖率 85% / diff 90% 或
+TASK-0064 的预算结论。0065 原完整 run 10/14、总覆盖率 68.09%、Action002
+SPENT 均保留，Action003 revision002 的具体批准仍待回答，不复用旧动作。
+
+本地发布候选 `51563af` 的审查只覆盖 source cutoff `bc5de09`；之后追加事实尚
+不在该核定内，required CI、原生发布治理及具体远端操作仍未完成。I1 cold BOOT
+既有规格有效，真实 admission 与生命周期缺口尚未闭合；I2/E5/I5/Phase 3/4 的
+方向及进入条件不由这些准备材料建立。七项完成要求仍以本文件 2026-10-04
+原条目为准，目标 active；下列窗口保留各自当时的事实。
+
+本次两个真实 status 返回封存于 `${RUNTIME_ROOT}/harness-model-backlog-20261004-001/`
+`goal-current-queue-reconciliation-001/native-status-tool-results.json`，SHA256
+`e1b616443fd49b37611eb258866c8475a37439dc499386989faa6e96e86b49ca`。
+详见[当前执行与限定结果](backlog-execution-2026-10-04.md#2026-10-06-限定后处理单次完成原失败保持)。
+
 ## 2026-10-05 当前核定：局部诊断失败，BOOT 规格仍有效
 
 006 单次诊断真实 exit 1，仅首节点三阶段中 call FAIL；九阶段测量未完成，
