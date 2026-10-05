@@ -1,5 +1,37 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-05 原生重试登记与后继准备
+
+root 已完成此前 status 所列的机械 `retry_reason_or_escalation`：工具 `8aa9c0`
+执行一次 native begin，使用独立归因支持的真实理由；begin/status 均 exit 0。
+事件 23 于 UTC `2026-10-05T14:00:01Z` 追加 implementation_retried，当前
+IMPLEMENTING / Missing `implementation_result`，classification fresh、approvals
+current、evidence stale。原 22 事件的语义前缀、五源及 spec 保持；原失败 evidence
+SHA `062c5f6770a207d22bebe7ad58d29d73341a312d4a49f03d10b82a6e0e0e1b8b`
+未变，继续保留未跟踪状态。OwnTask 账本提交 `f6fb20a`；未运行新的 verify 或 mutation。
+
+新普通短 pytest parent 已创建、核实为空且无 reparse。Action003 revision002 独立
+报告 `task0065-action003-independent-review-001/report.json` SHA256
+`a746c9d523791f7cfb590df11d321977e31449f8fb3c464efb9240d56f98e1af`，结论
+GO_FOR_REQUEST_ACTION003_REVISION002_ONLY、necessary findings `[]`、execution_go false。
+具体批准请求绑定 canonical SHA
+`ed7b260f56e2beb626c99740b8339b67ba252d624ba95ec942377d9633d90e2a`，当前未回答。
+单次完整 V2 保留原 14 检查、85%/90%、预算及固定五变异；既有 spec 批准保持有效。
+新动作到期 UTC `2026-10-06T13:36:25Z`，启动须至少剩余 90 分钟。此登记不将
+旧 FAILED 10/14、68.09% 或 SPENT Action002 变为成功，也未证明其他失败原因已修复。
+
+并行阶段启用 **4 名 sub-agent**：两名非作者分别审 counter source004 的 entry/audit
+和 lifecycle/current closure；I1 协议作者及其一名纯 consumer 作者独占另两份材料。
+counter 薄改对严格 DOS 扩展路径先校验再剥前缀，非 DOS namespace 提前拒绝，保留
+最终实际 resolve/private containment；80 项作者纯检查不是物理身份或 OS 验证。
+它的实际 packet、request、执行及最终能力字段仍为空。I1 真实 native/shared Job/
+launcher/signal 能力也未绑定。原 counter 失败与全部旧提案保留。
+
+串行依赖为：具体新动作批准及 fresh admission → 单次原完整 V2；counter 新提案
+经两名非作者审查后再机械装配，实际执行另由 root 定稿；I1 依赖真实已验收能力及
+冷启动具体 action。各真实运行按资源串行，counter PASS 不是 V2 的 Policy 前置。
+发布尚无原生迁移或 allocator 路由决定、完整 CI 或远端写入；七项目标仍 active。
+
 ## 2026-10-05 完整 V2 实际失败与行动消费
 
 独立 verifier `/root/case_review006` 对固定 subject `4f23e5c` 仅执行一次完整
@@ -332,7 +364,7 @@ I1 新请求实现树外目录，原资格作者独占新的可执行资格 cont
 
 | 项目 | 本轮工作及完成条件 | 当前状态 |
 | --- | --- | --- |
-| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 单次完整 V2 实际 10/14、四项 required FAIL，整体 FAILED；五项 mutation 全 killed，Action002 SPENT；007 限定资格及 console 未测限制保留 |
+| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 已真实登记重试，当前 IMPLEMENTING；旧完整 V2 为 10/14、四项 required FAIL，Action002 SPENT；Action003 revision002 待具体批准，尚无新 run；007 限定资格及 console 未测限制保留 |
 | 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | 61 个原生资产核验、36 个缺失原件已恢复；仍 FAILED / Missing retry_reason_or_escalation；schema 002 不采用，当前完整预算仍待实测 |
 | F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | 75 个封存资产核验、35 个 ignored 日志已恢复；仍 BLOCKED / Missing block_resolution，五测试路径仍超范围 |
 | 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | Windows success，POSIX queued/0 steps；Linux 停用约定已定位 |

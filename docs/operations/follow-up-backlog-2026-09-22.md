@@ -1,5 +1,18 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-05 当前核定：重试理由已登记，新完整 V2 尚未启动
+
+TASK-0065 native begin/status 实际成功，事件 23 已追加；当前 IMPLEMENTING /
+Missing `implementation_result`，classification fresh、approvals current、evidence stale。
+可移植账本提交 `f6fb20a`，原失败 evidence 和固定源码保持。此前完整 V2 的
+10/14、总覆盖率 68.09% 以及 Action002 SPENT 均仍是原 run 的事实。
+
+Action003 revision002 仅获独立 GO_FOR_REQUEST，真实具体批准请求已提交但尚未回答；
+canonical SHA 为 `ed7b260f56e2beb626c99740b8339b67ba252d624ba95ec942377d9633d90e2a`。
+短 pytest parent 不改变检查、预算或阈值。counter source004 和 I1 身份协议继续并行
+准备，均未执行真实业务；发布路由尚未选择，旧本地文档审查不覆盖本节。七项目标 active。
+详见[实际登记与并行职责](backlog-execution-2026-10-04.md#2026-10-05-原生重试登记与后继准备)。
+
 ## 2026-10-05 当前核定：完整 V2 实际失败，具体行动已消费
 
 TASK-0065 单次完整原生 V2 已完成，实际 run 为

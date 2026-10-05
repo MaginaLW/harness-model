@@ -1,5 +1,19 @@
 # 维护收尾与待办
 
+## 2026-10-05 最新：原生重试已登记，新动作待具体批准
+
+TASK-0065 已用真实失败理由执行 native begin/status，工具 `8aa9c0` exit 0；事件 23
+为 implementation_retried，当前 IMPLEMENTING / Missing `implementation_result`。
+classification fresh、approvals current、evidence stale；源码、规格和原失败 evidence 未变。
+账本阶段提交 `f6fb20a`。原 V2 的 10/14、68.09% 和 Action002 SPENT 保留。
+
+Action003 revision002 已通过独立请求审查，canonical SHA256 为
+`ed7b260f56e2beb626c99740b8339b67ba252d624ba95ec942377d9633d90e2a`。
+具体单次批准请求已提交，尚未收到新批准；完整 V2 未再次启动。短 pytest parent
+只针对确认的路径问题，其他原因仍待实际检查。counter 新 source004 仅纯词法准备，
+两名非作者审查进行中；I1 同次身份协议仍为纯模型，真实能力未绑定。七项目标 active。
+详见[重试登记与后继准备](backlog-execution-2026-10-04.md#2026-10-05-原生重试登记与后继准备)。
+
 ## 2026-10-05 最新：完整 V2 已结束，原生仍 FAILED
 
 TASK-0065 的独立单次 run `run-20261005T125556290422Z` 实际完成，CLI exit 0，
