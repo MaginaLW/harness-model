@@ -1,5 +1,44 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-06 诊断 007 完成与冻结 consumer 拒绝
+
+source005 的改变仅限定当前 `_read_only_git` 源码调用链、四组固定只读 Git
+argv 及唯一 `GIT_OPTIONAL_LOCKS=0` child 增量；其他环境或调用者仍拒绝。
+两份源审查、机械组装与两份 READY 绑定审查均已封存。READY5 的真实当前
+闭包为 target 1073 / outer 104 / overlap 6 / union 1171；最终 16 文件包
+root manifest SHA256 `5e5ab1da5a570b35ddcef8a5e679c87b20b73eb5869eb6571f04f7c97590a8f9`。
+组装前一次未完成工具错误与后续仅补齐未写文件的记录分开保留，未改写旧包。
+request SHA256 `71d2f5a5b77ff6f3a924d1b75c6e6912a092a4fd323f00d62755dcc83d36e70d`。
+
+root 在现有普通本地诊断授权内单独冻结 007 的一次范围决定，未将它当作
+人类 native Action 批准。实际初始工具 `f2f19e` / session `71959`，最终
+工具 `1a377c` exit 0。UTC `2026-10-05T15:57:35.9489342Z–15:57:51.2955458Z`；
+start/deadline/observed QPC 为 `3749823469493 / 3750423469493 / 3749977021344`，
+frequency `10000000`，退出上界 15.3551851 秒。原 60 秒 / 5 秒预留与
+90 秒根侧观察窗口保留，未在执行中重置。root 前后输入 SHA 均为
+`2e717b8f5a00b94d1b1046d600b00ffce187c8bb250405393e2cebe63ebf1a91`。
+
+counter 记录三个节点 / 九个阶段全部 PASS、190 条 admitted Git prelaunch
+intents、guards_equal=true；phase wall sum 12.97966649994487 秒，audit hook
+1762194500 ns。此值不代表真实 EXE 加载、CPU、完整套件或预算失败的全部原因。
+root stdout/stderr 的 copy_completed=true、各单次 close 与 process dispose
+已记录；目标 own Job 与资源账本另由独立生命周期读回限定，不能升级为全 OS
+回收证明。实际工具回执 `budget-current-c7-root-actual-007/root-real-tool-receipt.json`
+SHA256 `c6ce8dac62314c993dca86a7f2fcc174c46dffab20d0ab6a6174172adca5538c`。
+
+原冻结 consumer SHA256 `8036afc7a7bfad566974b8725fc34a11cc7725114d90b230ce9e3400a4775dd9`
+仅实际读取一次；真实工具 `0d6a28` exit 1，trace 为
+`validate_facts:663 -> validate_root_guards:329 -> root auxiliary closure absent`。
+指定 `consumer-acceptance.json` 不存在。工具原始返回对象另封存，SHA256
+`e2b19b531ba9e87f4557050ba45e8a436e755b903ef7682c6f1765c5cbdf7b79`；独立负回执
+SHA256 `eab030ccec58a3d51db632e08bb47b687fe7f5336fd136b123d1fc888f408cf6`。
+保留该所需失败，不改原 consumer、证据或 READY，不重跑已经消费的 007。
+
+这一阶段启用三名 sub-agent：入口证据、资源生命周期、源契约诊断各一名，
+只读审查并行；root 封存与文档提交串行。尚无正面局部验收、完整 V2 或
+预算问题解决结论。TASK-0065 Action003 revision002 的具体批准请求仍未回复；
+旧 FAILED、68.09%、SPENT 及外仓 cancelled 均保留，七项目标继续 active。
+
 ## 2026-10-05 诊断 006 实际读回已封存
 
 独立入口审查结论 `ACTUAL_FAILED_NO_RETRY_NO_ACCEPTANCE`，报告

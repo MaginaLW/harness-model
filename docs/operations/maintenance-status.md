@@ -1,5 +1,19 @@
 # 维护收尾与待办
 
+## 2026-10-06 最新：007 局部运行完成，冻结 consumer 拒绝
+
+新单次请求仅执行一次，实际最终工具 `1a377c` 与 root 观察的 child 均 exit 0；
+原 QPC 退出观察上界为 15.3551851 秒，仍在原 60 秒窗口内。三个固定节点的
+九个阶段全部通过，190 条 Git 预启动意图已记录；输入前后哈希相同。
+这些意图不等于实际 EXE 加载、CPU 测量或完整验证预算归因。
+
+冻结 consumer 的真实工具 `0d6a28` exit 1，在 `validate_root_guards:329` 拒绝
+`root auxiliary closure absent`；指定正面产物不存在。原 trace 与负回执已独立
+封存，不重跑已消费的 007、不改原 consumer、不覆盖所需失败。三名 sub-agent
+并行核对入口、生命周期和源契约，root 串行整合；尚无局部验收或新完整 V2。
+TASK-0065 Action003 revision002 仍待具体批准，七项目标 active。详见
+[007 实际记录](backlog-execution-2026-10-04.md#2026-10-06-诊断-007-完成与冻结-consumer-拒绝)。
+
 ## 2026-10-05 最新：006 两份实际读回封存
 
 独立读回确认局部诊断失败；目标 own Job 收尾闭合有实际账本，root stream
