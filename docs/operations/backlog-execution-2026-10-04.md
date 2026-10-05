@@ -1,5 +1,23 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-05 诊断 006 实际读回已封存
+
+独立入口审查结论 `ACTUAL_FAILED_NO_RETRY_NO_ACCEPTANCE`，报告
+`actual-entry-review-006/report.json` SHA256
+`2d130844ff1c92dd3d9f4215b0c842f00d7f5612c6cbde6d28dd0745590a137a`。
+41 条已记录意图全部在首节点 setup；失败的 call 意图在 environment 准入前被
+拒绝，未计入这 41 条。独立生命周期审查结论
+`FAILED_TARGET_OWNED_JOB_CLOSURE_RECORDED_ROOT_CAPTURE_UNKNOWN`，报告
+`actual-lifecycle-review-006/report.json` SHA256
+`e3565f46d5baf0a13d51d7d1001d0042ec01eb790b751d46fabab0bd4af66b51`。
+目标账本记录 own Job 的 parentSignaled=true、Active0、单次 Terminate、六个
+native handle 单次关闭，以及 receiver observed/confirmed close；root 的
+copy_completed=false/retained UNKNOWN 保留。raw file.closed=true 没有显式次数
+字段，次数仍未知；这些局部账本不升级为全 OS 回收证明。各 11 / 24 个选定原件
+前后哈希稳定，未执行额外清理、consumer、业务、Git 或 native。root 再读旧 005
+负回执及 TASK-0065 失败 archive 的 SHA 仍分别为 `c24c88d4…` / `062c5f67…`。
+源码环境兼容性仍为未执行提案；006 原请求与两个失败窗口均不重试。
+
 ## 2026-10-05 诊断 006 与取消范围核定
 
 两个 READY 绑定薄审均为 `GO_FOR_ROOT_EXACT_ONCE_SCOPE_DECISION`、必要 Finding 0。
