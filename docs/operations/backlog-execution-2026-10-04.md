@@ -1,5 +1,58 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-06 限定后处理单次完成，原失败保持
+
+新的后处理副本仅按封存两个 hunk 生成，逆向逐字节还原为原 `8036afc7…`。
+完整五条四字段资格声明及原 SHA 绑定保持；root 实际两字段 hook 事实仅作
+严格操作投影比较。其他输入、身份、QPC、own Job、关闭、当前快照、输出隔离及
+finish 门不变，成功标签明确 qualified 和原 consumer failed。十二个真实 AST
+片段的 FAKE schema 用例通过，不验证身份值或实际原件；八文件准备 manifest
+SHA256 `afb791922902ec9ccdfbfd80c17953fd9972d8e3d3200c920d3953e9162b06b1`。
+非作者入口和 preflight 报告 SHA256 分别为
+`6951964f1820931540123e6518dac6f5c9f01dca8324d4d7c97054583734f052`、
+`d59f1ff4bbfb32620951334161f51a5b741150bedd1f8dae23db0f698e7834cb`；
+必要 Finding 0，仅同意 root 独立的一次只读 qualified 范围决定，不批准 native。
+
+root 外部 caller 的单参数 Write 静态重载疑点在执行前以独立 r02 的明确三参数
+调用修正，原 caller 字节保留；解析、单行逆回及新 SHA 均核对，未消费旧 caller。
+scope decision SHA256 `db7b25539475c6b8652e7b2fdc32a7203218b06312345bfedc074210251dc205`，
+绑定 newself、manifest、两审查、真实原失败、原正确输出位置和直接 CPython3.11.9
+等二十个原件。此普通本地读回决定不是人类 cleanup/mutation action 批准。
+
+实际工具 `72e105` exit 0，child 0；二十原件 SHA/stat 前后相同，原正面输出仍
+不存在。后继独立 `qualified-result.json` SHA256
+`633e40c9da6713bdbc9b2d1607173558cb049100ef2b14ef825f1fb420b4b7cb`，结果为
+`QUALIFIED_POSTPROCESSING_ONLY_ORIGINAL_FROZEN_CONSUMER_FAILED`。当前全部原件、
+目录名、缺席、身份、关闭及 finish 门已读取通过；仅支持原三个节点九阶段/
+190 个 Git prelaunch intent/phase wall sum 12.97966649994487 秒。原 counter
+tool `1a377c` 的 QPC 退出上界仍为 15.3551851 秒，不以新读取重置或补造退出时间。
+后处理真实工具回执 SHA256
+`af05ed59ab27b5a8ef783a7c8c208b14c0219b3213f22e922d203b99867a9bf2`，与原 counter
+工具回执分开。七件实际 payload 封存 manifest SHA256
+`dbcd695d1ec3b386ccfc6623d0c94ae9c7296c755b2b2f3c7bf6b35c0964f46f`。
+新范围已消费，不重跑新旧 consumer、counter，也未运行 native/VM/清理。
+
+独立实际报告 `budget-current-c7-qualified-postprocessor-actual-review-001/report.json`
+SHA256 `70a99ac949c7af1f31d515dfe02f0f86cf9b6e155addf90a13f86c7cab1ad826`，
+十二个选定原件的两次 SHA/精确整数 stat 稳定、十七项检查、Finding 0。保存的
+`72e105` 两条实际返回 JSON 与新结果/summary 相同，二十控制绑定前后一致，
+新 scope 已消费；原 `1a377c`、原 `0d6a28` 以及后处理工具身份分别保留。
+读回只核返回数据及必要原件，未再执行代码 body、consumer、全部闭包或 native；
+原正确 CLI 输出位置两次 FileNotFoundError，旧错误路径的范围不追认。
+
+原 entry007 报告的 absence 只查询了 root stream 目录中的同名文件；新独立
+准备审查已明确该范围并核对原 CLI 正确位置，旧 sealed 报告不改。原冻结失败
+`0d6a28`、其 trace/回执及正确原正面位置缺席继续保留；raw file close 次数及
+全 OS 回收仍未知，Task 验收、完整 V2、EXE 加载和全套预算归因均不由此建立。
+Task65 原失败 archive SHA `062c5f67…` 再读未变，Action003 revision002 仍待批准。
+
+本地安全文档候选 `51563af0175ea3c65468558deef02ca39c4bbdce` 覆盖 source
+`bc5de09e62ef4d25e3d00373a711d9e938867140`；仅五文档同步，三处原候选链接修复
+和另十文档保留，215 相对文件链接有效、whitespace/portable/clean 检查通过。
+作者报告 SHA `7d55e2557fd64699b3cb1c1c833614384c81ab7dca911ee45253577af3be38aa`；
+不含此最新后处理追加，亦无 required CI、Task67 或远端发布。当前并行两名
+sub-agent 分别独立读回实际后处理及审查文档候选，root 串行整合和阶段提交。
+
 ## 2026-10-06 诊断 007 读回与契约根因封存
 
 入口报告 `budget-current-c7-actual-entry-review-007/report.json` SHA256
