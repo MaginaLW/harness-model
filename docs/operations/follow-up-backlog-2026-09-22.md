@@ -1,5 +1,19 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-06 当前核定：TASK-0064 的真实恢复入口已完成
+
+TASK-0064 native begin/status 均实际返回 0，事件21和提交 `364aa16` 已登记；
+当前 IMPLEMENTING / REVIEW / V2，Missing `implementation_result`，classification
+fresh、approvals current、旧 evidence stale。原日志前缀逐字节保持，五个保护
+输入不变，原 regression/coverage_xml/integration 失败与 SPENT action 保留。恢复理由只
+支持原 GitContext-only 实现诊断，不表示预算问题修复，不授权新的完整验证动作。
+
+F 仍 BLOCKED、五测试路径超范围、Gate REJECT，真实 scope/dependency 处理未
+完成。发布只读核查确认远端等于候选 base，但 clean maxTask62 会碰撞真实63；
+完整账本迁入或共享分配器治理的方向问题待答。候选同步只固定 source `e214999`，
+此后追加不自动成为其已审查内容，未创建新发布 Task 或远端写入。七项目标仍 active。
+详见[本轮真实恢复与发布核查](backlog-execution-2026-10-04.md#2026-10-06-task-0064-原生机械恢复与发布基线核查)。
+
 ## 2026-10-06 当前核定：原生实施状态与局部结果边界
 
 当前工作区只读 native status 分别由工具 `d430aa`、`a12fd9` 返回 0：

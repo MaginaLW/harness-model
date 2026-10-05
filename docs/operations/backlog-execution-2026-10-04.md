@@ -1,5 +1,53 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-06 TASK-0064 原生机械恢复与发布基线核查
+
+两条恢复流分别在真实 restored/src 上仅调用一次 status/scope/Gate。F/TASK-0063
+仍 BLOCKED / Missing `block_resolution`，scope 五测试路径越界、Gate REJECT；
+当前 condition 为 scope_expanded，旧 human resolution 不覆盖本次阻断。
+TASK-0064 在该只读窗口仍 FAILED，scope-valid、Gate REJECT；原 failure event20
+仅 conclusion=failed，没有五项升级标记。既有规格批准 current，不能重复申请。
+审计原件 `f-task64-current-safe-next-step-audit-001/REPORT.md` SHA256
+`e19d78e5b6f76a5ea18c3212cb73b83858d0190cd45e61b9be7f21f17bdf6ada`，
+五十五件 exact manifest SHA256
+`8d1da3f7604b14fc4743d5f009bd5d7e44878a8dac9f012b5d0a641ad85e32b2`。
+三十五个恢复树选定输入 SHA/stat 相同；该审计在 begin 前封存，不追改其 FAILED。
+
+root 独立决定仅登记同 frozen GitContext-only 范围的真实恢复理由；工具 `1d2787`
+native begin 返回 0，UTC `2026-10-05T17:22:33Z` 追加 implementation_retried
+事件21。原事件前缀 14645 字节的 SHA256 `c468bcf1…` 保持；源码、spec、
+approvals、旧 SPENT action 和旧 failed evidence 五个保护输入 SHA 不变。复核后
+只提交 task.yaml 的 state/updated_at 与 events 的新尾行，提交 `364aa16`。
+实际最终 status `5d43ec` 返回 0：IMPLEMENTING / REVIEW / V2，Missing
+`implementation_result`，subject `50777d64` / observed HEAD `364aa16`，
+classification fresh、approvals current、evidence stale，仅旧 OwnTask evidence 未跟踪。
+
+新 sibling `task0064-native-retry-entry-001/report.json` SHA256
+`394d2556d56d9bb140367a5f21d85289a2bbb05b281fd7704ceab8c94d3fdf5c`；
+十件 payload manifest SHA256
+`27234fe6c60517b3b8e07434eb54b86c0ecb6684a77d4692f9f3c6b0aed49b0f`。
+必要勘误：event21 的原 reason、上述 sealed report 的 failed-check 列表及前一份
+lead 报告误列 unit；root 直接读取原 evidence（工具 `4ba045`）确认 unit_tests
+passed / exit0 / 126816ms，真实三失败为 regression_tests / 900301ms、
+coverage_xml / exit1 / 1118810ms、integration / 600434ms。原事件和 sealed
+报告不改写，后继诊断与 OwnTask 补充记录按准确 checks 追加；不把 tests/unit 中
+的失败 node 路径等同 unit_tests check 失败。原 run 仍 11/14，不产生新验收。
+第一份准备因 PowerShell bare false 错误产生 null 文件，原6字节与真实错误保留；
+独立 r02 修正并核对后才执行 begin。中间 status 的 Goal 编码错误原样保存，最终
+以 UTF-8 输出读取。状态恢复不表示三项失败已修复；未重验、改预算/85%/90%、
+消费新 action 或复用旧 SPENT。原 GitContext-only 失败诊断与安全文档同步继续并行。
+
+发布只读工具实际查询 origin refs/heads/main，返回
+`db3efabab562971aef1a6eb1317b679d42eeadb9`，等于本地 origin/main 和候选 base；
+对象已本地，无 fetch。远端与候选 maxTask62，直接 native start 会碰撞真实63，
+不能伪造目录、改 UUID 或手填任务号。独立树外路由核查固定 main `3840847`，
+不覆盖后续 `e214999`；报告 `publication-live-baseline-routing-audit-001/report.json`
+SHA256 `f14dffd3d63966b5c3f4ed882e69fdf41a9f5e7ba3bd48c37ea38fb54219eb66`，
+manifest SHA256 `fb1538cc38a08aadff88acebc7ce8fce870e93d0dc9e32ce70134683ba9eeacd`。
+A 的完整历史账本迁入扩域 / B 的共享 namespace 源码治理是真实 scope 选择，
+已向所有者提交方向问题；普通准入资料无需重请准备许可。准确 required CI、
+发布治理与具体远端动作尚未完成，未创建 Task67 或执行远端写入。七项目标 active。
+
 ## 2026-10-06 本地文档候选独立核定
 
 候选 `51563af` / source cutoff `bc5de09` 的独立报告为

@@ -1,5 +1,19 @@
 # 维护收尾与待办
 
+## 2026-10-06 最新：TASK-0064 恢复入口已登记
+
+真实 native begin 返回 0并追加事件21，原状态由 FAILED 进入 IMPLEMENTING；
+提交 `364aa16` 只含本任务 state/updated_at 与事件尾行。当前 status Missing
+`implementation_result`，classification fresh、approvals current、evidence stale。
+原事件前缀逐字节保持，源码/spec/批准/SPENT action/失败 evidence 不变，未重验。
+这不是原三项失败修复或新的完整 V2。F 仍 BLOCKED/scope 越界/Gate REJECT。
+
+远端 main 与文档候选 base 同为 `db3efab`；原生任务号直接分配会碰撞其他工作区
+真实63。完整账本迁入或共享分配器治理的方向问题已提交，具体 action 仍未准入。
+本地同步固定 source `e214999`，不自动追认后续状态追加。两名 sub-agent 分别薄核
+原失败与同步文档，root 串行整合；七项目标 active。详见
+[真实恢复与基线核查](backlog-execution-2026-10-04.md#2026-10-06-task-0064-原生机械恢复与发布基线核查)。
+
 ## 2026-10-06 最新：文档候选独立核定
 
 候选 `51563af` 的独立审查为 `GO_LOCAL_DOCS_CANDIDATE_ONLY`，必要 Finding 0；
