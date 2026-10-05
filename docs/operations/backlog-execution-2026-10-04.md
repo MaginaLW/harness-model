@@ -17,6 +17,37 @@ TASK-0064 未跟踪的原生 `evidence.json` 保留，不移动、不入库；�
 独立 outer 预审的关闭再试与 deadline 缺口正在新版本修复，完整 V2/动作批准仍未完成。
 回读类型错误原件及另立诊断均保留，不重写检查输出。
 
+### 2026-10-05 单次资格 005 失败，事件参数冲突另立修复
+
+005 在三路独立静审通过后实际只执行一次，UTC
+`2026-10-05T03:24:43.952Z–03:24:53.301Z`。完成工具返回 1，控制器实际 exit 2；
+首个 `outer-normal` worker exit 3 为其预定控制值，但 controller 在记录成功事件时
+发生 `TypeError: execute.<locals>.emit() got multiple values for argument 'kind'`。
+事件名与 dispatch 类型同时绑定同一个形参，故 `PASS_CONTROL_ONLY` 只是未获终态
+验收的提议。timeout/crash 控制、34 个必需生产 case 及完整 V2 均未启动。
+
+root 前后 7128 个固定输入和 27 个 prepared 文件的完整 snapshot 字节相同。实际
+outer receipt 报告 parent signaled、active processes 0、terminate 0、各自有 handle
+close 单次；已转移 child handle 的 acquisition 完整且单次确认关闭。这些是该失败
+控制的范围内资源证据，不代表完整资格通过，也不改写未知字段。25 个实际原件的
+前后字节、哈希、文件属性和精确名单相同，索引位于同一树外 runtime 的
+`windows-qualification-root-failure-diagnosis-005/facts-and-original-hashes.json`，SHA256
+`0229a1b8a75b2b07af75032caa831ee96108fa3ca261c24ab828e5deacb53bba`。
+实际 root/case 原件分别保存在 `windows-qualification-root-execution-005/` 与
+`windows-qualification-execution-005/`；005 请求不重跑。
+
+本阶段并行 **3 名 sub-agent**：两个分别只读核事件故障和资源终态，一个独占新的
+006 请求作事件形参最小修复与纯 fake 检查。主 agent 负责独立原件索引、原生状态、
+文档和之后的新单次入口。006 不改生产五文件、worker、原节点、断言或时序；修复
+→ 冻结 → 三路独立审查 → 新单次真实资格 → 终态验收仍串行，完整 V2 尚未启动。
+
+I1 revision009 已独立差异复审为 `GO_FOR_PREPARATION`，仅确认日志尾 seek、native
+错误主因及 observer 异常下 close 路径的三处修复，报告 SHA256 为
+`e8d77bb9091de030e82bf865425f59596ce7d5443811b66071997544bcfdd63f`。
+24 个纯 fake 检查不代替 OS/copy/VM/SSH 验证。原生 status 最新回读仍为 TASK-0065
+IMPLEMENTING、Missing `implementation_result`；TASK-0066 WAITING_FOR_SPEC_REVIEW、
+Missing `spec_approval`，两工作区 tracked 干净。既有 spec 请求仍待真实回复。
+
 ### 2026-10-05 验证环境隔离及资格 004 静审
 
 主检出原 Python 3.11 环境的 editable 安装指向主检出源码，而原生验证子进程会清除
@@ -91,7 +122,7 @@ I1 新请求实现树外目录，原资格作者独占新的可执行资格 cont
 
 | 项目 | 本轮工作及完成条件 | 当前状态 |
 | --- | --- | --- |
-| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；资格 003 首个控制失败，新请求诊断准备中，完整 V2 未启动 |
+| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；005 首个控制因事件形参冲突失败，新 006 准备中，完整 V2 未启动 |
 | 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | schema 002收益不足不采用；offline caller 002已完成，当前完整预算仍待实测 |
 | F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | BLOCKED，恢复方案核查中 |
 | 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | Windows success，POSIX queued/0 steps；Linux 停用约定已定位 |

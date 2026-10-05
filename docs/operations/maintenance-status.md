@@ -1,5 +1,20 @@
 # 维护收尾与待办
 
+## 2026-10-05 最新：资格 005 实际失败，新 006 修复准备
+
+005 经三路独立静审后只执行一次，完成工具返回 1、控制器 exit 2。首个 normal
+控制的成功事件记录发生 `kind` 形参重复绑定 TypeError；其局部 `PASS_CONTROL_ONLY`
+提议没有成为资格验收。后续 timeout/crash、34 个必需生产 case 和完整 V2 未启动。
+7128 固定输入和 27 prepared 文件的前后 snapshot 字节相同，25 实际原件保持。
+失败控制的 scoped resource receipt 报告已知句柄单次关闭，不据此接受整体资格。
+005 原件和单次请求封存，新 006 只修事件函数形参，生产源码与原测试保持。
+详见[实际退出、证据位置及修复归属](backlog-execution-2026-10-04.md#2026-10-05-单次资格-005-失败事件参数冲突另立修复)。
+
+I1 revision009 独立差异审查通过准备合同，仍无 copy/VM/SSH 执行。最新 native status
+为 TASK-0065 IMPLEMENTING、Missing `implementation_result`；TASK-0066
+WAITING_FOR_SPEC_REVIEW、Missing `spec_approval`。两工作区 tracked 干净，TASK-0066
+已提出的规格批准请求仍待真实回复，七项完成条件及 active 目标保持。
+
 ## 2026-10-05 最新：资格 004 静审未通过，验证环境已隔离
 
 TASK-0065 专用 Python 3.11 环境已沿用原 27 个依赖版本正常安装，最小环境变量下的
