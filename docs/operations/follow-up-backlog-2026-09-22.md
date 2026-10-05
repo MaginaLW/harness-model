@@ -1,5 +1,19 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-06 当前核定：TASK-0064 已记录范围外依赖阻断
+
+原失败诊断确认 unit check 通过，真实三失败为 regression/coverage_xml/integration；
+两个超时的瓶颈 UNKNOWN，coverage 明确反例属于冻结 GitContext-only 范围外的
+ProcessRunner 合同。原恢复理由错误名称已追加勘误，原事件及封存原件不改写。
+native new_dependencies / BLOCK 追加实际成功，事件22及提交 `b631ecb` 已完成；
+当前 BLOCKED / Missing `block_resolution`，旧 spec approvals current、evidence
+stale，没有重验或改变全部检查、预算和85%/90%。F 的范围阻断也仍未解除。
+
+文档候选 `aa37f12` 的独立审查只核定 source `e214999`，219相对目标有效；
+不覆盖后续本任务记录，亦不等同发布治理/required CI/远端动作准入。Task65
+Action003 revision002 具体批准与发布 A/B 方向问题仍待答。七项原完整完成
+要求和目标 active 保持，详见[实际诊断与依赖追加](backlog-execution-2026-10-04.md#2026-10-06-task-0064-范围外依赖已原生阻断)。
+
 ## 2026-10-06 当前核定：TASK-0064 的真实恢复入口已完成
 
 TASK-0064 native begin/status 均实际返回 0，事件21和提交 `364aa16` 已登记；

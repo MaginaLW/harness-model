@@ -1,5 +1,20 @@
 # 维护收尾与待办
 
+## 2026-10-06 最新：原失败诊断与依赖阻断已登记
+
+TASK-0064 的原 unit check 通过；真实三失败是 regression、coverage_xml、
+integration。两个超时瓶颈仍 UNKNOWN，coverage 预算内 exit1 的明确失败节点
+属于范围外 ProcessRunner；sentinel 的写入时刻和返回后存活未知。勘误按 OwnTask
+新增，旧事件和封存报告不重写。native new_dependencies 阻断实际成功，事件22
+与提交 `b631ecb` 已完成；当前 BLOCKED / Missing `block_resolution`，旧批准
+current、失败 evidence stale，原预算/检查/85%/90%及 SPENT 保留。
+
+文档候选 `aa37f12` 获独立 GO_LOCAL_DOCS_CANDIDATE_ONLY、必要 Finding0，
+219相对目标有效、工作区 clean；仅覆盖 source `e214999`，不含上述 TASK-0064
+后继。完整 required CI、发布治理及远端动作仍未进行，发布方向问题和 Task65
+新具体批准尚待答复；七项目标 active。详见
+[诊断、原生阻断与候选核定](backlog-execution-2026-10-04.md#2026-10-06-task-0064-范围外依赖已原生阻断)。
+
 ## 2026-10-06 最新：TASK-0064 恢复入口已登记
 
 真实 native begin 返回 0并追加事件21，原状态由 FAILED 进入 IMPLEMENTING；

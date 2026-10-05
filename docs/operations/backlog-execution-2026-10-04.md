@@ -1,5 +1,49 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-06 TASK-0064 范围外依赖已原生阻断
+
+同冻结范围的必要薄核已读取原 run `run-20261003T153150710903Z` 的准确三份失败
+stdout。unit_tests 实际 passed / exit0 / 126816ms；regression_tests 900301ms
+与 integration 600434ms 都为 RUNNER_TIMEOUT，无最终摘要或明确慢节点，瓶颈
+UNKNOWN。coverage_xml 在1200秒预算内 exit1 / 1118810ms，摘要为1 failed、
+3036 passed、1 skipped；唯一最终失败为 ProcessRunner 的 child-tree sentinel
+断言。日志仅证明最终文件存在，写入时刻、taskkill 结果与返回后存活均 UNKNOWN。
+
+fixture 直接调用 run_execution，没有调用 GitContext；当前没有已证可在冻结的
+GitContext-only 源码内诚实修复的问题。ProcessRunner 合同需要独立治理与真实
+资格，超出旧 scope，且其后继集成不保证两个预算超时同时解决。诊断报告
+`task0064-frozen-failure-diagnosis-001/REPORT.md` SHA256
+`bae95e1a39123b83873afb101e6ad67d5d048b8e7fa1c0fe5126d653b85c6c9a`，
+九件 manifest SHA256
+`dea16a7e5ae5ca9fd11633a6f4825515554f43cc7fdb4ac9cd3fc56670582754`。
+十个选定输入两次 SHA/stat 稳定，未执行测试、fixture、collector、helper 或 native。
+
+作者封存并停止 ledger 读写后，root 新增 OwnTask 勘误和依赖说明，保留原 event21
+及两个已封存报告的错误名称。真实工具 `802281` native escalate --to BLOCK /
+new_dependencies 返回0，UTC `2026-10-05T17:40:22Z` 追加 task_blocked 事件22。
+此前15083字节日志前缀逐字节保持；七个保护输入不变，源码/spec/classification/
+旧批准/failed evidence/SPENT 均未改。复核后只提交本任务 state/updated_at、新
+事件及补充文档，提交 `b631ecb`。最终 status 工具 `13e965` 返回0：BLOCKED /
+Missing `block_resolution`，subject `50777d64` / observed HEAD `b631ecb`，
+classification fresh、approvals current、evidence stale；status 展示原 REVIEW/V2，
+新事件请求 route BLOCK。未重复批准旧 spec，未重验、消费新动作或降低原预算/阈值。
+
+实际 root sibling `task0064-native-dependency-escalation-001/report.json` SHA256
+`7dc58abc93372214d886a6b1aad9f7dea2bfd5a40bf9e2c743e59532a2378268`；
+八件 payload manifest SHA256
+`14366f23376c4f03fd716414f45304e6686ccb940037b5e67cdfedb47dc0aece`。
+这是必要的范围/依赖治理追加，不能作为 TASK-0064 完整验收或预算问题已解决。
+
+本地文档候选 `aa37f12` 的非作者审查已封存：GO_LOCAL_DOCS_CANDIDATE_ONLY、
+必要 Finding0，只覆盖 source cutoff `e214999`。四文档131行新增/0删除、另十一
+committed blob 不变，三处链接修复保留；十八个选定输入两次 raw SHA/精确 stat
+稳定，219个相对目标有效、whitespace/portable/配置祖先排除通过，候选 clean。
+报告 `publication-current-doc-independent-review-002/report.json` SHA256
+`ec40dbe361d2a6267b8ebb2131d5d198496a93d06443945a0fc4da65557635d7`；
+该审查不含后续 TASK-0064 恢复、阻断、勘误或本节追加，亦非 required CI、
+Task67、远端 push/merge 的准入。发布路径方向问题和 Task65 Action003 revision002
+具体批准仍待回复，七项目标保持 active。
+
 ## 2026-10-06 TASK-0064 原生机械恢复与发布基线核查
 
 两条恢复流分别在真实 restored/src 上仅调用一次 status/scope/Gate。F/TASK-0063
