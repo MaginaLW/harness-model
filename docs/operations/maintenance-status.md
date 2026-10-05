@@ -1,5 +1,22 @@
 # 维护收尾与待办
 
+## 2026-10-05 当前：资格 003 失败，TASK-0066 待规格批准
+
+TASK-0065 原生 status 仍为 IMPLEMENTING / REVIEW / V2，classification fresh、
+既有 spec approval current、Missing `implementation_result`，工作区干净。资格 003
+实际单次控制器 exit 2：首个 outer-normal 的 self birth 检查失败，接收端 ledger
+缺失保持 UNKNOWN。timeout/crash 控制及 28 个生产 case 未启动，原 timeout 节点和
+完整 V2 未运行。1602 冻结输入前后匹配；失败、原件和本次单次请求保留，不重试。
+venv redirector 新建解释器的协议假设缺口已独立定位，另备新请求，生产源码未改。
+
+TASK-0066 已实际 classify/freeze、记录正式非作者 Design APPROVE并提交 `434bf68`。
+原生状态为 WAITING_FOR_SPEC_REVIEW / REVIEW / V2，Missing `spec_approval`；冻结
+spec SHA256 为 `dcd67fa8220ad10a4c0cc62c5975a5c4f2cfe77b523e9c714b5fe21e4f5eec7f`。
+已请求该 spec 决定，未收到新的批准；cold copy/VM/SSH/服务/CI 仍未授权或执行。
+既有 TASK-0065 spec 批准不代替新 task 决定。实际证据位置及准入基线纠正见
+[执行记录](backlog-execution-2026-10-04.md#2026-10-05-单次真实资格失败及-i1-原生准入)。
+七项完整完成条件保留，目标 active，旧 FAILED/SPENT 不改写。
+
 ## 2026-10-05 I1 只读身份取得及公开样本盘点
 
 I1 revision004 metadata-only probe 经独立静审后仅一次实际执行，exit 0、stderr 空。

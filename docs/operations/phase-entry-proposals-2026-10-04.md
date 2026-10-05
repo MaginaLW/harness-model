@@ -4,7 +4,8 @@
 
 本文件承接[当前待办第 5、6 项](follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)，
 给出 I1/I2、E5、I5 / Phase 3 和 Phase 4 的具体可审查材料。它是准备提案，不是治理
-Task、冻结规格、Policy、采集许可或执行计划。数值阈值、观察窗口、保留期、预算与具体
+Task、冻结规格、Policy、采集许可或执行计划。其后的 I1 原生 Task 与本提案分开，见下节。
+数值阈值、观察窗口、保留期、预算与具体
 执行资产仍待决定；不以提案完成宣布进入门已经满足。
 
 权威入口为[独立启动条件](next-stage-start-conditions-2026-10-02.md)、
@@ -13,6 +14,19 @@ Task、冻结规格、Policy、采集许可或执行计划。数值阈值、观�
 与当前原生 Policy。既有任务、批准、取消、失败原件和已消费动作保持追加式保留。
 
 ## 1. 当前需求与证据矩阵
+
+### I1 原生准备进展（2026-10-05）
+
+固定既有 guest 的隔离冷启动已另建 TASK-0066，实际 classify/freeze 并取得非作者
+正式 Design APPROVE，阶段提交 `434bf68`。冻结 spec SHA256 为
+`dcd67fa8220ad10a4c0cc62c5975a5c4f2cfe77b523e9c714b5fe21e4f5eec7f`；native
+WAITING_FOR_SPEC_REVIEW / REVIEW / V2，Missing `spec_approval`。规格决定请求尚未
+回答；独立静审通过的 revision007只准备固定 cold copy、安全描述符、前后 identity、
+新鲜 host gate、固定 WHPX/网络/资源及单次 BOOT 合同，不授权实际复制或 VM/SSH。
+完整 native 源码投影、当前版本事实和短窗口单次动作仍需填实并独立批准，不能使用
+过期 metadata-only 窗口。密钥/token不直接读取或导出；将来固定 SSH client 消费
+已有 key reference/agent身份须包含在具体 authentication 动作范围。
+这不是服务交接、双通道 CI 完成、I2 新目标或 Phase 3/4 进入证据。
 
 ### 新增公开样本盘点（2026-10-05，只绑定该快照）
 

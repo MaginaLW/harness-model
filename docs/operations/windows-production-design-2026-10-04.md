@@ -1,5 +1,20 @@
 # Windows 超时处理生产设计提案：2026-10-04
 
+## 2026-10-05 资格 003 的实际失败
+
+三路独立静审允许一次固定资格请求；实际执行在首个 `outer-normal` 控制停止，
+exit 2，原因先为 worker self birth mismatch，随后接收端 transfer ledger absent、
+登记保持 UNKNOWN。没有进入 timeout/crash 控制或任何生产 case，不代表 backend
+已取得 OS 资格，也未运行原 timeout 节点或完整 V2。包含五候选的 1602 固定输入前后
+匹配，失败原件保留，请求不重试。
+
+独立诊断发现 Windows venv redirector 新建解释器进程，固定 CreateProcess 返回的
+launcher birth 不能直接等同脚本 self birth；原整数传输无精度丢失，该 worker 实际
+self 值没有记录。修复属于资格框架，新的执行解释器、依赖及启动环境须明确冻结，
+保持实际 birth 检查，并补测生产 runner 启动原 venv redirector 的进程树语义。
+源码不因该诊断改变。[实际原件索引与并发归属](backlog-execution-2026-10-04.md#2026-10-05-单次真实资格失败及-i1-原生准入)
+给出可恢复证据位置；资格成功后才推进具体单次 mutation 批准和完整 native V2。
+
 ## 2026-10-05 已实现的本地阶段
 
 两 src 已提交 `e64f6aa`，三 tests 独立提交 `4f23e5c`，native subject 为 `4f23e5c`。
@@ -11,7 +26,7 @@ timeout wait/query 未知及 close 失败保留原 owner，正常 accounting 查
 独立 root 111 个 pure fake 测试通过/0.58 秒，局部 Ruff/format/strict mypy/whitespace
 通过；五文件固定，原断言、真实 timeout 节点及原时序保持。sync 和本地证据已提交
 `8aefd27`，仍为 IMPLEMENTING。源码与 mock 控制流已验证，真实 Windows 资格和完整 V2
-尚未运行。console stdin 等价仍未测；无 crash-atomic 创建/KOC，own inheritance lock
+在该实施阶段尚未运行。console stdin 等价仍未测；无 crash-atomic 创建/KOC，own inheritance lock
 只隔离本模块调用。独立 outer 的关闭再试和 deadline 缺口须在资格执行前修正。
 
 本提案承接[私有候选及其限制](windows-private-timeout-repair-2026-10-04.md)。原封存两份

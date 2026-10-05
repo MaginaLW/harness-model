@@ -11,11 +11,44 @@
 `block_resolution`。两者 classification fresh、approvals current、evidence stale。
 TASK-0064 未跟踪的原生 `evidence.json` 保留，不移动、不入库；原失败及 SPENT action 不改写。
 
-截至本地 2026-10-05，TASK-0065 已有源码提交 `e64f6aa`、独立测试提交 `4f23e5c`
+资格执行前的本地实施阶段，TASK-0065 已有源码提交 `e64f6aa`、独立测试提交 `4f23e5c`
 及 sync/本地证据提交 `8aefd27`。root 独立 111 个纯 fake 测试/0.58 秒、Ruff、format、
-两源码 strict mypy 和 whitespace 通过，五文件固定字节保持。真实资格尚未执行，
+两源码 strict mypy 和 whitespace 通过，五文件固定字节保持。当时真实资格尚未执行，
 独立 outer 预审的关闭再试与 deadline 缺口正在新版本修复，完整 V2/动作批准仍未完成。
 回读类型错误原件及另立诊断均保留，不重写检查输出。
+
+### 2026-10-05 单次真实资格失败及 I1 原生准入
+
+资格包 003 经三路独立静审后仅一次实际执行，UTC
+`2026-10-05T01:24:01.124Z–01:24:02.253Z`，控制器 exit 2。第一个 `outer-normal`
+控制进程在 self birth 检查失败；接收端随后缺 transfer acquisition ledger，保持
+`UNKNOWN_ACQUISITION_REGISTRY / complete=false`。timeout/crash 控制和 28 个生产
+case 均未启动，原 timeout 节点没有执行。失败清理原件报告仅自有 outer Job 一次
+terminate，parent signaled、active processes 0、各 close 单次；空剩余句柄列表不能
+替代完整登记证明。前后 1602 个固定输入匹配，本次请求不重试，完整 V2 未启动。
+
+root 原件目录为 `${RUNTIME_ROOT}/harness-model-backlog-20261004-001/`
+`windows-qualification-root-execution-003/`；actual case 原件在同根
+`windows-qualification-execution-003/`。root 新增事实/原件哈希索引为
+`windows-qualification-root-failure-diagnosis-003/facts-and-original-hashes.json`，
+SHA256 `13c9a71f4ae3af27d95dbd13a2efaec81d084c94404b4fd3eff3cf88351a4a8f`。
+独立诊断确认 raw JSON 整数精确；venv redirector 会新建执行解释器，raw launcher birth
+与脚本 self birth 等同的框架假设不可接受。该 worker 实际 self 值未写入原件，保持
+未知；这不是生产候选故障或预算耗尽的证据。新请求另行冻结，不移除出生身份检查。
+
+该诊断阶段启用 **3 名 sub-agent** 分别核控制器、资源终态和 case 身份协议；作者
+另安排 **2 名研究 sub-agent** 核官方 launcher 与 ABI。独立预算测量准备和 I1 admission
+投影准备各启用 **1 名 sub-agent**，分别独占新的私有叶目录；主 agent 负责原件索引、
+状态整合和文档。新资格修复 → 冻结 → 独立审查 → 单次真实资格 → 原生完整 V2 串行。
+
+TASK-0066 已实际 classify/freeze 并记录非作者正式 Design Review APPROVE，阶段提交
+`434bf68`。冻结 spec SHA256 为
+`dcd67fa8220ad10a4c0cc62c5975a5c4f2cfe77b523e9c714b5fe21e4f5eec7f`；
+native 为 WAITING_FOR_SPEC_REVIEW / REVIEW / V2，分类 fresh，Missing `spec_approval`。
+spec 批准请求已提出但尚未收到回答；cold copy、VM、SSH、服务和 CI 动作未获批或执行。
+原准备提交 `826d063` 因 native 要求 classify 时 HEAD 等于初始 base，已通过保留 durable
+ref 后 soft reset 恢复准入基线，工作文件保留；修正记录在自身 preparation 目录，
+旧提交可恢复。没有改写既有 F/TASK-0064 或失败证据。
 
 并行追加的独立工作为 **3 名 sub-agent**：offline 诊断静审、I1 边界静审、外仓实时
 只读刷新；与原五个职责分离、没有共享写入。静审结束后，原 Windows 作者改为独占
@@ -26,11 +59,11 @@ I1 新请求实现树外目录，原资格作者独占新的可执行资格 cont
 
 | 项目 | 本轮工作及完成条件 | 当前状态 |
 | --- | --- | --- |
-| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | 安全基线已提交，TASK-0065 已获真实 spec批准并 begin，实施中 |
+| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；资格 003 首个控制失败，新请求诊断准备中，完整 V2 未启动 |
 | 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | schema 002收益不足不采用；offline caller 002已完成，当前完整预算仍待实测 |
 | F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | BLOCKED，恢复方案核查中 |
 | 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | Windows success，POSIX queued/0 steps；Linux 停用约定已定位 |
-| I1 / I2 | 从实际使用缺口选择生命周期或可信目标；按幂等、权限、完整等价验证及可执行恢复条件准入 | TASK-0066 NEW 草稿；7 输入 opened identity 已实际只读取得，VM/动作未批准或执行；I2 新目标未选 |
+| I1 / I2 | 从实际使用缺口选择生命周期或可信目标；按幂等、权限、完整等价验证及可执行恢复条件准入 | TASK-0066 正式 Design APPROVE，WAITING_FOR_SPEC_REVIEW；Missing spec_approval，VM/动作未批准或执行；I2 新目标未选 |
 | E5 / I5 / Phase 3 / Phase 4 | 分别形成最小需求和样本/隐私/度量/真实 V3 边界材料；按独立进入门选择方向，缺失不补造 | 61 公开 task 样本盘点及缺失规则草案已备，真实进入门未满足，实施未启动 |
 | 远端发布 | 核对累计候选及本机内容，选择排除配置 `52474d9` 的干净基线；审核和准确 required CI 后按具体动作授权发布 | 发布清单核查中，未写远端 |
 

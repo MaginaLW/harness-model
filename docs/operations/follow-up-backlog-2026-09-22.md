@@ -1,5 +1,18 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-05 当前核定：资格 003 失败，I1 正式规格待批准
+
+Windows 生产资格 003 仅一次实际执行，在第一个 outer-normal 控制的 birth 检查
+失败，控制器 exit 2，接收端缺 ledger 保持 UNKNOWN；尚未开始 28 个生产 case。
+1602 输入前后保持，原 timeout 节点和完整 V2 未运行。本次请求不重试；venv launcher
+与真正解释器的出生身份假设已定位，新的资格环境另行冻结和审查，源码保持不变。
+
+TASK-0066 已完成实际 classify/freeze、正式 Design APPROVE、阶段提交 `434bf68`；
+WAITING_FOR_SPEC_REVIEW / REVIEW / V2，Missing `spec_approval`。该冻结 spec 的
+批准请求待回答，cold copy/VM/SSH/服务/CI 尚未获批或执行。I2/E5 新需求未选，其他
+七项完整进入/验证/发布条件均继续保留，目标 active。原件索引、并行工作和准确范围
+见[本轮执行](backlog-execution-2026-10-04.md#2026-10-05-单次真实资格失败及-i1-原生准入)。
+
 ## 2026-10-05 实施进展
 
 TASK-0065 源码 `e64f6aa`、独立安全测试 `4f23e5c` 和本地证据 `8aefd27` 已提交。
