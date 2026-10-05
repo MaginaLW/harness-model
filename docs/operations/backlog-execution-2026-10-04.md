@@ -1,5 +1,40 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-06 诊断 007 读回与契约根因封存
+
+入口报告 `budget-current-c7-actual-entry-review-007/report.json` SHA256
+`0ebc0345d42e63b7f134ba07a18a0066b9e8b89e6ea47b4a5f3b7a6e2d30b220`，
+结论 `ACTUAL_3NODE_MEASUREMENT_PASS_FROZEN_CONSUMER_FAIL_NO_ACCEPTANCE`。
+23 个必要原件的两次 SHA 与精确 metadata 稳定；实际 190 个 intent 分为
+142 inherited / 48 fixed optional-locks，均为预启动意图。root capture 结束
+上界 15.3726795 秒；没有重扫全部闭包或运行 reviewed body。
+
+生命周期报告 `budget-current-c7-actual-lifecycle-review-007/report.json` SHA256
+`0560d5046fb8c4eb2f9f42ec7d6bc1ee7132d6f8f30ca89be024157f5058458a`。
+36 个选定原件两读 SHA/stat 稳定；own Job parent signaled、Active0、
+Terminate 次数 0、六个 native handle 各 close_calls=1；transfer target356
+与 receiver572 的身份、关闭及 token 已记录。root 两路 copy_completed=true、
+各 close1/dispose1。2671 owner / 8 transfer 边界非 late；原始 file 关闭次数和
+首次 cleanup 独立采样仍未知，不能作为全 OS 回收证明。consumer 指定正面
+输出前后仍不存在；原完整命令没有存入 returned tool result 的限制保持。
+
+独立源/数据报告 `budget-current-c7-consumer-auxiliary-mismatch-001/report.json`
+SHA256 `364d721d32ad271d7f069fba75713b12fe51df9e9011f322f73d4d4259a98bcd`。
+10 固定原件两读稳定；PS 主动生成五条两字段 hook 事实，资格声明每条另有
+`interpreter_id`、`purpose`。四个 auxiliary key、outer absence16、操作目录和
+`.pth` 数组均相同；唯一已确认不相等条件是完整 hook 字典列表，不是 raw
+startup 输入缺失、嵌套或数组折叠。所保存后续数据未发现另一必要冲突，当前
+完整闭包/finish 读取仍未知，不将保存 equality 当作新鲜验证。
+
+root actual007 的五件实际工具及失败 payload 在两次 SHA/PS metadata 稳定后
+封存，manifest SHA256 `f45a4ebd7f9782a711e0be501471da86b2775c6e5638e8f61508fad3cdc1011b`。
+新的 qualified 后处理仅准备独立副本与严格操作投影，保留原资格 SHA、全部
+其他门和原 consumer 失败；原 READY、工具、consumer 和正面输出位置均不改。
+实际消费须另行冻结 newself、一次范围、原失败绑定并经过独立审查。本阶段尚未
+运行后继 consumer、counter、native 或清理。原完整 V2 失败 archive 再核 SHA
+仍为 `062c5f6770a207d22bebe7ad58d29d73341a312d4a49f03d10b82a6e0e0e1b8b`；
+Task65 Action003 revision002 仍待具体批准，七项目标 active。
+
 ## 2026-10-06 诊断 007 完成与冻结 consumer 拒绝
 
 source005 的改变仅限定当前 `_read_only_git` 源码调用链、四组固定只读 Git
