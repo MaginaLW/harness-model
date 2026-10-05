@@ -1,5 +1,20 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-06 本地文档候选独立核定
+
+候选 `51563af` / source cutoff `bc5de09` 的独立报告为
+`GO_LOCAL_DOCS_CANDIDATE_ONLY`、必要 Finding 0；十八个选定文档/原件两次
+SHA/精确 stat 稳定，HEAD/status/index 稳定，累计仍只原十五文档。新五文档
+与冻结源除三处已保存链接修复外完全相同，另十 committed blob 未变；215
+相对文件链接有效、路径/身份/whitespace 检查通过，排除配置祖先实际 exit 1。
+旧工作副本 CRLF 与 Git blob LF 分别保存 SHA，仅以内存视图比较，未改文件字节；
+审查者自身初步断言错误与纠正记录保留，不被写成候选或 native 失败。
+独立报告 `publication-current-doc-independent-review-001/report.json` SHA256
+`944383f1df06c0556b255d76a1f8a861daacfbe03a626a66608578338a774f78`。
+此核定不覆盖主目录之后的 qualified 实际事实追加，不是 required CI、原生发布
+Task67、推送、合并或部署授权。尚无远端写入；七项目标保持 active，Task65
+Action003 revision002 的具体新清理动作批准仍未回复。
+
 ## 2026-10-06 限定后处理单次完成，原失败保持
 
 新的后处理副本仅按封存两个 hunk 生成，逆向逐字节还原为原 `8036afc7…`。
