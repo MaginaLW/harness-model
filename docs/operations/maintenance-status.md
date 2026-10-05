@@ -1,5 +1,46 @@
 # 维护收尾与待办
 
+## 2026-10-05 最新：单次预算诊断失败，原件保留
+
+最终独立审查后的 request `94440be` 已仅执行一次；实际工具 `191d3e` 和 root 观察的
+子进程均退出 1。pytest logging 默认打开被严格外写 audit 拒绝，结果没有测得三个
+节点、九个 phase 或 Git intent。首尾输入 SHA 相同，错误位于 native stdout；
+不将这项诊断失败写成生产错误或预算因果证明，不重跑原请求。
+
+root stream copy-completion 仍为 false / UNKNOWN；目标 Job 收尾另做独立核定。
+归一化实际工具原件 `budget-current-c7-root-actual-failure-001/root-real-tool-receipt.json`
+SHA256 `c24c88d4db53eb4d27430921a95dc0c61f88d93082d08f2eac95aa05ad75e62d`。
+TASK-0065 完整 V2 尚未启动，Action002 未消费。详见
+[单次失败与接续](backlog-execution-2026-10-04.md#2026-10-05-单次预算诊断实际失败)。
+
+## 2026-10-05 最新：历史资产已恢复，本地准备候选已封存
+
+F 历史检出固定在 `166fe313`，75 个封存原件核验、35 个 ignored 日志以 CreateNew
+恢复，2039 个 tracked 文件和原引用未变。native status / scope / validate / gate
+返回 `0 / 1 / 0 / 2`；TASK-0063 仍 BLOCKED / Missing `block_resolution`，五测试路径
+超范围，旧 FAILED 及当前事件 25 保留。报告 `f-historical-workspace-restoration-001/report.json`
+SHA256 `4eb6650e0053ae5fdca21536a274f2718f37483aa48489f6162dc33de62b8973`。
+
+TASK-0064 历史检出固定在 `ef5943b`，61 个封存原生文件核验，35 个 ignored 日志及
+一个明确获准的未跟踪 `evidence.json` 恢复，2065 个 tracked 文件和原引用未变。
+native 四项返回 `0 / 0 / 0 / 2`；仍 FAILED / Missing `retry_reason_or_escalation`，
+原 11/14 结果、三项失败及 SPENT 行动保留。dirty=true 仅为原生 `evidence.json`，
+不暂存、不入库。报告 `task0064-historical-workspace-restoration-001/report.json`
+SHA256 `5c9b91667762d9452d3844d1ea425253232037521279c13a6f2b6512c19459f8`。
+两项恢复不代表任务验收或新 V2；原件、事件与审批未改写。
+
+TASK-0065 Action002 和 TASK-0066 既有规格已真实批准。TASK-0066 的可移植实施准备
+提交 `e549500`，当前 IMPLEMENTING / Missing `implementation_result`；guest copy、
+VM、SSH 或服务动作仍没有具体执行批准。完整 V2、mutation 与行动消费尚未启动。
+
+干净基线上的本地 docs-only 候选 `bbc1a25` 仅含 15 文档，198 个相对文件目标存在，
+独立审查为 `GO_LOCAL_DOCS_CANDIDATE_ONLY`；报告
+`publication-docs-only-actual-review-001/report.json` SHA256
+`1cd2ff8bebd4b7e3696cea9ec3895b7beddd98ad70c28179e26fa805036e8b4a`。
+尚无 TASK-0067、完整 CI 或远端写入；此审查不自动覆盖随后主文档追加，也不构成
+发布验收。七项目标仍 active；下列旧“待批准”表述保留其记录窗口。详见
+[本轮恢复与当前七项状态](backlog-execution-2026-10-04.md#2026-10-05-历史资产恢复与本地准备封存)。
+
 ## 2026-10-05 最新：具体行动和 I1 规格已批准
 
 所有者新回复后，native 已分别登记 TASK-0065 的具体 Action002（含该次限定临时

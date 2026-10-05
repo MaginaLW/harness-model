@@ -17,6 +17,54 @@ TASK-0064 未跟踪的原生 `evidence.json` 保留，不移动、不入库；�
 独立 outer 预审的关闭再试与 deadline 缺口正在新版本修复，完整 V2/动作批准仍未完成。
 回读类型错误原件及另立诊断均保留，不重写检查输出。
 
+### 2026-10-05 单次预算诊断实际失败
+
+最终两路独立审查后，request `94440be` 仅执行一次；真实工具 `191d3e` 退出 1，
+root 观察的子进程也退出 1。pytest 配置 logging 时，其默认文件打开被严格外写 audit
+拒绝；错误实际位于 native stdout，stderr 为空。结果为 INCOMPLETE_OR_FAILED，
+三个节点、九个 phase 和 Git intent 均未测得，不能推断生产错误或完整预算根因。
+首尾输入 SHA 相同，原请求、错误与失败终态保留，不重跑这次请求。
+
+root copy-completion 标志仍为 false，保留 UNKNOWN，不因已有文件哈希或 close 次数
+改为成功；目标 Job 的 negative 收尾回执另做独立核定。实际工具归一化原件位于
+`budget-current-c7-root-actual-failure-001/root-real-tool-receipt.json`，SHA256
+`c24c88d4db53eb4d27430921a95dc0c61f88d93082d08f2eac95aa05ad75e62d`。
+TASK-0065 完整 V2 尚未启动，Action002 仍未消费；诊断失败不代替该任务的原生检查。
+
+### 2026-10-05 历史资产恢复与本地准备封存
+
+F 历史检出已从真实保留提交 `166fe313` 恢复原分支上下文，75 个封存原件全部核验，
+35 个缺失 ignored 日志以 CreateNew 恢复，2039 个 tracked 文件和保留引用未变。
+自己的源码下，native status / scope / validate / gate 实际返回码为 `0 / 1 / 0 / 2`；
+TASK-0063 仍为 BLOCKED / REVIEW / V2，Missing `block_resolution`，五个测试文件仍
+超出冻结范围。封存快照止于 FAILED 事件 24，当前 BLOCKED 事件 25 保留；CRLF/LF
+只用于比较视图，不改写原件。恢复报告为 `f-historical-workspace-restoration-001/report.json`，
+SHA256 `4eb6650e0053ae5fdca21536a274f2718f37483aa48489f6162dc33de62b8973`。
+
+TASK-0064 历史检出已从真实保留提交 `ef5943b` 恢复原分支上下文，两份原始 JSONL
+仅在内存解码，61 个原生文件均与封存清单一致；25 个 tracked 原件保持当前版本，
+35 个 ignored 日志及一个明确获准的未跟踪 `evidence.json` 以 CreateNew 恢复。
+2065 个 tracked 文件和原引用未变，native 四项实际返回码为 `0 / 0 / 0 / 2`。
+任务仍为 FAILED / REVIEW / V2，Missing `retry_reason_or_escalation`；dirty=true 仅来自
+`.ai/tasks/TASK-0064/evidence.json`，该原生生成物不暂存、不入库。原事件 20、11/14
+检查结果、回归/覆盖率/集成三项失败及 SPENT 行动保留。报告为
+`task0064-historical-workspace-restoration-001/report.json`，SHA256
+`5c9b91667762d9452d3844d1ea425253232037521279c13a6f2b6512c19459f8`。
+两次恢复只证明历史资产可读回，不是新 V2 或任务验收；未 resolve、重跑或复用旧行动。
+
+TASK-0066 的既有规格已真实批准，可移植实施准备记录已提交 `e549500`，当前
+IMPLEMENTING，Missing `implementation_result`。该记录没有授权 guest copy、VM、SSH
+或服务动作；具体单次外部行动及真实准入仍未完成。TASK-0065 的 Action002 也已按
+原绑定批准，完整 V2、mutation 与行动消费尚未启动，原预算与阈值保持。
+
+独立干净基线上的本地 docs-only 候选 `bbc1a25` 已提交，仅含 15 份文档；198 个相对
+文件目标存在性检查通过，独立审查为 `GO_LOCAL_DOCS_CANDIDATE_ONLY`，报告
+`publication-docs-only-actual-review-001/report.json` SHA256
+`1cd2ff8bebd4b7e3696cea9ec3895b7beddd98ad70c28179e26fa805036e8b4a`。
+TASK-0067 未创建、完整 CI 未运行、远端未写入；本地文档审查不构成发布验收。
+该审查只绑定 `bbc1a25`，不自动覆盖随后主文档的追加。以下章节保留各自历史窗口，
+当前七项状态以本节及下表为准，持续目标仍 active。
+
 ### 2026-10-05 实际批准登记与准备推进
 
 所有者新回复“批准前面的任务”后，先实际回读两个 native status：TASK-0065
@@ -232,13 +280,13 @@ I1 新请求实现树外目录，原资格作者独占新的可执行资格 cont
 
 | 项目 | 本轮工作及完成条件 | 当前状态 |
 | --- | --- | --- |
-| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；007 必需 34 项及三个控制限定接纳，两 console 未测得；具体 mutation 提案待批准，完整 V2 未启动 |
-| 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | schema 002收益不足不采用；offline caller 002已完成，当前完整预算仍待实测 |
-| F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | BLOCKED，恢复方案核查中 |
+| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；007 必需 34 项及三个控制限定接纳，两 console 未测得；Action002 已批准且未消费，完整 V2 未启动 |
+| 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | 61 个原生资产核验、36 个缺失原件已恢复；仍 FAILED / Missing retry_reason_or_escalation；schema 002 不采用，当前完整预算仍待实测 |
+| F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | 75 个封存资产核验、35 个 ignored 日志已恢复；仍 BLOCKED / Missing block_resolution，五测试路径仍超范围 |
 | 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | Windows success，POSIX queued/0 steps；Linux 停用约定已定位 |
-| I1 / I2 | 从实际使用缺口选择生命周期或可信目标；按幂等、权限、完整等价验证及可执行恢复条件准入 | TASK-0066 正式 Design APPROVE，WAITING_FOR_SPEC_REVIEW；Missing spec_approval，VM/动作未批准或执行；I2 新目标未选 |
+| I1 / I2 | 从实际使用缺口选择生命周期或可信目标；按幂等、权限、完整等价验证及可执行恢复条件准入 | TASK-0066 规格已批准，e549500 实施准备已提交；IMPLEMENTING / Missing implementation_result，VM/动作未批准或执行；I2 新目标未选 |
 | E5 / I5 / Phase 3 / Phase 4 | 分别形成最小需求和样本/隐私/度量/真实 V3 边界材料；按独立进入门选择方向，缺失不补造 | 61 公开 task 样本盘点及缺失规则草案已备，真实进入门未满足，实施未启动 |
-| 远端发布 | 核对累计候选及本机内容，选择排除配置 `52474d9` 的干净基线；审核和准确 required CI 后按具体动作授权发布 | 发布清单核查中，未写远端 |
+| 远端发布 | 核对累计候选及本机内容，选择排除配置 `52474d9` 的干净基线；审核和准确 required CI 后按具体动作授权发布 | bbc1a25 本地 15-doc 候选独立 GO_LOCAL_DOCS_CANDIDATE_ONLY；198 相对目标存在，尚无 TASK-0067、完整 CI 或远端写入 |
 
 ## 并行与串行
 
