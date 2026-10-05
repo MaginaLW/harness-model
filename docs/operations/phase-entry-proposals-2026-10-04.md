@@ -1,5 +1,13 @@
 # 后继阶段需求与合同提案：2026-10-04
 
+## 2026-10-05 取消范围核查已完成
+
+同范围 TASK-0066 cold BOOT spec 不因 cancelled 自动撤销；009 没有 CI
+状态门，仍拒绝缺失的真实 admission/action。需要新 job/action 路径的是原
+attempt 的自然 CI 验收后继；runner/服务/CI 属于原 BOOT 非目标，须新的范围
+决定与准确动作批准。源码薄核没有业务执行，当前真实资格、NativeGit 和完整 V2 缺口保留。
+详见[本轮边界](backlog-execution-2026-10-04.md#2026-10-05-诊断-006-与取消范围核定)。
+
 ## 2026-10-05 当前事实：原排队 job 已取消
 
 八个固定官方 GET 与 root HTTP body 回读确认 run `37177002687` attempt 1 及

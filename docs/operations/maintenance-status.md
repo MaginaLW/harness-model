@@ -1,5 +1,18 @@
 # 维护收尾与待办
 
+## 2026-10-05 最新：诊断 006 实际失败，冷启动范围保留
+
+root 单次工具 `8968d5` / child 均 exit 1，原 QPC 观察的退出上界为
+5.4659501 秒；输入前后哈希相同。counter 仅产生首节点的三阶段记录，
+call FAILED，其余两节点未完成；41 条已记录 Git 预启动意图不能代表完整测量。
+原失败与新失败均保留，006 请求已消费；stream copy-completed=false 的未知
+及原生关闭证据须独立读回，尚无诊断验收或新完整 V2。
+
+已封存的取消范围薄核明确：cancelled 阻断原 attempt 的自然 CI 验收路径，
+不撤销 TASK-0066 的 cold BOOT spec；009 不读取 CI 状态，仍因真实 admission、
+生命周期资格等独立条件未就绪。TASK-0065 Action003 revision002 仍待具体批准。
+详见[本轮执行](backlog-execution-2026-10-04.md#2026-10-05-诊断-006-与取消范围核定)。
+
 ## 2026-10-05 最新：外仓原 POSIX run 已终态取消
 
 实际八 GET / root HTTP body 回读确认 r3s 原 run `37177002687` attempt 1 为

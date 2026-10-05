@@ -1,5 +1,37 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-05 诊断 006 与取消范围核定
+
+两个 READY 绑定薄审均为 `GO_FOR_ROOT_EXACT_ONCE_SCOPE_DECISION`、必要 Finding 0。
+root 根据已有普通本地诊断授权，单独记录一次范围决定；未将此记录当作人类
+native Action 批准。实际工具 `8968d5` 与 child 均 exit 1，UTC
+`2026-10-05T15:02:10.2650842Z–15:02:15.7229522Z` 的原 QPC 退出观察上界
+为 5.4659501 秒，原 60 秒 / 5 秒预留及输入前后哈希均保留。
+首节点 setup/call/teardown 为 PASS/FAIL/PASS，只有三阶段记录；其余两节点
+未完成。41 条已记录预启动意图、guards_equal=true 不构成九阶段成功或完整
+预算归因。真实 trace 是 child environment expansion 的审计拒绝；映射被
+pytest 截断，具体差异仍未知。固定源在 `_read_only_git` 添加
+`GIT_OPTIONAL_LOCKS=0`，仅作为与调用链一致的源码推断。
+
+负回执 `budget-current-c7-root-actual-006/root-real-tool-receipt.json` SHA256
+`8f57337f532108378e8a13b5217665fc446795fff2fbc51462cd5658ae188e88`；
+实际 completed tool 记录及 root/target 原件分别保留。root 的 stdout/stderr
+copy_completed=false、单次 close/dispose 及 retained UNKNOWN 不得改写为全回收。
+006 已消费且不重试，旧 005 同样保留为失败。后继源码兼容性仅准备提案；当前
+并行三名 sub-agent 分别读回实际入口、资源生命周期及准备精确环境提案，root
+同步本轮记录。下一次实际运行依赖归因、绑定与具体单次范围决定，串行执行。
+
+取消范围薄核仅只读六个固定输入，原哈希稳定，业务/VM/CI 调用为 0：
+`i1-cancelled-natural-job-scope-001/ASSESSMENT.md` SHA256
+`9b616b3a98d2f4c89997c5a63a0ea5e7833aa4d52488ae6c5b8f605c71cd91e0`。
+TASK-0066 spec `dcd67fa8220ad10a4c0cc62c5975a5c4f2cfe77b523e9c714b5fe21e4f5eec7f`
+明确一次 cold BOOT、排除 runner/接单/CI；009 未读取 queued/API 状态。因此
+cancelled 终结原 attempt 的自然 CI 验收，不能自动撤销 cold BOOT spec，亦不能
+声称 009 会按取消状态预拒绝。相同范围准备可继续；真实准入、生命周期资格、
+NativeGit 缺口和 TASK-0065 旧完整 V2 失败仍是独立未完成项。新的服务/runner/CI
+路线须明确范围及准确新 action，不能混入原 BOOT 规格或复活旧 cancelled job。
+TASK-0065 保持 IMPLEMENTING，Action003 revision002 待具体批准，七项目标 active。
+
 ## 2026-10-05 外仓原 POSIX job 已终态取消
 
 八个固定只读官方 GET 均成功，UTC 窗口为 14:18:11 至 14:18:14；报告

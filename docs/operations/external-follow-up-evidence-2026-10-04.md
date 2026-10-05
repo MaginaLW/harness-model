@@ -1,5 +1,17 @@
 # 外仓后继证据与剩余依赖：2026-10-04
 
+## 2026-10-05 取消只影响原自然 CI 路径
+
+六个固定源码/报告的独立薄核已封存；本核没有新增 GET、业务或 VM 调用。
+`i1-cancelled-natural-job-scope-001/ASSESSMENT.md` SHA256
+`9b616b3a98d2f4c89997c5a63a0ea5e7833aa4d52488ae6c5b8f605c71cd91e0`。
+TASK-0066 已批准 spec 将一次 cold BOOT 与 POSIX CI/服务交接明确区分；009
+没有 queued/API 状态门，并声明 tree_or_ci_acceptance=false。原 cancelled
+attempt 不可自然接取验收，但不会自动撤销同范围 BOOT spec，也不会成为 009
+新增的拒绝条件。BOOT 当前仍缺真实 admission、资格和准确单次 action；启用
+runner、服务交接或 CI 重跑须另外确定范围和动作。下列 14:18 实际窗口仍有效，
+取消原因保持未知。详见[完整边界](backlog-execution-2026-10-04.md#2026-10-05-诊断-006-与取消范围核定)。
+
 ## 2026-10-05 晚间只读刷新：原 POSIX job 已取消
 
 UTC `2026-10-05T14:18:11.645950Z–14:18:14.846072Z` 的八个固定官方 gh GET 均
