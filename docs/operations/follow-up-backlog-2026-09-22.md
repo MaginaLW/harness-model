@@ -1,5 +1,26 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-05 当前核定：完整 V2 实际失败，具体行动已消费
+
+TASK-0065 单次完整原生 V2 已完成，实际 run 为
+`run-20261005T125556290422Z`，UTC 12:55:55 至 13:14:02，用时约 1087 秒。
+原生 evidence 为 failed：14 项必需检查中 10 项通过，unit、regression、coverage_xml、
+integration 四项失败；CLI exit 0 不构成验收。固定五项 mutation 全 killed，Action002
+已消费且不可复用。同一次覆盖率数据的总覆盖率为 68.09%，低于 85%；diff coverage
+94%。原检查、断言、预算和 85%/90% 阈值保留，失败原件及全部事件持续保存。
+
+当前 native 为 FAILED / Missing `retry_reason_or_escalation`，Gate REJECT。实际日志
+确认至少一类 Windows 过长临时路径错误；其余断言与子进程失败按原 traceback 独立归因，
+尚不能全部解释为路径问题。下一步先完成最小环境修正的可审查方案，再按原生状态恢复；
+下一完整 V2 的具体单次 action 另行绑定，既有 spec 批准保持其实际有效性。
+
+TASK-0066 既有规格已批准、实施准备为 `e549500`。I1 root observer 与 NativeGit
+模型准备包已封存；同次 wrapper 身份协议和 Git 内部资源关闭接口仍有实际缺口，
+冷启动动作尚未准入。F/TASK-0063 与 TASK-0064 的历史资产已恢复，原 BLOCKED/
+FAILED、SPENT 保留；本地 15 文档发布候选 `bbc1a25` 的独立审查只覆盖该候选。
+七项目标仍 active，详细结果与后继依赖见[本轮执行](backlog-execution-2026-10-04.md)。
+下列窗口保留各自当时的状态。
+
 ## 2026-10-05 当前核定：资格 003 失败，I1 正式规格待批准
 
 Windows 生产资格 003 仅一次实际执行，在第一个 outer-normal 控制的 birth 检查

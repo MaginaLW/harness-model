@@ -1,5 +1,57 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-05 完整 V2 实际失败与行动消费
+
+独立 verifier `/root/case_review006` 对固定 subject `4f23e5c` 仅执行一次完整
+V2，实际 run `run-20261005T125556290422Z`。真实工具 `3b662e` / session 42364
+完成为 `61abbc` exit 0；child CLI exit 0。UTC 起止为
+`2026-10-05T12:55:55.651098Z` 至 `2026-10-05T13:14:02.565869Z`，用时
+1086.9394613 秒。原生 evidence 和 run archive 原字节 SHA256 同为
+`062c5f6770a207d22bebe7ad58d29d73341a312d4a49f03d10b82a6e0e0e1b8b`，结论 failed。
+
+| 实际检查 | 原生结果 | 实际测试摘要或限制 |
+| --- | --- | --- |
+| contract、scope、Ruff、format、smoke、mypy | 六项 passed | 保持原命令与阈值 |
+| unit | failed | 130 failed / 1949 passed / 6 skipped / 27 errors，126.39 秒 |
+| regression | failed | 647 failed / 2421 passed / 7 skipped / 65 errors，328.77 秒 |
+| coverage_xml | failed | 同上失败数量，406.65 秒；未触及 1200 秒预算 |
+| diff coverage | passed | 94%，门仍为 90% |
+| acceptance | passed | 9 passed，0.46 秒 |
+| integration | failed | 506 failed / 453 passed / 1 skipped / 31 errors，197.81 秒 |
+| targeted mutation、independent verifier | 两项 passed | 固定五项全部 killed，非作者 verifier 已真实执行 |
+
+14 项必需检查为 10 passed / 4 failed；十二项实际检查均正常返回且未超时。
+成功的变异结果及 CLI exit 0 不抵销四项 required FAIL。真实 mutation run 为
+`MUTRUN-20261005T131343Z-de3510e2914d6b6c`，raw mutation evidence SHA256
+`0f68976a9b78d5f73434456fec860b4155f19b066e5ca7ea674d7193e4154118`；raw SHA 与
+canonical mutation digest 分别保留。Action002 receipt SHA256
+`7a058ef6e45fc251ba4513988cd93d9f426ffcd3ec5baefb55153d4921722a0e`，事件 21 已消费，
+事件 22 为 verification_failed → FAILED，行动 SPENT 且不可复用。
+
+同一实际 `.coverage` 数据保持字节及 metadata：原 CI precision0 报告总覆盖率 68%，
+补充 precision2 为 68.09%，两个 `fail-under=85` 均 exit 2。base..HEAD、base..subject、
+worktree 三项 whitespace 均通过；没有重收测试。五个冻结业务文件的 raw/hash/mtime
+保持，HEAD `b0958e6` 在执行及读回阶段未移动，只有实际 Task 记录产生增量。
+
+只读 native status 为 FAILED / Missing `retry_reason_or_escalation`；Gate exit 2 / REJECT，
+同时保留 STATE_INVALID、EVIDENCE_STALE、EVIDENCE_NOT_PASSED、V2_EVIDENCE_NOT_FINAL、
+V2_REVIEW_STALE、V2_CHECKS_INCOMPLETE、CODE_APPROVAL_STALE 七项理由。含实际机器命令路径
+的 native `evidence.json` 保留为未跟踪原件；tracked 阶段说明仅记可移植摘要与原 SHA。
+原失败、SPENT、日志及 archived evidence 不删除、不覆盖。
+
+独立只读归因正在按完成日志区分 WinError206、fixture copy/setup、嵌套 pytest 和其他
+断言。已确认至少一类过长临时路径，不将全部失败猜作同一原因，也不能凭失败测试提前
+返回就证明旧 TASK-0064 的完整预算问题已解决。最小后继准备优先规划短且独占的 pytest
+parent；源码、断言、检查和门保持，恢复理由依真实发现记录，下一单次 action 新绑定。
+
+并行准备阶段为 **3 名 sub-agent**：实际失败归因、I1 公开生命周期范围设计、干净发布
+原生路由设计，分别独占新的树外目录。另 **1 名 sub-agent** 准备日志兼容 counter 后继，
+真实 V2 的三项新增 pyc 保留并重新绑定当前 namespace。I1 observer 的 20 项纯虚拟检查
+及 consumer 正向 1 / 拒绝 22 通过，NativeGit 十项模型检查通过；它们均未启动真实
+collector、wrapper、VM 或 guest IO，同次身份与内部关闭接口仍未实际资格核定。
+新 counter → 新完整 V2 → I1 准入按真实资源与依赖串行；counter PASS 不是 V2 的 Policy
+前置条件。七项目标保持 active，发布 `bbc1a25` 的旧局部审查不覆盖本节新追加。
+
 所有者本次要求读取待办、设立持续目标并完成任务，授权必要的常规本地工作。持续目标已经
 设立；本文件记录实际执行顺序、写入归属和完成条件。来源为
 [当前七项待办](follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)，
@@ -280,7 +332,7 @@ I1 新请求实现树外目录，原资格作者独占新的可执行资格 cont
 
 | 项目 | 本轮工作及完成条件 | 当前状态 |
 | --- | --- | --- |
-| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；007 必需 34 项及三个控制限定接纳，两 console 未测得；Action002 已批准且未消费，完整 V2 未启动 |
+| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 单次完整 V2 实际 10/14、四项 required FAIL，整体 FAILED；五项 mutation 全 killed，Action002 SPENT；007 限定资格及 console 未测限制保留 |
 | 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | 61 个原生资产核验、36 个缺失原件已恢复；仍 FAILED / Missing retry_reason_or_escalation；schema 002 不采用，当前完整预算仍待实测 |
 | F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | 75 个封存资产核验、35 个 ignored 日志已恢复；仍 BLOCKED / Missing block_resolution，五测试路径仍超范围 |
 | 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | Windows success，POSIX queued/0 steps；Linux 停用约定已定位 |

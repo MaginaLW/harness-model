@@ -1,5 +1,22 @@
 # 维护收尾与待办
 
+## 2026-10-05 最新：完整 V2 已结束，原生仍 FAILED
+
+TASK-0065 的独立单次 run `run-20261005T125556290422Z` 实际完成，CLI exit 0，
+原生结论 failed，14 项中 10 passed / 4 failed。unit、regression、coverage_xml、
+integration 均失败，十二项实际检查均正常返回且未超时。五项 mutation 全 killed；
+Action002 已消费，原 receipt、launch claim 和 MUTRUN 保留，不能复用。
+
+同一实际 `.coverage` 数据两次只读报告分别为 precision0 的 68% 与 precision2 的
+68.09%，85% 门均 exit 2；diff coverage 94%。三项 whitespace 检查通过。
+native Missing `retry_reason_or_escalation`，Gate REJECT；独立失败归因正在区分
+明确的长临时路径、fixture 准备及仍未知的问题，完整通过尚未建立。
+
+当前 I1 observer 纯虚拟检查通过，NativeGit 模型保持 BLOCKED；真实同次身份、
+内部资源关闭、具体冷启动 action 和 fresh host gates 仍待补齐。发布候选 `bbc1a25`
+仅具有本地 15 文档审查，新主文档追加需重新纳入候选核查。七项目标 active。
+详见[完整 V2 实际结果](backlog-execution-2026-10-04.md#2026-10-05-完整-v2-实际失败与行动消费)。
+
 ## 2026-10-05 最新：单次预算诊断失败，原件保留
 
 最终独立审查后的 request `94440be` 已仅执行一次；实际工具 `191d3e` 和 root 观察的
