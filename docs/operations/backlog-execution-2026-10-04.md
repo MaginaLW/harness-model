@@ -17,6 +17,46 @@ TASK-0064 未跟踪的原生 `evidence.json` 保留，不移动、不入库；�
 独立 outer 预审的关闭再试与 deadline 缺口正在新版本修复，完整 V2/动作批准仍未完成。
 回读类型错误原件及另立诊断均保留，不重写检查输出。
 
+### 2026-10-05 单次资格 007 的限定矩阵接纳
+
+007 在三路独立静审后只执行一次，UTC
+`2026-10-05T10:34:03.330Z–10:38:14.760Z`。真实完成工具 `e4d681` 返回 0，
+controller exit 0；单次 consumer `fc9282` 返回 0，结论为
+`PASS_LIMITED_REQUIRED_REAL_MATRIX_ONLY`。34 项必需生产 case 及三个控制完成；
+两项 console 因实际 `AllocConsole` 返回 false / WinError 5 保持
+`UNMEASURED_CONSOLE_RESOURCE`，不计入通过项。未经测量的平台和异常 OS fault
+收尾仍为 UNKNOWN。原节点源码、断言、时序和生产五文件没有修改。
+
+root 退出立即观察的原始 QPC 为 `3558206820201`，frequency `10000000`，
+high-resolution true，距原 300 秒矩阵期限尚余 `68.3302239` 秒；这是真实退出
+观察的上界，不是精确退出时刻。537 份 raw 输出及 539 个精确输出名称核验一致，
+完整 consumer guard 8388 项相等；root 的 7236 固定输入与 32 prepared 文件
+前后 snapshot SHA 均为
+`4f20cc7ce416ca83b9a64b8a4693ed9c361ba8161b5b5d6e8802f8a6ecca50bd`。
+实际案例与生命周期两路非作者复核均无阻断 finding，分别封存为
+`windows-qualification-actual-case-review-007/report.json` SHA
+`4afe87d4e6793e83b016af1629223b6a9b2f210ddb0d2beb5f8b6bdc63336592` 和
+`windows-qualification-execution-lifecycle-actual-review-007/report.json` SHA
+`9e68820c42d6f892597e37a3f66cbd69b3efe5d8b63e6d30861dc59243aac907`。
+29 份正常释放回执的 `cleanup_complete=false` 原值保留；正常存活子进程的自然退出
+不改写先前状态。003、005、006 的实际失败及原件仍保留，本次不重跑旧请求。
+
+新的具体单次 mutation 提案位于 `task0065-mutation-action-proposal-002/action.json`，
+规范 SHA `5ec33e688add3f138a1fd4a912ce563e67dd47efd7269bec947bab5712da496a`，
+有效至 `2026-10-06T10:54:45Z`。独立行动审查结论仅为 `GO_FOR_REQUEST`，报告
+`task0065-mutation-action-review-002-external-001/report.json` SHA
+`3db0477b4210359037018245b75cb858c579cc5c18af8541cc2584ee9737178c`。
+具体行动及本次原生临时清理正在请求真实批准，尚未记录批准、消费或启动完整 V2。
+固定五项、每 detector 60 秒、DEVNULL 元数据范围及原 14 检查/预算保持。
+native V2 自身不独立强制 CI 的 85% 总覆盖率和 whitespace；之后须从同一 coverage
+数据检查 85% 并检查完整变更 whitespace，发布仍须当前完整 CI 证据。
+
+预算计数器的薄外层/入口草案 `budget-current-c7-implementation-draft-001/` 完成
+49 项纯检查，两名非作者分别复核入口身份和外层时钟/收尾。实际 007 接纳引用仍未
+写入草案；只有另建最终封存包后才可进行新的单次诊断。未运行原 counter 三节点、
+完整预算或 mutation。TASK-0065 仍为 IMPLEMENTING，Missing `implementation_result`；
+TASK-0066 既有规格决定待回复，七项目标仍 active。
+
 ### 2026-10-05 单次资格 006 的局部结果与 parser 比较失败
 
 006 三路独立静审实际完成后只执行一次，UTC
@@ -165,7 +205,7 @@ I1 新请求实现树外目录，原资格作者独占新的可执行资格 cont
 
 | 项目 | 本轮工作及完成条件 | 当前状态 |
 | --- | --- | --- |
-| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；006 三控制及 3.11 局部 case 通过，3.13 原节点 AST 比较失败，完整 V2 未启动 |
+| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；007 必需 34 项及三个控制限定接纳，两 console 未测得；具体 mutation 提案待批准，完整 V2 未启动 |
 | 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | schema 002收益不足不采用；offline caller 002已完成，当前完整预算仍待实测 |
 | F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | BLOCKED，恢复方案核查中 |
 | 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | Windows success，POSIX queued/0 steps；Linux 停用约定已定位 |
