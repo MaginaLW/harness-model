@@ -1,5 +1,20 @@
 # 维护收尾与待办
 
+## 2026-10-05 最新：资格 004 静审未通过，验证环境已隔离
+
+TASK-0065 专用 Python 3.11 环境已沿用原 27 个依赖版本正常安装，最小环境变量下的
+来源诊断确认加载候选源码；旧 1602 个固定输入及依赖 metadata 保持。该工作区
+tracked 状态干净，原生 status 仍为 IMPLEMENTING / REVIEW / V2、批准 current，
+Missing `implementation_result`。
+
+资格 004 冻结 34 个必需 case；资源静审确认 normal-live-child 在出生记录 rename
+失败、独立日志仍健康时缺远端句柄 acquisition 字段。004 尚未执行，新 005 仅修复
+这一登记路径；失败 003、原 timeout 节点、生产源码及各冻结原件均保留。预算 002
+独审只通过准备合同，真实三个节点测量及完整 V2 未启动。I1 的日志失败路径正在
+新 revision009 修订；TASK-0066 仍待既有 spec 批准请求的真实回复。详见
+[本阶段证据和并发归属](backlog-execution-2026-10-04.md#2026-10-05-验证环境隔离及资格-004-静审)。
+七项目标继续 active，没有以静审或来源诊断代替验收。
+
 ## 2026-10-05 当前：资格 003 失败，TASK-0066 待规格批准
 
 TASK-0065 原生 status 仍为 IMPLEMENTING / REVIEW / V2，classification fresh、

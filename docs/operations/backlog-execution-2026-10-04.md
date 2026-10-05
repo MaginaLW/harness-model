@@ -17,6 +17,38 @@ TASK-0064 未跟踪的原生 `evidence.json` 保留，不移动、不入库；�
 独立 outer 预审的关闭再试与 deadline 缺口正在新版本修复，完整 V2/动作批准仍未完成。
 回读类型错误原件及另立诊断均保留，不重写检查输出。
 
+### 2026-10-05 验证环境隔离及资格 004 静审
+
+主检出原 Python 3.11 环境的 editable 安装指向主检出源码，而原生验证子进程会清除
+`PYTHONPATH`。因此另外创建 TASK-0065 专用环境，沿用实际 27 个依赖版本，正常安装
+候选工作区的 editable 包；最小 `PATH`/`SystemRoot` 下的只读来源诊断 exit 0，确认
+`aiflow` 来源为候选源码、pytest 来源为新环境。安装前后旧 1602 个固定输入及依赖
+metadata 的字节、哈希和记录属性均相同；候选工作区仅新增被既有规则忽略的 egg-info，
+tracked 工作区干净。该诊断没有启动 V2、mutation 或资格 case。
+
+环境证据位于 `${RUNTIME_ROOT}/harness-model-backlog-20261004-001/`
+`task0065-native-verification-environment-001/`，`after.json` SHA256 为
+`45796b27dc36034c3369a62c98c32b1fcb0f8fa305d8174ad2655cac544164c1`。
+新环境的 3251 个文件已纳入资格 004 的绑定；该包冻结 27 文件、7086 输入、1085 项
+启动缺失约束和 34 个必需 case（原 14×2，加三个实际 venv 目标各两个 case）。
+绑定 SHA256 为 `22f8dcb95faed1f8cfe333058a36224f3d58ffaa7ddffb50e28dc5002d602b1c`，
+manifest 为 `e34d8a531720ce757759429bff8f2f34ab39c3faa0b80264a85fd7f59c998110`。
+
+三路独立静审分别负责身份/启动、资源/期限、case/终态。case 角色通过，资源角色发现
+`normal-live-child` 的具体可恢复缺口：远端 DuplicateHandle 已成功、只有出生记录
+rename 失败且独立日志仍健康时，现有记录没有远端句柄值，接收端不能恢复登记。
+失败路径不会报告 PASS，但不满足已取得句柄的完整账本约定，故 004 不执行。新 005
+仅复用已有 acquisition 协议修复该路径，保留自然完成证明、所有原断言和时序；原
+753 字节 timeout 节点、生产五文件、004 冻结原件及失败 003 均不改写。
+本次修订并行 **1 名 sub-agent** 独占新 worker，作者负责串行装配/冻结；之后仍经
+**3 名独立 sub-agent** 差异审查，主 agent 负责新单次入口、实际执行和终态验收。
+
+预算请求 002 两个静态 P1 已修正，独立复审为 `GO_FOR_PREPARATION`，报告 SHA256
+`f0e468555f2921da8568390f7e266935972feb28a232d3a13e02ca64880b3c02`。它只准备三个
+既有节点的 Git 调用意图计数与 phase wall time，outer 绑定仍 null、执行保持 blocked；
+没有完整预算已解决的结论。I1 revision008 的资源审查另有日志 API 返回值和原 native
+错误主因保留缺口，原件封存，009 在树外修订；TASK-0066 spec 决定仍待真实回复。
+
 ### 2026-10-05 单次真实资格失败及 I1 原生准入
 
 资格包 003 经三路独立静审后仅一次实际执行，UTC
