@@ -17,6 +17,49 @@ TASK-0064 未跟踪的原生 `evidence.json` 保留，不移动、不入库；�
 独立 outer 预审的关闭再试与 deadline 缺口正在新版本修复，完整 V2/动作批准仍未完成。
 回读类型错误原件及另立诊断均保留，不重写检查输出。
 
+### 2026-10-05 单次资格 006 的局部结果与 parser 比较失败
+
+006 三路独立静审实际完成后只执行一次，UTC
+`2026-10-05T04:12:38.958Z–04:14:37.169Z`。完成工具返回 1、controller exit 2；
+三个前置控制及 CPython 3.11 的 16 个生产 case 返回各自范围内 PASS，包含原
+timeout 函数的实际调用、自然完成 live child 和 venv timeout tree。随后 CPython
+3.13 的首个原 timeout case 在执行函数前报 `AssertionError: original node AST changed`，
+worker exit 2。矩阵没有完成，没有 positive consumer、完整 V2 或整体任务验收。
+
+最后 case 的 stderr 为 0 字节，主因在 `worker-result.json` 的 `error` 和
+`worker-failure-terminal.json` 的 `primary`，不能因 stderr 空或错误读取
+`primary_error` 字段而宣称无异常。该函数在 AST guard 前已 import 部分 aiflow
+代码，但原测试的 compile/exec/call 尚未发生。root 前后 7191 固定输入及 28
+prepared 文件的完整 snapshot 字节相同；283 个实际原件的前后 hash、属性和名单
+一致，索引为 `windows-qualification-root-failure-diagnosis-006/`
+`facts-and-original-hashes.json`，SHA256
+`fe0b2535ccf6076d29b4bf87da7ee5dbd5054aa1da2bf28441accf0d6832d6a8`。
+实际 root/case 目录分别为 `windows-qualification-root-execution-006/` 和
+`windows-qualification-execution-006/`，本次失败请求不重跑。
+
+独立的两个纯 stdlib parser 诊断读取相同 source：3.11 的 default AST dump SHA256
+仍为原绑定 `b54756d0d32a138bd3b5526aaafe8f613faff2a882d53b6d271efb6a27b31803`，
+3.13 为 `88f632d205e07b713485c0c22c134e00af5ad17d96823dd773589d3e7e2c545d`。
+测试全文件 raw hash、按 worker `read_text` 通用换行语义提取的 753-byte 函数文本
+hash 保持；物理 CRLF slice 与该规范化文本的字节数不能混称。[官方 AST 文档](https://docs.python.org/3.13/library/ast.html)
+记录了新增字段及 default dump 的空字段显示差异。非作者完整字段分解已封存，
+报告 SHA256 为 `2d72a667cb44bbd2f3095040954e0fe38adff86d82d6b66b547ce5ed3c7cb0a7`：
+共同字段的值、类型及顺序相同，schema 仅新增空 `type_params`，默认 dump 则省略
+原空列表。实际资源终态仍由另一角色核查，不把该表示差异写成生产故障或完整
+预算结论；17 个必需生产单元和两个 console 单元未启动。
+
+本次并行 **3 名 sub-agent** 分别负责作者 parser 根因提案、非作者同 source/字段
+语义核查和非作者实际资源收尾；主 agent 独占原件索引及文档。旧三个 review 线程
+遇到模型 capacity、未产出结论，不算 GO；新的默认设置 case reviewer 已实际
+完成 006 静审，没有切换模型。之后的新修复仍须独立冻结、复审、另立单次请求。
+
+发布库存的新快照为 27 个静态提交建议、39 个路径（24 历史账本、15 文档），
+三条原分支均继承禁发 `52474d9`。另立干净基线工作区后，15 文档已按源 Git blob
+投影并暂存，尚未提交；发现五处相对链接依赖未纳入的账本或用户未跟踪计划，
+因此不称完整可发布包，也不复制该用户计划或未经治理的账本。外仓最新 18 GET
+窗口 UTC `03:33:32–03:35:42` 的 CI/runner 状态未变；两条 repo metadata 临时
+clone 字段已在新请求最终封存前脱敏，旧原件不改，私有 runtime 不进入发布包。
+
 ### 2026-10-05 单次资格 005 失败，事件参数冲突另立修复
 
 005 在三路独立静审通过后实际只执行一次，UTC
@@ -122,7 +165,7 @@ I1 新请求实现树外目录，原资格作者独占新的可执行资格 cont
 
 | 项目 | 本轮工作及完成条件 | 当前状态 |
 | --- | --- | --- |
-| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；005 首个控制因事件形参冲突失败，新 006 准备中，完整 V2 未启动 |
+| Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 实施已提交；006 三控制及 3.11 局部 case 通过，3.13 原节点 AST 比较失败，完整 V2 未启动 |
 | 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | schema 002收益不足不采用；offline caller 002已完成，当前完整预算仍待实测 |
 | F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | BLOCKED，恢复方案核查中 |
 | 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | Windows success，POSIX queued/0 steps；Linux 停用约定已定位 |
