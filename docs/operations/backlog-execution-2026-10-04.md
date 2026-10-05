@@ -17,6 +17,33 @@ TASK-0064 未跟踪的原生 `evidence.json` 保留，不移动、不入库；�
 独立 outer 预审的关闭再试与 deadline 缺口正在新版本修复，完整 V2/动作批准仍未完成。
 回读类型错误原件及另立诊断均保留，不重写检查输出。
 
+### 2026-10-05 实际批准登记与准备推进
+
+所有者新回复“批准前面的任务”后，先实际回读两个 native status：TASK-0065
+IMPLEMENTING、Missing `implementation_result`；TASK-0066 WAITING_FOR_SPEC_REVIEW、
+Missing `spec_approval`。随后实际登记具体 Action002 和既有 TASK-0066 冻结规格，
+分别在 UTC `11:32:39`、`11:34:35` 返回 0。前者绑定规范 SHA
+`5ec33e688add3f138a1fd4a912ce563e67dd47efd7269bec947bab5712da496a`，
+包括该次原生临时工作区的限定清理；后者绑定已展示的规格 SHA
+`dcd67fa8220ad10a4c0cc62c5975a5c4f2cfe77b523e9c714b5fe21e4f5eec7f`。
+批准按原类型追加，Task-0065 旧规格批准不重复登记。
+
+Task-0065 批准提交 `612a41c`，批准原字节 4418B / SHA
+`349e93984b5e1fe74903b215b4b10d57555a1d3396b86801efc14884ba954f34`
+机械安置到自己的 `action-v2-targeted-mutation-002.json`，提交 `b0958e6`，供
+原生 collector 的封闭 glob 查找；条件和规范摘要不改。五个业务文件及 subject
+`4f23e5c` 保持。Task-0066 批准提交 `98aee22`，原生 YAML 序列化排序经语义核对，
+仅 state/updated_at 改变；随后准备作者实际 begin，提交 `7e83894`，现为 IMPLEMENTING。
+两个任务的完整 V2 未启动；mutation 未消费，I1 外部生命周期具体行动尚未批准或执行。
+
+预算入口草案独立检查 68 项通过，只允许草案定稿；外层独立复核封存 NO_GO，报告
+`budget-current-c7-draft-outer-lifecycle-review-001/report.json` SHA
+`6b4eb75809388603ab253c8cc2642f974296ca87997599e4e96c4b00059249ae`。
+两个必要修复是原 registry 的强引用保留，以及清理时钟/失败报告不能覆盖原 primary。
+原 helper 已在 exitcode 内检查 signaled，不新增重复 Wait。修复另建 002；001 原件和
+NULL 绑定不改。根观察器与 consumer 在另一树外目录准备，实际计数诊断仍未运行。
+诊断、完整 V2 及 I1 实际动作按共享依赖串行，准备和独立复核并行。
+
 ### 2026-10-05 单次资格 007 的限定矩阵接纳
 
 007 在三路独立静审后只执行一次，UTC
