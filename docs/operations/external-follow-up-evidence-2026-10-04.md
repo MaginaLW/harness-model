@@ -1,5 +1,32 @@
 # 外仓后继证据与剩余依赖：2026-10-04
 
+## 2026-10-05 晚间只读刷新：原 POSIX job 已取消
+
+UTC `2026-10-05T14:18:11.645950Z–14:18:14.846072Z` 的八个固定官方 gh GET 均
+HTTP 200 / exit 0，各 raw stdout/stderr、HTTP、exit、时间与 SHA 保留于
+`${RUNTIME_ROOT}/harness-model-backlog-20261004-001/external-current-read-004`。
+报告 SHA256 `448ae9971ce118bb8b98064bf7a6b49c3e2b05bddccc1f3fc1d1ef76d8375088`；
+manifest SHA256 `a921898db67e09a98183bd65e3856553dd75b5cb2dbe55111d6e0eaa43dc5197`。
+root 工具 `09dbec` 独立读取实际 HTTP body，核实两 SHA、全部 jobs/steps 与取消终态。
+
+- r3s main 保持 `9e1b538c6acdcb8fde410172ebf1dff4485e6ffb`；
+  [run 37177002687](https://github.com/MaginaLW/r3s-VPS/actions/runs/37177002687)
+  attempt 1 已为 completed/cancelled，API updated_at 为 `2026-10-05T04:26:34Z`。
+  POSIX `111361608389` 同为 completed/cancelled、runner 0、0 steps；Windows
+  `111361608550` 保持 success，七 steps 全 success。取消原因及主体未查询，保持未知。
+- r3s runner 21 online、22 offline，均 busy=false。既有停用约定未改变；恢复 runner
+  不能让已终态的原 job 重新排队，后继验收须重新冻结合法的 job/action 路径。
+- 精确 dotfiles 仓库为 `MaginaLW/ai-agent-dotfiles`，main 保持
+  `ac8e4854b50592a1216acce7f0d08b718478e25a`；
+  [run 37109686458](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37109686458)
+  attempt 1 保持 success，四 jobs、29 steps 全 success。自托管 runners GET 返回空；
+  这不否定历史 jobs 中的 GitHub 托管 runner，也不证明实际 Apply。
+
+八查询非原子；本窗口没有最新 run 发现、check-runs 或保护规则刷新，不构成 I1
+两次 300 秒 host gates、双通道验收或新权限。没有 CI 取消、重跑、新 push、服务、
+VM、SSH 或部署。原排队窗口、原件及既有规格批准仍保留；冷启动后继须按新实际
+终态评估，不把原批准推导为新 CI 触发。下列旧窗口保持其当时事实。
+
 ## 2026-10-05 本地晨间只读刷新
 
 新查询窗口为 UTC `2026-10-04T23:02:08.0985444Z–23:06:09.9473006Z`，18 个 GET，

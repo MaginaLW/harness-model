@@ -1,5 +1,21 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-05 外仓原 POSIX job 已终态取消
+
+八个固定只读官方 GET 均成功，UTC 窗口为 14:18:11 至 14:18:14；报告
+`external-current-read-004/report.json` SHA256
+`448ae9971ce118bb8b98064bf7a6b49c3e2b05bddccc1f3fc1d1ef76d8375088`。
+root 工具 `09dbec` 独立解析实际 HTTP body，确认 main 两 SHA 未变、全部 jobs/steps
+及 r3s run `37177002687` attempt 1 的 completed/cancelled。POSIX `111361608389`
+已 cancelled、runner 0 / 0 steps；Windows 保持 success / 7 steps。dotfiles 指定
+run 仍四 jobs / 29 steps 全 success。取消原因未知，未发起 CI 或服务/VM 写入。
+
+原 I1 自然接取候选已终态；新实际 job/action 路径须重新冻结，source-only 范围影响
+核查与 counter 新包机械准备并行，各一名主 sub-agent，counter 另有一名源绑定作者。
+原规格批准、排队窗口及全部原件保留。TASK-0065 当前 IMPLEMENTING，新具体
+Action003 revision002 请求尚未回答；完整 V2 未再次启动，七项目标仍 active。
+详见[外仓刷新](external-follow-up-evidence-2026-10-04.md#2026-10-05-晚间只读刷新原-posix-job-已取消)。
+
 ## 2026-10-05 原生重试登记与后继准备
 
 root 已完成此前 status 所列的机械 `retry_reason_or_escalation`：工具 `8aa9c0`
@@ -367,8 +383,8 @@ I1 新请求实现树外目录，原资格作者独占新的可执行资格 cont
 | Windows 超时处理 | 以封存候选形成精确生产 scope、支持矩阵、错误/资源语义和安全基线；另建治理 Task，真实 Design Review、Missing 所需决定后实施并完整验证 | TASK-0065 已真实登记重试，当前 IMPLEMENTING；旧完整 V2 为 10/14、四项 required FAIL，Action002 SPENT；Action003 revision002 待具体批准，尚无新 run；007 限定资格及 console 未测限制保留 |
 | 完整测试预算 / TASK-0064 | 以原 run 和耗时原件定位累计成本；性能变更单独准入，实际确定候选依赖后合法承接或恢复；全部 14 检查、原预算、85%/90% 保持 | 61 个原生资产核验、36 个缺失原件已恢复；仍 FAILED / Missing retry_reason_or_escalation；schema 002 不采用，当前完整预算仍待实测 |
 | F / TASK-0063 | 区分原历史窗口的已执行导入与原生收尾；确定真实恢复 scope 和依赖，按 native Missing 推进；新 context 如需新真实来源则独立取得 | 75 个封存资产核验、35 个 ignored 日志已恢复；仍 BLOCKED / Missing block_resolution，五测试路径仍超范围 |
-| 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | Windows success，POSIX queued/0 steps；Linux 停用约定已定位 |
-| I1 / I2 | 从实际使用缺口选择生命周期或可信目标；按幂等、权限、完整等价验证及可执行恢复条件准入 | TASK-0066 规格已批准，e549500 实施准备已提交；IMPLEMENTING / Missing implementation_result，VM/动作未批准或执行；I2 新目标未选 |
+| 外仓双通道 / 实际应用 | 只读刷新准确 SHA、完整 CI 和 runner；实际 POSIX 恢复或 Apply/部署须先有精确目标与独立准入 | UTC 14:18 刷新：Windows success，原 POSIX cancelled/runner0/0 steps；dotfiles 四 jobs/29 steps success；Linux 停用约定保持，尚无双通道验收 |
+| I1 / I2 | 从实际使用缺口选择生命周期或可信目标；按幂等、权限、完整等价验证及可执行恢复条件准入 | TASK-0066 既有规格已批准、准备已提交，当前 IMPLEMENTING；原 POSIX job 已 cancelled，后继实际 job/action 路径待重新冻结；VM/动作未执行，I2 新目标未选 |
 | E5 / I5 / Phase 3 / Phase 4 | 分别形成最小需求和样本/隐私/度量/真实 V3 边界材料；按独立进入门选择方向，缺失不补造 | 61 公开 task 样本盘点及缺失规则草案已备，真实进入门未满足，实施未启动 |
 | 远端发布 | 核对累计候选及本机内容，选择排除配置 `52474d9` 的干净基线；审核和准确 required CI 后按具体动作授权发布 | bbc1a25 本地 15-doc 候选独立 GO_LOCAL_DOCS_CANDIDATE_ONLY；198 相对目标存在，尚无 TASK-0067、完整 CI 或远端写入 |
 

@@ -1,5 +1,15 @@
 # 后继阶段需求与合同提案：2026-10-04
 
+## 2026-10-05 当前事实：原排队 job 已取消
+
+八个固定官方 GET 与 root HTTP body 回读确认 run `37177002687` attempt 1 及
+POSIX job `111361608389` 已 completed/cancelled、runner 0、0 steps；取消原因未知。
+Windows 通道仍 success，dotfiles 四 jobs / 29 steps 仍 success。查询窗口为 UTC
+14:18:11 至 14:18:14，详见[原始刷新](external-follow-up-evidence-2026-10-04.md#2026-10-05-晚间只读刷新原-posix-job-已取消)。
+本提案旧“queued 构成候选需求”属于当时窗口；原 job 已不可自然接取，I1 真实后继
+须冻结新的合法 job/action 和验收路径。既有规格批准保留，新的 CI 触发、重跑或
+服务/VM 生命周期不能由旧排队事实推导授权；source-only 影响核查正在推进。
+
 状态：`proposal / not_frozen / implementation_not_started`。
 
 本文件承接[当前待办第 5、6 项](follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)，

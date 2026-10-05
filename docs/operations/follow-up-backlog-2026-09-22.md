@@ -1,5 +1,15 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-05 当前核定：原 POSIX job 不再排队
+
+UTC 14:18 的八 GET 与 root 原始 HTTP body 回读确认 r3s run `37177002687`
+attempt 1 已 completed/cancelled；POSIX runner 0 / 0 steps，Windows 仍 success。
+原排队接取条件不再成立，I1 后继具体 job/action 路径待重新冻结；取消原因未知，
+没有重跑、恢复服务或 VM 执行。dotfiles 既有四 jobs / 29 steps 仍 success。
+TASK-0065 当前 IMPLEMENTING，Action003 revision002 单次批准请求仍待回答；
+全部原失败、SPENT 与既有规格批准保留，七项目标 active。
+详见[当前外仓证据](external-follow-up-evidence-2026-10-04.md#2026-10-05-晚间只读刷新原-posix-job-已取消)。
+
 ## 2026-10-05 当前核定：重试理由已登记，新完整 V2 尚未启动
 
 TASK-0065 native begin/status 实际成功，事件 23 已追加；当前 IMPLEMENTING /

@@ -1,5 +1,14 @@
 # 维护收尾与待办
 
+## 2026-10-05 最新：外仓原 POSIX run 已终态取消
+
+实际八 GET / root HTTP body 回读确认 r3s 原 run `37177002687` attempt 1 为
+completed/cancelled，POSIX 仍 runner 0 / 0 steps；Windows 保持七 steps success。
+两仓 main SHA 未变，dotfiles 四 jobs / 29 steps 仍 success。取消原因未知。
+原排队接取路径已不可用，I1 后继需重新冻结合法 job/action；尚无新 CI 或 VM 动作。
+TASK-0065 仍 IMPLEMENTING，新 Action003 revision002 请求未回答，旧失败/SPENT 保留。
+详见[外仓实际刷新](external-follow-up-evidence-2026-10-04.md#2026-10-05-晚间只读刷新原-posix-job-已取消)。
+
 ## 2026-10-05 最新：原生重试已登记，新动作待具体批准
 
 TASK-0065 已用真实失败理由执行 native begin/status，工具 `8aa9c0` exit 0；事件 23
