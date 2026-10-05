@@ -1,5 +1,65 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-06 I1 公开 self-query 已单次只读核验
+
+树外 wrapper self-query 组件已实现并封存，16553 bytes / SHA256
+`2ddaf6b80c8b5f059dc85e91f50c609501662f40e87f5bdf78ae8bd21367a1f3`；
+七件 manifest 为
+`b8fd0fd4981c1783df98a8fa83d43e055478711f03395bee19edea7a58ebf6cb`。
+组件实现公开 Win32 自进程 PID、整数 creation FILETIME、UTF-16 映像路径、
+原 QPC 同窗与 raw return/last-error、主/secondary 错误保留。pseudo handle
+借用，实际独立 launcher/shared Job/根 owner 证明保持缺失；旧 FAKE_ONLY、
+009 wrapper、root observer、src、spec 与旧原件未变。
+
+作者 `55ee05` exit0/14全FAKE；非作者 `e2c005` exit0/14FAKE、三源码 compile、
+PS Parser 零错误，八必要输入 raw SHA/精确 stat 两读稳定，必要 Finding0。
+独审 `i1-self-query-independent-review-001/report.json` SHA256
+`6f86ff7c7cae2c0059c8098dfb3d8cffab0ac0def0c9f3e6a6545dd18401c6af`，
+只支持 GO_LIMITED_SELF_READ_ONLY_PROBE。本轮复用两名 sub-agent，摸底独立
+并行，作者实现与非作者审查串行；root 同时准备另一独占目录的 probe，实际
+执行串行，非作者真实读回与 root 记录并行，各文件唯一写入者。
+
+root 固定 interpreter/module/driver/launcher 摘要，隔离/no-site/no-bytecode
+启动新普通本地辅助进程。真实工具 `cec7c6` exit0，child/parent均0；仅一次，
+request已消费且保留。root `080211` exit0 薄核20条实际观测、六个API名称，
+creation FILETIME原整数 `134356984082977949`。component SELF_REPORTED_ONLY，
+driver SELF_API_RETURNED_LIMITED_RESULT；source guard/launch error均null。
+
+原件位于 `${RUNTIME_ROOT}/harness-model-backlog-20261004-001/`
+`i1-self-query-readonly-probe-001/`。实际工具返回 SHA256
+`a1876562ac1913f972705913e09ab15efeeedaf3ff45ad40f4b7df54ef114ad3`；
+driver receipt为
+`a659ac8fd251e55263e433d3e46f716db1b0d7b0ac7ecbe56ff18e277ca25ed5`；
+parent receipt为
+`790df80344ca0d338fc2c35cb9b739add2807946fe0c3a6466c2d25f8782afa9`；
+消费request为
+`c618b2f40bd34c9d93d37b2ad57bba9588e0610d38b795486c614f9f0865c5ea`。
+非作者真实读回已封存于新 `i1-self-query-actual-readback-review-001/`：
+report SHA256
+`97af3f784deb9e86d370ac0cd3f8c4771a6b8778698f13958360aa03cd55598c`，
+十一件 manifest 为
+`a6b507e36f0dcd8424460cf9460189541606ce09a520a119cf9a30cedb24c3b8`。
+实际修订 reader `fe063e` exit0，46项对账通过、七固定原件 raw SHA/精确
+stat 两读稳定、必要Finding0，GO_ACTUAL_LIMITED_SELF_READ_ONLY_ONLY。
+初版reader `feed8d` exit1的源码/工具/回执保持；错误为自有消费者把
+.NET DateTime.Ticks起点误当FILETIME，新owned revision只纠正整数映射。
+实际入口、API、原件均未重跑或改写。[Microsoft官方定义](https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks)
+将UTC DateTime.Ticks起点定为公历0001年；修订读回仅核该局部真实结果。
+
+本次原60秒window只用于self-read。parent returned_qpc是child返回后取样，
+没有建立完整工具/receipt结束的硬时间上界；Win32同步调用无法抢占。EXE文件
+前后摘要是文件观测，运行中opened/loaded image identity仍UNKNOWN。所有
+independent_identity_proven、native_binding_qualified、business_ready及硬wall
+标记保持false；该局部实现尚未接入旧协议，未建立独立born或完整生命周期。
+
+TASK-0066仍待完整 implementation_result，原native checks/budgets与85%/90%
+保持。OwnTask局部记录已提交`9eb42ad`，真实status工具`633c3a` exit0：
+IMPLEMENTING / REVIEW / V2、Missing implementation_result、worktree clean，
+classification fresh、approvals current、evidence not_available；五保护账本输入
+原SHA/长度保持。Task65 Action003 revision002与发布A/B待答；旧失败/SPENT、F/Task64
+真实范围/依赖BLOCK保持。未执行VM/copy/SSH/NativeGit业务/CI/服务/凭据/provider或清理；
+本追加不在候选aa37f12的source e214999独审覆盖内，七项目标active。
+
 ## 2026-10-06 TASK-0064 范围外依赖已原生阻断
 
 同冻结范围的必要薄核已读取原 run `run-20261003T153150710903Z` 的准确三份失败

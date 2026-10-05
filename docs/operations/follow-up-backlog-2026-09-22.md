@@ -1,5 +1,19 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-06 当前核定：I1 公开 self-query 局部实现与实际核验
+
+树外self-query模块已完成，作者与非作者各14项纯检查通过，源码独审无必要
+Finding。root限定新普通辅助进程的一次只读核验真实exit0，child/parent均0、
+20条API观测及整数FILETIME已保留；请求已消费，source guard无错误。非作者
+修订reader实际46项对账通过、七原件两读稳定，初版epoch错误及失败原件保留；
+结论仅GO_ACTUAL_LIMITED_SELF_READ_ONLY_ONLY，详见[本轮实际记录](backlog-execution-2026-10-04.md#2026-10-06-i1-公开-self-query-已单次只读核验)。
+
+结果仅SELF_REPORTED_ONLY；独立birth、launcher/sharedJob、完整binding与
+业务就绪仍缺，完整工具硬wall上界未建立。Task66 implementation_result未
+形成；Task65新完整V2/Action003具体批准、F/64 block resolution、发布A/B及
+后续阶段门保持真实待办，全部原检查/预算/85%/90%与失败/SPENT保留。本追加
+不在aa37f12候选e214999独审覆盖内，七项目标active。
+
 ## 2026-10-06 当前核定：TASK-0064 已记录范围外依赖阻断
 
 原失败诊断确认 unit check 通过，真实三失败为 regression/coverage_xml/integration；
