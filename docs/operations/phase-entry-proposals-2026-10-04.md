@@ -14,6 +14,38 @@ Task、冻结规格、Policy、采集许可或执行计划。数值阈值、观�
 
 ## 1. 当前需求与证据矩阵
 
+### 新增公开样本盘点（2026-10-05，只绑定该快照）
+
+公开盘点绑定主仓 `8ef4e723` 和 UTC `2026-10-04T23:45:02Z–23:45:07Z`。
+780 个 tracked 输入在生产者前后及 root 独立回读时 bytes/SHA256 匹配；后续文档更新
+不替换这个快照。只包含 TASK-0001–0062 的 61 个 tracked task（0021 缺号，原因未知），
+不纳入其他工作区的 0063–0066、task-free、外仓或私有证据。
+
+| 已记录维度 | 快照数量 |
+| --- | --- |
+| state 字段 | MERGED 47、BLOCKED 8、APPROVED_FOR_MERGE 5、FAILED 1 |
+| route / V 字段 | REVIEW 49、AUTO 11、ASK 1；V0 2、V1 47、V2 12 |
+| 公开 Review | 198 个文件覆盖 48 任务；design 48、implementation 43 任务 |
+| 公开 root 整体验证原件 | 49 任务；46 passed、3 failed；12 任务缺此范围原件 |
+| verification_failed 事件 | 42 条覆盖 23 任务；后继成功不消除这些事件 |
+
+字段盘点未运行 native status、freshness 或 Gate；MERGED 等标签不是当前独立验收。
+没有 typed cancel / not-run 事实不等于零取消或未运行；缺公开原件不等于没有执行。
+版本横跨五个 Policy 版本，revision、重试和原件副本不增加独立样本；未补造模型身份、
+费用、人类分钟或缺陷率。
+
+该盘点支持分层及缺失合同的定性设计，尚不能判断 Phase 3 样本门充分。候选规则为：
+先确定真实业务决定和总体、必需任务 family / 角色 / stage / 平台、独立 episode 与
+尝试链、观察窗口及缺失处理、访问和保留；定量比较另需估计对象及允许不确定性。
+必需分层为空就保留未满足，不能为达标临时删层；不套用 Phase 4 蓝图的 30 天/30 任务。
+
+私有派生摘要为 `${RUNTIME_ROOT}/harness-model-backlog-20261004-001/`
+`phase3-public-ledger-inventory-001.json`，raw SHA256
+`0377947bb7343623b129d20045d7ad27d65ab7247ac184533bdee12707d0c599`。
+它只保留公开元数据、引用及输入 hashes，没有复制 evidence 正文或私密来源。
+最初派生时的 CRLF/dictionary 分组错误及修正原因也保留，不改源记录；不启动 telemetry、
+V3 或 Phase 3/4 实施。
+
 | 单元 | 已有事实或真实需求 | 尚未选择或满足的条件 | 本提案可交付范围 |
 | --- | --- | --- | --- |
 | I1 生命周期复用 | 同仓双平台 CI、guest 重启业务、恢复及原生收尾已完成；Linux runner 22 离线符合既有停用约定，POSIX queued 构成受控恢复接单的候选需求 | 尚未决定是否恢复接单，也未冻结当前 guest 冷启动身份、串行交接、权限、幂等、业务验证和可执行回退 | 保留既有已交付范围；准备固定实例的受控交接，不将离线直接判故障，不执行停启、注册、更新或重新运行 CI |

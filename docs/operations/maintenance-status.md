@@ -1,5 +1,22 @@
 # 维护收尾与待办
 
+## 2026-10-05 I1 只读身份取得及公开样本盘点
+
+I1 revision004 metadata-only probe 经独立静审后仅一次实际执行，exit 0、stderr 空。
+七个固定输入及八个祖先的 opened final path / volume / file index / creation/write
+FILETIME 已取得；17 个自有 file/snapshot handles 均单次确认关闭，期限内完成。
+QEMU 与 TCP22240 的前后查询为空，窗口仅 UTC `2026-10-04T23:58:48.946Z–48.963Z`；
+该读数不作为未来冷启动的 fresh host gate。没有读取 guest 内容、哈希、ACL、copy、
+VM/SSH/服务动作，execution_authorized=false。实际 streams 与 terminal 保留；
+后继请求须用新 revision 绑定这些候选身份。TASK-0066 已真实创建为 NEW、草稿 validate
+通过，尚未 classify/freeze/Review/批准/begin。
+
+Phase 3 公开快照完成 61 个 tracked task 的覆盖/缺失盘点，780 输入前后和 root 回读
+hash 匹配；只绑定 `8ef4e723` 与自己的时间窗口。没有以 task 数、完成标签或失败后
+成功判定充分性，也未补私密模型身份、人类分钟、费用。详见[公开样本边界](phase-entry-proposals-2026-10-04.md#新增公开样本盘点2026-10-05只绑定该快照)。
+真实 Windows 资格执行包仍在修订独立审查发现的失败证据及期限缺口；源码保持冻结，
+完整 V2 和高风险动作尚未执行，持续目标保持 active。
+
 ## 2026-10-05 历史成本离线分区完成
 
 独立修订后的 offline caller 002 已唯一执行，exit 0、180867600 ns，root 独立前后
