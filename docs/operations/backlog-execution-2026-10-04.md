@@ -1,5 +1,68 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 NativeGit 治理准入与后继单次请求
+
+本轮完成两个真实可审查前置条件，不将七项待办缩为局部接口或准备检查。
+新 managed checkout来自真实私有HEAD `9eb42ad`和Task63–66前缀，UUID保留；
+未选择发布A/B、迁入截断账本或手工分配ID。安全test-only提交 `3ee817d`
+先于native start，只新增 `tests/unit/test_git_execution_injection_contract.py`
+377行，raw SHA `0c8cc89544825c2c36269283719dcb97679395a71211d5db13d4bc2577c14309`。
+实际pytest `c74c94` exit1/31 cases=6 failed+25 missing-API errors、0 skipped；
+Ruff/format `298509` exit0。非作者GO_FOR_SAFE_TEST_COMMIT，report SHA
+`7ab2753f00b3957003f7d63f8a29530cff18898870387b2d712e87f187df2e11`；
+这是预实现RED，新fixture bodies尚未通过。原source/tests未改，新module仍missing。
+
+native start `56a578`实际分配TASK-0067，base/subject自动取真实test commit，
+source allowlist精确为git_execution.py、git_context.py和scope.py；OwnTask另按
+原规则处理。validate `ba754e`、classify `61d273`、freeze `4456ad`均0；
+分类真实ROUTE-DEFAULT-REVIEW/V2。spec SHA
+`45830a047da8d943321cad4321d4b0f99fce07e381e4c296b64165b4fe0b6d16`，
+context canonical `ecfa33a68f394d77ab958fc83e3370330f21954f87fccbb28c6eb2bd7ed95e42`。
+独立Design重新核实际Task/context/Policy/输入与event，9 schema+19 pure checks
+通过、25输入两读稳定、APPROVE/findings=[]。root `1385c7`真实native record，
+actor windows_design；OwnTask-only提交 `372c0aa`，9文件316新增行，whitespace/
+portable通过。最新status `b2e643` exit0：WAITING_FOR_SPEC_REVIEW、REVIEW/V2、
+fresh、clean，唯一Missing spec_approval，approvals/evidence not_available。
+规格批准问题已发出，当前未获批准/未begin/source实现，Task66旧批准不涵盖三源码。
+
+规格完整覆盖五个公开入口与其内部Git，保留None/helper hooks、immutable raw
+DTO、falsey非None实例、默认argv/env/bytes/timeout/cleanup/error、metadata
+fallback、ordered ancestry和scope三来源；非法末HEAD在成功首pair后仍1call再False。
+接口不提供真实Git/进程身份/Job/硬截止或VM资格，也不宣称整个CLI已可注入。
+原子版本绑定、完整source projection、qualified backend和完整I1准入仍须成立。
+原native创建原件在树外保留；schema可选机器path诊断未入tracked记录，ID/UUID/
+base/subject/事件未手改。root初版读回错误将native updated_at当字节异常，第二
+版误用PowerShell自动date解析；两份失败保留，新pure JSON `5f65c7` exit0确认
+只有正常updated_at及event5增加、原1975B事件前缀不变。未重复record或修native数据。
+
+Task65当前status `8fd3ef` exit0：IMPLEMENTING/REVIEW/V2/fresh/current、
+evidence stale、Missing implementation_result；HEAD f6fb20a、subject4f23e5c，
+dirty仅本任务旧evidence.json。旧Action003 revision002 raw SHA18ef1b1...不变，
+expiry2026-10-06T13:36:25Z已早于实际native host UTC读，旧请求未执行且不延期改写。
+新revision003仅改expiry、摘要及condition10当前状态叙述；原retry23不是动作批准。
+新raw SHA `9f7ce126ac6a7e4f723937407c6696c68ed879916d9f96d10d20b9894daa5f50`，
+canonical `21545d3a6f86ff27083b42c6613f56b2ffcf84ec352c93bea3b40aebeb6d906a`，
+expiry2026-10-09T16:12:38Z，latest90min start14:42:38Z。作者74selected两读稳定；
+非作者 `226405` exit0/137 pure checks、31selected两读稳定、0必要findings，仅
+GO_FOR_NEW_ACTION_APPROVAL_REQUEST。report SHA
+`186fea851bf19ae6e653d3be93792bdd7bfd9a988fab9bfa92ce07156c9b4651`，
+manifest SHA `af5d1f1e0a37b77c66438ba747404555e8ec5a2df291aa1dcb7434dbcbd4d97a`。
+
+新的具体单次批准问题已发出；尚未approved/materialized/consumed/执行。原Action002
+SPENT和run10/14 FAIL保留；原14检查/budgets/85%总/90%diff、固定五、DEVNULL、
+限本次native自产临时workspace清理、launch-time身份/parent/binding与90min窗口
+守卫不变；34 required资格和console2未测、意外OS fault UNKNOWN不升级。完整
+验证前须具体批准，运行期间source/refs冻结、各Git写入阶段串行，不自动重试。
+
+root串行创建/冻结/record/提交；两sub-agent并行审test和draft，实际Design随后
+串行。过期请求后继的作者和非作者也串行，各owned leaf独占；root同时维护
+其他独立记录。证据在 `${RUNTIME_ROOT}/harness-model-backlog-20261004-001/`
+的i1-nativegit-governance-root-001、各test/draft/native-design-review leaf及
+ task0065-mutation-action-proposal-003-revision-003和对应independent-review-001。
+所有原件/失败保留。F/Task64实际BLOCK、I1 root-held共享provider缺口、发布A/B、
+I2/E5/I5/Phase 3/4的需求/门仍待决；aa37f12审查固定e214999不覆盖这些新追加。
+未执行新V2、VM/SSH、provider、CI重跑、push/merge或部署，七项目标保持active。
+
 ## 2026-10-06 I1 公开 self-query 已单次只读核验
 
 树外 wrapper self-query 组件已实现并封存，16553 bytes / SHA256

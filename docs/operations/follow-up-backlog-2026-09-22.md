@@ -1,5 +1,24 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 当前核定：NativeGit 新治理规格与单次验证请求待批准
+
+真实私有前缀的新 managed checkout 已完成独立安全测试提交 `3ee817d`，
+仅新增一个契约测试文件；31 cases 的预实现 RED（6 failed/25 errors/0 skipped）
+保留，Ruff/format通过，不称CI或V2通过。native start实际分配 TASK-0067，
+随后 validate/classify/freeze、独立 Design APPROVE和native review record完成，
+OwnTask阶段提交 `372c0aa`。当前 WAITING_FOR_SPEC_REVIEW / REVIEW / V2，
+classification fresh、worktree clean、唯一Missing `spec_approval`。范围精确为
+Git execution/context/scope三源码；尚未begin或实现，不复用Task66规格批准。
+
+Task65 status仍IMPLEMENTING/fresh/current、旧evidence stale。旧Action003
+revision002窗口已过期并保持未执行；新的revision003已独立通过请求审核，
+canonical `21545d3a6f86ff27083b42c6613f56b2ffcf84ec352c93bea3b40aebeb6d906a`，
+expiry `2026-10-09T16:12:38Z`，启动时须至少余90分钟。新规格批准与新单次动作
+批准问题均已发出，均尚未收到答复或执行；完整14项、原budget、85%/90%、
+旧失败/SPENT及资格UNKNOWN保留。F/Task64 BLOCK、I1完整资格、发布A/B和后续
+阶段条件仍待处理，本追加不在aa37f12的e214999发布审查覆盖内；七项目标active。
+详见[实际准入与请求](backlog-execution-2026-10-04.md#2026-10-07-nativegit-治理准入与后继单次请求)。
+
 ## 2026-10-06 当前核定：I1 公开 self-query 局部实现与实际核验
 
 树外self-query模块已完成，作者与非作者各14项纯检查通过，源码独审无必要
