@@ -1,5 +1,68 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 TASK-0068 设计已审查，短路径诊断继续
+
+本段追加当前核定，不替换下方原执行和失败窗口。TASK-0067 当前仍 BLOCKED /
+Missing `block_resolution`；TASK-0065 仍 FAILED / `retry_reason_or_escalation`。
+前者获批的一次完整 CLI 已发生，后者 Action003 已 SPENT；均未进行新 native V2。
+
+独立 task-free 安全契约测试先提交 `5da32d9`，增强版再提交
+`10f00bba6f7d3ebf34f78c3c90c9d0ddcc565632`：一次 6 RED / 14 PASS，0 skip/xfail。
+3 个合法 OwnTask 恢复被现行入口拒绝，2 个 foreign dirty 路径和 1 个真实 Windows
+junction 未被拒绝；其余负例通过不证明被旧 HEAD 拒绝遮蔽的下游批准/resolution 边界。
+生产 classifier 原件未改。
+
+native start 实际分配 **TASK-0068**，唯一生产 scope 为
+`src/aiflow/classification_service.py` 的 `_require_baseline` 与必要导入；真实 base/source
+subject 均为 `10f00bb`，branch `codex/classification-governance-recovery`。
+validate/classify/freeze 已完成，REVIEW/V2；当前独立 Design Review `REV-0680/r1`
+为 APPROVE、0 findings，并由 root 实际 native record。治理阶段提交
+`c233b33f597585c3ef47a96d4d79ac1ce6ad94a8`，最终 status clean、classification fresh、
+WAITING_FOR_SPEC_REVIEW，**Missing 仅 `spec_approval`**。已请求新任务的当前规格决定，
+未进入实现或记录人类批准。
+
+冻结 spec SHA256 `0e8f30835dd27accc208652f5f469c473115c617277b56ab462e7048daa97840`，
+classification input `715ad33ff1408e2091d99bbc8aea29ac7939d903c3bb62228bd4e27c47506a89`，
+design context `16c27ca5260aabea6f00c43fa241c2633135df084e3413ff36cc72d0116c7214`。
+`${TASK68_CHECKOUT}/.ai/tasks/TASK-0068/spec.md` 保持初次 NEW 严格身份、真实 ancestry、
+OwnTask 物理归属/路径边界、pending/resolution/manual_authorization/current review/approval，
+不改变完整 14 项、原预算、85% 总覆盖率 CI 门与 90% diff coverage 门。
+root 设计封存 `${RUNTIME_ROOT}/task0068-native-design-root-preparation-001/REPORT.md` SHA
+`f175f469fa8bb456bb85204b9ce9ecdfeea3986c4bb632e614fb255dbae5b42d`；
+manifest `fafc561e45ef771db59f3862678630307d4f5fcb64f31a3af7fecdc411831564`。
+独立审查只批准设计结论，不授予人类规格/动作批准或 TASK-0067 恢复权限。
+
+TASK-0065 局部 file-API 对照已在 UTC 08:05:21.9472227–08:05:22.0374283 执行一次：
+
+| public os.open cell | 普通/API 字符数 | 实际观察 |
+| --- | --- | --- |
+| ordinary-short | 190/190 | 新 0B 文件创建成功，close 一次确认 |
+| ordinary-long-264 | 264/264 | FileNotFoundError，errno2、winerror=null，无 fd |
+| extended-long-same-physical-length | 264/268 | 不同名 0B 文件创建成功，close 一次确认 |
+
+同实际 text mkstemp flags 的三个一次性调用支持当前 review-record 临时写入的路径命名空间因素；
+不是 mkstemp 本身调用、Win206 证明、原节点通过或三个完整超时的共同根因。ENV4 与原 prefix ENV17 /
+full native ENV2 区分；raw stderr 空、双 drains EOF、已知 closes/dispose、20 protected 与 packet
+前后 guard 相同。264 字符文件 postread 用明确 extended namespace，失败文件 absent、成功文件 0B；
+root 自有普通 lstat Win3 与 duplicate-reference reader error 分开保留，不倒填目标 null winerror。
+root capture `${RUNTIME_ROOT}/task0065-file-api-root-execution-001/REPORT.md` SHA
+`3f18a529e905294883d99964bc9a5d0726626b5111566f9bb6e29f02b7cfa024`；manifest
+`23c6497f48512901ddde7502da5d5e671c1cc497a081890d0bb01607f6a77db5`。
+
+完整 native V2 还会追加 container50 与 pytest leaf15；22 字符父目录仍令已知临时名达到264，
+不视为解决候选。root 另新建并保留 6 字符普通空父目录 `${SHORT_PYTEST_PARENT}`；当前原生
+只读 validate/plan 通过，默认派生 basetemp73，已知首号 review-record tmp248。动态嵌套及
+pytest suffix 的整体最大值未知；没有创建 run container 或调用 producer。父目录 binding
+`${RUNTIME_ROOT}/task0065-native-v2-short-parent-preparation-002/short-parent-binding.json` SHA
+`572b4474b1e153470ce664c5d3acbe92d8b8531555af57b4a37860e71ef4b064`。
+普通 prefix004 已封存但独审为 NO_GO：环境请求路径仍指旧003、限制文字未反映短路径、
+一个纯检查 receipt 指针悬空；尚未调用目标。旧包与作者检查原件保留，新005修订和观察器
+绑定暂停等待 fresh 独审。完整 V2 重试仍需原生机械 retry 准入、当前独立 verifier 与
+新精确 action。旧范围、检查、预算、阈值和失败原件保留。
+
+七项目标仍 active。008 外仓窗口、Task63/64 BLOCK、Task66 implementation 及 I1/I2/E5/
+I5/Phase3/4/发布方向条件未因本准备关闭。上述本地提交未推送/合并，不在旧发布独审覆盖内。
+
 ## 2026-10-07 TASK-0067 获批执行失败，声明恢复已 BLOCK
 
 所有者回复“TASK-0067批准”已实际登记为 Action001 revision003 的精确单次批准，

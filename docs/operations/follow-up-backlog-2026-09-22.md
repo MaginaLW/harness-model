@@ -1,5 +1,24 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 当前核定：TASK-0068 设计待规格决定
+
+TASK-0067 已获批执行一次完整 V2 并失败，现 BLOCKED / `block_resolution`；原批准调用
+已发生，不能据 mutation 未消费复用。独立恢复治理任务 **TASK-0068** 已真实分配，安全契约
+基线为 6 RED / 14 PASS，生产源码未改；REVIEW/V2、冻结设计已独审 APPROVE 并原生记录。
+治理阶段 `c233b33`，当前 clean/fresh、WAITING_FOR_SPEC_REVIEW，仅 Missing `spec_approval`；
+精确当前规格决定已请求，尚未实现。规格与实际证据见
+[新治理任务与诊断](backlog-execution-2026-10-04.md#2026-10-07-task-0068-设计已审查短路径诊断继续)。
+
+TASK-0065 普通 file-API 三对照已观察：普通190成功、普通264报 errno2/null winerror、
+extended 物理264成功，支持该 review-record 临时写入的路径命名空间因素；完整三个超时
+共同原因仍 UNKNOWN。原生完整运行会叠加67字符，因此新6字符普通空父目录只完成当前
+只读结构准入，known tmp248，不宣称整体动态最大值或完整验收。短 prefix004独审发现
+旧环境绑定及准备证据指针错误，NO_GO且未执行；新005修订与观察器等 fresh独审。
+原 FAILED/SPENT 保留，未新 native retry/V2。旧 spec/code/动作批准不移植。
+
+七项目标 active；外仓008精确 workflow 窗口及其限制、Task63/64 BLOCK、Task66 IMPLEMENTING、
+I1实际资格与后续阶段/发布条件保留。下列旧段只描述各自原窗口。
+
 ## 2026-10-07 当前核定：TASK-0067 完整验证失败并 BLOCK
 
 “TASK-0067批准”已实际登记并用于一次原14项完整V2：10 PASS、4 FAIL，原生 FAILED。

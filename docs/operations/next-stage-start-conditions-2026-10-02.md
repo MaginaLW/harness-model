@@ -1,5 +1,12 @@
 # 下阶段启动条件：2026-10-02
 
+2026-10-07 追加：独立恢复任务 TASK-0068 当前 frozen REVIEW/V2 设计已通过独审并原生记录，
+治理阶段提交 `c233b33`，clean/fresh、WAITING_FOR_SPEC_REVIEW / Missing `spec_approval`。
+基线契约6 RED/14 PASS是实现前缺口，生产源码未改；它不解除 Task67 BLOCK、Task65失败或 I1 资格门。
+普通 file-API 对照支持 review-record 临时写入的路径命名空间因素，完整超时共同根因仍未知；
+新普通短父目录仅当前结构准入，未发生完整重试。真实规格、诊断和后续限制见
+[本轮新增核定](backlog-execution-2026-10-04.md#2026-10-07-task-0068-设计已审查短路径诊断继续)。
+
 2026-10-07 当前窗口补记：TASK-0067 已获批执行完整V2但原生 FAILED（10/14），
 随后 BLOCKED / Missing `block_resolution`。I1公开接口已有实现不等于实际 lifecycle
 backend资格；声明恢复及重分类治理限制另在准备，不解除下列进入门。
