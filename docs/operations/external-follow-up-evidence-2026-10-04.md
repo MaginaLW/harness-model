@@ -1,5 +1,22 @@
 # 外仓后继证据与剩余依赖：2026-10-04
 
+## 2026-10-08 dotfiles 四项 CI 成功，r3s 仍未完成
+
+Dotfiles 019窗口 UTC 2026-10-07T19:49:02.5639694Z–19:49:33.1861471Z：[Validate run37662955635](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37662955635) actual attempt1 completed/success，updated19:32:35Z。
+本轮仅直接查询 run、shard3/job112934838593和末 main，各一次；该job actualrun_id/head_sha/run_attempt匹配，completed/success19:32:34Z，test step19:32:30Z成功，7个返回steps全部success。
+两者与末 main 同 `7c0aab19b6e42ad96ee3681f1a9a3b4c50aebe7f`；连续窗口稳定性未知，成功HTTP数字码未捕获。没有重新读取全部jobs即时列表。
+结合018同SHA/actualattempt1的gates、shard1和shard2成功终态，固定源定义的4个job成功证据已齐，整个本次Validate成功；018的19:19窗口保持历史，不称四job同窗口观测。
+`${RUNTIME_ROOT}/external-current-head-ci-019/manifest.json`：`1ca558c86c689df2c8bf627db4d63e4baf19b0a9245f1ae537ef4348de3c3e99`，15 payload/self16；Root完整hash及原始run/job/末main复核通过。该CI不证明I1、I2、Apply、provider或native清理资格。
+
+独立仓 r3s 010窗口 UTC 2026-10-07T19:59:26.5859992Z–20:01:38.5232530Z，5次GET各一次、HTTP200/rc0；首末 main 同 `8898f48c6470857aa402224d6ece4be86abbe4f2`，非原子窗口。
+从当前head完整页1/total1重新选出 workflow345447146 唯一latest run37499267909、actualattempt1，completed/cancelled；POSIX job112391761795 cancelled/0steps/runner0，Windows job112391762315 success/7steps全success，实际run/head/attempt字段匹配。
+新的repo runners完整页1/total1仅返回Windows21 online/idle，Linux22未返回；不能沿用009的offline快照断言当前状态，也不能由未返回推断删除、注册来源或host/guest/service故障。双通道仍未完成。
+`${RUNTIME_ROOT}/external-r3s-current-dual-channel-010/manifest.json`：`13b7363b0ee6c0de987daa68d4ab10810a81cfccecf76de1a90b889352bfa6c2`，23 payload/self24；Root完整hash、5个原始HTTP200 body及run/job/runner字段复核通过。取消、未返回和宿主原因未知。
+
+上述准确句柄均为已观测终态，停止等待；无自动发现新job、重跑、注册变更、VM/SSH/service动作或远端写入。恢复方案须先核准确注册来源/宿主事实及独立准入，不能从Windows成功推导POSIX完成。
+TASK-0065 Action005仍无匹配批准；发布A/B、新I2/E5目标问题待答，既有有效规格、原生FAILED/SPENT和85%/90%门保持。0065/NativeGit验收未完成，I1真实启动、Apply、Phase3/4及发布未准入，七项目标仍未全部完成。
+本阶段仅追加三个维护入口；候选81、私有源码/账本及三用户草稿保持。以下原标题与全部旧正文raw保留，旧窗口不被新终态覆盖。
+
 ## 2026-10-08 远端任务目录与分片合同补项
 
 发布仓 `MaginaLW/harness-model` 的新只读窗口为 UTC 2026-10-07T19:12:58.317506Z–19:13:05.020980Z，4个 official GET 各一次。
