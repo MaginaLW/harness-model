@@ -1,5 +1,54 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-08 核定：Task68 完整验证失败，Task65 超时观察与局部 QA 已提交
+
+以下为本地 2026-10-08 的证据核定；运行及外仓观测时点均以 UTC 明示。
+Task68 唯一完整原生 V2 `run-20261007T131235907044Z` 于
+2026-10-07T14:01:34.5646008Z 终态：14 项中 10 PASS、4 FAIL。
+regression、coverage、integration 分别在 900032、1200047、600031 ms 超时；
+diff coverage 因同 run 的 coverage.xml 缺失失败，85% 总体与 90% diff 未获证明。
+原生 evidence SHA256 `4795b8de1f36149c058a834da9c6f404c3e47e9b80c8a0b146ed5a04cd71a49b`；
+Action001 `0463b271fb460b7df626b341640a035a11ed87f02385910fe1371ea5f25c6b89`
+已消费且不可复用（SPENT）。原执行包封存 59 payload / 60 files，manifest
+`ec0a1e9d9fa7eb4e7275d8668c16df08496b5c550ff29edf67ed7e0077e6d1d5`，
+位于 `${RUNTIME_ROOT}/task0068-native-v2-action001-execution-001`。
+机械诊断恢复 event21（2026-10-07T15:50:21Z）、commit
+`c16e77f3f23768a81f857633462eb5ccbdf23655` 使任务回到 IMPLEMENTING；
+该阶段 status 缺 implementation_result。旧失败、SPENT、20-event 前缀及三条批准保留，
+source `21f90a59940b888e7233b76fc3ee43f915f378ad` 保持；此恢复没有执行第二轮完整验证。
+
+Task65 首次通信超时的可选观察已提交，治理 source commit
+`499f00ff74e6c169defe81e46899b98c97221fbc`；安全测试独立 commit
+`3489113fd95d3ecf02eaca12d8b3edaee9113999`。仅按既有读取顺序保存标量状态和
+monotonic 时间，不记录原始输出或敏感信息；它不是截止瞬间的原子采样，不能倒推旧超时因果。
+最终 94 项 fake-only 合约测试 PASS（0.49s），Ruff、format（136 files）、mypy（45 files）PASS；
+首次 format FAIL 原件保留，修正仅改两处换行且完整 AST 相同。
+非作者静态及格式后独审为 STATIC_APPROVE，0 unresolved finding；格式后独审 manifest
+`6246a692ec0a7ff6ca575e554070428ecf5be1d3e46e93b541d8636caece84a8`。
+证据分别在 `${RUNTIME_ROOT}/task0065-timeout-observation-local-qa-001` 和
+`${RUNTIME_ROOT}/task0065-timeout-observation-formatted-review-001`；QA 仅封存顶层常规文件，
+保留的 mypy-cache/temp 子树未读取、未哈希。上述结果不构成完整 V2、CI 85%/90% 或 Windows
+OS qualification；旧 Action004 已 SPENT，新的完整验证仍须具体 Action 批准及 fresh admission。
+
+Task68 单一既有节点一次 cProfile 实测为 1 PASS（pytest 2.90s、进程 elapsed 3.375s），
+`${RUNTIME_ROOT}/task0068-single-node-profile-001` 为 PARTIAL_DIAGNOSTIC_PASS，
+12 payload / 13 files，manifest `d35821f620152971a4815ee0b89abeb27a148f3cde0dfb3ddad333b29879f5c9`。
+该节点生产 Git 30 次 / 0.823s，fixture Git 13 次 / 0.619s，contract validation
+159 次 / 0.558s，其中 schema registry 0.389s 属嵌套成本，不可相加。
+原 timeout 的 active node 与共同根因仍 UNKNOWN；尚无经证明的成本优化，原 schema 成本优化
+NO_GO 与 Git 新鲜度边界保持，不扩大 Task64/68 冻结规格，也不以该局部结果验收或恢复 Task67。
+
+外仓快照010仅覆盖 2026-10-07T13:56:57.5409514Z–13:58:01.1624122Z：
+前后 main `3e1663ee998b886b63238fe197d9f7a2a3a4ce73` 相同，Validate run
+[37630229655](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37630229655)
+为 in_progress / null；四项 check 均匹配该 head，gates success、三个 shard in_progress，
+combined status pending / 0 contexts。required-status-checks GET 实际 HTTP404
+“Branch not protected”；required names 与整体 required CI 为 UNKNOWN，不推断其他规则。
+`${RUNTIME_ROOT}/external-current-head-ci-010` 已逐项核对 25 payload / 26 files，manifest
+`e9fde2c2f1361ec0e66a55c3bfe623de4065888cd4f9d465fbb4323fee5ad8a2`；
+此历史窗口不表示本次核定时远端状态，未新增 GET、CI dispatch 或远端写入。
+七项目标尚未全部完成，既有进入、验收、发布门保持；下文原记录完整保留为早先时点。
+
 ## 2026-10-07 Task68 Action001 已批准并真实启动完整验证
 
 人类已批准 Action001 revision002 的一次完整原生 V2；原生 human/action 批准为
