@@ -1,5 +1,29 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-08 远端任务目录与分片合同补项
+
+发布仓 `MaginaLW/harness-model` 的新只读窗口为 UTC 2026-10-07T19:12:58.317506Z–19:13:05.020980Z，4个 official GET 各一次。
+首末 main 同为 `db3efabab562971aef1a6eb1317b679d42eeadb9`；固定该 SHA 的任务目录完整返回61项、最高 TASK-0062，0063–0068均不存在；远端 UUID 与本地及六个 private owner 相同。
+这是实际窗口观测，不能由首末相同证明连续稳定，也不证明私有账本已整合、内容等价、CI或验收。发布 A/B 方向仍待决定。
+`${RUNTIME_ROOT}/publication-remote-current-namespace-001/sealed-manifest.json`：`96dcf67220b0beea5e805ae7d9e024bffc58a3e4b5466806d822e2c8a9acbd84`，25 payload/self26，独立读回通过。
+
+外仓 dotfiles 的018窗口 UTC 2026-10-07T19:19:31.9876639Z–19:20:03.1144181Z：[Validate run37662955635](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37662955635) 仍 in_progress/null，actual attempt1。
+完整4项 jobs 均由实际 run_id/head_sha/run_attempt 字段绑定 `7c0aab19b6e42ad96ee3681f1a9a3b4c50aebe7f`，名称恰好对应固定 workflow；gates、shard1、shard2均 success，仅 shard3/job112934838593 in_progress/null。
+shard2终态18:52:03Z、shard1终态19:11:17Z；末 main 同7c0，只有末观测，不证明全窗口稳定。3次 GET CLI rc0，成功 HTTP 数字码未捕获；整体工作流尚未成功。
+`${RUNTIME_ROOT}/external-current-head-ci-018/manifest.json`：`8abf8ebdeb53d36a4389dd9014794e673542b59edb1e88abdf0c3188924b9294`，16 payload/self17；017原运行中窗口及实际attempt字段证据保留。
+
+固定同一7c0源的合同002仅读取 orchestrator、runner、shards、失败指南；4次 GET各一次，HTTP200，4个解码 Git blob 匹配，无源执行。
+源 workflow 将 unified-test-runner 交给3个分片，gates job选择其余10项；静态分片列7/9/27共43个独立 suite ID。旧42项记述保持为历史，不作为当前清单。
+`${RUNTIME_ROOT}/external-dotfiles-frozen-validation-contract-002/manifest.json`：`f905ef61724240be23f1592d50389cecaa9b27bede24747d763a92f7f182d035`，30 payload/self31。
+合同003仅再读取 [test-runner-common](https://github.com/MaginaLW/ai-agent-dotfiles/blob/7c0aab19b6e42ad96ee3681f1a9a3b4c50aebe7f/scripts/test-runner-common.ps1) 与 [test-timeouts](https://github.com/MaginaLW/ai-agent-dotfiles/blob/7c0aab19b6e42ad96ee3681f1a9a3b4c50aebe7f/tests/test-timeouts.psd1)，UTC 19:17:05.9185922Z–19:17:08.1985029Z，2次 GET各一次、HTTP200及2个 Git blob 匹配。
+直接实现拒绝缺失、重复、extra和空分片，分片并集须精确覆盖实际发现集合；Counts以所选suite计，非单条断言数，非零/timeout不能满足PASS。实际发现集合、底层native runner、JSON helper/schema和进程清理资格仍未证明。
+静态 RequiredJobTimeoutSeconds = 300 + 所选suite超时总和 + 120；三分片为8700/10260/12495秒，workflow为10200/11100/14100秒，余量1500/840/1605秒。该不等式经独立算术核对，helper只记录预算，不强制workflow时限，也不证明实际耗时。
+`${RUNTIME_ROOT}/external-dotfiles-frozen-runner-contract-003/manifest.json`：`2f68207eeae89218312f5b89afc8a19d8a73f259ed99fe7e7f00ff1386ba347d`，18 payload/self19；未递归读取callee或套用本仓85%/90%作为外仓合同。
+
+TASK-0065 Action005的具体批准、发布账本方向和新I2/E5目标问题仍待答复；原生失败/SPENT与既有规格批准保持。TASK-0066规格要求的0065/NativeGit验收未完成，冷启动动作未生成。
+本阶段只追加这两份维护记录；候选81及私有源码/账本未改，本轮未发起原生验证或远端写入。Apply、I1真实启动、Phase3/4及发布未准入，七项目标未全部完成。
+以下原标题与旧正文 raw 保留，旧窗口不被当前静态合同或局部CI改写。
+
 ## 2026-10-08 外仓终态、当前窗口与固定源合同
 
 `MaginaLW/ai-agent-dotfiles` 015：UTC 2026-10-07T17:55:28.2899123Z–17:55:50.9557526Z，[run37643757056](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37643757056) 与 job112905949241 的实际 attempt2 均 completed/success，终态17:54:57Z；head与末 main 为 `b04613f5e5fdcdbbe5fae65453a28b84f8460bd7`，旧句柄已停止等待。
