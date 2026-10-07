@@ -1,5 +1,21 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 当前核定：完整 V2 失败，新 NativeGit 单次请求待批准
+
+TASK-0065 已完成一次原完整V2，native FAILED：10/14PASS、4/14FAIL。
+regression/coverage/integration均超时，diff coverage因XML缺失失败；unit2112PASS、
+acceptance9PASS、五mutation killed不推翻required失败。Action003已真实消费，
+事件27状态FAILED，Missing retry_reason_or_escalation；没有重试或finalize。
+当前85%同dataset未测、90%检查失败且无百分比；原检查/预算/阈值与旧失败/SPENT保留。
+只读诊断未得到本轮失败traceback，候选fixture/helper修复超Task65已批范围。
+
+TASK-0067 三源实现与局部检查已通过；正式V2尚缺。新Action001 revision003
+canonical3ae0f935...的请求与执行包分别通过独审，均不表示执行批准或质量通过。
+新ENV绑定原件已封存，旧393d仅历史；本次新单次请求已发出，仍待具体人类批准。
+详见[完整验证与新请求](backlog-execution-2026-10-04.md#2026-10-07-完整原生-v2-失败nativegit-新单次动作待批准)。
+七项目标active，F/Task64、I1完整资格、发布方向及后续阶段进入条件仍待处理。
+本追加没有远端动作，不在aa37f12/e214999发布独审覆盖内。
+
 ## 2026-10-07 新批准已登记，NativeGit 源实现已提交
 
 所有者“批准这些权限需求”已实际登记：TASK-0067 spec approve/begin均rc0，

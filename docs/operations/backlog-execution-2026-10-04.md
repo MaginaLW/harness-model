@@ -1,5 +1,42 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 完整原生 V2 失败，NativeGit 新单次动作待批准
+
+TASK-0065 本轮由真实独立 verifier `/root/case_review006` 单次执行，
+run `run-20261007T042015660050Z` 从04:20:14Z到05:08:27Z结束。
+同session10114的actual终态工具1ad61d exit0，双raw stream完整捕获；
+native evidence实际结论FAILED，14required中10PASS/4FAIL，不称CI或验收成功。
+regression/coverage/integration分别RUNNER_TIMEOUT 900015/1200016/600032ms；
+diff coverage因本run coverage.xml不存在而exit1。unit输出2112PASS、acceptance9PASS。
+本run没有可用coverage数据，85%同dataset为UNKNOWN_UNMEASURED；90%检查FAIL且
+没有百分比，不借旧dataset、不combine suffix、不补跑。五固定mutation均killed，
+但不消除required失败。Action003 canonical21545d3a...实际05:08:00Z消费，
+native事件26消费/27verification_failed，状态FAILED，Missing retry_reason_or_escalation。
+
+native evidence raw SHA `d01a2544be138243d0f7f1d2973efbc5b7639c684ef09e30da94dcb18119f40b`，
+新receipt raw037594cb...、mutation rawab60b1eb...与canonical6bbfd9c0...分开保存；
+旧failed raw062c5f67...与Action002 SPENT不变。verifier私有report28384182...、
+manifest e09d8984...已封存，89 selected两读稳定；启动输入和五冻结文件未改。
+当前已批累计范围是两源码、三unit tests与OwnTask，不能把“五文件”写成“五源码”。
+四个F模块尚无本轮失败traceback；旧WinError206不是本轮同根因证明。
+只读诊断最终manifest02357211...保留；候选fixture/helper修复超出Task65冻结范围。
+当前不BEGIN/retry/finalize，不伪造passed Implementation Review，不降低原门禁。
+
+TASK-0067 源码subject38ca6dc和73相关cases通过保持，非作者另30个purefake
+检查通过；正式完整V2仍缺。其新Action001 revision003只修ENV绑定，原三源、
+14checks/预算、85/90、fixed5/60s/DEVNULL、限定原生临时清理、单次与到期
+2026-10-10T04:26:28Z（启动至少余90min）保持。canonical
+`3ae0f93506d2b8c075b598d06465a2cf49a5505fb18d66a7f608506a872965c7`，
+rawc619c909...、invocationrawd338d3a8...；旧393d请求/审查只属历史，不覆盖新ENV。
+新请求独审98断言/31selected稳定/0findings，仅请求批准GO；独立启动包审查
+46检查/28selected稳定/0findings，仅准备包GO，未执行guard/launcher/业务。
+root actual status897c70：IMPLEMENTING/fresh/current/clean、Missing implementation_result。
+具体新版单次请求已发出，尚未获新action批准或材料化；不得借Task65已消费动作。
+
+七项目标仍active，Task63/64原BLOCK、I1完整backend资格、I2/后续phase条件和
+发布A/B方向未关闭。所有当前原件在`${RUNTIME_ROOT}`对应新leaf保留；本文追加
+不在aa37f12/e214999发布审查覆盖内。本轮没有远端、provider、VM或付费动作。
+
 ## 2026-10-07 新权限批准已登记，NativeGit 源实现已提交
 
 所有者新回复“批准这些权限需求”后，root回读两个native status和封存摘要。
