@@ -1,5 +1,33 @@
 # 下阶段启动条件：2026-10-02
 
+## 2026-10-08 外仓终态、当前窗口与固定源合同
+
+`MaginaLW/ai-agent-dotfiles` 015：UTC 2026-10-07T17:55:28.2899123Z–17:55:50.9557526Z，[run37643757056](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37643757056) 与 job112905949241 的实际 attempt2 均 completed/success，终态17:54:57Z；head与末 main 为 `b04613f5e5fdcdbbe5fae65453a28b84f8460bd7`，旧句柄已停止等待。
+证据 `${RUNTIME_ROOT}/external-current-head-ci-015`，manifest `676b839fd544d760a122d5cebea61ccdd250a394bc4ac69f10322e5759fb0233`；该成功不覆盖后继 head。
+
+同仓016：UTC 2026-10-07T18:08:00.5989152Z–18:08:54.9336248Z，首末 main 同为 `7c0aab19b6e42ad96ee3681f1a9a3b4c50aebe7f`；唯一 Validate [run37662955635](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37662955635) 实际 attempt1 为 in_progress/null。
+4个同头 checks 中 repository gates success，3个 test shards in_progress/null；各 check 没有 attempt 字段，仍 UNKNOWN。5次 GET 均 CLI rc0，旧 helper 未捕获成功 HTTP 数字码，HTTP code UNKNOWN；首末相同不证明全窗口稳定。
+证据 `${RUNTIME_ROOT}/external-current-head-ci-016`，manifest `61abf4590f6a4813c3feb2cc7f804827685dced9413e15da7dbba02bbfac01a5`；无完整终态，当前工作流验收未完成。
+
+固定源合同读取窗口 UTC 2026-10-07T18:12:21.1945797Z–18:18:48.9692031Z：仅读取同仓 `7c0aab19` 的 Validate workflow 与 AGENTS，3次 GET 各一次、HTTP200/CLI rc0，解码内容未执行。
+该 workflow 明确定义4项预期：Validate repository gates、Validate test shard 1/2/3 of 3；与016四个 checks 对应，3个 shard 尚未完成。
+源内强制 shard 非零退出失败、summary 存在且 Passed==Discovered；AGENTS 要求原范围/阈值及 required CI，本地检查不能替代 CI。底层脚本与完整数值阈值未读，不能迁用本仓85%/90%作为外仓合同。
+[固定 workflow](https://github.com/MaginaLW/ai-agent-dotfiles/blob/7c0aab19b6e42ad96ee3681f1a9a3b4c50aebe7f/.github/workflows/validate.yml) · [固定 AGENTS](https://github.com/MaginaLW/ai-agent-dotfiles/blob/7c0aab19b6e42ad96ee3681f1a9a3b4c50aebe7f/AGENTS.md)；`${RUNTIME_ROOT}/external-dotfiles-current-workflow-contract-001` manifest `b9b7c06075434827addf41dbc5f6948b67324b4623670cfab1f1397692b783df`，不是 latest-main 证明。
+
+同仓保护窗口 UTC 2026-10-07T18:01:18.9897731Z–18:01:22.2920971Z：branch main 为7c0、protected=false、protection.enabled=false、status enforcement off；classic required endpoint 为 HTTP404，active rules HTTP200完整 []。
+服务器 required status names 为空仅是上述三次顺序响应的交叉推论；classic endpoint 没有成功名单对象，全窗口保护稳定性未知。该空集不豁免源合同，不构成质量或 Apply 验收。
+证据 `${RUNTIME_ROOT}/external-classic-protection-current-001`，manifest `ad746e4a92bb412118f351c8d59a8aa55dce4e8a20a69e7e345c4ca7e33812c5`；旧404与失败原件保持。
+
+独立仓 `MaginaLW/r3s-VPS` 009：UTC 2026-10-07T18:13:10.0979220Z–18:16:39.0292353Z，首末 main 同为 `8898f48c6470857aa402224d6ece4be86abbe4f2`；5次 GET 各一次、HTTP200/CLI rc0。
+offline-verify run37499267909 实际 attempt1 completed/cancelled；POSIX job112391761795 cancelled、steps=[]、runner_id=0，Windows job112391762315 success且7个 steps success。无 live 句柄可继续等待，双通道仍未完成。
+Linux runner22 offline/idle、Windows runner21 online/idle；取消与 offline 原因 UNKNOWN，started_at 不足证明 POSIX 执行，不自动恢复或重跑，也不由 Windows 状态推出原始门禁或 provider 资格。
+证据 `${RUNTIME_ROOT}/external-r3s-current-dual-channel-009`，manifest `f5e306ddc2ddfc7b54c718e0c2f867881dc84f7ee8787cf5d65c4ce41329844a`；两仓 head、工作流及窗口分别绑定。
+
+Root 实际只读原生核对：TASK-0063/0064/0067 仍 BLOCKED / Missing block_resolution，0065/0066/0068 仍 IMPLEMENTING / Missing implementation_result；六项 classification fresh、批准 current，0066 evidence not_available，其余 evidence stale。
+TASK-0065 Action005 仍待具体批准；0068 的10/14 PASS原 FAILED与SPENT、既有规格批准及本仓验证阈值保持。I1假接口准备与候选81的原来源窗口未扩展，候选不包含本次前缀。
+发布命名空间、新 I2/E5 方向和 Phase3 门仍待决定；Apply、Phase4与发布未准入，七项目标未全部完成。本阶段仅追加维护文档，无新的原生验证、远端写入或自动 watch。
+以下原标题与全部旧正文 raw 保留；旧窗口、失败与未知结论不被改写。
+
 ## 2026-10-08 I1 假接口准备、文档候选与外仓后继窗口
 
 I1 root-held 生命周期 backend / observer 接口仅在 runtime 完成假接口准备。
