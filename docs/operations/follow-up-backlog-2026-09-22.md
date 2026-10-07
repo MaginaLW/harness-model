@@ -1,5 +1,34 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 Task68 Action001封存独审并请求具体批准，Task65单节点实测完成
+
+Task68 Action001 revision002及一次启动器已封存，非作者独审为
+GO_FOR_SPECIFIC_ACTION_APPROVAL_REQUEST，0 unresolved finding；仅支持具体批准请求。
+Action canonical `0463b271fb460b7df626b341640a035a11ed87f02385910fe1371ea5f25c6b89`，
+expiry2026-10-10T12:00:00Z、启动余量至少90分钟，实际verifier为/root/f_recovery。
+完整14项、原4110秒逐项预算总和、85 branch总体/90 diff、固定5项各60秒DEVNULL
+及原本次调用所有的有界清理保持；没有新outer wall或整轮自动重试。
+Data26payload manifest `24e36092a20a9e9ca3d2e7fba9b76fc6066c61b8a190ecb89217211780a21e93`；
+launcher19payload manifest `fd82370e89260ed468adf74bdd5c486c337a12ee5c9ad13603c195ad1bd4ec8d`。
+独审10payload seal `cfef087c6be44c43e23ece074a653da1a1723a0a461773f9061fb34489d37841`，
+7001行/6992union与9trees双读稳定，只是启动前有限输入证明。
+唯一非原生时间相等条件已修复、旧candidate raw保留，未重批或执行来凑同秒。
+
+Root fresh status仅缺implementation_result，scope eligible且reason空、原spec批准current；
+实际native API验证该Action DTO/canonical，但matching action approval仍缺。
+原生Design context839d90b7与verifier context421356b8是不同schema，分别读取、不混用；
+Root初读错误断言保留并修正，只读错误未触发批准/验证/消费。
+已向人类请求这一具体Action批准；此记录时尚无新grant、final approved HEAD或fresh
+launch admission，完整V2尚未运行，不以80项targeted PASS代替验收或Task67恢复。
+
+Task65普通单节点 tests/unit/test_git_context.py::test_unparseable_head_is_rejected
+一次实测恰1 PASS/2.13秒，setup/call/teardown、parentexit0、双EOF和关闭回执完整，
+无超时/terminate/重试。封存20payload manifest
+`36c89cdb14fb785d5692a5de115ff77cca9c18354a3d5bda1c439892bc4f1ef2`。
+40项SHA/size不变；部分before大整数经过V8 Number丢精度，不能宣称全40精确stat。
+节点不是已知旧active node，原三timeout根因UNKNOWN、10PASS/4FAIL、Action004SPENT不变。
+以下各段保留历史时点，七项目标及其余验收、进入和发布门仍保持。
+
 ## 2026-10-07 外仓当前快照009：dotfiles main变化，当前requiredCI未知
 
 官方GitHub仅8次只读GET，窗口12:27:30–12:28:35 UTC。dotfiles main变为
