@@ -1,5 +1,44 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 Task65 完整验证失败并进入诊断准备，Task68 定向80项通过
+
+Task65 Action004 的唯一完整调用已结束，实际 run
+`run-20261007T110154452542Z` 为 FAILED，十四项10 PASS /4 FAIL。
+regression、coverage、integration 分别耗尽原900/1200/600秒通信预算；
+diff coverage 因本 run 的 coverage.xml 缺失失败。Unit2112 PASS、acceptance9 PASS
+和固定五项 mutation PASS 不代替完整验收或CI85/diff90。原始证据SHA256
+`623ad02f55dfb746626a458a967adcd933ed545998ef9cf8dddd85a7c5a27457`。
+Action004 已原生消费、SPENT且不可复用；没有再次运行完整验证。
+执行封存 `${RUNTIME_ROOT}/task0065-native-v2-action004-execution-001`，manifest
+`43a5370a5bd35d083f3bdb895ad830445990cdb49703104d6c8d7e2ca9e65f75`。
+启动器旧terminal canonical字段保留实际object写入缺陷；其他独立原件确认消费绑定，
+不改写该字段、不以此撤销SPENT或授权重试。
+
+Root按fresh status缺项机械begin，event33仅恢复IMPLEMENTING诊断准备，source不变；
+阶段commit `2003f634c0b82b2a1fcc82bb684da1c35b833993`。原event32失败、全部旧原件保留。
+独立只读诊断已封存，manifest
+`dd4f82d590c500b54cb107f3b9e6b5b3592a4cffe7036a698cded6a126e3c13b`。
+三项根因仍UNKNOWN：通信超时可由parent未终态或输出流未EOF任一项触发，
+现有日志只有terminate/release后回执。最后打印模块不能确定active node。
+后续仅准备单节点普通测量，不新增Action005或性能修复，不改变原预算和门禁。
+
+Task68 独立一次修复后定向测试实际80 PASS，0失败/错误/skip/xfail/xpass，
+真实Windows junction契约通过，旧三个Policy夹具案例全部通过；原77/3失败保留。
+80项耗时88.32秒，独立结果封存
+`${RUNTIME_ROOT}/task0068-classification-recovery-targeted-result-002`，manifest
+`fce44d2252ac8245afd80c87de2f4440ff6fb7a4a8fad22091e8015a6407033e`。
+实际结果report SHA256
+`fade4fc0ff85b605a7fad9b16fbbdefe92f43c843be3d69356bb4cef2d18be75`。
+OwnGov观察记录commit `2c75958680f5320bf5fe57f8fce7f64ffe9fac69` 后，native status
+IMPLEMENTING/Missing implementation_result，classification fresh、approvals current、clean。
+source21f90a5、原spec和唯一生产修改未变；定向PASS不是完整V2、CI85/90或Task67恢复。
+Task68 自己的Action001与启动器准备中，尚无该具体完整验证动作批准或执行。
+
+本阶段两名sub-agent并行负责Task65有限诊断与Task68动作/启动器准备；
+独立非作者动作审查在封包完成后串行进入，root账本与文档提交串行。
+七项目标active；F/Task64/Task67、I1/I2/E5/I5/Phase3/4和远端发布门未关闭。
+下面各段保留历史时点。
+
 ## 2026-10-07 Task68 当前设计已记录，合法恢复到实现状态
 
 独立 task-free 安全夹具已由单文件 commit
