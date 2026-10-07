@@ -1,5 +1,24 @@
 # 下阶段启动条件：2026-10-02
 
+2026-10-07 定向结果补记：Task68 source0dc233c已原生sync/event8，账本14fe42f；
+80项实际77PASS/3FAIL、20新契约及真实junction通过，旧Policy dirty fixture兼容待解。
+有限源码独审与static通过不当完整V2或解除Task67 BLOCK/I1资格；Task65 Action004
+once001计数NO_GO、002仅最小修订准备，新grant/完整V2仍无。见
+[当前定向结果](backlog-execution-2026-10-04.md#2026-10-07-task-0068-定向回归-7780旧-policy-fixture-兼容待解)。
+
+2026-10-07 规格回复后补记：Task68当前spec已获真实用户批准，native event6/7与阶段
+f48243c/e30fa8f已完成；当前IMPLEMENTING/implementation_result。单源码恢复入口修复已实现，
+Ruff/format/mypy通过，targeted回归与源码独审进行中；不是完整V2、Task67解除BLOCK或I1资格。
+Task65 Action004新动作及once入口独审仍待，不解除下方阶段/发布门。见
+[当前Task68](backlog-execution-2026-10-04.md#2026-10-07-task-0068-当前规格已批准并进入实现)。
+
+2026-10-07 封包补记：Task65 Action004 revision002仅完成非作者具体封包独审，
+50有效检查/5 DTO拒绝向量通过，必要finding0；680新增pyc语义UNKNOWN、007仍为有限历史资格。
+当前Task65 IMPLEMENTING/implementation_result，Task67 BLOCKED/block_resolution，
+Task68 WAITING_FOR_SPEC_REVIEW/spec_approval且classifier未改。尚无新动作批准/完整V2；
+once launcher、真实final HEAD与fresh launch条件仍准备，不解除I1或下方任何阶段门。见
+[Action004封包](backlog-execution-2026-10-04.md#2026-10-07-action004-封包独审通过尚未批准或执行)。
+
 2026-10-07 后续补记：一次prefix005普通诊断越过原review-record写入点并在原测试103行
 的verify_task入口 STOP，未进入producer；Task65随后仅完成native机械begin/event28，
 阶段41d6b59、当前IMPLEMENTING/Missing implementation_result。新Action004尚在fresh

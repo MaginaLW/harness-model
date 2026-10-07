@@ -1,5 +1,102 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 TASK-0068 定向回归 77/80，旧 Policy fixture 兼容待解
+
+独立一次80项定向回归实际77 PASS/3 FAIL、0 skip/xfail；冻结20新契约全部PASS，
+真实Windows junction创建rc0、attributes1040、Git可见foreign归属被拒。三个旧
+ test_classify_command 节点在恢复前保留未提交Policy，先被新OwnTask基线拒绝，
+未到它们所期待的pending identity、manual authorization或成功恢复检查。原trace/JUnit
+与失败fixture树保留，报告`${RUNTIME_ROOT}/task0068-classification-recovery-targeted-test-001/report.json`
+raw `6b28122ce784613ff3d9ac7475b0b1a0dec5b9abe8ed8c307280467ea203ca9a`，manifest
+`bec76a590f4587fbfc3001fcd808beb3182822a0a9075a01ce604a701f87a504`；root实读15payload/16exact及JUnit。
+这是 **FAILED_EXISTING_TARGETED_REGRESSIONS**，不是native完整V2的FAILED或验收PASS。
+
+源码独审仅有限通过：20selected稳定、10静态与30纯虚拟向量通过、必要finding0，
+其余模块AST保持。报告`${RUNTIME_ROOT}/task0068-classification-recovery-source-review-001/report.json`
+raw `7d22975425ab7a73624bdeaee328199bb304e4ff5a79bccf3cd7943a163d112c`，manifest
+`6efa189c9d5eaf10a11678605995e9aa741bf3eec920b3f16fd4d147e84564d4`；root实读9payload/10exact。
+source58de4c82与Ruff/format/mypy、20PASS不能覆盖上述3失败或完整14项验收。
+
+仅该单源码候选已阶段提交 `0dc233cba49f8d84aa97869ed82ecee4ad4ba29d`；
+真实native sync追加event8、source subject已合法从10f00bb推进至0dc233c，账本阶段`14fe42f`。
+当前仍IMPLEMENTING/Missing implementation_result，classification fresh、spec批准current；
+未因sync重复请求spec批准，未制作通过evidence或nativeImplementation/code approval。
+正在独立准备保留原Policy身份/授权/pending测试目的的合法fixture迁移流程；原spec仅单源码scope，
+不能顺手改测试、扩大OwnTask准入、忽略节点或移植base/subject/批准来取得PASS。
+
+Task65 Action004 once入口001独审有确定NO_GO：把binding总数5055误校为primary5054。
+新002仅准备最小计数及对应入口绑定修订，原001/NO_GO留存，未启动任何入口/claim。
+PID getter先于drain的初步故障推断已由真实PowerShell/CLR getter内存复核撤回，
+不作为产品阻塞或必要源码改动。Action004仍无新human grant/消费/完整V2。
+Task67仍BLOCK，七项和其他阶段/发布门未关闭；下面各段保留其历史时点。
+
+## 2026-10-07 TASK-0068 当前规格已批准并进入实现
+
+用户已明确回复批准 TASK-0068 当前冻结规格。root fresh native status仅缺spec_approval后，
+实际 approve追加event6（10:21:01 UTC、actor human），阶段提交
+`f48243ce30e8d077911f5bb72907bdb89f040475`；native begin追加event7
+（10:21:40 UTC、actor codex-backlog-root），阶段提交
+`e30fa8f1a63a8f35bbc09f70c7594168b0e0df6b`。原冻结spec/Design/Policy/DU事实保持，
+当前IMPLEMENTING / Missing implementation_result，classification fresh、approvals current。
+这些是真实新任务的批准与机械推进，不移植Task67的历史批准或失败。
+
+仅classification_service.py的_require_baseline与必要导入已实现并冻结raw
+`58de4c829fdac0aadd6c2f4e087eb0b3d4718b7268f8c275de024c06aeadbcba`；
+NEW仍严格HEAD=base=subject，recovery仍核对真实base≤subject≤HEAD/UUID/branch，
+subject..HEAD endpoint attestation与全部可见dirty只允许OwnTask逻辑及真实resolved归属。
+预期OwnTask根保持lexical，不以foreign alias的resolved根建立新的信任。
+原resolution/manual authorization/pending与其他批准边界未改；既有scope/Git模块未修改。
+Ruff、format、mypy单源码通过；冻结20case及相关旧回归、独立源码审查正在并行进行，
+不是完整V2或Task68验收。尚未同步新的source subject、批准targeted mutation或执行完整V2。
+
+Task65 Action004仍仅封包独审通过，新once入口正在封存并待独审；新动作没有批准/消费。
+Task67仍BLOCK、原失败与已用一次CLI批准不复用。下段Task68待规格描述的是此次回复前窗口。
+
+## 2026-10-07 Action004 封包独审通过，尚未批准或执行
+
+新 TASK-0065 Action004 revision002 已封存，最终 action raw SHA256
+`17c5ae40ec8f5be8cfdd0f74ac3424fab034c6b7fec1e0dfa11149f0900abaa3`，
+原生 normalized canonical SHA256
+`c8421ddeb32fed25aca7e33bc45986a3afe38e7db68d57158268e3efed0435d4`；
+到期时间固定为 `2026-10-10T09:46:39Z`，revision002 未延期。37 payload/38 exact files
+及 manifest `7b56940bbbd68a754de82405e445e03b8f22e5544ab3c5c08f87d1e2eb37bb66`
+已由 root 实读核对。包在 `${RUNTIME_ROOT}/task0065-action004-exact-preparation-001`。
+
+真实非作者封包独审通过：50 项有效核查及 5 个 private DTO 拒绝向量，必要 finding 0，
+5103 selected 双 raw/stat 稳定、5 棵当前目录树 exact/noRP。review report
+`${RUNTIME_ROOT}/task0065-action004-exact-independent-review-001/report.json` raw
+`7de70ee7bb7ef26e63f886bc2ee3edfbd3ad29821db9b523e07051bdaab608bc`，manifest
+`5a37ba97f4977b8e69305068d80c26e2641f175a40de0e6a1e6f7782a0996548`；14 payload/15 exact
+已由 root 实读核对。这仅是具体封包准备通过，**execution_GO=false**，不是完整 V2。
+
+5054 primary/5061 明确补充的保护输入保持；当前 venv3931 文件较007的3251多680个
+311-tagged pyc，旧 venv 文件没有缺失或 raw 漂移。680 个缓存的语义身份 UNKNOWN，
+`-B` 仍可能读取既有 pyc，整套环境不宣称等于007或已新资格化。一次闭合 PATH/SystemRoot
+正常 site 身份读回实际为 Python3.11.9、pointer8、27依赖版本及正确 source/pytest origins；
+platform.machine 为空、script 与未来 `-m` 的 sys.path0 不同均保留。007 的34 required/3 controls、
+311/313 与 native311 ENV2 目标有限历史测量可结合上述明确差异引用，未测 console 和
+unexpected OS-fault cleanup UNKNOWN；不因日期或派生 cache 自动重跑原一次 matrix。
+
+原14项、12 runnable+2 semantic、300/900/1200/600及其他全部预算、CI85/diff90、
+fixed5 的 baseline/mutant各60秒与 DEVNULL、原有 invocation-owned cleanup 均不变。
+旧 current evidence projection 和原 per-run archive 当前 raw 同为 d01a2544…；未来另获批准的
+原生 save_evidence 可先保存新 per-run 再原子更新 current projection，旧 per-run/rawlogs/SPENT
+与 event byte前缀不可重写。禁止手动删除、移动、忽略或 normalize current projection 来造 clean。
+
+本阶段实际 native status：TASK-0065 **IMPLEMENTING / Missing implementation_result**，
+subject4f23e5c/HEAD41d6b599，classification fresh、approvals current、失败 evidence stale；
+TASK-0067 **BLOCKED / block_resolution**；TASK-0068 **WAITING_FOR_SPEC_REVIEW / spec_approval**，
+HEADc233b33、clean、生产 classifier 未改。Task68 的规格决定仍等待真实回复。
+
+Action004 尚未物化到 Task glob、批准或消费。新 once launcher 与其独审正在串行依赖下准备；
+未来真实独立 verifier 为 /root/case_review006，最后 approved bookkeeping HEAD 保持 NULL，
+须新确切 human grant 后实际 native approve/commit 与 fresh status/context/source/ref/ENV/tree/parent
+核对，启动时至少剩90分钟。短 parent 只推导 known248，完整动态路径最大值和三个旧超时
+共同原因 UNKNOWN；不复用旧 claim/container，也不以私有检查代替14项完整验收。
+
+七项目标继续 active；Task63/64、Task66、I1/I2/E5/I5/Phase3/4及发布门保持。没有新完整
+native V2、provider/VM/service/付费调用、推送、合并或部署。以下旧段保留各自历史窗口。
+
 ## 2026-10-07 短路径前缀到达验证入口，TASK-0065 重试准备
 
 本段追加当前核定，旧 FAILED/SPENT、原始诊断和 NO_GO 窗口保留。prefix005 与

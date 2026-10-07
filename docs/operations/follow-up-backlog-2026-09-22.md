@@ -1,5 +1,40 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 当前核定：TASK-0068 旧回归兼容尚未通过
+
+Task68获批单源码候选已提交0dc233c，并由native sync/event8更新真实source subject，
+账本阶段14fe42f；仍IMPLEMENTING/implementation_result、spec批准current。定向80项77PASS/3FAIL，
+冻结20新契约和真实junction通过；三个旧Policy dirty fixture先被新边界拒绝。原失败保留，
+源码独审/Ruff/format/mypy不是完整验收；合法fixture迁移及现scope边界另在准备。
+Task65新once入口001计数错5054/5055为NO_GO，最小002正在修，Action004无新批准/消费。
+Task67仍BLOCK。见[定向失败与修订](backlog-execution-2026-10-04.md#2026-10-07-task-0068-定向回归-7780旧-policy-fixture-兼容待解)。
+以下较早待验证/待规格段保留各自窗口，七项与阶段/发布门保持。
+
+## 2026-10-07 当前核定：TASK-0068 规格获批，限定源码修复验证中
+
+用户明确批准当前spec；native approval/event6已提交f48243c，native begin/event7已提交e30fa8f。
+Task68当前IMPLEMENTING/implementation_result，spec/Design及class/Policy保持真实当前绑定。
+仅classification_service._require_baseline及必要导入已实现，Ruff/format/mypy通过；
+冻结20case与相关回归、独立源码审查正在进行，不作为完整V2或最终验收。
+Task65 Action004新批准/once入口独审尚缺，Task67仍BLOCK。见
+[Task68批准与实现](backlog-execution-2026-10-04.md#2026-10-07-task-0068-当前规格已批准并进入实现)。
+下面待规格段为批准回复前的历史窗口，七项与阶段/发布门保持。
+
+## 2026-10-07 当前核定：Action004 封包已独审，完整执行未批准
+
+TASK-0065 新 Action004 revision002 已冻结：canonical
+`c8421ddeb32fed25aca7e33bc45986a3afe38e7db68d57158268e3efed0435d4`，固定 expiry
+2026-10-10T09:46:39Z。非作者具体封包独审50项有效检查及5个DTO拒绝向量通过，必要finding0；
+5103 selected/5 trees稳定。当前3931 venv文件较007新增680个311 pyc，语义身份UNKNOWN，
+旧限定测量不升级为整个当前环境资格。原FAILED/SPENT、14项/原预算/CI85/diff90保持。
+
+实际 native status 仍为 Task65 IMPLEMENTING/implementation_result、Task67 BLOCKED/block_resolution、
+Task68 WAITING_FOR_SPEC_REVIEW/spec_approval。新动作尚未批准、物化、消费或完整执行；
+once launcher及其独审仍准备，真实final HEAD/fresh launch guards与新确切human grant尚待。
+Task68生产classifier未改，既有规格问题不重复请求。见
+[封包独审结论](backlog-execution-2026-10-04.md#2026-10-07-action004-封包独审通过尚未批准或执行)。
+其他七项与阶段/发布门保留，下列旧段仅描述各自窗口。
+
 ## 2026-10-07 当前核定：TASK-0065 已机械重试准备，未完整重跑
 
 修订 prefix005/observer003 已独审，root一次普通诊断越过原 review-record 写入点，
