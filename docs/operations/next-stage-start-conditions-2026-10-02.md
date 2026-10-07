@@ -1,5 +1,12 @@
 # 下阶段启动条件：2026-10-02
 
+2026-10-07 后续补记：一次prefix005普通诊断越过原review-record写入点并在原测试103行
+的verify_task入口 STOP，未进入producer；Task65随后仅完成native机械begin/event28，
+阶段41d6b59、当前IMPLEMENTING/Missing implementation_result。新Action004尚在fresh
+环境与绑定准备，旧FAILED/SPENT保留，没有完整重试或I1资格完成。Task68仍待当前规格
+决定且classifier未改，Task67仍BLOCK；不解除本页其余阶段门。见
+[前缀与重试准备](backlog-execution-2026-10-04.md#2026-10-07-短路径前缀到达验证入口task-0065-重试准备)。
+
 2026-10-07 追加：独立恢复任务 TASK-0068 当前 frozen REVIEW/V2 设计已通过独审并原生记录，
 治理阶段提交 `c233b33`，clean/fresh、WAITING_FOR_SPEC_REVIEW / Missing `spec_approval`。
 基线契约6 RED/14 PASS是实现前缺口，生产源码未改；它不解除 Task67 BLOCK、Task65失败或 I1 资格门。

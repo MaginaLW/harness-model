@@ -1,5 +1,19 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 当前核定：TASK-0065 已机械重试准备，未完整重跑
+
+修订 prefix005/observer003 已独审，root一次普通诊断越过原 review-record 写入点，
+到原测试103行的 verify_task入口后按设计 STOP，producer函数体未进入，目标 exit1。
+157events/340selected稳定，不作为原节点 PASS 或完整 V2。随后 native机械begin event28
+已完成，阶段 `41d6b59`；Task65当前 IMPLEMENTING / Missing `implementation_result`，
+真实source4f23e5c、旧失败 evidence、SPENT Action003与旧27event前缀保留。
+当前cycle actor为codex-backlog-root；新Action004还在fresh环境/绑定准备，没有新批准或
+完整执行。007限定历史资格、未测console/OSfault、动态路径及三个超时因果UNKNOWN保持。
+具体窗口与边界见[短路径前缀和重试准备](backlog-execution-2026-10-04.md#2026-10-07-短路径前缀到达验证入口task-0065-重试准备)。
+
+TASK-0068仍仅缺当前冻结spec_approval，classifier未实现；TASK-0067仍BLOCK。
+其他七项待办与阶段/发布门保持，以下各旧段只描述其历史窗口。
+
 ## 2026-10-07 当前核定：TASK-0068 设计待规格决定
 
 TASK-0067 已获批执行一次完整 V2 并失败，现 BLOCKED / `block_resolution`；原批准调用

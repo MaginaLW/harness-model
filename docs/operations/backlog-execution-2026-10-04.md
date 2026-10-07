@@ -1,5 +1,48 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 短路径前缀到达验证入口，TASK-0065 重试准备
+
+本段追加当前核定，旧 FAILED/SPENT、原始诊断和 NO_GO 窗口保留。prefix005 与
+observer003 分别完成独审；观察器独审 28 PASS、0 必要 findings，root fresh 只读
+preflight 通过后仅调用一次普通前缀诊断。UTC 09:25:13.2484528–09:26:24.9613518，
+launcher PID48864，root wrapper exit0、目标 pytest exit1。目标在原节点第103行经
+CLI412 调用原 `verification_service.py:876` 的 `verify_task` 入口，观察器抛出
+`DiagnosticStop`，函数体与全部 producer 未进入。原 review-record 写入完成并返回；
+157 events 中两条 StateTransitionError 是原 fixture 先尝试未获规格批准的 begin，
+后续真实到 READY_TO_IMPLEMENT/IMPLEMENTING。此窗口没有 FileNotFoundError；
+它支持当前短路径下越过旧失败写入点，不证明原节点完整 PASS 或三个超时共同根因。
+
+两路 raw stream 已知 EOF，8 个终端所列文件一次 flush/dispose，Process.Dispose
+一次确认，无 retained/primary/secondary；root normal return 在 terminal 发布关闭之后。
+125 protected、23 packet、26 observer 与本次 selected outputs 共340物理文件双 SHA/stat
+稳定，四个复制树 exact names 保持；after guard 只允许已知 Own capture 例外。
+root seal `${RUNTIME_ROOT}/task0065-single-prefix-diagnostic-root-execution-003/REPORT.md`
+SHA `ff818ce77d28848d31e640cbe3abb0474d73cadebc6b1f9740fec9a3995ed763`；manifest
+`5860eb2ebacbf4fd47fb51331843428a937727d05018a948fa0a1c279c2f542d`。
+这不是 held-wrapper/Job/严格墙钟或整个 fixture 树字节证明；旧005输入描述的是此次窗口，
+source/ref 观察 freeze 已在 seal 后释放，capture 与旧诊断目录不复用。
+
+root 随后实际 native status 仅缺 `retry_reason_or_escalation`，native begin 已追加
+event28（09:29:01 UTC、actor `codex-backlog-root`），当前 **IMPLEMENTING /
+Missing `implementation_result`**。机械阶段仅自身 task.yaml/events 两文件提交
+`41d6b599c3b21f5cbeadb7a3d5481fbd5e79bc70`；旧27events 的16062B前缀、原失败 evidence
+`d01a2544be138243d0f7f1d2973efbc5b7639c684ef09e30da94dcb18119f40b` 保留。
+真实 source subject `4f23e5c` 未动，当前只有原 OwnTask evidence.json untracked，
+不是 whole-worktree clean。classification fresh、approvals current、失败 evidence stale；
+native只读新 verifier context `27a9ab28b42d27e8b6756de5449b68d6c3cf4b70cf192356fed9bdb5d6e31058`，
+当前 implementation cycle actor 已是 `codex-backlog-root`，旧 actor 不作为新独立性事实。
+
+新 Action004 还在独立准备当前环境/源/refs/父目录与正式动作绑定，没有批准、消费、
+完整 native V2 或 producer。旧003仍 SPENT，不能因尚未到期复用。007仅是有限真实资格
+矩阵的历史证据：五候选 raw 仍匹配；完整环境/engine/ABI/startup/platform仍需 fresh核对，
+未测 console 和 OS-fault 保持 UNKNOWN。完整14项、原预算、CI85/diff90、固定五声明
+baseline/mutant各60秒、DEVNULL及原有受控本次清理保持。`${SHORT_PYTEST_PARENT}` 当前
+结构准备只能推导 known tmp248，动态最大值未知；完整运行不用普通诊断的 basetemp。
+
+TASK-0068 当前规格批准问题仍待真实回复，冻结设计已审查、生产classifier未改；Task67
+仍 BLOCK。Task63/64、Task66、外仓008、I1/I2/E5/I5/Phase3/4及发布进入条件未因此关闭。
+七项目标 active，本阶段本地提交未推送/合并，旧发布独审不覆盖新阶段。
+
 ## 2026-10-07 TASK-0068 设计已审查，短路径诊断继续
 
 本段追加当前核定，不替换下方原执行和失败窗口。TASK-0067 当前仍 BLOCKED /
