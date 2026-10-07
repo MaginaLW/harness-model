@@ -1,5 +1,18 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 外仓当前快照009：dotfiles main变化，当前requiredCI未知
+
+官方GitHub仅8次只读GET，窗口12:27:30–12:28:35 UTC。dotfiles main变为
+`3b11989d65046492034da08d947ea790d2a06b29`；API本次返回run35448682368为
+2026-09-19的旧head eeedc461，4项jobs中3个shard失败、gates成功，与当前main不匹配。
+当前main全部requiredCI仍UNKNOWN，不标当前main失败、不继承008的旧成功。
+r3s main8898f48c未变、run37499267909仍queued，POSIX未开始、Windows成功；
+Linux22 API offline原因未调查。没有重跑CI、主机/服务动作或远端写入。
+快照 `${RUNTIME_ROOT}/external-current-read-009` 已封存31payload，manifest
+`2fbe54d4ab95887d4604b7ee9ce388993b71fac6b6d1a442daae66a541cff8bc`。
+分次latest1读取不代表全部required检查；I2互信/Apply和Phase4未获证明。
+以下各段保留历史时点，七项目标和Task65/68最新本地结果仍按各自原件判断。
+
 ## 2026-10-07 Task65 完整验证失败并进入诊断准备，Task68 定向80项通过
 
 Task65 Action004 的唯一完整调用已结束，实际 run
