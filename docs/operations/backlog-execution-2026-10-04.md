@@ -1,5 +1,41 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 Action004 已批准并实际运行，Task68 独立安全夹具推进
+
+用户明确批准 Action004 revision002 一次完整 native V2。原生 approve 追加
+event29（10:54:34 UTC），四个本任务批准文件提交
+`7853d52cf72cf305965d7fc5f4868bc35006e4e1`；raw17216B 旧 event 前缀及
+三条旧 approval 保留。Root fresh native API 确认 final scope eligible、reason 空、
+原 source4f23e5c/context27a9ab28/spec current、当前真人 Action004 匹配。
+
+Action004 canonical SHA256 为
+`c8421ddeb32fed25aca7e33bc45986a3afe38e7db68d57158268e3efed0435d4`。
+启动器002独审17 PASS/0必要finding，旧001 NO_GO/F01与撤回F02原件保留。
+真实 verifier `/root/case_review006` 唯一调用入口 c63eb8/session21403；guard
+PASS、native managed PID34868 于11:01:53 UTC启动，实际 run 为
+`run-20261007T110154452542Z`。Unit raw日志结束为2112 passed/151.09s；
+全十四项、coverage、integration、ActionUse、launch/mutation和最终结论仍 UNKNOWN，
+不能以该局部日志或入口CLI代替原生验收。原预算、CI85/diff90、固定五项各60秒
+DEVNULL与本次调用所有的原有有界清理保持；没有自动整轮重试。
+
+批准准入封存于 `${RUNTIME_ROOT}/task0065-action004-root-approval-admission-001`，
+manifest `2307de792814ecf425996c42a6056da3fd2ce46e5962994d61f7ef54b761cfed`；
+原FAILED/SPENT不改，current projection只允许新native save_evidence按原实现更新。
+
+Task68 保留已批准spec0e8f3083和唯一production源58de4c82、20个冻结contracts。
+三个旧Policy夹具提案保留全部31原断言并通过独立静审；Policy/subject同时漂移，
+不声称单Policy因果覆盖。独立路线审查确认可将旧测试修复作为单独task-free阶段，
+仅把 `tests/integration/test_classify_command.py` 加入真实验证closure，不增加生产DU。
+Root native scope_expanded→BLOCK event9，提交 `b7542abe79e2cfc027e6247649cecd526647451e`；
+后续实际安全commit、eligible public sync、current-bound resolution、分类/Design仍须真实完成。
+旧77/80及3FAIL保留；未产生修复后测试PASS或Task68验收。
+
+本阶段4名sub-agent并行：Task65实际执行、Task68独立安全作者、治理/Design审查、
+独立复核各1名；Root账本与阶段提交串行。Task68实际测试等当前Task65完整调用终态，
+减少同机资源竞争。七项目标active；Task67及其他进入/发布门未关闭。
+
+下面各段保留其历史时点。
+
 ## 2026-10-07 TASK-0068 定向回归 77/80，旧 Policy fixture 兼容待解
 
 独立一次80项定向回归实际77 PASS/3 FAIL、0 skip/xfail；冻结20新契约全部PASS，
