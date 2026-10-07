@@ -1,5 +1,28 @@
 # 外仓后继证据与剩余依赖：2026-10-04
 
+## 2026-10-07 当前 SHA 的 dotfiles Validate 已成功，r3s 仍排队
+
+新008窗口 `2026-10-07T07:18:53.0093294Z–07:19:22.2944015Z`，两仓分别查询
+main、最新 main run、该 run jobs、repo runners，8个官方GET各一次、全部rc0。
+007原件保留；没有重试、重跑、主机或服务操作。原始返回与31payload+self精确32文件
+封存于 `${RUNTIME_ROOT}/external-current-read-008/`；report SHA256
+`b9a8365214051b186147b00a25395c540a5181a04590bab12e2d5d0360ceacdb`，
+manifest SHA256 `17340b46ccfc2a4519b53ce6686dcc9f2eb4021d5ebf50b92de585c7c926bbb3`。
+root工具47d315再次核对全部文件hash/length及精确名字，结论一致。
+
+dotfiles main `b1da25da0d57c8595d516039d79cd3c78303750c` 与
+[Validate run37575131851](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37575131851)
+head匹配；attempt1 completed/success，返回4/total4 jobs（gates及3 shards）和各steps全部success。
+第三shard test结束06:45:38Z、whole job06:45:40Z、run updated06:45:42Z。
+repo runner返回0/total0不证明不存在hosted runner。查询latest-one workflow不等于
+所有required-check清单或原报告的provider/backend资格，不执行Apply/部署。
+
+r3s main `8898f48c6470857aa402224d6ece4be86abbe4f2` 与
+[offline-verify run37499267909](https://github.com/MaginaLW/r3s-VPS/actions/runs/37499267909)
+head匹配；attempt1仍queued/null，POSIX job112391761795 queued/0steps/runner0；
+Windows strict job112391762315 completed/success。返回2/total2 repo runners：Linux22
+offline/idle、Windows21 online/idle。这是API窗口，host原因未知；未取得完整双通道验收。
+
 ## 2026-10-05 取消只影响原自然 CI 路径
 
 六个固定源码/报告的独立薄核已封存；本核没有新增 GET、业务或 VM 调用。

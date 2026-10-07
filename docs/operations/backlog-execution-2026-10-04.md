@@ -1,5 +1,70 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 TASK-0067 获批执行失败，声明恢复已 BLOCK
+
+所有者回复“TASK-0067批准”已实际登记为 Action001 revision003 的精确单次批准，
+canonical `3ae0f93506d2b8c075b598d06465a2cf49a5505fb18d66a7f608506a872965c7`。
+非作者 `/root/windows_design` 完成一次原 14 项完整 V2，run
+`run-20261007T060845229788Z`；普通启动观察 UTC 06:08:43.8756196 至
+06:56:23.0722643，终端 rc0 但原生结论 **FAILED：10/14 PASS，4/14 FAIL**。
+原预算、检查和 85%/90% 阈值均未降低，未自动重试。
+
+| required 失败项 | 实际结果 |
+| --- | --- |
+| regression_tests | RUNNER_TIMEOUT，900063ms，无最终 pytest summary |
+| coverage_xml | VERIFICATION_COMMAND_FAILED，exit1，1196578ms，非超时 |
+| integration | RUNNER_TIMEOUT，600032ms，无最终 pytest summary |
+| targeted_mutation | ACTION_FILE_INVALID，0ms，在消费及启动前拒绝 |
+
+coverage 本次完成并生成同 dataset XML：4 failed、3166 passed、1 skipped；
+综合行/分支覆盖率 89.2081736909323%，diff coverage 100%（67 行）。unit 2143
+及 acceptance 9 通过。这些百分比和局部通过不推翻 required 失败。三个场景
+设计 context 已生成，随后 review record 的原子写入失败；另一个 mutation contract
+fixture 报 FileNotFoundError。现有 traceback 不证明 WinError206，也未证明两项超时的根因。
+
+mutation 确定缺项是冻结 DU-001.permission_requirements 仅列 `spec_approval`，
+而真实 consumer 要求 `action_approval`；精确人类批准已存在。五个原生 unverified
+sentinel 不是五个真实 mutation 结果。动作原生状态 **UNCONSUMED_NOT_SPENT**，
+但已批准的一次完整 CLI 调用已经发生，不能据未消费状态复用本次批准。
+
+原 evidence raw SHA256 `29c8c88db59416a7d80afa7aaaec8cd733c9cee4dc5bdc11709eb0398f1656d6`
+与旧事件前缀、规格批准和三源码均保留。失败阶段提交 `4ca5ead`，native event12
+以 `new_permissions` 转 BLOCKED；声明恢复候选阶段提交 `3ca0418`，真实 status
+`da25d5`：BLOCKED / Missing `block_resolution`、classification fresh、approvals
+current、原失败 evidence stale。声明尚未改，resolution 尚未记录。
+
+候选仅向同 DU 增加 `action_approval`，纯计算仍为 REVIEW/V2；另有真实原生限制：
+重分类 `_require_baseline` 要求 HEAD==subject，OwnTask 治理提交已前移 HEAD，
+而 native sync 按设计保留源码 subject。不能改写 subject、移动 refs 或制造源码提交绕过。
+独立治理恢复变更正在准备安全契约测试与最小规格，原任务失败不因此变为通过。
+root 原执行封存报告位于 `${RUNTIME_ROOT}/task0067-native-v2-action001-root-execution-001/REPORT.md`，
+report SHA `613e9e962d1277f9991237e8f2ce84c19b65d029a6a9cbc2c7fd7293eeb293b9`，
+manifest SHA `4c5a70c379d533e315748bff9b5bc6e381f6359729ac598101c6e940ebf67bad`。
+
+TASK-0065 普通单场景诊断第一次退出3，在 pytest 配置阶段被观察器拒绝，尚未
+collection/fixture/trace；确定的观察器缺项是 pytest 自动生成 `PYTEST_VERSION`。
+原输出与 sealed root receipt 保留。新003包仅精确接纳实际9.1.1运行时版本，
+parent 原15+2键不预填；两包独审及root88inputs/17packet fresh准入后，第二次普通
+观察在新 v65e 执行一次，UTC 07:29:37.1172897–07:30:23.6706246，target exit1。
+context成功，随后 review record→storage._atomic_write_text→tempfile.mkstemp 的
+实际 cause 是 FileNotFoundError（errno2、winerror=null），失败临时 filename 实测264字符，
+parent180字符且postread存在。114 events/10exception events全部保留，没有进入verify
+或mutation函数；观察器、两个drains/EOF、7close及dispose均确认，88/17guard前后相同。
+这不是原完整节点或V2验收，也未证明WinError206/路径限制或三个超时的共同根因。
+原 TASK-0065 FAILED/SPENT 与冻结范围不变。第二次root报告
+`${RUNTIME_ROOT}/task0065-single-prefix-diagnostic-root-execution-002/REPORT.md` SHA
+`32b1f10566907c7f9e4be587270e28ad1f25e4f78b820b6efa32dbdd0a41cbd9`，
+manifest `c7e5921c847fab297a5db67f33d7df884b82dcb18d03e384257ef8e7e688b3f6`。
+
+外仓 UTC 07:18:53–07:19:22 的008只读窗口确认 dotfiles 当前 main `b1da25da…`
+的 Validate run37575131851 attempt1 completed/success、4/4 jobs 全部成功；r3s
+main `8898f48c…` 的 run37499267909 仍 queued，POSIX queued、Windows success。
+此查询只覆盖返回的 latest workflow，不是全部 required CI 或双通道验收，详见
+[当前外仓窗口](external-follow-up-evidence-2026-10-04.md#2026-10-07-当前-sha-的-dotfiles-validate-已成功r3s-仍排队)。
+Task63/64 仍 BLOCKED / `block_resolution`，Task66 IMPLEMENTING / `implementation_result`。
+七项目标 active；I1 实际生命周期资格、后续阶段条件和发布 A/B 方向未关闭。
+本追加不在 `aa37f12`/`e214999` 发布独审覆盖内。
+
 ## 2026-10-07 完整原生 V2 失败，NativeGit 新单次动作待批准
 
 TASK-0065 本轮由真实独立 verifier `/root/case_review006` 单次执行，

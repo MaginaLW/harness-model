@@ -1,5 +1,26 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 当前核定：TASK-0067 完整验证失败并 BLOCK
+
+“TASK-0067批准”已实际登记并用于一次原14项完整V2：10 PASS、4 FAIL，原生 FAILED。
+regression/integration 超时；coverage exit1（非超时，4 failed/3166 passed/1 skipped）；
+mutation 在消费前因冻结 DU 漏列已获批的 `action_approval` 拒绝。综合 coverage
+89.2081736909323%、diff100%、unit2143及acceptance9通过不能推翻 required 失败。
+动作原生 UNCONSUMED_NOT_SPENT，但已批一次完整CLI已发生，不能自动复用。
+
+失败及 BLOCK 记录已分别提交 `4ca5ead`/`3ca0418`；当前 BLOCKED / Missing
+`block_resolution`。同 DU 声明修正候选已准备但未应用；原生重分类另有 OwnTask
+治理 HEAD 与 source subject 相等检查的恢复限制，独立治理变更只在准备。
+TASK65 原 FAILED/SPENT 保留，第一次普通诊断在观察器环境准入处失败，未进入场景；
+修正及独审后的第二次普通观察已捕获review record原子临时写入的FileNotFoundError
+（errno2、winerror=null），未进入verify/mutation，原完整超时根因仍UNKNOWN。
+详见[当前失败与恢复材料](backlog-execution-2026-10-04.md#2026-10-07-task-0067-获批执行失败声明恢复已-block)。
+
+008实时只读窗口确认 dotfiles 当前SHA的latest Validate全4jobs成功，r3s仍排队；
+不是所有required CI或双通道验收。Task63/64仍BLOCKED、Task66仍IMPLEMENTING。
+七项目标active；I1完整资格、发布A/B方向及后续阶段门未满足。以下为历史追加，
+旧“待批准/尚未运行/外仓成功”只描述各自窗口，不覆盖本段当前核定。
+
 ## 2026-10-07 当前核定：完整 V2 失败，新 NativeGit 单次请求待批准
 
 TASK-0065 已完成一次原完整V2，native FAILED：10/14PASS、4/14FAIL。

@@ -1,5 +1,19 @@
 # 下阶段启动条件：2026-10-02
 
+2026-10-07 当前窗口补记：TASK-0067 已获批执行完整V2但原生 FAILED（10/14），
+随后 BLOCKED / Missing `block_resolution`。I1公开接口已有实现不等于实际 lifecycle
+backend资格；声明恢复及重分类治理限制另在准备，不解除下列进入门。
+TASK65原FAILED/SPENT仍保留；普通前缀观察已捕获review record原子临时写入
+FileNotFoundError，未进入verify/mutation，原完整超时根因及后续进入门仍未解决。
+
+外仓008只读窗口 UTC 07:18:53–07:19:22：dotfiles 当前 main `b1da25da…` 的
+latest Validate run37575131851 attempt1 已 completed/success，4/4 jobs success；
+r3s 当前 main `8898f48c…` 的 run37499267909 queued，POSIX queued、Windows success。
+这个精确 workflow 成功不表示所有 required CI、可信 backend、I2 扩仓或实际 Apply 完成。
+下方2026-10-03“dotfiles当前准确CI”是历史窗口；来源及当前限制见
+[008窗口](external-follow-up-evidence-2026-10-04.md#2026-10-07-当前-sha-的-dotfiles-validate-已成功r3s-仍排队)
+和[当前待办](backlog-execution-2026-10-04.md#2026-10-07-task-0067-获批执行失败声明恢复已-block)。
+
 2026-10-03：[报告回收](zcode-report-recovery-2026-10-03.md)完成指定核查，三份终稿附勘误，
 ZN-02 取消/无报告，独立评估不替代原报告。[F 具体规格](f-real-import-acceptance-2026-10-03.md)
 用新 design 目标承接受审对象，实际准入/context 及匹配来源仍依下列条件串行办理。
