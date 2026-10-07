@@ -1,5 +1,17 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 新批准已登记，NativeGit 源实现已提交
+
+所有者“批准这些权限需求”已实际登记：TASK-0067 spec approve/begin均rc0，
+三源码实现阶段提交38ca6dc、native同步真实subject，Own同步记录提交6d1f783。
+73个相关新旧cases和三源静态检查通过，原测试基线保留；正式V2和Implementation
+Review仍未完成，不以局部检查代替验收。TASK-0065新Action003r003 canonical21545d3a...
+已原生批准及Own提交0daa58f；48输入/26checks非作者preflight通过。新独立verifier
+启动包在树外准备，静审及最终source/refs冻结后才单次执行完整V2；旧失败/SPENT/
+UNKNOWN不变。详见[本次登记与实现](backlog-execution-2026-10-04.md#2026-10-07-新权限批准已登记nativegit-源实现已提交)。
+七项目标active，F/Task64依赖、I1完整资格、发布方向及后续阶段条件仍保留。
+
+
 ## 2026-10-07 当前核定：NativeGit 新治理规格与单次验证请求待批准
 
 真实私有前缀的新 managed checkout 已完成独立安全测试提交 `3ee817d`，

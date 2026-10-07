@@ -1,5 +1,40 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-07 新权限批准已登记，NativeGit 源实现已提交
+
+所有者新回复“批准这些权限需求”后，root回读两个native status和封存摘要。
+Task67仅Missing spec_approval；Task65新Action003r003原件与窗口有效。
+native spec approve工具fc1416 rc0、begin ac3ed0 rc0，Task67进入IMPLEMENTING。
+三源码按原spec45830a047...实现：immutable raw DTO、公开Protocol/default adapter、
+五入口显式同实例execution；None保持旧hooks，falsey非None不以truthiness选择。
+作者实际73个新旧相关cases PASS（6f0776），Ruff/format/三源mypy PASS（b8db39），
+7个补充pure fake PASS（aa02ec）；原测试基线hash0c8cc895...未改。源码阶段
+commit238635 rc0为38ca6dc6e191c41bd4ad6d835cc1bf71f0132bec，只三源码和OwnTask；
+native sync ac8e87实际同步subject38ca6dc，Own事件提交6d1f783。尚无完整V2/evidence。
+
+root提前请求implementation context被native拒绝；实际review_service要求passed
+evidence，不能以作者检查或fake制造它。源码非作者复核继续，正式Implementation
+Review等full V2 passed后再生成。Task67新single-use mutation Action尚未形成和获批；
+此次Task65具体Action批准不自动覆盖Task67，不降低原14checks/预算/85%/90%。
+
+Task65新Action003 canonical21545d3a...由native批准工具11d37b rc0登记，exact
+raw9f7ce126...材料化到本任务action glob；Own四文件commit28210f rc0为0daa58f。
+旧审批数组、原13447B事件prefix、classification及旧failed evidence原件读回未变；
+最初root读回用系统编码失败，另次显式UTF8纯读0b5f57通过，未重放native批准。
+非作者当前preflight actual01f1f0 rc0：48固定输入两读稳定/26checks/0findings；
+report3e331e0d...，manifest8c52ed43...，仅GO_CURRENT_PREPARED_LAUNCH_PREREQUISITES_ONLY。
+新独立verifier启动包在树外另leaf准备，尚未执行；其静审、launch-time原source/
+parent/approval/90min守卫和source/refs冻结须先成立，随后只执行一次原完整V2。
+旧Action002 SPENT与10/14FAIL、资格console2未测和意外OSfault UNKNOWN均保留。
+
+并行阶段3名sub-agent分别实现、当前动作preflight、验证覆盖审查；随后新增第4名
+独立verifier准备精确启动包，其非作者静审与root所有Git提交串行。正式启动后各
+worktree源码与Git refs冻结，只有本次native自身允许的日志/工作树动作执行。
+树外原件位于 `${RUNTIME_ROOT}/harness-model-backlog-20261004-001/` 的对应新leaf。
+七项目标已恢复active；F/Task64 BLOCK、I1完整后端资格、发布方向和后续阶段进入条件
+未被本局部实现关闭。本追加不在aa37f12固定e214999的发布独审覆盖内；没有远端写入。
+
+
 ## 2026-10-07 NativeGit 治理准入与后继单次请求
 
 本轮完成两个真实可审查前置条件，不将七项待办缩为局部接口或准备检查。
