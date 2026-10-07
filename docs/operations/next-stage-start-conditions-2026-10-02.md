@@ -1,5 +1,18 @@
 # 下阶段启动条件：2026-10-02
 
+## 2026-10-08 Task65 Action005 revision002 已独审，等待具体批准
+
+当前 source `499f00ff74e6c169defe81e46899b98c97221fbc`；机械同步 commit `f988bbb3280eb5ce889b4cb1bab609e072501640`。
+2026-10-07T16:35:38Z 原生查询为 IMPLEMENTING / Missing implementation_result；规格批准与当前 Design APPROVE 保持。
+新 Action005 revision002 canonical `a51f8ed47b49e3bac71aa91cc206d96e4ba416d306e068c4e4b41d1525efee46`。
+到期 2026-10-10T16:25:45Z，启动余量至少90分钟；完整14项/原4110秒逐项预算、CI85%同新run完整XML与90%diff、固定5项baseline/mutant各60秒DEVNULL保持。
+具体动作 `${RUNTIME_ROOT}/task0065-action005-exact-preparation-002/action.draft.json`；启动器 `${RUNTIME_ROOT}/task0065-action005-native-launcher-preparation-002`。
+非作者独审为 APPROVE_FOR_ACTION_APPROVAL_REQUEST，0 unresolved，Execution_GO=false；`${RUNTIME_ROOT}/task0065-action005-independent-review-001` manifest `8080d1c2b86c1e15bf3edfc86434a945896938088db3e5ff4763fe0f50db1873`。
+原算法有界清理仅覆盖本次新建pytest容器、system-temp下新mutation工作区及关联新Git登记、owned detector进程树；排除父目录、旧空间/登记及历史证据。
+旧 revision001 `b87880e73793cfb0b457f7f37166707ca0dd9db862088b1476d4530d37efbe55` 的 F01/NO_GO 原件保留；revision002仅静态修正原清理范围误述，不构成清理执行证明。
+上述16:35查询对新canonical的 matching current action grant 为 null；原 Action004 仍 SPENT，旧失败保持。
+本阶段仅支持请求人类批准，尚未获得 Action005 执行授权、物化动作或启动验证；新批准及 fresh admission 仍需按原生事实完成，不重复请求仍有效的规格批准。
+
 ## 2026-10-08 核定：Task68 完整验证失败，Task65 超时观察与局部 QA 已提交
 
 以下为本地 2026-10-08 的证据核定；运行及外仓观测时点均以 UTC 明示。
