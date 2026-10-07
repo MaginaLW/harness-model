@@ -1,5 +1,22 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 Task68 Action001 已批准并真实启动完整验证
+
+人类已批准 Action001 revision002 的一次完整原生 V2；原生 human/action 批准为
+2026-10-07T13:06:30Z 的 event17，Action canonical
+`0463b271fb460b7df626b341640a035a11ed87f02385910fe1371ea5f25c6b89`。
+批准账本阶段 commit `6564c53f0f165be71c1d964ced42dce3f88d9927`，
+source `21f90a59940b888e7233b76fc3ee43f915f378ad` 与已批准规格保持。
+实际 fresh native admission 后，封存入口唯一调用；预启动只读检查于13:12:33 UTC通过，
+原生进程于13:12:34.2037473Z真实启动，managed PID37196，独立verifier为/root/f_recovery。
+原生 run 为 `run-20261007T131235907044Z`；完整14项、原逐项预算及85%总体/90%diff
+阈值、固定5项baseline/mutant各60秒DEVNULL与本次所有的有界清理保持，无整轮自动重试。
+当前仍待原生终态、各项结果及同run覆盖率；启动、guard通过或局部测试不代表验收。
+源代码、ref和账本由本次验证冻结；既有失败和SPENT原件保留。
+批准与启动证据分别在 `${RUNTIME_ROOT}/task0068-action001-root-approval-admission-001`
+及 `${RUNTIME_ROOT}/task0068-native-v2-action001-execution-001`；运行包尚未终态封存。
+下文“请求批准、尚未运行”等段落保留为早先时点，不再表示当前授权状态。
+
 ## 2026-10-07 Task68 Action001封存独审并请求具体批准，Task65单节点实测完成
 
 Task68 Action001 revision002及一次启动器已封存，非作者独审为
