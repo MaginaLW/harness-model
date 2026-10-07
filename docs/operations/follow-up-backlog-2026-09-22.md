@@ -1,5 +1,19 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-07 当前核定：Task68 原规格批准有效，当前设计与实现状态已恢复
+
+旧fixture单独安全commit21f90a5保留31原断言，实际native sync/event10、绑定resolution/
+reclassification及current Design REV0681/r1已完成。2729B重复CLI输出原字节/metadata以
+R100保存在preparation，随后validate PASS；没有重试成功sync或改变validator。
+原spec/human批准有效，root机械现状态ack明确实际operator而非新human决定；
+event16 begin，OwnGov HEAD3df333e，status IMPLEMENTING/implementation_result/fresh/current/clean。
+修复后的实际tests未跑，旧77/80失败保留；准备与独审不替代完整14项、85/90和Gate。
+
+Task65获批唯一完整V2仍运行，最终evidence/ActionUse待原生终态；无整轮自动重试。
+Task68测试等待Task65终止后串行推进，专用环境和独立动作数据准备不提供其执行批准。
+七项与Task67/F/I1/I2/E5/I5/Phase3/4及发布门未关闭。
+详见[当前执行记录](backlog-execution-2026-10-04.md)。下方保留历史窗口。
+
 ## 2026-10-07 当前推进：Action004 获批并运行，Task68 安全夹具单独实施
 
 真实批准 Action004 revision002 已以event29/commit7853d52登记；本人独立verifier
