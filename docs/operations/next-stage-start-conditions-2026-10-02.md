@@ -1,5 +1,19 @@
 # 下阶段启动条件：2026-10-02
 
+## 2026-10-08 原生缺项与新外仓窗口
+
+Root 在各自工作区用固定公共 CLI 只读核对，七个 HEAD 前后相同：TASK-0063/0064/0067 仍 `BLOCKED` / Missing `block_resolution`；0065 为 `FAILED` / Missing `retry_reason_or_escalation`；0066/0068 仍 `IMPLEMENTING` / Missing `implementation_result`；0069 为 `WAITING_FOR_SPEC_REVIEW` / Missing `spec_approval`。Action005 已消费且整体 FAILED，旧批准不重问，也不授权新验证。Task69 的现有规格问题仍待答复，未开始整合实现。
+
+发布 A 已选择；两份普通文档派生稿已作本地阶段提交 `cb8d524409a53cb67808cf77d96577962c056cf0`，实际 Git 字节与已独审内容一致。原件和暂不公开历史保留，具体文件身份及后续 publisher 边界见[发布工作包](publication-package-2026-10-04.md#2026-10-08-两份派生文档已固定为本地-git-候选)。
+
+外仓本轮 21 个不同 endpoint 各明确 GET 一次，两个 main 前后分别相同：dotfiles `3a41b37d987214487b1690f14c035d3001b1d90c` 的 [Validate run 37702050986](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37702050986) actual attempt 1，4 jobs／4 同 suite checks 全部 completed/success；r3s `929a17bdd74a578b868c512d9630e7d04100f251` 的 [offline-verify run 37702047743](https://github.com/MaginaLW/r3s-VPS/actions/runs/37702047743) actual attempt 1，Windows 成功、POSIX queued／零 steps／runner_id 0。本次 runner API 只返回一个 Windows online/idle 注册项，不证明 Linux 宿主故障或全局不可用。
+
+UTC 2026-10-08T02:46:11Z–02:46:13Z 再只读轮询同一 r3s run 的 attempt 1 与 jobs，均 HTTP200／CLI rc0：运行仍 queued，Windows job 成功，POSIX job 仍 queued、零 steps。未触发重跑或 runner 恢复。固定 workflow 第 870–898 行仍要求 root fixture、dash／busybox-ash 双 engine 和双 receipt；POSIX 没有执行，双通道和该源合同覆盖门仍未关闭。
+
+外仓包 `${RUNTIME_ROOT}/pilot-current-readonly-status-20261008-001` manifest SHA256 `b08b0606d937ffbb0ca0fd55c580bcdb27d3b5fe5af2d75fc9bcfe92be6840a8`；固定运行轮询包 `${RUNTIME_ROOT}/pilot-r3s-run37702047743-readonly-poll-001` manifest SHA256 `fe3663f71e878ae7fb2319bff84b7070bbca65c63d5bad29888b6dc80b41703d`。Root 核对完整成员、SHA 和长度。dotfiles protection 的404、r3s protection／effective-rules 的403原响应保留，相应未知项未用成功 CI 补造。读取不是原子快照，也不代表所有 workflow 或试点 closeout。
+
+I2/E5 的新目标问题仍待答；F、完整本仓验证、I1 真正生命周期资格、Phase 3/4 与远端发布条件仍未全部满足。下方旧“当前”标题保留各自历史窗口，旧等待 Action005 批准或 A/B 选择的描述不作为现在缺项。
+
 ## 2026-10-08 新后续计划与现行进入门
 
 [新分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)统一后续排序、并行人数/职责和串行依赖，并提出 3-A 低风险反馈、3-B 高风险 V3 的解耦候选。合同与只读准备可以独立推进；正式采用拆分路线前，本文及原 Phase 3/4 进入门保持。

@@ -1,5 +1,20 @@
 # 本地记录的干净发布工作包：2026-10-04
 
+## 2026-10-08 两份派生文档已固定为本地 Git 候选
+
+两份普通文档派生稿已在私有文档准备分支提交为 `cb8d524409a53cb67808cf77d96577962c056cf0`，父提交仍为 `81e664809cd052486db878f68dbf00791a42d50b`。提交只包含下列两个路径；stored Git 字节与下节两份已独审派生稿的 SHA256、长度完全相同，工作区干净。原件仍保存在固定父提交和私有输入包中，原件的暂不公开结论保持。
+
+| 文件 | 实际 stored Git blob OID |
+| --- | --- |
+| `docs/operations/zcode-next-stage-assignments-2026-10-02.md` | `3d7539c9786e50303fb7588ef9ade3a236250794` |
+| `docs/operations/zcode-report-recovery-2026-10-03.md` | `6a38d916fd6ec422495728cadc2c9801e2f08f85` |
+
+回执 `${RUNTIME_ROOT}/publication-A-derived-docs-git-stage-001` 的 manifest SHA256 为 `40926d713134473683cc504505ef3dacc5806867353f731872b58ad09230ed1b`。Root 核对原件 Git OID/SHA、工作区与暂存区差异、实际提交成员、派生 stored blob OID/SHA/长度及提交后的干净状态；两个独审的内容范围没有扩展。
+
+该私有准备分支的父历史仍含暂不公开原件。后续 publisher 应提取已准入文件内容并重新核定累计候选，不能把整个准备分支历史当成公开准入。TASK-0069 仍为 `WAITING_FOR_SPEC_REVIEW`，仅缺 `spec_approval`；既有规格问题仍待人类答复。完整验证、publisher 准入及具体远端授权尚未完成。
+
+下节保留材化前的固定审查窗口，表中“尚无 stored Git OID”是当时 runtime 准备稿的身份。
+
 ## 2026-10-08 发布 A 的固定文档内容核定（准备）
 
 所有者已选择 A：整合私有账本及必要源码。新整合目标 TASK-0069 已实际创建，规格和独立 Design 记录提交为 `c9e0132933f894ed5c684af08952fd535e863fc5`；当前原生 status 为 WAITING_FOR_SPEC_REVIEW，仅缺 `spec_approval`。这不构成 publisher 准入、完整验证或远端动作授权。
