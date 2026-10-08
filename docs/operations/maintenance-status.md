@@ -1,5 +1,9 @@
 # 维护收尾与待办
 
+## 2026-10-09 TASK-0071 具体单次动作待批准
+
+新精确动作已材化并窄提交 `1911e5d`，canonical `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`；两路机制/权限独审最终0未解决问题，旧四问题及blocked机制保留。fresh status为clean、IMPLEMENTING REVIEW/V2、spec批准current，sole Missing implementation_result，scope/schema有效。范围为实际S589的一次完整V2、原14预算/85%/nativeB90/五mutation及同轮额外F90共享120秒比较；准确新owned资源/进程/Job有界清理单独绑定，没有push/merge/provider。当前无action grant、完整验证、parent创建/probe或消费；按规则2/4请求这一具体动作，规格不重复请求。完整选定材料、实际工具/规范化日志边界和后批准串行合同见[执行记录](next-plan-execution-2026-10-08.md)。
+
 ## 2026-10-09 TASK-0071 规格批准与当前源码阶段
 
 所有者已批准新71当前冻结0f519规格，native approve/begin记录提交 `7cfa783`；实际source唯一新增模块提交 `589843a`，两元数据subject同步提交 `2084e50`，旧事件前缀保持。提交后clean、classification fresh、spec approval current，IMPLEMENTING / REVIEW / V2，sole Missing implementation_result，scope/validate有效。两路当前新71源码内容独审均0未解决问题，actual新71源的224节点局部通过，Ruff实际0.16.5/check+format及47源码mypy通过；冻结F5、规格和七合同不变。module行91.497227%、line-plus-branch88.908046%只为局部诊断，不是完整85%/90%、V2、正式Review或合并验收。

@@ -2,6 +2,18 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 TASK-0071 新单次 V2 动作已材化，待具体动作决定
+
+唯一选用提案为 `${EXECUTION_ROOT}/task0071-v2-action-preparation-002/source-packet-002`；其动作已逐字节材化到实际治理分支 `.ai/tasks/TASK-0071/action-v2-targeted-mutation-001.json`，仅此文件28行提交为 `1911e5dca43318445345c5247b1ed764360e4df5`。raw SHA256 `2382de64de2c37c666515a57385c974e4ccf182c3294c1ecbe728fc59aa97d68` / 7,703字节，原生 action 合同校验后的 canonical 为 `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`；preapproval packet 为 `1bca29075a0a4dfef4dbef93448f21b70fae1e33e6c3abb505d30dac784914ba` / 99,180字节。可用固定 `git show 1911e5d:.ai/tasks/TASK-0071/action-v2-targeted-mutation-001.json` 复核。当前无action grant、消费或执行。
+
+两路非作者分别核机制技术与权限边界，最终均0未解决 finding，仅认可该精确准备材料；技术原四项分别闭合，旧001 blocked机制、旧proposal label001和所有审查保留。最终技术报告SHA `1f89228a252209d3eb93b56f6f05e2e5659ac2fcebca2bfea0631bb5fcd511bd`，权限报告SHA `1ab8418ba19d63b09f0a9cb1f2801a755bb2358eec2649629b72159e05119e31`。17 guard、18累计比较、9捕获mock及AST/parser通过，只是纯机制测试。Root核002的34封闭成员和全部所选源/工具/运行时/context pins无差异；实际native文件raw与stored HEAD blob及受审proposal一致。
+
+具体范围为由真实非实现者 `/root/task71_verifier` 执行一次原完整V2，并在14项全部实际PASS、整体branch覆盖率和同轮XML闭合后进行额外原F→同S累计90。保留原14及预算、85%整体、native B90、五组固定mutation各baseline/mutant60秒；额外比较两次直接owned Start及可证明同Job后代共用真实120秒。Git直接向本次exclusive新owned文件写完整F→S patch，复制前/副本/复制后pins一致；额外child双端明确是现有backend规范化UTF8文本，原stdout/stderr字节UNKNOWN，不能冒称raw。唯一outer launcher继续原字节双sink。额外比较单独exclusive claim绑定同outer/input/action/S/native evidence/XML，既有claim/receipt先拒绝，失败不重跑；native14通过而累计失败仍不得作spec验收或推进正式Review/code/finalize/Gate。
+
+新003工具追加确认实际S/H及一次源module元数据导入，未API；Ruff metadata0.16.1与原实际CLI0.16.5分别保留，原001/002误用metadata的字段已追加errata，实际被resolver选择的二进制单独pin。默认sandbox裸Git读取失败原件保留，同argv/ENV5的scoped require_escalated只读对照成功；未来精确launch限定该真实工具上下文，不改config/ACL/argv或伪称默认上下文资格。选定29算法文件含内部GitPathTool/command_runner，有限pins不证明完整startup、Git依赖、loaded-image或OS/Job资格。
+
+刚刷新实际owner：clean、S仍 `589843a`、HEAD为上述提案提交、IMPLEMENTING / REVIEW / V2、classification fresh/spec approval current/evidence not_available，sole Missing implementation_result，scope/validate有效。快照报告 `task0071-native-action-admission-001/report.json` SHA `3b2c09a958c482f95a348cc549264df708f7f8e2f55d253b48cbb2e735af84c4`。未创建/probe两个短parent；未来人类/native具体动作批准后才能exclusive创建、核四向真实identity/empty/native验证回执，追加实际postgrant HEAD/current状态和新final packet后复核再单次启动。动作有效期至UTC `2026-10-09T10:00:00Z`，启动至少剩5400秒。只覆盖hash绑定的新owned资源及可证进程/Job有界清理，父级/历史/source/unknown保留；push/merge/PR/provider均不在范围。规格批准仍current，不重复请求；整体计划及正式验收未完成。
+
 ## 2026-10-09 TASK-0071 新规格获批，实际源码与 subject 已提交
 
 所有者明确批准当前冻结规格 `0f519ee5d853e3dc1268386081129d4610a16f837675483320d04b0ca183673e`；原生 spec approve/begin 已发生，三份本任务机械记录提交为 `7cfa78392de6bebcdade3f600dac3d37f1d6a848`。本次批准只覆盖该规格，不从 TASK-0070 转移任何批准、验证结果或动作。

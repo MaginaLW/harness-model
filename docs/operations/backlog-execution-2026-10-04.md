@@ -1,5 +1,9 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-09 TASK-0071 单次完整验证的具体材料已齐备
+
+唯一选中002机制/packet label002，原001 blocked和四finding保持；两路最终机制/权限审0未解决问题。动作原件仅新增own-task文件提交 `1911e5d`，canonical `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`，S589不变。刚刷新的实际status clean/fresh/spec current，IMPLEMENTING REVIEW/V2 sole Missing implementation_result，scope/validate有效。具体完整V2、同轮额外F90/120秒与仅新owned资源/进程/Job有界清理等待单次动作批准，原14预算、85/90和五mutation保持；无grant、V2、消费或parent创建/probe，push/merge/provider不包括。普通准备不生成执行许可，后批准actual HEAD/parent receipts/finalpacket须继续串行复核，见[执行记录](next-plan-execution-2026-10-08.md)。
+
 ## 2026-10-09 TASK-0071 实际规格批准、源码提交与当前缺项
 
 新71冻结0f519规格已获所有者批准，native approve/begin提交 `7cfa783`；唯一source阶段 `589843a`、原生subject同步 `2084e50` 已完成。actualownerclean/fresh、specapprovalcurrent，IMPLEMENTING REVIEW/V2 sole Missing implementation_result，scope/schema有效；旧11条Git事件前缀保持，新增同步一条。新71源码两路非作者静态审查0未解决问题；Rootactual新71/source局部224passed、Ruff实际0.16.5/check+format与47源码mypy通过，14源/规格/F5/合同和13工具选中pins前后一致。关闭数据稳定，module行91.497227%/line-plus-branch88.908046%不填原生验收缺项。证据见[执行记录](next-plan-execution-2026-10-08.md)。
