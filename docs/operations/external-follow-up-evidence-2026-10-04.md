@@ -1,5 +1,20 @@
 # 外仓后继证据与剩余依赖：2026-10-04
 
+## 2026-10-08 当前核定：发布 A 已选择，Action005 为 FAILED
+
+所有者已选择 A：整合私有账本及必要源码。此前 A/B 问题不再待答；新的整合 task、冻结规格与发布批准仍须按实际原生状态分别建立。
+TASK-0065 Action005 revision002 canonical `a51f8ed47b49e3bac71aa91cc206d96e4ba416d306e068c4e4b41d1525efee46` 已登记并由实际独立 verifier 单次执行 launcher003；UTC 2026-10-08T00:13:04Z 的实际工具终态已见证业务进程、启动器、双 EOF 及输出关闭，没有整轮重试。
+原生 14 项全部 required，12 passed；regression 为 RUNNER_TIMEOUT 900031 ms，integration 为 RUNNER_TIMEOUT 600016 ms。整体 conclusion=failed，a51 已消费且不可复用；CLI/tool exit0 不改变失败。
+同轮 XML 的 lines 8525/9300、branches 2708/3272，combined 11233/12572=89.35%，达到85%；原生 base diff coverage92%达到90%，固定5项 baseline0/mutant1均 killed。它们不抵销两项失败，也不替代未来固定 public base 的累计 diff90%。
+两次超时边界 parent 未 signaled、双 reader EOF 未完成，后续 owned Job 清理完成；具体阻塞节点与根因仍 UNKNOWN。源5文件内容与元数据保持；5094输入中3项原生任务写入及2个既有生成 pyc 更新如实记录，不宣称整个运行闭包或 loaded image 已资格化。
+`${RUNTIME_ROOT}/task0065-action005-independent-execution-observation-001/manifest.json` SHA `7b1a3710707e9ae881aae365e61b4e639ac45106766d8690ad8accd409437317`，92 payload/self93；Root完整原字节、长度、固定7stat及成员复核通过。
+本次仅提交 events、task.yaml及a51消费回执3项机械记录，提交 `76e64d414841fc4899ca1d01f68b9eb381de69c5`，subject仍 `499f00ff74e6c169defe81e46899b98c97221fbc`。最新原生 status 为 FAILED，Missing: retry_reason_or_escalation；未记录新的重试或恢复。
+`${RUNTIME_ROOT}/task0065-action005-native-terminal-metadata-stage-001/manifest.json` SHA `9a99dec2f64670ab246bb059ca11bc6ddf9913df0276b7c3645baacea5d3d413`，69 payload/self70。最新 evidence SHA `139cec2f3f20347e0c48a4d51b1e37d0eee7a71f4bdecc4256363caa018fbbd9` 是 untracked 私有原件，含实际本机路径，不入本次提交，不在公开同路径生成替代件。
+六个 owner 的原始任务树已分别保全；历史来源未知项保持未知。A 的公开取舍预审为193项历史准入候选、3项旧原件私有留存、15项文档未知；65当前37项 Git 已完成独立内容准入审查，173份 raw 原件仍绑定 a30 窗口，后续整合按当前身份重绑；不把 PRE-A5 表称为当前全部文件。
+独立整合工作区已从实际 `c16e77f3f23768a81f857633462eb5ccbdf23655` 建立，真实目录最高 TASK-0068，政策、schema、CI和忽略规则与固定公开 base 相同；先做单独安全测试阶段，再以原生分配器取得真实新编号，未手工创建编号或转移旧批准。
+I2/E5 的新目标问题仍待答。Task65完整验收、F/Task64、I1真实资格、r3s双通道、Apply、Phase3/4及发布尚未全部完成。下面各旧标题和正文保留其历史窗口，不构成当前缺少A选择或Action005批准的结论。
+
+
 ## 2026-10-08 dotfiles 四项 CI 成功，r3s 仍未完成
 
 Dotfiles 019窗口 UTC 2026-10-07T19:49:02.5639694Z–19:49:33.1861471Z：[Validate run37662955635](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37662955635) actual attempt1 completed/success，updated19:32:35Z。
