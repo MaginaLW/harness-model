@@ -1,5 +1,11 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-08 TASK-0069 FAILED / SPENT 当前核定
+
+真实独立 verifier 的唯一完整 V2 已结束：10/14 required通过，regression与integration按原900/600秒预算超时，coverage_xml中11个测试失败，diff coverage78%未达90%。同轮overall88.945%及固定五组mutation通过，不改变整体FAILED。原动作已消费、不可复用；终局元数据提交 `b0c18f5` 已在本地整合分支保留，六源码subject635及旧Task65失败保持。
+
+提交后scope-valid/validate valid，status仍FAILED、Missing `retry_reason_or_escalation`，spec批准current，Gate REJECT；没有retry、finalize或code批准。两项超时节点和根因UNKNOWN，8个原子写入traceback支持长路径假说但尚未复现确认。S1说明模块规格及独审继续独立准备。新private evidence/context、精确失败和下一步依赖见[执行记录](next-plan-execution-2026-10-08.md)。以下旧窗口保持，不作为当前验收或新动作授权。
+
 ## 2026-10-08 外仓新窗口与待核状态
 
 固定七个 GET 在 UTC 12:01:40–12:01:45 各执行一次。dotfiles 新 main 为 `3a41b37d987214487b1690f14c035d3001b1d90c`，已知成功 run/job 属于旧 `7c0aab19`；新 main 的完整 CI 尚未核定。r3s-VPS 四项 HTTP404，当前状态和原因 UNKNOWN。原 HTTP/body、窗口和有限结论见[执行记录](next-plan-execution-2026-10-08.md)；旧终态保留，未自动发现、重跑、恢复或发布。

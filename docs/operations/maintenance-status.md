@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-08 TASK-0069 终局失败，单次动作已消费
+
+完整 V2 已终局 FAILED：14项 required 中10通过，regression900秒超时、integration600秒超时、coverage_xml含11个测试失败、diff coverage78%低于90%。同轮总覆盖率88.945%达到85%，固定五组mutation均killed，均不能抵销必需失败。终局提交 `b0c18f5` 只保存3项任务元数据；源码与历史原件保持。
+
+提交后 status 为 FAILED，Missing `retry_reason_or_escalation`；原spec current，evidence因未通过而stale，scope/validate有效，Gate REJECT。旧动作SPENT，不重跑或执行Recovery提示。长路径假说有8个traceback支持但未复现，两项超时节点/根因仍UNKNOWN。完整报告、同轮覆盖率、私有新原件和后续并行职责见[执行记录](next-plan-execution-2026-10-08.md)。下述“已启动/尚无终局”等文字只保留此前窗口；完整验收与发布尚未完成。
+
 ## 2026-10-08 外仓固定句柄刷新
 
 UTC 12:01:40–12:01:45 的七个指定 GET 已各一次读取并保存 HTTP/body 原件。dotfiles main 已到 `3a41b37d987214487b1690f14c035d3001b1d90c`，旧成功 run/job 仍绑定 `7c0aab19`，新 main 的 CI 未核定；r3s-VPS 四项 HTTP404，当前状态及原因 UNKNOWN。细节与固定原件见[执行记录](next-plan-execution-2026-10-08.md)。下面外仓成功、cancelled 或 runner 状态只属于旧窗口，未重试或远端写入。

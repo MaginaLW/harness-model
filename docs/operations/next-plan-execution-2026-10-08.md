@@ -2,6 +2,29 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-08 单次完整 V2 终局：FAILED / SPENT
+
+唯一获批动作在 UTC `12:32:48.6365025Z` 结束，真实独立 verifier 为 `/root/task69_verifier`，run 为 `run-20261008T114710177182Z`。业务结论 **FAILED**：14 项 required 中 10 passed、4 failed。业务进程退出、双 EOF、sink flush/close 和外部工具对最终文件关闭的见证均已保存；CLI/tool exit0 只表示该调用完成，不表示验收通过。没有重跑、额外清理或预算变更。下述启动、获批及未批准提案部分属于此前窗口。
+
+| 必需失败项 | 实际结果 | 下一步事实边界 |
+| --- | --- | --- |
+| regression_tests | RUNNER_TIMEOUT，900032 ms，原预算900秒 | timeout 时 parent 未 signaled、reader 未完成 EOF；随后 owned cleanup/drain 完成。具体阻塞节点及根因 UNKNOWN。 |
+| coverage_xml | exit1，1075750 ms；11 failed、3191 passed、1 skipped | 8 个完整 traceback 的临时路径长261或268字符，支持长路径边界假说；3个 review 只返回原子写入错误。尚未复现确认。 |
+| diff_coverage | exit1；61/78 executable diff lines 命中，显示78%，低于90% | 17个缺行涉及 timeout observation、时钟异常和 fallback；与11个测试失败的关系 UNKNOWN。 |
+| integration | RUNNER_TIMEOUT，600031 ms，原预算600秒 | timeout 与后续 owned cleanup 分别保留；具体阻塞节点及根因 UNKNOWN。 |
+
+同轮 writer 关闭后，`.coverage`、XML及 SQLite companion 状态经 source-before/copy/source-after 核对一致，再只运行一次 `coverage report --precision=0 --fail-under=85`，rc0、显示89%；原始 combined ratio 为 `11240/12637 = 88.94516103505579%`。五个固定 mutation 均 baseline0/mutant1、killed，原各60秒预算保持。85%与mutation通过不抵销四项 required 失败；未重新 collect 或替换原 evidence。
+
+动作 canonical `1a213d6751af78284bfebe9926dd9edd9dd3456dc3ce38769bbf3260debade37` 已实际 consumed=true、reusable=false；原 Task65 FAILED/SPENT 不变。终局窄提交 `b0c18f5b8b8c092e27c461e06ea4806c56276bb1` 仅记录本任务 events 11–13、state/updated_at及消费回执，六源码保持 subject `635cbe3`。旧10条事件的 Git LF规范前缀和 JSON对象相同；prelaunch physical raw 前缀未核，不混同两种身份。本地整合分支已快进到该提交，没有远端写入。
+
+提交后实际 status 为 FAILED / REVIEW / V2，Missing `retry_reason_or_escalation`，classification fresh、approvals current、evidence stale；scope-valid、validate valid，Gate REJECT。freshness 的唯一失效原因是 `FRESHNESS_EVIDENCE_NOT_PASSED`，八项版本字段和 verifier context 一致，不能据此重复请求 spec。Gate 同时拒绝未通过、未final、实现review缺项及code批准缺项。Recovery 命令仅为提示；当前不执行 begin、retry、escalation、finalize 或 code approval。
+
+提交后仍有两份 private untracked 原件：本任务 `evidence.json` 与新 verifier context，不修改 ignore 掩盖 dirty。evidence 的12个 command_summary 含本机绝对路径；未来公开投影必须另外保留其缺席边界，不能发布整个私有分支，也不在同路径生成变换替代件。原 catalog 与四项旧私有保留名单保持其固定窗口，不冒充已覆盖本次新执行材料。
+
+最终报告 `task69-verifier-preflight-001/execution-observation-004/final-execution-report.json` SHA256 `250eb520f5e08208ad0bb2518396ddc42faeb3a901ca31d2e198faa418488a8b`；manifest `6735c12cea8e4a6951b8ecd4dcf7989603ce3fad2f41ae3d7ee33e8f406ee356` 的72项原字节/长度由 Root 复核无差异。原 evidence SHA256 `950568ee5fe36f9710006280d333709c9d56b8e2a0cab4a9d6efaa2e63b5f4f7`。封闭日志/静态诊断 `task69-closed-coverage-diagnostic-001/report.revision002.json` SHA256 `9f8c3944067d482720006cacd929eb25e9fc7b75a5e02b7728246a4438642490`；原件均在 `${EXECUTION_ROOT}`。当前注册表读取及候选解释器 manifest 不证明运行时缓存或 loaded-image 资格。
+
+维护恢复线需先把长路径假说、超时未知和diff缺口各自形成可评审的新范围，再按真实原生状态处理所需准入与新具体动作；不把 Missing 当作重跑旧动作的许可。独立 S1 非评分说明模块继续规格准备：1名作者修订输入来源、隐私输出、依赖语义、测试base及验证副作用合同，2名非作者只复核实际修订；共同冻结、原生分配/分类及最终验证串行。它不等待维护线全部通过，也不产分数或实际放行动作。完整维护验收、S2–S5、Phase3/4与发布仍未完成。
+
 ## 2026-10-08 单次完整 V2 已启动
 
 真实独立 actor `/root/task69_verifier` 于 `2026-10-08T11:47:09.5352941Z` 启动唯一业务调用；原生 event 11 随后将本任务转入 VERIFYING，run 为 `run-20261008T114710177182Z`。冻结 ready inputs SHA256 `72081a2e3a093afb563277d8910289ed407b23c15eee8aca82832fbbcb0759f6` 与最终 activation 窄审 `825434b49f934d801c7cbef065225f3c918c10d0ad93e4f6a1a9c3e05b4d980c` 已实际核对，启动时 guard 单次通过、双 EOF 与 sink 关闭完整。外层单次 claim 已创建；业务尚未终结，不能据 guard、CLI 或 transport 推定通过及 action consumption。
