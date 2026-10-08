@@ -1,5 +1,10 @@
 # 维护收尾与待办
 
+## 2026-10-08 新规格已批准，后续执行进入实际整合
+
+TASK-0069 冻结规格 e785ed663af145f006995980ec146c3ac13bd89568d38e09c203838a551110f1 已在本轮 fresh status 后获得人类批准，原生 approve/begin 成功；当前 IMPLEMENTING，Missing implementation_result。源码与 canonical 历史恢复、S0 归因及非评分设计详见[本次执行记录](next-plan-execution-2026-10-08.md)。完整验证、公开投影和发布尚未完成。下述 Task69 待审、Action005 待批准或 A/B 待选等旧窗口不作为当前指令，旧正文保持。
+
+
 ## 2026-10-08 后续工作排序已整合
 
 后续计划入口更新为[多层审核、置信度反馈与减少人工介入分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)。新计划明确 S0–S5 的并行职责、sub-agent 数量、串行依赖、质量和效果验收；现有七项待办映射到核心能力、维护和目标验收各线，历史编号与原件保持。
