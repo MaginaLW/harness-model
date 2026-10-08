@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-09 源码局部阶段完成，新的安全B与TASK-0071
+
+TASK-0070源阶段 `fe2ec4e` / 同步元数据 `f4f18bd` 已提交；实际ownerclean/fresh、原规格批准current、IMPLEMENTING / REVIEW / V2、sole Missing implementation_result。两路源码独审0未关闭项，冻结147节点及静态检查通过；原独立反例的3个引用构造错误已保留后修正，3项通过。
+
+新的独立source-free安全B `12abb0d` 只新增77节点边界测试，原F4和旧任务历史保持；最终两路静态审查0未关闭项。以原已授权源码为QA owner的224节点局部通过，module行91.497227%、line-plus-branch88.908046%，不等于整体85/native90/累计90/fullCI。实际新TASK-0071已分配/材化/freeze/classify，首轮Design的覆盖率措辞REQUEST_CHANGES已原生登记并保留旧冻结全文；澄清后新冻结为 `0f519ee5d853e3dc1268386081129d4610a16f837675483320d04b0ca183673e`，两份当前Design APPROVE且0未关闭项，own-task治理提交 `29a5ba1` 后clean/fresh、WAITING_FOR_SPEC_REVIEW / REVIEW / V2、sole Missing spec_approval，scope/schema有效。待批准该新冻结规格，spec/action不从70转移，71尚无源码实施；c44批准仍current不重复请求。原14预算、85%/90%及五mutation保持，同时要求原F→新S累计90。固定事实、证据、角色与串行依赖见[执行记录](next-plan-execution-2026-10-08.md)。原Task69FAILED/SPENT和整体未完成保持。
+
 ## 2026-10-08 TASK-0070 已获规格批准并 begin
 
 所有者新规格批准已实际登记，三份元数据提交 `f81494e`；提交后clean/fresh、spec批准current、IMPLEMENTING / REVIEW / V2，sole Missing implementation_result，scope/schema有效。四路源码/reader/技术/隐私职责与独立verifier准备见[执行记录](next-plan-execution-2026-10-08.md)。F安全基础和合同保持，新完整动作尚未获批或运行，产品验收与整体目标未完成；下述spec待答仅保留较早窗口。

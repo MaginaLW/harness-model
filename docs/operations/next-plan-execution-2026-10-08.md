@@ -2,6 +2,20 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 源码阶段已提交，独立边界 foundation 与新 TASK-0071
+
+TASK-0070 单源码阶段提交 `fe2ec4e7cc1588ba3ebda3841874fef768f9a99d`，源码为 `da181a0772f546a71ac6d9373d58f3af791baf6b172744bb15961f22bc501a1e` / 89,122字节；随后原生sync并提交两份元数据为 `f4f18bdb0870b2182ac4f7bae3e485379b6ed514`。实际owner提交后clean、classification fresh、原c44规格批准current、IMPLEMENTING / REVIEW / V2，唯一Missing仍为implementation_result，scope/validate有效。两路源内容独审在该SHA上均0未关闭问题；冻结147节点局部通过，Ruff、format及完整src的47文件mypy通过。独立公共反例原15节点中的12项通过，另3项输入构造的旧scope引用遗漏已保存原失败并只修输入关联；修正后的3项均通过。局部结果不填原生implementation_result。
+
+原冻结F只允许source，不允许在其后加入安全测试。按AGENTS规则8，另从source-free `f81494e86bcb35769cd302a098ee0f12d1f0373f` 建立安全单元，提交 `12abb0daf7aacc8056687911aafcc33f4da14333` 仅新增 `tests/unit/test_advisory_status_boundaries.py` 的631行；15函数、77节点，raw与Gitblob均为 `f1d42e2eddfd922980b97773410f281b4ad05f8cbbd2924421f3497a37c75b97` / 25,347字节。新checkout原四件由已核Gitblob恢复LF，内容diff为零并刷新stat缓存，旧owner原件不写。两路独审将三处超出冻结合同的测试预期收窄，原001–003版本、原输出及finding窗口保留，最终004均0未关闭项，Ruff/format/whitespace通过。
+
+Root明确以TASK-0070已授权源码为局部QA owner执行最终77边界节点及原147节点，224 passed；测试文件来自新的source-free工作树，产品import和fixture来自原QA owner，普通仓库级资源fixture在此局部诊断中未启用。关闭数据原件/副本/再次原件一致，WAL/SHM/journal不存在；只读JSON、不查询SQLite。module代码行990/1082 = 91.497227%，line-plus-branch1547/1740 = 88.908046%，excluded0；整体85、native diff90、累计diff90和完整CI仍未核定。`${EXECUTION_ROOT}/task0070-local-final-boundary-coverage-closed-001/report.json` SHA256 `fdb97e6a1642caefe377f180371a1e640b3d526f0fdb128df5c211441230c962`。Root复核64项源/合同/审查成员及材化测试，报告 `advisory-closed-source-and-safe-stage-integrity-001/report.json` SHA256 `44b967b7da7fb3f9109489052adbefc15e17154f85af8a280994a0bec1854dd6`。
+
+原生start在上述实际B上分配TASK-0071，branch `codex/advisory-status-boundary`，sole allow/DU仍仅该源码；原F四件及新测试五安全路径不进入source DU。旧TASK-0070当前owner/批准/subject/history保留；新checkout的70 namespace仅是f814历史快照，不标当前owner、不假关闭。新71的七合同完整材化且原字节不变，原14required/预算、85%、90%、五固定mutation全部保持；另要求原F `fb6837dcb94e959178f4c16ff851fe9155fd032b`→同一新S的累计90与native B→S90同时成立，用同轮完整branch-enabled关闭XML，并将额外120秒累计比较放入未来具体执行包，不伪造第15个required ID。
+
+首冻结c46的两路正式Design均REQUEST_CHANGES，指出将整体branch覆盖率与diff-cover现行可执行行算法混写的歧义。旧冻结全文已保存于own-task `spec-revisions/`，两份旧审查原生登记且不重写；仅澄清此句后重新freeze/classify，当前冻结SHA256 `0f519ee5d853e3dc1268386081129d4610a16f837675483320d04b0ca183673e` / 12,297字节，当前Design context为 `41c6c91b288a9bee40d0dc33f7c363031fb1da2135e6f62cb53148d5379b3eaa`。两份当前Design `REV-0071003`、`REV-0071004` 已原生登记为APPROVE，0未关闭项；治理阶段 `29a5ba12d34e9d7bd6ef2763faf2c036ba295b87` 仅提交19份own-task记录。提交后clean/fresh、WAITING_FOR_SPEC_REVIEW / REVIEW / V2，唯一Missing spec_approval，scope/schema有效。原件可用该分支 `.ai/tasks/TASK-0071/spec.md` 或固定 `git show 29a5ba1:.ai/tasks/TASK-0071/spec.md` 复核。新71尚未begin或实施源码，规格/动作批准没有从70转移；依实际Missing请求这份新冻结规格，c44有效批准不重复请求。
+
+边界准备启用1名独立作者和2名静态审查sub-agent；两路正式Design由非模板作者并行完成。主agent串行执行原批准账本推进、源码局部验证/提交、source-free安全B提交、实际新任务分配/材化/冻结/分类、审查登记与新鲜状态核定。顺序依赖为安全B→真实新任务/spec/Design→当前Missing规格决定→单源码实施和实际新S→新工具/身份/资源准入及单次具体动作→完整验证/Review/code/Gate。原完整V2准备机制仅是准备知识，不是当前71资格或grant；短资源parent没有创建/probe，Task69 FAILED/SPENT不变，S2–S5与整体目标未完成。
+
 ## 2026-10-08 TASK-0070 规格获批并进入实施
 
 所有者已明确批准实际冻结规格 `c44b8574099e46ee1a2a357e78e50ac898f08a9a86244ce937cb1b1c6fb5de53`。fresh status核为唯一Missing spec_approval后，原生approve/begin成功；提交 `f81494e86bcb35769cd302a098ee0f12d1f0373f` 仅含本任务approvals、events和task三份记录。提交后clean、classification fresh、approvals current、IMPLEMENTING / REVIEW / V2，唯一Missing变为implementation_result，scope-valid且validate valid。下方待规格批准文字保留其此前窗口；本次批准不授予完整验证或发布动作。
