@@ -1,5 +1,9 @@
 # 维护收尾与待办
 
+## 2026-10-09 TASK-0071 单次动作已批准并入账
+
+所有者已批准精确canonical `3e920e01…66e10e7`；原生批准事件13及三份own-task账本提交为 `0848db7`，S589保持。当前clean/fresh、approvals current、IMPLEMENTING REVIEW/V2 sole Missing implementation_result，scope/validate有效。真实postgrant admission、并行职责及后续final packet/两路窄审/独立单次启动依赖见[执行记录](next-plan-execution-2026-10-08.md)。完整V2尚未运行、最终激活未完成；旧失败和消费保持，整体目标未完成。下述待动作批准文字为旧窗口，有效批准不重复请求。
+
 ## 2026-10-09 TASK-0071 具体单次动作待批准
 
 新精确动作已材化并窄提交 `1911e5d`，canonical `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`；两路机制/权限独审最终0未解决问题，旧四问题及blocked机制保留。fresh status为clean、IMPLEMENTING REVIEW/V2、spec批准current，sole Missing implementation_result，scope/schema有效。范围为实际S589的一次完整V2、原14预算/85%/nativeB90/五mutation及同轮额外F90共享120秒比较；准确新owned资源/进程/Job有界清理单独绑定，没有push/merge/provider。当前无action grant、完整验证、parent创建/probe或消费；按规则2/4请求这一具体动作，规格不重复请求。完整选定材料、实际工具/规范化日志边界和后批准串行合同见[执行记录](next-plan-execution-2026-10-08.md)。

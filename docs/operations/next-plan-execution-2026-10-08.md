@@ -2,6 +2,14 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 TASK-0071 精确单次动作获批，最终启动材料准备中
+
+所有者已明确批准上述 action 原件；原生 action approval 于 UTC `2026-10-08T23:57:32Z` 追加，canonical 仍为 `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`。账本提交 `0848db780d63fa82ecd906f8033f582e2c1b333e` 仅含三份 own-task 元数据，旧批准与旧12条事件语义前缀保持，仅追加批准事件13；业务 subject `589843a` 不变。
+
+当前 actual owner clean、IMPLEMENTING / REVIEW / V2、classification fresh、approvals current，sole Missing `implementation_result`，scope/validate有效；源码、tests、Policy/schema自S未变。真实 postgrant admission `${EXECUTION_ROOT}/task0071-native-postgrant-admission-001/admission.json` SHA256 `23a18dad7aa0938a790395c31e2e671b861866a76d16b9b03254c40ca60bf385` / 4,291字节，保留五条只读命令的实际双端原件。此快照不生成最终启动许可。
+
+本阶段Root串行负责批准账本、状态快照和提交；2名sub-agent分别独占获批parent/执行包准备与真实verifier身份准备，之后2名非作者并行窄审实际final packet，再由该独立verifier单次启动。真实资源回执、最终封包与激活尚未完成，完整V2未运行；原14预算、85%整体、B90、F90/共享120秒及五mutation全部保持。有效期和90分钟启动余量继续执行，不重复请求已有效的规格或动作批准。Task69 FAILED/SPENT及旧70、历史原件、S2–S5与整体未完成保持；下述待动作批准文字只属于此前窗口。
+
 ## 2026-10-09 TASK-0071 新单次 V2 动作已材化，待具体动作决定
 
 唯一选用提案为 `${EXECUTION_ROOT}/task0071-v2-action-preparation-002/source-packet-002`；其动作已逐字节材化到实际治理分支 `.ai/tasks/TASK-0071/action-v2-targeted-mutation-001.json`，仅此文件28行提交为 `1911e5dca43318445345c5247b1ed764360e4df5`。raw SHA256 `2382de64de2c37c666515a57385c974e4ccf182c3294c1ecbe728fc59aa97d68` / 7,703字节，原生 action 合同校验后的 canonical 为 `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`；preapproval packet 为 `1bca29075a0a4dfef4dbef93448f21b70fae1e33e6c3abb505d30dac784914ba` / 99,180字节。可用固定 `git show 1911e5d:.ai/tasks/TASK-0071/action-v2-targeted-mutation-001.json` 复核。当前无action grant、消费或执行。
