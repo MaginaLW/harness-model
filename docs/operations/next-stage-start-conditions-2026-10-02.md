@@ -1,5 +1,11 @@
 # 下阶段启动条件：2026-10-02
 
+## 2026-10-08 新后续计划与现行进入门
+
+[新分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)统一后续排序、并行人数/职责和串行依赖，并提出 3-A 低风险反馈、3-B 高风险 V3 的解耦候选。合同与只读准备可以独立推进；正式采用拆分路线前，本文及原 Phase 3/4 进入门保持。
+
+新计划第 5.3 节明确路线决定与治理准入，第 10 节承接旧待办；不能将文档完成视作阶段实施、样本充分、授权消费或真实软件接入完成。
+
 ## 2026-10-08 外仓终态、当前窗口与固定源合同
 
 `MaginaLW/ai-agent-dotfiles` 015：UTC 2026-10-07T17:55:28.2899123Z–17:55:50.9557526Z，[run37643757056](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37643757056) 与 job112905949241 的实际 attempt2 均 completed/success，终态17:54:57Z；head与末 main 为 `b04613f5e5fdcdbbe5fae65453a28b84f8460bd7`，旧句柄已停止等待。

@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-08 后续工作排序已整合
+
+后续计划入口更新为[多层审核、置信度反馈与减少人工介入分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)。新计划明确 S0–S5 的并行职责、sub-agent 数量、串行依赖、质量和效果验收；现有七项待办映射到核心能力、维护和目标验收各线，历史编号与原件保持。
+
+本次为文档整合，不改变 Policy、原阶段进入门或执行权限。新计划记录 TASK-0065 原件晚于下述“Action005 待批准”窗口的差异，当前 freshness/Gate 尚未成功重新核定；后续执行先读原件与可工作的原生状态，不把历史前缀当作当前授权指令。
+
 ## 2026-10-08 外仓终态、当前窗口与固定源合同
 
 `MaginaLW/ai-agent-dotfiles` 015：UTC 2026-10-07T17:55:28.2899123Z–17:55:50.9557526Z，[run37643757056](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37643757056) 与 job112905949241 的实际 attempt2 均 completed/success，终态17:54:57Z；head与末 main 为 `b04613f5e5fdcdbbe5fae65453a28b84f8460bd7`，旧句柄已停止等待。

@@ -1,5 +1,11 @@
 # 后续待完成项目：2026-09-22 核定
 
+## 2026-10-08 后续排序入口更新
+
+后续排序与分工采用[多层审核和置信度反馈分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)。第 10 节保留七项旧编号并映射到新主线，避免 E5/I5/Phase 3/4 继续作为一个串行大包；原件与已交付、失败、阻断处置继续保留，实际进入门以 Policy 和当前原生事实为准。
+
+计划整合不启动生产评分、provider、V3 或调度，也不授权发布。TASK-0065 等当前记录与历史窗口的差异见新计划第 2 节，执行前核对当前原件和 status/gate。
+
 ## 2026-10-08 dotfiles 四项 CI 成功，r3s 仍未完成
 
 Dotfiles 019窗口 UTC 2026-10-07T19:49:02.5639694Z–19:49:33.1861471Z：[Validate run37662955635](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37662955635) actual attempt1 completed/success，updated19:32:35Z。
