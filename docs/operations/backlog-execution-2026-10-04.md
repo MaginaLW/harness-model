@@ -1,5 +1,11 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-09 TASK-0071 实际规格批准、源码提交与当前缺项
+
+新71冻结0f519规格已获所有者批准，native approve/begin提交 `7cfa783`；唯一source阶段 `589843a`、原生subject同步 `2084e50` 已完成。actualownerclean/fresh、specapprovalcurrent，IMPLEMENTING REVIEW/V2 sole Missing implementation_result，scope/schema有效；旧11条Git事件前缀保持，新增同步一条。新71源码两路非作者静态审查0未解决问题；Rootactual新71/source局部224passed、Ruff实际0.16.5/check+format与47源码mypy通过，14源/规格/F5/合同和13工具选中pins前后一致。关闭数据稳定，module行91.497227%/line-plus-branch88.908046%不填原生验收缺项。证据见[执行记录](next-plan-execution-2026-10-08.md)。
+
+新具体完整V2动作及两路审查正在准备，尚无action grant、完整V2或parent创建/probe。原14/预算、85%整体、B→S native90与原F→同S累计90和五mutation保持；source安全基础、旧70真实owner/批准/history和Task69FAILED/SPENT保持。正式Review/code/finalize/Gate、七项待办与整体目标仍未完成。下面新71spec待答只保留历史窗口，不重复请求有效批准。
+
 ## 2026-10-09 TASK-0070源码阶段与新TASK-0071实际准备
 
 已批准的70唯一源码提交 `fe2ec4e`，原生subject同步提交 `f4f18bd`；actualownerclean/fresh、原spec批准current，IMPLEMENTING / REVIEW / V2 sole Missing implementation_result。冻结147节点、Ruff/format/mypy及两路源码独审完成，仍未完整V2或验收。

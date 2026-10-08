@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-09 TASK-0071 规格批准与当前源码阶段
+
+所有者已批准新71当前冻结0f519规格，native approve/begin记录提交 `7cfa783`；实际source唯一新增模块提交 `589843a`，两元数据subject同步提交 `2084e50`，旧事件前缀保持。提交后clean、classification fresh、spec approval current，IMPLEMENTING / REVIEW / V2，sole Missing implementation_result，scope/validate有效。两路当前新71源码内容独审均0未解决问题，actual新71源的224节点局部通过，Ruff实际0.16.5/check+format及47源码mypy通过；冻结F5、规格和七合同不变。module行91.497227%、line-plus-branch88.908046%只为局部诊断，不是完整85%/90%、V2、正式Review或合并验收。
+
+新动作机制和实际非实现者工具/身份准备正在绑定上述真实S；原14预算、85%整体、B→S native90、原F→同S累计90和五组mutation保持。新完整动作尚未获批或运行，短parent未创建/probe；旧70批准/history、Task69FAILED/SPENT及整体未完成保持。固定证据与并行/串行责任见[执行记录](next-plan-execution-2026-10-08.md)。下面新71待spec文字仅为较早窗口，不重复请求仍current的规格批准。
+
 ## 2026-10-09 源码局部阶段完成，新的安全B与TASK-0071
 
 TASK-0070源阶段 `fe2ec4e` / 同步元数据 `f4f18bd` 已提交；实际ownerclean/fresh、原规格批准current、IMPLEMENTING / REVIEW / V2、sole Missing implementation_result。两路源码独审0未关闭项，冻结147节点及静态检查通过；原独立反例的3个引用构造错误已保留后修正，3项通过。

@@ -2,6 +2,20 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 TASK-0071 新规格获批，实际源码与 subject 已提交
+
+所有者明确批准当前冻结规格 `0f519ee5d853e3dc1268386081129d4610a16f837675483320d04b0ca183673e`；原生 spec approve/begin 已发生，三份本任务机械记录提交为 `7cfa78392de6bebcdade3f600dac3d37f1d6a848`。本次批准只覆盖该规格，不从 TASK-0070 转移任何批准、验证结果或动作。
+
+实际 TASK-0071 owner 新建唯一源码，raw 与 stored Git blob 同为 `da181a0772f546a71ac6d9373d58f3af791baf6b172744bb15961f22bc501a1e` / 89,122 字节；source 阶段 `589843a8beab11616c1dc3027cb64f6fa3d20388` 仅新增该文件的 2,222 行。随后原生 sync 的两份 own-task 元数据提交为 `2084e50ae8541135d84eff4a924d164b74cdef17`，旧 11 条 canonical Git event 前缀保持，仅追加一条 subject 同步；S 到 H 只有本任务 events/task 差异。提交后实际 status 为 IMPLEMENTING / REVIEW / V2、classification fresh、spec approval current、evidence not_available，sole Missing implementation_result；worktree clean、scope-valid、validate valid。该状态不是验证通过或合并准入。
+
+两名非作者分别对当前新71源码做技术和隐私/权威静态审查，均0未解决 finding；各自复读 source/spec/F5/七合同的14输入不变。报告 SHA256 分别为 `873e7f3801f3d1872b8f0aebbde20de9a5d5ff2031b0c83375ae3c3071edacf1` 与 `ce9ab7f36ff79a428e5afb3f3b21ead3d41c96a94524fed28b9fb7a3b6b077d1`，Root核29成员无差异；这些是 pre-verification 内容审查，不是正式 Implementation Review。
+
+Root 在实际新71/source及新工具环境执行一次局部检查：原147节点和B中新77节点共224 passed，Ruff实际0.16.5/check与format通过，完整src的47文件mypy通过。局部纯API诊断未启用仓库级资源fixture，完整V2 recipe保持原样。所有14输入及13工具选中pins前后不变；关闭coverage原件、副本、再次原件SHA/长度一致，WAL/SHM/journal缺席且未查询SQLite。module行990/1082 = 91.497227%，line-plus-branch1547/1740 = 88.908046%，不代替整体85、native B90、累计F90或完整CI。`${EXECUTION_ROOT}/task0071-local-qa-001/report.json` SHA256 `afbdc4f20a7bd999712c81537c84d886547bf98894b60175497da3d637e1a8b1`；工具/准备/局部原件91成员Root核定无差异，报告 `83e1c479a8995cc31964f5d7d3032f720068bc32d8aeb8f727973afeda124ef5`。
+
+实施准备并行职责为1名源码作者、1名实际独立verifier工具/身份准备、1名新动作机制作者；源码关闭后2名非作者并行审查。Root独占本任务原生账本、局部QA、统一Git提交和subject同步。当前实际非实现者为 `/root/task71_verifier`，新工具直接指向本任务src与明确既有依赖；早期六次只读查询仅解析有限模块origin，当时新源码尚缺席，不证明完整startup、Git依赖、loaded-image或OS/Job资格。
+
+下一串行依赖为实际S及当前工具/actor → 新具体动作/资源合同及两路审查 → 所需单次动作批准 → 完整原生V2 → 正式Implementation Review/finalize/code/Gate。原14required/预算、85%整体、B `12abb0d`→S native90、原F `fb6837d`→同S累计90及五固定mutation保持；累计比较进入新动作、共享真实120秒期限，不新增native required ID。两个短parent仍未创建/probe，无新完整动作grant、V2或重跑。Task69 FAILED/SPENT、旧70真实owner/history及S2–S5和整体未完成保持。下述新71待规格批准文字仅保留此前窗口。
+
 ## 2026-10-09 源码阶段已提交，独立边界 foundation 与新 TASK-0071
 
 TASK-0070 单源码阶段提交 `fe2ec4e7cc1588ba3ebda3841874fef768f9a99d`，源码为 `da181a0772f546a71ac6d9373d58f3af791baf6b172744bb15961f22bc501a1e` / 89,122字节；随后原生sync并提交两份元数据为 `f4f18bdb0870b2182ac4f7bae3e485379b6ed514`。实际owner提交后clean、classification fresh、原c44规格批准current、IMPLEMENTING / REVIEW / V2，唯一Missing仍为implementation_result，scope/validate有效。两路源内容独审在该SHA上均0未关闭问题；冻结147节点局部通过，Ruff、format及完整src的47文件mypy通过。独立公共反例原15节点中的12项通过，另3项输入构造的旧scope引用遗漏已保存原失败并只修输入关联；修正后的3项均通过。局部结果不填原生implementation_result。
