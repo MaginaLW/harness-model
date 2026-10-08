@@ -1,5 +1,9 @@
 # 维护收尾与待办
 
+## 2026-10-08 TASK-0070 已获规格批准并 begin
+
+所有者新规格批准已实际登记，三份元数据提交 `f81494e`；提交后clean/fresh、spec批准current、IMPLEMENTING / REVIEW / V2，sole Missing implementation_result，scope/schema有效。四路源码/reader/技术/隐私职责与独立verifier准备见[执行记录](next-plan-execution-2026-10-08.md)。F安全基础和合同保持，新完整动作尚未获批或运行，产品验收与整体目标未完成；下述spec待答仅保留较早窗口。
+
 ## 2026-10-08 九项维护故障测试局部通过
 
 独立维护分支安全提交 `d7e972e` 只追加一个unit文件315行，原测试前缀、源码和任务历史保持。2名sub-agent完成编写和独审，Root串行一次执行九个fake节点，9 passed / 0 failed，计划15缺行全部实测命中；859–860保留且未命中。Ruff、format、whitespace通过，工作区干净，封闭coverage副本与10件原件校核通过；这仅为局部软件验证，完整V2和累计diff90仍未证明。具体原件与边界见[执行记录](next-plan-execution-2026-10-08.md)。

@@ -2,6 +2,12 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-08 TASK-0070 规格获批并进入实施
+
+所有者已明确批准实际冻结规格 `c44b8574099e46ee1a2a357e78e50ac898f08a9a86244ce937cb1b1c6fb5de53`。fresh status核为唯一Missing spec_approval后，原生approve/begin成功；提交 `f81494e86bcb35769cd302a098ee0f12d1f0373f` 仅含本任务approvals、events和task三份记录。提交后clean、classification fresh、approvals current、IMPLEMENTING / REVIEW / V2，唯一Missing变为implementation_result，scope-valid且validate valid。下方待规格批准文字保留其此前窗口；本次批准不授予完整验证或发布动作。
+
+实施阶段启用4名sub-agent：一名独占新增 `src/aiflow/advisory_status.py`；三名分别核reader/oracles、严格协议与分类、隐私与无副作用边界。主agent串行执行准入、局部验证、整合与提交；另1名独立verifier只准备新身份、工具、环境和资源绑定。F四份安全基础、七份合同、旧任务历史保持；源码实施及其新完整V2尚在进行/准备，不预称产品或质量通过。实际批准/事件与四原件校核报告位于`${EXECUTION_ROOT}/task0070-spec-approval-and-begin-001/report.json`，SHA256 `3525b872e25583ee68b4f72a90b245505ee0ef6a4e54d102ad3a96c84f982308`。
+
 ## 2026-10-08 维护故障测试完成局部验证
 
 从实际终局 `b0c18f5` 建立独立维护分支 `codex/maintenance-fault-tests`，安全阶段提交 `d7e972ee0184fa877ea2f28b4bec682035e00783` 仅追加 `tests/unit/test_windows_owned_job.py` 的315行。原59,279字节测试前缀逐字节保持，源码与任务历史未改。2名sub-agent分别负责候选编写和独立静态审查；主agent串行执行局部检查、核对证据并提交。两处格式问题保留原候选后定点修订，完整函数AST不变；最终独审零实质问题，Ruff、format和whitespace通过。
