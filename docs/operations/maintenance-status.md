@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-08 九项维护故障测试局部通过
+
+独立维护分支安全提交 `d7e972e` 只追加一个unit文件315行，原测试前缀、源码和任务历史保持。2名sub-agent完成编写和独审，Root串行一次执行九个fake节点，9 passed / 0 failed，计划15缺行全部实测命中；859–860保留且未命中。Ruff、format、whitespace通过，工作区干净，封闭coverage副本与10件原件校核通过；这仅为局部软件验证，完整V2和累计diff90仍未证明。具体原件与边界见[执行记录](next-plan-execution-2026-10-08.md)。
+
+新鲜只读status仍为TASK-0070 WAITING_FOR_SPEC_REVIEW、sole Missing spec_approval，具体新规格请求待答；TASK-0069仍FAILED、Missing retry_reason_or_escalation、原spec current，旧动作SPENT。未begin Task70、retry Task69、probe短路径或执行新完整动作。后续目标尚未全部完成。
+
 ## 2026-10-08 S1 测试基础已提交，TASK-0070 等待新规格批准
 
 独立安全基础 `fb6837d` 已提交四份测试/fixture/说明，全部52项为synthetic计划场景，只有静态校核通过，pytest未执行、产品API尚未实现。原生TASK-0070以该实际base分配，sole source为`src/aiflow/advisory_status.py`；冻结、分类和两份当前Design APPROVE/零发现已登记，治理提交 `dcf24ac` 后工作区干净，classification fresh，WAITING_FOR_SPEC_REVIEW / REVIEW / V2，唯一Missing是spec_approval，已请求该具体新规格决定。

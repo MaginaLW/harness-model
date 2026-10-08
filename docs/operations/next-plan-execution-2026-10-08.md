@@ -2,6 +2,16 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-08 维护故障测试完成局部验证
+
+从实际终局 `b0c18f5` 建立独立维护分支 `codex/maintenance-fault-tests`，安全阶段提交 `d7e972ee0184fa877ea2f28b4bec682035e00783` 仅追加 `tests/unit/test_windows_owned_job.py` 的315行。原59,279字节测试前缀逐字节保持，源码与任务历史未改。2名sub-agent分别负责候选编写和独立静态审查；主agent串行执行局部检查、核对证据并提交。两处格式问题保留原候选后定点修订，完整函数AST不变；最终独审零实质问题，Ruff、format和whitespace通过。
+
+九个精确fake节点只执行一次，实际9 passed / 0 failed，pytest报告0.73秒。15个计划缺行748、759–760、832–833、835–836、897、899、1070–1072、1075–1077全部实际命中；断言检查原TimeoutExpired优先、首次观察冻结、捕获事实独立、UNKNOWN/null及回执副本与异常消息边界。859–860的字典分配兜底未命中，继续保留在分母中。数据仅用于局部软件诊断，未资格化真实OS/Job，也不证明完整或累计diff覆盖率；没有重跑旧V2或复用SPENT动作。
+
+关闭后的coverage原件复制前后与副本哈希均为 `60e6dfa5ecb7afae6f83b182e2a9d677066aae9a8c29fc4963c1138dac22167f`，122,880字节，原件的WAL/SHM/journal均不存在；导出后再次核对原件和副本未变。`${EXECUTION_ROOT}/maintenance-fault-tests-local-verification-001/report.json` SHA256 `8e0672310b4b3fa8a0142a3b2f57e151742f977f82b678b6943476b2eb664eeb`，manifest `cbe9eb7a236f2be2050300a9adc60cedf1a9ddd7d53455432de2e2d2ba28112e`；Root复核10成员的SHA/长度无差异。提交后工作区干净，完整base差异仅该测试文件。
+
+随后分别只读刷新实际owner状态：TASK-0070仍在 `dcf24ac`、clean/fresh、WAITING_FOR_SPEC_REVIEW / REVIEW / V2，唯一Missing为spec_approval，既有具体请求保持待答；未begin或实施其源码。TASK-0069仍在 `b0c18f5`、FAILED / REVIEW / V2，subject635、spec批准current、evidence stale、Missing retry_reason_or_escalation；两个既有私有未跟踪原件保持。14required、原预算、85%/90%、五组mutation及新具体动作批准要求不变。短parent尚未probe，匿名超时仍UNKNOWN；整体计划未全部完成。
+
 ## 2026-10-08 S1 独立测试基础与 TASK-0070 冻结规格
 
 S1 非评分离线解释线已完成安全基础与真实治理准入准备。独立安全基础提交 `fb6837dcb94e959178f4c16ff851fe9155fd032b` 仅新增四路径：`tests/unit/test_advisory_status.py`、`tests/integration/test_advisory_status_isolation.py`、`tests/fixtures/advisory/status-cases.json`、`docs/operations/advisory-status.md`。32 个行为场景覆盖22组，另有20个 reader 正反例，全部为 synthetic 计划场景。AST、JSON、原字节/SHA/长度、Ruff、format、whitespace及暂存 blob 核对通过；格式化前后函数 AST 一致。产品模块尚未实现，pytest 未执行；这是 EXPECTED_RED_PREPARATION_NOT_EXECUTED，不能称测试通过或产品验收。
