@@ -1,5 +1,9 @@
 # 维护收尾与待办
 
+## 2026-10-08 外仓固定句柄刷新
+
+UTC 12:01:40–12:01:45 的七个指定 GET 已各一次读取并保存 HTTP/body 原件。dotfiles main 已到 `3a41b37d987214487b1690f14c035d3001b1d90c`，旧成功 run/job 仍绑定 `7c0aab19`，新 main 的 CI 未核定；r3s-VPS 四项 HTTP404，当前状态及原因 UNKNOWN。细节与固定原件见[执行记录](next-plan-execution-2026-10-08.md)。下面外仓成功、cancelled 或 runner 状态只属于旧窗口，未重试或远端写入。
+
 ## 2026-10-08 TASK-0069 单次完整验证已启动
 
 已批准的新动作由真实独立 verifier 单次启动，原生 event 11 为 VERIFYING，run `run-20261008T114710177182Z`；当前尚无终局。具体绑定和并行审查职责见[执行记录](next-plan-execution-2026-10-08.md)。下面 IMPLEMENTING、尚未启动等文字保留各自较早观察窗口；历史失败、已消费动作和公开发布边界不变。

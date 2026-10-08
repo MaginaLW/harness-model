@@ -8,6 +8,17 @@
 
 完整验证由 1 名独立 sub-agent 执行；另 2 名 sub-agent 并行准备代码预审和验证后流程核对，均只读业务来源，不修改冻结输入或预写未来结果。正式实现 review 必须在本次 passed snapshot 产生后串行绑定；同轮 coverage writer 关闭后核定 precision 0 的 85% 门及真实 line-plus-branch ratio，原生 diff90 与全部 required 结果另核。失败不重跑，旧 Task65 FAILED/SPENT 保持。
 
+## 2026-10-08 已知外仓句柄的新读取窗口
+
+UTC `2026-10-08T12:01:40.949Z`–`12:01:45.360Z` 对两仓七个指定 GET 各执行一次，原 HTTP header/body、stderr、rc 和读取时间均保留。Root 复核 30 个 manifest 成员的 SHA256/长度及七个实际 body；未发现新句柄，也未重试或写入远端。各请求为分别的观察窗口，不证明连续或原子稳定性。
+
+| 仓库与已知句柄 | 本次实际结果 | 当前边界 |
+| --- | --- | --- |
+| dotfiles main、run `37662955635`、job `112934838593` | 三项 HTTP200/rc0；main 为 `3a41b37d987214487b1690f14c035d3001b1d90c`；固定 run/job attempt1 均 completed/success，job 的七个返回 steps 全 success。 | 固定 run/job 仍绑定 `7c0aab19b6e42ad96ee3681f1a9a3b4c50aebe7f`，不能证明新 main 的 CI；其余三 jobs 未在本窗口读取。 |
+| r3s-VPS main、run `37499267909`、jobs `112391761795` / `112391762315` | 四项 HTTP404/rc1，error body 为 Not Found。 | 本次 main/run/job 状态 UNKNOWN；不从404推定删除、访问变更、取消原因或宿主/runner 故障。 |
+
+报告 `external-fixed-handles-refresh-001/report.json` SHA256 为 `bb2b98a90e23cb98bff8f763cc15cf7821006818dc832b3d1ec267db4ae2b779`，manifest 为 `e517db9f96218fd17e72ebc4dc41c1412988db21254159cd13fc7e66e4817bb4`；原件在 `${EXECUTION_ROOT}`。旧窗口与终态保留；本次读取不授予 CI 重跑、runner 恢复、Apply 或发布权限。
+
 ## 2026-10-08 单次动作已实际获批
 
 所有者已明确批准 canonical `1a213d6751af78284bfebe9926dd9edd9dd3456dc3ce38769bbf3260debade37` 的完整 V2 单次动作；原生 action row 和 event 10 在 `2026-10-08T11:19:35Z` 记录，窄元数据提交为 `1f754f59f644be11fca2d1844ec75e3199e34849`。只有三份本任务元数据追加或更新，实施 subject `635cbe3`、冻结 preapproval、源码、启动器和动作 canonical 保持。干净工作区的 status/scope 为 fresh/current/scope-valid，后一次 11:30 validate 为 valid；观察窗口分别保留。当前 IMPLEMENTING、Missing `implementation_result`，执行包正在完成机械绑定与独审，尚未启动完整 V2 或消费动作。下述未批准提案部分是此前准备窗口。

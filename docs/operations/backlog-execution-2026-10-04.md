@@ -1,5 +1,9 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-08 外仓新窗口与待核状态
+
+固定七个 GET 在 UTC 12:01:40–12:01:45 各执行一次。dotfiles 新 main 为 `3a41b37d987214487b1690f14c035d3001b1d90c`，已知成功 run/job 属于旧 `7c0aab19`；新 main 的完整 CI 尚未核定。r3s-VPS 四项 HTTP404，当前状态和原因 UNKNOWN。原 HTTP/body、窗口和有限结论见[执行记录](next-plan-execution-2026-10-08.md)；旧终态保留，未自动发现、重跑、恢复或发布。
+
 ## 2026-10-08 TASK-0069 已进入实际单次 V2
 
 已获批的新动作于 UTC `11:47:09.5352941Z` 由真实独立 verifier 启动一次，原生 event 11 为 VERIFYING，run `run-20261008T114710177182Z`；尚无最终验收结论。绑定、当前检查及并行职责见[执行记录](next-plan-execution-2026-10-08.md)。旧 Task65 FAILED/SPENT 与其根因 UNKNOWN 保持；不以本次启动解除任何旧阻塞或批准发布。
