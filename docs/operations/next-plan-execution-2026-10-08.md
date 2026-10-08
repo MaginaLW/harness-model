@@ -2,6 +2,20 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-08 S1 独立测试基础与 TASK-0070 冻结规格
+
+S1 非评分离线解释线已完成安全基础与真实治理准入准备。独立安全基础提交 `fb6837dcb94e959178f4c16ff851fe9155fd032b` 仅新增四路径：`tests/unit/test_advisory_status.py`、`tests/integration/test_advisory_status_isolation.py`、`tests/fixtures/advisory/status-cases.json`、`docs/operations/advisory-status.md`。32 个行为场景覆盖22组，另有20个 reader 正反例，全部为 synthetic 计划场景。AST、JSON、原字节/SHA/长度、Ruff、format、whitespace及暂存 blob 核对通过；格式化前后函数 AST 一致。产品模块尚未实现，pytest 未执行；这是 EXPECTED_RED_PREPARATION_NOT_EXECUTED，不能称测试通过或产品验收。
+
+原生 `start` 在实际干净 foundation 上分配 TASK-0070，单源码 allow/DU 仅为 `src/aiflow/advisory_status.py`，未预填任务编号或倒填 base。七章规格与七份选中合同完整材化；创建 raw 的可选本机路径保留在 private 包，新 tracked task 省略该可选字段，既有任务不改。真实 validate、freeze、classify及两份非作者 Design record 已完成；`REV-0070001`、`REV-0070002` 均 APPROVE、零发现，绑定 actual context `e2bfcc45d50c76535db5fc8615c8214786ed894e15dfc10bac6a2510f45c59d8`。
+
+治理阶段提交 `dcf24ac8e32af65279cb3f79416b550247447c6a` 仅包含本任务15份记录，实际治理分支为 `codex/advisory-status`。提交后 worktree clean、classification fresh、状态 WAITING_FOR_SPEC_REVIEW / REVIEW / V2，唯一 Missing 为 `spec_approval`；scope-valid。实际冻结规格 SHA256 为 `c44b8574099e46ee1a2a357e78e50ac898f08a9a86244ce937cb1b1c6fb5de53`，原件在该分支 `.ai/tasks/TASK-0070/spec.md`，可用 `git show dcf24ac:.ai/tasks/TASK-0070/spec.md` 读取固定版本。已按 AGENTS 规则2、5请求这一新规格批准；没有 begin、源码实施、人类 spec/code/action grant 或业务验证。
+
+接口仅解释 caller 已提供的固定 bytes：六类别，无评分、I/O、账本、授权或执行效果。来源 hash 和声明不认证生产者或 live 权限；current 仅为 reported native assessment，unknown 不生成新人类 Missing。完整14 required、原预算、85%整体与90% diff、五组固定 mutation及独立 verifier 保持。新完整验证必须另绑定其真实 subject、工具、资源与当前具体动作；Task69 FAILED/SPENT不变。模块准备不证明宿主接入、评分校准、3-A/3-B采纳、S2–S5完成或真实人工介入下降。
+
+安全foundation与受影响审查阶段并行安排4名 sub-agent：2名分别编写 unit/fixture 与 integration/docs，另2名做技术、来源与权限审查；原生材化准备和独立维护候选各另有1名 sub-agent，文件归属分离。后继真实Design绑定由2名非作者复核。主 agent 串行完成统一静态校核、foundation提交、实际任务分配/冻结/分类、真实Design登记和治理提交。依赖顺序为 foundation → native base →冻结/分类→Design→当前 spec 决定→单源码实施→新具体动作和完整验证；源码与后继动作未获得当前准入前不执行。
+
+独立维护恢复候选也已封存：短 parent 方案仅提供所列路径的静态算术，已列四位 counter 保守最长254字符，其余动态路径与实际资格仍未知，未创建或 probe；九项有意义的 fake fault 测试计划针对15个 diff 缺行，两项内存分配兜底不以 OOM、no-cover 或伪 seam 凑覆盖。假设76/78仅为97.436%算术，不能代替实测。原匿名 timeout 节点及根因仍UNKNOWN，未来新base的空diff不能代替原c04累计90%恢复证明。候选 manifest `5f15ba7e988b8065b340b927aa8ad2d779c9c4dfea093250e8496e35a36d799e` 的8项原字节由 Root 复核无差异；原件在 `${EXECUTION_ROOT}/task69-maintenance-recovery-preparation-001`。该候选没有执行测试、native retry、Job、清理、registry、provider 或远端写入，也没有未来动作 grant。维护验收、后继路线与发布仍未完成。
+
 ## 2026-10-08 单次完整 V2 终局：FAILED / SPENT
 
 唯一获批动作在 UTC `12:32:48.6365025Z` 结束，真实独立 verifier 为 `/root/task69_verifier`，run 为 `run-20261008T114710177182Z`。业务结论 **FAILED**：14 项 required 中 10 passed、4 failed。业务进程退出、双 EOF、sink flush/close 和外部工具对最终文件关闭的见证均已保存；CLI/tool exit0 只表示该调用完成，不表示验收通过。没有重跑、额外清理或预算变更。下述启动、获批及未批准提案部分属于此前窗口。

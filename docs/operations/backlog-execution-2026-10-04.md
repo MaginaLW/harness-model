@@ -1,5 +1,11 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-08 S1 安全基础与新 TASK-0070 的当前缺项
+
+S1非评分说明线的独立安全基础已提交为 `fb6837d`，四文件/52 synthetic计划场景只有静态校核，未pytest或实现产品API。原生TASK-0070在真实base分配并冻结/分类，两份真实Design记录APPROVE/零发现；治理提交 `dcf24ac` 后clean、classification fresh，WAITING_FOR_SPEC_REVIEW / REVIEW / V2，唯一Missing为spec_approval，已请求冻结SHA `c44b8574099e46ee1a2a357e78e50ac898f08a9a86244ce937cb1b1c6fb5de53` 的新决定。
+
+单源码实施和新完整动作尚未准入；14required、原预算及85%/90%保持。维护恢复另有封存候选，仅静态路径算术与有意义故障测试计划，原匿名超时仍UNKNOWN，没有probe/retry或旧动作复用。当前固定原件、串行依赖与并行职责见[执行记录](next-plan-execution-2026-10-08.md)；TASK-0069 FAILED/SPENT及历史任务原件保持，七项待办和整体后续目标未全部完成。
+
 ## 2026-10-08 TASK-0069 FAILED / SPENT 当前核定
 
 真实独立 verifier 的唯一完整 V2 已结束：10/14 required通过，regression与integration按原900/600秒预算超时，coverage_xml中11个测试失败，diff coverage78%未达90%。同轮overall88.945%及固定五组mutation通过，不改变整体FAILED。原动作已消费、不可复用；终局元数据提交 `b0c18f5` 已在本地整合分支保留，六源码subject635及旧Task65失败保持。

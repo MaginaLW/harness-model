@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-08 S1 测试基础已提交，TASK-0070 等待新规格批准
+
+独立安全基础 `fb6837d` 已提交四份测试/fixture/说明，全部52项为synthetic计划场景，只有静态校核通过，pytest未执行、产品API尚未实现。原生TASK-0070以该实际base分配，sole source为`src/aiflow/advisory_status.py`；冻结、分类和两份当前Design APPROVE/零发现已登记，治理提交 `dcf24ac` 后工作区干净，classification fresh，WAITING_FOR_SPEC_REVIEW / REVIEW / V2，唯一Missing是spec_approval，已请求该具体新规格决定。
+
+冻结SHA256 `c44b8574099e46ee1a2a357e78e50ac898f08a9a86244ce937cb1b1c6fb5de53`；完整合同和实际职责、静态边界见[执行记录](next-plan-execution-2026-10-08.md)。尚无begin、源码实施或新验证动作。独立维护恢复候选仅封存路径算术与故障测试计划，未probe/retry；TASK-0069 FAILED/SPENT、14required及85%/90%保持。整体后续目标尚未完成。
+
 ## 2026-10-08 TASK-0069 终局失败，单次动作已消费
 
 完整 V2 已终局 FAILED：14项 required 中10通过，regression900秒超时、integration600秒超时、coverage_xml含11个测试失败、diff coverage78%低于90%。同轮总覆盖率88.945%达到85%，固定五组mutation均killed，均不能抵销必需失败。终局提交 `b0c18f5` 只保存3项任务元数据；源码与历史原件保持。
