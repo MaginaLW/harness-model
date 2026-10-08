@@ -1,5 +1,9 @@
 # 维护收尾与待办
 
+## 2026-10-08 TASK-0069 单次完整验证已启动
+
+已批准的新动作由真实独立 verifier 单次启动，原生 event 11 为 VERIFYING，run `run-20261008T114710177182Z`；当前尚无终局。具体绑定和并行审查职责见[执行记录](next-plan-execution-2026-10-08.md)。下面 IMPLEMENTING、尚未启动等文字保留各自较早观察窗口；历史失败、已消费动作和公开发布边界不变。
+
 ## 2026-10-08 新规格已批准，后续执行进入实际整合
 
 TASK-0069 冻结规格 e785ed663af145f006995980ec146c3ac13bd89568d38e09c203838a551110f1 已在本轮 fresh status 后获得人类批准，原生 approve/begin 成功；当前 IMPLEMENTING，Missing implementation_result。源码与 canonical 历史恢复、S0 归因及非评分设计详见[本次执行记录](next-plan-execution-2026-10-08.md)。完整验证、公开投影和发布尚未完成。下述 Task69 待审、Action005 待批准或 A/B 待选等旧窗口不作为当前指令，旧正文保持。

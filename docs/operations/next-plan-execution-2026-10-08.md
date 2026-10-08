@@ -2,6 +2,12 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-08 单次完整 V2 已启动
+
+真实独立 actor `/root/task69_verifier` 于 `2026-10-08T11:47:09.5352941Z` 启动唯一业务调用；原生 event 11 随后将本任务转入 VERIFYING，run 为 `run-20261008T114710177182Z`。冻结 ready inputs SHA256 `72081a2e3a093afb563277d8910289ed407b23c15eee8aca82832fbbcb0759f6` 与最终 activation 窄审 `825434b49f934d801c7cbef065225f3c918c10d0ad93e4f6a1a9c3e05b4d980c` 已实际核对，启动时 guard 单次通过、双 EOF 与 sink 关闭完整。外层单次 claim 已创建；业务尚未终结，不能据 guard、CLI 或 transport 推定通过及 action consumption。
+
+完整验证由 1 名独立 sub-agent 执行；另 2 名 sub-agent 并行准备代码预审和验证后流程核对，均只读业务来源，不修改冻结输入或预写未来结果。正式实现 review 必须在本次 passed snapshot 产生后串行绑定；同轮 coverage writer 关闭后核定 precision 0 的 85% 门及真实 line-plus-branch ratio，原生 diff90 与全部 required 结果另核。失败不重跑，旧 Task65 FAILED/SPENT 保持。
+
 ## 2026-10-08 单次动作已实际获批
 
 所有者已明确批准 canonical `1a213d6751af78284bfebe9926dd9edd9dd3456dc3ce38769bbf3260debade37` 的完整 V2 单次动作；原生 action row 和 event 10 在 `2026-10-08T11:19:35Z` 记录，窄元数据提交为 `1f754f59f644be11fca2d1844ec75e3199e34849`。只有三份本任务元数据追加或更新，实施 subject `635cbe3`、冻结 preapproval、源码、启动器和动作 canonical 保持。干净工作区的 status/scope 为 fresh/current/scope-valid，后一次 11:30 validate 为 valid；观察窗口分别保留。当前 IMPLEMENTING、Missing `implementation_result`，执行包正在完成机械绑定与独审，尚未启动完整 V2 或消费动作。下述未批准提案部分是此前准备窗口。
