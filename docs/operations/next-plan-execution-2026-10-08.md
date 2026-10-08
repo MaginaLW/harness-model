@@ -61,3 +61,13 @@ Task63 的三份 HOLD_BACK 原件仍在私有整合树与历史中完整保留�
 下一链为：catalog 独审及必要修复 → 精确实施提交与原生 subject 同步 → 新 Task69 一次动作、环境及 launcher 绑定 → 独审和实际动作批准 → 完整原生 V2 → 原生实现审查/code/finalize/Gate。14 项、原预算、85% 总覆盖率、原生 base diff90 与固定五组 mutation 保持；后续 publisher 另以固定 public base 验证累计 diff90 和 required CI。
 
 完整验证、Task65/F/I1/r3s/Apply 的各自验收、S2–S5、Phase3/4 与远端发布尚未完成。只完成实际允许的机械条件，剩余真实决定和具体动作在材料齐备后按当前 Missing 与适用规则提出。
+
+## 新单次 V2 动作的准备窗口
+
+TASK-0069 动作提案已按原生 action 合同校验并单独提交为 `5f6d90adb585c9523ba70581f0d0766c3c1c8e7a`；其 parent 是 `562e7fc`，只新增本任务 action 文件，实施 subject 保持 `635cbe3`。动作 canonical SHA256 为 `1a213d6751af78284bfebe9926dd9edd9dd3456dc3ce38769bbf3260debade37`，有效期至 `2026-10-09T10:00:00Z`。这是未批准提案；原生 approvals 仍只有 spec，本轮未运行完整 V2、消费动作或执行清理。
+
+准备独审发现普通验证子进程剥离 `PYTHONPATH`，共享 editable 环境可能加载主仓源码，而原 PATH 可能解析到全局 diff-cover。已在独占忽略目录准备新解释器环境，源码固定到本任务副本，依赖使用明确的既有目录引用，diff-cover 入口绑定新解释器；共享环境未改。独立的无 `PYTHONPATH` 只读探针确认实际 source origin 与 CLI help；工具路径与入口也已核对。这是有限来源资格，不是产品测试、完整 startup/loaded-image 闭包或真实 Job 资格。
+
+冻结 preapproval 包 SHA256 为 `74f05d78c0134d2e1311ed006cbe02f68ad6793cab1e723603d78281d3924a22`，固定机制、252 份选定源码/测试/配置及 8 份工具输入、ENV5、argv 与两个不同的空临时父目录。12 个纯 guard 测试和 16 个 memory capture/close/environment/parser 场景通过；早期失败与中断原件保留。捕获机制只复用历史 transport，使用新的 Task69 来源、actor、动作、单次 claim 和 sink；规格批准不授予这次动作权限。
+
+本次提案不填未来 approval 或 bookkeeping HEAD。实际动作获批后，只追加本任务真实原生批准及其窄提交，再以实际产生的 HEAD 和 fresh status/scope/批准事实另建 execution packet并复核；冻结 canonical、业务 source 与 preapproval 包不回写。原 14 required、原预算、85%/90%、五组 mutation 各 60 秒和仅本次新建资源的有界清理保持。公开投影、publisher 门与远端批准继续单独处理。
