@@ -1,5 +1,38 @@
 # 本地记录的干净发布工作包：2026-10-04
 
+## 2026-10-08 发布 A 的固定文档内容核定（准备）
+
+所有者已选择 A：整合私有账本及必要源码。新整合目标 TASK-0069 已实际创建，规格和独立 Design 记录提交为 `c9e0132933f894ed5c684af08952fd535e863fc5`；当前原生 status 为 WAITING_FOR_SPEC_REVIEW，仅缺 `spec_approval`。这不构成 publisher 准入、完整验证或远端动作授权。
+
+本次内容审查只绑定文档候选 `81e664809cd052486db878f68dbf00791a42d50b` 相对固定公开基线 `db3efabab562971aef1a6eb1317b679d42eeadb9` 的 15 份文档。主工作区后继 `0e663791a724d19a75e1b0c0b5876a9d0984bb4d` 的变化不在该次准入范围；上述基线也不是本次重新查询的远端最新 HEAD。
+
+三组独立内容审查覆盖全部 15 项：13 份为 `ADMIT_AS_FIXED_HISTORICAL_DOCUMENT`，只准入固定历史文字，不将旧“当前”摘要用作现在的 native、CI 或验收结论。两份原件因精确私有会话定位符和截短 preflight locator 保持暂不公开：
+
+- `docs/operations/zcode-next-stage-assignments-2026-10-02.md`：四个会话定位符，共八处。
+- `docs/operations/zcode-report-recovery-2026-10-03.md`：五处会话定位符及两处八位十六进制 preflight 片段。片段未被认定为完整凭据。
+
+两份普通文档已有 runtime 公开派生稿，原件不变。派生稿明确标注源提交、原 Git OID/SHA 和非原字节性质，以一致的逻辑来源占位符替换 13 处会话定位符、两处 token 片段，三个表头说明占位符；其余正文及 FAILED、SPENT、取消、未验收与权限限制保留。派生稿不是 Task63/65 evidence 等暂不公开原件的同路径变换替代，也不是 F 真实报告。
+
+| 派生稿逻辑文件 | 实际字节数 / SHA256 | 当前身份 |
+| --- | --- | --- |
+| `doc-12.public.draft.md` | 10899 / `b8da64189403212baea5580b8aa1ed8c46d9f6469f44122adfef2e744e475bb6` | 普通文档派生准备稿，尚无 stored Git OID。 |
+| `doc-13.public.draft.md` | 35559 / `0900014dc6b87881ef0e32fa62481aed1090736eaf8a2f79406feec5ebf1ae09` | 普通文档派生准备稿，尚无 stored Git OID。 |
+
+原 15 文档输入包为 `${RUNTIME_ROOT}/publication-A-frozen15docs-admission-input-001`，manifest SHA `2ecf8669763b2bc46e078362d3f4144bd5175d599b4814e68c80fcd5bef294ed`。三组审查包 `publication-A-frozen15docs-admission-group-a-001`、`publication-A-frozen15docs-admission-group-b-001`、`publication-A-frozen15docs-admission-group-c-001` 的 manifest 分别为 `e062b2aed75d4e617b4d7efa33335f2858d4868236dbdad9a40e85238f1f367f`、`8b2666304f273cd35c5d7fbe211f36e39ce76073c2a374e1b51cd5bc684657b4`、`c7d237a3e3d3006756da9b9a10848431fd6c0f63358ad6d839266bf55f412da0`；Root 核对全部成员、SHA、长度及 stored Git blob OID，15 项没有重复或缺项。完整字节扫描与实际语义阅读覆盖在各报告分开记录，不声明绝对无秘密或全部行均人工阅读。
+
+派生准备包为 `${RUNTIME_ROOT}/publication-A-frozen15docs-public-derived-proposal-002`，manifest SHA `7deeb0b63c461042c915ba3609172c29b02a2b84dedaf074d7c3cf40d3fd39f9`；首次表头数量准备错误及空输出原件在 `publication-A-frozen15docs-public-derived-proposal-001` 保留，不是业务验证重试。两路独审分别核对事实语义与最小字节变换，均为 `ADMIT_DERIVED_DOCUMENT_CONTENT_PREPARATION_ONLY`，发现项为零。Root 已核对输入、派生包、两个回执的完整成员、SHA 和长度；派生内容准入不改变两份原件的暂不公开结论。
+
+| 独审包（位于 `${RUNTIME_ROOT}`） | `review.json` SHA256 | manifest SHA256 |
+| --- | --- | --- |
+| `publication-A-frozen15docs-derived-semantics-independent-review-001` | `c27d1019dfc1234ce64fb3aaecb0343661d55532b8e1f76edb75515a0b9b1ceb` | `d5e16cb16735850752c8904b3681188d4d548262a6668978e431120731aea975` |
+| `publication-A-frozen15docs-derived-bytes-independent-review-001` | `b3f10e941bb3b8bea4e04f464771bf42bccbb931c0b4ba728600f85aab9dadd6` | `5a7a7b28b66b17201c1d0a104ab57f96192f36e947a7097d61e9ba0ba1ee84ae` |
+
+静态链接盘点仅覆盖 320 个 Markdown 内联引用：116 个目标存在于固定公开基线，129 个仅存在于固定文档候选，75 个外部 locator 未获取。片段正确性、代码/纯文本引用、私有 archive、新投影及新 catalog 的实际可得性未由此证明。原报告、会话、token 与私有 recipe 不随文档内容准入导出。
+
+后续仍须完成 TASK-0069 所需的实际批准与实现，逐值审查实际 NONnative catalog，绑定后继普通文档版本，以及固定累计候选的完整规定检查、85% 总覆盖率和原生/公开累计 base 各自的 90% diff coverage。Action005 已消费且整体 FAILED；既有 CI、局部通过及本次文档准入不替代这些门。publisher、具体 push/merge 授权及远端证明尚未完成。
+
+以下 2026-10-04 文本保留为早期仅文档发布路径的历史材料，其范围与远端查询窗口不作为方案 A 的当前准入或授权。
+
 本页落实[待办第 7 项](follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)的静态发布清单。
 只读核验和材料准备已完成；尚未创建 publisher Task、工作区或发布候选，未 cherry-pick、
 更新 refs、推送、写入 PR 或合并。实际候选及其新批准、完整验证和远端证明仍待执行。
