@@ -11,7 +11,7 @@ allowed_scope:
 base_commit: 9215ae1fce8749dbc45ad2168a9303112c433177
 branch: claude/simplify-architecture
 created_at: '2026-10-09T14:15:02Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -101,7 +101,7 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-09T14:36:47Z'
 subject_commit: 65512bee49f8b57f42b2b8eb1fce6f803a8a4eaf
 task_id: TASK-0072
-updated_at: '2026-10-09T15:29:59Z'
+updated_at: '2026-10-09T23:10:35Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md
