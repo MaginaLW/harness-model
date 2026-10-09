@@ -1,5 +1,21 @@
 # 维护收尾与待办
 
+## 2026-10-09 失败终局已提交，格式安全基础完成
+
+TASK-0071独立终局审计已CLOSED，Root核109封包成员无差异。终局账本窄提交 `6b0baf7` 仅含events/task/action-use；subject/spec/source/F5与有效批准保持。提交后实际FAILED/REVIEW/V2、classification fresh、approvals current、Missing retry_reason_or_escalation，scope/validate有效，Gate拒绝；private evidence/context原件保留未跟踪，不能称clean。完整整体89.4136468%、nativeB diff91.4972274%均达标，但14项仍12通过、格式失败、集成600秒超时，原action SPENT，F累计NOT_RUN。安全source-free文档基础 `f90ae85` 只改第二Python示例排版、实际format-check通过且postcommit clean，无新增源码、不覆盖旧失败。下一串行门为新诊断机制/两路独审/具体动作批准后的一次600秒integration节点/阶段/540秒stack观察；当前无新grant或执行，根因UNKNOWN。证据与并行责任见[执行记录](next-plan-execution-2026-10-08.md)；整体未完成，下述为此前窗口。
+
+## 2026-10-09 TASK-0071 单次验证失败及后续诊断准备
+
+实际原14为12 passed/2 failed：基础文档format exit1/328ms，以及integration RUNNER_TIMEOUT600015ms/nullrc。事件15实际消费本次action，事件16FAILED，五固定mutation均killed；原预算和门禁保持，无retry。累计helper唯一Start后按native失败拒绝，内部Git/diff producer未运行，原F90未知。外部关闭见证与实际status/Gate由独立终局审计继续核，Root不提前finalize/Review/code或改当前C71。文档候选独立安全修订与匿名集成超时诊断分开，后者node/stack/根因UNKNOWN，先准备新受限诊断而不盲重跑完整V2。证据与并行职责见[执行记录](next-plan-execution-2026-10-08.md)，整体未完成；下述运行中文字属旧窗口。
+
+## 2026-10-09 TASK-0071 运行中发现基础文档格式缺口
+
+同次闭合日志已有unit2342 passed、完整regression3426 passed/1已有POSIX skip及47源码mypy通过；coverage和剩余检查仍执行。原生format stdout指出基础文档Python示例需要排版；私有修复候选已独审0未解决问题，正文/AST/token语义相同且未应用，F5/source/spec仍冻结。局部检查未覆盖该文档的缺口与原失败线索均保留，不以候选覆盖required失败或宣称V2验收。终局后按真实status/Missing/Gate协调最小安全修订，具体证据与并行职责见[执行记录](next-plan-execution-2026-10-08.md)。
+
+## 2026-10-09 TASK-0071 获批单次验证已启动
+
+真实独立verifier按原grant执行一次冻结launcher，ready输入 `0ea0687f…55ee7` 获两路最终窄审0后由Root明确派发。guard进程实际唯一Start/exit0/双EOF及关闭回执齐全；UTC 00:23:48原生事件14进入VERIFYING，暂无终局或验收。具体证据及1名executor/1名终局审计者的串行依赖见[执行记录](next-plan-execution-2026-10-08.md)。原预算、85/90、额外F90共享120秒及无retry保持，旧失败/消费与整体未完成不变。下述尚未启动文字只属旧窗口。
+
 ## 2026-10-09 TASK-0071 单次动作已批准并入账
 
 所有者已批准精确canonical `3e920e01…66e10e7`；原生批准事件13及三份own-task账本提交为 `0848db7`，S589保持。当前clean/fresh、approvals current、IMPLEMENTING REVIEW/V2 sole Missing implementation_result，scope/validate有效。真实postgrant admission、并行职责及后续final packet/两路窄审/独立单次启动依赖见[执行记录](next-plan-execution-2026-10-08.md)。完整V2尚未运行、最终激活未完成；旧失败和消费保持，整体目标未完成。下述待动作批准文字为旧窗口，有效批准不重复请求。

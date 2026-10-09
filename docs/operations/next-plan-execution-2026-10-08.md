@@ -2,6 +2,46 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 终局审计关闭、失败账本提交与安全格式基础
+
+独立终局只读审计已 CLOSED：69 个闭合原件在 source-before/copy/source-after 窗口稳定，289 个 ready 输入中的 287 个受保护输入保持，另两份允许原生追加的 events/task 仅有本次终局变化。Root复核审计98成员、执行者8成员及终局补充3成员共109成员无差异。外部精确文本prefix比较false保留；唯一JSON结构差异是最终launcher文件自身的关闭receipt，冻结脚本先写内部终局、再刷新publication receipts、最后输出外部终局，补充见证不改变原失败或内层身份UNKNOWN。报告位于`${EXECUTION_ROOT}/task0071-terminal-native-audit-001/terminal-review-001/REPORT.md`，SHA256 `824bce4a9eaceea59d23d7a0a3f3ee3a15286965593d97806bd2aa738d4d547f`。
+
+终局提交 `6b0baf74d4686b068803d26ebcdd0c1380d850fa` 仅含TASK-0071的events、task及已消费action-use三路径，原事件前缀保留；subject仍 `589843a8beab11616c1dc3027cb64f6fa3d20388`，冻结spec/source/F5及已有批准不变。真实postcommit status为FAILED/REVIEW/V2、classification fresh、approvals current、evidence stale，Missing=`retry_reason_or_escalation`；scope/validate有效，Gate仍拒绝。含本机运行路径的原生evidence/context保留在owner未跟踪原件，不能据此称worktree clean。独立freshness核定唯一stale reason为 `FRESHNESS_EVIDENCE_NOT_PASSED`，不是批准或版本失配；既有有效规格批准不重复请求。
+
+同轮完整branch-enabled XML为lines9578/10437、branches3277/3940，整体合计12855/14377 = 89.4136468%，达到85；native B diff为990/1082 = 91.4972274%，达到90。14项仍12通过、格式失败、集成600秒超时，旧single-use动作SPENT；F累计比较NOT_RUN，不能用两个达标比例抵销必需失败或未知项。不存在正式Implementation Review、finalize/code/Gate通过、retry或发布许可。
+
+文档语义保持候选已在独立source-free安全基础形成提交 `f90ae85054d1009aacc064a6e7ad9cc96cc065a9`，parent为原B `12abb0daf7aacc8056687911aafcc33f4da14333`。该提交仅改`docs/operations/advisory-status.md`第二Python fence排版（56增/24删），raw与Gitblob为 `e1d90baf43a75006c97c4618d76eaaa2116dcc560d101d9a4182bcd3e5cc7d91` /9341字节；其余四安全原件Git内容与原B相同。实际选定Ruff的独立文档format-check exit0、1 file already formatted；postcommit clean、源码在文件系统及Git树均缺席。此阶段task-free安全修订不回写旧C71 F5、不建立新的源码task、不证明完整CI或修复集成超时。Root阶段核对报告`${EXECUTION_ROOT}/task0071-root-terminal-reconciliation-001/report.json` SHA256 `b818ff0810254b8a9c977a4087c534f0730998888b98075938728cf08f7f3a39`。
+
+闭合集成q输出没有node、stack或逐项耗时，具体根因UNKNOWN。后续串行依赖为：一名机制作者完成新单次完整integration诊断候选（原600秒、节点/阶段计时、540秒一次无locals stack及新自有资源边界）→两名非作者分别核机制和权限→当前实际status及新具体动作批准→独立执行一次诊断→按真实根因决定修订和新源码规格/完整V2。当前仅准备，不创建诊断parent、不启动pytest/Job或消费新动作；原FAILED/SPENT及全部门禁保留。实际治理源码的两处D/owner raw差异是CRLF/LF，归一后语义相同；机制使用owner实际public WindowsOwnedProcess接口，不假设不存在的runtime API。下述文字为各此前窗口，整体计划仍未完成。
+
+## 2026-10-09 TASK-0071 单次 V2 终局：12通过、2失败，动作消费
+
+唯一 run `run-20261009T002348072446Z` 于UTC `01:05:19.6728854Z` 返回终局，外部工具exit1、native CLI exit0、额外helper exit2；CLI exit0不是验收。Root实际复读原生evidence：14 required中12 passed/2 failed，分别为 `ruff_format_check` exit1/328ms/VERIFICATION_COMMAND_FAILED，以及 `integration` null exit/timed_out/600015ms/RUNNER_TIMEOUT。原900/1200/600等预算及所有阈值保持，没有重跑。全回归与完整coverage均3426 passed/1已有POSIX skip，native B90为990/1082 eligible lines，其他PASS不抵销两项失败。
+
+原生事件15于UTC `01:05:00Z`实际消费canonical `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`；事件16于 `01:05:19Z` 进入FAILED。action-use为consumed=true/reusable=false，五固定mutation均killed。额外helper确实唯一Start，但 `cumulative-acceptance.json` 为attempted=false、comparison_processes=[]、native_fourteen_passed=false、not_run_native_failed；内部Git/diff producer未运行，原F累计90未知，不能用native B90代替。完整验收、正式Implementation Review/finalize/code/Gate均未推进。
+
+guard/native/helper各唯一Start、真实退出及双EOF/source/sink/managed process CLOSED，transport_complete=true、secondary_errors=[]。执行者正在核外部stdout与内部terminal文本prefix不一致的实际结构差异，终局文件不能自证自身关闭；保持匹配false及原件，不将其改写为相等。独立审计者消费真正闭合见证并刷新status/scope/validate/freshness/Gate，Root在审计关闭前不改C71 refs/账本/source。
+
+本轮集成stderr保存deadline的parent未signaled、reader未EOF/未complete和不完整prefix，与后续owned cleanup/drain/active0分开；闭合q stdout没有确切node/stack，slow-workload/hang/根因仍UNKNOWN，不能从dots或后续PASS追认。1名sub-agent只读形成单次节点/阶段计时及deadline前stack诊断候选，另1名独审仅核真实准入路径，不执行pytest/Job或复用spent。文档候选单独独审0可形成source-free安全foundation，但不证明解决集成超时；新fullV2动作不能只修格式后忽略已知超时。后续规格revision002的完整技术正文与原14/85/新B90/原F90均保留，Task-ID/B/批准/动作仍未赋值。整体计划及旧69/70/71原件保持；下述运行中文字仅为此前窗口。
+
+## 2026-10-09 TASK-0071 同次 V2 进行中：闭合回归通过，格式缺口保留
+
+本次 run `run-20261009T002348072446Z` 的闭合 unit stdout 为2342 passed/132.34秒；完整 regression stdout 为3426 passed、1 skipped/828.12秒，唯一跳过为已有POSIX FIFO条件；mypy stdout为47源码文件无问题。两份后续stderr为空。coverage与剩余检查仍在同次运行，尚无终局。上述结果不追认Task69历史匿名timeout根因，也不代替原14完整结果。
+
+原生 `ruff_format_check-004.stdout.log` 明确报告 `docs/operations/advisory-status.md:58:21` 的Python示例需要排版，1 file would be reformatted/658 already formatted；此前局部source格式检查未覆盖这个基础文档。该必需失败线索保持，不能被其他PASS或修复候选抵消。当前F5、source/spec、工具、原预算与refs未修改。
+
+1名sub-agent在独占私有副本执行唯一stdin formatter诊断，另1名非作者独立只读复核；候选仅改变第二个Python fence布局，非代码字节、2块AST和非布局token一致。原文c60/9203字节与候选e1d90/9341字节分别保存，候选未应用；初始helper语法错误发生在执行formatter之前，原错误另存，实际formatter总次数1。诊断报告SHA `29630f494b51912143192c2b38d9fd8915eb831a86739963aa0c61e38e037503`，独审报告SHA `eb86ac9056efa8eca0ef98d6ee334547059b227e22f833446860f72cf028b7bb` /0未解决问题；Root核封闭16及4成员无差异。原件在 `${EXECUTION_ROOT}/task0071-doc-format-diagnostic-001` 与 `task0071-doc-format-independent-review-001`。诊断TEMP/TMP仅用自有私有leaf，不是NativeENV重跑、正式Implementation Review或新动作授权。
+
+实际1名executor继续持有同一live工具handle；1名独立终局审计者等待外部闭合见证，另1名非作者只做安全修订流程静态诊断。Root负责串行终局消费、真实status/Missing/Gate及后续范围协调；未选择新task编号、修改base/spec或执行retry。完整终局后才依据真实缺项推进，旧窗口继续保留。
+
+## 2026-10-09 TASK-0071 获批单次完整 V2 已实际启动
+
+两个最终非作者窄审均为 `APPROVE_FOR_EXACT_ONCE_LAUNCH` / 0未解决问题，实际绑定 ready inputs SHA256 `0ea0687f01d886259a4e56e928ea5c9d24c9adb6aa5dabd19013f4fe66a55ee7` / 89,997字节。最终技术报告SHA `3a8826b9127ef4b2e778aa2597c830175d2109dd01ad8d4426d691e7c00c02dc`，权限报告SHA `62508d5fad0dd50bc12615e73b5f13b019d01ece5417745e58363781aa5d6e35`。Root核 ready6成员、技术2成员及权限3成员无差异，三份ready数据的实际限定改动与追加回执相等；已完成的只读 `validate_final` 数据检查不冒称守卫进程、OS/Job或V2结果。
+
+Root基于真实已有human/native grant明确派发一次，`${EXECUTION_ROOT}/task0071-root-once-dispatch-001/dispatch.json` SHA `32b438c13f8aed3a2ef5ce8892c3943f40d8bcdcc6a2bca784fe7be55ea3a1b4` / 3,214字节；实际独立verifier在原scoped工具上下文启动同冻结launcher的 `-Execute` 入口。outer exclusive claim于UTC `00:23:46.1261309Z` 创建；真实guard唯一Start、exit0、双EOF、source/sink/process关闭及transport_complete均实际观测。native实际Start为 `00:23:47.4494674Z`，原生事件14于 `00:23:48Z` 记录 `/root/task71_verifier` → VERIFYING；Root与执行者分别只读核对。这不是inner image/Job资格、action消费推定或验收。
+
+本次原14/预算、85%整体、nativeB90、同轮原F累计90/共享120秒、五mutation及无retry均保持。1名真实executor持有唯一live工具handle，另1名独立审计者仅准备终局消费，Root不改正在使用的C71 refs/source；活跃logs/XML/SQLite不提前封PASS或查询。当前尚无终局、正式Implementation Review/code/finalize/Gate，额外累计比较只能由同一launcher按实际native14结果串行进入，不单独重放。所有失败、旧69FAILED/SPENT、历史owner和整体未完成保持；下述未启动或待final packet文字属于此前窗口。
+
 ## 2026-10-09 TASK-0071 精确单次动作获批，最终启动材料准备中
 
 所有者已明确批准上述 action 原件；原生 action approval 于 UTC `2026-10-08T23:57:32Z` 追加，canonical 仍为 `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`。账本提交 `0848db780d63fa82ecd906f8033f582e2c1b333e` 仅含三份 own-task 元数据，旧批准与旧12条事件语义前缀保持，仅追加批准事件13；业务 subject `589843a` 不变。
