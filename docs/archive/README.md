@@ -122,3 +122,7 @@
 | `docs/superpowers/plans/2026-08-21-chapter-06-task-6-4-execution.md` | [2026-08-21-chapter-06-task-6-4-execution.md](plans/2026-08-21-chapter-06-task-6-4-execution.md) |
 | `docs/superpowers/plans/2026-08-21-chapter-06-task-6-5-execution.md` | [2026-08-21-chapter-06-task-6-5-execution.md](plans/2026-08-21-chapter-06-task-6-5-execution.md) |
 | `docs/superpowers/plans/2026-08-21-chapter-07-task-7-1-execution.md` | [2026-08-21-chapter-07-task-7-1-execution.md](plans/2026-08-21-chapter-07-task-7-1-execution.md) |
+
+## 已移除的试点工具（2026-10-10）
+
+- [自托管执行基础设施](../operations/self-hosted-runners.md)、[Runner 盘点与健康检查](../operations/runner-health-checks.md)、[执行回执](../operations/runner-receipts.md)、[受控工具发现](../operations/controlled-tool-discovery.md)、[本地证据移交](../operations/evidence-handoff.md)：对应工具已删除，文档保留历史事实或恢复指引。

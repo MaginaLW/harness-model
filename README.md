@@ -34,7 +34,6 @@
 | [模型选择与代理职责](docs/operations/model-selection.md) | UI 与运行时决定型号，职责不绑定模型代际 |
 | [按需反馈与回灌](docs/operations/feedback-loop.md) | 已登记试点仅在有实质问题或明确请求时执行 |
 | [维护收尾与待办](docs/operations/maintenance-status.md) | 当前状态、未完成项与待决定事项 |
-| [自托管执行基础设施](docs/operations/self-hosted-runners.md) | 私有 runner 接入、健康检查与回执契约 |
 | [阶段一 MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) | 已确认的技术与治理基础设计 |
 | [历史设计与验收](docs/archive/README.md) | 架构文档、阶段一/二设计、实施目录、验收报告、章节追踪、历史状态投影与未授权蓝图的索引 |
 
