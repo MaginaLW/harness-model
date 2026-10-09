@@ -25,5 +25,53 @@
     "spec_sha256": "559f4f716a7ac8192a0afbe11dc9960ec18ee196f9ba5f99d68cd572dda4313e",
     "subject_commit": "993a9a0619577117417d80de96e73aa18270b464",
     "task_id": "TASK-0062"
+  },
+  {
+    "action_sha256": "abea1a83c2a68674359f9fe57a86cc51e27c7daf4899db150a5da86aa58b9aca",
+    "actor": "owner-authorized-root",
+    "approval_type": "action",
+    "approved_at": "2026-10-01T23:13:27Z",
+    "base_commit": "993a9a0619577117417d80de96e73aa18270b464",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-01T23:28:13.592613+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing direct owner authority explicitly authorizes push. This separate single-use action binds exact Q f5707ff178b760bb0215c7d5cb773cc4d06c75d6, literal feature ref and verified fresh predecessor f402bd7ab1fbe6c6415117817d3adb0ec62899ac; ordinary non-force push only, no implicit tags, fixed command-local GH credential protocol and actual-Q Gate passed.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "559f4f716a7ac8192a0afbe11dc9960ec18ee196f9ba5f99d68cd572dda4313e",
+    "subject_commit": "993a9a0619577117417d80de96e73aa18270b464",
+    "task_id": "TASK-0062"
+  },
+  {
+    "action_sha256": "8784d1e1625f6e5fb3559516b2501ffdb218ffee52ea171526572cee6c027de4",
+    "actor": "owner-authorized-root",
+    "approval_type": "action",
+    "approved_at": "2026-10-01T23:14:59Z",
+    "base_commit": "993a9a0619577117417d80de96e73aa18270b464",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-01T23:29:48.956269+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing owner authorization covers publication. Separate single-use approval updates only existing PR44 literal title and reviewed body005 SHA d2d5d9b6dedbca7d436c450c9475e57831835fa4fb1ab5ab61eb28f4caef771c after actual Q push6c5ee9/0 and exact-Q remote readback; fresh main/protection/PR checks and nonauthor byte approval were verified. No merge or branch change is authorized by this PR-update action.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "559f4f716a7ac8192a0afbe11dc9960ec18ee196f9ba5f99d68cd572dda4313e",
+    "subject_commit": "993a9a0619577117417d80de96e73aa18270b464",
+    "task_id": "TASK-0062"
+  },
+  {
+    "action_sha256": "87baa8b02f01a2c9978f0e72eb6009cbcd04de16d580375e63c3eb4bbb143985",
+    "actor": "owner-authorized-root",
+    "approval_type": "action",
+    "approved_at": "2026-10-01T23:35:11Z",
+    "base_commit": "993a9a0619577117417d80de96e73aa18270b464",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-01T23:50:00.645871+00:00",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "Existing direct owner authorization explicitly covers protected merge. This separate concrete single-use approval binds PR44 headQ f5707ff178b760bb0215c7d5cb773cc4d06c75d6/mainB48bf777106b9fdfef1ddf83d3abc95859fb8e580 and successful exactQ run36939643115/check110627914984 app15368 complete unchanged85/90/allquality chain; corrected binder independently reviewed, fresh protection and literal reviewed PR content verified. Ordinary --merge --match-head-commit only; no admin/force/delete/auto. Independent actual-M proof is required before native closes.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "559f4f716a7ac8192a0afbe11dc9960ec18ee196f9ba5f99d68cd572dda4313e",
+    "subject_commit": "993a9a0619577117417d80de96e73aa18270b464",
+    "task_id": "TASK-0062"
   }
 ]

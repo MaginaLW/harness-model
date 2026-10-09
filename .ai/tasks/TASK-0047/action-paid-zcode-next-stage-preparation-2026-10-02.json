@@ -1,0 +1,19 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "a2309e905de0117c51444a4938f096c71bd2150ac3aeded72aae59341dce49d2",
+  "subject_commit": "c0b4cb62eb8754d9364433df6ba9948ffcf43fc2",
+  "expires_at": "2026-10-03T00:00:00Z",
+  "single_use": true,
+  "action_type": "paid_external_call",
+  "target": "One batch of four new ZCode read-only preparation tasks: ZN-01 and ZN-02 in harness-model, ZN-03 in ai-agent-dotfiles, ZN-04 in the current r3s-VPS project",
+  "parameter_summary": "Owner expressly requested next-stage conditions, task assignment to ZCode and correct project association, then confirmed the desktop is unlocked. Submit each fixed prompt once through the existing official desktop UI, using its project defaults without changing account, model, subscription, permission or privacy settings. Prompt definitions are fixed at cfec0779f52a267f6bfe0fdfee71344ab7d68aa4 in docs/operations/zcode-next-stage-assignments-2026-10-02.md; each transmission also includes the complete common read-only boundary.",
+  "conditions": [
+    "This is a new independent action audit based on the owner's current ZCode assignment request and resumed instruction, not reuse of expired ZCode approvals or any push/merge/code approval. TASK-0047 keeps its original subject, specification and MERGED state; this append-only maintenance audit does not reopen implementation or prove task submission.",
+    "Exact UTF-8 transmitted prompt SHA256 values: ZN-01 097aa053a856360b8bfd1c865338ccba607c5cca6ffce14a2b44bddf206a1b4e; ZN-02 bbdf6b8d1a902d7e92b361286f87b1b60b93e4dbd0b5fe8d4ef596bac8fe929b; ZN-03 25f41755ffbcff6bc3754273b493cd37f2d4c171520337e6b0fe691242914759; ZN-04 65273994dec4a52433bb1405457d01bdb2489eb94b914eb68f40a94d85c2e2fe.",
+    "Each task may only use native file reading of its specified repository instructions, public source and directly related status/evidence. It outputs one preparation report in its own conversation. No terminal, shell, command, script, test, file modification, commit, clone/fetch, external API, additional worker/model, provider integration or automatic retry; report UNKNOWN where native read-only access is insufficient.",
+    "No credentials, account/private configuration or prior raw conversations may be read or transmitted. No subscription purchase, model/account/permission/security/privacy change, permission-dialog approval, deployment, deletion, installation, export, repository expansion or remote publication is authorized by this action.",
+    "ZN-01 does not create a native task, envelope, import or formal review; its report is not the matched genuine F artifact. ZN-02 does not begin Phase 3/4, compute trust/model routing or collect new private/cost samples. Existing completed external-project conversations are not resumed and the historical r3s-VPS migration root is not selected.",
+    "Verify the selected actual project before each submission and read back the new task/project association afterwards. At most four initial prompt submissions, one per package; do not resend an ambiguous or failed provider request. UI navigation and read-only metadata observation are not additional prompt calls. Preserve failures and record actual operation count separately.",
+    "A current UI model label is only observed metadata, not authenticated provider/model identity. This authorization is not a cost cap and does not promise one underlying inference call per task. The existing pre-command wrapper remains a non-executing deny/observation boundary; no wrapper bypass or automatic action consumption is introduced."
+  ]
+}
