@@ -1,0 +1,50 @@
+{
+  "base_commit": "9215ae1fce8749dbc45ad2168a9303112c433177",
+  "branch": "claude/simplify-architecture",
+  "classification_input_sha256": "5696b70a8057ab37bb33fab7b7fc4d885a5a4e89478e054308eb2abe4e779fc8",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/**",
+      "src/aiflow/verification.py",
+      ".github/workflows/ai-quality-gate.yml",
+      "tests/**",
+      "docs/operations/quickstart.md",
+      "README.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Run the full pytest suite once per V1/V2 verification and drop the duplicate CI contract step",
+        "impact_scope": [
+          ".ai/policy/**",
+          "src/aiflow/verification.py",
+          ".github/workflows/ai-quality-gate.yml",
+          "tests/**",
+          "docs/operations/quickstart.md",
+          "README.md",
+          "docs/operations/maintenance-status.md"
+        ],
+        "planned_actions": [
+          "Bump all four Policy files to 2.4.0 and give unit_tests, regression_tests, acceptance and integration the exact coverage_xml command, environment and timeout so the plan executes one pytest run.",
+          "In src/aiflow/verification.py require acceptance/integration commands to equal the bound full coverage pytest command instead of fixed subdirectory commands.",
+          "Remove the duplicate 'Validate contracts' CI step.",
+          "Update tests and quickstart text describing the old commands."
+        ]
+      }
+    ],
+    "goal": "Run the full pytest suite once per V1/V2 verification and drop the duplicate CI contract step",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "bcb558b632282baaa0a0cdfce61de93562f2266fbb270b00f919deaa52db5f53",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "7170dea8405fd6a8266501c895738dac15255535e3701c36e3d1eafc06e83ef4",
+  "task_id": "TASK-0072"
+}

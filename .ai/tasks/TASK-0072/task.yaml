@@ -1,0 +1,109 @@
+allowed_scope:
+- .ai/policy/**
+- src/aiflow/verification.py
+- .github/workflows/ai-quality-gate.yml
+- tests/**
+- docs/operations/quickstart.md
+- README.md
+- docs/operations/maintenance-status.md
+- docs/operations/recovery.md
+- docs/operations/pytest-temporary-roots.md
+base_commit: 9215ae1fce8749dbc45ad2168a9303112c433177
+branch: claude/simplify-architecture
+created_at: '2026-10-09T14:15:02Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Run the full pytest suite once per V1/V2 verification and drop the duplicate
+    CI contract step
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  impact_scope:
+  - .ai/policy/**
+  - src/aiflow/verification.py
+  - .github/workflows/ai-quality-gate.yml
+  - tests/**
+  - docs/operations/quickstart.md
+  - README.md
+  - docs/operations/maintenance-status.md
+  - docs/operations/recovery.md
+  - docs/operations/pytest-temporary-roots.md
+  inputs:
+  - Policy 2.3.0 V1 runs pytest three times (unit_tests, regression_tests, coverage_xml)
+    and V2 five times (plus acceptance, integration); the verification plan already
+    merges checks whose argv, environment, cwd and log sensitivity are identical into
+    one execution.
+  - 'Recorded V2 runs failed by timeout: coverage_xml 1118 s, regression_tests timeout
+    900 s, integration timeout 600 s (docs/operations/verification-budget-decision-2026-10-04.md).'
+  - The pytest result parser only requires exit code zero, so a single full coverage
+    run is a superset of every subset run.
+  - CI 'Validate contracts' step reruns two test files that the following full coverage
+    run already executes.
+  permission_requirements: []
+  planned_actions:
+  - Bump all four Policy files to 2.4.0 and give unit_tests, regression_tests, coverage_xml,
+    acceptance and integration one fixed full-suite coverage command, environment
+    and timeout so the plan executes one pytest run.
+  - In src/aiflow/verification.py pin the exact full-suite argv, environment, timeout
+    and parsers for those five checks and reject any extra selector.
+  - Run the CI 'Validate contracts' step only in non-bootstrap mode and refresh the
+    workflow budget comment.
+  - Update tests (including negative subset tests and a pyproject testpaths pin) and
+    the quickstart, recovery and pytest-temporary-roots docs.
+  - After the implementation commit, escalate with policy_changed, resolve, reclassify,
+    and obtain a fresh design review and spec approval before verify and gate.
+  protections:
+    dry_run: false
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0072
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Targeted unit/integration/acceptance tests for policy, plan and workflow.
+  - Full pytest with coverage >=85%, diff coverage >=90%, ruff check/format, mypy,
+    git diff --check.
+  - AI Flow verify and gate for this task.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: b66b0eb12764dd6c6d1294f366338428322022feb80ccc0d85eb1291ac704ded
+goal: Run the full pytest suite once per V1/V2 verification and drop the duplicate
+  CI contract step
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-10-09T14:36:47Z'
+subject_commit: 65512bee49f8b57f42b2b8eb1fce6f803a8a4eaf
+task_id: TASK-0072
+updated_at: '2026-10-09T15:29:59Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- docs/superpowers/plans/01_self_hosted_runner_codex_prompt_2026-09-12.md
+- docs/superpowers/plans/02_harness_model_self_hosted_runner_plan_2026-09-12.md
+- docs/superpowers/plans/2026-09-12-harness-model_cross-agent_review-fix_plan_2026-09-12.md

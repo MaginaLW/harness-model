@@ -1,0 +1,55 @@
+{
+  "base_commit": "9215ae1fce8749dbc45ad2168a9303112c433177",
+  "branch": "claude/simplify-architecture",
+  "classification_input_sha256": "13d36dea5bfa7610e66900b0b67adc482a05142122f3b478858d58c1a1aa471e",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/**",
+      "src/aiflow/verification.py",
+      ".github/workflows/ai-quality-gate.yml",
+      "tests/**",
+      "docs/operations/quickstart.md",
+      "README.md",
+      "docs/operations/maintenance-status.md",
+      "docs/operations/recovery.md",
+      "docs/operations/pytest-temporary-roots.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Run the full pytest suite once per V1/V2 verification and drop the duplicate CI contract step",
+        "impact_scope": [
+          ".ai/policy/**",
+          "src/aiflow/verification.py",
+          ".github/workflows/ai-quality-gate.yml",
+          "tests/**",
+          "docs/operations/quickstart.md",
+          "README.md",
+          "docs/operations/maintenance-status.md",
+          "docs/operations/recovery.md",
+          "docs/operations/pytest-temporary-roots.md"
+        ],
+        "planned_actions": [
+          "Bump all four Policy files to 2.4.0 and give unit_tests, regression_tests, coverage_xml, acceptance and integration one fixed full-suite coverage command, environment and timeout so the plan executes one pytest run.",
+          "In src/aiflow/verification.py pin the exact full-suite argv, environment, timeout and parsers for those five checks and reject any extra selector.",
+          "Run the CI 'Validate contracts' step only in non-bootstrap mode and refresh the workflow budget comment.",
+          "Update tests (including negative subset tests and a pyproject testpaths pin) and the quickstart, recovery and pytest-temporary-roots docs.",
+          "After the implementation commit, escalate with policy_changed, resolve, reclassify, and obtain a fresh design review and spec approval before verify and gate."
+        ]
+      }
+    ],
+    "goal": "Run the full pytest suite once per V1/V2 verification and drop the duplicate CI contract step",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "d404cd960ba16ec7aa4aa3e924797ecbff0b00594a8f2972866c50321e4bcf3c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "b66b0eb12764dd6c6d1294f366338428322022feb80ccc0d85eb1291ac704ded",
+  "task_id": "TASK-0072"
+}

@@ -1,0 +1,54 @@
+{
+  "context_sha256": "309d6c4091c4300ac03892b1490f38ee3506d270acfd13e83e694590804f4fe3",
+  "findings": [
+    {
+      "evidence_refs": [
+        "src/aiflow/verification.py:498-510",
+        "src/aiflow/process_runner.py:178-183"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 245,
+        "path": "src/aiflow/verification.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Check the exact full-suite argv during parsing, before --basetemp is appended"
+    },
+    {
+      "evidence_refs": [
+        "pyproject.toml:37-42"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 39,
+        "path": "pyproject.toml"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Consider pinning pyproject addopts as well as testpaths"
+    },
+    {
+      "evidence_refs": [
+        "docs/operations/recovery.md:35-38"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 255,
+        "path": "src/aiflow/verification.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Prefer requiring all five timeouts to equal coverage_xml over hard-coding 1200 s, or document the hard-coded value"
+    }
+  ],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-09T14:45:00Z",
+  "review_id": "REV-0002",
+  "review_stage": "design",
+  "reviewer": "claude-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Revised spec b66b0eb1 resolves all REV-0001 findings: exact full-suite argv, environment, timeout and parsers are pinned for all five pytest checks with negative tests and a testpaths pin; Validate contracts stays for non-bootstrap mode; recovery.md and pytest-temporary-roots.md are in scope; the self-triggered policy_changed round, shared-failure attribution, --check semantics and the manual 85% coverage run are explicit. Three low advisory notes remain. This task is V1, so its own verify exercises only the V1 merge; the V2 five-check merge is proven by plan and acceptance tests.",
+  "task_id": "TASK-0072"
+}
