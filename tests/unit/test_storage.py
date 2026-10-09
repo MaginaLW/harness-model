@@ -264,3 +264,10 @@ def test_read_validates_schema_version_immediately(tmp_path: Path) -> None:
         read_task_yaml(tmp_path, "TASK-0001", "task.yaml", contract_name="task")
 
     assert caught.value.code == "CONTRACT_VALIDATION_FAILED"
+
+
+def test_reserve_skips_numbers_reserved_on_other_branches(tmp_path: Path) -> None:
+    (tmp_path / ".ai" / "tasks" / "TASK-0002").mkdir(parents=True)
+
+    assert reserve_task_id(tmp_path, reserved_numbers={9, 4}) == "TASK-0010"
+    assert reserve_task_id(tmp_path, reserved_numbers={1}) == "TASK-0011"

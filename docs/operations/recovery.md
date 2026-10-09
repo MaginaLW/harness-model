@@ -13,6 +13,7 @@
 - 诊断：检查 `.ai/tasks/<TASK-ID>/creation_failed.json`，并运行 `python -m aiflow status <TASK-ID> --format json`。
 - 可恢复操作：在同一仓库运行 `python -m aiflow start --recover <TASK-ID>`；CLI 会核对 repository ID 并原子完成缺失文件。
 - 禁止操作：不复制其他仓库的 marker，不手工预占或重用 task ID，不删除 marker 后假定创建成功。
+- 说明：`start` 分配的 task ID 会高于本地目录及所有本地分支、远程跟踪分支 `.ai/tasks/` 中已出现的编号；尚未 fetch 的远程分支不在其内，并行开分支前先 fetch。
 
 ## REC-02 损坏 JSON/YAML
 

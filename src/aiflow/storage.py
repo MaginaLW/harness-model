@@ -6,6 +6,7 @@ import json
 import os
 import re
 import tempfile
+from collections.abc import Iterable
 from contextlib import suppress
 from pathlib import Path
 from typing import Any
@@ -97,8 +98,10 @@ def reserve_task_id(
     repository_root: Path,
     *,
     max_attempts: int = MAX_RESERVATION_ATTEMPTS,
+    reserved_numbers: Iterable[int] = (),
 ) -> str:
-    """Atomically reserve and return the next task ID, retrying creation races."""
+    """Atomically reserve the next task ID above local and ``reserved_numbers`` IDs."""
+    reserved = tuple(reserved_numbers)
     root = task_root(repository_root)
     try:
         root.mkdir(parents=True, exist_ok=True)
@@ -117,7 +120,7 @@ def reserve_task_id(
                 code="STORAGE_ID_RESERVATION_FAILED",
                 details={},
             ) from error
-        next_number = max(numbers, default=0) + 1
+        next_number = max([*numbers, *reserved], default=0) + 1
         task_id = f"TASK-{next_number:04d}"
         try:
             _mkdir_reserved_directory(root / task_id)

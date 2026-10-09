@@ -12,7 +12,7 @@ import pytest
 
 from aiflow.contracts import validate_contract
 from aiflow.errors import AiflowError
-from aiflow.git_context import GIT_TIMEOUT_SECONDS, collect_git_context
+from aiflow.git_context import GIT_TIMEOUT_SECONDS, collect_git_context, task_numbers_in_refs
 
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -227,3 +227,40 @@ def test_production_git_commands_use_fixed_argument_arrays_and_timeout(
     assert all(kwargs["timeout"] == 10 for _arguments, kwargs in calls)
     assert all(kwargs["cwd"] == repository for _arguments, kwargs in calls)
     assert all("env" not in kwargs and "shell" not in kwargs for _arguments, kwargs in calls)
+
+
+def _commit_all(repository: Path, message: str) -> None:
+    run_git(repository, "add", "-A")
+    run_git(
+        repository,
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit",
+        "-m",
+        message,
+    )
+
+
+def test_task_numbers_in_refs_reads_every_branch_tree(tmp_path: Path) -> None:
+    repository = create_repository(tmp_path / "repository")
+    assert task_numbers_in_refs(repository) == frozenset()
+
+    run_git(repository, "switch", "-c", "other")
+    for name in ("TASK-0009", "TASK-nope", "notes"):
+        (repository / ".ai" / "tasks" / name).mkdir(parents=True)
+        (repository / ".ai" / "tasks" / name / "task.yaml").write_text("{}\n", encoding="utf-8")
+    _commit_all(repository, "other branch task")
+    run_git(repository, "switch", "main")
+    (repository / ".ai" / "tasks" / "TASK-0003").mkdir(parents=True)
+    (repository / ".ai" / "tasks" / "TASK-0003" / "task.yaml").write_text("{}\n", encoding="utf-8")
+
+    assert task_numbers_in_refs(repository) == frozenset({9})
+    assert task_numbers_in_refs(repository / "folder") == frozenset({9})
+
+
+def test_task_numbers_in_refs_fails_closed_outside_git(tmp_path: Path) -> None:
+    with pytest.raises(AiflowError) as caught:
+        task_numbers_in_refs(tmp_path)
+    assert caught.value.code == "GIT_TASK_REFS_UNAVAILABLE"
