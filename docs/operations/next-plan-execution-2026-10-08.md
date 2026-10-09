@@ -2,6 +2,18 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 新集成诊断动作已准备，安全基础保留原生编号历史
+
+新动作 `.ai/tasks/TASK-0071/action-integration-observation-diagnostic-001.json` 已在实际owner窄提交 `a2237c2a78acb08144810e65f32a65e9b6eeec4f`，仅含提案与本任务外部诊断记录方案；subject仍为 `589843a`。canonical SHA256为 `4a6de2408f9f21d669a785113f6eb956066e128c351bcb6badb496deb114ee88`，raw为 `b1b00422389a3e997a85098090345eacb39a3601186f7f48db3ef88739fa5558` /4718字节，绑定002 preapproval `d7269b351471972a9cc3b57c9bc40c9611f351a4d3b3bb065e9d1e3529afa28a` /45775字节。旧001 blocked机制与问题原件保留；002关闭捕获目录归属、helper单次入口和真实Job active0三个问题组，作者15项纯内存、9项transport mock、5项capture ownership mock及parser通过，仅证明准备机制。
+
+两名非作者完成002窄审后，再核实际动作与Root记录方案的具体绑定，均0未解决问题；技术报告 `03101ed26767aa88837b924357eb42203500e51f386165d731e6300a06d3506a`，权限报告 `2e5668a4e36b7dfbc5a0e7ff2990243ee3789f39c952de3284ff154107541d04`。这些结论仅支持请求这一精确批准，不提供启动资格。实际准入报告 `${EXECUTION_ROOT}/task0071-integration-diagnostic-native-action-admission-001/report.json` SHA256 `0cfdf0e9cec9d13812cd382655b84ec0a25c1bb39042e74e68706535e1ec8009`：HEAD为a223、FAILED/REVIEW/V2、classification fresh、既有批准current、evidence stale，Missing仍为 `retry_reason_or_escalation`；scope/validate有效，Gate拒绝，14个受保护输入前后不变，新matching action grant为0。批准请求已发出，尚待所有者回复；不将原生Missing改称action缺项，也不重复请求有效规格批准。
+
+精确范围为一次既有完整integration观察：原600秒业务预算、节点及阶段耗时、sessionstart后540秒一次无locals父进程栈、仅本次新建资源及可证自有进程/Job的5秒有界清理，保留所有目录、失败和两个独占claim，不重跑。有效期至UTC `2026-10-09T10:00:00Z`，启动至少余留900秒。CLI没有此诊断的execute/consumer，Root按AI Flow规则1固定外部记录路径；规则4要求单独动作批准。generic native action记录不会离开FAILED，外部单次消费不能伪造原生consumed事件、evidence或V2结果。Root bound方案为 `${EXECUTION_ROOT}/task0071-integration-diagnostic-root-decision-001/decision.bound-action-001.json`，SHA256 `9d063a9e93007189448363732d93485fef7ee565137bd61d7f5b8ce19be7c0a2`。当前没有新grant、parent/capture/claim创建或pytest/Job执行；旧V2仍FAILED/SPENT，完整V2、push/merge/provider不在这次范围。
+
+安全Doc worktree现使用真正历史提交 `7cfa78392de6bebcdade3f600dac3d37f1d6a848` 形成新基础 `a425c416e618a83f7e775f30f159d807a83c1223`，仅应用同一Doc排版候选（56增/24删），实际format-check通过，postcommit clean且源码缺席。原生分配器扫描当前checkout物理task目录，原f90基础最高70，直接start会再次候选71；新基础保留真实19份历史TASK-0071文件，raw前后不变，物理与Git namespace最高71。旧 `f90ae85` 分支/提交仍保留；不伪造目录、counter、import或重编号。新基础历史IMPLEMENTING快照不代表当前FAILED owner，不转移批准或证据；未来task实际ID、B、冻结规格和批准尚未分配。闭合报告 `${EXECUTION_ROOT}/task0071-doc-native-foundation-001/report.json` SHA256 `b9ee15d8c25ebd146e7aeae42c2023f98efe519921559b11006a3324c02b6675`，Doc raw/Gitblob仍为e1d90/9341字节，旧C71 source/spec/F5及当前六个保护输入保持。
+
+当前准备并行阶段启用2名sub-agent，分别只核新诊断final pregrant封包成员、独立核新Doc基础封包；Root同步追加状态文档。依赖串行：具体新动作批准→Root真实native批准记录与fresh状态→2名sub-agent分别准备本次资源/执行包及独立actor身份→2名非作者分别复核实际final packet的技术和权限→1名独立verifier执行一次诊断→只读终局审计→Root按真实根因决定修订与新源码task/规格/完整V2。批准和最终启动事实未发生，不提前填充；整体后续计划仍未完成。以下原窗口全部保留。
+
 ## 2026-10-09 终局审计关闭、失败账本提交与安全格式基础
 
 独立终局只读审计已 CLOSED：69 个闭合原件在 source-before/copy/source-after 窗口稳定，289 个 ready 输入中的 287 个受保护输入保持，另两份允许原生追加的 events/task 仅有本次终局变化。Root复核审计98成员、执行者8成员及终局补充3成员共109成员无差异。外部精确文本prefix比较false保留；唯一JSON结构差异是最终launcher文件自身的关闭receipt，冻结脚本先写内部终局、再刷新publication receipts、最后输出外部终局，补充见证不改变原失败或内层身份UNKNOWN。报告位于`${EXECUTION_ROOT}/task0071-terminal-native-audit-001/terminal-review-001/REPORT.md`，SHA256 `824bce4a9eaceea59d23d7a0a3f3ee3a15286965593d97806bd2aa738d4d547f`。

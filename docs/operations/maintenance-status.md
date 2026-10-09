@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-09 新诊断已具备审批材料，原生历史基础完成
+
+新单次integration诊断提案及外部记录方案窄提交为 `a2237c2`，canonical `4a6de2408f9f21d669a785113f6eb956066e128c351bcb6badb496deb114ee88`；两路实际绑定独审均0，仅支持精确批准请求。fresh原生状态仍FAILED/REVIEW/V2、已有批准current、Missing retry_reason_or_escalation、scope/schema有效而Gate拒绝；新grant为0，请求已发出。诊断限定完整integration一次600秒、节点/阶段计时、540秒一次无locals父栈及自有进程/Job5秒有界清理，目录保留、失败不重跑；18:00（UTC+8）到期且启动余留15分钟。Rule4需单独动作授权，Rule1外部记录不伪造原生消费或验收。未创建新parent/capture/claim或启动pytest/Job，旧V2 FAILED/SPENT及全部门禁保持。
+
+安全Doc新基础 `a425c41` 从真实历史 `7cfa783` 形成，仅应用同一排版候选，format-check通过、clean、源码缺席，19份历史71文件不变；旧f90基础分支保留。新基础最高task namespace71，避免旧f90最高70导致原生分配重复；未实际分配新task/规格/批准，历史快照不代替当前owner。2名sub-agent分别窄核诊断封包和Doc封包，Root串行维护状态文档；批准后真实资源/actor准备、两路final审查、独立单次执行和新源码规格仍需按依赖完成，详见[执行记录](next-plan-execution-2026-10-08.md)。整体未完成；下述为此前窗口。
+
 ## 2026-10-09 失败终局已提交，格式安全基础完成
 
 TASK-0071独立终局审计已CLOSED，Root核109封包成员无差异。终局账本窄提交 `6b0baf7` 仅含events/task/action-use；subject/spec/source/F5与有效批准保持。提交后实际FAILED/REVIEW/V2、classification fresh、approvals current、Missing retry_reason_or_escalation，scope/validate有效，Gate拒绝；private evidence/context原件保留未跟踪，不能称clean。完整整体89.4136468%、nativeB diff91.4972274%均达标，但14项仍12通过、格式失败、集成600秒超时，原action SPENT，F累计NOT_RUN。安全source-free文档基础 `f90ae85` 只改第二Python示例排版、实际format-check通过且postcommit clean，无新增源码、不覆盖旧失败。下一串行门为新诊断机制/两路独审/具体动作批准后的一次600秒integration节点/阶段/540秒stack观察；当前无新grant或执行，根因UNKNOWN。证据与并行责任见[执行记录](next-plan-execution-2026-10-08.md)；整体未完成，下述为此前窗口。

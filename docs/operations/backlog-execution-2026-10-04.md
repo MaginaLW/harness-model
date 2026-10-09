@@ -1,5 +1,9 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-09 单次诊断批准材料和真实历史基础已齐
+
+新诊断 canonical `4a6de240…14ee88` 已在actual owner提交 `a2237c2`，两路实际动作绑定独审0；原生仍FAILED、既有批准current、Missing retry_reason_or_escalation、新grant为0，精确请求待答。只覆盖完整integration一次600秒观察、节点/阶段耗时、540秒一次无locals父栈和自有进程/Job5秒有界清理，原失败/消费不改、目录保留、不重跑；尚无新资源或执行。安全Doc新基础 `a425c41` 保留真实19份71历史文件及旧f90分支，源码缺席、工作树clean、format-check通过，未来task实际编号和规格仍未分配；历史快照不转移当前owner批准。当前2名sub-agent独立核两组封包，批准后的实际准备/两路final审查/独立一次执行及根因驱动新规格为串行门，具体记录与边界见[执行记录](next-plan-execution-2026-10-08.md)。七项待办、旧69/70/71历史与整体未完成；下述窗口全部保留。
+
 ## 2026-10-09 审计封闭与可复核安全修订阶段
 
 原单次V2终局经独审CLOSED：FAILED/SPENT、12通过/格式失败/集成600秒超时保留；整体89.4136468%与nativeB diff91.4972274%不抵销失败，F累计NOT_RUN。Root核109成员无差异并提交TASK-0071终局三路径为 `6b0baf7`；postcommit批准current、分类fresh、Missing retry_reason_or_escalation、scope/schema有效而Gate拒绝。另一安全source-free基础 `f90ae85` 仅修Doc Python fence布局，实际format-check通过、工作树clean、源码缺席，原C71冻结F5不改。集成根因仍UNKNOWN，新一次600秒诊断候选由1名作者准备、完成后2名非作者独审，后续准确动作单独批准后才执行；无新诊断grant/pytest/Job/parent或完整V2重跑。七项待办、旧69/70/71证据与整体未完成，具体闭合见证、当前状态和串行依赖见[执行记录](next-plan-execution-2026-10-08.md)。下述运行中/候选未应用文字保留历史窗口。
