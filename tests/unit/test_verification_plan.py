@@ -184,19 +184,46 @@ def test_shared_subset_selector_is_rejected_even_when_all_pytest_checks_agree(
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [("timeout_seconds", 600), ("environment", {"COVERAGE_FILE": "{run_dir}/other.coverage"})],
+    [
+        ("timeout_seconds", 600),
+        ("environment", {"COVERAGE_FILE": "{run_dir}/other.coverage"}),
+        (
+            "command",
+            [
+                "diff-cover",
+                "-m",
+                "pytest",
+                "--cov=aiflow",
+                "--cov-branch",
+                "--cov-report=xml:{run_dir}/coverage.xml",
+            ],
+        ),
+    ],
 )
-def test_pytest_checks_must_form_one_execution(tmp_path: Path, field: str, value: object) -> None:
+def test_pytest_checks_pin_one_execution_shape_even_when_all_agree(
+    tmp_path: Path, field: str, value: object
+) -> None:
     bundle = v2_bundle()
-    integration = next(item for item in checks(bundle, "V2") if item["id"] == "integration")
-    integration[field] = value
+    for level in ("V1", "V2"):
+        for item in checks(bundle, level):
+            if item["id"] in {
+                "unit_tests",
+                "regression_tests",
+                "coverage_xml",
+                "acceptance",
+                "integration",
+            }:
+                item[field] = deepcopy(value)
 
     with pytest.raises(ContractError) as caught:
         parse_verification_plan(
             bundle, context(tmp_path), level="V2", tool_available=lambda _argv: True
         )
 
-    assert caught.value.code == "VERIFICATION_COMMAND_INVALID"
+    assert caught.value.code in {
+        "VERIFICATION_COMMAND_INVALID",
+        "VERIFICATION_COVERAGE_CONFIG_INVALID",
+    }
 
 
 def test_pyproject_collects_the_whole_tests_tree() -> None:

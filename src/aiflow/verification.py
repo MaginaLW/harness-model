@@ -36,10 +36,11 @@ ALLOWED_VARIABLES = frozenset(
 ALLOWED_PARSERS = frozenset({"exit_zero", "pytest", "coverage_xml", "diff_cover"})
 _VARIABLE_PATTERN = re.compile(r"\{([^{}]+)\}")
 _RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
-# Every pytest check runs the same full coverage suite, executed once per plan.
+# Every pytest check runs the same full coverage suite, so the plan executes it once.
 PYTEST_CHECK_IDS = frozenset(
     {"unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"}
 )
+FULL_SUITE_TIMEOUT_SECONDS = 1200
 
 
 @dataclass(frozen=True)
@@ -247,6 +248,7 @@ def _require_output_semantics(
         raise ContractError("Smoke command is invalid", code="VERIFICATION_COMMAND_INVALID")
     if check.check_id in PYTEST_CHECK_IDS:
         expected_argv = (
+            context.python,
             "-m",
             "pytest",
             "--cov=aiflow",
@@ -255,8 +257,9 @@ def _require_output_semantics(
         )
         expected_parser = "coverage_xml" if check.check_id == "coverage_xml" else "pytest"
         if (
-            check.argv[1:] != expected_argv
+            check.argv != expected_argv
             or check.environment != {"COVERAGE_FILE": (run_dir / ".coverage").as_posix()}
+            or check.timeout_seconds != FULL_SUITE_TIMEOUT_SECONDS
             or check.result_parser != expected_parser
         ):
             raise ContractError(
@@ -436,21 +439,6 @@ def parse_verification_plan(
         )
         for check_id in required_ids
     )
-    full_suite = {
-        (
-            check.argv,
-            tuple(sorted(check.environment.items())),
-            check.cwd,
-            check.log_sensitivity,
-            check.timeout_seconds,
-        )
-        for check in checks
-        if check.check_id in PYTEST_CHECK_IDS
-    }
-    if len(full_suite) > 1:
-        raise ContractError(
-            "Pytest checks must form one execution", code="VERIFICATION_COMMAND_INVALID"
-        )
     grouped: dict[tuple[object, ...], list[str]] = {}
     execution_checks: dict[tuple[object, ...], VerificationCheck] = {}
     for check in checks:

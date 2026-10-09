@@ -253,7 +253,7 @@ action-approved targeted mutation 与 independent-verifier 流程均已实现。
 bootstrap 步骤强制。达到上限仍是验证失败，必须保留 run 并诊断原因，不能靠降级、跳过
 coverage 或无理由重复重试进入 Gate。
 
-使用 `--check acceptance`、`--check integration` 等局部检查时，仍运行完整覆盖率套件，所得
+使用 `--check` 选择任一 pytest 检查（如 `acceptance`、`integration`）时，仍运行完整覆盖率套件；选择其他检查只运行所选检查。所得
 evidence 是 partial/provisional，不能形成 final evidence 或进入 Gate。`--finalize`、code
 approval 和 CI 输出也不能把 missing、stale、tampered、non-killed 或 unverified 的当前 V2
 事实变成 passed。CI evidence 只提供 Gate attestation；它不替代当前本地 evidence、
