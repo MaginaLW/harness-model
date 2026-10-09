@@ -1,5 +1,11 @@
 # 当前待办执行：2026-10-04
 
+## 2026-10-09 原七项与S0–S5逐项核对完成
+
+[完成条件与剩余依赖矩阵](follow-up-completion-audit-2026-10-09.md)保留原七项及S0–S5全部退出条件，区分F历史恢复/新导入路线与真实Apply、I1/I2、E5/Phase3/4、发布缺项。[S1补充](../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)已形成版本兼容、预算来源/停止残余和三个synthetic例子，两非作者修复后均0；Root实际核40封闭成员、7追加回执和14保护输入无差异，Git EOF机械修正保留已审原件。没有为未选目标新造模板或将用户草稿变为执行指令。
+
+当前新4a6单次诊断批准仍待回复，原生FAILED/SPENT、既有批准current/Missing retry_reason_or_escalation及完整门禁保持；没有新grant、资源/claim或业务执行。AI Flow规则4的具体动作授权后仍须完成真实绑定、准备、独审、独立一次观察与根因驱动的新范围/完整验证。七项待办和全目标尚未完成；本轮责任与封存记录见[执行记录](next-plan-execution-2026-10-08.md)，下述历史窗口保留。
+
 ## 2026-10-09 单次诊断批准材料和真实历史基础已齐
 
 新诊断 canonical `4a6de240…14ee88` 已在actual owner提交 `a2237c2`，两路实际动作绑定独审0；原生仍FAILED、既有批准current、Missing retry_reason_or_escalation、新grant为0，精确请求待答。只覆盖完整integration一次600秒观察、节点/阶段耗时、540秒一次无locals父栈和自有进程/Job5秒有界清理，原失败/消费不改、目录保留、不重跑；尚无新资源或执行。安全Doc新基础 `a425c41` 保留真实19份71历史文件及旧f90分支，源码缺席、工作树clean、format-check通过，未来task实际编号和规格仍未分配；历史快照不转移当前owner批准。当前2名sub-agent独立核两组封包，批准后的实际准备/两路final审查/独立一次执行及根因驱动新规格为串行门，具体记录与边界见[执行记录](next-plan-execution-2026-10-08.md)。七项待办、旧69/70/71历史与整体未完成；下述窗口全部保留。

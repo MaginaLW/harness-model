@@ -1,5 +1,11 @@
 # 维护收尾与待办
 
+## 2026-10-09 全范围退出条件与独立文档准备完成
+
+已形成[七项待办及S0–S5完成核对](follow-up-completion-audit-2026-10-09.md)和[S1合同兼容/审核预算补充](../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)。补充给出固定版本适用、预算归属/停止残余包和三个synthetic例子；两名非作者定点复核后0未解决项，Root仅追加末尾空行格式修正，原件保留。Root核40封闭成员、7追加回执和14当前保护输入无差异。F历史恢复与新真实导入的依赖分别列明，I1有限原件缺席保持unknown，用户草稿不当作当前Apply目标。普通文档交付不提供生产评分、执行权限或完整质量验收。
+
+新4a6诊断精确批准仍待回复，原生FAILED/SPENT、既有批准current和Missing retry_reason_or_escalation保持；AI Flow规则4要求独立动作批准，无新资源/claim/pytest/Job。已完成的安全准备与未满足的业务/阶段/发布条件分别保留，整体未完成。并行职责、串行门和封存依据见[执行记录](next-plan-execution-2026-10-08.md)；下述为此前窗口。
+
 ## 2026-10-09 新诊断已具备审批材料，原生历史基础完成
 
 新单次integration诊断提案及外部记录方案窄提交为 `a2237c2`，canonical `4a6de2408f9f21d669a785113f6eb956066e128c351bcb6badb496deb114ee88`；两路实际绑定独审均0，仅支持精确批准请求。fresh原生状态仍FAILED/REVIEW/V2、已有批准current、Missing retry_reason_or_escalation、scope/schema有效而Gate拒绝；新grant为0，请求已发出。诊断限定完整integration一次600秒、节点/阶段计时、540秒一次无locals父栈及自有进程/Job5秒有界清理，目录保留、失败不重跑；18:00（UTC+8）到期且启动余留15分钟。Rule4需单独动作授权，Rule1外部记录不伪造原生消费或验收。未创建新parent/capture/claim或启动pytest/Job，旧V2 FAILED/SPENT及全部门禁保持。

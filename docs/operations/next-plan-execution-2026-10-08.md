@@ -2,6 +2,16 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 全目标核对与S1兼容/审核预算补充
+
+本轮重新核对原七项待办与S0–S5，形成[完成条件与依赖核对](follow-up-completion-audit-2026-10-09.md)，保留各线的真实退出条件、FAILED/SPENT/取消/partial/unknown及历史原件。F后继明确区分仅承接历史事实的恢复范围与选定新真实导入的范围：只有后者需要匹配新来源/context/preflight/record，不将来源重取作为两条路共有的附加门。I1原件在本轮获准有限目录未定位，不据此推断全局不存在或当前资格；三份用户草稿不是当前Apply目标。选定来源的进一步核对未识别可独立完成的新实质准备，不补造目标、字段或重复模板。
+
+[S1合同兼容与审核预算](../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)补齐带版本pins的提案/设计/实际C71 API适用关系、预算来源与停止残余包，以及三个synthetic正交例子。它不新增数值预算、产品字段、第二状态机、每轮签字或3-A/3-B采纳。两名非作者原审发现同一spec raw/canonical措辞问题，定点修复后均0未解决项；本例raw、实际frozen_spec及相应批准字段同值，读件pin本身不认证批准。已审17656字节原件另存，Root为Git必需whitespace仅去掉末尾1个LF，不改正文。旧审报告和原件保留。
+
+Root实际复核7封包的40个封闭payload、7个追加回执及14个当前C71保护输入，均无差异；fresh owner仍a223/FAILED、既有批准current、Missing retry_reason_or_escalation。汇合报告 `${EXECUTION_ROOT}/full-goal-requirement-reconciliation-001/precommit-report.json` SHA256 `fb464a1bd1d1bd7b8e04fda6cb216a32458ef3c81231045d5036d7f119b28333`，其whitespace字段仅是行尾空白检查的窗口，随后实际Git检查额外发现并修正上述EOF空行；最终格式/提交检查另追加记录，不改该封存报告。3名sub-agent分别核1–3、4–7、S0–S5；1名S1作者后接2名非作者审查，Root串行汇合、入口和提交。普通文档检查不等于CI/Gate或业务验收。
+
+新诊断canonical 4a6de240…14ee88的精确批准仍待人类回复；没有新grant、parent/capture/claim或pytest/Job执行。按AI Flow规则4，旧已消费V2批准不覆盖这一新动作。批准后的真实入账/fresh绑定、资源与actor准备、两路final审查、独立一次观察、闭合根因及新源码规格/动作/完整验证保持串行。七项待办和S0–S5尚未全部退出，整体目标未完成；以下均保留此前观察窗口。
+
 ## 2026-10-09 新诊断准备终校封存，待精确动作批准
 
 两项窄独立封包审计已关闭：诊断实际技术/权限/native admission成员为1/1/10，共12，无哈希、长度或报告绑定差异；Doc基础4成员同样无差异。Root再核这16成员和两个独审封包的5成员，共21封闭payload，14个当前C71保护输入及所选Root记录前后保持，真实owner HEAD仍a223、Doc foundation HEAD仍a425且clean/源码缺席。Root初次只读检查器将实际空数组按数字检查的失败与源脚本保留，按真实schema修正后成功；不是业务诊断重跑。汇合报告 `${EXECUTION_ROOT}/task0071-root-pregrant-reconciliation-001/report.json` SHA256 `e818a55286f0d99b9f2fc6db0e9fa91497028d2e9d40709fae527c58be801728`，4成员封存manifest为 `6c661b9e69cc0be06a64efe7e5f3573d2632989e2a40a1fd612985cf784b5cd1`。核对限定封存窗口与有限当前pins，不冒称新的native status查询、全166闭包、OS/Job资格或执行许可。
