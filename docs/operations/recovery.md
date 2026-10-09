@@ -32,7 +32,8 @@
 - 可恢复操作：修复具体失败原因后运行 `python -m aiflow begin <TASK-ID> --actor <ACTOR> --reason "<FIX>"`，再执行全量 `verify`。
 - 禁止操作：不在没有 retry reason 时重试，不删除失败 run，不将定向 provisional 证据当作 final evidence。
 
-active Policy `2.3.0` 继续为 V1/V2 `regression_tests` 和 `coverage_xml` 分别提供 900 秒和 1200 秒。
+active Policy `2.4.0` 中，V1/V2 的全部 pytest 检查共享一次完整覆盖率执行，上限 1200 秒
+（该命令形状与相同超时由 `src/aiflow/verification.py` 强制）。
 达到任一上限仍应保留为失败证据并诊断环境或性能原因；不得通过降为 V0、跳过 coverage、修改
 evidence 或重复碰运气来放行。若确需再次调整 Policy，必须建立或恢复有界 task，重新完成分类、
 规格审批、验证和 Gate。

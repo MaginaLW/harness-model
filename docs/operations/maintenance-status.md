@@ -8,7 +8,7 @@
 
 **已完成**
 
-- 阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 已于 2026-08-30 完成；源码包收口版本 `0.2.0`，active Policy `2.3.0`。`docs/superpowers/state/*.yaml` 是当时冻结的历史投影，不再更新。
+- 阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 已于 2026-08-30 完成；源码包收口版本 `0.2.0`，active Policy `2.4.0`（TASK-0072 起 V1/V2 的 pytest 检查共享一次完整覆盖率执行）。`docs/superpowers/state/*.yaml` 是当时冻结的历史投影，不再更新。
 - 已交付工作及其限制分别见[本地辅助工具](local-tools-closeout-2026-09-22.md)、[自托管执行基础设施](self-hosted-runners.md)、[E4 启动前收尾](e4-preflight-closeout-2026-09-23.md)；外仓试点按[按需反馈与回灌](feedback-loop.md)处理，无实质问题即 no-op。
 
 **未完成与待决定**（证据与依赖见[完整范围核对](follow-up-completion-audit-2026-10-09.md)）

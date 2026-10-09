@@ -1,5 +1,5 @@
 schema_version: "1.0"
-policy_version: "2.3.0"
+policy_version: "2.4.0"
 policy_kind: verification_levels
 allowed_placeholders:
   - "{python}"
@@ -73,15 +73,31 @@ levels:
         required: true
         result_parser: exit_zero
       - id: unit_tests
-        command: ["{python}", -m, pytest, tests/unit, -q]
-        timeout_seconds: 300
+        command:
+          - "{python}"
+          - -m
+          - pytest
+          - --cov=aiflow
+          - --cov-branch
+          - "--cov-report=xml:{run_dir}/coverage.xml"
+        timeout_seconds: 1200
         required: true
         result_parser: pytest
+        environment:
+          COVERAGE_FILE: "{run_dir}/.coverage"
       - id: regression_tests
-        command: ["{python}", -m, pytest, -q]
-        timeout_seconds: 900
+        command:
+          - "{python}"
+          - -m
+          - pytest
+          - --cov=aiflow
+          - --cov-branch
+          - "--cov-report=xml:{run_dir}/coverage.xml"
+        timeout_seconds: 1200
         required: true
         result_parser: pytest
+        environment:
+          COVERAGE_FILE: "{run_dir}/.coverage"
       - id: mypy
         command: ["{python}", -m, mypy, src]
         timeout_seconds: 300
@@ -140,15 +156,31 @@ levels:
         required: true
         result_parser: exit_zero
       - id: unit_tests
-        command: ["{python}", -m, pytest, tests/unit, -q]
-        timeout_seconds: 300
+        command:
+          - "{python}"
+          - -m
+          - pytest
+          - --cov=aiflow
+          - --cov-branch
+          - "--cov-report=xml:{run_dir}/coverage.xml"
+        timeout_seconds: 1200
         required: true
         result_parser: pytest
+        environment:
+          COVERAGE_FILE: "{run_dir}/.coverage"
       - id: regression_tests
-        command: ["{python}", -m, pytest, -q]
-        timeout_seconds: 900
+        command:
+          - "{python}"
+          - -m
+          - pytest
+          - --cov=aiflow
+          - --cov-branch
+          - "--cov-report=xml:{run_dir}/coverage.xml"
+        timeout_seconds: 1200
         required: true
         result_parser: pytest
+        environment:
+          COVERAGE_FILE: "{run_dir}/.coverage"
       - id: mypy
         command: ["{python}", -m, mypy, src]
         timeout_seconds: 300
@@ -180,15 +212,31 @@ levels:
         result_parser: diff_cover
         threshold: 90
       - id: acceptance
-        command: ["{python}", -m, pytest, tests/acceptance, -q]
-        timeout_seconds: 300
+        command:
+          - "{python}"
+          - -m
+          - pytest
+          - --cov=aiflow
+          - --cov-branch
+          - "--cov-report=xml:{run_dir}/coverage.xml"
+        timeout_seconds: 1200
         required: true
         result_parser: pytest
+        environment:
+          COVERAGE_FILE: "{run_dir}/.coverage"
       - id: integration
-        command: ["{python}", -m, pytest, tests/integration, -q]
-        timeout_seconds: 600
+        command:
+          - "{python}"
+          - -m
+          - pytest
+          - --cov=aiflow
+          - --cov-branch
+          - "--cov-report=xml:{run_dir}/coverage.xml"
+        timeout_seconds: 1200
         required: true
         result_parser: pytest
+        environment:
+          COVERAGE_FILE: "{run_dir}/.coverage"
       - id: targeted_mutation
         command: ["{python}", -m, aiflow, --help]
         timeout_seconds: 30
