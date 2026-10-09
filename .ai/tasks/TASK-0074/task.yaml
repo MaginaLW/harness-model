@@ -1,0 +1,84 @@
+allowed_scope:
+- src/aiflow/storage.py
+- src/aiflow/git_context.py
+- src/aiflow/task_service.py
+- tests/**
+- docs/operations/recovery.md
+base_commit: 9970239e814610eb85b7cde09494b9af83827d43
+branch: claude/simplify-architecture
+created_at: '2026-10-09T22:34:25Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Allocate new task IDs above every task number present on local and remote-tracking
+    branches
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/storage.py
+  - src/aiflow/git_context.py
+  - src/aiflow/task_service.py
+  - tests/**
+  - docs/operations/recovery.md
+  inputs:
+  - storage.reserve_task_id takes max(local .ai/tasks directories)+1, so branches
+    created before other branches' tasks allocate the same IDs.
+  - On 2026-10-09 aiflow start on claude/simplify-architecture allocated TASK-0063
+    while TASK-0063..0071 already existed on unmerged codex/* branches.
+  permission_requirements: []
+  planned_actions:
+  - Collect TASK numbers from .ai/tasks in commits referenced by refs/heads and refs/remotes
+    via git ls-tree.
+  - Pass those numbers to reserve_task_id so the next ID exceeds all of them.
+  - Add unit and integration tests for the merged numbering and git failure handling.
+  protections:
+    dry_run: false
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0074
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Unit tests for numbering and git collection; integration test with a higher-numbered
+    task on another branch.
+  - Full pytest with coverage >=85%, diff coverage >=90%, ruff, mypy, git diff --check;
+    AI Flow verify and gate.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 77f08fc66627be4c68315ac5d8e853f335bd6776488cb9e4f948736f16b402f5
+goal: Allocate new task IDs above every task number present on local and remote-tracking
+  branches
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-10-09T22:34:47Z'
+subject_commit: 867569c2584c07c2a15d6e63d4fb52230b5fd196
+task_id: TASK-0074
+updated_at: '2026-10-09T22:58:41Z'
+worktree_dirty: false
+worktree_dirty_paths: []

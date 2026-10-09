@@ -1,0 +1,162 @@
+{
+  "base_commit": "9970239e814610eb85b7cde09494b9af83827d43",
+  "branch": "claude/simplify-architecture",
+  "classification_input_sha256": "6f5affe5b64b323d8402d53a1bd28a483d2b9e4f376b6c7d9964a5798f50f6f6",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/storage.py",
+      "src/aiflow/git_context.py",
+      "src/aiflow/task_service.py",
+      "tests/**",
+      "docs/operations/recovery.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Allocate new task IDs above every task number present on local and remote-tracking branches",
+        "impact_scope": [
+          "src/aiflow/storage.py",
+          "src/aiflow/git_context.py",
+          "src/aiflow/task_service.py",
+          "tests/**",
+          "docs/operations/recovery.md"
+        ],
+        "planned_actions": [
+          "Collect TASK numbers from .ai/tasks in commits referenced by refs/heads and refs/remotes via git ls-tree.",
+          "Pass those numbers to reserve_task_id so the next ID exceeds all of them.",
+          "Add unit and integration tests for the merged numbering and git failure handling."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "docs/operations/recovery.md",
+        "src/aiflow/git_context.py",
+        "src/aiflow/storage.py",
+        "src/aiflow/task_service.py",
+        "tests/integration/test_start_command.py",
+        "tests/unit/test_git_context.py",
+        "tests/unit/test_storage.py"
+      ],
+      "files": [
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/git_context.py"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/storage.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_start_command.py"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_git_context.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_storage.py"
+        }
+      ],
+      "totals": {
+        "additions": 120,
+        "deletions": 5,
+        "files": 7
+      }
+    },
+    "goal": "Allocate new task IDs above every task number present on local and remote-tracking branches",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0074",
+        "--actor",
+        "claude-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "1fae829ae85d29a026499bee948d1fb4165a56b5fcf71d270f5c2b1bc91b479c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "ba563f37f195c5419abc8ac07cc6442acd4f76c934a44c531a4cdde5e68139ab",
+  "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "77f08fc66627be4c68315ac5d8e853f335bd6776488cb9e4f948736f16b402f5",
+  "subject_commit": "867569c2584c07c2a15d6e63d4fb52230b5fd196",
+  "task_id": "TASK-0074"
+}
