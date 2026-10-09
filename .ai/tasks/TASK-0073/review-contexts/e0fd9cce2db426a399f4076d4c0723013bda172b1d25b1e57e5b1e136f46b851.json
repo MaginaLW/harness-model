@@ -1,0 +1,212 @@
+{
+  "base_commit": "61eeff3f15676d2e909227acabd473c66ac3d62f",
+  "branch": "claude/simplify-architecture",
+  "classification_input_sha256": "d2ba893631852c0b7183aa05011a5a631bf7256de2452c71f5974d451fdcd638",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/document_parsing.py",
+      "src/aiflow/scenarios.py",
+      "src/aiflow/mutation_evidence.py",
+      "src/aiflow/errors.py",
+      "src/aiflow/scope.py",
+      "src/aiflow/workflow.py",
+      "src/aiflow/verification_level.py",
+      "tests/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Remove unneeded complexity from src/aiflow without changing CLI, Policy, contract, evidence or Gate behavior",
+        "impact_scope": [
+          "src/aiflow/document_parsing.py",
+          "src/aiflow/scenarios.py",
+          "src/aiflow/mutation_evidence.py",
+          "src/aiflow/errors.py",
+          "src/aiflow/scope.py",
+          "src/aiflow/workflow.py",
+          "src/aiflow/verification_level.py",
+          "tests/**"
+        ],
+        "planned_actions": [
+          "Replace the YAML dispatch guard with a minimal standard-library implementation keeping load_yaml_text semantics (independent results, original errors).",
+          "Move scenarios.py into tests and update its two importers.",
+          "Delete _task0014_production_subject and keep only the synthetic path in its tests.",
+          "Delete the caller-less definitions and reuse V0_CHECK_IDS in verification_level.",
+          "Remove tests that only exercised deleted implementation details."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "src/aiflow/document_parsing.py",
+        "src/aiflow/errors.py",
+        "src/aiflow/mutation_evidence.py",
+        "src/aiflow/scenarios.py",
+        "src/aiflow/scope.py",
+        "src/aiflow/verification_level.py",
+        "src/aiflow/workflow.py",
+        "tests/e2e/scenario_runner.py",
+        "tests/e2e/scenario_support.py",
+        "tests/integration/test_mutation_runner_contract.py",
+        "tests/integration/test_scenario_runner.py",
+        "tests/unit/test_document_parsing.py",
+        "tests/unit/test_mutation_evidence.py"
+      ],
+      "files": [
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 620,
+          "path": "src/aiflow/document_parsing.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 12,
+          "path": "src/aiflow/errors.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 55,
+          "path": "src/aiflow/mutation_evidence.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 348,
+          "path": "src/aiflow/scenarios.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 10,
+          "path": "src/aiflow/scope.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/verification_level.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 5,
+          "path": "src/aiflow/workflow.py"
+        },
+        {
+          "additions": 348,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/e2e/scenario_runner.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/e2e/scenario_support.py"
+        },
+        {
+          "additions": 26,
+          "binary": false,
+          "deletions": 77,
+          "path": "tests/integration/test_mutation_runner_contract.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_scenario_runner.py"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 766,
+          "path": "tests/unit/test_document_parsing.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 117,
+          "path": "tests/unit/test_mutation_evidence.py"
+        }
+      ],
+      "totals": {
+        "additions": 415,
+        "deletions": 2014,
+        "files": 13
+      }
+    },
+    "goal": "Remove unneeded complexity from src/aiflow without changing CLI, Policy, contract, evidence or Gate behavior",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0073",
+        "--actor",
+        "claude-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "e0fd9cce2db426a399f4076d4c0723013bda172b1d25b1e57e5b1e136f46b851",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "c349586777f6790f8af726f9c0ac0bb2226c0ac723a60acb991ff40c27a1a8d9",
+  "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "662f8e515d3da1a34f29f427b415fb9fd05287908787a87947749c49f997225d",
+  "subject_commit": "26e745177a26c200d427cd1d8d506a8b777dac74",
+  "task_id": "TASK-0073"
+}

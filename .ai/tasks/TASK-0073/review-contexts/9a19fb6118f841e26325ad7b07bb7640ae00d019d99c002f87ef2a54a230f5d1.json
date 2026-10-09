@@ -1,0 +1,53 @@
+{
+  "base_commit": "61eeff3f15676d2e909227acabd473c66ac3d62f",
+  "branch": "claude/simplify-architecture",
+  "classification_input_sha256": "d2ba893631852c0b7183aa05011a5a631bf7256de2452c71f5974d451fdcd638",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/document_parsing.py",
+      "src/aiflow/scenarios.py",
+      "src/aiflow/mutation_evidence.py",
+      "src/aiflow/errors.py",
+      "src/aiflow/scope.py",
+      "src/aiflow/workflow.py",
+      "src/aiflow/verification_level.py",
+      "tests/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Remove unneeded complexity from src/aiflow without changing CLI, Policy, contract, evidence or Gate behavior",
+        "impact_scope": [
+          "src/aiflow/document_parsing.py",
+          "src/aiflow/scenarios.py",
+          "src/aiflow/mutation_evidence.py",
+          "src/aiflow/errors.py",
+          "src/aiflow/scope.py",
+          "src/aiflow/workflow.py",
+          "src/aiflow/verification_level.py",
+          "tests/**"
+        ],
+        "planned_actions": [
+          "Replace the YAML dispatch guard with a minimal standard-library implementation keeping load_yaml_text semantics (independent results, original errors).",
+          "Move scenarios.py into tests and update its two importers.",
+          "Delete _task0014_production_subject and keep only the synthetic path in its tests.",
+          "Delete the caller-less definitions and reuse V0_CHECK_IDS in verification_level.",
+          "Remove tests that only exercised deleted implementation details."
+        ]
+      }
+    ],
+    "goal": "Remove unneeded complexity from src/aiflow without changing CLI, Policy, contract, evidence or Gate behavior",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "9a19fb6118f841e26325ad7b07bb7640ae00d019d99c002f87ef2a54a230f5d1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "662f8e515d3da1a34f29f427b415fb9fd05287908787a87947749c49f997225d",
+  "task_id": "TASK-0073"
+}
