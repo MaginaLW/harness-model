@@ -16,6 +16,7 @@ from aiflow.scope import (
     assess_scope,
     collect_verification_changed_paths,
 )
+from aiflow.storage import TASK_ID_PATTERN
 
 GIT_TIMEOUT_SECONDS = 10
 HEAD_PATTERN = re.compile(r"^[0-9a-f]{40}$")
@@ -177,6 +178,28 @@ def _dirty_paths(status: str) -> tuple[str, ...]:
             raise _error("Git status output is invalid", "GIT_STATUS_INVALID")
         paths.add(_normalize_status_path(line[3:]))
     return tuple(sorted(paths))
+
+
+def task_numbers_in_refs(repository_root: Path) -> frozenset[int]:
+    """Return TASK numbers under ``.ai/tasks`` in every local and remote-tracking branch."""
+    code = "GIT_TASK_REFS_UNAVAILABLE"
+    refs = _run_git(
+        repository_root,
+        ("for-each-ref", "--format=%(objectname)", "refs/heads", "refs/remotes"),
+        failure_code=code,
+    )
+    numbers: set[int] = set()
+    for commit in sorted(set(refs.split())):
+        listing = _run_git(
+            repository_root,
+            ("ls-tree", "--full-tree", "--name-only", commit, ".ai/tasks/"),
+            failure_code=code,
+        )
+        for line in listing.splitlines():
+            match = TASK_ID_PATTERN.fullmatch(line.rsplit("/", 1)[-1])
+            if match is not None:
+                numbers.add(int(match.group("number")))
+    return frozenset(numbers)
 
 
 def collect_git_context(path: Path) -> GitContext:

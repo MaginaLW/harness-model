@@ -13,7 +13,7 @@ import yaml
 from aiflow import task_service
 from aiflow.cli import main
 from aiflow.contracts import require_valid_contract
-from aiflow.errors import StorageError
+from aiflow.errors import AiflowError, StorageError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
@@ -271,3 +271,45 @@ def test_start_help_lists_all_creation_arguments(capsys: pytest.CaptureFixture[s
         "--recover",
     ):
         assert option in output
+
+
+def test_start_allocates_above_task_ids_on_other_branches(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    run_git(repository, "switch", "-c", "parallel")
+    task = repository / ".ai" / "tasks" / "TASK-0009"
+    task.mkdir(parents=True)
+    (task / "task.yaml").write_text("{}\n", encoding="utf-8")
+    run_git(repository, "add", ".ai/tasks")
+    run_git(
+        repository,
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit",
+        "-m",
+        "parallel task",
+    )
+    run_git(repository, "switch", "main")
+    monkeypatch.chdir(repository)
+
+    assert main(["start", "--objective", "Parallel-safe ID", "--allow", "tracked.txt"]) == 0
+    assert capsys.readouterr().out.splitlines()[0] == "TASK-0010"
+
+
+def test_start_creates_nothing_when_branch_task_ids_are_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    monkeypatch.chdir(repository)
+
+    def unavailable(_root: Path) -> frozenset[int]:
+        raise AiflowError("refs unavailable", code="GIT_TASK_REFS_UNAVAILABLE")
+
+    monkeypatch.setattr(task_service, "task_numbers_in_refs", unavailable)
+
+    assert main(["start", "--objective", "No ID", "--allow", "tracked.txt"]) != 0
+    assert not (repository / ".ai" / "tasks").exists()
+    assert "refs unavailable" in capsys.readouterr().err

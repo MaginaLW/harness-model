@@ -1,0 +1,45 @@
+{
+  "base_commit": "9970239e814610eb85b7cde09494b9af83827d43",
+  "branch": "claude/simplify-architecture",
+  "classification_input_sha256": "6f5affe5b64b323d8402d53a1bd28a483d2b9e4f376b6c7d9964a5798f50f6f6",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/storage.py",
+      "src/aiflow/git_context.py",
+      "src/aiflow/task_service.py",
+      "tests/**",
+      "docs/operations/recovery.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Allocate new task IDs above every task number present on local and remote-tracking branches",
+        "impact_scope": [
+          "src/aiflow/storage.py",
+          "src/aiflow/git_context.py",
+          "src/aiflow/task_service.py",
+          "tests/**",
+          "docs/operations/recovery.md"
+        ],
+        "planned_actions": [
+          "Collect TASK numbers from .ai/tasks in commits referenced by refs/heads and refs/remotes via git ls-tree.",
+          "Pass those numbers to reserve_task_id so the next ID exceeds all of them.",
+          "Add unit and integration tests for the merged numbering and git failure handling."
+        ]
+      }
+    ],
+    "goal": "Allocate new task IDs above every task number present on local and remote-tracking branches",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "96b992b9742cef2d291e62d90b76be63bf7595f7d1a3e947f5e7f3c28d0b7df3",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "77f08fc66627be4c68315ac5d8e853f335bd6776488cb9e4f948736f16b402f5",
+  "task_id": "TASK-0074"
+}

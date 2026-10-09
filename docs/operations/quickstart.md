@@ -240,18 +240,20 @@ python -m aiflow verify <TASK-ID> --actor <VERIFIER> --finalize
 python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "local V2 evidence reviewed"
 ```
 
-active Policy `2.3.0` 下，默认 live V2 在完整 V1 prefix 后，依次执行确定性、离线的
-`pytest tests/acceptance -q`、`pytest tests/integration -q`，以及由单独 action approval 绑定的
-targeted mutation；三项各自保留真实进程结果、日志与工具版本，independent Verifier 也必须与
+active Policy `2.4.0` 下，`unit_tests`、`regression_tests`、`coverage_xml` 以及 V2 的
+`acceptance`、`integration` 共用同一条完整覆盖率命令
+`python -m pytest --cov=aiflow --cov-branch --cov-report=xml:<run>/coverage.xml`，计划引擎将其合并为
+一次执行；各检查 ID 仍分别出现在 evidence 中，但共享同一进程结果与日志，失败不再按子集归因。
+V2 另有由单独 action approval 绑定的 targeted mutation，independent Verifier 也必须与
 Implementer 使用不同的非空 task-local actor 标签。Chapter 11 的 acceptance、integration、
 action-approved targeted mutation 与 independent-verifier 流程均已实现。
 
-V1/V2 的 `regression_tests` 和 `coverage_xml` 上限分别为 900 秒和 1200 秒；这些上限仅为
-Windows 已验证运行时留出波动余量，不改变命令、parser、required 状态、85% 总覆盖率或
-90% diff coverage 门槛。达到上限仍是验证失败，必须保留 run 并诊断原因，不能靠降级、跳过
+这次共享的完整 pytest 执行上限为 1200 秒，为 Windows 已验证运行时留出波动余量；
+它不改变 parser、required 状态或 90% diff coverage 门槛。85% 总覆盖率目前只由 CI
+bootstrap 步骤强制。达到上限仍是验证失败，必须保留 run 并诊断原因，不能靠降级、跳过
 coverage 或无理由重复重试进入 Gate。
 
-使用 `--check acceptance`、`--check integration` 或其他局部检查时，只执行所选检查，所得
+使用 `--check` 选择任一 pytest 检查（如 `acceptance`、`integration`）时，仍运行完整覆盖率套件；选择其他检查只运行所选检查。所得
 evidence 是 partial/provisional，不能形成 final evidence 或进入 Gate。`--finalize`、code
 approval 和 CI 输出也不能把 missing、stale、tampered、non-killed 或 unverified 的当前 V2
 事实变成 passed。CI evidence 只提供 Gate attestation；它不替代当前本地 evidence、

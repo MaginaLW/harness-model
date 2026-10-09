@@ -32,7 +32,7 @@ def test_repeated_policy_load_reads_equal_size_content_with_restored_mtime(tmp_p
     path = directory / "routing.yaml"
     before = path.stat()
     original = path.read_text(encoding="utf-8")
-    changed = original.replace("2.3.0", "2.3.1")
+    changed = original.replace("2.4.0", "2.4.1")
     assert len(changed) == len(original) and changed != original
     path.write_text(changed, encoding="utf-8")
     os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
@@ -109,14 +109,14 @@ def test_valid_policy_has_complete_stable_bundle() -> None:
     bundle = load_policy_bundle(PROJECT_ROOT)
 
     assert set(bundle.documents) == set(POLICY_FILES)
-    assert bundle.policy_version == "2.3.0"
+    assert bundle.policy_version == "2.4.0"
     assert len(bundle.sha256) == 64
     assert bundle.sha256 == load_policy_bundle(PROJECT_ROOT).sha256
 
 
 def test_active_policy_binds_exact_verification_time_budgets() -> None:
     documents = v2_documents()
-    assert {document["policy_version"] for document in documents.values()} == {"2.3.0"}
+    assert {document["policy_version"] for document in documents.values()} == {"2.4.0"}
 
     levels = documents["verification-levels.yaml"]["levels"]
     assert isinstance(levels, list)
@@ -128,15 +128,7 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
         assert isinstance(raw_checks, list)
         by_id = {item["id"]: item for item in raw_checks if isinstance(item, dict)}
 
-        assert by_id["regression_tests"] == {
-            "id": "regression_tests",
-            "command": ["{python}", "-m", "pytest", "-q"],
-            "timeout_seconds": 900,
-            "required": True,
-            "result_parser": "pytest",
-        }
-        assert by_id["coverage_xml"] == {
-            "id": "coverage_xml",
+        full_suite = {
             "command": [
                 "{python}",
                 "-m",
@@ -147,9 +139,14 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
             ],
             "timeout_seconds": 1200,
             "required": True,
-            "result_parser": "coverage_xml",
             "environment": {"COVERAGE_FILE": "{run_dir}/.coverage"},
         }
+        pytest_ids = ["unit_tests", "regression_tests", "coverage_xml"]
+        if level_id == "V2":
+            pytest_ids += ["acceptance", "integration"]
+        for check_id in pytest_ids:
+            parser = "coverage_xml" if check_id == "coverage_xml" else "pytest"
+            assert by_id[check_id] == {"id": check_id, **full_suite, "result_parser": parser}
         assert by_id["diff_coverage"]["command"][-2:] == ["--fail-under", "90"]
         assert by_id["diff_coverage"]["threshold"] == 90
 
@@ -183,7 +180,7 @@ def test_v1_must_preserve_the_semantic_v0_prefix() -> None:
 
 def test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras() -> None:
     documents = v2_documents()
-    assert _validate_cross_file(documents) == "2.3.0"
+    assert _validate_cross_file(documents) == "2.4.0"
 
     levels = documents["verification-levels.yaml"]["levels"]
     assert isinstance(levels, list)

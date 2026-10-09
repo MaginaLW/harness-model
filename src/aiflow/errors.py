@@ -50,15 +50,3 @@ class PolicyError(AiflowError):
     """Policy loading or evaluation failed."""
 
     default_code = "POLICY_ERROR"
-
-
-class VerificationError(AiflowError):
-    """Verification could not produce a valid result."""
-
-    default_code = "VERIFICATION_ERROR"
-
-
-class GateError(AiflowError):
-    """A required task gate is not satisfied."""
-
-    default_code = "GATE_ERROR"

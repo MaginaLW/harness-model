@@ -87,17 +87,13 @@ def test_v1_contains_v0_categories_and_coverage_environment(tmp_path: Path) -> N
 
 
 @pytest.mark.parametrize("level", ["V1", "V2"])
-def test_parsed_regression_and_coverage_budgets_are_exact(level: str, tmp_path: Path) -> None:
+def test_pytest_checks_share_one_full_coverage_execution(level: str, tmp_path: Path) -> None:
     parsed = plan(level, tmp_path)
     by_id = {check.check_id: check for check in parsed.checks}
-    regression = by_id["regression_tests"]
-    coverage = by_id["coverage_xml"]
-
-    assert regression.argv == (sys.executable, "-m", "pytest", "-q")
-    assert regression.timeout_seconds == 900
-    assert regression.required is True
-    assert regression.result_parser == "pytest"
-    assert coverage.argv == (
+    pytest_ids = ("unit_tests", "regression_tests", "coverage_xml")
+    if level == "V2":
+        pytest_ids += ("acceptance", "integration")
+    full_suite = (
         sys.executable,
         "-m",
         "pytest",
@@ -105,10 +101,18 @@ def test_parsed_regression_and_coverage_budgets_are_exact(level: str, tmp_path: 
         "--cov-branch",
         f"--cov-report=xml:{(parsed.run_dir / 'coverage.xml').as_posix()}",
     )
-    assert coverage.timeout_seconds == 1200
-    assert coverage.required is True
-    assert coverage.result_parser == "coverage_xml"
-    assert coverage.environment == {"COVERAGE_FILE": (parsed.run_dir / ".coverage").as_posix()}
+
+    for check_id in pytest_ids:
+        check = by_id[check_id]
+        assert check.argv == full_suite
+        assert check.timeout_seconds == 1200
+        assert check.required is True
+        assert check.environment == {"COVERAGE_FILE": (parsed.run_dir / ".coverage").as_posix()}
+        assert check.result_parser == ("coverage_xml" if check_id == "coverage_xml" else "pytest")
+    pytest_executions = [item for item in parsed.executions if "pytest" in item.argv]
+    assert len(pytest_executions) == 1
+    assert pytest_executions[0].check_ids == pytest_ids
+    assert pytest_executions[0].timeout_seconds == 1200
     assert by_id["diff_coverage"].threshold == 90
 
 
@@ -123,41 +127,113 @@ def test_v2_has_complete_v1_prefix_and_fixed_extra_order(tmp_path: Path) -> None
     assert all(check.required for check in parsed.checks[-4:])
 
 
-def test_v2_acceptance_and_integration_use_exact_offline_pytest_commands(tmp_path: Path) -> None:
-    parsed = parse_verification_plan(
-        v2_bundle(), context(tmp_path), level="V2", tool_available=lambda _argv: True
-    )
-    by_id = {check.check_id: check for check in parsed.checks}
-
-    assert by_id["acceptance"].argv == (sys.executable, "-m", "pytest", "tests/acceptance", "-q")
-    assert by_id["acceptance"].result_parser == "pytest"
-    assert by_id["integration"].argv == (sys.executable, "-m", "pytest", "tests/integration", "-q")
-    assert by_id["integration"].result_parser == "pytest"
-
-
 @pytest.mark.parametrize(
-    ("check_id", "command", "parser"),
+    ("level", "check_id", "command", "parser"),
     [
-        ("acceptance", ["{python}", "-m", "aiflow", "--help"], "pytest"),
-        ("acceptance", ["{python}", "-m", "pytest", "tests/unit", "-q"], "pytest"),
-        ("integration", ["{python}", "-m", "pytest", "tests", "-q"], "pytest"),
-        ("integration", ["{python}", "-m", "pytest", "tests/integration", "-q"], "exit_zero"),
+        ("V2", "acceptance", ["{python}", "-m", "aiflow", "--help"], "pytest"),
+        ("V2", "acceptance", ["{python}", "-m", "pytest", "tests/acceptance", "-q"], "pytest"),
+        ("V2", "integration", ["{python}", "-m", "pytest", "tests/integration", "-q"], "pytest"),
+        ("V2", "integration", None, "exit_zero"),
+        ("V1", "unit_tests", ["{python}", "-m", "pytest", "tests/unit", "-q"], "pytest"),
+        ("V1", "regression_tests", ["{python}", "-m", "pytest", "-q"], "pytest"),
     ],
 )
-def test_v2_acceptance_and_integration_reject_non_exact_commands(
-    tmp_path: Path, check_id: str, command: list[str], parser: str
+def test_pytest_checks_reject_non_full_suite_commands(
+    tmp_path: Path, level: str, check_id: str, command: list[str] | None, parser: str
 ) -> None:
     bundle = v2_bundle()
-    check = next(item for item in checks(bundle, "V2") if item["id"] == check_id)
-    check["command"] = command
+    check = next(item for item in checks(bundle, level) if item["id"] == check_id)
+    if command is not None:
+        check["command"] = command
     check["result_parser"] = parser
+
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level=level, tool_available=lambda _argv: True
+        )
+
+    assert caught.value.code == "VERIFICATION_COMMAND_INVALID"
+
+
+@pytest.mark.parametrize("selector", ["tests/unit", "-k", "--ignore=tests/acceptance", "-x"])
+def test_shared_subset_selector_is_rejected_even_when_all_pytest_checks_agree(
+    tmp_path: Path, selector: str
+) -> None:
+    bundle = v2_bundle()
+    for level in ("V1", "V2"):
+        for item in checks(bundle, level):
+            if item["id"] in {
+                "unit_tests",
+                "regression_tests",
+                "coverage_xml",
+                "acceptance",
+                "integration",
+            }:
+                item["command"] = [*item["command"], selector]
 
     with pytest.raises(ContractError) as caught:
         parse_verification_plan(
             bundle, context(tmp_path), level="V2", tool_available=lambda _argv: True
         )
 
-    assert caught.value.code == "VERIFICATION_COMMAND_INVALID"
+    assert caught.value.code in {
+        "VERIFICATION_COMMAND_INVALID",
+        "VERIFICATION_COVERAGE_CONFIG_INVALID",
+    }
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("timeout_seconds", 600),
+        ("environment", {"COVERAGE_FILE": "{run_dir}/other.coverage"}),
+        (
+            "command",
+            [
+                "diff-cover",
+                "-m",
+                "pytest",
+                "--cov=aiflow",
+                "--cov-branch",
+                "--cov-report=xml:{run_dir}/coverage.xml",
+            ],
+        ),
+    ],
+)
+def test_pytest_checks_pin_one_execution_shape_even_when_all_agree(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    bundle = v2_bundle()
+    for level in ("V1", "V2"):
+        for item in checks(bundle, level):
+            if item["id"] in {
+                "unit_tests",
+                "regression_tests",
+                "coverage_xml",
+                "acceptance",
+                "integration",
+            }:
+                item[field] = deepcopy(value)
+
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level="V2", tool_available=lambda _argv: True
+        )
+
+    assert caught.value.code in {
+        "VERIFICATION_COMMAND_INVALID",
+        "VERIFICATION_COVERAGE_CONFIG_INVALID",
+    }
+
+
+def test_pyproject_collects_the_whole_tests_tree() -> None:
+    import tomllib
+
+    options = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["tool"][
+        "pytest"
+    ]["ini_options"]
+    assert options["testpaths"] == ["tests"]
+    assert options["addopts"] == "-ra"
 
 
 def test_v2_rejects_prefix_tampering_missing_extra_and_optional_extra(tmp_path: Path) -> None:
@@ -199,24 +275,6 @@ def test_unknown_level_is_rejected_before_plan_lookup(tmp_path: Path) -> None:
     with pytest.raises(ContractError) as required_error:
         _required_ids("V3")
     assert required_error.value.code == "VERIFICATION_POLICY_INVALID"
-
-
-def test_repeated_argv_keeps_distinct_category_mapping(tmp_path: Path) -> None:
-    bundle = bundle_copy()
-    unit = next(item for item in checks(bundle, "V1") if item["id"] == "unit_tests")
-    regression = next(item for item in checks(bundle, "V1") if item["id"] == "regression_tests")
-    regression["command"] = deepcopy(unit["command"])
-    parsed = parse_verification_plan(
-        bundle, context(tmp_path), level="V1", tool_available=lambda _argv: True
-    )
-    assert len(parsed.checks) == len({check.check_id for check in parsed.checks})
-    by_id = {check.check_id: check for check in parsed.checks}
-    assert by_id["unit_tests"].argv == by_id["regression_tests"].argv
-    grouped = next(
-        execution for execution in parsed.executions if "unit_tests" in execution.check_ids
-    )
-    assert grouped.check_ids == ("unit_tests", "regression_tests")
-    assert len(parsed.executions) == len(parsed.checks) - 1
 
 
 def test_missing_tool_blocks_required_check(tmp_path: Path) -> None:
@@ -545,7 +603,7 @@ def test_explicit_pytest_root_changes_only_native_pytest_argv(tmp_path: Path, le
             assert execution == original
         for check_id in execution.check_ids:
             assert by_id[check_id].argv == execution.argv
-    assert len(temporary.leaves) == eligible == (3 if level == "V1" else 5)
+    assert len(temporary.leaves) == eligible == 1
     for check in parsed.checks:
         assert replace(check, argv=before[check.check_id].argv) == before[check.check_id]
     assert parsed.run_dir == baseline.run_dir
@@ -599,27 +657,23 @@ def test_v0_validates_explicit_pytest_root_without_allocating_layout(tmp_path: P
 def test_deduplicated_pytest_checks_share_one_owned_leaf(tmp_path: Path) -> None:
     parent = tmp_path / "pytest-parent"
     parent.mkdir()
-    bundle = bundle_copy()
-    unit = next(item for item in checks(bundle, "V1") if item["id"] == "unit_tests")
-    regression = next(item for item in checks(bundle, "V1") if item["id"] == "regression_tests")
-    regression["command"] = deepcopy(unit["command"])
     parsed = parse_verification_plan(
-        bundle,
+        bundle_copy(),
         context(tmp_path, pytest_temp_root=parent),
         level="V1",
         tool_available=lambda _argv: True,
     )
     grouped = next(item for item in parsed.executions if "unit_tests" in item.check_ids)
-    assert grouped.check_ids == ("unit_tests", "regression_tests")
+    assert grouped.check_ids == ("unit_tests", "regression_tests", "coverage_xml")
     assert parsed.pytest_temporary is not None
-    assert len(parsed.pytest_temporary.leaves) == 2
+    assert len(parsed.pytest_temporary.leaves) == 1
     by_id = {item.check_id: item for item in parsed.checks}
     assert by_id["unit_tests"].argv == by_id["regression_tests"].argv == grouped.argv
-    assert grouped.timeout_seconds == 900
+    assert grouped.timeout_seconds == 1200
     selected = verification_service._selected_plan(parsed, ("unit_tests",))
     assert selected.pytest_temporary is parsed.pytest_temporary
     assert selected.executions[0].argv == grouped.argv
-    assert selected.executions[0].timeout_seconds == 300
+    assert selected.executions[0].timeout_seconds == 1200
     empty = verification_service._empty_plan(parsed)
     assert empty.pytest_temporary is parsed.pytest_temporary
     assert empty.executions == ()

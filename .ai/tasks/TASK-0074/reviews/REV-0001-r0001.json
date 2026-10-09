@@ -1,0 +1,79 @@
+{
+  "context_sha256": "96b992b9742cef2d291e62d90b76be63bf7595f7d1a3e947f5e7f3c28d0b7df3",
+  "findings": [
+    {
+      "evidence_refs": [
+        "git ls-tree --name-only HEAD .ai/tasks/"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 65,
+        "path": "src/aiflow/git_context.py"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Use git ls-tree --full-tree --name-only <commit> .ai/tasks/ (trailing slash), take basenames and match TASK pattern exactly"
+    },
+    {
+      "evidence_refs": [
+        "46 refs / 36 unique commits measured"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 20,
+        "path": "src/aiflow/git_context.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "De-duplicate commit OIDs before one ls-tree per commit; latency grows with refs"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0074/spec.md"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 96,
+        "path": "src/aiflow/storage.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Specify the git failure code and test that no task directory is created when collection fails"
+    },
+    {
+      "evidence_refs": [
+        "spec non-goal: no network"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 1,
+        "path": ".ai/tasks/TASK-0074/spec.md"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Treeless partial clones may lazily fetch during ls-tree; consider GIT_NO_LAZY_FETCH=1"
+    },
+    {
+      "evidence_refs": [
+        "_run_git returns stripped stdout"
+      ],
+      "finding_id": "RF-005",
+      "location": {
+        "line": 100,
+        "path": "tests/integration/test_start_command.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Test empty ref sets and refs without .ai/tasks as non-errors"
+    }
+  ],
+  "outcome": "APPROVE_WITH_CONDITIONS",
+  "recorded_at": "2026-10-10T01:10:00Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "claude-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Design is correct and scoped: git collection stays in git_context/task_service and reserve_task_id only takes extra numbers as a floor, keeping the mkdir retry loop. Failing closed is safe because start already requires a git context, start --recover never reserves IDs, and repositories without other refs return empty output. Per-commit ls-tree costs about 1.25 s for 36 unique commits here; acceptable. Conditions for implementation: exact ls-tree form with trailing slash and --full-tree, and a specified git failure code with a test that no task directory is created on failure.",
+  "task_id": "TASK-0074"
+}

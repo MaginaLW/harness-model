@@ -51,8 +51,10 @@ def test_v2_policy_exposes_real_offline_acceptance_and_integration(tmp_path: Pat
     by_id = {check.check_id: check for check in plan.checks}
 
     assert tuple(check.check_id for check in plan.checks) == V1_CHECK_IDS + V2_EXTRA_CHECK_IDS
-    assert by_id["acceptance"].argv == (sys.executable, "-m", "pytest", "tests/acceptance", "-q")
-    assert by_id["integration"].argv == (sys.executable, "-m", "pytest", "tests/integration", "-q")
+    assert by_id["acceptance"].argv == by_id["integration"].argv == by_id["coverage_xml"].argv
+    assert by_id["acceptance"].argv[1:4] == ("-m", "pytest", "--cov=aiflow")
+    shared = [item for item in plan.executions if "acceptance" in item.check_ids]
+    assert len(shared) == 1 and "integration" in shared[0].check_ids
 
 
 def test_selected_acceptance_never_schedules_mutation(tmp_path: Path) -> None:

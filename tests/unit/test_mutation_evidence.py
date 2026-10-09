@@ -1005,79 +1005,6 @@ def test_small_helpers_fail_closed_without_runner(tmp_path: Path) -> None:
     assert caught.value.code == "MUTATION_EVIDENCE_WRITE_FAILED"
 
 
-@pytest.mark.parametrize("state", ["IMPLEMENTING", "VERIFYING"])
-def test_selector_allows_current_focused_and_v1_states(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, state: str
-) -> None:
-    tasks = tmp_path / ".ai/tasks"
-    (tasks / "TASK-0014").mkdir(parents=True)
-    record = SimpleNamespace(task={"current_state": state, "subject_commit": "a" * 40})
-    monkeypatch.setattr(evidence, "task_root", lambda _: tasks)
-    monkeypatch.setattr(evidence, "read_task_record_strict", lambda *_: record)
-    monkeypatch.setattr(evidence, "_validate_bindings", lambda *_: ({}, {}, "b" * 64))
-    assert evidence._task0014_production_subject(tmp_path) == "a" * 40
-
-
-def test_selector_inactive_never_calls_runner(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    tasks = tmp_path / ".ai/tasks"
-    (tasks / "TASK-0014").mkdir(parents=True)
-    (tasks / "TASK-10000").mkdir()
-
-    class Record:
-        task = {"current_state": "IMPLEMENTING", "subject_commit": "a" * 40}
-
-    calls = {"runner": 0}
-    monkeypatch.setattr(evidence, "task_root", lambda _: tasks)
-    monkeypatch.setattr(evidence, "read_task_record_strict", lambda *_: Record())
-    monkeypatch.setattr(
-        evidence, "run_targeted_mutations", lambda *_: calls.__setitem__("runner", 1)
-    )
-    assert evidence._task0014_production_subject(tmp_path) is None
-    assert calls == {"runner": 0}
-
-
-def test_selector_ignores_historical_nonterminal_tasks_on_old_subjects(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    tasks = tmp_path / ".ai/tasks"
-    for task_id in ("TASK-0008", "TASK-0009", "TASK-0014"):
-        (tasks / task_id).mkdir(parents=True)
-    current_binding = {
-        "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
-        "branch": "main",
-    }
-    records = {
-        "TASK-0008": SimpleNamespace(
-            task={
-                **current_binding,
-                "current_state": "BLOCKED",
-                "subject_commit": "8" * 40,
-            }
-        ),
-        "TASK-0009": SimpleNamespace(
-            task={
-                **current_binding,
-                "current_state": "APPROVED_FOR_MERGE",
-                "subject_commit": "9" * 40,
-            }
-        ),
-        "TASK-0014": SimpleNamespace(
-            task={
-                **current_binding,
-                "current_state": "IMPLEMENTING",
-                "subject_commit": "a" * 40,
-            }
-        ),
-    }
-    monkeypatch.setattr(evidence, "task_root", lambda _: tasks)
-    monkeypatch.setattr(evidence, "read_task_record_strict", lambda _root, name: records[name])
-    monkeypatch.setattr(evidence, "_validate_bindings", lambda *_: ({}, {}, "b" * 64))
-
-    assert evidence._task0014_production_subject(tmp_path) == "a" * 40
-
-
 @pytest.mark.parametrize(
     ("subject", "assessment", "expected"),
     [
@@ -1288,50 +1215,6 @@ def test_load_manifest_and_contract_key_errors_are_normalized(
     with pytest.raises(ContractError) as caught:
         evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     assert caught.value.code == "MUTATION_EVIDENCE_SEMANTICS_INVALID"
-
-
-def test_selector_fail_closed_inventory_and_state_variants(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(
-        evidence,
-        "task_root",
-        lambda _: SimpleNamespace(iterdir=lambda: (_ for _ in ()).throw(OSError("blocked"))),
-    )
-    with pytest.raises(ContractError) as caught:
-        evidence._task0014_production_subject(tmp_path)
-    assert caught.value.code == "MUTATION_EVIDENCE_BINDING_STALE"
-
-    tasks = tmp_path / ".ai/tasks"
-    (tasks / "TASK-0014").mkdir(parents=True)
-    (tasks / "TASK-10000").mkdir()
-    (tasks / "not-a-task").mkdir()
-    monkeypatch.setattr(evidence, "task_root", lambda _: tasks)
-    current = SimpleNamespace(task={"current_state": "CLOSED", "subject_commit": "a" * 40})
-    merged = SimpleNamespace(task={"current_state": "MERGED"})
-    monkeypatch.setattr(
-        evidence,
-        "read_task_record_strict",
-        lambda _root, name: current if name == "TASK-0014" else merged,
-    )
-    assert evidence._task0014_production_subject(tmp_path) is None
-
-    current.task = {"current_state": "IMPLEMENTING", "subject_commit": None}
-    with pytest.raises(ContractError) as caught:
-        evidence._task0014_production_subject(tmp_path)
-    assert caught.value.code == "MUTATION_EVIDENCE_SUBJECT_INVALID"
-
-    current.task = {"current_state": "IMPLEMENTING", "subject_commit": "a" * 40}
-    monkeypatch.setattr(
-        evidence,
-        "read_task_record_strict",
-        lambda _root, name: (
-            current
-            if name == "TASK-0014"
-            else (_ for _ in ()).throw(AiflowError("another task is malformed"))
-        ),
-    )
-    assert evidence._task0014_production_subject(tmp_path) is None
 
 
 def test_loader_internal_semantics_cover_reordered_and_uncovered_records(

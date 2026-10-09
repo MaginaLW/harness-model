@@ -1,0 +1,101 @@
+allowed_scope:
+- src/aiflow/document_parsing.py
+- src/aiflow/scenarios.py
+- src/aiflow/mutation_evidence.py
+- src/aiflow/errors.py
+- src/aiflow/scope.py
+- src/aiflow/workflow.py
+- src/aiflow/verification_level.py
+- tests/**
+base_commit: 61eeff3f15676d2e909227acabd473c66ac3d62f
+branch: claude/simplify-architecture
+created_at: '2026-10-09T15:30:21Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Remove unneeded complexity from src/aiflow without changing CLI, Policy, contract,
+    evidence or Gate behavior
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/document_parsing.py
+  - src/aiflow/scenarios.py
+  - src/aiflow/mutation_evidence.py
+  - src/aiflow/errors.py
+  - src/aiflow/scope.py
+  - src/aiflow/workflow.py
+  - src/aiflow/verification_level.py
+  - tests/**
+  inputs:
+  - document_parsing.py is 646 lines; about 460 lines (_DispatchGuard, bytecode/dispatch
+    qualification, graph walk) only guard a 64-entry cache of yaml.safe_load results;
+    task_service already calls yaml.safe_load directly.
+  - scenarios.py (348 lines) is imported only by tests/e2e/scenario_support.py and
+    tests/integration/test_scenario_runner.py and imports aiflow.cli, forming a cycle
+    inside the product package.
+  - mutation_evidence._task0014_production_subject selects a production mode only
+    while historical TASK-0014 is active; TASK-0014 is MERGED and only tests call
+    it.
+  - errors.VerificationError, errors.GateError, scope._nul_paths and workflow.check_preconditions
+    have no callers.
+  - verification_level._V0_REQUIRED_CHECKS duplicates verification.V0_CHECK_IDS.
+  permission_requirements: []
+  planned_actions:
+  - Replace the YAML dispatch guard with a minimal standard-library implementation
+    keeping load_yaml_text semantics (independent results, original errors).
+  - Move scenarios.py into tests and update its two importers.
+  - Delete _task0014_production_subject and keep only the synthetic path in its tests.
+  - Delete the caller-less definitions and reuse V0_CHECK_IDS in verification_level.
+  - Remove tests that only exercised deleted implementation details.
+  protections:
+    dry_run: false
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0073
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - aiflow --help subcommand set unchanged; git grep confirms removed symbols are
+    gone.
+  - Timing of YAML-heavy tests before and after.
+  - Full pytest with coverage >=85%, diff coverage >=90%, ruff check/format, mypy,
+    git diff --check; AI Flow verify and gate.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 662f8e515d3da1a34f29f427b415fb9fd05287908787a87947749c49f997225d
+goal: Remove unneeded complexity from src/aiflow without changing CLI, Policy, contract,
+  evidence or Gate behavior
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-10-09T15:36:15Z'
+subject_commit: 26e745177a26c200d427cd1d8d506a8b777dac74
+task_id: TASK-0073
+updated_at: '2026-10-09T22:12:24Z'
+worktree_dirty: false
+worktree_dirty_paths: []

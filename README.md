@@ -2,17 +2,15 @@
 
 一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
-> 当前治理模式：仓库维护模式，task-free 例外已启用。日常变更先按 [AGENTS.md](AGENTS.md) 的升级清单判断是否需要 task；清单之外适用例外的工作由 Agent 连续完成并通过 CI。维护模式只解除任务账本的强制性：CI 质量门禁的每一项检查与阈值、`main` 分支保护、以及高风险动作必须单独获批的要求都不放松，AI Flow CLI 保持完全可用。进入维护模式不授权任何外部或破坏性动作；恢复强制模式须由项目所有者明确决定。
+> 当前治理模式：仓库维护模式，task-free 例外已启用。是否需要 task、哪些要求不放松，均以 [AGENTS.md](AGENTS.md) 为唯一权威。
 
-项目同时追求可靠交付和减少人工介入。章节完成、测试通过证明的是已实现能力及其检查结果，尚不能证明真实任务中的人工时间或缺陷率下降。日常使用从[低干预工作方式](docs/operations/low-intervention.md)开始；用只读开销报告复算账本指标，区分机器步骤、必要决定与重复请求。
+项目同时追求可靠交付和减少人工介入。章节完成、测试通过证明的是已实现能力及其检查结果，尚不能证明真实任务中的人工时间或缺陷率下降。日常使用从[低干预工作方式](docs/operations/low-intervention.md)开始。
 
-后续工作排序以[多层审核与置信度反馈分阶段计划](docs/superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)为入口：S0–S5 按依赖推进核心能力，阶段内研究、模块实现和独立审核并行；现有失败恢复与真实导入保留独立维护线。该计划提出低风险反馈与高风险 V3 的路线拆分，现行准入与权限边界保持。
+准备应用到 ZCode、Codex 或其他项目时，从[接入指南](docs/operations/adoption.md)开始：先合并轻量规则、沿用目标质量检查，再决定是否需要完整引擎。当前不提供外仓一键安装，不要直接复制本仓 `.ai` 账本、身份、维护标记或模型配置。
 
-准备应用到 ZCode、Codex 或其他项目时，从[接入指南](docs/operations/adoption.md)开始：
-先合并轻量规则、沿用目标质量检查，再决定是否需要完整引擎。当前不提供外仓一键安装，
-不要直接复制本仓 `.ai` 账本、身份、维护标记或模型配置。
+## 当前状态
 
-> 当前状态：阶段一 MVP `0.1.0` 历史本地发布基线与阶段二 Chapters 8–13 均已完成，当前源码包收口版本为 `0.2.0`；13/13 chapters、77/77 tasks、408/408 steps 和 24/24 exit checks 已投影通过，active Policy 为 `2.3.0`。V1/V2 的完整回归和 coverage XML 检查分别使用 900 秒和 1200 秒上限，未减少检查或降低覆盖率门槛。阶段二交付结构化双阶段审核、可执行 V2、独立 verifier、acceptance/integration/targeted mutation、运行期 observation、受限 Hook/CLI/CI parity 和真实 REVIEW 自举证据。历史 evidence/approval 仍严格绑定原 task、subject、spec、Policy 与 attestation；当前 TASK-0028 正确显示 `merge_readiness: reverification_required`，阶段完成不把它伪写为当前 merge-ready。阶段三保持 `not_started` 且进入门未满足；系统仍不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。
+阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 均已完成，当前源码包版本为 `0.2.0`，active Policy 为 `2.4.0`（V1/V2 只运行一次完整覆盖率 pytest）。阶段三保持 `not_started` 且进入门未满足；系统不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。当前状态、未完成项与待决定事项只在[维护收尾与待办](docs/operations/maintenance-status.md)维护。`docs/superpowers/state/*.yaml` 是阶段二于 2026-08-30 完成时冻结的历史投影，不是当前事实来源。
 
 ## 阶段一目标
 
@@ -26,93 +24,34 @@
 
 | 文档 | 用途 |
 |---|---|
-| [分流与模型路由设计 V0.1](docs/architecture/AI代码协同分流与模型路由设计_V0.1.md) | 概念模型、分流原则和长期模型路由方向 |
-| [实施总体规划 V0.2](docs/architecture/AI代码协同系统实施总体规划_V0.2.md) | 总体架构、阶段路线和验收原则 |
-| [阶段一 MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) | 已确认的阶段一技术与治理设计 |
-| [阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md) | 7 章、44 个任务及逐步验证清单 |
-| [阶段二设计](docs/superpowers/specs/2026-08-22-phase-02-review-verification-design.md) | 双阶段审核、V2、独立验证、变异与 Hooks 的边界和兼容性设计 |
-| [阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md) | Chapter 8–13 的进入条件、任务顺序、验证与退出条件 |
-| [阶段二验收矩阵](docs/implementation/phase-02-acceptance-matrix.md) | 六项阶段输入到实现、测试、证据、重放命令和限制的映射 |
-| [阶段二证据索引](docs/implementation/phase-02-evidence-index.md) | REVIEW/V2/CI/Gate 历史证据与当前回归基线的可重放边界 |
-| [阶段二验收报告](docs/implementation/phase-02-acceptance-report.md) | Chapter 13 exits、整库质量结果、Gate 与残余限制 |
-| [阶段三进入输入](docs/implementation/phase-03-entry-inputs.md) | 阶段二结束后的可审计输入和仍未满足的阶段三进入门；不构成授权 |
-| [审批开销治理与未完成任务收敛实施目录](docs/superpowers/plans/2026-09-03-approval-overhead-and-open-task-consolidation-directory.md) | 历史诊断与处置记录：A2 仅余 TASK-0028，B0–B2 停止、B3 已解决、B4 暂缓；不是待逐章启动的实施队列 |
-| [维护收尾与待办](docs/operations/maintenance-status.md) | 已完成项、当前交付、保留的历史任务与后续工程缺口；附可复核基线和下一步 |
-| [自托管执行基础设施](docs/operations/self-hosted-runners.md) | 私有 runner 接入与运维、只读健康检查、可选回执契约及任务 02 验收进度 |
-| [ZCode 试点收尾与跨 Agent 协作执行目录](docs/superpowers/plans/2026-09-12-zcode-review-fix-execution.md) | 2026-09-12 核查：现有试点补证、最小交接设计、真实双工具闭环与条件性内核建设 |
-| [2026-09-12 计划收尾与后续顺序](docs/superpowers/plans/2026-09-12-plan-closeout-and-next-steps.md) | 最小 runner 试点已收口；下一步同仓 Windows/Linux CI、正式采用，协作线复用 E1–E5 |
-| [文档归档](docs/archive/README.md) | 章节 1–7 逐任务执行文档的归档位置、归档原则与原路径映射表 |
-| [资源感知多智能体调度设计](docs/superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) | “编排顾问 + 确定性控制面”、整机资源租约、背压与恢复设计 |
-| [本机过载防护预进入蓝图](docs/superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) | 阶段四进入门满足后编写单机控制面执行计划的设计输入，当前未授权实施 |
-| [自适应多智能体编排预进入蓝图](docs/superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md) | 安全控制面通过后编写编排顾问与真实 adapter 执行计划的设计输入，当前未授权实施 |
-| [Agent 规则](AGENTS.md) | 所有 Agent 的简短常驻约束 |
-| [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口；共同治理规则以 Agent 规则为准 |
+| [Agent 规则](AGENTS.md) | 所有 Agent 的唯一共同权威与维护模式升级清单 |
+| [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
-| [接入现有 AI 工作流](docs/operations/adoption.md) | ZCode 首批试点、只读仓库盘点、可合并规则和分批推广；区分轻量接入与完整引擎缺口 |
-| [ZCode 外仓试点反馈](docs/operations/zcode-adoption-feedback.md) | ai-agent-dotfiles 固定任务窗口的五项工程反馈、证据限制及已纳入的接入方法 |
-| [按需反馈与回灌](docs/operations/feedback-loop.md) | 已登记试点仅有实质问题或用户明确请求时执行；无问题无请求则 no-op，不因普通完成、版本差异或正常连续回执派生新提交验证 |
-| [低干预工作方式](docs/operations/low-intervention.md) | Agent 连续推进、必要人工决定的边界与可重跑的审批开销统计 |
-| [模型选择与代理职责](docs/operations/model-selection.md) | UI 与运行时决定型号，职责不绑定模型代际；保留历史型号证据 |
-| [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence、证据保留与精确清理边界 |
-| [阶段一验收报告](docs/implementation/phase-01-acceptance-report.md) | 十二项验收、四试点、覆盖率、限制和风险接受 |
-| [Chapter 8 追踪](docs/implementation/chapter-08-structured-review.md) | 结构化设计/实现审核的任务状态和兼容性护栏 |
-| [Chapter 9 追踪](docs/implementation/chapter-09-v2-policy-contracts.md) | V2 Policy、版本化 contracts、分类规则与兼容性边界 |
-| [Chapter 10 追踪](docs/implementation/chapter-10-independent-verifier-v2-evidence-gate.md) | 独立 Verifier、两阶段 V2 evidence/Gate 的退出证据与 live V2 限制 |
-| [Chapter 11 追踪](docs/implementation/chapter-11-acceptance-integration-mutation.md) | 已完成的 acceptance/integration、targeted mutation、live V2 与退出证据边界 |
-| [Chapter 12 状态](docs/superpowers/state/chapters/chapter-12.yaml) | 运行期升级观测与 Hooks 已完成 |
-| [Chapter 13 状态](docs/superpowers/state/chapters/chapter-13.yaml) | 自举 REVIEW 试点、负向 E2E、验收索引和阶段二基线已完成 |
+| [接入现有 AI 工作流](docs/operations/adoption.md) | 只读盘点、可合并规则和分批推广；区分轻量接入与完整引擎 |
+| [低干预工作方式](docs/operations/low-intervention.md) | Agent 连续推进与必要人工决定的边界 |
+| [Hooks](docs/operations/hooks.md) | 本地 wrapper、`aiflow observe` 协议与平台证据边界 |
+| [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence 与精确清理边界 |
+| [模型选择与代理职责](docs/operations/model-selection.md) | UI 与运行时决定型号，职责不绑定模型代际 |
+| [按需反馈与回灌](docs/operations/feedback-loop.md) | 已登记试点仅在有实质问题或明确请求时执行 |
+| [维护收尾与待办](docs/operations/maintenance-status.md) | 当前状态、未完成项与待决定事项 |
+| [阶段一 MVP 设计](docs/superpowers/specs/2026-08-01-ai-code-collaboration-mvp-design.md) | 已确认的技术与治理基础设计 |
+| [历史设计与验收](docs/archive/README.md) | 架构文档、阶段一/二设计、实施目录、验收报告、章节追踪、历史状态投影与未授权蓝图的索引 |
 
 ## 实施路线
 
-1. 工程基线与可执行契约
-2. 任务记录与状态核心
-3. 分流与验证等级引擎
-4. 治理交互流程
-5. 验证与证据闭环
-6. Agent、Hooks 与 CI 集成
-7. 试点验收与阶段一基线
-8. 结构化设计审核与实现审核
-9. V2 Policy、contracts 与分类
-10. 独立 Verifier、两阶段 V2 evidence 与 Gate
-11. acceptance、integration 与 targeted mutation
-12. 运行期升级观测与完整 Hooks
-13. 自举 REVIEW 试点与阶段二基线
+Chapters 1–7（工程基线、任务状态、分流与验证、治理交互、证据闭环、Agent/Hooks/CI、试点验收）按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)完成；Chapters 8–13（结构化审核、V2 contracts、独立 Verifier、acceptance/mutation、运行期观测与 Hooks、自举 REVIEW 试点）按[阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md)完成。计划中的未来能力不能当作已经可用。
 
-Chapters 1–7 按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)推进；Chapters 8–13 按[阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md)推进。当前事实以 [overall state](docs/superpowers/state/overall.yaml) 和对应 chapter state 为准，计划中的未来能力不能当作已经可用。
-
-## 资源感知调度路线
-
-子智能体并发会同时增加模型、工具进程、内存、CPU 和 I/O 消耗。项目采用两层方案：可选的“编排顾问”负责提出 DAG 和并行建议，确定性调度控制面独占资源准入、全树配额、租约、背压和恢复权。LLM 不能自行提高并发、预算或绕过 AI Flow。
-
-阶段二现已完成审核与 V2 可靠性闭环，但未实现资源调度器或模型路由。阶段三只有在
-[进入门](docs/implementation/phase-03-entry-inputs.md)满足并另建正式设计/实施目录后，才可用真实记录定义容量画像、telemetry 或 V3 用例；阶段四还须阶段三退出证据与量化协调成本，再先交付单机过载防护，最后才可能接入自适应编排。当前每会话静态并发上限只是纵深防御，不能视为跨会话、跨进程的整机安全保证；两份预进入蓝图都不是执行授权。
+后续排序提案见[多层审核与置信度反馈分阶段计划](docs/superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)；它是后续排序提案，不改变现行准入与权限边界。资源感知调度与阶段三/四蓝图只有在[阶段三进入门](docs/implementation/phase-03-entry-inputs.md)满足并另建正式设计后才可推进；当前每会话静态并发上限只是纵深防御，不是整机安全保证，蓝图都不是执行授权。
 
 ## 开始参与
 
-仓库处于维护模式；以下步骤适用于本仓库后续代码、配置、CI 或行为变更。
+1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时，再阅读其[平台适配入口](CLAUDE.md)。
+2. 按 AGENTS.md 的升级清单判断是否需要 task；日常维护按[低干预工作方式](docs/operations/low-intervention.md)推进。
+3. 使用 AI Flow 时，运行 `python -m aiflow --help`，以 CLI、active Policy 与当前 task ledger 的确定性结论为准。
 
-1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时，再阅读其 [平台适配入口](CLAUDE.md)。
-2. 日常维护按具体问题与[低干预工作方式](docs/operations/low-intervention.md)推进；只有推进阶段路线时才核对 [overall state](docs/superpowers/state/overall.yaml) 与对应 chapter state，不为普通修复增加阶段进入审批。
-3. 升级清单中的变更须创建或恢复 task；清单之外适用维护模式例外的工作直接实施并通过 CI 质量门禁。需要人类决定或风险较高的变更仍应主动走 AI Flow。
-4. 使用 AI Flow 时，以已安装 CLI、active Policy 与当前 task ledger 的确定性结论为准，保留范围、决定、批准与验证证据；出现变化时升级，不自行降级或跳过 Gate。
+## 运行期 observation 与 Hooks
 
-## 运行期 observation 与 Hooks 的当前边界
-
-`aiflow observe` 仅接收一个显式 task、一个本地 UTF-8 JSON object 输入和封闭的
-`apply`、`dry-run` 或 `ci` mode。它输出的是受当前 task/base/subject/Policy/classification
-绑定约束的 observation decision；所有有效 observation 的
-`execution_allowed=false`，因此以 exit 2 返回非授权结论，绝不以 exit 0 允许所描述的动作。
-`apply` 才可能追加 task-local audit 或单调 escalation；`dry-run` 与 `ci` 对完整 task
-目录零写。完整协议与恢复步骤见 [Hooks](docs/operations/hooks.md) 和
-[故障恢复](docs/operations/recovery.md)。
-
-当前 E2E 证据只覆盖两类 Hook 事实：pre-commit 的 `scope_out_of_bounds`，以及 pre-command
-对六种 Policy 禁止规范高风险 action 的拒绝/审计；在该支持范围内，Hook、CLI 与 CI 比较的是
-decision semantic fields，而非 source-sensitive digest、mode、ledger effect、event metadata、
-JSON 字节或文案。本地 Windows 验证保留既有 symlink capability skips，真实 PR 质量门也已在
-Linux 上通过；这些结果仍不证明跨平台 live Hook 安装或全部宿主行为。未安装 Hook 的客户端、
-IDE 保存、GUI/remote Git 和绕过 wrapper 的调用都不能被声明为已拦截；pre-command 也不解释
-自由 shell 或执行命令。
+`aiflow observe` 只接收显式 task、本地 JSON 输入和封闭 mode；所有有效 observation 都是 `execution_allowed=false` 的非授权结论（exit 2）。Hook 与 pre-command wrapper 只提供早期反馈和拒绝，不安装自身、不授权、不执行动作，也不是通用命令拦截器或沙箱。完整协议、E2E 证据范围与平台边界见 [Hooks](docs/operations/hooks.md)。
 
 ## 许可证
 

@@ -1,0 +1,111 @@
+{
+  "context_sha256": "bcb558b632282baaa0a0cdfce61de93562f2266fbb270b00f919deaa52db5f53",
+  "findings": [
+    {
+      "evidence_refs": [
+        "src/aiflow/verification.py:446-460",
+        "src/aiflow/process_runner.py:164-173",
+        "pyproject.toml:38"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 255,
+        "path": "src/aiflow/verification.py"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "Equality with coverage_xml still allows subset selectors; pin the exact full-suite argv, environment, timeout and parsers for all five pytest checks and pin pyproject testpaths"
+    },
+    {
+      "evidence_refs": [
+        ".ai/policy/verification-levels.yaml:20-46",
+        ".ai/tasks/TASK-0039/classification.json:44"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 63,
+        "path": ".github/workflows/ai-quality-gate.yml"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "Validate contracts CI step is the only contract test run for non-bootstrap V0 PRs; keep it for non-bootstrap mode"
+    },
+    {
+      "evidence_refs": [
+        "docs/operations/pytest-temporary-roots.md:54-57"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 35,
+        "path": "docs/operations/recovery.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "recovery.md and pytest-temporary-roots.md become inaccurate and are outside allowed_scope"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0047/events.jsonl",
+        "src/aiflow/approval.py:566-573",
+        "src/aiflow/gate.py:142"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 226,
+        "path": "src/aiflow/verification_service.py"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Policy change makes this task and other non-terminal tasks classification-stale; plan the policy_changed escalation, reclassification, design review and spec approval round"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/process_runner.py:190"
+      ],
+      "finding_id": "RF-005",
+      "location": {
+        "line": 243,
+        "path": "docs/operations/quickstart.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Shared run weakens failure attribution and changes --check semantics; document in quickstart"
+    },
+    {
+      "evidence_refs": [
+        "tests/integration/test_github_workflow.py:82"
+      ],
+      "finding_id": "RF-006",
+      "location": {
+        "line": 17,
+        "path": ".github/workflows/ai-quality-gate.yml"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Workflow 68.5-minute budget comment becomes stale"
+    },
+    {
+      "evidence_refs": [
+        ".github/workflows/ai-quality-gate.yml:76",
+        "src/aiflow/mutation_manifest.py:35"
+      ],
+      "finding_id": "RF-007",
+      "location": {
+        "line": 89,
+        "path": ".ai/policy/verification-levels.yaml"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "85% total coverage is not enforced by aiflow verify; run it manually; keep MUT-V2-001 detector test"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-10-09T15:05:00Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "claude-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Collapsing unit_tests, regression_tests, acceptance and integration onto the coverage_xml command does merge into one execution with per-check results and complete V2 evidence (checked by in-memory plan simulation). Changes needed: pin the exact full-suite command, argv, environment, timeout and parsers for all five checks instead of 'equal to coverage_xml'; keep the contract CI step for non-bootstrap V0 runs; add recovery.md and pytest-temporary-roots.md to scope; plan the policy_changed reclassification round; update quickstart wording on shared runs and --check; refresh the workflow budget comment; note that 85% total coverage is enforced only by CI bootstrap and must be run manually.",
+  "task_id": "TASK-0072"
+}

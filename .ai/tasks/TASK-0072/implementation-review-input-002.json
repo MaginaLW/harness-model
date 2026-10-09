@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0005",
+  "revision": 1,
+  "task_id": "TASK-0072",
+  "review_stage": "implementation",
+  "reviewer": "claude-implementation-reviewer",
+  "recorded_at": "2026-10-09T15:35:00Z",
+  "context_sha256": "907b4ce3a685f4b96b6cb02a7855301f0948a4e7d23b76f0b1d8795bbfaa0a74",
+  "outcome": "APPROVE",
+  "summary": "REV-0004 RF-001..RF-003 are resolved in 65512be: each of the five pytest checks must match the exact interpreter-bound full coverage argv, COVERAGE_FILE environment, 1200 s timeout and parser; with cwd and log sensitivity not Policy-settable the checks always form one execution, so removing the set-level check leaves no split path. V1 evidence at 65512be passed all 10 checks with one shared pytest execution (2835 passed, 1 skipped, 819.84 s). RF-004 and RF-005 remain declared low follow-ups.",
+  "findings": [
+    {"finding_id": "RF-001", "severity": "low", "status": "open", "title": "Out-of-scope chapter-11 doc still describes fixed subdirectory commands; CHANGELOG lacks a Policy 2.4.0 entry (follow-up)", "location": {"path": "docs/implementation/chapter-11-acceptance-integration-mutation.md", "line": 10}, "evidence_refs": ["CHANGELOG.md:28"]},
+    {"finding_id": "RF-002", "severity": "low", "status": "open", "title": "Shared run measured 1083 s then 820 s on Windows against 1200 s; V2 and Linux CI timing unmeasured (declared risk)", "location": {"path": ".ai/policy/verification-levels.yaml", "line": 83}, "evidence_refs": [".ai/tasks/TASK-0072/evidence.json"]}
+  ]
+}

@@ -31,6 +31,7 @@ from aiflow.git_context import (
     collect_git_context,
     commits_are_ancestral,
     evaluate_verification_git_context,
+    task_numbers_in_refs,
 )
 from aiflow.policy import load_policy_bundle
 from aiflow.scope import (
@@ -317,7 +318,8 @@ def start_task(
     combined_forbidden = list(dict.fromkeys([*defaults, *requested_forbidden]))
     spec = _load_spec_template(Path(context.repository_path))
 
-    task_id = reserve_task_id(Path(context.repository_path))
+    branch_task_numbers = task_numbers_in_refs(Path(context.repository_path))
+    task_id = reserve_task_id(Path(context.repository_path), reserved_numbers=branch_task_numbers)
     task_directory = resolve_task_path(Path(context.repository_path), task_id)
     occurred_at = _utc_now()
     bundle: dict[str, Any] = {

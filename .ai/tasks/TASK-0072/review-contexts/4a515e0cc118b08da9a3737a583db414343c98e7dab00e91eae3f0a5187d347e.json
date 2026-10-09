@@ -1,0 +1,235 @@
+{
+  "base_commit": "9215ae1fce8749dbc45ad2168a9303112c433177",
+  "branch": "claude/simplify-architecture",
+  "classification_input_sha256": "13d36dea5bfa7610e66900b0b67adc482a05142122f3b478858d58c1a1aa471e",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/**",
+      "src/aiflow/verification.py",
+      ".github/workflows/ai-quality-gate.yml",
+      "tests/**",
+      "docs/operations/quickstart.md",
+      "README.md",
+      "docs/operations/maintenance-status.md",
+      "docs/operations/recovery.md",
+      "docs/operations/pytest-temporary-roots.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Run the full pytest suite once per V1/V2 verification and drop the duplicate CI contract step",
+        "impact_scope": [
+          ".ai/policy/**",
+          "src/aiflow/verification.py",
+          ".github/workflows/ai-quality-gate.yml",
+          "tests/**",
+          "docs/operations/quickstart.md",
+          "README.md",
+          "docs/operations/maintenance-status.md",
+          "docs/operations/recovery.md",
+          "docs/operations/pytest-temporary-roots.md"
+        ],
+        "planned_actions": [
+          "Bump all four Policy files to 2.4.0 and give unit_tests, regression_tests, coverage_xml, acceptance and integration one fixed full-suite coverage command, environment and timeout so the plan executes one pytest run.",
+          "In src/aiflow/verification.py pin the exact full-suite argv, environment, timeout and parsers for those five checks and reject any extra selector.",
+          "Run the CI 'Validate contracts' step only in non-bootstrap mode and refresh the workflow budget comment.",
+          "Update tests (including negative subset tests and a pyproject testpaths pin) and the quickstart, recovery and pytest-temporary-roots docs.",
+          "After the implementation commit, escalate with policy_changed, resolve, reclassify, and obtain a fresh design review and spec approval before verify and gate."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/hard-rules.yaml",
+        ".ai/policy/permissions.yaml",
+        ".ai/policy/routing.yaml",
+        ".ai/policy/verification-levels.yaml",
+        ".github/workflows/ai-quality-gate.yml",
+        "README.md",
+        "docs/operations/maintenance-status.md",
+        "docs/operations/pytest-temporary-roots.md",
+        "docs/operations/quickstart.md",
+        "docs/operations/recovery.md",
+        "src/aiflow/verification.py",
+        "tests/acceptance/test_v2_acceptance.py",
+        "tests/integration/test_github_workflow.py",
+        "tests/integration/test_templates_and_policy.py",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_verification_plan.py"
+      ],
+      "files": [
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/hard-rules.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/permissions.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/routing.yaml"
+        },
+        {
+          "additions": 61,
+          "binary": false,
+          "deletions": 13,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 2,
+          "path": ".github/workflows/ai-quality-gate.yml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "README.md"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/pytest-temporary-roots.md"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 7,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 32,
+          "binary": false,
+          "deletions": 24,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/acceptance/test_v2_acceptance.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_github_workflow.py"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 8,
+          "path": "tests/integration/test_templates_and_policy.py"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 14,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 89,
+          "binary": false,
+          "deletions": 62,
+          "path": "tests/unit/test_verification_plan.py"
+        }
+      ],
+      "totals": {
+        "additions": 230,
+        "deletions": 141,
+        "files": 16
+      }
+    },
+    "goal": "Run the full pytest suite once per V1/V2 verification and drop the duplicate CI contract step",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0072",
+        "--actor",
+        "claude-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "4a515e0cc118b08da9a3737a583db414343c98e7dab00e91eae3f0a5187d347e",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "d7e2d2a0ced30a763dadf630f6443fc9cb7cde236169d0bc3bea8487f74dfbbf",
+  "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "b66b0eb12764dd6c6d1294f366338428322022feb80ccc0d85eb1291ac704ded",
+  "subject_commit": "3ff8f600775d329f09dc237418ddcd377d80d196",
+  "task_id": "TASK-0072"
+}

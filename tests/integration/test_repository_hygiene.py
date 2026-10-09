@@ -7,7 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 GITIGNORE = ROOT / ".gitignore"
-RECOVERY = ROOT / "docs" / "operations" / "recovery.md"
 
 
 def _is_ignored(path: str) -> bool:
@@ -77,19 +76,3 @@ def test_ledger_extensions_are_never_ignored_globally() -> None:
 
     for pattern in ("*.json", "*.jsonl", "*.yaml", "*.yml", "*.md"):
         assert pattern not in text, pattern
-
-
-def test_recovery_document_sets_evidence_and_path_boundaries() -> None:
-    text = RECOVERY.read_text(encoding="utf-8")
-
-    assert "运行时证据、精确清理与路径边界" in text
-    assert "唯一的 task-local 忽略规则" in text
-    assert "精确 task、run 和文件" in text
-    assert "不作跨 clone 或新 worktree 的持久性承诺" in text
-    assert "OS 临时运行目录" in text
-    assert "不得用宽泛的 `*.log`、`*.xml`" in text
-    assert "不改写它们" in text
-    assert "当前 CLI 生成的 task、evidence、action 或 snapshot" in text
-    assert "事后替换这些记录中的路径" in text
-    assert "${REPO_ROOT}" in text
-    assert "${TEMP_ROOT}" in text

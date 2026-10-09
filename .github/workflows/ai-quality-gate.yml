@@ -14,8 +14,9 @@ concurrency:
 jobs:
   ai-quality-gate:
     runs-on: ubuntu-latest
-    # The fixed V2 checks may consume 68.5 minutes serially; leave room for
-    # dependency setup, Gate evaluation, diagnostics, and runner variance.
+    # V2 runs one shared full coverage pytest execution (1200 s budget) plus
+    # lint, typing and diff coverage; leave room for dependency setup, Gate
+    # evaluation, diagnostics, and runner variance.
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
@@ -60,6 +61,8 @@ jobs:
           test "$(git symbolic-ref --quiet --short HEAD)" = "$PR_HEAD_REF"
           test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
       - name: Validate contracts
+        # Bootstrap mode runs the full suite below; formal V0 runs no pytest.
+        if: steps.governance.outputs.bootstrap_active != 'true'
         run: >-
           uv run --locked python -m pytest
           tests/unit/test_contracts.py tests/integration/test_templates_and_policy.py -q

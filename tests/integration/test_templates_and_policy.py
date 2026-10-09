@@ -157,13 +157,11 @@ def policy_bundle_errors(bundle: PolicyBundle) -> list[str]:
     v2_ids = {check["id"] for check in _level(bundle, "V2")["checks"]}
     if v2_ids != v1_ids | EXPECTED_V2_EXTRA_CHECKS:
         errors.append("verification: V2 check set is incomplete")
-    for check_id, target in (
-        ("acceptance", "tests/acceptance"),
-        ("integration", "tests/integration"),
-    ):
+    coverage_command = _check(bundle, "V1", "coverage_xml").get("command")
+    for check_id in ("unit_tests", "regression_tests", "acceptance", "integration"):
         check = _check(bundle, "V2", check_id)
-        if check.get("command") != ["{python}", "-m", "pytest", target, "-q"]:
-            errors.append(f"verification: {check_id} must use its fixed offline pytest target")
+        if check.get("command") != coverage_command:
+            errors.append(f"verification: {check_id} must share the full coverage pytest run")
         if check.get("required") is not True or check.get("result_parser") != "pytest":
             errors.append(f"verification: {check_id} must be a required pytest check")
 
@@ -292,14 +290,14 @@ def test_v1_cannot_omit_a_v0_check() -> None:
     assert "verification: V1 must include every V0 check" in policy_bundle_errors(bundle)
 
 
-def test_v2_acceptance_and_integration_cannot_be_replaced_with_help_or_wrong_target() -> None:
+def test_v2_acceptance_and_integration_cannot_leave_the_shared_coverage_run() -> None:
     bundle = load_policy_bundle()
     _check(bundle, "V2", "acceptance")["command"] = ["{python}", "-m", "aiflow", "--help"]
     _check(bundle, "V2", "integration")["result_parser"] = "exit_zero"
 
     errors = policy_bundle_errors(bundle)
 
-    assert "verification: acceptance must use its fixed offline pytest target" in errors
+    assert "verification: acceptance must share the full coverage pytest run" in errors
     assert "verification: integration must be a required pytest check" in errors
 
 

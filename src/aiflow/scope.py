@@ -225,16 +225,6 @@ def _run_git(root: Path, arguments: Sequence[str]) -> bytes:
     return result.stdout
 
 
-def _nul_paths(output: bytes) -> set[str]:
-    try:
-        values = output.decode("utf-8").split("\0")
-    except UnicodeDecodeError as error:
-        raise StorageError(
-            "Git scope output is invalid", code="SCOPE_GIT_OUTPUT_INVALID"
-        ) from error
-    return {normalize_repository_path(value) for value in values if value}
-
-
 def _diff_paths(output: bytes) -> set[str]:
     """Parse ``git diff --name-status -z``, preserving both rename/copy paths."""
     try:

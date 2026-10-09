@@ -36,9 +36,11 @@ ALLOWED_VARIABLES = frozenset(
 ALLOWED_PARSERS = frozenset({"exit_zero", "pytest", "coverage_xml", "diff_cover"})
 _VARIABLE_PATTERN = re.compile(r"\{([^{}]+)\}")
 _RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+# Every pytest check runs the same full coverage suite, so the plan executes it once.
 PYTEST_CHECK_IDS = frozenset(
     {"unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"}
 )
+FULL_SUITE_TIMEOUT_SECONDS = 1200
 
 
 @dataclass(frozen=True)
@@ -244,33 +246,27 @@ def _require_output_semantics(
 ) -> None:
     if check.check_id == "smoke" and check.argv[1:] != ("-m", "aiflow", "--help"):
         raise ContractError("Smoke command is invalid", code="VERIFICATION_COMMAND_INVALID")
-    v2_pytest_targets = {
-        "acceptance": "tests/acceptance",
-        "integration": "tests/integration",
-    }
-    if check.check_id in v2_pytest_targets and (
-        check.argv[1:] != ("-m", "pytest", v2_pytest_targets[check.check_id], "-q")
-        or check.result_parser != "pytest"
-    ):
-        raise ContractError("V2 pytest command is invalid", code="VERIFICATION_COMMAND_INVALID")
-    if check.check_id == "coverage_xml":
-        expected_coverage = (run_dir / ".coverage").as_posix()
-        expected_xml = (run_dir / "coverage.xml").as_posix()
-        reports = [
-            arg.removeprefix("--cov-report=xml:")
-            for arg in check.argv
-            if arg.startswith("--cov-report=xml:")
-        ]
+    if check.check_id in PYTEST_CHECK_IDS:
+        expected_argv = (
+            context.python,
+            "-m",
+            "pytest",
+            "--cov=aiflow",
+            "--cov-branch",
+            f"--cov-report=xml:{(run_dir / 'coverage.xml').as_posix()}",
+        )
+        expected_parser = "coverage_xml" if check.check_id == "coverage_xml" else "pytest"
         if (
-            check.argv[1:3] != ("-m", "pytest")
-            or check.argv.count("--cov=aiflow") != 1
-            or check.argv.count("--cov-branch") != 1
-            or check.environment != {"COVERAGE_FILE": expected_coverage}
-            or reports != [expected_xml]
+            check.argv != expected_argv
+            or check.environment != {"COVERAGE_FILE": (run_dir / ".coverage").as_posix()}
+            or check.timeout_seconds != FULL_SUITE_TIMEOUT_SECONDS
+            or check.result_parser != expected_parser
         ):
             raise ContractError(
-                "Coverage outputs must be bound to the run directory",
-                code="VERIFICATION_COVERAGE_CONFIG_INVALID",
+                "Pytest checks must share the run-directory-bound full coverage suite",
+                code="VERIFICATION_COVERAGE_CONFIG_INVALID"
+                if check.check_id == "coverage_xml"
+                else "VERIFICATION_COMMAND_INVALID",
             )
     if check.check_id == "diff_coverage":
         expected_xml = (run_dir / "coverage.xml").as_posix()

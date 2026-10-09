@@ -121,6 +121,9 @@ def test_workflow_attaches_exact_event_head_to_the_pr_source_branch() -> None:
 
     attachment = steps[attachment_index]
     assert attachment["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    contracts = steps[names.index("Validate contracts")]
+    assert contracts["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert governance_index < names.index("Validate contracts")
     assert attachment["env"] == {
         "PR_HEAD_REF": "${{ github.head_ref }}",
         "PR_HEAD_SHA": "${{ github.event.pull_request.head.sha }}",
@@ -271,7 +274,7 @@ def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
     assert 'git show "${BASE_SHA}:.ai/bootstrap-mode.yaml"' in text
     assert "bootstrap_active=true" in text
     assert "if: steps.governance.outputs.bootstrap_active == 'true'" in text
-    assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 4
+    assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 5
     assert 'COVERAGE_FILE="$RUNNER_TEMP/.coverage"' in text
     assert "--cov=aiflow --cov-branch --cov-fail-under=85" in text
     assert "--cov-report=term-missing" in text

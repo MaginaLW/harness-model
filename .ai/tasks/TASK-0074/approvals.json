@@ -1,0 +1,29 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-09T22:42:18Z",
+    "base_commit": "9970239e814610eb85b7cde09494b9af83827d43",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+    "reason": "项目所有者在会话中明确回复“E”，批准冻结规格 77f08fc66627be4c68315ac5d8e853f335bd6776488cb9e4f948736f16b402f5（设计审核 REV-0001 APPROVE_WITH_CONDITIONS，条件为实现细节）；不批准推送、合并或任何外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "77f08fc66627be4c68315ac5d8e853f335bd6776488cb9e4f948736f16b402f5",
+    "subject_commit": "9970239e814610eb85b7cde09494b9af83827d43",
+    "task_id": "TASK-0074"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-09T22:58:41Z",
+    "base_commit": "9970239e814610eb85b7cde09494b9af83827d43",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "ba563f37f195c5419abc8ac07cc6442acd4f76c934a44c531a4cdde5e68139ab",
+    "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+    "reason": "项目所有者在会话中明确回复“批准 TASK-0074”，批准代码 subject 867569c2584c07c2a15d6e63d4fb52230b5fd196（V1 evidence passed，实现审核 REV-0002 APPROVE）；本批准不含推送或合并动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "77f08fc66627be4c68315ac5d8e853f335bd6776488cb9e4f948736f16b402f5",
+    "subject_commit": "867569c2584c07c2a15d6e63d4fb52230b5fd196",
+    "task_id": "TASK-0074"
+  }
+]

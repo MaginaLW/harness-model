@@ -940,61 +940,6 @@ def _authorize_targeted_mutation_runner_launch(
         ) from error
 
 
-def _task0014_production_subject(repository_root: Path) -> str | None:
-    """Return the sole active TASK-0014 subject, or select the mocked mode.
-
-    This selector deliberately performs no runner action.  A malformed current
-    TASK-0014 is a governed failure, whereas another task bound to the same
-    repository, branch, and subject merely makes production mode ineligible.
-    """
-    root = Path(repository_root).resolve()
-    try:
-        directories = tuple(sorted(path for path in task_root(root).iterdir() if path.is_dir()))
-    except OSError as error:
-        raise _error(
-            "Mutation evidence task inventory is unavailable", "MUTATION_EVIDENCE_BINDING_STALE"
-        ) from error
-    task_records: list[tuple[str, dict[str, Any]]] = []
-    current_task: dict[str, Any] | None = None
-    for directory in directories:
-        if not re.fullmatch(r"TASK-\d{4,}", directory.name):
-            continue
-        try:
-            record = read_task_record_strict(root, directory.name)
-        except Exception as error:
-            if directory.name == "TASK-0014":
-                raise _error(
-                    "TASK-0014 bindings are invalid", "MUTATION_EVIDENCE_BINDING_STALE"
-                ) from error
-            return None
-        task_records.append((directory.name, record.task))
-        if directory.name == "TASK-0014":
-            current_task = record.task
-    if current_task is None:
-        return None
-    if current_task.get("current_state") not in {"IMPLEMENTING", "VERIFYING"}:
-        return None
-    subject = current_task.get("subject_commit")
-    if not isinstance(subject, str):
-        raise _error("TASK-0014 subject is invalid", "MUTATION_EVIDENCE_SUBJECT_INVALID")
-    current_binding = (
-        current_task.get("repository_id"),
-        current_task.get("branch"),
-        subject,
-    )
-    head_bound_active = [
-        task_id
-        for task_id, task in task_records
-        if task.get("current_state") != "MERGED"
-        and (task.get("repository_id"), task.get("branch"), task.get("subject_commit"))
-        == current_binding
-    ]
-    if head_bound_active != ["TASK-0014"]:
-        return None
-    _validate_bindings(root, "TASK-0014", subject)
-    return subject
-
-
 def _reserve_record_root(root: Path, task_id: str, now: datetime) -> tuple[str, Path]:
     try:
         lexical_logs = task_root(root) / task_id / "logs"

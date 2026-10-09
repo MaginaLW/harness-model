@@ -1,0 +1,42 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-09T14:27:05Z",
+    "base_commit": "9215ae1fce8749dbc45ad2168a9303112c433177",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d21a386779147dfad962a0fc0656bef61bc581e27f63c4789dcc06520fa10ff1",
+    "reason": "项目所有者在会话中明确回复“批准 b66b0eb1，同时 B 预授权，继续”，批准冻结规格 b66b0eb12764dd6c6d1294f366338428322022feb80ccc0d85eb1291ac704ded（Policy 2.3.0，设计审核 REV-0002 APPROVE）；不批准推送、合并或任何外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "b66b0eb12764dd6c6d1294f366338428322022feb80ccc0d85eb1291ac704ded",
+    "subject_commit": "9215ae1fce8749dbc45ad2168a9303112c433177",
+    "task_id": "TASK-0072"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-09T14:38:03Z",
+    "base_commit": "9215ae1fce8749dbc45ad2168a9303112c433177",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+    "reason": "按项目所有者在会话中的预授权（“批准 b66b0eb1，同时 B 预授权，继续”）记录再批准：Policy 2.4.0 重新分类后规格摘要仍为 b66b0eb12764dd6c6d1294f366338428322022feb80ccc0d85eb1291ac704ded，独立设计审核 REV-0003 为 APPROVE，路由 REVIEW，验证级别 V1；不批准推送、合并或任何外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "b66b0eb12764dd6c6d1294f366338428322022feb80ccc0d85eb1291ac704ded",
+    "subject_commit": "3ff8f600775d329f09dc237418ddcd377d80d196",
+    "task_id": "TASK-0072"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-09T15:29:59Z",
+    "base_commit": "9215ae1fce8749dbc45ad2168a9303112c433177",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "0ee737618717d9f2876f6e27be5455d25556741d9266048698841a31bb6d2589",
+    "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+    "reason": "项目所有者在会话中明确回复“C & D”，批准 TASK-0072 代码 subject 65512bee49f8b57f42b2b8eb1fce6f803a8a4eaf（V1 evidence passed，实现审核 REV-0005 APPROVE）；不批准推送、合并或任何外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "b66b0eb12764dd6c6d1294f366338428322022feb80ccc0d85eb1291ac704ded",
+    "subject_commit": "65512bee49f8b57f42b2b8eb1fce6f803a8a4eaf",
+    "task_id": "TASK-0072"
+  }
+]
