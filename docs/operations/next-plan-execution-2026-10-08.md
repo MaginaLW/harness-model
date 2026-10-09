@@ -2,6 +2,14 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 会话收尾：诊断提案到期
+
+按所有者“收尾”要求结束本轮推进。当前原生status再次核定owner HEAD为a223、FAILED/REVIEW/V2、classification fresh、既有批准current、evidence stale，Missing仍为retry_reason_or_escalation。原单次V2失败/消费和未运行的F累计比较保持；文档阶段提交 `1a1dbeac2d78772b2598486d4fe47d9b2a43c8db` 已完成，不替代完整验收。
+
+新诊断action raw仍为b1b004…5558，canonical仍4a6de240…14ee88；其expires_at为UTC `2026-10-09T10:00:00Z`，即新加坡时间当日18:00。本轮收尾读取时为20:23，提案已到期，本会话未收到该新动作批准，也未执行。后续恢复须重新形成具体动作/期限、核当前绑定并按实际所需批准及最终审查推进，不沿用到期启动资格，不重复请求仍有效的规格批准。本轮不启动诊断、重试、push/merge/provider或清理失败原件。
+
+全目标继续保持blocked，未满足的七项及S0–S5退出条件见[完成核对](follow-up-completion-audit-2026-10-09.md)。已提交的文档/独审、私有封包、历史记录与三份用户未跟踪草稿保留；下述所有“请求待答”等均为当时观察窗口。
+
 ## 2026-10-09 全目标核对与S1兼容/审核预算补充
 
 本轮重新核对原七项待办与S0–S5，形成[完成条件与依赖核对](follow-up-completion-audit-2026-10-09.md)，保留各线的真实退出条件、FAILED/SPENT/取消/partial/unknown及历史原件。F后继明确区分仅承接历史事实的恢复范围与选定新真实导入的范围：只有后者需要匹配新来源/context/preflight/record，不将来源重取作为两条路共有的附加门。I1原件在本轮获准有限目录未定位，不据此推断全局不存在或当前资格；三份用户草稿不是当前Apply目标。选定来源的进一步核对未识别可独立完成的新实质准备，不补造目标、字段或重复模板。
