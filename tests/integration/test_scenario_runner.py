@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from aiflow.errors import ContractError
-from aiflow.scenarios import (
+from tests.e2e.scenario_runner import (
     ScenarioDefinition,
     ScenarioOperation,
     prepare_scenario_repository,

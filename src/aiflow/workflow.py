@@ -146,8 +146,3 @@ def evaluate_preconditions(facts: WorkflowFacts) -> WorkflowEvaluation:
     else:
         results.append(PreconditionResult("verification_configuration_complete", "not_applicable"))
     return WorkflowEvaluation(_sort_results(results))
-
-
-def check_preconditions(facts: WorkflowFacts) -> WorkflowEvaluation:
-    """Compatibility spelling for callers that use check-style service APIs."""
-    return evaluate_preconditions(facts)

@@ -7,11 +7,11 @@ from dataclasses import dataclass
 from typing import cast
 
 from aiflow.policy import PolicyBundle
+from aiflow.verification import V0_CHECK_IDS
 
 V0 = "V0"
 V1 = "V1"
 V2 = "V2"
-_V0_REQUIRED_CHECKS = frozenset({"contract", "scope", "ruff_check", "ruff_format_check", "smoke"})
 _V2_REQUIREMENTS = (
     (
         "acceptance_required",
@@ -109,7 +109,7 @@ def _policy_v0_complete(bundle: PolicyBundle) -> bool:
         for check in checks
         if isinstance(check, Mapping) and check.get("required") is True
     }
-    return _V0_REQUIRED_CHECKS.issubset(required)
+    return required.issuperset(V0_CHECK_IDS)
 
 
 def _policy_v2_complete(bundle: PolicyBundle) -> bool:

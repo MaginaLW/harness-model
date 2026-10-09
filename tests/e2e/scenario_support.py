@@ -14,7 +14,6 @@ import yaml
 
 from aiflow import verification_service
 from aiflow.cli import main
-from aiflow.scenarios import prepare_scenario_repository
 from aiflow.storage import (
     atomic_write_json,
     atomic_write_yaml,
@@ -31,6 +30,7 @@ from aiflow.verification import (
     VerificationExecution,
     VerificationPlan,
 )
+from tests.e2e.scenario_runner import prepare_scenario_repository
 
 ROOT = Path(__file__).resolve().parents[2]
 TASK_ID = "TASK-0001"
