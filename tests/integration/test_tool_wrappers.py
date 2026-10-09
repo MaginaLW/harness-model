@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import subprocess
 import sys
 from pathlib import Path
@@ -11,38 +10,9 @@ import pytest
 from aiflow.errors import ContractError
 from aiflow.observation import serialize_observation
 from aiflow.policy import evaluate_action_permission, load_policy_bundle
-from aiflow.verification_service import VerifyResult
-from tools import gauntlet
 from tools.hooks import pre_command, pre_commit
 
 ROOT = Path(__file__).resolve().parents[2]
-
-
-def test_gauntlet_delegates_provisional_verification_and_formats_json(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
-    observed: dict[str, object] = {}
-
-    def fake_verify(root: Path, task_id: str, **kwargs: object) -> VerifyResult:
-        observed.update(root=root, task_id=task_id, **kwargs)
-        return VerifyResult(task_id, "provisional", "IMPLEMENTING", Path("evidence.json"), ())
-
-    monkeypatch.setattr(gauntlet, "verify_task", fake_verify)
-    monkeypatch.chdir(ROOT)
-
-    assert gauntlet.main(["--task", "TASK-0001", "--provisional", "--format", "json"]) == 0
-    assert observed["task_id"] == "TASK-0001"
-    assert observed["actor"] == "gauntlet"
-    assert observed["provisional"] is True
-    assert json.loads(capsys.readouterr().out)["conclusion"] == "provisional"
-
-
-def test_gauntlet_uses_cli_error_exit(monkeypatch: pytest.MonkeyPatch) -> None:
-    def reject(*args: object, **kwargs: object) -> VerifyResult:
-        raise ContractError("not ready", code="VERIFY_STATE_INVALID")
-
-    monkeypatch.setattr(gauntlet, "verify_task", reject)
-    assert gauntlet.main(["--task", "TASK-0001"]) == 1
 
 
 @pytest.mark.parametrize(
@@ -441,7 +411,7 @@ def test_pre_commit_rejects_missing_or_ambiguous_task(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize(
     "script",
-    ("tools/gauntlet.py", "tools/hooks/pre_commit.py", "tools/hooks/pre_command.py"),
+    ("tools/hooks/pre_commit.py", "tools/hooks/pre_command.py"),
 )
 def test_wrapper_help_is_executable(script: str) -> None:
     result = subprocess.run(

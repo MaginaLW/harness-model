@@ -4,9 +4,9 @@ These adapters call the executable AI Flow core. They provide earlier feedback; 
 
 The supported high-risk checks and unknown pre-command categories fail closed. The wrappers do not install themselves, consume an approval, execute a command, or turn a diagnostic result into permission for a real external operation.
 
-## Verification wrapper
+## Verification
 
-Run `python tools/gauntlet.py --task TASK-ID`. Add `--provisional` for diagnostic evidence that cannot satisfy Gate, and `--format json` for machine-readable output. The wrapper does not read verification Policy or choose checks; `aiflow.verification_service.verify_task` remains authoritative.
+Run `python -m aiflow verify TASK-ID --actor ACTOR`; add `--check CHECK-ID` for diagnostic (provisional) evidence that cannot satisfy Gate. `aiflow.verification_service.verify_task` remains authoritative. The former `tools/gauntlet.py` wrapper duplicated this command and was removed in favor of `aiflow verify`.
 
 ## Pre-commit
 
