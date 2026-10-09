@@ -2,6 +2,12 @@
 
 本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
+## 2026-10-09 新诊断准备终校封存，待精确动作批准
+
+两项窄独立封包审计已关闭：诊断实际技术/权限/native admission成员为1/1/10，共12，无哈希、长度或报告绑定差异；Doc基础4成员同样无差异。Root再核这16成员和两个独审封包的5成员，共21封闭payload，14个当前C71保护输入及所选Root记录前后保持，真实owner HEAD仍a223、Doc foundation HEAD仍a425且clean/源码缺席。Root初次只读检查器将实际空数组按数字检查的失败与源脚本保留，按真实schema修正后成功；不是业务诊断重跑。汇合报告 `${EXECUTION_ROOT}/task0071-root-pregrant-reconciliation-001/report.json` SHA256 `e818a55286f0d99b9f2fc6db0e9fa91497028d2e9d40709fae527c58be801728`，4成员封存manifest为 `6c661b9e69cc0be06a64efe7e5f3573d2632989e2a40a1fd612985cf784b5cd1`。核对限定封存窗口与有限当前pins，不冒称新的native status查询、全166闭包、OS/Job资格或执行许可。
+
+本次状态文档阶段提交 `bad8f2fa20f3c26d9af4b89aadeee6839c81f3db` 仅追加三份既有文档，旧正文、124个相对链接及whitespace核对通过；用户三份未跟踪草稿保留。新动作批准请求仍待回复，未建立新grant、资源、claim或执行；旧FAILED/SPENT、当前Gate拒绝与整体未完成保持。下一步依赖仍为具体批准后的真实记录、资源/actor准备和两个最终非作者审查；下述均为原观察窗口。
+
 ## 2026-10-09 新集成诊断动作已准备，安全基础保留原生编号历史
 
 新动作 `.ai/tasks/TASK-0071/action-integration-observation-diagnostic-001.json` 已在实际owner窄提交 `a2237c2a78acb08144810e65f32a65e9b6eeec4f`，仅含提案与本任务外部诊断记录方案；subject仍为 `589843a`。canonical SHA256为 `4a6de2408f9f21d669a785113f6eb956066e128c351bcb6badb496deb114ee88`，raw为 `b1b00422389a3e997a85098090345eacb39a3601186f7f48db3ef88739fa5558` /4718字节，绑定002 preapproval `d7269b351471972a9cc3b57c9bc40c9611f351a4d3b3bb065e9d1e3529afa28a` /45775字节。旧001 blocked机制与问题原件保留；002关闭捕获目录归属、helper单次入口和真实Job active0三个问题组，作者15项纯内存、9项transport mock、5项capture ownership mock及parser通过，仅证明准备机制。
