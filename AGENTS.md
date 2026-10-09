@@ -22,6 +22,7 @@ AI Flow CLI 保持完全可用，下述规则在使用它时仍然完整适用�
 6. 可执行 Policy 与 CLI 上线后以其确定性结论为准，不在 Agent 文件中复制规则表。
 7. 模型选择与职责分离：仓库不固定主会话或 sub-agent 的型号与推理档位，沿用用户选择和运行时默认。跨模型委派以当前工具实际暴露的能力及兼容性为准；独立 worker 不得标作原生 sub-agent，不得通过切换主会话或改写模型目录伪造兼容性。涉及模型身份的结论须核对实际线程元数据，历史型号不作为当前默认或权限依据；详见[模型选择与代理职责](docs/operations/model-selection.md)。
 8. 安全改动（文档、测试）与治理面改动（`.github/workflows/**`、`.ai/policy/**`、`.ai/schemas/**`、`src/aiflow/**`）应放进**不同的 task**；适用维护模式例外的安全改动直接 task-free。任务路由取各单元的最严重值，同 task 内拆分不改变任何审批；拆分减少等待耦合，不减少批准总数。Agent 连续完成已授权范围内的检查、修复、验证、账本推进与阶段提交，无须逐步询问“是否继续”；只有缺少真实方向决定或所需授权时才请求人类，详见[低干预工作方式](docs/operations/low-intervention.md)。
+9. 合并 PR 只用 merge commit：仓库已禁用 squash 与 rebase 合并，因为证据与批准绑定具体提交 SHA，改写历史会让它们脱离 `main`。不得强推或改写已推送的提交；同步基线时把 `main` 合并进分支，不做 rebase。已因 squash 脱离 `main` 的证据提交由已推送的 `archive/*` 标签保持可达（如 `archive/claude-simplify-architecture`），不得删除这些标签。
 
 启动：运行 `python -m aiflow --help`。维护模式下 task 不再是每次变更的前置条件；决定使用 AI Flow 时，为该变更创建或恢复 task 并按 CLI 状态推进。
 
