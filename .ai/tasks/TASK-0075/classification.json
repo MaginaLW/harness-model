@@ -1,0 +1,54 @@
+{
+  "base_commit": "8e3d48378a11e133767cae772f39798c4f9d36e9",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "e494c1e5efe3a778d37f5e0be81b458e0001558facaced5e49b7947c506b7773",
+  "classifications": [
+    {
+      "classified_at": "2026-10-10T00:14:44Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Changes that can touch the governance surface require independent review.",
+      "explanations": [
+        "Changes that can touch the governance surface require independent review."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Changes that can touch the governance surface require independent review.",
+          "predicate_explanations": [
+            "impact_scope: overlaps_paths -> true"
+          ],
+          "priority": 750,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE"
+        }
+      ],
+      "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+      "policy_version": "2.5.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Cross-module interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-CROSS-MODULE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-10-10T00:14:44Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "policy_version": "2.5.0",
+  "schema_version": "1.0",
+  "subject_commit": "23c5721427676d1f8756c66c04f8851133ea147a",
+  "task_id": "TASK-0075"
+}

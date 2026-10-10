@@ -10,7 +10,7 @@ planned_actions:
   - select_conflict_report_format
 controlled_actions: []
 impact_scope:
-  - src/aiflow/conflicts.py
+  - src/app/conflicts.py
   - docs/conflict-reports.md
 reversibility: reversible
 verification_methods:

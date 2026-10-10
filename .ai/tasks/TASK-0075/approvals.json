@@ -1,0 +1,42 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-10T00:10:39Z",
+    "base_commit": "8e3d48378a11e133767cae772f39798c4f9d36e9",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+    "reason": "按项目所有者 2026-10-10 在会话中“按计划执行”对第 2 步（治理面路由下限，涉及授权文件 hard-rules.yaml）的预授权记录：冻结规格 009dd87e05053a76828736452ce03d79aa7e5348be7e47d39e779df3a6132826 与计划一致，独立设计审核 REV-0002 为 APPROVE，路由 REVIEW；不含部署或其他外部动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "009dd87e05053a76828736452ce03d79aa7e5348be7e47d39e779df3a6132826",
+    "subject_commit": "8e3d48378a11e133767cae772f39798c4f9d36e9",
+    "task_id": "TASK-0075"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-10T00:16:07Z",
+    "base_commit": "8e3d48378a11e133767cae772f39798c4f9d36e9",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+    "reason": "按项目所有者 2026-10-10“按计划执行”对第 2 步的预授权记录 Policy 2.5.0 重新分类后的再批准：规格摘要仍为 009dd87e05053a76828736452ce03d79aa7e5348be7e47d39e779df3a6132826，独立设计审核 REV-0003 APPROVE，路由 REVIEW、V1 未降低。",
+    "schema_version": "1.0",
+    "spec_sha256": "009dd87e05053a76828736452ce03d79aa7e5348be7e47d39e779df3a6132826",
+    "subject_commit": "23c5721427676d1f8756c66c04f8851133ea147a",
+    "task_id": "TASK-0075"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-10T00:44:35Z",
+    "base_commit": "8e3d48378a11e133767cae772f39798c4f9d36e9",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "b1ead3917f3816fd0229411324608ed73b3a2bc04116fdad6a3fc07165c9fe21",
+    "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+    "reason": "按项目所有者 2026-10-10“按计划执行”对第 2 步的预授权记录代码批准：subject 4df0d739eed942d376137fe092eee0124370f42f，V1 evidence passed，独立实现审核 REV-0005 APPROVE（无未关闭的 critical/high）。",
+    "schema_version": "1.0",
+    "spec_sha256": "009dd87e05053a76828736452ce03d79aa7e5348be7e47d39e779df3a6132826",
+    "subject_commit": "4df0d739eed942d376137fe092eee0124370f42f",
+    "task_id": "TASK-0075"
+  }
+]

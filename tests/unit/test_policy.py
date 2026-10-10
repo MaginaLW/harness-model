@@ -32,7 +32,7 @@ def test_repeated_policy_load_reads_equal_size_content_with_restored_mtime(tmp_p
     path = directory / "routing.yaml"
     before = path.stat()
     original = path.read_text(encoding="utf-8")
-    changed = original.replace("2.4.0", "2.4.1")
+    changed = original.replace("2.5.0", "2.5.1")
     assert len(changed) == len(original) and changed != original
     path.write_text(changed, encoding="utf-8")
     os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
@@ -109,14 +109,14 @@ def test_valid_policy_has_complete_stable_bundle() -> None:
     bundle = load_policy_bundle(PROJECT_ROOT)
 
     assert set(bundle.documents) == set(POLICY_FILES)
-    assert bundle.policy_version == "2.4.0"
+    assert bundle.policy_version == "2.5.0"
     assert len(bundle.sha256) == 64
     assert bundle.sha256 == load_policy_bundle(PROJECT_ROOT).sha256
 
 
 def test_active_policy_binds_exact_verification_time_budgets() -> None:
     documents = v2_documents()
-    assert {document["policy_version"] for document in documents.values()} == {"2.4.0"}
+    assert {document["policy_version"] for document in documents.values()} == {"2.5.0"}
 
     levels = documents["verification-levels.yaml"]["levels"]
     assert isinstance(levels, list)
@@ -180,7 +180,7 @@ def test_v1_must_preserve_the_semantic_v0_prefix() -> None:
 
 def test_v2_policy_requires_ordered_semantic_prefix_and_fixed_required_extras() -> None:
     documents = v2_documents()
-    assert _validate_cross_file(documents) == "2.4.0"
+    assert _validate_cross_file(documents) == "2.5.0"
 
     levels = documents["verification-levels.yaml"]["levels"]
     assert isinstance(levels, list)
@@ -459,3 +459,19 @@ def test_semantic_rule_change_changes_digest(tmp_path: Path) -> None:
     write(path, value)
 
     assert load_policy_bundle(tmp_path, policy_directory=policy).sha256 != before
+
+
+@pytest.mark.parametrize("value", [[], "src/aiflow/**", [""], [1]])
+def test_overlaps_paths_values_are_rejected_when_policy_loads(
+    tmp_path: Path, value: object
+) -> None:
+    directory = copy_policy(tmp_path)
+    path = directory / "hard-rules.yaml"
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    rule = next(
+        item for item in document["rules"] if item["id"] == "HARD-REVIEW-GOVERNANCE-SURFACE"
+    )
+    rule["conditions"][0]["value"] = value
+    path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    with pytest.raises(PolicyError):
+        load_policy_bundle(tmp_path, policy_directory=directory)

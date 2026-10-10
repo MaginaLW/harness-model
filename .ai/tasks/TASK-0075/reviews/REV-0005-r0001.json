@@ -1,0 +1,40 @@
+{
+  "context_sha256": "056234587065bf09c095eed012cf338fc6b421f4328bd248d85eb2428ec6b4d1",
+  "findings": [
+    {
+      "evidence_refs": [
+        "docs/operations/hooks.md:13-17"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 111,
+        "path": ".ai/policy/hard-rules.yaml"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Deferred: governance list omits tools/hooks/**, .claude/** and .codex/**"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/predicates.py:65-79"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 180,
+        "path": ".ai/schemas/policy.schema.json"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Deferred: Policy-side overlaps_paths values are not path-validated at load; fails closed"
+    }
+  ],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-10T11:55:00Z",
+  "review_id": "REV-0005",
+  "review_stage": "implementation",
+  "reviewer": "claude-implementation-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "REV-0004 RF-002 resolved in 4df0d73: ? wildcard and backslash cases added; all nine mutants are now killed. V1 evidence at 4df0d73 passed all ten checks. Deferring RF-001 (governance list coverage gap that predates this change) and RF-003 (fails closed) to a follow-up Policy task is acceptable because hard-rules.yaml is an owner-approved authority file and the frozen spec fixes the list.",
+  "task_id": "TASK-0075"
+}

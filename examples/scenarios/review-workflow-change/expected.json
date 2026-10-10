@@ -4,10 +4,12 @@
   "route": "REVIEW",
   "verification_level": "V1",
   "rule_ids": [
-    "HARD-REVIEW-CI-CD"
+    "HARD-REVIEW-CI-CD",
+    "HARD-REVIEW-GOVERNANCE-SURFACE"
   ],
   "reasons": [
-    "CI or CD behavior changes require review."
+    "CI or CD behavior changes require review.",
+    "Changes that can touch the governance surface require independent review."
   ],
   "next_allowed_state": "WAITING_FOR_SPEC_REVIEW",
   "required_approvals": [

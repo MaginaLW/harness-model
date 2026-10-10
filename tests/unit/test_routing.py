@@ -17,7 +17,12 @@ def _bundle() -> PolicyBundle:
 
 
 def _unit(identifier: str, facts: dict[str, object], **extra: object) -> dict[str, object]:
-    return {"decision_unit_id": identifier, **facts, **extra}
+    return {
+        "decision_unit_id": identifier,
+        "impact_scope": ["docs/example.md"],
+        **facts,
+        **extra,
+    }
 
 
 def _facts(*, automatic: bool, clear: bool, impact: str, directions: int) -> dict[str, object]:
@@ -258,3 +263,44 @@ def test_risk_routing_preserves_each_decision_unit() -> None:
 
     assert result.route == "REVIEW"
     assert [unit.route for unit in result.unit_decisions] == ["AUTO", "REVIEW"]
+
+
+@pytest.mark.parametrize(
+    ("impact_scope", "expected"),
+    [
+        (["src/aiflow/storage.py"], "REVIEW"),
+        (["**"], "REVIEW"),
+        (["src/**"], "REVIEW"),
+        (["[s]rc/**"], "REVIEW"),
+        (["SRC/AIFLOW/x.py"], "REVIEW"),
+        (["s?c/aiflow/x.py"], "REVIEW"),
+        ([r"src\aiflow\x.py"], "REVIEW"),
+        (["docs/s?c/x.md"], "AUTO"),
+        ([".github/workflows/ci.yml"], "REVIEW"),
+        (["AGENTS.md"], "REVIEW"),
+        (["docs/**", "tests/**"], "AUTO"),
+        (["docs/operations/x.md"], "AUTO"),
+    ],
+)
+def test_governance_surface_floor_ignores_self_reported_low_impact(
+    impact_scope: list[str], expected: str
+) -> None:
+    facts = _facts(automatic=True, clear=True, impact="low", directions=1)
+    decision = route_decision_unit(_unit("DU-001", facts, impact_scope=impact_scope), _bundle())
+    assert decision.route == expected
+    assert ("HARD-REVIEW-GOVERNANCE-SURFACE" in decision.matched_rule_ids) is (expected == "REVIEW")
+
+
+def test_missing_or_empty_impact_scope_counts_as_governance_surface() -> None:
+    facts = _facts(automatic=True, clear=True, impact="low", directions=1)
+    missing = {"decision_unit_id": "DU-001", **facts}
+    assert route_decision_unit(missing, _bundle()).route == "REVIEW"
+    empty = _unit("DU-002", facts, impact_scope=[])
+    assert route_decision_unit(empty, _bundle()).route == "REVIEW"
+
+
+@pytest.mark.parametrize("impact_scope", [["../outside"], ["/abs/path"], ["a/./b"], [7]])
+def test_invalid_impact_scope_blocks_routing(impact_scope: list[object]) -> None:
+    facts = _facts(automatic=True, clear=True, impact="low", directions=1)
+    decision = route_decision_unit(_unit("DU-001", facts, impact_scope=impact_scope), _bundle())
+    assert decision.route == "BLOCK"

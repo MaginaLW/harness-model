@@ -55,7 +55,7 @@ def test_ask_scenario_requires_answer_then_passes_v1_gate(
     commit_implementation(
         repository,
         {
-            "src/aiflow/conflicts.py": (
+            "src/app/conflicts.py": (
                 "def render_conflict() -> tuple[str, str]:\n    return ('markdown', 'json')\n"
             ),
             "docs/conflict-reports.md": "# Conflict reports\n\nMarkdown and JSON are emitted.\n",

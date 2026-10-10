@@ -1,0 +1,89 @@
+allowed_scope:
+- .ai/policy/**
+- .ai/schemas/policy.schema.json
+- src/aiflow/predicates.py
+- tests/**
+- README.md
+- docs/operations/quickstart.md
+- docs/operations/recovery.md
+- examples/scenarios/**
+base_commit: 8e3d48378a11e133767cae772f39798c4f9d36e9
+branch: claude/governance-route-floor
+created_at: '2026-10-10T00:02:50Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Route any decision unit whose impact scope overlaps the governance surface
+    to at least REVIEW
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - .ai/policy/**
+  - .ai/schemas/policy.schema.json
+  - src/aiflow/predicates.py
+  - tests/**
+  - README.md
+  - docs/operations/quickstart.md
+  - docs/operations/recovery.md
+  - examples/scenarios/**
+  inputs:
+  - TASK-0073 declared impact low with src/aiflow/** in scope and was routed AUTO;
+    AGENTS.md says the escalation list must go through review, but no Policy rule
+    enforces it.
+  - 'Owner-approved plan (2026-10-10): agents may record approvals for escalation-list
+    tasks only after independent review, so the review floor must be enforced by Policy.'
+  permission_requirements: []
+  planned_actions:
+  - Add overlaps_paths predicate operator and schema enum value.
+  - Add HARD-REVIEW-GOVERNANCE-SURFACE to hard-rules.yaml and bump Policy to 2.5.0.
+  - Add operator and routing tests; update version references in docs.
+  protections:
+    dry_run: false
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0075
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Unit tests for overlaps_paths and routing of governance-surface units.
+  - Full pytest with coverage >=85%, diff coverage >=90%, ruff, mypy; AI Flow verify
+    and gate.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 009dd87e05053a76828736452ce03d79aa7e5348be7e47d39e779df3a6132826
+goal: Route any decision unit whose impact scope overlaps the governance surface to
+  at least REVIEW
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-10-10T00:14:44Z'
+subject_commit: 4df0d739eed942d376137fe092eee0124370f42f
+task_id: TASK-0075
+updated_at: '2026-10-10T00:44:35Z'
+worktree_dirty: false
+worktree_dirty_paths: []
