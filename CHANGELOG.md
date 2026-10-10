@@ -7,6 +7,14 @@ package 已发布到外部 registry。
 
 ### Changed
 
+- active Policy 升至 `2.4.0`：V1/V2 的 pytest 检查共享一次完整覆盖率 pytest 执行（TASK-0072）。
+- 精简 `src/aiflow`：YAML 读取加缓存、场景 runner 移到 tests、删除死代码（TASK-0073）。
+- 新任务 ID 分配跳过其他分支已用的任务编号（TASK-0074）。
+- 删除未接入的 runner、诊断与证据移交工具以及 `tools/gauntlet.py`。
+- 精简文档入口，过程记录不再堆入入口文件。
+- PR 只用 merge commit 合并，不改写已推送历史（AGENTS.md 规则 9）。
+- 记录项目所有者 2026-10-10 授予的常设授权（AGENTS.md「常设授权」）：限定条件下 Agent 可自主推送、开 PR、合并并代为记录批准。
+
 - 为维护模式补充升级清单：`.github/workflows/**`、`.ai/policy/**`、`.ai/schemas/**`、`src/aiflow/**`、`.gitignore` 与 `.gitattributes`、任务账本本身，以及任何有外部副作用或不可逆的动作，仍须走 AI Flow。标记本身是二值的，无法区分「改一行文档」与「改 CI 任务解析」——本轮的 TASK-0035 正属于后者，而 TASK-0036 的实现审核抓到了全部测试都放过的忽略规则漏洞；清单由入口文件契约测试强制，AGENTS.md 的行数上限相应放宽到 27。同时修正 `docs/operations/github-branch-protection.md` 中「所有者已结束自举、后续 PR 走正式路径」的过时表述。
 
 - 项目所有者明确决定进入仓库维护模式：重建 `.ai/bootstrap-mode.yaml`（`mode: bootstrap_auto` / `status: active`），代码、配置、CI 或行为变更不再强制创建 AI Flow task。维护模式**只**解除任务账本的强制性——CI 质量门禁的每一项检查与阈值（完整测试、85% 总覆盖率、90% diff coverage、whitespace、Ruff、format、mypy）、`main` 分支保护、以及高风险动作必须单独获批的要求均不放松；既有任务记录、证据与日志仍是追加式的。`src/aiflow/**` 不含任何 bootstrap 感知，CLI 保持完全可用，风险较高或需要留痕的变更仍应主动走 AI Flow。CI 在 base SHA 上读取标记，因此本次进入 PR 自身仍走正式路径；恢复强制模式只需删除标记文件。
