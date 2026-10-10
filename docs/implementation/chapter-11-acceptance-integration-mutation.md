@@ -12,6 +12,8 @@ Chapter 11 已分阶段补全 live V2 的执行证据。最终结论绑定 TASK-
 - `--check acceptance` 或 `--check integration` 只运行所选进程且不调度 mutation；但 V2 的必需 mutation artifact 缺失时整体结论仍为 `failed`，不能用 partial/provisional 语义掩盖，也不能成为 Gate-eligible evidence。只有显式选择并通过 `targeted_mutation`、且所选检查与 verifier role fact 同时完整时，partial observation 才可为 provisional。
 - 计划解析继续拒绝错误 pytest 目录、错误 parser、`aiflow --help` 占位和 shell-like 命令形式。
 
+> 现行说明：以上固定命令描述的是 Policy `2.1.0` 时的行为。自 Policy `2.4.0`（TASK-0072）起，acceptance 与 integration 检查与其他 pytest 检查共享同一次完整覆盖率 pytest 执行；历史证据保留其当时记录的原始命令。
+
 ## 11.2 已完成：受控 mutant manifest
 
 - `.ai/mutations/phase-02-critical-manifest.json` 是仓库级、版本化权威清单，只声明五项阶段二关键保障：V2 固定必需检查、Verifier 独立性、code approval 的 passing evidence 前置、Gate 的 killed mutation 前置，以及 verification snapshot 绑定。
