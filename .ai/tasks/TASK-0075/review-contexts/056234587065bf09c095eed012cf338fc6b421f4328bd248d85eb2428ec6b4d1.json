@@ -1,0 +1,224 @@
+{
+  "base_commit": "8e3d48378a11e133767cae772f39798c4f9d36e9",
+  "branch": "claude/governance-route-floor",
+  "classification_input_sha256": "e494c1e5efe3a778d37f5e0be81b458e0001558facaced5e49b7947c506b7773",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/**",
+      ".ai/schemas/policy.schema.json",
+      "src/aiflow/predicates.py",
+      "tests/**",
+      "README.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/recovery.md",
+      "examples/scenarios/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Route any decision unit whose impact scope overlaps the governance surface to at least REVIEW",
+        "impact_scope": [
+          ".ai/policy/**",
+          ".ai/schemas/policy.schema.json",
+          "src/aiflow/predicates.py",
+          "tests/**",
+          "README.md",
+          "docs/operations/quickstart.md",
+          "docs/operations/recovery.md",
+          "examples/scenarios/**"
+        ],
+        "planned_actions": [
+          "Add overlaps_paths predicate operator and schema enum value.",
+          "Add HARD-REVIEW-GOVERNANCE-SURFACE to hard-rules.yaml and bump Policy to 2.5.0.",
+          "Add operator and routing tests; update version references in docs."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/hard-rules.yaml",
+        ".ai/policy/permissions.yaml",
+        ".ai/policy/routing.yaml",
+        ".ai/policy/verification-levels.yaml",
+        ".ai/schemas/policy.schema.json",
+        "README.md",
+        "docs/operations/quickstart.md",
+        "docs/operations/recovery.md",
+        "examples/scenarios/ask-conflict-strategy/input.yaml",
+        "examples/scenarios/review-workflow-change/expected.json",
+        "src/aiflow/predicates.py",
+        "tests/e2e/test_ask_scenario.py",
+        "tests/fixtures/routing/decision-table.json",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_routing.py"
+      ],
+      "files": [
+        {
+          "additions": 21,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/hard-rules.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/permissions.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/routing.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/schemas/policy.schema.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "README.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "examples/scenarios/ask-conflict-strategy/input.yaml"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 2,
+          "path": "examples/scenarios/review-workflow-change/expected.json"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/predicates.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/e2e/test_ask_scenario.py"
+        },
+        {
+          "additions": 475,
+          "binary": false,
+          "deletions": 23,
+          "path": "tests/fixtures/routing/decision-table.json"
+        },
+        {
+          "additions": 20,
+          "binary": false,
+          "deletions": 4,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_routing.py"
+        }
+      ],
+      "totals": {
+        "additions": 633,
+        "deletions": 42,
+        "files": 15
+      }
+    },
+    "goal": "Route any decision unit whose impact scope overlaps the governance surface to at least REVIEW",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0075",
+        "--actor",
+        "claude-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "056234587065bf09c095eed012cf338fc6b421f4328bd248d85eb2428ec6b4d1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "b1ead3917f3816fd0229411324608ed73b3a2bc04116fdad6a3fc07165c9fe21",
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "009dd87e05053a76828736452ce03d79aa7e5348be7e47d39e779df3a6132826",
+  "subject_commit": "4df0d739eed942d376137fe092eee0124370f42f",
+  "task_id": "TASK-0075"
+}

@@ -1,0 +1,51 @@
+{
+  "base_commit": "8e3d48378a11e133767cae772f39798c4f9d36e9",
+  "branch": "claude/governance-route-floor",
+  "classification_input_sha256": "69a42141a15e9404cdf378b2a9ac0fe106b53e132453b8a2cae14fa1090d552a",
+  "content": {
+    "allowed_scope": [
+      ".ai/policy/**",
+      ".ai/schemas/policy.schema.json",
+      "src/aiflow/predicates.py",
+      "tests/**",
+      "README.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/recovery.md",
+      "examples/scenarios/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Route any decision unit whose impact scope overlaps the governance surface to at least REVIEW",
+        "impact_scope": [
+          ".ai/policy/**",
+          ".ai/schemas/policy.schema.json",
+          "src/aiflow/predicates.py",
+          "tests/**",
+          "README.md",
+          "docs/operations/quickstart.md",
+          "docs/operations/recovery.md",
+          "examples/scenarios/**"
+        ],
+        "planned_actions": [
+          "Add overlaps_paths predicate operator and schema enum value.",
+          "Add HARD-REVIEW-GOVERNANCE-SURFACE to hard-rules.yaml and bump Policy to 2.5.0.",
+          "Add operator and routing tests; update version references in docs."
+        ]
+      }
+    ],
+    "goal": "Route any decision unit whose impact scope overlaps the governance surface to at least REVIEW",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "400d3b2d161c842f6bbcb51308e15f974ddea629ab175b0fa558614c17923bd2",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "b87e94fe0ec1a9a7c028b7e8019cf75b286c9af01f7c2ab89af65c3f5c21edf9",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "009dd87e05053a76828736452ce03d79aa7e5348be7e47d39e779df3a6132826",
+  "task_id": "TASK-0075"
+}

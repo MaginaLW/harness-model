@@ -1,0 +1,40 @@
+{
+  "context_sha256": "0e22d93716bc2d5077f2b1f069567e296430dd180ef6300b3081ea31e6d65c5b",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/policy/hard-rules.yaml:103"
+      ],
+      "finding_id": "RF-007",
+      "location": {
+        "line": 11,
+        "path": "AGENTS.md"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Policy governance list is wider than the AGENTS.md escalation list; align AGENTS.md in a follow-up"
+    },
+    {
+      "evidence_refs": [
+        "README.md:13"
+      ],
+      "finding_id": "RF-008",
+      "location": {
+        "line": 11,
+        "path": "docs/operations/maintenance-status.md"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "maintenance-status.md still says Policy 2.4.0 (out of scope); follow up"
+    }
+  ],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-10T10:40:00Z",
+  "review_id": "REV-0003",
+  "review_stage": "design",
+  "reviewer": "claude-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Policy 2.5.0 differs from 2.4.0 only by the version bumps, HARD-REVIEW-GOVERNANCE-SURFACE (REVIEW, priority 750, match all, ten governance patterns, missing: match) and the schema operator with its non-empty string-array check. The REV-0002 design holds in commit 23c5721; operator probes and golden results behave as specified; REVIEW/V1 is appropriate.",
+  "task_id": "TASK-0075"
+}

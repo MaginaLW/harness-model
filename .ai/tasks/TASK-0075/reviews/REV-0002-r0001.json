@@ -1,0 +1,51 @@
+{
+  "context_sha256": "400d3b2d161c842f6bbcb51308e15f974ddea629ab175b0fa558614c17923bd2",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0075/spec.md"
+      ],
+      "finding_id": "RF-007",
+      "location": {
+        "line": 11,
+        "path": "AGENTS.md"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Policy governance list is wider than the AGENTS.md escalation list; align AGENTS.md in a follow-up"
+    },
+    {
+      "evidence_refs": [],
+      "finding_id": "RF-008",
+      "location": {
+        "line": 11,
+        "path": "docs/operations/maintenance-status.md"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "maintenance-status.md still says Policy 2.4.0 and is outside scope; follow up"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/routing.py:286"
+      ],
+      "finding_id": "RF-009",
+      "location": {
+        "line": 66,
+        "path": "src/aiflow/decision_units.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Empty impact_scope yields no overlap; optionally treat as overlapping"
+    }
+  ],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-10T10:00:00Z",
+  "review_id": "REV-0002",
+  "review_stage": "design",
+  "reviewer": "claude-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Revised spec 009dd87e resolves REV-0001: golden criterion restated and achievable, wildcard segments include *, ? and [, schema if/then validates overlaps_paths values at load time, governance list widened conservatively, normalize_repository_path plus casefold, priority 750 with missing: match. Checking impact_scope remains sufficient against AUTO edits of governance paths; REVIEW/V1 fits. Implementation notes: move the e2e ASK scenario path, confirm verification-evidence-flow routing expectations.",
+  "task_id": "TASK-0075"
+}

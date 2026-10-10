@@ -1,0 +1,89 @@
+{
+  "context_sha256": "64944d222b3edc14da85f3b436bdc69508755ed98d867e8bf4cc5696c15fde93",
+  "findings": [
+    {
+      "evidence_refs": [
+        "examples/scenarios/ask-conflict-strategy/input.yaml:13",
+        "examples/scenarios/review-workflow-change/expected.json"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 26,
+        "path": ".ai/tasks/TASK-0075/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "Golden scenarios change: ask-conflict-strategy impact_scope uses src/aiflow and becomes REVIEW; review-workflow-change gains a rule id; examples/scenarios not in scope"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/scope.py:135"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 9,
+        "path": ".ai/tasks/TASK-0075/spec.md"
+      },
+      "severity": "high",
+      "status": "open",
+      "title": "Treat any segment containing *, ? or [ as a wildcard segment; otherwise [s]rc/** is read as a literal and routes AUTO"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/predicates.py:52"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 36,
+        "path": ".ai/tasks/TASK-0075/spec.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Name the load-time validation for overlaps_paths values (schema if/then or Policy cross-file check)"
+    },
+    {
+      "evidence_refs": [
+        ".github/workflows/ai-quality-gate.yml:43"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 11,
+        "path": "AGENTS.md"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Governance list omits tools/ci/**, .ai/bootstrap-mode.yaml, .ai/tasks/**, AGENTS.md, CLAUDE.md, pyproject.toml, uv.lock"
+    },
+    {
+      "evidence_refs": [],
+      "finding_id": "RF-005",
+      "location": {
+        "line": 82,
+        "path": "src/aiflow/scope.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Reuse normalize_repository_path (rejects '.', absolute, empty) and casefold both sides"
+    },
+    {
+      "evidence_refs": [],
+      "finding_id": "RF-006",
+      "location": {
+        "line": 23,
+        "path": "tests/unit/test_routing.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "missing:error blocks synthetic routing test units without impact_scope; rule priority unspecified"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-10-10T09:30:00Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "claude-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Checking decision-unit impact_scope is sufficient (classification requires impact_scope within allowed_scope; AUTO commits are limited to AUTO-unit impact_scope; attestation/worktree changes must be governance-only) and segment-prefix overlap is conservative, but the golden-unchanged acceptance criterion is unattainable, wildcard segments must include ?, [ as well as *, load-time validation needs a named mechanism, and the governance list misses paths that steer CI or rules.",
+  "task_id": "TASK-0075"
+}

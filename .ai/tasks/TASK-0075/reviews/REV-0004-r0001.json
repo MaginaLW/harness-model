@@ -1,0 +1,53 @@
+{
+  "context_sha256": "d311a7262a3523b4de4ce9163ada013df756fda1bd005dd398197e79d53fbe00",
+  "findings": [
+    {
+      "evidence_refs": [
+        "docs/operations/hooks.md:13-17"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 111,
+        "path": ".ai/policy/hard-rules.yaml"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Governance list omits tools/hooks/**, .claude/** and .codex/**; follow-up Policy task (matches frozen spec)"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/predicates.py:80"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 268,
+        "path": "tests/unit/test_routing.py"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "No tests for the '?' wildcard or backslash normalization; those mutants survive"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/predicates.py:65-79"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 180,
+        "path": ".ai/schemas/policy.schema.json"
+      },
+      "severity": "low",
+      "status": "open",
+      "title": "Policy-side overlaps_paths values are not path-validated at load; fails closed at evaluation"
+    }
+  ],
+  "outcome": "APPROVE_WITH_CONDITIONS",
+  "recorded_at": "2026-10-10T11:20:00Z",
+  "review_id": "REV-0004",
+  "review_stage": "implementation",
+  "reviewer": "claude-implementation-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "overlaps_paths is conservative for every adversarial pattern tried and invalid inputs always BLOCK; golden and fixture edits only reflect the new rule; mutation testing kills most mutants. Conditions: add tests for the '?' wildcard and backslash normalization (two mutants survive); extend the governance list to tools/hooks/**, .claude/** and .codex/** in a follow-up Policy task.",
+  "task_id": "TASK-0075"
+}
