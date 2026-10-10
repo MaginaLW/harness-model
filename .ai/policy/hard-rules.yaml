@@ -1,5 +1,5 @@
 schema_version: "1.0"
-policy_version: "2.4.0"
+policy_version: "2.5.0"
 policy_kind: hard_rules
 rules:
   - id: HARD-BLOCK-EXTERNAL-SENSITIVE
@@ -100,3 +100,23 @@ rules:
         operator: not_equals
         value: []
         missing: error
+  - id: HARD-REVIEW-GOVERNANCE-SURFACE
+    priority: 750
+    route: REVIEW
+    explanation: Changes that can touch the governance surface require independent review.
+    match: all
+    conditions:
+      - field: impact_scope
+        operator: overlaps_paths
+        value:
+          - .github/**
+          - .ai/**
+          - src/aiflow/**
+          - tools/ci/**
+          - AGENTS.md
+          - CLAUDE.md
+          - pyproject.toml
+          - uv.lock
+          - .gitignore
+          - .gitattributes
+        missing: match

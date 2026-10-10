@@ -8,7 +8,8 @@ from dataclasses import dataclass
 from numbers import Real
 from typing import cast
 
-from aiflow.errors import PolicyError
+from aiflow.errors import ContractError, PolicyError
+from aiflow.scope import normalize_repository_path
 
 SUPPORTED_OPERATORS = frozenset(
     {
@@ -20,6 +21,7 @@ SUPPORTED_OPERATORS = frozenset(
         "exists",
         "is_empty",
         "greater_than_or_equal",
+        "overlaps_paths",
     }
 )
 MISSING_STRATEGIES = frozenset({"error", "match", "no_match"})
@@ -58,6 +60,45 @@ def _require_sequence(value: object, *, operator: str) -> Sequence[object]:
 
 def _is_number(value: object) -> bool:
     return isinstance(value, Real) and not isinstance(value, bool)
+
+
+def _literal_prefix(pattern: object, *, operator: str) -> tuple[str, ...]:
+    """Return the casefolded path segments before the first wildcard segment."""
+    if not isinstance(pattern, str):
+        raise _policy_error(
+            "Predicate requires path strings", "PREDICATE_TYPE_INVALID", operator=operator
+        )
+    try:
+        normalized = normalize_repository_path(pattern)
+    except ContractError as error:
+        raise _policy_error(
+            "Predicate path is invalid", "PREDICATE_TYPE_INVALID", operator=operator
+        ) from error
+    prefix: list[str] = []
+    for segment in normalized.casefold().split("/"):
+        if any(character in segment for character in "*?["):
+            break
+        prefix.append(segment)
+    return tuple(prefix)
+
+
+def _paths_overlap(actual: object, expected: object, *, operator: str) -> bool:
+    """Conservatively decide whether any two path patterns can name a common path."""
+    actual_prefixes = [
+        _literal_prefix(item, operator=operator)
+        for item in _require_sequence(actual, operator=operator)
+    ]
+    expected_prefixes = [
+        _literal_prefix(item, operator=operator)
+        for item in _require_sequence(expected, operator=operator)
+    ]
+    if not actual_prefixes:
+        return True
+    return any(
+        left[: len(right)] == right or right[: len(left)] == left
+        for left in actual_prefixes
+        for right in expected_prefixes
+    )
 
 
 def _validate_condition(condition: Mapping[str, object]) -> tuple[str, str, object, str]:
@@ -122,6 +163,8 @@ def evaluate_predicate(
                 "Predicate requires a collection value", "PREDICATE_TYPE_INVALID", operator=operator
             )
         matched = len(actual) == 0
+    elif operator == "overlaps_paths":
+        matched = _paths_overlap(actual, expected, operator=operator)
     else:
         if not _is_number(actual) or not _is_number(expected):
             raise _policy_error(

@@ -10,7 +10,7 @@
 
 ## 当前状态
 
-阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 均已完成，当前源码包版本为 `0.2.0`，active Policy 为 `2.4.0`（V1/V2 只运行一次完整覆盖率 pytest）。阶段三保持 `not_started` 且进入门未满足；系统不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。当前状态、未完成项与待决定事项只在[维护收尾与待办](docs/operations/maintenance-status.md)维护。`docs/superpowers/state/*.yaml` 是阶段二于 2026-08-30 完成时冻结的历史投影，不是当前事实来源。
+阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 均已完成，当前源码包版本为 `0.2.0`，active Policy 为 `2.5.0`（V1/V2 只运行一次完整覆盖率 pytest；`impact_scope` 触及治理面的决策单元至少走 REVIEW）。阶段三保持 `not_started` 且进入门未满足；系统不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。当前状态、未完成项与待决定事项只在[维护收尾与待办](docs/operations/maintenance-status.md)维护。`docs/superpowers/state/*.yaml` 是阶段二于 2026-08-30 完成时冻结的历史投影，不是当前事实来源。
 
 ## 阶段一目标
 

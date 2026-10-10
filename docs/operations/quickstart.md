@@ -167,7 +167,7 @@ python -m aiflow classify <TASK-ID> --actor quickstart
 python -m aiflow status <TASK-ID> --format json
 ```
 
-对上述低影响、可逆、无外部副作用的完整事实，预期 route 为 `AUTO`。两风险字段缺失时，
+对上述低影响、可逆、无外部副作用的完整事实，预期 route 为 `AUTO`。若决策单元的 `impact_scope` 触及治理面（`.github/**`、`.ai/**`、`src/aiflow/**`、`tools/ci/**`、`AGENTS.md` 等，清单见 `HARD-REVIEW-GOVERNANCE-SURFACE`），无论自报影响如何，route 至少为 `REVIEW`。两风险字段缺失时，
 先处理上述零写输入错误；其他事实不足则按 Policy 分类，若得到可解释的 `BLOCK`，
 应按 [恢复手册](recovery.md) 处理，不直接改写状态。
 
@@ -240,7 +240,7 @@ python -m aiflow verify <TASK-ID> --actor <VERIFIER> --finalize
 python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "local V2 evidence reviewed"
 ```
 
-active Policy `2.4.0` 下，`unit_tests`、`regression_tests`、`coverage_xml` 以及 V2 的
+active Policy `2.5.0` 下，`unit_tests`、`regression_tests`、`coverage_xml` 以及 V2 的
 `acceptance`、`integration` 共用同一条完整覆盖率命令
 `python -m pytest --cov=aiflow --cov-branch --cov-report=xml:<run>/coverage.xml`，计划引擎将其合并为
 一次执行；各检查 ID 仍分别出现在 evidence 中，但共享同一进程结果与日志，失败不再按子集归因。
