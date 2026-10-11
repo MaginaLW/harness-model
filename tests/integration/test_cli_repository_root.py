@@ -79,6 +79,38 @@ def test_real_status_is_identical_at_root_and_deep_directory_without_chdir_or_as
     assert Path.cwd() == invocation
 
 
+def test_real_validate_is_identical_at_root_and_deep_directory_without_chdir_or_asset_writes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    invocation = _deep(repository)
+    monkeypatch.chdir(repository)
+    assert cli.main(["start", "--objective", "validate same task", "--allow", "tracked.txt"]) == 0
+    capsys.readouterr()
+    before = _snapshot(repository / ".ai")
+
+    assert cli.main(["validate", "TASK-0001"]) == 0
+    expected = capsys.readouterr()
+    assert expected.out == "TASK-0001 valid\n"
+    assert expected.err == ""
+    assert Path.cwd() == repository
+    assert _snapshot(repository / ".ai") == before
+    monkeypatch.chdir(invocation)
+    monkeypatch.setattr(os, "chdir", lambda *_args: pytest.fail("CLI must never chdir"))
+
+    try:
+        result = cli.main(["validate", "TASK-0001"])
+    finally:
+        assert Path.cwd() == invocation
+        assert _snapshot(repository / ".ai") == before
+    assert result == 0
+    actual = capsys.readouterr()
+    assert actual.out == expected.out
+    assert actual.err == expected.err
+
+
 @pytest.mark.parametrize(
     "arguments, expected",
     [
@@ -252,6 +284,160 @@ def test_explicit_file_arguments_stay_relative_to_invocation_with_root_named_dec
         }
         assert capsys.readouterr().out.strip() == str((invocation / "result.json").resolve())
     assert Path.cwd() == invocation
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "begin",
+        "close",
+        "classify",
+        "freeze",
+        "escalate",
+        "resolve",
+        "review-show",
+        "review-resolve",
+        "scope",
+        "sync",
+        "start-recover",
+    ],
+)
+def test_remaining_business_dispatches_use_one_root_schema_scope_and_preserve_cwd(
+    command: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    invocation = _deep(repository)
+    schema_path = repository / ".ai" / "schemas" / "task.schema.json"
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema["title"] = "dispatch repository schema"
+    schema_path.write_text(json.dumps(schema), encoding="utf-8")
+    before = _snapshot(repository / ".ai")
+    monkeypatch.chdir(invocation)
+    monkeypatch.setattr(os, "chdir", lambda *_args: pytest.fail("dispatch must never chdir"))
+    seen: list[Path] = []
+    task_id = "TASK-0001"
+    subject = "a" * 40
+    recovered_directory = repository / ".ai" / "tasks" / task_id
+    arguments = {
+        "begin": ["begin", task_id, "--actor", "implementer"],
+        "close": [
+            "close",
+            task_id,
+            "--result",
+            "merged",
+            "--merge-commit",
+            subject,
+            "--actor",
+            "owner",
+        ],
+        "classify": ["classify", task_id, "--actor", "classifier"],
+        "freeze": ["freeze", task_id, "--actor", "specifier"],
+        "escalate": [
+            "escalate",
+            task_id,
+            "--to",
+            "REVIEW",
+            "--reason-code",
+            "scope_expanded",
+            "--impact",
+            "bounded scope",
+            "--next-step",
+            "review scope",
+            "--actor",
+            "reviewer",
+        ],
+        "resolve": [
+            "resolve",
+            task_id,
+            "--condition",
+            "scope assessed",
+            "--evidence-ref",
+            "reviews/REV-0001-r0001.json",
+            "--reason",
+            "existing evidence",
+            "--actor",
+            "owner",
+        ],
+        "review-show": ["review", "show", task_id, "--format", "json"],
+        "review-resolve": [
+            "review",
+            "resolve",
+            task_id,
+            "--review",
+            "REV-0001",
+            "--finding",
+            "F-001",
+            "--reason",
+            "resolved",
+            "--actor",
+            "reviewer",
+        ],
+        "scope": ["scope", task_id],
+        "sync": ["sync", task_id, "--actor", "verifier"],
+        "start-recover": ["start", "--recover", task_id],
+    }
+    services = {
+        "begin": "begin_task",
+        "close": "close_task",
+        "classify": "classify_task",
+        "freeze": "freeze_task",
+        "escalate": "escalate_task",
+        "resolve": "record_resolution",
+        "review-show": "list_review_records",
+        "review-resolve": "resolve_review_finding",
+        "scope": "validate_task_scope",
+        "sync": "evaluate_and_sync_verification_subject",
+        "start-recover": "recover_task",
+    }
+    results = {
+        "begin": SimpleNamespace(task={"current_state": "IMPLEMENTING"}),
+        "close": SimpleNamespace(task={"current_state": "MERGED"}),
+        "classify": {"effective_route": "REVIEW"},
+        "freeze": SimpleNamespace(task={"current_state": "READY_TO_IMPLEMENT"}),
+        "escalate": SimpleNamespace(task={"current_state": "ESCALATED"}),
+        "resolve": SimpleNamespace(task={"current_state": "ESCALATED"}),
+        "review-show": (),
+        "review-resolve": SimpleNamespace(record={"review_id": "REV-0001", "revision": 2}),
+        "scope": None,
+        "sync": SimpleNamespace(subject_commit=subject),
+        "start-recover": SimpleNamespace(task_id=task_id, task_directory=recovered_directory),
+    }
+    expected = {
+        "begin": f"{task_id} IMPLEMENTING\n",
+        "close": f"{task_id} MERGED\n",
+        "classify": f"{task_id} REVIEW\n",
+        "freeze": f"{task_id} READY_TO_IMPLEMENT\n",
+        "escalate": f"{task_id} ESCALATED\n",
+        "resolve": f"{task_id} ESCALATED\n",
+        "review-show": json.dumps({"task_id": task_id, "reviews": []}, sort_keys=True) + "\n",
+        "review-resolve": f"{task_id} REV-0001 r0002\n",
+        "scope": f"{task_id} scope-valid\n",
+        "sync": f"{task_id} {subject}\n",
+        "start-recover": f"{task_id}\n{recovered_directory.resolve()}\n",
+    }
+
+    def business(root: Path, *_args: object, **_kwargs: Any) -> Any:
+        assert root == repository.resolve(), "business service must receive the Git worktree root"
+        assert Path.cwd() == invocation
+        assert contracts.load_schema("task")["title"] == "dispatch repository schema"
+        seen.append(root)
+        return results[command]
+
+    monkeypatch.setattr(cli, services[command], business)
+
+    try:
+        result = cli.main(arguments[command])
+    finally:
+        assert Path.cwd() == invocation
+        assert _snapshot(repository / ".ai") == before
+    assert result == 0
+    captured = capsys.readouterr()
+    assert captured.out == expected[command]
+    assert captured.err == ""
+    assert seen == [repository.resolve()]
 
 
 def test_cli_success_and_business_failure_restore_prior_schema_between_repositories(

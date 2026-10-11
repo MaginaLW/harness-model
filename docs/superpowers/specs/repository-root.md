@@ -59,7 +59,7 @@ ContextVar 仅提供调用作用域隔离，不证明跨线程自动传播或建
 | 无仓库入口 | help/version/无命令/argparse错误不调用Git或业务服务，保留现有退出与输出合同。 |
 | 正式质量 | 固定候选通过完整测试、85%总覆盖率、90%diff coverage、whitespace、Ruff、format、mypy及required CI；原生verify/Gate分别保留对应版本结果。 |
 
-新增测试以真实 CLI 分派、资源绑定和错误边界为中心，不只复述辅助函数。mock仅用于难以稳定制造的Git超时/非法输出；根、子目录、嵌套仓库及文件参数场景采用真实隔离fixture。
+新增测试验证 CLI 分派、资源绑定和错误边界，不只复述辅助函数。Git 超时/非法输出可使用 mock；业务服务 spy 可隔离服务状态，验证 CLI 接线、相对文件参数及 context 恢复。真实 start/status/validate、nested/linked Git 与 Schema registry 验证仍使用真实隔离 fixture。
 
 ## 6. 并行与准入顺序
 
