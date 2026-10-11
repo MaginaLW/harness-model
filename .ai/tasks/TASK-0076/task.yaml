@@ -92,8 +92,8 @@ goal: Retire external review import and the pytest temp-root option, consolidate
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-10-10T00:45:57Z'
-subject_commit: 8fb09e953d4a5ab1087ad4a561bd56d948370984
+subject_commit: 8b9fa19d64f980b022e74e159c6d04f74a0fe984
 task_id: TASK-0076
-updated_at: '2026-10-11T04:53:23Z'
+updated_at: '2026-10-11T05:10:24Z'
 worktree_dirty: false
 worktree_dirty_paths: []
