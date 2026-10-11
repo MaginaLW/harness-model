@@ -64,6 +64,7 @@ def _run(advisory: Any, root: Path, capsys: pytest.CaptureFixture[str]) -> tuple
     report = json.loads(captured.out)
     assert report["probability_status"] == "unestimated"
     assert report["execution_allowed"] is False
+    assert "SOURCE_READ_ATOMICITY_NOT_ESTABLISHED" in report["unknown"]
     return result, report
 
 
@@ -85,6 +86,113 @@ def test_current_approval_is_preserved_without_a_new_human_approval_request(
     ]
     assert report["mechanical_preparation"] == []
     assert report["native_gate"] == {"status": "not_evaluated"}
+    assert report["native_status"]["missing_conditions"] == ["spec_approval"]
+    assert report["advice_basis"] == [
+        {
+            "advice": "CHECK_EXISTING_APPROVALS_AND_STANDING_AUTHORIZATION",
+            "source": "native_status.missing_conditions",
+            "missing_condition": "spec_approval",
+        }
+    ]
+
+
+@pytest.mark.parametrize("field", ["base_commit", "subject_commit", "observed_head"])
+def test_native_commit_changes_remain_visible_without_changing_native_decisions(
+    field: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    advisory: Any,
+) -> None:
+    summary = _summary()
+    monkeypatch.setattr(advisory, "summarize_task", lambda *_args: summary)
+    _, before = _run(advisory, tmp_path, capsys)
+
+    summary = replace(summary, **{field: "d" * 40})
+    _, after = _run(advisory, tmp_path, capsys)
+
+    assert before["native_status"][field] == getattr(_summary(), field)
+    assert after["native_status"][field] == "d" * 40
+    assert before != after
+    before["native_status"][field] = "d" * 40
+    assert before == after
+
+
+def test_absent_subject_is_unknown_without_an_unrecognized_field_warning(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    advisory: Any,
+) -> None:
+    monkeypatch.setattr(advisory, "summarize_task", lambda *_args: _summary(subject_commit=None))
+
+    result, report = _run(advisory, tmp_path, capsys)
+
+    assert result == 0
+    assert report["native_status"]["subject_commit"] == "unknown"
+    assert "NATIVE_STATUS_FIELD_UNRECOGNIZED" not in report["unknown"]
+
+
+@pytest.mark.parametrize("field", ["base_commit", "subject_commit", "observed_head"])
+@pytest.mark.parametrize("value", ["SENSITIVE /private/path", "A" * 40, "d" * 39, "d" * 41])
+def test_unrecognized_commit_values_are_not_echoed(
+    field: str,
+    value: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    advisory: Any,
+) -> None:
+    monkeypatch.setattr(advisory, "summarize_task", lambda *_args: _summary(**{field: value}))
+
+    result, report = _run(advisory, tmp_path, capsys)
+
+    assert result == 0
+    assert report["native_status"][field] == "unknown"
+    assert value not in json.dumps(report)
+    assert "NATIVE_STATUS_FIELD_UNRECOGNIZED" in report["unknown"]
+
+
+def test_distinct_native_missing_conditions_keep_their_own_advice_basis(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    advisory: Any,
+) -> None:
+    summary = _summary(
+        missing_conditions=("spec_approval", "classification", "code_approval", "classification")
+    )
+    monkeypatch.setattr(advisory, "summarize_task", lambda *_args: summary)
+
+    result, report = _run(advisory, tmp_path, capsys)
+
+    assert result == 0
+    assert report["native_status"]["missing_conditions"] == [
+        "classification",
+        "code_approval",
+        "spec_approval",
+    ]
+    assert report["mechanical_preparation"] == ["PREPARE_CLASSIFICATION_FACTS"]
+    assert report["decision_or_authorization_checks"] == [
+        "CHECK_EXISTING_APPROVALS_AND_STANDING_AUTHORIZATION"
+    ]
+    assert report["advice_basis"] == [
+        {
+            "advice": "PREPARE_CLASSIFICATION_FACTS",
+            "source": "native_status.missing_conditions",
+            "missing_condition": "classification",
+        },
+        {
+            "advice": "CHECK_EXISTING_APPROVALS_AND_STANDING_AUTHORIZATION",
+            "source": "native_status.missing_conditions",
+            "missing_condition": "code_approval",
+        },
+        {
+            "advice": "CHECK_EXISTING_APPROVALS_AND_STANDING_AUTHORIZATION",
+            "source": "native_status.missing_conditions",
+            "missing_condition": "spec_approval",
+        },
+    ]
 
 
 @pytest.mark.parametrize("state", ["FAILED", "BLOCKED", "ESCALATED"])
@@ -96,7 +204,9 @@ def test_failed_or_blocked_work_is_diagnosed_without_retry_advice(
     advisory: Any,
 ) -> None:
     summary = _summary(
-        current_state=state, missing_conditions=("verification_result",), evidence="stale"
+        current_state=state,
+        missing_conditions=("verification_result", "retry_reason_or_escalation"),
+        evidence="stale",
     )
     monkeypatch.setattr(advisory, "summarize_task", lambda *_args: summary)
 
@@ -108,6 +218,13 @@ def test_failed_or_blocked_work_is_diagnosed_without_retry_advice(
     assert report["mechanical_preparation"] == []
     assert report["decision_or_authorization_checks"] == [
         "CHECK_DIAGNOSIS_SCOPE_AND_EXISTING_AUTHORIZATION"
+    ]
+    assert report["advice_basis"] == [
+        {
+            "advice": "CHECK_DIAGNOSIS_SCOPE_AND_EXISTING_AUTHORIZATION",
+            "source": "native_status.current_state",
+            "state": state,
+        }
     ]
 
 
@@ -128,6 +245,8 @@ def test_merged_history_does_not_become_pending_reverification(
     assert result == 0
     assert report["native_status"]["evidence"] == "stale"
     assert report["mechanical_preparation"] == report["decision_or_authorization_checks"] == []
+    assert report["native_status"]["missing_conditions"] == ["reverification"]
+    assert report["advice_basis"] == []
 
 
 def test_ask_is_a_direction_decision_and_unknown_fields_are_not_repeated(
@@ -146,7 +265,15 @@ def test_ask_is_a_direction_decision_and_unknown_fields_are_not_repeated(
     _, report = _run(advisory, tmp_path, capsys)
 
     assert report["native_status"]["route"] == "unknown"
+    assert report["native_status"]["missing_conditions"] == ["ask_answer"]
     assert report["decision_or_authorization_checks"] == ["DECIDE_ASK_DIRECTION"]
+    assert report["advice_basis"] == [
+        {
+            "advice": "DECIDE_ASK_DIRECTION",
+            "source": "native_status.missing_conditions",
+            "missing_condition": "ask_answer",
+        }
+    ]
     assert "NATIVE_MISSING_CONDITION_UNRECOGNIZED" in report["unknown"]
 
 
