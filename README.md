@@ -45,6 +45,10 @@ Chapters 1–7（工程基线、任务状态、分流与验证、治理交互、
 
 阶段三仍为 `not_started`，实际实现准入尚未完成。[阶段三进入输入](docs/implementation/phase-03-entry-inputs.md)保留原三门，并明确两包关系：3-A 非评分准备可先做，生产估计与真实 shadow 先满足自身数据、方法和用途条件；3-B 独立验证真实 V3。整体 Phase 3 须两包各自退出；Phase 4 编排继续依赖整体退出、稳定接口与实测协调需求。完整引擎跨仓产品化、provider 和固定动作可信执行按真实需求分别准入。旧七项是历史未验收范围，TASK-0063～0071 已归档、不再默认续跑；未来能力与历史通过均不能当作当前可用能力。
 
+现有 S0/S1 准备工具包括[固定 HEAD 事实快照](docs/operations/effect-observations.md#固定提交的事实快照)和[只读任务准备建议](docs/operations/review-advisory.md)。
+建议复用当前原生 status 与适用状态的 Gate，固定 `probability_status=unestimated`、`execution_allowed=false`，不给执行权限。
+这些能力不代表生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
+
 ## 开始参与
 
 1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时，再阅读其[平台适配入口](CLAUDE.md)。
