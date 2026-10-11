@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "task_category": "coding_exercises",
+  "models": [
+    "gpt-5-high-aider-32faf82",
+    "gemini-2.5-pro-preview-06-05-32k-aider-f827f22",
+    "claude-opus-4-20250514-32k-aider-9ef3211"
+  ],
+  "sources": [
+    {
+      "source_id": "aider-polyglot-two-attempts",
+      "family": "aider-polyglot",
+      "category": "coding_exercises",
+      "url": "https://raw.githubusercontent.com/Aider-AI/aider/cb6a152e5ee27fbc77ac499d5e628ccd74a5fa2a/aider/website/_data/polyglot_leaderboard.yml",
+      "retrieved_at": "2026-10-11T17:22:35.675895+00:00",
+      "as_of": "2025-10-04",
+      "revision": "cb6a152e5ee27fbc77ac499d5e628ccd74a5fa2a",
+      "metric": "pass_rate_2_percent",
+      "direction": "higher",
+      "protocol": "225 Polyglot exercises; cumulative all-tests-pass within up to two attempts, failed-test feedback on retry. as_of is source commit date; public page updated 2025-11-20. Different harness/edit configurations are illustrative profiles, not controlled bare-model comparisons. Other budgets unknown.",
+      "observations": [
+        {
+          "model_id": "gpt-5-high-aider-32faf82",
+          "label": "gpt-5 (high)",
+          "configuration": "openai/gpt-5 alias, immutable snapshot unknown; reasoning high; diff; aider 0.86.2.dev, harness 32faf82; row date 2025-08-23; pass_rate_1=52.0 (117/225), pass_rate_2=88.0 (198/225).",
+          "score": 88.0
+        },
+        {
+          "model_id": "gemini-2.5-pro-preview-06-05-32k-aider-f827f22",
+          "label": "gemini-2.5-pro-preview-06-05 (32k think)",
+          "configuration": "thinking_tokens=32768; diff-fenced; aider 0.84.1.dev, harness f827f22; row date 2025-06-06; pass_rate_1=46.2 (104/225), pass_rate_2=83.1 (187/225).",
+          "score": 83.1
+        },
+        {
+          "model_id": "claude-opus-4-20250514-32k-aider-9ef3211",
+          "label": "claude-opus-4-20250514 (32k thinking)",
+          "configuration": "thinking_tokens=32000; diff; aider 0.83.3.dev, harness 9ef3211; row date 2025-05-25; pass_rate_1=37.3 (84/225), pass_rate_2=72.0 (162/225).",
+          "score": 72.0
+        }
+      ]
+    }
+  ]
+}
