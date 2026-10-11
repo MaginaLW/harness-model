@@ -19,11 +19,19 @@ python tools/analysis/review_advisory.py TASK-0001 --repository <完整克隆根
 正常读取退出码为 `0`，包括 Gate 拒绝；读取失败退出码为 `1`。退出码不代表批准、
 执行或合并许可。参数解析仍使用 argparse 的帮助和错误契约。
 
-`native_status` 仅投影闭合状态、路由、验证等级、新鲜度和 dirty 布尔值。
+`native_status` 投影闭合状态、路由、验证等级、新鲜度和 dirty 布尔值，以及
+`base_commit`、`subject_commit`、`observed_head` 和受限 `missing_conditions`。
+版本事实只复用原生结果，缺失保持未知。
 `native_gate` 仅包含是否实际读取、原生 passed 布尔值及已知原因码。
 这些字段保留原生含义，不能把新鲜度标签解释成新的验证结果。
 工具不输出目标、actor、文件内容、dirty 文件名、绝对路径或错误详情。
 未知原生字段只产生固定 unknown 代码，不以自由文本输出，也不推测对应动作。
+
+`advice_basis` 每行用 `advice` 和 `source` 标明建议码与来源；由原生缺项产生的建议
+带 `missing_condition`。失败诊断的 `source` 为 `native_status.current_state`，并带
+`state`。这些字段解释已有建议的来源，不新建批准、权限或验收结论；未知保持未知。
+`unknown` 始终包含 `SOURCE_READ_ATOMICITY_NOT_ESTABLISHED`，表示多次原生读取
+尚未证明是同一个原子快照，不能据版本字段建立新的放行依据。
 
 | 建议代码 | 需要准备或核对的事项 |
 | --- | --- |
@@ -54,7 +62,9 @@ python tools/analysis/review_advisory.py TASK-0001 --repository <完整克隆根
 调用者的 bytecode 设置。它用 `contextlib.chdir` 暂时进入目标根目录，并在两次原生
 读取期间共同设置 `GIT_OPTIONAL_LOCKS=0`，避免 Git status 刷新 index；退出时恢复 cwd
 与原环境值。其他 Git 环境保持原样。此入口不提供进程内并发库 API，读取也不是原子
-快照；任务或仓库同时发生变化时，应重新读取当前原件再作决定。
+快照；多次读取的原子一致性未证明，`base_commit`、`subject_commit`、`observed_head`
+也不构成固定原子窗口。
+任务或仓库同时发生变化时，应重新读取当前原件再作决定。
 
 该工具是离线建议能力，不证明置信度校准、人工打断减少、provider 接入、真实执行
 试点或阶段三退出已完成。

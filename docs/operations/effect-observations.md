@@ -42,18 +42,36 @@ python tools/analysis/approval_overhead.py --snapshot --format json
 
 快照格式版本为 `1.0`，用途标识为 `tracked_ledger_snapshot`。它先固定 `HEAD`，再读取该
 提交中明确匹配的 `.ai/tasks/TASK-*/task.yaml`、`classification.json`、`events.jsonl`、
-`evidence.json` 和 `reviews/REV-*-r*.json` Git blob；输出来源提交、实际执行工具的 SHA-256、
-各来源文件的 blob 标识及受限字段投影。它不读取未提交材料、logs/private 目录或另行采集
+`evidence.json`、`reviews/REV-*-r*.json` 及同 task tracked
+`review-contexts/<64sha>.json` Git blob；输出来源提交、实际执行工具的 SHA-256、
+各来源文件的 blob 标识及受限字段投影。未被审核引用的 context 不解析或投影，
+但仍列在白名单 blob 来源中。它不读取未提交材料、logs/private 目录或另行采集
 原始聊天；解析白名单原件后不输出 actor、审核正文、命令或本机路径，不写入文件、账本或
-Git 状态。缺少必要的 task/event
-原件、已纳入原件格式损坏或投影字段无效时拒绝输出，错误信息不回显原内容。
+Git 状态。缺少必要的 task/event 原件、参与解析的原件格式损坏或投影字段无效时
+拒绝输出，错误信息不回显原内容。
 
 每个 task 暂作为一个保守依赖组，输出原状态/路由、事件顺序及结果、审核阶段/版本/原结论、
 当前 evidence 的绑定和各检查原结果。验证尝试按账本的 started/result 事件定位；无法证明
-全历史完整性或对应 evidence 的尝试关系时保持 `unknown`。后续通过、MERGED 或审核修订
-不会覆盖此前 FAILED/BLOCK/REQUEST_CHANGES；检查、Finding、修订和重试不增加独立样本数。
+全历史完整性或对应 evidence 的尝试关系时保持 `unknown`；
+`historical_first_result`、`history_completeness`、`evidence_attempt_linkage` 继续为 `unknown`。
+后续通过、MERGED 或审核修订不会覆盖此前 FAILED/BLOCK/REQUEST_CHANGES；
+检查、Finding、修订和重试不增加独立样本数。
 
-`coverage` 报告任务记录数及证据、审核、尝试等缺项。实际模型身份、费用、人类工作分钟和
+context 只投影 Schema、stage、hash 与 base/spec/Policy/classification 绑定，以及
+implementation 的 subject、evidence 或 V2 snapshot；design 的 subject/evidence/snapshot
+为 `not_applicable`。按 canonical 内容 SHA-256 核对 context 文件名、`context_sha256`
+与审核引用，不一致时拒绝快照；通过 hash 校验后，review 与 context 的 stage 对应关系
+`context_linkage` 为 `matched` 或 `mismatched`，来源缺失保持 `unknown`。
+这项关联核对不重算审核或当前批准新鲜度，不补造执行结果。
+
+review 的 `event_links` 按 `review_id` + `revision` 对应账本事件。
+`review_recorded` 的 stage/context 对应关系为 `matched`、`mismatched` 或 `unknown`；
+`review_finding_resolved` 只记录 `revision_reference`，不回填原审核或新的验收结果。
+REQUEST_CHANGES 后追加 resolved 不提供独立缺陷真值，也不证明重新审核或验证通过。
+
+`coverage` 报告任务记录数及证据、审核、尝试等缺项；review 子记录计数为
+`review_records`、`review_records_with_context`、`review_records_with_matching_record_event`。
+来源存在与事件对应分别计数，不等于整条链已验收，也不增加独立样本数。实际模型身份、费用、人类工作分钟和
 真实宿主事件始终为 `unknown`；缺失不补零，不据 actor 或工具耗时推断。快照没有重新验证
 账本声明，不输出评分、概率或授权结论，也不认证独立样本。它是 S0 既有事实的离线输入，
 不冻结 S1 统计/隐私参数，不启动 telemetry 采集、影子评估或阶段三实施。
