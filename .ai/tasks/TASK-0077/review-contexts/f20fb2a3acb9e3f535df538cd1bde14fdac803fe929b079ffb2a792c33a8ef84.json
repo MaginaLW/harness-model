@@ -1,0 +1,41 @@
+{
+  "base_commit": "f9ae00cf0a2df4c4318b8efc700c64a81833e079",
+  "branch": "codex/repository-root",
+  "classification_input_sha256": "b7ed7596e453f2780b2e120be5e4c41d68dbfd95f00e30d51fe41e11be41cdaf",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "src/aiflow/contracts.py",
+      "src/aiflow/git_context.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Resolve CLI repository roots and isolate default schema resources without changing invocation file paths",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "src/aiflow/contracts.py",
+          "src/aiflow/git_context.py"
+        ],
+        "planned_actions": [
+          "Extract a reusable Git-root resolver with ancestor and crossed .git marker rejection.",
+          "Bind default contract resources in a scoped context without changing process cwd.",
+          "Pass the resolved root to business services while preserving invocation-relative file arguments."
+        ]
+      }
+    ],
+    "goal": "Resolve CLI repository roots and isolate default schema resources without changing invocation file paths",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "f20fb2a3acb9e3f535df538cd1bde14fdac803fe929b079ffb2a792c33a8ef84",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "78c083548afb7ab80a33bb20496221a0d58274547f64b74084fe05ed3fefbac3",
+  "task_id": "TASK-0077"
+}

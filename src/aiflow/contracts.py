@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
+from contextlib import contextmanager
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +18,7 @@ from aiflow.errors import ContractError
 JsonObject = dict[str, Any]
 
 SCHEMA_RELATIVE_DIRECTORY = Path(".ai") / "schemas"
+_SCHEMA_DIRECTORY: ContextVar[Path | None] = ContextVar("schema_directory", default=None)
 SCHEMA_FILES = {
     "approval": "approval.schema.json",
     "ask-options": "ask-options.schema.json",
@@ -48,6 +51,22 @@ class ContractValidationError(ContractError):
         )
 
 
+@contextmanager
+def schema_directory_context(directory: Path) -> Iterator[None]:
+    """Bind contract resources for one call and restore the previous context on exit."""
+    token = _SCHEMA_DIRECTORY.set(directory)
+    try:
+        yield
+    finally:
+        _SCHEMA_DIRECTORY.reset(token)
+
+
+def _effective_schema_directory(schema_directory: Path | None) -> Path:
+    if schema_directory is not None:
+        return schema_directory
+    return _SCHEMA_DIRECTORY.get() or SCHEMA_RELATIVE_DIRECTORY
+
+
 def load_schema(contract_name: str, schema_directory: Path | None = None) -> JsonObject:
     """Load a known contract schema without accepting arbitrary paths."""
     try:
@@ -55,14 +74,15 @@ def load_schema(contract_name: str, schema_directory: Path | None = None) -> Jso
     except KeyError as error:
         raise KeyError(f"Unknown contract: {contract_name}") from error
 
-    directory = schema_directory if schema_directory is not None else SCHEMA_RELATIVE_DIRECTORY
+    directory = _effective_schema_directory(schema_directory)
     value = json.loads((directory / filename).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
         raise TypeError(f"Schema {contract_name} must contain a JSON object")
     return value
 
 
-def _schema_registry(schema_directory: Path = SCHEMA_RELATIVE_DIRECTORY) -> Registry[Any]:
+def _schema_registry(schema_directory: Path | None = None) -> Registry[Any]:
+    schema_directory = _effective_schema_directory(schema_directory)
     resources: list[tuple[str, Resource[Any]]] = []
     for filename in SCHEMA_FILES.values():
         path = schema_directory / filename
@@ -105,8 +125,9 @@ def _additional_property_errors(error: ValidationError) -> list[str]:
 def _safe_schema_errors(
     contract_name: str,
     value: object,
-    schema_directory: Path = SCHEMA_RELATIVE_DIRECTORY,
+    schema_directory: Path | None = None,
 ) -> list[str]:
+    schema_directory = _effective_schema_directory(schema_directory)
     validator = Draft202012Validator(
         load_schema(contract_name, schema_directory),
         format_checker=FormatChecker(),
@@ -186,7 +207,9 @@ def _validate_contract_with_schema_directory(
 
 def validate_contract(contract_name: str, value: object) -> list[str]:
     """Return stable, JSON Pointer-addressed validation errors."""
-    return _validate_contract_with_schema_directory(contract_name, value, SCHEMA_RELATIVE_DIRECTORY)
+    return _validate_contract_with_schema_directory(
+        contract_name, value, _effective_schema_directory(None)
+    )
 
 
 def _require_valid_contract_with_schema_directory(

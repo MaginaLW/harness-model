@@ -1,0 +1,195 @@
+{
+  "base_commit": "1694900b1049df55b0861fb3c88a924be16f016e",
+  "branch": "codex/repository-root",
+  "classification_input_sha256": "a5e92d52a391ad49f059a7ae4acfb8a66df6fbac6495eccf0233d5f98fe0c952",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "src/aiflow/contracts.py",
+      "src/aiflow/git_context.py",
+      "tests/integration/test_gate_parity.py",
+      "tests/unit/test_contracts.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Resolve CLI repository roots and isolate default schema resources without changing invocation file paths",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "src/aiflow/contracts.py",
+          "src/aiflow/git_context.py"
+        ],
+        "planned_actions": [
+          "Extract a reusable Git-root resolver with ancestor and crossed .git marker rejection.",
+          "Bind default contract resources in a scoped context without changing process cwd.",
+          "Pass the resolved root to business services while preserving invocation-relative file arguments."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0078/approvals.json",
+        ".ai/tasks/TASK-0078/classification.json",
+        ".ai/tasks/TASK-0078/events.jsonl",
+        ".ai/tasks/TASK-0078/review-contexts/fe4dbaa133d1aece0d3be4a12910ede2f85c6fbe908d9d6ae91bb36b53dfcea4.json",
+        ".ai/tasks/TASK-0078/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0078/spec.md",
+        ".ai/tasks/TASK-0078/task.yaml",
+        "src/aiflow/cli.py",
+        "src/aiflow/contracts.py",
+        "src/aiflow/git_context.py",
+        "tests/integration/test_gate_parity.py",
+        "tests/unit/test_contracts.py"
+      ],
+      "files": [
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0078/approvals.json"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0078/classification.json"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0078/events.jsonl"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0078/review-contexts/fe4dbaa133d1aece0d3be4a12910ede2f85c6fbe908d9d6ae91bb36b53dfcea4.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0078/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0078/spec.md"
+        },
+        {
+          "additions": 81,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0078/task.yaml"
+        },
+        {
+          "additions": 188,
+          "binary": false,
+          "deletions": 179,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 5,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/git_context.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_gate_parity.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_contracts.py"
+        }
+      ],
+      "totals": {
+        "additions": 470,
+        "deletions": 188,
+        "files": 12
+      }
+    },
+    "goal": "Resolve CLI repository roots and isolate default schema resources without changing invocation file paths",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0078",
+        "--actor",
+        "codex-main"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "2d75e7892b9743d4865909d73f47041a7b7bdaba42f8d509eeb7a33d8422f4a6",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "60035166f73b29b29cfbdc0ff9a8b9649e0f7e772298e8640d62f25cf6ca70ea",
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "78c083548afb7ab80a33bb20496221a0d58274547f64b74084fe05ed3fefbac3",
+  "subject_commit": "acd05b14a09e16e87394f8920ef854170165a585",
+  "task_id": "TASK-0078"
+}

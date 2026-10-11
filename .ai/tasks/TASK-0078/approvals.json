@@ -1,0 +1,42 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-11T08:02:47Z",
+    "base_commit": "1694900b1049df55b0861fb3c88a924be16f016e",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+    "reason": "Project owner explicitly approved the frozen TASK-0078 specification and implementation in this conversation on 2026-10-11.",
+    "schema_version": "1.0",
+    "spec_sha256": "78c083548afb7ab80a33bb20496221a0d58274547f64b74084fe05ed3fefbac3",
+    "subject_commit": "1694900b1049df55b0861fb3c88a924be16f016e",
+    "task_id": "TASK-0078"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-11T08:22:27Z",
+    "base_commit": "1694900b1049df55b0861fb3c88a924be16f016e",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+    "reason": "Carry forward the project owner explicit approval of the unchanged frozen TASK-0078 specification and implementation on 2026-10-11. The original spec approval remains fresh; this entry resumes native state after precise companion integration metadata reclassification and independent design APPROVE, without a new owner decision.",
+    "schema_version": "1.0",
+    "spec_sha256": "78c083548afb7ab80a33bb20496221a0d58274547f64b74084fe05ed3fefbac3",
+    "subject_commit": "acd05b14a09e16e87394f8920ef854170165a585",
+    "task_id": "TASK-0078"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-11T08:39:20Z",
+    "base_commit": "1694900b1049df55b0861fb3c88a924be16f016e",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "60035166f73b29b29cfbdc0ff9a8b9649e0f7e772298e8640d62f25cf6ca70ea",
+    "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+    "reason": "常设授权：两名非作者 Agent 正式 implementation 审核均 APPROVE、无未关闭 critical/high 发现，Native V1 全部检查通过；原规格批准有效，本次不含外部副作用且不触及授权文件。",
+    "schema_version": "1.0",
+    "spec_sha256": "78c083548afb7ab80a33bb20496221a0d58274547f64b74084fe05ed3fefbac3",
+    "subject_commit": "acd05b14a09e16e87394f8920ef854170165a585",
+    "task_id": "TASK-0078"
+  }
+]

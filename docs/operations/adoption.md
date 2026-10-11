@@ -337,6 +337,13 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 [仓库身份](../../src/aiflow/git_context.py)、[Schema 加载](../../src/aiflow/contracts.py)
 和[任务存储](../../src/aiflow/storage.py)的当前实现核查，不是已存在的安装命令。
 
+根定位的待实施范围见[CLI 仓库根定位规格](../superpowers/specs/repository-root.md)：
+无环境覆盖时使用 Git 确定的最近工作树根；该根缺少 `.ai` 时拒绝，不回退父仓资源；环境覆盖导致定位
+越过嵌套 `.git` 边界时拒绝。普通 linked worktree 使用自己的根，调用过程不 `chdir`。
+用户文件参数 `--input`、`--options-file`、`--output`、`--evidence`、`--action-file`、
+`--ci-run-dir` 仍相对调用目录，不重新拼到仓库根。该方案只补内部资源定位，
+不提供初始化、资源分发、身份复制或目标 CI 适配；源码正式验收后才更新当前能力与用法。
+
 真实项目需要这一层时再按本仓 AI Flow 创建治理变更并验证干净外仓端到端流程；
 它不阻塞轻量试点，也不授权自动恢复强制 task、阶段三/四、模型路由或可信外部执行器。
 现有 [Hook wrapper](hooks.md)仍不执行或授权 push/merge，不能拿来伪装通用安全控制面。

@@ -291,8 +291,9 @@ def test_repository_id_is_a_single_stable_uuid_v4(tmp_path: Path) -> None:
     assert raw.splitlines() == [value.encode("utf-8")]
 
     copied_ai = tmp_path / "different-absolute-checkout" / ".ai"
-    shutil.copytree(REPOSITORY_ROOT / ".ai", copied_ai)
+    copied_ai.mkdir(parents=True)
     copied = copied_ai / "repository-id"
+    shutil.copy2(source, copied)
     assert copied.read_text(encoding="utf-8").strip() == value
 
 
