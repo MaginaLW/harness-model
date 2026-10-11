@@ -1,0 +1,33 @@
+{
+  "context_sha256": "f20fb2a3acb9e3f535df538cd1bde14fdac803fe929b079ffb2a792c33a8ef84",
+  "findings": [
+    {
+      "evidence_refs": [
+        "tests/integration/test_cli_repository_root.py",
+        "docs/superpowers/specs/repository-root.md"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 20,
+        "path": ".ai/tasks/TASK-0077/spec.md"
+      },
+      "resolution": {
+        "actor": "codex-main",
+        "reason": "The separately committed acceptance prerequisite now contains a real root/deep validate regression with unchanged cwd and all .ai bytes/directories. Independent safety review APPROVE closes the missing-test finding. Preserve REV-0001-r0001 and TASK-0077 BLOCKED; no implementation, task verify, or original-base approval is claimed.",
+        "resolved_at": "2026-10-11T07:55:30Z"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "Missing promised validate acceptance case"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-10-11T07:55:30Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "codex-roadmap-audit",
+  "revision": 2,
+  "schema_version": "1.0",
+  "summary": "Frozen design bindings match; add the promised deep-directory validate acceptance regression before implementation acceptance.",
+  "task_id": "TASK-0077"
+}
