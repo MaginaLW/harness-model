@@ -31,6 +31,33 @@ JSON 按工具原始单行输出、UTF-8、一个 LF 结尾归一化后的 SHA-2
 这些数字只描述账本。一次人类答复可能授权多个具体动作并产生多条记录；后续批准可能
 有真实的新规格或版本事实，不能自动标成浪费。当前分类也不是过去每个时刻的路由。
 
+## 固定提交的事实快照
+
+同一工具提供可选的只读快照；原有默认 text/json 账本统计格式保持不变：
+
+```sh
+python tools/analysis/approval_overhead.py --snapshot --format text
+python tools/analysis/approval_overhead.py --snapshot --format json
+```
+
+快照格式版本为 `1.0`，用途标识为 `tracked_ledger_snapshot`。它先固定 `HEAD`，再读取该
+提交中明确匹配的 `.ai/tasks/TASK-*/task.yaml`、`classification.json`、`events.jsonl`、
+`evidence.json` 和 `reviews/REV-*-r*.json` Git blob；输出来源提交、实际执行工具的 SHA-256、
+各来源文件的 blob 标识及受限字段投影。它不读取未提交材料、logs/private 目录或另行采集
+原始聊天；解析白名单原件后不输出 actor、审核正文、命令或本机路径，不写入文件、账本或
+Git 状态。缺少必要的 task/event
+原件、已纳入原件格式损坏或投影字段无效时拒绝输出，错误信息不回显原内容。
+
+每个 task 暂作为一个保守依赖组，输出原状态/路由、事件顺序及结果、审核阶段/版本/原结论、
+当前 evidence 的绑定和各检查原结果。验证尝试按账本的 started/result 事件定位；无法证明
+全历史完整性或对应 evidence 的尝试关系时保持 `unknown`。后续通过、MERGED 或审核修订
+不会覆盖此前 FAILED/BLOCK/REQUEST_CHANGES；检查、Finding、修订和重试不增加独立样本数。
+
+`coverage` 报告任务记录数及证据、审核、尝试等缺项。实际模型身份、费用、人类工作分钟和
+真实宿主事件始终为 `unknown`；缺失不补零，不据 actor 或工具耗时推断。快照没有重新验证
+账本声明，不输出评分、概率或授权结论，也不认证独立样本。它是 S0 既有事实的离线输入，
+不冻结 S1 统计/隐私参数，不启动 telemetry 采集、影子评估或阶段三实施。
+
 ## 尚不能得出的结论
 
 人类实际被打断次数、审核/决策工作分钟、真实返工工作量、交付后缺陷率均为 `unknown`。
