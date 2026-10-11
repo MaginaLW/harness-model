@@ -202,8 +202,8 @@ def task_numbers_in_refs(repository_root: Path) -> frozenset[int]:
     return frozenset(numbers)
 
 
-def collect_git_context(path: Path) -> GitContext:
-    """Collect normalized repository facts without reading business file contents."""
+def resolve_repository_root(path: Path) -> Path:
+    """Locate the enclosing Git worktree without crossing a nested Git boundary."""
     requested_path = path.resolve()
     root_output = _run_git(
         requested_path,
@@ -216,6 +216,20 @@ def collect_git_context(path: Path) -> GitContext:
     if not root_path.is_absolute():
         raise _error("Git repository root is not absolute", "GIT_NOT_REPOSITORY")
     repository_root = root_path.resolve()
+    if not requested_path.is_relative_to(repository_root):
+        raise _error("Git repository root is not an ancestor of the directory", "GIT_ROOT_INVALID")
+    directory = requested_path
+    while directory != repository_root:
+        marker = directory / ".git"
+        if marker.is_file() or marker.is_dir():
+            raise _error("Git repository root crosses a nested Git boundary", "GIT_ROOT_INVALID")
+        directory = directory.parent
+    return repository_root
+
+
+def collect_git_context(path: Path) -> GitContext:
+    """Collect normalized repository facts without reading business file contents."""
+    repository_root = resolve_repository_root(path)
     repository_id = _read_repository_id(repository_root)
 
     head = _run_git(

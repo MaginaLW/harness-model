@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -12,9 +12,11 @@ from aiflow import __version__
 from aiflow.approval import approve_task
 from aiflow.ask_service import answer_task
 from aiflow.classification_service import classify_task
+from aiflow.contracts import SCHEMA_RELATIVE_DIRECTORY, schema_directory_context
 from aiflow.errors import AiflowError
 from aiflow.escalation import ESCALATION_REASON_CODES, escalate_task, record_resolution
 from aiflow.gate import evaluate_gate
+from aiflow.git_context import resolve_repository_root
 from aiflow.observation_adapter import (
     parse_observation_mode,
     run_observation_file,
@@ -167,203 +169,210 @@ def build_parser() -> ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run the root command without exposing unfinished business subcommands."""
+    """Parse repository-free entry points, then dispatch within one repository scope."""
     raw_arguments = list(sys.argv[1:] if argv is None else argv)
     try:
         parser = build_parser()
         arguments = parser.parse_args(raw_arguments)
-        if arguments.command == "start":
-            if arguments.recover is not None:
-                if arguments.objective is not None or arguments.allow or arguments.forbid_action:
-                    raise AiflowError(
-                        "Recovery cannot be combined with creation arguments",
-                        code="START_INPUT_INVALID",
-                    )
-                start_result = recover_task(Path.cwd(), arguments.recover)
-            else:
-                start_result = start_task(
-                    Path.cwd(),
-                    objective=arguments.objective,
-                    allowed_scope=arguments.allow,
-                    forbidden_actions=arguments.forbid_action,
-                    allow_detached=arguments.allow_detached,
-                )
-            print(start_result.task_id)
-            print(start_result.task_directory.resolve())
-        elif arguments.command == "begin":
-            transition_result = begin_task(
-                Path.cwd(),
-                arguments.task_id,
-                actor=arguments.actor,
-                reason=arguments.reason,
-            )
-            print(f"{arguments.task_id} {transition_result.task['current_state']}")
-        elif arguments.command == "close":
-            transition_result = close_task(
-                Path.cwd(),
-                arguments.task_id,
-                result=arguments.result,
-                merge_commit=arguments.merge_commit,
-                actor=arguments.actor,
-            )
-            print(f"{arguments.task_id} {transition_result.task['current_state']}")
-        elif arguments.command == "classify":
-            classification = classify_task(Path.cwd(), arguments.task_id, actor=arguments.actor)
-            print(f"{arguments.task_id} {classification['effective_route']}")
-        elif arguments.command == "freeze":
-            freeze_result = freeze_task(Path.cwd(), arguments.task_id, actor=arguments.actor)
-            print(f"{arguments.task_id} {freeze_result.task['current_state']}")
-        elif arguments.command == "answer":
-            answer_result = answer_task(
-                Path.cwd(),
-                arguments.task_id,
-                options_file=arguments.options_file,
-                selected_option_id=arguments.select,
-                actor=arguments.actor,
-                reason=arguments.reason,
-            )
-            print(f"{arguments.task_id} {answer_result.task['current_state']}")
-            print("ASK option structure was validated; semantic exclusivity was not proven.")
-        elif arguments.command == "approve":
-            approval_result = approve_task(
-                Path.cwd(),
-                arguments.task_id,
-                approval_type=arguments.type,
-                actor=arguments.actor,
-                reason=arguments.reason,
-                action_file=arguments.action_file,
-            )
-            print(f"{arguments.task_id} {approval_result.task['current_state']}")
-        elif arguments.command == "escalate":
-            escalation_result = escalate_task(
-                Path.cwd(),
-                arguments.task_id,
-                target_route=arguments.to,
-                reason_code=arguments.reason_code,
-                impact=arguments.impact,
-                next_step=arguments.next_step,
-                actor=arguments.actor,
-                existing_work_disposition=arguments.existing_work,
-            )
-            print(f"{arguments.task_id} {escalation_result.task['current_state']}")
-        elif arguments.command == "resolve":
-            resolution_result = record_resolution(
-                Path.cwd(),
-                arguments.task_id,
-                condition=arguments.condition,
-                evidence_refs=arguments.evidence_ref,
-                actor=arguments.actor,
-                reason=arguments.reason,
-                authorize_downgrade=arguments.authorize_downgrade,
-            )
-            print(f"{arguments.task_id} {resolution_result.task['current_state']}")
-        elif arguments.command == "review":
-            if arguments.review_command == "context":
-                context = build_review_context(Path.cwd(), arguments.task_id, arguments.stage)
-                if arguments.output is not None:
-                    atomic_write_json(arguments.output, context)
-                    print(str(arguments.output.resolve()))
-                else:
-                    print(json.dumps(context, ensure_ascii=False, sort_keys=True))
-            elif arguments.review_command == "record":
-                record_result = record_review(
-                    Path.cwd(),
-                    arguments.task_id,
-                    input_path=arguments.input,
-                    actor=arguments.actor,
-                )
-                print(
-                    f"{arguments.task_id} {record_result.record['review_id']} "
-                    f"r{int(record_result.record['revision']):04d}"
-                )
-            elif arguments.review_command == "resolve":
-                finding_result = resolve_review_finding(
-                    Path.cwd(),
-                    arguments.task_id,
-                    review_id=arguments.review,
-                    finding_id=arguments.finding,
-                    reason=arguments.reason,
-                    actor=arguments.actor,
-                )
-                print(
-                    f"{arguments.task_id} {finding_result.record['review_id']} "
-                    f"r{int(finding_result.record['revision']):04d}"
-                )
-            elif arguments.review_command == "show":
-                reviews = list_review_records(Path.cwd(), arguments.task_id, stage=arguments.stage)
-                if arguments.format == "json":
-                    print(
-                        json.dumps(
-                            {"task_id": arguments.task_id, "reviews": list(reviews)},
-                            ensure_ascii=False,
-                            sort_keys=True,
-                        )
-                    )
-                else:
-                    for record in reviews:
-                        print(
-                            f"{record['review_id']} r{int(record['revision']):04d} "
-                            f"{record['review_stage']} {record['outcome']}"
-                        )
-        elif arguments.command == "status":
-            summary = summarize_task(Path.cwd(), arguments.task_id)
-            print(summary.to_json() if arguments.format == "json" else summary.to_text())
-        elif arguments.command == "observe":
-            if arguments.task_id is None or arguments.input is None or arguments.mode is None:
-                raise AiflowError(
-                    "Observation task, input and mode are required",
-                    code="OBSERVATION_ADAPTER_INVALID",
-                )
-            observe_result = run_observation_file(
-                Path.cwd(),
-                arguments.task_id,
-                arguments.input,
-                mode=parse_observation_mode(arguments.mode),
-                actor=arguments.actor,
-            )
-            print(
-                json.dumps(
-                    serialize_observation_result(observe_result),
-                    ensure_ascii=False,
-                    sort_keys=True,
-                    separators=(",", ":"),
-                )
-            )
-            return 0 if observe_result.decision.execution_allowed else 2
-        elif arguments.command == "verify":
-            verify_result = verify_task(
-                Path.cwd(),
-                arguments.task_id,
-                actor=arguments.actor,
-                check_ids=arguments.check,
-                ci=arguments.ci,
-                ci_run_dir=arguments.ci_run_dir,
-                output=arguments.output,
-                finalize=arguments.finalize,
-                abandon=arguments.abandon,
-                reason=arguments.reason,
-            )
-            print(
-                f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}"
-            )
-        elif arguments.command == "gate":
-            decision = evaluate_gate(
-                Path.cwd(), arguments.task_id, evidence_path=arguments.evidence
-            )
-            print(decision.to_json() if arguments.format == "json" else decision.to_text())
-            return 0 if decision.passed else 2
-        elif arguments.command == "validate":
-            validate_task_artifacts(Path.cwd(), arguments.task_id)
-            print(f"{arguments.task_id} valid")
-        elif arguments.command == "scope":
-            validate_task_scope(Path.cwd(), arguments.task_id)
-            print(f"{arguments.task_id} scope-valid")
-        elif arguments.command == "sync":
-            assessment = evaluate_and_sync_verification_subject(
-                Path.cwd(), arguments.task_id, mode="final", actor=arguments.actor
-            )
-            print(f"{arguments.task_id} {assessment.subject_commit}")
+        if arguments.command is None:
+            return 0
+        repository_root = resolve_repository_root(Path.cwd())
+        with schema_directory_context(repository_root / SCHEMA_RELATIVE_DIRECTORY):
+            return _dispatch(arguments, repository_root)
     except AiflowError as error:
         print(error.message, file=sys.stderr)
         return 1
+
+
+def _dispatch(arguments: Namespace, repository_root: Path) -> int:
+    """Pass the root to services while explicit file arguments retain invocation cwd."""
+    if arguments.command == "start":
+        if arguments.recover is not None:
+            if arguments.objective is not None or arguments.allow or arguments.forbid_action:
+                raise AiflowError(
+                    "Recovery cannot be combined with creation arguments",
+                    code="START_INPUT_INVALID",
+                )
+            start_result = recover_task(repository_root, arguments.recover)
+        else:
+            start_result = start_task(
+                repository_root,
+                objective=arguments.objective,
+                allowed_scope=arguments.allow,
+                forbidden_actions=arguments.forbid_action,
+                allow_detached=arguments.allow_detached,
+            )
+        print(start_result.task_id)
+        print(start_result.task_directory.resolve())
+    elif arguments.command == "begin":
+        transition_result = begin_task(
+            repository_root,
+            arguments.task_id,
+            actor=arguments.actor,
+            reason=arguments.reason,
+        )
+        print(f"{arguments.task_id} {transition_result.task['current_state']}")
+    elif arguments.command == "close":
+        transition_result = close_task(
+            repository_root,
+            arguments.task_id,
+            result=arguments.result,
+            merge_commit=arguments.merge_commit,
+            actor=arguments.actor,
+        )
+        print(f"{arguments.task_id} {transition_result.task['current_state']}")
+    elif arguments.command == "classify":
+        classification = classify_task(repository_root, arguments.task_id, actor=arguments.actor)
+        print(f"{arguments.task_id} {classification['effective_route']}")
+    elif arguments.command == "freeze":
+        freeze_result = freeze_task(repository_root, arguments.task_id, actor=arguments.actor)
+        print(f"{arguments.task_id} {freeze_result.task['current_state']}")
+    elif arguments.command == "answer":
+        answer_result = answer_task(
+            repository_root,
+            arguments.task_id,
+            options_file=arguments.options_file,
+            selected_option_id=arguments.select,
+            actor=arguments.actor,
+            reason=arguments.reason,
+        )
+        print(f"{arguments.task_id} {answer_result.task['current_state']}")
+        print("ASK option structure was validated; semantic exclusivity was not proven.")
+    elif arguments.command == "approve":
+        approval_result = approve_task(
+            repository_root,
+            arguments.task_id,
+            approval_type=arguments.type,
+            actor=arguments.actor,
+            reason=arguments.reason,
+            action_file=arguments.action_file,
+        )
+        print(f"{arguments.task_id} {approval_result.task['current_state']}")
+    elif arguments.command == "escalate":
+        escalation_result = escalate_task(
+            repository_root,
+            arguments.task_id,
+            target_route=arguments.to,
+            reason_code=arguments.reason_code,
+            impact=arguments.impact,
+            next_step=arguments.next_step,
+            actor=arguments.actor,
+            existing_work_disposition=arguments.existing_work,
+        )
+        print(f"{arguments.task_id} {escalation_result.task['current_state']}")
+    elif arguments.command == "resolve":
+        resolution_result = record_resolution(
+            repository_root,
+            arguments.task_id,
+            condition=arguments.condition,
+            evidence_refs=arguments.evidence_ref,
+            actor=arguments.actor,
+            reason=arguments.reason,
+            authorize_downgrade=arguments.authorize_downgrade,
+        )
+        print(f"{arguments.task_id} {resolution_result.task['current_state']}")
+    elif arguments.command == "review":
+        if arguments.review_command == "context":
+            context = build_review_context(repository_root, arguments.task_id, arguments.stage)
+            if arguments.output is not None:
+                atomic_write_json(arguments.output, context)
+                print(str(arguments.output.resolve()))
+            else:
+                print(json.dumps(context, ensure_ascii=False, sort_keys=True))
+        elif arguments.review_command == "record":
+            record_result = record_review(
+                repository_root,
+                arguments.task_id,
+                input_path=arguments.input,
+                actor=arguments.actor,
+            )
+            print(
+                f"{arguments.task_id} {record_result.record['review_id']} "
+                f"r{int(record_result.record['revision']):04d}"
+            )
+        elif arguments.review_command == "resolve":
+            finding_result = resolve_review_finding(
+                repository_root,
+                arguments.task_id,
+                review_id=arguments.review,
+                finding_id=arguments.finding,
+                reason=arguments.reason,
+                actor=arguments.actor,
+            )
+            print(
+                f"{arguments.task_id} {finding_result.record['review_id']} "
+                f"r{int(finding_result.record['revision']):04d}"
+            )
+        elif arguments.review_command == "show":
+            reviews = list_review_records(repository_root, arguments.task_id, stage=arguments.stage)
+            if arguments.format == "json":
+                print(
+                    json.dumps(
+                        {"task_id": arguments.task_id, "reviews": list(reviews)},
+                        ensure_ascii=False,
+                        sort_keys=True,
+                    )
+                )
+            else:
+                for record in reviews:
+                    print(
+                        f"{record['review_id']} r{int(record['revision']):04d} "
+                        f"{record['review_stage']} {record['outcome']}"
+                    )
+    elif arguments.command == "status":
+        summary = summarize_task(repository_root, arguments.task_id)
+        print(summary.to_json() if arguments.format == "json" else summary.to_text())
+    elif arguments.command == "observe":
+        if arguments.task_id is None or arguments.input is None or arguments.mode is None:
+            raise AiflowError(
+                "Observation task, input and mode are required",
+                code="OBSERVATION_ADAPTER_INVALID",
+            )
+        observe_result = run_observation_file(
+            repository_root,
+            arguments.task_id,
+            arguments.input,
+            mode=parse_observation_mode(arguments.mode),
+            actor=arguments.actor,
+        )
+        print(
+            json.dumps(
+                serialize_observation_result(observe_result),
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+        )
+        return 0 if observe_result.decision.execution_allowed else 2
+    elif arguments.command == "verify":
+        verify_result = verify_task(
+            repository_root,
+            arguments.task_id,
+            actor=arguments.actor,
+            check_ids=arguments.check,
+            ci=arguments.ci,
+            ci_run_dir=arguments.ci_run_dir,
+            output=arguments.output,
+            finalize=arguments.finalize,
+            abandon=arguments.abandon,
+            reason=arguments.reason,
+        )
+        print(f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}")
+    elif arguments.command == "gate":
+        decision = evaluate_gate(
+            repository_root, arguments.task_id, evidence_path=arguments.evidence
+        )
+        print(decision.to_json() if arguments.format == "json" else decision.to_text())
+        return 0 if decision.passed else 2
+    elif arguments.command == "validate":
+        validate_task_artifacts(repository_root, arguments.task_id)
+        print(f"{arguments.task_id} valid")
+    elif arguments.command == "scope":
+        validate_task_scope(repository_root, arguments.task_id)
+        print(f"{arguments.task_id} scope-valid")
+    elif arguments.command == "sync":
+        assessment = evaluate_and_sync_verification_subject(
+            repository_root, arguments.task_id, mode="final", actor=arguments.actor
+        )
+        print(f"{arguments.task_id} {assessment.subject_commit}")
     return 0
