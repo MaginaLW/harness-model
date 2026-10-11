@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from contextlib import chdir
 from pathlib import Path
@@ -85,9 +86,10 @@ def main(argv: list[str] | None = None) -> int:
         "native_gate": {"status": "not_evaluated"},
         "mechanical_preparation": [],
         "decision_or_authorization_checks": [],
-        "unknown": ["AUTHORIZATION_COVERAGE_NOT_EVALUATED"],
+        "advice_basis": [],
+        "unknown": [],
     }
-    unknown = ["AUTHORIZATION_COVERAGE_NOT_EVALUATED"]
+    unknown = ["AUTHORIZATION_COVERAGE_NOT_EVALUATED", "SOURCE_READ_ATOMICITY_NOT_ESTABLISHED"]
     exit_code = 0
     failure_code = "ADVISORY_INPUT_INVALID"
     try:
@@ -108,25 +110,64 @@ def main(argv: list[str] | None = None) -> int:
                     else:
                         status[field] = "unknown"
                         unknown.append("NATIVE_STATUS_FIELD_UNRECOGNIZED")
+                for field in ("base_commit", "subject_commit", "observed_head"):
+                    value = getattr(summary, field)
+                    if isinstance(value, str) and re.fullmatch(r"[0-9a-f]{40}", value):
+                        status[field] = value
+                    else:
+                        status[field] = "unknown"
+                        if field != "subject_commit" or value is not None:
+                            unknown.append("NATIVE_STATUS_FIELD_UNRECOGNIZED")
                 status["worktree_dirty"] = (
                     summary.worktree_dirty if isinstance(summary.worktree_dirty, bool) else None
                 )
+                known_missing: set[str] = set()
+                for missing in summary.missing_conditions:
+                    if isinstance(missing, str) and (
+                        missing in PREPARATION or missing in DECISIONS
+                    ):
+                        known_missing.add(missing)
+                    else:
+                        unknown.append("NATIVE_MISSING_CONDITION_UNRECOGNIZED")
+                status["missing_conditions"] = sorted(known_missing)
                 report["native_status"] = status
                 preparation: set[str] = set()
                 decisions: set[str] = set()
+                advice_basis: list[dict[str, str]] = []
                 if summary.current_state != "MERGED":
-                    for missing in summary.missing_conditions:
+                    for missing in sorted(known_missing):
                         if missing in PREPARATION:
-                            preparation.add(PREPARATION[missing])
-                        elif missing in DECISIONS:
-                            decisions.add(DECISIONS[missing])
+                            advice = PREPARATION[missing]
+                            preparation.add(advice)
                         else:
-                            unknown.append("NATIVE_MISSING_CONDITION_UNRECOGNIZED")
+                            advice = DECISIONS[missing]
+                            decisions.add(advice)
+                        advice_basis.append(
+                            {
+                                "advice": advice,
+                                "source": "native_status.missing_conditions",
+                                "missing_condition": missing,
+                            }
+                        )
                 if summary.current_state in {"FAILED", "BLOCKED", "ESCALATED"}:
+                    diagnostic = "CHECK_DIAGNOSIS_SCOPE_AND_EXISTING_AUTHORIZATION"
+                    advice_basis = [
+                        basis
+                        for basis in advice_basis
+                        if basis["advice"] not in preparation and basis["advice"] != diagnostic
+                    ]
                     preparation.clear()
-                    decisions.add("CHECK_DIAGNOSIS_SCOPE_AND_EXISTING_AUTHORIZATION")
+                    decisions.add(diagnostic)
+                    advice_basis.append(
+                        {
+                            "advice": diagnostic,
+                            "source": "native_status.current_state",
+                            "state": summary.current_state,
+                        }
+                    )
                 report["mechanical_preparation"] = sorted(preparation)
                 report["decision_or_authorization_checks"] = sorted(decisions)
+                report["advice_basis"] = advice_basis
                 if summary.current_state == "APPROVED_FOR_MERGE":
                     failure_code = "NATIVE_GATE_READ_FAILED"
                     gate = evaluate_gate(repository, arguments.task_id)

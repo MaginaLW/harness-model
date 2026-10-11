@@ -51,7 +51,8 @@ REQUIRED_EVENT_FIELDS = frozenset(
 )
 SNAPSHOT_PATH = re.compile(
     r"\.ai/tasks/(TASK-[0-9]{4,})/(?:task\.yaml|classification\.json|events\.jsonl|"
-    r"evidence\.json|reviews/REV-[0-9]{4,}-r[0-9]{4,}\.json)"
+    r"evidence\.json|reviews/REV-[0-9]{4,}-r[0-9]{4,}\.json|"
+    r"review-contexts/[0-9a-f]{64}\.json)"
 )
 SNAPSHOT_PATTERNS = {
     "schema_version": r"(?:1|2)\.0",
@@ -83,6 +84,7 @@ SNAPSHOT_PATTERNS = {
             "policy_sha256",
             "classification_input_sha256",
             "context_sha256",
+            "evidence_sha256",
             "verification_snapshot_sha256",
         ),
         r"[0-9a-f]{64}",
@@ -536,6 +538,19 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
                     payload, ("effective_route", "conclusion"), task_id, "events.jsonl"
                 )
             )
+            if facts["event_type"] in {"review_recorded", "review_finding_resolved"}:
+                facts.update(
+                    _snapshot_fields(
+                        payload,
+                        ("review_id", "review_stage", "context_sha256"),
+                        task_id,
+                        "events.jsonl",
+                    )
+                )
+                revision = payload.get("revision")
+                if revision is not None and (type(revision) is not int or revision < 1):
+                    raise _error(task_id, "events.jsonl", "review revision is invalid")
+                facts["revision"] = "unknown" if revision is None else revision
             events.append(facts)
             if facts["event_type"] in {"verification_started", "verification_restarted"}:
                 active = {
@@ -592,18 +607,102 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
                 raise _error(task_id, "review.json", "missing required fields")
             if path.rsplit("/", 1)[1] != f"{review['review_id']}-r{revision:04d}.json":
                 raise _error(task_id, "review.json", "identity does not match source filename")
-            row["reviews"].append(
-                {
-                    "source_ref": path,
-                    "revision": revision,
+            review_facts = {
+                "source_ref": path,
+                "revision": revision,
+                **_snapshot_fields(
+                    review,
+                    ("review_id", "review_stage", "outcome", "context_sha256", "recorded_at"),
+                    task_id,
+                    "review.json",
+                ),
+                "context": "unknown",
+                "context_linkage": "unknown",
+                "event_links": [],
+            }
+            context_path = prefix + f"review-contexts/{review['context_sha256']}.json"
+            context_source = blobs.get(context_path)
+            if context_source is not None:
+                context = _snapshot_document(context_source[1], task_id, "review-context.json")
+                stable = {key: value for key, value in context.items() if key != "context_sha256"}
+                canonical = json.dumps(
+                    stable, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+                )
+                digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+                if digest != review["context_sha256"] or context.get("context_sha256") != digest:
+                    raise _error(
+                        task_id, "review-context.json", "context digest does not match source"
+                    )
+                context_facts = {
+                    "source_ref": context_path,
                     **_snapshot_fields(
-                        review,
-                        ("review_id", "review_stage", "outcome", "context_sha256", "recorded_at"),
+                        context,
+                        (
+                            "schema_version",
+                            "review_stage",
+                            "context_sha256",
+                            "base_commit",
+                            "spec_sha256",
+                            "policy_sha256",
+                            "classification_input_sha256",
+                            "subject_commit",
+                            "evidence_sha256",
+                            "verification_snapshot_sha256",
+                        ),
                         task_id,
-                        "review.json",
+                        "review-context.json",
                     ),
                 }
-            )
+                stage = context_facts["review_stage"]
+                version = context_facts["schema_version"]
+                if stage not in {"design", "implementation"} or version not in {"1.0", "2.0"}:
+                    raise _error(
+                        task_id, "review-context.json", "context stage or version is invalid"
+                    )
+                inapplicable = (
+                    ("subject_commit", "evidence_sha256", "verification_snapshot_sha256")
+                    if stage == "design"
+                    else ("verification_snapshot_sha256",)
+                    if version == "1.0"
+                    else ("evidence_sha256",)
+                )
+                if (stage == "design" and version != "1.0") or any(
+                    field in context for field in inapplicable
+                ):
+                    raise _error(task_id, "review-context.json", "inapplicable context binding")
+                context_facts.update(dict.fromkeys(inapplicable, "not_applicable"))
+                review_facts["context"] = context_facts
+                review_facts["context_linkage"] = (
+                    "matched" if stage == review_facts["review_stage"] else "mismatched"
+                )
+            for event in events:
+                if (
+                    event.get("review_id") != review["review_id"]
+                    or event.get("revision") != revision
+                ):
+                    continue
+                binding = "revision_reference"
+                if event["event_type"] == "review_recorded":
+                    comparisons = [
+                        event[field] == review[field]
+                        for field in ("review_stage", "context_sha256")
+                        if event[field] != "unknown"
+                    ]
+                    binding = (
+                        "mismatched"
+                        if not all(comparisons)
+                        else "matched"
+                        if len(comparisons) == 2
+                        else "unknown"
+                    )
+                review_facts["event_links"].append(
+                    {
+                        "sequence": event["sequence"],
+                        "event_type": event["event_type"],
+                        "binding": binding,
+                    }
+                )
+            row["reviews"].append(review_facts)
         missing["reviews"] += int(not row["reviews"])
         missing["verification_attempts"] += int(not row["verification_attempts"])
         if "evidence.json" in documents:
@@ -663,6 +762,15 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
         "tasks": rows,
         "coverage": {
             "task_records": len(rows),
+            "review_records": sum(len(row["reviews"]) for row in rows),
+            "review_records_with_context": sum(
+                review["context"] != "unknown" for row in rows for review in row["reviews"]
+            ),
+            "review_records_with_matching_record_event": sum(
+                any(link["binding"] == "matched" for link in review["event_links"])
+                for row in rows
+                for review in row["reviews"]
+            ),
             "missing_tasks_by_field": dict(sorted(missing.items())),
             "actual_model_unknown_tasks": len(rows),
             "human_work_minutes_unknown_tasks": len(rows),
@@ -688,6 +796,8 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
             "not independent samples.",
             "Event ordering only locates recorded attempts; "
             "completeness and evidence linkage are unknown.",
+            "Review links compare committed references and context content hashes only; "
+            "they do not establish freshness, review correctness, identity or authorization.",
             "Logs, free text, actors, identity, working files "
             "and external/private sources are excluded.",
         ],

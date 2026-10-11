@@ -21,8 +21,12 @@
 后续按有效能力推进，顺序以 [S0–S5 路线](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)为设计输入。项目所有者已选择 **B：3-A 低风险建议与校准、3-B 高风险 V3 独立准入和验收**，首场景为本仓自然治理任务的只读建议，范围见[置信度反馈设计](../superpowers/specs/confidence-feedback.md)。当前范围的准备与常规实施按 [AGENTS.md](../../AGENTS.md) 准入；样本充分性、统计接受标准、隐私、保留期和风险用途参数尚未全部冻结，路线选择不批准新私密采集、provider 或执行动作。
 
 已具备[固定 HEAD 的账本事实快照](effect-observations.md#固定提交的事实快照)，以及复用当前原生 status 与适用状态 Gate 的[非评分只读建议](review-advisory.md)。
+快照保守核对同 task 审核 context 与 review/event 引用，关联状态和子记录计数不提供新验收或独立样本；原失败及历史完整性等 `unknown` 保留。
+建议的 `native_status` 提供 `base_commit`、`subject_commit`、`observed_head` 和受限 `missing_conditions`；`advice_basis` 通过 `advice`、`source` 及 `missing_condition` 或 `state` 记录已有建议的具体依据。
 建议固定 `probability_status=unestimated`、`execution_allowed=false`；概率未估计，不给执行权限。
+`SOURCE_READ_ATOMICITY_NOT_ESTABLISHED` 明确多次原生读取尚未证明原子一致性，版本投影不代表固定的原子观察窗口。
 两项属于 S0/S1 准备，不证明生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
+数据与方法合同、可靠身份、人时、独立缺陷真值、统一 telemetry、评分/校准、真实 shadow 与宿主接入仍需各自证据和准入。
 
 | 能力 | 已有基础 | 剩余建设与验收 |
 |---|---|---|
