@@ -1,0 +1,79 @@
+schema_version: '1.0'
+task_id: TASK-0077
+goal: Resolve CLI repository roots and isolate default schema resources without changing
+  invocation file paths
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: codex/repository-root
+base_commit: f9ae00cf0a2df4c4318b8efc700c64a81833e079
+subject_commit: f9ae00cf0a2df4c4318b8efc700c64a81833e079
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope:
+- src/aiflow/cli.py
+- src/aiflow/contracts.py
+- src/aiflow/git_context.py
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- force_push
+current_state: BLOCKED
+created_at: '2026-10-11T07:34:43Z'
+updated_at: '2026-10-11T07:46:14Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0077
+  decision_unit_id: DU-001
+  goal: Resolve CLI repository roots and isolate default schema resources without
+    changing invocation file paths
+  inputs:
+  - Owner requested continued construction; current complete-clone CLI uses invocation
+    cwd for task and default schema resources.
+  - Independently reviewed repository-root specification and separately committed
+    TDD acceptance tests define the bounded behavior.
+  planned_actions:
+  - Extract a reusable Git-root resolver with ancestor and crossed .git marker rejection.
+  - Bind default contract resources in a scoped context without changing process cwd.
+  - Pass the resolved root to business services while preserving invocation-relative
+    file arguments.
+  impact_scope:
+  - src/aiflow/cli.py
+  - src/aiflow/contracts.py
+  - src/aiflow/git_context.py
+  reversibility: reversible
+  verification_methods:
+  - Independent path and schema boundary acceptance tests, full pytest with 85 percent
+    total and 90 percent diff coverage, Ruff, format, mypy, whitespace, native verify
+    and Gate, and required CI.
+  external_side_effects: []
+  permission_requirements: []
+  impact_categories: []
+  controlled_actions: []
+  scope:
+    clear: true
+  impact:
+    level: medium
+  protections:
+    verified_backup: false
+    dry_run: false
+  verification:
+    automatic: true
+    tools_missing: false
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: false
+    behavior_changed: true
+    code_modified: true
+    interaction_scope: cross_module
+    regression_risk: true
+    error_detectability: high
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
+frozen_spec_sha256: 78c083548afb7ab80a33bb20496221a0d58274547f64b74084fe05ed3fefbac3
+spec_frozen_at: '2026-10-11T07:35:45Z'
