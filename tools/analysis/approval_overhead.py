@@ -8,7 +8,11 @@ approval required a human interruption.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
+import re
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -45,6 +49,45 @@ REQUIRED_EVENT_FIELDS = frozenset(
         "payload",
     }
 )
+SNAPSHOT_PATH = re.compile(
+    r"\.ai/tasks/(TASK-[0-9]{4,})/(?:task\.yaml|classification\.json|events\.jsonl|"
+    r"evidence\.json|reviews/REV-[0-9]{4,}-r[0-9]{4,}\.json)"
+)
+SNAPSHOT_PATTERNS = {
+    "schema_version": r"(?:1|2)\.0",
+    "repository_id": r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+    "current_state": r"[A-Z][A-Z_]{0,63}",
+    "from_state": r"[A-Z][A-Z_]{0,63}",
+    "to_state": r"[A-Z][A-Z_]{0,63}",
+    "event_type": r"[a-z][a-z_]{0,63}",
+    "effective_route": r"AUTO|ASK|REVIEW|BLOCK",
+    "effective_verification_level": r"V[012]",
+    "review_id": r"REV-[0-9]{4,}",
+    "review_stage": r"design|implementation",
+    "outcome": r"APPROVE|APPROVE_WITH_CONDITIONS|REQUEST_CHANGES|REJECT|BLOCKED",
+    "conclusion": r"passed|failed|provisional",
+    "phase": r"pre_implementation_review|final",
+    "verification_level": r"V[012]",
+    "mode": r"local|ci",
+    "status": r"passed|failed|unverified|skipped|cancelled|not_run|partial|unknown",
+    "check_id": r"[a-z][a-z0-9_-]{0,63}",
+    "category": r"[a-z][a-z0-9_-]{0,63}",
+    "generated_at": r"[0-9TZ:.+\-]{20,40}",
+    "recorded_at": r"[0-9TZ:.+\-]{20,40}",
+    "occurred_at": r"[0-9TZ:.+\-]{20,40}",
+    **dict.fromkeys(("base_commit", "subject_commit", "attestation_head"), r"[0-9a-f]{40}"),
+    **dict.fromkeys(
+        (
+            "frozen_spec_sha256",
+            "spec_sha256",
+            "policy_sha256",
+            "classification_input_sha256",
+            "context_sha256",
+            "verification_snapshot_sha256",
+        ),
+        r"[0-9a-f]{64}",
+    ),
+}
 
 
 class LedgerDataError(ValueError):
@@ -275,6 +318,382 @@ def build_report(repository: Path) -> dict[str, Any]:
     }
 
 
+def _snapshot_git(repository: Path, *arguments: str, data: bytes | None = None) -> bytes:
+    environment = {
+        key: value for key, value in os.environ.items() if not key.upper().startswith("GIT_")
+    }
+    environment.update(
+        {
+            "GIT_CONFIG_GLOBAL": os.devnull,
+            "GIT_CONFIG_SYSTEM": os.devnull,
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_OPTIONAL_LOCKS": "0",
+            "GIT_TERMINAL_PROMPT": "0",
+            "GIT_NO_LAZY_FETCH": "1",
+            "GIT_ALLOW_PROTOCOL": "",
+        }
+    )
+    try:
+        result = subprocess.run(
+            ["git", "--no-replace-objects", "--no-pager", "-C", str(repository), *arguments],
+            input=data,
+            capture_output=True,
+            env=environment,
+            timeout=30,
+            check=True,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        raise LedgerDataError("snapshot: committed Git inputs could not be read") from error
+    return result.stdout
+
+
+def _snapshot_blobs(repository: Path) -> tuple[str, dict[str, tuple[str, bytes]]]:
+    commit = _snapshot_git(repository, "rev-parse", "--verify", "HEAD").decode().strip()
+    if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
+        raise LedgerDataError("snapshot: invalid source commit")
+    tree = _snapshot_git(repository, "ls-tree", "-r", "-z", commit, "--", ".ai/tasks")
+    selected: dict[str, str] = {}
+    for entry in tree.split(b"\0"):
+        if not entry:
+            continue
+        metadata, name = entry.split(b"\t", 1)
+        path = name.decode("utf-8", errors="replace")
+        if SNAPSHOT_PATH.fullmatch(path) is None:
+            continue
+        mode, kind, oid = metadata.decode("ascii").split()
+        if mode not in {"100644", "100755"} or kind != "blob":
+            raise LedgerDataError("snapshot: ledger input must be a regular Git blob")
+        selected[path] = oid
+    if not selected:
+        raise LedgerDataError("snapshot: no committed ledger inputs found")
+    selected = dict(sorted(selected.items()))
+    batch = _snapshot_git(
+        repository,
+        "cat-file",
+        "--batch",
+        data="".join(f"{oid}\n" for oid in selected.values()).encode("ascii"),
+    )
+    blobs: dict[str, tuple[str, bytes]] = {}
+    offset = 0
+    for path, oid in selected.items():
+        end = batch.find(b"\n", offset)
+        header = batch[offset:end].split()
+        if end < 0 or len(header) != 3 or header[:2] != [oid.encode(), b"blob"]:
+            raise LedgerDataError("snapshot: invalid Git blob response")
+        try:
+            size = int(header[2])
+        except ValueError as error:
+            raise LedgerDataError("snapshot: invalid Git blob length") from error
+        offset = end + 1
+        contents = batch[offset : offset + size]
+        offset += size
+        if size < 0 or len(contents) != size or batch[offset : offset + 1] != b"\n":
+            raise LedgerDataError("snapshot: incomplete Git blob response")
+        offset += 1
+        blobs[path] = (oid, contents)
+    if offset != len(batch):
+        raise LedgerDataError("snapshot: unexpected Git blob response")
+    return commit, blobs
+
+
+def _unique_snapshot_mapping(pairs: Iterable[tuple[str, Any]]) -> dict[str, Any]:
+    mapping: dict[str, Any] = {}
+    for key, value in pairs:
+        if not isinstance(key, str) or key in mapping:
+            raise ValueError("snapshot mapping keys must be unique strings")
+        mapping[key] = value
+    return mapping
+
+
+class _SnapshotLoader(yaml.SafeLoader):
+    def construct_mapping(self, node: Any, deep: bool = False) -> dict[str, Any]:
+        self.flatten_mapping(node)
+        return _unique_snapshot_mapping(
+            (self.construct_object(key, deep=deep), self.construct_object(value, deep=deep))
+            for key, value in node.value
+        )
+
+
+def _snapshot_document(contents: bytes, task_id: str, filename: str) -> dict[str, Any]:
+    try:
+        value = (
+            yaml.load(contents, Loader=_SnapshotLoader)
+            if filename == "task.yaml"
+            else json.loads(contents, object_pairs_hook=_unique_snapshot_mapping)
+        )
+    except (UnicodeError, ValueError, yaml.YAMLError) as error:
+        raise _error(task_id, filename, "invalid document") from error
+    value = _require_mapping(value, task_id, filename)
+    if value.get("task_id") != task_id:
+        raise _error(task_id, filename, "task_id does not match directory")
+    return value
+
+
+def _snapshot_fields(
+    document: dict[str, Any], fields: Iterable[str], task_id: str, filename: str
+) -> dict[str, Any]:
+    facts: dict[str, Any] = {}
+    for field in fields:
+        value = document.get(field)
+        if value is None:
+            facts[field] = "unknown"
+        elif not isinstance(value, str) or re.fullmatch(SNAPSHOT_PATTERNS[field], value) is None:
+            raise _error(task_id, filename, f"{field} is invalid")
+        else:
+            facts[field] = value
+    return facts
+
+
+def build_snapshot(repository: Path) -> dict[str, Any]:
+    """Describe committed ledger facts, without reading working files or private logs."""
+    commit, blobs = _snapshot_blobs(repository)
+    task_ids = sorted({path.split("/")[2] for path in blobs})
+    rows: list[dict[str, Any]] = []
+    missing: Counter[str] = Counter()
+    binding_fields = ("base_commit", "subject_commit", "spec_sha256", "policy_sha256")
+    for task_id in task_ids:
+        prefix = f".ai/tasks/{task_id}/"
+        documents: dict[str, dict[str, Any]] = {}
+        for filename in ("task.yaml", "classification.json", "evidence.json"):
+            source = blobs.get(prefix + filename)
+            if source is None:
+                if filename == "task.yaml":
+                    raise _error(task_id, filename, "committed file is required")
+                missing[filename] += 1
+                continue
+            documents[filename] = _snapshot_document(source[1], task_id, filename)
+        task = documents["task.yaml"]
+        _require_string(task.get("current_state"), task_id, "task.yaml", "current_state")
+        row: dict[str, Any] = {
+            "task_id": task_id,
+            "dependence_group": task_id,
+            "task": _snapshot_fields(
+                task,
+                ("schema_version", "repository_id", "current_state", "frozen_spec_sha256")
+                + binding_fields[:2],
+                task_id,
+                "task.yaml",
+            ),
+            "classification": "unknown",
+            "reviews": [],
+            "verification_attempts": [],
+            "evidence": "unknown",
+        }
+        if "classification.json" in documents:
+            classification = documents["classification.json"]
+            _require_string(
+                classification.get("effective_route"),
+                task_id,
+                "classification.json",
+                "effective_route",
+            )
+            row["classification"] = _snapshot_fields(
+                classification,
+                ("effective_route", "effective_verification_level", "classification_input_sha256")
+                + binding_fields,
+                task_id,
+                "classification.json",
+            )
+        event_source = blobs.get(prefix + "events.jsonl")
+        if event_source is None:
+            raise _error(task_id, "events.jsonl", "committed file is required")
+        events: list[dict[str, Any]] = []
+        active: dict[str, Any] | None = None
+        try:
+            lines = event_source[1].decode("utf-8").splitlines()
+        except UnicodeError as error:
+            raise _error(task_id, "events.jsonl", "invalid encoding") from error
+        if not lines:
+            raise _error(task_id, "events.jsonl", "event records are required")
+        previous_sequence = 0
+        for line in lines:
+            event = _snapshot_document(line.encode(), task_id, "events.jsonl")
+            sequence = event.get("sequence")
+            if (
+                not REQUIRED_EVENT_FIELDS.issubset(event)
+                or type(sequence) is not int
+                or sequence <= previous_sequence
+            ):
+                raise _error(task_id, "events.jsonl", "invalid fields or sequence")
+            if any(
+                event.get(field) is None
+                for field in ("event_type", "from_state", "to_state", "occurred_at")
+            ):
+                raise _error(task_id, "events.jsonl", "missing required event facts")
+            previous_sequence = sequence
+            facts = {
+                "sequence": sequence,
+                **_snapshot_fields(
+                    event,
+                    ("event_type", "from_state", "to_state", "occurred_at"),
+                    task_id,
+                    "events.jsonl",
+                ),
+            }
+            payload = _require_mapping(event["payload"], task_id, "events.jsonl")
+            facts.update(
+                _snapshot_fields(
+                    payload, ("effective_route", "conclusion"), task_id, "events.jsonl"
+                )
+            )
+            events.append(facts)
+            if facts["event_type"] in {"verification_started", "verification_restarted"}:
+                active = {
+                    "stage": "verification",
+                    "start_sequence": sequence,
+                    "result_sequence": "unknown",
+                    "original_result": "unknown",
+                }
+                row["verification_attempts"].append(active)
+            elif facts["event_type"] in {
+                "verification_passed",
+                "verification_failed",
+                "verification_checked",
+            }:
+                expected = {
+                    "verification_passed": "passed",
+                    "verification_failed": "failed",
+                    "verification_checked": "provisional",
+                }[facts["event_type"]]
+                if facts["conclusion"] not in {expected, "unknown"}:
+                    raise _error(task_id, "events.jsonl", "event and conclusion conflict")
+                if active is None:
+                    active = {"stage": "verification", "start_sequence": "unknown"}
+                    row["verification_attempts"].append(active)
+                active.update(
+                    {
+                        "result_sequence": sequence,
+                        "original_result": facts["conclusion"],
+                        "to_state": facts["to_state"],
+                    }
+                )
+                active = None
+        row["events"] = events
+        row["history_completeness"] = "unknown"
+        row["historical_first_result"] = "unknown"
+        row["evidence_attempt_linkage"] = "unknown"
+        for path, (_, contents) in blobs.items():
+            if not path.startswith(prefix + "reviews/"):
+                continue
+            review = _snapshot_document(contents, task_id, "review.json")
+            revision = review.get("revision")
+            if type(revision) is not int or revision < 1:
+                raise _error(task_id, "review.json", "revision is invalid")
+            if not all(
+                review.get(field) is not None
+                for field in (
+                    "review_id",
+                    "review_stage",
+                    "outcome",
+                    "context_sha256",
+                    "recorded_at",
+                )
+            ):
+                raise _error(task_id, "review.json", "missing required fields")
+            if path.rsplit("/", 1)[1] != f"{review['review_id']}-r{revision:04d}.json":
+                raise _error(task_id, "review.json", "identity does not match source filename")
+            row["reviews"].append(
+                {
+                    "source_ref": path,
+                    "revision": revision,
+                    **_snapshot_fields(
+                        review,
+                        ("review_id", "review_stage", "outcome", "context_sha256", "recorded_at"),
+                        task_id,
+                        "review.json",
+                    ),
+                }
+            )
+        missing["reviews"] += int(not row["reviews"])
+        missing["verification_attempts"] += int(not row["verification_attempts"])
+        if "evidence.json" in documents:
+            evidence = documents["evidence.json"]
+            checks = evidence.get("checks")
+            if not isinstance(checks, list) or evidence.get("conclusion") is None:
+                raise _error(task_id, "evidence.json", "checks or conclusion is invalid")
+            projected_checks = []
+            for check in checks:
+                check = _require_mapping(check, task_id, "evidence.json")
+                if not all(
+                    check.get(field) is not None for field in ("check_id", "category", "status")
+                ):
+                    raise _error(task_id, "evidence.json", "missing required check fields")
+                projected = _snapshot_fields(
+                    check, ("check_id", "category", "status"), task_id, "evidence.json"
+                )
+                for field, expected_type in (
+                    ("required", bool),
+                    ("exit_code", int),
+                    ("timed_out", bool),
+                    ("duration_ms", int),
+                ):
+                    value = check.get(field)
+                    if value is not None and type(value) is not expected_type:
+                        raise _error(task_id, "evidence.json", f"{field} is invalid")
+                    if field == "duration_ms" and isinstance(value, int) and value < 0:
+                        raise _error(task_id, "evidence.json", "duration_ms is invalid")
+                    projected[field] = "unknown" if value is None else value
+                projected_checks.append(projected)
+            row["evidence"] = {
+                **_snapshot_fields(
+                    evidence,
+                    (
+                        "schema_version",
+                        "phase",
+                        "verification_level",
+                        "mode",
+                        "conclusion",
+                        "generated_at",
+                        "attestation_head",
+                        "verification_snapshot_sha256",
+                    )
+                    + binding_fields,
+                    task_id,
+                    "evidence.json",
+                ),
+                "checks": projected_checks,
+            }
+        rows.append(row)
+    return {
+        "schema_version": "1.0",
+        "measurement": "tracked_ledger_snapshot",
+        "source_commit": commit,
+        "executed_tool_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "sources": [{"ref": path, "git_blob": oid} for path, (oid, _) in blobs.items()],
+        "tasks": rows,
+        "coverage": {
+            "task_records": len(rows),
+            "missing_tasks_by_field": dict(sorted(missing.items())),
+            "actual_model_unknown_tasks": len(rows),
+            "human_work_minutes_unknown_tasks": len(rows),
+            "cost_unknown_tasks": len(rows),
+            "host_events_unknown_tasks": len(rows),
+        },
+        "unknown": dict.fromkeys(
+            (
+                "actual_model",
+                "human_interruptions",
+                "human_work_minutes",
+                "cost",
+                "host_events",
+                "defect_escape_rate",
+            ),
+            "unknown",
+        ),
+        "limitations": [
+            "Committed ledger statements were not reverified; "
+            "this is not acceptance or authorization.",
+            "Task groups are conservative dependencies, not a certified independent sample count.",
+            "Checks, findings, review revisions and retries are child records, "
+            "not independent samples.",
+            "Event ordering only locates recorded attempts; "
+            "completeness and evidence linkage are unknown.",
+            "Logs, free text, actors, identity, working files "
+            "and external/private sources are excluded.",
+        ],
+    }
+
+
 def _text(report: dict[str, Any]) -> str:
     tasks = report["tasks"]
     approvals = report["approvals"]
@@ -302,14 +721,28 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("repository", nargs="?", type=Path, default=Path.cwd())
     parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument(
+        "--snapshot", action="store_true", help="Describe allowlisted committed HEAD facts"
+    )
     arguments = parser.parse_args(argv)
     try:
-        report = build_report(arguments.repository.resolve())
+        report = (
+            build_snapshot(arguments.repository.resolve())
+            if arguments.snapshot
+            else build_report(arguments.repository.resolve())
+        )
     except LedgerDataError as error:
         print(f"approval-overhead: {error}", file=sys.stderr)
         return 2
     if arguments.format == "json":
         print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+    elif arguments.snapshot:
+        print(
+            f"Tracked ledger snapshot (read-only; not reverified): {report['source_commit']}\n"
+            f"Coverage: {report['coverage']}\n"
+            "Actual model, human time, cost and host events: unknown.\n"
+            "Checks, review revisions and retries do not increase independent samples."
+        )
     else:
         print(_text(report))
     return 0
