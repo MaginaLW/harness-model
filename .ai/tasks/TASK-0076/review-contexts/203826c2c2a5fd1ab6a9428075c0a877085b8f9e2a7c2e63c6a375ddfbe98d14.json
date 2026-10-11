@@ -1,0 +1,54 @@
+{
+  "base_commit": "8fb09e953d4a5ab1087ad4a561bd56d948370984",
+  "branch": "claude/retire-unused-features",
+  "classification_input_sha256": "438ca4063a55f0ae794b273981b2a5c5431adcb1da34753adb3c19c75eb8d1bb",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/**",
+      ".ai/schemas/external-review.schema.json",
+      ".ai/schemas/external-review-import.schema.json",
+      ".ai/schemas/external-review-repository-mapping.schema.json",
+      "tests/**",
+      "docs/operations/**",
+      "README.md",
+      "AGENTS.md",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Retire external review import and the pytest temp-root option, consolidate timestamp helpers, and align governance docs with Policy 2.5.0",
+        "impact_scope": [
+          "src/aiflow/**",
+          ".ai/schemas/external-review.schema.json",
+          ".ai/schemas/external-review-import.schema.json",
+          ".ai/schemas/external-review-repository-mapping.schema.json",
+          "tests/**",
+          "docs/operations/**",
+          "README.md",
+          "AGENTS.md",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "Delete external_review module, CLI subcommand, contracts, schemas, fixtures and tests; tombstone its doc.",
+          "Delete --pytest-temp-root, verification_temporary and their branches and tests; tombstone its doc.",
+          "Consolidate the eight identical timestamp helpers.",
+          "Align AGENTS.md escalation list, maintenance-status, README/quickstart/recovery/hooks mentions and CHANGELOG."
+        ]
+      }
+    ],
+    "goal": "Retire external review import and the pytest temp-root option, consolidate timestamp helpers, and align governance docs with Policy 2.5.0",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "203826c2c2a5fd1ab6a9428075c0a877085b8f9e2a7c2e63c6a375ddfbe98d14",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "0314f80d794b65e6dafdad019d1d0c7cc795af2be602a559337b4a6fa780130b",
+  "task_id": "TASK-0076"
+}

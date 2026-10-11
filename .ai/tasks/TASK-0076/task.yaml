@@ -1,0 +1,99 @@
+allowed_scope:
+- src/aiflow/**
+- .ai/schemas/external-review.schema.json
+- .ai/schemas/external-review-import.schema.json
+- .ai/schemas/external-review-repository-mapping.schema.json
+- tests/**
+- docs/operations/**
+- README.md
+- AGENTS.md
+- CHANGELOG.md
+base_commit: 8fb09e953d4a5ab1087ad4a561bd56d948370984
+branch: claude/retire-unused-features
+created_at: '2026-10-10T00:45:21Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Retire external review import and the pytest temp-root option, consolidate
+    timestamp helpers, and align governance docs with Policy 2.5.0
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/**
+  - .ai/schemas/external-review.schema.json
+  - .ai/schemas/external-review-import.schema.json
+  - .ai/schemas/external-review-repository-mapping.schema.json
+  - tests/**
+  - docs/operations/**
+  - README.md
+  - AGENTS.md
+  - CHANGELOG.md
+  inputs:
+  - Project owner decided on 2026-10-10 to retire external review import and the pytest
+    temp-root option (no completed real import; last three verifications passed without
+    the option).
+  - Eight _now/_utc_now helpers in src/aiflow are byte-identical and not monkeypatched
+    by tests.
+  - 'TASK-0075 design review RF-007/RF-008: AGENTS.md escalation list is narrower
+    than the Policy 2.5.0 governance surface and maintenance-status still names Policy
+    2.4.0.'
+  - 'observe/hooks retirement was dropped: the phase-2 acceptance matrix rows P2-ESC-01
+    and P2-HOOK-01 and historical ledger replay depend on them.'
+  permission_requirements: []
+  planned_actions:
+  - Delete external_review module, CLI subcommand, contracts, schemas, fixtures and
+    tests; tombstone its doc.
+  - Delete --pytest-temp-root, verification_temporary and their branches and tests;
+    tombstone its doc.
+  - Consolidate the eight identical timestamp helpers.
+  - Align AGENTS.md escalation list, maintenance-status, README/quickstart/recovery/hooks
+    mentions and CHANGELOG.
+  protections:
+    dry_run: false
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0076
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - CLI help checks, git grep for removed symbols, status of historical tasks.
+  - Full pytest with coverage >=85%, diff coverage >=90%, ruff, mypy; AI Flow verify
+    and gate.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 0314f80d794b65e6dafdad019d1d0c7cc795af2be602a559337b4a6fa780130b
+goal: Retire external review import and the pytest temp-root option, consolidate timestamp
+  helpers, and align governance docs with Policy 2.5.0
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-10T00:45:57Z'
+subject_commit: 8fb09e953d4a5ab1087ad4a561bd56d948370984
+task_id: TASK-0076
+updated_at: '2026-10-11T04:53:23Z'
+worktree_dirty: false
+worktree_dirty_paths: []
