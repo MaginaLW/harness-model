@@ -19,7 +19,7 @@
 
 ## 剩余建设主线
 
-后续按有效能力推进，顺序以 [S0–S5 路线](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)为设计输入。项目所有者已选择 **B：3-A 低风险建议与校准、3-B 高风险 V3 独立准入和验收**，首场景为本仓自然治理任务的只读建议，范围见[置信度反馈设计](../superpowers/specs/confidence-feedback.md)。当前范围的准备与常规实施按 [AGENTS.md](../../AGENTS.md) 准入；样本充分性、统计接受标准、隐私、保留期和风险用途参数尚未全部冻结，路线选择不批准新私密采集、provider 或执行动作。
+后续按有效能力推进，顺序以 [S0–S5 路线](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)为设计输入。项目所有者已选择 **B：3-A 低风险建议与校准、3-B 高风险 V3 独立准入和验收**，首场景为本仓自然治理任务的只读建议，首用途已选**追加机器审核，并基于审核结果积累认识**，范围见[置信度反馈设计](../superpowers/specs/confidence-feedback.md)。当前范围的准备与常规实施按 [AGENTS.md](../../AGENTS.md) 准入；样本充分性、统计接受标准、隐私、保留期和风险用途参数尚未全部冻结，路线和用途选择不批准新私密采集、provider 或执行动作。
 
 已具备[固定 HEAD 的账本事实快照](effect-observations.md#固定提交的事实快照)，以及复用当前原生 status 与适用状态 Gate 的[非评分只读建议](review-advisory.md)。
 快照保守核对同 task 审核 context 与 review/event 引用，关联状态和子记录计数不提供新验收或独立样本；原失败及历史完整性等 `unknown` 保留。
@@ -31,7 +31,7 @@
 这些能力属于 S0/S1 准备，不证明生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
 数据与方法合同、可靠身份、人时、独立缺陷真值、统一 telemetry、评分/校准、真实 shadow 与宿主接入仍需各自证据和准入。
 
-[来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位、估计条件和用途决定。它们是 S0/S1 的文档准备，不是运行时 telemetry、统计实现或新数据采集。下一步先统一首个用途及其容许错误，再形成对应来源、样本、真值和精度方案；参数尚未冻结时继续非评分准备，不把候选文档当作生产评分准入。
+[来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位与估计条件。[追加机器专项审核与反馈候选](../superpowers/specs/supplemental-machine-review.md)承接已选用途，具体化“专项审核→处理→复核→结果反馈”的来源和停止边界。它们是 S0/S1 的文档准备，不是运行时 telemetry、统计实现或新数据采集。下一步围绕该用途形成首个目标、触发、错误接受、来源、样本、真值和精度方案；参数尚未冻结时继续非评分准备，不把候选文档当作生产评分准入。
 
 | 能力 | 已有基础 | 剩余建设与验收 |
 |---|---|---|
