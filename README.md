@@ -41,9 +41,9 @@
 
 Chapters 1–7（工程基线、任务状态、分流与验证、治理交互、证据闭环、Agent/Hooks/CI、试点验收）按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)完成；Chapters 8–13（结构化审核、V2 contracts、独立 Verifier、acceptance/mutation、运行期观测与 Hooks、自举 REVIEW 试点）按[阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md)完成。计划中的未来能力不能当作已经可用。
 
-剩余建设以数据与效果基线、任务分层置信度、反馈驱动审核和最小宿主接入为主线，按 **S0/S1 准备 → S2 离线验证 → S3 真实影子评估 → S4 单场景试点 → S5 按效果扩展** 推进。当前有效能力清单、依赖与旧工作线边界见[维护收尾与待办](docs/operations/maintenance-status.md#剩余建设主线)，设计输入见[多层审核与置信度反馈分阶段计划](docs/superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)。项目所有者已要求继续建设；当前范围的准备与常规实施仍按 AGENTS.md 准入，3-A/3-B 路线及数据、统计、隐私和风险用途参数尚未正式冻结。
+剩余建设以数据与效果基线、任务分层置信度、反馈驱动审核和最小宿主接入为主线，按 **S0/S1 准备 → S2 离线验证 → S3 真实影子评估 → S4 单场景试点 → S5 按效果扩展** 推进。项目所有者已选择 **B：3-A 低风险建议与校准、3-B 高风险 V3 独立准入和验收**，首场景为本仓自然治理任务的只读建议，见[置信度反馈设计](docs/superpowers/specs/confidence-feedback.md)。有效能力清单和旧工作线边界见[维护收尾与待办](docs/operations/maintenance-status.md#剩余建设主线)，设计输入见[多层审核与置信度反馈分阶段计划](docs/superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)。当前范围的准备与常规实施仍按 AGENTS.md 准入；数据、统计、隐私和风险用途参数尚未全部冻结。
 
-阶段三进入门仍未满足；评分实施须满足[原进入门](docs/implementation/phase-03-entry-inputs.md)，或正式采用拆分路线并完成对应准入。完整引擎跨仓产品化、provider、固定动作可信执行与 V3 按真实需求分别推进；Phase 4 编排依赖阶段三真实退出与实测协调需求。旧七项是历史未验收范围，TASK-0063～0071 已归档、不再默认续跑；未来能力与历史通过均不能当作当前可用能力。
+阶段三仍为 `not_started`，实际实现准入尚未完成。[阶段三进入输入](docs/implementation/phase-03-entry-inputs.md)保留原三门，并明确两包关系：3-A 非评分准备可先做，生产估计与真实 shadow 先满足自身数据、方法和用途条件；3-B 独立验证真实 V3。整体 Phase 3 须两包各自退出；Phase 4 编排继续依赖整体退出、稳定接口与实测协调需求。完整引擎跨仓产品化、provider 和固定动作可信执行按真实需求分别准入。旧七项是历史未验收范围，TASK-0063～0071 已归档、不再默认续跑；未来能力与历史通过均不能当作当前可用能力。
 
 ## 开始参与
 
