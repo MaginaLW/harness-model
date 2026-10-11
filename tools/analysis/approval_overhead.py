@@ -825,27 +825,226 @@ def _text(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def build_availability(repository: Path) -> dict[str, Any]:
+    """Map existing projections to candidate requirements; do not estimate a target."""
+    snapshot = build_snapshot(repository)
+    common = [
+        "candidate_version_bindings",
+        "actual_model_identity",
+        "task_conditions",
+        "acceptance_protocol",
+        "dependency_independence",
+    ]
+    author = [
+        *common,
+        "verification_evidence",
+        "recorded_verification_results",
+        "review_results",
+        "evidence_attempt_linkage",
+    ]
+    reviewer = [
+        *common,
+        "review_results",
+        "review_context_bindings",
+        "review_event_references",
+        "review_information_and_budget",
+        "defect_report_matching",
+    ]
+    targets = {
+        "author_first_acceptance": {
+            "denominator_definition": "Predeclared first candidates in included attempt chains.",
+            "required_facts": [*author, "first_candidate_lineage"],
+        },
+        "author_after_repair_acceptance": {
+            "denominator_definition": (
+                "Included chains that actually entered the declared repair strategy."
+            ),
+            "required_facts": [*author, "repair_candidate_lineage", "repair_strategy_and_budget"],
+        },
+        "review_detection": {
+            "denominator_definition": (
+                "Predeclared review units with independently adjudicated actionable defects."
+            ),
+            "required_facts": [*reviewer, "independent_positive_truth"],
+        },
+        "review_false_positive": {
+            "denominator_definition": (
+                "Predeclared review opportunities independently adjudicated without "
+                "the corresponding actionable defect."
+            ),
+            "required_facts": [*reviewer, "independent_negative_truth_and_opportunities"],
+        },
+    }
+    not_projected = (
+        "actual_model_identity",
+        "task_conditions",
+        "acceptance_protocol",
+        "dependency_independence",
+        "repair_strategy_and_budget",
+        "independent_positive_truth",
+        "independent_negative_truth_and_opportunities",
+        "defect_report_matching",
+        "review_information_and_budget",
+    )
+    rows: list[dict[str, Any]] = []
+    counts: dict[str, Counter[str]] = {}
+    for task in snapshot["tasks"]:
+        prefix = f".ai/tasks/{task['task_id']}/"
+        events_ref = prefix + "events.jsonl"
+        reviews = task["reviews"]
+        review_refs = [review["source_ref"] for review in reviews]
+        context_refs = sorted(
+            {
+                review["context"]["source_ref"]
+                for review in reviews
+                if review["context"] != "unknown"
+            }
+        )
+        attempts = task["verification_attempts"]
+        evidence_present = task["evidence"] != "unknown"
+        if not reviews or any(review["context"] == "unknown" for review in reviews):
+            context_availability = "source_missing"
+        elif all(review["context_linkage"] == "matched" for review in reviews):
+            context_availability = "projected"
+        else:
+            context_availability = "linkage_unknown"
+        facts = {
+            "candidate_version_bindings": {
+                "availability": "projected"
+                if all(
+                    task["task"][field] != "unknown" for field in ("base_commit", "subject_commit")
+                )
+                else "linkage_unknown",
+                "source_refs": [prefix + "task.yaml"],
+            },
+            "verification_evidence": {
+                "availability": "projected" if evidence_present else "source_missing",
+                "source_refs": [prefix + "evidence.json"] if evidence_present else [],
+            },
+            "recorded_verification_results": {
+                "availability": "projected"
+                if attempts and all(attempt["original_result"] != "unknown" for attempt in attempts)
+                else "linkage_unknown",
+                "source_refs": [events_ref],
+            },
+            "review_results": {
+                "availability": "projected" if reviews else "source_missing",
+                "source_refs": review_refs,
+            },
+            "review_context_bindings": {
+                "availability": context_availability,
+                "source_refs": [*review_refs, *context_refs],
+            },
+            "review_event_references": {
+                "availability": "projected"
+                if reviews
+                and all(
+                    review["event_links"]
+                    and all(
+                        link["binding"] in {"matched", "revision_reference"}
+                        for link in review["event_links"]
+                    )
+                    for review in reviews
+                )
+                else "linkage_unknown",
+                "source_refs": [events_ref, *review_refs],
+            },
+        }
+        for fact in (
+            "first_candidate_lineage",
+            "repair_candidate_lineage",
+            "evidence_attempt_linkage",
+        ):
+            facts[fact] = {"availability": "linkage_unknown", "source_refs": [events_ref]}
+        for fact in not_projected:
+            facts[fact] = {"availability": "not_projected", "source_refs": []}
+        for name, fact in facts.items():
+            counts.setdefault(name, Counter())[fact["availability"]] += 1
+        rows.append(
+            {
+                "task_id": task["task_id"],
+                "dependence_group": task["dependence_group"],
+                "facts": facts,
+                "observations": task,
+            }
+        )
+    return {
+        "schema_version": "1.0",
+        "measurement": "confidence_evidence_availability",
+        "probability_status": "unestimated",
+        "method_status": "design_pending",
+        "execution_allowed": False,
+        "source_commit": snapshot["source_commit"],
+        "executed_tool_sha256": snapshot["executed_tool_sha256"],
+        "sources": snapshot["sources"],
+        "targets": targets,
+        "tasks": rows,
+        "coverage": {
+            "task_records": len(rows),
+            "by_fact": {
+                name: {
+                    status: count[status]
+                    for status in (
+                        "projected",
+                        "source_missing",
+                        "not_projected",
+                        "linkage_unknown",
+                    )
+                }
+                for name, count in sorted(counts.items())
+            },
+        },
+        "unknown": snapshot["unknown"],
+        "limitations": [
+            *snapshot["limitations"],
+            "Availability describes projections and references, "
+            "not target eligibility or estimability.",
+            "Source missing means at least one needed allowlisted source is absent at this commit; "
+            "not projected does not establish absence in the original repository.",
+            "Task fact counts are not statistical denominators or independent sample counts.",
+            "Target definitions are candidates; population, protocol, truth, "
+            "precision and use are not frozen.",
+        ],
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Read-only AI Flow approval-overhead ledger report"
     )
     parser.add_argument("repository", nargs="?", type=Path, default=Path.cwd())
     parser.add_argument("--format", choices=("text", "json"), default="text")
-    parser.add_argument(
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument(
         "--snapshot", action="store_true", help="Describe allowlisted committed HEAD facts"
+    )
+    modes.add_argument(
+        "--availability", action="store_true", help="Map non-scoring target evidence availability"
     )
     arguments = parser.parse_args(argv)
     try:
-        report = (
-            build_snapshot(arguments.repository.resolve())
-            if arguments.snapshot
-            else build_report(arguments.repository.resolve())
-        )
+        repository = arguments.repository.resolve()
+        if arguments.availability:
+            report = build_availability(repository)
+        elif arguments.snapshot:
+            report = build_snapshot(repository)
+        else:
+            report = build_report(repository)
     except LedgerDataError as error:
         print(f"approval-overhead: {error}", file=sys.stderr)
         return 2
     if arguments.format == "json":
         print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+    elif arguments.availability:
+        print(
+            "Confidence evidence availability (read-only; unestimated): "
+            f"{report['source_commit']}\n"
+            "Method: design_pending | execution_allowed=false\n"
+            f"Task records: {report['coverage']['task_records']}"
+        )
+        for name, count in report["coverage"]["by_fact"].items():
+            print(f"{name}: {count}")
+        print("Task fact counts are not statistical denominators or independent sample counts.")
     elif arguments.snapshot:
         print(
             f"Tracked ledger snapshot (read-only; not reverified): {report['source_commit']}\n"

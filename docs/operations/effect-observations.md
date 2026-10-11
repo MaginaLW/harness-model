@@ -76,6 +76,45 @@ REQUEST_CHANGES 后追加 resolved 不提供独立缺陷真值，也不证明重
 账本声明，不输出评分、概率或授权结论，也不认证独立样本。它是 S0 既有事实的离线输入，
 不冻结 S1 统计/隐私参数，不启动 telemetry 采集、影子评估或阶段三实施。
 
+## 四目标证据可用性
+
+同一工具可输出非评分的证据可用性矩阵：
+
+```sh
+python tools/analysis/approval_overhead.py --availability --format text
+python tools/analysis/approval_overhead.py --availability --format json
+```
+
+`--availability` 与 `--snapshot` 互斥；原默认统计及 snapshot 格式保持不变。
+该模式直接复用固定 tracked HEAD 的白名单快照，不新增来源、发现私密目录或采集数据。
+用途标识为 `confidence_evidence_availability`；`targets` 中的四个 ID 为
+`author_first_acceptance`、`author_after_repair_acceptance`、`review_detection`、
+`review_false_positive`，对应作者首次验收、修复后验收、审核检出与误报。
+各目标的 `denominator_definition` 是候选定义文字，`required_facts` 列所需事实，
+均不计算分母或确定纳入单位；
+方法候选见[只读置信度方法设计](../superpowers/specs/readonly-confidence-method.md)。
+
+| 证据标签 | 含义与边界 |
+|---|---|
+| `projected` | 该事实已由固定快照投影；不等于原声明已独立验证、缺陷真值或目标已可估计。 |
+| `source_missing` | 该 fact 所需的白名单原件在固定提交中至少缺少一件，可能是部分缺失；不判断未提交、私密或其他来源中是否存在。 |
+| `not_projected` | 所需字段没有被快照投影；不证明原仓不存在该事实。 |
+| `linkage_unknown` | 已有投影不足以证明所需对应关系，或存在已知冲突；不以当前状态或最后一次通过补全链路。 |
+
+`tasks` 按 `task_id`、保守 `dependence_group` 与 `facts` 展开；各 fact 给出
+`availability` 和 `source_refs`，引用只列固定白名单中实际读取的文件。
+`observations` 完整保留原 snapshot task 投影；部分来源缺失时，已有原值与冲突仍保留。
+`coverage.task_records` 和 `coverage.by_fact` 只按任务事实计数，后者为每项事实列出
+四种标签的计数，包括零；text 展示全部 `by_fact`，JSON 保留完整可复核投影。
+这些覆盖计数只描述该快照，不提供目标真正分母或独立样本数。
+原失败、取消、skip 和未知保留；关联、resolved 或缺少失败记录不生成新的验收与缺陷真值。
+输出保持 `method_status=design_pending`、`probability_status=unestimated`、
+`execution_allowed=false`；不输出评分、可估计资格、新门禁或授权。
+S1 的数据、方法、用途、隐私和质量条件仍须分别形成并准入；矩阵不宣告全部冻结，
+也不启动生产估计、真实 shadow、provider、V3 或宿主执行。
+该模式继承 snapshot 的安全拒绝：必要原件缺少或参与解析的原件格式损坏时以退出码
+`2` 拒绝，不输出空来源矩阵。
+
 ## 尚不能得出的结论
 
 人类实际被打断次数、审核/决策工作分钟、真实返工工作量、交付后缺陷率均为 `unknown`。
