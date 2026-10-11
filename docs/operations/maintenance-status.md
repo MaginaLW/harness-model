@@ -15,6 +15,7 @@
 - 2026-10-10 架构精简（PR #46）已合并并关闭 TASK-0072/0073/0074：V1/V2 只运行一次完整覆盖率 pytest、`src/aiflow` 净减约 1040 行、删除未接入的工具试点、任务 ID 分配跳过其他分支已用编号。PR #46 以 squash 合并为 `0f5aa4c`，任务证据绑定的原始提交由标签 `archive/claude-simplify-architecture` 保留。未完成的 TASK-0063～0071 所在分支已归档为本地 `archive/codex-*` 标签，未合并。
 - TASK-0075 的治理面 REVIEW 下限已由 PR #51 合并，账本已关闭：Policy 2.5.0 覆盖 `.github/**`、`.ai/**`、`src/aiflow/**`、`tools/ci/**` 及 Agent 入口、依赖与 Git 配置文件；准入以当前 Policy 和 CLI 结论为准。
 - TASK-0076 已由 PR #52 合并，账本已关闭：退役外部审核导入与 `verify --pytest-temp-root`，合并八处相同的 UTC 时间戳辅助函数，同步退役说明与治理清单。原生 V1 完整验证、两份独立实现审核、Gate 与远端 required CI 均通过；历史任务、失败记录和恢复来源保留。
+- TASK-0078 已由 PR #55 合并并关闭：完整克隆内的 CLI 根目录、子目录与 worktree 定位，以及默认 Schema 资源作用域已交付。它是 TASK-0077 的后继，原阻断记录保留；这不提供完整引擎的外仓初始化或资源分发。
 
 ## 剩余建设主线
 
@@ -29,6 +30,8 @@
 `SOURCE_READ_ATOMICITY_NOT_ESTABLISHED` 明确多次原生读取尚未证明原子一致性，版本投影不代表固定的原子观察窗口。
 这些能力属于 S0/S1 准备，不证明生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
 数据与方法合同、可靠身份、人时、独立缺陷真值、统一 telemetry、评分/校准、真实 shadow 与宿主接入仍需各自证据和准入。
+
+[来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位、估计条件和用途决定。它们是 S0/S1 的文档准备，不是运行时 telemetry、统计实现或新数据采集。下一步先统一首个用途及其容许错误，再形成对应来源、样本、真值和精度方案；参数尚未冻结时继续非评分准备，不把候选文档当作生产评分准入。
 
 | 能力 | 已有基础 | 剩余建设与验收 |
 |---|---|---|
