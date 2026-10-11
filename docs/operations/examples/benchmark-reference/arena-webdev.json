@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "task_category": "webdev_preference",
+  "models": ["gpt-6-astra-max", "gpt-6.1-sol-max", "gpt-6-sol-max", "gpt-5.6-sol-xhigh-codex-harness"],
+  "sources": [
+    {
+      "source_id": "arena-webdev",
+      "family": "arena-code-webdev",
+      "category": "webdev_preference",
+      "url": "https://arena.ai/leaderboard/code/webdev",
+      "retrieved_at": "2026-10-11T17:26:04+00:00",
+      "as_of": "2026-10-08",
+      "revision": null,
+      "metric": "arena_score",
+      "direction": "higher",
+      "protocol": "Paired human preference for runnable websites. as_of is page date, not per-model run date. Immutable page revision, row run dates, interval confidence level, exact model snapshots and budgets unknown. Context is displayed capacity, not actual tokens used.",
+      "observations": [
+        {
+          "model_id": "gpt-6-astra-max",
+          "label": "gpt-6-astra-max",
+          "configuration": "max; harness unknown; displayed interval 1775-1797 (+11/-11); votes=5189; context capacity 1.1M.",
+          "score": 1786
+        },
+        {
+          "model_id": "gpt-6.1-sol-max",
+          "label": "gpt-6.1-sol-max",
+          "configuration": "max; harness unknown; displayed interval 1740-1770 (+15/-15); votes=2102; context capacity 1.1M.",
+          "score": 1755
+        },
+        {
+          "model_id": "gpt-6-sol-max",
+          "label": "gpt-6-sol-max",
+          "configuration": "max; harness unknown; displayed interval 1676-1700 (+12/-12); votes=3407; context capacity 1.1M.",
+          "score": 1688
+        },
+        {
+          "model_id": "gpt-5.6-sol-xhigh-codex-harness",
+          "label": "gpt-5.6-sol-xhigh (codex-harness)",
+          "configuration": "xhigh; codex-harness; displayed interval 1612-1624 (+6/-6); votes=16639; context capacity 1.1M.",
+          "score": 1618
+        }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,8 @@
 
 本稿承接[当前设计](confidence-feedback.md)、[数据与尝试链合同](readonly-confidence-data-contract.md)、[方法协议候选](readonly-confidence-method.md)及[效果口径](../../operations/effect-observations.md)。已有风险、失败或技术分歧事实可以继续支持非评分建议准备；当前工具仍为 `probability_status=unestimated`、`execution_allowed=false`。未来以概率触发追加审核，须先满足对应数据、方法、质量、授权及用途条件。
 
+项目所有者已允许最初评分参考各排名网站。[离线外部参考工具](../../operations/benchmark-reference.md)把公开榜单原分数和完整受测配置保留，并给出声明候选集合内的相对参考分；可作为专项审核候选准备的附带信息。外部参考与本仓审核事实并列，不混成成功概率、不替代具体问题、实际身份、预算或授权。后续仍按本稿的审核→处理→复核链积累认识，真实统计或评分触发继续满足原准入。
+
 ## 1. 决策单位与具体问题
 
 决策单位是**一个固定候选，加一个具体专项问题**，不是一个模型、审核人数或完整任务的泛化评分。候选以实际 commit/tree、受审范围及适用规格/Policy 引用定位；有未提交差异时还须能复核当时差异，收尾提交不能冒充原候选。

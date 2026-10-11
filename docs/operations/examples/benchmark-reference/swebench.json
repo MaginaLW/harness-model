@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "task_category": "repository_repair",
+  "models": [
+    "gemini-3-flash-preview-high-mini-swe-2.0.0",
+    "gpt-5-2-high-mini-swe-2.0.0",
+    "gpt-5-2-codex-mini-swe-2.0.0",
+    "gpt-5-mini-2025-08-07-mini-swe-2.0.0"
+  ],
+  "sources": [
+    {
+      "source_id": "swebench-verified-mini-v2",
+      "family": "swebench-verified",
+      "category": "repository_repair",
+      "url": "https://raw.githubusercontent.com/SWE-bench/swe-bench.github.io/193160a463a435d05cf44a1fa9dc5eac832113c3/data/leaderboards.json",
+      "retrieved_at": "2026-10-11T17:22:34.373892+00:00",
+      "as_of": "2026-09-01",
+      "revision": "193160a463a435d05cf44a1fa9dc5eac832113c3",
+      "metric": "resolved_percent",
+      "direction": "higher",
+      "protocol": "Verified: 500 repair tasks; mini-SWE-agent 2.0.0; one attempt. as_of is source commit date, not evaluation date. checked=null; independent review truth unknown. Exact immutable model snapshots and other run conditions unknown.",
+      "observations": [
+        {
+          "model_id": "gemini-3-flash-preview-high-mini-swe-2.0.0",
+          "label": "Gemini 3 Flash (high)",
+          "configuration": "Model tag gemini-3-flash-preview; reasoning high; mini-SWE-agent 2.0.0; row date 2026-02-17.",
+          "score": 75.8
+        },
+        {
+          "model_id": "gpt-5-2-high-mini-swe-2.0.0",
+          "label": "GPT 5.2 (high)",
+          "configuration": "Model tag gpt-5-2; reasoning high; mini-SWE-agent 2.0.0; row date 2026-02-17.",
+          "score": 72.8
+        },
+        {
+          "model_id": "gpt-5-2-codex-mini-swe-2.0.0",
+          "label": "GPT 5.2 Codex",
+          "configuration": "Model tag gpt-5-2-codex; reasoning unknown; mini-SWE-agent 2.0.0; row date 2026-02-19.",
+          "score": 72.8
+        },
+        {
+          "model_id": "gpt-5-mini-2025-08-07-mini-swe-2.0.0",
+          "label": "GPT 5 mini",
+          "configuration": "Model tag gpt-5-mini-2025-08-07; reasoning unknown; mini-SWE-agent 2.0.0; row date 2026-02-17.",
+          "score": 56.2
+        }
+      ]
+    }
+  ]
+}
