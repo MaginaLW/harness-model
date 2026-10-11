@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Mapping, Sequence
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -15,15 +14,12 @@ from aiflow.git_context import collect_git_context, commits_are_ancestral
 from aiflow.policy import load_policy_bundle
 from aiflow.routing import ROUTE_ORDER, entry_requires_ask, route_task
 from aiflow.scope import matches_scope, normalize_repository_path
+from aiflow.state import utc_timestamp
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import TaskRecord, read_task_record_strict, transition_task_record
 from aiflow.verification_level import verification_for_task
 
 VERIFICATION_LEVEL_ORDER = ("V0", "V1", "V2")
-
-
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _stable_input(task: Mapping[str, object], units: tuple[dict[str, Any], ...]) -> str:
@@ -553,7 +549,7 @@ def classify_task(repository_root: Path, task_id: str, *, actor: str) -> dict[st
     verification = verification_for_task({**record.task, "decision_units": list(units)}, bundle)
     blocked = bool(verification.blocking_reasons)
     route = "BLOCK" if blocked else routes.effective_route
-    at = _now()
+    at = utc_timestamp()
     entries = _entries(
         routes, verification, version=bundle.policy_version, digest=bundle.sha256, at=at
     )

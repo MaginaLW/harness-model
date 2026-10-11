@@ -1,0 +1,493 @@
+{
+  "base_commit": "8fb09e953d4a5ab1087ad4a561bd56d948370984",
+  "branch": "claude/retire-unused-features",
+  "classification_input_sha256": "438ca4063a55f0ae794b273981b2a5c5431adcb1da34753adb3c19c75eb8d1bb",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/**",
+      ".ai/schemas/external-review.schema.json",
+      ".ai/schemas/external-review-import.schema.json",
+      ".ai/schemas/external-review-repository-mapping.schema.json",
+      "tests/**",
+      "docs/operations/**",
+      "README.md",
+      "AGENTS.md",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Retire external review import and the pytest temp-root option, consolidate timestamp helpers, and align governance docs with Policy 2.5.0",
+        "impact_scope": [
+          "src/aiflow/**",
+          ".ai/schemas/external-review.schema.json",
+          ".ai/schemas/external-review-import.schema.json",
+          ".ai/schemas/external-review-repository-mapping.schema.json",
+          "tests/**",
+          "docs/operations/**",
+          "README.md",
+          "AGENTS.md",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "Delete external_review module, CLI subcommand, contracts, schemas, fixtures and tests; tombstone its doc.",
+          "Delete --pytest-temp-root, verification_temporary and their branches and tests; tombstone its doc.",
+          "Consolidate the eight identical timestamp helpers.",
+          "Align AGENTS.md escalation list, maintenance-status, README/quickstart/recovery/hooks mentions and CHANGELOG."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/external-review-import.schema.json",
+        ".ai/schemas/external-review-repository-mapping.schema.json",
+        ".ai/schemas/external-review.schema.json",
+        ".ai/tasks/TASK-0076/approvals.json",
+        ".ai/tasks/TASK-0076/classification.json",
+        ".ai/tasks/TASK-0076/events.jsonl",
+        ".ai/tasks/TASK-0076/review-contexts/203826c2c2a5fd1ab6a9428075c0a877085b8f9e2a7c2e63c6a375ddfbe98d14.json",
+        ".ai/tasks/TASK-0076/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0076/spec.md",
+        ".ai/tasks/TASK-0076/task.yaml",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/operations/external-review-import.md",
+        "docs/operations/hooks.md",
+        "docs/operations/maintenance-status.md",
+        "docs/operations/pytest-temporary-roots.md",
+        "docs/operations/quickstart.md",
+        "docs/operations/recovery.md",
+        "src/aiflow/approval.py",
+        "src/aiflow/ask_service.py",
+        "src/aiflow/classification_service.py",
+        "src/aiflow/cli.py",
+        "src/aiflow/contracts.py",
+        "src/aiflow/external_review.py",
+        "src/aiflow/process_runner.py",
+        "src/aiflow/review_service.py",
+        "src/aiflow/state.py",
+        "src/aiflow/task_service.py",
+        "src/aiflow/verification.py",
+        "src/aiflow/verification_service.py",
+        "src/aiflow/verification_temporary.py",
+        "tests/fixtures/contracts/invalid/external-review-import.extra.json",
+        "tests/fixtures/contracts/invalid/external-review-import.invalid.json",
+        "tests/fixtures/contracts/invalid/external-review-import.missing.json",
+        "tests/fixtures/contracts/invalid/external-review-repository-mapping.extra.json",
+        "tests/fixtures/contracts/invalid/external-review-repository-mapping.invalid.json",
+        "tests/fixtures/contracts/invalid/external-review-repository-mapping.missing.json",
+        "tests/fixtures/contracts/invalid/external-review.extra.json",
+        "tests/fixtures/contracts/invalid/external-review.invalid.json",
+        "tests/fixtures/contracts/invalid/external-review.missing.json",
+        "tests/fixtures/contracts/valid/external-review-import.json",
+        "tests/fixtures/contracts/valid/external-review-repository-mapping.json",
+        "tests/fixtures/contracts/valid/external-review.json",
+        "tests/integration/test_external_review_command.py",
+        "tests/integration/test_verify_command.py",
+        "tests/unit/test_cli.py",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_external_review.py",
+        "tests/unit/test_external_review_metadata.py",
+        "tests/unit/test_process_runner.py",
+        "tests/unit/test_verification_plan.py",
+        "tests/unit/test_verification_temporary.py"
+      ],
+      "files": [
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 48,
+          "path": ".ai/schemas/external-review-import.schema.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 74,
+          "path": ".ai/schemas/external-review-repository-mapping.schema.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 257,
+          "path": ".ai/schemas/external-review.schema.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0076/approvals.json"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0076/classification.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0076/events.jsonl"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0076/review-contexts/203826c2c2a5fd1ab6a9428075c0a877085b8f9e2a7c2e63c6a375ddfbe98d14.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0076/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0076/spec.md"
+        },
+        {
+          "additions": 99,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0076/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "AGENTS.md"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "CHANGELOG.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "README.md"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 72,
+          "path": "docs/operations/external-review-import.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/hooks.md"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 153,
+          "path": "docs/operations/pytest-temporary-roots.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 7,
+          "path": "src/aiflow/approval.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 7,
+          "path": "src/aiflow/ask_service.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 6,
+          "path": "src/aiflow/classification_service.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 90,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 12,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1156,
+          "path": "src/aiflow/external_review.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 21,
+          "path": "src/aiflow/process_runner.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 6,
+          "path": "src/aiflow/review_service.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/state.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 7,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 43,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 44,
+          "path": "src/aiflow/verification_service.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 321,
+          "path": "src/aiflow/verification_temporary.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 54,
+          "path": "tests/fixtures/contracts/invalid/external-review-import.extra.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 53,
+          "path": "tests/fixtures/contracts/invalid/external-review-import.invalid.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 7,
+          "path": "tests/fixtures/contracts/invalid/external-review-import.missing.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 17,
+          "path": "tests/fixtures/contracts/invalid/external-review-repository-mapping.extra.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 16,
+          "path": "tests/fixtures/contracts/invalid/external-review-repository-mapping.invalid.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 7,
+          "path": "tests/fixtures/contracts/invalid/external-review-repository-mapping.missing.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 39,
+          "path": "tests/fixtures/contracts/invalid/external-review.extra.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 38,
+          "path": "tests/fixtures/contracts/invalid/external-review.invalid.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 31,
+          "path": "tests/fixtures/contracts/invalid/external-review.missing.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 53,
+          "path": "tests/fixtures/contracts/valid/external-review-import.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 16,
+          "path": "tests/fixtures/contracts/valid/external-review-repository-mapping.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 38,
+          "path": "tests/fixtures/contracts/valid/external-review.json"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 2295,
+          "path": "tests/integration/test_external_review_command.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 299,
+          "path": "tests/integration/test_verify_command.py"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_cli.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 504,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 663,
+          "path": "tests/unit/test_external_review.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 249,
+          "path": "tests/unit/test_external_review_metadata.py"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 202,
+          "path": "tests/unit/test_process_runner.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 168,
+          "path": "tests/unit/test_verification_plan.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 647,
+          "path": "tests/unit/test_verification_temporary.py"
+        }
+      ],
+      "totals": {
+        "additions": 384,
+        "deletions": 7725,
+        "files": 53
+      }
+    },
+    "goal": "Retire external review import and the pytest temp-root option, consolidate timestamp helpers, and align governance docs with Policy 2.5.0",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0076",
+        "--actor",
+        "codex-root-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "8ef9ffd6acfe02f0fc9b7a8578177c360944e9e1c5d1b86b22c8a7b94b9ea15c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "c3cc6f79f2d886ad526398d5e1175e83064dd5f22f8bf31e74d2ab8baf112674",
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "0314f80d794b65e6dafdad019d1d0c7cc795af2be602a559337b4a6fa780130b",
+  "subject_commit": "8b9fa19d64f980b022e74e159c6d04f74a0fe984",
+  "task_id": "TASK-0076"
+}

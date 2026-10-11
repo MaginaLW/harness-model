@@ -133,7 +133,8 @@ NON_STATE_EVENTS = frozenset(
 )
 
 
-def _utc_now() -> str:
+def utc_timestamp() -> str:
+    """Return the shared UTC timestamp used by task records and process results."""
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
@@ -174,7 +175,7 @@ def _event(
         "to_state": to_state,
         "event_type": event_type,
         "actor": actor.strip(),
-        "occurred_at": occurred_at or _utc_now(),
+        "occurred_at": occurred_at or utc_timestamp(),
         "payload": dict(payload),
     }
     require_valid_contract("event", event)

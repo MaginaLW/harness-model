@@ -8,7 +8,7 @@
 
 维护模式**只**解除任务账本的强制性。以下一律不放松：CI 质量门禁的每一项检查与阈值（完整测试、85% 总覆盖率、90% diff coverage、whitespace、Ruff、format、mypy）；`main` 的分支保护与 required check；高风险动作按下方常设授权处理；既有任务记录、证据与日志仍是追加式的，不得重写或删除。
 
-仍须走 AI Flow 的升级清单：`.github/workflows/**`、`.ai/policy/**`、`.ai/schemas/**`、`src/aiflow/**`、`.gitignore` 与 `.gitattributes`、任务账本本身，以及任何有外部副作用或不可逆的动作。其余变更由 CI 质量门禁把关。
+仍须走 AI Flow 的升级清单：`.github/**`（包括 `.github/workflows/**`）、`.ai/**`（包括 `.ai/policy/**`、`.ai/schemas/**` 与任务账本）、`src/aiflow/**`、`tools/ci/**`、`AGENTS.md`、`CLAUDE.md`、`pyproject.toml`、`uv.lock`、`.gitignore` 与 `.gitattributes`，以及任何有外部副作用或不可逆的动作。其余变更由 CI 质量门禁把关。
 
 AI Flow CLI 保持完全可用，下述规则在使用它时仍然完整适用。对清单之外但风险较高、需要留痕或需要人类决策的变更，同样应主动创建 task；恢复强制模式只需删除标记文件。
 

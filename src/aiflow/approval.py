@@ -22,7 +22,7 @@ from aiflow.policy import load_policy_bundle
 from aiflow.review import validate_review_package
 from aiflow.review_service import ReviewAssessment, latest_review_assessment
 from aiflow.specification import specification_digest
-from aiflow.state import create_record_event, create_transition_event
+from aiflow.state import create_record_event, create_transition_event, utc_timestamp
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import _persist_event_and_task, load_task_record
 from aiflow.verifier_service import (
@@ -280,7 +280,7 @@ def approval_is_current(
         if not isinstance(expires_at, str):
             return False
         try:
-            unexpired = _utc(expires_at) > _utc(now or _now())
+            unexpired = _utc(expires_at) > _utc(now or utc_timestamp())
         except ContractError:
             return False
         return (
@@ -305,10 +305,6 @@ def matching_approval(
         ):
             return approval
     return None
-
-
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _read_text(path: Path, *, code: str) -> str:
@@ -579,7 +575,7 @@ def approve_task(
         for entry in entries
         if isinstance(entry, Mapping) and entry.get("route") == "REVIEW"
     }
-    approved_at = _now()
+    approved_at = utc_timestamp()
     review_package: str | None = None
     evidence_current = False
     evidence_sha256: str | None = None

@@ -253,6 +253,9 @@ action-approved targeted mutation 与 independent-verifier 流程均已实现。
 bootstrap 步骤强制。达到上限仍是验证失败，必须保留 run 并诊断原因，不能靠降级、跳过
 coverage 或无理由重复重试进入 Gate。
 
+`verify` 已移除 `--pytest-temp-root`；当前验证使用默认临时目录，不再接受该选项。
+手工质量重放仍按下文将 coverage 数据写入独立 run directory；这与 pytest fixture 临时目录是不同用途。
+
 使用 `--check` 选择任一 pytest 检查（如 `acceptance`、`integration`）时，仍运行完整覆盖率套件；选择其他检查只运行所选检查。所得
 evidence 是 partial/provisional，不能形成 final evidence 或进入 Gate。`--finalize`、code
 approval 和 CI 输出也不能把 missing、stale、tampered、non-killed 或 unverified 的当前 V2

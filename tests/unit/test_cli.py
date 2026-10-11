@@ -6,6 +6,8 @@ import subprocess
 from collections.abc import Callable
 from importlib.metadata import metadata, version
 
+import pytest
+
 import aiflow
 
 
@@ -46,3 +48,31 @@ def test_unknown_argument_uses_argparse_error_contract(
     assert "error:" in result.stderr
     assert "Traceback" not in result.stdout
     assert "Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [("external-review",), ("verify", "TASK-0001", "--pytest-temp-root", "unused")],
+)
+def test_retired_interfaces_use_argparse_rejection(
+    run_aiflow: Callable[..., subprocess.CompletedProcess[str]], arguments: tuple[str, ...]
+) -> None:
+    result = run_aiflow(*arguments)
+
+    assert result.returncode == 2
+    assert "usage:" in result.stderr
+    assert "error:" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+
+
+def test_help_exposes_only_supported_interfaces(
+    run_aiflow: Callable[..., subprocess.CompletedProcess[str]],
+) -> None:
+    root = run_aiflow("--help")
+    verify = run_aiflow("verify", "--help")
+
+    assert root.returncode == verify.returncode == 0
+    assert "external-review" not in root.stdout
+    assert "--pytest-temp-root" not in verify.stdout
+    assert "observe" in root.stdout
+    assert "--finalize" in verify.stdout

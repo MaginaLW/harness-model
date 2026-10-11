@@ -53,6 +53,8 @@ Chapters 1–7（工程基线、任务状态、分流与验证、治理交互、
 
 `aiflow observe` 只接收显式 task、本地 JSON 输入和封闭 mode；所有有效 observation 都是 `execution_allowed=false` 的非授权结论（exit 2）。Hook 与 pre-command wrapper 只提供早期反馈和拒绝，不安装自身、不授权、不执行动作，也不是通用命令拦截器或沙箱。完整协议、E2E 证据范围与平台边界见 [Hooks](docs/operations/hooks.md)。
 
+`aiflow external-review` 与 `aiflow verify --pytest-temp-root` 已移除；历史记录继续保留。退役范围与历史恢复来源见[外部审核导入](docs/operations/external-review-import.md)和[pytest 临时目录](docs/operations/pytest-temporary-roots.md)。
+
 ## 许可证
 
 本项目采用 [MIT License](LICENSE)。

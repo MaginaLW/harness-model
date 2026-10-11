@@ -8,7 +8,6 @@ import re
 import subprocess
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -44,7 +43,7 @@ from aiflow.scope import (
     is_task_governance_path,
 )
 from aiflow.specification import specification_digest, validate_specification
-from aiflow.state import create_record_event, create_transition_event, replay_events
+from aiflow.state import create_record_event, create_transition_event, replay_events, utc_timestamp
 from aiflow.storage import (
     atomic_write_json,
     atomic_write_text,
@@ -94,10 +93,6 @@ class TransitionResult:
 
     task: dict[str, Any]
     event: dict[str, Any]
-
-
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _unique_nonempty(values: Sequence[str], *, field_name: str) -> list[str]:
@@ -321,7 +316,7 @@ def start_task(
     branch_task_numbers = task_numbers_in_refs(Path(context.repository_path))
     task_id = reserve_task_id(Path(context.repository_path), reserved_numbers=branch_task_numbers)
     task_directory = resolve_task_path(Path(context.repository_path), task_id)
-    occurred_at = _utc_now()
+    occurred_at = utc_timestamp()
     bundle: dict[str, Any] = {
         "schema_version": "1.0",
         "status": "creating",

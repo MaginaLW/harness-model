@@ -7,6 +7,7 @@ package 已发布到外部 registry。
 
 ### Changed
 
+- 退役 `aiflow external-review` 与 `aiflow verify --pytest-temp-root`，合并八处相同的 UTC 时间戳辅助函数；同步退役说明、Policy 2.5.0 治理面升级清单与当前维护状态，保留历史记录（TASK-0076）。
 - active Policy 升至 `2.4.0`：V1/V2 的 pytest 检查共享一次完整覆盖率 pytest 执行（TASK-0072）。
 - 精简 `src/aiflow`：YAML 读取加缓存、场景 runner 移到 tests、删除死代码（TASK-0073）。
 - 新任务 ID 分配跳过其他分支已用的任务编号（TASK-0074）。
