@@ -22,10 +22,12 @@
 
 已具备[固定 HEAD 的账本事实快照](effect-observations.md#固定提交的事实快照)，以及复用当前原生 status 与适用状态 Gate 的[非评分只读建议](review-advisory.md)。
 快照保守核对同 task 审核 context 与 review/event 引用，关联状态和子记录计数不提供新验收或独立样本；原失败及历史完整性等 `unknown` 保留。
+同一工具的[四目标证据可用性](effect-observations.md#四目标证据可用性)模式复用该快照，区分已投影、白名单中至少一件所需原件缺失、未投影字段和关系未知；已有原值与冲突保留，任务事实覆盖计数不是估计分母或独立样本。
+矩阵保持 `method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`；[方法候选](../superpowers/specs/readonly-confidence-method.md)不代表 S1 全部冻结或生产评分准入。
 建议的 `native_status` 提供 `base_commit`、`subject_commit`、`observed_head` 和受限 `missing_conditions`；`advice_basis` 通过 `advice`、`source` 及 `missing_condition` 或 `state` 记录已有建议的具体依据。
 建议固定 `probability_status=unestimated`、`execution_allowed=false`；概率未估计，不给执行权限。
 `SOURCE_READ_ATOMICITY_NOT_ESTABLISHED` 明确多次原生读取尚未证明原子一致性，版本投影不代表固定的原子观察窗口。
-两项属于 S0/S1 准备，不证明生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
+这些能力属于 S0/S1 准备，不证明生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
 数据与方法合同、可靠身份、人时、独立缺陷真值、统一 telemetry、评分/校准、真实 shadow 与宿主接入仍需各自证据和准入。
 
 | 能力 | 已有基础 | 剩余建设与验收 |
