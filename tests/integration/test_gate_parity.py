@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import pytest
+from test_start_command import create_repository
 
 from aiflow import cli
 from aiflow.gate import GateFacts, evaluate_gate_facts
@@ -38,7 +39,8 @@ def test_package_local_and_ci_gate_have_identical_machine_decisions(
     assert isinstance(facts, dict)
     package = evaluate_gate_facts(GateFacts(**facts))  # type: ignore[arg-type]
     monkeypatch.setattr(cli, "evaluate_gate", lambda *args, **kwargs: package)
-    monkeypatch.chdir(tmp_path)
+    repository = create_repository(tmp_path / "repository")
+    monkeypatch.chdir(repository)
 
     local_exit = cli.main(["gate", "TASK-0001", "--format", "json"])
     local = json.loads(capsys.readouterr().out)
