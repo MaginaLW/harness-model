@@ -8,6 +8,8 @@ The supported high-risk checks and unknown pre-command categories fail closed. T
 
 Run `python -m aiflow verify TASK-ID --actor ACTOR`; add `--check CHECK-ID` for diagnostic (provisional) evidence that cannot satisfy Gate. `aiflow.verification_service.verify_task` remains authoritative. The former `tools/gauntlet.py` wrapper duplicated this command and was removed in favor of `aiflow verify`.
 
+The retired `--pytest-temp-root` option is no longer accepted. Verification uses the default temporary-directory behavior; the observation protocol and Hook checks below remain available.
+
 ## Pre-commit
 
 Run `python tools/hooks/pre_commit.py --task TASK-ID` from a Git pre-commit integration or an Agent before requesting a commit. Omitting `--task` is accepted only when exactly one non-merged task exists. The check delegates task status, changed-path collection, scope matching, and workflow prerequisites to core services. It never runs `git commit`, edits the index, or fixes files.

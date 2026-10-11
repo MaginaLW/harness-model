@@ -7,7 +7,6 @@ import hashlib
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -19,7 +18,7 @@ from aiflow.errors import ContractError, StateTransitionError, StorageError
 from aiflow.policy import load_policy_bundle
 from aiflow.routing import entry_requires_ask
 from aiflow.specification import SpecificationAssessment, validate_specification
-from aiflow.state import create_transition_event
+from aiflow.state import create_transition_event, utc_timestamp
 from aiflow.storage import atomic_write_json, atomic_write_text, read_task_json, resolve_task_path
 from aiflow.task_service import TransitionResult, _persist_event_and_task, load_task_record
 
@@ -240,10 +239,6 @@ def prepare_answer(
     )
 
 
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-
-
 def _load_options_file(path: Path) -> Mapping[str, object]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -355,7 +350,7 @@ def answer_task(
         raise StorageError(
             "Could not read task specification", code="SPECIFICATION_READ_FAILED"
         ) from error
-    answered_at = _utc_now()
+    answered_at = utc_timestamp()
     prepared = prepare_answer(
         task_state=str(record.task.get("current_state")),
         classification=classification,

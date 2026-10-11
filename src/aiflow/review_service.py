@@ -7,7 +7,6 @@ import json
 import subprocess
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
@@ -17,6 +16,7 @@ from aiflow.evidence import validate_v2_snapshot
 from aiflow.freshness import current_classification_input_digest
 from aiflow.policy import load_policy_bundle
 from aiflow.specification import specification_digest
+from aiflow.state import utc_timestamp
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
 from aiflow.task_service import read_task_record_strict, record_task_event
 
@@ -41,10 +41,6 @@ class ReviewAssessment:
 
     context: Mapping[str, Any]
     record: Mapping[str, Any]
-
-
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _canonical(value: Mapping[str, object]) -> str:
@@ -589,7 +585,7 @@ def resolve_review_finding(
         raise ContractError("Review context is invalid", code="REVIEW_CONTEXT_MISMATCH")
     candidate = json.loads(json.dumps(previous))
     candidate["revision"] = int(previous["revision"]) + 1
-    candidate["recorded_at"] = _now()
+    candidate["recorded_at"] = utc_timestamp()
     changed = False
     for finding in candidate["findings"]:
         if finding["finding_id"] == finding_id:

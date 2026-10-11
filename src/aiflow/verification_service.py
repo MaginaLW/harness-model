@@ -36,6 +36,7 @@ from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.process_runner import ProcessResult, run_execution
 from aiflow.review_service import ReviewAssessment, latest_review_assessment
 from aiflow.specification import specification_digest
+from aiflow.state import utc_timestamp
 from aiflow.storage import read_task_json, resolve_task_path
 from aiflow.task_service import (
     TaskRecord,
@@ -45,7 +46,6 @@ from aiflow.task_service import (
     transition_task_record,
 )
 from aiflow.verification import (
-    PYTEST_CHECK_IDS,
     V1_CHECK_IDS,
     V2_EXTRA_CHECK_IDS,
     VerificationCheck,
@@ -54,7 +54,6 @@ from aiflow.verification import (
     VerificationPlan,
     parse_verification_plan,
 )
-from aiflow.verification_temporary import create_pytest_temporary, validate_pytest_temp_root
 from aiflow.verifier_service import (
     build_verifier_context,
     current_implementer_actor,
@@ -156,10 +155,6 @@ def _targeted_mutation_projection(
             "results": [dict(item) for item in facts.results],
         }
     return projection, facts
-
-
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _run_id() -> str:
@@ -336,7 +331,6 @@ def _selected_plan(plan: VerificationPlan, check_ids: Sequence[str]) -> Verifica
         tuple(reason for reason in plan.blocking_reasons if reason.rsplit(":", 1)[-1] in wanted),
         tuple(identifier for identifier in plan.unverified_check_ids if identifier in wanted),
         plan.comparison_subject,
-        plan.pytest_temporary,
     )
 
 
@@ -349,7 +343,6 @@ def _empty_plan(plan: VerificationPlan) -> VerificationPlan:
         (),
         (),
         plan.comparison_subject,
-        plan.pytest_temporary,
     )
 
 
@@ -382,7 +375,7 @@ def _review_ref(assessment: ReviewAssessment) -> dict[str, str]:
 
 
 def _independent_verifier_result() -> ProcessResult:
-    observed_at = _now()
+    observed_at = utc_timestamp()
     return ProcessResult(
         "ROLE-CHECK",
         "independent_verifier",
@@ -501,13 +494,6 @@ def _execute_plan(
         if reason.startswith("VERIFICATION_TOOL_MISSING:")
     }
     by_id = {check.check_id: check for check in plan.checks}
-    temporary = plan.pytest_temporary
-    if temporary is not None and any(
-        set(item.check_ids) & PYTEST_CHECK_IDS
-        and not any(identifier in missing_ids for identifier in item.check_ids)
-        for item in plan.executions
-    ):
-        temporary = create_pytest_temporary(temporary)
     results: list[ProcessResult] = []
     for sequence, execution in enumerate(plan.executions, start=1):
         if any(identifier in missing_ids for identifier in execution.check_ids):
@@ -520,7 +506,6 @@ def _execute_plan(
                 allowed_run_root=plan.run_dir.parent,
                 repository_root=repository_root,
                 sequence=sequence,
-                pytest_temporary=temporary,
             )
         )
     return results
@@ -888,17 +873,9 @@ def verify_task(
     abandon: bool = False,
     reason: str | None = None,
     version_probe: VersionProbe = _default_version_probe,
-    pytest_temp_root: Path | None = None,
 ) -> VerifyResult:
     """Execute one governed local verification or read-only CI attestation."""
     root = repository_root.resolve()
-    if pytest_temp_root is not None:
-        if finalize or abandon:
-            raise ContractError(
-                "Pytest temporary root requires an execution mode",
-                code="VERIFY_PYTEST_TEMP_ARGUMENT_INVALID",
-            )
-        pytest_temp_root = validate_pytest_temp_root(pytest_temp_root)
     if abandon:
         if ci or check_ids or finalize or ci_run_dir is not None or output is not None:
             raise ContractError(
@@ -996,7 +973,6 @@ def verify_task(
         sys.executable,
         identifier,
         run_directory if ci else None,
-        pytest_temp_root,
     )
     full_plan = parse_verification_plan(
         bundle, context, level=cast(Literal["V0", "V1", "V2"], level)
@@ -1025,20 +1001,7 @@ def verify_task(
         planned_evidence_checks = execution_plan.checks
     if not ci:
         _start_local_verification(root, task_id, record, cast(str, effective_actor))
-    try:
-        results = _execute_plan(root, execution_plan)
-    except AiflowError as error:
-        if not ci and pytest_temp_root is not None:
-            transition_task_record(
-                root,
-                task_id,
-                target_state="FAILED",
-                event_type="verification_failed",
-                actor=cast(str, effective_actor),
-                payload={"conclusion": "failed", "reason_code": error.code},
-                satisfied_preconditions={"verification_failed"},
-            )
-        raise
+    results = _execute_plan(root, execution_plan)
     if level == "V2":
         results.append(_independent_verifier_result())
         if ci:
@@ -1094,9 +1057,6 @@ def verify_task(
             *(argument for check_id in check_ids for argument in ("--check", check_id)),
         )
     )
-    if pytest_temp_root is not None:
-        # Review contexts include this recipe; concrete argv stays in private evidence.
-        reproduce_command = (*reproduce_command, "--pytest-temp-root", "${PYTEST_TEMP_ROOT}")
     facts_level = "V1" if level == "V2" else level
     facts = EvidenceFacts(
         task_id,
@@ -1112,7 +1072,7 @@ def verify_task(
         "ci" if ci else "local",
         identifier,
         full_plan.run_dir,
-        _now(),
+        utc_timestamp(),
         reproduce_command,
         assessment.attestation_head if ci else None,
         (assessment.attestation_scope.passed and assessment.worktree_scope.passed) if ci else None,
