@@ -65,3 +65,5 @@
 Agent 在该范围内完成对应实现输入合同、来源／质量条件与 Policy 影响核对，按现有治理执行必要验证；合格即可推进 S2 离线实现，不重复请求已覆盖的决定。首个[离线数学实现合同](review-detection-offline.md)仅接受显式 synthetic 计数，验证固定方法的数值边界与拒绝行为。真实观察须在实现验证与自身数据／方法／质量准入成立后，明确 `T0/T1`、实际候选、职责／预算和原件条件；缺机械证据由 Agent 补，真实来源或风险变化才重新集中决定。S2 synthetic／历史回放只验证实现，不启动或补造自然观察。
 
 当前仍为 `method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`，模型评分更新未实现；3-A 真实评分／shadow 与 Phase 3 仍未准入。采用决定也不满足 3-B V3 或 Phase 3 整体退出，不提前启动 Phase 4。
+
+[真实观察准备流程](../../operations/review-detection-preparation.md)将上述已采用规则落实为原件定位、职责移交、可复用声明与不足处理；它不登记真实单位、不设置 `T0/T1`，填写模板或技术审核不提供真实入口事实。

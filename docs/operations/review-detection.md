@@ -2,6 +2,8 @@
 
 `tools/analysis/review_detection.py` 按[固定接口合同](../superpowers/specs/review-detection-offline.md)计算 synthetic 计数下的条件检出比例及区间。它交付首个有界 S2 数学模块；[已采用的起步范围](../superpowers/specs/review-detection-admission.md)仍须完成真实来源、方法与质量准入，30 日观察窗口的 `T0` 尚未启动。
 
+后续自然工作的候选、机会、输入、职责和预算端点按[真实观察准备流程](review-detection-preparation.md)核对。该流程提供可复制的说明模板；实际事实未核定时只保留来源与缺口，不把真实计数改标 synthetic 输入本工具。
+
 ## 使用
 
 在仓库根目录把 UTF-8 JSON 直接送入标准输入。以下 ASCII 示例假定 `n=104` 个独立正缺陷机会，其中 `k=52` 个在预算内正确检出；它们只演示数值计算，不代表已有真实机会或审核结果。
