@@ -35,7 +35,7 @@
 
 [审核结果回读](review-feedback.md)已将固定 tracked `HEAD` 的正式账本审核修订、Finding 状态和已有验证原值汇总，并提供 commit/path/blob/locator 原件引用。它复用快照白名单，默认 snapshot/availability 保持不变。[公开 PR 回读](pr-feedback.md)另接受显式选定的 task-free 来源，保留当前描述中的各轮协调者摘要、原生集合数量及所见 workflow 原值；v2 将处置、修复候选和复核引用声明精确关联原 Finding，平铺保留，并对缺来源、候选冲突或角色声明问题提出非评分核对。v1 原报告形状与全部原失败保留，来源包仍为 1.0。两者可并列外部参考；声明关联不认证作者实际采纳、独立复核、actual diff、实际模型配置或 required check 完整性。当前补齐声明处理链与来源核对，模型评分更新及自动审核安排仍未实现，尚未完整评分闭环；原失败与未知继续保留。
 
-[来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位与估计条件。[追加机器专项审核与反馈候选](../superpowers/specs/supplemental-machine-review.md)承接已选用途，具体化“专项审核→处理→复核→结果反馈”的来源和停止边界。它们是 S0/S1 的文档准备；结果回读是受限源码投影，均不是运行时 telemetry、统计估计或新数据采集。下一步在已有回读事实与缺口上形成首个目标、触发、错误接受、实际身份、真值和精度方案；参数尚未冻结时继续非评分准备，不把候选文档或状态记录当作生产评分准入。
+[来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位与估计条件。[追加机器专项审核与反馈候选](../superpowers/specs/supplemental-machine-review.md)承接已选用途，具体化“专项审核→处理→复核→结果反馈”的来源和停止边界。首目标协议按 `review_detection` [具体化](../superpowers/specs/review-detection-protocol.md)：针对本仓自然契约专项审核，预声明候选、契约对象与缺陷类别机会，再核独立正真值及报告匹配。剩余来源、适用总体、裁定、精度及风险参数待集中定稿；协议是 S0/S1 候选，不计算估计或样本量，不新增来源或采集动作，也不构成 3-A/S2/S3 准入。已有账本、PR v2 与榜单只提供原声明，实际身份、真值与统计独立性无法证明时保留未知；Phase 3 仍为 `not_started`。
 
 | 能力 | 已有基础 | 剩余建设与验收 |
 |---|---|---|
