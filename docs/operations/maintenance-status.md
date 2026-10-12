@@ -35,7 +35,7 @@
 
 [审核结果回读](review-feedback.md)已将固定 tracked `HEAD` 的正式账本审核修订、Finding 状态和已有验证原值汇总，并提供 commit/path/blob/locator 原件引用。它复用快照白名单，默认 snapshot/availability 保持不变。[公开 PR 回读](pr-feedback.md)另接受显式选定的 task-free 来源，保留当前描述中的各轮协调者摘要、原生集合数量及所见 workflow 原值；v2 将处置、修复候选和复核引用声明精确关联原 Finding，平铺保留，并对缺来源、候选冲突或角色声明问题提出非评分核对。v1 原报告形状与全部原失败保留，来源包仍为 1.0。两者可并列外部参考；声明关联不认证作者实际采纳、独立复核、actual diff、实际模型配置或 required check 完整性。当前补齐声明处理链与来源核对，模型评分更新及自动审核安排仍未实现，尚未完整评分闭环；原失败与未知继续保留。
 
-[来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位与估计条件。[追加机器专项审核与反馈候选](../superpowers/specs/supplemental-machine-review.md)承接已选用途，具体化“专项审核→处理→复核→结果反馈”的来源和停止边界。首目标协议按 `review_detection` [具体化](../superpowers/specs/review-detection-protocol.md)：针对本仓自然契约专项审核，预声明候选、契约对象与缺陷类别机会，再核独立正真值及报告匹配。剩余来源、适用总体、裁定、精度及风险参数待集中定稿；协议是 S0/S1 候选，不计算估计或样本量，不新增来源或采集动作，也不构成 3-A/S2/S3 准入。已有账本、PR v2 与榜单只提供原声明，实际身份、真值与统计独立性无法证明时保留未知；Phase 3 仍为 `not_started`。
+[来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位与估计条件。[追加机器专项审核与反馈候选](../superpowers/specs/supplemental-machine-review.md)承接已选用途，具体化“专项审核→处理→复核→结果反馈”的来源和停止边界。首目标协议按 `review_detection` [具体化](../superpowers/specs/review-detection-protocol.md)：针对本仓自然契约专项审核，预声明候选、契约对象与缺陷类别机会，再核独立正真值及报告匹配。项目所有者已采用粗略研究精度：95% 覆盖，等尾双侧 `alpha=0.05`（每尾 `0.025`），区间总宽 `U-L<=0.20`（20 个百分点）；不是 ±20 个百分点、模型 95% 可靠或能力阈值。来源、总体、独立真值/裁定、相关组、窗口、预算及风险参数仍待集中定稿；条件性样本规划只是设计需求，不是实际合格 N、充分性或新预算。协议仍为 S0/S1 候选，不新增来源或采集，也不构成 3-A/S2/S3 准入；原件、实际身份及真值无法证明时保留未知，Phase 3 仍为 `not_started`。
 
 | 能力 | 已有基础 | 剩余建设与验收 |
 |---|---|---|
