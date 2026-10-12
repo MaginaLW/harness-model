@@ -1,6 +1,6 @@
 # 本仓审核结果回读
 
-`tools/analysis/review_feedback.py` 从固定 tracked `HEAD` 的正式账本原件，汇总审核修订、Finding 状态和已有验证结果，支持追加机器审核后的事实反馈。它复用[事实快照](effect-observations.md#固定提交的事实快照)的 Git 白名单，不读 PR、会话或私密来源，不新增采集器或结果库。Task-free 来源另由[公开 PR 反馈回读](pr-feedback.md)支持，并可形成下一轮非评分核对问题；模型分数更新及自动审核安排尚未实现，不能称为完整评分反馈闭环。
+`tools/analysis/review_feedback.py` 从固定 tracked `HEAD` 的正式账本原件，汇总审核修订、Finding 状态和已有验证结果，支持追加机器审核后的事实反馈。它复用[事实快照](effect-observations.md#固定提交的事实快照)的 Git 白名单，不读 PR、会话或私密来源，不新增采集器或结果库。Task-free 来源另由[公开 PR 反馈回读](pr-feedback.md)支持，并可形成下一轮非评分核对问题；其 v2 块还可显式关联 Finding、作者处置、修复候选和复核声明，不改本工具的来源或未知字段。模型分数更新及自动审核安排尚未实现，不能称为完整评分反馈闭环。
 
 ## 使用
 
@@ -48,7 +48,7 @@ python -B tools/analysis/review_feedback.py --task TASK-0077 --reference-input d
 
 ## 与初始参考和后续判断衔接
 
-`external_reference` 与本仓事实并列：榜单仍计算声明配置集合内的相对分，本仓状态仍是原件事实；两者不混分、不把 Finding 数、resolved、APPROVE 或最终 CI 通过换算模型胜率。`model_score_update_status=not_implemented` 明确没有根据反馈更新评分。PR 回读的 `next_review_questions` 可支持下一轮非评分问题准备，但没有自动改变审核安排。
+`external_reference` 与本仓事实并列：榜单仍计算声明配置集合内的相对分，本仓状态仍是原件事实；两者不混分、不把 Finding 数、resolved、APPROVE 或最终 CI 通过换算模型胜率。`model_score_update_status=not_implemented` 明确没有根据反馈更新评分。PR 回读的 `reported_followups` 将处理关系声明与原报告分开，缺引用或候选冲突仍保留；其 `next_review_questions` 可支持下一轮非评分问题准备，但没有自动改变审核安排。
 
 当前维持 `method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`，无权限或账本效果；route、Gate、CI、批准和原审核流程继续按现行规则执行。只读回读属于 S0/S1 事实准备，其普通源码实施按现行维护授权完成；生产概率、真实评分 shadow 或策略接入的 3-A/S2–S4 条件不成为这份非评分摘要的额外逐次审批。
 

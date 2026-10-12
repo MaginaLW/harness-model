@@ -10,7 +10,7 @@
 
 `executed_tool_sha256` 标识实际执行工具的字节，不保证工具与来源提交同版，也不认证来源声明。复算应同时固定来源提交与工具版本，并保留各自标识；本稿不执行历史复算。
 
-[Task-free PR 回读](../../operations/pr-feedback.md)是独立来源接口：显式输入选定公开 connector capture，记录实际输入 bytes hash 与输入 locator，不扩大以下 Git 白名单。PR 描述反馈块只投影协调者声明，原生 reviews/threads 仅列数量，workflow 只保留所见运行与查询引用；当前描述的多个块、捕获时间和 hash 不证明原子一致性或完整追加历史。TASK-ID 为 `not_applicable`，实际身份、真值与 required check 完整性保持未知。
+[Task-free PR 回读](../../operations/pr-feedback.md)是独立来源接口：显式输入选定公开 connector capture，记录实际输入 bytes hash 与输入 locator，不扩大以下 Git 白名单。PR 描述反馈块只投影协调者声明，原生 reviews/threads 仅列数量，workflow 只保留所见运行与查询引用。v2 块另以 `record_id + review_id + finding_id` 显式定位原发现，关联作者处置、修复候选和二元复核引用；同名 Finding 不自动合并。目标不在当前 capture 中时保留声明与 `not_in_capture`，候选未知或冲突不补当前 head，所引用原件仍未抓取。当前描述的多个块、捕获时间和 hash 不证明原子一致性或完整追加历史。TASK-ID 为 `not_applicable`，实际身份、独立复核、真值与 required check 完整性保持未知；关联成功不提供评分更新资格。v1-only 输出保持原形状，含 v2 块的输出明确使用报告版本 `2.0`。
 
 ## 2. 现有 Git 白名单与字段映射
 
