@@ -105,7 +105,7 @@ def coefficients(n):
 
 def cdf(k, n, p):
     q = 1 - p
-    return fsum(coefficients(n)[j] * p**j * q**(n-j) for j in range(k + 1))
+    return fsum(coefficients(n)[j] * p**j * q ** (n - j) for j in range(k + 1))
 
 
 def root(k, n, target):
