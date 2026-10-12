@@ -4,9 +4,9 @@
 
 ## 1. 固定输入与引用
 
-当前自动投影复用 `tools/analysis/approval_overhead.py` 的 `--snapshot` / `--availability`，不增加另一个解析器。先固定 tracked `HEAD` 的提交，再读该提交的普通 Git blob；未提交材料不进入历史快照。live 当前建议仍依赖当时的原生读取，不能用快照替代原生状态、批准新鲜度或 Gate。
+当前自动投影复用 `tools/analysis/approval_overhead.py` 的 `--snapshot` / `--availability`；[审核结果回读](../../operations/review-feedback.md)调用同一 `build_snapshot(..., include_feedback=True)`，只增加受限 Finding 字段，不增加另一个原件解析器。默认统计、snapshot 与 availability 保持原格式。先固定 tracked `HEAD` 的提交，再读该提交的普通 Git blob；未提交材料不进入历史快照。live 当前建议仍依赖当时的原生读取，不能用快照替代原生状态、批准新鲜度或 Gate。
 
-每个可复核声明定位到 `source_commit`、仓内 `path`、`git_blob` 与 semantic locator。前三项可由现有报告的 `source_commit`、`sources[].ref/git_blob` 对应；semantic locator 是本稿的文档定位约定，不是已实现的新输出字段：YAML/JSON 用字段名与已有对象 ID，JSONL 用 `task_id + sequence`，review 用 `review_id + revision`。行号可辅助阅读，不能单独标识修订。引用必须指向实际读取的原件，只有哈希而没有可读原件时不能补成证据。
+每个可复核声明定位到 `source_commit`、仓内 `path`、`git_blob` 与 semantic locator。原 snapshot 的前三项由 `source_commit`、`sources[].ref/git_blob` 对应，未增加 locator 字段；新反馈报告的来源引用包含上述四项，其中 `locator` 用已有对象 ID、修订或事件 sequence 定位。YAML/JSON 用字段名与已有对象 ID，JSONL 用 `task_id + sequence`，review 用 `review_id + revision`，Finding 再附 `finding_id`。行号可辅助阅读，不能单独标识修订。引用必须指向实际读取的原件，只有哈希而没有可读原件时不能补成证据。
 
 `executed_tool_sha256` 标识实际执行工具的字节，不保证工具与来源提交同版，也不认证来源声明。复算应同时固定来源提交与工具版本，并保留各自标识；本稿不执行历史复算。
 
@@ -18,9 +18,9 @@
 |---|---|---|
 | `P/task.yaml` | `task_id`；`schema_version`、`repository_id`、`current_state`、`frozen_spec_sha256`、`base_commit`、`subject_commit`。 | `task_id` 来自路径并核对原件；goal、inputs、actor、命令和正文不输出。当前版本绑定不是历史每次候选绑定。 |
 | `P/classification.json` | `effective_route`、`effective_verification_level`、`classification_input_sha256`、`base_commit`、`subject_commit`、`spec_sha256`、`policy_sha256`。 | 记录的分类不等于过去每个时刻的路由，也不重新计算分类。原件缺席时保留 `unknown`。 |
-| `P/events.jsonl` | `sequence`、`event_type`、`from_state`、`to_state`、`occurred_at`；payload 的 `effective_route`、`conclusion`；仅审核记录/解决事件另投影 `review_id`、`review_stage`、`context_sha256`、`revision`。 | 不输出 actor、自由文本、批准 payload、命令或 Finding 正文；时间顺序只定位已记录事件。 |
+| `P/events.jsonl` | `sequence`、`event_type`、`from_state`、`to_state`、`occurred_at`；payload 的 `effective_route`、`conclusion`；仅审核记录/解决事件另投影 `review_id`、`review_stage`、`context_sha256`、`revision`。显式反馈投影增加解决事件的 `finding_id`。 | 不输出 actor、自由文本、批准 payload、命令或 Finding 正文；时间顺序只定位已记录事件。 |
 | `P/evidence.json` | `schema_version`、`phase`、`verification_level`、`mode`、`conclusion`、`generated_at`、`attestation_head`、`verification_snapshot_sha256` 及 base/subject/spec/Policy 绑定；`checks[]` 的 `check_id`、`category`、`status`、`required`、`exit_code`、`timed_out`、`duration_ms`。 | 原值为账本声明，未重新验证；检查耗时不提供人时或费用。当前 evidence 不自动属于旧验证尝试。 |
-| `P/reviews/REV-<数字>-r<数字>.json` | `source_ref`、`review_id`、`revision`、`review_stage`、`outcome`、`context_sha256`、`recorded_at`；派生 `context_linkage` 与 `event_links`。 | 以 ID/revision 对应事件，保留原 outcome；不投影 Findings、作者身份或审核正文，不提供缺陷真值。 |
+| `P/reviews/REV-<数字>-r<数字>.json` | `source_ref`、`review_id`、`revision`、`review_stage`、`outcome`、`context_sha256`、`recorded_at`；派生 `context_linkage` 与 `event_links`。显式反馈投影增加 Findings 的 `finding_id`、`severity`、`status`、`resolved_at`。 | 默认 snapshot/availability 不投影 Findings；反馈只投影列出的结构字段，不含正文、reviewer、reason、任意路径或 evidence refs。保留原 outcome，不提供作者处置、独立复核或缺陷真值。 |
 | `P/review-contexts/<64sha>.json` | 仅被同 task review 引用时解析：`source_ref`、`schema_version`、`review_stage`、`context_sha256`、base/spec/Policy/classification 绑定，及适用的 `subject_commit`、`evidence_sha256`、`verification_snapshot_sha256`。 | canonical hash 校验后只比较引用与 stage；不投影 content 正文或验证摘要。未被引用的 tracked context 仅列入 blob 来源。 |
 
 `task.yaml` 与 `events.jsonl` 是快照必需原件；缺失时拒绝输出，而不是生成空矩阵。可选原件缺席与部分字段未知按现有规则保留。design context 的 subject/evidence/snapshot 为 `not_applicable`；implementation context 的 `schema_version=1.0` 时 snapshot 不适用，`schema_version=2.0` 时 evidence 不适用。这是 context Schema 版本规则，与 verification level 不同；不适用性沿用原投影，不改写成缺失。
@@ -43,6 +43,8 @@
 ## 4. 尝试链与未知值
 
 当前 `verification_attempts` 由 `verification_started` / `verification_restarted` 与后续 result 事件定位，保留 start/result sequence 和 `original_result`。它是已记录的验证尝试，不是作者候选链。`historical_first_result`、`history_completeness`、`evidence_attempt_linkage` 保持 `unknown`。
+
+反馈按 task/review/Finding 保留每次已观测修订，原生 resolve 不修改 review outcome；`observed_first_revision`/`observed_latest_revision` 不宣称全历史首次/末次。修订缺号、stage/context 变化、严重度变化、重开或某修订缺已有 Finding 时保留原值并列 `history_issues`，不以末次状态补齐。实际模型、作者处置、独立复核与独立真值未有来源仍为未知；同 task 及跨 task 相关性规则不因回读而放松。
 
 首次候选需预先指定链起点、阶段、候选版本、角色、验收协议与完整性依据；窗口内第一条记录、最小 sequence 或最早 tracked commit 都不能单独证明历史首次。修复链另需原候选及原失败、明确的修复入口、父子候选版本和修复策略/支持/预算；重试、重新审核、resolved 或 source-only successor 均不自动提供这些事实。每个失败、partial、取消、skip、未运行和 unknown 保留原值，后续成功不覆盖它们。四目标的事件与真正分母继续引用[方法候选](readonly-confidence-method.md#2-四目标的事件与分母)，本稿不计算分母或样本数。
 
@@ -84,7 +86,7 @@ actual 模型身份只接受获准、可复核的运行元数据，requested/rep
 |---|---|---|
 | `.ai/tasks/TASK-0077/task.yaml` | `a0374c2d07419a4c52e86ec90fcb194382e1fc01` | `task_id=TASK-0077; current_state=BLOCKED`；保留原任务，不能因后继合并关闭它。 |
 | `.ai/tasks/TASK-0077/reviews/REV-0001-r0001.json` | `f8e3c2d5fea44e04e7425d919e215a37bde33d00` | `review_id=REV-0001; revision=1; outcome=REQUEST_CHANGES`。 |
-| `.ai/tasks/TASK-0077/reviews/REV-0001-r0002.json` | `264ed83951514c691af1c43c5fa27d49b83da2e7` | `review_id=REV-0001; revision=2; outcome=REQUEST_CHANGES`；手工可核 Finding `RF-001.status=resolved`，但该字段不被快照投影，也不生成新验收或缺陷真值。 |
+| `.ai/tasks/TASK-0077/reviews/REV-0001-r0002.json` | `264ed83951514c691af1c43c5fa27d49b83da2e7` | `review_id=REV-0001; revision=2; outcome=REQUEST_CHANGES`；Finding `RF-001.status=resolved` 默认不被 snapshot/availability 投影，新反馈模式可受限回读；不生成新验收或缺陷真值。 |
 | `.ai/tasks/TASK-0078/task.yaml` | `359d178aed99763863c2fbc6f1536cad3a4b4d76` | `decision_units[decision_unit_id=DU-001].inputs` 声明 source-only successor 并保留 TASK-0077；这是手工引用的账本文字关系，当前自动投影不输出 inputs。`current_state=MERGED`、`subject_commit=acd05b14a09e16e87394f8920ef854170165a585` 分别是状态与候选绑定声明。 |
 | `.ai/tasks/TASK-0078/events.jsonl` | `589729d99f6d3c30229de5bcf2d29212899490b9` | `task_id=TASK-0078; sequence=16/17` 分别记录 verification started/passed，17 的原 conclusion 为 `passed`；sequence 22 记录 merge。事件顺序不提供历史首候选或旧 evidence 关联。 |
 | `.ai/tasks/TASK-0078/reviews/REV-0003-r0001.json` | `fdbb8de75b5ebf738e6159de9cf6cd1423d0fbbb` | `review_id=REV-0003; revision=1; review_stage=implementation; outcome=APPROVE`，引用同 task context `2d75e7892b9743d4865909d73f47041a7b7bdaba42f8d509eeb7a33d8422f4a6`。 |

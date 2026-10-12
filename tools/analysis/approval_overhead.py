@@ -15,6 +15,7 @@ import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -64,6 +65,9 @@ SNAPSHOT_PATTERNS = {
     "effective_route": r"AUTO|ASK|REVIEW|BLOCK",
     "effective_verification_level": r"V[012]",
     "review_id": r"REV-[0-9]{4,}",
+    "finding_id": r"RF-[0-9]{3,}",
+    "severity": r"critical|high|medium|low",
+    "finding_status": r"open|resolved",
     "review_stage": r"design|implementation",
     "outcome": r"APPROVE|APPROVE_WITH_CONDITIONS|REQUEST_CHANGES|REJECT|BLOCKED",
     "conclusion": r"passed|failed|provisional",
@@ -446,7 +450,59 @@ def _snapshot_fields(
     return facts
 
 
-def build_snapshot(repository: Path) -> dict[str, Any]:
+def _snapshot_findings(review: dict[str, Any], task_id: str) -> list[dict[str, Any]]:
+    findings = review.get("findings")
+    if not isinstance(findings, list):
+        raise _error(task_id, "review.json", "findings must contain an array")
+    projected: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for finding in findings:
+        finding = _require_mapping(finding, task_id, "review.json")
+        if any(finding.get(field) is None for field in ("finding_id", "severity", "status")):
+            raise _error(task_id, "review.json", "missing required finding fields")
+        facts = _snapshot_fields(
+            {**finding, "finding_status": finding["status"]},
+            ("finding_id", "severity", "finding_status"),
+            task_id,
+            "review.json",
+        )
+        if facts["finding_id"] in seen:
+            raise _error(task_id, "review.json", "finding IDs must be unique within a revision")
+        seen.add(facts["finding_id"])
+        resolved_at = "not_applicable"
+        if facts["finding_status"] == "open":
+            if "resolution" in finding:
+                raise _error(task_id, "review.json", "open finding cannot contain resolution")
+        else:
+            resolution = _require_mapping(finding.get("resolution"), task_id, "review.json")
+            value = resolution.get("resolved_at")
+            if (
+                not isinstance(value, str)
+                or re.fullmatch(
+                    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"
+                    r"(?:\.[0-9]+)?(?:Z|[+\-](?:[01][0-9]|2[0-3]):[0-5][0-9])",
+                    value,
+                )
+                is None
+            ):
+                raise _error(task_id, "review.json", "resolved_at is invalid")
+            try:
+                datetime.fromisoformat(value)
+            except ValueError as error:
+                raise _error(task_id, "review.json", "resolved_at is invalid") from error
+            resolved_at = value
+        projected.append(
+            {
+                "finding_id": facts["finding_id"],
+                "severity": facts["severity"],
+                "status": facts["finding_status"],
+                "resolved_at": resolved_at,
+            }
+        )
+    return projected
+
+
+def build_snapshot(repository: Path, *, include_feedback: bool = False) -> dict[str, Any]:
     """Describe committed ledger facts, without reading working files or private logs."""
     commit, blobs = _snapshot_blobs(repository)
     task_ids = sorted({path.split("/")[2] for path in blobs})
@@ -551,6 +607,12 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
                 if revision is not None and (type(revision) is not int or revision < 1):
                     raise _error(task_id, "events.jsonl", "review revision is invalid")
                 facts["revision"] = "unknown" if revision is None else revision
+                if include_feedback and facts["event_type"] == "review_finding_resolved":
+                    if payload.get("finding_id") is None:
+                        raise _error(task_id, "events.jsonl", "finding_id is required")
+                    facts.update(
+                        _snapshot_fields(payload, ("finding_id",), task_id, "events.jsonl")
+                    )
             events.append(facts)
             if facts["event_type"] in {"verification_started", "verification_restarted"}:
                 active = {
@@ -620,6 +682,8 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
                 "context_linkage": "unknown",
                 "event_links": [],
             }
+            if include_feedback:
+                review_facts["findings"] = _snapshot_findings(review, task_id)
             context_path = prefix + f"review-contexts/{review['context_sha256']}.json"
             context_source = blobs.get(context_path)
             if context_source is not None:
@@ -695,13 +759,23 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
                         if len(comparisons) == 2
                         else "unknown"
                     )
-                review_facts["event_links"].append(
-                    {
-                        "sequence": event["sequence"],
-                        "event_type": event["event_type"],
-                        "binding": binding,
-                    }
-                )
+                link = {
+                    "sequence": event["sequence"],
+                    "event_type": event["event_type"],
+                    "binding": binding,
+                }
+                if include_feedback and event["event_type"] == "review_finding_resolved":
+                    link["finding_id"] = event["finding_id"]
+                    link["binding"] = (
+                        "finding_revision_reference"
+                        if any(
+                            finding["finding_id"] == event["finding_id"]
+                            and finding["status"] == "resolved"
+                            for finding in review_facts["findings"]
+                        )
+                        else "mismatched"
+                    )
+                review_facts["event_links"].append(link)
             row["reviews"].append(review_facts)
         missing["reviews"] += int(not row["reviews"])
         missing["verification_attempts"] += int(not row["verification_attempts"])
@@ -753,7 +827,7 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
                 "checks": projected_checks,
             }
         rows.append(row)
-    return {
+    report: dict[str, Any] = {
         "schema_version": "1.0",
         "measurement": "tracked_ledger_snapshot",
         "source_commit": commit,
@@ -802,6 +876,9 @@ def build_snapshot(repository: Path) -> dict[str, Any]:
             "and external/private sources are excluded.",
         ],
     }
+    if include_feedback:
+        report["feedback_projection"] = True
+    return report
 
 
 def _text(report: dict[str, Any]) -> str:

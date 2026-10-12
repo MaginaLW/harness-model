@@ -115,6 +115,20 @@ S1 的数据、方法、用途、隐私和质量条件仍须分别形成并准�
 该模式继承 snapshot 的安全拒绝：必要原件缺少或参与解析的原件格式损坏时以退出码
 `2` 拒绝，不输出空来源矩阵。
 
+## 审核结果回读
+
+[审核结果回读工具](review-feedback.md)复用上述固定 Git 白名单，以显式反馈投影增加
+Finding 的 ID、严重度、状态和解决时间，以及解决事件的 Finding ID；原默认统计、snapshot
+与 availability 的字段和格式保持不变。它保留 review 各修订的原 outcome、
+受限 context/event 引用、验证尝试和 evidence 原值，输出原件的 commit/path/blob/locator。
+不输出正文、reason、reviewer、actor、任意路径或 evidence refs，不补读 PR、会话或私密材料。
+
+报告按 task/review/Finding 展示已观测历史与异常；resolved 只表示原件状态，
+不补作者采纳、修复、独立复核或缺陷真值。实际身份与类别未有来源时保持未知，
+task-free 审核反馈为 `not_projected`。可选外部榜单参考与这些事实并列，
+不混分或更新模型能力；`model_score_update_status=not_implemented`。
+它补结果回读，不证明完整反馈闭环、评分/真实 shadow 准入或效果收益。
+
 ## 当前来源覆盖参考
 
 来源固定为提交 `75cb3198daf02ebd440097dc4b127460a314fd00`；
