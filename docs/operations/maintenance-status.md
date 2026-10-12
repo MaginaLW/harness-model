@@ -37,6 +37,8 @@
 
 [来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位与估计条件。[追加机器专项审核与反馈候选](../superpowers/specs/supplemental-machine-review.md)承接已选用途，具体化“专项审核→处理→复核→结果反馈”的来源和停止边界。首目标协议按 `review_detection` [具体化](../superpowers/specs/review-detection-protocol.md)：针对本仓自然契约专项审核，预声明候选、契约对象与缺陷类别机会，再核独立正真值及报告匹配。项目所有者已采用粗略研究精度：95% 覆盖，等尾双侧 `alpha=0.05`（每尾 `0.025`），区间总宽 `U-L<=0.20`（20 个百分点）；不是 ±20 个百分点、模型 95% 可靠或能力阈值。来源、总体、独立真值/裁定、相关组、窗口、预算及风险参数仍待集中定稿；条件性样本规划只是设计需求，不是实际合格 N、充分性或新预算。协议仍为 S0/S1 候选，不新增来源或采集，也不构成 3-A/S2/S3 准入；原件、实际身份及真值无法证明时保留未知，Phase 3 仍为 `not_started`。
 
+下一步的[集中准入候选](../superpowers/specs/review-detection-admission.md)已具体化为纯文档契约首次专项审核、未来固定 30 日窗口、既有公开来源与预算、独立裁定及未知回退。它尚未由项目所有者采用；当前只完成来源盘点和可评审方案，不启动真实观察或评分，也不重复请求已选用途与精度。
+
 | 能力 | 已有基础 | 剩余建设与验收 |
 |---|---|---|
 | 数据与效果基线（S0/S1） | task、review、verification、失败 receipts、受限账本/公开 PR 回读与合同提案；首场景已选本仓自然治理任务的只读建议 | 在自然真实边界形成请求→决定→执行→结果来源链；统一费用、返工、缺陷、工具失败和人工介入口径，明确独立样本、身份、缺失、隐私与偏差规则。现有记录数量不证明样本充分或效果提升。 |
