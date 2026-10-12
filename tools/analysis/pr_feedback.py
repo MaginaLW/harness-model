@@ -80,7 +80,9 @@ def _reference(value: object, pr_url: str) -> str | None:
     return ref
 
 
-def _records(body: str, pr_url: str, head_sha: str) -> list[dict[str, Any]]:
+def _records(
+    body: str, pr_url: str, head_sha: str
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     from benchmark_reference import _reject_constant, _unique_object
 
     markers = list(re.finditer(r"<!--\s*(/?aiflow-review-feedback:[^>]*?)\s*-->", body))
@@ -89,24 +91,30 @@ def _records(body: str, pr_url: str, head_sha: str) -> list[dict[str, Any]]:
     if len(markers) % 2:
         raise ValueError("unpaired feedback marker")
     records: list[dict[str, Any]] = []
+    followups: list[dict[str, Any]] = []
     seen: set[str] = set()
     for start, end in zip(markers[::2], markers[1::2]):
+        marker = start.group(1).strip()
         if (
-            start.group(1).strip() != "aiflow-review-feedback:v1"
-            or end.group(1).strip() != "/aiflow-review-feedback:v1"
+            marker not in {"aiflow-review-feedback:v1", "aiflow-review-feedback:v2"}
+            or end.group(1).strip() != "/" + marker
         ):
             raise ValueError("unsupported or nested feedback marker")
+        version = "2.0" if marker.endswith(":v2") else "1.0"
         text = body[start.end() : end.start()].strip()
         if text.startswith("```"):
             fenced = re.fullmatch(r"```json[ \t]*\r?\n(.*?)\r?\n```", text, re.DOTALL)
             if fenced is None:
                 raise ValueError("invalid feedback JSON fence")
             text = fenced.group(1)
+        fields = {"schema_version", "record_id", "candidate_commit", "category", "reviews"}
+        if version == "2.0":
+            fields.add("followups")
         record = _mapping(
             json.loads(text, object_pairs_hook=_unique_object, parse_constant=_reject_constant),
-            {"schema_version", "record_id", "candidate_commit", "category", "reviews"},
+            fields,
         )
-        if record["schema_version"] != "1.0":
+        if record["schema_version"] != version:
             raise ValueError("unsupported feedback version")
         record_id = _text(record["record_id"], r"[A-Za-z0-9_-]{1,64}")
         if record_id in seen:
@@ -164,7 +172,7 @@ def _records(body: str, pr_url: str, head_sha: str) -> list[dict[str, Any]]:
             )
         records.append(
             {
-                "schema_version": "1.0",
+                "schema_version": version,
                 "record_id": record_id,
                 "candidate_commit": candidate,
                 "category": category,
@@ -180,7 +188,163 @@ def _records(body: str, pr_url: str, head_sha: str) -> list[dict[str, Any]]:
                 "source": _source(pr_url, f"body.feedback[{record_id}]"),
             }
         )
-    return records
+        if version == "2.0":
+            for index, value in enumerate(_list(record["followups"])):
+                followup = _mapping(
+                    value, {"finding_ref", "author_disposition", "repair", "recheck_ref"}
+                )
+                raw_finding_ref = _mapping(
+                    followup["finding_ref"], {"record_id", "review_id", "finding_id"}
+                )
+                projected_ref = {
+                    field: _text(
+                        raw_finding_ref[field],
+                        r"RF-[0-9]{3,}" if field == "finding_id" else r"[A-Za-z0-9_-]{1,64}",
+                    )
+                    for field in ("record_id", "review_id", "finding_id")
+                }
+                disposition = _mapping(followup["author_disposition"], {"decision", "original_ref"})
+                disposition_ref = _reference(disposition["original_ref"], pr_url)
+                repair = _mapping(followup["repair"], {"kind", "candidate_commit", "original_ref"})
+                repair_ref = _reference(repair["original_ref"], pr_url)
+                recheck_ref = None
+                if followup["recheck_ref"] is not None:
+                    raw_recheck_ref = _mapping(followup["recheck_ref"], {"record_id", "review_id"})
+                    recheck_ref = {
+                        field: _text(raw_recheck_ref[field], r"[A-Za-z0-9_-]{1,64}")
+                        for field in ("record_id", "review_id")
+                    }
+                followups.append(
+                    {
+                        "record_id": record_id,
+                        "finding_ref": projected_ref,
+                        "author_disposition": {
+                            "decision": _enum(
+                                disposition["decision"],
+                                {"accepted", "rejected", "undecided", "unknown"},
+                            ),
+                            "original_ref": disposition_ref,
+                            "original_reference_status": (
+                                "not_provided" if disposition_ref is None else "not_fetched"
+                            ),
+                        },
+                        "repair": {
+                            "kind": _enum(
+                                repair["kind"],
+                                {
+                                    "code_change",
+                                    "documentation_change",
+                                    "same_candidate_retry",
+                                    "contract_change",
+                                    "unknown",
+                                },
+                            ),
+                            "candidate_commit": _sha(repair["candidate_commit"], nullable=True),
+                            "original_ref": repair_ref,
+                            "original_reference_status": (
+                                "not_provided" if repair_ref is None else "not_fetched"
+                            ),
+                        },
+                        "recheck_ref": recheck_ref,
+                        "source": _source(pr_url, f"body.feedback[{record_id}].followups[{index}]"),
+                        "record_kind": "coordinator_reported",
+                    }
+                )
+    return records, followups
+
+
+def _link_followups(
+    records: list[dict[str, Any]], followups: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Compare explicit references within this capture, without authenticating claims."""
+    reviews = {
+        (record["record_id"], review["review_id"]): (record, review)
+        for record in records
+        for review in record["reviews"]
+    }
+    findings = {
+        (record["record_id"], review["review_id"], finding["finding_id"]): (record, finding)
+        for record in records
+        for review in record["reviews"]
+        for finding in review["findings"]
+    }
+    questions: list[dict[str, Any]] = []
+    for followup in followups:
+        finding_ref = followup["finding_ref"]
+        original = findings.get(
+            (finding_ref["record_id"], finding_ref["review_id"], finding_ref["finding_id"])
+        )
+        original_candidate = None if original is None else original[0]["candidate_commit"]
+        repair_candidate = followup["repair"]["candidate_commit"]
+        recheck_ref = followup["recheck_ref"]
+        recheck = (
+            None
+            if recheck_ref is None
+            else reviews.get((recheck_ref["record_id"], recheck_ref["review_id"]))
+        )
+        recheck_candidate = None if recheck is None else recheck[0]["candidate_commit"]
+        candidate_binding = (
+            "unknown"
+            if repair_candidate is None or recheck_candidate is None
+            else "matched_reported"
+            if repair_candidate == recheck_candidate
+            else "mismatched"
+        )
+        followup.update(
+            {
+                "finding_linkage": "not_in_capture" if original is None else "matched_reported",
+                "finding_source": None if original is None else dict(original[1]["source"]),
+                "original_candidate_commit": original_candidate,
+                "recheck_linkage": (
+                    "not_provided"
+                    if recheck_ref is None
+                    else "not_in_capture"
+                    if recheck is None
+                    else "matched_reported"
+                ),
+                "reported_recheck": None
+                if recheck is None
+                else {
+                    "role": recheck[1]["role"],
+                    "outcome": recheck[1]["outcome"],
+                    "candidate_commit": recheck_candidate,
+                    "source": dict(recheck[1]["source"]),
+                    "original_ref": recheck[1]["original_ref"],
+                    "original_reference_status": recheck[1]["original_reference_status"],
+                },
+                "recheck_candidate_binding": candidate_binding,
+                "independent_recheck": "unknown",
+                "independent_truth": "unknown",
+                "actual_model_identity": "unknown",
+            }
+        )
+        codes: list[str] = []
+        if original is None:
+            codes.append("LOCATE_FOLLOWUP_FINDING")
+        if (recheck_ref is not None and recheck is None) or (
+            recheck_ref is None
+            and followup["author_disposition"]["decision"] == "accepted"
+            and repair_candidate is not None
+        ):
+            codes.append("LOCATE_FOLLOWUP_RECHECK")
+        if original_candidate is not None and repair_candidate is not None:
+            same_candidate = original_candidate == repair_candidate
+            if (followup["repair"]["kind"] == "same_candidate_retry" and not same_candidate) or (
+                followup["repair"]["kind"] in {"code_change", "documentation_change"}
+                and same_candidate
+            ):
+                codes.append("CHECK_REPORTED_REPAIR_CANDIDATE")
+        if recheck is not None:
+            if candidate_binding != "matched_reported":
+                codes.append("CHECK_RECHECK_CANDIDATE_REFERENCE")
+            if recheck[1]["role"] in {"author_reported", "unknown"}:
+                codes.append("CHECK_REPORTED_RECHECK_ROLE")
+        if recheck_ref is not None and all(
+            recheck_ref[field] == finding_ref[field] for field in ("record_id", "review_id")
+        ):
+            codes.append("CHECK_REPORTED_RECHECK_REFERENCE")
+        questions.extend({"code": code, "source": dict(followup["source"])} for code in codes)
+    return questions
 
 
 def _native_collection(value: object, key: str, field: str, pr_url: str) -> dict[str, Any]:
@@ -243,7 +407,9 @@ def build_pr_feedback(document: object, *, reference_input: object | None = None
     body = raw_pr.get("body")
     if body is not None and not isinstance(body, str):
         raise ValueError("invalid PR body")
-    records = [] if body is None else _records(body, pr_url, head_sha)
+    records, followups = ([], []) if body is None else _records(body, pr_url, head_sha)
+    has_followup_version = any(record["schema_version"] == "2.0" for record in records)
+    followup_questions = _link_followups(records, followups)
     questions: list[dict[str, Any]] = []
     if not records:
         questions.append({"code": "LOCATE_STRUCTURED_FEEDBACK", "source": _source(pr_url, "body")})
@@ -268,15 +434,28 @@ def build_pr_feedback(document: object, *, reference_input: object | None = None
                 )
             for finding in review["findings"]:
                 if finding["status"] == "open":
-                    questions.append(
-                        {
-                            "code": "INSPECT_REPORTED_OPEN_FINDING",
+                    question: dict[str, Any] = {
+                        "code": "INSPECT_REPORTED_OPEN_FINDING",
+                        "record_id": record["record_id"],
+                        "review_id": review["review_id"],
+                        "finding_id": finding["finding_id"],
+                        "source": finding["source"],
+                    }
+                    linked = [
+                        dict(followup["source"])
+                        for followup in followups
+                        if followup["finding_linkage"] == "matched_reported"
+                        and followup["finding_ref"]
+                        == {
                             "record_id": record["record_id"],
                             "review_id": review["review_id"],
                             "finding_id": finding["finding_id"],
-                            "source": finding["source"],
                         }
-                    )
+                    ]
+                    if linked:
+                        question["followup_sources"] = linked
+                    questions.append(question)
+    questions.extend(followup_questions)
     workflows = data["workflows"]
     observations: list[dict[str, Any]] = []
     if workflows is not None:
@@ -324,8 +503,8 @@ def build_pr_feedback(document: object, *, reference_input: object | None = None
         from benchmark_reference import build_reference
 
         reference = build_reference(reference_input)
-    return {
-        "schema_version": "1.0",
+    report: dict[str, Any] = {
+        "schema_version": "2.0" if has_followup_version else "1.0",
         "measurement": "task_free_pr_feedback",
         "repository": repository,
         "retrieved_at": retrieved_at,
@@ -379,6 +558,10 @@ def build_pr_feedback(document: object, *, reference_input: object | None = None
             "they do not trigger review or authorize actions.",
         ],
     }
+    if has_followup_version:
+        report["reported_followups"] = followups
+        report["coverage"]["reported_followup_records"] = len(followups)
+    return report
 
 
 def main(argv: list[str] | None = None) -> int:
