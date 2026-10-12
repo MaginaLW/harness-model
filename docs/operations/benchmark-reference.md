@@ -59,6 +59,6 @@ Arena 没有本轮取得的不可变来源 revision，示例为带抓取时间�
 
 先依据具体专项问题、可用配置身份、既有授权和预算准备机器审核候选；外部参考是附带信息，不单独决定是否追加审核。每轮仍引用固定受审版本、原报告、新增/重复/未裁定问题、作者处理、修复版本与受影响处非作者复核。沿用现有审核记录和 PR 收尾，不新增会话采集或第二结果库。
 
-[审核结果回读工具](review-feedback.md)已可从固定 tracked `HEAD` 的正式账本生成受限反馈摘要，并用 `--reference-input` 将本工具的输入并列展示为 `external_reference`。它保留审核修订、Finding 状态和已有验证原值；不读取 task-free PR 收尾或认证本仓实际模型配置。
+[审核结果回读工具](review-feedback.md)已可从固定 tracked `HEAD` 的正式账本生成受限反馈摘要，并用 `--reference-input` 将本工具的输入并列展示为 `external_reference`。它保留审核修订、Finding 状态和已有验证原值；task-free 来源另用[公开 PR 回读](pr-feedback.md)，支持同一外部参考输入与下一轮问题准备。两种回读均不认证本仓实际模型配置。
 
-初期并列展示“外部参考”和“本仓可复核事实/未知”。不把 Finding 数、APPROVE、采纳或最终 CI 通过当模型胜率，不将本仓计数与榜单分数直接平均。`model_score_update_status=not_implemented` 明确反馈尚不更新分数或审核安排；真实反馈满足[方法协议](../superpowers/specs/readonly-confidence-method.md)的身份、目标、机会集/真值、独立组、精度与用途条件后，才评审本仓估计及外部参考的迁移/更新方式。当前概率准入、S2/S3 和 Phase 3 状态保持原结论。
+初期并列展示“外部参考”和“本仓可复核事实/未知”。不把 Finding 数、APPROVE、采纳或最终 CI 通过当模型胜率，不将本仓计数与榜单分数直接平均。`model_score_update_status=not_implemented` 明确反馈尚不更新分数；下一轮问题只是来源支持的非评分准备，不自动安排审核。真实反馈满足[方法协议](../superpowers/specs/readonly-confidence-method.md)的身份、目标、机会集/真值、独立组、精度与用途条件后，才评审本仓估计及外部参考的迁移/更新方式。当前概率准入、S2/S3 和 Phase 3 状态保持原结论。

@@ -1,6 +1,6 @@
 # 本仓审核结果回读
 
-`tools/analysis/review_feedback.py` 从固定 tracked `HEAD` 的正式账本原件，汇总审核修订、Finding 状态和已有验证结果，支持追加机器审核后的事实反馈。它复用[事实快照](effect-observations.md#固定提交的事实快照)的 Git 白名单，不读 PR、会话或私密来源，不新增采集器或结果库。当前交付的是结果回读；模型分数更新及下一轮审核安排尚未实现，不能称为完整反馈闭环。
+`tools/analysis/review_feedback.py` 从固定 tracked `HEAD` 的正式账本原件，汇总审核修订、Finding 状态和已有验证结果，支持追加机器审核后的事实反馈。它复用[事实快照](effect-observations.md#固定提交的事实快照)的 Git 白名单，不读 PR、会话或私密来源，不新增采集器或结果库。Task-free 来源另由[公开 PR 反馈回读](pr-feedback.md)支持，并可形成下一轮非评分核对问题；模型分数更新及自动审核安排尚未实现，不能称为完整评分反馈闭环。
 
 ## 使用
 
@@ -42,13 +42,13 @@ python -B tools/analysis/review_feedback.py --task TASK-0077 --reference-input d
 | Finding 的状态历史与已有解决事件引用 | 不能推作者采纳/驳回、缺陷真值、独立复核或实际修复范围；`author_disposition`、`independent_recheck` 保持 `unknown`。 |
 | 已记录验证尝试及 evidence 原值 | 不补全首候选、修复入口或历史 evidence-attempt 链；失败、partial、skip 和 unknown 不被后续成功覆盖。 |
 | 同 task 的保守依赖关联 | Finding、检查、修订、重试不增加独立样本；不同 task 也可能共享候选、规格或后继关系。 |
-| 正式账本来源覆盖 | task-free 审核反馈为 `task_free_feedback_status=not_projected`；PR 收尾记录不会因可公开访问而被本工具读取，也不创建虚构 TASK-ID。 |
+| 正式账本来源覆盖 | 本工具的 task-free 审核反馈仍为 `task_free_feedback_status=not_projected`；另用[PR 回读](pr-feedback.md)显式输入选定公开来源，不扩大 Git 白名单，也不创建虚构 TASK-ID。 |
 
 实际模型及审核配置、任务类别、报告新增/重复对应、独立正负真值、人时和费用没有相应获准来源时保持未知；不从 actor、模型名称、自述、Finding 数或工具耗时补值。缺少实际配置不阻挡这份非评分事实报告，但不能据此归入模型层或更新模型评分。
 
 ## 与初始参考和后续判断衔接
 
-`external_reference` 与本仓事实并列：榜单仍计算声明配置集合内的相对分，本仓状态仍是原件事实；两者不混分、不把 Finding 数、resolved、APPROVE 或最终 CI 通过换算模型胜率。`model_score_update_status=not_implemented` 明确没有根据反馈更新评分，也没有自动改变下一轮审核安排。
+`external_reference` 与本仓事实并列：榜单仍计算声明配置集合内的相对分，本仓状态仍是原件事实；两者不混分、不把 Finding 数、resolved、APPROVE 或最终 CI 通过换算模型胜率。`model_score_update_status=not_implemented` 明确没有根据反馈更新评分。PR 回读的 `next_review_questions` 可支持下一轮非评分问题准备，但没有自动改变审核安排。
 
 当前维持 `method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`，无权限或账本效果；route、Gate、CI、批准和原审核流程继续按现行规则执行。只读回读属于 S0/S1 事实准备，其普通源码实施按现行维护授权完成；生产概率、真实评分 shadow 或策略接入的 3-A/S2–S4 条件不成为这份非评分摘要的额外逐次审批。
 
