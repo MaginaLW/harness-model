@@ -10,6 +10,8 @@
 
 `executed_tool_sha256` 标识实际执行工具的字节，不保证工具与来源提交同版，也不认证来源声明。复算应同时固定来源提交与工具版本，并保留各自标识；本稿不执行历史复算。
 
+[Task-free PR 回读](../../operations/pr-feedback.md)是独立来源接口：显式输入选定公开 connector capture，记录实际输入 bytes hash 与输入 locator，不扩大以下 Git 白名单。PR 描述反馈块只投影协调者声明，原生 reviews/threads 仅列数量，workflow 只保留所见运行与查询引用；当前描述的多个块、捕获时间和 hash 不证明原子一致性或完整追加历史。TASK-ID 为 `not_applicable`，实际身份、真值与 required check 完整性保持未知。
+
 ## 2. 现有 Git 白名单与字段映射
 
 下表中 `P` 是 `.ai/tasks/TASK-<至少四位十进制数字>/`；路径必须完整匹配。review ID 与 revision 文件名各至少四位，context 文件名为 64 位小写十六进制 SHA-256。语法、类型、身份或 canonical hash 冲突沿用工具的拒绝行为，不能伪装成普通缺失。
@@ -29,7 +31,7 @@
 
 ## 3. 变更标识与 request → decision → execution → result
 
-使用 AI Flow 的变更以真实 `task_id` 和仓库身份定位。task-free 工作使用真实变更的 baseline/candidate commit 或 tree、仓内变更范围及已有 PR 引用，不创建虚构 TASK-ID；其 TASK-ID 是 `not_applicable`。未提交候选还需当时可复核的差异依据，收尾 commit 不能冒充被测版本。当前快照只有 task 原件，task-free 来源与链为 `not_projected`；不能因它未出现而删除这类工作、增加分母或断言没有任务。没有适合且获准的保存位置时保留 `unknown`，不新建存储。
+使用 AI Flow 的变更以真实 `task_id` 和仓库身份定位。task-free 工作使用真实变更的 baseline/candidate commit 或 tree、仓内变更范围及已有 PR 引用，不创建虚构 TASK-ID；其 TASK-ID 是 `not_applicable`。未提交候选还需当时可复核的差异依据，收尾 commit 不能冒充被测版本。原 Git 快照只有 task 原件，task-free 来源与链仍为 `not_projected`；独立 PR 回读保留显式报告的候选 SHA 或 null，不从最终 head 补旧候选，也不闭合请求、实际执行或完整反馈链。不能因来源未出现而删除这类工作、增加分母或断言没有任务。没有适合且获准的保存位置时保留 `unknown`，不新建存储。
 
 | 链阶段 | 当前白名单能支持的事实 | 仍未知或未投影的关系 |
 |---|---|---|
