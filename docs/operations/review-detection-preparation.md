@@ -63,7 +63,9 @@ git show <CANDIDATE_COMMIT>:<REPO_RELATIVE_PATH>
 
 ## 关闭后回读原值，条件满足才推进评分
 
-回读复用[固定 Git 工具](review-feedback.md)或[公开 PR 工具](pr-feedback.md)，按原接口组织内存输入并经标准输入读取，不落盘新增副本。原报告、裁定和匹配依据继续引用原位置，公开 PR 只追加脱敏关系摘要。`matched_reported` 核对声明关联，不认证语义匹配、真值或实际修复；hash、APPROVE、resolved、CI 通过和填写完整均不证明真实观察就绪。
+正式账本回读使用[固定 Git 工具](review-feedback.md)的既有 `repository`／`--task` 接口，读取所选仓库固定 `HEAD` 的白名单原件；`--task` 仅过滤输出，不缩小底层读取与校验范围，也不接收 stdin 来源包。Task-free 回读使用[公开 PR 工具](pr-feedback.md)，才按其原接口在内存中组织 capture 并经标准输入读取，不落盘新增副本。
+
+原报告、裁定和匹配依据继续引用原位置，公开 PR 只追加脱敏关系摘要。`matched_reported` 核对声明关联，不认证语义匹配、真值或实际修复；hash、APPROVE、resolved、CI 通过和填写完整均不证明真实观察就绪。
 
 | 后续阶段 | 需要核对的真实事实 | 不足时的处理 |
 |---|---|---|
