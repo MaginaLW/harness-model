@@ -17,7 +17,7 @@ allowed_scope:
 base_commit: 3d3374e01d6418225e995a59d007545e549a4531
 branch: codex/reliability-feedback-improvements
 created_at: '2026-10-13T04:41:08Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -80,7 +80,7 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-13T04:42:27Z'
 subject_commit: c56f7785913c4b94943a5b42f95b9ebecb382da4
 task_id: TASK-0079
-updated_at: '2026-10-13T05:18:51Z'
+updated_at: '2026-10-13T05:25:45Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - tests/unit/test_feedback_text.py
