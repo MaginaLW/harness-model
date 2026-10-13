@@ -22,6 +22,7 @@
 | 查看正式账本中的审核与 Finding 历史 | [审核结果回读](docs/operations/review-feedback.md) | 完整克隆的固定 tracked `HEAD`；可按 task 过滤输出 | 保留原结果、来源与未知，不重算 Gate 或更新模型分数。 |
 | 查看 task-free PR 的审核、处理与复核声明 | [公开 PR 回读](docs/operations/pr-feedback.md) | 经标准输入提供的公开 connector 来源包 | 汇总所供声明及待核对问题，不认证缺陷真值、独立复核或实际模型身份。 |
 | 检查假设计数下的检出区间 | [离线区间计算](docs/operations/review-detection.md) | 标准输入中的 synthetic 整数计数 | 仅提供条件数学结果；真实来源与窗口准备见[观察流程](docs/operations/review-detection-preparation.md)。 |
+| 核对观察声明的时间、引用和选择缺口 | [观察输入检查](docs/operations/review-detection-input.md) | 标准输入中的候选／机会声明与原件引用 | 保留未知和冲突；不认证来源、启动窗口或产生真实估计。 |
 | 定位当前任务的准备缺项 | [只读任务建议](docs/operations/review-advisory.md) | 完整克隆及真实 TASK-ID | 复用原生 status 与适用状态的 Gate，只给建议，不授予执行权限。 |
 
 ## 阶段一目标

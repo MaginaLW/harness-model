@@ -9,6 +9,7 @@ import re
 import sys
 from contextlib import chdir
 from pathlib import Path
+from typing import cast
 
 if __name__ == "__main__":
     sys.dont_write_bytecode = True
@@ -71,11 +72,43 @@ DECISIONS = {
 }
 
 
+def _format_text(report: dict[str, object]) -> str:
+    """Summarize the safe native projection without turning it into execution advice."""
+    lines = ["Current facts:", f"  task={report['task_id'] or 'unknown'}"]
+    status = cast(dict[str, object] | None, report["native_status"])
+    if status is None:
+        lines.append("  native_status=unknown")
+    else:
+        for field, value in status.items():
+            if field != "missing_conditions":
+                lines.append(f"  {field}={json.dumps(value, ensure_ascii=True)}")
+    gate = cast(dict[str, object], report["native_gate"])
+    lines.append(f"  native_gate={json.dumps(gate, ensure_ascii=True, sort_keys=True)}")
+    lines.append("Missing / unknown:")
+    if status is not None:
+        missing = cast(list[str], status["missing_conditions"])
+        lines.append(f"  native_missing_conditions={', '.join(missing) or 'none_reported'}")
+    for code in cast(list[str], report["unknown"]):
+        lines.append(f"  {code}")
+    if "error_code" in report:
+        lines.append(f"  error_code={report['error_code']}")
+    lines.append("Next preparation / authorization checks (not execution):")
+    basis = cast(list[dict[str, str]], report["advice_basis"])
+    for item in basis:
+        source_value = item.get("missing_condition", item.get("state", "unknown"))
+        lines.append(f"  {item['advice']}: {item['source']}={source_value}")
+    if not basis:
+        lines.append("  none_in_native_projection; unknowns_above_remain")
+    lines.append("Scope: probability_status=unestimated; execution_allowed=false")
+    return "\n".join(lines)
+
+
 def main(argv: list[str] | None = None) -> int:
     """Run one synchronous CLI read; this entry is not a concurrent library API."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("task_id", metavar="TASK-ID")
     parser.add_argument("--repository", type=Path, default=DEFAULT_REPOSITORY, metavar="ROOT")
+    parser.add_argument("--format", choices=("json", "text"), default="json")
     arguments = parser.parse_args(argv)
     report: dict[str, object] = {
         "schema_version": "1.0",
@@ -189,7 +222,10 @@ def main(argv: list[str] | None = None) -> int:
         unknown.append(failure_code)
         exit_code = 1
     report["unknown"] = sorted(set(unknown))
-    print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+    if arguments.format == "text":
+        print(_format_text(report))
+    else:
+        print(json.dumps(report, ensure_ascii=False, sort_keys=True))
     return exit_code
 
 

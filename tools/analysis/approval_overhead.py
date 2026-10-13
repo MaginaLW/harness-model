@@ -221,9 +221,10 @@ def build_report(repository: Path) -> dict[str, Any]:
             )
             if classification.get("task_id") != task_id:
                 raise _error(task_id, "classification.json", "task_id does not match directory")
-            route = classification.get("effective_route")
-            if not isinstance(route, str) or route not in ROUTES:
+            raw_route = classification.get("effective_route")
+            if not isinstance(raw_route, str) or raw_route not in ROUTES:
                 raise _error(task_id, "classification.json", "effective_route is invalid")
+            route = raw_route
         routes[route] += 1
 
         approvals = _read_json(directory / "approvals.json", task_id)
@@ -412,7 +413,7 @@ def _unique_snapshot_mapping(pairs: Iterable[tuple[str, Any]]) -> dict[str, Any]
 
 
 class _SnapshotLoader(yaml.SafeLoader):
-    def construct_mapping(self, node: Any, deep: bool = False) -> dict[str, Any]:
+    def construct_mapping(self, node: Any, deep: bool = False) -> dict[Any, Any]:
         self.flatten_mapping(node)
         return _unique_snapshot_mapping(
             (self.construct_object(key, deep=deep), self.construct_object(value, deep=deep))
@@ -985,7 +986,7 @@ def build_availability(repository: Path) -> dict[str, Any]:
             context_availability = "projected"
         else:
             context_availability = "linkage_unknown"
-        facts = {
+        facts: dict[str, dict[str, Any]] = {
             "candidate_version_bindings": {
                 "availability": "projected"
                 if all(
@@ -1035,8 +1036,8 @@ def build_availability(repository: Path) -> dict[str, Any]:
             facts[fact] = {"availability": "linkage_unknown", "source_refs": [events_ref]}
         for fact in not_projected:
             facts[fact] = {"availability": "not_projected", "source_refs": []}
-        for name, fact in facts.items():
-            counts.setdefault(name, Counter())[fact["availability"]] += 1
+        for name, details in facts.items():
+            counts.setdefault(name, Counter())[details["availability"]] += 1
         rows.append(
             {
                 "task_id": task["task_id"],

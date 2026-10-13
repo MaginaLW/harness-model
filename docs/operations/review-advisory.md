@@ -8,6 +8,7 @@
 
 ```powershell
 python tools/analysis/review_advisory.py TASK-0001
+python tools/analysis/review_advisory.py TASK-0001 --format text
 python tools/analysis/review_advisory.py TASK-0001 --repository <完整克隆根目录>
 ```
 
@@ -18,6 +19,12 @@ python tools/analysis/review_advisory.py TASK-0001 --repository <完整克隆根
 输出为 JSON，固定 `probability_status: "unestimated"`、`execution_allowed: false`。
 正常读取退出码为 `0`，包括 Gate 拒绝；读取失败退出码为 `1`。退出码不代表批准、
 执行或合并许可。参数解析仍使用 argparse 的帮助和错误契约。
+
+默认输出与显式 `--format json` 相同，字段和版本保持兼容。`--format text` 从同一
+受限报告生成简短的当前事实、原生缺项与 unknown、下一步准备或授权核对清单；
+每条建议附原生来源字段和状态或缺项代码。它保留当前批准、新鲜度、历史 MERGED、
+失败码和原生 Gate 结果，不根据摘要新增批准请求或执行动作。没有建议仍显示未知；
+两种格式的退出码相同，读取失败的文本也不会回显原异常、路径或输入内容。
 
 `native_status` 投影闭合状态、路由、验证等级、新鲜度和 dirty 布尔值，以及
 `base_commit`、`subject_commit`、`observed_head` 和受限 `missing_conditions`。
