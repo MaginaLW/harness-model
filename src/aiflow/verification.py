@@ -245,6 +245,7 @@ def _require_output_semantics(
             "-m",
             "pytest",
             "--cov=aiflow",
+            "--cov=tools/analysis",
             "--cov-branch",
             f"--cov-report=xml:{(run_dir / 'coverage.xml').as_posix()}",
         )
@@ -262,29 +263,20 @@ def _require_output_semantics(
                 else "VERIFICATION_COMMAND_INVALID",
             )
     if check.check_id == "diff_coverage":
-        expected_xml = (run_dir / "coverage.xml").as_posix()
+        expected_coverage_argv = (
+            context.python,
+            "tools/ci/check_coverage.py",
+            "--run-dir",
+            run_dir.as_posix(),
+            "--base",
+            context.base_commit,
+        )
         if (
-            check.argv[0] != "diff-cover"
-            or check.argv.count(expected_xml) != 1
-            or check.argv.count("--compare-branch") != 1
-            or check.argv.count("--fail-under") != 1
-        ):
-            raise ContractError(
-                "Diff coverage configuration is invalid",
-                code="VERIFICATION_DIFF_COVERAGE_CONFIG_INVALID",
-            )
-        try:
-            compare = check.argv[check.argv.index("--compare-branch") + 1]
-            threshold = check.argv[check.argv.index("--fail-under") + 1]
-        except (ValueError, IndexError) as error:
-            raise ContractError(
-                "Diff coverage configuration is invalid",
-                code="VERIFICATION_DIFF_COVERAGE_CONFIG_INVALID",
-            ) from error
-        if (
-            expected_xml not in check.argv
-            or compare != context.base_commit
-            or threshold != "90"
+            check.argv != expected_coverage_argv
+            or check.environment != {}
+            or check.timeout_seconds != 120
+            or check.required is not True
+            or check.result_parser != "exit_zero"
             or check.threshold != 90
         ):
             raise ContractError(
