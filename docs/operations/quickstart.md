@@ -205,9 +205,17 @@ observation 仍会以 exit 2 返回 `execution_allowed: false`：这是有效、
 
 ## 继续实际任务前
 
-用 `spec.md` 冻结可执行规格，然后按 route 执行 ASK/REVIEW 决定或批准，再运行 `begin`、实施、`sync`、`verify` 和 Gate。所有命令都以 `python -m aiflow ...` 为权威入口；未获单独批准时不执行 push、merge、deploy、delete、凭据或付费外部调用。
+实际任务是否需要 task，以 [AGENTS.md](../../AGENTS.md) 的维护模式及升级清单为准。选择进入 AI Flow 时，用 `spec.md` 冻结可执行规格，然后按 route 执行 ASK/REVIEW 决定或批准，再运行 `begin`、实施、`sync`、`verify` 和 Gate。所有命令都以 `python -m aiflow ...` 为权威入口。
+
+具体动作的授权以 [AGENTS.md「常设授权」](../../AGENTS.md#常设授权) 为唯一权威；先核对既有批准及常设授权覆盖，不重复请求已覆盖的决定。本页演示任务显式禁止 push、merge、deploy 和 delete，继续演示仍须遵守这些任务范围。
 
 ## REVIEW 双阶段审核
+
+`status`、`gate` 与 `review show` 的 `--format json` 在参数解析成功后遇到领域错误时，
+向 stderr 输出只含 `code` 和 `message` 的 JSON，stdout 为空，退出 `1`。内部 details
+和异常原因不输出；文本模式仍输出一行错误消息。非法参数沿用 argparse 的 usage 与退出 `2`；
+有效但未通过的 Gate 决策仍在 stdout 输出原 JSON 并退出 `2`。读取到非法 UTF-8 任务文档时，
+错误码为 `STORAGE_READ_FAILED`，原文件保持不变。
 
 `REVIEW` 任务的规格批准前，先生成只含规格、Policy、base、分类和决策单元的 design context，由审核者提交结构化结论：
 

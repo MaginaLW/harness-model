@@ -564,12 +564,92 @@ def build_pr_feedback(document: object, *, reference_input: object | None = None
     return report
 
 
+def _format_text(report: dict[str, Any]) -> str:
+    """Render only the normalized projection; never render supplied bodies or names."""
+    pr = report["pull_request"]
+    counts = report["coverage"]
+    lines = [
+        "Current facts (supplied claims):",
+        f"  PR #{pr['number']}: {pr['state']}; merged={str(pr['merged']).lower()}",
+        f"  source={pr['url']}; head={pr['head_sha']}",
+        f"  records={counts['reported_records']}; reviews={counts['reported_review_records']}; "
+        f"findings={counts['reported_finding_records']}; "
+        f"followups={counts.get('reported_followup_records', 0)}",
+    ]
+    for record in report["reported_feedback"]:
+        lines.append(
+            f"  record {record['record_id']}: candidate={record['candidate_commit'] or 'unknown'}; "
+            f"binding={record['candidate_binding']}"
+        )
+        for review in record["reviews"]:
+            lines.append(
+                f"    review {review['review_id']}: {review['outcome']}; role={review['role']}; "
+                f"original={review['original_reference_status']}"
+            )
+            for finding in review["findings"]:
+                lines.append(
+                    f"      {finding['finding_id']}: {finding['severity']}/{finding['status']}; "
+                    f"original={finding['original_reference_status']}"
+                )
+    for followup in report.get("reported_followups", []):
+        ref = followup["finding_ref"]
+        lines.append(
+            f"  followup {followup['record_id']} -> "
+            f"{ref['record_id']}/{ref['review_id']}/{ref['finding_id']}: "
+            f"disposition={followup['author_disposition']['decision']}; "
+            f"repair={followup['repair']['kind']}; finding={followup['finding_linkage']}; "
+            f"recheck={followup['recheck_linkage']}; "
+            f"candidate_binding={followup['recheck_candidate_binding']}"
+        )
+    for run in report["workflow_observations"]:
+        lines.append(
+            f"  workflow {run['id']}: {run['status']}/{run['conclusion'] or 'unknown'}; "
+            f"binding={run['candidate_binding']}"
+        )
+    lines.extend(
+        [
+            "Missing / unknown:",
+            f"  feedback={report['structured_feedback_status']}; "
+            f"workflows={report['workflow_collection_status']}",
+            "  history_completeness=unknown; source_atomicity=unknown; "
+            "required_checks_status=unknown",
+            "  actual_model_identity=unknown; independent_truth=unknown; "
+            "independent_recheck=unknown",
+        ]
+    )
+    for field in ("native_reviews", "native_threads"):
+        collection = report[field]
+        count = collection["records_in_capture"]
+        lines.append(
+            f"  {field}={collection['collection_status']}; "
+            f"records_in_capture={count if count is not None else 'unknown'}; "
+            "field_projection=not_projected"
+        )
+    lines.append("Next source checks (not execution):")
+    for question in report["next_review_questions"]:
+        source = question["source"]
+        lines.append(f"  {question['code']}: {source['url']} @ {source['locator']}")
+    if not report["next_review_questions"]:
+        lines.append("  none_in_supplied_projection; unknowns_above_remain")
+    reference = "not_provided" if report["external_reference"] is None else "separate_unscored"
+    lines.extend(
+        [
+            f"Scope: external_reference={reference}; probability_status=unestimated; "
+            "method_status=design_pending; model_score_update_status=not_implemented",
+            "execution_allowed=false; permission_effect=none; ledger_effect=none",
+            "Use --format json for the complete projection and byte hashes.",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def main(argv: list[str] | None = None) -> int:
     sys.dont_write_bytecode = True
     from benchmark_reference import _reject_constant, _unique_object
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference-input", type=Path)
+    parser.add_argument("--format", choices=("json", "text"), default="json")
     arguments = parser.parse_args(argv)
     try:
         original = sys.stdin.buffer.read()
@@ -599,7 +679,10 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, RecursionError):
         print("pr-feedback: supplied records or reference input are invalid", file=sys.stderr)
         return 2
-    print(json.dumps(report, ensure_ascii=True, sort_keys=True, allow_nan=False))
+    if arguments.format == "text":
+        print(_format_text(report))
+    else:
+        print(json.dumps(report, ensure_ascii=True, sort_keys=True, allow_nan=False))
     return 0
 
 

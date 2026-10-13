@@ -1,0 +1,51 @@
+{
+  "base_commit": "3d3374e01d6418225e995a59d007545e549a4531",
+  "branch": "codex/reliability-feedback-improvements",
+  "classification_input_sha256": "cab27e4d4a098f4a3d6202b44362b5500b9beef7c6e3d710c686fd48d93910a3",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/storage.py",
+      "src/aiflow/cli.py",
+      "README.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md",
+      "docs/operations/pr-feedback.md",
+      "docs/operations/review-advisory.md",
+      "docs/operations/review-detection-input.md",
+      "docs/superpowers/specs/review-detection-input.md",
+      "tools/analysis/approval_overhead.py",
+      "tools/analysis/pr_feedback.py",
+      "tools/analysis/review_advisory.py",
+      "tools/analysis/review_detection_input.py",
+      "tests/unit/test_feedback_text.py",
+      "tests/unit/test_review_detection_input.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Handle invalid task encoding and preserve safe machine-readable CLI domain errors",
+        "impact_scope": [
+          "src/aiflow/storage.py",
+          "src/aiflow/cli.py"
+        ],
+        "planned_actions": [
+          "Map invalid task UTF-8 to the existing safe STORAGE_READ_FAILED domain error.",
+          "Emit only stable code and controlled message for parsed JSON-mode domain failures, retaining all existing success, text and argparse behavior."
+        ]
+      }
+    ],
+    "goal": "Handle invalid task encoding and preserve safe machine-readable CLI domain errors",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "cd74fd200fd00c7591ae64c556072a3e385e306164cde3c9594ac23eeb7dff58",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "dca38105dba154792826f959029d5723451b95e155ed9e19ed7a836156a4618d",
+  "task_id": "TASK-0079"
+}

@@ -1,0 +1,273 @@
+{
+  "base_commit": "3d3374e01d6418225e995a59d007545e549a4531",
+  "branch": "codex/reliability-feedback-improvements",
+  "classification_input_sha256": "cab27e4d4a098f4a3d6202b44362b5500b9beef7c6e3d710c686fd48d93910a3",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/storage.py",
+      "src/aiflow/cli.py",
+      "README.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md",
+      "docs/operations/pr-feedback.md",
+      "docs/operations/review-advisory.md",
+      "docs/operations/review-detection-input.md",
+      "docs/superpowers/specs/review-detection-input.md",
+      "tools/analysis/approval_overhead.py",
+      "tools/analysis/pr_feedback.py",
+      "tools/analysis/review_advisory.py",
+      "tools/analysis/review_detection_input.py",
+      "tests/unit/test_feedback_text.py",
+      "tests/unit/test_review_detection_input.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Handle invalid task encoding and preserve safe machine-readable CLI domain errors",
+        "impact_scope": [
+          "src/aiflow/storage.py",
+          "src/aiflow/cli.py"
+        ],
+        "planned_actions": [
+          "Map invalid task UTF-8 to the existing safe STORAGE_READ_FAILED domain error.",
+          "Emit only stable code and controlled message for parsed JSON-mode domain failures, retaining all existing success, text and argparse behavior."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0079/approvals.json",
+        ".ai/tasks/TASK-0079/classification.json",
+        ".ai/tasks/TASK-0079/events.jsonl",
+        ".ai/tasks/TASK-0079/review-contexts/cd74fd200fd00c7591ae64c556072a3e385e306164cde3c9594ac23eeb7dff58.json",
+        ".ai/tasks/TASK-0079/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0079/spec.md",
+        ".ai/tasks/TASK-0079/task.yaml",
+        "README.md",
+        "docs/operations/maintenance-status.md",
+        "docs/operations/pr-feedback.md",
+        "docs/operations/quickstart.md",
+        "docs/operations/review-advisory.md",
+        "docs/operations/review-detection-input.md",
+        "docs/superpowers/specs/review-detection-input.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/storage.py",
+        "tests/unit/test_feedback_text.py",
+        "tests/unit/test_review_detection_input.py",
+        "tools/analysis/approval_overhead.py",
+        "tools/analysis/pr_feedback.py",
+        "tools/analysis/review_advisory.py",
+        "tools/analysis/review_detection_input.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0079/approvals.json"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0079/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0079/events.jsonl"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0079/review-contexts/cd74fd200fd00c7591ae64c556072a3e385e306164cde3c9594ac23eeb7dff58.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0079/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0079/spec.md"
+        },
+        {
+          "additions": 89,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0079/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "README.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/pr-feedback.md"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/review-advisory.md"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/review-detection-input.md"
+        },
+        {
+          "additions": 112,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/superpowers/specs/review-detection-input.md"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/storage.py"
+        },
+        {
+          "additions": 277,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_feedback_text.py"
+        },
+        {
+          "additions": 876,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_review_detection_input.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 6,
+          "path": "tools/analysis/approval_overhead.py"
+        },
+        {
+          "additions": 84,
+          "binary": false,
+          "deletions": 1,
+          "path": "tools/analysis/pr_feedback.py"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 1,
+          "path": "tools/analysis/review_advisory.py"
+        },
+        {
+          "additions": 424,
+          "binary": false,
+          "deletions": 0,
+          "path": "tools/analysis/review_detection_input.py"
+        }
+      ],
+      "totals": {
+        "additions": 2179,
+        "deletions": 10,
+        "files": 22
+      }
+    },
+    "goal": "Handle invalid task encoding and preserve safe machine-readable CLI domain errors",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0079",
+        "--actor",
+        "codex-main"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "5d7de7beb52bc1aa1431fee9b9f84e23d9ab5458281bc451dfdc952b4a292434",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "212c7172250aedd91c96fa1e4fd2223badea2e594d078f61018055e27d986df6",
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "dca38105dba154792826f959029d5723451b95e155ed9e19ed7a836156a4618d",
+  "subject_commit": "c56f7785913c4b94943a5b42f95b9ebecb382da4",
+  "task_id": "TASK-0079"
+}

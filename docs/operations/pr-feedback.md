@@ -8,6 +8,7 @@
 
 ```console
 PUBLIC_CAPTURE_JSON | python -B tools/analysis/pr_feedback.py
+PUBLIC_CAPTURE_JSON | python -B tools/analysis/pr_feedback.py --format text
 PUBLIC_CAPTURE_JSON | python -B tools/analysis/pr_feedback.py --reference-input docs/operations/examples/benchmark-reference/swebench.json
 ```
 
@@ -22,9 +23,43 @@ PUBLIC_CAPTURE_JSON | python -B tools/analysis/pr_feedback.py --reference-input 
 
 来源包顶层必须保留表中全部字段，只接受这些字段。PR payload 必须含 `number`、`url`、`state`、`merged`、`head_sha`、`merge_commit_sha`、`body`；workflow 每行必须含 `id`、`name`、`status`、`conclusion`，原 connector 其余字段可保留在输入，但不投影。缺 key 属于错误，退出 `2`；允许的 null 专门表示未知或未捕获，不能把字段静默删掉。PR `body=null` 为 `not_captured`；有 body 但没有标记块为 `absent`，两者分开。
 
+### 按现有 connector 在内存中组包
+
+工具名前缀随连接环境提供，以下使用当前 GitHub 工具的操作名和参数名。先选定已授权的公开 PR，再按依赖顺序读取：
+
+| 顺序 | 操作及参数 | 内存中保留的值 |
+|---|---|---|
+| 1，串行 | `github_get_pr_info({repository_full_name: repository, pr_number: number})` | 解包并核对原 PR payload，记为 `pr_payload`；固定其中的 `head_sha`，记为 `requested_head`。 |
+| 2，可并行 | `github_list_pull_request_reviews({repo_full_name: repository, pr_number: number})` | 原 `{"reviews": [...]}` payload，记为 `reviews_payload`。 |
+| 2，可并行 | `github_list_pull_request_review_threads({repo_full_name: repository, pr_number: number})` | 原 `{"review_threads": [...]}` payload，记为 `threads_payload`。 |
+| 2，可并行 | `github_fetch_commit_workflow_runs({repo_full_name: repository, commit_sha: requested_head})` | 原 `{"workflow_runs": [...]}` payload，记为 `runs_payload`。 |
+| 3，串行 | 将来源包编码为 UTF-8 JSON，通过已有内存管道传入本工具 stdin | 使用固定 PR payload、原集合和本轮完成捕获的带时区时间。 |
+
+这些工具返回的是 MCP 响应包装；先检查调用是否成功、实际 payload 位于哪一层及其必需字段，再取原 payload。不要把整个包装传入读取器，也不要假定每个响应的 `structuredContent` 都直接对应表中的 payload。PR 读取失败或形状不符时停止本次组包；可选集合未读取、调用失败或未能确认形状时用 null，不补造成功空集合。
+
+下例仅展示内存变量到现有字段的对应关系，变量代表上表已核对的 payload，不是新增抓取脚本或输入文件：
+
+```text
+{
+  "schema_version": "1.0",
+  "repository": repository,
+  "retrieved_at": capture_completed_at_with_timezone,
+  "pull_request": pr_payload,
+  "native_reviews": reviews_payload_or_null,
+  "native_threads": threads_payload_or_null,
+  "workflows": runs_payload_is_available
+    ? {"requested_commit_sha": requested_head, "data": runs_payload}
+    : null
+}
+```
+
+只有成功响应确实返回空集合时，才使用 `{"reviews": []}`、`{"review_threads": []}` 或 `{"workflow_runs": []}`。Workflow 接口只覆盖 PR 触发运行的第一页；查询 SHA 固定仍不能证明实际 checkout 或 required checks 全覆盖。多次调用也不是原子读取，`source_atomicity` 保持 unknown。如另行复读 PR 后发现 head 或 body 改变，应重新读取一组来源，不将新 PR payload 单独替换进旧组包。旧审核块中的候选保留原值，不为匹配当前 head 而改写。
+
 不为演示建立实际审核输入副本，不将会话、身份、凭据、日志或本机信息加入公开来源包。可选 `--reference-input` 接受[榜单工具](benchmark-reference.md)的原输入；外部参考与本仓反馈并列，不混分、不自动匹配实际模型。
 
 输出 JSON 使用 ASCII 转义，解码后保留原文字；`input_sha256` 绑定实际输入字节，`executed_tool_sha256` 标识本次工具字节。它们只支持复算 supplied 内容，不认证远端原件。正常退出为 `0`，读取、解析或校验错误为 `2`，不输出部分成功报告或回显原输入。捕获时间、内容 hash 均不能认证完整历史、来源原子性或声明真实性。
+
+默认输出与显式 `--format json` 相同，保持现有 JSON 字段和版本。`--format text` 只将同一受限投影排成“当前事实、缺项或未知、下一步来源核对”摘要：保留原审核结论、Finding 状态、后续处理声明和 workflow 原结果；问题代码仍带公开来源与输入 locator。它不输出原 PR 正文、原生审核正文、作者或 workflow 自由名称。没有核对问题也仍明确未知，后续 accepted 声明不会把原 open 改成 resolved。外部参考只标明是否另外提供，完整参考、原件引用、详细关联和字节 hash 继续通过 JSON 查看；两种格式的退出码和无执行效果相同。
 
 ## PR 描述中的可选反馈块
 

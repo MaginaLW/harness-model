@@ -1,0 +1,13 @@
+{
+  "context_sha256": "cd74fd200fd00c7591ae64c556072a3e385e306164cde3c9594ac23eeb7dff58",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-13T04:44:22Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "codex-cli-design-review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Approve the bounded CLI error design. Invalid UTF-8 maps to the existing safe storage error; parsed JSON-mode domain failures expose only code and controlled message while preserving text, argparse, success payloads, and negative Gate exit behavior. Companion paths are explicitly separated from the governed decision unit. Implementation and complete verification remain required; no findings.",
+  "task_id": "TASK-0079"
+}

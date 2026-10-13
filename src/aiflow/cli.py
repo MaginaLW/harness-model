@@ -171,6 +171,7 @@ def build_parser() -> ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     """Parse repository-free entry points, then dispatch within one repository scope."""
     raw_arguments = list(sys.argv[1:] if argv is None else argv)
+    arguments: Namespace | None = None
     try:
         parser = build_parser()
         arguments = parser.parse_args(raw_arguments)
@@ -180,7 +181,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         with schema_directory_context(repository_root / SCHEMA_RELATIVE_DIRECTORY):
             return _dispatch(arguments, repository_root)
     except AiflowError as error:
-        print(error.message, file=sys.stderr)
+        if arguments is not None and getattr(arguments, "format", None) == "json":
+            print(json.dumps({"code": error.code, "message": error.message}), file=sys.stderr)
+        else:
+            print(error.message, file=sys.stderr)
         return 1
 
 
