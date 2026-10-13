@@ -1,0 +1,28 @@
+{
+  "context_sha256": "ca4b1adaab1ff81f00c301bc5273f42ea223784bf2e785c819af27a00e9252d9",
+  "findings": [
+    {
+      "evidence_refs": [
+        "tools/ci/check_coverage.py",
+        "tests/integration/test_coverage_gates.py"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 72,
+        "path": "tools/ci/check_coverage.py"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "Hidden Python paths can bypass the independent diff coverage threshold"
+    }
+  ],
+  "outcome": "REQUEST_CHANGES",
+  "recorded_at": "2026-10-13T05:48:29Z",
+  "review_id": "REV-0003",
+  "review_stage": "implementation",
+  "reviewer": "codex-quality-correctness-review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent review reproduced a hidden-path diff coverage bypass in candidate 48efbf6 despite 2883 passing tests and all native checks. A new analysis/.unexecuted.py with four unexecuted lines appears at zero coverage in XML while analysis total coverage remains 96 percent; the additional include glob omits that hidden path, so diff-cover reports no measurable lines and the checker exits zero. Remove the redundant include filter because domain XML is already isolated, and add both-domain hidden file and hidden directory regressions.",
+  "task_id": "TASK-0080"
+}

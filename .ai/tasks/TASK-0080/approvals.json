@@ -11,5 +11,18 @@
     "spec_sha256": "4e3152820ad25bc1fd6472cd702a69b34de9f8de4c465469f243fd5aeb1b5e47",
     "subject_commit": "32c5bd33a79dc9f52aaedb77284783803b702c1e",
     "task_id": "TASK-0080"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-13T05:37:20Z",
+    "base_commit": "32c5bd33a79dc9f52aaedb77284783803b702c1e",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "The owner explicitly requested this improvement, and the unchanged frozen specification authorizes same-spec Policy renewal. Independent REV-0002 approves the new Policy and exact companion scope with no findings; native reclassification remains REVIEW/V1 without downgrade. Prior approval and review remain preserved. Code approval/publication still require full verify and standing authorization.",
+    "schema_version": "1.0",
+    "spec_sha256": "4e3152820ad25bc1fd6472cd702a69b34de9f8de4c465469f243fd5aeb1b5e47",
+    "subject_commit": "48efbf6f6b8c53268b24ace3955e3c561a23504e",
+    "task_id": "TASK-0080"
   }
 ]
