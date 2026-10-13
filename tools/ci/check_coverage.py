@@ -44,7 +44,7 @@ def check_coverage(repository: Path, run_dir: Path, base: str) -> int:
         inventories[name] = [str(path) for path in files]
 
     failed = False
-    for name, relative in DOMAINS:
+    for name, _ in DOMAINS:
         print(f"Coverage domain: {name}", flush=True)
         total = coverage.report(morfs=inventories[name], include=[], omit=[], ignore_errors=False)
         if not math.isfinite(total) or total < 85:
@@ -60,6 +60,7 @@ def check_coverage(repository: Path, run_dir: Path, base: str) -> int:
             omit=[],
             ignore_errors=False,
         )
+        # The domain XML is the filter, including hidden Python files.
         result = subprocess.run(
             [
                 sys.executable,
@@ -69,8 +70,6 @@ def check_coverage(repository: Path, run_dir: Path, base: str) -> int:
                 "--compare-branch",
                 base,
                 "--fail-under=90",
-                "--include",
-                f"{relative}/**/*.py",
             ],
             cwd=repository,
             shell=False,
