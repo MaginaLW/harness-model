@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import subprocess
 import sys
@@ -124,17 +125,44 @@ def _pr_cli(document: object, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_pr_default_json_is_identical_to_explicit_json() -> None:
-    default = _pr_cli(_capture())
-    explicit = _pr_cli(_capture(), "--format", "json")
+@pytest.fixture(params=("subprocess", "in_process"))
+def pr_cli(
+    request: pytest.FixtureRequest,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> Any:
+    if request.param == "subprocess":
+        return _pr_cli
+    spec = importlib.util.spec_from_file_location("pr_feedback_text", PR_SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    def run(document: object, *args: str) -> SimpleNamespace:
+        raw = json.dumps(document).encode("utf-8")
+        with io.TextIOWrapper(io.BytesIO(raw), encoding="utf-8") as stream:
+            with monkeypatch.context() as patch:
+                patch.syspath_prepend(str(PR_SCRIPT.parent))
+                patch.setattr(sys, "stdin", stream)
+                patch.setattr(sys, "dont_write_bytecode", sys.dont_write_bytecode)
+                returncode = module.main(list(args))
+                captured = capsys.readouterr()
+        return SimpleNamespace(returncode=returncode, stdout=captured.out, stderr=captured.err)
+
+    return run
+
+
+def test_pr_default_json_is_identical_to_explicit_json(pr_cli: Any) -> None:
+    default = pr_cli(_capture())
+    explicit = pr_cli(_capture(), "--format", "json")
     assert default.returncode == explicit.returncode == 0
     assert default.stdout == explicit.stdout
     assert default.stderr == explicit.stderr == ""
     assert json.loads(default.stdout)["schema_version"] == "2.0"
 
 
-def test_pr_text_preserves_failure_followup_uncertainty_and_source_questions() -> None:
-    result = _pr_cli(_capture(), "--format", "text")
+def test_pr_text_preserves_failure_followup_uncertainty_and_source_questions(pr_cli: Any) -> None:
+    result = pr_cli(_capture(), "--format", "text")
     assert result.returncode == 0 and result.stderr == ""
     for fact in (
         "REQUEST_CHANGES",
@@ -163,11 +191,11 @@ def test_pr_text_preserves_failure_followup_uncertainty_and_source_questions() -
     assert "PRIVATE_" not in result.stdout
 
 
-def test_pr_text_absence_and_capture_failure_do_not_imply_complete_history() -> None:
+def test_pr_text_absence_and_capture_failure_do_not_imply_complete_history(pr_cli: Any) -> None:
     capture = _capture()
     capture["pull_request"]["body"] = None
     capture["workflows"] = None
-    result = _pr_cli(capture, "--format", "text")
+    result = pr_cli(capture, "--format", "text")
     assert result.returncode == 0
     assert "feedback=not_captured; workflows=not_captured" in result.stdout
     assert "LOCATE_STRUCTURED_FEEDBACK" in result.stdout
@@ -175,7 +203,7 @@ def test_pr_text_absence_and_capture_failure_do_not_imply_complete_history() -> 
     assert "history_completeness=unknown" in result.stdout
 
 
-def test_pr_text_no_questions_still_reports_unknown() -> None:
+def test_pr_text_no_questions_still_reports_unknown(pr_cli: Any) -> None:
     capture = _capture()
     empty = {
         "schema_version": "1.0",
@@ -190,14 +218,14 @@ def test_pr_text_no_questions_still_reports_unknown() -> None:
         + "\n<!-- /aiflow-review-feedback:v1 -->"
     )
     capture["workflows"]["data"]["workflow_runs"][0]["conclusion"] = "success"
-    result = _pr_cli(capture, "--format", "text")
+    result = pr_cli(capture, "--format", "text")
     assert result.returncode == 0
     assert "none_in_supplied_projection; unknowns_above_remain" in result.stdout
     assert "required_checks_status=unknown" in result.stdout
 
 
-def test_pr_text_invalid_input_keeps_safe_error_contract() -> None:
-    result = _pr_cli({"PRIVATE_INVALID_MARKER": "not a capture"}, "--format", "text")
+def test_pr_text_invalid_input_keeps_safe_error_contract(pr_cli: Any) -> None:
+    result = pr_cli({"PRIVATE_INVALID_MARKER": "not a capture"}, "--format", "text")
     assert result.returncode == 2
     assert result.stdout == ""
     assert result.stderr.strip() == "pr-feedback: supplied records or reference input are invalid"
