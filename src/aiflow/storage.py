@@ -202,7 +202,7 @@ def atomic_write_yaml(target: Path, value: object) -> None:
 def _read_text(path: Path) -> str:
     try:
         return path.read_text(encoding="utf-8")
-    except OSError as error:
+    except (OSError, UnicodeDecodeError) as error:
         raise StorageError(
             "Could not read task document",
             code="STORAGE_READ_FAILED",

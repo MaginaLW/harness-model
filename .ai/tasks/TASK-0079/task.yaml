@@ -1,0 +1,89 @@
+allowed_scope:
+- src/aiflow/storage.py
+- src/aiflow/cli.py
+- README.md
+- docs/operations/quickstart.md
+- docs/operations/maintenance-status.md
+- docs/operations/pr-feedback.md
+- docs/operations/review-advisory.md
+- docs/operations/review-detection-input.md
+- docs/superpowers/specs/review-detection-input.md
+- tools/analysis/approval_overhead.py
+- tools/analysis/pr_feedback.py
+- tools/analysis/review_advisory.py
+- tools/analysis/review_detection_input.py
+- tests/unit/test_feedback_text.py
+- tests/unit/test_review_detection_input.py
+base_commit: 3d3374e01d6418225e995a59d007545e549a4531
+branch: codex/reliability-feedback-improvements
+created_at: '2026-10-13T04:41:08Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Handle invalid task encoding and preserve safe machine-readable CLI domain
+    errors
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/storage.py
+  - src/aiflow/cli.py
+  inputs:
+  - The owner requested completion of the five reviewed improvements; this decision
+    unit implements the bounded CLI error repair.
+  - Task-free regression baseline 3d3374e preserves the observed encoding and JSON
+    error failures. Companion tools and documentation are separately committed task-free;
+    their exact paths are included only for cumulative scope integration.
+  permission_requirements: []
+  planned_actions:
+  - Map invalid task UTF-8 to the existing safe STORAGE_READ_FAILED domain error.
+  - Emit only stable code and controlled message for parsed JSON-mode domain failures,
+    retaining all existing success, text and argparse behavior.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0079
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Existing independent failure regressions, complete native V1 verification, independent
+    staged reviews, Gate and unchanged required CI.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: dca38105dba154792826f959029d5723451b95e155ed9e19ed7a836156a4618d
+goal: Handle invalid task encoding and preserve safe machine-readable CLI domain errors
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-13T04:42:27Z'
+subject_commit: 7a1c85228263ed20d331e3a81440d1ecc5c6211a
+task_id: TASK-0079
+updated_at: '2026-10-13T04:48:38Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- tests/unit/test_feedback_text.py
+- tools/analysis/approval_overhead.py
+- tools/analysis/pr_feedback.py
+- tools/analysis/review_advisory.py
