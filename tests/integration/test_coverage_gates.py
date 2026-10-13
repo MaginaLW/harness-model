@@ -258,3 +258,50 @@ def test_coverage_gates_fail_each_changed_file_with_passing_totals(
     assert relative in result.stdout
     assert "Coverage: 25%" in result.stdout
     assert "Coverage: 100%" in result.stdout
+
+
+@pytest.mark.parametrize("domain", DOMAINS)
+@pytest.mark.parametrize("hidden", [".unexecuted.py", ".hidden/unexecuted.py"])
+def test_coverage_gates_reject_uncovered_hidden_changes(
+    tmp_path: Path, domain: str, hidden: str
+) -> None:
+    repository, run_dir, base = _repository(tmp_path)
+    relative = f"{domain}/{hidden}"
+    unexecuted = repository / relative
+    unexecuted.parent.mkdir(parents=True, exist_ok=True)
+    unexecuted.write_text(
+        "".join(f"missed_{index} = {index}\n" for index in range(4)), encoding="utf-8"
+    )
+    other = next(item for item in DOMAINS if item != domain)
+    covered = repository / other / "same.py"
+    covered.write_text(
+        covered.read_text(encoding="utf-8")
+        + "".join(f"changed_{index} = {index}\n" for index in range(40)),
+        encoding="utf-8",
+    )
+    _commit(repository, "add uncovered hidden source and covered opposite-domain lines")
+    _collect(repository, run_dir)
+    totals = {item: _total(repository, run_dir, (item,)) for item in DOMAINS}
+    assert all(total >= 85 for total in totals.values())
+
+    result = _check(repository, run_dir, base)
+
+    report = run_dir / f"coverage-{'core' if domain == DOMAINS[0] else 'analysis'}.xml"
+    assert unexecuted.resolve() in _reported_files(repository, report)
+    hidden_class = next(
+        element
+        for element in ET.parse(report).findall(".//class")
+        if element.attrib["filename"].replace("\\", "/").endswith(relative)
+    )
+    hidden_lines = hidden_class.findall("./lines/line")
+    assert len(hidden_lines) == 4
+    assert {line.attrib["hits"] for line in hidden_lines} == {"0"}
+    assert result.returncode == 1, (
+        f"domain totals={totals}; hidden XML has four unexecuted lines\n"
+        + result.stdout
+        + result.stderr
+    )
+    assert "total coverage is below 85 percent" not in result.stderr
+    assert relative in result.stdout
+    assert "Coverage: 0%" in result.stdout
+    assert "Coverage: 100%" in result.stdout

@@ -74,8 +74,6 @@ def test_fixed_domains_include_unmeasured_nested_files_and_isolate_reports(setup
                 "--compare-branch",
                 BASE,
                 "--fail-under=90",
-                "--include",
-                f"{relative}/**/*.py",
             ],
         )
         assert run.call_args_list[index].kwargs == {
