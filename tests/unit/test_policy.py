@@ -134,6 +134,7 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
                 "-m",
                 "pytest",
                 "--cov=aiflow",
+                "--cov=tools/analysis",
                 "--cov-branch",
                 "--cov-report=xml:{run_dir}/coverage.xml",
             ],
@@ -147,8 +148,23 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
         for check_id in pytest_ids:
             parser = "coverage_xml" if check_id == "coverage_xml" else "pytest"
             assert by_id[check_id] == {"id": check_id, **full_suite, "result_parser": parser}
-        assert by_id["diff_coverage"]["command"][-2:] == ["--fail-under", "90"]
-        assert by_id["diff_coverage"]["threshold"] == 90
+        assert by_id["diff_coverage"] == {
+            "id": "diff_coverage",
+            "command": [
+                "{python}",
+                "tools/ci/check_coverage.py",
+                "--run-dir",
+                "{run_dir}",
+                "--base",
+                "{base_commit}",
+            ],
+            "timeout_seconds": 120,
+            "required": True,
+            "environment": {},
+            "result_parser": "exit_zero",
+            "threshold": 90,
+        }
+        assert by_id["mypy"]["command"] == ["{python}", "-m", "mypy", "src", "tools/analysis"]
 
 
 def test_legacy_v1_policy_branch_remains_valid() -> None:

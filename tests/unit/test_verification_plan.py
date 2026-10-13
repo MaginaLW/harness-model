@@ -14,6 +14,7 @@ from aiflow import verification_service
 from aiflow.errors import ContractError
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.verification import (
+    VerificationCheck,
     VerificationContext,
     _required_ids,
     parse_check_result,
@@ -96,6 +97,7 @@ def test_pytest_checks_share_one_full_coverage_execution(level: str, tmp_path: P
         "-m",
         "pytest",
         "--cov=aiflow",
+        "--cov=tools/analysis",
         "--cov-branch",
         f"--cov-report=xml:{(parsed.run_dir / 'coverage.xml').as_posix()}",
     )
@@ -192,6 +194,7 @@ def test_shared_subset_selector_is_rejected_even_when_all_pytest_checks_agree(
                 "-m",
                 "pytest",
                 "--cov=aiflow",
+                "--cov=tools/analysis",
                 "--cov-branch",
                 "--cov-report=xml:{run_dir}/coverage.xml",
             ],
@@ -487,7 +490,7 @@ def test_coverage_and_diff_cover_must_share_run_dir_base_and_threshold(tmp_path:
         )
     assert caught.value.code == "VERIFICATION_COVERAGE_CONFIG_INVALID"
 
-    for required_argument in ("--cov=aiflow", "--cov-branch"):
+    for required_argument in ("--cov=aiflow", "--cov=tools/analysis", "--cov-branch"):
         bundle = bundle_copy()
         coverage_check = next(item for item in checks(bundle, "V1") if item["id"] == "coverage_xml")
         coverage_check["command"].remove(required_argument)
@@ -497,7 +500,7 @@ def test_coverage_and_diff_cover_must_share_run_dir_base_and_threshold(tmp_path:
             )
         assert caught.value.code == "VERIFICATION_COVERAGE_CONFIG_INVALID"
 
-    for token, replacement in (("{base_commit}", "c" * 40), ("90", "89")):
+    for token, replacement in (("{base_commit}", "c" * 40), ("{run_dir}", "{run_dir}/other")):
         bundle = bundle_copy()
         diff = next(item for item in checks(bundle, "V1") if item["id"] == "diff_coverage")
         diff["command"][diff["command"].index(token)] = replacement
@@ -519,7 +522,7 @@ def test_coverage_and_diff_cover_must_share_run_dir_base_and_threshold(tmp_path:
         )
     assert caught.value.code == "VERIFICATION_DIFF_COVERAGE_CONFIG_INVALID"
 
-    for flag, value in (("--compare-branch", "c" * 40), ("--fail-under", "1")):
+    for flag, value in (("--base", "c" * 40), ("--run-dir", "{run_dir}/other")):
         duplicate_flag = bundle_copy()
         diff = next(item for item in checks(duplicate_flag, "V1") if item["id"] == "diff_coverage")
         diff["command"].extend([flag, value])
@@ -543,6 +546,99 @@ def test_invalid_policy_allow_lists_are_rejected(tmp_path: Path) -> None:
     assert caught.value.code == "VERIFICATION_POLICY_INVALID"
 
 
+@pytest.mark.parametrize("level", ["V1", "V2"])
+def test_domain_coverage_check_uses_fixed_entry_and_binding(level: str, tmp_path: Path) -> None:
+    parsed = plan(level, tmp_path)
+    check = next(item for item in parsed.checks if item.check_id == "diff_coverage")
+    assert check.argv == (
+        sys.executable,
+        "tools/ci/check_coverage.py",
+        "--run-dir",
+        parsed.run_dir.as_posix(),
+        "--base",
+        "a" * 40,
+    )
+    assert check.cwd == ROOT.resolve()
+    assert check.environment == {}
+    assert check.timeout_seconds == 120
+    assert check.required is True
+    assert check.result_parser == "exit_zero"
+    assert check.threshold == 90
+    result = parse_check_result(check, returncode=0, output="core and analysis passed")
+    assert result.conclusion == "passed"
+    assert parse_check_result(check, returncode=1, output="TOTAL 100%").conclusion == "failed"
+
+
+@pytest.mark.parametrize("level", ["V1", "V2"])
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        (
+            "command",
+            [
+                "diff-cover",
+                "tools/ci/check_coverage.py",
+                "--run-dir",
+                "{run_dir}",
+                "--base",
+                "{base_commit}",
+            ],
+        ),
+        (
+            "command",
+            ["{python}", "tools/ci/other.py", "--run-dir", "{run_dir}", "--base", "{base_commit}"],
+        ),
+        (
+            "command",
+            [
+                "{python}",
+                "tools/ci/check_coverage.py",
+                "--base",
+                "{base_commit}",
+                "--run-dir",
+                "{run_dir}",
+            ],
+        ),
+        ("command", ["{python}", "tools/ci/check_coverage.py", "--run-dir", "{run_dir}", "--base"]),
+        (
+            "command",
+            [
+                "{python}",
+                "tools/ci/check_coverage.py",
+                "--run-dir",
+                "{run_dir}",
+                "--base",
+                "{base_commit}",
+                "--total",
+                "1",
+            ],
+        ),
+        ("result_parser", "diff_cover"),
+        ("required", False),
+        ("environment", {"COVERAGE_FILE": "{run_dir}/.coverage"}),
+        ("timeout_seconds", 119),
+        ("timeout_seconds", 121),
+        ("threshold", 89),
+        ("threshold", 91),
+        ("threshold", None),
+    ],
+)
+def test_domain_coverage_check_rejects_complete_command_or_metadata_tampering(
+    tmp_path: Path, level: str, field: str, value: object
+) -> None:
+    bundle = bundle_copy()
+    for level_id in ("V1", "V2"):
+        check = next(item for item in checks(bundle, level_id) if item["id"] == "diff_coverage")
+        check[field] = deepcopy(value)
+
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level=level, tool_available=lambda _argv: True
+        )
+
+    assert caught.value.code == "VERIFICATION_DIFF_COVERAGE_CONFIG_INVALID"
+
+
 def test_parse_does_not_create_coverage_files_in_repository_root(tmp_path: Path) -> None:
     coverage = ROOT / ".coverage"
     xml = ROOT / "coverage.xml"
@@ -564,9 +660,17 @@ def test_selected_and_empty_plans_preserve_shared_execution_argv(tmp_path: Path)
     assert verification_service._empty_plan(parsed).executions == ()
 
 
-def test_diff_coverage_threshold_and_missing_xml_are_deterministic(tmp_path: Path) -> None:
-    check = next(
-        check for check in plan("V1", tmp_path).checks if check.check_id == "diff_coverage"
+def test_legacy_diff_cover_parser_remains_deterministic(tmp_path: Path) -> None:
+    check = VerificationCheck(
+        check_id="diff_coverage",
+        level="V1",
+        argv=("diff-cover", "coverage.xml", "--fail-under", "90"),
+        environment={},
+        cwd=tmp_path,
+        timeout_seconds=120,
+        required=True,
+        result_parser="diff_cover",
+        threshold=90,
     )
     assert (
         parse_check_result(
@@ -589,6 +693,9 @@ def test_diff_coverage_threshold_and_missing_xml_are_deterministic(tmp_path: Pat
         ).conclusion
         == "passed"
     )
+
+
+def test_missing_coverage_xml_is_deterministic(tmp_path: Path) -> None:
     coverage = next(
         check for check in plan("V1", tmp_path).checks if check.check_id == "coverage_xml"
     )

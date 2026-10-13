@@ -1,0 +1,13 @@
+{
+  "context_sha256": "d5a758a22fe5077be70f842f1405d3fc785c6240dd3a1984ec2ff2fd316a456f",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-13T06:08:39Z",
+  "review_id": "REV-0004",
+  "review_stage": "implementation",
+  "reviewer": "codex-quality-correctness-review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent final review approves source 39529ed512e4ddcd486f9c1ed0031bdbc185b9fd and the current evidence. RF-001 is fixed: isolated domain XML and full-path matching include hidden source without cross-domain compensation. Four real regressions and complete locked native verification of 2887 tests plus all ten required checks passed. No unresolved findings. The separate whole-batch supplemental replay identified a prior text-output coverage-collection gap for a task-free follow-up; it does not change this frozen candidate or its native check results.",
+  "task_id": "TASK-0080"
+}

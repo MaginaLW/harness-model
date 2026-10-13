@@ -263,9 +263,9 @@ def test_resolved_task_output_flows_to_verify_and_gate() -> None:
 
 def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    diff_cover_command = (
-        'uv run --locked diff-cover "$RUNNER_TEMP/coverage.xml" '
-        '--compare-branch "$BASE_SHA" --fail-under=90'
+    coverage_command = (
+        "uv run --locked python tools/ci/check_coverage.py "
+        '--run-dir "$RUNNER_TEMP" --base "$BASE_SHA"'
     )
 
     assert "mode: bootstrap_auto" in text
@@ -276,10 +276,13 @@ def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
     assert "if: steps.governance.outputs.bootstrap_active == 'true'" in text
     assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 5
     assert 'COVERAGE_FILE="$RUNNER_TEMP/.coverage"' in text
-    assert "--cov=aiflow --cov-branch --cov-fail-under=85" in text
+    assert "--cov=aiflow --cov=tools/analysis --cov-branch" in text
     assert "--cov-report=term-missing" in text
     assert '--cov-report="xml:$RUNNER_TEMP/coverage.xml"' in text
-    assert diff_cover_command in text
+    assert coverage_command in text
+    assert text.index('--cov-report="xml:$RUNNER_TEMP/coverage.xml"') < text.index(coverage_command)
+    assert "--cov-fail-under" not in text
+    assert "uv run --locked diff-cover" not in text
     assert 'git diff --check "$BASE_SHA..$HEAD_SHA"' in text
     assert "uv run --locked ruff check ." in text
     assert "uv run --locked ruff format --check ." in text

@@ -105,6 +105,8 @@ macOS/Linux 将最后三条命令中的 `.\.venv\Scripts\python.exe` 换成
 
 - `No module named aiflow` 通常表示命中了系统 Python。改用项目解释器，或在项目虚拟环境中
   重新执行 editable 安装；不要用全局安装掩盖解释器选择错误。
+- 能导入模块也不证明当前解释器的安装元数据与源码一致。质量检查显式使用按锁文件建立的
+  项目 `.venv`；若包版本或依赖来自其他安装，先核对 `sys.executable` 与项目环境再运行检查。
 - `uv sync --locked` 报告锁文件过期时，不要移除 `--locked` 或顺手重写锁文件。先运行
   `uv lock --check`，再将依赖或锁文件变更作为单独受治理任务处理。
 - `pip` 或 uv 的新版本提示不代表项目依赖损坏。以当前安装前端的 `pip check` 或
@@ -256,16 +258,19 @@ python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "loca
 
 active Policy `2.5.0` 下，`unit_tests`、`regression_tests`、`coverage_xml` 以及 V2 的
 `acceptance`、`integration` 共用同一条完整覆盖率命令
-`python -m pytest --cov=aiflow --cov-branch --cov-report=xml:<run>/coverage.xml`，计划引擎将其合并为
+`python -m pytest --cov=aiflow --cov=tools/analysis --cov-branch --cov-report=xml:<run>/coverage.xml`，计划引擎将其合并为
 一次执行；各检查 ID 仍分别出现在 evidence 中，但共享同一进程结果与日志，失败不再按子集归因。
 V2 另有由单独 action approval 绑定的 targeted mutation，independent Verifier 也必须与
 Implementer 使用不同的非空 task-local actor 标签。Chapter 11 的 acceptance、integration、
 action-approved targeted mutation 与 independent-verifier 流程均已实现。
 
-这次共享的完整 pytest 执行上限为 1200 秒，为 Windows 已验证运行时留出波动余量；
-它不改变 parser、required 状态或 90% diff coverage 门槛。85% 总覆盖率目前只由 CI
-bootstrap 步骤强制。达到上限仍是验证失败，必须保留 run 并诊断原因，不能靠降级、跳过
-coverage 或无理由重复重试进入 Gate。
+这次共享的完整 pytest 执行上限为 1200 秒，为 Windows 已验证运行时留出波动余量。
+CI 与原生 V1/V2 随后统一调用
+`python tools/ci/check_coverage.py --run-dir <run_dir> --base <base_commit>`，从同一次分支覆盖率数据
+分别检查 `src/aiflow` 与 `tools/analysis`：每个目录的总覆盖率均须达到 85%，变更覆盖率均须达到
+90%，不能互相补足。原生检查仍使用 `diff_coverage` 类别及既有 required 状态；strict mypy 同时
+检查这两个目录。达到执行上限或任一门槛失败仍是验证失败，必须保留 run 并诊断原因，不能靠降级、
+跳过 coverage 或无理由重复重试进入 Gate。
 
 `verify` 已移除 `--pytest-temp-root`；当前验证使用默认临时目录，不再接受该选项。
 手工质量重放仍按下文将 coverage 数据写入独立 run directory；这与 pytest fixture 临时目录是不同用途。
@@ -291,22 +296,23 @@ implementation review 或 local code approval。Gate 仍逐项核对这些 curre
 
 历史 `APPROVED_FOR_MERGE` task 在后续业务 `HEAD` 上可能正确显示
 `merge_readiness: reverification_required`；这不会抹去其历史 evidence，也不能被改写成当前通过。
-先运行自动追踪和四类负向自举回归，再运行完整质量命令：
+先运行自动追踪和四类负向自举回归，再执行静态检查及下文的一次完整覆盖率运行。
+以下命令显式使用锁文件配置的项目解释器；macOS/Linux 将 `.\.venv\Scripts\python.exe`
+换成 `.venv/bin/python`。
 
 ```powershell
-python -m pytest tests/integration/test_acceptance_traceability.py -q
-python -m pytest tests/acceptance/test_phase_02_self_hosting.py tests/integration/test_phase_02_self_hosting.py tests/e2e/test_phase_02_self_hosting_scenario.py tests/e2e/test_phase_02_negative_self_hosting.py -q
-python -m pytest -q
-python -m ruff check .
-python -m ruff format --check .
-python -m mypy src
+.\.venv\Scripts\python.exe -m pytest tests/integration/test_acceptance_traceability.py -q
+.\.venv\Scripts\python.exe -m pytest tests/acceptance/test_phase_02_self_hosting.py tests/integration/test_phase_02_self_hosting.py tests/e2e/test_phase_02_self_hosting_scenario.py tests/e2e/test_phase_02_negative_self_hosting.py -q
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe -m ruff format --check .
+.\.venv\Scripts\python.exe -m mypy src tools/analysis
 git diff --check
 ```
 
 覆盖率命令必须把数据库和 XML 写入精确的独立 run directory，不能写入仓库根。下面的
 PowerShell 示例在操作系统临时目录中为本次运行创建唯一目录；命令以 `origin/main` 的共同
 祖先作为本次变更覆盖比较的 base。若任务冻结了不同的 base commit，应把 `$baseCommit`
-改为该精确 SHA。先前的完整质量命令可继续运行，再单独运行以下覆盖率与 diff-cover 门槛：
+改为该精确 SHA。完整 pytest 同时收集两个目录的分支覆盖率，再由固定检查器检查各自门槛：
 
 ```powershell
 $runId = "harness-model-quality-{0}" -f ([guid]::NewGuid().ToString("N"))
@@ -317,17 +323,20 @@ $baseCommit = (git merge-base HEAD origin/main).Trim()
 New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 $env:COVERAGE_FILE = $coverageFile
 try {
-    python -m pytest -q --cov=aiflow --cov-branch --cov-report=term-missing --cov-report="xml:$coverageXml" --cov-fail-under=85
+    .\.venv\Scripts\python.exe -m pytest -q --cov=aiflow --cov=tools/analysis --cov-branch --cov-report=term-missing --cov-report="xml:$coverageXml"
     if ($LASTEXITCODE -ne 0) { throw "coverage pytest failed with exit $LASTEXITCODE" }
-    .\.venv\Scripts\diff-cover.exe $coverageXml --compare-branch=$baseCommit --fail-under=90
-    if ($LASTEXITCODE -ne 0) { throw "diff-cover failed with exit $LASTEXITCODE" }
+    .\.venv\Scripts\python.exe tools/ci/check_coverage.py --run-dir $runDir --base $baseCommit
+    if ($LASTEXITCODE -ne 0) { throw "coverage checks failed with exit $LASTEXITCODE" }
 }
 finally {
     Remove-Item Env:COVERAGE_FILE -ErrorAction SilentlyContinue
 }
 ```
 
-这两项阈值分别要求总分支覆盖率不低于 85%、相对 `$baseCommit` 的变更覆盖率不低于 90%。
+检查器从 `$runDir/.coverage` 生成 `coverage-core.xml` 和 `coverage-analysis.xml`，每个目录均须
+满足总分支覆盖率不低于 85%、相对 `$baseCommit` 的变更覆盖率不低于 90%。未执行的 Python 文件
+仍计入各自分母；数据缺失、无分支数据或某个目录完全未测量均失败。合并的 `coverage.xml` 供查看，
+其总数不能代替两个目录分别通过。纯文档等没有可测新增行的 diff 可为空，但有效覆盖率数据仍是前提。
 成功或失败后先保留 run directory 以便定位结果；若要把它绑定为 task evidence，应按正式
 `aiflow verify` 流程生成 task-local run，而不是把这个临时目录当作权威 evidence。只有在确认
 无需保留诊断信息后，才可用精确路径 `Remove-Item -LiteralPath $runDir -Recurse` 删除本次
