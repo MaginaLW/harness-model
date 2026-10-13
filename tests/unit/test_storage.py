@@ -255,6 +255,29 @@ def test_read_rejects_corrupt_documents(
     assert caught.value.code == "STORAGE_PARSE_FAILED"
 
 
+@pytest.mark.parametrize(
+    ("filename", "reader"), [("task.json", read_task_json), ("task.yaml", read_task_yaml)]
+)
+def test_read_rejects_non_utf8_with_safe_storage_error(
+    tmp_path: Path, filename: str, reader: object
+) -> None:
+    path = tmp_path / ".ai" / "tasks" / "TASK-0001" / filename
+    path.parent.mkdir(parents=True)
+    content = b"private-document-marker\xff"
+    path.write_bytes(content)
+
+    with pytest.raises(StorageError) as caught:
+        reader(tmp_path, "TASK-0001", filename)  # type: ignore[operator]
+
+    assert caught.value.code == "STORAGE_READ_FAILED"
+    assert str(caught.value) == "Could not read task document"
+    assert caught.value.details == {"filename": filename}
+    assert isinstance(caught.value.__cause__, UnicodeDecodeError)
+    assert "private-document-marker" not in json.dumps(caught.value.to_dict())
+    assert str(tmp_path) not in json.dumps(caught.value.to_dict())
+    assert path.read_bytes() == content
+
+
 def test_read_validates_schema_version_immediately(tmp_path: Path) -> None:
     path = tmp_path / ".ai" / "tasks" / "TASK-0001" / "task.yaml"
     path.parent.mkdir(parents=True)

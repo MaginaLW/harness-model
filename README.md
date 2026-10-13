@@ -12,6 +12,18 @@
 
 阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 均已完成，当前源码包版本为 `0.2.0`，active Policy 为 `2.5.0`（V1/V2 只运行一次完整覆盖率 pytest；`impact_scope` 触及治理面的决策单元至少走 REVIEW）。阶段三保持 `not_started` 且进入门未满足；系统不提供 V3、真实模型路由、资源调度、通用命令拦截或操作系统安全沙箱。当前状态、未完成项与待决定事项只在[维护收尾与待办](docs/operations/maintenance-status.md)维护。`docs/superpowers/state/*.yaml` 是阶段二于 2026-08-30 完成时冻结的历史投影，不是当前事实来源。
 
+## 按需求选工具
+
+以下工具提供离线参考、事实回读或准备建议，具体命令与输入格式见各自用法。
+
+| 需求 | 工具与用法 | 输入 | 结果边界 |
+|---|---|---|---|
+| 比较公开榜单中的候选配置 | [初始外部参考](docs/operations/benchmark-reference.md) | 显式整理的榜单 JSON 文件 | 声明集合内的相对参考分，不是本仓成功或检错概率。 |
+| 查看正式账本中的审核与 Finding 历史 | [审核结果回读](docs/operations/review-feedback.md) | 完整克隆的固定 tracked `HEAD`；可按 task 过滤输出 | 保留原结果、来源与未知，不重算 Gate 或更新模型分数。 |
+| 查看 task-free PR 的审核、处理与复核声明 | [公开 PR 回读](docs/operations/pr-feedback.md) | 经标准输入提供的公开 connector 来源包 | 汇总所供声明及待核对问题，不认证缺陷真值、独立复核或实际模型身份。 |
+| 检查假设计数下的检出区间 | [离线区间计算](docs/operations/review-detection.md) | 标准输入中的 synthetic 整数计数 | 仅提供条件数学结果；真实来源与窗口准备见[观察流程](docs/operations/review-detection-preparation.md)。 |
+| 定位当前任务的准备缺项 | [只读任务建议](docs/operations/review-advisory.md) | 完整克隆及真实 TASK-ID | 复用原生 status 与适用状态的 Gate，只给建议，不授予执行权限。 |
+
 ## 阶段一目标
 
 - 支持 `AUTO`、`ASK`、`REVIEW`、`BLOCK` 与动态升级。
