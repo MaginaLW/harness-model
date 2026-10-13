@@ -40,6 +40,26 @@ python tools/analysis/review_advisory.py TASK-0001 --repository <完整克隆根
 `unknown` 始终包含 `SOURCE_READ_ATOMICITY_NOT_ESTABLISHED`，表示多次原生读取
 尚未证明是同一个原子快照，不能据版本字段建立新的放行依据。
 
+工具在原生读取前后比较有限相关输入的内部指纹。发现差异时只追加
+`SOURCE_INPUTS_CHANGED_DURING_READ`；任一指纹无法读取时只追加
+`SOURCE_INPUT_CHANGE_CHECK_UNAVAILABLE`。两码沿用现有 `unknown` 字段，JSON/text
+报告形状与退出码不变；原生读取失败仍保留其错误码和退出码。指纹、路径与正文
+不输出，诊断不改写原生投影或建议，也不自动重试。
+
+监测范围为 Git 上下文的仓库身份、HEAD、branch、dirty 布尔值和路径，
+`.ai/repository-id`、四个固定 Policy 文件及 Policy 目录项、固定 Schema 文件和
+仓库级 `.ai/mutations/phase-02-critical-manifest.json`（复用 `CANONICAL_MANIFEST_PATH`），
+以及当前任务的 `task.yaml`、`spec.md`、`classification.json`、`approvals.json`、
+`evidence.json`、`events.jsonl`、`review-package.md`、
+`creation_failed.json`、`approval_pending.json` 和 `reviews/*.json`、
+`review-contexts/*.json`、`verifier-contexts/*.json` 的存在性、列表与内容摘要。
+缺失作为可比较的状态；读取失败、非普通对象或父对象不是目录使检查不可用。
+路径须位于目标仓库和声明父目录内，当前任务内容另受原生 `resolve_task_path` 的
+task 边界限制；task 内 symlink/junction 跳往其他 task 同样使检查不可用。
+它不遍历其他 task、日志或自由引用，未覆盖 V2 mutation 日志、业务文件正文和
+上下文 Schema 重定向。前后相同仍不证明原子快照，也无法发现先变化再恢复的 ABA
+变化或监测范围外变化；原有原子性 unknown 始终保留。
+
 | 建议代码 | 需要准备或核对的事项 |
 | --- | --- |
 | `PREPARE_CLASSIFICATION_FACTS` | 按实际范围填写分类事实，再按原生流程处理。 |
@@ -66,11 +86,11 @@ python tools/analysis/review_advisory.py TASK-0001 --repository <完整克隆根
 
 入口是单个同步 CLI 调用。独立工具进程在导入原生 AI Flow 前禁用 bytecode 写入，
 因此普通 `python` 调用也不会创建仓库内的 `__pycache__`；导入工具模块不会修改
-调用者的 bytecode 设置。它用 `contextlib.chdir` 暂时进入目标根目录，并在两次原生
-读取期间共同设置 `GIT_OPTIONAL_LOCKS=0`，避免 Git status 刷新 index；退出时恢复 cwd
-与原环境值。其他 Git 环境保持原样。此入口不提供进程内并发库 API，读取也不是原子
-快照；多次读取的原子一致性未证明，`base_commit`、`subject_commit`、`observed_head`
-也不构成固定原子窗口。
+调用者的 bytecode 设置。它用 `contextlib.chdir` 暂时进入目标根目录，并在原生
+读取及前后指纹期间共同设置 `GIT_OPTIONAL_LOCKS=0`，避免 Git status 刷新 index；
+原生读取抛错时也尝试后指纹，退出时恢复 cwd 与原环境值。其他 Git 环境保持原样。
+此入口不提供进程内并发库 API，读取也不是原子快照；多次读取的原子一致性未证明，
+`base_commit`、`subject_commit`、`observed_head` 也不构成固定原子窗口。
 任务或仓库同时发生变化时，应重新读取当前原件再作决定。
 
 该工具是离线建议能力，不证明置信度校准、人工打断减少、provider 接入、真实执行

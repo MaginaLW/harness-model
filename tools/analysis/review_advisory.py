@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -14,9 +15,13 @@ from typing import cast
 if __name__ == "__main__":
     sys.dont_write_bytecode = True
 
+from aiflow.contracts import SCHEMA_FILES  # noqa: E402
 from aiflow.gate import evaluate_gate  # noqa: E402
+from aiflow.git_context import collect_git_context  # noqa: E402
+from aiflow.mutation_manifest import CANONICAL_MANIFEST_PATH  # noqa: E402
+from aiflow.policy import POLICY_FILES  # noqa: E402
 from aiflow.status_service import MISSING_BY_STATE, summarize_task  # noqa: E402
-from aiflow.storage import validate_task_id  # noqa: E402
+from aiflow.storage import resolve_task_path, validate_task_id  # noqa: E402
 
 DEFAULT_REPOSITORY = Path(__file__).resolve().parents[2]
 STATUS_VALUES = {
@@ -70,6 +75,85 @@ DECISIONS = {
     "block_resolution": "CHECK_DIAGNOSIS_SCOPE_AND_EXISTING_AUTHORIZATION",
     "escalation_resolution": "CHECK_DIAGNOSIS_SCOPE_AND_EXISTING_AUTHORIZATION",
 }
+
+
+def _input_fingerprint(repository: Path, task_id: str) -> str | None:
+    """Compare a finite input inventory; matching hashes do not prove atomic reads."""
+    try:
+        validate_task_id(task_id)
+        root = repository.resolve()
+        task = Path(".ai/tasks") / task_id
+        tasks_directory = root / ".ai/tasks"
+        if tasks_directory.exists() and not tasks_directory.is_dir():
+            return None
+        paths = {Path(".ai/repository-id"), CANONICAL_MANIFEST_PATH}
+        paths.update(Path(".ai/policy") / name for name in POLICY_FILES)
+        paths.update(Path(".ai/schemas") / name for name in SCHEMA_FILES.values())
+        paths.update(
+            task / name
+            for name in (
+                "task.yaml",
+                "spec.md",
+                "classification.json",
+                "approvals.json",
+                "evidence.json",
+                "events.jsonl",
+                "review-package.md",
+                "creation_failed.json",
+                "approval_pending.json",
+            )
+        )
+        inventories: list[tuple[str, bool, list[str]]] = []
+        for relative, pattern in (
+            (Path(".ai/policy"), "*"),
+            (task / "reviews", "*.json"),
+            (task / "review-contexts", "*.json"),
+            (task / "verifier-contexts", "*.json"),
+        ):
+            directory = root / relative
+            if relative.is_relative_to(task):
+                resolve_task_path(root, task_id, relative.relative_to(task))
+            if not directory.resolve().is_relative_to(root):
+                return None
+            if directory.exists() and not directory.is_dir():
+                return None
+            entries = (
+                sorted(entry for entry in directory.iterdir() if entry.match(pattern))
+                if directory.is_dir()
+                else []
+            )
+            inventories.append((relative.as_posix(), directory.is_dir(), [p.name for p in entries]))
+            if relative != Path(".ai/policy"):
+                paths.update(relative / entry.name for entry in entries)
+        contents: list[tuple[str, str | None]] = []
+        for relative in sorted(paths):
+            path = root / relative
+            if relative.is_relative_to(task):
+                resolve_task_path(root, task_id, relative.relative_to(task))
+            if path.parent.exists() and not path.parent.is_dir():
+                return None
+            boundary = path.parent.resolve()
+            if not boundary.is_relative_to(root) or not path.resolve().is_relative_to(boundary):
+                return None
+            if path.exists() and not path.is_file():
+                return None
+            digest = hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
+            contents.append((relative.as_posix(), digest))
+        context = collect_git_context(root)
+        if Path(context.repository_path).resolve() != root:
+            return None
+        payload = (
+            context.repository_id,
+            context.branch,
+            context.head,
+            context.worktree_dirty,
+            context.dirty_paths,
+            inventories,
+            contents,
+        )
+        return hashlib.sha256(json.dumps(payload, ensure_ascii=True).encode("utf-8")).hexdigest()
+    except Exception:
+        return None
 
 
 def _format_text(report: dict[str, object]) -> str:
@@ -132,8 +216,10 @@ def main(argv: list[str] | None = None) -> int:
         previous_locks = os.environ.get("GIT_OPTIONAL_LOCKS")
         with chdir(repository):
             os.environ["GIT_OPTIONAL_LOCKS"] = "0"
+            before: str | None = None
             try:
                 failure_code = "NATIVE_STATUS_READ_FAILED"
+                before = _input_fingerprint(repository, arguments.task_id)
                 summary = summarize_task(repository, arguments.task_id)
                 status: dict[str, object] = {}
                 for field, allowed in STATUS_VALUES.items():
@@ -213,10 +299,17 @@ def main(argv: list[str] | None = None) -> int:
                         "reason_codes": reasons,
                     }
             finally:
-                if previous_locks is None:
-                    os.environ.pop("GIT_OPTIONAL_LOCKS", None)
-                else:
-                    os.environ["GIT_OPTIONAL_LOCKS"] = previous_locks
+                try:
+                    after = _input_fingerprint(repository, arguments.task_id)
+                    if before is None or after is None:
+                        unknown.append("SOURCE_INPUT_CHANGE_CHECK_UNAVAILABLE")
+                    elif before != after:
+                        unknown.append("SOURCE_INPUTS_CHANGED_DURING_READ")
+                finally:
+                    if previous_locks is None:
+                        os.environ.pop("GIT_OPTIONAL_LOCKS", None)
+                    else:
+                        os.environ["GIT_OPTIONAL_LOCKS"] = previous_locks
     except Exception:
         report["error_code"] = failure_code
         unknown.append(failure_code)
