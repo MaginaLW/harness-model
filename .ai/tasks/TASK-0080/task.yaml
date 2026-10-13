@@ -1,0 +1,88 @@
+allowed_scope:
+- .github/workflows/ai-quality-gate.yml
+- pyproject.toml
+- .ai/policy/verification-levels.yaml
+- src/aiflow/verification.py
+- tools/ci/check_coverage.py
+- tests/unit/test_check_coverage.py
+- tests/unit/test_verification_plan.py
+- tests/unit/test_policy.py
+- tests/integration/test_templates_and_policy.py
+- tests/integration/test_github_workflow.py
+- tests/integration/test_coverage_gates.py
+- docs/operations/quickstart.md
+- docs/operations/maintenance-status.md
+base_commit: 32c5bd33a79dc9f52aaedb77284783803b702c1e
+branch: codex/analysis-quality-gates
+created_at: '2026-10-13T05:26:02Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Enforce independent coverage and strict typing for analysis tools
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  impact_scope:
+  - .github/workflows/ai-quality-gate.yml
+  - pyproject.toml
+  - .ai/policy/verification-levels.yaml
+  - src/aiflow/verification.py
+  - tools/ci/check_coverage.py
+  inputs:
+  - The owner requested all five reviewed improvements; this successor implements
+    the independent analysis quality gates after PR 70 merged.
+  - Two fixed code domains must independently retain or exceed 85 percent total and
+    90 percent diff coverage; strict typing expands to tools/analysis.
+  permission_requirements: []
+  planned_actions:
+  - Use one shared full branch-coverage pytest execution for both domains and one
+    fixed checker for independent totals and diffs.
+  - Extend strict mypy to src and tools/analysis; bind the exact native checker command
+    and preserve all check categories and budgets.
+  - Renew the unchanged frozen specification and independent design review against
+    the new Policy digest through native recovery, without reducing route or verification.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0080
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Meaningful dual-domain and missing-data regressions; complete locked native verification;
+    independent design and implementation reviews; Gate; required CI.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 4e3152820ad25bc1fd6472cd702a69b34de9f8de4c465469f243fd5aeb1b5e47
+goal: Enforce independent coverage and strict typing for analysis tools
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-13T05:26:47Z'
+subject_commit: 32c5bd33a79dc9f52aaedb77284783803b702c1e
+task_id: TASK-0080
+updated_at: '2026-10-13T05:28:25Z'
+worktree_dirty: false
+worktree_dirty_paths: []

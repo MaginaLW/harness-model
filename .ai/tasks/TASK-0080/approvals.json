@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-13T05:28:24Z",
+    "base_commit": "32c5bd33a79dc9f52aaedb77284783803b702c1e",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+    "reason": "Owner explicitly requested all reviewed improvements, including independent quality gates for analysis tools. The frozen design was independently APPROVE with no findings and contract validation passed. The same-spec Policy renewal is explicitly within this authorized scope; code approval and publication still require complete verification and standing authorization.",
+    "schema_version": "1.0",
+    "spec_sha256": "4e3152820ad25bc1fd6472cd702a69b34de9f8de4c465469f243fd5aeb1b5e47",
+    "subject_commit": "32c5bd33a79dc9f52aaedb77284783803b702c1e",
+    "task_id": "TASK-0080"
+  }
+]

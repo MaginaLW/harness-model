@@ -1,0 +1,53 @@
+{
+  "base_commit": "32c5bd33a79dc9f52aaedb77284783803b702c1e",
+  "branch": "codex/analysis-quality-gates",
+  "classification_input_sha256": "6ed0a6cce6b18dbe52a21658fbbc8e07b2ac137c4f132042594916b303afb822",
+  "content": {
+    "allowed_scope": [
+      ".github/workflows/ai-quality-gate.yml",
+      "pyproject.toml",
+      ".ai/policy/verification-levels.yaml",
+      "src/aiflow/verification.py",
+      "tools/ci/check_coverage.py",
+      "tests/unit/test_check_coverage.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/unit/test_policy.py",
+      "tests/integration/test_templates_and_policy.py",
+      "tests/integration/test_github_workflow.py",
+      "tests/integration/test_coverage_gates.py",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Enforce independent coverage and strict typing for analysis tools",
+        "impact_scope": [
+          ".github/workflows/ai-quality-gate.yml",
+          "pyproject.toml",
+          ".ai/policy/verification-levels.yaml",
+          "src/aiflow/verification.py",
+          "tools/ci/check_coverage.py"
+        ],
+        "planned_actions": [
+          "Use one shared full branch-coverage pytest execution for both domains and one fixed checker for independent totals and diffs.",
+          "Extend strict mypy to src and tools/analysis; bind the exact native checker command and preserve all check categories and budgets.",
+          "Renew the unchanged frozen specification and independent design review against the new Policy digest through native recovery, without reducing route or verification."
+        ]
+      }
+    ],
+    "goal": "Enforce independent coverage and strict typing for analysis tools",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "fbdef7ce6de88dcf671e2171efa2b9042d091d88d00d67f2c4a9b61e5e470727",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "5dd060a85532a77fe64e318647c495056aa602acac27a145a7f50ddfaa26f3d6",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "4e3152820ad25bc1fd6472cd702a69b34de9f8de4c465469f243fd5aeb1b5e47",
+  "task_id": "TASK-0080"
+}
