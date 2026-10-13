@@ -30,6 +30,7 @@
 建议的 `native_status` 提供 `base_commit`、`subject_commit`、`observed_head` 和受限 `missing_conditions`；`advice_basis` 通过 `advice`、`source` 及 `missing_condition` 或 `state` 记录已有建议的具体依据。
 建议固定 `probability_status=unestimated`、`execution_allowed=false`；概率未估计，不给执行权限。
 `SOURCE_READ_ATOMICITY_NOT_ESTABLISHED` 明确多次原生读取尚未证明原子一致性，版本投影不代表固定的原子观察窗口。
+任务建议在原生读取前后比较有限相关输入，变化或检查不可用仅分别追加 `SOURCE_INPUTS_CHANGED_DURING_READ`、`SOURCE_INPUT_CHANGE_CHECK_UNAVAILABLE`；不改变原生 status/Gate、报告形状或退出码，不自动重试。实际覆盖与限制见[只读任务准备建议](review-advisory.md)：前后相同不证明原子快照，ABA 与范围外变化仍可能遗漏，原子性 unknown 始终保留。
 这些能力属于 S0/S1 准备，不证明生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
 数据与方法合同、可靠身份、人时、独立缺陷真值、统一 telemetry、评分/校准、真实 shadow 与宿主接入仍需各自证据和准入。
 
