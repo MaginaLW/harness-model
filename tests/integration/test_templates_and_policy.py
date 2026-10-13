@@ -172,6 +172,15 @@ def policy_bundle_errors(bundle: PolicyBundle) -> list[str]:
     diff_coverage = _check(bundle, "V1", "diff_coverage")
     if diff_coverage.get("threshold") != 90:
         errors.append("verification: diff-cover threshold must be 90")
+    if diff_coverage.get("command") != [
+        "{python}",
+        "tools/ci/check_coverage.py",
+        "--run-dir",
+        "{run_dir}",
+        "--base",
+        "{base_commit}",
+    ]:
+        errors.append("verification: domain coverage must use the fixed checker and run binding")
 
     forbidden = set(bundle["permissions.yaml"].get("forbidden_automatic_actions", []))
     if forbidden != EXPECTED_FORBIDDEN_ACTIONS:
@@ -280,6 +289,23 @@ def test_diff_cover_threshold_is_fixed_at_ninety() -> None:
     _check(bundle, "V1", "diff_coverage")["threshold"] = 89
 
     assert "verification: diff-cover threshold must be 90" in policy_bundle_errors(bundle)
+
+
+def test_domain_coverage_cannot_switch_back_to_a_combined_only_report() -> None:
+    bundle = load_policy_bundle()
+    _check(bundle, "V1", "diff_coverage")["command"] = [
+        "diff-cover",
+        "{run_dir}/coverage.xml",
+        "--compare-branch",
+        "{base_commit}",
+        "--fail-under",
+        "90",
+    ]
+
+    assert (
+        "verification: domain coverage must use the fixed checker and run binding"
+        in policy_bundle_errors(bundle)
+    )
 
 
 def test_v1_cannot_omit_a_v0_check() -> None:
