@@ -16,7 +16,7 @@ allowed_scope:
 base_commit: 32c5bd33a79dc9f52aaedb77284783803b702c1e
 branch: codex/analysis-quality-gates
 created_at: '2026-10-13T05:26:02Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -82,8 +82,8 @@ goal: Enforce independent coverage and strict typing for analysis tools
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-10-13T05:26:47Z'
-subject_commit: 48efbf6f6b8c53268b24ace3955e3c561a23504e
+subject_commit: 39529ed512e4ddcd486f9c1ed0031bdbc185b9fd
 task_id: TASK-0080
-updated_at: '2026-10-13T05:48:29Z'
+updated_at: '2026-10-13T06:09:47Z'
 worktree_dirty: false
 worktree_dirty_paths: []

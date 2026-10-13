@@ -1,0 +1,297 @@
+{
+  "base_commit": "32c5bd33a79dc9f52aaedb77284783803b702c1e",
+  "branch": "codex/analysis-quality-gates",
+  "classification_input_sha256": "9f512423c298548bb3020bb7d1dec8a1c20b91ac53ac6f3e0c73c0b0d3d62b11",
+  "content": {
+    "allowed_scope": [
+      ".github/workflows/ai-quality-gate.yml",
+      "pyproject.toml",
+      ".ai/policy/verification-levels.yaml",
+      "src/aiflow/verification.py",
+      "tools/ci/check_coverage.py",
+      "tests/unit/test_check_coverage.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/unit/test_policy.py",
+      "tests/integration/test_templates_and_policy.py",
+      "tests/integration/test_github_workflow.py",
+      "tests/integration/test_coverage_gates.py",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md",
+      "tests/integration/test_acceptance_traceability.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Enforce independent coverage and strict typing for analysis tools",
+        "impact_scope": [
+          ".github/workflows/ai-quality-gate.yml",
+          "pyproject.toml",
+          ".ai/policy/verification-levels.yaml",
+          "src/aiflow/verification.py",
+          "tools/ci/check_coverage.py"
+        ],
+        "planned_actions": [
+          "Use one shared full branch-coverage pytest execution for both domains and one fixed checker for independent totals and diffs.",
+          "Extend strict mypy to src and tools/analysis; bind the exact native checker command and preserve all check categories and budgets.",
+          "Renew the unchanged frozen specification and independent design review against the new Policy digest through native recovery, without reducing route or verification."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/verification-levels.yaml",
+        ".ai/tasks/TASK-0080/approvals.json",
+        ".ai/tasks/TASK-0080/classification.json",
+        ".ai/tasks/TASK-0080/events.jsonl",
+        ".ai/tasks/TASK-0080/review-contexts/785053d6eef87981a394c730228313d1ed0be4df58ba4c3db8c226747cb39f72.json",
+        ".ai/tasks/TASK-0080/review-contexts/ca4b1adaab1ff81f00c301bc5273f42ea223784bf2e785c819af27a00e9252d9.json",
+        ".ai/tasks/TASK-0080/review-contexts/fbdef7ce6de88dcf671e2171efa2b9042d091d88d00d67f2c4a9b61e5e470727.json",
+        ".ai/tasks/TASK-0080/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0080/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0080/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0080/spec.md",
+        ".ai/tasks/TASK-0080/task.yaml",
+        ".github/workflows/ai-quality-gate.yml",
+        "docs/operations/maintenance-status.md",
+        "docs/operations/quickstart.md",
+        "pyproject.toml",
+        "src/aiflow/verification.py",
+        "tests/integration/test_acceptance_traceability.py",
+        "tests/integration/test_coverage_gates.py",
+        "tests/integration/test_github_workflow.py",
+        "tests/integration/test_templates_and_policy.py",
+        "tests/unit/test_check_coverage.py",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_verification_plan.py",
+        "tools/ci/check_coverage.py"
+      ],
+      "files": [
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 14,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/approvals.json"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/classification.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/events.jsonl"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/review-contexts/785053d6eef87981a394c730228313d1ed0be4df58ba4c3db8c226747cb39f72.json"
+        },
+        {
+          "additions": 269,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/review-contexts/ca4b1adaab1ff81f00c301bc5273f42ea223784bf2e785c819af27a00e9252d9.json"
+        },
+        {
+          "additions": 53,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/review-contexts/fbdef7ce6de88dcf671e2171efa2b9042d091d88d00d67f2c4a9b61e5e470727.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/spec.md"
+        },
+        {
+          "additions": 89,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0080/task.yaml"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": ".github/workflows/ai-quality-gate.yml"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 26,
+          "binary": false,
+          "deletions": 17,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "pyproject.toml"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 22,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/integration/test_acceptance_traceability.py"
+        },
+        {
+          "additions": 307,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_coverage_gates.py"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 5,
+          "path": "tests/integration/test_github_workflow.py"
+        },
+        {
+          "additions": 26,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_templates_and_policy.py"
+        },
+        {
+          "additions": 233,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_check_coverage.py"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 113,
+          "binary": false,
+          "deletions": 6,
+          "path": "tests/unit/test_verification_plan.py"
+        },
+        {
+          "additions": 96,
+          "binary": false,
+          "deletions": 0,
+          "path": "tools/ci/check_coverage.py"
+        }
+      ],
+      "totals": {
+        "additions": 1546,
+        "deletions": 73,
+        "files": 25
+      }
+    },
+    "goal": "Enforce independent coverage and strict typing for analysis tools",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0080",
+        "--actor",
+        "codex-main"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "d5a758a22fe5077be70f842f1405d3fc785c6240dd3a1984ec2ff2fd316a456f",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "446ea1aef3ae7b4095f83d55b5d2c3504ad66ac81d6b3f3d7970580ce6b3f0c0",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "4e3152820ad25bc1fd6472cd702a69b34de9f8de4c465469f243fd5aeb1b5e47",
+  "subject_commit": "39529ed512e4ddcd486f9c1ed0031bdbc185b9fd",
+  "task_id": "TASK-0080"
+}

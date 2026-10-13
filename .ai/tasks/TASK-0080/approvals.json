@@ -24,5 +24,19 @@
     "spec_sha256": "4e3152820ad25bc1fd6472cd702a69b34de9f8de4c465469f243fd5aeb1b5e47",
     "subject_commit": "48efbf6f6b8c53268b24ace3955e3c561a23504e",
     "task_id": "TASK-0080"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-13T06:09:47Z",
+    "base_commit": "32c5bd33a79dc9f52aaedb77284783803b702c1e",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "446ea1aef3ae7b4095f83d55b5d2c3504ad66ac81d6b3f3d7970580ce6b3f0c0",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立 REV-0004 和 REV-0005 均 APPROVE，RF-001 已按追加记录解决，无未关闭 critical/high；冻结候选完整原生验证2887测试及全部10项检查通过。无外部副作用、不触及授权文件；发布仍须 Gate 和 required CI。另行 task-free 测试阶段处理已披露的整批补充覆盖率缺口，最终交付前必须复算通过，不降低阈值。",
+    "schema_version": "1.0",
+    "spec_sha256": "4e3152820ad25bc1fd6472cd702a69b34de9f8de4c465469f243fd5aeb1b5e47",
+    "subject_commit": "39529ed512e4ddcd486f9c1ed0031bdbc185b9fd",
+    "task_id": "TASK-0080"
   }
 ]
