@@ -57,5 +57,37 @@
     "spec_sha256": "b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
     "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
     "task_id": "TASK-0082"
+  },
+  {
+    "action_sha256": "408f2fccc22b87d49ccefb1dc46dd8311bd00cc790f28909e482f291e8396ef2",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-14T15:15:38Z",
+    "base_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-14T19:15:30Z",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立design REV0002及implementation REV0003均APPROVE且无open high/critical，完整unchanged V0与当前code批准、P提交后Gate均PASS。只批准本task publication lineage P=c2aa0ded的最终Q一次正常非强推及唯一PR；Q仅可追加本次5个治理动作/批准/事件文件，PR范围明确包含原有TASK81 close64cd的两文件及TASK82安全账本。subject固定2ac，实际Q写执行receipt且merge须相同Q；不推main/其它ref，不含私有evidence/log，远端CI及单独merge批准仍必需。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
+    "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "task_id": "TASK-0082"
+  },
+  {
+    "action_sha256": "89dafede1dc3cc0e3e9b199b204c7a6e3e6b811266517c2249fdaa74aaf9ce33",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-14T15:15:47Z",
+    "base_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-14T19:15:30Z",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：当前独立design/implementation APPROVE、unchanged V0 PASS、code批准及Gate均有效。只批准此次branch至main唯一PR的一次受保护merge commit；严格绑定与唯一push记录相同的真实Q、P=c2aa0ded治理lineage与实际R，原main64cd须为祖先，PR仅TASK82安全账本加既存TASK81 close两文件；全部原阈值required checks必须对exact Q真实成功并使用match-head-commit expectedhead guard。head/base改变、CI缺失/失败/跳过/陈旧即停止，不squash/rebase/bypass/force或改设置，成功后实际M/祖先/main包含证明才可close。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
+    "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "task_id": "TASK-0082"
   }
 ]
