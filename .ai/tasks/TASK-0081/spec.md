@@ -4,7 +4,7 @@
 
 Preserve the original failed verification evidence and the bytes needed to recover every cleanup target while reclaiming ignored local artifact storage in the owner-approved order.
 
-DRAFT: the exact candidate inventory is now known, but complete recovery archive hashes, usable restore proof and protected inventory checks remain pending. verified_backup remains false. No deletion is permitted by this draft, and no final classification or specification is frozen yet.
+DRAFT: the exact candidate inventory and all three stream-verified archives are now available. The complete recovery rehearsal and delete preflight remain pending. verified_backup remains false. No deletion is permitted by this draft, and no final classification or specification is frozen yet.
 
 ## 范围
 
@@ -55,12 +55,22 @@ Preserve every pre-existing primary-checkout .ai task record and logs directory,
 
 ## 验收条件
 
-- Before cleanup, create and verify a compact package sufficient to inspect the original failed verification and its known failure inputs; do not claim that unknown random fixture state is reproducible.
+- Before cleanup, create and verify a conservative failure-and-provenance package sufficient to inspect the original failed verification and its known failure inputs. minimum-failure.tar.xz retains its preparation filename, includes some provenance-unknown material, and does not claim a minimal reproduction set. Unknown random fixture state is not assumed reproducible.
 - Before deleting any target, complete full-recovery.tar.xz for all 18 full_recovery_roots, including nested checkout .git data and unique files. The sole excluded ruff.exe must match its independently retained .venv/Scripts/ruff.exe source hash immediately before deletion. Verify all archive entry names, types, sizes, file hashes and recorded link targets; rehearse restoration into an empty local directory and compare bytes, directory structure and link descriptions without following links or executing any historical material. Absolute junction targets require the original location for functional reconstruction; ACL equivalence and historical replay remain uncertified.
 - Resolve each source root inside the repository, require the exact reviewed relative-path allowlist, check ignored status, reject reparse roots and any scope drift, and recheck inventory before deletion.
 - Delete only approved redundant fixture/cache/copy roots after independent review and a version-bound delete action approval. Keep the complete recovery archive and minimal failure package locally ignored.
 - Compress old ignored inventory metadata only after a lossless verification; preserve original failure evidence in its original .ai task/log location.
 - Compare protected entries, existing Git refs and tracked non-task files before and after. Preserve unknowns and failures. Run native verification without changing selected checks or thresholds, independent implementation review and gate.
+
+The current preparation evidence is local and ignored under .reasonix/repository-hygiene-20261014:
+
+- archive-receipts.json (SHA-256 60818de8b7cd554272e3d97232dba3e19fc8df6803ca571ab8d3901245472466) binds the archive and final inventory hashes after per-entry stream readback.
+- full-recovery.tar.xz: 84458884 compressed bytes, 914402345 logical file bytes, 174179 files; SHA-256 06ae3bd211fd4dc641e074ae9992003a75db02720f82210ad4dfff50f9ac60e9. Its inventory is full-recovery-inventory.json.gz, SHA-256 6365cd5edff5a0072c1f39a1fb6fdab4d832ae823c225a666d0ccbcda081e0cd.
+- minimum-failure.tar.xz: 10142136 compressed bytes, 5755 files; SHA-256 0c818820ee748ef0adebf767c75200684d10dd46bc281f43ed6810b8e177ad4b. Its inventory is minimum-final-inventory.json.gz, SHA-256 2d79b86663ab1c534dc2f7e51c5dc6b5e1195e7f2ba9fec5e246205b6e5ed48f.
+- old-metadata.tar.gz: 1572698 compressed bytes, 16 files; SHA-256 926d144c96b04c333dfaf8fb595fa01e745163a4a2c0336c55a9f5f028a82f4a. Its inventory is old-metadata-final-inventory.json.gz, SHA-256 fb9e2da318ef03e9d0d075e3f6a3c30c6a800b7235ab3d46ab7fa20991d2373c.
+- restore-receipts.json records completed 6959-entry conservative-package and 17-entry metadata restorations with independent no-follow topology comparisons. Neither certifies ACL, directory-time equivalence or historical replay.
+- original-location-mode-probe.json records a successful four-entry original-location restore when the absolute target was initially absent. The bounded recovery mode rejects existing roots, path escape and reparse ancestors, and restores directories/files before links. Final helper review and the complete recovery rehearsal remain required.
+- archive-preparation-adjustment.json preserves the stopped random-seek archive verification attempt, the stream-order replacement and the fact that original sources were not deleted. It is preparation evidence, not cleanup completion.
 
 ## 非目标
 
@@ -76,4 +86,4 @@ A missing or changed candidate, incomplete archive, hash or restoration mismatch
 
 ## 回滚
 
-Before deletion a verified complete recovery archive must restore every selected entry, including nested Git metadata and unique originals. Restore into an empty local root and verify hashes/topology before replacing a cleaned location. Retain the archive and manifest after cleanup; any ledger correction is appended through native CLI events without rewriting earlier records.
+Before deletion a verified complete recovery archive must restore every selected entry, including nested Git metadata and unique originals. Rehearse into an empty local root and verify hashes/topology. For actual original-location recovery, the bounded original_roots mode accepts only the exact absent roots inside the repository, rejects reparse ancestors or existing roots, restores directories/files before links, and never executes historical code. This preserves absolute junction targets; old ruff is copied back only from its hash-matched retained primary source. Retain the archive and manifest after cleanup; any ledger correction is appended through native CLI events without rewriting earlier records.

@@ -77,14 +77,26 @@ decision_units:
     complete recovery archive covers 18 roots; the remaining ruff.exe has an independently
     preserved primary .venv source with matching SHA-256, which must be rechecked
     before deletion.
-  - The compact failure package retains selected failed fixtures, nested checkout
-    Git metadata and TASK-0069 failed evidence; the separate complete archive retains
-    every original candidate entry. Neither package certifies historical replay or
-    ACL equivalence.
+  - The conservative failure-and-provenance package retains selected failed fixtures,
+    nested checkout Git metadata and TASK-0069 failed evidence; the separate complete
+    archive retains every original candidate entry. Neither package certifies historical
+    replay or ACL equivalence.
+  - 'archive-receipts.json now records three complete, per-entry stream-verified archives:
+    full recovery 84458884 bytes, conservative failure/provenance 10142136 bytes,
+    and old metadata 1572698 bytes. Complete restore and delete preflight are still
+    pending, so verified_backup remains false.'
+  - minimum-failure.tar.xz retains its preparation filename but intentionally contains
+    some provenance-unknown material; the name does not claim a mathematically or
+    behaviorally minimal reproduction set.
+  - archive-preparation-adjustment.json preserves the stopped random-seek verification
+    attempt and its stream-order replacement; original sources were not deleted.
+  - original-location-mode-probe.json records four-entry recovery at absent original
+    targets, including absolute junction reconstruction. This limited probe does not
+    substitute for the pending full recovery rehearsal.
   planned_actions:
-  - Prepare a compact failure-evidence package, a complete recovery archive for the
-    18 listed roots, an exact-source-backed ruff duplicate check, and lossless metadata
-    archive before deleting any candidate.
+  - Prepare a conservative failure-and-provenance package, a complete recovery archive
+    for the 18 listed roots, an exact-source-backed ruff duplicate check, and lossless
+    metadata archive before deleting any candidate.
   - After exact inventory, archive integrity, restore rehearsal, independent review
     and action approval pass, remove only the enumerated ignored redundant local artifacts.
   - After approval, remove only the 16 exact old metadata files after lossless archive
