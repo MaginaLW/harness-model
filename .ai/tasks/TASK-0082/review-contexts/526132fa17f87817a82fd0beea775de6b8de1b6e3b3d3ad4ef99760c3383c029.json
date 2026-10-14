@@ -1,0 +1,93 @@
+{
+  "base_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+  "branch": "codex/reasonix-retirement",
+  "classification_input_sha256": "84cfc73aa54ffbc6a2f88e83a1f9983273d862acf69b6b9ec81c8190758dccdf",
+  "content": {
+    "allowed_scope": [
+      ".reasonix/**",
+      ".pytest_cache/**",
+      ".ruff_cache/**",
+      "src/aiflow/__pycache__/**",
+      ".ai/tasks/TASK-0082/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Retire unused Reasonix local artifacts and exact inventoried caches with compact byte-exact recovery for every original entry",
+        "impact_scope": [
+          ".reasonix/**",
+          ".pytest_cache/**",
+          ".ruff_cache/**",
+          "src/aiflow/__pycache__/**",
+          ".ai/tasks/TASK-0082/**"
+        ],
+        "planned_actions": [
+          "Use the actually verified 124510420-byte outer XZ and pinned recovery recipe/helper to preserve byte-exact recovery for all 2171 original entries, including the physically reconstructed original gzip; keep all required audit/failed evidence and recovery material outside deletion targets.",
+          "Verify the final retention mapping, full archive/member hashes, actual restoration and exact current deletion inventory; obtain independent design review, native spec approval and a finite-lived single-use exact delete action.",
+          "After approval, remove only the four exact ignored roots using the reviewed no-follow non-recursive deletion helper; preserve original primary AI Flow records/logs, owner drafts, private evidence, active virtual environment, refs and archive tags outside those roots.",
+          "Compare protected material and refs before and after, preserve actual execution receipts, run the unchanged Policy-selected native verification, obtain independent implementation review and code approval, and require a passing gate before protected repository publication.",
+          "After complete native verification, inspect only .pytest_cache, .ruff_cache and src/aiflow/__pycache__. If no generated entries exist, record the empty observation and skip. Otherwise independently inventory exact generated-cache entries, prove byte backup and actual restoration, obtain a separate finite-lived single-use native delete action, and perform one generated-cache-only final sweep with protected postflight. Never include .reasonix, source files or a root outside the existing scope; do not rerun cache-producing tools afterward."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [],
+      "files": [],
+      "totals": {
+        "additions": 0,
+        "deletions": 0,
+        "files": 0
+      }
+    },
+    "goal": "Retire unused Reasonix local artifacts and exact inventoried caches with compact byte-exact recovery for every original entry",
+    "route": "REVIEW",
+    "verification_level": "V0",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0082",
+        "--actor",
+        "codex-cleanup-governance"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V0"
+    }
+  },
+  "context_sha256": "526132fa17f87817a82fd0beea775de6b8de1b6e3b3d3ad4ef99760c3383c029",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "19194977bfbdd5f8432f9ad6b8e2a556817af4d0e529eedb34da403aa659dd7e",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
+  "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+  "task_id": "TASK-0082"
+}

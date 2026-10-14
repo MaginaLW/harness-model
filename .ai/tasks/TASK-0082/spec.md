@@ -4,7 +4,7 @@
 
 Retire the unused repository Reasonix working directory and the three inventoried generated caches while retaining byte-recoverability of all 2171 original entries, including all 1939 files, in compact recovery material outside all deletion roots.
 
-DRAFT: exact source inventory and dependency evidence exist, and the all-entry outer-XZ plus exact-gzip-recipe retention strategy is selected. Final retained bundle/helper hashes, complete outer-member/EOF verification, physical full restoration and exact protected execution preflight remain pending. verified_backup=false and dry_run=false reflect this state. Preparation-only ledger commits are allowed. Do not classify, freeze, approve, begin or delete until Root provides and admits the real evidence; a preparation commit does not constitute execution admission.
+Complete retained recovery and the exact protected dry preflight have now actually passed. verified_backup=true and dry_run=true reflect the receipts pinned below. The current stage permits classification, freezing and independent design review; no approval, begin or deletion has happened. Keep HEAD 2acfc317d5e4f5daa1d0333748ff9cd726843260 unchanged until the separate approved core execution completes.
 
 ## 范围
 
@@ -15,7 +15,7 @@ Only these four exact original roots and their descendants are cleanup targets:
 - .ruff_cache
 - src/aiflow/__pycache__
 
-The only additional task scope is .ai/tasks/TASK-0082/** for this new ledger and its locally ignored retention/verification logs. This worker edits only task governance files outside logs; Root and the independent workers own the runtime/helper/retention material inside logs. No nonexistent .mypy_cache or broad source, tests or tools cache globs are authorized.
+The only additional task scope is .ai/tasks/TASK-0082/** for this new ledger and its locally ignored retention/verification logs. Core execution also removes only the four derived-only rehearsal targets enumerated by the final plan inside these logs; all retained packages/helpers/receipts are outside every target. This worker edits only task governance files outside logs; Root and the independent workers own the runtime/helper/retention material inside logs. No nonexistent .mypy_cache or broad source, tests or tools cache globs are authorized.
 
 The original material/protection baseline is 64cd6a3252c5d8fa23f92e32dc09e2ae24bc1376. Preparation-only ledger commits preserve this original baseline; the still-NEW classification base/subject will be aligned to the real preparation HEAD before first classification, without rewriting history or claiming later recovery proofs already exist.
 
@@ -42,7 +42,49 @@ The new task does not revise TASK-0081 admission: its primary gzip archive, prio
 - Preserve actual execution-started/completed or failed receipts. Recheck original protected task/log/private material, owner drafts, .venv, original refs and retained package hashes after deletion. Report actual original logical/allocated savings separately from discarded copies created by this task and from retained recovery overhead. Cache absence is a cleanup-time observation; later normal tools may regenerate caches.
 - Run native validation, scope and the complete unchanged Policy-selected verification level. An independent implementation APPROVE with no unresolved critical/high findings precedes code approval and gate. Required CI still runs the full suite, both coverage domains and thresholds, whitespace, Ruff, formatting and strict typing before protected merge-commit publication.
 
-The already completed isolated gzip recipe proof is logs/reasonix-retirement/gzip-reconstruction.json, SHA-256 4bce6b7d7b7b1a1594fc46828dfc642c2afbcfba5aa622be53663a4d370f0614. It streamed 1355581440 tar bytes (SHA-256 4dbbf6167aa57785a206a5a7919977a18fd6b647b0c09df804b372556434d6d4), reconstructed the original 424878535 gzip bytes with the exact expected SHA, and wrote no new large gzip file. This proves the recipe only; outer-bundle creation, complete physical restoration and final execution preflight remain pending.
+The already completed isolated gzip recipe proof is logs/reasonix-retirement/gzip-reconstruction.json, SHA-256 4bce6b7d7b7b1a1594fc46828dfc642c2afbcfba5aa622be53663a4d370f0614. It streamed 1355581440 tar bytes (SHA-256 4dbbf6167aa57785a206a5a7919977a18fd6b647b0c09df804b372556434d6d4), reconstructed the original 424878535 gzip bytes with the exact expected SHA, and wrote no new large gzip file. This isolated probe is now supplemented by the complete physical restoration and exact protected dry preflight pinned below; its hash-only result alone was never used as complete recovery proof.
+
+Conditional final generated-cache-only stage:
+
+- The unchanged native process runner does not forward PYTHONDONTWRITEBYTECODE or RUFF_NO_CACHE. Full native verification may therefore legitimately recreate .pytest_cache, .ruff_cache or src/aiflow/__pycache__; cache absence is not assumed from parent-process environment settings.
+- Only after the complete unchanged native verification passes, inspect these exact three already-scoped roots. If no generated entries exist, preserve the actual empty observation and do not execute a sweep. If entries exist, admit an independent exact inventory of the newly generated cache entries, verify current bytes/kinds/topology and their generated-cache purpose, create a byte-preserving backup outside the roots and actually restore/compare it before any removal.
+- A separate finite-lived single-use native delete action must bind that new exact inventory, backup/restoration proof, reviewed cache-only helper/parameters, current task/spec/Policy/subject and protected conditions. The core four-root action remains one-shot: this is a separate predefined generated-cache stage, not its retry, continuation or broader authorization. Permit at most one such final sweep; an interrupted or failed sweep is not permission to retry.
+- The optional sweep may remove only independently verified generated entries inside .pytest_cache, .ruff_cache and src/aiflow/__pycache__, using no-follow non-recursive bottom-up removal. It must never include .reasonix, tracked/source files, primary environment, evidence, another cache root or anything outside the existing scope. Reject unexpected entries, reparse points, hardlinks, changed hashes or active consumers.
+- Preserve the actual sweep execution or skip receipt and independently verify final absence and protected postflight. Do not run cache-producing verification/lint/test tools again after this final sweep. Independent implementation review, code approval and gate still depend on the already completed unchanged native verification, fresh governed bindings and this actual final postflight; the sweep does not reduce or replace any native check or required remote CI gate.
+
+Admitted complete recovery and refreshed exact core execution facts:
+
+- Current plan: logs/reasonix-retirement/plan.json, SHA-256 9c42897c8928bee7ed0ea26f76307eb05dce4670083ee4ece31cc8a8abfe2e63. It fixes the same four original roots, 2171 original entries/1939 files/630175443 logical bytes, the same four derived-only targets below with 3294 entries, one permitted core execution and 19 retained artifact hashes.
+- Derived-only core targets: logs/reasonix-retirement/backup-v3/restore-check; logs/reasonix-retirement/backup-v3/long-path-probe; logs/reasonix-retirement/backup-v2/restore-check; logs/reasonix-retirement/backup/retained-reasonix.tar.xz. The retained final package is instead backup-v2/retained-reasonix.tar.xz and is never a deletion target.
+- Actual retained package and complete recovery remain unchanged: backup-v2/retained-reasonix.tar.xz, 124510420 bytes, SHA-256 bdef374bb8c63264c9d0fe0daadd704f9b5998d791880c8c77434a0a5e858b49; recovery helper backup-v3/backup.py SHA-256 af6ef6c6c43c0034da90843149121ec8f120c1c0470065f7c4fdfd5612b5f067; complete PASS receipt backup-v3/backup-complete.json SHA-256 fcf2e6830f26b7c1c5c774a7682cf47ab4617ca9272975df5ff272eddd33c408. Complete member/EOF, physical gzip reconstruction, all 2171 original entries/1939 file SHA/mtime_ns, original directories and no-history-execution checks passed. ACLs, creation/access times and alternate streams remain uncertified.
+- Earlier refs-before.json SHA-256 aba9245dca3bb1abf20750e066c50b25faca75bccb325ab9f18ece74dadfb86a and delete-preflight.json SHA-256 033a9302d6a8eaaba949e1c5d50b6a8b654f1bdf165622153923e2419d48b330 remain unchanged. Their earlier actual PASS covered 58 refs; that observation later became stale. Independent reviews/REV-0001-r0001.json records REQUEST_CHANGES with high RF-001 and is never overwritten.
+- The sole missing alias is refs/remotes/origin/codex/local-artifact-cleanup at 44cc29bcb8a9e420d83b91f0f1355df101e18d43. Its object remains readable and is an ancestor of main 64cd6a3252c5d8fa23f92e32dc09e2ae24bc1376. The actor, time and cause of disappearance remain unknown; do not attribute pruning, infer lost objects or recreate a phantom alias. No actual ref is modified by the baseline refresh.
+- Current refs-current.json has 57 entries, SHA-256 eec75aa68c2d11dd0b3ff57ea858fcc026dee75083ec6b9ce37a1aad99ccbbdb. ref-baseline-refresh.json SHA-256 4c407cc6b6e177beb1e4a1ffea6fa6f315b699a98630ba8e56d6beb900b77759 records the exact sole difference, no added/changed refs, ancestry proof and unknown attribution. All other ref protections remain in force.
+- Current full delete-preflight-v2.json SHA-256 badf666b6035de2944f8c16dbd85c5a5af39fd12c1835fb154ced8136b573f62 is actual PASS for 2171 originals, 3294 derived entries, 8988 protected entries and all 57 current refs. Protected inventory SHA-256 bea2c16c77eaa3b9a726452d0221462ed1267016f70ee1b4d3a0499c9f839773 and derived inventory SHA-256 fae066895742b32135cfa983f31de9ba950a7e4cb4a30ef3d846d2586566354f are unchanged.
+- Current core delete helper retire.py SHA-256 3b635a67ff6ffbcad5a1770ac9b52e6ae57db3198b355a8bf08227ffe668b279 only changes the two ref comparisons to the explicit current snapshot. plan-v1.json SHA-256 24e3ef0fbf9db1f2afe15a848b073b9cde58bee5d257d20a6d83f90038e107b9 and retire-v1.py SHA-256 2a0c4c3f3d9e5cc9f76add1b8d43004ed71f5bb933fbb9419b9df2d44d2b1366 preserve the superseded runtime inputs. delete-action-v1.json preserves the first unapproved action; it is not execution permission.
+- The refreshed core action must target exactly plan roots plus derived_roots in plan order and bind this current helper/plan, all 19 artifacts, current v2 preflight, frozen task facts and unchanged subject HEAD. It is single-use and finite-lived. Scope, REVIEW route, V0 fact assessment and every Policy threshold are unchanged; fresh independent design approval and native approvals remain pending. An optional later generated-cache sweep still requires a different action and actual fresh evidence.
+
+Current exact retained artifact pins fixed by plan.json:
+
+- logs/reasonix-retirement/inventory/exact-inventory.json.gz: SHA-256 6e9ac8108407726a46901fd54a6a0ce2ecfd78e714d47c510eb318e503d1defd.
+- logs/reasonix-retirement/inventory/revalidation.json: SHA-256 6b115bdf8ebaad6416112e1f7d4b5fc42012cfc0c909b61f0a46026ccd3d4719.
+- logs/reasonix-retirement/dependencies/dependency-audit.json: SHA-256 261da3b093df7ecea1e24f7750a0ac7e459848c46fec1198199f0a2f3c42ac47.
+- logs/reasonix-retirement/protected.json.gz: SHA-256 bea2c16c77eaa3b9a726452d0221462ed1267016f70ee1b4d3a0499c9f839773.
+- logs/reasonix-retirement/refs-before.json: SHA-256 aba9245dca3bb1abf20750e066c50b25faca75bccb325ab9f18ece74dadfb86a.
+- logs/reasonix-retirement/derived.json.gz: SHA-256 fae066895742b32135cfa983f31de9ba950a7e4cb4a30ef3d846d2586566354f.
+- logs/reasonix-retirement/retire.py: SHA-256 3b635a67ff6ffbcad5a1770ac9b52e6ae57db3198b355a8bf08227ffe668b279.
+- logs/reasonix-retirement/gzip-reconstruction.json: SHA-256 4bce6b7d7b7b1a1594fc46828dfc642c2afbcfba5aa622be53663a4d370f0614.
+- logs/reasonix-retirement/backup-v2/retained-reasonix.tar.xz: SHA-256 bdef374bb8c63264c9d0fe0daadd704f9b5998d791880c8c77434a0a5e858b49.
+- logs/reasonix-retirement/backup-v3/source-inventory.json.gz: SHA-256 6e9ac8108407726a46901fd54a6a0ce2ecfd78e714d47c510eb318e503d1defd.
+- logs/reasonix-retirement/backup-v3/gzip-recipe.json: SHA-256 4bce6b7d7b7b1a1594fc46828dfc642c2afbcfba5aa622be53663a4d370f0614.
+- logs/reasonix-retirement/backup-v3/backup.py: SHA-256 af6ef6c6c43c0034da90843149121ec8f120c1c0470065f7c4fdfd5612b5f067.
+- logs/reasonix-retirement/backup-v3/backup-complete.json: SHA-256 fcf2e6830f26b7c1c5c774a7682cf47ab4617ca9272975df5ff272eddd33c408.
+- logs/reasonix-retirement/backup-v3/archive-readback.json: SHA-256 9287ee0ac6946c083c2536513747ca6b7c83820741cc543d1d4dfb2c31cf13e6.
+- logs/reasonix-retirement/backup-v3/RESTORE.md: SHA-256 f0a17144506fccf04a3ecc5c83903cd39627d4bb5b3d9342fa7e857327165729.
+- logs/reasonix-retirement/backup-v3/long-path-probe.json: SHA-256 2a720ecad57db8519232e2de972e4c90e50b189bcedc32f437c7c03f2d9e1645.
+- logs/reasonix-retirement/backup-v3/derived-inventory.json.gz: SHA-256 bd7b44c42a225b281e28596fdc30c5df1e57ca2a1085ac1be39cc5ed3fd58eb4.
+- logs/reasonix-retirement/refs-current.json: SHA-256 eec75aa68c2d11dd0b3ff57ea858fcc026dee75083ec6b9ce37a1aad99ccbbdb.
+- logs/reasonix-retirement/ref-baseline-refresh.json: SHA-256 4c407cc6b6e177beb1e4a1ffea6fa6f315b699a98630ba8e56d6beb900b77759.
 
 ## 禁止动作
 

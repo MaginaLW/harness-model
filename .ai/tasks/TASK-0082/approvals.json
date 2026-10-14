@@ -1,1 +1,61 @@
-[]
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-14T14:50:05Z",
+    "base_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "本轮所有者明确授权进一步清理并移除未使用的 Reasonix 目录；据此明示授权记录本规格批准，常设授权仅用于机械代理记录而不扩大删除范围。独立原审核者已验证 RF-001 修复并正式 REV-0002 APPROVE/findings 为空，旧 REQUEST_CHANGES 与 resolved revision 保留；完整2171条实体恢复、19项pins和57refs当前全量预检实际PASS，REVIEW/V0与Policy阈值未降低。此批准不替代单次delete action、后续原生verify、独立实现审核或最终Gate。",
+    "schema_version": "1.0",
+    "spec_sha256": "b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
+    "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "task_id": "TASK-0082"
+  },
+  {
+    "action_sha256": "994eccba43b66ea9d3819191a4e50bcc49f089570955835f2296a16552c22e5a",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-14T14:50:14Z",
+    "base_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-14T18:44:50Z",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "本轮所有者明确授权的同一精确 Reasonix 清理：只删除plan所列4个原根与4个独立清单中的派生演练根，全部原2171条可逐字节恢复。独立 REV-0002 APPROVE/findings为空、RF-001已独立确认修复，完整备份/实体恢复/当前57refs与8988protected预检实际PASS。此单次delete action994eccba精确绑定subject2ac、plan9c428、helper3b635和全部19pins，有限期且禁止重试；后续cache sweep、出版、其它文件或refs均不在本action授权内，常设授权不扩大本轮明示范围。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
+    "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "task_id": "TASK-0082"
+  },
+  {
+    "action_sha256": "4d8dc3ed04e7ccc43a4c15bd643d7b2a9b07628ff80cf726fdd46902eeafac0a",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-14T15:00:27Z",
+    "base_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-14T19:00:17Z",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "本轮项目所有者已明确要求删除闲置本地物料，冻结规格已包含完整原生V0后的独立最终生成缓存阶段；按常设授权仅代录机械批准，不扩大删除授权。独立 /root/retirement_retention 已确认 helper、149条源清单、146文件877513B、完整gzip EOF、逐字节实际恢复、152条派生树及4pins全部PASS；当前原生V0五项PASS，准确绑定plan5158d2、helper837cd9、raw evidence34902282、core4f2fcee2、subject2ac。只批准新cache action的一次精确执行，绝不复用core动作，未授权执行/重试/其他路径。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
+    "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "task_id": "TASK-0082"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-14T15:12:30Z",
+    "base_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "19194977bfbdd5f8432f9ad6b8e2a556817af4d0e529eedb34da403aa659dd7e",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立 /root/retirement_retention 正式 implementation REV-0003 APPROVE/findings=[]，绑定当前context526132fa与冻结spec b58631、subject2ac；完整未修改原生V0五检查实际PASS且evidence raw34902282/canonical19194977保持新鲜。所有者本轮明确授权的core一次删除与distinct最终cache一次删除均完成；此前进程拒绝均before-start，unknown与原件保留；独立当前8988protected/57refs、19+4retained pins、完整恢复与全部目标absent核对PASS。这里只代录code批准，保留后续Gate、原阈值required CI及受保护merge-commit出版，不扩大删除/重试/外部动作权限。",
+    "schema_version": "1.0",
+    "spec_sha256": "b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
+    "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+    "task_id": "TASK-0082"
+  }
+]
