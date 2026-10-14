@@ -39,7 +39,7 @@ allowed_scope:
 base_commit: 734cb108f6416a4bce04a4fcee879d586a1f2cbe
 branch: codex/local-artifact-cleanup
 created_at: '2026-10-14T12:16:33Z'
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -235,6 +235,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-14T13:12:38Z'
 subject_commit: 734cb108f6416a4bce04a4fcee879d586a1f2cbe
 task_id: TASK-0081
-updated_at: '2026-10-14T13:16:17Z'
+updated_at: '2026-10-14T13:32:06Z'
 worktree_dirty: false
 worktree_dirty_paths: []

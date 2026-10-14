@@ -27,5 +27,19 @@
     "spec_sha256": "e60c722d4de75c35d670f540709ec4f33cd5e1e4099c52ea4729e4e741e51d41",
     "subject_commit": "734cb108f6416a4bce04a4fcee879d586a1f2cbe",
     "task_id": "TASK-0081"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-14T13:32:06Z",
+    "base_commit": "734cb108f6416a4bce04a4fcee879d586a1f2cbe",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "613aff3410d2d7767e7298402c423dff4cdb2801433083a2302d33fe8d97e9ee",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立设计 REV-0001 与实施 REV-0002 均 APPROVE 且 findings 为空；Policy 客观选择的完整原生 V0 五项 required checks 全通过，实际单次精确清理及 8751 protected/57 refs/1851 preserved 比较通过，未触及授权文件、Policy、CI、程序行为或外部运行副作用。仅批准当前冻结实现；后续出版仍须 native Gate、精确 action 批准及所有原 required CI 门禁通过。",
+    "schema_version": "1.0",
+    "spec_sha256": "e60c722d4de75c35d670f540709ec4f33cd5e1e4099c52ea4729e4e741e51d41",
+    "subject_commit": "734cb108f6416a4bce04a4fcee879d586a1f2cbe",
+    "task_id": "TASK-0081"
   }
 ]

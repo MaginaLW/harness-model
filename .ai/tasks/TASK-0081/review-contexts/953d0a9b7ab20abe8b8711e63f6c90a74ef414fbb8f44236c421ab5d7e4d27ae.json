@@ -1,0 +1,155 @@
+{
+  "base_commit": "734cb108f6416a4bce04a4fcee879d586a1f2cbe",
+  "branch": "codex/local-artifact-cleanup",
+  "classification_input_sha256": "3875105cbba20cfff763ea519e9f091eddaf525ac48881c43e95a70960c228ca",
+  "content": {
+    "allowed_scope": [
+      ".pytest_cache/confidence-contract-checks/**",
+      ".pytest_cache/confidence-contract-r2/**",
+      ".pytest_cache/construction/**",
+      ".pytest_cache/construction-native-tmp/**",
+      ".pytest_cache/ct1/**",
+      ".pytest_cache/feedback-text-coverage/**",
+      ".pytest_cache/task0076-contracts-failed-01/**",
+      ".pytest_cache/task0076-full/**",
+      ".pytest_cache/task0076-os-temp/**",
+      ".pytest_cache/task0076-temp/**",
+      ".pytest_cache/task0076-timeout-diagnose/**",
+      ".pytest_cache/pr-feedback-independent.coverage/**",
+      ".reasonix/execution-20261008/task0070-local-mypy-001/mypy-cache/**",
+      ".reasonix/execution-20261008/task0070-local-mypy-002/mypy-cache/**",
+      ".reasonix/execution-20261008/task0070-local-mypy-003/mypy-cache/**",
+      ".reasonix/execution-20261008/task0070-local-mypy-005/mypy-cache/**",
+      ".reasonix/execution-20261009/task0071-local-qa-001/mypy-cache/**",
+      ".reasonix/execution-20261008/publication-a-status-002/**",
+      ".reasonix/execution-20261008/task69-tools-001/venv/Scripts/ruff.exe",
+      ".reasonix/repository-hygiene-20261013/restore-refs.txt",
+      ".reasonix/repository-hygiene-20261013/refs-cleanup.json",
+      ".reasonix/repository-hygiene-20261013/recycled-ruff.json",
+      ".reasonix/repository-hygiene-20261013/recycled-pytest-verified.json",
+      ".reasonix/repository-hygiene-20261013/recycled-base-verified.json",
+      ".reasonix/repository-hygiene-20261013/recycled-archive-verified.json",
+      ".reasonix/repository-hygiene-20261013/recycle-probe.json",
+      ".reasonix/repository-hygiene-20261013/pytest-cache-execution.jsonl",
+      ".reasonix/repository-hygiene-20261013/completion-check.json",
+      ".reasonix/repository-hygiene-20261013/closeout.json",
+      ".reasonix/repository-hygiene-20261013/cache-targets-pytest.txt",
+      ".reasonix/repository-hygiene-20261013/cache-plan-pytest.json",
+      ".reasonix/repository-hygiene-20261013/cache-plan-base.json",
+      ".reasonix/repository-hygiene-20261013/cache-execution.jsonl",
+      ".reasonix/repository-hygiene-20261013/cache-archive-verified.json",
+      ".reasonix/repository-hygiene-20261013/baseline.json",
+      ".reasonix/repository-hygiene-20261014/**",
+      ".ai/tasks/TASK-0081/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Preserve failure evidence and recoverability while reclaiming ignored local artifacts",
+        "impact_scope": [
+          ".pytest_cache/confidence-contract-checks/**",
+          ".pytest_cache/confidence-contract-r2/**",
+          ".pytest_cache/construction/**",
+          ".pytest_cache/construction-native-tmp/**",
+          ".pytest_cache/ct1/**",
+          ".pytest_cache/feedback-text-coverage/**",
+          ".pytest_cache/task0076-contracts-failed-01/**",
+          ".pytest_cache/task0076-full/**",
+          ".pytest_cache/task0076-os-temp/**",
+          ".pytest_cache/task0076-temp/**",
+          ".pytest_cache/task0076-timeout-diagnose/**",
+          ".pytest_cache/pr-feedback-independent.coverage/**",
+          ".reasonix/execution-20261008/task0070-local-mypy-001/mypy-cache/**",
+          ".reasonix/execution-20261008/task0070-local-mypy-002/mypy-cache/**",
+          ".reasonix/execution-20261008/task0070-local-mypy-003/mypy-cache/**",
+          ".reasonix/execution-20261008/task0070-local-mypy-005/mypy-cache/**",
+          ".reasonix/execution-20261009/task0071-local-qa-001/mypy-cache/**",
+          ".reasonix/execution-20261008/publication-a-status-002/**",
+          ".reasonix/execution-20261008/task69-tools-001/venv/Scripts/ruff.exe",
+          ".reasonix/repository-hygiene-20261013/restore-refs.txt",
+          ".reasonix/repository-hygiene-20261013/refs-cleanup.json",
+          ".reasonix/repository-hygiene-20261013/recycled-ruff.json",
+          ".reasonix/repository-hygiene-20261013/recycled-pytest-verified.json",
+          ".reasonix/repository-hygiene-20261013/recycled-base-verified.json",
+          ".reasonix/repository-hygiene-20261013/recycled-archive-verified.json",
+          ".reasonix/repository-hygiene-20261013/recycle-probe.json",
+          ".reasonix/repository-hygiene-20261013/pytest-cache-execution.jsonl",
+          ".reasonix/repository-hygiene-20261013/completion-check.json",
+          ".reasonix/repository-hygiene-20261013/closeout.json",
+          ".reasonix/repository-hygiene-20261013/cache-targets-pytest.txt",
+          ".reasonix/repository-hygiene-20261013/cache-plan-pytest.json",
+          ".reasonix/repository-hygiene-20261013/cache-plan-base.json",
+          ".reasonix/repository-hygiene-20261013/cache-execution.jsonl",
+          ".reasonix/repository-hygiene-20261013/cache-archive-verified.json",
+          ".reasonix/repository-hygiene-20261013/baseline.json",
+          ".reasonix/repository-hygiene-20261014/**",
+          ".ai/tasks/TASK-0081/**"
+        ],
+        "planned_actions": [
+          "Prepare the conservative failure-and-provenance package, adopt full-recovery-v2.tar.gz only after the complete independent restoration and delete preflight pass, verify the exact-source-backed ruff duplicate, and losslessly archive old metadata before deletion.",
+          "After exact inventory, archive integrity, restore rehearsal, independent review and action approval pass, remove only the enumerated ignored redundant local artifacts.",
+          "After approval, remove only the 16 exact old metadata files after lossless archive and restore verification; preserve the old hygiene directory and all non-enumerated entries; append only this new task ledger."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [],
+      "files": [],
+      "totals": {
+        "additions": 0,
+        "deletions": 0,
+        "files": 0
+      }
+    },
+    "goal": "Preserve failure evidence and recoverability while reclaiming ignored local artifacts",
+    "route": "REVIEW",
+    "verification_level": "V0",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0081",
+        "--actor",
+        "codex-cleanup-governance"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V0"
+    }
+  },
+  "context_sha256": "953d0a9b7ab20abe8b8711e63f6c90a74ef414fbb8f44236c421ab5d7e4d27ae",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "613aff3410d2d7767e7298402c423dff4cdb2801433083a2302d33fe8d97e9ee",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "e60c722d4de75c35d670f540709ec4f33cd5e1e4099c52ea4729e4e741e51d41",
+  "subject_commit": "734cb108f6416a4bce04a4fcee879d586a1f2cbe",
+  "task_id": "TASK-0081"
+}
