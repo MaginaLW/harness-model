@@ -1,0 +1,24 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "3875105cbba20cfff763ea519e9f091eddaf525ac48881c43e95a70960c228ca",
+  "action_type": "merge",
+  "target": "https://github.com/MaginaLW/harness-model single TASK-0081 PR refs/heads/codex/local-artifact-cleanup -> refs/heads/main",
+  "parameter_summary": "One protected merge-commit of the single PR for this exact task branch into main, only for the actual exact tested PR head Q after unchanged required CI succeeds; bind Q with --match-head-commit, with no bypass or history rewrite.",
+  "subject_commit": "734cb108f6416a4bce04a4fcee879d586a1f2cbe",
+  "conditions": [
+    "Standing authorization applies only to this owner-requested TASK-0081 ledger publication after independent design and implementation APPROVE, complete native V0 verification, current code approval and a passing native gate.",
+    "Repository is exactly https://github.com/MaginaLW/harness-model.git; source branch is exactly refs/heads/codex/local-artifact-cleanup and destination of the single task PR is main in the same repository.",
+    "Native task subject remains 734cb108f6416a4bce04a4fcee879d586a1f2cbe, frozen spec remains e60c722d4de75c35d670f540709ec4f33cd5e1e4099c52ea4729e4e741e51d41, and classification input remains 3875105cbba20cfff763ea519e9f091eddaf525ac48881c43e95a70960c228ca.",
+    "Only this task ledger may be published. Exclude local raw evidence.json, logs, backups, work directories, credentials, owner drafts and machine-specific data. All publication attestation commits after 1a1c3b4f2bab7450cdd5a2ff766d261279ccfed9 must change only .ai/tasks/TASK-0081/**.",
+    "Preserve existing refs and archive tags except the normal protected main advancement by this PR merge commit; no force push, published history rewrite, other branch/ref update, branch deletion, deployment, data deletion, credentials export or paid call is authorized by these publication actions.",
+    "This approval is finite-lived and single-use. Record the actual execution head, target and result in the publication receipt. Expiry, changed task/spec/Policy/classification, mismatching target or unexpected diff fails closed; no automatic retry is authorized.",
+    "Before merge, resolve and record the unique actual PR number/URL in MaginaLW/harness-model whose head repository/branch is exactly this repository and codex/local-artifact-cleanup and whose base is main. A different or second PR is not covered.",
+    "Read and record actual PR head Q and current protected main tip R. Q must descend from the approved publication attestation lineage, R must be an ancestor of Q, and the PR diff must contain only this task ledger. No main update outside a normal merge commit is permitted.",
+    "All existing required checks, including the complete test suite, independent total/diff coverage gates, whitespace, Ruff, formatting and strict mypy, must report success for this exact Q. Pending, missing, skipped, stale-head or failed checks do not authorize merge; never weaken thresholds or repository protection.",
+    "Perform only merge-commit publication with the actual exact Q bound using --match-head-commit Q or equivalent API expected-head guard. Do not squash, rebase, use admin bypass, disable checks, force, change repository settings or substitute another head.",
+    "If the PR head or base changes after Q/R and successful checks are recorded, do not merge under the stale snapshot. Re-establish exact current Q/R, ancestry, task-only scope and every unchanged required check before the single approved operation; this does not authorize additional code changes.",
+    "After success, record actual merge commit M and prove the exact tested Q is an ancestor of M and main contains M. Do not close the native task before this real external merge proof exists."
+  ],
+  "expires_at": "2026-10-14T17:36:47Z",
+  "single_use": true
+}

@@ -1,0 +1,21 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "3875105cbba20cfff763ea519e9f091eddaf525ac48881c43e95a70960c228ca",
+  "action_type": "push",
+  "target": "https://github.com/MaginaLW/harness-model.git refs/heads/codex/local-artifact-cleanup",
+  "parameter_summary": "One normal non-force push of this task publication branch, including subsequent task-only governance attestation commits descending from 1a1c3b4f2bab7450cdd5a2ff766d261279ccfed9; no other ref or local private artifact.",
+  "subject_commit": "734cb108f6416a4bce04a4fcee879d586a1f2cbe",
+  "conditions": [
+    "Standing authorization applies only to this owner-requested TASK-0081 ledger publication after independent design and implementation APPROVE, complete native V0 verification, current code approval and a passing native gate.",
+    "Repository is exactly https://github.com/MaginaLW/harness-model.git; source branch is exactly refs/heads/codex/local-artifact-cleanup and destination of the single task PR is main in the same repository.",
+    "Native task subject remains 734cb108f6416a4bce04a4fcee879d586a1f2cbe, frozen spec remains e60c722d4de75c35d670f540709ec4f33cd5e1e4099c52ea4729e4e741e51d41, and classification input remains 3875105cbba20cfff763ea519e9f091eddaf525ac48881c43e95a70960c228ca.",
+    "Only this task ledger may be published. Exclude local raw evidence.json, logs, backups, work directories, credentials, owner drafts and machine-specific data. All publication attestation commits after 1a1c3b4f2bab7450cdd5a2ff766d261279ccfed9 must change only .ai/tasks/TASK-0081/**.",
+    "Preserve existing refs and archive tags except the normal protected main advancement by this PR merge commit; no force push, published history rewrite, other branch/ref update, branch deletion, deployment, data deletion, credentials export or paid call is authorized by these publication actions.",
+    "This approval is finite-lived and single-use. Record the actual execution head, target and result in the publication receipt. Expiry, changed task/spec/Policy/classification, mismatching target or unexpected diff fails closed; no automatic retry is authorized.",
+    "Immediately before push, record exact local publication head Q and confirm its ancestry from 1a1c3b4f2bab7450cdd5a2ff766d261279ccfed9. Every later publication commit is only this task governance attestation; frozen cleanup specification and consumed delete action remain unchanged.",
+    "Push exactly Q to refs/heads/codex/local-artifact-cleanup without force, mirror, all, tags or another refspec. The recorded Q must remain the pushed object; main is not directly pushed.",
+    "Open or reuse only one non-draft task PR from this exact branch to main; the eventual merge requires its separate merge action and every unchanged required check."
+  ],
+  "expires_at": "2026-10-14T17:36:47Z",
+  "single_use": true
+}

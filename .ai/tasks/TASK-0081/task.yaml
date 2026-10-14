@@ -1,0 +1,240 @@
+allowed_scope:
+- .pytest_cache/confidence-contract-checks/**
+- .pytest_cache/confidence-contract-r2/**
+- .pytest_cache/construction/**
+- .pytest_cache/construction-native-tmp/**
+- .pytest_cache/ct1/**
+- .pytest_cache/feedback-text-coverage/**
+- .pytest_cache/task0076-contracts-failed-01/**
+- .pytest_cache/task0076-full/**
+- .pytest_cache/task0076-os-temp/**
+- .pytest_cache/task0076-temp/**
+- .pytest_cache/task0076-timeout-diagnose/**
+- .pytest_cache/pr-feedback-independent.coverage/**
+- .reasonix/execution-20261008/task0070-local-mypy-001/mypy-cache/**
+- .reasonix/execution-20261008/task0070-local-mypy-002/mypy-cache/**
+- .reasonix/execution-20261008/task0070-local-mypy-003/mypy-cache/**
+- .reasonix/execution-20261008/task0070-local-mypy-005/mypy-cache/**
+- .reasonix/execution-20261009/task0071-local-qa-001/mypy-cache/**
+- .reasonix/execution-20261008/publication-a-status-002/**
+- .reasonix/execution-20261008/task69-tools-001/venv/Scripts/ruff.exe
+- .reasonix/repository-hygiene-20261013/restore-refs.txt
+- .reasonix/repository-hygiene-20261013/refs-cleanup.json
+- .reasonix/repository-hygiene-20261013/recycled-ruff.json
+- .reasonix/repository-hygiene-20261013/recycled-pytest-verified.json
+- .reasonix/repository-hygiene-20261013/recycled-base-verified.json
+- .reasonix/repository-hygiene-20261013/recycled-archive-verified.json
+- .reasonix/repository-hygiene-20261013/recycle-probe.json
+- .reasonix/repository-hygiene-20261013/pytest-cache-execution.jsonl
+- .reasonix/repository-hygiene-20261013/completion-check.json
+- .reasonix/repository-hygiene-20261013/closeout.json
+- .reasonix/repository-hygiene-20261013/cache-targets-pytest.txt
+- .reasonix/repository-hygiene-20261013/cache-plan-pytest.json
+- .reasonix/repository-hygiene-20261013/cache-plan-base.json
+- .reasonix/repository-hygiene-20261013/cache-execution.jsonl
+- .reasonix/repository-hygiene-20261013/cache-archive-verified.json
+- .reasonix/repository-hygiene-20261013/baseline.json
+- .reasonix/repository-hygiene-20261014/**
+- .ai/tasks/TASK-0081/**
+base_commit: 734cb108f6416a4bce04a4fcee879d586a1f2cbe
+branch: codex/local-artifact-cleanup
+created_at: '2026-10-14T12:16:33Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: local
+    mechanical: true
+    regression_risk: false
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Preserve failure evidence and recoverability while reclaiming ignored local
+    artifacts
+  impact:
+    level: low
+  impact_categories: []
+  impact_scope:
+  - .pytest_cache/confidence-contract-checks/**
+  - .pytest_cache/confidence-contract-r2/**
+  - .pytest_cache/construction/**
+  - .pytest_cache/construction-native-tmp/**
+  - .pytest_cache/ct1/**
+  - .pytest_cache/feedback-text-coverage/**
+  - .pytest_cache/task0076-contracts-failed-01/**
+  - .pytest_cache/task0076-full/**
+  - .pytest_cache/task0076-os-temp/**
+  - .pytest_cache/task0076-temp/**
+  - .pytest_cache/task0076-timeout-diagnose/**
+  - .pytest_cache/pr-feedback-independent.coverage/**
+  - .reasonix/execution-20261008/task0070-local-mypy-001/mypy-cache/**
+  - .reasonix/execution-20261008/task0070-local-mypy-002/mypy-cache/**
+  - .reasonix/execution-20261008/task0070-local-mypy-003/mypy-cache/**
+  - .reasonix/execution-20261008/task0070-local-mypy-005/mypy-cache/**
+  - .reasonix/execution-20261009/task0071-local-qa-001/mypy-cache/**
+  - .reasonix/execution-20261008/publication-a-status-002/**
+  - .reasonix/execution-20261008/task69-tools-001/venv/Scripts/ruff.exe
+  - .reasonix/repository-hygiene-20261013/restore-refs.txt
+  - .reasonix/repository-hygiene-20261013/refs-cleanup.json
+  - .reasonix/repository-hygiene-20261013/recycled-ruff.json
+  - .reasonix/repository-hygiene-20261013/recycled-pytest-verified.json
+  - .reasonix/repository-hygiene-20261013/recycled-base-verified.json
+  - .reasonix/repository-hygiene-20261013/recycled-archive-verified.json
+  - .reasonix/repository-hygiene-20261013/recycle-probe.json
+  - .reasonix/repository-hygiene-20261013/pytest-cache-execution.jsonl
+  - .reasonix/repository-hygiene-20261013/completion-check.json
+  - .reasonix/repository-hygiene-20261013/closeout.json
+  - .reasonix/repository-hygiene-20261013/cache-targets-pytest.txt
+  - .reasonix/repository-hygiene-20261013/cache-plan-pytest.json
+  - .reasonix/repository-hygiene-20261013/cache-plan-base.json
+  - .reasonix/repository-hygiene-20261013/cache-execution.jsonl
+  - .reasonix/repository-hygiene-20261013/cache-archive-verified.json
+  - .reasonix/repository-hygiene-20261013/baseline.json
+  - .reasonix/repository-hygiene-20261014/**
+  - .ai/tasks/TASK-0081/**
+  inputs:
+  - 'The owner explicitly requested bounded cleanup in this order: minimal failure
+    package, redundant successful fixtures and work copies, then metadata compression.'
+  - Preserve all pre-existing AI Flow task records and logs, private evidence, owner
+    drafts, the active virtual environment, existing Git refs and archives.
+  - The exact 19 candidate roots and 16 metadata files are enumerated by .reasonix/repository-hygiene-20261014/plan.json;
+    random fixture state is not assumed reproducible.
+  - 'Draft only: verified backup and deletion authorization have not yet been materialized
+    in this task.'
+  - The plan inventories 255378 candidate entries and 946719785 logical bytes. The
+    complete recovery archive covers 18 roots; the remaining ruff.exe has an independently
+    preserved primary .venv source with matching SHA-256, which must be rechecked
+    before deletion.
+  - The conservative failure-and-provenance package retains selected failed fixtures,
+    nested checkout Git metadata and TASK-0069 failed evidence; the separate complete
+    archive retains every original candidate entry. Neither package certifies historical
+    replay or ACL equivalence.
+  - 'archive-receipts.json now records three complete, per-entry stream-verified archives:
+    full recovery 84458884 bytes, conservative failure/provenance 10142136 bytes,
+    and old metadata 1572698 bytes. Complete restore and delete preflight are still
+    pending, so verified_backup remains false.'
+  - minimum-failure.tar.xz retains its preparation filename but intentionally contains
+    some provenance-unknown material; the name does not claim a mathematically or
+    behaviorally minimal reproduction set.
+  - archive-preparation-adjustment.json preserves the stopped random-seek verification
+    attempt and its stream-order replacement; original sources were not deleted.
+  - original-location-mode-probe.json records four-entry recovery at absent original
+    targets, including absolute junction reconstruction. This limited probe does not
+    substitute for the pending full recovery rehearsal.
+  - 'Later failure retained: full-recovery.tar.xz restoration stopped after 42917
+    files when one Git pack copy hash differed. The source, archive-stream reread
+    and fresh plain copy match the expected inventory; the failed copy is preserved
+    separately and the cause remains unknown.'
+  - A subsequent full xz readback failed a different Markdown member hash assertion.
+    The original source matches the first manifest; raw console is unavailable and
+    xz-second-read-failure.json is a reconstruction from tool output. No original
+    sources were deleted.
+  - A replacement full-recovery-v2.tar.gz is being prepared from independently computed
+    whole-source hashes, with archive write hashes and a complete sequential archive
+    readback required to match. v2 full restoration and reviewed no-follow comparison
+    remain pending; the original xz artifacts and diagnostics are retained and do
+    not count as a usable verified backup.
+  - The replacement changes backup compression only. Exact scope, complete per-entry
+    content and topology checks, independent review, deletion action approval and
+    protected comparisons remain unchanged. The task is still NEW and no classify,
+    freeze, approve or cleanup is authorized by this draft.
+  - 'v2-backup-receipt.json now records PASS for full-recovery-v2.tar.gz: 424878535
+    compressed bytes, 914402345 logical bytes, 174179 files and 255377 entries across
+    18 roots. Independently computed source hashes match archive writing and complete
+    sequential readback; complete restoration and delete preflight are still pending.'
+  - The stable source-key snapshot and metadata scans before and after hashing match
+    the original deletion baseline. source-v2-v1-comparison.json confirms all 255377
+    v2 source entries equal the first archive-derived inventory; this does not explain
+    the prior runtime mismatches.
+  - The gzip package is the proposed primary full recovery source. The original xz
+    package and all failed-copy/diagnostic artifacts remain historical, unadmitted
+    candidates. Earlier topology and restore/readback anomaly causes remain unknown.
+  - full-restore-v2-receipt.json now verifies all 255377 full-recovery entries by
+    complete bytes, directories and link descriptors, with an independent no-follow
+    whole-tree comparison. It binds the primary gzip archive, independent source inventory,
+    frozen helper, junction script and restore script. Delete preflight is still pending,
+    so verified_backup remains false until that final admissibility check passes.
+  - 'Final admissibility facts supersede the earlier chronological draft snapshots:
+    full v2 restore and exact delete preflight have now passed; verified_backup=true
+    and dry_run=true are supported by their real receipts. No original sources have
+    yet been deleted.'
+  - The original protected/material baseline remains d388288a1248f2641386ec1962fcd3b4dbda4d74
+    in the immutable plan. The final NEW task classification baseline is 734cb108f6416a4bce04a4fcee879d586a1f2cbe,
+    whose intervening commits contain only this task draft; no history is rewritten.
+  - delete-preflight.json verifies 255394 deletion entries and 956575010 logical bytes,
+    the source-backed executable, complete current source hashes and frozen archive/helper
+    bindings; all 8751 protected entries, 57 original refs and 1851 preserved execution
+    entries match. The owner explicitly authorized this bounded local cleanup; deletion
+    still requires a separate version-bound native action approval after independent
+    design review.
+  - The final cleanup helper is SHA-256 b18ca6cc863216cb7351214502b46b045f405b5cc25095819e0abde1ba392317.
+    Execution must remain at the classification subject HEAD through action approval
+    and deletion; committing the new task records is deferred until actual deletion
+    is complete.
+  - The first classification attempt rejected the undeclared gate token action with
+    DECISION_UNIT_PERMISSION_UNDECLARED before creating classification evidence. The
+    unchanged native parser recognizes action_approval; that exact gate token is now
+    used. The earlier NEW freeze event remains in the append-only log; this corrected
+    final spec is frozen again before review.
+  - Repository publication after local cleanup is permitted by the existing standing
+    authorization, subject to native code approval, gate, separate push/merge action
+    approvals and every unchanged required CI check. This permission does not authorize
+    deployment, secrets, paid calls, force push or history rewriting; original main
+    changes only through a protected merge-commit PR.
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Prepare the conservative failure-and-provenance package, adopt full-recovery-v2.tar.gz
+    only after the complete independent restoration and delete preflight pass, verify
+    the exact-source-backed ruff duplicate, and losslessly archive old metadata before
+    deletion.
+  - After exact inventory, archive integrity, restore rehearsal, independent review
+    and action approval pass, remove only the enumerated ignored redundant local artifacts.
+  - After approval, remove only the 16 exact old metadata files after lossless archive
+    and restore verification; preserve the old hygiene directory and all non-enumerated
+    entries; append only this new task ledger.
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: irreversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0081
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Verify complete per-entry archive coverage, file hashes and symlink targets; restore
+    bytes, directories and link descriptions into a new empty local root without following
+    links or executing historical materials; recheck the source-backed executable
+    hash.
+  - Compare protected inventory before and after cleanup; compare all pre-existing
+    Git refs; validate exact candidate allowlist and ignored status.
+  - Run the unmodified AI Flow verification level selected from the explicit facts,
+    scope validation, independent design and implementation reviews, and gate.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- secret_export
+- paid_external_call
+- force_push
+- history_rewrite
+frozen_spec_sha256: e60c722d4de75c35d670f540709ec4f33cd5e1e4099c52ea4729e4e741e51d41
+goal: Preserve failure evidence and recoverability while reclaiming ignored local
+  artifacts
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-14T13:12:38Z'
+subject_commit: 734cb108f6416a4bce04a4fcee879d586a1f2cbe
+task_id: TASK-0081
+updated_at: '2026-10-14T13:37:14Z'
+worktree_dirty: false
+worktree_dirty_paths: []
