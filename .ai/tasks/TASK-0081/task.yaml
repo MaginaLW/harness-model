@@ -9,8 +9,42 @@ subject_commit: d388288a1248f2641386ec1962fcd3b4dbda4d74
 worktree_dirty: false
 worktree_dirty_paths: []
 allowed_scope:
+- .pytest_cache/confidence-contract-checks/**
+- .pytest_cache/confidence-contract-r2/**
+- .pytest_cache/construction/**
+- .pytest_cache/construction-native-tmp/**
+- .pytest_cache/ct1/**
+- .pytest_cache/feedback-text-coverage/**
+- .pytest_cache/task0076-contracts-failed-01/**
+- .pytest_cache/task0076-full/**
+- .pytest_cache/task0076-os-temp/**
+- .pytest_cache/task0076-temp/**
+- .pytest_cache/task0076-timeout-diagnose/**
+- .pytest_cache/pr-feedback-independent.coverage/**
+- .reasonix/execution-20261008/task0070-local-mypy-001/mypy-cache/**
+- .reasonix/execution-20261008/task0070-local-mypy-002/mypy-cache/**
+- .reasonix/execution-20261008/task0070-local-mypy-003/mypy-cache/**
+- .reasonix/execution-20261008/task0070-local-mypy-005/mypy-cache/**
+- .reasonix/execution-20261009/task0071-local-qa-001/mypy-cache/**
+- .reasonix/execution-20261008/publication-a-status-002/**
+- .reasonix/execution-20261008/task69-tools-001/venv/Scripts/ruff.exe
+- .reasonix/repository-hygiene-20261013/restore-refs.txt
+- .reasonix/repository-hygiene-20261013/refs-cleanup.json
+- .reasonix/repository-hygiene-20261013/recycled-ruff.json
+- .reasonix/repository-hygiene-20261013/recycled-pytest-verified.json
+- .reasonix/repository-hygiene-20261013/recycled-base-verified.json
+- .reasonix/repository-hygiene-20261013/recycled-archive-verified.json
+- .reasonix/repository-hygiene-20261013/recycle-probe.json
+- .reasonix/repository-hygiene-20261013/pytest-cache-execution.jsonl
+- .reasonix/repository-hygiene-20261013/completion-check.json
+- .reasonix/repository-hygiene-20261013/closeout.json
+- .reasonix/repository-hygiene-20261013/cache-targets-pytest.txt
+- .reasonix/repository-hygiene-20261013/cache-plan-pytest.json
+- .reasonix/repository-hygiene-20261013/cache-plan-base.json
+- .reasonix/repository-hygiene-20261013/cache-execution.jsonl
+- .reasonix/repository-hygiene-20261013/cache-archive-verified.json
+- .reasonix/repository-hygiene-20261013/baseline.json
 - .reasonix/repository-hygiene-20261014/**
-- .reasonix/repository-hygiene-20261013/**
 - .ai/tasks/TASK-0081/**
 forbidden_actions:
 - push
@@ -35,25 +69,71 @@ decision_units:
     package, redundant successful fixtures and work copies, then metadata compression.'
   - Preserve all pre-existing AI Flow task records and logs, private evidence, owner
     drafts, the active virtual environment, existing Git refs and archives.
-  - The exact candidate inventory and full recovery archive are being prepared under
-    .reasonix/repository-hygiene-20261014; random fixture state is not assumed reproducible.
+  - The exact 19 candidate roots and 16 metadata files are enumerated by .reasonix/repository-hygiene-20261014/plan.json;
+    random fixture state is not assumed reproducible.
   - 'Draft only: verified backup and deletion authorization have not yet been materialized
     in this task.'
+  - The plan inventories 255378 candidate entries and 946719785 logical bytes. The
+    complete recovery archive covers 18 roots; the remaining ruff.exe has an independently
+    preserved primary .venv source with matching SHA-256, which must be rechecked
+    before deletion.
+  - The compact failure package retains selected failed fixtures, nested checkout
+    Git metadata and TASK-0069 failed evidence; the separate complete archive retains
+    every original candidate entry. Neither package certifies historical replay or
+    ACL equivalence.
   planned_actions:
-  - Prepare a minimal failure reproduction package and an independent complete recovery
+  - Prepare a compact failure-evidence package, a complete recovery archive for the
+    18 listed roots, an exact-source-backed ruff duplicate check, and lossless metadata
     archive before deleting any candidate.
   - After exact inventory, archive integrity, restore rehearsal, independent review
     and action approval pass, remove only the enumerated ignored redundant local artifacts.
-  - Compress historical ignored hygiene metadata only after verifying lossless round-trip
-    recovery; append this task ledger without rewriting earlier tasks.
+  - After approval, remove only the 16 exact old metadata files after lossless archive
+    and restore verification; preserve the old hygiene directory and all non-enumerated
+    entries; append only this new task ledger.
   impact_scope:
+  - .pytest_cache/confidence-contract-checks/**
+  - .pytest_cache/confidence-contract-r2/**
+  - .pytest_cache/construction/**
+  - .pytest_cache/construction-native-tmp/**
+  - .pytest_cache/ct1/**
+  - .pytest_cache/feedback-text-coverage/**
+  - .pytest_cache/task0076-contracts-failed-01/**
+  - .pytest_cache/task0076-full/**
+  - .pytest_cache/task0076-os-temp/**
+  - .pytest_cache/task0076-temp/**
+  - .pytest_cache/task0076-timeout-diagnose/**
+  - .pytest_cache/pr-feedback-independent.coverage/**
+  - .reasonix/execution-20261008/task0070-local-mypy-001/mypy-cache/**
+  - .reasonix/execution-20261008/task0070-local-mypy-002/mypy-cache/**
+  - .reasonix/execution-20261008/task0070-local-mypy-003/mypy-cache/**
+  - .reasonix/execution-20261008/task0070-local-mypy-005/mypy-cache/**
+  - .reasonix/execution-20261009/task0071-local-qa-001/mypy-cache/**
+  - .reasonix/execution-20261008/publication-a-status-002/**
+  - .reasonix/execution-20261008/task69-tools-001/venv/Scripts/ruff.exe
+  - .reasonix/repository-hygiene-20261013/restore-refs.txt
+  - .reasonix/repository-hygiene-20261013/refs-cleanup.json
+  - .reasonix/repository-hygiene-20261013/recycled-ruff.json
+  - .reasonix/repository-hygiene-20261013/recycled-pytest-verified.json
+  - .reasonix/repository-hygiene-20261013/recycled-base-verified.json
+  - .reasonix/repository-hygiene-20261013/recycled-archive-verified.json
+  - .reasonix/repository-hygiene-20261013/recycle-probe.json
+  - .reasonix/repository-hygiene-20261013/pytest-cache-execution.jsonl
+  - .reasonix/repository-hygiene-20261013/completion-check.json
+  - .reasonix/repository-hygiene-20261013/closeout.json
+  - .reasonix/repository-hygiene-20261013/cache-targets-pytest.txt
+  - .reasonix/repository-hygiene-20261013/cache-plan-pytest.json
+  - .reasonix/repository-hygiene-20261013/cache-plan-base.json
+  - .reasonix/repository-hygiene-20261013/cache-execution.jsonl
+  - .reasonix/repository-hygiene-20261013/cache-archive-verified.json
+  - .reasonix/repository-hygiene-20261013/baseline.json
   - .reasonix/repository-hygiene-20261014/**
-  - .reasonix/repository-hygiene-20261013/**
   - .ai/tasks/TASK-0081/**
   reversibility: irreversible
   verification_methods:
-  - Verify complete per-entry archive coverage and file hashes; restore the archive
-    into a new empty local root and compare original contents and topology.
+  - Verify complete per-entry archive coverage, file hashes and symlink targets; restore
+    bytes, directories and link descriptions into a new empty local root without following
+    links or executing historical materials; recheck the source-backed executable
+    hash.
   - Compare protected inventory before and after cleanup; compare all pre-existing
     Git refs; validate exact candidate allowlist and ignored status.
   - Run the unmodified AI Flow verification level selected from the explicit facts,
@@ -62,7 +142,7 @@ decision_units:
   permission_requirements:
   - action
   scope:
-    clear: false
+    clear: true
   impact:
     level: low
   protections:
