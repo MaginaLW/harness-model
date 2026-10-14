@@ -1,0 +1,1 @@
+{"actor": "aiflow", "event_type": "task_created", "from_state": "NEW", "occurred_at": "2026-10-14T14:05:51Z", "payload": {"objective": "Retire unused Reasonix local artifacts, preserve the minimal unique audit material, and remove verified disposable repository caches"}, "schema_version": "1.0", "sequence": 1, "task_id": "TASK-0082", "to_state": "NEW"}

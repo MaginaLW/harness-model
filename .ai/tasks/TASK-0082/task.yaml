@@ -1,0 +1,146 @@
+schema_version: '1.0'
+task_id: TASK-0082
+goal: Retire unused Reasonix local artifacts and exact inventoried caches with compact
+  byte-exact recovery for every original entry
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+branch: codex/reasonix-retirement
+base_commit: 64cd6a3252c5d8fa23f92e32dc09e2ae24bc1376
+subject_commit: 64cd6a3252c5d8fa23f92e32dc09e2ae24bc1376
+worktree_dirty: false
+worktree_dirty_paths: []
+allowed_scope:
+- .reasonix/**
+- .pytest_cache/**
+- .ruff_cache/**
+- src/aiflow/__pycache__/**
+- .ai/tasks/TASK-0082/**
+forbidden_actions:
+- deploy
+- secret_export
+- paid_external_call
+- force_push
+- history_rewrite
+current_state: NEW
+created_at: '2026-10-14T14:05:51Z'
+updated_at: '2026-10-14T14:05:51Z'
+decision_units:
+- schema_version: '1.0'
+  task_id: TASK-0082
+  decision_unit_id: DU-001
+  goal: Retire unused Reasonix local artifacts and exact inventoried caches with compact
+    byte-exact recovery for every original entry
+  inputs:
+  - The owner explicitly authorized further cleanup, particularly removing the repository
+    .reasonix directory after uninstalling Reasonix, while retaining the necessary
+    unique evidence and recovery material.
+  - 'The fixed exact inventory is logs/reasonix-retirement/inventory/exact-inventory.json.gz,
+    SHA-256 6e9ac8108407726a46901fd54a6a0ce2ecfd78e714d47c510eb318e503d1defd: four
+    exact roots, 2171 entries, 1939 files and 630175443 logical file bytes. Its independent
+    second full SHA scan passed with no missing, extra or changed entries.'
+  - The exact roots are .reasonix, .pytest_cache, .ruff_cache and src/aiflow/__pycache__.
+    No candidate is tracked or unignored, and no reparse point or hardlink group was
+    observed. No absent cache directory or broad source/test/tool cache glob is included.
+  - The current dependency audit found no live tracked code, CI, local agent configuration
+    or Git worktree/alternates dependency on .reasonix. Historical source/evidence
+    references are preserved. Zero matching processes is only a point-in-time observation
+    and is not proof of uninstall completeness or absence of every open handle or
+    future activity.
+  - Reasonix execution trees contain unique historical source and evidence. Deletion
+    requires a separately retained compact complete recovery-equivalent payload and
+    every necessary unique original outside all four deletion roots, with explicit
+    per-entry coverage and actual restoration proof.
+  - The prior TASK-0081 gzip admission and all recorded failures remain historical
+    facts. A successor compact representation may be admitted only by new independent
+    payload equivalence, inventory and recovery proofs; it does not rewrite the old
+    task or claim that unknown anomaly causes were fixed.
+  - 'Draft only: the final retention selection, retained package/helper hashes, complete
+    recovery/equivalence proofs, protected baseline and exact execution preflight
+    are pending. verified_backup and dry_run remain false. No native classification,
+    freeze, approval, implementation or deletion is authorized by this draft.'
+  - 'The selected retention strategy now preserves byte-recoverability of every one
+    of the 2171 original entries, including all 1939 files, in one outer XZ bundle:
+    store all 1938 other original files and all directories, omit only the redundant
+    large gzip, and restore that gzip through an exact reconstruction recipe. The
+    earlier 41-file minimal-retention analysis is not selected.'
+  - 'gzip-reconstruction.json records an actual PASS without writing a new large gzip:
+    the retained compact XZ payload reconstructs 424878535 original gzip bytes with
+    SHA-256 a7c81e516aa2dbc89186722ec421b7a37a4a9aa670d6119c3f1cb4ba2b089658. The
+    exact recipe uses Python 3.11.9, zlib compile/runtime 1.3.1, original gzip header
+    filename and mtime, compresslevel 6 and 1048576-byte chunks. This task changes
+    neither environment nor Policy.'
+  - The complete outer-bundle archive/member/EOF proof, actual restoration including
+    a real regenerated gzip file, closed-file SHA readback and independent no-follow
+    full 2171-entry comparison remain pending. The successful hash-only gzip probe
+    is not the final full recovery proof; verified_backup and dry_run remain false.
+  - The original material/protection baseline is 64cd6a3252c5d8fa23f92e32dc09e2ae24bc1376.
+    Preparation-only commits of this task ledger are permitted; before first classification,
+    the still-NEW task base/subject will be aligned to the actual preparation HEAD
+    without changing original inventory/protection facts or rewriting history. No
+    execution admission follows from a preparation commit.
+  planned_actions:
+  - 'Prepare one compact outer XZ recovery bundle outside all four roots covering
+    all 2171 original entries: include every original file except the single byte-reconstructible
+    large gzip, preserve its exact recipe and all directories, original failures,
+    manifests and unknowns. Do not use the discarded 41-file minimal-retention option.'
+  - Verify the final retention mapping, full archive/member hashes, actual restoration
+    and exact current deletion inventory; obtain independent design review, native
+    spec approval and a finite-lived single-use exact delete action.
+  - After approval, remove only the four exact ignored roots using the reviewed no-follow
+    non-recursive deletion helper; preserve original primary AI Flow records/logs,
+    owner drafts, private evidence, active virtual environment, refs and archive tags
+    outside those roots.
+  - Compare protected material and refs before and after, preserve actual execution
+    receipts, run the unchanged Policy-selected native verification, obtain independent
+    implementation review and code approval, and require a passing gate before protected
+    repository publication.
+  impact_scope:
+  - .reasonix/**
+  - .pytest_cache/**
+  - .ruff_cache/**
+  - src/aiflow/__pycache__/**
+  - .ai/tasks/TASK-0082/**
+  reversibility: irreversible
+  verification_methods:
+  - Validate the frozen exact inventory and independently reread every current source
+    SHA, kind, topology, ignored/tracked status, reparse point and hardlink fact before
+    deletion.
+  - Verify outer-archive members and complete EOF, restore all original directories
+    and 1938 stored files, physically reconstruct the omitted gzip under the pinned
+    Python/zlib recipe, close and independently hash that file, and independently
+    compare file SHA/kind/path topology for all 2171 original entries without following
+    links. Preserve historical failures and uncertified scenarios.
+  - Bind final helper, inventory, retained payload, restoration receipts and protected
+    baseline hashes in a single-use exact action; compare protected original task/log/private
+    material, owner drafts, active environment and original refs after execution.
+  - Run native validation and the complete unmodified Policy-selected verification
+    level, independent design and implementation reviews, code approval and gate.
+    Keep every required CI test, coverage threshold, whitespace, lint, format and
+    type check for publication.
+  external_side_effects: []
+  permission_requirements:
+  - action_approval
+  scope:
+    clear: true
+  impact:
+    level: low
+  protections:
+    verified_backup: false
+    dry_run: false
+  verification:
+    automatic: true
+    tools_missing: false
+  impact_categories: []
+  controlled_actions: []
+  business_direction_count: 1
+  change_characteristics:
+    mechanical: true
+    behavior_changed: false
+    code_modified: false
+    interaction_scope: local
+    regression_risk: false
+    error_detectability: high
+  verification_requirements:
+    acceptance_required: false
+    integration_required: false
+    targeted_mutation_required: false
+    independent_verifier_required: false
