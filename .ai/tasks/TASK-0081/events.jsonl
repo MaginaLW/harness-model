@@ -1,0 +1,1 @@
+{"actor": "aiflow", "event_type": "task_created", "from_state": "NEW", "occurred_at": "2026-10-14T12:16:33Z", "payload": {"objective": "Preserve failure evidence and recoverability while reclaiming ignored local artifacts"}, "schema_version": "1.0", "sequence": 1, "task_id": "TASK-0081", "to_state": "NEW"}
