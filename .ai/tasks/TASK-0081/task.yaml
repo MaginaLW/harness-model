@@ -110,10 +110,22 @@ decision_units:
     content and topology checks, independent review, deletion action approval and
     protected comparisons remain unchanged. The task is still NEW and no classify,
     freeze, approve or cleanup is authorized by this draft.
+  - 'v2-backup-receipt.json now records PASS for full-recovery-v2.tar.gz: 424878535
+    compressed bytes, 914402345 logical bytes, 174179 files and 255377 entries across
+    18 roots. Independently computed source hashes match archive writing and complete
+    sequential readback; complete restoration and delete preflight are still pending.'
+  - The stable source-key snapshot and metadata scans before and after hashing match
+    the original deletion baseline. source-v2-v1-comparison.json confirms all 255377
+    v2 source entries equal the first archive-derived inventory; this does not explain
+    the prior runtime mismatches.
+  - The gzip package is the proposed primary full recovery source. The original xz
+    package and all failed-copy/diagnostic artifacts remain historical, unadmitted
+    candidates. Earlier topology and restore/readback anomaly causes remain unknown.
   planned_actions:
-  - Prepare a conservative failure-and-provenance package, a complete recovery archive
-    for the 18 listed roots, an exact-source-backed ruff duplicate check, and lossless
-    metadata archive before deleting any candidate.
+  - Prepare the conservative failure-and-provenance package, adopt full-recovery-v2.tar.gz
+    only after the complete independent restoration and delete preflight pass, verify
+    the exact-source-backed ruff duplicate, and losslessly archive old metadata before
+    deletion.
   - After exact inventory, archive integrity, restore rehearsal, independent review
     and action approval pass, remove only the enumerated ignored redundant local artifacts.
   - After approval, remove only the 16 exact old metadata files after lossless archive

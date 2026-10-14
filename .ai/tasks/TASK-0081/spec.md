@@ -4,7 +4,7 @@
 
 Preserve the original failed verification evidence and the bytes needed to recover every cleanup target while reclaiming ignored local artifact storage in the owner-approved order.
 
-DRAFT: the exact candidate inventory and all three stream-verified archives are now available. The complete recovery rehearsal and delete preflight remain pending. verified_backup remains false. No deletion is permitted by this draft, and no final classification or specification is frozen yet.
+DRAFT: the exact candidate inventory is fixed. The proposed primary full backup is full-recovery-v2.tar.gz, whose independent source hashing, archive writing and complete sequential readback passed. The complete recovery rehearsal and delete preflight remain pending. verified_backup remains false. No deletion is permitted by this draft, and no final classification or specification is frozen yet.
 
 ## 范围
 
@@ -56,13 +56,13 @@ Preserve every pre-existing primary-checkout .ai task record and logs directory,
 ## 验收条件
 
 - Before cleanup, create and verify a conservative failure-and-provenance package sufficient to inspect the original failed verification and its known failure inputs. minimum-failure.tar.xz retains its preparation filename, includes some provenance-unknown material, and does not claim a minimal reproduction set. Unknown random fixture state is not assumed reproducible.
-- Before deleting any target, complete full-recovery.tar.xz for all 18 full_recovery_roots, including nested checkout .git data and unique files. The sole excluded ruff.exe must match its independently retained .venv/Scripts/ruff.exe source hash immediately before deletion. Verify all archive entry names, types, sizes, file hashes and recorded link targets; rehearse restoration into an empty local directory and compare bytes, directory structure and link descriptions without following links or executing any historical material. Absolute junction targets require the original location for functional reconstruction; ACL equivalence and historical replay remain uncertified.
+- Before deleting any target, admit full-recovery-v2.tar.gz and full-source-v2-inventory.json.gz for all 18 full_recovery_roots only after the full recovery rehearsal and delete preflight pass, including nested checkout .git data and unique files. full-recovery.tar.xz remains an unadmitted historical candidate after the preserved failures. The sole excluded ruff.exe must match its independently retained .venv/Scripts/ruff.exe source hash immediately before deletion. Verify all archive entry names, types, sizes, file hashes and recorded link targets; rehearse restoration into an empty local directory and compare bytes, directory structure and link descriptions without following links or executing any historical material. Absolute junction targets require the original location for functional reconstruction; ACL equivalence and historical replay remain uncertified.
 - Resolve each source root inside the repository, require the exact reviewed relative-path allowlist, check ignored status, reject reparse roots and any scope drift, and recheck inventory before deletion.
-- Delete only approved redundant fixture/cache/copy roots after independent review and a version-bound delete action approval. Keep the complete recovery archive and minimal failure package locally ignored.
+- Delete only approved redundant fixture/cache/copy roots after independent review and a version-bound delete action approval. Keep the primary complete recovery archive, conservative failure-and-provenance package, metadata archive, original failed candidate and diagnostic bytes locally ignored.
 - Compress old ignored inventory metadata only after a lossless verification; preserve original failure evidence in its original .ai task/log location.
 - Compare protected entries, existing Git refs and tracked non-task files before and after. Preserve unknowns and failures. Run native verification without changing selected checks or thresholds, independent implementation review and gate.
 
-The current preparation evidence is local and ignored under .reasonix/repository-hygiene-20261014:
+Earlier candidate archive evidence (historical preparation snapshot; later failures below prevent admission of its xz full-recovery candidate) remains local and ignored under .reasonix/repository-hygiene-20261014:
 
 - archive-receipts.json (SHA-256 60818de8b7cd554272e3d97232dba3e19fc8df6803ca571ab8d3901245472466) binds the archive and final inventory hashes after per-entry stream readback.
 - full-recovery.tar.xz: 84458884 compressed bytes, 914402345 logical file bytes, 174179 files; SHA-256 06ae3bd211fd4dc641e074ae9992003a75db02720f82210ad4dfff50f9ac60e9. Its inventory is full-recovery-inventory.json.gz, SHA-256 6365cd5edff5a0072c1f39a1fb6fdab4d832ae823c225a666d0ccbcda081e0cd.
@@ -86,6 +86,14 @@ The diagnostic receipt hashes are:
 - restore-failure-preserved.json: SHA-256 df8badaaf6c63b9d193387b16ed32b7c31e77ce978d2139bff11bfaf98d5ae90.
 - pack-readback-diagnostic.json: SHA-256 618f39017812465de7beb704d7fa5b556805f9c79c188a64e35015ab012a1282.
 - xz-second-read-failure.json: SHA-256 4522db4f218b7069c716a55c8845354ca9db5eb5eab53bdc52a591df98525873.
+
+Proposed primary gzip backup (latest draft evidence):
+
+- v2-backup-receipt.json (SHA-256 fde7cc5968828a8079e0dd6ef6facb6f9aa2b34f3c6cc63a90d36c442157837c) records PASS for full-recovery-v2.tar.gz: SHA-256 a7c81e516aa2dbc89186722ec421b7a37a4a9aa670d6119c3f1cb4ba2b089658, 424878535 compressed bytes, 914402345 logical file bytes, 174179 files and 255377 entries over all 18 full-recovery roots.
+- Its independently source-hashed inventory is full-source-v2-inventory.json.gz, SHA-256 2b72e1492c8483233e4ce28763c55b4ac71af3450342d48462ffaaeaed3d2085. Source keys were fixed before hashing; before/after metadata checks match the deletion baseline. Source-reader hashes during archive writing and a complete sequential archive readback all match that independent inventory.
+- source-v2-v1-comparison.json confirms identical keys and entries between the independent v2 source inventory and the first archive-derived inventory: 255377 entries, zero differences. All earlier topology, restore-copy and archive-readback anomaly causes remain unknown. Passing this independent chain does not claim that those causes were fixed.
+- The immutable plan remains SHA-256 309123482f0c06dcd7f8d6fa94af16a0c85c15ad7d357e4312bc8971271b9eae; deletion inventory remains SHA-256 814258e102ebc26a6ddcc6de25a9193588bbbcb83ec25e60c0e98728d4bbe1ea. The backup binds helper SHA-256 f4fb391d91a9ab3da2235db047933320e3f95a2ac575c24d8806c4bd2007f9be.
+- Full restoration, independent no-follow content/topology comparison, and exact delete preflight are still pending. verified_backup remains false, no final spec is frozen and no deletion is authorized by this draft.
 
 ## 非目标
 
