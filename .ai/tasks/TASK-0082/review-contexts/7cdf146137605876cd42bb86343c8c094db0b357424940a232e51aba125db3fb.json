@@ -1,0 +1,47 @@
+{
+  "base_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+  "branch": "codex/reasonix-retirement",
+  "classification_input_sha256": "bea0ca4ba4890d7d3840a41b521e5b229588832f24b5699686811c5ebd0e0353",
+  "content": {
+    "allowed_scope": [
+      ".reasonix/**",
+      ".pytest_cache/**",
+      ".ruff_cache/**",
+      "src/aiflow/__pycache__/**",
+      ".ai/tasks/TASK-0082/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Retire unused Reasonix local artifacts and exact inventoried caches with compact byte-exact recovery for every original entry",
+        "impact_scope": [
+          ".reasonix/**",
+          ".pytest_cache/**",
+          ".ruff_cache/**",
+          "src/aiflow/__pycache__/**",
+          ".ai/tasks/TASK-0082/**"
+        ],
+        "planned_actions": [
+          "Use the actually verified 124510420-byte outer XZ and pinned recovery recipe/helper to preserve byte-exact recovery for all 2171 original entries, including the physically reconstructed original gzip; keep all required audit/failed evidence and recovery material outside deletion targets.",
+          "Verify the final retention mapping, full archive/member hashes, actual restoration and exact current deletion inventory; obtain independent design review, native spec approval and a finite-lived single-use exact delete action.",
+          "After approval, remove only the four exact ignored roots using the reviewed no-follow non-recursive deletion helper; preserve original primary AI Flow records/logs, owner drafts, private evidence, active virtual environment, refs and archive tags outside those roots.",
+          "Compare protected material and refs before and after, preserve actual execution receipts, run the unchanged Policy-selected native verification, obtain independent implementation review and code approval, and require a passing gate before protected repository publication.",
+          "After complete native verification, inspect only .pytest_cache, .ruff_cache and src/aiflow/__pycache__. If no generated entries exist, record the empty observation and skip. Otherwise independently inventory exact generated-cache entries, prove byte backup and actual restoration, obtain a separate finite-lived single-use native delete action, and perform one generated-cache-only final sweep with protected postflight. Never include .reasonix, source files or a root outside the existing scope; do not rerun cache-producing tools afterward."
+        ]
+      }
+    ],
+    "goal": "Retire unused Reasonix local artifacts and exact inventoried caches with compact byte-exact recovery for every original entry",
+    "route": "REVIEW",
+    "verification_level": "V0"
+  },
+  "context_sha256": "7cdf146137605876cd42bb86343c8c094db0b357424940a232e51aba125db3fb",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "9a3f7d58ec5987f2c0786f7b0da869010f53703c9bb5a1ca008eb12bce8de1eb",
+  "task_id": "TASK-0082"
+}

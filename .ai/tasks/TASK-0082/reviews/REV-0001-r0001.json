@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0001",
+  "revision": 1,
+  "task_id": "TASK-0082",
+  "review_stage": "design",
+  "reviewer": "/root/retirement_dependencies",
+  "recorded_at": "2026-10-14T14:38:22.224103+00:00",
+  "context_sha256": "7cdf146137605876cd42bb86343c8c094db0b357424940a232e51aba125db3fb",
+  "outcome": "REQUEST_CHANGES",
+  "summary": "Independent frozen-design review found one current execution-admission blocker. Native design context is freshly equal to the supplied context, and the frozen specification is 9a3f7d58ec5987f2c0786f7b0da869010f53703c9bb5a1ca008eb12bce8de1eb on subject 2acfc317d5e4f5daa1d0333748ff9cd726843260. A fresh read-only call to the reviewed deletion helper validation stops at the protected-reference comparison: the pinned baseline and earlier PASS preflight specify 58 original refs, while current Git state has 57. The sole missing local remote-tracking ref is refs/remotes/origin/codex/local-artifact-cleanup at 44cc29bcb8a9e420d83b91f0f1355df101e18d43; no other ref is added or changed, and HEAD is unchanged. The commit object remains readable, but the actor, time and cause of the reference removal are unknown. Do not infer pruning or object loss. Correct the frozen protection facts and their plan/preflight/action bindings through the native workflow, retain the superseded observations and this failure, then obtain a fresh current context and a successful complete execution preflight before approval or deletion. Merely changing a receipt count is insufficient. All other independent read-only checks passed: all 17 retained artifact SHA bindings were freshly rehashed; all 2171 original entries, 1939 original files, 3294 derived entries and 8988 protected entries match current byte/metadata inventories; every original file in the physical v3 restored tree matches its original SHA, size and mtime; an independent sequential outer XZ readback verified all 2170 members and complete EOF. The omitted original gzip is physically present in that restored tree with the bound 424878535-byte size and original SHA. Core action canonical hash 3611a1770fb8791c963a6aac5c48134b0d0221e2b91054a18bf1e80ee5359a3e, exact target order, plan/helper/preflight hashes and all 17 artifact conditions match. No execution markers exist. The earlier six helper findings are repaired; no other high finding was identified. Four original and four derived targets are bounded and disjoint from retained/protected material; current native approvals and state, expiry, single-use marker, no-follow nonrecursive deletion and retained postflight hashes are required. The optional final generated-cache sweep remains a separate bounded stage requiring fresh inventory, byte backup, actual restoration, another exact finite-lived single-use action and protected postflight; this core action does not authorize it. Historical failures and unknowns remain preserved, and no historical code or actions were executed. This review does not approve core execution, optional sweep or publication.",
+  "findings": [
+    {
+      "finding_id": "RF-001",
+      "severity": "high",
+      "title": "Protected refs are stale: frozen baseline/preflight require 58 refs but current state has 57, missing refs/remotes/origin/codex/local-artifact-cleanup",
+      "location": {
+        "path": ".ai/tasks/TASK-0082/logs/reasonix-retirement/refs-before.json",
+        "line": 1
+      },
+      "evidence_refs": [
+        ".ai/tasks/TASK-0082/logs/reasonix-retirement/refs-before.json",
+        ".ai/tasks/TASK-0082/logs/reasonix-retirement/delete-preflight.json",
+        ".ai/tasks/TASK-0082/logs/reasonix-retirement/retire.py:160",
+        ".ai/tasks/TASK-0082/spec.md",
+        ".ai/tasks/TASK-0082/delete-action.json",
+        "Independent current Git ref observation: expected 58; current 57; sole missing refs/remotes/origin/codex/local-artifact-cleanup at 44cc29bcb8a9e420d83b91f0f1355df101e18d43; no added or changed refs; cause unknown"
+      ],
+      "status": "open"
+    }
+  ]
+}

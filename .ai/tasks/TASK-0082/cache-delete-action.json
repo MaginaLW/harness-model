@@ -1,0 +1,33 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "84cfc73aa54ffbc6a2f88e83a1f9983273d862acf69b6b9ec81c8190758dccdf",
+  "action_type": "delete",
+  "target": ".ruff_cache; src/aiflow/__pycache__; .ai/tasks/TASK-0082/logs/reasonix-retirement/cache-sweep/restore-check",
+  "parameter_summary": "One final generated-cache-only sweep after complete native V0: exactly 149 source entries / 146 files / 877513 bytes in two generated cache roots and 152 task-created restoration rehearsal entries; separate from the already consumed core action.",
+  "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+  "conditions": [
+    "The owner explicitly authorized removal of unused local artifacts. This is only the already frozen conditional final generated-cache stage; independent helper and actual preparation review by /root/retirement_retention passed before this distinct native action approval.",
+    "Task state must remain the actual post-V0 WAITING_FOR_FINAL_REVIEW. All five unchanged native V0 checks must remain actual PASS with current frozen spec, classification, Policy and fixed subject; never regress task state or alter native evidence to satisfy this action.",
+    "Delete exactly plan roots plus derived_roots in plan order: .ruff_cache, src/aiflow/__pycache__ and this stage own restore-check only. No .reasonix, .pytest_cache, original source, other task, retained evidence, backup, environment or ref is covered.",
+    "Keep the 353737-byte small gzip and its exact source/recovery inventories and actual 149-entry/146-file byte SHA/mtime/topology restoration and complete gzip EOF PASS proof outside every deletion target. Preserve the 124510420-byte core recovery archive and all earlier receipts.",
+    "Revalidate all 149 source and 152 derived entries, all four artifact bindings, 8988 protected entries and every one of the 57 protected refs; reject unexpected entries, tracked paths, path escape, reparse points, hardlinks, changed pins or active consumers. The reviewed parent venv-launcher exception is narrow; process snapshots are point-in-time evidence only.",
+    "Permitted execution count is one. Require absent exclusive execution-started marker before any unlink, use no-follow bottom-up non-recursive unlink/rmdir, record final root absence and retained artifact/protected/ref postflight, and never retry an interrupted or failed sweep under this authorization.",
+    "Execution HEAD, native base_commit and subject_commit must remain exactly 2acfc317d5e4f5daa1d0333748ff9cd726843260 through this sweep. The core action is already consumed and cannot be reused; this action grants no further core attempt.",
+    "After the final sweep do not run cache-producing verification, pytest or Ruff again. Independent implementation review, code approval and Gate must use the already completed unchanged native V0 plus actual final postflight; unchanged remote required CI remains necessary before publication.",
+    "No Policy, authorization, shared ignore rules, CI gates or thresholds change; no deployment, paid call, secret export, force push, history rewrite or other ref operation is covered.",
+    "ExactCachePlanSHA256: 5158d2bade81b334ac8842e10c2b13b6adb9422d8e9655fca1c4f478ad183546",
+    "ExactCacheHelperSHA256: 837cd90b976a101596900b06da0502db673161116db06731d79aa41e1aaf8a7a",
+    "ExactCachePreflightSHA256: b978c8c75b442b286aa27ea9b21135ec18da3dbf3968b0eae311be63f22cce89",
+    "FrozenSpecSHA256: b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375",
+    "PolicySHA256: 13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "ClassificationInputSHA256: 84cfc73aa54ffbc6a2f88e83a1f9983273d862acf69b6b9ec81c8190758dccdf",
+    "NativeEvidenceSHA256: 34902282ee76b30d803cba2563d80c01a276bb5cf5eb09222bd8b7c4d0d8287d",
+    "CoreExecutionSHA256: 4f2fcee2c21a32b1e10fafe75eb120f25fa7144a07da5ef98d9927ac627445d1",
+    "ExactArtifactSHA256: .ai/tasks/TASK-0082/logs/reasonix-retirement/cache-sweep/inventory.json.gz 97251b1079a596c459193c45ceb5641117c047b574e33264733d8682903a087d",
+    "ExactArtifactSHA256: .ai/tasks/TASK-0082/logs/reasonix-retirement/cache-sweep/cache-backup.tar.gz fcb23c2596e7f02e89f7f3d2a59218df3d3bad279c30aa44a9f3c4cd6a7dfe24",
+    "ExactArtifactSHA256: .ai/tasks/TASK-0082/logs/reasonix-retirement/cache-sweep/recovery-inventory.json.gz c6f8951ad067b758bb82460c9b429532552f65fe37f61e17628bc7e72a64d516",
+    "ExactArtifactSHA256: .ai/tasks/TASK-0082/logs/reasonix-retirement/cache-sweep/recovery-proof.json 551aa59330d76d2f74b32a8de3b477eef36fdd1289243a205c5acc466b0efe02"
+  ],
+  "expires_at": "2026-10-14T19:00:17Z",
+  "single_use": true
+}

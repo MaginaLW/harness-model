@@ -1,0 +1,24 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "84cfc73aa54ffbc6a2f88e83a1f9983273d862acf69b6b9ec81c8190758dccdf",
+  "action_type": "push",
+  "target": "https://github.com/MaginaLW/harness-model.git refs/heads/codex/reasonix-retirement",
+  "parameter_summary": "One normal non-force push of exact final publication head Q descending from P c2aa0ded748eede404bfa4f93b72dac3dc79e594, carrying existing TASK-0081 close 64cd6a3252c5d8fa23f92e32dc09e2ae24bc1376 plus safe TASK-0082 ledger only, and its unique PR to main.",
+  "subject_commit": "2acfc317d5e4f5daa1d0333748ff9cd726843260",
+  "conditions": [
+    "Standing authorization covers only this owner-requested TASK-0082 safe ledger publication after independent design and implementation APPROVE with no open high/critical findings, complete unchanged native V0 PASS, current code approval and native Gate PASS. It grants no further cleanup or deletion attempt.",
+    "Repository is exactly https://github.com/MaginaLW/harness-model.git; source branch is refs/heads/codex/reasonix-retirement; the unique non-draft task PR targets refs/heads/main in this same repository. No other or second PR is covered.",
+    "Native base_commit and subject_commit remain 2acfc317d5e4f5daa1d0333748ff9cd726843260; frozen spec b58631fd4406b9995963199dadaa7ffd004a7dd630972d7d25739cc9ba7d5375; classification input 84cfc73aa54ffbc6a2f88e83a1f9983273d862acf69b6b9ec81c8190758dccdf; Policy 13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21. Do not edit evidence, synchronize subject to publication HEAD, rerun cache-producing checks or lower freshness.",
+    "PublicationAttestationLineage: c2aa0ded748eede404bfa4f93b72dac3dc79e594",
+    "P is the approved cleanup ledger commit. Define Q once as exact local publication HEAD immediately before the sole push; record Q in the local execution receipt before that push. Q must descend from P and original local main 64cd6a3252c5d8fa23f92e32dc09e2ae24bc1376. All P..Q commits may change only .ai/tasks/TASK-0082/push-action.json, .ai/tasks/TASK-0082/merge-action.json, .ai/tasks/TASK-0082/approvals.json, .ai/tasks/TASK-0082/events.jsonl and .ai/tasks/TASK-0082/task.yaml. The merge must use this same pushed and tested Q.",
+    "The PR diff may contain TASK-0082 safe governance records and the existing TASK-0081 close commit 64cd6a3252c5d8fa23f92e32dc09e2ae24bc1376 only at .ai/tasks/TASK-0081/events.jsonl and .ai/tasks/TASK-0081/task.yaml. Prove both old-task file changes are exactly inherited from that existing commit, with no new edits. No other old task, source, dependency, Policy, authorization, Schema, CI or shared ignore change is covered.",
+    "Exclude raw canonical evidence.json, all logs/backups/workdirs, private evidence, owner drafts, credentials and machine-specific data. The later exact local evidence-ignore append is separate reversible publication hygiene; it is neither a published change nor the earlier unchanged-protection proof.",
+    "Preserve refs and archive tags except this exact normal branch push and protected main advancement by the unique PR merge commit. No direct main push, force, mirror, all/tags refspec, published history rewrite, other ref update/deletion, deployment, data deletion, credential export, paid call, admin bypass or repository setting change is authorized.",
+    "This exact action is finite-lived and single-use. Record canonical action SHA, target, exact Q/PR and result locally. Expiry, changed native bindings, wrong target, unexpected diff or started/uncertain operation fail closed; no automatic retry, substitute head or additional push is covered.",
+    "Immediately before push require native Gate PASS, fresh classification/current approvals/passed evidence, clean worktree, correct branch/repository, final Reasonix/cache absence, P/original-main ancestry and exact safe diff. Record Q once.",
+    "Push exactly recorded Q to refs/heads/codex/reasonix-retirement by one explicit normal non-force refspec; main, tags and all other refs are excluded. Q must remain the actual pushed object.",
+    "Open or reuse only the unique PR from this exact repository/branch to main. PR creation does not authorize merge; require the separate native merge action and unchanged successful required CI for precisely Q."
+  ],
+  "expires_at": "2026-10-14T19:15:30Z",
+  "single_use": true
+}
