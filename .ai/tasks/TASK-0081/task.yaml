@@ -93,6 +93,23 @@ decision_units:
   - original-location-mode-probe.json records four-entry recovery at absent original
     targets, including absolute junction reconstruction. This limited probe does not
     substitute for the pending full recovery rehearsal.
+  - 'Later failure retained: full-recovery.tar.xz restoration stopped after 42917
+    files when one Git pack copy hash differed. The source, archive-stream reread
+    and fresh plain copy match the expected inventory; the failed copy is preserved
+    separately and the cause remains unknown.'
+  - A subsequent full xz readback failed a different Markdown member hash assertion.
+    The original source matches the first manifest; raw console is unavailable and
+    xz-second-read-failure.json is a reconstruction from tool output. No original
+    sources were deleted.
+  - A replacement full-recovery-v2.tar.gz is being prepared from independently computed
+    whole-source hashes, with archive write hashes and a complete sequential archive
+    readback required to match. v2 full restoration and reviewed no-follow comparison
+    remain pending; the original xz artifacts and diagnostics are retained and do
+    not count as a usable verified backup.
+  - The replacement changes backup compression only. Exact scope, complete per-entry
+    content and topology checks, independent review, deletion action approval and
+    protected comparisons remain unchanged. The task is still NEW and no classify,
+    freeze, approve or cleanup is authorized by this draft.
   planned_actions:
   - Prepare a conservative failure-and-provenance package, a complete recovery archive
     for the 18 listed roots, an exact-source-backed ruff duplicate check, and lossless

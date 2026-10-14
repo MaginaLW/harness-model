@@ -72,6 +72,21 @@ The current preparation evidence is local and ignored under .reasonix/repository
 - original-location-mode-probe.json records a successful four-entry original-location restore when the absolute target was initially absent. The bounded recovery mode rejects existing roots, path escape and reparse ancestors, and restores directories/files before links. Final helper review and the complete recovery rehearsal remain required.
 - archive-preparation-adjustment.json preserves the stopped random-seek archive verification attempt, the stream-order replacement and the fact that original sources were not deleted. It is preparation evidence, not cleanup completion.
 
+Later preparation failure and replacement plan (appended after the preceding preparation snapshot):
+
+- The first complete full-recovery.tar.xz restore did not pass. restore-failure-diagnostic.json records 42917 files created, one mismatching Git pack and 131262 files still missing. restore-failure-preserved.json identifies failed-pack-copy.bin and records that the source, archive reread and a fresh copy match the expected hash. The failed restored copy remains preserved; the cause is unknown.
+- pack-readback-diagnostic.json records the matching expected/source/archive-stream/fresh-copy hashes and differing failed-copy hash. This diagnostic does not repair or complete the failed full restoration.
+- A resumed attempt then failed during pure xz archive verification at a different Markdown member. xz-second-read-failure.json records that the original source still matches the expected first-manifest hash, the assertion failed, raw console was not preserved, and the receipt was reconstructed from tool output. The cause remains unknown. No original sources were deleted.
+- The replacement full-recovery-v2.tar.gz is being prepared from a separately computed complete source inventory. The new archive must pass source hash comparison during writing, full sequential archive readback, a complete independent restoration and no-follow content/topology comparison, and delete preflight. The original xz package, failed restore, failed-copy bytes and diagnostic receipts remain preserved. Compression format changes do not relax any check or scope.
+- No usable full-backup conclusion follows from the earlier successful readback receipt. verified_backup remains false, the task remains NEW, and classification, freezing, approvals and deletion remain unperformed. Only a successful, independently reviewed replacement evidence chain may support a final specification.
+
+The diagnostic receipt hashes are:
+
+- restore-failure-diagnostic.json: SHA-256 bbac6fc0bdde68cac0e263e74729574878c7836821052cca5dfcb2faea722c98.
+- restore-failure-preserved.json: SHA-256 df8badaaf6c63b9d193387b16ed32b7c31e77ce978d2139bff11bfaf98d5ae90.
+- pack-readback-diagnostic.json: SHA-256 618f39017812465de7beb704d7fa5b556805f9c79c188a64e35015ab012a1282.
+- xz-second-read-failure.json: SHA-256 4522db4f218b7069c716a55c8845354ca9db5eb5eab53bdc52a591df98525873.
+
 ## 非目标
 
 No application implementation, Policy or authorization revision, public publication of local machine data, provider call, deployment or historical task cleanup. Publication of the new ledger is a separate final phase under the existing standing authorization.
