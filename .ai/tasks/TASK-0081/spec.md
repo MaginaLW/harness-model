@@ -4,7 +4,9 @@
 
 Preserve the original failed verification evidence and the bytes needed to recover every cleanup target while reclaiming ignored local artifact storage in the owner-approved order.
 
-DRAFT: the exact candidate inventory is fixed. The proposed primary full backup is full-recovery-v2.tar.gz, whose independent source hashing, archive writing and complete sequential readback passed. The complete recovery rehearsal and delete preflight remain pending. verified_backup remains false. No deletion is permitted by this draft, and no final classification or specification is frozen yet.
+The primary recovery chain is now admitted: independently source-hashed full-recovery-v2.tar.gz, complete 255377-entry restoration, independent no-follow comparison and the exact delete preflight have passed. verified_backup=true and dry_run=true are supported by actual receipts. No original source has been deleted. Independent design review, a frozen spec, explicit version-bound delete action approval and final verification remain required.
+
+The immutable original protected/material baseline is d388288a1248f2641386ec1962fcd3b4dbda4d74. The final NEW classification governance baseline is 734cb108f6416a4bce04a4fcee879d586a1f2cbe; all intervening commits only contain this new task draft, with no source or Policy change and no history rewrite. Keep this HEAD through deletion so the exact action and execution version remain aligned; commit the completed native stage afterward.
 
 ## 范围
 
@@ -51,7 +53,7 @@ The exact old metadata files are:
 - .reasonix/repository-hygiene-20261013/cache-archive-verified.json
 - .reasonix/repository-hygiene-20261013/baseline.json
 
-Preserve every pre-existing primary-checkout .ai task record and logs directory, private evidence, owner drafts, primary .venv, and pre-existing refs and archive tags. Preserve the nested publication checkout, including its complete .git, unique original files and TASK-0069 logs, in the complete recovery archive before removing its working copy. Creating this task branch and new commits is allowed; original main and all other pre-existing refs remain fixed. No source code, test code, dependency, Policy, authorization, CI, repository settings or runtime behavior change is planned.
+Preserve every pre-existing primary-checkout .ai task record and logs directory, private evidence, owner drafts, primary .venv, and pre-existing refs and archive tags. Preserve the nested publication checkout, including its complete .git, unique original files and TASK-0069 logs, in the complete recovery archive before removing its working copy. Creating this task branch and new commits is allowed. During local cleanup original main and all other pre-existing refs remain fixed. After cleanup, repository publication may advance main only through the normal protected PR merge-commit flow under the existing standing authorization; no force update or history rewrite is permitted. No source code, test code, dependency, Policy, authorization, CI, repository settings or runtime behavior change is planned.
 
 ## 验收条件
 
@@ -77,7 +79,7 @@ Later preparation failure and replacement plan (appended after the preceding pre
 - The first complete full-recovery.tar.xz restore did not pass. restore-failure-diagnostic.json records 42917 files created, one mismatching Git pack and 131262 files still missing. restore-failure-preserved.json identifies failed-pack-copy.bin and records that the source, archive reread and a fresh copy match the expected hash. The failed restored copy remains preserved; the cause is unknown.
 - pack-readback-diagnostic.json records the matching expected/source/archive-stream/fresh-copy hashes and differing failed-copy hash. This diagnostic does not repair or complete the failed full restoration.
 - A resumed attempt then failed during pure xz archive verification at a different Markdown member. xz-second-read-failure.json records that the original source still matches the expected first-manifest hash, the assertion failed, raw console was not preserved, and the receipt was reconstructed from tool output. The cause remains unknown. No original sources were deleted.
-- The replacement full-recovery-v2.tar.gz is being prepared from a separately computed complete source inventory. The new archive must pass source hash comparison during writing, full sequential archive readback, a complete independent restoration and no-follow content/topology comparison, and delete preflight. The original xz package, failed restore, failed-copy bytes and diagnostic receipts remain preserved. Compression format changes do not relax any check or scope.
+- The replacement full-recovery-v2.tar.gz is being prepared from a separately computed complete source inventory. The new archive must pass source hash comparison during writing, full sequential archive readback, a complete independent restoration and no-follow content/topology comparison, and delete preflight. The original xz package, failed-restore diagnostics, failed-copy bytes and diagnostic receipts remain preserved. Derived rehearsal trees may be removed after final verification; the separately preserved failure bytes and original packages must remain. Compression format changes do not relax any check or scope.
 - No usable full-backup conclusion follows from the earlier successful readback receipt. verified_backup remains false, the task remains NEW, and classification, freezing, approvals and deletion remain unperformed. Only a successful, independently reviewed replacement evidence chain may support a final specification.
 
 The diagnostic receipt hashes are:
@@ -87,21 +89,30 @@ The diagnostic receipt hashes are:
 - pack-readback-diagnostic.json: SHA-256 618f39017812465de7beb704d7fa5b556805f9c79c188a64e35015ab012a1282.
 - xz-second-read-failure.json: SHA-256 4522db4f218b7069c716a55c8845354ca9db5eb5eab53bdc52a591df98525873.
 
-Proposed primary gzip backup (latest draft evidence):
+Admitted primary gzip backup and actual recovery proof:
 
 - v2-backup-receipt.json (SHA-256 fde7cc5968828a8079e0dd6ef6facb6f9aa2b34f3c6cc63a90d36c442157837c) records PASS for full-recovery-v2.tar.gz: SHA-256 a7c81e516aa2dbc89186722ec421b7a37a4a9aa670d6119c3f1cb4ba2b089658, 424878535 compressed bytes, 914402345 logical file bytes, 174179 files and 255377 entries over all 18 full-recovery roots.
 - Its independently source-hashed inventory is full-source-v2-inventory.json.gz, SHA-256 2b72e1492c8483233e4ce28763c55b4ac71af3450342d48462ffaaeaed3d2085. Source keys were fixed before hashing; before/after metadata checks match the deletion baseline. Source-reader hashes during archive writing and a complete sequential archive readback all match that independent inventory.
 - source-v2-v1-comparison.json confirms identical keys and entries between the independent v2 source inventory and the first archive-derived inventory: 255377 entries, zero differences. All earlier topology, restore-copy and archive-readback anomaly causes remain unknown. Passing this independent chain does not claim that those causes were fixed.
 - The immutable plan remains SHA-256 309123482f0c06dcd7f8d6fa94af16a0c85c15ad7d357e4312bc8971271b9eae; deletion inventory remains SHA-256 814258e102ebc26a6ddcc6de25a9193588bbbcb83ec25e60c0e98728d4bbe1ea. The backup binds helper SHA-256 f4fb391d91a9ab3da2235db047933320e3f95a2ac575c24d8806c4bd2007f9be.
-- Full restoration, independent no-follow content/topology comparison, and exact delete preflight are still pending. verified_backup remains false, no final spec is frozen and no deletion is authorized by this draft.
+- full-restore-v2-receipt.json (SHA-256 b26cb5e73c0f1fbd6eaa492b82f2b5c063270528bad5af0a3e346ead1b4c2b5f) now verifies all 255377 entries, complete content/link targets and independent no-follow topology comparison. It binds helper f4fb391d91a9ab3da2235db047933320e3f95a2ac575c24d8806c4bd2007f9be, junction script c299031347fe41062dad8f58eaa31fcfa5f5356cdb69ac6db4ce941cba45e59d, and restore script dbad1c29cc4c5a1d5fcfc4f20b25b5a2c2da70bd740f3240a3a52c46fa336e4e. Exact delete preflight has now passed; its final bindings are listed below. This supersedes earlier historical draft snapshots. verified_backup=true and dry_run=true support classification; actual deletion still requires independent design review and a separate native action approval.
+
+Final exact delete preflight:
+
+- delete-preflight.json (SHA-256 9a386338aaf0e1300487c6bf1e66ada050ae73e959132376a7318e0e4e92e785) covers 255394 original entries and 956575010 logical bytes: all 19 roots plus the 16 exact metadata files. Its complete source SHA scan equals the primary independent inventory, metadata archive and retained ruff source. All 8751 protected entries, 57 original refs and 1851 preserved execution entries match; tracked changes affect only this new task.
+- The reviewed cleanup helper is cleanup.py, SHA-256 b18ca6cc863216cb7351214502b46b045f405b5cc25095819e0abde1ba392317. The preflight receipt binds this helper, plan, retained packages and inventories, complete restore proof, original-location probe, negative guards and protected baselines. These bindings must remain identical at execution.
+- The owner explicitly requested the bounded cleanup. Remove only the exact 19 roots and 16 metadata files after native action approval, then remove the enumerated derived rehearsal trees and disposable readback copy under the new work directory using an independently inventoried no-follow traversal. Preserve all packages, original failed candidate, failed-pack-copy.bin, raw/reconstructed diagnostics, manifests and receipts. Do not delete an unenumerated original artifact.
+- The action is single-use, finite-lived, bound to the unchanged subject HEAD, exact plan/helper/binding hashes and reviewed targets. A repeated execution or changed binding fails before deletion. After cleanup, recheck protected material, pre-existing refs, remaining execution entries and actual root absence; preserve the resulting original receipt.
+
+Native preparation correction: the first classify rejected the undeclared permission gate token action before creating any classification evidence. The unchanged parser accepts action_approval; that exact token now retains the mandatory separate deletion approval. The earlier NEW freeze event remains in the append-only ledger and this final specification will be frozen again for independent review. No Schema, Policy, permission rule or threshold is changed.
 
 ## 非目标
 
-No application implementation, Policy or authorization revision, public publication of local machine data, provider call, deployment or historical task cleanup. Publication of the new ledger is a separate final phase under the existing standing authorization.
+No application implementation, Policy or authorization revision, public publication of local machine data, provider call, deployment or historical task cleanup. Publication of the new ledger is permitted final follow-through under the existing standing authorization. Native code approval and gate, exact separate push/merge action approvals, and all unchanged required CI checks precede protected PR merge-commit publication. Local cleanup does not itself perform repository publication.
 
 ## 禁止动作
 
-Do not delete before backup, restoration and action approval pass. Do not modify primary-checkout existing .ai tasks or logs, private evidence, owner drafts or primary .venv. Do not change any pre-existing ref or archive tag other than the newly created task branch. Do not deploy, export secrets, pay for calls, weaken gates, change authorization, force push or rewrite published history.
+Do not delete before backup, restoration and action approval pass. Do not modify primary-checkout existing .ai tasks or logs, private evidence, owner drafts or primary .venv. During local cleanup do not change any pre-existing ref or archive tag other than the newly created task branch. Later protected PR publication may advance main by merge commit after all native and required CI gates pass; preserve other pre-existing refs and archive tags. Do not deploy, export secrets, pay for calls, weaken gates, change authorization, force push or rewrite published history.
 
 ## 错误行为
 
