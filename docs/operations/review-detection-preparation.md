@@ -2,6 +2,36 @@
 
 本页把[已采用的起步范围](../superpowers/specs/review-detection-admission.md)转为后续自然工作的移交流程。当前交付仅为准备：本轮未登记或核定实际合格候选、真实机会或裁定记录，`T0/T1` 未设置，30 日窗口尚未启动。[离线数学工具](review-detection.md)只接受 synthetic 计数，不接收真实记录；准备完成不把它升级为真实评分接口。
 
+## 不依赖真实任务的离线演练
+
+从完整克隆的仓库根运行下列 PowerShell 命令，复用项目 `.venv`；其他平台使用对应的项目解释器。输入是虚构仓库的空声明，不引用真实审核、宿主对象或观察窗口，仅在内存管道传递，不另存输入或输出副本。
+
+```powershell
+$declarations = @'
+{
+  "schema_version": "1.0",
+  "repository": "synthetic/project",
+  "admission_package": "review-detection-admission-v0.1",
+  "window": {"t0": null, "t1": null},
+  "candidates": []
+}
+'@
+$declarations | .\.venv\Scripts\python.exe -B tools/analysis/review_detection_input.py
+if ($LASTEXITCODE -ne 0) { throw 'Declaration rehearsal failed' }
+$declarations | .\.venv\Scripts\python.exe -B tools/analysis/review_detection_sources.py . --resolve-locators
+if ($LASTEXITCODE -ne 0) { throw 'Source rehearsal failed' }
+```
+
+两次正常退出均为 `0`，表示可输出报告，不表示准入。第一份报告的三个 `coverage` 计数均为零，第二份 `source_checks` 为空；两份均保留 `LOCATE_NATURAL_CANDIDATE`、空窗口、`observation_admission=unknown`、`probability_status=unestimated`、`model_score_update_status=not_implemented` 和 `execution_allowed=false`。原件入口只核显式仓库根，空引用不触发文档正文读取。
+
+需要检查非空声明、冲突、真实临时 Git 对象和定位边界时，复用既有反例测试；这些夹具与测试结果不纳入研究记录：
+
+```powershell
+.\.venv\Scripts\python.exe -B -m pytest tests/unit/test_review_detection_input.py tests/unit/test_review_detection_sources.py tests/unit/test_snapshot_git_bounded.py tests/unit/test_review_detection.py -q
+```
+
+测试会在测试临时目录创建可丢弃夹具，pytest 可写忽略的缓存；这不是零写入命令。失败先诊断并保留结果，不改用宿主对象验证。演练完成后，可独立完成的入口和机械反例已有实现；下一步按[通道核定结果](../superpowers/specs/review-detection-host-evidence.md#7-已核通道的选择与落实顺序)补宿主资料，并在自然任务出现时按下节固定真实候选。不要把本次准备工作或旧审核追溯纳入未来窗口。
+
 ## 准备候选与来源
 
 等本仓自然发生仅含 `docs/**` 普通文档、且包含 `docs/superpowers/specs/**` 契约内容的工作，再核对其首次非作者专项审核。不得为凑样本创建任务、制造缺陷、追加审核或追溯纳入已有报告。直接矛盾类的可检验要求、先前适用契约及版本，以[协议](../superpowers/specs/review-detection-protocol.md#2-机会裁定审核与匹配的顺序)为准。
@@ -94,6 +124,8 @@ gh api graphql -f 'query={repository(owner:"OWNER",name:"REPOSITORY"){pullReques
 [后续最小接入候选](../superpowers/specs/review-detection-host-evidence.md#5-后续最小接入候选)单独保持 pending／not_started：先核真实通道、宿主绑定和必然返回范围，再形成含对象、次数／页数／字节上限及停止条件的一次授权。当前没有可执行宿主读取请求，不复用已关闭额度；派发、完整输入、独立性、时间与费用端点分别验原件，缺口不由候选获批关闭。
 
 [单次握手候选](../superpowers/specs/review-detection-host-evidence.md#6-通道核定与单次握手授权候选)已固定请求内容、四个必需返回字段和拟议次数／字节／时限；实际 Desktop 端点、绑定、server 版本及接收前范围限制仍缺。CLI 版本与 proxy 帮助不补这些事实，当前不连接、不请求空白握手批准；握手也不继承后续任务读取许可。
+
+[已核通道的选择与落实顺序](../superpowers/specs/review-detection-host-evidence.md#7-已核通道的选择与落实顺序)区分 App Server 协议、proxy、终端 UI、Code Mode 出站连接、设备配对及当前应用工具。静态核对已完成，实际接入保持未启动；先补既有入口的宿主绑定、版本、返回面与接收前限额，再形成具体一次范围，不通过启动新 server、读取配置或探测 socket 补缺。
 
 ### 先核职责覆盖，再取得独立裁定
 
