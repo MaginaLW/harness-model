@@ -185,4 +185,4 @@ Workflow 来源限于 connector 首页及 PR 触发运行。原行没有可认�
 | `WAIT_FOR_RECORDED_CHECK` | 查询 SHA 与 head 相同，运行尚非 completed；等待所见运行结果，不自动重跑。 |
 | `CHECK_NONPASS_RESULT_SCOPE` | 查询 SHA 与 head 相同，运行 completed 且 conclusion 为其他非 success 值或 null；核对取消、skip、neutral 等原结果适用范围，不统称失败。 |
 
-Task-free 报告的 TASK-ID 为 `not_applicable`，实际模型身份保持 `unknown`。`model_score_update_status=not_implemented`、`method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`；权限和账本效果均为 none，Phase 3 仍为 `not_started`。当前补齐公开 PR 的声明处理链及下一轮来源核对，尚未实现反馈更新模型分数、自动安排审核或完整的评分闭环。上述问题只核对已有来源与声明，不要求制造新一轮审核。普通非评分摘要不以未来生产概率准入增加逐次审批；生产估计、真实评分 shadow 与策略接入仍满足各自 3-A/S2–S4 条件。
+Task-free 报告的 TASK-ID 为 `not_applicable`，实际模型身份保持 `unknown`。`model_score_update_status=not_implemented`、`method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`；权限和账本效果均为 none，Phase 3 仍为 `not_started`。当前补齐公开 PR 的声明处理链及下一轮来源核对，真实模型评分更新、自动审核安排及真实评分反馈闭环尚未实现。上述问题只核对已有来源与声明，不要求制造新一轮审核。普通非评分摘要不以未来生产概率准入增加逐次审批；生产估计、真实评分 shadow 与策略接入仍满足各自 3-A/S2–S4 条件。
