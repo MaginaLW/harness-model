@@ -23,6 +23,7 @@
 | 查看 task-free PR 的审核、处理与复核声明 | [公开 PR 回读](docs/operations/pr-feedback.md) | 经标准输入提供的公开 connector 来源包 | 汇总所供声明及待核对问题，不认证缺陷真值、独立复核或实际模型身份。 |
 | 检查假设计数下的检出区间 | [离线区间计算](docs/operations/review-detection.md) | 标准输入中的 synthetic 整数计数 | 仅提供条件数学结果；真实来源与窗口准备见[观察流程](docs/operations/review-detection-preparation.md)。 |
 | 核对观察声明的时间、引用和选择缺口 | [观察输入检查](docs/operations/review-detection-input.md) | 标准输入中的候选／机会声明与原件引用 | 保留未知和冲突；不认证来源、启动窗口或产生真实估计。 |
+| 演练记录到条件计数与区间的处理 | [记录级合成分析](docs/operations/review-detection-analysis.md) | synthetic envelope、原声明结构及情景假设 | 关键未知整批阻断；只给合成条件结果，真实数据与评分未启用。 |
 | 核对文档引用是否对应本地 Git 原件 | [固定文档原件核对](docs/operations/review-detection-input.md#本地-git-原件核对) | 同一声明包及显式本地 Git 根目录 | 只核 commit/path/blob 和字节；语义定位、公开性与观察准入仍未知。 |
 | 定位固定文档中的精确字节跨度 | [行跨度定位](docs/operations/review-detection-input.md#精确行跨度定位) | 上述入口显式 `--resolve-locators`；行跨度与预期 SHA-256 | 位置命中与 Git 对象匹配分开；语义适用、真实时序和准入另核。 |
 | 定位当前任务的准备缺项 | [只读任务建议](docs/operations/review-advisory.md) | 完整克隆及真实 TASK-ID | 复用原生 status 与适用状态的 Gate，只给建议，不授予执行权限。 |
