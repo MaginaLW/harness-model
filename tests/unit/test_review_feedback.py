@@ -869,3 +869,103 @@ def test_cli_non_git_directory_does_not_disclose_process_failure(tmp_path: Path)
     assert result.returncode == 2
     assert result.stdout == ""
     assert "Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("with_reference", [False, True])
+def test_cli_cyclic_repository_root_has_only_the_safe_error(
+    tmp_path: Path, with_reference: bool
+) -> None:
+    root = tmp_path / "private-cyclic-root"
+    arguments: list[str] = []
+    if with_reference:
+        reference = tmp_path / "reference.json"
+        _write_json(reference, _reference_input())
+        arguments = ["--reference-input", str(reference)]
+    try:
+        root.symlink_to(root.name, target_is_directory=True)
+    except (NotImplementedError, OSError) as error:
+        pytest.skip(f"directory symlinks are unavailable: {type(error).__name__}")
+    try:
+        result = subprocess.run(
+            [sys.executable, "-B", str(SCRIPT), str(root), *arguments],
+            capture_output=True,
+            timeout=30,
+        )
+    finally:
+        root.unlink()
+    assert result.returncode == 2
+    assert result.stdout == b""
+    assert (
+        result.stderr
+        == ("review-feedback: committed source or reference input is invalid" + os.linesep).encode()
+    )
+    assert b"private-cyclic-root" not in result.stderr
+    assert b"Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("with_reference", [False, True])
+def test_main_repository_resolution_failure_stops_before_snapshot_git_or_network(
+    tmp_path: Path,
+    feedback: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    with_reference: bool,
+) -> None:
+    root = tmp_path / "private-unresolvable-root"
+    arguments = [str(root)]
+    if with_reference:
+        reference = tmp_path / "reference.json"
+        _write_json(reference, _reference_input())
+        arguments.extend(["--reference-input", str(reference)])
+    native_resolve = Path.resolve
+    resolution_calls = 0
+
+    def failed_resolve(path: Path, *args: Any, **kwargs: Any) -> Path:
+        nonlocal resolution_calls
+        if path == root:
+            resolution_calls += 1
+            raise RuntimeError(str(root))
+        return native_resolve(path, *args, **kwargs)
+
+    def forbidden(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("Root resolution must finish before snapshot, Git or network calls.")
+
+    snapshot_module = importlib.import_module("approval_overhead")
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "resolve", failed_resolve)
+        patch.setattr(snapshot_module, "build_snapshot", forbidden)
+        patch.setattr(subprocess, "run", forbidden)
+        patch.setattr(socket, "socket", forbidden)
+        assert feedback.main(arguments) == 2
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == "review-feedback: committed source or reference input is invalid\n"
+    assert str(root) not in captured.err
+    assert "Traceback" not in captured.err
+    assert resolution_calls == 1
+
+
+def test_main_snapshot_runtime_error_remains_an_internal_failure(
+    tmp_path: Path,
+    feedback: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    snapshot_module = importlib.import_module("approval_overhead")
+    snapshot_calls = 0
+
+    def broken_snapshot(repository: Path, *, include_feedback: bool) -> None:
+        nonlocal snapshot_calls
+        snapshot_calls += 1
+        assert repository == tmp_path.resolve()
+        assert include_feedback is True
+        raise RuntimeError("synthetic internal snapshot failure")
+
+    monkeypatch.setattr(snapshot_module, "build_snapshot", broken_snapshot)
+    with pytest.raises(RuntimeError, match="^synthetic internal snapshot failure$"):
+        feedback.main([str(tmp_path)])
+
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
+    assert snapshot_calls == 1

@@ -16,6 +16,8 @@ python -B tools/analysis/review_feedback.py --task TASK-0077 --reference-input d
 
 正常退出为 `0`；原件或输入读取、解析、校验失败时退出 `2`，不输出成功报告或回显原内容。JSON 输出使用 ASCII 转义，解码后保留原文字。工具不写输入、账本、审核原件、Git 状态或新存储。
 
+仓库根路径解析失败（含 Python 3.11 的循环目录符号链接）也走相同错误出口：stdout 为空，stderr 固定为 `review-feedback: committed source or reference input is invalid`，不回显 traceback、本地路径或底层异常；不换源或重试。
+
 ## 来源与受限字段
 
 报告用途标识为 `measurement=review_feedback_readback`。底层使用 `build_snapshot(repository, include_feedback=True)`；已有 `approval_overhead.py` 默认统计、`--snapshot` 与 `--availability` 的格式和字段不变。

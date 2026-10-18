@@ -246,7 +246,11 @@ def main(argv: list[str] | None = None) -> int:
             )
             if reference_input is None:
                 raise ValueError("reference input must be an object")
-        snapshot = build_snapshot(arguments.repository.resolve(), include_feedback=True)
+        try:
+            repository = arguments.repository.resolve()
+        except RuntimeError as error:
+            raise ValueError("repository root could not be resolved") from error
+        snapshot = build_snapshot(repository, include_feedback=True)
         report = build_feedback(snapshot, reference_input=reference_input, task_ids=arguments.task)
         if original is not None:
             report["external_reference"]["input_sha256"] = hashlib.sha256(original).hexdigest()
