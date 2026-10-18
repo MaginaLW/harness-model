@@ -531,6 +531,78 @@ def test_cli_and_real_inprocess_main_bind_bytes_without_writing_or_disclosing_so
 
 
 @pytest.mark.parametrize(
+    "suffix", ["\u00a0", "\u2003", "\u3000"], ids=["nbsp", "em-space", "ideographic-space"]
+)
+@pytest.mark.parametrize("resolve_locators", [False, True])
+def test_real_git_root_preserves_trailing_unicode_whitespace_at_all_entrypoints(
+    checker: Any,
+    repository: dict[str, Any],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    suffix: str,
+    resolve_locators: bool,
+) -> None:
+    root = tmp_path / ("repository" + suffix)
+    assert root.parent.resolve() == tmp_path.resolve()
+    repository["root"].rename(root)
+    repository["root"] = root
+    span = b"# Contract\n"
+    document = _document(_reference(repository, locator=_line_selector(1, 1, span)))
+    original = copy.deepcopy(document)
+    payload = (" \n" + json.dumps(document) + "\n").encode()
+    before = _state(root)
+
+    expected = checker.build_source_checks(root, document, resolve_locators=resolve_locators)
+    item = _candidate_check(expected)
+    assert item["status"] == "matched_git_object"
+    assert item["observed"] == {
+        "git_blob": repository["blob"],
+        "mode": "100644",
+        "bytes_read": len(CONTENT),
+        "content_sha256": hashlib.sha256(CONTENT).hexdigest(),
+    }
+    assert item["locator_resolution"] == ("matched_span" if resolve_locators else "not_evaluated")
+    if resolve_locators:
+        assert item["locator_check"] == {
+            "status": "matched_span",
+            "reason": "MATCHED_LINE_SPAN",
+            "observed": {
+                "start_line": 1,
+                "end_line": 1,
+                "byte_start": 0,
+                "byte_end": len(span),
+                "span_sha256": hashlib.sha256(span).hexdigest(),
+            },
+        }
+    assert expected["window"] == {"t0": None, "t1": None}
+    assert expected["observation_admission"] == "unknown"
+    assert expected["source_authenticity"] == "unknown"
+    assert expected["probability_status"] == "unestimated"
+    assert expected["execution_allowed"] is False
+
+    result = _cli(root, payload, cwd=tmp_path, resolve_locators=resolve_locators)
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == b""
+    assert result.stdout.isascii()
+    report = json.loads(result.stdout)
+    assert report.pop("input_sha256") == hashlib.sha256(payload).hexdigest()
+    assert report.pop("executed_tool_sha256") == hashlib.sha256(SCRIPT.read_bytes()).hexdigest()
+    assert report == expected
+
+    monkeypatch.setattr(sys, "stdin", io.TextIOWrapper(io.BytesIO(payload), encoding="utf-8"))
+    flags = [str(root)] + (["--resolve-locators"] if resolve_locators else [])
+    assert checker.main(flags) == 0
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert json.loads(captured.out) == json.loads(result.stdout)
+    assert PRIVATE not in captured.out
+    assert document == original
+    assert _state(root) == before
+    assert {path.name for path in tmp_path.iterdir()} == {root.name}
+
+
+@pytest.mark.parametrize(
     "payload",
     [
         b"\xffprivate",

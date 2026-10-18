@@ -148,7 +148,11 @@ def build_source_checks(
     declarations = build_detection_input(document)
     try:
         repository = repository.resolve(strict=True)
-        root = _snapshot_git(repository, "rev-parse", "--show-toplevel").decode("utf-8").strip()
+        root = (
+            _snapshot_git(repository, "rev-parse", "--show-toplevel")
+            .decode("utf-8")
+            .removesuffix("\n")
+        )
         if Path(root).resolve(strict=True) != repository:
             raise ValueError("explicit repository root is required")
     except RuntimeError as error:
