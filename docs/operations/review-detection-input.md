@@ -53,6 +53,8 @@ OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_source
 
 正常报告含冲突和缺口，退出 `0`；非法声明或仓库根退出 `2`，不回显输入与底层异常。CLI hash 只绑定 stdin 和工具字节。报告继续固定未知准入、未估计概率、无评分更新及 `execution_allowed=false`。
 
+仓库根路径无法解析（包括循环符号链接）时，默认模式与 `--resolve-locators` 都只返回上述安全错误：stdout 为空，stderr 为固定说明，不输出 traceback 或根路径；不改用当前目录、HEAD 或其他路径重试。
+
 ## 精确行跨度定位
 
 默认原件报告保持 v1；需要核对固定字节位置时，显式使用[有界定位合同](../superpowers/specs/review-detection-locators.md)的 opt-in：
