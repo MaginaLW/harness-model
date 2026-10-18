@@ -89,7 +89,7 @@ gh api graphql -f 'query={repository(owner:"OWNER",name:"REPOSITORY"){pullReques
 
 平台编辑历史可以补证某项声明／报告文字的公开时序；本地 `review_recorded` 只证明本地录入，不能当宿主审核开始事件。独立裁定和预算关闭各有自己的原件要求，不由前一端点的命中传递成立。
 
-[宿主只读接入候选](../superpowers/specs/review-detection-host-evidence.md)固定了已核 CLI 协议能力、版本差异和供所有者集中决定的一轮读取范围。它仍为 `scope_decision=pending`；不是现有公开来源范围的自动延伸，也不授权读取私密会话或启用遥测。
+[宿主只读接入边界](../superpowers/specs/review-detection-host-evidence.md)固定了已核 CLI 协议能力、版本差异及所有者明确批准过的一轮读取范围；当前 `scope_decision=approved_once`、`read_state=closed`。该轮已结束，不形成重试或常设权限，不授权读取私密会话或启用遥测；实际派发、完整输入、独立性和货币端点仍未因此取得。
 
 ### 先核职责覆盖，再取得独立裁定
 
