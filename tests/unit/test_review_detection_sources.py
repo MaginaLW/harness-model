@@ -199,11 +199,14 @@ def _state(root: Path) -> dict[str, str]:
     }
 
 
-def _cli(root: Path, payload: bytes, cwd: Path | None = None) -> subprocess.CompletedProcess[bytes]:
+def _cli(
+    root: Path, payload: bytes, cwd: Path | None = None, *, resolve_locators: bool = False
+) -> subprocess.CompletedProcess[bytes]:
     environment = os.environ.copy()
     environment["PYTHONIOENCODING"] = "ascii"
     return subprocess.run(
-        [sys.executable, "-B", str(SCRIPT), str(root)],
+        [sys.executable, "-B", str(SCRIPT), str(root)]
+        + (["--resolve-locators"] if resolve_locators else []),
         input=payload,
         capture_output=True,
         check=False,
@@ -726,3 +729,442 @@ def test_script_main_guard_executes_real_cli_entry_in_process(
     captured = capsys.readouterr()
     assert captured.err == ""
     assert _candidate_check(json.loads(captured.out))["status"] == "matched_git_object"
+
+
+def test_opt_in_locator_matches_real_git_line_bytes(
+    checker: Any, repository: dict[str, Any]
+) -> None:
+    span = b"# Contract\n"
+    reference = _reference(
+        repository, locator=f"lines-v1:L1-L1:sha256={hashlib.sha256(span).hexdigest()}"
+    )
+    report = checker.build_source_checks(
+        repository["root"], _document(reference), resolve_locators=True
+    )
+    assert report["schema_version"] == "2.0"
+    assert report["measurement"] == "review_detection_git_locator_checks"
+    item = _candidate_check(report)
+    assert item["locator_resolution"] == "matched_span"
+    assert item["locator_check"] == {
+        "status": "matched_span",
+        "reason": "MATCHED_LINE_SPAN",
+        "observed": {
+            "start_line": 1,
+            "end_line": 1,
+            "byte_start": 0,
+            "byte_end": len(span),
+            "span_sha256": hashlib.sha256(span).hexdigest(),
+        },
+    }
+
+
+def _committed_reference(
+    repository: dict[str, Any], contents: bytes, locator: str
+) -> dict[str, Any]:
+    root = repository["root"]
+    blob = _blob(root, contents)
+    commit = _commit(root, [("100644", "blob", blob, "contract.md")])
+    return _reference(repository, source_commit=commit, git_blob=blob, locator=locator)
+
+
+def _line_selector(start: int, end: int, span: bytes) -> str:
+    return f"lines-v1:L{start}-L{end}:sha256={hashlib.sha256(span).hexdigest()}"
+
+
+def _unlocated(status: str, reason: str) -> dict[str, Any]:
+    return {
+        "status": status,
+        "reason": reason,
+        "observed": dict.fromkeys(
+            ("start_line", "end_line", "byte_start", "byte_end", "span_sha256")
+        ),
+    }
+
+
+@pytest.mark.parametrize(
+    "contents,start,end,byte_start,byte_end,span",
+    [
+        (b"alpha\nbeta\n", 2, 2, 6, 11, b"beta\n"),
+        (b"alpha\nbeta", 2, 2, 6, 10, b"beta"),
+        (b"alpha\r\nbeta\r\n", 1, 2, 0, 13, b"alpha\r\nbeta\r\n"),
+        (b"alpha\r\nbeta", 2, 2, 7, 11, b"beta"),
+        (b"one\rtwo\nlast", 1, 1, 0, 8, b"one\rtwo\n"),
+        (b"\n", 1, 1, 0, 1, b"\n"),
+        (b"\n\n", 2, 2, 1, 2, b"\n"),
+        (b"first\n\nlast\n", 2, 3, 6, 12, b"\nlast\n"),
+        (b"same\nsame\nlast", 2, 2, 5, 10, b"same\n"),
+        ("契约\n实例".encode(), 2, 2, 7, 13, "实例".encode()),
+        (
+            "a\u0085b\u2028c\u2029d\ve\ff\r\nlast".encode(),
+            2,
+            2,
+            18,
+            22,
+            b"last",
+        ),
+    ],
+)
+def test_locator_uses_raw_lf_byte_boundaries_only(
+    checker: Any,
+    repository: dict[str, Any],
+    contents: bytes,
+    start: int,
+    end: int,
+    byte_start: int,
+    byte_end: int,
+    span: bytes,
+) -> None:
+    reference = _committed_reference(repository, contents, _line_selector(start, end, span))
+    item = _candidate_check(
+        checker.build_source_checks(repository["root"], _document(reference), resolve_locators=True)
+    )
+    assert item["status"] == "matched_git_object"
+    assert item["locator_resolution"] == "matched_span"
+    assert item["locator_check"] == {
+        "status": "matched_span",
+        "reason": "MATCHED_LINE_SPAN",
+        "observed": {
+            "start_line": start,
+            "end_line": end,
+            "byte_start": byte_start,
+            "byte_end": byte_end,
+            "span_sha256": hashlib.sha256(span).hexdigest(),
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "selector",
+    [
+        "lines-v1:",
+        "lines-v1:L0-L1:sha256=" + "0" * 64,
+        "lines-v1:L01-L1:sha256=" + "0" * 64,
+        "lines-v1:L1-L01:sha256=" + "0" * 64,
+        "lines-v1:L2-L1:sha256=" + "0" * 64,
+        "lines-v1:L+1-L1:sha256=" + "0" * 64,
+        "lines-v1:L-1-L1:sha256=" + "0" * 64,
+        "lines-v1:L١-L١:sha256=" + "0" * 64,
+        "lines-v1:L１-L１:sha256=" + "0" * 64,
+        "lines-v1:L1-L1:SHA256=" + "0" * 64,
+        "lines-v1:L1-L1:sha256=" + "A" * 64,
+        "lines-v1:L1-L1:sha256=" + "a" * 63,
+        "lines-v1:L1-L1:sha256=" + "a" * 65,
+        "lines-v1:L1-L1:sha256=" + "a" * 64 + "\n",
+        "lines-v1: L1-L1:sha256=" + "0" * 64,
+        "lines-v1:L" + "9" * 5000 + "-L" + "9" * 5000 + ":sha256=" + "0" * 64,
+    ],
+    ids=[
+        "empty",
+        "zero",
+        "leading-zero-start",
+        "leading-zero-end",
+        "reverse",
+        "plus",
+        "negative",
+        "arabic-digits",
+        "fullwidth-digits",
+        "hash-key",
+        "uppercase-hash",
+        "short-hash",
+        "long-hash",
+        "trailing-newline",
+        "space",
+        "huge-digits",
+    ],
+)
+def test_recognized_invalid_selector_never_guesses_a_span(
+    checker: Any, repository: dict[str, Any], selector: str
+) -> None:
+    reference = _reference(repository, locator=selector)
+    item = _candidate_check(
+        checker.build_source_checks(repository["root"], _document(reference), resolve_locators=True)
+    )
+    assert item["status"] == "matched_git_object"
+    assert item["locator_resolution"] == "invalid_selector"
+    assert item["locator_check"] == _unlocated("invalid_selector", "INVALID_LINE_SELECTOR")
+
+
+@pytest.mark.parametrize(
+    "contents,start,end,status,reason",
+    [
+        (b"", 1, 1, "invalid_selector", "INVALID_LINE_SELECTOR"),
+        (b"abc", 1, 4, "invalid_selector", "INVALID_LINE_SELECTOR"),
+        (b"abc", 4, 4, "invalid_selector", "INVALID_LINE_SELECTOR"),
+        (b"abc", 1, 3, "span_unavailable", "LINE_RANGE_NOT_PRESENT"),
+        (b"abc", 2, 2, "span_unavailable", "LINE_RANGE_NOT_PRESENT"),
+        (b"abc\n", 2, 2, "span_unavailable", "LINE_RANGE_NOT_PRESENT"),
+        (b"one\rtwo", 2, 2, "span_unavailable", "LINE_RANGE_NOT_PRESENT"),
+    ],
+)
+def test_locator_distinguishes_byte_bound_from_missing_lines_without_clipping(
+    checker: Any,
+    repository: dict[str, Any],
+    contents: bytes,
+    start: int,
+    end: int,
+    status: str,
+    reason: str,
+) -> None:
+    reference = _committed_reference(repository, contents, _line_selector(start, end, contents))
+    item = _candidate_check(
+        checker.build_source_checks(repository["root"], _document(reference), resolve_locators=True)
+    )
+    assert item["status"] == "matched_git_object"
+    assert item["locator_resolution"] == status
+    assert item["locator_check"] == _unlocated(status, reason)
+
+
+@pytest.mark.parametrize("contents", [b"safe\n\xff", b"safe\n\xc0\xaf", b"safe\n\x00"])
+def test_entire_blob_must_be_strict_utf8_without_nul_before_selecting_valid_ascii_line(
+    checker: Any, repository: dict[str, Any], contents: bytes
+) -> None:
+    reference = _committed_reference(repository, contents, _line_selector(1, 1, b"safe\n"))
+    item = _candidate_check(
+        checker.build_source_checks(repository["root"], _document(reference), resolve_locators=True)
+    )
+    assert item["status"] == "matched_git_object"
+    assert item["observed"]["content_sha256"] == hashlib.sha256(contents).hexdigest()
+    assert item["locator_resolution"] == "not_evaluated"
+    assert item["locator_check"] == _unlocated("not_evaluated", "DOCUMENT_ENCODING_UNSUPPORTED")
+
+
+@pytest.mark.parametrize("locator", ["opaque", "lines-v2:L1-L1:sha256=" + "0" * 64])
+def test_unsupported_locator_is_not_interpreted_as_an_anchor(
+    checker: Any, repository: dict[str, Any], locator: str
+) -> None:
+    reference = _reference(repository, locator=locator)
+    item = _candidate_check(
+        checker.build_source_checks(repository["root"], _document(reference), resolve_locators=True)
+    )
+    assert item["status"] == "matched_git_object"
+    assert item["locator_check"] == _unlocated("not_evaluated", "UNSUPPORTED_LOCATOR")
+    assert item["locator_resolution"] == "not_evaluated"
+
+
+def test_same_git_object_is_read_once_but_each_locator_retains_its_own_result(
+    checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    first = _reference(repository, locator=_line_selector(1, 1, b"# Contract\n"))
+    second = _reference(repository, locator=_line_selector(2, 2, b"\n"))
+    conflict = _reference(repository, locator=_line_selector(1, 1, b"other\n"))
+    document = _document(first)
+    document["candidates"][0]["refs"].update(report=second, closure=conflict)
+    document["candidates"][0]["opportunities"] = [_opportunity(first)]
+    original = copy.deepcopy(document)
+    commands: list[list[str]] = []
+    native_run = subprocess.run
+
+    def observed_run(command: list[str], **options: Any) -> Any:
+        commands.append(command)
+        return native_run(command, **options)
+
+    monkeypatch.setattr(subprocess, "run", observed_run)
+    before = _state(repository["root"])
+    report = checker.build_source_checks(repository["root"], document, resolve_locators=True)
+    by_location = {item["input_locator"]: item for item in report["source_checks"]}
+    matched = _candidate_check(report)
+    assert matched["locator_check"]["status"] == "matched_span"
+    blank = by_location["$.candidates[0].refs.report"]
+    assert blank["locator_check"]["observed"] == {
+        "start_line": 2,
+        "end_line": 2,
+        "byte_start": 11,
+        "byte_end": 12,
+        "span_sha256": hashlib.sha256(b"\n").hexdigest(),
+    }
+    wrong = by_location["$.candidates[0].refs.closure"]
+    assert wrong["locator_check"] == {
+        **matched["locator_check"],
+        "status": "conflict",
+        "reason": "SPAN_HASH_MISMATCH",
+    }
+    assert wrong["locator_resolution"] == "conflict"
+    assert wrong["reported_reference"] == conflict
+    assert sum(_body_command(command) for command in commands) == 1
+    matched["locator_check"]["observed"]["byte_start"] = 99
+    other = by_location["$.candidates[0].opportunities[0].contract_ref"]
+    assert other["locator_check"]["observed"]["byte_start"] == 0
+    assert document == original
+    assert _state(repository["root"]) == before
+
+
+def test_locator_uses_declared_version_even_when_head_and_worktree_have_matching_other_text(
+    checker: Any, repository: dict[str, Any]
+) -> None:
+    root = repository["root"]
+    old_span = b"# Contract\n"
+    new_span = b"# Changed\n"
+    old_reference = _reference(repository, locator=_line_selector(1, 1, old_span))
+    new_reference = _committed_reference(repository, new_span, _line_selector(1, 1, new_span))
+    _git(root, "update-ref", "refs/heads/main", new_reference["source_commit"])
+    (root / "docs").mkdir()
+    (root / "docs/contract.md").write_bytes(b"dirty worktree\n")
+    document = _document(new_reference)
+    opportunity = _opportunity(old_reference)
+    document["candidates"][0]["opportunities"] = [opportunity]
+    before = _state(root)
+    report = checker.build_source_checks(root, document, resolve_locators=True)
+    by_location = {item["input_locator"]: item for item in report["source_checks"]}
+    assert (
+        _candidate_check(report)["locator_check"]["observed"]["span_sha256"]
+        == hashlib.sha256(new_span).hexdigest()
+    )
+    original = by_location["$.candidates[0].opportunities[0].contract_ref"]
+    assert (
+        original["locator_check"]["observed"]["span_sha256"] == hashlib.sha256(old_span).hexdigest()
+    )
+    assert original["locator_resolution"] == "matched_span"
+    assert _state(root) == before
+
+
+@pytest.mark.parametrize(
+    "kind", ["null", "pr", "outside", "wrong_blob", "missing_commit", "missing_path", "large"]
+)
+def test_locator_cannot_bypass_source_gate_or_add_object_reads(
+    checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    reference: Any = _reference(repository, locator="lines-v1:invalid")
+    if kind == "null":
+        reference = None
+    elif kind == "pr":
+        reference = {
+            "kind": "pr",
+            "url": "https://github.com/synthetic/project/pull/3",
+            "locator": "lines-v1:invalid",
+        }
+    elif kind == "outside":
+        reference["path"] = "src/private.md"
+    elif kind == "wrong_blob":
+        reference["git_blob"] = "0" * 40
+    elif kind == "missing_commit":
+        reference["source_commit"] = "0" * 40
+    elif kind == "missing_path":
+        reference["path"] = "docs/absent.md"
+    else:
+        reference = _committed_reference(repository, b"x" * (1024 * 1024 + 1), "lines-v1:invalid")
+    commands: list[list[str]] = []
+    native_run = subprocess.run
+
+    def observed_run(command: list[str], **options: Any) -> Any:
+        commands.append(command)
+        return native_run(command, **options)
+
+    monkeypatch.setattr(subprocess, "run", observed_run)
+    document = _document(reference)
+    default = checker.build_source_checks(repository["root"], document)
+    default_commands = commands.copy()
+    commands.clear()
+    resolved = checker.build_source_checks(repository["root"], document, resolve_locators=True)
+    item = _candidate_check(resolved)
+    assert item["locator_check"] == _unlocated("not_evaluated", "SOURCE_NOT_MATCHED")
+    assert item["locator_resolution"] == "not_evaluated"
+    assert item["status"] != "matched_git_object"
+    assert item["reported_reference"] == reference
+    assert commands == default_commands
+    assert not any(_body_command(command) for command in commands)
+    assert {
+        key: value for key, value in item.items() if key != "locator_check"
+    } == _candidate_check(default)
+
+
+def test_mismatched_source_bytes_never_resolve_a_locator(
+    checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    native_run = subprocess.run
+
+    def corrupted_run(command: list[str], **options: Any) -> Any:
+        result = native_run(command, **options)
+        if _body_command(command):
+            return subprocess.CompletedProcess(command, 0, stdout=b"x" * len(CONTENT), stderr=b"")
+        return result
+
+    monkeypatch.setattr(subprocess, "run", corrupted_run)
+    reference = _reference(repository, locator=_line_selector(1, 1, b"x" * len(CONTENT)))
+    item = _candidate_check(
+        checker.build_source_checks(repository["root"], _document(reference), resolve_locators=True)
+    )
+    assert item["reason"] == "GIT_OBJECT_HASH_MISMATCH"
+    assert item["locator_check"] == _unlocated("not_evaluated", "SOURCE_NOT_MATCHED")
+
+
+def test_opt_in_only_adds_locator_evidence_and_does_not_admit_or_mutate_input(
+    checker: Any, repository: dict[str, Any]
+) -> None:
+    reference = _reference(repository, locator=_line_selector(3, 3, (PRIVATE + "\n").encode()))
+    document = _document(reference)
+    document["candidates"][0]["opportunities"] = [_opportunity(reference)]
+    original = copy.deepcopy(document)
+    before = _state(repository["root"])
+    default = checker.build_source_checks(repository["root"], document)
+    assert (
+        checker.build_source_checks(repository["root"], document, resolve_locators=False) == default
+    )
+    resolved = checker.build_source_checks(repository["root"], document, resolve_locators=True)
+    assert PRIVATE not in json.dumps(resolved)
+    assert resolved["window"] == {"t0": None, "t1": None}
+    assert resolved["observation_admission"] == "unknown"
+    assert resolved["source_authenticity"] == "unknown"
+    assert resolved["execution_allowed"] is False
+    assert resolved["next_source_checks"] == default["next_source_checks"]
+    assert resolved["schema_version"] == "2.0"
+    assert resolved["measurement"] == "review_detection_git_locator_checks"
+    resolved["schema_version"] = "1.0"
+    resolved["measurement"] = "review_detection_git_source_checks"
+    for item in resolved["source_checks"]:
+        item.pop("locator_check")
+        item["locator_resolution"] = "not_evaluated"
+    assert resolved == default
+    assert document == original
+    assert _state(repository["root"]) == before
+
+
+@pytest.mark.parametrize("conflict", [False, True])
+def test_opt_in_real_cli_and_inprocess_main_keep_conflicts_as_reports(
+    checker: Any,
+    repository: dict[str, Any],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    conflict: bool,
+) -> None:
+    span = b"different\n" if conflict else b"# Contract\n"
+    reference = _reference(repository, locator=_line_selector(1, 1, span))
+    document = _document(reference)
+    payload = (" \n" + json.dumps(document) + "\n").encode()
+    expected = checker.build_source_checks(repository["root"], document, resolve_locators=True)
+    before = _state(repository["root"])
+    result = _cli(repository["root"], payload, cwd=tmp_path, resolve_locators=True)
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == b""
+    assert result.stdout.isascii()
+    report = json.loads(result.stdout)
+    assert report.pop("input_sha256") == hashlib.sha256(payload).hexdigest()
+    assert report.pop("executed_tool_sha256") == hashlib.sha256(SCRIPT.read_bytes()).hexdigest()
+    assert report == expected
+    assert _candidate_check(report)["locator_resolution"] == (
+        "conflict" if conflict else "matched_span"
+    )
+    monkeypatch.setattr(sys, "stdin", io.TextIOWrapper(io.BytesIO(payload), encoding="utf-8"))
+    assert checker.main([str(repository["root"]), "--resolve-locators"]) == 0
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert json.loads(captured.out)["source_checks"] == expected["source_checks"]
+    assert PRIVATE not in captured.out
+    assert _state(repository["root"]) == before
+    assert {path.name for path in tmp_path.iterdir()} == {"repository"}
+
+
+@pytest.mark.parametrize("issue", ["input", "root"])
+def test_opt_in_cli_still_rejects_invalid_input_or_root_without_partial_report(
+    repository: dict[str, Any], issue: str
+) -> None:
+    root = repository["root"]
+    payload = json.dumps(_document(_reference(repository))).encode()
+    if issue == "input":
+        payload = b"not JSON"
+    else:
+        root = root / PRIVATE
+    result = _cli(root, payload, resolve_locators=True)
+    assert result.returncode == 2
+    assert result.stdout == b""
+    assert result.stderr.decode().strip() == ERROR

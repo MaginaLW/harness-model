@@ -1,6 +1,6 @@
 # 固定文档的有界定位核对
 
-状态：`review-detection-locators-v0.1`；待实现合同。承接[固定 Git 原件](review-detection-sources.md)，为明确供给的契约、对象和实例提供可重读的精确字节位置。定位命中不是语义适用、违约真值、真实预声明或观察准入。
+状态：`review-detection-locators-v0.1`；由原件工具的显式 opt-in 实现。承接[固定 Git 原件](review-detection-sources.md)，为明确供给的契约、对象和实例提供可重读的精确字节位置。定位命中不是语义适用、违约真值、真实预声明或观察准入。
 
 ## 兼容接口
 
