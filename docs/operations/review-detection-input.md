@@ -47,6 +47,8 @@ OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_source
 
 输入仍是上面的声明包；必须显式指定本地 Git 工作树根。原声明工具及其 `build_detection_input` 保持 no-I/O，独立入口不改变默认输出或账本白名单。
 
+根目录名称中的合法空白字符按原路径保留，包括末尾的 Unicode 空白；不会把它们当作 Git 输出的行结束符删掉。嵌套目录、bare 仓库、缺失目录或普通文件仍不能代替工作树根。
+
 独立报告逐项核对显式 `docs/**` 引用自己的 commit、精确 literal path、普通文件 mode、声明 blob 及实际字节。每件最多读取 1 MiB，不读工作树、PR 或正文里的链接，不输出正文。`matched_git_object` 只表示上述对象绑定与字节匹配；错误 blob 为 `conflict`，缺对象、路径或读取失败为 `unavailable`，PR、null、范围外、非普通文件及超限为 `not_checked`，具体原因分列。
 
 每项的 `locator_resolution=not_evaluated`，原 `VERIFY_*` 待核事项继续保留。实际公开性、仓库身份、语义定位、先前契约适用、自然变更范围、预声明、职责、真值、预算及关闭均需对应证据；本地对象命中不将它们认证为成立。工具不补 HEAD 或 baseline，也不登记合格观察单位。
