@@ -27,7 +27,7 @@ OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_source
 
 对象头部声明的大小不作为实际输出长度保证。正文使用无缓冲管道，最多读取声明大小加一个超量探测字节（因而每件管道读取硬上界为 1 MiB + 1 字节）；探测字节只用于拒绝多余输出，不增加可接受正文上限。超量、短读、进程失败或超时均保留 `unavailable/GIT_READ_UNAVAILABLE`，不输出部分正文；终止并回收子进程、关闭管道。原有 30 秒期限同时覆盖正文读取与等待进程退出，stderr 不捕获。默认快照、availability 及其他未指定输出上界的 Git 调用保持原路径。
 
-复用 `approval_overhead._snapshot_git` 的隔离调用：清除继承的 `GIT_*`，禁全局／系统配置、replace objects、交互、可选锁、lazy fetch 和协议访问，每次 Git 调用上限 30 秒。命令只读，不执行 checkout、fetch、hooks、filters 或被读内容；不改变该辅助函数及既有快照范围。
+复用 `approval_overhead._snapshot_git` 的隔离调用：清除继承的 `GIT_*`，禁全局／系统配置、replace objects、交互、可选锁、lazy fetch 和协议访问，每次 Git 调用上限 30 秒。命令只读，不执行 checkout、fetch、hooks、filters 或被读内容；未指定输出上界的既有调用与快照范围保持不变。
 
 ## 输出与限制
 
