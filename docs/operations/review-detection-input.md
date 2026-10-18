@@ -53,6 +53,20 @@ OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_source
 
 正常报告含冲突和缺口，退出 `0`；非法声明或仓库根退出 `2`，不回显输入与底层异常。CLI hash 只绑定 stdin 和工具字节。报告继续固定未知准入、未估计概率、无评分更新及 `execution_allowed=false`。
 
+## 精确行跨度定位
+
+默认原件报告保持 v1；需要核对固定字节位置时，显式使用[有界定位合同](../superpowers/specs/review-detection-locators.md)的 opt-in：
+
+```console
+OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_sources.py <LOCAL_REPOSITORY_ROOT> --resolve-locators
+```
+
+引用的 `locator` 使用 `lines-v1:L<start>-L<end>:sha256=<64位小写hex>`，行号从 1 开始且不带前导零。预期 hash 绑定所选行的原始字节，包含实际 CR／LF；按 LF 划行，不归一化或增加末尾空行。只对已核对的普通 Git 文档字节定位，其他原件结果继续保留；旧 opaque locator 不猜测。
+
+opt-in 输出 v2 报告，逐项 `locator_check` 给出位置和实际跨度 hash，不输出正文。`matched_span` 只表示位置和 hash 相符，错 hash 保留 `conflict`；非法选择器、缺行、未支持编码／定位和未核来源分别报告。Git 对象命中与定位命中分开，所有 `VERIFY_*` 继续待核。
+
+在原 PR 说明旧要求为何适用于该候选对象及实例，才有可复核的语义关系；定位命中本身不提供这层结论。真实准备声明按[准备流程](review-detection-preparation.md)先发布、回读再派发首次审核；公开描述历史及派发原件缺失时仍保留时序未知，不借本工具登记单位或设置窗口。
+
 ## 后续衔接
 
 依照[真实观察准备流程](review-detection-preparation.md)在自然工作中核对实际事实；已采用范围、精度和 30 日规则不需要重新选择。工具不设置 `T0/T1`，本次实现不启动观察。已有[区间计算器](review-detection.md)继续只接受 synthetic 计数，不能把本报告的记录数或真实计数改成 synthetic 输入。
