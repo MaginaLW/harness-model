@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -197,3 +201,286 @@ def test_binding_counts_follow_approval_type_and_keep_action_limits(
     assert overhead_module.build_report(tmp_path)["approvals"][
         "same_binding_subsequent_records_by_type"
     ] == {"action": 0, "code": 0, "spec": 1}
+
+
+def _run_overhead(
+    repository: Path, *arguments: str, encoding: str = "utf-8"
+) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        [sys.executable, "-B", str(TOOL_PATH), str(repository), *arguments],
+        capture_output=True,
+        env={**os.environ, "PYTHONINTMAXSTRDIGITS": "4300", "PYTHONIOENCODING": encoding},
+        check=False,
+        timeout=15,
+    )
+
+
+def _tree_bytes(root: Path) -> dict[str, bytes]:
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in root.rglob("*")
+        if path.is_file()
+    }
+
+
+def _malformed_ledger(root: Path, filename: str, malformed: str) -> None:
+    directory = _ledger(root)
+    (directory / "approvals.json").write_text("[]", encoding="utf-8")
+    event = json.dumps(_event("task_created", sequence=1)) + "\n"
+    (directory / "events.jsonl").write_text(event, encoding="utf-8")
+    value = "9" * 4500 if malformed == "integer" else "[" * 1500 + "null" + "]" * 1500
+    payload = (
+        "private-probe: " + value if filename == "task.yaml" else '{"private-probe":' + value + "}"
+    )
+    if filename == "events.jsonl":
+        payload = event + payload + "\n"
+    (directory / filename).write_text(payload, encoding="utf-8")
+
+
+@pytest.fixture
+def fixed_integer_limit() -> Any:
+    original = sys.get_int_max_str_digits()
+    sys.set_int_max_str_digits(4300)
+    try:
+        yield
+    finally:
+        sys.set_int_max_str_digits(original)
+
+
+@pytest.mark.parametrize(
+    "filename", ["task.yaml", "classification.json", "approvals.json", "events.jsonl"]
+)
+@pytest.mark.parametrize("malformed", ["integer", "deep"])
+def test_legacy_parser_limits_are_safe_cli_errors(
+    tmp_path: Path,
+    overhead_module: Any,
+    capsys: pytest.CaptureFixture[str],
+    fixed_integer_limit: Any,
+    filename: str,
+    malformed: str,
+) -> None:
+    _malformed_ledger(tmp_path, filename, malformed)
+    before = _tree_bytes(tmp_path)
+    message = {
+        "task.yaml": "invalid YAML",
+        "classification.json": "invalid JSON",
+        "approvals.json": "invalid JSON",
+        "events.jsonl": "invalid JSON at line 2",
+    }[filename]
+    expected = f"approval-overhead: TASK-0001/{filename}: {message}\n"
+
+    assert overhead_module.main([str(tmp_path), "--format", "json"]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == expected
+    result = _run_overhead(tmp_path, "--format", "json")
+    assert result.returncode == 2
+    assert result.stdout == b""
+    assert result.stderr.decode("ascii").replace("\r\n", "\n") == expected
+    assert _tree_bytes(tmp_path) == before
+
+
+def _commit_fixture(root: Path) -> None:
+    environment = {
+        key: value for key, value in os.environ.items() if not key.upper().startswith("GIT_")
+    }
+    environment.update(
+        {
+            "GIT_CONFIG_GLOBAL": os.devnull,
+            "GIT_CONFIG_SYSTEM": os.devnull,
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_OPTIONAL_LOCKS": "0",
+            "GIT_TERMINAL_PROMPT": "0",
+            "GIT_ALLOW_PROTOCOL": "",
+        }
+    )
+    for arguments in (
+        ("-c", "init.templateDir=", "init", "--quiet"),
+        ("add", ".ai/tasks"),
+        (
+            "-c",
+            "user.name=Synthetic Fixture",
+            "-c",
+            "user.email=synthetic@example.invalid",
+            "commit",
+            "--quiet",
+            "-m",
+            "synthetic parser boundary",
+        ),
+    ):
+        subprocess.run(
+            ["git", "-c", f"core.hooksPath={root / '.git/no-hooks'}", *arguments],
+            cwd=root,
+            env=environment,
+            capture_output=True,
+            check=True,
+            timeout=15,
+        )
+
+
+@pytest.mark.parametrize("mode", ["--snapshot", "--availability"])
+@pytest.mark.parametrize("filename", ["task.yaml", "classification.json", "events.jsonl"])
+@pytest.mark.parametrize("malformed", ["integer", "deep"])
+def test_committed_parser_limits_are_safe_cli_errors(
+    tmp_path: Path,
+    overhead_module: Any,
+    capsys: pytest.CaptureFixture[str],
+    fixed_integer_limit: Any,
+    mode: str,
+    filename: str,
+    malformed: str,
+) -> None:
+    _malformed_ledger(tmp_path, filename, malformed)
+    _commit_fixture(tmp_path)
+    before = _tree_bytes(tmp_path)
+    expected = f"approval-overhead: TASK-0001/{filename}: invalid document\n"
+
+    assert overhead_module.main([str(tmp_path), mode, "--format", "json"]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == expected
+    result = _run_overhead(tmp_path, mode, "--format", "json")
+    assert result.returncode == 2
+    assert result.stdout == b""
+    assert result.stderr.decode("ascii").replace("\r\n", "\n") == expected
+    assert _tree_bytes(tmp_path) == before
+
+
+@pytest.mark.parametrize("mode", [None, "--snapshot", "--availability"])
+@pytest.mark.parametrize("failure", [RuntimeError, OSError, ValueError])
+def test_root_resolution_errors_stop_before_any_ledger_read(
+    tmp_path: Path,
+    overhead_module: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    mode: str | None,
+    failure: type[Exception],
+) -> None:
+    native_resolve = Path.resolve
+    calls = 0
+
+    def failed_resolve(path: Path, *args: Any, **kwargs: Any) -> Path:
+        nonlocal calls
+        if path == tmp_path:
+            calls += 1
+            raise failure("private-root-probe")
+        return native_resolve(path, *args, **kwargs)
+
+    def forbidden_read(*args: Any, **kwargs: Any) -> None:
+        pytest.fail("root resolution failure must stop before ledger/Git reads")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "resolve", failed_resolve)
+        for name in ("build_report", "build_snapshot", "build_availability", "_snapshot_git"):
+            patch.setattr(overhead_module, name, forbidden_read)
+        arguments = [str(tmp_path), "--format", "json"]
+        if mode:
+            arguments.append(mode)
+        assert overhead_module.main(arguments) == 2
+    captured = capsys.readouterr()
+    assert calls == 1
+    assert captured.out == ""
+    assert captured.err == "approval-overhead: repository: root path could not be resolved\n"
+
+
+@pytest.mark.parametrize("mode", [None, "--snapshot", "--availability"])
+def test_cyclic_root_has_only_the_safe_cli_error(tmp_path: Path, mode: str | None) -> None:
+    root = tmp_path / "private-root-probe"
+    try:
+        root.symlink_to(root.name, target_is_directory=True)
+    except (NotImplementedError, OSError) as error:
+        pytest.skip(f"directory symlinks are unavailable: {type(error).__name__}")
+    arguments = ["--format", "json"]
+    if mode:
+        arguments.append(mode)
+    result = _run_overhead(root, *arguments)
+    assert result.returncode == 2
+    assert result.stdout == b""
+    assert result.stderr.replace(b"\r\n", b"\n") == (
+        b"approval-overhead: repository: root path could not be resolved\n"
+    )
+
+
+@pytest.mark.parametrize("failure", [RuntimeError, OSError, ValueError, RecursionError])
+def test_internal_build_errors_are_not_reclassified_as_root_input_errors(
+    tmp_path: Path,
+    overhead_module: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: type[Exception],
+) -> None:
+    def failed_build(*args: Any, **kwargs: Any) -> None:
+        raise failure("internal-build-probe")
+
+    monkeypatch.setattr(overhead_module, "build_report", failed_build)
+    with pytest.raises(failure, match="internal-build-probe"):
+        overhead_module.main([str(tmp_path)])
+
+
+@pytest.mark.parametrize("field", ["decision_unit_id", "current_state"])
+@pytest.mark.parametrize("encoding", ["utf-8", "ascii", "gbk"])
+@pytest.mark.parametrize("output_format", ["json", "text"])
+def test_unicode_legacy_projection_survives_stdout_encoding_without_changing_values(
+    tmp_path: Path,
+    overhead_module: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    encoding: str,
+    output_format: str,
+) -> None:
+    directory = _ledger(tmp_path)
+    label = "synthetic_\u4e2d\U0001f9ea"
+    approval = _approval("spec", actor=label)
+    if field == "decision_unit_id":
+        approval[field] = label
+    else:
+        (directory / "task.yaml").write_text(
+            f"task_id: TASK-0001\ncurrent_state: {label}\n", encoding="utf-8"
+        )
+    (directory / "approvals.json").write_text(
+        json.dumps([approval], ensure_ascii=False), encoding="utf-8"
+    )
+    (directory / "events.jsonl").write_text(
+        json.dumps(_event("task_created", sequence=1)) + "\n", encoding="utf-8"
+    )
+    expected = overhead_module.build_report(tmp_path)
+    before = _tree_bytes(tmp_path)
+
+    with (
+        io.BytesIO() as buffer,
+        io.TextIOWrapper(buffer, encoding=encoding, newline="\n") as output,
+    ):
+        with monkeypatch.context() as patch:
+            patch.setattr(sys, "stdout", output)
+            assert overhead_module.main([str(tmp_path), "--format", output_format]) == 0
+        output.flush()
+        in_process = buffer.getvalue()
+    result = _run_overhead(tmp_path, "--format", output_format, encoding=encoding)
+
+    assert result.returncode == 0
+    assert result.stderr == b""
+    assert result.stdout.replace(b"\r\n", b"\n") == in_process
+    if output_format == "json":
+        assert json.loads(result.stdout.decode("ascii")) == expected
+    else:
+        text = overhead_module._text(expected) + "\n"
+        assert result.stdout.replace(b"\r\n", b"\n") == text.encode(
+            encoding, errors="backslashreplace"
+        )
+    assert _tree_bytes(tmp_path) == before
+
+
+def test_text_main_accepts_a_string_stream_without_an_encoding(
+    tmp_path: Path, overhead_module: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    directory = _ledger(tmp_path)
+    (directory / "approvals.json").write_text("[]", encoding="utf-8")
+    (directory / "events.jsonl").write_text(
+        json.dumps(_event("task_created", sequence=1)) + "\n", encoding="utf-8"
+    )
+    expected = overhead_module._text(overhead_module.build_report(tmp_path)) + "\n"
+    output = io.StringIO()
+    monkeypatch.setattr(sys, "stdout", output)
+
+    assert overhead_module.main([str(tmp_path), "--format", "text"]) == 0
+
+    assert output.getvalue() == expected
