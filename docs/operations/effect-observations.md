@@ -40,6 +40,10 @@ python tools/analysis/approval_overhead.py --snapshot --format text
 python tools/analysis/approval_overhead.py --snapshot --format json
 ```
 
+当前工具的 JSON 使用 ASCII 转义，解码后字段和原文字保持不变；默认 text 仅将当前输出编码无法表示的字符转义，正常 UTF-8 文本保持原样。上文历史版本的原始输出与 hash 仍按该固定版本复算。
+
+账本 JSON／YAML／事件行超出解析器整数或嵌套能力时，停止报告并按原文件／行定位返回输入错误；默认统计、快照和可用性模式均不输出 traceback 或部分成功报告。根路径无法解析时也返回固定路径错误，不回显路径或换用其他根重试。错误退出码为 `2`，stdout 为空；这些错误不改变账本、批准或原结果。
+
 快照格式版本为 `1.0`，用途标识为 `tracked_ledger_snapshot`。它先固定 `HEAD`，再读取该
 提交中明确匹配的 `.ai/tasks/TASK-*/task.yaml`、`classification.json`、`events.jsonl`、
 `evidence.json`、`reviews/REV-*-r*.json` 及同 task tracked

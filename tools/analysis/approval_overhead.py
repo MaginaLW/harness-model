@@ -111,7 +111,7 @@ def _read_json(path: Path, task_id: str) -> Any:
         return json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError as error:
         raise _error(task_id, path.name, "file is required") from error
-    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+    except (OSError, ValueError, RecursionError) as error:
         raise _error(task_id, path.name, "invalid JSON") from error
 
 
@@ -120,7 +120,7 @@ def _read_yaml(path: Path, task_id: str) -> Any:
         return yaml.safe_load(path.read_text(encoding="utf-8"))
     except FileNotFoundError as error:
         raise _error(task_id, path.name, "file is required") from error
-    except (OSError, UnicodeError, yaml.YAMLError) as error:
+    except (OSError, ValueError, RecursionError, yaml.YAMLError) as error:
         raise _error(task_id, path.name, "invalid YAML") from error
 
 
@@ -170,7 +170,7 @@ def _read_events(path: Path, task_id: str) -> list[dict[str, Any]]:
             raise _error(task_id, path.name, f"blank line at {line_number}")
         try:
             event = json.loads(line)
-        except json.JSONDecodeError as error:
+        except (ValueError, RecursionError) as error:
             raise _error(task_id, path.name, f"invalid JSON at line {line_number}") from error
         event = _require_mapping(event, task_id, path.name)
         if not REQUIRED_EVENT_FIELDS.issubset(event):
@@ -489,7 +489,7 @@ def _snapshot_document(contents: bytes, task_id: str, filename: str) -> dict[str
             if filename == "task.yaml"
             else json.loads(contents, object_pairs_hook=_unique_snapshot_mapping)
         )
-    except (UnicodeError, ValueError, yaml.YAMLError) as error:
+    except (ValueError, RecursionError, yaml.YAMLError) as error:
         raise _error(task_id, filename, "invalid document") from error
     value = _require_mapping(value, task_id, filename)
     if value.get("task_id") != task_id:
@@ -1162,7 +1162,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     arguments = parser.parse_args(argv)
     try:
-        repository = arguments.repository.resolve()
+        try:
+            repository = arguments.repository.resolve()
+        except (OSError, RuntimeError, ValueError) as error:
+            raise LedgerDataError("repository: root path could not be resolved") from error
         if arguments.availability:
             report = build_availability(repository)
         elif arguments.snapshot:
@@ -1173,7 +1176,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"approval-overhead: {error}", file=sys.stderr)
         return 2
     if arguments.format == "json":
-        print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        print(json.dumps(report, ensure_ascii=True, sort_keys=True))
     elif arguments.availability:
         print(
             "Confidence evidence availability (read-only; unestimated): "
@@ -1192,7 +1195,12 @@ def main(argv: list[str] | None = None) -> int:
             "Checks, review revisions and retries do not increase independent samples."
         )
     else:
-        print(_text(report))
+        text = _text(report)
+        if sys.stdout.encoding:
+            text = text.encode(sys.stdout.encoding, errors="backslashreplace").decode(
+                sys.stdout.encoding
+            )
+        print(text)
     return 0
 
 

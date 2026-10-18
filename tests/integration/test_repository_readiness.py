@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import stat
@@ -67,6 +68,82 @@ def tree_bytes(root: Path) -> dict[str, bytes]:
         for path in root.rglob("*")
         if path.is_file() and not path.is_symlink()
     }
+
+
+@pytest.mark.parametrize("invocation", ("subprocess", "in_process"))
+@pytest.mark.parametrize("stream_encoding", ("ascii", "gbk", "utf-8"))
+@pytest.mark.parametrize("output_format", ("json", "text"))
+@pytest.mark.parametrize("unicode_root", (False, True))
+def test_inventory_preserves_unicode_metadata_with_restricted_stdout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    invocation: str,
+    stream_encoding: str,
+    output_format: str,
+    unicode_root: bool,
+) -> None:
+    name = "repository-仓库🙂" if unicode_root else "repository"
+    repository = create_repository(tmp_path / name)
+    expected = repository_readiness.build_inventory(repository)
+    before = tree_bytes(repository)
+    arguments = ["--repo", str(repository), "--format", output_format]
+
+    if invocation == "subprocess":
+        environment = dict(os.environ, PYTHONIOENCODING=stream_encoding)
+        result = subprocess.run(
+            [sys.executable, "-B", str(SCRIPT), *arguments],
+            capture_output=True,
+            check=False,
+            encoding=stream_encoding,
+            env=environment,
+            timeout=20,
+        )
+        returncode, output, errors = result.returncode, result.stdout, result.stderr
+    else:
+        with io.BytesIO() as buffer:
+            with io.TextIOWrapper(buffer, encoding=stream_encoding, newline="\n") as stream:
+                with monkeypatch.context() as patch:
+                    patch.setattr(sys, "stdout", stream)
+                    returncode = repository_readiness.main(arguments)
+                    stream.flush()
+                output = buffer.getvalue().decode(stream_encoding)
+        errors = capsys.readouterr().err
+
+    assert returncode == 0, errors
+    assert errors == ""
+    if output_format == "json":
+        assert output.isascii()
+        assert json.loads(output) == expected
+    else:
+        displayed_name = {
+            "ascii": r"repository-\u4ed3\u5e93\U0001f642",
+            "gbk": "repository-仓库" + r"\U0001f642",
+            "utf-8": name,
+        }[stream_encoding]
+        if not unicode_root:
+            displayed_name = name
+        assert "/" + displayed_name + "\n" in output
+        assert "HEAD: " + expected["repository"]["head"] + "\n" in output
+        assert "Branch: main\n" in output
+        assert "Dirty paths: " + str(expected["repository"]["dirty"]["path_count"]) + "\n" in output
+        if stream_encoding == "utf-8":
+            assert output == repository_readiness._text_report(expected) + "\n"
+    assert tree_bytes(repository) == before
+
+
+def test_inventory_text_main_accepts_stdout_without_an_encoding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository-仓库🙂")
+    expected = repository_readiness.build_inventory(repository)
+    before = tree_bytes(repository)
+    stream = io.StringIO()
+    with monkeypatch.context() as patch:
+        patch.setattr(sys, "stdout", stream)
+        assert repository_readiness.main(["--repo", str(repository)]) == 0
+    assert stream.getvalue() == repository_readiness._text_report(expected) + "\n"
+    assert tree_bytes(repository) == before
 
 
 def test_inventory_is_read_only_and_consistent_from_a_subdirectory(tmp_path: Path) -> None:

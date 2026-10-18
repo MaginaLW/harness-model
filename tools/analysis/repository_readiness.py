@@ -316,9 +316,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"inventory error [{error.code}]: {error.message}", file=sys.stderr)
         return 2
     if arguments.format == "json":
-        print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        print(json.dumps(report, ensure_ascii=True, sort_keys=True))
     else:
-        print(_text_report(report))
+        encoding = sys.stdout.encoding or "utf-8"
+        print(_text_report(report).encode(encoding, errors="backslashreplace").decode(encoding))
     return 0
 
 
