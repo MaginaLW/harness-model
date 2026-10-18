@@ -20,7 +20,7 @@
 
 项目所有者已为 `review_detection` 粗略研究采用 95% 覆盖、等尾双侧 `alpha=0.05`（每尾 `0.025`），区间总宽 `U-L<=0.20`（20 个百分点）；不是 ±20 个百分点、模型 95% 可靠或能力阈值。该决定只确定这项研究精度，不认证来源、总体、独立真值/裁定、相关组、窗口、预算或风险接受已经成立。条件性样本规划只是设计需求，不是实际合格 N、样本充分或新预算；3-A、S2/S3 与整体 Phase 3 的准入状态保持原结论。
 
-项目所有者已整体采用[有限研究范围](../superpowers/specs/review-detection-admission.md)：纯文档契约首次专项审核、未来固定 30 日窗口、既有公开来源与原预算、相关组选择及非评分回退。首个 [S2 离线数学模块](../operations/review-detection.md)已按[独立合同](../superpowers/specs/review-detection-offline.md)交付并验证 synthetic 计算；真实输入实现与观察尚未准入，真实原件、独立真值、质量条件与 `T0/T1` 仍待核定。该子模块不构成整体 S2 或 Phase 3 退出，不改写原三门基线或整体阶段状态。
+项目所有者已整体采用[有限研究范围](../superpowers/specs/review-detection-admission.md)：纯文档契约首次专项审核、未来固定 30 日窗口、既有公开来源与原预算、相关组选择及非评分回退。首个 [S2 离线数学模块](../operations/review-detection.md)已按[独立合同](../superpowers/specs/review-detection-offline.md)交付并验证 synthetic 计算；[记录级合成分析](../operations/review-detection-analysis.md)另提供记录接口与整批回退的离线实现。真实输入启用与观察尚未准入，真实原件、独立真值、质量条件与 `T0/T1` 仍待核定。这些局部交付不构成整体 S2 或 Phase 3 退出，不改写原三门基线或整体阶段状态。
 
 | 能力包 | 独立进入条件 | 退出所需证据 | 当前状态 |
 |---|---|---|---|
