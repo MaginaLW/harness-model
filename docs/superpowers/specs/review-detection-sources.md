@@ -23,9 +23,11 @@ OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_source
 1. 完整 SHA 指向本地 commit 对象；不解析分支、标签或替换对象。
 2. 该 commit 的精确路径存在，且为单一 `100644` 或 `100755` 普通 blob。目录、符号链接和 submodule 不能作为普通原件读取。
 3. 树中实际 blob 与声明 `git_blob` 相等；不符时不读取另一 blob 正文。
-4. 读取对应 blob 的实际字节，复算 Git SHA-1 对象 ID，并输出内容 SHA-256 和字节数；不输出正文。每件 blob 最多 1 MiB，此限额仅约束本地读取资源，不是样本数、审核预算或统计门槛。先读对象大小，超限不读正文。
+4. 读取对应 blob 的实际字节，复算 Git SHA-1 对象 ID，并输出内容 SHA-256 和字节数；不输出正文。每件 blob 的接收上限为 1 MiB，此限额仅约束本地读取资源，不是样本数、审核预算或统计门槛。先读对象大小，超限不读正文。
 
-复用 `approval_overhead._snapshot_git` 的隔离调用：清除继承的 `GIT_*`，禁全局／系统配置、replace objects、交互、可选锁、lazy fetch 和协议访问，每次 Git 调用上限 30 秒。命令只读，不执行 checkout、fetch、hooks、filters 或被读内容；不改变该辅助函数及既有快照范围。
+对象头部声明的大小不作为实际输出长度保证。正文使用无缓冲管道，最多读取声明大小加一个超量探测字节（因而每件管道读取硬上界为 1 MiB + 1 字节）；探测字节只用于拒绝多余输出，不增加可接受正文上限。超量、短读、进程失败或超时均保留 `unavailable/GIT_READ_UNAVAILABLE`，不输出部分正文；终止并回收子进程、关闭管道。原有 30 秒期限同时覆盖正文读取与等待进程退出，stderr 不捕获。默认快照、availability 及其他未指定输出上界的 Git 调用保持原路径。
+
+复用 `approval_overhead._snapshot_git` 的隔离调用：清除继承的 `GIT_*`，禁全局／系统配置、replace objects、交互、可选锁、lazy fetch 和协议访问，每次 Git 调用上限 30 秒。命令只读，不执行 checkout、fetch、hooks、filters 或被读内容；未指定输出上界的既有调用与快照范围保持不变。
 
 ## 输出与限制
 
@@ -60,7 +62,7 @@ CLI 增加 `input_sha256` 与 `executed_tool_sha256`，仅绑定实际 stdin 和
 
 - 在真实 Git 夹具上核正确绑定、不同版本的候选／契约、错误 blob、缺对象／路径及 commit 类型冲突；工作树内容不能替代 Git 原件。
 - literal 文件名中的 `*`、`[`、pathspec magic 不扩大读取；目录、symlink、submodule 和范围外引用均不能按普通文档通过。
-- PR／null 保留未核；错误 blob 不读其他正文，超限不读正文，字节 hash 与长度不符不能命中。
+- PR／null 保留未核；错误 blob 不读其他正文，声明超限不读正文，字节 hash 与长度不符不能命中。真实损坏 loose object 的声明大小为 0、1 或 1 MiB 而正文更大时，实际读取仍受声明大小加一个探测字节约束，默认与定位模式均不认证部分正文。
 - 继承 `GIT_DIR` 等、replace refs 不能改变对象；缺本地对象不触发联网。固定仓库失败为安全错误，引用级故障与原值保留。
 - 不修改输入、Git refs、工作树或输入来源，不回显正文；现有声明工具的 no-I/O 和 synthetic 数学接口原样通过。
 - 在本仓明确的真实文档引用上做一次非评分核对，给出真实匹配和受控错误引用的冲突；它是来源能力验证，不是自然审核单位、独立缺陷真值或研究样本。

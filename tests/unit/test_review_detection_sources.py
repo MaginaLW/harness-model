@@ -11,6 +11,8 @@ import os
 import runpy
 import subprocess
 import sys
+import tempfile
+import zlib
 from pathlib import Path
 from typing import Any
 
@@ -244,15 +246,17 @@ def test_blob_sha_cannot_be_used_as_source_commit(checker: Any, repository: dict
 def test_wrong_blob_never_reads_either_blob_body(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    import approval_overhead
+
     other = _blob(repository["root"], b"another private blob\n")
     commands: list[list[str]] = []
-    native_run = subprocess.run
+    original_snapshot = approval_overhead._snapshot_git
 
-    def observed_run(command: list[str], **options: Any) -> Any:
-        commands.append(command)
-        return native_run(command, **options)
+    def observed_snapshot(root: Path, *arguments: str, **options: Any) -> bytes:
+        commands.append(list(arguments))
+        return original_snapshot(root, *arguments, **options)
 
-    monkeypatch.setattr(subprocess, "run", observed_run)
+    monkeypatch.setattr(approval_overhead, "_snapshot_git", observed_snapshot)
     reference = _reference(repository, git_blob=other)
     item = _candidate_check(checker.build_source_checks(repository["root"], _document(reference)))
     assert item["reason"] == "GIT_BLOB_MISMATCH"
@@ -336,6 +340,8 @@ def test_pathspec_patterns_cannot_select_a_different_existing_file(
 def test_null_pr_and_out_of_scope_references_remain_unread(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch, kind: str
 ) -> None:
+    import approval_overhead
+
     reference: Any = None
     reason = "REFERENCE_NOT_PROVIDED"
     if kind == "pr":
@@ -348,14 +354,14 @@ def test_null_pr_and_out_of_scope_references_remain_unread(
     elif kind == "outside":
         reference = _reference(repository, path="src/private.md")
         reason = "PATH_OUTSIDE_DOCS_SCOPE"
-    native_run = subprocess.run
+    original_snapshot = approval_overhead._snapshot_git
     commands: list[list[str]] = []
 
-    def observed_run(command: list[str], **options: Any) -> Any:
-        commands.append(command)
-        return native_run(command, **options)
+    def observed_snapshot(root: Path, *arguments: str, **options: Any) -> bytes:
+        commands.append(list(arguments))
+        return original_snapshot(root, *arguments, **options)
 
-    monkeypatch.setattr(subprocess, "run", observed_run)
+    monkeypatch.setattr(approval_overhead, "_snapshot_git", observed_snapshot)
     item = _candidate_check(checker.build_source_checks(repository["root"], _document(reference)))
     assert (item["status"], item["reason"]) == ("not_checked", reason)
     assert item["reported_reference"] == reference
@@ -366,18 +372,20 @@ def test_null_pr_and_out_of_scope_references_remain_unread(
 def test_blob_resource_limit_is_checked_before_any_body_read(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch, size: int
 ) -> None:
+    import approval_overhead
+
     root = repository["root"]
     contents = b"x" * size
     blob = _blob(root, contents)
     commit = _commit(root, [("100644", "blob", blob, "large.md")])
     commands: list[list[str]] = []
-    native_run = subprocess.run
+    original_snapshot = approval_overhead._snapshot_git
 
-    def observed_run(command: list[str], **options: Any) -> Any:
-        commands.append(command)
-        return native_run(command, **options)
+    def observed_snapshot(root: Path, *arguments: str, **options: Any) -> bytes:
+        commands.append(list(arguments))
+        return original_snapshot(root, *arguments, **options)
 
-    monkeypatch.setattr(subprocess, "run", observed_run)
+    monkeypatch.setattr(approval_overhead, "_snapshot_git", observed_snapshot)
     reference = _reference(repository, source_commit=commit, path="docs/large.md", git_blob=blob)
     item = _candidate_check(checker.build_source_checks(root, _document(reference)))
     if size > 1024 * 1024:
@@ -388,6 +396,78 @@ def test_blob_resource_limit_is_checked_before_any_body_read(
         assert item["status"] == "matched_git_object"
         assert item["observed"]["bytes_read"] == size
         assert item["observed"]["content_sha256"] == hashlib.sha256(contents).hexdigest()
+
+
+@pytest.mark.parametrize("resolve_locators", [False, True])
+@pytest.mark.parametrize("declared_size", [0, 1, 1024 * 1024])
+def test_malformed_loose_blob_body_is_bounded_while_git_overstates_its_safety(
+    checker: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    declared_size: int,
+    resolve_locators: bool,
+) -> None:
+    import approval_overhead
+
+    with tempfile.TemporaryDirectory(prefix="harness-bounded-source-") as directory:
+        root = Path(directory)
+        _git(root, "init", "--quiet")
+        contents = b"x" * (1024 * 1024 + 1)
+        malformed = f"blob {declared_size}\0".encode("ascii") + contents
+        blob = hashlib.sha1(malformed).hexdigest()
+        object_path = root / ".git" / "objects" / blob[:2] / blob[2:]
+        object_path.parent.mkdir()
+        object_path.write_bytes(zlib.compress(malformed))
+        commit = _commit(root, [("100644", "blob", blob, "contract.md")])
+        assert int(_git(root, "cat-file", "-s", blob)) == declared_size
+        assert _git(root, "cat-file", "blob", blob) == contents
+        reference = _reference({"commit": commit, "blob": blob})
+        before = _state(root)
+        original_snapshot = approval_overhead._snapshot_git
+        original_popen = subprocess.Popen
+        body_limits: list[int | None] = []
+        body_reads: list[int] = []
+
+        class ObservedPipe:
+            def __init__(self, pipe: Any) -> None:
+                self.pipe = pipe
+
+            def __getattr__(self, name: str) -> Any:
+                return getattr(self.pipe, name)
+
+            def read(self, size: int = -1) -> bytes:
+                data = self.pipe.read(size)
+                body_reads.append(len(data))
+                return data
+
+        def observed_popen(command: list[str], **options: Any) -> Any:
+            process = original_popen(command, **options)
+            if _body_command(command):
+                assert process.stdout is not None
+                process.stdout = ObservedPipe(process.stdout)
+            return process
+
+        def observed_snapshot(repository: Path, *arguments: str, **options: Any) -> bytes:
+            if _body_command(list(arguments)):
+                body_limits.append(options.get("output_limit"))
+            return original_snapshot(repository, *arguments, **options)
+
+        monkeypatch.setattr(subprocess, "Popen", observed_popen)
+        monkeypatch.setattr(approval_overhead, "_snapshot_git", observed_snapshot)
+        report = checker.build_source_checks(
+            root, _document(reference), resolve_locators=resolve_locators
+        )
+        item = _candidate_check(report)
+        assert (item["status"], item["reason"]) == ("unavailable", "GIT_READ_UNAVAILABLE")
+        assert item["observed"]["bytes_read"] is None
+        assert item["observed"]["content_sha256"] is None
+        assert item["reported_reference"] == reference
+        if resolve_locators:
+            assert item["locator_check"] == _unlocated("not_evaluated", "SOURCE_NOT_MATCHED")
+        assert body_reads
+        assert sum(body_reads) <= declared_size + 1
+        assert body_limits == [declared_size]
+        assert PRIVATE not in json.dumps(report)
+        assert _state(root) == before
 
 
 def test_inherited_git_redirection_and_replace_refs_cannot_change_original_objects(
@@ -476,21 +556,29 @@ def test_empty_package_creates_no_candidate_or_window(
 def test_reference_level_read_faults_preserve_input_without_partial_authentication(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch, issue: str
 ) -> None:
+    import approval_overhead
+
+    original_snapshot = approval_overhead._snapshot_git
     native_run = subprocess.run
 
-    def altered_run(command: list[str], **options: Any) -> Any:
-        result = native_run(command, **options)
-        if "cat-file" not in command:
-            return result
-        if issue == "read_error" and "-s" in command:
+    def failed_run(command: list[str], **options: Any) -> Any:
+        if issue == "read_error" and "cat-file" in command and "-s" in command:
             raise OSError(PRIVATE)
+        return native_run(command, **options)
+
+    def altered_snapshot(root: Path, *arguments: str, **options: Any) -> bytes:
+        result = original_snapshot(root, *arguments, **options)
+        command = list(arguments)
+        if "cat-file" not in arguments:
+            return result
         if issue == "size" and "-s" in command:
-            return subprocess.CompletedProcess(command, 0, stdout=b"999\n", stderr=b"")
+            return b"999\n"
         if issue == "body" and _body_command(command):
-            return subprocess.CompletedProcess(command, 0, stdout=b"x" * len(CONTENT), stderr=b"")
+            return b"x" * len(CONTENT)
         return result
 
-    monkeypatch.setattr(subprocess, "run", altered_run)
+    monkeypatch.setattr(subprocess, "run", failed_run)
+    monkeypatch.setattr(approval_overhead, "_snapshot_git", altered_snapshot)
     reference = _reference(repository)
     item = _candidate_check(checker.build_source_checks(repository["root"], _document(reference)))
     assert item["status"] in {"conflict", "unavailable"}
@@ -732,15 +820,16 @@ def test_actual_git_calls_are_isolated_local_read_only_and_bounded(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     native_run = subprocess.run
+    native_popen = subprocess.Popen
     commands: list[list[str]] = []
+    body_commands: list[list[str]] = []
     for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_OBJECT_DIRECTORY", "GIT_CONFIG_COUNT"):
         monkeypatch.setenv(name, PRIVATE)
 
-    def inspected_run(command: list[str], **options: Any) -> Any:
+    def inspect_environment(command: list[str], options: dict[str, Any]) -> None:
         commands.append(command)
         assert "--no-replace-objects" in command
         assert "--no-pager" in command
-        assert options["timeout"] == 30
         environment = options["env"]
         assert environment["GIT_CONFIG_GLOBAL"] == os.devnull
         assert environment["GIT_CONFIG_SYSTEM"] == os.devnull
@@ -753,9 +842,24 @@ def test_actual_git_calls_are_isolated_local_read_only_and_bounded(
             for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_OBJECT_DIRECTORY", "GIT_CONFIG_COUNT")
         )
         assert any(name in command for name in ("rev-parse", "cat-file", "ls-tree"))
+
+    def inspected_run(command: list[str], **options: Any) -> Any:
+        inspect_environment(command, options)
+        assert options["timeout"] == 30
         return native_run(command, **options)
 
+    def inspected_popen(command: list[str], **options: Any) -> Any:
+        inspect_environment(command, options)
+        if _body_command(command):
+            body_commands.append(command)
+            assert options["stdin"] == subprocess.DEVNULL
+            assert options["stdout"] == subprocess.PIPE
+            assert options["stderr"] == subprocess.DEVNULL
+            assert options["bufsize"] == 0
+        return native_popen(command, **options)
+
     monkeypatch.setattr(subprocess, "run", inspected_run)
+    monkeypatch.setattr(subprocess, "Popen", inspected_popen)
     document = _document(_reference(repository))
     document["candidates"][0]["refs"]["report"] = _reference(repository, source_commit="0" * 40)
     before = _state(repository["root"])
@@ -769,6 +873,7 @@ def test_actual_git_calls_are_isolated_local_read_only_and_bounded(
     assert missing["reason"] == "GIT_READ_UNAVAILABLE"
     assert _state(repository["root"]) == before
     assert commands
+    assert len(body_commands) == 1
 
 
 @pytest.mark.parametrize(
@@ -1079,6 +1184,8 @@ def test_unsupported_locator_is_not_interpreted_as_an_anchor(
 def test_same_git_object_is_read_once_but_each_locator_retains_its_own_result(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    import approval_overhead
+
     first = _reference(repository, locator=_line_selector(1, 1, b"# Contract\n"))
     second = _reference(repository, locator=_line_selector(2, 2, b"\n"))
     conflict = _reference(repository, locator=_line_selector(1, 1, b"other\n"))
@@ -1087,13 +1194,13 @@ def test_same_git_object_is_read_once_but_each_locator_retains_its_own_result(
     document["candidates"][0]["opportunities"] = [_opportunity(first)]
     original = copy.deepcopy(document)
     commands: list[list[str]] = []
-    native_run = subprocess.run
+    original_snapshot = approval_overhead._snapshot_git
 
-    def observed_run(command: list[str], **options: Any) -> Any:
-        commands.append(command)
-        return native_run(command, **options)
+    def observed_snapshot(root: Path, *arguments: str, **options: Any) -> bytes:
+        commands.append(list(arguments))
+        return original_snapshot(root, *arguments, **options)
 
-    monkeypatch.setattr(subprocess, "run", observed_run)
+    monkeypatch.setattr(approval_overhead, "_snapshot_git", observed_snapshot)
     before = _state(repository["root"])
     report = checker.build_source_checks(repository["root"], document, resolve_locators=True)
     by_location = {item["input_locator"]: item for item in report["source_checks"]}
@@ -1158,6 +1265,8 @@ def test_locator_uses_declared_version_even_when_head_and_worktree_have_matching
 def test_locator_cannot_bypass_source_gate_or_add_object_reads(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch, kind: str
 ) -> None:
+    import approval_overhead
+
     reference: Any = _reference(repository, locator="lines-v1:invalid")
     if kind == "null":
         reference = None
@@ -1178,13 +1287,13 @@ def test_locator_cannot_bypass_source_gate_or_add_object_reads(
     else:
         reference = _committed_reference(repository, b"x" * (1024 * 1024 + 1), "lines-v1:invalid")
     commands: list[list[str]] = []
-    native_run = subprocess.run
+    original_snapshot = approval_overhead._snapshot_git
 
-    def observed_run(command: list[str], **options: Any) -> Any:
-        commands.append(command)
-        return native_run(command, **options)
+    def observed_snapshot(root: Path, *arguments: str, **options: Any) -> bytes:
+        commands.append(list(arguments))
+        return original_snapshot(root, *arguments, **options)
 
-    monkeypatch.setattr(subprocess, "run", observed_run)
+    monkeypatch.setattr(approval_overhead, "_snapshot_git", observed_snapshot)
     document = _document(reference)
     default = checker.build_source_checks(repository["root"], document)
     default_commands = commands.copy()
@@ -1205,15 +1314,17 @@ def test_locator_cannot_bypass_source_gate_or_add_object_reads(
 def test_mismatched_source_bytes_never_resolve_a_locator(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    native_run = subprocess.run
+    import approval_overhead
 
-    def corrupted_run(command: list[str], **options: Any) -> Any:
-        result = native_run(command, **options)
-        if _body_command(command):
-            return subprocess.CompletedProcess(command, 0, stdout=b"x" * len(CONTENT), stderr=b"")
+    original_snapshot = approval_overhead._snapshot_git
+
+    def corrupted_snapshot(root: Path, *arguments: str, **options: Any) -> bytes:
+        result = original_snapshot(root, *arguments, **options)
+        if _body_command(list(arguments)):
+            return b"x" * len(CONTENT)
         return result
 
-    monkeypatch.setattr(subprocess, "run", corrupted_run)
+    monkeypatch.setattr(approval_overhead, "_snapshot_git", corrupted_snapshot)
     reference = _reference(repository, locator=_line_selector(1, 1, b"x" * len(CONTENT)))
     item = _candidate_check(
         checker.build_source_checks(repository["root"], _document(reference), resolve_locators=True)
