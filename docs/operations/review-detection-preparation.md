@@ -19,6 +19,8 @@ git show <CANDIDATE_COMMIT>:<REPO_RELATIVE_PATH>
 
 候选与先前契约分别使用各自的固定提交；先前契约须核适用关系与入口前存在依据，不用候选中新改文字冒充旧契约。`ls-tree` 核对普通文件的 mode、blob 与路径，符号链接或子模块不按普通原件处理；提交显示的时间不独自证明输入固定或实际时序。
 
+明确供给的 Git 文档引用可用[独立本地原件核对](review-detection-input.md#本地-git-原件核对)检查 commit、精确路径、普通 blob 和实际字节。它不解析 semantic locator，不核定自然变更范围、真实时序、独立真值或准入，PR 与未支持来源继续保留缺口。
+
 不另存审核输入、capture、原聊天、身份、会话日志或 oracle，不新增结果库、采集器或 Schema。公开保存仍按[既有边界](effect-observations.md#保存与隐私边界)执行；本页模板只供原 PR／CLI 流程中的人工语义说明，不是新增必填接口，也不能把模板字段送入现有 v2 块或 CLI Schema。
 
 ## 核对入口事实，再声明机会与窗口
