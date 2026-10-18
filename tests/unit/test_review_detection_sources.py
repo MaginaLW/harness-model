@@ -593,6 +593,69 @@ def test_invalid_repository_roots_are_rejected_without_path_or_error_disclosure(
     assert result.stderr.decode().strip() == ERROR
 
 
+@pytest.mark.parametrize("resolve_locators", [False, True])
+def test_cyclic_repository_root_has_only_the_safe_cli_error(
+    tmp_path: Path, resolve_locators: bool
+) -> None:
+    root = tmp_path / PRIVATE
+    try:
+        root.symlink_to(root.name, target_is_directory=True)
+    except (NotImplementedError, OSError) as error:
+        pytest.skip(f"directory symlinks are unavailable: {type(error).__name__}")
+    try:
+        result = _cli(root, json.dumps(_document(None)).encode(), resolve_locators=resolve_locators)
+    finally:
+        root.unlink()
+    assert result.returncode == 2
+    assert result.stdout == b""
+    assert result.stderr.decode().strip() == ERROR
+    assert PRIVATE.encode() not in result.stderr
+    assert b"Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("failed_resolution", [1, 2], ids=["supplied-root", "git-root"])
+@pytest.mark.parametrize("resolve_locators", [False, True])
+def test_both_repository_resolution_failures_are_safe_at_library_and_cli_boundaries(
+    checker: Any,
+    repository: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failed_resolution: int,
+    resolve_locators: bool,
+) -> None:
+    root = repository["root"]
+    document = _document(None)
+    native_resolve = Path.resolve
+    resolution_calls = 0
+
+    def failed_resolve(path: Path, *arguments: Any, **options: Any) -> Path:
+        nonlocal resolution_calls
+        if path == root:
+            resolution_calls += 1
+            if resolution_calls == failed_resolution:
+                raise RuntimeError(PRIVATE)
+        return native_resolve(path, *arguments, **options)
+
+    monkeypatch.setattr(Path, "resolve", failed_resolve)
+    with pytest.raises(ValueError) as error:
+        checker.build_source_checks(root, document, resolve_locators=resolve_locators)
+    assert PRIVATE not in str(error.value)
+    assert resolution_calls == failed_resolution
+
+    resolution_calls = 0
+    monkeypatch.setattr(
+        sys, "stdin", io.TextIOWrapper(io.BytesIO(json.dumps(document).encode()), encoding="utf-8")
+    )
+    flags = [str(root)] + (["--resolve-locators"] if resolve_locators else [])
+    assert checker.main(flags) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err.strip() == ERROR
+    assert PRIVATE not in captured.err
+    assert "Traceback" not in captured.err
+    assert resolution_calls == failed_resolution
+
+
 def test_actual_git_calls_are_isolated_local_read_only_and_bounded(
     checker: Any, repository: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:

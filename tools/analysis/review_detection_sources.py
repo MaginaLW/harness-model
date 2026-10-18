@@ -146,10 +146,13 @@ def build_source_checks(
     from review_detection_input import build_detection_input
 
     declarations = build_detection_input(document)
-    repository = repository.resolve(strict=True)
-    root = _snapshot_git(repository, "rev-parse", "--show-toplevel").decode("utf-8").strip()
-    if Path(root).resolve(strict=True) != repository:
-        raise ValueError("explicit repository root is required")
+    try:
+        repository = repository.resolve(strict=True)
+        root = _snapshot_git(repository, "rev-parse", "--show-toplevel").decode("utf-8").strip()
+        if Path(root).resolve(strict=True) != repository:
+            raise ValueError("explicit repository root is required")
+    except RuntimeError as error:
+        raise ValueError("repository root could not be resolved") from error
     checks: list[dict[str, Any]] = []
     cache: dict[tuple[str, str, str], tuple[dict[str, Any], bytes | None]] = {}
     for index, candidate in enumerate(declarations["reported_candidates"]):
