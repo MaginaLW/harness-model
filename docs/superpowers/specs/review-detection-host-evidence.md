@@ -2,7 +2,7 @@
 
 状态：`review-detection-host-evidence-v0.1`，`scope_decision=approved_once`，`read_state=closed`。所有者已明确批准第 3 节的一次有界只读，该轮已结束，不形成常设或重试权限。[原准入](review-detection-admission.md#2-来源职责与保存)的公开 Git／PR 范围保持；宿主返回值例外仅限这次明确批准，不修改自动快照白名单、Schema、权限或账本，不启动观察窗口。
 
-上述状态只涵盖第 1–4 节的已关闭范围；第 5 节是独立的后续候选，尚未采用或执行，不恢复原次数。
+上述状态只涵盖第 1–4 节的已关闭范围；第 5–6 节是独立的后续候选，尚未采用或执行，不恢复原次数。
 
 ## 1. 实核的协议能力与版本边界
 
@@ -95,3 +95,39 @@ codex debug prompt-input --help
 当前不能填实的通道、对象和限额继续标缺，不请求空白采集许可。需新建导出、启用遥测或改变保存边界时，先提交对应具体方案及风险决定，不借本候选实施。[官方遥测说明](https://learn.chatgpt.com/docs/config-file/config-advanced#observability-and-telemetry)不是既有读取凭据，也不能追补启用前的实际输入。
 
 获准后的路径仍须在通道／宿主／对象不匹配、返回超范围、截断、失败、预算耗尽或覆盖冲突时立即停止，不更换来源、对象或自动重试。只接受有依据的窄事实，其余保留未知；上述证据及数据／方法／质量条件未全部核定前，不设置 `T0/T1`、不登记合格单位、不估计或更新评分。
+
+## 6. 通道核定与单次握手授权候选
+
+状态：`review-detection-host-channel-v0.1`，`scope_decision=pending`，`read_state=not_started`，`binding=unknown`。本节把第 5 节的通道前提细化为可检查的请求、返回面与拒绝条件，**尚不可执行，也不请求现在批准连接**；不是第 3 节读取重试或线程／goal 读取授权。
+
+### 现有来源能核定到哪里
+
+| 项目 | 当前可核事实 | 尚未核定 |
+|---|---|---|
+| 本地 CLI | 静态 `codex --version` 为 `0.152.1`；`app-server proxy --help` 提供 `--sock <SOCKET_PATH>`。 | 没有实际 socket 或它属于当前 Desktop 的依据；CLI 版本不等于当前 Desktop／server 版本。不得探默认 socket、枚举进程或读取配置／环境来补。 |
+| 当前工具定义 | 提供摘要、goal 和账户限额接口；未暴露原始 `initialize`、`thread/turns/list` 或当前 Desktop 连接描述的匹配入口。 | 工具存在不证明代理所连 server 的版本、会话归属或协议返回范围；不通过旧对象调用试通。 |
+| 既有静态协议 | `protocol/v1/InitializeParams.json` 与 `InitializeResponse.json` 可核握手字段；不是实际连接返回。 | 未取得运行版本、实现能力或接入凭据；不启动 proxy／daemon／app-server 验证。 |
+
+成功握手在此静态基线**必需返回** `codexHome`、`platformFamily`、`platformOs`、`userAgent`。其中 `codexHome` 是本机绝对路径，可能含个人信息，不能包装成“只接收版本号”；各字符串均无 `maxLength`。响应没有独立 `serverVersion`、build、Desktop 实例或任务绑定字段；`userAgent` 也没有保证可解析版本或身份的格式。平台相同、目录相同或版本字符串相同均不能认证本次 Desktop 绑定。
+
+[官方握手及通知说明](https://learn.chatgpt.com/docs/app-server#initialization)规定每连接一次 `initialize` 并确认 `initialized`。`optOutNotificationMethods` 只按精确方法名屏蔽通知，不能通配，且不适用于请求、响应或错误；不能据此保证只接收一条成功响应。静态 JSON-RPC 错误可带任意 `data`，通知／服务器请求可能携带路径、正文或认证／工具相关材料；不由“只发 initialize”推定这些流量不会到达，也不响应任何认证或工具回调。
+
+### 待填实的单次范围
+
+以下是**拟议上限与请求内容**，不是现有通道已经支持的限额。缺任一前提就保持 blocked，不创建连接：
+
+| 待核项 | 具体候选与停止边界 |
+|---|---|
+| 端点和绑定 | 宿主提供方须从既有、受支持来源给出一个精确端点及其绑定此 Desktop 实例的可复核办法，另给实际 server 版本／构建与相应协议依据；不得从本地 CLI 或将来的 UA 猜配。当前这些值缺失，不公开端点、凭据或私密映射。 |
+| 次数与时限 | 最多建立 1 次新客户端连接、发送 1 次 `initialize` 请求；仅在匹配成功响应后发送 1 次 `initialized` 确认，然后关闭自身连接。总时限拟定 5 秒、无重连／重试／分页，不停止宿主服务，不读取任何线程或 goal。 |
+| 接收范围与上限 | 成功响应四字段，以及实际通道可能发送的错误／通知／服务器请求，必须先明确真实范围、接收者和是否含个人信息；拟定整个接收流上限 64 KiB。先证明既有通道能在接收前落实该范围和字节上限；仅客户端收满后截断、过滤或关闭不满足此要求。当前协议无此服务端参数或保证，故尚不能执行。 |
+| 授权对象 | 通道及限制核实后，所有者才能对这个填实的一次连接／握手及其实际暴露范围明确决定；不是纯数值读取，也不承诺握手绝对无日志或连接状态效果。不能用文档批准、原第 3 节批准或“只读”标签代替。 |
+| 保存与反馈 | 原始响应、路径、错误正文、认证材料及映射不落盘、不公开；仅内存核对，原 PR／CLI 追加匿名阶段、是否匹配和缺口。无来源可复核的版本或绑定仍 unknown；不把握手成功当实际派发、完整输入、独立性或预算端点。 |
+
+候选请求固定为下式；`clientInfo.version` 是本候选客户端标识，不是宿主版本。它不 opt-in 实验 API 或 attestation，不设置扩展，也不保证排除所有服务器回调：
+
+```json
+{"id":1,"method":"initialize","params":{"clientInfo":{"name":"harness_model_channel_check","version":"0.1.0"},"capabilities":{"experimentalApi":false,"requestAttestation":false,"mcpServerOpenaiFormElicitation":false}}}
+```
+
+只有资料先证明端点／绑定、实际版本、全部可能接收范围和接收前限额，才形成可提交批准的单次授权。当前缺口不能通过握手本身反向补成连接许可；不探测或自动等待通道出现，不增加导出／采集器、配置或遥测。即使未来握手获准且成功，后续任务读取仍须按第 5 节另形成具体范围，不自动续接；`T0/T1` 与观察入口继续未设置。
