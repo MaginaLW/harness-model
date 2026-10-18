@@ -2,6 +2,8 @@
 
 状态：`review-detection-sources-v0.1`。本合同补齐[声明输入检查](review-detection-input.md)不能读取引用目标的机械缺口，复用[已采用范围](review-detection-admission.md)内明确供给的文档原件。它不改变原声明工具的纯函数、默认 CLI、输入形状或 no-I/O 边界，不扩展账本快照白名单，不登记观察单位或启动窗口。
 
+[有界定位合同](review-detection-locators.md)另定义显式 opt-in 的精确行跨度核对；默认 v1 的 `locator_resolution=not_evaluated` 及以下行为不变。
+
 ## 接口与读取范围
 
 函数为 `build_source_checks(repository, document)`；显式入口为：
