@@ -72,7 +72,7 @@ def _check_reference(
         if size > _MAX_BLOB_BYTES:
             result["reason"] = "BLOB_SIZE_LIMIT"
             return result, None
-        contents = _snapshot_git(repository, "cat-file", "blob", blob)
+        contents = _snapshot_git(repository, "cat-file", "blob", blob, output_limit=size)
         if len(contents) != size:
             raise ValueError("incomplete object read")
         observed.update(bytes_read=size, content_sha256=hashlib.sha256(contents).hexdigest())

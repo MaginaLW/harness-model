@@ -15,8 +15,10 @@ import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
+from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
+from threading import Event, Timer
 from typing import Any, Iterable
 
 import yaml
@@ -325,7 +327,18 @@ def build_report(repository: Path) -> dict[str, Any]:
     }
 
 
-def _snapshot_git(repository: Path, *arguments: str, data: bytes | None = None) -> bytes:
+def _snapshot_git(
+    repository: Path,
+    *arguments: str,
+    data: bytes | None = None,
+    output_limit: int | None = None,
+) -> bytes:
+    if output_limit is not None and (
+        type(output_limit) is not int or output_limit < 0 or data is not None
+    ):
+        raise LedgerDataError(
+            "snapshot: bounded Git reads require a nonnegative limit and no stdin"
+        )
     environment = {
         key: value for key, value in os.environ.items() if not key.upper().startswith("GIT_")
     }
@@ -341,8 +354,56 @@ def _snapshot_git(repository: Path, *arguments: str, data: bytes | None = None) 
         }
     )
     try:
+        command = ["git", "--no-replace-objects", "--no-pager", "-C", str(repository), *arguments]
+        if output_limit is not None:
+            with subprocess.Popen(
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                bufsize=0,
+                env=environment,
+            ) as process:
+                assert process.stdout is not None
+                timed_out = Event()
+
+                def stop() -> None:
+                    with suppress(OSError):
+                        process.kill()
+
+                def expire() -> None:
+                    timed_out.set()
+                    stop()
+
+                watchdog = Timer(30, expire)
+                watchdog.daemon = True
+                started = False
+                try:
+                    try:
+                        watchdog.start()
+                    except RuntimeError as error:
+                        raise LedgerDataError(
+                            "snapshot: committed Git inputs could not be read"
+                        ) from error
+                    started = True
+                    contents = bytearray()
+                    while len(contents) <= output_limit:
+                        chunk = process.stdout.read(min(65536, output_limit + 1 - len(contents)))
+                        if not chunk:
+                            break
+                        contents.extend(chunk)
+                    if len(contents) > output_limit:
+                        raise LedgerDataError("snapshot: committed Git output exceeds read limit")
+                    if process.wait() != 0 or timed_out.is_set():
+                        raise LedgerDataError("snapshot: committed Git inputs could not be read")
+                    return bytes(contents)
+                finally:
+                    watchdog.cancel()
+                    stop()
+                    if started:
+                        watchdog.join()
         result = subprocess.run(
-            ["git", "--no-replace-objects", "--no-pager", "-C", str(repository), *arguments],
+            command,
             input=data,
             capture_output=True,
             env=environment,
