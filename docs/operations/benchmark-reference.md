@@ -4,7 +4,7 @@
 
 ## 使用
 
-在仓库根目录运行，读取 UTF-8 JSON，输出 JSON 到标准输出。输出使用 ASCII 转义以兼容 Windows 管道编码，JSON 解码后的文字保持原值。不写输入、账本或结果库，不访问网络、调用模型或读取本地会话。正常退出为 0，文件或数据错误为 2。
+在仓库根目录运行，读取 UTF-8 JSON，输出 JSON 到标准输出。输出使用 ASCII 转义以兼容 Windows 管道编码，JSON 解码后的文字保持原值。不写输入、账本或结果库，不访问网络、调用模型或读取本地会话。正常退出为 0，文件或数据错误为 2；错误时 stdout 为空，stderr 只输出固定说明 `Invalid reference input.`，不回显文件路径、输入原文或底层异常。
 
 ```console
 python tools/analysis/benchmark_reference.py --input docs/operations/examples/benchmark-reference/swebench.json

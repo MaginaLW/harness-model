@@ -181,7 +181,7 @@ Windows 注册安装包元数据可通过 `Get-AppxPackage -Name OpenAI.Codex` �
 ### 需要用户查看或询问的内容
 
 1. 按 [Settings 说明](https://learn.chatgpt.com/docs/app/settings)在 Windows 用 `Ctrl+,` 打开设置，查看 `Connections` 中已有页面。只记录栏目及是否有直接提供的端点／server 信息，不开启功能。[远程连接说明](https://learn.chatgpt.com/docs/remote-connections)中的 `Set up`／`Add`、允许访问及扫码会开始设置或配对，并非端点信息查询。当前用户已确认有 Connections、页面仅见远程访问开关或配对入口；这一查看已完成，无须重复，也未取得原始端点。
-2. 需要维护方提供资料时，回到输入框键入 `/`，选择实际显示的反馈入口。按[官方反馈说明](https://learn.chatgpt.com/docs/reference/troubleshooting#feedback-and-logs)检查现有 session、logs／diagnostics 等附带选项，取消附带；文档没有保证默认勾选状态。无法确认取消时关闭弹窗，不提交。只传下面的文字，不导出会话或诊断包；本轮未发送反馈。
+2. 需要维护方提供资料时，回到输入框键入 `/`，选择实际显示的反馈入口。按[官方反馈说明](https://learn.chatgpt.com/docs/reference/troubleshooting#feedback-and-logs)检查现有 session、logs／diagnostics 等附带选项，取消附带；文档没有保证默认勾选状态。无法确认取消时关闭弹窗，不提交。只传下面的文字，不导出会话或诊断包。用户已报告反馈提交；当前尚未取得维护方回复，无须重复提交。
 3. 对回复分别核对下表。反馈 session ID、连接设置可见、同版本或同目录均不替代 Desktop 绑定。若该版本没有受支持入口，记录这一明确限制，不开启配对、新服务或日志寻找替代。
 
 | 资料 | 向宿主提供方索取的可复核说明 |
