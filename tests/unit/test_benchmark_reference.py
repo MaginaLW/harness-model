@@ -436,8 +436,7 @@ def test_cli_rejects_ambiguous_or_invalid_input_without_partial_output(
 
     assert code == 2
     assert captured.out == ""
-    assert captured.err.strip()
-    assert "Traceback" not in captured.err
+    assert captured.err == "Invalid reference input.\n"
     assert input_path.read_bytes() == payload
 
 
@@ -466,7 +465,7 @@ def test_cli_rejects_duplicate_keys_even_when_last_value_is_a_valid_document(
 
     assert code == 2
     assert captured.out == ""
-    assert captured.err.strip()
+    assert captured.err == "Invalid reference input.\n"
 
 
 @pytest.mark.parametrize("file_kind", ["missing", "directory"])
@@ -480,8 +479,44 @@ def test_cli_io_errors_are_reported_without_a_traceback(
 
     assert code == 2
     assert captured.out == ""
-    assert captured.err.strip()
-    assert "Traceback" not in captured.err
+    assert captured.err == "Invalid reference input.\n"
+
+
+@pytest.mark.parametrize("stream_encoding", ["ascii", "gbk", "utf-8"])
+@pytest.mark.parametrize("failure", ["missing", "directory", "retrieved_at", "as_of"])
+def test_cli_errors_do_not_echo_paths_or_input_values(
+    tmp_path: Path, stream_encoding: str, failure: str
+) -> None:
+    marker = "SYNTHETIC_PRIVATE_中文_🙂"
+    input_path = tmp_path / f"{marker}.json"
+    original: bytes | None = None
+    if failure == "directory":
+        input_path.mkdir()
+    elif failure != "missing":
+        document = _document(_source(**{failure: marker}))
+        original = json.dumps(document, ensure_ascii=False).encode("utf-8")
+        input_path.write_bytes(original)
+    before = sorted(path.name for path in tmp_path.iterdir())
+    environment = os.environ.copy()
+    environment["PYTHONIOENCODING"] = stream_encoding
+
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--input", str(input_path)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+
+    assert result.returncode == 2
+    assert result.stdout == b""
+    assert result.stderr.splitlines() == [b"Invalid reference input."]
+    assert sorted(path.name for path in tmp_path.iterdir()) == before
+    if original is not None:
+        assert input_path.read_bytes() == original
+    if failure == "directory":
+        assert list(input_path.iterdir()) == []
 
 
 def test_standalone_script_works_without_the_repository_python_package(tmp_path: Path) -> None:

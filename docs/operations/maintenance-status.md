@@ -68,7 +68,7 @@
 
 [通道支持关系核对](../superpowers/specs/review-detection-host-evidence.md#7-已核通道的选择与落实顺序)已完成官方文档、本机静态帮助及当前工具定义的比对。App Server 有集成协议，proxy、终端 UI、执行宿主出站连接和设备配对各有不同职责；当前仍无能绑定此 Desktop 且满足返回范围／接收前限额的原始证据通道。现有检查器已配[可直接运行的空声明演练与反例入口](review-detection-preparation.md#不依赖真实任务的离线演练)，不新增采集器、结果库或 Schema。后续依赖宿主提供方的真实通道资料及自然任务证据，实际连接、读取和研究窗口均未启动。
 
-[资料获取与人工移交](../superpowers/specs/review-detection-host-evidence.md#8-资料获取安装版本与人工移交)已区分系统 CLI `0.152.1`、注册 Desktop 包 `26.1013.4894.0` 及包内 CLI `0.163.0-alpha.10.2`，后者的帮助和静态 Schema 已另核；运行 server 版本及 Desktop 绑定仍未知。用户已只读确认 Connections 页面仅有远程访问／配对入口。后续提供反馈入口的具体步骤和最小文字草稿，索取端点绑定、版本化返回面及限制依据；未发送反馈、运行完整 doctor 或实际 daemon version。64 KiB／5 秒仍为本仓候选约束，未当作平台既有保证，连接与观察窗口继续未启动。
+[资料获取与人工移交](../superpowers/specs/review-detection-host-evidence.md#8-资料获取安装版本与人工移交)已区分系统 CLI `0.152.1`、注册 Desktop 包 `26.1013.4894.0` 及包内 CLI `0.163.0-alpha.10.2`，后者的帮助和静态 Schema 已另核；运行 server 版本及 Desktop 绑定仍未知。用户已只读确认 Connections 页面仅有远程访问／配对入口，并已报告提交反馈，索取端点绑定、版本化返回面及限制依据；尚未取得维护方回复，无须重复提交。未运行完整 doctor 或实际 daemon version。64 KiB／5 秒仍为本仓候选约束，未当作平台既有保证，连接与观察窗口继续未启动。
 
 | 能力 | 已有基础 | 剩余建设与验收 |
 |---|---|---|

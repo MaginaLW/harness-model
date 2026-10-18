@@ -207,8 +207,8 @@ def main(argv: list[str] | None = None) -> int:
         )
         report = build_reference(document)
         report["input_sha256"] = hashlib.sha256(original).hexdigest()
-    except (OSError, ValueError, RecursionError) as exc:
-        print(f"Invalid reference input: {exc}", file=sys.stderr)
+    except (OSError, ValueError, RecursionError):
+        print("Invalid reference input.", file=sys.stderr)
         return 2
     print(json.dumps(report, ensure_ascii=True, sort_keys=True, allow_nan=False))
     return 0
