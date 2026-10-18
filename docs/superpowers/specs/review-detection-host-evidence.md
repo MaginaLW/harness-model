@@ -131,3 +131,25 @@ codex debug prompt-input --help
 ```
 
 只有资料先证明端点／绑定、实际版本、全部可能接收范围和接收前限额，才形成可提交批准的单次授权。当前缺口不能通过握手本身反向补成连接许可；不探测或自动等待通道出现，不增加导出／采集器、配置或遥测。即使未来握手获准且成功，后续任务读取仍须按第 5 节另形成具体范围，不自动续接；`T0/T1` 与观察入口继续未设置。
+
+## 7. 已核通道的选择与落实顺序
+
+官方文档、本机静态帮助和当前可调用工具定义的核对已完成；结论限于这些来源。第 3 节仍为 `closed`，第 5、6 节的实际接入／握手仍为 `not_started`，Desktop 绑定仍为 `unknown`。当前没有可执行的原始宿主证据读取通道；这不推断平台不存在其他能力。
+
+| 入口 | 已核支持关系 | 本项目当前可用边界 |
+|---|---|---|
+| App Server 客户端协议 | [官方 App Server](https://learn.chatgpt.com/docs/app-server#protocol)描述 JSON-RPC、stdio、WebSocket 和 Unix socket；文档同时说明 app-server 命令及 WebSocket 尚属实验性、不支持生产工作负载。 | 可作为后续集成的协议依据；文档未提供本次 Desktop 实例的端点或绑定证明。新启 server 不等于连接当前 Desktop。 |
+| `codex app-server proxy --sock` | 本机 `0.152.1` 静态帮助说明将 stdio 字节转发到已运行的控制 socket；上述官方页面没有给出该子命令的接入约定。 | 参数存在不证明精确 socket、归属、协议版本或接收前限额；不探测默认路径，不运行 proxy 试通。 |
+| `codex --remote` | [官方 CLI](https://learn.chatgpt.com/docs/cli/reference)描述连接 app-server 的终端 UI；本机帮助同时列出 `--remote-auth-token-env`。 | 不是任意 JSON-RPC 证据读取入口，不读取令牌或启动终端会话来补证。 |
+| `--code-mode-host` | 官方协议与本机帮助均将其作为 app-server 到 Code Mode 执行宿主的出站连接，区别于 `--listen`。 | 不能据此绑定既有 Desktop，也不提供本项目所需的派发／输入导出。 |
+| `codex remote-control` | [官方开发命令](https://learn.chatgpt.com/docs/developer-commands#codex-remote-control)用于管理 daemon／配对；本机帮助有 `start`、`stop`、`pair` 与 `--json`。 | 不是限定任务的只读证据导出。官方所述 `--no-daemon` 未在本机该帮助中出现，不能照搬新文档参数或为此升级环境。 |
+| 应用内远程连接与当前工具 | [官方远程连接](https://learn.chatgpt.com/docs/remote-connections)描述设备配对和 SSH；当前工具仅暴露摘要、goal、共享限额等相关入口，未暴露原始握手／turn 读取及 Desktop 连接描述。 | 远程操作能力不等于证据导出；工具定义核对不调用对象，不读取其他聊天、账户、配置、进程或日志。 |
+
+静态 `--version`／`--help` 不建立上述连接，但也不能承诺二进制启动绝对零写入：本机返回临时 PATH alias 创建被拒绝的警告，帮助和版本仍成功退出。该警告不作为宿主不可用的根因，不提权、重试或修改 PATH 来消除它。CLI 版本仍不代表 Desktop／server 版本。
+
+后续只收敛到以下依赖，不再新增猜测端点的命令或未接入的采集器：
+
+1. 宿主能力提供方给出既有受支持入口、精确端点的取得办法、当前 Desktop 绑定依据及实际 server／协议版本；材料不含凭据、正文或私密映射。
+2. 核对该入口上全部可能接收内容、接收者与接收前可落实的范围／字节上限。协议队列、分页条数、通知 opt-out 和客户端收到后过滤均不替代第 6 节条件。
+3. 仅在这些事实齐备后填实第 6 节的一次连接范围，按其实际暴露面取得所需决定；后续任务读取仍另按第 5 节核范围。当前不提出空白连接或采集请求。
+4. 在等待真实通道资料及自然候选期间，继续使用[现有离线演练](../../operations/review-detection-preparation.md#不依赖真实任务的离线演练)和检查器。实际派发、完整输入、独立性、时间／费用及真实准入各自保留缺口，不由文档或演练通过关闭。
