@@ -153,3 +153,48 @@ codex debug prompt-input --help
 2. 核对该入口上全部可能接收内容、接收者与接收前可落实的范围／字节上限。协议队列、分页条数、通知 opt-out 和客户端收到后过滤均不替代第 6 节条件。
 3. 仅在这些事实齐备后填实第 6 节的一次连接范围，按其实际暴露面取得所需决定；后续任务读取仍另按第 5 节核范围。当前不提出空白连接或采集请求。
 4. 在等待真实通道资料及自然候选期间，继续使用[现有离线演练](../../operations/review-detection-preparation.md#不依赖真实任务的离线演练)和检查器。实际派发、完整输入、独立性、时间／费用及真实准入各自保留缺口，不由文档或演练通过关闭。
+
+## 8. 资料获取、安装版本与人工移交
+
+### 先区分系统 CLI、安装包与运行实例
+
+Windows 注册安装包元数据可通过 `Get-AppxPackage -Name OpenAI.Codex` 取得，仅读取名称、版本及包清单即可定位安装组件，不需要读取用户配置或会话。本次核得的三个版本事实分别为：
+
+| 来源 | 已核事实 | 不能据此认定 |
+|---|---|---|
+| 系统 PATH 中的 CLI | `0.152.1`；前述旧帮助及静态 Schema 属于此版本。 | Desktop 的 bundled CLI 或运行 server 使用同一版本。 |
+| 注册的 `OpenAI.Codex` 包 | `26.1013.4894.0`；包清单的应用入口为 `app/ChatGPT.exe`。 | 当前窗口的进程身份、端点或运行 server 构建。 |
+| 该包的 `app/resources/codex.exe` | 实际 `--version` 为 `0.163.0-alpha.10.2`；其静态帮助及 `generate-json-schema --experimental` 已另核。 | 该二进制正服务当前 Desktop，或已取得连接／读取许可。 |
+
+[官方故障说明](https://learn.chatgpt.com/docs/reference/troubleshooting#feature-is-working-in-the-codex-cli-but-not-in-the-chatgpt-desktop-app)明确 Desktop 与系统 CLI 可以包含不同版本。这里保留两个静态基线，不用新包版本改写旧读取，也不把安装事实提升为运行绑定。生成的协议是忽略目录中的构建材料，不包含宿主响应，不随文档提交。
+
+新版静态 Schema 的 `InitializeResponse` 仍要求 `codexHome`、`platformFamily`、`platformOs`、`userAgent`，没有独立 server build／Desktop 实例字段或字符串 `maxLength`；JSON-RPC 错误的 `data` 仍可为任意值。现有候选使用的 `clientInfo` 与 capabilities 字段仍存在，但这只核语法，不批准连接。新版另有可选 `explicitGatewayOauth`，其描述涉及 server gateway runtime 状态；本候选不设置它，也不承诺 initialize 普遍无状态效果。`thread/turns/list` 的 `limit` 仍为页条数，`itemsView=notLoaded` 仍只是省略 items，均不限制整个返回字节数。
+
+其他返回面不能照搬旧版：新版 item cursor 可为字符串或对象锚点，条目可带 producer 实际记录的可空起止时标；Turn 的错误信息新增任意字符串／对象兜底，服务器请求中的 MCP elicitation 另有 `openai/userVerification` 形状。这些结构与旧静态基线分别核对，既不证明实际运行提供它们，也不证明仅握手时会或不会收到它们。elicitation 所传输入 Schema 中的 `maxLength`／`maxItems` 不是传输或累计响应限制。
+
+### 自动检查的停止点
+
+安装包内 CLI 新提供 `app-server daemon version`，帮助仅说明打印本地 CLI 和运行 app-server 的版本 JSON。本轮只读取其 `--help`；公开文档未给出该命令是否连接／自动启动、读取哪些状态、完整返回字段和大小限制，亦未说明如何确认属于当前 Desktop。因此不执行实际查询，也不把同一命令转交用户手工代跑。
+
+系统及包内 `doctor --help` 均只有格式与展开选项，没有仅采集端点的选项。[官方 doctor 说明](https://learn.chatgpt.com/docs/developer-commands#codex-doctor)覆盖配置、认证、runtime 和 thread inventory 等检查；`--summary` 只改变显示，`--json` 只说明输出脱敏，不能据此推断采集范围缩小。本轮未运行完整 doctor，未读取进程、配置、会话或日志。
+
+### 需要用户查看或询问的内容
+
+1. 按 [Settings 说明](https://learn.chatgpt.com/docs/app/settings)在 Windows 用 `Ctrl+,` 打开设置，查看 `Connections` 中已有页面。只记录栏目及是否有直接提供的端点／server 信息，不开启功能。[远程连接说明](https://learn.chatgpt.com/docs/remote-connections)中的 `Set up`／`Add`、允许访问及扫码会开始设置或配对，并非端点信息查询。当前用户已确认有 Connections、页面仅见远程访问开关或配对入口；这一查看已完成，无须重复，也未取得原始端点。
+2. 需要维护方提供资料时，回到输入框键入 `/`，选择实际显示的反馈入口。按[官方反馈说明](https://learn.chatgpt.com/docs/reference/troubleshooting#feedback-and-logs)检查现有 session、logs／diagnostics 等附带选项，取消附带；文档没有保证默认勾选状态。无法确认取消时关闭弹窗，不提交。只传下面的文字，不导出会话或诊断包；本轮未发送反馈。
+3. 对回复分别核对下表。反馈 session ID、连接设置可见、同版本或同目录均不替代 Desktop 绑定。若该版本没有受支持入口，记录这一明确限制，不开启配对、新服务或日志寻找替代。
+
+| 资料 | 向宿主提供方索取的可复核说明 |
+|---|---|
+| 端点与 Desktop 绑定 | 该 OS／版本是否支持外部只读客户端连接已运行 Desktop；官方端点取得步骤，以及端点关联当前实例的依据。先要方法与脱敏依据，不索取凭据或私密映射。 |
+| 运行版本与返回面 | 实例的实际 server build、匹配的版本化协议／Schema，以及 initialize 上全部成功、错误、通知和服务器请求的可能字段。安装版本或静态 Schema 不能代填实际版本。 |
+| 接收前限制 | 是否有既有机制能在数据交给本项目接收者前落实范围和累计 65,536 字节上限；明确计数单位、实施位置、是否覆盖错误／异步消息、超限行为及适用 build。 |
+| 新版版本查询命令 | `app-server daemon version` 是否仅查询已有 daemon、会否自动启动或读取配置；JSON 字段、是否含本机路径、大小限制及它与当前 Desktop 的关系。 |
+
+累计 64 KiB、5 秒及一次连接仍是第 6 节的本仓候选约束，不是平台承诺。[官方协议](https://learn.chatgpt.com/docs/app-server#protocol)的 bounded queues、消息分帧，以及[通知 opt-out](https://learn.chatgpt.com/docs/app-server#notification-opt-out)不能证明这些约束已落实。若现有接口只能在客户端收取后过滤，继续保持缺口；需要改变候选时另行评估，不静默放宽。
+
+可供用户自行核对并提交的文字草稿：
+
+> Windows 上安装的 OpenAI.Codex 为 26.1013.4894.0，包内 CLI 为 0.163.0-alpha.10.2，PATH CLI 为 0.152.1。Connections 只显示远程访问和配对设置。我想让本地只读客户端连接当前已运行的 Desktop app-server，不新启服务、不导出会话。请问受支持的端点获取、Desktop 实例绑定和实际 server 版本核验办法是什么？initialize 连接上可能返回哪些内容，是否有接收前范围及累计字节上限？另外，`app-server daemon version` 是否只查询已有 daemon，具体读取和返回哪些信息，能否确认属于该 Desktop？若当前不支持，请直接说明。
+
+取得资料仍不自动授权握手或后续对象读取；继续按第 5、6 节填实实际范围。实际派发、完整输入、独立性和预算端点分别保留未知，`T0/T1` 与观察窗口不因资料准备而启动。
