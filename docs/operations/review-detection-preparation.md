@@ -91,6 +91,8 @@ gh api graphql -f 'query={repository(owner:"OWNER",name:"REPOSITORY"){pullReques
 
 [宿主只读接入边界](../superpowers/specs/review-detection-host-evidence.md)固定了已核 CLI 协议能力、版本差异及所有者明确批准过的一轮读取范围；当前 `scope_decision=approved_once`、`read_state=closed`。该轮已结束，不形成重试或常设权限，不授权读取私密会话或启用遥测；实际派发、完整输入、独立性和货币端点仍未因此取得。
 
+[后续最小接入候选](../superpowers/specs/review-detection-host-evidence.md#5-后续最小接入候选)单独保持 pending／not_started：先核真实通道、宿主绑定和必然返回范围，再形成含对象、次数／页数／字节上限及停止条件的一次授权。当前没有可执行宿主读取请求，不复用已关闭额度；派发、完整输入、独立性、时间与费用端点分别验原件，缺口不由候选获批关闭。
+
 ### 先核职责覆盖，再取得独立裁定
 
 新自然任务若已有授权与原安排明确涵盖独立裁定，在首次被测审核前就把专项审核、非作者事实裁定及后续匹配的职责、允许材料和停止范围分别固定到原位置；不能在看到 Finding 后把未覆盖的一轮改名为“初始批次”或“残余复核”。通用的一批初始专项审核及一次受影响残余复核，不自动提供额外独立裁定职责或预算。
