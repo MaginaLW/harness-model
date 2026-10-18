@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-更新于 2026-10-13。本节是当前状态的唯一摘要；逐窗口的历史记录见文末指针，旧窗口文字不作为当前指令。
+更新于 2026-10-18。本节是当前状态的唯一摘要；逐窗口的历史记录见文末指针，旧窗口文字不作为当前指令。
 
 **治理模式**：仓库维护模式，task-free 例外已启用；规则以 [AGENTS.md](../../AGENTS.md) 为唯一权威。CI 质量门禁与 `main` 分支保护不放松。
 
@@ -18,6 +18,8 @@
 - TASK-0075 的治理面 REVIEW 下限已由 PR #51 合并，账本已关闭：Policy 2.5.0 覆盖 `.github/**`、`.ai/**`、`src/aiflow/**`、`tools/ci/**` 及 Agent 入口、依赖与 Git 配置文件；准入以当前 Policy 和 CLI 结论为准。
 - TASK-0076 已由 PR #52 合并，账本已关闭：退役外部审核导入与 `verify --pytest-temp-root`，合并八处相同的 UTC 时间戳辅助函数，同步退役说明与治理清单。原生 V1 完整验证、两份独立实现审核、Gate 与远端 required CI 均通过；历史任务、失败记录和恢复来源保留。
 - TASK-0078 已由 PR #55 合并并关闭：完整克隆内的 CLI 根目录、子目录与 worktree 定位，以及默认 Schema 资源作用域已交付。它是 TASK-0077 的后继，原阻断记录保留；这不提供完整引擎的外仓初始化或资源分发。
+- TASK-0081 已由 [PR #74](https://github.com/MaginaLW/harness-model/pull/74) 合并并关闭：完成精确清单内的本地测试夹具、缓存、冗余工作副本和重复工具清理。完整恢复演练、独立审核、原生验证与 required CI 均通过；失败证据、恢复材料、原任务记录和 Git refs 保留。历史归档异常原因及 ACL 等价性仍未核实。
+- TASK-0082 已由 [PR #75](https://github.com/MaginaLW/harness-model/pull/75) 合并，[PR #76](https://github.com/MaginaLW/harness-model/pull/76) 已发布关闭记录：退役本地 `.reasonix` 及精确清单内的缓存，完整原文件字节恢复与独立比对通过，原生验证、独立审核和 required CI 均通过。恢复包及历史失败保留；本地清理不证明历史执行可重放或卸载完整性。
 
 ## 剩余建设主线
 
@@ -75,6 +77,8 @@ E5、样本、V3 与 Phase 4 的历史设计输入见[合同提案](phase-entry-
 
 - [七项后续待办](follow-up-backlog-2026-09-22.md)的历史退出条件未全部验收，整体目标未完成；它们不再是默认执行队列。原范围与证据核对见[完整范围核对](follow-up-completion-audit-2026-10-09.md)。
 - TASK-0063～0071 未完成，其工作线已归档为本地 `archive/codex-*` 标签，不再推进。若新的真实需求需要其中能力，应先确定当前范围、恢复来源与准入，不能直接续用历史动作。
+- 四条历史验收分支 `pilot/ask-report`、`pilot/auto-doc`、`pilot/block-dry-run` 和 `pilot/review-policy` 按原提交保留；[阶段一验收报告](../implementation/phase-01-acceptance-report.md#四个真实受控试点)引用其 attestation HEAD，不能仅因落后 `main` 而清理或作为待合并队列。
+- 本地 `archive/local-task0079-private-evidence` 分支保留 TASK-0079 的两次失败证据，当前无其他分支或标签保全其 tip，不直接合并或公开推送。既有 `archive/*` 标签全部保留；其中 `archive/claude-simplify-architecture` 已有远端副本，其余归档标签当前仅在本地，保全范围不可混同。
 - `external-review`、`verify --pytest-temp-root` 及 runner/诊断/证据移交工具已退役。F 的旧导入验收及 A/B 选择不作为默认待执行方向；新的报告获取或宿主接入需求须按现有能力重新定义。
 - 原失败、SPENT、partial、unknown 结论、用户草稿、既有批准和历史治理编号保持；后继成功或新方案不改写原件。当前批准覆盖以实际 CLI `status` / `gate` 为准，已消费或过期动作不因继续建设而恢复。
 
