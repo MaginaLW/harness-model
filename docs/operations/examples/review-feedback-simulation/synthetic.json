@@ -1,0 +1,617 @@
+{
+  "schema_version": "1.0",
+  "record_origin": "synthetic",
+  "score_update": {
+    "schema_version": "1.0",
+    "record_origin": "synthetic",
+    "profile_assignment": "assumed",
+    "previous": {
+      "snapshot_id": "score-1",
+      "scope": {
+        "profile_id": "synthetic-profile",
+        "profile_revision": "profile-v1",
+        "condition_id": "synthetic-condition"
+      },
+      "analysis": {
+        "schema_version": "1.0",
+        "record_origin": "synthetic",
+        "declarations": {
+          "schema_version": "1.0",
+          "repository": "synthetic/project",
+          "admission_package": "review-detection-admission-v0.1",
+          "window": {
+            "t0": "2026-01-01T00:00:00Z",
+            "t1": "2026-01-31T00:00:00Z"
+          },
+          "candidates": [
+            {
+              "candidate_id": "candidate-a",
+              "related_group": "group-a",
+              "candidate_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "declared_at": "2025-12-31T23:50:00Z",
+              "entered_at": "2026-01-01T00:00:00Z",
+              "report_fixed_at": "2026-01-02T00:00:00Z",
+              "closed_at": "2026-01-05T00:00:00Z",
+              "refs": {
+                "candidate": {
+                  "kind": "git",
+                  "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "path": "docs/synthetic-a.md",
+                  "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                  "locator": "synthetic-section"
+                },
+                "declaration": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-declaration"
+                },
+                "related_group": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-related_group"
+                },
+                "conditions": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-conditions"
+                },
+                "roles": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-roles"
+                },
+                "budget": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-budget"
+                },
+                "report": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-report"
+                },
+                "closure": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-closure"
+                }
+              },
+              "opportunities": [
+                {
+                  "opportunity_id": "opportunity-a",
+                  "contract_ref": {
+                    "kind": "git",
+                    "source_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "path": "docs/superpowers/specs/synthetic-prior.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "object_ref": {
+                    "kind": "git",
+                    "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "path": "docs/synthetic-a.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "instance_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "a-instance"
+                  },
+                  "defect_class": "direct_contradiction",
+                  "truth": "positive",
+                  "adjudication_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "a-adjudication"
+                  },
+                  "adjudication_fixed_at": "2026-01-03T00:00:00Z",
+                  "match": "detected",
+                  "matching_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "a-matching"
+                  },
+                  "matched_at": "2026-01-04T00:00:00Z"
+                }
+              ]
+            },
+            {
+              "candidate_id": "candidate-b",
+              "related_group": "group-b",
+              "candidate_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "declared_at": "2025-12-31T23:50:00Z",
+              "entered_at": "2026-01-01T00:00:00Z",
+              "report_fixed_at": "2026-01-02T00:00:00Z",
+              "closed_at": "2026-01-05T00:00:00Z",
+              "refs": {
+                "candidate": {
+                  "kind": "git",
+                  "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "path": "docs/synthetic-b.md",
+                  "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                  "locator": "synthetic-section"
+                },
+                "declaration": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-declaration"
+                },
+                "related_group": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-related_group"
+                },
+                "conditions": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-conditions"
+                },
+                "roles": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-roles"
+                },
+                "budget": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-budget"
+                },
+                "report": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-report"
+                },
+                "closure": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-closure"
+                }
+              },
+              "opportunities": [
+                {
+                  "opportunity_id": "opportunity-b",
+                  "contract_ref": {
+                    "kind": "git",
+                    "source_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "path": "docs/superpowers/specs/synthetic-prior.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "object_ref": {
+                    "kind": "git",
+                    "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "path": "docs/synthetic-b.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "instance_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "b-instance"
+                  },
+                  "defect_class": "direct_contradiction",
+                  "truth": "positive",
+                  "adjudication_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "b-adjudication"
+                  },
+                  "adjudication_fixed_at": "2026-01-03T00:00:00Z",
+                  "match": "not_detected",
+                  "matching_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "b-matching"
+                  },
+                  "matched_at": "2026-01-04T00:00:00Z"
+                }
+              ]
+            }
+          ]
+        },
+        "scenario_assumptions": {
+          "selection_fixed_before_outcomes": "assumed",
+          "history_and_grouping_complete": "assumed",
+          "independent_truth_and_semantic_matching": "assumed",
+          "review_conditions_comparable": "assumed",
+          "group_outcomes_independent": "assumed",
+          "reports_and_budget_endpoints_complete": "assumed",
+          "single_analysis_after_fixed_window": "assumed"
+        }
+      }
+    },
+    "current": {
+      "snapshot_id": "score-2",
+      "scope": {
+        "profile_id": "synthetic-profile",
+        "profile_revision": "profile-v1",
+        "condition_id": "synthetic-condition"
+      },
+      "analysis": {
+        "schema_version": "1.0",
+        "record_origin": "synthetic",
+        "declarations": {
+          "schema_version": "1.0",
+          "repository": "synthetic/project",
+          "admission_package": "review-detection-admission-v0.1",
+          "window": {
+            "t0": "2026-01-01T00:00:00Z",
+            "t1": "2026-01-31T00:00:00Z"
+          },
+          "candidates": [
+            {
+              "candidate_id": "candidate-a",
+              "related_group": "group-a",
+              "candidate_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "declared_at": "2025-12-31T23:50:00Z",
+              "entered_at": "2026-01-01T00:00:00Z",
+              "report_fixed_at": "2026-01-02T00:00:00Z",
+              "closed_at": "2026-01-05T00:00:00Z",
+              "refs": {
+                "candidate": {
+                  "kind": "git",
+                  "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "path": "docs/synthetic-a.md",
+                  "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                  "locator": "synthetic-section"
+                },
+                "declaration": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-declaration"
+                },
+                "related_group": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-related_group"
+                },
+                "conditions": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-conditions"
+                },
+                "roles": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-roles"
+                },
+                "budget": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-budget"
+                },
+                "report": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-report"
+                },
+                "closure": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "a-closure"
+                }
+              },
+              "opportunities": [
+                {
+                  "opportunity_id": "opportunity-a",
+                  "contract_ref": {
+                    "kind": "git",
+                    "source_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "path": "docs/superpowers/specs/synthetic-prior.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "object_ref": {
+                    "kind": "git",
+                    "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "path": "docs/synthetic-a.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "instance_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "a-instance"
+                  },
+                  "defect_class": "direct_contradiction",
+                  "truth": "positive",
+                  "adjudication_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "a-adjudication"
+                  },
+                  "adjudication_fixed_at": "2026-01-03T00:00:00Z",
+                  "match": "detected",
+                  "matching_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "a-matching"
+                  },
+                  "matched_at": "2026-01-04T00:00:00Z"
+                }
+              ]
+            },
+            {
+              "candidate_id": "candidate-b",
+              "related_group": "group-b",
+              "candidate_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "declared_at": "2025-12-31T23:50:00Z",
+              "entered_at": "2026-01-01T00:00:00Z",
+              "report_fixed_at": "2026-01-02T00:00:00Z",
+              "closed_at": "2026-01-05T00:00:00Z",
+              "refs": {
+                "candidate": {
+                  "kind": "git",
+                  "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "path": "docs/synthetic-b.md",
+                  "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                  "locator": "synthetic-section"
+                },
+                "declaration": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-declaration"
+                },
+                "related_group": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-related_group"
+                },
+                "conditions": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-conditions"
+                },
+                "roles": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-roles"
+                },
+                "budget": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-budget"
+                },
+                "report": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-report"
+                },
+                "closure": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "b-closure"
+                }
+              },
+              "opportunities": [
+                {
+                  "opportunity_id": "opportunity-b",
+                  "contract_ref": {
+                    "kind": "git",
+                    "source_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "path": "docs/superpowers/specs/synthetic-prior.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "object_ref": {
+                    "kind": "git",
+                    "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "path": "docs/synthetic-b.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "instance_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "b-instance"
+                  },
+                  "defect_class": "direct_contradiction",
+                  "truth": "positive",
+                  "adjudication_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "b-adjudication"
+                  },
+                  "adjudication_fixed_at": "2026-01-03T00:00:00Z",
+                  "match": "not_detected",
+                  "matching_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "b-matching"
+                  },
+                  "matched_at": "2026-01-04T00:00:00Z"
+                }
+              ]
+            },
+            {
+              "candidate_id": "candidate-c",
+              "related_group": "group-c",
+              "candidate_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "declared_at": "2025-12-31T23:50:00Z",
+              "entered_at": "2026-01-01T00:00:00Z",
+              "report_fixed_at": "2026-01-02T00:00:00Z",
+              "closed_at": "2026-01-05T00:00:00Z",
+              "refs": {
+                "candidate": {
+                  "kind": "git",
+                  "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "path": "docs/synthetic-c.md",
+                  "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                  "locator": "synthetic-section"
+                },
+                "declaration": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "c-declaration"
+                },
+                "related_group": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "c-related_group"
+                },
+                "conditions": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "c-conditions"
+                },
+                "roles": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "c-roles"
+                },
+                "budget": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "c-budget"
+                },
+                "report": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "c-report"
+                },
+                "closure": {
+                  "kind": "pr",
+                  "url": "https://github.com/synthetic/project/pull/17",
+                  "locator": "c-closure"
+                }
+              },
+              "opportunities": [
+                {
+                  "opportunity_id": "opportunity-c",
+                  "contract_ref": {
+                    "kind": "git",
+                    "source_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "path": "docs/superpowers/specs/synthetic-prior.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "object_ref": {
+                    "kind": "git",
+                    "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "path": "docs/synthetic-c.md",
+                    "git_blob": "cccccccccccccccccccccccccccccccccccccccc",
+                    "locator": "synthetic-section"
+                  },
+                  "instance_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "c-instance_ref"
+                  },
+                  "defect_class": "direct_contradiction",
+                  "truth": "positive",
+                  "adjudication_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "c-adjudication_ref"
+                  },
+                  "adjudication_fixed_at": "2026-01-03T00:00:00Z",
+                  "match": "not_detected",
+                  "matching_ref": {
+                    "kind": "pr",
+                    "url": "https://github.com/synthetic/project/pull/17",
+                    "locator": "c-matching_ref"
+                  },
+                  "matched_at": "2026-01-04T00:00:00Z"
+                }
+              ]
+            }
+          ]
+        },
+        "scenario_assumptions": {
+          "selection_fixed_before_outcomes": "assumed",
+          "history_and_grouping_complete": "assumed",
+          "independent_truth_and_semantic_matching": "assumed",
+          "review_conditions_comparable": "assumed",
+          "group_outcomes_independent": "assumed",
+          "reports_and_budget_endpoints_complete": "assumed",
+          "single_analysis_after_fixed_window": "assumed"
+        }
+      }
+    }
+  },
+  "calibration": {
+    "schema_version": "1.0",
+    "record_origin": "synthetic",
+    "scope": {
+      "profile_id": "synthetic-profile",
+      "profile_revision": "profile-v1",
+      "condition_id": "synthetic-condition"
+    },
+    "predictor_revision": "score-2",
+    "fit_fixed_at": "2026-02-04T00:00:00Z",
+    "bin_edges": [
+      0,
+      0.5,
+      1
+    ],
+    "scenario_assumptions": {
+      "predictions_fixed_before_outcomes": "assumed",
+      "bins_and_split_predeclared": "assumed",
+      "complete_independent_groups": "assumed",
+      "same_target_and_predictor": "assumed",
+      "no_material_drift": "assumed"
+    },
+    "fit": [
+      {
+        "unit_id": "fit-1",
+        "related_group": "group-fit-1",
+        "prediction": 0.1,
+        "outcome": 0,
+        "predicted_at": "2026-02-02T00:00:00Z",
+        "outcome_at": "2026-02-03T00:00:00Z"
+      },
+      {
+        "unit_id": "fit-2",
+        "related_group": "group-fit-2",
+        "prediction": 0.3,
+        "outcome": 0,
+        "predicted_at": "2026-02-02T00:00:00Z",
+        "outcome_at": "2026-02-03T00:00:00Z"
+      },
+      {
+        "unit_id": "fit-3",
+        "related_group": "group-fit-3",
+        "prediction": 0.7,
+        "outcome": 1,
+        "predicted_at": "2026-02-02T00:00:00Z",
+        "outcome_at": "2026-02-03T00:00:00Z"
+      },
+      {
+        "unit_id": "fit-4",
+        "related_group": "group-fit-4",
+        "prediction": 0.9,
+        "outcome": 1,
+        "predicted_at": "2026-02-02T00:00:00Z",
+        "outcome_at": "2026-02-03T00:00:00Z"
+      }
+    ],
+    "heldout": [
+      {
+        "unit_id": "heldout-1",
+        "related_group": "group-heldout-1",
+        "prediction": 0.2,
+        "outcome": 0,
+        "predicted_at": "2026-02-05T00:00:00Z",
+        "outcome_at": "2026-02-06T00:00:00Z"
+      },
+      {
+        "unit_id": "heldout-2",
+        "related_group": "group-heldout-2",
+        "prediction": 0.8,
+        "outcome": 1,
+        "predicted_at": "2026-02-05T00:00:00Z",
+        "outcome_at": "2026-02-06T00:00:00Z"
+      }
+    ]
+  },
+  "routing_scenario": {
+    "baseline_route": "REVIEW",
+    "baseline_continuation": "assumed",
+    "authorization_boundary_preserved": "assumed",
+    "no_material_drift": "assumed",
+    "trigger_below_lower_bound": 0.8,
+    "max_interval_width": 1,
+    "max_heldout_brier": 0.25
+  }
+}
