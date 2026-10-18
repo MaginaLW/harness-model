@@ -42,7 +42,7 @@ python -B tools/analysis/review_feedback.py --task TASK-0077 --reference-input d
 | Finding 的状态历史与已有解决事件引用 | 不能推作者采纳/驳回、缺陷真值、独立复核或实际修复范围；`author_disposition`、`independent_recheck` 保持 `unknown`。 |
 | 已记录验证尝试及 evidence 原值 | 不补全首候选、修复入口或历史 evidence-attempt 链；失败、partial、skip 和 unknown 不被后续成功覆盖。 |
 | 同 task 的保守依赖关联 | Finding、检查、修订、重试不增加独立样本；不同 task 也可能共享候选、规格或后继关系。 |
-| 正式账本来源覆盖 | 本工具的 task-free 审核反馈仍为 `task_free_feedback_status=not_projected`；另用[PR 回读](pr-feedback.md)显式输入选定公开来源，不扩大 Git 白名单，也不创建虚构 TASK-ID。 |
+| 正式账本来源覆盖 | 本工具的 task-free 审核反馈仍为 `task_free_feedback_status=not_projected`；对应 limitation 只说明本报告不投影，并指向已有的[PR 回读](pr-feedback.md)，不表示项目尚未实现该能力。另用 PR 回读显式输入选定公开来源，不扩大 Git 白名单，也不创建虚构 TASK-ID。 |
 
 实际模型及审核配置、任务类别、报告新增/重复对应、独立正负真值、人时和费用没有相应获准来源时保持未知；不从 actor、模型名称、自述、Finding 数或工具耗时补值。缺少实际配置不阻挡这份非评分事实报告，但不能据此归入模型层或更新模型评分。
 

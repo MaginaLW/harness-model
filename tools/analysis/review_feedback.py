@@ -217,7 +217,8 @@ def build_feedback(
             "Resolved records do not establish acceptance, repair, correctness or recheck.",
             "Current task bindings never replace the candidate bindings in review contexts.",
             "Task selection filters output only; the snapshot reads the full Git allowlist.",
-            "Task-free PR feedback, actual runtime identity and score updates are not implemented.",
+            "Task-free PR feedback is not projected by this report; use pr_feedback.py separately.",
+            "Actual runtime identity and score updates are not implemented.",
             "External references are displayed separately; no model matching or score mixing.",
         ],
     }
