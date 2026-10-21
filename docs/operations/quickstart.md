@@ -138,30 +138,42 @@ python -m aiflow start \
   --forbid-action delete
 ```
 
-2. 在首次分类前，编辑 `.ai/tasks/<TASK-ID>/task.yaml` 的决策单元，补齐下列明确事实。
-当前 CLI 还没有专用的事实录入子命令；`impact_categories` 或 `controlled_actions`
-缺失时，classify 会在路由前列出缺项的 DU 与字段，且不写入任务或分类记录，由 Agent
-按已读事实补齐后重试，不自动转为人工审核。非法类型或枚举由契约拒绝。
+2. 在 `freeze` 和首次 `classify` 前，用 `facts` 录入已评估的决策单元风险事实。
+先将下列示例保存为本地 UTF-8 `build/local/facts.json`；`build/` 由仓库已提交的忽略规则排除，本地输入不要提交。
+示例值只适用于已核实满足这些条件的本地文档工作，
+不能作为未知风险的默认值。不要直接编辑 `task.yaml`。
 
-```yaml
-scope: {clear: true}
-impact: {level: low}
-protections: {verified_backup: true, dry_run: true}
-verification: {automatic: true, tools_missing: false}
-impact_categories: [documentation]
-controlled_actions: []
-business_direction_count: 1
-change_characteristics:
-  mechanical: false
-  behavior_changed: false
-  code_modified: false
-  interaction_scope: local
-  regression_risk: false
-  error_detectability: high
+```json
+{
+  "scope": {"clear": true},
+  "impact": {"level": "low"},
+  "protections": {"verified_backup": true, "dry_run": true},
+  "verification": {"automatic": true, "tools_missing": false},
+  "impact_categories": ["documentation"],
+  "controlled_actions": [],
+  "business_direction_count": 1,
+  "change_characteristics": {
+    "mechanical": false,
+    "behavior_changed": false,
+    "code_modified": false,
+    "interaction_scope": "local",
+    "regression_risk": false,
+    "error_detectability": "high"
+  }
+}
 ```
 
 这里的 `controlled_actions: []` 表示已确认本地文档示例不执行部署或生产数据删除，
-不是尚未评估风险时的默认值。
+不是尚未评估风险时的默认值。`start` 生成的单元为 `DU-001`；其他任务使用其真实 DU ID。
+在 PowerShell 或 POSIX shell 中分别运行预览和应用：
+
+```console
+python -m aiflow facts <TASK-ID> --decision-unit DU-001 --input build/local/facts.json --actor quickstart --dry-run
+python -m aiflow facts <TASK-ID> --decision-unit DU-001 --input build/local/facts.json --actor quickstart
+```
+
+预览和应用使用相同的合同与资格校验；`--dry-run` 对任务工件零写入。输入相对路径仍以调用目录为准，
+因此从子目录运行时应指向该目录实际可读的 JSON 文件。字段替换和恢复限制见下节。
 
 3. 分类并查看只读状态。
 
@@ -189,6 +201,40 @@ python -m aiflow gate <TASK-ID> --format json
 python -m aiflow gate <TASK-ID> --format json
 ```
 
+## 分类前风险事实录入
+
+`facts` 仅接受 `current_state=NEW`、尚无冻结规格字段、分类记录或待物化分类工件的任务。
+当前仓库身份、分支和 HEAD 必须匹配任务原有 repository／branch／base／subject 绑定；
+草稿文件变脏不授权更新 Git 基线。仓库没有 `DRAFT` 状态。命令仅修改一个已存在的指定 DU，
+不修改目标、范围路径、身份、Git 绑定、状态、批准或验证证据，也不自动冻结、分类、派发审核或执行动作。
+
+输入必须是一个非空的本地 UTF-8 JSON object。允许替换的 DU 顶层字段仅有：
+`scope`、`impact`、`protections`、`verification`、`impact_categories`、`controlled_actions`、
+`business_direction_count`、`change_characteristics`、`verification_requirements`、`reversibility`、
+`external_side_effects` 和 `permission_requirements`。每个提供的顶层字段都**整体替换**原字段，
+不递归合并局部嵌套对象；嵌套对象须满足既有完整 Schema。省略字段保留原来的存在性和值，
+不会推断风险事实或补默认值。非法 JSON、任意深度的重复键、非有限数值、未知字段、无效类型或不满足完整结果合同的输入均被拒绝；
+即使只改一个 DU，也校验全部 DU 和完整任务。录入内容是 actor 的声明，不是事实真实性的独立验证。
+
+成功输出 JSON，包含 `task_id`、`decision_unit_id`、`dry_run`、`changed`、`applied`、`recovered`、
+`before` 和 `after`；前后值是所选 DU 中实际存在的完整风险字段投影。普通应用与原值相同时，
+不追加事件、不改变时间戳。有变化的应用追加一个带 DU、actor 和前后投影的 `risk_facts_recorded` 事件，
+再以该事件时间物化任务。这复用仓库单写入者下的暂存／追加／替换流程，不承诺跨进程隔离或任意 I/O 失败下的原子性。
+
+若事件已完整追加而任务替换中断，只有**同一 DU、actor 且产生相同完整结果的等价有效更新**可以在精确核对后续完一次替换；
+必须保留原事件、时间戳及有效 `task.yaml.next`，不能手工修暂存文件。核对不绑定 JSON 排版或原始键集合；
+改变更新结果的输入会被拒绝。恢复不追加第二个事件。
+预览不恢复；普通加载器也不自动修复此类替换。追加结果不确定、日志部分写入／损坏、暂存文件未知／不匹配、
+或缺少必要恢复材料时，保留原工件并报错，不自动重试。
+
+严格读取遇到任意待物化 `task.yaml.next` 即拒绝；即使暂存文件丢失，已记录但未物化的风险事实也会阻断首次分类。
+冻结等 `NEW` 自环事件不解除这一屏障。首次合法的 `NEW → CLASSIFIED` 记录后，
+后续风险变化继续走既有 `escalate`、显式人工重评估、`resolve` 和重新 `classify` 流程；
+历史 facts 事件不会永久锁住后续合法重评估，`facts` 命令自身仍只用于上述合格 `NEW` 任务。
+
+省略 `impact_categories` 或 `controlled_actions` 不会绕过首次分类的明确评估要求；`classify` 会在路由前列出缺项，
+且不写任务或分类记录。按实际事实用 `facts` 补齐后再分类，不自动转为人工审核，也不预定 `AUTO` 结果。
+
 ## 只读 observation 示例
 
 `observe` 的输入必须是已经绑定到当前 task、base、subject 与 Policy 的事实；只读 evaluator
@@ -207,7 +253,7 @@ observation 仍会以 exit 2 返回 `execution_allowed: false`：这是有效、
 
 ## 继续实际任务前
 
-实际任务是否需要 task，以 [AGENTS.md](../../AGENTS.md) 的维护模式及升级清单为准。选择进入 AI Flow 时，用 `spec.md` 冻结可执行规格，然后按 route 执行 ASK/REVIEW 决定或批准，再运行 `begin`、实施、`sync`、`verify` 和 Gate。所有命令都以 `python -m aiflow ...` 为权威入口。
+实际任务是否需要 task，以 [AGENTS.md](../../AGENTS.md) 的维护模式及升级清单为准。选择进入 AI Flow 时，先在合格 `NEW` 状态用 `facts` 补齐显式风险事实，再冻结 `spec.md` 并分类，按 route 执行 ASK/REVIEW 决定或批准，然后运行 `begin`、实施、`sync`、`verify` 和 Gate。所有命令都以 `python -m aiflow ...` 为权威入口。
 
 具体动作的授权以 [AGENTS.md「常设授权」](../../AGENTS.md#常设授权) 为唯一权威；先核对既有批准及常设授权覆盖，不重复请求已覆盖的决定。本页演示任务显式禁止 push、merge、deploy 和 delete，继续演示仍须遵守这些任务范围。
 

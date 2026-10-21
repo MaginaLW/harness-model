@@ -68,6 +68,7 @@ def test_transition_table_matches_independent_fixture() -> None:
         "review_finding_resolved",
         "observation_recorded",
         "observation_refused",
+        "risk_facts_recorded",
     }
 
 

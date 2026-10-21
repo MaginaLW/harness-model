@@ -1,0 +1,51 @@
+{
+  "base_commit": "3f8dfaf2a028866a55d5cea4bdaa0f50e04c3d22",
+  "branch": "codex/explicit-risk-facts",
+  "classification_input_sha256": "66aa9ad855ee0fe470048609d8706c7b734d1613df2ce62814e5aee4dcc6926f",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "src/aiflow/decision_units.py",
+      "src/aiflow/facts_service.py",
+      "src/aiflow/task_service.py",
+      "src/aiflow/state.py",
+      "tests/integration/test_facts_command.py",
+      "tests/unit/test_facts_recovery.py",
+      "tests/unit/test_state.py",
+      "docs/operations/quickstart.md",
+      "docs/operations/adoption.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Record explicit draft decision-unit risk facts with read-only preview and audited local updates",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "src/aiflow/decision_units.py",
+          "src/aiflow/facts_service.py",
+          "src/aiflow/task_service.py",
+          "src/aiflow/state.py"
+        ],
+        "planned_actions": [
+          "Add bounded NEW-only risk facts input and read-only preview.",
+          "Preserve omitted fields, validate full resulting decision units and task, and record audited local changes.",
+          "Handle interrupted facts materialization without allowing classification to read stale facts."
+        ]
+      }
+    ],
+    "goal": "Record explicit draft decision-unit risk facts with read-only preview and audited local updates",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "cdbc7de10a453b90756ecb16ba50ac077ad92123819c4a36a276824c5109e4fb",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "17639706085b4813fe2186206255236bc7fa646938c79636245a0def1c183f6c",
+  "task_id": "TASK-0083"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "review_id": "REV-0002",
+  "revision": 1,
+  "task_id": "TASK-0083",
+  "review_stage": "design",
+  "reviewer": "/root/facts_design_audit",
+  "recorded_at": "2026-10-21T15:09:50Z",
+  "context_sha256": "cdbc7de10a453b90756ecb16ba50ac077ad92123819c4a36a276824c5109e4fb",
+  "outcome": "APPROVE",
+  "summary": "Independent review approves the revised frozen design and verifies its native context, specification and classification-input hashes. The design bounds writes to twelve explicit risk fields of one existing NEW, unfrozen and unclassified decision unit, validates complete existing contracts, preserves omitted fields and unrelated metadata, and gives preview, rejection and ordinary no-op zero-write behavior. Recovery is restricted to the same validated apply intent and exact complete-event staged replacement, preserving the original audit event without generalizing task recovery. Strict-reader staging guards and the legal later classification_recorded NEW-to-CLASSIFIED barrier prevent stale initial facts while retaining the existing explicit reassessment path after classification. The expanded test_state scope and reassessment regression address the identified integration boundaries. Existing validation gates, single-writer and uncertain I/O limitations, all paused activities and both deferred routes remain explicit. No open design findings remain; implementation correctness and verification require their separate evidence.",
+  "findings": []
+}

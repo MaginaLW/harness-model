@@ -15,6 +15,7 @@ from aiflow.classification_service import classify_task
 from aiflow.contracts import SCHEMA_RELATIVE_DIRECTORY, schema_directory_context
 from aiflow.errors import AiflowError
 from aiflow.escalation import ESCALATION_REASON_CODES, escalate_task, record_resolution
+from aiflow.facts_service import record_risk_facts
 from aiflow.gate import evaluate_gate
 from aiflow.git_context import resolve_repository_root
 from aiflow.observation_adapter import (
@@ -55,6 +56,12 @@ def build_parser() -> ArgumentParser:
     start.add_argument("--forbid-action", action="append", default=[])
     start.add_argument("--allow-detached", action="store_true")
     start.add_argument("--recover", metavar="TASK-ID")
+    facts = subparsers.add_parser("facts", help="record explicit risk facts before classification")
+    facts.add_argument("task_id")
+    facts.add_argument("--decision-unit", required=True)
+    facts.add_argument("--input", required=True, type=Path)
+    facts.add_argument("--actor", required=True)
+    facts.add_argument("--dry-run", action="store_true")
     begin = subparsers.add_parser("begin", help="begin implementation or retry")
     begin.add_argument("task_id")
     begin.add_argument("--actor", required=True)
@@ -208,6 +215,16 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             )
         print(start_result.task_id)
         print(start_result.task_directory.resolve())
+    elif arguments.command == "facts":
+        facts_result = record_risk_facts(
+            repository_root,
+            arguments.task_id,
+            decision_unit_id=arguments.decision_unit,
+            input_path=arguments.input,
+            actor=arguments.actor,
+            dry_run=arguments.dry_run,
+        )
+        print(json.dumps(facts_result, ensure_ascii=False, sort_keys=True))
     elif arguments.command == "begin":
         transition_result = begin_task(
             repository_root,
