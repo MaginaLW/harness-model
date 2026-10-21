@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-21T15:10:33Z",
+    "base_commit": "3f8dfaf2a028866a55d5cea4bdaa0f50e04c3d22",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：用户已明确要求本功能；冻结规格独立审核 APPROVE、无未关闭 critical/high，contract 校验通过。实现后仍须完整 verify、独立实现审核、Gate 和 required CI。",
+    "schema_version": "1.0",
+    "spec_sha256": "17639706085b4813fe2186206255236bc7fa646938c79636245a0def1c183f6c",
+    "subject_commit": "3f8dfaf2a028866a55d5cea4bdaa0f50e04c3d22",
+    "task_id": "TASK-0083"
+  }
+]

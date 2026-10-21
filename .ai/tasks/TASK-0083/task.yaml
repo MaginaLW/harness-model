@@ -1,0 +1,96 @@
+allowed_scope:
+- src/aiflow/cli.py
+- src/aiflow/decision_units.py
+- src/aiflow/facts_service.py
+- src/aiflow/task_service.py
+- src/aiflow/state.py
+- tests/integration/test_facts_command.py
+- tests/unit/test_facts_recovery.py
+- tests/unit/test_state.py
+- docs/operations/quickstart.md
+- docs/operations/adoption.md
+- docs/operations/maintenance-status.md
+base_commit: 3f8dfaf2a028866a55d5cea4bdaa0f50e04c3d22
+branch: codex/explicit-risk-facts
+created_at: '2026-10-21T14:56:15Z'
+current_state: READY_TO_IMPLEMENT
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Record explicit draft decision-unit risk facts with read-only preview and
+    audited local updates
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/cli.py
+  - src/aiflow/decision_units.py
+  - src/aiflow/facts_service.py
+  - src/aiflow/task_service.py
+  - src/aiflow/state.py
+  inputs:
+  - The owner explicitly selected the draft risk-facts CLI and requested implementation,
+    verification and merge. Real scoring, automatic review arrangement and host connections
+    remain paused; other new routes remain unstarted.
+  - Current Quickstart requires manually editing decision-unit facts before first
+    classification. The repository has NEW, not DRAFT, as its pre-classification task
+    state.
+  - The command will use existing decision-unit/task contracts and local event materialization.
+    Companion tests and long-lived usage documentation are separately committed task-free;
+    allowed_scope includes their exact cumulative paths.
+  - Source implementation has no external effect. Conditional push, PR and merge use
+    the existing standing authorization after independent reviews, verification, Gate
+    and required CI. No authority or quality threshold is changed.
+  permission_requirements: []
+  planned_actions:
+  - Add bounded NEW-only risk facts input and read-only preview.
+  - Preserve omitted fields, validate full resulting decision units and task, and
+    record audited local changes.
+  - Handle interrupted facts materialization without allowing classification to read
+    stale facts.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0083
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - In-process CLI tests for allowed facts, no-write preview/rejections, frozen/classified
+    states, transaction failures and strict recovery; full native verification, 85
+    percent domain coverage, 90 percent diff coverage, Ruff, format, strict mypy,
+    independent review, Gate and required CI.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 17639706085b4813fe2186206255236bc7fa646938c79636245a0def1c183f6c
+goal: Record explicit draft decision-unit risk facts with read-only preview and audited
+  local updates
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-21T15:08:36Z'
+subject_commit: 3f8dfaf2a028866a55d5cea4bdaa0f50e04c3d22
+task_id: TASK-0083
+updated_at: '2026-10-21T15:10:33Z'
+worktree_dirty: false
+worktree_dirty_paths: []
