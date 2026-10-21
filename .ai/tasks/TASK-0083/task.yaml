@@ -13,7 +13,7 @@ allowed_scope:
 base_commit: 3f8dfaf2a028866a55d5cea4bdaa0f50e04c3d22
 branch: codex/explicit-risk-facts
 created_at: '2026-10-21T14:56:15Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -91,6 +91,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-21T15:08:36Z'
 subject_commit: d917af097353dd592bf60696a9e4e8eb6f1bd680
 task_id: TASK-0083
-updated_at: '2026-10-21T16:06:26Z'
+updated_at: '2026-10-21T16:13:15Z'
 worktree_dirty: false
 worktree_dirty_paths: []
