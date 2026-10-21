@@ -89,8 +89,8 @@ goal: Record explicit draft decision-unit risk facts with read-only preview and 
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-10-21T15:08:36Z'
-subject_commit: 3f8dfaf2a028866a55d5cea4bdaa0f50e04c3d22
+subject_commit: d917af097353dd592bf60696a9e4e8eb6f1bd680
 task_id: TASK-0083
-updated_at: '2026-10-21T15:10:42Z'
+updated_at: '2026-10-21T15:47:05Z'
 worktree_dirty: false
 worktree_dirty_paths: []
