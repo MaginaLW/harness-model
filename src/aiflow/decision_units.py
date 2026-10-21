@@ -8,12 +8,28 @@ from collections.abc import Collection, Mapping, Sequence
 from copy import deepcopy
 from typing import Any
 
-from aiflow.contracts import validate_contract
-from aiflow.errors import PolicyError
+from aiflow.contracts import require_valid_contract, validate_contract
+from aiflow.errors import ContractError, PolicyError
 
 KNOWN_REVERSIBILITY = frozenset({"reversible", "conditionally_reversible", "irreversible"})
 # Requirement tokens name gates; approval records use the related spec/code/action types.
 DECLARED_PERMISSION_REQUIREMENTS = frozenset({"spec_approval", "code_approval", "action_approval"})
+RISK_FACT_FIELDS = frozenset(
+    {
+        "scope",
+        "impact",
+        "protections",
+        "verification",
+        "impact_categories",
+        "controlled_actions",
+        "business_direction_count",
+        "change_characteristics",
+        "verification_requirements",
+        "reversibility",
+        "external_side_effects",
+        "permission_requirements",
+    }
+)
 
 
 def _error(message: str, code: str, **details: object) -> PolicyError:
@@ -116,3 +132,32 @@ def classification_input_digest(
     }
     canonical = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def risk_facts(unit: Mapping[str, object]) -> dict[str, Any]:
+    """Project only present explicit risk fields, without inferring missing facts."""
+    return {key: deepcopy(unit[key]) for key in sorted(RISK_FACT_FIELDS) if key in unit}
+
+
+def apply_risk_facts(
+    task: Mapping[str, object], decision_unit_id: str, facts: Mapping[str, object]
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Replace supplied top-level facts of one existing, fully validated unit."""
+    if not facts or set(facts) - RISK_FACT_FIELDS:
+        raise ContractError(
+            "Risk facts must contain only supported explicit risk fields",
+            code="FACTS_FIELDS_INVALID",
+        )
+    require_valid_contract("task", task)
+    units = parse_decision_units(task)
+    if not any(unit["decision_unit_id"] == decision_unit_id for unit in units):
+        raise ContractError("Decision unit does not exist", code="FACTS_UNIT_NOT_FOUND")
+    updated: dict[str, Any] = deepcopy(dict(task))
+    unit = next(
+        unit for unit in updated["decision_units"] if unit["decision_unit_id"] == decision_unit_id
+    )
+    before = risk_facts(unit)
+    unit.update(deepcopy(dict(facts)))
+    parse_decision_units(updated)
+    require_valid_contract("task", updated)
+    return updated, before, risk_facts(unit)

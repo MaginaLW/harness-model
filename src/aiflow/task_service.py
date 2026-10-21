@@ -14,7 +14,12 @@ from typing import Any, Literal, cast
 import yaml
 
 from aiflow.contracts import require_valid_contract
-from aiflow.decision_units import classification_input_digest, parse_decision_units
+from aiflow.decision_units import (
+    RISK_FACT_FIELDS,
+    classification_input_digest,
+    parse_decision_units,
+    risk_facts,
+)
 from aiflow.errors import (
     AiflowError,
     ContractError,
@@ -426,6 +431,8 @@ def _persist_event_and_task(
     task_directory: Path,
     task: Mapping[str, object],
     event: Mapping[str, object],
+    *,
+    preserve_staged_on_append_failure: bool = False,
 ) -> None:
     target = task_directory / "task.yaml"
     staged = task_directory / "task.yaml.next"
@@ -433,7 +440,8 @@ def _persist_event_and_task(
     try:
         _append_event(task_directory / "events.jsonl", event)
     except AiflowError:
-        staged.unlink(missing_ok=True)
+        if not preserve_staged_on_append_failure:
+            staged.unlink(missing_ok=True)
         raise
     try:
         _replace_materialized_task(staged, target)
@@ -473,6 +481,45 @@ def _is_subject_sync_staged_patch(
     return raw_task.get("subject_commit") == old_subject and dict(staged_task) == expected
 
 
+def _require_materialized_risk_facts(record: TaskRecord) -> None:
+    """Refuse unapplied initial facts until strict first classification proves completion."""
+    latest: dict[str, dict[str, Any]] = {}
+    for event in record.events:
+        if (
+            event.get("event_type") == "classification_recorded"
+            and event.get("from_state") == "NEW"
+            and event.get("to_state") == "CLASSIFIED"
+        ):
+            latest.clear()
+        if event.get("event_type") != "risk_facts_recorded":
+            continue
+        payload = event.get("payload")
+        if (
+            event.get("from_state") != "NEW"
+            or event.get("to_state") != "NEW"
+            or not isinstance(payload, dict)
+            or set(payload) != {"decision_unit_id", "before", "after"}
+            or not isinstance(payload.get("decision_unit_id"), str)
+            or not isinstance(payload.get("before"), dict)
+            or not isinstance(payload.get("after"), dict)
+            or set(payload["before"]) - RISK_FACT_FIELDS
+            or set(payload["after"]) - RISK_FACT_FIELDS
+        ):
+            raise StateTransitionError("Risk facts event is invalid", code="FACTS_EVENT_INVALID")
+        latest[payload["decision_unit_id"]] = payload["after"]
+    if not latest:
+        return
+    units = {unit["decision_unit_id"]: unit for unit in parse_decision_units(record.task)}
+    if any(
+        identifier not in units or risk_facts(units[identifier]) != after
+        for identifier, after in latest.items()
+    ):
+        raise StateTransitionError(
+            "Recorded risk facts are not materialized; preserve the task and recovery files",
+            code="FACTS_MATERIALIZATION_MISMATCH",
+        )
+
+
 def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
     """Load and replay a task, repairing event-ahead materialization if necessary."""
     raw_task = read_task_yaml(
@@ -487,8 +534,15 @@ def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
     events = _read_event_log(repository_root, task_id)
     terminal_state = replay_events(events, task_id=task_id)
     staged_path = resolve_task_path(repository_root, task_id, "task.yaml.next")
+    if staged_path.exists() and events[-1].get("event_type") == "risk_facts_recorded":
+        raise StateTransitionError(
+            "Pending risk facts require the same explicit facts apply command",
+            code="FACTS_RECOVERY_REQUIRED",
+        )
+    if not staged_path.exists():
+        _require_materialized_risk_facts(TaskRecord(task=task, events=tuple(events)))
     if task.get("current_state") == terminal_state:
-        if not staged_path.is_file():
+        if not staged_path.exists():
             return TaskRecord(task=task, events=tuple(events))
         staged_task = read_task_yaml(
             repository_root,
@@ -504,6 +558,7 @@ def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
                 code="STATE_MATERIALIZATION_MISMATCH",
                 details={},
             )
+        _require_materialized_risk_facts(TaskRecord(task=staged_task, events=tuple(events)))
         try:
             _replace_materialized_task(
                 staged_path, resolve_task_path(repository_root, task_id, "task.yaml")
@@ -533,6 +588,7 @@ def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
             details={"materialized": task.get("current_state"), "replayed": terminal_state},
         )
     repaired: dict[str, Any] = staged_task
+    _require_materialized_risk_facts(TaskRecord(task=repaired, events=tuple(events)))
     recovery_event = create_record_event(
         repaired,
         event_type="state_recovered",
@@ -546,8 +602,8 @@ def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
     return TaskRecord(task=repaired, events=tuple([*events, recovery_event]))
 
 
-def read_task_record_strict(repository_root: Path, task_id: str) -> TaskRecord:
-    """Read and replay a task without repairing or mutating any file."""
+def _read_task_record(repository_root: Path, task_id: str) -> TaskRecord:
+    """Read validated task/state history; pending facts need service-specific checks."""
     raw_task = read_task_yaml(
         repository_root,
         task_id,
@@ -565,6 +621,17 @@ def read_task_record_strict(repository_root: Path, task_id: str) -> TaskRecord:
             details={"materialized": raw_task.get("current_state"), "replayed": terminal_state},
         )
     return TaskRecord(task=raw_task, events=tuple(events))
+
+
+def read_task_record_strict(repository_root: Path, task_id: str) -> TaskRecord:
+    """Read a fully materialized task without repairing or mutating any file."""
+    record = _read_task_record(repository_root, task_id)
+    if resolve_task_path(repository_root, task_id, "task.yaml.next").exists():
+        raise StateTransitionError(
+            "Task has a pending materialized replacement", code="STATE_MATERIALIZATION_MISMATCH"
+        )
+    _require_materialized_risk_facts(record)
+    return record
 
 
 def transition_task_record(
