@@ -1,0 +1,259 @@
+{
+  "base_commit": "3f8dfaf2a028866a55d5cea4bdaa0f50e04c3d22",
+  "branch": "codex/explicit-risk-facts",
+  "classification_input_sha256": "66aa9ad855ee0fe470048609d8706c7b734d1613df2ce62814e5aee4dcc6926f",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "src/aiflow/decision_units.py",
+      "src/aiflow/facts_service.py",
+      "src/aiflow/task_service.py",
+      "src/aiflow/state.py",
+      "tests/integration/test_facts_command.py",
+      "tests/unit/test_facts_recovery.py",
+      "tests/unit/test_state.py",
+      "docs/operations/quickstart.md",
+      "docs/operations/adoption.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Record explicit draft decision-unit risk facts with read-only preview and audited local updates",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "src/aiflow/decision_units.py",
+          "src/aiflow/facts_service.py",
+          "src/aiflow/task_service.py",
+          "src/aiflow/state.py"
+        ],
+        "planned_actions": [
+          "Add bounded NEW-only risk facts input and read-only preview.",
+          "Preserve omitted fields, validate full resulting decision units and task, and record audited local changes.",
+          "Handle interrupted facts materialization without allowing classification to read stale facts."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0083/approvals.json",
+        ".ai/tasks/TASK-0083/classification.json",
+        ".ai/tasks/TASK-0083/events.jsonl",
+        ".ai/tasks/TASK-0083/review-contexts/31c54a354575582bfca50a2a0a4a563024bffcf56af6fd5105f66f00f30e350f.json",
+        ".ai/tasks/TASK-0083/review-contexts/cdbc7de10a453b90756ecb16ba50ac077ad92123819c4a36a276824c5109e4fb.json",
+        ".ai/tasks/TASK-0083/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0083/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0083/spec.md",
+        ".ai/tasks/TASK-0083/task.yaml",
+        "docs/operations/adoption.md",
+        "docs/operations/maintenance-status.md",
+        "docs/operations/quickstart.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/decision_units.py",
+        "src/aiflow/facts_service.py",
+        "src/aiflow/state.py",
+        "src/aiflow/task_service.py",
+        "tests/integration/test_facts_command.py",
+        "tests/unit/test_facts_recovery.py",
+        "tests/unit/test_state.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/approvals.json"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/classification.json"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/events.jsonl"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/review-contexts/31c54a354575582bfca50a2a0a4a563024bffcf56af6fd5105f66f00f30e350f.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/review-contexts/cdbc7de10a453b90756ecb16ba50ac077ad92123819c4a36a276824c5109e4fb.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/spec.md"
+        },
+        {
+          "additions": 96,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0083/task.yaml"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 4,
+          "path": "docs/operations/adoption.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 68,
+          "binary": false,
+          "deletions": 22,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/decision_units.py"
+        },
+        {
+          "additions": 185,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/facts_service.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/state.py"
+        },
+        {
+          "additions": 72,
+          "binary": false,
+          "deletions": 5,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 565,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_facts_command.py"
+        },
+        {
+          "additions": 354,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_facts_recovery.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_state.py"
+        }
+      ],
+      "totals": {
+        "additions": 1668,
+        "deletions": 34,
+        "files": 20
+      }
+    },
+    "goal": "Record explicit draft decision-unit risk facts with read-only preview and audited local updates",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0083",
+        "--actor",
+        "codex-main"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "5e0e1396975f31be4545c32631d8e6fd37176cc5097f6eee6b5dba8aa6cfe7e1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "be9d9cc090dd679bcf5df522f5290ed80fb5b61cff033e58f5018b06fbf1ea0c",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "17639706085b4813fe2186206255236bc7fa646938c79636245a0def1c183f6c",
+  "subject_commit": "d917af097353dd592bf60696a9e4e8eb6f1bd680",
+  "task_id": "TASK-0083"
+}
