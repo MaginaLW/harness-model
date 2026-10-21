@@ -328,13 +328,14 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
   模板与任务存储。不得复制本仓身份、历史 task、批准、证据或维护模式标记。
 - 完整克隆内的业务 CLI 可从 Git 工作树根或内部子目录调用；内部任务、Policy、
   模板及默认 Schema 使用同一定位根，Schema 来自 `<root>/.ai/schemas`。
-- 新 task 的分类前仍需由 Agent 按实际情况填写显式风险事实，见
-  [Quickstart 的草稿步骤](quickstart.md)；缺字段不是向人类求批的理由。
+- 新 task 在 `freeze` 与首次 `classify` 前，由 Agent 按实际情况使用 `facts` 预览和录入显式风险事实，见
+  [Quickstart 用法与恢复边界](quickstart.md#分类前风险事实录入)。命令只用于原 Git 绑定下、尚未冻结或分类的 `NEW` 任务，
+  不推断缺省事实，不证明声明真实，也不授权执行；缺机械字段不是向人类求批的理由。
 - 本仓 CI 命令、路径、85% / 90% 阈值及维护模式是本仓约束，不是外仓通用安装模板。
   外仓必须映射自己的质量检查与治理模式，不能通过复制 bootstrap 标记跳过原有 Gate。
 
-因此，全引擎外仓产品化仍需独立设计和验证：安全且不覆盖已有配置的初始化与资源分发、
-显式草稿事实录入，以及目标 CI 适配。源于
+`facts` 只补显式风险事实的本地录入入口。因此，全引擎外仓产品化仍需独立设计和验证：
+安全且不覆盖已有配置的初始化与资源分发、新仓库身份和目标 CI 适配。源于
 [`pyproject.toml`](../../pyproject.toml)、[CLI](../../src/aiflow/cli.py)、
 [仓库身份](../../src/aiflow/git_context.py)、[Schema 加载](../../src/aiflow/contracts.py)
 和[任务存储](../../src/aiflow/storage.py)的当前实现核查，不是已存在的安装命令。
