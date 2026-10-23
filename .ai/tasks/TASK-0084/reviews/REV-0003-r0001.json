@@ -1,0 +1,13 @@
+{
+  "context_sha256": "11d6c99e10121816d179ab42a47fc91284d7b3d43b0cb4e67e95cec94e9bcc99",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-23T16:58:37Z",
+  "review_id": "REV-0003",
+  "review_stage": "design",
+  "reviewer": "/root/unicode_design_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent design review approves the expanded frozen Unicode maintenance specification and verifies that the native context exactly matches the supplied context. The added shared-writer scope addresses the independently reproduced high data-integrity defect: PyYAML allow_unicode=True folds U+0085 in a valid facts value into a space, leaving successful apply inconsistent with event facts and preventing strict loading or exact interrupted-replacement recovery. Changing the existing safe_dump call to allow_unicode=False is the smallest correction using the existing serializer; isolated single-character and real-service experiments establish exact decoded Unicode values without a custom traversal, option, framework or dependency. New YAML writes will use standard escapes, including for Chinese and emoji, while historical files and unescaped UTF-8 event serialization remain unchanged. The existing standard-stream event reader and facts JSON ASCII-output changes remain bounded. The acceptance contract now explicitly requires actual apply, strict loading, no-op, rejected-actor preservation and interrupted recovery with exact original event, actor and timestamp, plus existing parser, contract and I/O errors and privacy projection limits. The current task is freshly classified REVIEW/V1 and correctly frozen in WAITING_FOR_SPEC_REVIEW; the earlier verification is explicitly abandoned as failed and prior reviews remain historical. No old verification or review is promoted to acceptance of this scope. Final implementation review, complete fresh native quality verification, Gate, required remote CI and merge-commit publication require their separate evidence. Authority, quality thresholds and all paused real-scoring, automatic-review, host and observation activities remain unchanged. No open design findings remain.",
+  "task_id": "TASK-0084"
+}

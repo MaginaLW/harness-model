@@ -11,5 +11,18 @@
     "spec_sha256": "4ea5d937b59d0d3f415478855d2943ec9d630bc4d74930d7821b80d3469a91c7",
     "subject_commit": "233a2980b6ca72868c6c984ad36c521075f4b188",
     "task_id": "TASK-0084"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-23T16:59:15Z",
+    "base_commit": "30d4edb3964fd8dd30600d77d391f2a6aa3d6f7d",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：扩大后的Unicode/YAML数据保真规格已有独立设计审核APPROVE，无开放设计发现；实际实现、完整验证与最终审核仍待完成。",
+    "schema_version": "1.0",
+    "spec_sha256": "6cb13a82e93779cd7671a674f0515734d21e30f9f16caad50152c0031a9a4b88",
+    "subject_commit": "6f1f6b5c7fe89e918a70988511fdc0a184f07d7d",
+    "task_id": "TASK-0084"
   }
 ]

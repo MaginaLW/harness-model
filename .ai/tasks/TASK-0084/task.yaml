@@ -5,10 +5,11 @@ allowed_scope:
 - tests/integration/test_approval_overhead.py
 - tests/unit/test_telemetry_snapshot.py
 - tests/integration/test_facts_command.py
-- tests/unit/test_unicode_events.py
 - docs/operations/effect-observations.md
 - docs/operations/quickstart.md
 - docs/operations/maintenance-status.md
+- src/aiflow/storage.py
+- tests/unit/test_storage.py
 base_commit: 30d4edb3964fd8dd30600d77d391f2a6aa3d6f7d
 branch: codex/event-record-lines
 created_at: '2026-10-23T16:38:52Z'
@@ -32,15 +33,21 @@ decision_units:
   impact_scope:
   - src/aiflow/task_service.py
   - src/aiflow/cli.py
+  - src/aiflow/storage.py
   inputs:
   - The owner requested productive maintenance using boring-engineering.
   - Reproduced valid Unicode event text being split into invalid JSON records, plus
     facts output failing after a successful write under GBK stdout.
   - Real scoring, automatic review arrangement and host connections remain paused.
+  - Independent implementation review reproduced existing U+0085 data loss in YAML
+    serialization; the incomplete old-candidate V1 run was deliberately abandoned
+    and preserved before this scope change.
   permission_requirements: []
   planned_actions:
   - Replace Unicode-aware event splitting with standard text-stream line reading.
   - ASCII-escape facts JSON without changing decoded values or stored facts.
+  - Use the existing YAML serializer ASCII escapes to preserve exact Unicode values,
+    including NEL, during normal writes and facts recovery.
   protections:
     dry_run: false
     verified_backup: false
@@ -65,14 +72,14 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 4ea5d937b59d0d3f415478855d2943ec9d630bc4d74930d7821b80d3469a91c7
+frozen_spec_sha256: 6cb13a82e93779cd7671a674f0515734d21e30f9f16caad50152c0031a9a4b88
 goal: Preserve valid Unicode in event replay and facts JSON output
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
-spec_frozen_at: '2026-10-23T16:46:04Z'
-subject_commit: 06ec3ec339df3b2244759cc8e76d0e20ca680db1
+spec_frozen_at: '2026-10-23T16:57:36Z'
+subject_commit: 3855727df2a7ce8cdcd4539af7d8c86462766578
 task_id: TASK-0084
-updated_at: '2026-10-23T16:48:41Z'
+updated_at: '2026-10-23T16:59:33Z'
 worktree_dirty: false
 worktree_dirty_paths: []

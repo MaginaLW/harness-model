@@ -6,7 +6,9 @@ Preserve valid Unicode text when replaying task events and returning risk-facts 
 
 ## 范围
 
-Core changes are limited to `src/aiflow/task_service.py` and `src/aiflow/cli.py`. Read event records using standard text-stream line boundaries instead of Unicode-aware `str.splitlines()`. Keep UTF-8 event serialization unchanged, including unescaped U+0085, U+2028 and U+2029 inside JSON strings. Return facts results using ASCII-escaped JSON; decoded fields and values remain identical under ASCII, GBK and UTF-8 stdout.
+Core changes are limited to `src/aiflow/task_service.py`, `src/aiflow/cli.py` and `src/aiflow/storage.py`. Read event records using standard text-stream line boundaries instead of Unicode-aware `str.splitlines()`. Keep UTF-8 event serialization unchanged, including unescaped U+0085, U+2028 and U+2029 inside JSON strings. Return facts results using ASCII-escaped JSON; decoded fields and values remain identical under ASCII, GBK and UTF-8 stdout.
+
+Independent review also reproduced existing YAML data loss: with `allow_unicode=True`, U+0085 in a facts value is folded into a space, so apply reports success but strict loading and interrupted replacement recovery reject the changed materialization. Set the existing `yaml.safe_dump` call to `allow_unicode=False`, using the serializer's standard escapes to preserve exact decoded values. This applies to new YAML writes through the existing shared writer, including Chinese and emoji; it does not rewrite historical files, change UTF-8 event serialization or add a new configuration option.
 
 The task ledger belongs to this task. Companion tests and long-lived usage/current-state documentation are separate task-free commits. `tools/analysis/approval_overhead.py` receives the same bounded event-reading correction in a separate task-free commit for legacy reports and fixed-HEAD snapshots. Cumulative allowed paths include these exact companions. Reuse standard `readlines()` and `io.StringIO`; introduce no parser framework or dependency.
 
@@ -18,6 +20,7 @@ No new Schema, Policy, routing, approval, state transition, recovery mechanism, 
 
 - Reproduce the pre-fix failure for legal Unicode separators in event strings and facts output with emoji under a restricted stdout encoding.
 - Exercise actual task loading and facts CLI apply, preview and no-op paths. Successful apply writes one unchanged Unicode event; subsequent task reads and a repeated apply succeed without extra events. Decoded JSON retains exact Unicode values.
+- Prove YAML write/read round trips for Unicode values, including U+0085, and actual facts apply, strict loading, no-op and interrupted-replacement recovery. Preserve the original event, actor, timestamp and rejected-request bytes. Existing YAML parsing, contract and I/O errors remain unchanged.
 - Cover LF/CRLF and terminal-newline compatibility. Empty, malformed and blank event records still follow existing rejection behavior; private fields are not newly projected, and read-only reports preserve source bytes.
 - Exercise legacy statistics, fixed-HEAD snapshots and their existing consumers using the current fixtures. No unknown or historical failure is promoted to success.
 - Obtain independent design and implementation reviews, native verification and Gate. Full pytest, separate core/analysis 85 percent total and 90 percent diff coverage, whitespace, Ruff, format, strict mypy and remote required CI remain mandatory. Publish only with a merge commit.
