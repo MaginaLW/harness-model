@@ -236,6 +236,95 @@ def test_snapshot_excludes_private_free_text_and_has_no_writes(
     assert {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()} == before
 
 
+@pytest.mark.parametrize("separator", ["\u0085", "\u2028", "\u2029"])
+@pytest.mark.parametrize("newline", ["\n", "\r\n"])
+@pytest.mark.parametrize("terminated", [False, True])
+def test_committed_jsonl_keeps_unicode_string_separators_inside_records(
+    snapshot_module: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    separator: str,
+    newline: str,
+    terminated: bool,
+) -> None:
+    documents = _documents()
+    events = documents[PREFIX + "events.jsonl"]
+    events[0]["payload"]["reason"] = f"private-jsonl-before{separator}private-jsonl-after"
+    text = newline.join(json.dumps(event, ensure_ascii=False) for event in events)
+    contents = (text + newline * terminated).encode("utf-8")
+    documents[PREFIX + "events.jsonl"] = contents
+    _git_inputs(snapshot_module, monkeypatch, documents)
+    before = {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
+
+    report = snapshot_module.build_snapshot(tmp_path)
+
+    assert report["coverage"]["task_records"] == 1
+    task = report["tasks"][0]
+    assert [event["sequence"] for event in task["events"]] == [1, 2, 3, 4, 5]
+    assert [attempt["original_result"] for attempt in task["verification_attempts"]] == [
+        "failed",
+        "passed",
+    ]
+    assert "private-jsonl" not in json.dumps(report, ensure_ascii=False)
+    assert documents[PREFIX + "events.jsonl"] == contents
+    assert {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()} == before
+
+
+def test_snapshot_accepts_cr_delimited_event_records(
+    snapshot_module: Any, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    documents = _documents()
+    events = documents[PREFIX + "events.jsonl"]
+    events[0]["payload"]["reason"] = "private-jsonl-before\u2028private-jsonl-after"
+    documents[PREFIX + "events.jsonl"] = "\r".join(
+        json.dumps(event, ensure_ascii=False) for event in events
+    ).encode("utf-8")
+    _git_inputs(snapshot_module, monkeypatch, documents)
+
+    report = snapshot_module.build_snapshot(tmp_path)
+
+    assert len(report["tasks"][0]["events"]) == 5
+    assert "private-jsonl" not in json.dumps(report, ensure_ascii=False)
+
+
+def test_availability_accepts_unicode_string_separators_in_committed_events(
+    snapshot_module: Any, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    documents = _documents()
+    documents[PREFIX + "events.jsonl"][0]["payload"]["reason"] = (
+        "private-jsonl-before\u0085\u2028\u2029private-jsonl-after"
+    )
+    _git_inputs(snapshot_module, monkeypatch, documents)
+
+    report = snapshot_module.build_availability(tmp_path)
+
+    assert report["coverage"]["task_records"] == 1
+    assert "private-jsonl" not in json.dumps(report, ensure_ascii=False)
+
+
+@pytest.mark.parametrize("invalid_line", ["", " \t", "private-jsonl-invalid"])
+def test_committed_jsonl_still_rejects_invalid_physical_records(
+    snapshot_module: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    invalid_line: str,
+) -> None:
+    documents = _documents()
+    event = documents[PREFIX + "events.jsonl"][0]
+    event["payload"]["reason"] = "private-jsonl-before\u2028private-jsonl-after"
+    text = json.dumps(event, ensure_ascii=False) + "\n" + invalid_line + "\n"
+    documents[PREFIX + "events.jsonl"] = text.encode("utf-8")
+    _git_inputs(snapshot_module, monkeypatch, documents)
+
+    assert snapshot_module.main([str(tmp_path), "--snapshot", "--format", "json"]) == 2
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == "approval-overhead: TASK-0001/events.jsonl: invalid document\n"
+    assert "private-jsonl" not in captured.err
+
+
 def test_missing_optional_data_is_unknown_and_unclosed_attempt_stays_open(
     snapshot_module: Any, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

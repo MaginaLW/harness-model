@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import os
 import re
@@ -159,7 +160,8 @@ def _binding(approval: dict[str, Any]) -> str:
 
 def _read_events(path: Path, task_id: str) -> list[dict[str, Any]]:
     try:
-        lines = path.read_text(encoding="utf-8").splitlines()
+        with path.open(encoding="utf-8") as stream:
+            lines = stream.readlines()
     except FileNotFoundError as error:
         raise _error(task_id, path.name, "file is required") from error
     except (OSError, UnicodeError) as error:
@@ -620,7 +622,7 @@ def build_snapshot(repository: Path, *, include_feedback: bool = False) -> dict[
         events: list[dict[str, Any]] = []
         active: dict[str, Any] | None = None
         try:
-            lines = event_source[1].decode("utf-8").splitlines()
+            lines = io.StringIO(event_source[1].decode("utf-8"), newline=None).readlines()
         except UnicodeError as error:
             raise _error(task_id, "events.jsonl", "invalid encoding") from error
         if not lines:
