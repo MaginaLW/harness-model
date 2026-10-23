@@ -24,5 +24,19 @@
     "spec_sha256": "6cb13a82e93779cd7671a674f0515734d21e30f9f16caad50152c0031a9a4b88",
     "subject_commit": "6f1f6b5c7fe89e918a70988511fdc0a184f07d7d",
     "task_id": "TASK-0084"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-23T17:22:48Z",
+    "base_commit": "30d4edb3964fd8dd30600d77d391f2a6aa3d6f7d",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "435ffc103073760525b3edfbec67dcbb3ff100bb4785138007baec20028340cb",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立实现审核REV-0004 APPROVE，原high数据完整性问题已实际关闭，无开放critical/high；固定候选原生V1十项检查及3835测试通过，无源代码外部副作用、不触及授权文件。",
+    "schema_version": "1.0",
+    "spec_sha256": "6cb13a82e93779cd7671a674f0515734d21e30f9f16caad50152c0031a9a4b88",
+    "subject_commit": "0a20779ae6b3bd357c3a2ff785a9fb760f76b490",
+    "task_id": "TASK-0084"
   }
 ]
