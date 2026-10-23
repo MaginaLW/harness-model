@@ -1,0 +1,13 @@
+{
+  "context_sha256": "ace52043caabde1c7e2c8ccecb9d2dc2b2d1d5d8917a44404b2b4e507adc57a6",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-23T16:42:47Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "/root/unicode_design_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent design review approves the frozen bounded Unicode maintenance design and confirms that the native design context exactly matches the supplied context. The existing UTF-8 event writer can emit legal U+0085, U+2028 and U+2029 within JSON strings, while str.splitlines incorrectly treats them as record boundaries; standard UTF-8 text-stream readlines preserves those characters and retains LF, CRLF, terminal-newline, parsing, replay and I/O-error behavior. ASCII escaping only the facts CLI result fixes the reproduced GBK emoji output failure after successful persistence while preserving decoded values, event bytes and apply, preview and no-op semantics. The analysis readers and their real consumers receive the same direct standard-library correction in a separate task-free commit; no parser abstraction, dependency, schema, policy or authority expansion is proposed. Required malformed and blank input rejection, private-field projection limits, source-byte preservation and historical failure retention are explicit acceptance conditions. Implementation review, native quality verification, Gate, remote required CI and merge-commit publication remain separate evidence; real scoring, automatic-review arrangement, host connections and observation start remain paused. No open design findings remain.",
+  "task_id": "TASK-0084"
+}

@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-23T16:47:27Z",
+    "base_commit": "30d4edb3964fd8dd30600d77d391f2a6aa3d6f7d",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：当前冻结规格已由独立 Agent 审核 APPROVE，无未关闭发现；实施与正式验证仍按 REVIEW/V1 完成。",
+    "schema_version": "1.0",
+    "spec_sha256": "4ea5d937b59d0d3f415478855d2943ec9d630bc4d74930d7821b80d3469a91c7",
+    "subject_commit": "233a2980b6ca72868c6c984ad36c521075f4b188",
+    "task_id": "TASK-0084"
+  }
+]

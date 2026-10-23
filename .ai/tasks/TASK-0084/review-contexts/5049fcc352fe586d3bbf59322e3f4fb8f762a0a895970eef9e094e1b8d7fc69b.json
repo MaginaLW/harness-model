@@ -1,0 +1,46 @@
+{
+  "base_commit": "30d4edb3964fd8dd30600d77d391f2a6aa3d6f7d",
+  "branch": "codex/event-record-lines",
+  "classification_input_sha256": "117e3645adfb7a75bf6cf3b2b8f0342d4d60b3cb444663dcd895e3c304c12d60",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "src/aiflow/cli.py",
+      "tools/analysis/approval_overhead.py",
+      "tests/integration/test_approval_overhead.py",
+      "tests/unit/test_telemetry_snapshot.py",
+      "tests/integration/test_facts_command.py",
+      "tests/unit/test_unicode_events.py",
+      "docs/operations/effect-observations.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Preserve valid Unicode in event replay and facts JSON output",
+        "impact_scope": [
+          "src/aiflow/task_service.py",
+          "src/aiflow/cli.py"
+        ],
+        "planned_actions": [
+          "Replace Unicode-aware event splitting with standard text-stream line reading.",
+          "ASCII-escape facts JSON without changing decoded values or stored facts."
+        ]
+      }
+    ],
+    "goal": "Preserve valid Unicode in event replay and facts JSON output",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "5049fcc352fe586d3bbf59322e3f4fb8f762a0a895970eef9e094e1b8d7fc69b",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "4ea5d937b59d0d3f415478855d2943ec9d630bc4d74930d7821b80d3469a91c7",
+  "task_id": "TASK-0084"
+}
