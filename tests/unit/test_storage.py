@@ -213,6 +213,13 @@ def test_atomic_json_write_replaces_complete_document(tmp_path: Path) -> None:
     assert not list(tmp_path.glob(f".{target.name}.*.tmp"))
 
 
+def test_atomic_yaml_write_preserves_mixed_unicode_roundtrip(tmp_path: Path) -> None:
+    target = resolve_task_path(tmp_path, "TASK-0001", "value.yaml")
+    value = {"message": "中文😀\u0085middle\u2028next\u2029end"}
+    atomic_write_yaml(target, value)
+    assert read_task_yaml(tmp_path, "TASK-0001", "value.yaml") == value
+
+
 def test_interrupted_atomic_write_preserves_existing_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
