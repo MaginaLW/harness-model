@@ -1,0 +1,264 @@
+{
+  "base_commit": "30d4edb3964fd8dd30600d77d391f2a6aa3d6f7d",
+  "branch": "codex/event-record-lines",
+  "classification_input_sha256": "ac6655a07f5100c9c30cd74e44bbdec67f1cb87f3a93ad91353806b806362f47",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "src/aiflow/cli.py",
+      "tools/analysis/approval_overhead.py",
+      "tests/integration/test_approval_overhead.py",
+      "tests/unit/test_telemetry_snapshot.py",
+      "tests/integration/test_facts_command.py",
+      "docs/operations/effect-observations.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md",
+      "src/aiflow/storage.py",
+      "tests/unit/test_storage.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Preserve valid Unicode in event replay and facts JSON output",
+        "impact_scope": [
+          "src/aiflow/task_service.py",
+          "src/aiflow/cli.py",
+          "src/aiflow/storage.py"
+        ],
+        "planned_actions": [
+          "Replace Unicode-aware event splitting with standard text-stream line reading.",
+          "ASCII-escape facts JSON without changing decoded values or stored facts.",
+          "Use the existing YAML serializer ASCII escapes to preserve exact Unicode values, including NEL, during normal writes and facts recovery."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0084/approvals.json",
+        ".ai/tasks/TASK-0084/classification.json",
+        ".ai/tasks/TASK-0084/events.jsonl",
+        ".ai/tasks/TASK-0084/review-contexts/11d6c99e10121816d179ab42a47fc91284d7b3d43b0cb4e67e95cec94e9bcc99.json",
+        ".ai/tasks/TASK-0084/review-contexts/5049fcc352fe586d3bbf59322e3f4fb8f762a0a895970eef9e094e1b8d7fc69b.json",
+        ".ai/tasks/TASK-0084/review-contexts/ace52043caabde1c7e2c8ccecb9d2dc2b2d1d5d8917a44404b2b4e507adc57a6.json",
+        ".ai/tasks/TASK-0084/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0084/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0084/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0084/spec.md",
+        ".ai/tasks/TASK-0084/task.yaml",
+        "docs/operations/effect-observations.md",
+        "docs/operations/quickstart.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/storage.py",
+        "src/aiflow/task_service.py",
+        "tests/integration/test_approval_overhead.py",
+        "tests/integration/test_facts_command.py",
+        "tests/unit/test_storage.py",
+        "tests/unit/test_telemetry_snapshot.py",
+        "tools/analysis/approval_overhead.py"
+      ],
+      "files": [
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/approvals.json"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/classification.json"
+        },
+        {
+          "additions": 29,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/events.jsonl"
+        },
+        {
+          "additions": 49,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/review-contexts/11d6c99e10121816d179ab42a47fc91284d7b3d43b0cb4e67e95cec94e9bcc99.json"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/review-contexts/5049fcc352fe586d3bbf59322e3f4fb8f762a0a895970eef9e094e1b8d7fc69b.json"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/review-contexts/ace52043caabde1c7e2c8ccecb9d2dc2b2d1d5d8917a44404b2b4e507adc57a6.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/spec.md"
+        },
+        {
+          "additions": 85,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0084/task.yaml"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/effect-observations.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/storage.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 73,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_approval_overhead.py"
+        },
+        {
+          "additions": 129,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_facts_command.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_storage.py"
+        },
+        {
+          "additions": 89,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_telemetry_snapshot.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 2,
+          "path": "tools/analysis/approval_overhead.py"
+        }
+      ],
+      "totals": {
+        "additions": 726,
+        "deletions": 5,
+        "files": 21
+      }
+    },
+    "goal": "Preserve valid Unicode in event replay and facts JSON output",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0084",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "432d3559a03c9fdd78186c20668982fcc8f5b2e5190ece0b1ae6b63f8ad3b8ea",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "435ffc103073760525b3edfbec67dcbb3ff100bb4785138007baec20028340cb",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "6cb13a82e93779cd7671a674f0515734d21e30f9f16caad50152c0031a9a4b88",
+  "subject_commit": "0a20779ae6b3bd357c3a2ff785a9fb760f76b490",
+  "task_id": "TASK-0084"
+}

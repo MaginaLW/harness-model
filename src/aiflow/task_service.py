@@ -376,7 +376,8 @@ def recover_task(repository_root: Path, task_id: str) -> StartResult:
 def _read_event_log(repository_root: Path, task_id: str) -> list[dict[str, Any]]:
     path = resolve_task_path(repository_root, task_id, "events.jsonl")
     try:
-        lines = path.read_text(encoding="utf-8").splitlines()
+        with path.open(encoding="utf-8") as stream:
+            lines = stream.readlines()
     except (OSError, UnicodeError) as error:
         raise StorageError(
             "Could not read task event log",

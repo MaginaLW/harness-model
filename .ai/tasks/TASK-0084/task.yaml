@@ -1,0 +1,85 @@
+allowed_scope:
+- src/aiflow/task_service.py
+- src/aiflow/cli.py
+- tools/analysis/approval_overhead.py
+- tests/integration/test_approval_overhead.py
+- tests/unit/test_telemetry_snapshot.py
+- tests/integration/test_facts_command.py
+- docs/operations/effect-observations.md
+- docs/operations/quickstart.md
+- docs/operations/maintenance-status.md
+- src/aiflow/storage.py
+- tests/unit/test_storage.py
+base_commit: 30d4edb3964fd8dd30600d77d391f2a6aa3d6f7d
+branch: codex/event-record-lines
+created_at: '2026-10-23T16:38:52Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Preserve valid Unicode in event replay and facts JSON output
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/task_service.py
+  - src/aiflow/cli.py
+  - src/aiflow/storage.py
+  inputs:
+  - The owner requested productive maintenance using boring-engineering.
+  - Reproduced valid Unicode event text being split into invalid JSON records, plus
+    facts output failing after a successful write under GBK stdout.
+  - Real scoring, automatic review arrangement and host connections remain paused.
+  - Independent implementation review reproduced existing U+0085 data loss in YAML
+    serialization; the incomplete old-candidate V1 run was deliberately abandoned
+    and preserved before this scope change.
+  permission_requirements: []
+  planned_actions:
+  - Replace Unicode-aware event splitting with standard text-stream line reading.
+  - ASCII-escape facts JSON without changing decoded values or stored facts.
+  - Use the existing YAML serializer ASCII escapes to preserve exact Unicode values,
+    including NEL, during normal writes and facts recovery.
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0084
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Targeted Unicode CLI and event-reading regressions, independent review, complete
+    native verification, Gate and required CI.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 6cb13a82e93779cd7671a674f0515734d21e30f9f16caad50152c0031a9a4b88
+goal: Preserve valid Unicode in event replay and facts JSON output
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-10-23T16:57:36Z'
+subject_commit: 0a20779ae6b3bd357c3a2ff785a9fb760f76b490
+task_id: TASK-0084
+updated_at: '2026-10-23T17:22:48Z'
+worktree_dirty: false
+worktree_dirty_paths: []

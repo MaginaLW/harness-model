@@ -189,7 +189,7 @@ def atomic_write_json(target: Path, value: object) -> None:
 def atomic_write_yaml(target: Path, value: object) -> None:
     """Serialize and atomically replace a YAML document."""
     try:
-        content = yaml.safe_dump(value, allow_unicode=True, sort_keys=False)
+        content = yaml.safe_dump(value, allow_unicode=False, sort_keys=False)
     except yaml.YAMLError as error:
         raise StorageError(
             "Could not serialize YAML task document",

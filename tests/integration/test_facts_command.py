@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -11,6 +14,7 @@ import pytest
 import yaml
 from test_begin_close_commands import create_repository, run_git
 
+from aiflow import task_service
 from aiflow.cli import main
 from aiflow.storage import atomic_write_yaml, read_task_json, resolve_task_path
 from aiflow.task_service import load_task_record, transition_task_record
@@ -322,6 +326,131 @@ def test_valid_finite_numbers_and_paired_unicode_remain_recordable(
     for field, value in expected.items():
         assert report["after"][field] == value
         assert _task(repository)["decision_units"][0][field] == value
+
+
+@pytest.mark.parametrize("separator", ["\u0085", "\u2028", "\u2029"])
+def test_unicode_actor_keeps_event_log_readable_and_repeated_apply_is_a_noop(
+    draft: tuple[Path, Path], capsys: pytest.CaptureFixture[str], separator: str
+) -> None:
+    repository, source = draft
+    actor = f"declarer{separator}suffix"
+    assert _facts(source, actor=actor) == 0
+    assert _report(capsys)["applied"] is True
+    applied = _artifacts(repository)
+    record = load_task_record(repository, "TASK-0001")
+    assert len(record.events) == 2
+    assert record.events[-1]["actor"] == actor
+    assert record.events[-1]["payload"]["after"] == FACTS
+    assert main(["status", "TASK-0001", "--format", "json"]) == 0
+    assert _report(capsys)["current_state"] == "NEW"
+    assert _facts(source, actor=actor) == 0
+    report = _report(capsys)
+    assert report["changed"] is report["applied"] is report["recovered"] is False
+    assert _artifacts(repository) == applied
+
+
+@pytest.mark.parametrize("interrupted", [False, True])
+def test_nel_fact_value_survives_apply_recovery_and_noop(
+    draft: tuple[Path, Path],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    interrupted: bool,
+) -> None:
+    repository, source = draft
+    value = "测试\u0085😀\u2028line\u2029end"
+    source.write_text(json.dumps({"external_side_effects": [value]}), encoding="utf-8")
+    if interrupted:
+
+        def fail(_staged: Path, _target: Path) -> None:
+            raise OSError("simulated interrupted replacement")
+
+        with monkeypatch.context() as patch:
+            patch.setattr(task_service, "_replace_materialized_task", fail)
+            assert _facts(source) == 1
+        assert not capsys.readouterr().out
+        pending = _artifacts(repository)
+        assert "task.yaml.next" in pending
+        assert _facts(source, actor="different") == 1
+        assert not capsys.readouterr().out
+        assert _artifacts(repository) == pending
+    assert _facts(source) == 0
+    report = _report(capsys)
+    assert report["applied"] is True
+    assert report["recovered"] is interrupted
+    applied = _artifacts(repository)
+    record = load_task_record(repository, "TASK-0001")
+    assert len(record.events) == 2
+    assert record.task["decision_units"][0]["external_side_effects"] == [value]
+    assert record.events[-1]["payload"]["after"]["external_side_effects"] == [value]
+    assert record.events[-1]["actor"] == "declarer"
+    assert _facts(source) == 0
+    report = _report(capsys)
+    assert report["changed"] is report["applied"] is report["recovered"] is False
+    assert _artifacts(repository) == applied
+
+
+@pytest.mark.parametrize("encoding", ["ascii", "gbk", "utf-8"])
+def test_unicode_facts_subprocess_report_survives_stdout_encoding(
+    draft: tuple[Path, Path], encoding: str
+) -> None:
+    repository, source = draft
+    facts = {**FACTS, "external_side_effects": ["测试😀"]}
+    source.write_text(json.dumps(facts, ensure_ascii=False), encoding="utf-8")
+    environment = os.environ.copy()
+    environment["PYTHONPATH"] = str(Path(__file__).resolve().parents[2] / "src")
+    environment["PYTHONIOENCODING"] = encoding
+    command = [
+        sys.executable,
+        "-m",
+        "aiflow",
+        "facts",
+        "TASK-0001",
+        "--decision-unit",
+        "DU-001",
+        "--input",
+        str(source),
+        "--actor",
+        "declarer",
+    ]
+    original = _artifacts(repository)
+    before: dict[str, object] = {
+        "reversibility": "reversible",
+        "external_side_effects": [],
+        "permission_requirements": [],
+    }
+    applied: dict[str, bytes] = {}
+    for mode in ("preview", "apply", "noop"):
+        result = subprocess.run(
+            [*command, *(["--dry-run"] if mode == "preview" else [])],
+            cwd=repository,
+            env=environment,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        assert result.returncode == 0, result.stderr.decode(encoding)
+        assert not result.stderr
+        assert json.loads(result.stdout.decode(encoding)) == {
+            "task_id": "TASK-0001",
+            "decision_unit_id": "DU-001",
+            "dry_run": mode == "preview",
+            "changed": mode != "noop",
+            "applied": mode == "apply",
+            "recovered": False,
+            "before": facts if mode == "noop" else before,
+            "after": facts,
+        }
+        if mode == "preview":
+            assert _artifacts(repository) == original
+        elif mode == "apply":
+            applied = _artifacts(repository)
+        else:
+            assert _artifacts(repository) == applied
+    record = load_task_record(repository, "TASK-0001")
+    assert len(record.events) == 2
+    assert record.task["decision_units"][0]["external_side_effects"] == ["测试😀"]
+    assert record.events[-1]["payload"]["after"] == facts
+    assert json.loads(source.read_text(encoding="utf-8")) == facts
 
 
 @pytest.mark.parametrize(

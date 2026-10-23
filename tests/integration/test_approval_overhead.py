@@ -146,6 +146,79 @@ def test_report_rejects_corrupt_ledger_data(
     assert "TASK-0001/events.jsonl: invalid JSON at line 1" in capsys.readouterr().err
 
 
+@pytest.mark.parametrize("separator", ["\u0085", "\u2028", "\u2029"])
+@pytest.mark.parametrize("newline", ["\n", "\r\n"])
+@pytest.mark.parametrize("terminated", [False, True])
+def test_report_keeps_unicode_string_separators_inside_jsonl_records(
+    tmp_path: Path,
+    overhead_module: Any,
+    capsys: pytest.CaptureFixture[str],
+    separator: str,
+    newline: str,
+    terminated: bool,
+) -> None:
+    directory = _ledger(tmp_path)
+    (directory / "approvals.json").write_text("[]", encoding="utf-8")
+    events = [_event("task_created", sequence=1), _event("verification_failed", sequence=2)]
+    events[0]["payload"] = {"reason": f"private-jsonl-before{separator}private-jsonl-after"}
+    text = newline.join(json.dumps(event, ensure_ascii=False) for event in events)
+    (directory / "events.jsonl").write_bytes((text + newline * terminated).encode("utf-8"))
+    before = _tree_bytes(tmp_path)
+
+    assert overhead_module.main([str(tmp_path), "--format", "json"]) == 0
+
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    report = json.loads(captured.out)
+    assert report["events"] == {
+        "total": 2,
+        "by_type": {"task_created": 1, "verification_failed": 1},
+        "escalation_events": 0,
+        "verification_failed_events": 1,
+    }
+    assert "private-jsonl" not in captured.out
+    assert _tree_bytes(tmp_path) == before
+
+
+def test_report_accepts_cr_delimited_event_records(tmp_path: Path, overhead_module: Any) -> None:
+    directory = _ledger(tmp_path)
+    (directory / "approvals.json").write_text("[]", encoding="utf-8")
+    events = [_event("task_created", sequence=1), _event("verification_failed", sequence=2)]
+    events[0]["payload"] = {"reason": "private-jsonl-before\u2028private-jsonl-after"}
+    text = "\r".join(json.dumps(event, ensure_ascii=False) for event in events)
+    (directory / "events.jsonl").write_bytes(text.encode("utf-8"))
+
+    report = overhead_module.build_report(tmp_path)
+
+    assert report["events"]["total"] == 2
+    assert "private-jsonl" not in json.dumps(report, ensure_ascii=False)
+
+
+@pytest.mark.parametrize("invalid_line", ["", " \t", "private-jsonl-invalid"])
+def test_report_still_rejects_invalid_physical_jsonl_records(
+    tmp_path: Path,
+    overhead_module: Any,
+    capsys: pytest.CaptureFixture[str],
+    invalid_line: str,
+) -> None:
+    directory = _ledger(tmp_path)
+    (directory / "approvals.json").write_text("[]", encoding="utf-8")
+    event = _event("task_created", sequence=1)
+    event["payload"] = {"reason": "private-jsonl-before\u2028private-jsonl-after"}
+    text = json.dumps(event, ensure_ascii=False) + "\n" + invalid_line + "\n"
+    (directory / "events.jsonl").write_bytes(text.encode("utf-8"))
+    before = _tree_bytes(tmp_path)
+
+    assert overhead_module.main([str(tmp_path), "--format", "json"]) == 2
+
+    captured = capsys.readouterr()
+    reason = "invalid JSON at line 2" if invalid_line.strip() else "blank line at 2"
+    assert captured.out == ""
+    assert captured.err == f"approval-overhead: TASK-0001/events.jsonl: {reason}\n"
+    assert "private-jsonl" not in captured.err
+    assert _tree_bytes(tmp_path) == before
+
+
 def test_report_accepts_unclassified_new_task(tmp_path: Path, overhead_module: Any) -> None:
     directory = _ledger(tmp_path)
     (directory / "classification.json").unlink()

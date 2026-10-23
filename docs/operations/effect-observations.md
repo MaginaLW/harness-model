@@ -44,6 +44,8 @@ python tools/analysis/approval_overhead.py --snapshot --format json
 
 账本 JSON／YAML／事件行超出解析器整数或嵌套能力时，停止报告并按原文件／行定位返回输入错误；默认统计、快照和可用性模式均不输出 traceback 或部分成功报告。根路径无法解析时也返回固定路径错误，不回显路径或换用其他根重试。错误退出码为 `2`，stdout 为空；这些错误不改变账本、批准或原结果。
 
+事件按文本流的实际行边界读取，兼容 LF、CRLF 和末行无换行。JSON 字符串中合法的 U+0085、U+2028、U+2029 保持正文，不拆成新事件；空白行和损坏记录仍拒绝，事件原字节和私有字段的投影边界保持不变。
+
 快照格式版本为 `1.0`，用途标识为 `tracked_ledger_snapshot`。它先固定 `HEAD`，再读取该
 提交中明确匹配的 `.ai/tasks/TASK-*/task.yaml`、`classification.json`、`events.jsonl`、
 `evidence.json`、`reviews/REV-*-r*.json` 及同 task tracked

@@ -1,0 +1,49 @@
+{
+  "base_commit": "30d4edb3964fd8dd30600d77d391f2a6aa3d6f7d",
+  "branch": "codex/event-record-lines",
+  "classification_input_sha256": "ac6655a07f5100c9c30cd74e44bbdec67f1cb87f3a93ad91353806b806362f47",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "src/aiflow/cli.py",
+      "tools/analysis/approval_overhead.py",
+      "tests/integration/test_approval_overhead.py",
+      "tests/unit/test_telemetry_snapshot.py",
+      "tests/integration/test_facts_command.py",
+      "docs/operations/effect-observations.md",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md",
+      "src/aiflow/storage.py",
+      "tests/unit/test_storage.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Preserve valid Unicode in event replay and facts JSON output",
+        "impact_scope": [
+          "src/aiflow/task_service.py",
+          "src/aiflow/cli.py",
+          "src/aiflow/storage.py"
+        ],
+        "planned_actions": [
+          "Replace Unicode-aware event splitting with standard text-stream line reading.",
+          "ASCII-escape facts JSON without changing decoded values or stored facts.",
+          "Use the existing YAML serializer ASCII escapes to preserve exact Unicode values, including NEL, during normal writes and facts recovery."
+        ]
+      }
+    ],
+    "goal": "Preserve valid Unicode in event replay and facts JSON output",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "11d6c99e10121816d179ab42a47fc91284d7b3d43b0cb4e67e95cec94e9bcc99",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "6cb13a82e93779cd7671a674f0515734d21e30f9f16caad50152c0031a9a4b88",
+  "task_id": "TASK-0084"
+}

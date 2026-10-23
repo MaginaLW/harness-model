@@ -224,7 +224,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             actor=arguments.actor,
             dry_run=arguments.dry_run,
         )
-        print(json.dumps(facts_result, ensure_ascii=False, sort_keys=True))
+        print(json.dumps(facts_result, ensure_ascii=True, sort_keys=True))
     elif arguments.command == "begin":
         transition_result = begin_task(
             repository_root,
