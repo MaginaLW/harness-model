@@ -1,0 +1,42 @@
+{
+  "base_commit": "f845b436bdba52cdc8d27ebec2c8b78faecca988",
+  "branch": "codex/sdk-context-trigger",
+  "classification_input_sha256": "3bcaa23c919f7f88efafabf7618c80d800bd2e899683352fc47bf397fad1a155",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "src/aiflow/sdk_review.py",
+      "tests/unit/test_sdk_review.py",
+      "tests/integration/test_sdk_context_trigger.py",
+      "docs/superpowers/specs/sdk-readonly-review.md",
+      "docs/operations/sdk-and-engine-plan.md",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prepare an opt-in single SDK supplement at the implementation-context node",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "src/aiflow/sdk_review.py"
+        ],
+        "planned_actions": [
+          "Implement and simulate one default-off CLI node using the existing SDK runner; do not activate it against a real model or publish externally."
+        ]
+      }
+    ],
+    "goal": "Prepare an opt-in single SDK supplement at the implementation-context node",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "6f46efdd085adba9e8b8f3b4dbb71133115d5a0d9f933967f2784877d7240a97",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "aa3b329bb2f91c4b244c14c2469507022e6201fed36380be1eef2f61c4bb014c",
+  "task_id": "TASK-0087"
+}

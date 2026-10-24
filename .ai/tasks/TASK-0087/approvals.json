@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-24T06:45:00Z",
+    "base_commit": "f845b436bdba52cdc8d27ebec2c8b78faecca988",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立设计审核REV-0001 APPROVE，无开放critical/high；仅默认关闭节点的本地实现与模拟，不执行真实SDK或外部动作，不触及授权文件。",
+    "schema_version": "1.0",
+    "spec_sha256": "aa3b329bb2f91c4b244c14c2469507022e6201fed36380be1eef2f61c4bb014c",
+    "subject_commit": "f845b436bdba52cdc8d27ebec2c8b78faecca988",
+    "task_id": "TASK-0087"
+  }
+]
