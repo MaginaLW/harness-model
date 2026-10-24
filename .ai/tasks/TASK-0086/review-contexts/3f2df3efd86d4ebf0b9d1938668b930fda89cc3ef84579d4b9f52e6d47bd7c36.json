@@ -1,0 +1,44 @@
+{
+  "base_commit": "1905da336ef6dbbb9742099be7afe4787aee778d",
+  "branch": "codex/sdk-readonly-review",
+  "classification_input_sha256": "58dc3a3bb8260e2abc728b0b28a13ccff54dff51442ac0fa837a1e7192ded5a4",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/sdk_review.py",
+      "pyproject.toml",
+      "uv.lock",
+      "tests/unit/test_sdk_review.py",
+      "docs/superpowers/specs/sdk-readonly-review.md",
+      "docs/operations/sdk-and-engine-plan.md",
+      "docs/operations/maintenance-status.md",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Implement the opt-in self-managed SDK document review client",
+        "impact_scope": [
+          "src/aiflow/sdk_review.py",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "planned_actions": [
+          "Implement and validate an opt-in fixed-document SDK runner; implementation and required tests do not start a model runtime."
+        ]
+      }
+    ],
+    "goal": "Implement the opt-in self-managed SDK document review client",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "3f2df3efd86d4ebf0b9d1938668b930fda89cc3ef84579d4b9f52e6d47bd7c36",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "8022803dddd6fc54ceef0a1023261bfb8a4556b9c1c7b52ae823429504c076ea",
+  "task_id": "TASK-0086"
+}

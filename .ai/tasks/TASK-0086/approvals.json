@@ -1,0 +1,42 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-24T02:44:11Z",
+    "base_commit": "1905da336ef6dbbb9742099be7afe4787aee778d",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立设计审核REV-0001 APPROVE，无开放critical/high；仅实现和离线验证，真实调用是用户明确选择的后续执行步骤，不触及授权文件。",
+    "schema_version": "1.0",
+    "spec_sha256": "65a6f333b5da8513c899ca78aae17693a5e6926be2703fff8a05d1a126ae3e3f",
+    "subject_commit": "1905da336ef6dbbb9742099be7afe4787aee778d",
+    "task_id": "TASK-0086"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-24T03:13:24Z",
+    "base_commit": "1905da336ef6dbbb9742099be7afe4787aee778d",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立设计审核REV-0002 APPROVE，纠正Agent额外加重的root-deny/canary条件，回到已选择的标准read-only单次审核；无开放critical/high，不变更Policy或质量门。",
+    "schema_version": "1.0",
+    "spec_sha256": "8022803dddd6fc54ceef0a1023261bfb8a4556b9c1c7b52ae823429504c076ea",
+    "subject_commit": "1905da336ef6dbbb9742099be7afe4787aee778d",
+    "task_id": "TASK-0086"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-24T04:19:44Z",
+    "base_commit": "1905da336ef6dbbb9742099be7afe4787aee778d",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "84752c34d827bd9ecd26e91624af150a59b442b56e96556459fd2b61faab1819",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立实现审核REV-0003 APPROVE，无开放critical/high；固定subject的完整V1十项、3959测试和85/90覆盖率门均通过。只批准可停用SDK客户端的实现与离线验证，不触及授权文件；真实单次订阅执行已由所有者另行明确选择。",
+    "schema_version": "1.0",
+    "spec_sha256": "8022803dddd6fc54ceef0a1023261bfb8a4556b9c1c7b52ae823429504c076ea",
+    "subject_commit": "c2855df8bd0da26eb888a2e8378bf1dd1bf5feba",
+    "task_id": "TASK-0086"
+  }
+]
