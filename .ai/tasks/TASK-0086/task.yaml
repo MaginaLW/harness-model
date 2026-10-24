@@ -1,0 +1,82 @@
+allowed_scope:
+- src/aiflow/sdk_review.py
+- pyproject.toml
+- uv.lock
+- tests/unit/test_sdk_review.py
+- docs/superpowers/specs/sdk-readonly-review.md
+- docs/operations/sdk-and-engine-plan.md
+- docs/operations/maintenance-status.md
+- README.md
+base_commit: 1905da336ef6dbbb9742099be7afe4787aee778d
+branch: codex/sdk-readonly-review
+created_at: '2026-10-24T02:38:03Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Implement the opt-in self-managed SDK document review client
+  impact:
+    level: medium
+  impact_categories:
+  - authentication
+  - external_action
+  impact_scope:
+  - src/aiflow/sdk_review.py
+  - pyproject.toml
+  - uv.lock
+  inputs:
+  - The owner requested completion of the one-shot self-managed SDK review pilot and
+    selected the existing Codex login and subscription quota.
+  - The docs-only contract candidate is committed; real scoring, automatic arrangement
+    and existing Desktop attachment remain separate.
+  - Published openai-codex 0.163.0 pins CLI runtime 0.163.0; explicit permission,
+    configuration and lifecycle checks are required.
+  permission_requirements: []
+  planned_actions:
+  - Implement and validate an opt-in fixed-document SDK runner; implementation and
+    required tests do not start a model runtime.
+  protections:
+    dry_run: true
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0086
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Real Git input regressions, fake SDK lifecycle and permission regressions, pinned
+    SDK compatibility checks, full native V1, independent review, Gate and required
+    CI.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 8022803dddd6fc54ceef0a1023261bfb8a4556b9c1c7b52ae823429504c076ea
+goal: Implement the opt-in self-managed SDK document review client
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-10-24T03:10:59Z'
+subject_commit: 1905da336ef6dbbb9742099be7afe4787aee778d
+task_id: TASK-0086
+updated_at: '2026-10-24T03:13:26Z'
+worktree_dirty: false
+worktree_dirty_paths: []
