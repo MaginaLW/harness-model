@@ -657,6 +657,37 @@ def test_runtime_uses_standard_read_only_and_one_turn_on_windows(
     assert fake_sdk.close_calls == 1
 
 
+def test_explicit_codex_home_does_not_require_an_os_home(
+    fake_sdk: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def unavailable_home(cls: type[Path]) -> Path:
+        raise RuntimeError("Could not determine home directory")
+
+    monkeypatch.setattr(Path, "home", classmethod(unavailable_home))
+    assert run_fake(fake_sdk, tmp_path)["status"] == "completed"
+
+
+def test_execute_explicit_instruction_home_does_not_require_an_os_home(
+    repository: tuple[Path, str, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, _candidate, _reference = repository
+    home = root / "sdk-home"
+    home.mkdir()
+    instructions = home / "AGENTS.md"
+    instructions.write_bytes(b"Declared global guidance.\n")
+    digest = hashlib.sha256(instructions.read_bytes()).hexdigest()
+    monkeypatch.setenv("CODEX_HOME", str(home))
+    monkeypatch.chdir(root)
+
+    def unavailable_home(cls: type[Path]) -> Path:
+        raise RuntimeError("Could not determine home directory")
+
+    monkeypatch.setattr(Path, "home", classmethod(unavailable_home))
+    monkeypatch.setattr(sdk_review, "_run_sdk", lambda *args: runtime_result())
+    argv = arguments(repository, root / "build/explicit-home", execute=True)
+    assert sdk_review.main([*argv, "--global-instructions-sha256", digest]) == 0
+
+
 def test_runtime_disables_inherited_notify_and_accepts_official_chatgpt_default(
     fake_sdk: Any, tmp_path: Path
 ) -> None:
