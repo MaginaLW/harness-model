@@ -7,7 +7,7 @@ allowed_scope:
 base_commit: f4b3974cd3260a7feb21e90b102936888386819a
 branch: codex/close-merge-validation
 created_at: '2026-10-24T00:29:14Z'
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -68,8 +68,8 @@ repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 repository_path_at_creation: D:/Repos/harness-model
 schema_version: '1.0'
 spec_frozen_at: '2026-10-24T00:35:10Z'
-subject_commit: f4b3974cd3260a7feb21e90b102936888386819a
+subject_commit: 4b8fcfd4aab0fbc88d567df5204173e27e2f10ab
 task_id: TASK-0085
-updated_at: '2026-10-24T00:36:02Z'
+updated_at: '2026-10-24T01:02:17Z'
 worktree_dirty: false
 worktree_dirty_paths: []

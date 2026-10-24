@@ -1,0 +1,198 @@
+{
+  "base_commit": "f4b3974cd3260a7feb21e90b102936888386819a",
+  "branch": "codex/close-merge-validation",
+  "classification_input_sha256": "2890bbaefd481be8c98a730103cd6565b7d04c5d6b54c080a23a525062fc39ce",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "tests/integration/test_begin_close_commands.py",
+      "tests/e2e/test_auto_scenario.py",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Verify local merge topology and candidate ancestry before task closeout",
+        "impact_scope": [
+          "src/aiflow/task_service.py"
+        ],
+        "planned_actions": [
+          "Check local merge parents and reviewed-candidate ancestry before recording an externally declared merge."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0085/approvals.json",
+        ".ai/tasks/TASK-0085/classification.json",
+        ".ai/tasks/TASK-0085/events.jsonl",
+        ".ai/tasks/TASK-0085/review-contexts/99852e786e5c3600dcd2de640261a4aa38e6150aefba9d5fedf3d6d16ebe7e4a.json",
+        ".ai/tasks/TASK-0085/review-contexts/dc6cfe0f217bf0803a6af424ccc8a359a041c14c6f21207b44a9a2049346b3b2.json",
+        ".ai/tasks/TASK-0085/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0085/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0085/spec.md",
+        ".ai/tasks/TASK-0085/task.yaml",
+        "docs/operations/quickstart.md",
+        "src/aiflow/task_service.py",
+        "tests/e2e/test_auto_scenario.py",
+        "tests/integration/test_begin_close_commands.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/classification.json"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/events.jsonl"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/review-contexts/99852e786e5c3600dcd2de640261a4aa38e6150aefba9d5fedf3d6d16ebe7e4a.json"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/review-contexts/dc6cfe0f217bf0803a6af424ccc8a359a041c14c6f21207b44a9a2049346b3b2.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/spec.md"
+        },
+        {
+          "additions": 75,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0085/task.yaml"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 6,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/e2e/test_auto_scenario.py"
+        },
+        {
+          "additions": 219,
+          "binary": false,
+          "deletions": 4,
+          "path": "tests/integration/test_begin_close_commands.py"
+        }
+      ],
+      "totals": {
+        "additions": 577,
+        "deletions": 11,
+        "files": 13
+      }
+    },
+    "goal": "Verify local merge topology and candidate ancestry before task closeout",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0085",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "1c6e66a2f4cbabfed3b32ba355ef9d12798406df7e6e92bba69d451fa52d4ee6",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "f24cd266057195f8ef389a7afc4abee98052b3056efeec5c7a7f3065f8ca1029",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "07b6b5148fa8aeffe55b1f1a3862f777d1457741aa051b90bc3290b78560f9be",
+  "subject_commit": "4b8fcfd4aab0fbc88d567df5204173e27e2f10ab",
+  "task_id": "TASK-0085"
+}
