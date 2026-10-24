@@ -548,44 +548,30 @@ def _run_sdk(
     return snapshot
 
 
-def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--candidate", required=True)
-    parser.add_argument("--reference", required=True)
-    parser.add_argument("--document", action="append", required=True)
-    parser.add_argument("--reference-document", action="append", default=[])
-    parser.add_argument("--question", required=True)
-    parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--execute", action="store_true")
-    parser.add_argument("--global-instructions-sha256")
-    args = parser.parse_args(argv)
+def execute_review(
+    root: Path,
+    request: dict[str, Any],
+    output: Path,
+    *,
+    global_instructions_sha256: str | None = None,
+    trigger_binding: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Execute one prepared request; a trigger marker is only an application claim."""
     receipt: dict[str, Any] | None = None
     receipt_path: Path | None = None
     try:
-        root = Path(
-            _git(Path.cwd(), "rev-parse", "--show-toplevel").decode("utf-8").strip()
-        ).resolve()
-        request = prepare_request(
-            root,
-            args.candidate,
-            args.reference,
-            args.document,
-            args.reference_document,
-            args.question,
-        )
-        if not args.execute:
-            print(
-                json.dumps(
-                    {
-                        "status": "prepared",
-                        "manifest": request["manifest"],
-                        "input_sha256": request["input_sha256"],
-                    },
-                    ensure_ascii=True,
-                )
-            )
-            return 0
-        output = args.output.resolve()
+        root = root.resolve()
+        if trigger_binding is not None and (
+            not isinstance(trigger_binding, dict)
+            or set(trigger_binding) != {"node", "task_id", "context_sha256"}
+            or trigger_binding["node"] != "review_context_implementation"
+            or not isinstance(trigger_binding["task_id"], str)
+            or re.fullmatch(r"TASK-[0-9]{4,}", trigger_binding["task_id"]) is None
+            or not isinstance(trigger_binding["context_sha256"], str)
+            or re.fullmatch(r"[0-9a-f]{64}", trigger_binding["context_sha256"]) is None
+        ):
+            raise ValueError("Invalid trigger binding")
+        output = output.resolve()
         if not output.is_relative_to(root / "build") or output == root / "build":
             raise ValueError("Execution output must be a new ignored build directory")
         if subprocess.run(
@@ -597,17 +583,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         ).returncode:
             raise ValueError("Execution output must be ignored")
         expected: dict[str, str] = {}
-        if args.global_instructions_sha256 is not None:
-            if re.fullmatch(r"[0-9a-f]{64}", args.global_instructions_sha256) is None:
+        if global_instructions_sha256 is not None:
+            if re.fullmatch(r"[0-9a-f]{64}", global_instructions_sha256) is None:
                 raise ValueError("Invalid instruction hash")
             home = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
             instructions = (home / "AGENTS.md").resolve()
-            if (
-                hashlib.sha256(instructions.read_bytes()).hexdigest()
-                != args.global_instructions_sha256
-            ):
+            if hashlib.sha256(instructions.read_bytes()).hexdigest() != global_instructions_sha256:
                 raise ValueError("Instruction source changed")
-            expected[str(instructions)] = args.global_instructions_sha256
+            expected[str(instructions)] = global_instructions_sha256
         output.mkdir(parents=True, exist_ok=False)
         receipt_path = output / "receipt.json"
         receipt = {
@@ -623,6 +606,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 for digest in sorted(expected.values())
             ],
         }
+        if trigger_binding is not None:
+            receipt["trigger_binding"] = dict(trigger_binding)
         atomic_write_json(receipt_path, receipt)
         with tempfile.TemporaryDirectory(prefix="aiflow-sdk-review-") as temporary:
             workdir = Path(temporary)
@@ -667,13 +652,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             receipt["report"] = validate_report(result["report"], request)
         receipt["finished_at"] = utc_timestamp()
         atomic_write_json(receipt_path, receipt)
-        print(
-            json.dumps(
-                {"status": receipt["status"], "input_sha256": request["input_sha256"]},
-                ensure_ascii=True,
-            )
-        )
-        return 0 if receipt["status"] == "completed" else 1
+        return receipt
     except (Exception, KeyboardInterrupt):
         if receipt is not None and receipt_path is not None:
             receipt["status"] = "unknown"
@@ -683,6 +662,60 @@ def main(argv: Sequence[str] | None = None) -> int:
                 atomic_write_json(receipt_path, receipt)
             except OSError:
                 pass
+        raise ValueError(
+            "SDK review input, runtime or output is unavailable; no automatic retry."
+        ) from None
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--candidate", required=True)
+    parser.add_argument("--reference", required=True)
+    parser.add_argument("--document", action="append", required=True)
+    parser.add_argument("--reference-document", action="append", default=[])
+    parser.add_argument("--question", required=True)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--global-instructions-sha256")
+    args = parser.parse_args(argv)
+    try:
+        root = Path(
+            _git(Path.cwd(), "rev-parse", "--show-toplevel").decode("utf-8").strip()
+        ).resolve()
+        request = prepare_request(
+            root,
+            args.candidate,
+            args.reference,
+            args.document,
+            args.reference_document,
+            args.question,
+        )
+        if not args.execute:
+            print(
+                json.dumps(
+                    {
+                        "status": "prepared",
+                        "manifest": request["manifest"],
+                        "input_sha256": request["input_sha256"],
+                    },
+                    ensure_ascii=True,
+                )
+            )
+            return 0
+        receipt = execute_review(
+            root,
+            request,
+            args.output,
+            global_instructions_sha256=args.global_instructions_sha256,
+        )
+        print(
+            json.dumps(
+                {"status": receipt["status"], "input_sha256": request["input_sha256"]},
+                ensure_ascii=True,
+            )
+        )
+        return 0 if receipt["status"] == "completed" else 1
+    except (Exception, KeyboardInterrupt):
         print(
             "SDK review input, runtime or output is unavailable; no automatic retry.",
             file=sys.stderr,
