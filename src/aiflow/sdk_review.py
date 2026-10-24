@@ -278,7 +278,7 @@ def _run_sdk(
             client_module = importlib.import_module("openai_codex.client")
             metadata_module = importlib.import_module("openai_codex._initialize_metadata")
             input_root = workdir.resolve()
-            home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))).resolve()
+            home = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex").resolve()
             expected = {
                 Path(path).resolve(): digest for path, digest in expected_instructions.items()
             }
@@ -600,7 +600,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.global_instructions_sha256 is not None:
             if re.fullmatch(r"[0-9a-f]{64}", args.global_instructions_sha256) is None:
                 raise ValueError("Invalid instruction hash")
-            home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
+            home = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
             instructions = (home / "AGENTS.md").resolve()
             if (
                 hashlib.sha256(instructions.read_bytes()).hexdigest()
