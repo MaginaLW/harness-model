@@ -1,0 +1,80 @@
+allowed_scope:
+- src/aiflow/cli.py
+- src/aiflow/sdk_review.py
+- tests/unit/test_sdk_review.py
+- tests/integration/test_sdk_context_trigger.py
+- docs/superpowers/specs/sdk-readonly-review.md
+- docs/operations/sdk-and-engine-plan.md
+- README.md
+base_commit: f845b436bdba52cdc8d27ebec2c8b78faecca988
+branch: codex/sdk-context-trigger
+created_at: '2026-10-24T06:37:21Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Prepare an opt-in single SDK supplement at the implementation-context node
+  impact:
+    level: medium
+  impact_categories:
+  - authentication
+  - external_action
+  impact_scope:
+  - src/aiflow/cli.py
+  - src/aiflow/sdk_review.py
+  inputs:
+  - Owner authorized local preparation and simulation for an explicitly enabled single
+    supplement after successful implementation-context generation; no new real call
+    or external publication is authorized.
+  - The existing SDK runner and feedback format are already delivered by TASK-0086;
+    preserve those boundaries.
+  permission_requirements: []
+  planned_actions:
+  - Implement and simulate one default-off CLI node using the existing SDK runner;
+    do not activate it against a real model or publish externally.
+  protections:
+    dry_run: true
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0087
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Real Git/context and fake SDK integration regressions, unchanged standalone SDK
+    tests, full native V1, independent design/implementation review and local Gate.
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: aa3b329bb2f91c4b244c14c2469507022e6201fed36380be1eef2f61c4bb014c
+goal: Prepare an opt-in single SDK supplement at the implementation-context node
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+repository_path_at_creation: D:/Repos/harness-model
+schema_version: '1.0'
+spec_frozen_at: '2026-10-24T06:39:50Z'
+subject_commit: df4bdb7391e54d06d1eeb2ec28ac738b61765032
+task_id: TASK-0087
+updated_at: '2026-10-24T07:23:21Z'
+worktree_dirty: false
+worktree_dirty_paths: []

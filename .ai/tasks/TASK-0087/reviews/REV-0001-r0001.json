@@ -1,0 +1,13 @@
+{
+  "context_sha256": "6f46efdd085adba9e8b8f3b4dbb71133115d5a0d9f933967f2784877d7240a97",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-24T06:44:10.881782Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "/root/sdk_design_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent formal design review approves the frozen specification after independently recomputing the supplied canonical context hash and rebuilding an identical native design context. The authorized requirement is local preparation and simulation of one explicit supplement at the existing implementation-context node. Reusing summarize_task and build_review_context for current native facts, prepare_request for fixed Git material, and one shared execute_review block for both actual consumers is sufficient; no new formatter, provider layer, scheduler, persistent queue, configuration or environment is justified. The default path must not import the SDK runner module. The enabled path rejects partial, wrong-stage, missing, stale or mismatched input before dispatch and rechecks native facts and context immediately before the shared execution helper. Candidate and reference remain the exact context subject and base, with explicitly selected changed docs paths, explicit reference documents and one question; observed HEAD is never substituted. The three-field application trigger binding is a supplied receipt association, not authenticated identity or human authority. One invocation dispatches at most one turn; distinct invocations are not globally exactly-once. Completed REQUEST_CHANGES remains a completed review outcome, while failed or unknown execution preserves its receipt, never retries or reuses output, and returns failure without replacing native context output or modifying formal reviews, approvals, findings or task state. Existing standalone behavior, output reservation, validated reports and bounded lifecycle remain shared. Ordinary SDK read-only does not establish a file-read whitelist or complete model context; runtime state maintenance may have side effects, and prelaunch freshness checks are snapshots rather than atomic locks. Real Git/context fixtures with fake execution and preserved standalone regressions cover the stated contracts; full native V1 and independent implementation review remain required. This is design approval only, with no implementation or runtime certification. Current scope permits no real SDK turn, external communication, push, PR, merge or deployment; later activation needs its own concrete scope decision. No open design findings remain.",
+  "task_id": "TASK-0087"
+}

@@ -1,0 +1,208 @@
+{
+  "base_commit": "f845b436bdba52cdc8d27ebec2c8b78faecca988",
+  "branch": "codex/sdk-context-trigger",
+  "classification_input_sha256": "3bcaa23c919f7f88efafabf7618c80d800bd2e899683352fc47bf397fad1a155",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "src/aiflow/sdk_review.py",
+      "tests/unit/test_sdk_review.py",
+      "tests/integration/test_sdk_context_trigger.py",
+      "docs/superpowers/specs/sdk-readonly-review.md",
+      "docs/operations/sdk-and-engine-plan.md",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prepare an opt-in single SDK supplement at the implementation-context node",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "src/aiflow/sdk_review.py"
+        ],
+        "planned_actions": [
+          "Implement and simulate one default-off CLI node using the existing SDK runner; do not activate it against a real model or publish externally."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0087/approvals.json",
+        ".ai/tasks/TASK-0087/classification.json",
+        ".ai/tasks/TASK-0087/events.jsonl",
+        ".ai/tasks/TASK-0087/review-contexts/6f46efdd085adba9e8b8f3b4dbb71133115d5a0d9f933967f2784877d7240a97.json",
+        ".ai/tasks/TASK-0087/review-package.md",
+        ".ai/tasks/TASK-0087/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0087/spec.md",
+        ".ai/tasks/TASK-0087/task.yaml",
+        "docs/operations/sdk-and-engine-plan.md",
+        "docs/superpowers/specs/sdk-readonly-review.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/sdk_review.py",
+        "tests/integration/test_sdk_context_trigger.py",
+        "tests/unit/test_sdk_review.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0087/approvals.json"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0087/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0087/events.jsonl"
+        },
+        {
+          "additions": 42,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0087/review-contexts/6f46efdd085adba9e8b8f3b4dbb71133115d5a0d9f933967f2784877d7240a97.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0087/review-package.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0087/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0087/spec.md"
+        },
+        {
+          "additions": 80,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0087/task.yaml"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/sdk-and-engine-plan.md"
+        },
+        {
+          "additions": 34,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/superpowers/specs/sdk-readonly-review.md"
+        },
+        {
+          "additions": 117,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 82,
+          "binary": false,
+          "deletions": 49,
+          "path": "src/aiflow/sdk_review.py"
+        },
+        {
+          "additions": 530,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_sdk_context_trigger.py"
+        },
+        {
+          "additions": 149,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_sdk_review.py"
+        }
+      ],
+      "totals": {
+        "additions": 1218,
+        "deletions": 51,
+        "files": 14
+      }
+    },
+    "goal": "Prepare an opt-in single SDK supplement at the implementation-context node",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0087",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "7e1d2328a667c36c5d4404d966bdeddcab717463a99553f91da0c58a8747a189",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "efb5f05142c3aec2873fc6520f4be77ae96a1a0f9311f6e45c83c3e30b91f904",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "aa3b329bb2f91c4b244c14c2469507022e6201fed36380be1eef2f61c4bb014c",
+  "subject_commit": "df4bdb7391e54d06d1eeb2ec28ac738b61765032",
+  "task_id": "TASK-0087"
+}

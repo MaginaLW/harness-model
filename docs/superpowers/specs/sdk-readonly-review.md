@@ -35,7 +35,7 @@
 4. 通过实际 connector 回读真实 PR，在内存组包交给既有 `pr_feedback.py`。原报告、作者处置、独立复核、CI 和交付分别保留；缺件、旧候选与当前 head 不同等事实不回填。
 5. 工程完成要求固定输入经自管 SDK 得到有效最终报告，结果有实际来源，现有反馈入口能正确回读，源码通过必需质量门且可停用。没有真实成功回执时，只能报告已完成离线部分，目标仍未完成。
 
-本合同不新增反馈 Schema、数据库、通用 provider 层、后台队列、自动触发或执行权限。`T0/T1` 保持未设置，概率保持未估计；真实评分、审核策略接入和 Phase 3 退出各按自身证据推进。
+单次工程验收不启用反馈 Schema、数据库、通用 provider 层、后台队列、按评分触发或执行权限。下述可选工作节点仍须显式启用；`T0/T1` 保持未设置，概率保持未估计，真实评分、审核策略接入和 Phase 3 退出各按自身证据推进。
 
 ## 使用
 
@@ -56,3 +56,36 @@ python -m aiflow.sdk_review --candidate <CANDIDATE-SHA> --reference <REFERENCE-S
 每次显式执行使用新的 ignored `build/` 子目录，先保留 `receipt.json` 的 started 状态。只有收到有效终局报告并通过位置／形状验证才记为 completed；failed／unknown 不可重用目录自动重放。回执中的 token 是用量，实费与实际模型身份没有独立来源时仍 unknown。
 
 报告的 outcome 和 Finding 摘要由协调者按[既有 PR 反馈格式](../../operations/pr-feedback.md#pr-描述中的可选反馈块)放到真实 PR，再用实际 connector capture 回读。报告不是 GitHub 原生 review，SDK 工程验收也不自动形成统计观察或审核触发规则。
+
+## 可选节点：生成正式实现审核上下文之后
+
+节点位于 `aiflow review context TASK-ID --stage implementation` 成功生成上下文之后，默认关闭。
+本阶段只准备本地实现与模拟验证，尚未激活真实触发。没有 `--sdk-review-enable-once` 时，
+原命令的输出和行为不变，不导入 SDK 运行器、不构造客户端或启动模型。
+
+显式启用时，任务须处于 `WAITING_FOR_FINAL_REVIEW`，原生分类及验证证据须新鲜有效。
+候选取该上下文的 `subject_commit`，参考取其 `base_commit`；选择的候选文档必须是本任务
+实际变更的显式 `docs/**` 路径，另须给出参考文档、专项问题和新的 ignored 回执目录。
+准备输入前与派发前核对原生状态、上下文 hash 和版本绑定；不以当前 HEAD 替换受审候选。
+这些检查是派发前快照，不是对后续仓库变更的原子锁。
+
+未来选定真实任务、输入及新的一次订阅调用范围后，可使用以下入口；命令中的开关本身
+不证明已经取得人类授权，当前本地准备也不消费下一次真实调用：
+
+```console
+python -m aiflow review context TASK-ID --stage implementation --output build/review-context.json --sdk-review-enable-once --sdk-review-document docs/superpowers/specs/contract.md --sdk-review-reference-document docs/operations/existing-contract.md --sdk-review-question "核对本次契约变更的直接矛盾" --sdk-review-output build/sdk-review/context-1
+```
+
+候选文档和参考文档参数可重复；已有 Codex 全局指令时，按前述 hash 核对方式提供
+`--sdk-review-global-instructions-sha256 <EXPECTED-SHA256>`。缺输入、错误阶段、过期或
+错绑定的上下文在派发前拒绝。共享运行器继续使用原有登录、只读/never/无工具网络及
+30 秒启动、120 秒 turn、10 秒取消确认和 5 秒关闭等待，不增加调用或自动重试。
+
+每次显式启用最多派发一个 turn；重复回执目录拒绝，跨目录重复调用也仍需新的具体决定。
+回执可附 `trigger_binding` 的节点、task ID 和原生 context hash，只表示应用绑定，不认证
+实际模型身份、完整上下文或授权。失败/unknown 保留并返回失败；completed 的
+`REQUEST_CHANGES` 保持原结论，并不等于执行失败或批准。
+
+原生上下文 stdout/文件格式保持不变，补充执行状态写 stderr。该节点不创建正式 review、
+批准、Finding 处置或状态迁移，也不替代独立审核、原生验证或 Gate。原报告仍由协调者按
+既有反馈格式处理，不自动发布或持续安排；真实统计、Desktop 附着与 `T0/T1` 均不因此开启。

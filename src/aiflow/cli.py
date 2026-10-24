@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 import sys
 from argparse import ArgumentParser, Namespace
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
+from typing import Any
 
 from aiflow import __version__
 from aiflow.approval import approve_task
@@ -28,6 +29,7 @@ from aiflow.review_service import (
     list_review_records,
     record_review,
     resolve_review_finding,
+    validate_review_context,
 )
 from aiflow.status_service import summarize_task
 from aiflow.storage import atomic_write_json
@@ -112,6 +114,16 @@ def build_parser() -> ArgumentParser:
     review_context.add_argument("task_id")
     review_context.add_argument("--stage", required=True, choices=["design", "implementation"])
     review_context.add_argument("--output", type=Path)
+    review_context.add_argument(
+        "--sdk-review-enable-once",
+        action="store_true",
+        help="explicitly request one supplemental SDK document review after this context",
+    )
+    review_context.add_argument("--sdk-review-document", action="append")
+    review_context.add_argument("--sdk-review-reference-document", action="append")
+    review_context.add_argument("--sdk-review-question")
+    review_context.add_argument("--sdk-review-output", type=Path)
+    review_context.add_argument("--sdk-review-global-instructions-sha256")
     review_record = review_commands.add_parser(
         "record", help="persist an immutable structured review"
     )
@@ -193,6 +205,77 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             print(error.message, file=sys.stderr)
         return 1
+
+
+def _require_sdk_context_ready(
+    repository_root: Path, task_id: str, context: Mapping[str, Any]
+) -> None:
+    validate_review_context(context)
+    status = summarize_task(repository_root, task_id)
+    if (
+        status.current_state != "WAITING_FOR_FINAL_REVIEW"
+        or status.classification != "fresh"
+        or status.evidence != "passed"
+        or context.get("review_stage") != "implementation"
+        or context.get("task_id") != status.task_id
+        or context.get("repository_id") != status.repository_id
+        or context.get("base_commit") != status.base_commit
+        or context.get("subject_commit") != status.subject_commit
+        or build_review_context(repository_root, task_id, "implementation") != context
+    ):
+        raise AiflowError(
+            "Supplemental SDK review requires a current implementation context and passed evidence",
+            code="SDK_REVIEW_CONTEXT_NOT_READY",
+        )
+
+
+def _run_sdk_context_supplement(
+    arguments: Namespace, repository_root: Path, context: Mapping[str, Any]
+) -> int:
+    _require_sdk_context_ready(repository_root, arguments.task_id, context)
+    changed = set(context["content"]["diff_summary"]["changed_paths"])
+    if (
+        not all(path.startswith("docs/") for path in arguments.sdk_review_document)
+        or not set(arguments.sdk_review_document) <= changed
+    ):
+        raise AiflowError(
+            "Supplemental SDK documents must be changed paths in this context",
+            code="SDK_REVIEW_DOCUMENT_NOT_CHANGED",
+        )
+    try:
+        # The ordinary context path does not even import the optional runner module.
+        from aiflow.sdk_review import execute_review, prepare_request
+
+        request = prepare_request(
+            repository_root,
+            context["subject_commit"],
+            context["base_commit"],
+            arguments.sdk_review_document,
+            arguments.sdk_review_reference_document,
+            arguments.sdk_review_question,
+        )
+        _require_sdk_context_ready(repository_root, arguments.task_id, context)
+        receipt = execute_review(
+            repository_root,
+            request,
+            arguments.sdk_review_output,
+            global_instructions_sha256=arguments.sdk_review_global_instructions_sha256,
+            trigger_binding={
+                "node": "review_context_implementation",
+                "task_id": arguments.task_id,
+                "context_sha256": context["context_sha256"],
+            },
+        )
+    except AiflowError:
+        raise
+    except (Exception, KeyboardInterrupt) as error:
+        raise AiflowError(
+            "Supplemental SDK review is unavailable; no automatic retry",
+            code="SDK_REVIEW_UNAVAILABLE",
+        ) from error
+    status = receipt.get("status", "unknown")
+    print(f"Supplemental SDK review: {status}", file=sys.stderr)
+    return 0 if status == "completed" else 1
 
 
 def _dispatch(arguments: Namespace, repository_root: Path) -> int:
@@ -294,12 +377,45 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
         print(f"{arguments.task_id} {resolution_result.task['current_state']}")
     elif arguments.command == "review":
         if arguments.review_command == "context":
+            sdk_options = (
+                arguments.sdk_review_document,
+                arguments.sdk_review_reference_document,
+                arguments.sdk_review_question,
+                arguments.sdk_review_output,
+                arguments.sdk_review_global_instructions_sha256,
+            )
+            if not arguments.sdk_review_enable_once and any(
+                value is not None for value in sdk_options
+            ):
+                raise AiflowError(
+                    "Supplemental SDK options require --sdk-review-enable-once",
+                    code="SDK_REVIEW_NOT_ENABLED",
+                )
+            if arguments.sdk_review_enable_once:
+                if arguments.stage != "implementation":
+                    raise AiflowError(
+                        "Supplemental SDK review is only available after an implementation context",
+                        code="SDK_REVIEW_STAGE_INVALID",
+                    )
+                if (
+                    not arguments.sdk_review_document
+                    or not arguments.sdk_review_reference_document
+                    or not arguments.sdk_review_question
+                    or not arguments.sdk_review_question.strip()
+                    or arguments.sdk_review_output is None
+                ):
+                    raise AiflowError(
+                        "Supplemental SDK documents, references, question and output are required",
+                        code="SDK_REVIEW_INPUT_REQUIRED",
+                    )
             context = build_review_context(repository_root, arguments.task_id, arguments.stage)
             if arguments.output is not None:
                 atomic_write_json(arguments.output, context)
                 print(str(arguments.output.resolve()))
             else:
                 print(json.dumps(context, ensure_ascii=False, sort_keys=True))
+            if arguments.sdk_review_enable_once:
+                return _run_sdk_context_supplement(arguments, repository_root, context)
         elif arguments.review_command == "record":
             record_result = record_review(
                 repository_root,

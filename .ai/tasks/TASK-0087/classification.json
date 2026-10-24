@@ -1,0 +1,64 @@
+{
+  "base_commit": "f845b436bdba52cdc8d27ebec2c8b78faecca988",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "3bcaa23c919f7f88efafabf7618c80d800bd2e899683352fc47bf397fad1a155",
+  "classifications": [
+    {
+      "classified_at": "2026-10-24T06:39:49Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Secret or authentication changes require review.",
+      "explanations": [
+        "Secret or authentication changes require review.",
+        "Changes that can touch the governance surface require independent review."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Secret or authentication changes require review.",
+          "predicate_explanations": [
+            "impact_categories: contains_any -> true"
+          ],
+          "priority": 790,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-SECRETS-AUTH"
+        },
+        {
+          "explanation": "Changes that can touch the governance surface require independent review.",
+          "predicate_explanations": [
+            "impact_scope: overlaps_paths -> true"
+          ],
+          "priority": 750,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE"
+        }
+      ],
+      "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+      "policy_version": "2.5.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-SECRETS-AUTH",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Cross-file interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-CROSS-FILE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-10-24T06:39:49Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "policy_version": "2.5.0",
+  "schema_version": "1.0",
+  "subject_commit": "f845b436bdba52cdc8d27ebec2c8b78faecca988",
+  "task_id": "TASK-0087"
+}
