@@ -25,6 +25,8 @@
 
 - TASK-0084 已由 [PR #105](https://github.com/MaginaLW/harness-model/pull/105) 合并并关闭：修复 Unicode 事件误拆行、ASCII/GBK 管道中的 facts 输出异常，以及 U+0085 的 YAML 数据丢失。新 YAML 写入使用标准字符转义，解码值精确保留，不重写历史文件。独立设计／实现审核、完整原生 V1、Gate 与 required CI 均通过；完整测试为 3835 项，core/analysis 总覆盖率为 89%/97%，两域变更覆盖率均为 100%。旧候选因发现数据丢失而中断的验证记录保留。
 
+- TASK-0085 已由 [PR #107](https://github.com/MaginaLW/harness-model/pull/107) 合并并关闭：[`close` 的本地合并核对](quickstart.md#记录已完成的合并)要求至少两个父提交，且至少一个非第一父包含 `base → subject` 链；普通或无关提交、空缺候选及不可用的必要 Git 事实均拒绝关闭。复用既有祖先检查，无新增模块、依赖、配置或权限，历史 `MERGED` 记录保留。独立设计／实现审核、完整原生 V1、Gate 与 required CI 均通过；完整测试为 3858 项，core/analysis 总覆盖率为 89%/97%，core 变更覆盖率为 100%，analysis 源码未变更。该检查不认证 PR、目标分支、远端完成状态或 required CI，发布时仍分别核对。
+
 **两条新路线的方案入口**：[应用自管 SDK 与完整引擎跨仓初始化方案](sdk-and-engine-plan.md)已记录具体步骤、启动材料、风险、恢复与验收要求。当前仅完成文档准备，两条路线均未启动实现、安装、真实调用或目标仓应用；真实评分、自动审核安排和宿主连接继续暂停，`T0/T1` 未设置。
 
 ## 剩余建设主线
