@@ -28,6 +28,7 @@
 | 核对文档引用是否对应本地 Git 原件 | [固定文档原件核对](docs/operations/review-detection-input.md#本地-git-原件核对) | 同一声明包及显式本地 Git 根目录 | 只核 commit/path/blob 和字节；语义定位、公开性与观察准入仍未知。 |
 | 定位固定文档中的精确字节跨度 | [行跨度定位](docs/operations/review-detection-input.md#精确行跨度定位) | 上述入口显式 `--resolve-locators`；行跨度与预期 SHA-256 | 位置命中与 Git 对象匹配分开；语义适用、真实时序和准入另核。 |
 | 定位当前任务的准备缺项 | [只读任务建议](docs/operations/review-advisory.md) | 完整克隆及真实 TASK-ID | 复用原生 status 与适用状态的 Gate，只给建议，不授予执行权限。 |
+| 准备或显式执行一次自管 SDK 文档审核 | [单次只读审核](docs/superpowers/specs/sdk-readonly-review.md#使用) | 固定 Git 文档、适用旧契约和一个问题；真实执行需可选 SDK 与既有登录 | 默认不启动 SDK；普通只读不提供输入目录读取白名单，不启用统计评分或自动安排。 |
 
 ## 阶段一目标
 

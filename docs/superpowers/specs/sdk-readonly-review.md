@@ -15,7 +15,9 @@
 
 默认只准备和预览，不导入 SDK、构造客户端、创建运行时子进程或调用模型；固定 Git 对象的读取仍使用本地 Git。显式执行前核对固定输入、当前候选和运行边界；启动后不自动重试、续跑或切换通道。
 
-推理调用所需通信与工具网络分开。指定材料在隔离工作目录内处理，文件不允许写入，显式关闭 shell、外部检索、MCP、插件和子代理；保留运行时必要的无副作用内置工具，不声称严格零工具。改写请求由有效的只读沙箱与拒绝策略处理。必须按固定 SDK／运行时核实实际配置与读取范围，不能仅凭空配置表、只读预设或提示文字宣称隔离；无法建立必需限制时拒绝真实调用，未暴露的内部模型上下文保持 unknown。
+推理调用所需通信与工具网络分开。应用使用官方普通 `read_only` 预设和 `never` 批准策略，核对实际线程回执中的只读及无工具网络配置，关闭审核不需要的 shell、外部检索、MCP、插件和子代理。普通只读不等于“只有输入目录可读”，也不证明完整模型上下文；模型内置工具不能全部由本客户端认证为不可用。固定输入的 hash 只绑定应用发送的文本。
+
+既有全局指令需要显式提供预期 hash 并核对已加载来源，回执只保存来源类别／hash，不复制正文或公开本机路径。无法证明的内部上下文继续 unknown。本首版不要求 root-deny 或目录外拒读探针，不安装 WSL／其他执行环境，不迁移凭据，不手工修改 ACL 或全局配置。SDK 自身正常状态写入及沙箱维护可能存在，不能把一次只读审核说成整个运行过程零写入。
 
 一次工程验收只覆盖一个审核 turn，最多等待 120 秒，取消确认另有最多 10 秒收尾时间。项目所有者已选择现有 Codex 登录与订阅配额，不接入 API key 计费；实际用量与实费来源分别记录，不能把客户端超时当作强制金额上限。不导出或入库凭据；新增付费、额外调用或扩大来源不能借单次试点继续执行。
 
@@ -34,3 +36,23 @@
 5. 工程完成要求固定输入经自管 SDK 得到有效最终报告，结果有实际来源，现有反馈入口能正确回读，源码通过必需质量门且可停用。没有真实成功回执时，只能报告已完成离线部分，目标仍未完成。
 
 本合同不新增反馈 Schema、数据库、通用 provider 层、后台队列、自动触发或执行权限。`T0/T1` 保持未设置，概率保持未估计；真实评分、审核策略接入和 Phase 3 退出各按自身证据推进。
+
+## 使用
+
+在已有 Codex ChatGPT 登录的本机安装可选依赖；普通安装和 AI Flow 检查不需要启动 SDK：
+
+```console
+uv sync --extra dev --extra sdk
+```
+
+先用完整提交 SHA 准备固定输入。默认只读 Git 对象，输出 portable manifest 和实际发送文本的 hash，不创建运行目录或启动 SDK：
+
+```console
+python -m aiflow.sdk_review --candidate <CANDIDATE-SHA> --reference <REFERENCE-SHA> --document docs/superpowers/specs/sdk-readonly-review.md --reference-document docs/operations/sdk-and-engine-plan.md --question "核对新合同与既有约束的直接矛盾" --output build/sdk-review/run-1
+```
+
+实际调用在相同命令增加 `--execute`。存在已审阅的 Codex 全局 AGENTS 时，再给 `--global-instructions-sha256 <EXPECTED-SHA256>`；不提供或 hash／实际来源不符时，在模型 turn 前拒绝。该参数声明既有指令来源，不授予新的文件或工具访问权限。
+
+每次显式执行使用新的 ignored `build/` 子目录，先保留 `receipt.json` 的 started 状态。只有收到有效终局报告并通过位置／形状验证才记为 completed；failed／unknown 不可重用目录自动重放。回执中的 token 是用量，实费与实际模型身份没有独立来源时仍 unknown。
+
+报告的 outcome 和 Finding 摘要由协调者按[既有 PR 反馈格式](../../operations/pr-feedback.md#pr-描述中的可选反馈块)放到真实 PR，再用实际 connector capture 回读。报告不是 GitHub 原生 review，SDK 工程验收也不自动形成统计观察或审核触发规则。
