@@ -1,0 +1,231 @@
+{
+  "base_commit": "1905da336ef6dbbb9742099be7afe4787aee778d",
+  "branch": "codex/sdk-readonly-review",
+  "classification_input_sha256": "58dc3a3bb8260e2abc728b0b28a13ccff54dff51442ac0fa837a1e7192ded5a4",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/sdk_review.py",
+      "pyproject.toml",
+      "uv.lock",
+      "tests/unit/test_sdk_review.py",
+      "docs/superpowers/specs/sdk-readonly-review.md",
+      "docs/operations/sdk-and-engine-plan.md",
+      "docs/operations/maintenance-status.md",
+      "README.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Implement the opt-in self-managed SDK document review client",
+        "impact_scope": [
+          "src/aiflow/sdk_review.py",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "planned_actions": [
+          "Implement and validate an opt-in fixed-document SDK runner; implementation and required tests do not start a model runtime."
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0086/approvals.json",
+        ".ai/tasks/TASK-0086/classification.json",
+        ".ai/tasks/TASK-0086/events.jsonl",
+        ".ai/tasks/TASK-0086/evidence.json",
+        ".ai/tasks/TASK-0086/review-contexts/3f2df3efd86d4ebf0b9d1938668b930fda89cc3ef84579d4b9f52e6d47bd7c36.json",
+        ".ai/tasks/TASK-0086/review-contexts/e6c7acad18d84f7eec14e7dd79b40981199b1c410c16557ae6e62e1d818ad2a3.json",
+        ".ai/tasks/TASK-0086/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0086/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0086/spec.md",
+        ".ai/tasks/TASK-0086/task.yaml",
+        "README.md",
+        "docs/operations/sdk-and-engine-plan.md",
+        "docs/superpowers/specs/sdk-readonly-review.md",
+        "pyproject.toml",
+        "src/aiflow/sdk_review.py",
+        "tests/unit/test_sdk_review.py",
+        "uv.lock"
+      ],
+      "files": [
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/approvals.json"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/classification.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/evidence.json"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/review-contexts/3f2df3efd86d4ebf0b9d1938668b930fda89cc3ef84579d4b9f52e6d47bd7c36.json"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/review-contexts/e6c7acad18d84f7eec14e7dd79b40981199b1c410c16557ae6e62e1d818ad2a3.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 42,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/spec.md"
+        },
+        {
+          "additions": 82,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0086/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "README.md"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/sdk-and-engine-plan.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/superpowers/specs/sdk-readonly-review.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 0,
+          "path": "pyproject.toml"
+        },
+        {
+          "additions": 694,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/sdk_review.py"
+        },
+        {
+          "additions": 1102,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_sdk_review.py"
+        },
+        {
+          "additions": 203,
+          "binary": false,
+          "deletions": 1,
+          "path": "uv.lock"
+        }
+      ],
+      "totals": {
+        "additions": 2548,
+        "deletions": 4,
+        "files": 17
+      }
+    },
+    "goal": "Implement the opt-in self-managed SDK document review client",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0086",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "c57199c9cc11fc5ebadcdd233121b1e9d1b1799af48fedbbd6391757bb358264",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "84752c34d827bd9ecd26e91624af150a59b442b56e96556459fd2b61faab1819",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "8022803dddd6fc54ceef0a1023261bfb8a4556b9c1c7b52ae823429504c076ea",
+  "subject_commit": "c2855df8bd0da26eb888a2e8378bf1dd1bf5feba",
+  "task_id": "TASK-0086"
+}

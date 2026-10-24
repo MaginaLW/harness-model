@@ -10,7 +10,7 @@ allowed_scope:
 base_commit: 1905da336ef6dbbb9742099be7afe4787aee778d
 branch: codex/sdk-readonly-review
 created_at: '2026-10-24T02:38:03Z'
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -77,6 +77,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-24T03:10:59Z'
 subject_commit: c2855df8bd0da26eb888a2e8378bf1dd1bf5feba
 task_id: TASK-0086
-updated_at: '2026-10-24T03:59:41Z'
+updated_at: '2026-10-24T04:19:44Z'
 worktree_dirty: false
 worktree_dirty_paths: []
