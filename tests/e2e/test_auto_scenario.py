@@ -9,6 +9,7 @@ from scenario_support import (
     classification,
     commit_implementation,
     evidence,
+    git,
     install_compact_verification,
     prepare_task,
     state,
@@ -38,6 +39,17 @@ def test_auto_document_scenario_reaches_closed_without_approval(
     assert all(check["status"] == "passed" for check in result["checks"])
     assert approvals(repository) == []
     assert main(["gate", TASK_ID, "--format", "json"]) == 0
+    merge = git(
+        repository,
+        "commit-tree",
+        f"{head}^{{tree}}",
+        "-p",
+        f"{head}^",
+        "-p",
+        head,
+        "-m",
+        "merge verified candidate",
+    )
     assert (
         main(
             [
@@ -46,7 +58,7 @@ def test_auto_document_scenario_reaches_closed_without_approval(
                 "--result",
                 "merged",
                 "--merge-commit",
-                head,
+                merge,
                 "--actor",
                 "integrator",
             ]

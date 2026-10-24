@@ -1,0 +1,38 @@
+{
+  "base_commit": "f4b3974cd3260a7feb21e90b102936888386819a",
+  "branch": "codex/close-merge-validation",
+  "classification_input_sha256": "f3939f52baa1cffdc07c05d6d973fce6065cb77a029dfccf03fa683d5b70410c",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "tests/integration/test_begin_close_commands.py",
+      "docs/operations/quickstart.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Verify local merge topology and candidate ancestry before task closeout",
+        "impact_scope": [
+          "src/aiflow/task_service.py"
+        ],
+        "planned_actions": [
+          "Check local merge parents and reviewed-candidate ancestry before recording an externally declared merge."
+        ]
+      }
+    ],
+    "goal": "Verify local merge topology and candidate ancestry before task closeout",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "dc6cfe0f217bf0803a6af424ccc8a359a041c14c6f21207b44a9a2049346b3b2",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "50a911b9c36c32f6c977554f27ba7813572eac9695533a03eb28a9e4a43bf2c2",
+  "task_id": "TASK-0085"
+}

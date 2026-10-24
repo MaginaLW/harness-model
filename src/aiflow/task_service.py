@@ -1162,23 +1162,49 @@ def begin_task(
     )
 
 
-def _require_commit(repository_root: Path, commit: str) -> None:
+def _require_merge_commit(
+    repository_root: Path, commit: str, *, base_commit: str, subject_commit: str | None
+) -> None:
     if COMMIT_PATTERN.fullmatch(commit) is None:
         raise ContractError("Merge commit is invalid", code="CLOSE_COMMIT_INVALID")
     try:
         result = subprocess.run(
-            ["git", "cat-file", "-e", f"{commit}^{{commit}}"],
+            ["git", "rev-list", "--parents", "-n", "1", commit],
             cwd=repository_root,
             capture_output=True,
             check=False,
             timeout=10,
         )
-    except (OSError, subprocess.TimeoutExpired) as error:
+        if result.returncode != 0:
+            raise ContractError("Merge commit does not exist", code="CLOSE_COMMIT_UNKNOWN")
+        lines = result.stdout.decode("ascii").splitlines()
+    except (OSError, subprocess.TimeoutExpired, UnicodeError) as error:
         raise ContractError(
             "Could not verify merge commit", code="CLOSE_COMMIT_UNAVAILABLE"
         ) from error
-    if result.returncode != 0:
-        raise ContractError("Merge commit does not exist", code="CLOSE_COMMIT_UNKNOWN")
+    fields = lines[0].split() if len(lines) == 1 else []
+    if (
+        not fields
+        or fields[0] != commit
+        or any(COMMIT_PATTERN.fullmatch(value) is None for value in fields)
+    ):
+        raise ContractError("Could not verify merge commit", code="CLOSE_COMMIT_UNAVAILABLE")
+    parents = fields[1:]
+    if len(parents) < 2:
+        raise ContractError("Commit is not a merge", code="CLOSE_NOT_MERGE")
+    if subject_commit is None or not any(
+        commits_are_ancestral(
+            repository_root,
+            base_commit=base_commit,
+            subject_commit=subject_commit,
+            head_commit=parent,
+        )
+        for parent in parents[1:]
+    ):
+        raise ContractError(
+            "Merge commit does not include the task candidate through an incoming parent",
+            code="CLOSE_SUBJECT_NOT_MERGED",
+        )
 
 
 def close_task(
@@ -1204,7 +1230,12 @@ def close_task(
         raise ContractError(
             "Task belongs to a different repository", code="CLOSE_REPOSITORY_MISMATCH"
         )
-    _require_commit(Path(context.repository_path), merge_commit)
+    _require_merge_commit(
+        Path(context.repository_path),
+        merge_commit,
+        base_commit=record.task["base_commit"],
+        subject_commit=record.task["subject_commit"],
+    )
     return transition_task_record(
         repository_root,
         task_id,

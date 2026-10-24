@@ -286,6 +286,18 @@ python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "impl
 
 `review record` 不覆盖历史；需关闭发现时使用 `review resolve` 追加 revision。code approval 仍同时要求现有八节 `review-package.md` 和通过的本地 evidence。
 
+## 记录已完成的合并
+
+外部 PR 与 required CI 核对完成后，使用完整的 40 位小写合并提交 SHA 关闭已批准任务：
+
+```sh
+python -m aiflow close <TASK-ID> --result merged --merge-commit <MERGE-SHA> --actor <INTEGRATOR>
+```
+
+`close` 要求任务处于 `APPROVED_FOR_MERGE` 且仓库身份一致。它在当前本地 Git 视图中要求该提交至少有两个父提交，并对至少一个非第一父提交验证 `base_commit → subject_commit → incoming parent`。允许相等、受审候选之后的治理提交，以及多父合并；普通提交、无关合并或仅第一父包含候选时拒绝关闭。Git 检查失败或事实不可用时返回错误，不记录合并。
+
+该命令只核对本地必要条件并追加关闭记录，不执行 Git 合并、fetch 或网络操作，也不认证具体 PR、目标分支、远端完成状态或 required CI。发布时仍须分别核对这些外部事实；历史 `MERGED` 记录不重新裁定。
+
 ## V2 独立 Verifier 与已完成的 Chapter 11
 
 V2 的 `--actor` 是 task-local 文本标签：会先 trim，再按精确字符串比较。它不代表人员、模型或外部身份认证。当前实现周期的 Implementer 取最近一次 `implementation_started` 或 `implementation_retried` 事件；V2 Verifier 必须提供非空且不同的标签。

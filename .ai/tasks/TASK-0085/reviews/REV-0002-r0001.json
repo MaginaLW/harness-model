@@ -1,0 +1,13 @@
+{
+  "context_sha256": "99852e786e5c3600dcd2de640261a4aa38e6150aefba9d5fedf3d6d16ebe7e4a",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-24T00:35:38Z",
+  "review_id": "REV-0002",
+  "review_stage": "design",
+  "reviewer": "/root/next_need_cli",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent design review approves the revised frozen closeout design and confirms that the recomputed native context exactly matches the supplied v2 context. The only scope addition is the existing end-to-end AUTO close success fixture, which currently submits an ordinary implementation commit and must instead construct a real merge. This is necessary compatibility work for the same bounded close contract, not a new production feature. Core scope remains task_service.py, extending the existing local commit check with standard Git parent inspection and the existing commits_are_ancestral helper. Requiring at least two parents and base-to-subject-to-an-incoming-parent ancestry correctly rejects an ordinary commit, unrelated merge or first-parent-only candidate, while accepting equality, later governance commits and later incoming parents in multi-parent merges. The existing full SHA, task state and repository checks, domain error and timeout model, event payload and consistent-task rejection behavior remain requirements. Prior reviews, failed receipts and historical MERGED records are retained; no migration or historical rejudgment is introduced. The proposed git rev-list parent query is direct and appropriate within the explicitly retained local Git view and trust boundary, with malformed output and command failures required to fail closed. PR identity, target branch, remote completion and required CI remain separately checked external facts; no anti-tampering guarantee, provider, network operation, generic Git wrapper, dependency, Policy, authority or execution permission is added. Companion tests and documentation remain separate task-free commits. Native V1, implementation review, Gate and required CI are still required; real scoring, automatic review arrangement, host connections and observation start remain paused. No open design findings remain.",
+  "task_id": "TASK-0085"
+}
