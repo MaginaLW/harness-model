@@ -1,0 +1,13 @@
+{
+  "context_sha256": "dc6cfe0f217bf0803a6af424ccc8a359a041c14c6f21207b44a9a2049346b3b2",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-24T00:31:15Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "/root/next_need_cli",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent design review approves the frozen bounded closeout repair and confirms that the recomputed native design context exactly matches the supplied context. The existing close contract records an externally completed merge, but the current implementation only proves that an object is a commit before marking merge_commit_verified; the existing integration test explicitly accepts an initial ordinary commit. Extending the existing close-only check with local Git parent inspection and the existing commits_are_ancestral helper is the smallest direct correction. The design requires at least two parents and base-to-subject-to-incoming-parent ancestry, accepts equality, later governance commits and any valid non-first parent in a multi-parent merge, and rejects ordinary or unrelated commits without changing a consistent task. It correctly avoids requiring the incoming parent to equal subject or forbidding subject from the first parent, which would break valid governance-only work. Existing task state, repository identity, full SHA checks, event payload, loading and recovery behavior remain unchanged; historical MERGED records are retained without revalidation. Tests explicitly cover real Git graph counterexamples, malformed metadata, missing objects, errors and timeouts, with source changes confined to task_service.py and companion tests and documentation committed separately. Local Git view consistency is necessary evidence only: it does not authenticate a particular PR, target branch, remote completion, required CI, or resistance to local Git configuration or object tampering. Those checks remain external, with no new trust boundary, network access, module, dependency, Schema, Policy, retry or execution permission. Native V1, implementation review, Gate and required CI remain separate acceptance steps. Real scoring, automatic review arrangement, host connections and the observation window remain paused. No open design findings remain.",
+  "task_id": "TASK-0085"
+}

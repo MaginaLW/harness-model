@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-24T00:36:00Z",
+    "base_commit": "f4b3974cd3260a7feb21e90b102936888386819a",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立设计审核REV-0002 APPROVE，无开放critical/high；冻结范围仅本地close必要条件及真实Git测试，不含外部副作用或授权文件变更。",
+    "schema_version": "1.0",
+    "spec_sha256": "07b6b5148fa8aeffe55b1f1a3862f777d1457741aa051b90bc3290b78560f9be",
+    "subject_commit": "f4b3974cd3260a7feb21e90b102936888386819a",
+    "task_id": "TASK-0085"
+  }
+]
