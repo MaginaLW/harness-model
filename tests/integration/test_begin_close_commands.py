@@ -564,16 +564,140 @@ def test_close_rejects_early_state_and_unknown_commit(
     assert "commit" in capsys.readouterr().err.lower()
 
 
-def test_close_records_existing_merge_without_running_merge(
+def close_commit(repository: Path, message: str, *parents: str) -> str:
+    """Create a local commit object without moving the test worktree or refs."""
+    tree = run_git(repository, "rev-parse", "HEAD^{tree}")
+    parent_arguments = [argument for parent in parents for argument in ("-p", parent)]
+    return run_git(
+        repository,
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit-tree",
+        tree,
+        *parent_arguments,
+        "-m",
+        message,
+    )
+
+
+@pytest.mark.parametrize(
+    "history",
+    [
+        "root",
+        "ordinary",
+        "unrelated-merge",
+        "first-parent-only",
+        "missing-subject",
+        "null-subject",
+        "unrelated-base",
+        "short-sha",
+        "uppercase-sha",
+    ],
+)
+def test_close_rejects_unmerged_candidate_without_writes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    history: str,
 ) -> None:
     repository = create_repository(tmp_path / "repository")
     start(repository, monkeypatch)
     make_ready(repository)
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
     make_approved(repository)
+    base = run_git(repository, "rev-parse", "HEAD")
+    subject = close_commit(repository, "reviewed candidate", base)
+    unrelated = close_commit(repository, "unrelated root")
+    target = close_commit(repository, "target branch", base)
+    merge = close_commit(repository, "merge candidate", target, subject)
+    if history == "root":
+        merge = base
+    elif history == "ordinary":
+        merge = subject
+    elif history == "unrelated-merge":
+        merge = close_commit(repository, "other merge", target, unrelated)
+    elif history == "first-parent-only":
+        merge = close_commit(repository, "candidate on target only", subject, target)
+    elif history == "missing-subject":
+        subject = "0" * 40
+    elif history == "null-subject":
+        subject = None
+    elif history == "unrelated-base":
+        base = unrelated
+    elif history == "short-sha":
+        merge = merge[:12]
+    else:
+        merge = "A" * 40
+    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+    task = load_task_record(repository, "TASK-0001").task
+    task.update(base_commit=base, subject_commit=subject)
+    atomic_write_yaml(task_path, task)
+    task_directory = task_path.parent
+    before = {path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()}
     head = run_git(repository, "rev-parse", "HEAD")
+    branch = run_git(repository, "branch", "--show-current")
+    capsys.readouterr()
+
+    assert (
+        main(
+            [
+                "close",
+                "TASK-0001",
+                "--result",
+                "merged",
+                "--merge-commit",
+                merge,
+                "--actor",
+                "closer",
+            ]
+        )
+        == 1
+    )
+
+    error = capsys.readouterr().err
+    assert "merge" in error.lower()
+    assert str(repository) not in error
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "APPROVED_FOR_MERGE"
+    after = {path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()}
+    assert after == before
+    assert run_git(repository, "rev-parse", "HEAD") == head
+    assert run_git(repository, "branch", "--show-current") == branch
+
+
+@pytest.mark.parametrize(
+    "history",
+    ["candidate", "later-governance", "subject-equals-base", "third-parent", "both-parents"],
+)
+def test_close_records_existing_merge_without_running_merge(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    history: str,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository)
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    make_approved(repository)
+    base = run_git(repository, "rev-parse", "HEAD")
+    subject = close_commit(repository, "reviewed candidate", base)
+    target = close_commit(repository, "target branch", base)
+    incoming = subject
+    if history == "subject-equals-base":
+        subject = base
+    elif history == "later-governance":
+        incoming = close_commit(repository, "later governance", subject)
+    elif history == "both-parents":
+        target = close_commit(repository, "candidate also on target", subject)
+    parents = [target, incoming]
+    if history == "third-parent":
+        parents.insert(1, close_commit(repository, "other incoming", base))
+    merge = close_commit(repository, "completed merge", *parents)
+    task = load_task_record(repository, "TASK-0001").task
+    task["subject_commit"] = subject
+    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
+    head_before = run_git(repository, "rev-parse", "HEAD")
     branch_before = run_git(repository, "branch", "--show-current")
 
     assert (
@@ -584,7 +708,7 @@ def test_close_records_existing_merge_without_running_merge(
                 "--result",
                 "merged",
                 "--merge-commit",
-                head,
+                merge,
                 "--actor",
                 "closer",
             ]
@@ -594,9 +718,100 @@ def test_close_records_existing_merge_without_running_merge(
 
     record = load_task_record(repository, "TASK-0001")
     assert record.task["current_state"] == "MERGED"
-    assert record.events[-1]["payload"] == {"merge_commit": head, "result": "merged"}
-    assert run_git(repository, "rev-parse", "HEAD") == head
+    assert record.events[-1]["event_type"] == "merge_recorded"
+    assert record.events[-1]["payload"] == {"merge_commit": merge, "result": "merged"}
+    assert run_git(repository, "rev-parse", "HEAD") == head_before
     assert run_git(repository, "branch", "--show-current") == branch_before
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "git-error",
+        "os-error",
+        "timeout",
+        "nonascii",
+        "empty",
+        "malformed-parent",
+        "mismatched-commit",
+        "extra-line",
+        "ancestry-error",
+        "ancestry-timeout",
+    ],
+)
+def test_close_rejects_unavailable_merge_facts_without_writes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failure: str,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository)
+    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    make_approved(repository)
+    base = run_git(repository, "rev-parse", "HEAD")
+    target = close_commit(repository, "target branch", base)
+    incoming = close_commit(repository, "incoming branch", base)
+    merge = close_commit(repository, "completed merge", target, incoming)
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    before = {path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()}
+    real_run = subprocess.run
+    failed_calls: list[list[str]] = []
+
+    def failing_git(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        parent_query = arguments[1:5] == ["rev-list", "--parents", "-n", "1"]
+        ancestry_query = arguments[1:3] == ["merge-base", "--is-ancestor"]
+        if not (
+            (failure.startswith("ancestry-") and ancestry_query)
+            or (not failure.startswith("ancestry-") and parent_query)
+        ):
+            return real_run(arguments, **kwargs)
+        failed_calls.append(arguments)
+        if failure in {"timeout", "ancestry-timeout"}:
+            raise subprocess.TimeoutExpired(arguments, 10, stderr=b"private git detail")
+        if failure in {"os-error", "ancestry-error"}:
+            raise OSError("private git detail")
+        output = {
+            "nonascii": b"\xff",
+            "empty": b"",
+            "malformed-parent": f"{merge} {target} invalid-parent\n".encode("ascii"),
+            "mismatched-commit": f"{base} {target} {incoming}\n".encode("ascii"),
+            "extra-line": f"{merge} {target} {incoming}\n{merge}\n".encode("ascii"),
+        }.get(failure, b"")
+        return subprocess.CompletedProcess(
+            arguments,
+            128 if failure == "git-error" else 0,
+            stdout=output,
+            stderr=b"private git detail",
+        )
+
+    monkeypatch.setattr(subprocess, "run", failing_git)
+    capsys.readouterr()
+
+    assert (
+        main(
+            [
+                "close",
+                "TASK-0001",
+                "--result",
+                "merged",
+                "--merge-commit",
+                merge,
+                "--actor",
+                "closer",
+            ]
+        )
+        == 1
+    )
+
+    assert failed_calls
+    error = capsys.readouterr().err
+    assert error
+    assert "private git detail" not in error
+    assert str(repository) not in error
+    after = {path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()}
+    assert after == before
 
 
 def test_classify_records_durable_evidence_and_is_idempotent(
