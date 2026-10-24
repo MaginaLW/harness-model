@@ -46,7 +46,7 @@
 | [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
 | [接入现有 AI 工作流](docs/operations/adoption.md) | 只读盘点、可合并规则和分批推广；区分轻量接入与完整引擎 |
-| [SDK 客户端与跨仓初始化方案](docs/operations/sdk-and-engine-plan.md) | 两条未来路线的步骤、启动材料、风险与验收；方案不构成启动决定 |
+| [SDK 客户端与跨仓初始化方案](docs/operations/sdk-and-engine-plan.md) | 已交付 SDK 的使用与后续边界，以及尚未选定目标的跨仓初始化步骤、材料与验收 |
 | [低干预工作方式](docs/operations/low-intervention.md) | Agent 连续推进与必要人工决定的边界 |
 | [Hooks](docs/operations/hooks.md) | 本地 wrapper、`aiflow observe` 协议与平台证据边界 |
 | [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence 与精确清理边界 |
