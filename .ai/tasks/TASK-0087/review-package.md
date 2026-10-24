@@ -2,7 +2,7 @@
 
 ## 审核目标
 
-Review the default-off implementation-context supplement against the frozen TASK-0087 specification. This phase is local preparation and simulation only; it does not authorize a real model turn or publication.
+Review fixed subject `df4bdb7391e54d06d1eeb2ec28ac738b61765032` and its default-off implementation-context supplement against the frozen TASK-0087 specification. This phase is local preparation and simulation only; it does not authorize a real model turn or publication.
 
 ## 背景
 
@@ -22,9 +22,9 @@ The checks are prelaunch snapshots, not an atomic repository lock. Context hashe
 
 ## 证据
 
-已验证：independent design review approved the frozen context. The 147 affected tests pass under the native process runner's reduced environment in 158.25 seconds: 112 SDK regressions (including the original 101) and 35 real Git/context integration cases using fake SDK execution. All 74 changed executable lines are covered. Whole-repository Ruff, format and strict mypy pass. Initial red regressions for the absent helper and missing CLI options are retained under the ignored local build directory. The authoritative final fixed-subject validation and its original logs will be recorded by native V1.
+已验证：independent design review approved the frozen context. Fixed-subject native V1 passes all ten checks and 4005 tests in 949.94 seconds; its canonical evidence and task-relative logs preserve the actual run. Core/analysis total coverage is 89/97 percent, and all 74 changed executable lines are covered. The 147 affected tests also pass under the native reduced environment in 158.25 seconds: 112 SDK regressions (including the original 101) and 35 real Git/context integration cases using fake SDK execution. Whole-repository Ruff, format and strict mypy pass. Initial red regressions for the absent helper and missing CLI options are retained under the ignored local build directory.
 
-未验证：complete native V1, final context-bound independent implementation review and local Gate remain pending. No real SDK call, remote CI, push, PR, merge, deployment, statistical window or Desktop connection has been performed in this phase.
+未验证：final context-bound independent implementation review and local Gate remain pending. No real SDK call, remote CI, push, PR, merge, deployment, statistical window or Desktop connection has been performed in this phase.
 
 ## 审核问题
 

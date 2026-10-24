@@ -11,5 +11,19 @@
     "spec_sha256": "aa3b329bb2f91c4b244c14c2469507022e6201fed36380be1eef2f61c4bb014c",
     "subject_commit": "f845b436bdba52cdc8d27ebec2c8b78faecca988",
     "task_id": "TASK-0087"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-24T07:23:20Z",
+    "base_commit": "f845b436bdba52cdc8d27ebec2c8b78faecca988",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "efb5f05142c3aec2873fc6520f4be77ae96a1a0f9311f6e45c83c3e30b91f904",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立实现审核REV-0002 APPROVE，无开放critical/high；固定subject完整V1十项、4005测试及85/90门禁通过。仅默认关闭节点的本地准备与模拟，不执行真实SDK，不触及授权文件；push/merge/部署和真实激活仍禁止，本地批准不提供外部动作授权。",
+    "schema_version": "1.0",
+    "spec_sha256": "aa3b329bb2f91c4b244c14c2469507022e6201fed36380be1eef2f61c4bb014c",
+    "subject_commit": "df4bdb7391e54d06d1eeb2ec28ac738b61765032",
+    "task_id": "TASK-0087"
   }
 ]
