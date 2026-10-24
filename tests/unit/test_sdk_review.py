@@ -1100,3 +1100,152 @@ def test_runtime_rejects_unsupported_mcp_names_before_sdk_construction(
     assert receipt["status"] == "failed"
     assert fake_sdk.constructors == []
     assert fake_sdk.turns == []
+
+
+@pytest.mark.parametrize("supplemental", [False, True])
+def test_shared_execution_returns_the_saved_receipt_and_keeps_trigger_binding_optional(
+    repository: tuple[Path, str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    supplemental: bool,
+) -> None:
+    root, candidate, _reference = repository
+    prepared = request(repository)
+    output = root / "build/shared-review"
+    binding = {
+        "node": "review_context_implementation",
+        "task_id": "TASK-0087",
+        "context_sha256": "a" * 64,
+    }
+    expected_report = (
+        report(outcome="REQUEST_CHANGES", findings=[finding()]) if supplemental else report()
+    )
+    calls = 0
+
+    def fake_sdk(*_args: Any) -> dict[str, Any]:
+        nonlocal calls
+        calls += 1
+        started = json.loads((output / "receipt.json").read_text(encoding="utf-8"))
+        assert started["status"] == "started"
+        assert started.get("trigger_binding") == (binding if supplemental else None)
+        return runtime_result(json.dumps(expected_report))
+
+    monkeypatch.setattr(sdk_review, "_run_sdk", fake_sdk)
+    receipt = sdk_review.execute_review(
+        root, prepared, output, trigger_binding=binding if supplemental else None
+    )
+
+    assert receipt == json.loads((output / "receipt.json").read_text(encoding="utf-8"))
+    assert receipt["status"] == "completed"
+    assert receipt["report"] == expected_report
+    assert receipt["manifest"]["candidate"] == candidate
+    assert ("trigger_binding" in receipt) is supplemental
+    binding["task_id"] = "TASK-9999"
+    if supplemental:
+        assert receipt["trigger_binding"]["task_id"] == "TASK-0087"
+    assert calls == 1
+    with pytest.raises(ValueError):
+        sdk_review.execute_review(root, prepared, output)
+    assert calls == 1
+    assert capsys.readouterr().out == ""
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"node": "design"},
+        {"task_id": "TASK-87"},
+        {"context_sha256": "bad-hash"},
+        {"authorization": "approved"},
+    ],
+)
+def test_shared_execution_rejects_invalid_trigger_markers_before_output_or_sdk(
+    repository: tuple[Path, str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    change: dict[str, str],
+) -> None:
+    root, _candidate, _reference = repository
+    output = root / "build/invalid-trigger"
+    binding = {
+        "node": "review_context_implementation",
+        "task_id": "TASK-0087",
+        "context_sha256": "a" * 64,
+        **change,
+    }
+
+    def forbidden(*_args: Any) -> dict[str, Any]:
+        raise AssertionError("Invalid marker must not dispatch the SDK")
+
+    monkeypatch.setattr(sdk_review, "_run_sdk", forbidden)
+    with pytest.raises(ValueError):
+        sdk_review.execute_review(root, request(repository), output, trigger_binding=binding)
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("failure", ["failed", "unknown", "invalid-report", "exception"])
+def test_shared_execution_preserves_failure_and_safe_exception_receipts(
+    repository: tuple[Path, str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
+) -> None:
+    root, _candidate, _reference = repository
+    output = root / f"build/shared-{failure}"
+    binding = {
+        "node": "review_context_implementation",
+        "task_id": "TASK-0087",
+        "context_sha256": "b" * 64,
+    }
+
+    def fake_sdk(*_args: Any) -> dict[str, Any]:
+        if failure == "exception":
+            raise RuntimeError("PRIVATE RUNTIME DETAIL MUST NOT APPEAR")
+        if failure == "invalid-report":
+            return runtime_result("PRIVATE MALFORMED MODEL CONTENT")
+        return runtime_result(status=failure)
+
+    monkeypatch.setattr(sdk_review, "_run_sdk", fake_sdk)
+    if failure in {"exception", "invalid-report"}:
+        with pytest.raises(ValueError) as raised:
+            sdk_review.execute_review(root, request(repository), output, trigger_binding=binding)
+        assert "PRIVATE" not in str(raised.value)
+    else:
+        assert (
+            sdk_review.execute_review(root, request(repository), output, trigger_binding=binding)[
+                "status"
+            ]
+            == failure
+        )
+    saved = json.loads((output / "receipt.json").read_text(encoding="utf-8"))
+    assert saved["status"] in {"failed", "unknown"}
+    assert saved["trigger_binding"] == binding
+    assert "report" not in saved
+    assert "PRIVATE" not in json.dumps(saved)
+
+
+def test_standalone_execution_reuses_the_shared_executor_and_existing_stdout(
+    repository: tuple[Path, str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    root, candidate, reference = repository
+    monkeypatch.chdir(root)
+    output = root / "build/shared-cli"
+    calls: list[tuple[Path, dict[str, Any], Path, dict[str, Any]]] = []
+
+    def fake_execute(
+        actual_root: Path, prepared: dict[str, Any], actual_output: Path, **kwargs: Any
+    ) -> dict[str, Any]:
+        calls.append((actual_root, prepared, actual_output, kwargs))
+        return {"status": "completed", "input_sha256": prepared["input_sha256"]}
+
+    monkeypatch.setattr(sdk_review, "execute_review", fake_execute)
+    assert sdk_review.main(arguments(repository, output, execute=True)) == 0
+    assert len(calls) == 1
+    assert calls[0][0] == root and calls[0][2] == output
+    assert calls[0][1]["candidate"] == candidate
+    assert calls[0][1]["reference"] == reference
+    assert calls[0][3] == {"global_instructions_sha256": None}
+    assert json.loads(capsys.readouterr().out) == {
+        "status": "completed",
+        "input_sha256": calls[0][1]["input_sha256"],
+    }
