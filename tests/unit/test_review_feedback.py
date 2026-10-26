@@ -231,6 +231,26 @@ def test_feedback_preserves_original_failures_without_claiming_truth(feedback: A
     }
 
 
+def test_source_blobs_and_unknowns_are_local_to_each_snapshot(feedback: Any) -> None:
+    snapshot = _snapshot(_review(), _review(2))
+    original = copy.deepcopy(snapshot)
+    first = feedback.build_feedback(snapshot)
+    assert snapshot == original
+
+    changed = copy.deepcopy(snapshot)
+    review_ref = changed["tasks"][0]["reviews"][0]["source_ref"]
+    for item in changed["sources"]:
+        item["git_blob"] = "2" * 40
+    changed["sources"] = [item for item in changed["sources"] if item["ref"] != review_ref]
+    second = feedback.build_feedback(changed)
+    reviews = second["tasks"][0]["reviews"]
+    assert reviews[0]["source"]["git_blob"] == "unknown"
+    assert reviews[1]["source"]["git_blob"] == "2" * 40
+    assert reviews[0]["context"]["source"]["git_blob"] == "2" * 40
+    assert reviews[0]["event_links"][0]["source"]["git_blob"] == "2" * 40
+    assert feedback.build_feedback(snapshot) == first
+
+
 def test_feedback_is_readback_without_model_scoring_or_permission_effect(feedback: Any) -> None:
     report = feedback.build_feedback(_snapshot())
     assert report["probability_status"] == "unestimated"

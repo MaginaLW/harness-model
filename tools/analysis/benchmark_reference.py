@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 import sys
+from collections import Counter
 from copy import deepcopy
 from datetime import date, datetime
 from pathlib import Path
@@ -44,7 +45,8 @@ def build_reference(document: object) -> dict[str, object]:
         raise ValueError("schema_version: expected 1.0")
     category = _text(data["task_category"], "task_category")
     models = [_text(value, "model_id") for value in _list(data["models"], "models")]
-    if len(models) < 2 or len(set(models)) != len(models):
+    model_ids = set(models)
+    if len(models) < 2 or len(model_ids) != len(models):
         raise ValueError("models: require at least two unique profiles")
     source_values = _list(data["sources"], "sources")
     if not source_values:
@@ -107,7 +109,7 @@ def build_reference(document: object) -> dict[str, object]:
                 item, {"model_id", "label", "configuration", "score"}, "observation"
             )
             model_id = _text(observation["model_id"], "model_id")
-            if model_id not in models or model_id in scores:
+            if model_id not in model_ids or model_id in scores:
                 raise ValueError("observations: require unique declared profile IDs")
             _text(observation["label"], "label")
             _text(observation["configuration"], "configuration")
@@ -132,14 +134,16 @@ def build_reference(document: object) -> dict[str, object]:
             else:
                 status = "available"
                 complete_scores = {model: cast(int | float, scores[model]) for model in models}
-                for model, score in complete_scores.items():
-                    better = sum(
-                        other > score if direction == "higher" else other < score
-                        for other in complete_scores.values()
-                    )
-                    tied = sum(other == score for other in complete_scores.values())
+                counts = Counter(complete_scores.values())
+                percentiles: dict[int | float, float] = {}
+                better = 0
+                for score in sorted(counts, reverse=direction == "higher"):
+                    tied = counts[score]
                     midrank = better + (tied + 1) / 2
-                    percentile = 100 * (len(models) - midrank) / (len(models) - 1)
+                    percentiles[score] = 100 * (len(models) - midrank) / (len(models) - 1)
+                    better += tied
+                for model, score in complete_scores.items():
+                    percentile = percentiles[score]
                     references[model] = round(percentile, 2)
                     components[model][source_id] = percentile
         source_reports.append(
