@@ -1,0 +1,159 @@
+{
+  "base_commit": "43f1b9d85f7d3600549d2a840ac9411bc2996be4",
+  "branch": "codex/agent-working-principles",
+  "classification_input_sha256": "39b7905d76e246accd40978a53dad365da78f99d060d53fba7b42c60860ae56a",
+  "content": {
+    "allowed_scope": [
+      "AGENTS.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完善 Agent 开发执行原则、计划与并行协作指引，保留现行治理边界",
+        "impact_scope": [
+          "AGENTS.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0092/approvals.json",
+        ".ai/tasks/TASK-0092/classification.json",
+        ".ai/tasks/TASK-0092/events.jsonl",
+        ".ai/tasks/TASK-0092/review-contexts/2ebce833c3d48fd6c5660b368e2ce73910ee77e7da6940c2176149b523d03298.json",
+        ".ai/tasks/TASK-0092/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0092/spec.md",
+        ".ai/tasks/TASK-0092/task.yaml",
+        "AGENTS.md"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0092/approvals.json"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0092/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0092/events.jsonl"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0092/review-contexts/2ebce833c3d48fd6c5660b368e2ce73910ee77e7da6940c2176149b523d03298.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0092/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 32,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0092/spec.md"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0092/task.yaml"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": "AGENTS.md"
+        }
+      ],
+      "totals": {
+        "additions": 222,
+        "deletions": 0,
+        "files": 8
+      }
+    },
+    "goal": "完善 Agent 开发执行原则、计划与并行协作指引，保留现行治理边界",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0092",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "2d09a0ec9578e1e6a2e9a08b7fb8cd0c8ae3068010fb61495c84d8f37f23ccf4",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "d0df518b608d68fa90e884eb843cc7aae72e2b9aa75f4741e35583ba116daf9c",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "b37bcc46492b74d24c0a4ff195e63f51fe800575930ced87dbe3cbf19aeb1f24",
+  "subject_commit": "c37790d7e22af19555ce608927cd39ed5a37fc6c",
+  "task_id": "TASK-0092"
+}
