@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -418,6 +419,134 @@ def test_pending_classification_rechecks_identity_and_risk_before_any_write(
     )
     assert expected in output
     assert {path: path.read_bytes() for path in paths} == before
+
+
+@pytest.mark.parametrize("outside_path", ["tracked.txt", ".ai/tasks/TASK-0999/task.yaml"])
+def test_reclassification_rejects_reverted_outside_task_history(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, outside_path: str
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    _prepare(
+        repository,
+        monkeypatch,
+        impact={"level": "medium"},
+        permission_requirements=["action_approval"],
+        verification_requirements={
+            "acceptance_required": True,
+            "integration_required": True,
+            "targeted_mutation_required": True,
+            "independent_verifier_required": True,
+        },
+    )
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    classification = read_task_json(
+        repository, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(classification, dict)
+    assert classification["effective_route"] == "REVIEW"
+    assert classification["effective_verification_level"] == "V2"
+    subject = classification["subject_commit"]
+
+    spec = resolve_task_path(repository, "TASK-0001", "spec.md")
+    spec.write_text(
+        spec.read_text(encoding="utf-8") + "\nSynthetic clarification.\n", encoding="utf-8"
+    )
+    assert (
+        main(
+            [
+                "escalate",
+                "TASK-0001",
+                "--to",
+                "REVIEW",
+                "--reason-code",
+                "spec_changed",
+                "--impact",
+                "Specification clarified",
+                "--next-step",
+                "Reclassify",
+                "--actor",
+                "classifier",
+            ]
+        )
+        == 0
+    )
+    assert (
+        main(
+            [
+                "resolve",
+                "TASK-0001",
+                "--condition",
+                "spec_changed",
+                "--evidence-ref",
+                "spec.md",
+                "--reason",
+                "Specification reassessed",
+                "--actor",
+                "reviewer",
+            ]
+        )
+        == 0
+    )
+    assert load_task_record(repository, "TASK-0001").task["current_state"] == "ESCALATED"
+
+    # Prove that the same resolution can recover when no outside history exists.
+    control = tmp_path / "control"
+    shutil.copytree(repository, control)
+    monkeypatch.chdir(control)
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+    recovered = read_task_json(
+        control, "TASK-0001", "classification.json", contract_name="classification"
+    )
+    assert isinstance(recovered, dict)
+    assert recovered["effective_route"] == "REVIEW"
+    assert recovered["effective_verification_level"] == "V2"
+    assert load_task_record(control, "TASK-0001").task["current_state"] == (
+        "WAITING_FOR_SPEC_REVIEW"
+    )
+    monkeypatch.chdir(repository)
+
+    def commit(path: str, message: str) -> str:
+        run_git(repository, "add", "-A", "--", path)
+        run_git(
+            repository,
+            "-c",
+            "user.name=AI Flow Tests",
+            "-c",
+            "user.email=aiflow@example.invalid",
+            "commit",
+            "-m",
+            message,
+        )
+        return run_git(repository, "rev-parse", "HEAD")
+
+    commit(".ai/tasks/TASK-0001", "Record task governance")
+    target = repository / outside_path
+    original = target.read_bytes() if target.exists() else None
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("synthetic outside change\n", encoding="utf-8")
+    changed = commit(outside_path, "Change outside path")
+    if original is None:
+        target.unlink()
+    else:
+        target.write_bytes(original)
+    restored = commit(outside_path, "Restore outside path")
+
+    assert run_git(repository, "diff", "--name-only", f"{changed}^..{changed}") == outside_path
+    assert run_git(repository, "diff", "--name-only", f"{changed}..{restored}") == outside_path
+    net_paths = run_git(repository, "diff", "--name-only", f"{subject}..{restored}").splitlines()
+    assert net_paths and all(path.startswith(".ai/tasks/TASK-0001/") for path in net_paths)
+    task_directory = resolve_task_path(repository, "TASK-0001")
+    before = {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
+    assert main(["classify", "TASK-0001", "--actor", "classifier"]) != 0
+    assert before == {
+        path.relative_to(task_directory): path.read_bytes()
+        for path in task_directory.rglob("*")
+        if path.is_file()
+    }
 
 
 def test_completed_pending_replay_allows_bound_recovery_and_only_cleans_marker(
