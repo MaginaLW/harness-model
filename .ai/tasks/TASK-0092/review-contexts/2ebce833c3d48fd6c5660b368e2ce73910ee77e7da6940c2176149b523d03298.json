@@ -1,0 +1,35 @@
+{
+  "base_commit": "43f1b9d85f7d3600549d2a840ac9411bc2996be4",
+  "branch": "codex/agent-working-principles",
+  "classification_input_sha256": "39b7905d76e246accd40978a53dad365da78f99d060d53fba7b42c60860ae56a",
+  "content": {
+    "allowed_scope": [
+      "AGENTS.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "完善 Agent 开发执行原则、计划与并行协作指引，保留现行治理边界",
+        "impact_scope": [
+          "AGENTS.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "完善 Agent 开发执行原则、计划与并行协作指引，保留现行治理边界",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "2ebce833c3d48fd6c5660b368e2ce73910ee77e7da6940c2176149b523d03298",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "b37bcc46492b74d24c0a4ff195e63f51fe800575930ced87dbe3cbf19aeb1f24",
+  "task_id": "TASK-0092"
+}

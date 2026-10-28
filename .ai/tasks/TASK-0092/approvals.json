@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-28T15:59:00Z",
+    "base_commit": "43f1b9d85f7d3600549d2a840ac9411bc2996be4",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "项目所有者明确批准任务规格",
+    "schema_version": "1.0",
+    "spec_sha256": "b37bcc46492b74d24c0a4ff195e63f51fe800575930ced87dbe3cbf19aeb1f24",
+    "subject_commit": "43f1b9d85f7d3600549d2a840ac9411bc2996be4",
+    "task_id": "TASK-0092"
+  }
+]
