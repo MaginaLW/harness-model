@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-更新于 2026-10-24。本节是当前状态的唯一摘要；逐窗口的历史记录见文末指针，旧窗口文字不作为当前指令。
+更新于 2026-10-28。本节是当前状态的唯一摘要；逐窗口的历史记录见文末指针，旧窗口文字不作为当前指令。
 
 **治理模式**：仓库维护模式，task-free 例外已启用；规则以 [AGENTS.md](../../AGENTS.md) 为唯一权威。CI 质量门禁与 `main` 分支保护不放松。
 
@@ -28,6 +28,8 @@
 - TASK-0085 已由 [PR #107](https://github.com/MaginaLW/harness-model/pull/107) 合并并关闭：[`close` 的本地合并核对](quickstart.md#记录已完成的合并)要求至少两个父提交，且至少一个非第一父包含 `base → subject` 链；普通或无关提交、空缺候选及不可用的必要 Git 事实均拒绝关闭。复用既有祖先检查，无新增模块、依赖、配置或权限，历史 `MERGED` 记录保留。独立设计／实现审核、完整原生 V1、Gate 与 required CI 均通过；完整测试为 3858 项，core/analysis 总覆盖率为 89%/97%，core 变更覆盖率为 100%，analysis 源码未变更。该检查不认证 PR、目标分支、远端完成状态或 required CI，发布时仍分别核对。
 
 - TASK-0086 已由 [PR #109](https://github.com/MaginaLW/harness-model/pull/109) 合并并关闭：交付可选、固定版本的[SDK 单次只读文档审核](../superpowers/specs/sdk-readonly-review.md#使用)，默认不导入或启动 SDK，显式执行才使用既有 ChatGPT 登录和自有运行时。独立设计／实现审核、完整原生 V1、Gate 与 required CI 均通过；3959 项测试通过，core/analysis 总覆盖率为 89%/97%，core 变更覆盖率为 95.7%。一次真实订阅审核返回有效 `APPROVE`、零发现，原报告已发布到该 PR，并经实际 connector 与既有反馈读取器回读。原文档候选与实现 head 不同的提示保留；被审文档 blob 相同不扩大审核范围。原失败保留，不形成统计样本或效果证明。
+
+- TASK-0087 已由 [PR #111](https://github.com/MaginaLW/harness-model/pull/111) 合并，并由 [PR #112](https://github.com/MaginaLW/harness-model/pull/112) 发布关闭记录：交付[正式实现审核上下文后的可选 SDK 补充节点](../superpowers/specs/sdk-readonly-review.md#可选节点生成正式实现审核上下文之后)。节点默认关闭，本地模拟与原生验证通过，尚未真实触发；实际调用须另选具体任务、输入与调用范围。补充结果不创建正式审核或批准，也不形成统计样本。
 
 **两条新路线的入口**：[应用自管 SDK 与完整引擎跨仓初始化方案](sdk-and-engine-plan.md)保留具体步骤、材料和验收要求。单次只读客户端及一次真实工程闭环已交付；后续按实际文档需求显式调用，不自动安排新审核。跨仓初始化仍未启动；真实统计评分、自动审核安排和现有 Desktop 附着继续暂停，`T0/T1` 未设置。
 
