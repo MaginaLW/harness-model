@@ -10,7 +10,9 @@
 
 现有未声明 profile 的 Python Policy 继续按原版本解析。禁止在读取时向其原始文档注入默认字段后再计算摘要；已有 canonical Policy digest、分类、批准与 evidence 的解释和新鲜度不变。Node profile 的名称、修订及各等级能力作为目标 Policy 的规范内容纳入 Policy 摘要。实际支持的 profile 与证据版本由引擎明确识别；提高能力或调整合同需版本化、重新审阅并使受影响证据失效。
 
-旧 CLI 使用目标仓的 Schema，不能仅靠新增 evidence 版本号声称旧程序一定拒绝。兼容门候选是为新 Node 合同使用目标专属的 Policy 新 major；现有引擎的 `policy.py` 只支持 major 1/2，但先读取 `verification-levels.yaml` 的 `levels`，再检查 major；若升级后的 Schema 允许新合同省略 `levels`，旧 loader 可能先抛出未捕获的 `KeyError`，不能声称所有新格式都能以明确的版本错误被干净拒绝。新目标格式和兼容门必须经实际旧程序验证，新引擎才可显式支持。不能修改源仓当前 active Policy 或用旧版本伪装新 profile。真实启用前须以实际旧 wheel 配合升级后的目标 Schema、Node Policy、任务及 evidence 分别调用 classify、verify、approve 和 gate，验证错误可控且均在产生执行或批准前拒绝，并覆盖恢复路径及其他 Policy 消费入口。现有 `approve` 遇到已有的 approval recovery marker 时会在加载 Policy 前恢复写入；本地合成测试已复现切换 Policy 后恢复旧批准，因而仅靠 Policy major 无法保护此路径。真实启用前须为旧任务的未完成 marker 制定受控交接或迁移，并确保不受支持的旧程序不再执行；具体方案及旧 wheel 反例尚待验证。若某条旧路径不经过兼容门，先解决该边界，不能只凭格式推断安全。目标配置损坏或被恶意更换时不承诺可抵御任意旧程序的绕过；该门不是发布者认证。
+旧 CLI 使用目标仓的 Schema，不能仅靠新增 evidence 版本号声称旧程序一定拒绝。兼容门候选是为新 Node 合同使用目标专属的 Policy 新 major；现有引擎的 `policy.py` 只支持 major 1/2，但先读取 `verification-levels.yaml` 的 `levels`，再检查 major；若升级后的 Schema 允许新合同省略 `levels`，旧 loader 可能先抛出未捕获的 `KeyError`，不能声称所有新格式都能以明确的版本错误被干净拒绝。新目标格式和兼容门必须经实际旧程序验证，新引擎才可显式支持。不能修改源仓当前 active Policy 或用旧版本伪装新 profile。真实启用前须以实际旧 wheel 配合升级后的目标 Schema、Node Policy、任务及 evidence 分别调用 classify、verify、approve 和 gate，验证错误可控且均在产生执行或批准前拒绝，并覆盖恢复路径及其他 Policy 消费入口。现有 `approve` 遇到已有的 approval recovery marker 时会在加载 Policy 前恢复写入；本地合成测试已复现切换 Policy 后恢复旧批准，因而仅靠 Policy major 无法保护此路径。真实启用前须为旧任务的未完成 marker 制定受控交接或迁移，并确保不受支持的旧程序不再执行；具体迁移方案和真实目标验收尚未完成。若某条旧路径不经过兼容门，先解决该边界，不能只凭格式推断安全。目标配置损坏或被恶意更换时不承诺可抵御任意旧程序的绕过；该门不是发布者认证。
+
+基线提交 `4b3420e` 离线构建的旧 CLI wheel 已在隔离虚拟环境、合成 Schema 和任务中验证；它是本地构建件，不是历史发行件。对于所测的两种 3.0 格式，省略 `levels` 时 classify、verify、approve、gate 和分类恢复均因未捕获 `KeyError` 退出；保留旧式 `levels` 时这些入口均以不支持 Policy 版本拒绝。两种格式下，已有的批准恢复 marker 均先于 Policy 检查完成旧批准。测试不覆盖所有 Schema、旧发行件或目标迁移状态，不能代替真实启用前的兼容性和迁移验收。
 
 ## 风险等级与检查集
 
