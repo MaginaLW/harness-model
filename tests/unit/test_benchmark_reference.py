@@ -10,6 +10,7 @@ import os
 import socket
 import subprocess
 import sys
+from itertools import product
 from pathlib import Path
 from typing import Any
 
@@ -116,6 +117,24 @@ def test_median_is_not_a_mean_and_raw_units_do_not_set_source_weight(reference: 
 def test_an_entirely_tied_panel_has_no_preferred_candidate(reference: Any, direction: str) -> None:
     report = reference.build_reference(_document(_source(scores=(7, 7, 7, 7), direction=direction)))
     assert _scores(report) == dict.fromkeys(("a", "b", "c", "d"), 50.0)
+
+
+@pytest.mark.parametrize("direction", ["higher", "lower"])
+def test_rank_groups_match_pairwise_midrank_for_every_small_tied_panel(
+    reference: Any, direction: str
+) -> None:
+    for scores in product((-1, 0, 1), repeat=4):
+        document = _document(_source(scores=scores, direction=direction))
+        report = reference.build_reference(document)
+        expected = {}
+        for model, score in zip(document["models"], scores, strict=True):
+            better = sum(
+                other > score if direction == "higher" else other < score for other in scores
+            )
+            midrank = better + (scores.count(score) + 1) / 2
+            expected[model] = round(100 * (len(scores) - midrank) / (len(scores) - 1), 2)
+        assert _scores(report) == expected
+        assert report["sources"][0]["reference_scores"] == expected
 
 
 def test_two_candidate_panel_and_zero_or_negative_raw_scores(reference: Any) -> None:

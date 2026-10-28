@@ -9,7 +9,7 @@ allowed_scope:
 base_commit: f845b436bdba52cdc8d27ebec2c8b78faecca988
 branch: codex/sdk-context-trigger
 created_at: '2026-10-24T06:37:21Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -75,6 +75,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-24T06:39:50Z'
 subject_commit: df4bdb7391e54d06d1eeb2ec28ac738b61765032
 task_id: TASK-0087
-updated_at: '2026-10-24T07:23:21Z'
+updated_at: '2026-10-24T12:11:57Z'
 worktree_dirty: false
 worktree_dirty_paths: []

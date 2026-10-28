@@ -14,16 +14,6 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
-def _source(snapshot: dict[str, Any], path: str, locator: str) -> dict[str, str]:
-    blobs = {source["ref"]: source["git_blob"] for source in snapshot["sources"]}
-    return {
-        "source_commit": snapshot["source_commit"],
-        "path": path,
-        "git_blob": blobs.get(path, "unknown"),
-        "locator": locator,
-    }
-
-
 def _histories(
     reviews: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -129,6 +119,16 @@ def build_feedback(
         from benchmark_reference import build_reference
 
         reference = build_reference(reference_input)
+    blobs = {source["ref"]: source["git_blob"] for source in snapshot["sources"]}
+
+    def source(path: str, locator: str) -> dict[str, str]:
+        return {
+            "source_commit": snapshot["source_commit"],
+            "path": path,
+            "git_blob": blobs.get(path, "unknown"),
+            "locator": locator,
+        }
+
     rows: list[dict[str, Any]] = []
     for task in snapshot["tasks"]:
         if selected is not None and task["task_id"] not in selected:
@@ -137,21 +137,18 @@ def build_feedback(
         for review in reviews:
             if "findings" not in review:
                 raise LedgerDataError("feedback: finding projection is missing")
-            review["source"] = _source(
-                snapshot,
+            review["source"] = source(
                 review["source_ref"],
                 f"review_id={review['review_id']},revision={review['revision']}",
             )
             context = review["context"]
             if isinstance(context, dict):
-                context["source"] = _source(
-                    snapshot,
+                context["source"] = source(
                     context["source_ref"],
                     f"context_sha256={review['context_sha256']}",
                 )
             for link in review["event_links"]:
-                link["source"] = _source(
-                    snapshot,
+                link["source"] = source(
                     f".ai/tasks/{task['task_id']}/events.jsonl",
                     f"task_id={task['task_id']},sequence={link['sequence']}",
                 )
