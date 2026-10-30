@@ -1,0 +1,110 @@
+{
+  "base_commit": "c854fb473ff324e6a297ae239a05e1ddfe5e94c6",
+  "branch": "codex/approved-action-hook",
+  "classification_input_sha256": "8099f40bb27e68254dd867a56f0a5b5a7ee90831f4df20bf782a766a3e947850",
+  "content": {
+    "allowed_scope": [
+      "docs/operations/hooks.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Document owner-authorized push and merge exception without relaxing existing task restrictions or quality gates",
+        "impact_scope": [
+          "docs/operations/hooks.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "docs/operations/hooks.md"
+      ],
+      "files": [
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/hooks.md"
+        }
+      ],
+      "totals": {
+        "additions": 3,
+        "deletions": 1,
+        "files": 1
+      }
+    },
+    "goal": "Document owner-authorized push and merge exception without relaxing existing task restrictions or quality gates",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0117",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "118da7b0fe7a6b23a6e89ef030069cb4cdc46a9df3007b40d190750dfa432120",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "22db0df6262ffd87df6a6c61ba44de6a34b73dbf8dec695ebf60e4f9ced82db1",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "6d38e8d6e161277617a0a9f33974dfad4ca89d6e6a61646d721bc4b3714d47a2",
+  "subject_commit": "fd7c8f239c5e1f2b8e0f4c59f2be8e07be941faa",
+  "task_id": "TASK-0117"
+}

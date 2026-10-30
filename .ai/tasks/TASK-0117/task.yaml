@@ -1,0 +1,73 @@
+allowed_scope:
+- docs/operations/hooks.md
+base_commit: c854fb473ff324e6a297ae239a05e1ddfe5e94c6
+branch: codex/approved-action-hook
+created_at: '2026-10-30T16:40:39Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: low
+    interaction_scope: local
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - push_branch_to_public_repository
+  - open_public_pull_request
+  - merge_pull_request
+  goal: Document owner-authorized push and merge exception without relaxing existing
+    task restrictions or quality gates
+  impact:
+    level: high
+  impact_categories:
+  - documentation
+  - external_action
+  impact_scope:
+  - docs/operations/hooks.md
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0117
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 6d38e8d6e161277617a0a9f33974dfad4ca89d6e6a61646d721bc4b3714d47a2
+goal: Document owner-authorized push and merge exception without relaxing existing
+  task restrictions or quality gates
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-30T16:41:30Z'
+subject_commit: fd7c8f239c5e1f2b8e0f4c59f2be8e07be941faa
+task_id: TASK-0117
+updated_at: '2026-10-30T17:04:38Z'
+worktree_dirty: false
+worktree_dirty_paths: []
