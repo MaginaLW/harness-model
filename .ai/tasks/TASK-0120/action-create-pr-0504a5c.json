@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "2f7d76f437d85e9f1122646cb2481b983a104a8c0ba6ca631cded8be682fa6f5",
+  "action_type": "github_create_pull_request",
+  "target": "repository=MaginaLW/harness-model;base=main;head=codex/privacy-test-first",
+  "parameter_summary": "title=Protect local paths in new task evidence;head_sha=0504a5c258d09d66a3b874d04b921d32bf6e8762;body_sha256=f9e452cb37c0001e25894637e1bbde1f5b3acfc45a31afc4fd8b1176def30004;draft=false",
+  "subject_commit": "669364e00e4b045760e03ccdfecdde25b7a47f11",
+  "conditions": [
+    "Owner explicitly authorized conditional public delivery of this bounded privacy fix.",
+    "Before launch require origin main 0a9892f343ccadefa362230815878c9550681c88 and remote head 0504a5c258d09d66a3b874d04b921d32bf6e8762; no existing PR for this head.",
+    "Before launch require TASK-0120 current reviews, evidence and Gate; require the exact title and body hash.",
+    "Create one non-draft PR only, with no labels, reviewers, projects, milestones, release or settings changes.",
+    "Launch, failure or interruption consumes this single-use authorization; verify an uncertain result read-only before any separate decision.",
+    "After creation verify the exact repository, base, head ref and head commit; this action does not authorize merge."
+  ],
+  "expires_at": "2026-10-30T20:42:13Z",
+  "single_use": true
+}
