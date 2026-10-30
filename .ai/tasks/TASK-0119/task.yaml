@@ -1,0 +1,73 @@
+allowed_scope:
+- AGENTS.md
+base_commit: 467b7fa95b0cb0c4e955e9a8d09b911770235d0e
+branch: codex/autonomy-current-main
+created_at: '2026-10-30T17:21:16Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: low
+    interaction_scope: local
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - push_branch_to_public_repository
+  - open_public_pull_request
+  - merge_pull_request
+  goal: Deliver owner-authorized agent autonomy rules while preserving existing task
+    prohibitions and quality gates
+  impact:
+    level: high
+  impact_categories:
+  - documentation
+  - external_action
+  impact_scope:
+  - AGENTS.md
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0119
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033
+goal: Deliver owner-authorized agent autonomy rules while preserving existing task
+  prohibitions and quality gates
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-30T17:21:37Z'
+subject_commit: 2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a
+task_id: TASK-0119
+updated_at: '2026-10-30T17:41:41Z'
+worktree_dirty: false
+worktree_dirty_paths: []

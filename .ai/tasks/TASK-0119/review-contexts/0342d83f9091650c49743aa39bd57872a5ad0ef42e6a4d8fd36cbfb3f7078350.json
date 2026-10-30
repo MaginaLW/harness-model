@@ -1,0 +1,35 @@
+{
+  "base_commit": "467b7fa95b0cb0c4e955e9a8d09b911770235d0e",
+  "branch": "codex/autonomy-current-main",
+  "classification_input_sha256": "b4be4e16cdfafd27b2536a7ff4e65608c81857a31e4dba2d3bc03b67f950a47f",
+  "content": {
+    "allowed_scope": [
+      "AGENTS.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Deliver owner-authorized agent autonomy rules while preserving existing task prohibitions and quality gates",
+        "impact_scope": [
+          "AGENTS.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Deliver owner-authorized agent autonomy rules while preserving existing task prohibitions and quality gates",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "0342d83f9091650c49743aa39bd57872a5ad0ef42e6a4d8fd36cbfb3f7078350",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033",
+  "task_id": "TASK-0119"
+}
