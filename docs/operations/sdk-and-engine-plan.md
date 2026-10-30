@@ -83,13 +83,48 @@
 ### 当前能力与真实缺口
 
 完整克隆内的根目录、子目录、linked worktree 定位及仓库级 Schema 作用域已经具备；
-TASK-0083 已交付显式风险事实 `facts` CLI，不再作为缺口。当前包仅分发 Python 代码，
-初始化、资源分发、新仓身份和目标 CI 适配仍未提供，见[接入边界](adoption.md#完整引擎的跨仓库边界)。
+TASK-0083 已交付显式风险事实 `facts` CLI，不再作为缺口。资源包候选是否可用以实际源码
+和所装 wheel 为准；初始化、目标 Policy 采用、新仓身份及目标验证和 CI 适配仍未交付，
+见[接入边界](adoption.md#完整引擎的跨仓库边界)。
 项目所有者已选择 agent-bridge 为完整引擎目标；目标选择不代表接入、目标验证或 V2 已交付。
 
 目标 CI 适配涉及核心验证代码，不只是修改 YAML：当前[验证器](../../src/aiflow/verification.py)
 约束了本仓覆盖率源 `aiflow`、`tools/analysis`、`tools/ci/check_coverage.py`、部分阈值与
 命令白名单。只复制 `.ai` 不能让完整验证在外仓成立，也不能承诺支持任意语言和 CI。
+
+### 资源包候选的读取与构建
+
+以下候选用法依赖对应源码纳入实际构建，不表示发行、目标接入或完整引擎验收已完成。
+候选从本仓 `.ai` 固定清单构建 20 项资源：15 个 Schema、四份待目标审阅的 Policy 种子和一份
+规格模板。普通 wheel 将资源与 `manifest.json` 放入 `aiflow/_bundled_resources`；源码包携带
+构建所需的原始资源，可再构建普通 wheel。资源使用 UTF-8 和 LF 规范字节；构建将 CRLF 转为 LF，
+拒绝裸 CR 和无效 UTF-8，不修改源文件。
+
+从安装了该普通 wheel 的环境，可用以下入口读取完整资源包：
+
+```python
+from importlib.resources import files
+from aiflow.resource_bundle import read_bundle
+
+manifest, resources = read_bundle(files("aiflow").joinpath("_bundled_resources"))
+```
+
+`resources` 的键为包内相对路径，值为字节。读取会核对固定清单、版本、文件长度和 SHA-256；
+缺项、多余项、内容不符或不兼容时拒绝。manifest 上限为 64 KiB，单项资源上限为 1 MiB，资源总量
+上限为 4 MiB。摘要检查包内一致性，不认证发行者。可编辑安装不提供 wheel 内的资源目录；
+需验证分发内容时应使用普通 wheel。运行时仍从目标仓自己的 `.ai` 读取 Schema 和 Policy，
+包升级不会自动替换目标文件；Policy 种子须按目标规则单独审阅并决定是否采用。
+
+在可信源码和已准备构建依赖的环境中，使用新建空输出目录构建；下面的路径是占位符：
+
+```powershell
+python -m build --no-isolation --wheel --outdir "<EMPTY_WHEEL_OUTPUT>"
+python -m build --no-isolation --sdist --outdir "<EMPTY_SDIST_OUTPUT>"
+```
+
+构建后端对其负责的资源、源码和部分输出路径检查链接、冲突及现存内容，但这些检查不证明
+检查与使用之间没有竞态，也不约束所有前端的最终输出行为。源码、工具链与输出位置须可信；
+重试时使用另一个新输出目录，不覆盖或清理来源不明的材料。
 
 ### 最小分阶段交付
 
