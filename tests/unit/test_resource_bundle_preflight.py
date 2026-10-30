@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import importlib
-import importlib.util
 import io
 import json
 import stat
@@ -41,12 +40,17 @@ PATHS = (
     | {"templates/spec.md"}
 )
 
-# An absent feature is the only skip condition. Broken imports of an existing
-# module must fail so dependency and initialization errors cannot be hidden.
-pytestmark = pytest.mark.skipif(
-    importlib.util.find_spec("aiflow.resource_bundle") is None,
-    reason="resource bundle is not implemented on this baseline",
-)
+# The checkout, not an unrelated installed package, determines availability.
+_resource_source = ROOT / "src/aiflow/resource_bundle.py"
+try:
+    _resource_source.lstat()
+except FileNotFoundError:
+    pytestmark = pytest.mark.skip(reason="resource bundle is not implemented on this baseline")
+else:
+    _resource_module = importlib.import_module("aiflow.resource_bundle")
+    _module_path = getattr(_resource_module, "__file__", None)
+    if _module_path is None or Path(_module_path).resolve() != _resource_source.resolve():
+        raise ImportError("resource bundle imported outside this checkout")
 
 
 @pytest.fixture
