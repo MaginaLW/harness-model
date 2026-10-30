@@ -1,0 +1,110 @@
+{
+  "base_commit": "467b7fa95b0cb0c4e955e9a8d09b911770235d0e",
+  "branch": "codex/autonomy-current-main",
+  "classification_input_sha256": "b4be4e16cdfafd27b2536a7ff4e65608c81857a31e4dba2d3bc03b67f950a47f",
+  "content": {
+    "allowed_scope": [
+      "AGENTS.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Deliver owner-authorized agent autonomy rules while preserving existing task prohibitions and quality gates",
+        "impact_scope": [
+          "AGENTS.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "AGENTS.md"
+      ],
+      "files": [
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 4,
+          "path": "AGENTS.md"
+        }
+      ],
+      "totals": {
+        "additions": 8,
+        "deletions": 4,
+        "files": 1
+      }
+    },
+    "goal": "Deliver owner-authorized agent autonomy rules while preserving existing task prohibitions and quality gates",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0119",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "57209ec9a3e63c527a5a20945a063beb6d00be4ef7ff22085f7e0aab49794f5c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "2d7d6fab4463b4bac6f12f189eb7b98a3edf6a4178cb8d3cfdb52fc7ccc49a5a",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033",
+  "subject_commit": "2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a",
+  "task_id": "TASK-0119"
+}
