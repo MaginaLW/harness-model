@@ -8,6 +8,7 @@ import io
 import json
 import stat
 import zipfile
+from importlib.resources.abc import Traversable
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -94,8 +95,7 @@ def test_bundle_rejects_altered_missing_or_extra_resource(bundle, corruption: st
         module.read_bundle(root)
 
 
-def test_bundle_rejects_zip_symlink_even_when_bytes_match(bundle) -> None:
-    module, _, manifest, files = bundle
+def _zip_bundle(manifest: dict, files: dict[str, bytes], member_type: int) -> bytes:
     output = io.BytesIO()
     with zipfile.ZipFile(output, "w") as archive:
         archive.writestr("bundle/manifest.json", json.dumps(manifest))
@@ -103,15 +103,75 @@ def test_bundle_rejects_zip_symlink_even_when_bytes_match(bundle) -> None:
             if path == "templates/spec.md":
                 entry = zipfile.ZipInfo(f"bundle/{path}")
                 entry.create_system = 3
-                entry.external_attr = (stat.S_IFLNK | 0o777) << 16
+                entry.external_attr = (member_type | 0o600) << 16
                 archive.writestr(entry, data)
             else:
                 archive.writestr(f"bundle/{path}", data)
-    with zipfile.ZipFile(io.BytesIO(output.getvalue())) as archive:
+    return output.getvalue()
+
+
+def test_bundle_rejects_zip_symlink_even_when_bytes_match(bundle) -> None:
+    module, _, manifest, files = bundle
+    with zipfile.ZipFile(io.BytesIO(_zip_bundle(manifest, files, stat.S_IFLNK))) as archive:
         entry = archive.getinfo("bundle/templates/spec.md")
         assert stat.S_ISLNK(entry.external_attr >> 16)
         with pytest.raises(ValueError):
             module.read_bundle(zipfile.Path(archive, "bundle/"))
+
+
+@pytest.mark.parametrize(
+    "member_type",
+    [stat.S_IFIFO, stat.S_IFCHR, stat.S_IFBLK, stat.S_IFSOCK],
+    ids=["fifo", "character-device", "block-device", "socket"],
+)
+def test_bundle_rejects_explicit_special_zip_member(bundle, member_type: int) -> None:
+    module, _, manifest, files = bundle
+    with zipfile.ZipFile(io.BytesIO(_zip_bundle(manifest, files, member_type))) as archive:
+        entry = archive.getinfo("bundle/templates/spec.md")
+        assert stat.S_IFMT(entry.external_attr >> 16) == member_type
+        with pytest.raises(ValueError):
+            module.read_bundle(zipfile.Path(archive, "bundle/"))
+
+
+def test_bundle_accepts_zip_member_without_file_type_metadata(bundle) -> None:
+    module, _, manifest, files = bundle
+    with zipfile.ZipFile(io.BytesIO(_zip_bundle(manifest, files, 0))) as archive:
+        entry = archive.getinfo("bundle/templates/spec.md")
+        assert stat.S_IFMT(entry.external_attr >> 16) == 0
+        assert module.read_bundle(zipfile.Path(archive, "bundle/")) == (manifest, files)
+
+
+def test_bundle_rejects_unknown_traversable_before_access() -> None:
+    module = importlib.import_module("aiflow.resource_bundle")
+    accesses: list[str] = []
+
+    def unexpected(operation: str):
+        accesses.append(operation)
+        raise AssertionError(f"unsupported Traversable was accessed: {operation}")
+
+    class UnknownTraversable(Traversable):
+        @property
+        def name(self) -> str:
+            return unexpected("name")
+
+        def iterdir(self):
+            return unexpected("iterdir")
+
+        def is_dir(self) -> bool:
+            return unexpected("is_dir")
+
+        def is_file(self) -> bool:
+            return unexpected("is_file")
+
+        def joinpath(self, *descendants: str):
+            return unexpected("joinpath")
+
+        def open(self, mode: str = "r", *args, **kwargs):
+            return unexpected("open")
+
+    with pytest.raises(ValueError):
+        module.read_bundle(UnknownTraversable())
+    assert accesses == []
 
 
 def test_source_rejects_file_with_unknown_link_count(monkeypatch: pytest.MonkeyPatch) -> None:
