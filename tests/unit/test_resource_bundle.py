@@ -12,6 +12,7 @@ import subprocess
 import sys
 import warnings
 import zipfile
+from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import Path
 
@@ -261,15 +262,15 @@ def test_invalid_policy_seed_is_rejected(source: Path, bad: bytes, message: str)
 def test_unreadable_source_resource_is_reported(
     source: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    original = Path.read_bytes
+    original = Path.open
     denied = source / ".ai/templates/spec.md"
 
-    def read_bytes(path: Path) -> bytes:
+    def open_file(path: Path, *args: object, **kwargs: object) -> object:
         if path == denied:
             raise PermissionError("synthetic access refusal")
-        return original(path)
+        return original(path, *args, **kwargs)
 
-    monkeypatch.setattr(Path, "read_bytes", read_bytes)
+    monkeypatch.setattr(Path, "open", open_file)
     with pytest.raises(ValueError, match="cannot read resource source"):
         build_bundle(source)
 
@@ -327,6 +328,140 @@ def test_bundle_reader_supports_zip_traversable(source: Path, tmp_path: Path) ->
             archive.writestr(f"bundle/{path}", data)
     with zipfile.ZipFile(archive_path) as archive:
         assert read_bundle(zipfile.Path(archive, "bundle/")) == (manifest, files)
+
+
+@contextmanager
+def bounded_bundle(tmp_path: Path, storage: str, manifest: bytes, files: dict[str, bytes]):
+    if storage == "filesystem":
+        root = tmp_path / "bundle"
+        root.mkdir()
+        (root / "manifest.json").write_bytes(manifest)
+        for path, data in files.items():
+            target = root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+        yield root
+    else:
+        output = io.BytesIO()
+        with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("bundle/manifest.json", manifest)
+            for path, data in files.items():
+                archive.writestr(f"bundle/{path}", data)
+        with zipfile.ZipFile(io.BytesIO(output.getvalue())) as archive:
+            yield zipfile.Path(archive, "bundle/")
+
+
+def track_bundle_reads(monkeypatch: pytest.MonkeyPatch, storage: str, limits: dict[str, int]):
+    path_type = Path if storage == "filesystem" else zipfile.Path
+    original_open = path_type.open
+    counts: dict[str, int] = {}
+
+    def guarded_open(path, *args, **kwargs):
+        stream = original_open(path, *args, **kwargs)
+        depth = 0
+
+        def wrap(method_name):
+            original_read = getattr(stream, method_name)
+
+            def guarded_read(*read_args, **read_kwargs):
+                nonlocal depth
+                depth += 1
+                try:
+                    result = original_read(*read_args, **read_kwargs)
+                finally:
+                    depth -= 1
+                if depth == 0:
+                    size = result if method_name == "readinto" else len(result)
+                    counts[path.name] = counts.get(path.name, 0) + size
+                    assert counts[path.name] <= limits[path.name] + 1
+                    total = sum(count for name, count in counts.items() if name != "manifest.json")
+                    assert total <= resource_bundle.MAX_BUNDLE_BYTES + 1
+                return result
+
+            monkeypatch.setattr(stream, method_name, guarded_read)
+
+        for method_name in ("read", "read1", "readinto"):
+            if hasattr(stream, method_name):
+                wrap(method_name)
+        return stream
+
+    monkeypatch.setattr(path_type, "open", guarded_open)
+
+
+@pytest.mark.parametrize("storage", ["filesystem", "zip"])
+def test_manifest_size_is_limited(
+    source: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, storage: str
+) -> None:
+    _, files = build_bundle(source)
+    monkeypatch.setattr(resource_bundle, "MAX_MANIFEST_BYTES", 64)
+    with bounded_bundle(tmp_path, storage, b" " * 256, files) as root:
+        track_bundle_reads(monkeypatch, storage, {"manifest.json": 64})
+        with pytest.raises(ValueError):
+            read_bundle(root)
+
+
+@pytest.mark.parametrize("storage", ["filesystem", "zip"])
+@pytest.mark.parametrize("overflow", ["resource", "total"])
+def test_declared_limits_reject_without_unbounded_reads(
+    source: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, storage: str, overflow: str
+) -> None:
+    manifest, files = build_bundle(source)
+    if overflow == "resource":
+        monkeypatch.setattr(resource_bundle, "MAX_RESOURCE_BYTES", max(map(len, files.values())))
+        manifest["files"][0]["size"] = resource_bundle.MAX_RESOURCE_BYTES + 1
+        files[manifest["files"][0]["path"]] = b"x" * (resource_bundle.MAX_RESOURCE_BYTES + 100)
+    else:
+        monkeypatch.setattr(resource_bundle, "MAX_BUNDLE_BYTES", sum(map(len, files.values())) // 2)
+    manifest_bytes = json.dumps(manifest).encode()
+    with bounded_bundle(tmp_path, storage, manifest_bytes, files) as root:
+        limits = {Path(path).name: resource_bundle.MAX_RESOURCE_BYTES for path in files}
+        limits["manifest.json"] = resource_bundle.MAX_MANIFEST_BYTES
+        track_bundle_reads(monkeypatch, storage, limits)
+        with pytest.raises(ValueError):
+            read_bundle(root)
+
+
+@pytest.mark.parametrize("storage", ["filesystem", "zip"])
+def test_resource_read_is_limited_by_resource_cap(
+    source: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, storage: str
+) -> None:
+    manifest, files = build_bundle(source)
+    target = "templates/spec.md"
+    monkeypatch.setattr(resource_bundle, "MAX_RESOURCE_BYTES", max(map(len, files.values())))
+    files[target] = b"x" * (resource_bundle.MAX_RESOURCE_BYTES + 100)
+    with bounded_bundle(tmp_path, storage, json.dumps(manifest).encode(), files) as root:
+        limits = {Path(path).name: resource_bundle.MAX_RESOURCE_BYTES for path in files}
+        limits["manifest.json"] = resource_bundle.MAX_MANIFEST_BYTES
+        track_bundle_reads(monkeypatch, storage, limits)
+        with pytest.raises(ValueError):
+            read_bundle(root)
+
+
+@pytest.mark.parametrize("content", [b"x" * 129, b"\r\n" * 129])
+def test_builder_limits_raw_and_normalized_resources(
+    source: Path, monkeypatch: pytest.MonkeyPatch, content: bytes
+) -> None:
+    (source / "pyproject.toml").write_text('[project]\nversion = "0.2.0"\n', encoding="utf-8")
+    (source / "src/aiflow/__init__.py").write_text('__version__ = "0.2.0"\n', encoding="utf-8")
+    for relative in PATHS:
+        path = source / ".ai" / relative
+        if relative.startswith("policy/"):
+            data = (
+                'schema_version: "1.0"\npolicy_version: "2.5.0"\n'
+                f"policy_kind: {resource_bundle.POLICIES[path.name]}\n"
+            ).encode()
+        else:
+            data = b"{}\n"
+        path.write_bytes(data)
+    monkeypatch.setattr(resource_bundle, "MAX_RESOURCE_BYTES", 128)
+    monkeypatch.setattr(resource_bundle, "MAX_BUNDLE_BYTES", 4096)
+    template = source / ".ai/templates/spec.md"
+    for valid in (b"x" * 128, b"\r\n" * 128):
+        template.write_bytes(valid)
+        assert len(build_bundle(source)[1]["templates/spec.md"]) == 128
+    template.write_bytes(content)
+    with pytest.raises(ValueError, match="size limit"):
+        build_bundle(source)
 
 
 @pytest.mark.parametrize("conflict", ["resource", "manifest", "directory", "file_directory"])
