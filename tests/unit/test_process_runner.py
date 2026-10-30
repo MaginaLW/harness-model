@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import os
 import sys
 import time
 from dataclasses import replace
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
+from types import SimpleNamespace
 
 import pytest
 
@@ -252,3 +254,206 @@ def test_execution_keeps_default_command_summary(tmp_path: Path) -> None:
     assert result.returncode == 0
     assert result.conclusion == "passed"
     assert "ordinary-check" in result.command_summary
+
+
+def test_runner_hides_known_paths_in_summary_without_changing_execution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = tmp_path / "repo"
+    repository.mkdir()
+    run_dir = tmp_path / "logs" / "run"
+    item = replace(
+        check(
+            (
+                sys.executable,
+                "-c",
+                "print('ordinary-check')",
+                f"--root={repository / 'config.toml'}",
+                f"--cov-report=xml:{run_dir / 'coverage.xml'}",
+                "--run-dir",
+                str(run_dir),
+                "--token=top-secret",
+            ),
+            environment={"COVERAGE_FILE": str(run_dir / ".coverage")},
+        ),
+        cwd=repository,
+    )
+    selected = execution(item)
+    received: dict[str, object] = {}
+
+    class SuccessfulProcess:
+        returncode = 0
+
+        def communicate(self, *, timeout: int) -> tuple[str, str]:
+            assert timeout == item.timeout_seconds
+            return "ordinary-check\n", ""
+
+    def launch(argv: list[str], **kwargs: object) -> SuccessfulProcess:
+        received.update(kwargs)
+        received["argv"] = argv
+        return SuccessfulProcess()
+
+    monkeypatch.setattr(process_runner.subprocess, "Popen", launch)
+    result = run_execution(
+        selected,
+        {item.check_id: item},
+        run_dir=run_dir,
+        allowed_run_root=tmp_path / "logs",
+        repository_root=repository,
+        sequence=1,
+        sensitive_values=["top-secret"],
+    )[0]
+
+    assert received["argv"] == list(selected.argv)
+    assert received["shell"] is False
+    environment = received["env"]
+    assert isinstance(environment, dict)
+    assert set(environment) <= {"PATH", "SystemRoot", "COVERAGE_FILE"}
+    assert "PATH" in environment
+    assert {entry for entry in os.defpath.split(os.pathsep) if entry} <= set(
+        environment["PATH"].split(os.pathsep)
+    )
+    if os.name == "nt" and os.environ.get("SystemRoot"):
+        assert environment["SystemRoot"] == os.environ["SystemRoot"]
+    else:
+        assert "SystemRoot" not in environment
+    assert environment["COVERAGE_FILE"] == str(run_dir / ".coverage")
+    assert result.conclusion == "passed"
+    assert sys.executable not in result.command_summary
+    assert f"--root={repository / 'config.toml'}" not in result.command_summary
+    assert str(run_dir) not in result.command_summary
+    assert "${PYTHON}" in result.command_summary
+    assert "--root=${REPO_ROOT}" in result.command_summary
+    assert "--cov-report=xml:${RUN_DIR}" in result.command_summary
+    assert "--run-dir ${RUN_DIR}" in result.command_summary
+    assert "config.toml" in result.command_summary and "coverage.xml" in result.command_summary
+    assert "-c" in result.command_summary and "ordinary-check" in result.command_summary
+    assert "top-secret" not in result.command_summary
+
+
+@pytest.mark.parametrize(
+    ("platform", "repo", "run", "argument", "expected"),
+    [
+        (
+            "nt",
+            r"C:\Work\Repo",
+            r"C:\Work\Repo\logs\run",
+            "--root=(c:/WORK/REPO)",
+            "--root=(${REPO_ROOT})",
+        ),
+        (
+            "nt",
+            r"C:\Work\Repo",
+            r"C:\Work\Repo\logs\run",
+            r"--root=C:\Work\Repo-other\config",
+            r"--root=C:\Work\Repo-other\config",
+        ),
+        (
+            "nt",
+            r"C:\Work\Repo",
+            r"C:\Work\Repo\logs\run",
+            r"--cov-report=xml:c:/WORK\REPO/logs\run/coverage.xml",
+            "--cov-report=xml:${RUN_DIR}/coverage.xml",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "--root=[/srv/Work/repo]",
+            "--root=[${REPO_ROOT}]",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "--root=/srv/work/repo",
+            "--root=/srv/work/repo",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "--cov-report=xml:/srv/Work/repo/logs/run/coverage.xml",
+            "--cov-report=xml:${RUN_DIR}/coverage.xml",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "--root='/srv/Work/repo',",
+            "--root='${REPO_ROOT}',",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            '--root="/srv/Work/repo",',
+            '--root="${REPO_ROOT}",',
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "/srv/Work/repo,next",
+            "${REPO_ROOT},next",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "/srv/Work/repo;next",
+            "${REPO_ROOT};next",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "/srv/Work/repo:next",
+            "${REPO_ROOT}:next",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "x/srv/Work/repo",
+            "x/srv/Work/repo",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "1/srv/Work/repo",
+            "1/srv/Work/repo",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "--root=/srv/Work/repo+other/config",
+            "--root=/srv/Work/repo+other/config",
+        ),
+        (
+            "posix",
+            "/srv/Work/repo",
+            "/srv/Work/repo/logs/run",
+            "--root=/srv/Work/repo~other/config",
+            "--root=/srv/Work/repo~other/config",
+        ),
+    ],
+)
+def test_summary_path_boundaries_and_longest_match(
+    monkeypatch: pytest.MonkeyPatch,
+    platform: str,
+    repo: str,
+    run: str,
+    argument: str,
+    expected: str,
+) -> None:
+    monkeypatch.setattr(process_runner, "os", SimpleNamespace(name=platform))
+    pure_path = PureWindowsPath if platform == "nt" else PurePosixPath
+    assert (
+        process_runner._summary_paths(
+            argument, repository_root=pure_path(repo), run_dir=pure_path(run)
+        )
+        == expected
+    )

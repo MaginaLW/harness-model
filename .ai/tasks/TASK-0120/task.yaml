@@ -1,0 +1,72 @@
+allowed_scope:
+- src/aiflow/task_service.py
+- src/aiflow/process_runner.py
+- src/aiflow/verification_service.py
+base_commit: 6f1aa18242e10d08e04a99861951dbda91def9fc
+branch: codex/privacy-test-first
+created_at: '2026-10-30T18:13:59Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - Push the reviewed codex/privacy-test-first branch to the public MaginaLW/harness-model
+    repository after applicable authorization and checks.
+  - Create a pull request in the public MaginaLW/harness-model repository after applicable
+    authorization and checks.
+  - Merge that pull request into main after applicable authorization and required
+    checks.
+  goal: Prevent known machine-path leakage in new tasks and verification evidence
+  impact:
+    level: high
+  impact_categories:
+  - external_action
+  impact_scope:
+  - src/aiflow/task_service.py
+  - src/aiflow/process_runner.py
+  - src/aiflow/verification_service.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0120
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 6dfaf1aa64a2d0b6306f23a3920e6ffbf2a369a97d0692fc12d7500e141a6d66
+goal: Prevent known machine-path leakage in new tasks and verification evidence
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-30T18:15:56Z'
+subject_commit: 669364e00e4b045760e03ccdfecdde25b7a47f11
+task_id: TASK-0120
+updated_at: '2026-10-30T18:38:39Z'
+worktree_dirty: false
+worktree_dirty_paths: []

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import re
 import sys
 from pathlib import Path
 
@@ -32,6 +34,39 @@ from aiflow.verification import (
     VerificationExecution,
     VerificationPlan,
 )
+
+
+def _assert_no_known_paths(value: object, paths: tuple[Path, ...]) -> None:
+    if isinstance(value, str):
+        normalized = value.replace("\\", "/")
+        for path in paths:
+            root = re.escape(str(path.resolve()).replace("\\", "/"))
+            pattern = rf"(?<![\w./~+\-]){root}(?=$|/|[^\w.~+\-])"
+            flags = re.IGNORECASE if os.name == "nt" else 0
+            assert re.search(pattern, normalized, flags) is None
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            _assert_no_known_paths(key, paths)
+            _assert_no_known_paths(item, paths)
+    elif isinstance(value, list):
+        for item in value:
+            _assert_no_known_paths(item, paths)
+
+
+def test_evidence_path_scan_respects_components_and_platform_case(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    _assert_no_known_paths({"arg": f"--config={root}-other/config.toml"}, (root,))
+    with pytest.raises(AssertionError):
+        _assert_no_known_paths({"arg": f"--config={root}/config.toml"}, (root,))
+    alternate_slashes = str(root).replace("\\", "/")
+    with pytest.raises(AssertionError):
+        _assert_no_known_paths([f"--config={alternate_slashes}/config.toml"], (root,))
+    different_case = str(root).swapcase()
+    if os.name == "nt":
+        with pytest.raises(AssertionError):
+            _assert_no_known_paths({"arg": f"--config={different_case}/config.toml"}, (root,))
+    else:
+        _assert_no_known_paths({"arg": f"--config={different_case}/config.toml"}, (root,))
 
 
 def _full_category_plan():
@@ -244,6 +279,18 @@ def test_v0_v1_evidence_reproduction_and_gate(
     evidence = read_task_json(repository, "TASK-0001", "evidence.json", contract_name="evidence")
     assert evidence["verification_level"] == expected_level
     assert tuple(check["check_id"] for check in evidence["checks"]) == expected_check_ids
+    run_dir = (
+        repository
+        / ".ai"
+        / "tasks"
+        / "TASK-0001"
+        / Path(evidence["checks"][0]["stdout_log_ref"]).parent
+    )
+    _assert_no_known_paths(evidence, (Path(sys.executable), repository, run_dir))
+    for check in evidence["checks"]:
+        assert "${PYTHON}" in check["command_summary"]
+        assert "-c" in check["command_summary"]
+        assert "chapter-five-checks-passed" in check["command_summary"]
     reproduce = evidence["reproduce_command"]
     assert reproduce[:3] == ["python", "-m", "aiflow"]
     assert main(reproduce[3:]) == 0
@@ -361,7 +408,16 @@ def test_governance_attestation_preserves_subject_and_ci_gate_passes(
         )
         == 0
     )
-    assert json.loads(ci_evidence.read_text(encoding="utf-8"))["attestation_governance_only"]
+    recorded = json.loads(ci_evidence.read_text(encoding="utf-8"))
+    assert recorded["attestation_governance_only"]
+    reproduce = recorded["reproduce_command"]
+    assert reproduce[:6] == ["python", "-m", "aiflow", "verify", "TASK-0001", "--ci"]
+    run_argument = reproduce[reproduce.index("--ci-run-dir") + 1]
+    output_argument = reproduce[reproduce.index("--output") + 1]
+    assert run_argument == "${CI_RUN_DIR}"
+    assert output_argument == "${CI_EVIDENCE}"
+    _assert_no_known_paths(recorded, (Path(sys.executable), repository, ci_run, ci_evidence))
+    assert "${PYTHON}" in recorded["checks"][0]["command_summary"]
 
 
 def test_review_attestation_and_business_change_require_fresh_code_approval(

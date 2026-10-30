@@ -1,0 +1,128 @@
+{
+  "base_commit": "6f1aa18242e10d08e04a99861951dbda91def9fc",
+  "branch": "codex/privacy-test-first",
+  "classification_input_sha256": "2f7d76f437d85e9f1122646cb2481b983a104a8c0ba6ca631cded8be682fa6f5",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "src/aiflow/process_runner.py",
+      "src/aiflow/verification_service.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prevent known machine-path leakage in new tasks and verification evidence",
+        "impact_scope": [
+          "src/aiflow/task_service.py",
+          "src/aiflow/process_runner.py",
+          "src/aiflow/verification_service.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "src/aiflow/process_runner.py",
+        "src/aiflow/task_service.py",
+        "src/aiflow/verification_service.py"
+      ],
+      "files": [
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/process_runner.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/verification_service.py"
+        }
+      ],
+      "totals": {
+        "additions": 26,
+        "deletions": 3,
+        "files": 3
+      }
+    },
+    "goal": "Prevent known machine-path leakage in new tasks and verification evidence",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0120",
+        "--actor",
+        "codex"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "c20f05f55c240310c24d29e7dbb210ad77580bd7ae262bec2433a393d3884ef1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "deaa5152fdf5e95f5673853bcaa6b5514ee0eeb7d7eac4583e4ebd21098ede5b",
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "6dfaf1aa64a2d0b6306f23a3920e6ffbf2a369a97d0692fc12d7500e141a6d66",
+  "subject_commit": "669364e00e4b045760e03ccdfecdde25b7a47f11",
+  "task_id": "TASK-0120"
+}
