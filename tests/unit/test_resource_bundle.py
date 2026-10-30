@@ -261,15 +261,15 @@ def test_invalid_policy_seed_is_rejected(source: Path, bad: bytes, message: str)
 def test_unreadable_source_resource_is_reported(
     source: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    original = Path.read_bytes
+    original = Path.open
     denied = source / ".ai/templates/spec.md"
 
-    def read_bytes(path: Path) -> bytes:
+    def open_file(path: Path, *args: object, **kwargs: object) -> object:
         if path == denied:
             raise PermissionError("synthetic access refusal")
-        return original(path)
+        return original(path, *args, **kwargs)
 
-    monkeypatch.setattr(Path, "read_bytes", read_bytes)
+    monkeypatch.setattr(Path, "open", open_file)
     with pytest.raises(ValueError, match="cannot read resource source"):
         build_bundle(source)
 
