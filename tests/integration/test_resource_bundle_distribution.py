@@ -12,6 +12,7 @@ import io
 import json
 import os
 import re
+import runpy
 import shutil
 import stat
 import subprocess
@@ -1197,6 +1198,88 @@ def test_build_rejects_hardlinked_output_without_modifying_external_file(
         assert not list((tmp_path / "dist").glob("*.tar.gz"))
     finally:
         link.unlink()
+
+
+@pytest.fixture
+def build_commands(monkeypatch: pytest.MonkeyPatch) -> dict:
+    import setuptools
+
+    # Load the actual build guards without invoking setuptools setup commands.
+    with monkeypatch.context() as patch:
+        patch.setattr(setuptools, "setup", lambda **kwargs: None)
+        return runpy.run_path(str(ROOT / "setup.py"))
+
+
+def test_builder_rejects_unknown_link_count_before_loading_module(
+    build_commands: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    target = ROOT / "src/aiflow/resource_bundle.py"
+    original_lstat = Path.lstat
+
+    def unknown_link_count(path: Path, *args: object, **kwargs: object) -> object:
+        info = original_lstat(path, *args, **kwargs)
+        if path == target:
+            return SimpleNamespace(st_mode=info.st_mode, st_file_attributes=0, st_nlink=0)
+        return info
+
+    def unexpected_load(*args: object, **kwargs: object) -> None:
+        pytest.fail("builder loaded before its source link count was validated")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "lstat", unknown_link_count)
+        patch.setattr(importlib.util, "spec_from_file_location", unexpected_load)
+        with pytest.raises(ValueError):
+            build_commands["resource_module"]()
+
+
+@pytest.mark.parametrize("target_kind", ["metadata", "python_output"])
+def test_existing_build_output_rejects_unknown_link_count_before_read(
+    tmp_path: Path, build_commands: dict, monkeypatch: pytest.MonkeyPatch, target_kind: str
+) -> None:
+    from setuptools import Distribution
+
+    output = tmp_path / "output"
+    output.mkdir()
+    target = output / "existing"
+    target.write_bytes(b"preserve\n")
+    source = tmp_path / "source.py"
+    source.write_bytes(b"preserve\n")
+    original_lstat = Path.lstat
+    original_read = Path.read_bytes
+    original_open = Path.open
+
+    def unknown_link_count(path: Path, *args: object, **kwargs: object) -> object:
+        info = original_lstat(path, *args, **kwargs)
+        if path == target:
+            return SimpleNamespace(st_mode=info.st_mode, st_file_attributes=0, st_nlink=0)
+        return info
+
+    def guarded_read(path: Path) -> bytes:
+        if path == target:
+            pytest.fail("build read the existing output before validating it")
+        return original_read(path)
+
+    def guarded_open(path: Path, *args: object, **kwargs: object):
+        if path == target:
+            pytest.fail("build opened the existing output before validating it")
+        return original_open(path, *args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "lstat", unknown_link_count)
+        patch.setattr(Path, "read_bytes", guarded_read)
+        patch.setattr(Path, "open", guarded_open)
+        if target_kind == "metadata":
+            with pytest.raises(ValueError):
+                build_commands["_guard_metadata_path"](output, inspect_children=True)
+        else:
+            command_type = build_commands["ResourceBuild"]
+            patch.setitem(
+                command_type.copy_file.__globals__, "resource_module", lambda: _resource_module
+            )
+            with pytest.raises(ValueError):
+                command_type(Distribution()).copy_file(str(source), str(target))
+    assert target.read_bytes() == b"preserve\n"
+    assert source.read_bytes() == b"preserve\n"
 
 
 def test_repeated_build_reuses_identical_bundle_without_rewriting_it(tmp_path: Path) -> None:
