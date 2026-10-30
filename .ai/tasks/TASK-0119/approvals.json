@@ -1,0 +1,29 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-30T17:22:47Z",
+    "base_commit": "467b7fa95b0cb0c4e955e9a8d09b911770235d0e",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "项目所有者已在本会话直接明确同意该具体自主规则候选并授权条件满足后的后继交付；独立设计审核通过。此记录不声称所有者逐字审阅冻结规格，也不声称一般常设授权条件已满足。",
+    "schema_version": "1.0",
+    "spec_sha256": "022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033",
+    "subject_commit": "467b7fa95b0cb0c4e955e9a8d09b911770235d0e",
+    "task_id": "TASK-0119"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-30T17:41:41Z",
+    "base_commit": "467b7fa95b0cb0c4e955e9a8d09b911770235d0e",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "2d7d6fab4463b4bac6f12f189eb7b98a3edf6a4178cb8d3cfdb52fc7ccc49a5a",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "依据所有者对此具体规则变更与条件性交付的直接授权记录；独立实现审核 APPROVE、V1 全部必需检查通过，不声称所有者逐字审核实现，外部动作仍逐项核验。",
+    "schema_version": "1.0",
+    "spec_sha256": "022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033",
+    "subject_commit": "2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a",
+    "task_id": "TASK-0119"
+  }
+]
