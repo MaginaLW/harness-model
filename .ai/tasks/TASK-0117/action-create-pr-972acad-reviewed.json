@@ -1,0 +1,19 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "8099f40bb27e68254dd867a56f0a5b5a7ee90831f4df20bf782a766a3e947850",
+  "action_type": "github_create_pull_request",
+  "target": "repository=MaginaLW/harness-model;base=main;head=codex/approved-action-hook",
+  "parameter_summary": "title=Clarify owner-authorized push and merge hook exception;head_sha=972acad880ca52389d9388f7c0d8e56e5f42754a;body_sha256=ec6b3e55f9cc7151eb1283428da65289854785c24251cab3f74e74ab194357c9;draft=false",
+  "subject_commit": "fd7c8f239c5e1f2b8e0f4c59f2be8e07be941faa",
+  "conditions": [
+    "Owner explicitly authorized conditional public delivery of this bounded change.",
+    "Before launch require origin main c854fb473ff324e6a297ae239a05e1ddfe5e94c6 and remote head 972acad880ca52389d9388f7c0d8e56e5f42754a; no existing PR for this head.",
+    "Before launch require TASK-0117 current reviews, evidence and Gate; require the exact title and body hash.",
+    "Create one non-draft PR only, with no labels, reviewers, projects, milestones, release or settings changes.",
+    "Launch, failure or interruption consumes this single-use authorization; verify an uncertain result read-only before any separate decision.",
+    "After creation verify the exact repository, base, head ref and head commit; this action does not authorize merge.",
+    "Use the independently reviewed body that describes the representative import probe; the earlier unattempted PR-creation action is not reused."
+  ],
+  "expires_at": "2026-10-30T19:10:47Z",
+  "single_use": true
+}

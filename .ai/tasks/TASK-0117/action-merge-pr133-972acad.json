@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "8099f40bb27e68254dd867a56f0a5b5a7ee90831f4df20bf782a766a3e947850",
+  "action_type": "github_merge_pull_request",
+  "target": "repository=MaginaLW/harness-model;pr=133;base=main",
+  "parameter_summary": "head_sha=972acad880ca52389d9388f7c0d8e56e5f42754a;base_sha=c854fb473ff324e6a297ae239a05e1ddfe5e94c6;method=merge;match_head=true;admin=false",
+  "subject_commit": "fd7c8f239c5e1f2b8e0f4c59f2be8e07be941faa",
+  "conditions": [
+    "Owner explicitly authorized this bounded rule change and conditional delivery; preserve explicit or unknown task bans and actual Hook or server refusals.",
+    "Before launch require PR 133 open and non-draft, exact head 972acad880ca52389d9388f7c0d8e56e5f42754a, exact base main c854fb473ff324e6a297ae239a05e1ddfe5e94c6, mergeable and clean.",
+    "Require required ai-quality-gate success for the exact PR head, TASK-0117 current evidence and Gate; use a merge commit with expected head, no admin override.",
+    "Launch, failure or interruption consumes this single-use authorization; verify uncertain results read-only before any separate decision.",
+    "This action does not authorize another merge, push, branch deletion, deployment, force or repository-setting change."
+  ],
+  "expires_at": "2026-10-30T19:18:08Z",
+  "single_use": true
+}
