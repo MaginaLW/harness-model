@@ -162,6 +162,8 @@ def _install_clean_clone(clone: Path, installed: Path) -> None:
                 "no_proxy": "*",
             }
         )
+        if "PIP_NO_INDEX" in os.environ:
+            env["PIP_NO_INDEX"] = os.environ["PIP_NO_INDEX"]
         _run(argv, cwd=clone, env=env)
     except BaseException as error:
         error.add_note(f"pip temp candidate; check interpreter temp root: {temporary.name}")
@@ -311,6 +313,64 @@ def test_clean_clone_pip_does_not_inherit_private_configuration_or_credentials(
     _install_clean_clone(tmp_path / "checkout", tmp_path / "installed")
     assert len(homes) == 1 and homes[0].is_dir()
     assert (private_home / ".netrc").read_text(encoding="utf-8").endswith("synthetic\n")
+
+
+@pytest.mark.parametrize("no_index", [None, "1", "false"])
+def test_clean_clone_pip_preserves_only_explicit_no_index(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, no_index: str | None
+) -> None:
+    if no_index is None:
+        monkeypatch.delenv("PIP_NO_INDEX", raising=False)
+    else:
+        monkeypatch.setenv("PIP_NO_INDEX", no_index)
+    monkeypatch.setenv("PIP_EXTRA_INDEX_URL", "https://private.invalid/simple")
+    monkeypatch.setenv("HTTPS_PROXY", "http://private.invalid:1234")
+
+    def fake_run(
+        argv: list[str], *, cwd: Path, env: dict[str, str] | None = None, expected: int = 0
+    ) -> subprocess.CompletedProcess[str]:
+        assert env is not None
+        assert env.get("PIP_NO_INDEX") == no_index
+        assert "PIP_EXTRA_INDEX_URL" not in env and "HTTPS_PROXY" not in env
+        assert env["PIP_INDEX_URL"] == "https://pypi.org/simple"
+        assert argv[argv.index("--index-url") + 1] == "https://pypi.org/simple"
+        # Both commands are read-only config inspection; neither installs or accesses an index.
+        child = (
+            "import subprocess,sys; r=subprocess.run([sys.executable,'-I','-m','pip',"
+            "'config','list'],capture_output=True,text=True,check=True); print(r.stdout)"
+        )
+        for command in (
+            [argv[0], "-I", "-m", "pip", "config", "list"],
+            [argv[0], "-I", "-c", child],
+        ):
+            result = subprocess.run(
+                command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=30
+            )
+            assert result.returncode == 0, result.stderr
+            assert (":env:.no-index=" in result.stdout) == (no_index is not None)
+            if no_index is not None:
+                assert f":env:.no-index='{no_index}'" in result.stdout
+            assert "private.invalid" not in result.stdout
+        # Parse the install options without running the resolver or making a request.
+        parse_options = (
+            "from pip._internal.commands import create_command; "
+            "options,_=create_command('install').parse_args("
+            "['--index-url','https://pypi.org/simple']); print(bool(options.no_index))"
+        )
+        result = subprocess.run(
+            [argv[0], "-I", "-c", parse_options],
+            cwd=tmp_path,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.strip() == str(no_index == "1")
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    monkeypatch.setitem(globals(), "_run", fake_run)
+    _install_clean_clone(tmp_path / "checkout", tmp_path / "installed")
 
 
 def test_clean_clone_pip_ignores_system_proxy_and_synthetic_netrc(
