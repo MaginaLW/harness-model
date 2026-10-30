@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import importlib
-import importlib.util
 import io
 import json
 import os
@@ -22,16 +21,24 @@ import aiflow
 from aiflow.contracts import SCHEMA_FILES
 from aiflow.policy import POLICY_FILES
 
-# Only an absent module is a skip. Import errors from a present module fail.
-if importlib.util.find_spec("aiflow.resource_bundle") is None:
+ROOT = Path(__file__).resolve().parents[2]
+BUNDLE_SOURCE = ROOT / "src/aiflow/resource_bundle.py"
+
+# Only an absent source file is a skip. A broken or mismatched import fails.
+try:
+    BUNDLE_SOURCE.lstat()
+except FileNotFoundError:
     pytestmark = pytest.mark.skip(reason="resource bundle is not implemented on this baseline")
 else:
     resource_bundle = importlib.import_module("aiflow.resource_bundle")
+    if resource_bundle.__file__ is None or Path(resource_bundle.__file__).resolve() != (
+        BUNDLE_SOURCE.resolve()
+    ):
+        raise ImportError("resource bundle is not loaded from the tested checkout")
     _source_file = resource_bundle._source_file
     build_bundle = resource_bundle.build_bundle
     read_bundle = resource_bundle.read_bundle
 
-ROOT = Path(__file__).resolve().parents[2]
 SCHEMAS = {
     "approval",
     "ask-options",
