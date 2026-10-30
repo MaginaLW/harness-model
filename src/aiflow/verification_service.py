@@ -1040,9 +1040,9 @@ def verify_task(
             task_id,
             "--ci",
             "--ci-run-dir",
-            str(run_directory),
+            "${CI_RUN_DIR}",
             "--output",
-            str(evidence_path),
+            "${CI_EVIDENCE}",
             *(("--actor", cast(str, verifier_actor)) if level == "V2" else ()),
         )
         if ci

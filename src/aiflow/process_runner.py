@@ -51,6 +51,29 @@ def _within(path: Path, parent: Path) -> bool:
     return True
 
 
+def _summary_paths(summary: str, *, repository_root: Path, run_dir: Path) -> str:
+    """Replace known local paths in display text without changing execution arguments."""
+    paths = (
+        (sys.executable, "${PYTHON}"),
+        (str(run_dir), "${RUN_DIR}"),
+        (str(repository_root), "${REPO_ROOT}"),
+    )
+    for path, placeholder in sorted(paths, key=lambda item: len(item[0]), reverse=True):
+        if not path:
+            continue
+        path_pattern = (
+            r"[\\/]".join(re.escape(part) for part in re.split(r"[\\/]", path))
+            if os.name == "nt"
+            else re.escape(path)
+        )
+        pattern = re.compile(
+            r"(?<![\w.\\/~+-])" + path_pattern + r"(?![\w.~+-])",
+            re.IGNORECASE if os.name == "nt" else 0,
+        )
+        summary = pattern.sub(lambda _match: placeholder, summary)
+    return summary
+
+
 def _validate_run_dir(run_dir: Path, allowed_run_root: Path) -> Path:
     root = allowed_run_root.resolve()
     candidate = run_dir.resolve()
@@ -250,6 +273,7 @@ def run_execution(
     summary = redact_command_summary(
         execution.argv, sensitive_values=sensitive_values, extra_patterns=extra_redaction_patterns
     )
+    summary = _summary_paths(summary, repository_root=cwd_root, run_dir=directory)
     for check in selected:
         parsed = (
             parse_check_result(

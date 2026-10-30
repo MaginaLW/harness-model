@@ -118,7 +118,10 @@ def test_start_creates_complete_contract_valid_task(
     assert isinstance(unit, dict)
     assert "impact_categories" not in unit
     assert "controlled_actions" not in unit
-    assert task["repository_path_at_creation"] == repository.resolve().as_posix()
+    assert "repository_path_at_creation" not in task
+    task_text = (task_directory / "task.yaml").read_text(encoding="utf-8")
+    assert repository.resolve().as_posix() not in task_text
+    assert str(repository.resolve()) not in task_text
 
     events = (task_directory / "events.jsonl").read_text(encoding="utf-8").splitlines()
     assert len(events) == 1
@@ -221,6 +224,10 @@ def test_interrupted_creation_is_marked_and_recoverable(
     assert "--recover TASK-0001" in capsys.readouterr().err
     task_directory = repository / ".ai" / "tasks" / "TASK-0001"
     assert (task_directory / "creation_failed.json").is_file()
+    marker = (task_directory / "creation_failed.json").read_text(encoding="utf-8")
+    assert "repository_path_at_creation" not in json.loads(marker)["task"]
+    assert repository.resolve().as_posix() not in marker
+    assert str(repository.resolve()) not in marker
 
     monkeypatch.setattr(task_service, "atomic_write_text", original)
     assert main(["start", "--recover", "TASK-0001"]) == 0
@@ -229,6 +236,50 @@ def test_interrupted_creation_is_marked_and_recoverable(
 
     assert main(["start", "--recover", "TASK-0001"]) == 1
     assert "not recoverable" in capsys.readouterr().err.lower()
+
+
+def test_legacy_task_path_is_read_without_rewriting_task(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    monkeypatch.chdir(repository)
+    assert main(["start", "--objective", "legacy", "--allow", "src/**"]) == 0
+    task_file = repository / ".ai" / "tasks" / "TASK-0001" / "task.yaml"
+    task = load_task(repository)
+    task["repository_path_at_creation"] = "C:/legacy-machine/private-repository"
+    task_file.write_text(yaml.safe_dump(task, sort_keys=False), encoding="utf-8")
+    before = task_file.read_bytes()
+
+    record = task_service.load_task_record(repository, "TASK-0001")
+
+    assert record.task["repository_path_at_creation"] == "C:/legacy-machine/private-repository"
+    assert task_file.read_bytes() == before
+
+
+def test_legacy_creation_marker_can_still_be_recovered(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    monkeypatch.chdir(repository)
+    original = task_service.atomic_write_text
+
+    def interrupt_spec(target: Path, content: str) -> None:
+        if target.name == "spec.md":
+            raise StorageError("simulated interruption")
+        original(target, content)
+
+    monkeypatch.setattr(task_service, "atomic_write_text", interrupt_spec)
+    assert main(["start", "--objective", "legacy", "--allow", "src/**"]) == 1
+    marker = repository / ".ai" / "tasks" / "TASK-0001" / "creation_failed.json"
+    legacy = json.loads(marker.read_text(encoding="utf-8"))
+    legacy["task"]["repository_path_at_creation"] = "C:/legacy-machine/private-repository"
+    marker.write_text(json.dumps(legacy), encoding="utf-8")
+    monkeypatch.setattr(task_service, "atomic_write_text", original)
+
+    assert main(["start", "--recover", "TASK-0001"]) == 0
+    assert load_task(repository)["repository_path_at_creation"] == (
+        "C:/legacy-machine/private-repository"
+    )
 
 
 def test_new_start_never_reuses_failed_reservation(
