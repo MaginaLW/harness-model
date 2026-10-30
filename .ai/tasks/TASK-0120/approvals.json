@@ -1,0 +1,29 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-30T18:18:30Z",
+    "base_commit": "6f1aa18242e10d08e04a99861951dbda91def9fc",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：独立设计审核 APPROVE 且无未关闭 critical/high；仅授权冻结规格范围内的本地实施，不授权外部动作或合并。",
+    "schema_version": "1.0",
+    "spec_sha256": "6dfaf1aa64a2d0b6306f23a3920e6ffbf2a369a97d0692fc12d7500e141a6d66",
+    "subject_commit": "6f1aa18242e10d08e04a99861951dbda91def9fc",
+    "task_id": "TASK-0120"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-30T18:38:39Z",
+    "base_commit": "6f1aa18242e10d08e04a99861951dbda91def9fc",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "deaa5152fdf5e95f5673853bcaa6b5514ee0eeb7d7eac4583e4ebd21098ede5b",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "常设授权：当前 subject 独立实现审核 APPROVE，原生 V1 的必需检查通过且无未关闭 critical/high；仅批准范围内代码，外部动作需分别核验。",
+    "schema_version": "1.0",
+    "spec_sha256": "6dfaf1aa64a2d0b6306f23a3920e6ffbf2a369a97d0692fc12d7500e141a6d66",
+    "subject_commit": "669364e00e4b045760e03ccdfecdde25b7a47f11",
+    "task_id": "TASK-0120"
+  }
+]

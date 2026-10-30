@@ -1,0 +1,39 @@
+{
+  "base_commit": "6f1aa18242e10d08e04a99861951dbda91def9fc",
+  "branch": "codex/privacy-test-first",
+  "classification_input_sha256": "2f7d76f437d85e9f1122646cb2481b983a104a8c0ba6ca631cded8be682fa6f5",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "src/aiflow/process_runner.py",
+      "src/aiflow/verification_service.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prevent known machine-path leakage in new tasks and verification evidence",
+        "impact_scope": [
+          "src/aiflow/task_service.py",
+          "src/aiflow/process_runner.py",
+          "src/aiflow/verification_service.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Prevent known machine-path leakage in new tasks and verification evidence",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "77482e310cd5410f6a60adb7c0eefe7ec61b4799f92e72e057a5491247b401a4",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "6dfaf1aa64a2d0b6306f23a3920e6ffbf2a369a97d0692fc12d7500e141a6d66",
+  "task_id": "TASK-0120"
+}
