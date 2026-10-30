@@ -209,7 +209,6 @@ def _build_task(
                 "permission_requirements": [],
             }
         ],
-        "repository_path_at_creation": context.repository_path,
     }
 
 
