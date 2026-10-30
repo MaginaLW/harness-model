@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "8099f40bb27e68254dd867a56f0a5b5a7ee90831f4df20bf782a766a3e947850",
+  "action_type": "github_create_pull_request",
+  "target": "repository=MaginaLW/harness-model;base=main;head=codex/approved-action-hook",
+  "parameter_summary": "title=Clarify owner-authorized push and merge hook exception;head_sha=972acad880ca52389d9388f7c0d8e56e5f42754a;body_sha256=5240718f2a9581c6a7bb5721f21d9c66b97a6a5acc97d2e783efbf6deca188b9;draft=false",
+  "subject_commit": "fd7c8f239c5e1f2b8e0f4c59f2be8e07be941faa",
+  "conditions": [
+    "Owner explicitly authorized conditional public delivery of this bounded change.",
+    "Before launch require origin main c854fb473ff324e6a297ae239a05e1ddfe5e94c6 and remote head 972acad880ca52389d9388f7c0d8e56e5f42754a; no existing PR for this head.",
+    "Before launch require TASK-0117 current reviews, evidence and Gate; require the exact title and body hash.",
+    "Create one non-draft PR only, with no labels, reviewers, projects, milestones, release or settings changes.",
+    "Launch, failure or interruption consumes this single-use authorization; verify an uncertain result read-only before any separate decision.",
+    "After creation verify the exact repository, base, head ref and head commit; this action does not authorize merge."
+  ],
+  "expires_at": "2026-10-30T19:09:36Z",
+  "single_use": true
+}

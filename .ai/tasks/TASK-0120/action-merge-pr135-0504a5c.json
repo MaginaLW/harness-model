@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "2f7d76f437d85e9f1122646cb2481b983a104a8c0ba6ca631cded8be682fa6f5",
+  "action_type": "github_merge_pull_request",
+  "target": "repository=MaginaLW/harness-model;pr=135;base=main",
+  "parameter_summary": "head_sha=0504a5c258d09d66a3b874d04b921d32bf6e8762;base_sha=0a9892f343ccadefa362230815878c9550681c88;method=merge;match_head=true;admin=false;server_auto_deletes_merged_source_branch=true",
+  "subject_commit": "669364e00e4b045760e03ccdfecdde25b7a47f11",
+  "conditions": [
+    "Owner explicitly authorized this bounded privacy fix and conditional delivery; preserve explicit or unknown task bans and actual Hook or server refusals.",
+    "Before launch require PR 135 open and non-draft, exact head 0504a5c258d09d66a3b874d04b921d32bf6e8762 in MaginaLW/harness-model, exact base main 0a9892f343ccadefa362230815878c9550681c88, mergeable and clean.",
+    "Require required ai-quality-gate success for the exact PR head, TASK-0120 current evidence and Gate; use a merge commit with expected head, no admin override.",
+    "Repository delete_branch_on_merge must remain true: successful merge automatically deletes only the already-merged source ref codex/privacy-test-first, whose exact tip is the audit head; its content must remain reachable through the merge commit.",
+    "Do not manually delete any branch, unmerged work or local worktree; do not alter repository settings, force, push tags or delete another ref.",
+    "Launch, failure or interruption consumes this single-use authorization; verify uncertain results read-only before any separate decision."
+  ],
+  "expires_at": "2026-10-30T20:49:45Z",
+  "single_use": true
+}

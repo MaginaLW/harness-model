@@ -5,7 +5,7 @@ allowed_scope:
 base_commit: 6f1aa18242e10d08e04a99861951dbda91def9fc
 branch: codex/privacy-test-first
 created_at: '2026-10-30T18:13:59Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -67,6 +67,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-30T18:15:56Z'
 subject_commit: 669364e00e4b045760e03ccdfecdde25b7a47f11
 task_id: TASK-0120
-updated_at: '2026-10-30T18:38:39Z'
+updated_at: '2026-10-30T18:52:04Z'
 worktree_dirty: false
 worktree_dirty_paths: []

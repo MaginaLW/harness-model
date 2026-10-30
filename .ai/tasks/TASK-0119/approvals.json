@@ -25,5 +25,53 @@
     "spec_sha256": "022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033",
     "subject_commit": "2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a",
     "task_id": "TASK-0119"
+  },
+  {
+    "action_sha256": "e098b0d790b4b999f380a33bd9b6fe9749fef9773e3e6e6cd56ffa869e2e6175",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-30T17:42:51Z",
+    "base_commit": "467b7fa95b0cb0c4e955e9a8d09b911770235d0e",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-30T19:42:50Z",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "依据所有者对具体自主规则与条件性交付的直接授权，记录仅限指定分支及精确提交的单次 push；不声称所有者逐字审核实现。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033",
+    "subject_commit": "2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a",
+    "task_id": "TASK-0119"
+  },
+  {
+    "action_sha256": "baf752097f5ca50b5ec4c73422ae984b988e54695ded5af7fe9bf424465f6064",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-30T17:44:58Z",
+    "base_commit": "467b7fa95b0cb0c4e955e9a8d09b911770235d0e",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-30T19:44:58Z",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "依据所有者对具体自主规则和条件性交付的直接授权，记录单次创建指定目标与版本 PR；合并须另行核验及记录。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033",
+    "subject_commit": "2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a",
+    "task_id": "TASK-0119"
+  },
+  {
+    "action_sha256": "a1acdf8dca3f080831201508e6c08c8db318e01c64888bce8d797b4d3635f002",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-30T18:01:40Z",
+    "base_commit": "467b7fa95b0cb0c4e955e9a8d09b911770235d0e",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-30T20:01:40Z",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "依据所有者对该具体自主规则及必需检查通过后条件性交付的授权，记录单次 PR 134 merge commit；服务器自动删除仅限本次已合并源分支，提交须通过合并记录保持可达。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "022e074d633218b685cd5bb426b709830573a1058e3ee4834e82e1c86210b033",
+    "subject_commit": "2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a",
+    "task_id": "TASK-0119"
   }
 ]

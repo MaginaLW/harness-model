@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "8099f40bb27e68254dd867a56f0a5b5a7ee90831f4df20bf782a766a3e947850",
+  "action_type": "git_push_branch",
+  "target": "repository=https://github.com/MaginaLW/harness-model.git;remote=origin;ref=refs/heads/codex/approved-action-hook",
+  "parameter_summary": "source_commit=972acad880ca52389d9388f7c0d8e56e5f42754a;expected_remote_ref=absent;new_remote_tip=972acad880ca52389d9388f7c0d8e56e5f42754a;force=false;tags=false;delete=false",
+  "subject_commit": "fd7c8f239c5e1f2b8e0f4c59f2be8e07be941faa",
+  "conditions": [
+    "User explicitly authorized this task and the specific push/merge process exception; preserve explicit or unknown task bans and actual Hook or server refusals.",
+    "Before launch require local HEAD 972acad880ca52389d9388f7c0d8e56e5f42754a, TASK-0117 state APPROVED_FOR_MERGE, fresh V1, independent reviews, validate, scope and Gate passed.",
+    "Before launch require origin main c854fb473ff324e6a297ae239a05e1ddfe5e94c6 and target branch absent; do not force, push tags, delete or alter another ref.",
+    "At launch the worktree may differ from the audit head only by TASK-0117 action and approval audit files.",
+    "Launch, failure or interruption consumes this single-use authorization; an uncertain outcome must be checked read-only before a separate decision.",
+    "After success verify origin branch resolves to the exact audit head. This action does not itself authorize PR creation or merge."
+  ],
+  "expires_at": "2026-10-30T19:07:35Z",
+  "single_use": true
+}
