@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "b4be4e16cdfafd27b2536a7ff4e65608c81857a31e4dba2d3bc03b67f950a47f",
+  "action_type": "github_create_pull_request",
+  "target": "repository=MaginaLW/harness-model;base=main;head=codex/autonomy-current-main",
+  "parameter_summary": "title=Expand agent autonomy within approved boundaries;head_sha=ad22ac7401f4617d71563952bf31c454adc73c7b;body_sha256=c925e4f350d216b2cd6a0c74c46fc0545611c91508f86e7a237792cc7794549c;draft=false",
+  "subject_commit": "2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a",
+  "conditions": [
+    "Owner explicitly authorized conditional public delivery of this bounded rule change.",
+    "Before launch require origin main 467b7fa95b0cb0c4e955e9a8d09b911770235d0e and remote head ad22ac7401f4617d71563952bf31c454adc73c7b; no existing PR for this head.",
+    "Before launch require TASK-0119 current reviews, evidence and Gate; require the exact title and body hash.",
+    "Create one non-draft PR only, with no labels, reviewers, projects, milestones, release or settings changes.",
+    "Launch, failure or interruption consumes this single-use authorization; verify an uncertain result read-only before any separate decision.",
+    "After creation verify the exact repository, base, head ref and head commit; this action does not authorize merge."
+  ],
+  "expires_at": "2026-10-30T19:44:58Z",
+  "single_use": true
+}

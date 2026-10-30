@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "b4be4e16cdfafd27b2536a7ff4e65608c81857a31e4dba2d3bc03b67f950a47f",
+  "action_type": "git_push_branch",
+  "target": "repository=https://github.com/MaginaLW/harness-model.git;remote=origin;ref=refs/heads/codex/autonomy-current-main",
+  "parameter_summary": "source_commit=ad22ac7401f4617d71563952bf31c454adc73c7b;expected_remote_ref=absent;new_remote_tip=ad22ac7401f4617d71563952bf31c454adc73c7b;force=false;tags=false;delete=false",
+  "subject_commit": "2e8c95dd7d50f1a6c1e95e0a8834fa98dd71396a",
+  "conditions": [
+    "Owner explicitly authorized this bounded autonomy rule change and conditional public delivery.",
+    "Before launch require local audit HEAD ad22ac7401f4617d71563952bf31c454adc73c7b, current TASK-0119 V1, independent reviews, validate, scope and Gate passed.",
+    "Before launch require origin main 467b7fa95b0cb0c4e955e9a8d09b911770235d0e and target branch absent; do not force, push tags, delete or alter another ref.",
+    "At launch local changes are limited to TASK-0119 action and approval audit files.",
+    "Launch, failure or interruption consumes this single-use authorization; an uncertain outcome must be checked read-only before a separate decision.",
+    "After success verify origin branch resolves to the exact audit head. This action does not itself authorize PR creation or merge."
+  ],
+  "expires_at": "2026-10-30T19:42:50Z",
+  "single_use": true
+}
