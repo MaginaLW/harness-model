@@ -5,8 +5,12 @@ from __future__ import annotations
 import hashlib
 import importlib
 import importlib.util
+import io
 import json
+import stat
+import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -84,3 +88,43 @@ def test_bundle_rejects_altered_missing_or_extra_resource(bundle, corruption: st
         (root / "templates/extra.md").write_bytes(b"extra\n")
     with pytest.raises(ValueError):
         module.read_bundle(root)
+
+
+def test_bundle_rejects_zip_symlink_even_when_bytes_match(bundle) -> None:
+    module, _, manifest, files = bundle
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w") as archive:
+        archive.writestr("bundle/manifest.json", json.dumps(manifest))
+        for path, data in files.items():
+            if path == "templates/spec.md":
+                entry = zipfile.ZipInfo(f"bundle/{path}")
+                entry.create_system = 3
+                entry.external_attr = (stat.S_IFLNK | 0o777) << 16
+                archive.writestr(entry, data)
+            else:
+                archive.writestr(f"bundle/{path}", data)
+    with zipfile.ZipFile(io.BytesIO(output.getvalue())) as archive:
+        entry = archive.getinfo("bundle/templates/spec.md")
+        assert stat.S_ISLNK(entry.external_attr >> 16)
+        with pytest.raises(ValueError):
+            module.read_bundle(zipfile.Path(archive, "bundle/"))
+
+
+def test_source_rejects_file_with_unknown_link_count(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = importlib.import_module("aiflow.resource_bundle")
+    target = ROOT / ".ai/templates/spec.md"
+    original = Path.lstat
+
+    def lstat(path: Path):
+        info = original(path)
+        if path != target:
+            return info
+        return SimpleNamespace(
+            st_mode=info.st_mode,
+            st_nlink=0,
+            st_file_attributes=getattr(info, "st_file_attributes", 0),
+        )
+
+    monkeypatch.setattr(Path, "lstat", lstat)
+    with pytest.raises(ValueError):
+        module.build_bundle(ROOT)
