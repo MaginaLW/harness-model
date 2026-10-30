@@ -1,0 +1,13 @@
+{
+  "context_sha256": "118da7b0fe7a6b23a6e89ef030069cb4cdc46a9df3007b40d190750dfa432120",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-10-30T17:04:25Z",
+  "review_id": "REV-0002",
+  "review_stage": "implementation",
+  "reviewer": "/root/ask_review",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "APPROVE the bounded documentation implementation at subject fd7c8f239c5e1f2b8e0f4c59f2be8e07be941faa and implementation context 118da7b0fe7a6b23a6e89ef030069cb4cdc46a9df3007b40d190750dfa432120. The text limits the owner-authorized exception to specific push/merge actions and retains manual binding checks, existing task prohibitions, real Hook and server refusals, review, Gate and required CI. Native local V1 records all ten required checks passed; one shared pytest run reported 4010 passed and 146 baseline resource-bundle skips, with 89% core and 98% analysis coverage and no measurable covered diff lines. The main verifier used independently reviewed CLI source 2cf78ea; a preflight probe checked that runner children import the target checkout. The guest used a loopback mirror and independently checked setuptools 84.2.1 outside uv.lock; guest-writable mirror logs are not independent proof of isolation. Code approval, Gate, publication privacy checks, precise external-action authorization and target CI remain separate.",
+  "task_id": "TASK-0117"
+}
