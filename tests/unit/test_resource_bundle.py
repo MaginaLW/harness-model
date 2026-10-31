@@ -181,7 +181,7 @@ def test_bundle_is_exact_and_manifest_hashes_canonical_bytes(source: Path) -> No
     assert manifest["schema_version"] == "1.0"
     assert manifest["bundle_version"] == "1.0"
     assert manifest["compatible_cli_versions"] == ["0.2.0"]
-    assert manifest["policy_version"] == "2.5.0"
+    assert manifest["policy_version"] == "2.6.0"
     entries = manifest["files"]
     assert [entry["path"] for entry in entries] == sorted(PATHS)
     for entry in entries:
@@ -220,9 +220,9 @@ def test_missing_resource_or_mismatched_policy_version_is_rejected(source: Path)
     path.unlink()
     with pytest.raises(ValueError):
         build_bundle(source)
-    path.write_text(
-        original.replace('policy_version: "2.5.0"', 'policy_version: "9.0.0"'), encoding="utf-8"
-    )
+    changed = original.replace('policy_version: "2.6.0"', 'policy_version: "9.0.0"')
+    assert changed != original
+    path.write_text(changed, encoding="utf-8")
     with pytest.raises(ValueError):
         build_bundle(source)
 

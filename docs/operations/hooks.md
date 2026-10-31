@@ -1,6 +1,6 @@
 # Thin local wrappers and Hooks
 
-These adapters call the executable AI Flow core. They provide earlier feedback; they do not replace CLI validation, CI Gate, repository branch protection, or explicit approval for external actions.
+These adapters call the executable AI Flow core. They provide earlier feedback; they do not replace CLI validation, CI Gate, repository branch protection, or the applicable authorization for external actions.
 
 The supported high-risk checks and unknown pre-command categories fail closed. The wrappers do not install themselves, consume an approval, execute a command, or turn a diagnostic result into permission for a real external operation.
 
@@ -16,7 +16,7 @@ For an AI Flow implementation-stage commit, run `python tools/hooks/pre_commit.p
 
 ## Pre-command
 
-Run `python tools/hooks/pre_command.py --action ACTION --target TARGET [--task TASK-ID]` before a normalized external action, except that a specific `push` or `merge` explicitly authorized by the project owner does not require proactively invoking this always-denying wrapper. This exception does not lift an explicit task prohibition or one whose provenance is unknown, and it does not override an installed Hook or a server refusal. Required action records, independent review, Gate, required CI and merge-commit rules still apply. Before each such action, manually verify the owner authorization and action record against the action, repository and ref, subject, conditions and expiry; stop if any are missing, stale or conflicting. These are process checks: the CLI does not authenticate the actor or enforce single use for push or merge.
+Run `python tools/hooks/pre_command.py --action ACTION --target TARGET [--task TASK-ID]` before a normalized external action, except that a `push` or `merge` covered by the standing authorization in [AGENTS.md](../../AGENTS.md#常设授权), or a specific such action explicitly authorized by the project owner, does not require proactively invoking this always-denying wrapper. An applicable standing authorization does not require a separate action record for each push or merge; outside it, the applicable single-action approval and record remain required. Before acting, check the repository, ref, current subject and authorization conditions; check the action record and expiry where one is required. This exception does not lift an explicit task prohibition or one whose provenance is unknown, and it does not override an installed Hook or a server refusal. Applicable independent review, Gate, required CI and merge-commit rules still apply. These are process checks: the CLI does not authenticate the actor, verify the real command or target, or enforce single use for push or merge.
 
 A blank target fails before Policy loading, task lookup, or observation construction. Only an explicitly Policy-allowed `read` category passes without reading `--task` or creating an observation. Unknown categories return denial (exit 2) before task lookup or observation; blank categories are invalid input (exit 1). For an active-Policy forbidden canonical high-risk action (`push`, `merge`, `deploy`, `delete`, `secret_export`, or `paid_external_call`), `--task` is optional only when exactly one non-`MERGED` task can be resolved; ambiguity, an invalid explicit task, target-contract failure, or stale binding fails closed. The wrapper records the structured observation through the shared service and then always returns denial (exit 2). It never consumes an action approval and never executes the action, including when an approval exists.
 
@@ -31,10 +31,11 @@ calling a category `read` cannot authenticate what an unrelated client really ex
 
 ## What the high-risk action approval requirement is actually worth
 
-`.ai/policy/permissions.yaml` forbids `push`, `merge`, `deploy`, `delete`, `secret_export`
-and `paid_external_call` from running automatically, and requires a separate action
-approval for each. **No code path checks that requirement for `push` or `merge`.** Recorded
-so that no reader mistakes the Policy declaration for an enforced control:
+`.ai/policy/permissions.yaml` denies automatic `push`, `merge`, `deploy`, `delete`,
+`secret_export` and `paid_external_call`. For push and merge, it specifies standing
+authorization or an individual action approval; the other four require an action approval.
+**No code path checks either authorization for a real push or merge.** The distinction
+below prevents mistaking the Policy declaration for an enforced control:
 
 - The CLI has no `push`, `merge` or `deploy` subcommand. `close` is documented as recording
   an externally completed merge, not performing one.
@@ -49,9 +50,9 @@ so that no reader mistakes the Policy declaration for an enforced control:
 - The only action type whose single-use semantics are enforced in code is
   `targeted_mutation_v2`, in `src/aiflow/mutation_evidence.py`.
 
-Consequently the approval requirement for `push` and `merge` is a **process convention
-observed by humans**, not a machine-checked control. Compliance is visible in the ledger
-after the fact, not prevented before it.
+Consequently the authorization requirement for `push` and `merge` is a **process
+convention**, not a machine-checked control. A standing-authorized action need not have an
+individual ledger entry; Git and PR history do not authenticate its authorization.
 
 Making it enforceable was attempted and rejected. TASK-0043's design review found that an
 `action` approval is mintable by the agent it would gate — `approvals.json` is an unsigned

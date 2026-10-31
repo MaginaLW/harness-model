@@ -12,7 +12,7 @@
 
 **已完成**
 
-- 阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 已于 2026-08-30 完成；源码包收口版本 `0.2.0`，active Policy `2.5.0`（V1/V2 的 pytest 检查共享一次完整覆盖率执行；`impact_scope` 触及治理面的决策单元至少走 REVIEW）。`docs/superpowers/state/*.yaml` 是当时冻结的历史投影，不再更新。
+- 阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 已于 2026-08-30 完成；源码包收口版本 `0.2.0`，active Policy `2.6.0`（V1/V2 的 pytest 检查共享一次完整覆盖率执行；`impact_scope` 触及治理面的决策单元至少走 REVIEW）。`docs/superpowers/state/*.yaml` 是当时冻结的历史投影，不再更新。
 - 已交付工作及其限制分别见[本地辅助工具](local-tools-closeout-2026-09-22.md)、[自托管执行基础设施](self-hosted-runners.md)（历史试点；runner、诊断与证据移交工具已于 2026-10-10 删除）、[E4 启动前收尾](e4-preflight-closeout-2026-09-23.md)；外仓试点按[按需反馈与回灌](feedback-loop.md)处理，无实质问题即 no-op。
 - 2026-10-10 架构精简（PR #46）已合并并关闭 TASK-0072/0073/0074：V1/V2 只运行一次完整覆盖率 pytest、`src/aiflow` 净减约 1040 行、删除未接入的工具试点、任务 ID 分配跳过其他分支已用编号。PR #46 以 squash 合并为 `0f5aa4c`，任务证据绑定的原始提交由标签 `archive/claude-simplify-architecture` 保留。未完成的 TASK-0063～0071 所在分支已归档为本地 `archive/codex-*` 标签，未合并。
 - TASK-0075 的治理面 REVIEW 下限已由 PR #51 合并，账本已关闭：Policy 2.5.0 覆盖 `.github/**`、`.ai/**`、`src/aiflow/**`、`tools/ci/**` 及 Agent 入口、依赖与 Git 配置文件；准入以当前 Policy 和 CLI 结论为准。

@@ -11,8 +11,10 @@
 
 1. **一次授权推进目标**：所有者决定目标与风险边界后，Agent 可自主拆分任务、选择技术方案、
    修复并验证；授权文件、门禁阈值、ASK 方向和 AGENTS.md 列出的高风险事项仍由所有者决定。
-2. **task-free 改动端到端执行**：建分支 → 实现与本地检查 → 推送并开 PR → 启用
-   auto-merge，required check 通过后以 merge commit 合并 → 删除已合并分支。
+2. **task-free 改动端到端执行**：建分支 → 实现与本地检查 → 按常设授权推送并开 PR →
+   启用 auto-merge，required check 通过后以 merge commit 合并 → 删除已合并分支。
+   常设授权覆盖的本仓常规交付不因其外部性单独创建 task，也不逐次记录 push/merge action；
+   执行前仍核对目标、版本、条件、已有禁令和目标仓规则。
 3. **升级清单内的 task**：独立审核者必须是不同于实现者的另一个 Agent。按 AGENTS.md
    分别核对 spec、code 和本地 action 的代签条件；规格经独立设计审核通过后可先记录批准，
    不要求最终 `verify` 已完成。适用 verify 和独立实现审核通过后记录 code 批准，随后

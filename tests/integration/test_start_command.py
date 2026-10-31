@@ -18,8 +18,6 @@ from aiflow.errors import AiflowError, StorageError
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
 DEFAULT_FORBIDDEN = {
-    "push",
-    "merge",
     "deploy",
     "delete",
     "secret_export",
