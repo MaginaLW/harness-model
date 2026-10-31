@@ -26,7 +26,11 @@ initialization.py 管理固定 JSON 合同、资源/Policy、恢复/重放、rea
 
 已验证：修复后的 ordinary wheel 完整验收通过，精确 source e0b264a，wheel SHA-256 ec8974ba1ac8a6775459890016e4d422189b342a32fa1f023362730f93faed39。全 47 个引擎 Python 模块与候选字节一致，七份运行依赖及所有加载来源均为独立环境。18 项验收与 33 条记录命令通过：零写预览、实际 NTFS 安装、完成重放、正常任务历史准入、原预览历史漂移拒绝、只读迁移、真实 flush 故障后同 UUID 恢复，以及精确旧版本 57f0676 的五个入口在无历史 partial 上拒绝且零写。原始报告含本机路径，仅本地保留。
 
-未验证：当前 source 的完整原生 V2、正式实现审核、code 批准、Gate 和远端 required CI 仍待完成。本记录不将旧 action 批准、旧 source 或部分测试当成当前完整证据。
+当前完整原生 V2 未通过：source e0b264a 在保留的 run-20261031T053007522517Z 中为 4494 passed、2 项平台 skip、3 项真实 Windows 安装失败，用时 1155.68 秒，未超时；coverage/diff 和静态检查通过、五项 native 变异 killed 不替代这三个失败。两个直接 API traceback 位于资源创建前的祖先 CreateFileW；同一目标在两种环境只读重现系统临时目录的 LIST_DIRECTORY 访问拒绝。4070a016 动作已永久消费，失败 evidence、context、receipt 与原始日志保留。
+
+独立权限对照确认：仅 READ_ATTRIBUTES 的句柄不能阻止目录改名，不可作为修复；TRAVERSE 加 READ_ATTRIBUTES 在系统临时目录可打开，且独立自建目录改名竞争被拒绝。后续仅祖先 pin 使用该已核验权限，真正目标根及资源目录保留原有权限/共享保护；不修改 ACL、不移动测试目录。
+
+未验证：修复后的新 source、当前完整原生 V2、正式实现审核、code 批准、Gate 和远端 required CI 仍待完成。本记录不将旧 action 批准、旧 source 或部分测试当成当前完整证据。
 
 ## 审核问题
 
