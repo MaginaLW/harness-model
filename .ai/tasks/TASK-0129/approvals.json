@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-31T22:14:36Z",
+    "base_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+    "reason": "常设授权：当前独立设计审核 REV-0001 r0001 APPROVE 且无未关闭发现，冻结规格及分类有效，仅授权既定范围实施",
+    "schema_version": "1.0",
+    "spec_sha256": "81f35bdb2f132e0f82da93a872989fa493fb2ca7528d57651cccca36d5ffad7d",
+    "subject_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "task_id": "TASK-0129"
+  }
+]
