@@ -7,6 +7,7 @@ import copy
 import hashlib
 import importlib
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -26,8 +27,7 @@ TASK_ID = "TASK-0001"
 DOCUMENT = "docs/contract.md"
 
 
-@pytest.fixture
-def ready_task(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def _build_ready_task(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     repository = create_repository(tmp_path / "repository")
     (repository / "docs").mkdir()
     (repository / DOCUMENT).write_text("# Contract\n\nOriginal requirement.\n", encoding="utf-8")
@@ -48,6 +48,37 @@ def ready_task(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     commit_all(repository, "docs: implement the bounded contract change")
     monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
     assert cli.main(["verify", TASK_ID, "--actor", "verifier"]) == 0
+    status = summarize_task(repository, TASK_ID)
+    assert status.current_state == "WAITING_FOR_FINAL_REVIEW"
+    assert status.classification == "fresh"
+    assert status.evidence == "passed"
+    context = build_review_context(repository, TASK_ID, "implementation")
+    assert DOCUMENT in context["content"]["diff_summary"]["changed_paths"]
+    return repository
+
+
+@pytest.fixture(scope="module")
+def ready_task_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    # Only this synthetic V1 prefix is portable; Node physical evidence is not.
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        return _build_ready_task(tmp_path_factory.mktemp("sdk-template"), monkeypatch)
+
+
+@pytest.fixture
+def ready_task(
+    ready_task_template: Path,
+    tmp_path_factory: pytest.TempPathFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Path:
+    repository = tmp_path_factory.mktemp("sdk-case") / "repository"
+    shutil.copytree(ready_task_template, repository, copy_function=shutil.copyfile)
+    for source in ready_task_template.rglob("*"):
+        if source.is_file():
+            destination = repository / source.relative_to(ready_task_template)
+            assert not source.samefile(destination)
+            assert destination.read_bytes() == source.read_bytes()
+    monkeypatch.chdir(repository)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
     status = summarize_task(repository, TASK_ID)
     assert status.current_state == "WAITING_FOR_FINAL_REVIEW"
     assert status.classification == "fresh"
