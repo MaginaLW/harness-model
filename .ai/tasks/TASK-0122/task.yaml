@@ -76,9 +76,9 @@ frozen_spec_sha256: f5cc602192d778bcf884cbc9aa2c6eb218c8d53c7478b79cad3bdd97bb31
 goal: Enable bounded standing delivery authorization with retained automated safeguards
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-10-31T01:16:33Z'
-subject_commit: db7b86ec8c710048758657799d1f3e42f7e41e7c
+spec_frozen_at: '2026-10-31T01:18:57Z'
+subject_commit: 485a9f67b3dd90f04acc9e05b86172d41bf43917
 task_id: TASK-0122
-updated_at: '2026-10-31T01:17:12Z'
+updated_at: '2026-10-31T01:19:57Z'
 worktree_dirty: false
 worktree_dirty_paths: []
