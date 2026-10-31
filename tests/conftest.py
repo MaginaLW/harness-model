@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
@@ -12,6 +13,16 @@ import pytest
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = REPOSITORY_ROOT / "src"
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_configure(config: pytest.Config) -> None:
+    """Keep each test invocation out of another invocation's numbered temp tree."""
+    if config.option.basetemp is None:
+        try:
+            config.option.basetemp = tempfile.mkdtemp(prefix="aiflow-pytest-")
+        except OSError as error:
+            raise pytest.UsageError("Could not create an isolated test temporary root") from error
 
 
 @pytest.fixture
