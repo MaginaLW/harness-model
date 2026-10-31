@@ -44,6 +44,12 @@ f57ee4f 的普通 wheel 重验通过：SHA-256 为 37391cbee8902c8b55b05dafbbe45
 
 run-20261031T061944449564Z 的执行会话已不可恢复，原 verifier/pytest 进程消失，只保留前置日志和 context，没有该 run 的完整测试结果或新 evidence。独立 verifier 已通过 CLI abandon 追加中断记录；退出原因和 pipeline cleanup 未确认，不报告测试数量、覆盖率、超时或成功。9c86 动作已用于一次 launch，不复用；因未观察到 mutation 消费回执，不能称已完成变异消费。CLI 当前拒绝生成正式 implementation context（requires passed evidence），本预审发现先保存在本审核包，待当前候选通过后在正式审核中引用并独立复核关闭。
 
+RF-001 本地预审处置：测试提交 038c8a4 在源码提交 fd5f8f461d2a1bf1c1e1f0ac317324ef04440576 之前。原代码上的 11 案例得到 10 failed、1 passed，修复后同矩阵 11 passed；它们重新绑定摘要与完成标记，避免仅由旧摘要拒绝造成假绿。当前完整初始化专项为 294 passed、2 项既有平台 skip（100.26 秒），真实进程退出码为 0，包含合法安装、恢复和重放。静态检查通过。独立复核确认六处 canonical JSON 比较与精确提交绑定完整、原 medium 发现已满足本地关闭条件；正式实现审核仍等待新候选的完整 Native 证据和有效 context。只为本地验证增加隐藏启动与直接落盘回执，原 CLI、1200 秒预算、85/90 门槛和检查范围不变；它不认证 cleanup，也不声称解决了宿主中断原因。
+
+当前 ordinary wheel 已重验：精确 subject fd5f8f4，wheel SHA-256 0792ffd75ba92197178aa750e9021e873b3525b6809c16d478f9b93cfbfb35b9；18 项检查、33 条命令、47 模块字节与安装来源全部通过。相同独立安装在 PATH/SYSTEMROOT 最小环境的系统 Temp 三项行为及七对象保护通过；另有 8 项 installed-wheel 重签错误数值类型输入，在创建 .ai 前拒绝，目录字节、对象身份与 mtime 均未变。各进程终局 exit 0，原始报告只在本地忽略目录保留。
+
+当前新 action b87a70be610f6ab167cfd8e4911d0aadbed7d1dd9fa6c68e473f43c0e950ed07 已经独立具体审核 APPROVE，无 critical/high，并按常设授权记录批准，仅绑定 fd5f8f4 的一次固定 Native 运行。旧失败、中断、消费和未确认状态均保留。当前完整 Native、正式实施审核、code 批准、Gate 和 exact-head required CI 尚待完成。
+
 初始化是否只创建受审清单且最后正确发布身份；中断、漂移、链接、未知状态和损坏是否拒绝且保留字节；新 CLI 是否在治理写入前拒绝不完整状态；legacy 与完整 native 门禁是否保持？
 
 ## 推荐结论

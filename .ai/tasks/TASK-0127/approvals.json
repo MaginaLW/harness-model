@@ -59,5 +59,21 @@
     "spec_sha256": "e2d19cda459bd20050520b7f7d2756a3e69edbfafd2d14b4e7b7b26f6f1b9298",
     "subject_commit": "f57ee4f1ea592aacffc94bcbd82920638ffe1b6e",
     "task_id": "TASK-0127"
+  },
+  {
+    "action_sha256": "b87a70be610f6ab167cfd8e4911d0aadbed7d1dd9fa6c68e473f43c0e950ed07",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-31T07:13:30Z",
+    "base_commit": "fb89032a69a5d9f062f168e4e0346a9237c5ab84",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-31T10:12:46Z",
+    "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+    "reason": "常设授权：当前fd5f8f4的具体b87a70动作独立审核APPROVE且无critical/high；仅固定五项native隔离变异，原1200及双域85/90不变，落盘隐藏supervisor仅改善回执不改变检查或认证cleanup；旧中断与动作保留不复用",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "e2d19cda459bd20050520b7f7d2756a3e69edbfafd2d14b4e7b7b26f6f1b9298",
+    "subject_commit": "fd5f8f461d2a1bf1c1e1f0ac317324ef04440576",
+    "task_id": "TASK-0127"
   }
 ]
