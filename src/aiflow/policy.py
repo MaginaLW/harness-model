@@ -42,58 +42,6 @@ class ActionPermission:
     rule_id: str | None = None
 
 
-class _UniqueKeyLoader(yaml.SafeLoader):
-    """Reject ambiguous mappings in the permissions Policy, including nested ones."""
-
-    def __init__(self, stream: Any) -> None:
-        super().__init__(stream)
-        self._checked_mappings: set[yaml.MappingNode] = set()
-        self._flattening_mappings: set[yaml.MappingNode] = set()
-
-    def flatten_mapping(self, node: yaml.MappingNode) -> None:
-        if node in self._flattening_mappings:
-            raise yaml.constructor.ConstructorError(
-                "while constructing a mapping",
-                node.start_mark,
-                "found a recursive merge",
-                node.start_mark,
-            )
-        if node in self._checked_mappings:
-            return
-        self._checked_mappings.add(node)
-        keys: set[Any] = set()
-        merge_key = object()
-        for key_node, _ in node.value:
-            if key_node.tag == "tag:yaml.org,2002:merge":
-                key = merge_key
-            elif key_node.tag == "tag:yaml.org,2002:value":
-                key = "="
-            else:
-                key = self.construct_object(key_node)
-            try:
-                duplicate = key in keys
-                keys.add(key)
-            except TypeError as error:
-                raise yaml.constructor.ConstructorError(
-                    "while constructing a mapping",
-                    node.start_mark,
-                    "found an unhashable key",
-                    key_node.start_mark,
-                ) from error
-            if duplicate:
-                raise yaml.constructor.ConstructorError(
-                    "while constructing a mapping",
-                    node.start_mark,
-                    "found a duplicate key",
-                    key_node.start_mark,
-                )
-        self._flattening_mappings.add(node)
-        try:
-            super().flatten_mapping(node)
-        finally:
-            self._flattening_mappings.remove(node)
-
-
 def evaluate_action_permission(bundle: PolicyBundle, action: str) -> ActionPermission:
     """Evaluate one normalized action without performing it or consuming approval."""
     normalized = action.strip().casefold()
@@ -165,12 +113,7 @@ def _load_document(root: Path, filename: str, expected_kind: str) -> dict[str, A
             details={"filename": filename},
         )
     try:
-        text = path.read_text(encoding="utf-8")
-        value = (
-            yaml.load(text, Loader=_UniqueKeyLoader)
-            if filename == "permissions.yaml"
-            else load_yaml_text(text)
-        )
+        value = load_yaml_text(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, yaml.YAMLError) as error:
         raise PolicyError(
             "Could not read or parse Policy file",

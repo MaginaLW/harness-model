@@ -226,14 +226,8 @@
           "enum": ["push", "merge", "deploy", "delete", "secret_export", "paid_external_call"]
         },
         "effect": {"const": "deny_automatic"},
-        "required_approval": {"enum": ["action", "standing_or_action"]}
-      },
-      "allOf": [
-        {
-          "if": {"properties": {"required_approval": {"const": "standing_or_action"}}},
-          "then": {"properties": {"action": {"enum": ["push", "merge"]}}}
-        }
-      ]
+        "required_approval": {"const": "action"}
+      }
     },
     "verification_check": {
       "type": "object",

@@ -1,5 +1,5 @@
 schema_version: "1.0"
-policy_version: "2.6.0"
+policy_version: "2.5.0"
 policy_kind: permissions
 allowed_automatic_actions: [read]
 forbidden_automatic_actions:
@@ -14,12 +14,12 @@ rules:
     priority: 690
     action: push
     effect: deny_automatic
-    required_approval: standing_or_action
+    required_approval: action
   - id: PERMISSION-DENY-AUTO-MERGE
     priority: 680
     action: merge
     effect: deny_automatic
-    required_approval: standing_or_action
+    required_approval: action
   - id: PERMISSION-DENY-AUTO-DEPLOY
     priority: 670
     action: deploy
