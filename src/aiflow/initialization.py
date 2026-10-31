@@ -575,6 +575,8 @@ def apply_initialization(
             or fs.read(held[PENDING], 64) != payloads[IDENTITY]
         ):
             raise _error("IDENTITY_PUBLICATION_CHANGED")
+        if set(_inventory(root)) != set(DIRECTORIES) | (set(payloads) - {PENDING}):
+            raise _error("IDENTITY_PUBLICATION_CHANGED")
         for relative in order:
             if fs.read(held[relative], len(payloads[relative])) != payloads[relative]:
                 raise _error("INSTALLATION_BYTES_CHANGED")

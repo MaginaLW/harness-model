@@ -415,13 +415,17 @@ class WindowsFilesystem:
                 ("flags", _U32),
                 ("root", _PTR),
                 ("length", _U32),
-                ("name", ctypes.c_ubyte * len(encoded)),
+                ("name", ctypes.c_ubyte * (len(encoded) + 2)),
             ]
 
         if Rename.name.offset != 20:
             raise _invalid()
+        # FILE_RENAME_INFO.FileName is NUL-terminated; FileNameLength excludes it.
         record = Rename(
-            0, None, len(encoded), (ctypes.c_ubyte * len(encoded)).from_buffer_copy(encoded)
+            0,
+            None,
+            len(encoded),
+            (ctypes.c_ubyte * (len(encoded) + 2)).from_buffer_copy(encoded + b"\0\0"),
         )
         if not self._api.SetFileInformationByHandle(
             handle, 3, ctypes.byref(record), ctypes.sizeof(record)
