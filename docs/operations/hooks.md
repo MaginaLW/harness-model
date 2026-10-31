@@ -12,7 +12,7 @@ The retired `--pytest-temp-root` option is no longer accepted. Verification uses
 
 ## Pre-commit
 
-Run `python tools/hooks/pre_commit.py --task TASK-ID` from a Git pre-commit integration or an Agent before requesting a commit. Omitting `--task` is accepted only when exactly one non-merged task exists. The check delegates task status, changed-path collection, scope matching, and workflow prerequisites to core services. It never runs `git commit`, edits the index, or fixes files.
+For an AI Flow implementation-stage commit, run `python tools/hooks/pre_commit.py --task TASK-ID` from a Git pre-commit integration or an Agent, using the task for those changes. This wrapper accepts only a task in `IMPLEMENTING` state; other task stages and task-free changes under maintenance mode do not require an Agent to invoke it proactively. An installed Hook still applies; diagnose any refusal rather than bypassing it. Omitting `--task` is accepted only when exactly one non-merged task exists. The check delegates task status, changed-path collection, scope matching, and workflow prerequisites to core services; an out-of-scope result can record an observation on the selected task. It never runs `git commit`, edits the index, or fixes files.
 
 ## Pre-command
 
