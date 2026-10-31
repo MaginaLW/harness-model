@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-31T01:23:41Z",
+    "base_commit": "0ba0a38e65416ba387d1f5c014c6c433f8a4678a",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "项目所有者在当前会话明确同意修改受限推送与合并常设授权并要求完成交付；后继规格独立设计审核通过，本记录不表示所有者本人审阅具体设计。",
+    "schema_version": "1.0",
+    "spec_sha256": "e6f929402876194cacb7dce46f9d14d68d1c3cd5ffa02035a8d5766a4f50dbea",
+    "subject_commit": "0ba0a38e65416ba387d1f5c014c6c433f8a4678a",
+    "task_id": "TASK-0123"
+  }
+]
