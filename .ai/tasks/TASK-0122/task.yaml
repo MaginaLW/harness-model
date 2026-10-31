@@ -11,7 +11,7 @@ allowed_scope:
 base_commit: db7b86ec8c710048758657799d1f3e42f7e41e7c
 branch: codex/standing-delivery-successor
 created_at: '2026-10-31T01:16:16Z'
-current_state: IMPLEMENTING
+current_state: BLOCKED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -79,6 +79,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-31T01:18:57Z'
 subject_commit: 485a9f67b3dd90f04acc9e05b86172d41bf43917
 task_id: TASK-0122
-updated_at: '2026-10-31T01:19:57Z'
+updated_at: '2026-10-31T01:21:54Z'
 worktree_dirty: false
 worktree_dirty_paths: []
