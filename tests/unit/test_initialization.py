@@ -755,6 +755,33 @@ def test_competitor_identity_is_not_replaced_at_publication(
     assert tree(repository) == before
 
 
+def test_wrong_publication_name_is_preserved_and_cannot_report_installation_success(
+    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    candidate = preview(repository, bundle)
+    publish = PortableFilesystem.rename_no_replace
+    wrong_name = repository / ".ai/repository-id-unexpected"
+    published = False
+
+    def publish_to_wrong_name(self, handle, target):
+        nonlocal published
+        publish(self, handle, target.with_name(wrong_name.name))
+        published = True
+
+    monkeypatch.setattr(PortableFilesystem, "rename_no_replace", publish_to_wrong_name)
+
+    with pytest.raises(AiflowError):
+        apply(repository, candidate, bundle)
+
+    assert published
+    assert not (repository / ".ai/repository-id").exists()
+    assert wrong_name.read_bytes() == (candidate["repository_id"] + "\n").encode("utf-8")
+    before = tree(repository)
+    with pytest.raises(AiflowError):
+        apply(repository, candidate, bundle)
+    assert tree(repository) == before
+
+
 @pytest.mark.parametrize("change", ["extra", "resource", "review", "identity", "state", "complete"])
 def test_complete_installation_tampering_blocks_ready_and_replay(
     repository: Path, bundle: Path, change: str

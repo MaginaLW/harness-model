@@ -416,11 +416,14 @@ def test_volume_reports_actual_filesystem_facts(kernel: FakeKernel) -> None:
     filesystem.close(handle)
 
 
-def test_identity_publication_uses_no_replace_absolute_utf16_name(kernel: FakeKernel) -> None:
+@pytest.mark.parametrize("padding", [0, 1, 2, 3], ids=["align-0", "align-1", "align-2", "align-3"])
+def test_identity_publication_uses_no_replace_absolute_utf16_name(
+    kernel: FakeKernel, padding: int
+) -> None:
     filesystem = windows.WindowsFilesystem(api=kernel)
     parent = filesystem.open_directory(FAKE_ROOT, share_write=True)
     handle = filesystem.create_file(parent, ".repository-id.pending", allow_rename=True)
-    target = FAKE_ROOT / ".ai/repository-id"
+    target = FAKE_ROOT / ".ai" / ("repository-id" + "x" * padding + "😀")
 
     filesystem.rename_no_replace(handle, target)
 
@@ -433,8 +436,10 @@ def test_identity_publication_uses_no_replace_absolute_utf16_name(kernel: FakeKe
     assert struct.unpack_from("<I", raw)[0] == 0
     assert struct.unpack_from("<Q", raw, 8)[0] == 0
     length = struct.unpack_from("<I", raw, 16)[0]
+    assert length == len(str(target).encode("utf-16-le"))
     name = raw[20 : 20 + length].decode("utf-16-le")
     assert name.replace("\\", "/") == str(target).replace("\\", "/")
+    assert raw[20 + length : 20 + length + 2] == b"\0\0"
     create = next(arguments for name, arguments in kernel.calls if name == "NtCreateFile")
     assert integer(create[1]) & 0x10000  # DELETE on the original pending object.
     kernel.fail["SetFileInformationByHandle"] = 0
