@@ -43,5 +43,19 @@
     "spec_sha256": "81f35bdb2f132e0f82da93a872989fa493fb2ca7528d57651cccca36d5ffad7d",
     "subject_commit": "7154cf6670c7dd338d596fd915715ad9517f5e97",
     "task_id": "TASK-0129"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-10-31T23:55:23Z",
+    "base_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "6e7f73aedfae77f8268945db1eb6f5b32e3eafefb10e7c0d15d95923289ecc6c",
+    "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+    "reason": "常设授权：当前独立实现审核 REV-0002 r1 APPROVE，16 high及5 medium全部resolved且无未关闭发现；当前完整Native14项通过，同一独立verifier已finalize，final canonical evidence 6e7f73aedfae77f8268945db1eb6f5b32e3eafefb10e7c0d15d95923289ecc6c，稳定snapshot920381cd保持；CLI必需交接概要已补且正式context0598保持",
+    "schema_version": "1.0",
+    "spec_sha256": "81f35bdb2f132e0f82da93a872989fa493fb2ca7528d57651cccca36d5ffad7d",
+    "subject_commit": "7154cf6670c7dd338d596fd915715ad9517f5e97",
+    "task_id": "TASK-0129"
   }
 ]
