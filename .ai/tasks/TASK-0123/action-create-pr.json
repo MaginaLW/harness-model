@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "3319bcc2954642b073f43fcaf124cce1d14a00b9836bbad4630737e02584c743",
+  "subject_commit": "c4adc4169967f25d21915ca524d9feda4ebe5f2c",
+  "expires_at": "2026-10-31T04:16:04Z",
+  "single_use": true,
+  "action_type": "github_create_pull_request",
+  "target": "repository=MaginaLW/harness-model;base=main;head=codex/standing-delivery-successor",
+  "parameter_summary": "head_sha=f07cae88cbd5d03b9cdeda237f9433279b005c40;base_sha=bbf9434cdf437c77d05fe30142bea51875d471ac;body_sha256=322b5557221af992d31ec3f09934ad4406df0b0944940fbb2af0c6c92e09e08e;draft=false",
+  "conditions": [
+    "The owner explicitly authorized conditional delivery of this bounded change.",
+    "Require origin main bbf9434cdf437c77d05fe30142bea51875d471ac and remote branch f07cae88cbd5d03b9cdeda237f9433279b005c40; create no duplicate PR.",
+    "Require current task reviews, V1 and Gate; creating a PR does not authorize merge.",
+    "Launch, failure or interruption consumes this single-use attempt; inspect an uncertain outcome before any further decision."
+  ]
+}
