@@ -6,7 +6,6 @@ import importlib
 import json
 import os
 import shutil
-import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -14,9 +13,16 @@ from uuid import UUID
 
 import pytest
 from initialization_helpers import PortableFilesystem
+from initialization_helpers import fixture_git as git
+from initialization_helpers import snapshot_tree as tree
 
 from aiflow.errors import AiflowError
-from aiflow.resource_bundle import RESOURCE_KINDS, build_bundle
+from aiflow.resource_bundle import (
+    MAX_BUNDLE_BYTES,
+    MAX_RESOURCE_BYTES,
+    RESOURCE_KINDS,
+    build_bundle,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "src/aiflow/initialization.py"
@@ -31,44 +37,6 @@ else:
         or Path(initialization.__file__).resolve() != SOURCE.resolve()
     ):
         raise ImportError("initialization is not loaded from the tested checkout")
-
-
-def git(root: Path, *arguments: str) -> str:
-    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
-    environment.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
-    result = subprocess.run(
-        ["git", "-c", "core.fsmonitor=false", *arguments],
-        cwd=root,
-        env=environment,
-        capture_output=True,
-        check=True,
-        encoding="utf-8",
-        timeout=15,
-    )
-    return result.stdout.rstrip("\r\n")
-
-
-def tree(root: Path) -> dict[str, tuple[object, ...]]:
-    """Observe all fixture bytes and directory entries without following links."""
-    result: dict[str, tuple[object, ...]] = {}
-    for directory, directories, filenames in os.walk(root, followlinks=False):
-        for name in (*directories, *filenames):
-            path = Path(directory) / name
-            info = path.lstat()
-            relative = path.relative_to(root).as_posix()
-            if stat.S_ISLNK(info.st_mode):
-                result[relative] = ("link", os.readlink(path))
-            elif path.is_dir():
-                result[relative] = ("directory", info.st_dev, info.st_ino)
-            else:
-                result[relative] = (
-                    "file",
-                    info.st_dev,
-                    info.st_ino,
-                    info.st_mtime_ns,
-                    path.read_bytes(),
-                )
-    return result
 
 
 @pytest.fixture(scope="session")
@@ -177,6 +145,31 @@ def portable_filesystem(request: pytest.FixtureRequest, monkeypatch: pytest.Monk
         for handle in list(instance.handles):
             instance.close(handle)
     assert leaked == 0, "initialization left fixture object handles open"
+
+
+@pytest.fixture(scope="session")
+def complete_installation_seed(
+    tmp_path_factory: pytest.TempPathFactory,
+    initialization_seed: Path,
+    initialization_bundle: Path,
+) -> Path:
+    """One logical installation to copy for read-only integrity tests, not fresh apply."""
+    root = tmp_path_factory.mktemp("completed-initialization") / "repository"
+    shutil.copytree(initialization_seed, root)
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(initialization, "WindowsFilesystem", PortableFilesystem)
+        candidate = preview(root, initialization_bundle)
+        assert apply(root, candidate, initialization_bundle)["phase"] == "installed"
+    assert all(not instance.handles for instance in PortableFilesystem.instances)
+    return root
+
+
+@pytest.fixture
+def installed_repository(tmp_path: Path, complete_installation_seed: Path) -> Path:
+    root = tmp_path / "installed-repository"
+    shutil.copytree(complete_installation_seed, root)
+    initialization.require_initialization_ready(root)
+    return root
 
 
 def test_preview_is_read_only_and_binds_a_fresh_uuid(repository: Path, bundle: Path) -> None:
@@ -377,6 +370,75 @@ def test_policy_review_binds_candidate_bytes_not_just_semantics(
             policy_directory=candidate,
         )
     assert tree(repository) == before
+
+
+def test_policy_candidate_changed_in_place_during_apply_is_never_published(
+    repository: Path, bundle: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    policy_directory = tmp_path / "candidate-policy"
+    shutil.copytree(bundle / "policy", policy_directory)
+    routing = policy_directory / "routing.yaml"
+    original_inode = routing.stat().st_ino
+    candidate = initialization.preview_initialization(
+        repository, bundle_root=bundle, policy_directory=policy_directory
+    )
+    decision = review(candidate)
+    flush = PortableFilesystem.flush
+    changed = False
+
+    def change_policy_after_first_flush(self, handle):
+        nonlocal changed
+        flush(self, handle)
+        if not changed:
+            with routing.open("ab") as stream:
+                stream.write(b"\n# Concurrent edit; semantics unchanged, reviewed bytes changed.\n")
+            changed = True
+
+    monkeypatch.setattr(PortableFilesystem, "flush", change_policy_after_first_flush)
+
+    with pytest.raises(AiflowError):
+        initialization.apply_initialization(
+            repository,
+            candidate,
+            decision,
+            bundle_root=bundle,
+            policy_directory=policy_directory,
+        )
+    assert changed
+    assert routing.stat().st_ino == original_inode
+    assert not (repository / ".ai/repository-id").exists()
+
+
+def test_valid_individual_policies_cannot_exceed_the_aggregate_bundle_limit(
+    repository: Path, bundle: Path, tmp_path: Path
+) -> None:
+    from aiflow.contracts import schema_directory_context
+    from aiflow.policy import POLICY_FILES, load_policy_bundle
+
+    policy_directory = tmp_path / "large-policy"
+    shutil.copytree(bundle / "policy", policy_directory)
+    with schema_directory_context(bundle / "schemas"):
+        original = load_policy_bundle(repository, policy_directory=bundle / "policy")
+    for name in POLICY_FILES:
+        path = policy_directory / name
+        original_bytes = path.read_bytes()
+        padding = b"\n#" + b"x" * (MAX_RESOURCE_BYTES - len(original_bytes) - 3) + b"\n"
+        path.write_bytes(original_bytes + padding)
+        assert path.stat().st_size == MAX_RESOURCE_BYTES
+    # These remain four independently valid Policies with unchanged semantics.
+    with schema_directory_context(bundle / "schemas"):
+        padded = load_policy_bundle(repository, policy_directory=policy_directory)
+    assert padded.sha256 == original.sha256
+    assert sum(path.stat().st_size for path in policy_directory.iterdir()) == MAX_BUNDLE_BYTES
+    before = tree(repository)
+
+    with pytest.raises(AiflowError):
+        initialization.preview_initialization(
+            repository, bundle_root=bundle, policy_directory=policy_directory
+        )
+
+    assert tree(repository) == before
+    assert not (repository / ".ai").exists()
 
 
 @pytest.mark.parametrize("kind", ["directory", "file", "case-alias"])
@@ -1002,3 +1064,136 @@ def test_incomplete_installation_rejects_cli_before_dispatch(
 
     assert cli.main(arguments) == 1
     assert tree(repository) == before
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("policy", None),
+        ("policy.files", "not an array"),
+        ("policy.semantic_sha256", None),
+        ("policy.policy_version", True),
+        ("bundle", []),
+        ("bundle.manifest_sha256", ["not a digest"]),
+        ("objects", {}),
+        ("policy_review_sha256", False),
+    ],
+)
+def test_malformed_nested_state_returns_domain_rejection_and_readonly_conflict(
+    installed_repository: Path, field: str, value: object
+) -> None:
+    path = installed_repository / ".ai/init-state.json"
+    state = json.loads(path.read_bytes())
+    parts = field.split(".")
+    owner = state
+    for part in parts[:-1]:
+        owner = owner[part]
+    owner[parts[-1]] = value
+    path.write_text(json.dumps(state), encoding="utf-8")
+    before = tree(installed_repository)
+
+    with pytest.raises(AiflowError):
+        initialization.require_initialization_ready(installed_repository)
+    inspected = initialization.inspect_initialization(installed_repository)
+
+    assert inspected["status"] == "conflict"
+    assert inspected["issues"]
+    assert tree(installed_repository) == before
+
+
+@pytest.mark.parametrize("field", ["profile", "cli_version", "bundle_version"])
+def test_inspect_distinguishes_unsupported_versions_from_corrupt_installations(
+    installed_repository: Path, field: str
+) -> None:
+    path = installed_repository / ".ai/init-state.json"
+    state = json.loads(path.read_bytes())
+    if field == "profile":
+        state["profile"] = "unavailable-profile"
+    else:
+        state["bundle"][field] = "99.0.0"
+    path.write_text(json.dumps(state), encoding="utf-8")
+    before = tree(installed_repository)
+
+    inspected = initialization.inspect_initialization(installed_repository)
+
+    assert inspected["status"] == "unsupported"
+    assert tree(installed_repository) == before
+
+
+def test_inspect_absent_repository_does_not_create_state(repository: Path) -> None:
+    before = tree(repository)
+    inspected = initialization.inspect_initialization(repository)
+    assert inspected["status"] == "absent"
+    assert inspected["issues"] == []
+    assert inspected["has_history"] is False
+    assert tree(repository) == before
+
+
+def test_inspect_verified_partial_reports_relative_missing_paths_without_recovery(
+    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    candidate = preview(repository, bundle)
+    create = PortableFilesystem.create_file
+
+    def interrupt(self, parent_handle, name, **keywords):
+        if name == "task.schema.json":
+            raise AiflowError("injected stop before a planned resource")
+        return create(self, parent_handle, name, **keywords)
+
+    monkeypatch.setattr(PortableFilesystem, "create_file", interrupt)
+    with pytest.raises(AiflowError):
+        apply(repository, candidate, bundle)
+    before = tree(repository)
+
+    inspected = initialization.inspect_initialization(repository)
+
+    assert inspected["status"] == "incomplete"
+    assert inspected["repository_id"] == candidate["repository_id"]
+    assert {"path": ".ai/schemas/task.schema.json", "code": "missing"} in inspected["issues"]
+    assert all(issue["code"] == "missing" for issue in inspected["issues"])
+    assert all(not Path(issue["path"]).is_absolute() for issue in inspected["issues"])
+    assert tree(repository) == before
+
+
+@pytest.mark.parametrize("change", ["modified", "missing", "unknown"])
+def test_inspect_and_migration_preserve_and_report_changed_managed_files(
+    installed_repository: Path, bundle: Path, change: str
+) -> None:
+    relative = ".ai/templates/spec.md"
+    path = installed_repository / relative
+    if change == "modified":
+        path.write_bytes(b"later owner change\n")
+    elif change == "missing":
+        path.unlink()
+    else:
+        path.unlink()
+        path.mkdir()
+    before = tree(installed_repository)
+
+    inspected = initialization.inspect_initialization(installed_repository)
+    planned = initialization.plan_initialization_migration(installed_repository, bundle_root=bundle)
+
+    assert inspected["status"] == "conflict"
+    assert planned["read_only"] is True
+    assert {"path": relative, "status": change} in [
+        {"path": row["path"], "status": row["status"]} for row in planned["files"]
+    ]
+    assert tree(installed_repository) == before
+
+
+def test_migration_reports_unknown_files_and_preserves_task_history(
+    installed_repository: Path, bundle: Path
+) -> None:
+    unknown = installed_repository / ".ai/owner-note.txt"
+    unknown.write_bytes(b"unknown owner material\n")
+    history = installed_repository / ".ai/tasks/TASK-0001/events.jsonl"
+    history.parent.mkdir(parents=True)
+    history.write_bytes(b"frozen original history\n")
+    before = tree(installed_repository)
+
+    planned = initialization.plan_initialization_migration(installed_repository, bundle_root=bundle)
+
+    assert planned["has_history"] is True
+    assert planned["read_only"] is True
+    assert {"path": ".ai/owner-note.txt", "code": "unknown"} in planned["issues"]
+    assert tree(installed_repository) == before

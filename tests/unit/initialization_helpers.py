@@ -4,9 +4,48 @@ from __future__ import annotations
 
 import os
 import stat
+import subprocess
 from pathlib import Path
 
 from aiflow.errors import AiflowError
+
+
+def fixture_git(root: Path, *arguments: str) -> str:
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    environment.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
+    result = subprocess.run(
+        ["git", "-c", "core.fsmonitor=false", *arguments],
+        cwd=root,
+        env=environment,
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
+        timeout=15,
+    )
+    return result.stdout.rstrip("\r\n")
+
+
+def snapshot_tree(root: Path) -> dict[str, tuple[object, ...]]:
+    """Observe all fixture bytes and directory entries without following links."""
+    result: dict[str, tuple[object, ...]] = {}
+    for directory, directories, filenames in os.walk(root, followlinks=False):
+        for name in (*directories, *filenames):
+            path = Path(directory) / name
+            info = path.lstat()
+            relative = path.relative_to(root).as_posix()
+            if stat.S_ISLNK(info.st_mode):
+                result[relative] = ("link", os.readlink(path))
+            elif path.is_dir():
+                result[relative] = ("directory", info.st_dev, info.st_ino)
+            else:
+                result[relative] = (
+                    "file",
+                    info.st_dev,
+                    info.st_ino,
+                    info.st_mtime_ns,
+                    path.read_bytes(),
+                )
+    return result
 
 
 class PortableFilesystem:

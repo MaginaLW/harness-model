@@ -7,6 +7,7 @@ import importlib
 import os
 import struct
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -45,6 +46,8 @@ class FakeKernel:
         self.attributes = 0
         self.links = 1
         self.filesystem = "NTFS"
+        self.creation_information = 2
+        self.io_status = 0
         self.native_names: list[str] = []
         self.native_roots: list[int] = []
         callbacks = {
@@ -104,7 +107,7 @@ class FakeKernel:
         options = integer(_arguments[3])
         handle = self._new(directory=bool(options & 1))
         ctypes.memmove(output, struct.pack("<Q", handle), 8)
-        ctypes.memmove(iosb, struct.pack("<QQ", 0, 2), 16)
+        ctypes.memmove(iosb, struct.pack("<QQ", self.io_status, self.creation_information), 16)
         return 0
 
     def _information(self, handle, output):
@@ -375,6 +378,30 @@ def test_nt_collision_is_translated_and_never_retried_as_open_existing(kernel: F
     filesystem.close(parent)
 
 
+@pytest.mark.parametrize("status", [0x103, 0x40000000, 0x80000005, 0xC0000022])
+def test_nt_nonzero_status_is_not_synchronous_creation_success(
+    kernel: FakeKernel, status: int
+) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    parent = filesystem.open_directory(FAKE_ROOT, share_write=True)
+    kernel.fail["NtCreateFile"] = status
+    with pytest.raises(AiflowError):
+        filesystem.create_directory(parent, ".ai", share_write=True)
+    kernel.fail.clear()
+    filesystem.close(parent)
+
+
+@pytest.mark.parametrize("information", [0, 1, 3, 99])
+def test_nt_success_requires_file_created_information(kernel: FakeKernel, information: int) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    parent = filesystem.open_directory(FAKE_ROOT, share_write=True)
+    kernel.creation_information = information
+    with pytest.raises(AiflowError):
+        filesystem.create_directory(parent, ".ai", share_write=True)
+    assert any(name == "CloseHandle" for name, _arguments in kernel.calls)
+    filesystem.close(parent)
+
+
 def test_volume_reports_actual_filesystem_facts(kernel: FakeKernel) -> None:
     filesystem = windows.WindowsFilesystem(api=kernel)
     handle = filesystem.open_directory(FAKE_ROOT, share_write=True)
@@ -445,3 +472,170 @@ def test_default_api_rejects_unsupported_platform_without_loading_dlls() -> None
         pytest.skip("the unsupported default path is exercised on POSIX")
     with pytest.raises(AiflowError):
         windows.WindowsFilesystem()
+
+
+def native_environment(monkeypatch: pytest.MonkeyPatch, kernel: FakeKernel, loader) -> None:
+    """Replace only this module's references, never the interpreter's os.name."""
+    proxy = SimpleNamespace(**{**vars(ctypes), "WinDLL": loader})
+    monkeypatch.setattr(windows, "ctypes", proxy)
+    monkeypatch.setattr(windows, "os", SimpleNamespace(name="nt"))
+    monkeypatch.setattr(
+        windows,
+        "sys",
+        SimpleNamespace(implementation=SimpleNamespace(name="cpython"), version_info=(3, 11)),
+    )
+
+
+def test_default_loader_binds_only_the_two_expected_dlls(
+    kernel: FakeKernel, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    loaded = []
+
+    def load(name, **keywords):
+        loaded.append((name, keywords))
+        return kernel
+
+    native_environment(monkeypatch, kernel, load)
+    filesystem = windows.WindowsFilesystem()
+    handle = filesystem.open_directory(FAKE_ROOT)
+    filesystem.close(handle)
+    assert loaded == [("kernel32", {"use_last_error": True}), ("ntdll", {"use_last_error": True})]
+
+
+def test_default_loader_failure_is_unsupported(
+    kernel: FakeKernel, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def unavailable(*_arguments, **_keywords):
+        raise OSError("synthetic missing Windows API")
+
+    native_environment(monkeypatch, kernel, unavailable)
+    with pytest.raises(AiflowError) as error:
+        windows.WindowsFilesystem()
+    assert error.value.code == "INITIALIZATION_UNSUPPORTED"
+
+
+@pytest.mark.parametrize("reason", ["os", "interpreter", "version"])
+def test_default_api_checks_runtime_before_loading_any_dll(
+    kernel: FakeKernel, monkeypatch: pytest.MonkeyPatch, reason: str
+) -> None:
+    def unexpected(*_arguments, **_keywords):
+        pytest.fail("unsupported runtime attempted to load a DLL")
+
+    native_environment(monkeypatch, kernel, unexpected)
+    if reason == "os":
+        monkeypatch.setattr(windows, "os", SimpleNamespace(name="posix"))
+    else:
+        monkeypatch.setattr(
+            windows,
+            "sys",
+            SimpleNamespace(
+                implementation=SimpleNamespace(
+                    name="pypy" if reason == "interpreter" else "cpython"
+                ),
+                version_info=(3, 12) if reason == "version" else (3, 11),
+            ),
+        )
+    with pytest.raises(AiflowError):
+        windows.WindowsFilesystem()
+
+
+def test_unknown_abi_is_rejected_before_api_use(
+    kernel: FakeKernel, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    proxy = SimpleNamespace(**{**vars(ctypes), "sizeof": lambda _value: 4})
+    monkeypatch.setattr(windows, "ctypes", proxy)
+    with pytest.raises(AiflowError):
+        windows.WindowsFilesystem(api=kernel)
+    assert not kernel.calls
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["\ud800", "x" * 256, "😀" * 128, "CON.txt", "aux", "trailing.", "trailing "],
+    ids=["surrogate", "too-long", "utf16-too-long", "device-extension", "device", "dot", "space"],
+)
+def test_child_name_encoding_and_windows_aliases_are_rejected(
+    kernel: FakeKernel, name: str
+) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    parent = filesystem.open_directory(FAKE_ROOT)
+    with pytest.raises(AiflowError):
+        filesystem.create_file(parent, name)
+    filesystem.close(parent)
+
+
+def test_absolute_name_rejects_invalid_utf16_without_opening(kernel: FakeKernel) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    with pytest.raises(AiflowError):
+        filesystem.open_file(FAKE_ROOT / "\ud800")
+    assert not kernel.calls
+
+
+@pytest.mark.parametrize("handle", [None, True, 0, 999])
+def test_unknown_handles_cannot_reach_kernel_io(kernel: FakeKernel, handle: object) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    with pytest.raises(AiflowError):
+        filesystem.identity(handle)
+    assert not kernel.calls
+
+
+def test_only_directory_handles_can_own_new_children(kernel: FakeKernel) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    file = filesystem.open_file(FAKE_ROOT / "file")
+    with pytest.raises(AiflowError):
+        filesystem.create_file(file, "child")
+    filesystem.close(file)
+
+
+def test_kernel_cannot_claim_more_read_bytes_than_the_buffer(kernel: FakeKernel) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    file = filesystem.open_file(FAKE_ROOT / "file")
+
+    def oversized_count(_handle, _buffer, size, count, _overlapped):
+        put_u32(count, integer(size) + 1)
+        return 1
+
+    kernel.ReadFile = oversized_count
+    with pytest.raises(AiflowError):
+        filesystem.read(file, 4)
+    filesystem.close(file)
+
+
+def test_opened_files_cannot_be_overwritten_even_with_writable_access(kernel: FakeKernel) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    file = filesystem.open_file(FAKE_ROOT / "existing", writable=True)
+    kernel.handles[file]["content"] = b"owner data"
+    with pytest.raises(AiflowError):
+        filesystem.write(file, b"replacement")
+    assert kernel.handles[file]["content"] == b"owner data"
+    filesystem.close(file)
+
+
+def test_new_file_gets_only_one_write_attempt(kernel: FakeKernel) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    root = filesystem.open_directory(FAKE_ROOT)
+    file = filesystem.create_file(root, "new")
+    filesystem.write(file, b"first")
+    with pytest.raises(AiflowError):
+        filesystem.write(file, b"second")
+    assert kernel.handles[file]["content"] == b"first"
+    filesystem.close(file)
+    filesystem.close(root)
+
+
+def test_rename_requires_the_original_rename_capable_handle(kernel: FakeKernel) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    file = filesystem.open_file(FAKE_ROOT / "not-owned-for-rename")
+    with pytest.raises(AiflowError):
+        filesystem.rename_no_replace(file, FAKE_ROOT / "destination")
+    filesystem.close(file)
+
+
+def test_closed_handles_are_not_closed_again_or_reused(kernel: FakeKernel) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    file = filesystem.open_file(FAKE_ROOT / "file")
+    filesystem.close(file)
+    count = sum(name == "CloseHandle" for name, _arguments in kernel.calls)
+    with pytest.raises(AiflowError):
+        filesystem.close(file)
+    assert sum(name == "CloseHandle" for name, _arguments in kernel.calls) == count
