@@ -140,8 +140,8 @@ goal: Deliver the complete installed Node V0/V1 profile with measured shared-run
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-10-31T22:10:23Z'
-subject_commit: a05037749cb9f9b301e761d77cfb3b3f54c1c9f0
+subject_commit: 547b1219e361dce14b1c44491983b28fc817dbd0
 task_id: TASK-0129
-updated_at: '2026-10-31T22:14:36Z'
+updated_at: '2026-10-31T22:27:58Z'
 worktree_dirty: false
 worktree_dirty_paths: []
