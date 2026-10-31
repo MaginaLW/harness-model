@@ -560,7 +560,10 @@ def evaluate_gate(
         if route_by_id.get(str(unit["decision_unit_id"])) == "AUTO"
     )
     forbidden_present = forbidden_action_present(
-        task.get("forbidden_actions", []),
+        (
+            *task.get("forbidden_actions", []),
+            *policy.documents["permissions.yaml"]["forbidden_automatic_actions"],
+        ),
         tuple(action for unit in unfinished_units for action in unit.get("planned_actions", [])),
     )
     approval_requirements = any(
