@@ -11,5 +11,21 @@
     "spec_sha256": "ffa877ba946514096acd359123f1610cec15af5d6dd220dcb20566351260cd90",
     "subject_commit": "1856975c94c74b267c60cfa5ee00a86cd46238d5",
     "task_id": "TASK-0126"
+  },
+  {
+    "action_sha256": "11bc0a76d650284647dac0dc9f447757a932c0fbb82f07161dff757518007e70",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-31T03:31:27Z",
+    "base_commit": "1856975c94c74b267c60cfa5ee00a86cd46238d5",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-31T05:30:42Z",
+    "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+    "reason": "常设授权：/root/review_task95独立审核当前具体action APPROVE，无critical/high；仅TASK126精确subject的一次本地固定变异，沿用原生隔离/消费/清理，不复用旧action",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "ffa877ba946514096acd359123f1610cec15af5d6dd220dcb20566351260cd90",
+    "subject_commit": "79addf5acec87295554464cedc096fa21d9b7a53",
+    "task_id": "TASK-0126"
   }
 ]
