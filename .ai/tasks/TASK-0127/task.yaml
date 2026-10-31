@@ -75,8 +75,8 @@ goal: Deliver reviewed non-overwriting Windows resource initialization
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-10-31T04:57:24Z'
-subject_commit: fb89032a69a5d9f062f168e4e0346a9237c5ab84
+subject_commit: 5efb6877959eb3c2522f87941511d96861eea35e
 task_id: TASK-0127
-updated_at: '2026-10-31T04:59:02Z'
+updated_at: '2026-10-31T05:21:29Z'
 worktree_dirty: false
 worktree_dirty_paths: []
