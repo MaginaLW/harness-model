@@ -1,0 +1,43 @@
+{
+  "base_commit": "1856975c94c74b267c60cfa5ee00a86cd46238d5",
+  "branch": "codex/agent-bridge-resource-delivery",
+  "classification_input_sha256": "01993b30f486d9989f27fc0fc1151091c247c512f110e4a7dda2cfb02ac16563",
+  "content": {
+    "allowed_scope": [
+      "setup.py",
+      "MANIFEST.in",
+      "pyproject.toml",
+      "uv.lock",
+      "src/aiflow/resource_bundle.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Deliver reviewed current-policy resources after repairing native test prerequisites",
+        "impact_scope": [
+          "setup.py",
+          "MANIFEST.in",
+          "pyproject.toml",
+          "uv.lock",
+          "src/aiflow/resource_bundle.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Deliver reviewed current-policy resources after repairing native test prerequisites",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "87695e98b499bc9ae79feb2a557e19685ecd9fa0f56a88f858a5f2391e81db5e",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "ffa877ba946514096acd359123f1610cec15af5d6dd220dcb20566351260cd90",
+  "task_id": "TASK-0126"
+}

@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "01993b30f486d9989f27fc0fc1151091c247c512f110e4a7dda2cfb02ac16563",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0126",
+  "parameter_summary": "One fresh fixed phase-02-critical run for the dependency-copy correction subject; five disposable isolated worktrees maximum; same audited direct Git, native checks and cleanup rules.",
+  "subject_commit": "a6580f9143a5ddf74244a3e09c41c087d5a6d80d",
+  "conditions": [
+    "Independent concrete action review APPROVE without open critical/high findings and current spec/design/classification bindings.",
+    "This authority targets the new copy-mode source; prior actions remain spent and prior failed/successful attempts remain historical.",
+    "One launch only; failure or interruption consumes it; preserve receipts, artifacts and unknown cleanup.",
+    "No target application, real engine/model/WeChat/production or private-material transmission; only existing anonymous public dependency acquisition in reviewed tests."
+  ],
+  "expires_at": "2026-10-31T06:10:11Z",
+  "single_use": true
+}

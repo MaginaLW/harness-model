@@ -447,7 +447,7 @@ def test_builder_limits_raw_and_normalized_resources(
         path = source / ".ai" / relative
         if relative.startswith("policy/"):
             data = (
-                'schema_version: "1.0"\npolicy_version: "2.5.0"\n'
+                'schema_version: "1.0"\npolicy_version: "2.6.0"\n'
                 f"policy_kind: {resource_bundle.POLICIES[path.name]}\n"
             ).encode()
         else:

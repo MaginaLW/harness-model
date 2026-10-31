@@ -1,0 +1,76 @@
+allowed_scope:
+- setup.py
+- MANIFEST.in
+- pyproject.toml
+- uv.lock
+- src/aiflow/resource_bundle.py
+base_commit: 1856975c94c74b267c60cfa5ee00a86cd46238d5
+branch: codex/agent-bridge-resource-delivery
+created_at: '2026-10-31T03:27:16Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - Anonymous public package dependency acquisition in disposable environments; reviewed
+    same-repository branch push, PR and conditional merge under standing authorization.
+  goal: Deliver reviewed current-policy resources after repairing native test prerequisites
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  - external_action
+  impact_scope:
+  - setup.py
+  - MANIFEST.in
+  - pyproject.toml
+  - uv.lock
+  - src/aiflow/resource_bundle.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0126
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: ffa877ba946514096acd359123f1610cec15af5d6dd220dcb20566351260cd90
+goal: Deliver reviewed current-policy resources after repairing native test prerequisites
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-31T03:27:55Z'
+subject_commit: a6580f9143a5ddf74244a3e09c41c087d5a6d80d
+task_id: TASK-0126
+updated_at: '2026-10-31T04:33:27Z'
+worktree_dirty: false
+worktree_dirty_paths: []

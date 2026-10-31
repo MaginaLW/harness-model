@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
 import re
 import shlex
 import subprocess
 import sys
+from importlib.machinery import PathFinder
 from pathlib import Path
 
 import yaml
@@ -54,7 +54,7 @@ def _installed_environment(target: Path) -> dict[str, str]:
 
 
 def _install_clean_clone(clone: Path, installed: Path, install_env: dict[str, str]) -> None:
-    if importlib.util.find_spec("pip") is not None:
+    if PathFinder.find_spec("pip") is not None:
         interpreter = sys.executable
     else:
         base_executable = getattr(sys, "_base_executable", None)
@@ -94,7 +94,7 @@ def test_clean_clone_uses_base_interpreter_when_active_has_no_pip(
         calls.append(argv)
         return subprocess.CompletedProcess(argv, 0, "", "")
 
-    monkeypatch.setattr(importlib.util, "find_spec", lambda name: None)
+    monkeypatch.setattr(PathFinder, "find_spec", lambda name: None)
     monkeypatch.setattr(sys, "_base_executable", str(base_interpreter), raising=False)
     monkeypatch.setitem(globals(), "_run", fake_run)
 
@@ -115,6 +115,30 @@ def test_clean_clone_uses_base_interpreter_when_active_has_no_pip(
             str(clone),
         ]
     ]
+
+
+def test_clean_clone_pip_probe_does_not_query_meta_path(monkeypatch, tmp_path: Path) -> None:
+    class RejectPipMetaFinder:
+        def find_spec(self, fullname: str, path=None, target=None):
+            if fullname == "pip":
+                raise AssertionError(
+                    "pip availability probing must not invoke global meta-path hooks"
+                )
+            return None
+
+    calls: list[list[str]] = []
+
+    def fake_run(argv: list[str], **kwargs) -> subprocess.CompletedProcess[str]:
+        calls.append(argv)
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    monkeypatch.setattr(sys, "meta_path", [RejectPipMetaFinder(), *sys.meta_path])
+    monkeypatch.setitem(globals(), "_run", fake_run)
+
+    _install_clean_clone(tmp_path / "checkout", tmp_path / "installed", {})
+
+    assert len(calls) == 1
+    assert calls[0][1:4] == ["-m", "pip", "install"]
 
 
 def test_quickstart_marked_commands_and_paths_are_executable() -> None:

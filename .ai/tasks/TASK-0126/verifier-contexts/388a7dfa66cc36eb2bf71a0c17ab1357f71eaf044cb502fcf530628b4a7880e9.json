@@ -1,0 +1,70 @@
+{
+  "base_commit": "1856975c94c74b267c60cfa5ee00a86cd46238d5",
+  "branch": "codex/agent-bridge-resource-delivery",
+  "classification_input_sha256": "01993b30f486d9989f27fc0fc1151091c247c512f110e4a7dda2cfb02ac16563",
+  "content": {
+    "acceptance_conditions": [
+      "Resource unit, preflight and distribution tests must load the candidate module from this checkout without absent-module skips, and exercise both build paths, LF/CRLF equivalence, corruption/type/link/archive boundaries and isolated offline installation outside the source tree. Run the complete native suite, both source domains' 85% total and 90% diff coverage, Ruff, format, mypy and whitespace without lowering checks or thresholds. Complete actual REVIEW/V2 native verification, independent design/implementation reviews, one-use action consumption, final evidence, code approval and Gate. Preserve unsuccessful attempts. Audit the current task and evidence for local absolute paths and secrets before committing. The existing maintenance-mode remote CI runs full quality checks; report that accurately and do not call it native CI replay. Confirm required checks against the exact PR head, then use only a merge commit if the task and repository permit delivery."
+    ],
+    "code_map": {
+      "allowed_scope": [
+        "MANIFEST.in",
+        "pyproject.toml",
+        "setup.py",
+        "src/aiflow/resource_bundle.py",
+        "uv.lock"
+      ],
+      "changed_paths": [
+        ".ai/tasks/TASK-0126/action-use-11bc0a76d650284647dac0dc9f447757a932c0fbb82f07161dff757518007e70.md",
+        ".ai/tasks/TASK-0126/action-v2-targeted-mutation-resource.json",
+        ".ai/tasks/TASK-0126/approvals.json",
+        ".ai/tasks/TASK-0126/classification.json",
+        ".ai/tasks/TASK-0126/events.jsonl",
+        ".ai/tasks/TASK-0126/evidence.json",
+        ".ai/tasks/TASK-0126/review-contexts/87695e98b499bc9ae79feb2a557e19685ecd9fa0f56a88f858a5f2391e81db5e.json",
+        ".ai/tasks/TASK-0126/review-contexts/e54255e96dbd1e6310135ba2784f57568d0096512fd434c2bda3f9ab372a4cb6.json",
+        ".ai/tasks/TASK-0126/review-package.md",
+        ".ai/tasks/TASK-0126/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0126/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0126/spec.md",
+        ".ai/tasks/TASK-0126/task.yaml",
+        ".ai/tasks/TASK-0126/verifier-contexts/7b37935775e40fecb5e094dbee9a65e18db1a024fa7038ae4947246b6986581a.json",
+        "MANIFEST.in",
+        "pyproject.toml",
+        "setup.py",
+        "src/aiflow/resource_bundle.py",
+        "uv.lock"
+      ]
+    },
+    "diff_summary": {
+      "additions": 1758,
+      "binary_files": 0,
+      "deletions": 2,
+      "files": 19
+    },
+    "frozen_spec": "# Task Specification\n\n## 目标\n\nDeliver the reviewed, versioned resource bundle on the current Policy 2.6.0 baseline so agent-bridge initialization can consume an installed wheel without this checkout.\n\n## 范围\n\nGoverned implementation is limited to setup.py, MANIFEST.in, pyproject.toml, uv.lock and src/aiflow/resource_bundle.py; the current task ledger is appended through the CLI. Reuse the resource candidate from commit 8881a896, independently review it against the current baseline and adapt its fixed Policy version to 2.6.0. Bundle only the 15 recognized schemas, four current Policy seeds and spec template from this checkout. Canonicalize UTF-8 CRLF to LF, reject bare CR, invalid encoding, missing/extra/duplicate/escaping inputs, unsupported file types, links/reparse points, unknown or non-unit file link counts and incompatible metadata. Bind resource paths, kinds, sizes and hashes, resource/CLI/Policy versions. Keep the fixed filesystem Path and zipfile.Path reader contract, bounded reads and fail-closed behavior. Preserve installed target Schema and Policy resolution; package updates never install resources into a repository.\n\nRetain the candidate build guards for source, resource, metadata, cache, staging and relevant existing output paths. Build direct wheel, sdist and rebuilt wheel using locked build/setuptools/wheel tools and no build isolation; audit complete distributions for identity/history exclusion. The inline package readme and exact sdist file list prevent tracked repository identity and histories from entering the distribution. The existing distribution tests reconstruct an offline wheelhouse only from verified installed locked runtime distributions, RECORD paths/hashes/sizes, compatible WHEEL tags and the explicit Python 3.11 no-extras closure; this proves local consistency, not publisher authenticity. Source and dependencies must be ordinary independent files; prepare the disposable environment with uv copy mode and verify link counts rather than relaxing the guards.\n\nThis is a successor delivery slice, not a recovery or downgrade of TASK-0112 or TASK-0125. Preserve all prior tasks, approvals, evidence, prohibitions and local private records in their original locations. Start on current main plus the separate task-free fixture correction; do not import old ledgers or approvals. The native full test suite and actual classified V2 remain mandatory. Its clean-checkout fixture may acquire public build dependencies: permit only anonymous public-index requests from a minimal credential-free environment with task-owned temporary paths. Do not transmit existing private evidence. Generate new path-safe evidence at its source, audit it and all new tracked content before any public delivery; if required private content remains, retain the block and continue independent work. Native V2 uses the current main contract; this task does not claim TASK-0095 attribution hardening or external-engine V2 support.\n\nTASK-0125 and its source, failed native evidence, permanently consumed action and later BLOCKED record remain on the retained codex/agent-bridge-delivery branch. Its full suite reached 74% before the fixed 1200-second limit and exposed three shared build-fixture setup errors. Independent reproduction traced those errors to pip availability probing through global meta-path hooks, not resource source code. The separate task-free baseline now uses PathFinder for that probe and a real regression; its pytest configuration allocates a fresh short temporary root per invocation, preserves explicit basetemp and fails closed on allocation failure. Real mini-pytest regressions cover those behaviors. A focused 130-test performance comparison improved from 181 seconds to 45 seconds with isolated roots and the same-installation direct Git executable. These measurements are diagnostics, not native V2 evidence. Native argv, complete test collection, budget, required categories and coverage thresholds remain unchanged.\n\nThis task starts at the actual pre-implementation baseline 1856975: all five production/build paths match current main, with setup.py, MANIFEST.in and the resource module absent. Apply only those five files from reviewed candidate 8869029 and independently review their exact current diff. Unlike starting after an implementation, this keeps the full resource change in the native 90% diff coverage range. Do not copy old task ledgers or approvals into this branch. Use a new task-bound, subject-bound one-use action and a fresh independent verifier context. The independently audited native environment may select the actual Git executable under the same installation rather than its cmd wrapper; versions, exec path and repository facts must agree. Do not add environment shims or change validation commands to obtain a pass.\n\nSerial execution: independently reviewed frozen contract, implementation, exact candidate commit and sync, separately reviewed/approved one-use local mutation action, independent native verification, current implementation review, finalization/code approval/Gate, then conditional same-repository delivery. Independent resource inspection and target read-only/isolated checks may run in parallel with non-overlapping ownership; the integrator owns these five implementation files and final verification. Use at most four concurrent agents including the integrator for this stage. Standing authorization permits spec approval before verify and the local mutation action before the verification it enables, provided the applicable independent review is APPROVE without open critical/high findings and current bindings hold.\n\n## 非目标\n\nNo initializer, target Policy adoption, Node verification profile, agent-bridge installation, remote settings, model/WeChat/production execution, V2 redesign, historical evidence transfer, generic migration framework or threshold changes. Resource delivery alone is not full agent-bridge integration. Companion tests and long-term usage documentation remain separate task-free changes.\n\n## 验收条件\n\nResource unit, preflight and distribution tests must load the candidate module from this checkout without absent-module skips, and exercise both build paths, LF/CRLF equivalence, corruption/type/link/archive boundaries and isolated offline installation outside the source tree. Run the complete native suite, both source domains' 85% total and 90% diff coverage, Ruff, format, mypy and whitespace without lowering checks or thresholds. Complete actual REVIEW/V2 native verification, independent design/implementation reviews, one-use action consumption, final evidence, code approval and Gate. Preserve unsuccessful attempts. Audit the current task and evidence for local absolute paths and secrets before committing. The existing maintenance-mode remote CI runs full quality checks; report that accurately and do not call it native CI replay. Confirm required checks against the exact PR head, then use only a merge commit if the task and repository permit delivery.\n\n## 禁止动作\n\nNo deployment, data deletion, credential export, paid calls, private-index access, transmission of unauthorized private materials, force push, pushed-history rewriting, tags, direct main push, cross-repository publication or repository setting changes. Conditional public delivery is only the exact reviewed candidate to MaginaLW/harness-model refs/heads/codex/agent-bridge-resource-delivery and its PR, after applicable local gates, then merge commit after current required checks. Do not include existing working-tree changes or old private task ledgers. Actual local mutation requires separately reviewed, current, single-use action approval and the existing isolation/consumption/cleanup controls.\n\n## 错误行为\n\nReject invalid/unsupported/ambiguous resources, metadata, manifests, paths, toolchain, bindings, stale approvals or evidence and unconfirmed process cleanup. Follow the CLI classification and scope gates; do not lower V2 or replace full native evidence with synthetic or partial results. Preserve failures and stop only the affected stage when a required owner decision or unavailable environment remains.\n\n## 回滚\n\nUse reviewed forward commits or Git revert for source/build configuration. Preserve append-only histories and evidence, never rewrite pushed commits or delete unknown files, and never uninstall target history.\n",
+    "goal": "Deliver reviewed current-policy resources after repairing native test prerequisites",
+    "known_limitations": [
+      "Acceptance, integration, and targeted mutation execution are owned by Chapter 11."
+    ],
+    "reproduce_command": [
+      "python",
+      "-m",
+      "aiflow",
+      "verify",
+      "TASK-0126",
+      "--actor",
+      "<verifier>"
+    ]
+  },
+  "context_sha256": "388a7dfa66cc36eb2bf71a0c17ab1357f71eaf044cb502fcf530628b4a7880e9",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "schema_version": "1.0",
+  "spec_sha256": "ffa877ba946514096acd359123f1610cec15af5d6dd220dcb20566351260cd90",
+  "subject_commit": "a6580f9143a5ddf74244a3e09c41c087d5a6d80d",
+  "task_id": "TASK-0126"
+}

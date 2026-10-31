@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "01993b30f486d9989f27fc0fc1151091c247c512f110e4a7dda2cfb02ac16563",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0126",
+  "parameter_summary": "One fixed phase-02-critical mutation run for this exact TASK-0126 subject; five disposable isolated worktrees maximum; current native runner and audited same-installation direct Git; no target applications or external services.",
+  "subject_commit": "79addf5acec87295554464cedc096fa21d9b7a53",
+  "conditions": [
+    "Independent action review APPROVE without open critical/high findings; current spec/classification/design and precise Git bindings must hold.",
+    "This is new authority for TASK-0126, not reuse of TASK-0125 consumed action or failed evidence.",
+    "One launch; failure/interruption consumes authority, preserve receipts and unknown cleanup; no retries under this approval.",
+    "Keep current native checks, budgets, 85/90 thresholds and isolation/cleanup controls. Anonymous public dependency acquisition only for the reviewed suite, no private material transmission."
+  ],
+  "expires_at": "2026-10-31T05:30:42Z",
+  "single_use": true
+}
