@@ -38,6 +38,12 @@ f57ee4f 的普通 wheel 重验通过：SHA-256 为 37391cbee8902c8b55b05dafbbe45
 
 ## 审核问题
 
+### 保留的实施预审发现 RF-001（medium，REQUEST_CHANGES）
+
+独立完整源码预审在 f57ee4f 确认：普通 Python equality 会把 JSON 的 bool/int 或 int/等值 float 视为相等。受影响边界为 preview.target、preview Policy files、preview objects，以及 state 的身份对象大小和 Policy files。特别是 preview 资源 size 改为等值 float 后重新绑定摘要，会通过 apply 的比较并写入 state，随后 ready 的严格 int 检查拒绝该成功返回的安装。此发现必须修复，不降级或接受未解决风险。最小修复复用现有 canonical JSON 序列化作类型敏感比较；畸形 preview 应在创建 .ai 前零写拒绝，畸形 state 应 ready 拒绝且 inspect 给非空问题、保持零写。
+
+run-20261031T061944449564Z 的执行会话已不可恢复，原 verifier/pytest 进程消失，只保留前置日志和 context，没有该 run 的完整测试结果或新 evidence。独立 verifier 已通过 CLI abandon 追加中断记录；退出原因和 pipeline cleanup 未确认，不报告测试数量、覆盖率、超时或成功。9c86 动作已用于一次 launch，不复用；因未观察到 mutation 消费回执，不能称已完成变异消费。CLI 当前拒绝生成正式 implementation context（requires passed evidence），本预审发现先保存在本审核包，待当前候选通过后在正式审核中引用并独立复核关闭。
+
 初始化是否只创建受审清单且最后正确发布身份；中断、漂移、链接、未知状态和损坏是否拒绝且保留字节；新 CLI 是否在治理写入前拒绝不完整状态；legacy 与完整 native 门禁是否保持？
 
 ## 推荐结论
