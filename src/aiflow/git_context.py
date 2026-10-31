@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import uuid
@@ -179,7 +180,8 @@ def _normalize_status_path(path: str) -> str:
     if (
         not path
         or "\\" in path
-        or ":" in path
+        or re.match(r"^[A-Za-z]:", path) is not None
+        or (os.name == "nt" and ":" in path)
         or any(ord(char) < 32 or ord(char) == 127 for char in path)
         or any(part in {"", ".", ".."} for part in path.split("/"))
     ):
@@ -321,11 +323,31 @@ def collect_git_context(path: Path) -> GitContext:
     repository_root = resolve_repository_root(path)
     repository_id = _read_repository_id(repository_root)
 
-    status = _run_git(
-        repository_root,
-        ("status", "--porcelain=v2", "--branch", "--no-show-stash", "-z", "--untracked-files=all"),
-        failure_code="GIT_STATUS_UNAVAILABLE",
-    )
+    try:
+        status = _run_git(
+            repository_root,
+            (
+                "status",
+                "--porcelain=v2",
+                "--branch",
+                "--no-show-stash",
+                "-z",
+                "--untracked-files=all",
+            ),
+            failure_code="GIT_STATUS_UNAVAILABLE",
+        )
+    except AiflowError:
+        # Preserve the original HEAD/branch failure priority with inherited Git env.
+        # Only the failed aggregate query needs these diagnostic reads.
+        head = _run_git(
+            repository_root,
+            ("rev-parse", "HEAD"),
+            failure_code="GIT_HEAD_UNAVAILABLE",
+        )
+        if HEAD_PATTERN.fullmatch(head) is None:
+            raise _error("Git HEAD is not a 40-character commit", "GIT_HEAD_INVALID")
+        _read_branch(repository_root)
+        raise
     head, status_branch, dirty_paths, has_upstream = _parse_status(status)
     # Git's --short spelling may include heads/ or refs/heads/ when tags collide.
     # Keep that existing fact instead of implementing Git's abbreviation algorithm.
