@@ -322,6 +322,10 @@ def load_policy_bundle(
     policy_directory: Path | None = None,
 ) -> PolicyBundle:
     """Load the four fixed Policy files and reject unsafe or contradictory input."""
+    if policy_directory is None:
+        from aiflow.initialization import require_initialization_ready
+
+        require_initialization_ready(repository_root)
     root = _policy_root(repository_root, policy_directory)
     try:
         _reject_conflicts(root)
