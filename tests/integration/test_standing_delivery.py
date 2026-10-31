@@ -305,6 +305,68 @@ def test_duplicate_key_inside_anchored_rule_is_rejected_before_start_writes(
     assert not (repository / ".ai" / "tasks").exists()
 
 
+@pytest.mark.parametrize("corruption", ["recursive_merge", "unhashable_key"])
+def test_malformed_yaml_keys_fail_closed_without_task_writes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    corruption: str,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    path, _ = _permissions(repository)
+    text = path.read_text(encoding="utf-8")
+    if corruption == "recursive_merge":
+        rule = "  - id: PERMISSION-DENY-AUTO-PUSH"
+        assert text.count(rule) == 1
+        text = text.replace(
+            rule,
+            "  - &recursive_rule\n    <<: *recursive_rule\n    id: PERMISSION-DENY-AUTO-PUSH",
+            1,
+        )
+    else:
+        text += "\n? [unhashable, key]\n: value\n"
+    path.write_text(text, encoding="utf-8")
+    with schema_directory_context(repository / ".ai" / "schemas"):
+        with pytest.raises(PolicyError) as caught:
+            load_policy_bundle(repository)
+    assert caught.value.code == "POLICY_READ_FAILED"
+    assert _start(monkeypatch, repository) == 1
+    assert "Traceback" not in capsys.readouterr().err
+    assert not (repository / ".ai" / "tasks").exists()
+
+
+@pytest.mark.parametrize("duplicate", [False, True])
+def test_yaml_value_tag_key_parsing_and_duplicate_detection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    duplicate: bool,
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    path, _ = _permissions(repository)
+    text = path.read_text(encoding="utf-8") + "\n=: value\n"
+    if duplicate:
+        text += '"=": value\n'
+    node = yaml.compose(text)
+    assert isinstance(node, yaml.MappingNode)
+    value_keys = [key for key, _ in node.value if key.value == "="]
+    assert value_keys[0].tag == "tag:yaml.org,2002:value"
+    if duplicate:
+        assert len(value_keys) == 2
+        assert value_keys[1].tag == "tag:yaml.org,2002:str"
+    assert yaml.safe_load(text)["="] == "value"
+    path.write_text(text, encoding="utf-8")
+    with schema_directory_context(repository / ".ai" / "schemas"):
+        with pytest.raises(PolicyError) as caught:
+            load_policy_bundle(repository)
+    # '=' is valid YAML but not an allowed Policy property; the duplicate is a
+    # parsing error and must be rejected before schema validation.
+    assert caught.value.code == ("POLICY_READ_FAILED" if duplicate else "POLICY_SCHEMA_INVALID")
+    assert _start(monkeypatch, repository) == 1
+    assert "Traceback" not in capsys.readouterr().err
+    assert not (repository / ".ai" / "tasks").exists()
+
+
 def test_start_api_uses_target_repository_schema_across_working_directories(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
