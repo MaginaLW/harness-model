@@ -250,6 +250,12 @@ class WindowsFilesystem:
             raise
         return handle
 
+    def _pin_ancestor(self, path: Path) -> int:
+        # TRAVERSE participates in sharing protection; attributes-only does not.
+        buffer = ctypes.create_string_buffer(_absolute_name(path) + b"\0\0")
+        handle = self._api.CreateFileW(buffer, 0xA0, 3, None, 3, 0x02200000, None)
+        return self._register(handle, _OwnedHandle(directory=True))
+
     def open_directory(self, path: Path, *, share_write: bool = False) -> int:
         buffer = ctypes.create_string_buffer(_absolute_name(path) + b"\0\0")
         handle = self._api.CreateFileW(

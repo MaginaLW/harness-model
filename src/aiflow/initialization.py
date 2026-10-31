@@ -507,7 +507,11 @@ def apply_initialization(
     try:
         # Retain every ancestor object, not just the final path string.
         for path in (*reversed(root.parents), root):
-            handle = fs.open_directory(path, share_write=True)
+            handle = (
+                fs.open_directory(path, share_write=True)
+                if path == root
+                else fs._pin_ancestor(path)
+            )
             handles.append(handle)
             info = _plain(path, directory=True)
             actual = fs.identity(handle)
