@@ -13,7 +13,7 @@ For this repository, `main` protection was configured and read back on 2026-08-3
 [`ai-quality-gate`](https://github.com/MaginaLW/harness-model/actions/runs/33299540705).
 The rule requires an up-to-date PR and conversation resolution, applies to administrators, and
 disallows force pushes and branch deletion. It requires zero GitHub reviewer approvals so the
-single-maintainer repository is not deadlocked; AI Flow approvals and separate external-action
+single-maintainer repository is not deadlocked; AI Flow approvals and applicable external-action
 authorization remain independent requirements.
 
 The workflow uses only `contents: read`, receives no secrets, and runs on `pull_request`, not `pull_request_target`. It verifies and gates the PR head, uploads runner-temp evidence and redacted logs, and performs no merge, push, deployment, approval, or branch-protection mutation.
@@ -26,7 +26,9 @@ While the pull request's base commit contains `.ai/bootstrap-mode.yaml` with the
 
 The workflow file is not proof that enforcement is active. Before claiming the repository is protected, run it on a real pull request, configure `ai-quality-gate` as required, and retain platform evidence that the target branch rejects direct/force pushes and bypasses outside the named emergency roles.
 
-Bootstrap mode has never granted push, merge, deployment, deletion, secret-export, or paid-call authority, and still does not. The project owner ended bootstrap once and has since re-entered it as repository maintenance mode, so PRs again take the bootstrap path: task resolution, AI Flow `verify`, and the Gate are skipped, while every quality check and threshold above, the branch-protection rule, the required check name, and the separate approval each external action needs all remain in force. AGENTS.md carries the escalation list of change classes that still go through AI Flow.
+Bootstrap mode has never granted push, merge, deployment, deletion, secret-export, or paid-call authority, and still does not. The project owner ended bootstrap once and has since re-entered it as repository maintenance mode, so PRs again take the bootstrap path: task resolution, AI Flow `verify`, and the Gate are skipped, while every quality check and threshold above, the branch-protection rule, the required check name, and the applicable authorization for external actions all remain in force. Standing authorization
+for the bounded delivery actions is defined in AGENTS.md; other actions retain their applicable
+individual approval requirements. AGENTS.md carries the escalation list of change classes that still go through AI Flow.
 
 ## Formal-mode canary evidence
 

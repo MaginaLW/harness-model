@@ -11,9 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal, cast
 
-import yaml
-
-from aiflow.contracts import require_valid_contract
+from aiflow.contracts import require_valid_contract, schema_directory_context
 from aiflow.decision_units import (
     RISK_FACT_FIELDS,
     classification_input_digest,
@@ -23,7 +21,6 @@ from aiflow.decision_units import (
 from aiflow.errors import (
     AiflowError,
     ContractError,
-    PolicyError,
     StateTransitionError,
     StorageError,
 )
@@ -37,7 +34,7 @@ from aiflow.git_context import (
     evaluate_verification_git_context,
     task_numbers_in_refs,
 )
-from aiflow.policy import load_policy_bundle
+from aiflow.policy import evaluate_action_permission, load_policy_bundle
 from aiflow.scope import (
     AutoPreflightFacts,
     assess_auto_scope,
@@ -142,21 +139,15 @@ def _validate_start_input(
 
 
 def _load_default_forbidden_actions(repository_root: Path) -> list[str]:
-    path = repository_root / ".ai" / "policy" / "permissions.yaml"
-    try:
-        value = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, yaml.YAMLError) as error:
-        raise PolicyError(
-            "Could not load permissions Policy",
-            code="POLICY_LOAD_FAILED",
-            details={"policy": "permissions"},
-        ) from error
-    if not isinstance(value, Mapping):
-        raise PolicyError("Permissions Policy must be an object", code="POLICY_INVALID")
-    actions = value.get("forbidden_automatic_actions")
-    if not isinstance(actions, list) or not all(isinstance(action, str) for action in actions):
-        raise PolicyError("Permissions Policy forbidden actions are invalid", code="POLICY_INVALID")
-    return _unique_nonempty(actions, field_name="forbidden_automatic_actions")
+    with schema_directory_context(repository_root / ".ai" / "schemas"):
+        bundle = load_policy_bundle(repository_root)
+    actions = bundle.documents["permissions.yaml"]["forbidden_automatic_actions"]
+    return [
+        action
+        for action in actions
+        if action not in {"push", "merge"}
+        or evaluate_action_permission(bundle, action).required_approval != "standing_or_action"
+    ]
 
 
 def _load_spec_template(repository_root: Path) -> str:
@@ -1049,7 +1040,10 @@ def _require_auto_preflight(
         for unit in unfinished
     )
     forbidden_present = forbidden_action_present(
-        record.task.get("forbidden_actions", []),
+        (
+            *record.task.get("forbidden_actions", []),
+            *bundle.documents["permissions.yaml"]["forbidden_automatic_actions"],
+        ),
         tuple(action for unit in unfinished for action in unit.get("planned_actions", [])),
     )
     workflow = evaluate_preconditions(

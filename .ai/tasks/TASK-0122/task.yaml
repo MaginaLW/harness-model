@@ -1,0 +1,84 @@
+allowed_scope:
+- AGENTS.md
+- .ai/policy/hard-rules.yaml
+- .ai/policy/permissions.yaml
+- .ai/policy/routing.yaml
+- .ai/policy/verification-levels.yaml
+- .ai/schemas/policy.schema.json
+- src/aiflow/task_service.py
+- src/aiflow/gate.py
+- src/aiflow/policy.py
+base_commit: db7b86ec8c710048758657799d1f3e42f7e41e7c
+branch: codex/standing-delivery-successor
+created_at: '2026-10-31T01:16:16Z'
+current_state: BLOCKED
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - Push the reviewed codex/standing-delivery-successor branch to the public MaginaLW/harness-model
+    repository after applicable authorization and checks.
+  - Create a pull request in the public MaginaLW/harness-model repository after applicable
+    authorization and checks.
+  - Merge that pull request into main by merge commit after applicable authorization
+    and required checks.
+  goal: Enable bounded standing delivery authorization with retained automated safeguards
+  impact:
+    level: high
+  impact_categories:
+  - external_action
+  impact_scope:
+  - AGENTS.md
+  - .ai/policy/hard-rules.yaml
+  - .ai/policy/permissions.yaml
+  - .ai/policy/routing.yaml
+  - .ai/policy/verification-levels.yaml
+  - .ai/schemas/policy.schema.json
+  - src/aiflow/task_service.py
+  - src/aiflow/gate.py
+  - src/aiflow/policy.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0122
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+forbidden_actions:
+- push
+- merge
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: f5cc602192d778bcf884cbc9aa2c6eb218c8d53c7478b79cad3bdd97bb3113a8
+goal: Enable bounded standing delivery authorization with retained automated safeguards
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-31T01:18:57Z'
+subject_commit: 485a9f67b3dd90f04acc9e05b86172d41bf43917
+task_id: TASK-0122
+updated_at: '2026-10-31T01:21:54Z'
+worktree_dirty: false
+worktree_dirty_paths: []

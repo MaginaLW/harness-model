@@ -1,0 +1,51 @@
+{
+  "base_commit": "db7b86ec8c710048758657799d1f3e42f7e41e7c",
+  "branch": "codex/standing-delivery-successor",
+  "classification_input_sha256": "bf300b9ee58ff3fe2418c54cc2ce2eda0f14d5ae635fa44194b62c279a850ada",
+  "content": {
+    "allowed_scope": [
+      "AGENTS.md",
+      ".ai/policy/hard-rules.yaml",
+      ".ai/policy/permissions.yaml",
+      ".ai/policy/routing.yaml",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/schemas/policy.schema.json",
+      "src/aiflow/task_service.py",
+      "src/aiflow/gate.py",
+      "src/aiflow/policy.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Enable bounded standing delivery authorization with retained automated safeguards",
+        "impact_scope": [
+          "AGENTS.md",
+          ".ai/policy/hard-rules.yaml",
+          ".ai/policy/permissions.yaml",
+          ".ai/policy/routing.yaml",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/schemas/policy.schema.json",
+          "src/aiflow/task_service.py",
+          "src/aiflow/gate.py",
+          "src/aiflow/policy.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Enable bounded standing delivery authorization with retained automated safeguards",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "06340012ade6a791a60a7fd1a11f78f0080b08c2198c2938c8bd1897b30ffc90",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "f5cc602192d778bcf884cbc9aa2c6eb218c8d53c7478b79cad3bdd97bb3113a8",
+  "task_id": "TASK-0122"
+}

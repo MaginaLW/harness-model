@@ -1,0 +1,28 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-31T01:17:10Z",
+    "base_commit": "db7b86ec8c710048758657799d1f3e42f7e41e7c",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
+    "reason": "项目所有者在当前会话明确同意修改受限推送与合并常设授权并要求完成交付；后继规格的独立设计审核已通过，本记录不表示所有者本人审阅具体设计。",
+    "schema_version": "1.0",
+    "spec_sha256": "f5cc602192d778bcf884cbc9aa2c6eb218c8d53c7478b79cad3bdd97bb3113a8",
+    "subject_commit": "db7b86ec8c710048758657799d1f3e42f7e41e7c",
+    "task_id": "TASK-0122"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-31T01:19:54Z",
+    "base_commit": "db7b86ec8c710048758657799d1f3e42f7e41e7c",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+    "reason": "所有者明确授权本次受限常设推送与合并规则修改和条件性交付；当前 Policy 的独立设计审核已通过，本记录不表示所有者本人审阅具体设计。",
+    "schema_version": "1.0",
+    "spec_sha256": "f5cc602192d778bcf884cbc9aa2c6eb218c8d53c7478b79cad3bdd97bb3113a8",
+    "subject_commit": "485a9f67b3dd90f04acc9e05b86172d41bf43917",
+    "task_id": "TASK-0122"
+  }
+]
