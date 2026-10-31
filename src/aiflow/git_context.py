@@ -160,24 +160,113 @@ def _read_branch(repository_root: Path) -> str:
     return branch
 
 
-def _normalize_status_path(raw_path: str) -> str:
-    path = raw_path.rsplit(" -> ", maxsplit=1)[-1]
-    if len(path) >= 2 and path.startswith('"') and path.endswith('"'):
-        path = path[1:-1]
-    normalized = path.replace("\\", "/")
-    candidate = Path(normalized)
-    if not normalized or candidate.is_absolute() or ".." in candidate.parts:
+def _valid_branch(branch: str) -> bool:
+    return (
+        bool(branch)
+        and not branch.endswith(".")
+        and not any(ord(char) <= 32 or ord(char) == 127 or char in "~^:?*[\\" for char in branch)
+        and ".." not in branch
+        and "@{" not in branch
+        and all(
+            part and not part.startswith(".") and not part.endswith(".lock")
+            for part in branch.split("/")
+        )
+    )
+
+
+def _normalize_status_path(path: str) -> str:
+    # Porcelain -z paths are literal: quotes and " -> " are part of the filename.
+    if (
+        not path
+        or "\\" in path
+        or ":" in path
+        or any(ord(char) < 32 or ord(char) == 127 for char in path)
+        or any(part in {"", ".", ".."} for part in path.split("/"))
+    ):
         raise _error("Git status contained an invalid path", "GIT_STATUS_INVALID")
-    return normalized
+    return path
 
 
-def _dirty_paths(status: str) -> tuple[str, ...]:
+def _parse_status(status: str) -> tuple[str, str, tuple[str, ...], bool]:
+    """Validate the fixed porcelain-v2 protocol, including every changed path."""
+    if not status.endswith("\0"):
+        raise _error("Git status records are incomplete", "GIT_STATUS_INVALID")
+    records = iter(status[:-1].split("\0"))
+    headers: dict[str, str] = {}
     paths: set[str] = set()
-    for line in status.splitlines():
-        if len(line) < 4 or line[2] != " ":
-            raise _error("Git status output is invalid", "GIT_STATUS_INVALID")
-        paths.add(_normalize_status_path(line[3:]))
-    return tuple(sorted(paths))
+    in_paths = False
+    for record in records:
+        if record.startswith("# "):
+            name, separator, value = record[2:].partition(" ")
+            if (
+                in_paths
+                or not separator
+                or name not in {"branch.oid", "branch.head", "branch.upstream", "branch.ab"}
+                or name in headers
+            ):
+                raise _error("Git status headers are invalid", "GIT_STATUS_INVALID")
+            headers[name] = value
+            continue
+        in_paths = True
+        kind = record[:1]
+        if kind == "?" and record.startswith("? "):
+            path = record[2:]
+        elif kind in {"1", "2", "u"}:
+            count = {"1": 8, "2": 9, "u": 10}[kind]
+            fields = record.split(" ", maxsplit=count)
+            if len(fields) != count + 1 or fields[0] != kind:
+                raise _error("Git status entry is incomplete", "GIT_STATUS_INVALID")
+            xy, submodule = fields[1:3]
+            if (
+                len(xy) != 2
+                or xy == ".."
+                or (
+                    xy not in {"DD", "AU", "UD", "UA", "DU", "AA", "UU"}
+                    if kind == "u"
+                    else any(char not in (".MTADRC" if kind == "2" else ".MTAD") for char in xy)
+                )
+                or re.fullmatch(r"N\.\.\.|S[.C][.M][.U]", submodule) is None
+            ):
+                raise _error("Git status flags are invalid", "GIT_STATUS_INVALID")
+            modes = fields[3:7] if kind == "u" else fields[3:6]
+            hashes = fields[7:10] if kind == "u" else fields[6:8]
+            if any(
+                mode not in {"000000", "100644", "100755", "120000", "160000"} for mode in modes
+            ):
+                raise _error("Git status modes are invalid", "GIT_STATUS_INVALID")
+            if any(HEAD_PATTERN.fullmatch(commit) is None for commit in hashes):
+                raise _error("Git status object IDs are invalid", "GIT_STATUS_INVALID")
+            if kind == "2":
+                score = fields[8]
+                if re.fullmatch(r"[RC](?:100|[1-9]?[0-9])", score) is None or score[0] not in xy:
+                    raise _error("Git status rename score is invalid", "GIT_STATUS_INVALID")
+                original = next(records, "")
+                _normalize_status_path(original)
+            path = fields[-1]
+        else:
+            raise _error("Git status record is unknown", "GIT_STATUS_INVALID")
+        path = _normalize_status_path(path)
+        if path in paths:
+            raise _error("Git status path is duplicated", "GIT_STATUS_INVALID")
+        paths.add(path)
+
+    head = headers.get("branch.oid")
+    if head is None or head == "(initial)":
+        raise _error("Git HEAD is unavailable", "GIT_HEAD_UNAVAILABLE")
+    if HEAD_PATTERN.fullmatch(head) is None:
+        raise _error("Git HEAD is not a 40-character commit", "GIT_HEAD_INVALID")
+    branch = headers.get("branch.head", "")
+    if branch != "(detached)" and not _valid_branch(branch):
+        raise _error("Git branch is unavailable or invalid", "GIT_BRANCH_UNAVAILABLE")
+    upstream = headers.get("branch.upstream")
+    ahead_behind = headers.get("branch.ab")
+    if (
+        (upstream is not None and not _valid_branch(upstream))
+        or (ahead_behind is not None and upstream is None)
+        or (ahead_behind is not None and re.fullmatch(r"\+[0-9]+ -[0-9]+", ahead_behind) is None)
+    ):
+        raise _error("Git status tracking headers are invalid", "GIT_STATUS_INVALID")
+    return head, branch, tuple(sorted(paths)), upstream is not None
 
 
 def task_numbers_in_refs(repository_root: Path) -> frozenset[int]:
@@ -232,21 +321,23 @@ def collect_git_context(path: Path) -> GitContext:
     repository_root = resolve_repository_root(path)
     repository_id = _read_repository_id(repository_root)
 
-    head = _run_git(
-        repository_root,
-        ("rev-parse", "HEAD"),
-        failure_code="GIT_HEAD_UNAVAILABLE",
-    )
-    if HEAD_PATTERN.fullmatch(head) is None:
-        raise _error("Git HEAD is not a 40-character commit", "GIT_HEAD_INVALID")
-
-    branch = _read_branch(repository_root)
     status = _run_git(
         repository_root,
-        ("status", "--porcelain=v1", "--untracked-files=all"),
+        ("status", "--porcelain=v2", "--branch", "--no-show-stash", "-z", "--untracked-files=all"),
         failure_code="GIT_STATUS_UNAVAILABLE",
     )
-    dirty_paths = _dirty_paths(status)
+    head, status_branch, dirty_paths, has_upstream = _parse_status(status)
+    # Git's --short spelling may include heads/ or refs/heads/ when tags collide.
+    # Keep that existing fact instead of implementing Git's abbreviation algorithm.
+    branch = _read_branch(repository_root)
+    expected_branches = {status_branch, f"heads/{status_branch}", f"refs/heads/{status_branch}"}
+    if status_branch == "(detached)":
+        # A real branch may be named "(detached)"; symbolic-ref disambiguates it.
+        expected_branches.add("DETACHED")
+        if branch == "DETACHED" and has_upstream:
+            raise _error("Detached HEAD cannot have an upstream", "GIT_STATUS_INVALID")
+    if branch not in expected_branches:
+        raise _error("Git branch observations do not agree", "GIT_BRANCH_UNAVAILABLE")
     return GitContext(
         repository_id=repository_id,
         repository_path=repository_root.as_posix(),

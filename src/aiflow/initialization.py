@@ -24,7 +24,13 @@ from aiflow import initialization_git as git
 from aiflow.contracts import schema_directory_context
 from aiflow.errors import AiflowError
 from aiflow.initialization_windows import WindowsFilesystem
-from aiflow.policy import POLICY_FILES, _UniqueKeyLoader, load_policy_bundle
+from aiflow.policy import (
+    NODE_POLICY_VERSION,
+    POLICY_FILES,
+    _UniqueKeyLoader,
+    is_node_policy,
+    load_policy_bundle,
+)
 from aiflow.resource_bundle import (
     BUNDLE_VERSION,
     CLI_VERSION,
@@ -36,6 +42,7 @@ from aiflow.resource_bundle import (
 from aiflow.verification import VerificationContext, parse_verification_plan
 
 PROFILE = "native-python-v1"
+NODE_PROFILE = "agent-bridge-node@1"
 MAX_JSON_BYTES = 64 * 1024
 STATE = ".ai/init-state.json"
 REVIEW = ".ai/policy-review.json"
@@ -130,7 +137,7 @@ def _read(path: Path, limit: int) -> bytes:
 
 
 def _profile(profile: object) -> None:
-    if profile != PROFILE or not isinstance(profile, str):
+    if not isinstance(profile, str) or profile not in (PROFILE, NODE_PROFILE):
         raise _error("PROFILE_UNSUPPORTED")
 
 
@@ -147,7 +154,24 @@ def _entries(directory: Path, limit: int) -> list[Path]:
     return result
 
 
-def _project(root: Path) -> None:
+def _project(root: Path, profile: str = PROFILE) -> None:
+    if profile == NODE_PROFILE:
+        try:
+            project = read_initialization_json(root / "package.json")
+            name, scripts = project.get("name"), project.get("scripts")
+            if (
+                not isinstance(name, str)
+                or not name.strip()
+                or not isinstance(scripts, dict)
+                or any(
+                    not isinstance(scripts.get(key), str) or not scripts[key].strip()
+                    for key in ("check", "build", "test")
+                )
+            ):
+                raise _error("TARGET_PROFILE_UNSUPPORTED")
+        except AiflowError as error:
+            raise _error("TARGET_PROFILE_UNSUPPORTED") from error
+        return
     if any(entry.name.casefold() == "package.json" for entry in _entries(root, 10_000)):
         raise _error("TARGET_PROFILE_UNSUPPORTED")
     try:
@@ -168,8 +192,10 @@ def _source_fact(path: Path, *, directory: bool = False) -> dict[str, Any]:
 
 
 def _materials(
-    root: Path, bundle_root: Path | None, policy_directory: Path | None
+    root: Path, bundle_root: Path | None, policy_directory: Path | None, profile: str = PROFILE
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, bytes], list[dict[str, Any]]]:
+    if profile == NODE_PROFILE and policy_directory is None:
+        raise _error("NODE_POLICY_REQUIRED")
     candidate = (
         files("aiflow").joinpath("_bundled_resources") if bundle_root is None else bundle_root
     )
@@ -202,10 +228,21 @@ def _materials(
             raise _error("BUNDLE_TOO_LARGE")
         with schema_directory_context(bundle / "schemas"):
             policy = load_policy_bundle(root, policy_directory=selected)
-            context = VerificationContext(root, "TASK-0001", "0" * 40, "0" * 40, "python", "init")
-            # Pure structural validation. This callback never probes tools/import hooks.
-            for level in ("V0", "V1", "V2"):
-                parse_verification_plan(policy, context, level=level, tool_available=lambda _: True)
+            if profile == NODE_PROFILE:
+                # The loader validates the entire closed contract without runtime materials.
+                if not is_node_policy(policy):
+                    raise _error("TARGET_PROFILE_UNSUPPORTED")
+            else:
+                if policy.policy_version.split(".", 1)[0] not in {"1", "2"}:
+                    raise _error("TARGET_PROFILE_UNSUPPORTED")
+                context = VerificationContext(
+                    root, "TASK-0001", "0" * 40, "0" * 40, "python", "init"
+                )
+                # Pure structural validation; never probes tools/import hooks.
+                for level in ("V0", "V1", "V2"):
+                    parse_verification_plan(
+                        policy, context, level=level, tool_available=lambda _: True
+                    )
         for name in POLICY_FILES:
             current = _read(selected / name, MAX_RESOURCE_BYTES).replace(b"\r\n", b"\n")
             if current != resources["policy/" + name]:
@@ -277,12 +314,12 @@ def preview_initialization(
     """Return a local, zero-write proposal; the caller saves/reviews it outside target."""
     _profile(profile)
     observed = git.observe_initialization_target(Path(target))
-    if observed["python_source_count"] < 1:
+    if profile == PROFILE and observed["python_source_count"] < 1:
         raise _error("TARGET_PROFILE_UNSUPPORTED")
     root = Path(observed["root"])
     _no_ai(root)
-    _project(root)
-    bundle, policy, resources, sources = _materials(root, bundle_root, policy_directory)
+    _project(root, profile)
+    bundle, policy, resources, sources = _materials(root, bundle_root, policy_directory, profile)
     observed = {**observed, "resource_sources": sources}
     identifier = str(uuid4())
     preview = {
@@ -437,12 +474,14 @@ def _existing(
     return found, completed
 
 
-def _same_target(root: Path, original: Mapping[str, Any], sources: list[dict[str, Any]]) -> None:
+def _same_target(
+    root: Path, original: Mapping[str, Any], sources: list[dict[str, Any]], profile: str = PROFILE
+) -> None:
     current = {
         **git.observe_initialization_target(root, exclude_initialization=True),
         "resource_sources": sources,
     }
-    if current["python_source_count"] < 1:
+    if profile == PROFILE and current["python_source_count"] < 1:
         raise _error("TARGET_PROFILE_UNSUPPORTED")
     if _json(current) != _json(original):
         raise _error("PREVIEW_STALE")
@@ -480,13 +519,14 @@ def apply_initialization(
     ):
         raise _error("PREVIEW_DIGEST_INVALID")
     root = git.resolve_initialization_root(Path(target))
-    _project(root)
-    bundle, policy, resources, sources = _materials(root, bundle_root, policy_directory)
+    profile = str(proposal["profile"])
+    _project(root, profile)
+    bundle, policy, resources, sources = _materials(root, bundle_root, policy_directory, profile)
     if _json(proposal["bundle"]) != _json(bundle) or _json(proposal["policy"]) != _json(policy):
         raise _error("PREVIEW_MATERIAL_CHANGED")
     if _json(proposal["objects"]) != _json(_objects(resources, identifier)):
         raise _error("PREVIEW_OBJECTS_INVALID")
-    _same_target(root, proposal["target"], sources)
+    _same_target(root, proposal["target"], sources, profile)
     decision = _review(proposal, policy_review)
     payloads = _payloads(proposal, decision, resources)
     aliases = [path for path in _entries(root, 10_000) if path.name.casefold() == ".ai"]
@@ -497,7 +537,7 @@ def apply_initialization(
         return {
             "schema_version": "1.0",
             "repository_id": identifier,
-            "profile": PROFILE,
+            "profile": profile,
             "phase": "already_complete",
         }
     fs = WindowsFilesystem()
@@ -521,7 +561,7 @@ def apply_initialization(
                 held[""] = handle
         if fs.volume(held[""])["filesystem"] != "NTFS":
             raise _error("FILESYSTEM_UNSUPPORTED")
-        _same_target(root, proposal["target"], sources)
+        _same_target(root, proposal["target"], sources, profile)
         for relative in DIRECTORIES:
             path = root / relative
             if relative in found:
@@ -559,7 +599,7 @@ def apply_initialization(
         # Recheck observed Git/worktree facts just before publishing identity. This
         # is a checked boundary, not an atomic lock of the entire application tree.
         final_bundle, final_policy, final_resources, final_sources = _materials(
-            root, bundle_root, policy_directory
+            root, bundle_root, policy_directory, profile
         )
         if (
             final_bundle != proposal["bundle"]
@@ -567,7 +607,7 @@ def apply_initialization(
             or final_resources != resources
         ):
             raise _error("PREVIEW_MATERIAL_CHANGED")
-        _same_target(root, proposal["target"], final_sources)
+        _same_target(root, proposal["target"], final_sources, profile)
         # The pending identity's DELETE-capable handle deliberately prevents
         # ordinary path opens. Inspect names/types here and read the held objects.
         if set(_inventory(root)) != set(DIRECTORIES) | (set(payloads) - {IDENTITY}):
@@ -596,7 +636,7 @@ def apply_initialization(
     return {
         "schema_version": "1.0",
         "repository_id": identifier,
-        "profile": PROFILE,
+        "profile": profile,
         "phase": phase,
     }
 
@@ -637,8 +677,11 @@ def _state_manifest(root: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any
     ):
         if not isinstance(digest, str) or not _HEX.fullmatch(digest):
             raise _error("INSTALLATION_STATE_INVALID")
-    if not isinstance(policy["policy_version"], str) or not re.fullmatch(
-        r"[12]\.[0-9]+\.[0-9]+", policy["policy_version"]
+    version = policy["policy_version"]
+    if not isinstance(version, str) or (
+        version != NODE_POLICY_VERSION
+        if state["profile"] == NODE_PROFILE
+        else not re.fullmatch(r"[12]\.[0-9]+\.[0-9]+", version)
     ):
         raise _error("INSTALLATION_STATE_INVALID")
     rows = state["objects"]
@@ -687,6 +730,7 @@ def _installed(root: Path) -> tuple[dict[str, Any], dict[str, bytes]]:
     if (
         policy.policy_version != state["policy"]["policy_version"]
         or policy.sha256 != state["policy"]["semantic_sha256"]
+        or (state["profile"] == NODE_PROFILE) != is_node_policy(policy)
     ):
         raise _error("POLICY_REVIEW_MISMATCH")
     decision = _review(state, read_initialization_json(root / REVIEW))
@@ -810,7 +854,7 @@ def plan_initialization_migration(
     _profile(profile)
     root = git.resolve_initialization_root(Path(target))
     inspected = inspect_initialization(root)
-    bundle, policy, resources, _ = _materials(root, bundle_root, policy_directory)
+    bundle, policy, resources, _ = _materials(root, bundle_root, policy_directory, profile)
     comparison: list[dict[str, Any]] = []
     for name, data in sorted(resources.items()):
         path = root / ".ai" / name

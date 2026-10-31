@@ -11,6 +11,15 @@
     "policy_kind": {
       "enum": ["hard_rules", "routing", "verification_levels", "permissions"]
     },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision"],
+      "properties": {
+        "id": {"const": "agent-bridge-node"},
+        "revision": {"type": "integer", "const": 1}
+      }
+    },
     "rules": {
       "type": "array",
       "items": {
@@ -58,8 +67,7 @@
     "levels": {
       "type": "array",
       "minItems": 2,
-      "maxItems": 3,
-      "items": {"$ref": "#/$defs/verification_level"}
+      "maxItems": 3
     },
     "forbidden_automatic_actions": {
       "type": "array",
@@ -75,6 +83,37 @@
       "items": {"const": "read"}
     }
   },
+  "allOf": [
+    {
+      "if": {"properties": {"policy_version": {"pattern": "^3(?:\\.|$)"}}},
+      "then": {"properties": {"policy_version": {"const": "3.1.0"}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "policy_version": {"const": "3.1.0"},
+          "policy_kind": {"const": "verification_levels"}
+        },
+        "required": ["policy_version", "policy_kind"]
+      },
+      "then": {
+        "required": ["profile"],
+        "properties": {"levels": {"$ref": "#/$defs/node_levels"}},
+        "not": {
+          "anyOf": [
+            {"required": ["allowed_placeholders"]},
+            {"required": ["allowed_commands"]},
+            {"required": ["allowed_environment"]},
+            {"required": ["run_directories"]}
+          ]
+        }
+      },
+      "else": {
+        "not": {"required": ["profile"]},
+        "properties": {"levels": {"items": {"$ref": "#/$defs/verification_level"}}}
+      }
+    }
+  ],
   "oneOf": [
     {
       "properties": {
@@ -111,13 +150,13 @@
     },
     {
       "properties": {"policy_kind": {"const": "verification_levels"}},
-      "required": [
-        "allowed_placeholders",
-        "allowed_commands",
-        "allowed_environment",
-        "run_directories",
-        "levels"
-      ],
+      "required": ["levels"],
+      "if": {"properties": {"policy_version": {"const": "3.1.0"}}},
+      "else": {
+        "required": [
+          "allowed_placeholders", "allowed_commands", "allowed_environment", "run_directories"
+        ]
+      },
       "not": {
         "anyOf": [
           {"required": ["rules"]},
@@ -145,6 +184,35 @@
     }
   ],
   "$defs": {
+    "node_levels": {
+      "const": [
+        {
+          "id": "V0",
+          "checks": [
+            {"id": "contract", "required": true, "timeout_seconds": 30},
+            {"id": "scope", "required": true, "timeout_seconds": 30},
+            {"id": "smoke", "required": true, "timeout_seconds": 30},
+            {"id": "node_build", "required": true, "timeout_seconds": 300},
+            {"id": "node_check", "required": true, "timeout_seconds": 600},
+            {"id": "diff_whitespace", "required": true, "timeout_seconds": 30}
+          ]
+        },
+        {
+          "id": "V1",
+          "checks": [
+            {"id": "contract", "required": true, "timeout_seconds": 30},
+            {"id": "scope", "required": true, "timeout_seconds": 30},
+            {"id": "smoke", "required": true, "timeout_seconds": 30},
+            {"id": "node_build", "required": true, "timeout_seconds": 300},
+            {"id": "node_check", "required": true, "timeout_seconds": 600},
+            {"id": "diff_whitespace", "required": true, "timeout_seconds": 30},
+            {"id": "ts_coverage", "required": true, "timeout_seconds": 600},
+            {"id": "ts_total_lines", "required": true, "timeout_seconds": 30, "threshold": 85},
+            {"id": "ts_diff_lines", "required": true, "timeout_seconds": 30, "threshold": 90}
+          ]
+        }
+      ]
+    },
     "condition": {
       "type": "object",
       "additionalProperties": false,

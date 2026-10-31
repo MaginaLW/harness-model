@@ -39,6 +39,21 @@ FULL_SUITE_TIMEOUT_SECONDS = 1200
 
 
 @dataclass(frozen=True)
+class NodePlanBindings:
+    """Material-validated roles for the one closed Node execution plan."""
+
+    node_executable: str
+    npm_cli: str
+    git_executable: str
+    execution_root: Path
+    user_config: Path
+    global_config: Path
+    coverage_directory: Path
+    expected_map_file: Path
+    source_manifest_file: Path
+
+
+@dataclass(frozen=True)
 class VerificationContext:
     """All concrete values allowed to fill a Policy command once."""
 
@@ -49,6 +64,7 @@ class VerificationContext:
     python: str
     run_id: str
     ci_run_dir: Path | None = None
+    node_bindings: NodePlanBindings | None = None
 
 
 @dataclass(frozen=True)
@@ -355,6 +371,133 @@ def _parse_check(
     return check
 
 
+def _node_plan(bundle: PolicyBundle, context: VerificationContext, level: str) -> VerificationPlan:
+    """Expand fixed roles, never commands supplied by a Node Policy."""
+    from aiflow.node_execution import NODE_COVERAGE_HELPER
+
+    run_dir = _run_directory(context)
+    if context.ci_run_dir is not None or level == "V2":
+        raise ContractError(
+            "Node execution capability is unavailable", code="NODE_CAPABILITY_UNAVAILABLE"
+        )
+    roles = context.node_bindings
+    if roles is None:
+        raise ContractError("Node material bindings are required", code="NODE_MATERIALS_REQUIRED")
+    python = (context.python, "-I", "-B", "-m", "aiflow")
+    npm = (
+        roles.node_executable,
+        roles.npm_cli,
+        "--userconfig",
+        str(roles.user_config),
+        "--globalconfig",
+        str(roles.global_config),
+        "--offline",
+        "run",
+    )
+    git = (
+        roles.git_executable,
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "diff",
+        "--no-ext-diff",
+        "--no-textconv",
+    )
+    definitions: list[tuple[str, int, tuple[tuple[str, ...], ...], Path, str, int | None]] = [
+        (
+            "contract",
+            30,
+            (python + ("validate", context.task_id),),
+            context.repository_root,
+            "exit_zero",
+            None,
+        ),
+        (
+            "scope",
+            30,
+            (python + ("scope", context.task_id),),
+            context.repository_root,
+            "exit_zero",
+            None,
+        ),
+        ("smoke", 30, (python + ("--help",),), context.repository_root, "exit_zero", None),
+        ("node_build", 300, (npm + ("build",),), roles.execution_root, "exit_zero", None),
+        ("node_check", 600, (npm + ("check",),), roles.execution_root, "exit_zero", None),
+        (
+            "diff_whitespace",
+            30,
+            (
+                git + ("--check", "--"),
+                git + ("--cached", "--check", "--"),
+                git + ("--check", context.base_commit, context.subject_commit, "--"),
+            ),
+            context.repository_root,
+            "exit_zero",
+            None,
+        ),
+    ]
+    if level == "V1":
+        coverage = npm + (
+            "test",
+            "--",
+            "--coverage.enabled",
+            "--coverage.provider=v8",
+            "--coverage.include=src/local/**/*.ts",
+            "--coverage.reporter=json-summary",
+            "--coverage.reporter=json",
+            "--coverage.reporter=text",
+            "--coverage.reportsDirectory=" + str(roles.coverage_directory),
+            "--coverage.reportOnFailure",
+        )
+        helper = (
+            roles.node_executable,
+            "--input-type=module",
+            "--eval",
+            NODE_COVERAGE_HELPER,
+            str(roles.source_manifest_file),
+            str(roles.expected_map_file),
+        )
+        definitions.extend(
+            [
+                ("ts_coverage", 600, (coverage, helper), roles.execution_root, "exit_zero", None),
+                ("ts_total_lines", 30, (), roles.execution_root, "ts_total_lines", 85),
+                ("ts_diff_lines", 30, (), roles.execution_root, "ts_diff_lines", 90),
+            ]
+        )
+    elif level != "V0":
+        raise ContractError("Node verification level is invalid", code="VERIFY_LEVEL_INVALID")
+    checks: list[VerificationCheck] = []
+    executions: list[VerificationExecution] = []
+    for check_id, timeout, commands, cwd, parser, threshold in definitions:
+        checks.append(
+            VerificationCheck(
+                check_id,
+                level,
+                commands[0] if commands else (),
+                {},
+                cwd,
+                timeout,
+                True,
+                parser,
+                threshold,
+            )
+        )
+        for index, argv in enumerate(commands):
+            executions.append(
+                VerificationExecution(
+                    f"EXEC-{len(executions) + 1:03d}",
+                    argv,
+                    {},
+                    cwd,
+                    30 if check_id == "ts_coverage" and index == 1 else timeout,
+                    (check_id,),
+                )
+            )
+    return VerificationPlan(
+        level, run_dir, tuple(checks), tuple(executions), (), (), context.subject_commit
+    )
+
+
 def parse_verification_plan(
     bundle: PolicyBundle,
     context: VerificationContext,
@@ -363,6 +506,10 @@ def parse_verification_plan(
     tool_available: Callable[[tuple[str, ...]], bool] = _tool_available,
 ) -> VerificationPlan:
     """Parse exactly the selected V0/V1 Policy checks, without starting processes."""
+    from aiflow.policy import is_node_policy
+
+    if is_node_policy(bundle):
+        return _node_plan(bundle, context, level)
     document = bundle.documents["verification-levels.yaml"]
     expected_placeholders = {f"{{{name}}}" for name in ALLOWED_VARIABLES}
     if (

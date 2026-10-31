@@ -16,7 +16,7 @@ from aiflow.evidence import V2_FINAL, V2_PRE_IMPLEMENTATION_REVIEW, validate_v2_
 from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import collect_git_context, commits_are_ancestral
 from aiflow.mutation_evidence import consume_targeted_mutation_evidence
-from aiflow.policy import load_policy_bundle
+from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.review_service import latest_review_assessment
 from aiflow.routing import ROUTE_ORDER, entry_requires_ask, route_task
 from aiflow.scope import (
@@ -360,6 +360,16 @@ def evaluate_gate(
     if not isinstance(classification, dict):
         raise ContractError("Gate classification is invalid", code="GATE_INPUT_INVALID")
     policy = load_policy_bundle(root)
+    node_policy = is_node_policy_candidate(policy.documents)
+    if node_policy:
+        if not is_node_policy(policy):
+            raise ContractError("Node Policy cannot be trusted", code="POLICY_NODE_INVALID")
+        if evidence_path is not None:
+            raise ContractError(
+                "Node CI evidence is unsupported", code="VERIFY_NODE_CI_UNSUPPORTED"
+            )
+        if classification.get("effective_verification_level") not in {"V0", "V1"}:
+            raise ContractError("Node V2 is unsupported", code="VERIFY_NODE_V2_UNSUPPORTED")
     spec_path = resolve_task_path(root, task_id, "spec.md")
     try:
         spec_sha256 = specification_digest(spec_path.read_text(encoding="utf-8"))
@@ -395,6 +405,7 @@ def evaluate_gate(
     )
     current: dict[str, object] = {
         "task_id": task_id,
+        "node_policy": node_policy,
         "repository_id": task.get("repository_id"),
         "branch": task.get("branch"),
         "base_commit": base,
@@ -445,6 +456,16 @@ def evaluate_gate(
         _read_external_evidence(evidence_path) if evidence_path is not None else None
     )
     evidence = external_evidence if external_evidence is not None else local_evidence
+    if node_policy and local_evidence is not None:
+        from aiflow.node_execution import recheck_node_evidence
+
+        node_facts = recheck_node_evidence(root, task_id, local_evidence)
+        current.update(
+            node_evidence_current=node_facts.current,
+            node_evidence_passed=node_facts.passed,
+            node_evidence_sha256=node_facts.evidence_sha256,
+            node_materials_sha256=node_facts.materials_sha256,
+        )
     evidence_report = (
         evaluate_freshness("evidence", evidence, current) if evidence is not None else None
     )
@@ -656,7 +677,8 @@ def evaluate_gate(
         and local_v2_source_current,
         evidence_passed=evidence is not None
         and evidence.get("conclusion") == "passed"
-        and local_v2_source_passed,
+        and local_v2_source_passed
+        and (not node_policy or current.get("node_evidence_passed") is True),
         code_approval_current=review_ids.issubset(approval_current["code"]),
         unresolved_block_or_escalation=block_present
         or task.get("current_state") in {"BLOCKED", "ESCALATED"},

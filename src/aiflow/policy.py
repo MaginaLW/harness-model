@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from aiflow.contracts import validate_contract
+from aiflow.contracts import contract_validation_batch, validate_contract
 from aiflow.document_parsing import load_yaml_text
 from aiflow.errors import PolicyError
 
@@ -21,6 +21,24 @@ POLICY_FILES: Mapping[str, str] = {
     "verification-levels.yaml": "verification_levels",
     "permissions.yaml": "permissions",
 }
+NODE_POLICY_VERSION = "3.1.0"
+NODE_PROFILE_ID = "agent-bridge-node"
+NODE_PROFILE_REVISION = 1
+NODE_V0_CHECKS = (
+    {"id": "contract", "required": True, "timeout_seconds": 30},
+    {"id": "scope", "required": True, "timeout_seconds": 30},
+    {"id": "smoke", "required": True, "timeout_seconds": 30},
+    {"id": "node_build", "required": True, "timeout_seconds": 300},
+    {"id": "node_check", "required": True, "timeout_seconds": 600},
+    {"id": "diff_whitespace", "required": True, "timeout_seconds": 30},
+)
+NODE_V1_CHECKS = NODE_V0_CHECKS + (
+    {"id": "ts_coverage", "required": True, "timeout_seconds": 600},
+    {"id": "ts_total_lines", "required": True, "timeout_seconds": 30, "threshold": 85},
+    {"id": "ts_diff_lines", "required": True, "timeout_seconds": 30, "threshold": 90},
+)
+NODE_V0_CHECK_IDS = tuple(str(check["id"]) for check in NODE_V0_CHECKS)
+NODE_V1_CHECK_IDS = tuple(str(check["id"]) for check in NODE_V1_CHECKS)
 
 
 @dataclass(frozen=True)
@@ -149,7 +167,12 @@ def _reject_conflicts(root: Path) -> None:
             )
 
 
-def _load_document(root: Path, filename: str, expected_kind: str) -> dict[str, Any]:
+def _load_document(
+    root: Path,
+    filename: str,
+    expected_kind: str,
+    validate: Callable[[object], list[str]],
+) -> dict[str, Any]:
     path = root / filename
     if not path.exists():
         raise PolicyError(
@@ -183,7 +206,14 @@ def _load_document(root: Path, filename: str, expected_kind: str) -> dict[str, A
             code="POLICY_SCHEMA_INVALID",
             details={"filename": filename},
         )
-    errors = validate_contract("policy", value)
+    version = value.get("policy_version")
+    if (
+        isinstance(version, str)
+        and version.split(".", 1)[0] == "3"
+        and version != NODE_POLICY_VERSION
+    ):
+        raise PolicyError("Policy version is unsupported", code="POLICY_LEVEL_INVALID")
+    errors = validate(value)
     if errors:
         raise PolicyError(
             "Policy document does not satisfy its Schema",
@@ -262,6 +292,30 @@ def _validate_cross_file(documents: dict[str, dict[str, Any]]) -> str:
     level_ids = [level["id"] for level in levels]
     version = str(next(iter(versions)))
     major = version.split(".", maxsplit=1)[0]
+    if is_node_policy_candidate(documents):
+        expected = {
+            "schema_version": "1.0",
+            "policy_version": NODE_POLICY_VERSION,
+            "policy_kind": "verification_levels",
+            "profile": {"id": NODE_PROFILE_ID, "revision": NODE_PROFILE_REVISION},
+            "levels": [
+                {"id": "V0", "checks": list(NODE_V0_CHECKS)},
+                {"id": "V1", "checks": list(NODE_V1_CHECKS)},
+            ],
+        }
+        # Canonical bytes preserve integer types: 1, true and 1.0 are distinct.
+        if (
+            version != NODE_POLICY_VERSION
+            or any(type(priority) is not int for priority in priorities)
+            or any(
+                "profile" in document
+                for name, document in documents.items()
+                if name != "verification-levels.yaml"
+            )
+            or _canonical(documents["verification-levels.yaml"]) != _canonical(expected)
+        ):
+            raise PolicyError("Node Policy contract is invalid", code="POLICY_LEVEL_INVALID")
+        return version
     if major == "1":
         expected_levels = ["V0", "V1"]
     elif major == "2":
@@ -306,6 +360,12 @@ def _validate_cross_file(documents: dict[str, dict[str, Any]]) -> str:
     return version
 
 
+def _canonical(value: object) -> bytes:
+    return json.dumps(
+        value, ensure_ascii=False, separators=(",", ":"), sort_keys=True, allow_nan=False
+    ).encode("utf-8")
+
+
 def _digest(documents: Mapping[str, Mapping[str, Any]]) -> str:
     canonical = json.dumps(
         {filename: documents[filename] for filename in POLICY_FILES},
@@ -314,6 +374,29 @@ def _digest(documents: Mapping[str, Mapping[str, Any]]) -> str:
         sort_keys=True,
     ).encode("utf-8")
     return hashlib.sha256(canonical).hexdigest()
+
+
+def is_node_policy_candidate(documents: Mapping[str, Mapping[str, Any]]) -> bool:
+    """Recognize Node-shaped inputs for rejection, without trusting their contract."""
+    return any(
+        "profile" in document or str(document.get("policy_version", "")).split(".", 1)[0] == "3"
+        for document in documents.values()
+    )
+
+
+def is_node_policy(bundle: PolicyBundle) -> bool:
+    """Accept only a complete, validated, digest-matched closed Node bundle."""
+    if bundle.policy_version != NODE_POLICY_VERSION or set(bundle.documents) != set(POLICY_FILES):
+        return False
+    try:
+        if any(validate_contract("policy", document) for document in bundle.documents.values()):
+            return False
+        return (
+            _validate_cross_file(bundle.documents) == NODE_POLICY_VERSION
+            and _digest(bundle.documents) == bundle.sha256
+        )
+    except (PolicyError, OSError, KeyError, TypeError, ValueError, RecursionError):
+        return False
 
 
 def load_policy_bundle(
@@ -333,9 +416,10 @@ def load_policy_bundle(
         raise PolicyError(
             "Could not inspect Policy directory", code="POLICY_READ_FAILED"
         ) from error
-    documents = {
-        filename: _load_document(root, filename, expected_kind)
-        for filename, expected_kind in POLICY_FILES.items()
-    }
-    version = _validate_cross_file(documents)
+    with contract_validation_batch("policy", len(POLICY_FILES)) as validate:
+        documents = {
+            filename: _load_document(root, filename, expected_kind, validate)
+            for filename, expected_kind in POLICY_FILES.items()
+        }
+        version = _validate_cross_file(documents)
     return PolicyBundle(documents=documents, policy_version=version, sha256=_digest(documents))

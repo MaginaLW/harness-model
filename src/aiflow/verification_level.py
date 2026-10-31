@@ -6,7 +6,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import cast
 
-from aiflow.policy import PolicyBundle
+from aiflow.policy import PolicyBundle, is_node_policy, is_node_policy_candidate
 from aiflow.verification import V0_CHECK_IDS
 
 V0 = "V0"
@@ -92,6 +92,8 @@ class TaskVerificationDecision:
 
 def _policy_v0_complete(bundle: PolicyBundle) -> bool:
     """Require the baseline V0 gates by ID and mark each as required."""
+    if is_node_policy_candidate(bundle.documents):
+        return is_node_policy(bundle)
     document = bundle.documents.get("verification-levels.yaml")
     if not isinstance(document, Mapping):
         return False
@@ -199,6 +201,14 @@ def determine_verification_level(
             ("V2 verification requirements are invalid; V1 is required.",),
         )
     if v2_reasons:
+        if is_node_policy_candidate(bundle.documents):
+            return VerificationDecision(
+                decision_unit_id,
+                V2,
+                tuple(reason[0] for reason in v2_reasons),
+                tuple(reason[1] for reason in v2_reasons),
+                ("installed_engine_evidence_unavailable",),
+            )
         if not _policy_v2_complete(bundle):
             return VerificationDecision(
                 decision_unit_id,
