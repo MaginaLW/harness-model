@@ -131,6 +131,46 @@ def test_legacy_policy_remains_valid_and_retains_all_default_forbids(
     assert set(task["forbidden_actions"]) == ACTIONS
 
 
+def test_legacy_policy_yaml_merge_override_loads_and_start_preserves_defaults(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    path, permissions = _permissions(repository)
+    permissions["policy_version"] = "2.5.0"
+    for action in ("push", "merge"):
+        _set_approval(permissions, action, "action")
+    text = yaml.safe_dump(permissions, sort_keys=False)
+    push = "- id: PERMISSION-DENY-AUTO-PUSH\n"
+    merge = (
+        "- id: PERMISSION-DENY-AUTO-MERGE\n"
+        "  priority: 680\n"
+        "  action: merge\n"
+        "  effect: deny_automatic\n"
+        "  required_approval: action\n"
+    )
+    assert text.count(push) == text.count(merge) == 1
+    text = text.replace(push, "- &push_rule\n  id: PERMISSION-DENY-AUTO-PUSH\n", 1)
+    text = text.replace(
+        merge,
+        "- <<: *push_rule\n  id: PERMISSION-DENY-AUTO-MERGE\n  priority: 680\n  action: merge\n",
+        1,
+    )
+    assert yaml.safe_load(text) == permissions
+    path.write_text(text, encoding="utf-8")
+    for name in ("hard-rules.yaml", "routing.yaml", "verification-levels.yaml"):
+        other = path.parent / name
+        document = yaml.safe_load(other.read_text(encoding="utf-8"))
+        document["policy_version"] = "2.5.0"
+        other.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    with schema_directory_context(repository / ".ai" / "schemas"):
+        policy = load_policy_bundle(repository)
+    assert policy.documents["permissions.yaml"] == permissions
+    assert _start(monkeypatch, repository) == 0
+    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+    assert isinstance(task, dict)
+    assert set(task["forbidden_actions"]) == ACTIONS
+
+
 @pytest.mark.parametrize("explicit", [[], ["push"], ["merge"], ["push", "merge"]])
 def test_new_task_preserves_explicit_forbids_and_other_policy_defaults(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, explicit: list[str]
@@ -228,6 +268,38 @@ def test_duplicate_policy_keys_are_rejected_before_start_writes(
             {"forbidden_automatic_actions": permissions["forbidden_automatic_actions"]},
             sort_keys=False,
         )
+    path.write_text(text, encoding="utf-8")
+    assert _start(monkeypatch, repository) == 1
+    assert not (repository / ".ai" / "tasks").exists()
+
+
+def test_duplicate_key_inside_anchored_rule_is_rejected_before_start_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    path, permissions = _permissions(repository)
+    text = path.read_text(encoding="utf-8")
+    rules = permissions["rules"]
+    assert isinstance(rules, list)
+    push = next(rule for rule in rules if rule["action"] == "push")
+    current = push["required_approval"]
+    start = text.index("  - id: PERMISSION-DENY-AUTO-PUSH")
+    end = text.index("\n  - id:", start + 1)
+    block = text[start:end]
+    original = f"    required_approval: {current}"
+    assert block.count(original) == 1
+    block = block.replace(
+        "  - id: PERMISSION-DENY-AUTO-PUSH",
+        "  - &push_rule\n    id: PERMISSION-DENY-AUTO-PUSH",
+        1,
+    )
+    block = block.replace(original, f"{original}\n{original}", 1)
+    text = text[:start] + block + text[end:]
+    merge = "  - id: PERMISSION-DENY-AUTO-MERGE"
+    assert text.count(merge) == 1
+    text = text.replace(merge, "  - <<: *push_rule\n    id: PERMISSION-DENY-AUTO-MERGE", 1)
+    # The permissive parser sees an unchanged valid Policy despite the duplicate.
+    assert yaml.safe_load(text) == permissions
     path.write_text(text, encoding="utf-8")
     assert _start(monkeypatch, repository) == 1
     assert not (repository / ".ai" / "tasks").exists()
