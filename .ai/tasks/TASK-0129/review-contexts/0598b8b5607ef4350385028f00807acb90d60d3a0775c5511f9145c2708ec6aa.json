@@ -1,0 +1,501 @@
+{
+  "base_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+  "branch": "codex/agent-bridge-node-completion",
+  "classification_input_sha256": "56afd059ab325827e4de2571916044220e8af66f5337bb98735a92c212267cbd",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/policy.schema.json",
+      ".ai/schemas/evidence.schema.json",
+      "src/aiflow/policy.py",
+      "src/aiflow/verification_level.py",
+      "src/aiflow/verification.py",
+      "src/aiflow/node_verification.py",
+      "src/aiflow/node_execution.py",
+      "src/aiflow/process_runner.py",
+      "src/aiflow/verification_service.py",
+      "src/aiflow/evidence.py",
+      "src/aiflow/freshness.py",
+      "src/aiflow/review_service.py",
+      "src/aiflow/approval.py",
+      "src/aiflow/gate.py",
+      "src/aiflow/status_service.py",
+      "src/aiflow/task_service.py",
+      "src/aiflow/initialization.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_node_v0_contract.py",
+      "tests/unit/test_node_v0_outputs.py",
+      "tests/unit/test_node_profile_contract.py",
+      "tests/integration/test_node_v0_recovery.py",
+      "tests/unit/test_node_process.py",
+      "tests/integration/test_node_verification.py",
+      "tests/unit/node_helpers.py",
+      "tests/fixtures/contracts/valid/evidence-node-31.json",
+      "tests/fixtures/contracts/invalid/evidence-node-31.extra.json",
+      "tests/fixtures/contracts/invalid/evidence-node-31.invalid.json",
+      "tests/fixtures/contracts/invalid/evidence-node-31.missing.json",
+      "src/aiflow/contracts.py",
+      "src/aiflow/state.py",
+      "src/aiflow/git_context.py",
+      "src/aiflow/initialization_git.py",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_state.py",
+      "tests/unit/test_git_context.py",
+      "tests/unit/test_initialization_git.py",
+      "tests/integration/test_sdk_context_trigger.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Deliver the complete installed Node V0/V1 profile with measured shared-runtime efficiency under every unchanged quality gate",
+        "impact_scope": [
+          ".ai/schemas/policy.schema.json",
+          ".ai/schemas/evidence.schema.json",
+          "src/aiflow/policy.py",
+          "src/aiflow/verification_level.py",
+          "src/aiflow/verification.py",
+          "src/aiflow/node_verification.py",
+          "src/aiflow/node_execution.py",
+          "src/aiflow/process_runner.py",
+          "src/aiflow/verification_service.py",
+          "src/aiflow/evidence.py",
+          "src/aiflow/freshness.py",
+          "src/aiflow/review_service.py",
+          "src/aiflow/approval.py",
+          "src/aiflow/gate.py",
+          "src/aiflow/status_service.py",
+          "src/aiflow/task_service.py",
+          "src/aiflow/initialization.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_node_v0_contract.py",
+          "tests/unit/test_node_v0_outputs.py",
+          "tests/unit/test_node_profile_contract.py",
+          "tests/integration/test_node_v0_recovery.py",
+          "tests/unit/test_node_process.py",
+          "tests/integration/test_node_verification.py",
+          "tests/unit/node_helpers.py",
+          "tests/fixtures/contracts/valid/evidence-node-31.json",
+          "tests/fixtures/contracts/invalid/evidence-node-31.extra.json",
+          "tests/fixtures/contracts/invalid/evidence-node-31.invalid.json",
+          "tests/fixtures/contracts/invalid/evidence-node-31.missing.json",
+          "src/aiflow/contracts.py",
+          "src/aiflow/state.py",
+          "src/aiflow/git_context.py",
+          "src/aiflow/initialization_git.py",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_state.py",
+          "tests/unit/test_git_context.py",
+          "tests/unit/test_initialization_git.py",
+          "tests/integration/test_sdk_context_trigger.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/evidence.schema.json",
+        ".ai/schemas/policy.schema.json",
+        ".ai/tasks/TASK-0129/action-use-e9b44840b30d01cfbdb87d7dbdf418ae11358ac4c2f2cd0d2b2968a7125f0a6f.md",
+        ".ai/tasks/TASK-0129/action-v2-targeted-mutation-node-completion.json",
+        ".ai/tasks/TASK-0129/approvals.json",
+        ".ai/tasks/TASK-0129/classification.json",
+        ".ai/tasks/TASK-0129/design-review-package.json",
+        ".ai/tasks/TASK-0129/events.jsonl",
+        ".ai/tasks/TASK-0129/evidence.json",
+        ".ai/tasks/TASK-0129/review-contexts/396c5f881fb7c4fe984fd9ed29db81d713c6de3f529c574e71b8c54e11779217.json",
+        ".ai/tasks/TASK-0129/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0129/spec.md",
+        ".ai/tasks/TASK-0129/task.yaml",
+        ".ai/tasks/TASK-0129/verifier-contexts/0170ba62133d7f94b0cdf5061bfe9f3696ce3c243f0bd662f6a1d26ac2815f80.json",
+        "src/aiflow/approval.py",
+        "src/aiflow/cli.py",
+        "src/aiflow/contracts.py",
+        "src/aiflow/evidence.py",
+        "src/aiflow/freshness.py",
+        "src/aiflow/gate.py",
+        "src/aiflow/git_context.py",
+        "src/aiflow/initialization.py",
+        "src/aiflow/node_execution.py",
+        "src/aiflow/node_verification.py",
+        "src/aiflow/policy.py",
+        "src/aiflow/process_runner.py",
+        "src/aiflow/review_service.py",
+        "src/aiflow/state.py",
+        "src/aiflow/status_service.py",
+        "src/aiflow/task_service.py",
+        "src/aiflow/verification.py",
+        "src/aiflow/verification_level.py",
+        "src/aiflow/verification_service.py",
+        "tests/integration/test_node_v0_recovery.py",
+        "tests/integration/test_node_verification.py",
+        "tests/integration/test_sdk_context_trigger.py",
+        "tests/unit/node_helpers.py",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_git_context.py",
+        "tests/unit/test_node_process.py",
+        "tests/unit/test_node_profile_contract.py",
+        "tests/unit/test_node_v0_contract.py",
+        "tests/unit/test_node_v0_outputs.py",
+        "tests/unit/test_state.py"
+      ],
+      "files": [
+        {
+          "additions": 470,
+          "binary": false,
+          "deletions": 3,
+          "path": ".ai/schemas/evidence.schema.json"
+        },
+        {
+          "additions": 77,
+          "binary": false,
+          "deletions": 9,
+          "path": ".ai/schemas/policy.schema.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/action-use-e9b44840b30d01cfbdb87d7dbdf418ae11358ac4c2f2cd0d2b2968a7125f0a6f.md"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/action-v2-targeted-mutation-node-completion.json"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/approvals.json"
+        },
+        {
+          "additions": 72,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/classification.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/design-review-package.json"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/events.jsonl"
+        },
+        {
+          "additions": 268,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/evidence.json"
+        },
+        {
+          "additions": 109,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/review-contexts/396c5f881fb7c4fe984fd9ed29db81d713c6de3f529c574e71b8c54e11779217.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 235,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/spec.md"
+        },
+        {
+          "additions": 147,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/task.yaml"
+        },
+        {
+          "additions": 148,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0129/verifier-contexts/0170ba62133d7f94b0cdf5061bfe9f3696ce3c243f0bd662f6a1d26ac2815f80.json"
+        },
+        {
+          "additions": 318,
+          "binary": false,
+          "deletions": 12,
+          "path": "src/aiflow/approval.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 83,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 425,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/evidence.py"
+        },
+        {
+          "additions": 34,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/freshness.py"
+        },
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/gate.py"
+        },
+        {
+          "additions": 141,
+          "binary": false,
+          "deletions": 28,
+          "path": "src/aiflow/git_context.py"
+        },
+        {
+          "additions": 68,
+          "binary": false,
+          "deletions": 24,
+          "path": "src/aiflow/initialization.py"
+        },
+        {
+          "additions": 3227,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/node_execution.py"
+        },
+        {
+          "additions": 440,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/node_verification.py"
+        },
+        {
+          "additions": 93,
+          "binary": false,
+          "deletions": 9,
+          "path": "src/aiflow/policy.py"
+        },
+        {
+          "additions": 478,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/process_runner.py"
+        },
+        {
+          "additions": 20,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/review_service.py"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/state.py"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/status_service.py"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 147,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/verification_level.py"
+        },
+        {
+          "additions": 156,
+          "binary": false,
+          "deletions": 10,
+          "path": "src/aiflow/verification_service.py"
+        },
+        {
+          "additions": 326,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_node_v0_recovery.py"
+        },
+        {
+          "additions": 709,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_node_verification.py"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/integration/test_sdk_context_trigger.py"
+        },
+        {
+          "additions": 338,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/node_helpers.py"
+        },
+        {
+          "additions": 123,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 525,
+          "binary": false,
+          "deletions": 14,
+          "path": "tests/unit/test_git_context.py"
+        },
+        {
+          "additions": 674,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_node_process.py"
+        },
+        {
+          "additions": 2836,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_node_profile_contract.py"
+        },
+        {
+          "additions": 1858,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_node_v0_contract.py"
+        },
+        {
+          "additions": 1575,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_node_v0_outputs.py"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_state.py"
+        }
+      ],
+      "totals": {
+        "additions": 16376,
+        "deletions": 126,
+        "files": 44
+      }
+    },
+    "goal": "Deliver the complete installed Node V0/V1 profile with measured shared-runtime efficiency under every unchanged quality gate",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0129",
+        "--actor",
+        "independent-node-profile-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "0598b8b5607ef4350385028f00807acb90d60d3a0775c5511f9145c2708ec6aa",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "81f35bdb2f132e0f82da93a872989fa493fb2ca7528d57651cccca36d5ffad7d",
+  "subject_commit": "7154cf6670c7dd338d596fd915715ad9517f5e97",
+  "task_id": "TASK-0129",
+  "verification_snapshot_sha256": "920381cd22f27c04ae8efa87b125c7b320bf722bd1293e804bb6ef788fcfdbd2"
+}
