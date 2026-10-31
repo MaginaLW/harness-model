@@ -7,7 +7,7 @@ allowed_scope:
 base_commit: 1856975c94c74b267c60cfa5ee00a86cd46238d5
 branch: codex/agent-bridge-resource-delivery
 created_at: '2026-10-31T03:27:16Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -71,6 +71,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-10-31T03:27:55Z'
 subject_commit: a6580f9143a5ddf74244a3e09c41c087d5a6d80d
 task_id: TASK-0126
-updated_at: '2026-10-31T04:33:27Z'
+updated_at: '2026-10-31T04:44:37Z'
 worktree_dirty: false
 worktree_dirty_paths: []
