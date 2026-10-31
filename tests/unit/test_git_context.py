@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -453,7 +454,18 @@ def test_real_conflict_is_in_dirty_paths(tmp_path: Path) -> None:
     (repository / "tracked.txt").write_text("main\n", encoding="utf-8")
     _commit_all(repository, "main")
     result = subprocess.run(
-        ["git", "merge", "other"], cwd=repository, capture_output=True, timeout=10
+        [
+            "git",
+            "-c",
+            "user.name=AI Flow Tests",
+            "-c",
+            "user.email=aiflow@example.invalid",
+            "merge",
+            "other",
+        ],
+        cwd=repository,
+        capture_output=True,
+        timeout=10,
     )
     assert result.returncode == 1
     assert collect_git_context(repository).dirty_paths == ("tracked.txt",)
@@ -647,3 +659,119 @@ def test_actual_detached_head_cannot_have_forged_tracking_header(
     with pytest.raises(AiflowError) as caught:
         collect_git_context(repository)
     assert caught.value.code == "GIT_STATUS_INVALID"
+
+
+@pytest.mark.parametrize("platform", ["nt", "posix"])
+@pytest.mark.parametrize(
+    "path",
+    ["name:part.txt", "folder/name:part.txt", "folder/a:b", "C:/outside", "C:relative", "z:part"],
+)
+@pytest.mark.parametrize(
+    "record,dirty_path",
+    [
+        ("? {path}\0", "{path}"),
+        (ORDINARY + "{path}\0", "{path}"),
+        (RENAME + "{path}\0original.txt\0", "{path}"),
+        (RENAME + "destination.txt\0{path}\0", "destination.txt"),
+    ],
+)
+def test_status_colon_paths_follow_platform_and_task_schema(
+    monkeypatch: pytest.MonkeyPatch, platform: str, path: str, record: str, dirty_path: str
+) -> None:
+    # Replace only the binding used by git_context; Pathlib's os.name stays native.
+    monkeypatch.setattr(git_context, "os", SimpleNamespace(name=platform), raising=False)
+    status = STATUS_HEADERS + record.format(path=path)
+    if platform == "nt" or path[:2] in {"C:", "z:"}:
+        with pytest.raises(AiflowError) as caught:
+            git_context._parse_status(status)
+        assert caught.value.code == "GIT_STATUS_INVALID"
+    else:
+        assert git_context._parse_status(status)[2] == (dirty_path.format(path=path),)
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Windows filenames cannot contain colon characters")
+def test_real_posix_colon_paths_include_ordinary_untracked_and_rename(tmp_path: Path) -> None:
+    repository = create_repository(tmp_path / "repository")
+    (repository / "name:before.txt").write_text("rename me\n", encoding="utf-8")
+    (repository / "ordinary:part.txt").write_text("initial\n", encoding="utf-8")
+    _commit_all(repository, "colon paths")
+    run_git(repository, "mv", "name:before.txt", "name:after.txt")
+    (repository / "ordinary:part.txt").write_text("changed\n", encoding="utf-8")
+    (repository / "folder/untracked:part.txt").write_text("untracked\n", encoding="utf-8")
+    context = collect_git_context(repository)
+    assert context.dirty_paths == (
+        "folder/untracked:part.txt",
+        "name:after.txt",
+        "ordinary:part.txt",
+    )
+
+
+def test_relative_git_environment_preserves_head_failure_priority(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    invocation = repository / "folder/deep"
+    invocation.mkdir()
+    monkeypatch.setenv("GIT_DIR", "../../.git")
+    monkeypatch.setenv("GIT_WORK_TREE", "../..")
+    assert git_context.resolve_repository_root(invocation) == repository.resolve()
+    with pytest.raises(AiflowError) as caught:
+        collect_git_context(invocation)
+    assert caught.value.code == "GIT_HEAD_UNAVAILABLE"
+    assert os.environ["GIT_DIR"] == "../../.git"
+    assert os.environ["GIT_WORK_TREE"] == "../.."
+
+
+@pytest.mark.parametrize(
+    "head_code,head_output,branch_code,expected",
+    [
+        (128, b"", 0, "GIT_HEAD_UNAVAILABLE"),
+        (0, b"invalid-head\n", 0, "GIT_HEAD_INVALID"),
+        (0, b"1" * 40 + b"\n", 128, "GIT_BRANCH_UNAVAILABLE"),
+        (0, b"1" * 40 + b"\n", 0, "GIT_STATUS_UNAVAILABLE"),
+    ],
+)
+def test_aggregate_failure_replays_original_head_branch_error_priority(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    head_code: int,
+    head_output: bytes,
+    branch_code: int,
+    expected: str,
+) -> None:
+    repository = tmp_path / "repository"
+    (repository / ".ai").mkdir(parents=True)
+    (repository / ".ai/repository-id").write_text(REPOSITORY_ID + "\n", encoding="utf-8")
+    calls = []
+
+    def failed(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        assert "env" not in kwargs
+        calls.append(tuple(arguments[1:]))
+        if arguments[1] == "rev-parse" and arguments[2] == "--show-toplevel":
+            code, output = 0, str(repository).encode() + b"\n"
+        elif arguments[1] == "status":
+            code, output = 1, b""
+        elif arguments[1] == "rev-parse":
+            assert arguments[2:] == ["HEAD"]
+            code, output = head_code, head_output
+        else:
+            assert arguments[1:] == ["symbolic-ref", "--short", "-q", "HEAD"]
+            code, output = branch_code, b"main\n"
+        return subprocess.CompletedProcess(arguments, code, stdout=output, stderr=b"private error")
+
+    monkeypatch.setattr(git_context.subprocess, "run", failed)
+    with pytest.raises(AiflowError) as caught:
+        collect_git_context(repository)
+    assert caught.value.code == expected
+    assert calls[:3] == [
+        ("rev-parse", "--show-toplevel"),
+        ("status", "--porcelain=v2", "--branch", "--no-show-stash", "-z", "--untracked-files=all"),
+        ("rev-parse", "HEAD"),
+    ]
+    assert len(calls) == (
+        4 if expected in {"GIT_BRANCH_UNAVAILABLE", "GIT_STATUS_UNAVAILABLE"} else 3
+    )
+    if expected == "GIT_STATUS_UNAVAILABLE":
+        assert caught.value.details["command"] == calls[1]
+        assert caught.value.details["returncode"] == 1
+    assert "private error" not in str(caught.value.to_dict())
