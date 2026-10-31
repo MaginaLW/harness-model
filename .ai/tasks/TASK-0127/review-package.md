@@ -50,8 +50,10 @@ RF-001 本地预审处置：测试提交 038c8a4 在源码提交 fd5f8f461d2a1bf
 
 当前新 action b87a70be610f6ab167cfd8e4911d0aadbed7d1dd9fa6c68e473f43c0e950ed07 已经独立具体审核 APPROVE，无 critical/high，并按常设授权记录批准，仅绑定 fd5f8f4 的一次固定 Native 运行。旧失败、中断、消费和未确认状态均保留。当前完整 Native、正式实施审核、code 批准、Gate 和 exact-head required CI 尚待完成。
 
+当前完整 Native 终局现已通过：source fd5f8f4，run-20261031T071550159376Z，4514 passed、2 项既有 POSIX 行为 skip、929.95 秒，原 1200 秒预算不变。14 项 required checks 全部 passed；core 总 branch+line 覆盖率 89.852184%、diff 998/1072=93.0970%，analysis 总覆盖率 97.503900%、无 changed-covered lines；mypy 58 文件及其余静态检查通过。独立 verifier 重核五项 baseline 0 / mutant 1 / killed、日志原字节摘要和 canonical 证据，main_tree_unchanged=true、run_reason=null；本次 mutation 工作树、临时目录和 owned 进程均无残留。新 action b87a70 的消费回执有效且不可复用。verification snapshot 为 c4a11c2f31637b10f5aec10cd28899e3b97659e2f984627d9c9b4f1d50f7217a；CLI 处于 WAITING_FOR_FINAL_REVIEW，正式实现审核、finalize、code 批准、Gate 和 exact-head required CI 仍须完成。
+
 初始化是否只创建受审清单且最后正确发布身份；中断、漂移、链接、未知状态和损坏是否拒绝且保留字节；新 CLI 是否在治理写入前拒绝不完整状态；legacy 与完整 native 门禁是否保持？
 
 ## 推荐结论
 
-当前处于实施与安装验收阶段。完成当前精确版本的独立验证与实现审核后，才记录 code 批准并以 Gate 判断就绪；精确 PR head 的 required CI 通过后才能按常设授权 merge commit。
+APPROVE。当前 fd5f8f4 的独立完整验证、安装验收与正式实现审核 REV-0002 均已通过，RF-001 保留原 medium 严重度并已独立复核 resolved。按常设授权记录当前 code 批准后仍须以 Gate 判断就绪；精确 PR head 的 required CI 通过且目标规则允许后，才能按常设授权 merge commit。
