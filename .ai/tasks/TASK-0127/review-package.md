@@ -1,0 +1,37 @@
+# TASK-0127 审核包
+
+## 审核目标
+
+交付经过目标 Policy 内容审阅的非覆盖资源初始化，建立新的仓库身份；不把安装完成称作 agent-bridge 或外仓 V2 已接入。
+
+## 背景
+
+真实实施前基线为 fb89032；测试先行并保持独立 task-free 提交。TASK-0126 资源分发及关闭文档已通过 PR138/139 合并，旧任务、失败与批准记录保留。
+
+## 代码地图
+
+initialization.py 管理固定 JSON 合同、资源/Policy、恢复/重放、ready guard 与只读检查；initialization_git.py 提供有界零写 Git 事实；initialization_windows.py 提供句柄绑定和原生独占创建/身份无覆盖发布。cli.py 在常规仓定位前分派 init，并在治理分派前检查状态；policy.py 的默认读取核对新式安装的采用决定。
+
+## 语义变更
+
+新增 preview/apply/inspect/migration-plan 四个入口。写入仅支持 Windows x64、CPython 3.11、本地 NTFS 的全新普通 Git 工作树。可验证 partial 保留原 UUID 并只创建缺失对象；完成重放零写；未知或修改后的对象保留并拒绝。资源和 metadata 保护到身份最后发布；源码包升级不自动替换目标资源。当前仅合成 Python 工程验收，不支持真实 Node 目标安装。
+
+## 风险
+
+摘要和 actor 标签不认证主体或授权。只保证明确测试的观察/发布边界，不声明整棵 Git 工作树原子锁、恶意同用户代码沙箱或断电事务。legacy 无标记仓不迁移；卸载不删除历史。Node 验证、installed-engine V2、目标 CI 和真实接入仍属后续交付。
+
+## 证据
+
+已验证：独立设计 REV-0001 APPROVE；预审发现的材料漂移、诊断缺项、Python 源要求、资源总量和仓内 Git 程序边界均已修复复核。稳定专项为 273 passed、2 项平台限定 skip，新三模块合计分支覆盖率 92%；全仓 Ruff、format、strict mypy、whitespace 通过。普通 wheel 的全模块来源/字节核对通过，但初次真实安装揭示 Win32 FileName NUL 缺口；旧失败 wheel 和现场保留。受控长度/canary 对照找到根因，新增独立回归及原对象发布后完整名称清单检查，修复 source 为 e0b264a2823ed9abd3d858cf2def225a4b14440f。修复后 Winhelper 72 passed、1 平台 skip，四项安装/重放/发布定向测试通过。所有含本机路径的原始材料只留本地忽略日志。
+
+已验证：修复后的 ordinary wheel 完整验收通过，精确 source e0b264a，wheel SHA-256 ec8974ba1ac8a6775459890016e4d422189b342a32fa1f023362730f93faed39。全 47 个引擎 Python 模块与候选字节一致，七份运行依赖及所有加载来源均为独立环境。18 项验收与 33 条记录命令通过：零写预览、实际 NTFS 安装、完成重放、正常任务历史准入、原预览历史漂移拒绝、只读迁移、真实 flush 故障后同 UUID 恢复，以及精确旧版本 57f0676 的五个入口在无历史 partial 上拒绝且零写。原始报告含本机路径，仅本地保留。
+
+未验证：当前 source 的完整原生 V2、正式实现审核、code 批准、Gate 和远端 required CI 仍待完成。本记录不将旧 action 批准、旧 source 或部分测试当成当前完整证据。
+
+## 审核问题
+
+初始化是否只创建受审清单且最后正确发布身份；中断、漂移、链接、未知状态和损坏是否拒绝且保留字节；新 CLI 是否在治理写入前拒绝不完整状态；legacy 与完整 native 门禁是否保持？
+
+## 推荐结论
+
+当前处于实施与安装验收阶段。完成当前精确版本的独立验证与实现审核后，才记录 code 批准并以 Gate 判断就绪；精确 PR head 的 required CI 通过后才能按常设授权 merge commit。
