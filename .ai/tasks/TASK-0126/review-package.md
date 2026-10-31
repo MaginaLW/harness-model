@@ -10,7 +10,7 @@
 
 ## 代码地图
 
-`setup.py` 和 `MANIFEST.in` 控制分发；`resource_bundle.py` 校验固定清单、类型、版本与摘要；`pyproject.toml` 和锁文件提供明确构建依赖。
+`setup.py` 和 `MANIFEST.in` 控制分发；`resource_bundle.py` 校验固定清单、类型、版本与摘要；`pyproject.toml` 和锁文件提供明确构建依赖，项目安装默认使用 copy 模式以满足独立文件条件。
 
 ## 语义变更
 
@@ -22,9 +22,9 @@
 
 ## 证据
 
-已验证：权威记录为 `reviews/REV-0001-r0001.json`、`reviews/REV-0002-r0001.json` 与已完成 finalization 的 `evidence.json`。4220 项测试、14 项 required checks 和五项当前 native 合同变异通过；core 90%、analysis 98%、本次资源 diff coverage 96.7%。含本机路径的原始日志留在忽略目录。
+已验证：当前 source subject 为 `a6580f9143a5ddf74244a3e09c41c087d5a6d80d`。权威记录为 `reviews/REV-0001-r0001.json`、`reviews/REV-0003-r0001.json` 与当前 finalization 的 `evidence.json`。4220 项测试用时 1025.43 秒，14 项 required checks 和五项当前 native 合同变异通过；core 90%、analysis 98%、本次资源 diff coverage 96.7%。新建离线环境的对照证实默认安装有 156 个非独立运行时文件，项目 copy 配置下为零。含本机路径的原始日志留在忽略目录。
 
-未验证：本次远端 required CI、实际推送与合并尚待执行；本任务不证明初始化或真实目标已接入。
+未验证：新 subject 对应远端 required CI、推送与合并尚待执行。前一 head 的 [CI](https://github.com/MaginaLW/harness-model/actions/runs/41166533470) 因依赖元数据链接数不为一而失败，其记录与旧批准、证据及消费回执保留；本轮没有放宽链接检查或依赖版本。本任务不证明初始化或真实目标已接入。
 
 ## 审核问题
 
