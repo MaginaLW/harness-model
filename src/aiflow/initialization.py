@@ -444,7 +444,7 @@ def _same_target(root: Path, original: Mapping[str, Any], sources: list[dict[str
     }
     if current["python_source_count"] < 1:
         raise _error("TARGET_PROFILE_UNSUPPORTED")
-    if current != original:
+    if _json(current) != _json(original):
         raise _error("PREVIEW_STALE")
 
 
@@ -482,9 +482,9 @@ def apply_initialization(
     root = git.resolve_initialization_root(Path(target))
     _project(root)
     bundle, policy, resources, sources = _materials(root, bundle_root, policy_directory)
-    if proposal["bundle"] != bundle or proposal["policy"] != policy:
+    if _json(proposal["bundle"]) != _json(bundle) or _json(proposal["policy"]) != _json(policy):
         raise _error("PREVIEW_MATERIAL_CHANGED")
-    if proposal["objects"] != _objects(resources, identifier):
+    if _json(proposal["objects"]) != _json(_objects(resources, identifier)):
         raise _error("PREVIEW_OBJECTS_INVALID")
     _same_target(root, proposal["target"], sources)
     decision = _review(proposal, policy_review)
@@ -658,16 +658,18 @@ def _state_manifest(root: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any
                 raise _error("INSTALLATION_STATE_INVALID")
             planned = {**planned, "size": row["size"], "sha256": row["sha256"]}
             resources[planned["path"].removeprefix(".ai/")] = row
-        if actual != planned:
+        if _json(actual) != _json(planned):
             raise _error("INSTALLATION_STATE_INVALID")
-    if policy["files"] != [
-        {
-            "path": "policy/" + name,
-            "size": resources["policy/" + name]["size"],
-            "sha256": resources["policy/" + name]["sha256"],
-        }
-        for name in sorted(POLICY_FILES)
-    ]:
+    if _json(policy["files"]) != _json(
+        [
+            {
+                "path": "policy/" + name,
+                "size": resources["policy/" + name]["size"],
+                "sha256": resources["policy/" + name]["sha256"],
+            }
+            for name in sorted(POLICY_FILES)
+        ]
+    ):
         raise _error("INSTALLATION_STATE_INVALID")
     if sum(row["size"] for row in resources.values()) > MAX_BUNDLE_BYTES:
         raise _error("BUNDLE_TOO_LARGE")
@@ -678,7 +680,7 @@ def _installed(root: Path) -> tuple[dict[str, Any], dict[str, bytes]]:
     state, planned = _state_manifest(root)
     identifier = state["repository_id"]
     resources = {name: _read(root / ".ai" / name, planned[name]["size"]) for name in RESOURCE_KINDS}
-    if state["objects"] != _objects(resources, identifier):
+    if _json(state["objects"]) != _json(_objects(resources, identifier)):
         raise _error("INSTALLATION_BYTES_CHANGED")
     with schema_directory_context(root / ".ai/schemas"):
         policy = load_policy_bundle(root, policy_directory=root / ".ai/policy")
