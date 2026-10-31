@@ -41,6 +41,9 @@ package-dir = {"" = "src"}
 where = ["src"]
 include = ["aiflow", "aiflow.*"]
 
+[tool.uv]
+link-mode = "copy"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
