@@ -8,6 +8,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from uuid import UUID
 
@@ -902,6 +903,67 @@ def test_actual_windows_backend_installs_and_replays(
     before = tree(repository)
     assert apply(repository, candidate, bundle)["phase"] == "already_complete"
     assert tree(repository) == before
+
+
+def test_actual_windows_system_temp_installation_keeps_ancestors_pinned(
+    initialization_seed: Path,
+    bundle: Path,
+    native_filesystem: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    require_windows_apply()
+    from aiflow.initialization_windows import WindowsFilesystem
+
+    system_temp = Path(os.environ["SystemRoot"]) / "Temp"
+    pin = WindowsFilesystem._pin_ancestor
+    observed = []
+    script = (
+        "import json,os,sys\n"
+        "try:\n"
+        " os.rename(sys.argv[1],sys.argv[2])\n"
+        "except OSError as error:\n"
+        " print(json.dumps({'renamed':False,'winerror':error.winerror}))\n"
+        "else:\n"
+        " print(json.dumps({'renamed':True}))\n"
+    )
+    with tempfile.TemporaryDirectory(prefix="aiflow-init-system-temp-", dir=system_temp) as name:
+        parent = Path(name)
+        moved = parent.with_name(parent.name + "-rename-control")
+        # This owned directory can be renamed before the protective handle exists.
+        parent.rename(moved)
+        moved.rename(parent)
+        root = parent / "repository"
+        shutil.copytree(initialization_seed, root)
+        candidate = preview(root, bundle)
+
+        def checked_pin(self, path):
+            handle = pin(self, path)
+            observed.append(Path(path))
+            if Path(path) == parent:
+                result = subprocess.run(
+                    [sys.executable, "-I", "-B", "-c", script, str(parent), str(moved)],
+                    cwd=system_temp,
+                    capture_output=True,
+                    check=True,
+                    encoding="utf-8",
+                    timeout=15,
+                )
+                assert json.loads(result.stdout) == {"renamed": False, "winerror": 32}
+            return handle
+
+        monkeypatch.setattr(WindowsFilesystem, "_pin_ancestor", checked_pin)
+
+        assert apply(root, candidate, bundle)["phase"] == "installed"
+        assert system_temp in observed
+        assert parent in observed
+        assert (root / ".ai/repository-id").read_bytes() == (
+            candidate["repository_id"] + "\n"
+        ).encode("utf-8")
+        initialization.require_initialization_ready(root)
+        assert initialization.inspect_initialization(root)["status"] == "complete"
+        before = tree(root)
+        assert apply(root, candidate, bundle)["phase"] == "already_complete"
+        assert tree(root) == before
 
 
 def test_actual_windows_handles_hold_resources_until_identity_publication(

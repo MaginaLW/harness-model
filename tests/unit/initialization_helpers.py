@@ -92,6 +92,10 @@ class PortableFilesystem:
     def open_directory(self, path: Path, *, share_write: bool = False) -> int:
         return self._hold(Path(path), directory=True)
 
+    def _pin_ancestor(self, path: Path) -> int:
+        # Logical object hold only; native access/sharing is tested separately.
+        return self.open_directory(path, share_write=True)
+
     def create_directory(self, parent_handle: int, name: str, *, share_write: bool = False) -> int:
         path = self._path(parent_handle, name)
         try:

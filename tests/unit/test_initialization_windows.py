@@ -210,6 +210,59 @@ def test_open_directory_holds_object_without_delete_sharing(
     filesystem.close(handle)
 
 
+def test_ancestor_pin_uses_traverse_and_attributes_without_directory_listing(
+    kernel: FakeKernel,
+) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    ancestor = filesystem._pin_ancestor(FAKE_ROOT.parent)
+    root = filesystem.open_directory(FAKE_ROOT, share_write=True)
+    calls = [arguments for name, arguments in kernel.calls if name == "CreateFileW"]
+
+    assert integer(calls[0][1]) == 0xA0  # TRAVERSE | READ_ATTRIBUTES; LIST_DIRECTORY is absent.
+    assert not integer(calls[0][1]) & 1
+    assert integer(calls[0][2]) == 3  # READ | WRITE sharing, never DELETE sharing.
+    assert integer(calls[0][4]) == 3  # OPEN_EXISTING.
+    assert integer(calls[0][5]) == 0x02200000  # BACKUP_SEMANTICS | OPEN_REPARSE_POINT.
+    assert integer(calls[1][1]) == 0x1000A1  # Target root retains the original full directory mask.
+    assert integer(calls[1][2]) == 3
+    assert filesystem.identity(ancestor)["file_id"] == ancestor
+    filesystem.close(root)
+    filesystem.close(ancestor)
+
+
+@pytest.mark.parametrize("operation", ["open", "identity", "close"])
+def test_ancestor_pin_failures_remain_domain_errors(kernel: FakeKernel, operation: str) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    if operation == "open":
+        kernel.fail["CreateFileW"] = ctypes.c_void_p(-1).value
+    elif operation == "identity":
+        kernel.fail["GetFileInformationByHandle"] = 0
+    else:
+        handle = filesystem._pin_ancestor(FAKE_ROOT)
+        kernel.fail["CloseHandle"] = 0
+
+    with pytest.raises(AiflowError) as error:
+        if operation == "close":
+            filesystem.close(handle)
+        else:
+            filesystem._pin_ancestor(FAKE_ROOT)
+    assert error.value.code == "INITIALIZATION_WINDOWS_FAILED"
+    assert error.value.details["winerror"] == 5
+    if operation == "identity":
+        assert any(name == "CloseHandle" for name, _arguments in kernel.calls)
+    if operation == "close":
+        kernel.fail.clear()
+        filesystem.close(handle)
+
+
+def test_ancestor_pin_rejects_reparse_objects(kernel: FakeKernel) -> None:
+    filesystem = windows.WindowsFilesystem(api=kernel)
+    kernel.attributes = 0x400
+    with pytest.raises(AiflowError):
+        filesystem._pin_ancestor(FAKE_ROOT)
+    assert any(name == "CloseHandle" for name, _arguments in kernel.calls)
+
+
 def test_atomic_child_creation_returns_the_created_object(kernel: FakeKernel) -> None:
     filesystem = windows.WindowsFilesystem(api=kernel)
     parent = filesystem.open_directory(FAKE_ROOT, share_write=True)
