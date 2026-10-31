@@ -69,8 +69,8 @@ goal: Deliver reviewed current-policy resources after repairing native test prer
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-10-31T03:27:55Z'
-subject_commit: 79addf5acec87295554464cedc096fa21d9b7a53
+subject_commit: a6580f9143a5ddf74244a3e09c41c087d5a6d80d
 task_id: TASK-0126
-updated_at: '2026-10-31T03:56:14Z'
+updated_at: '2026-10-31T04:13:28Z'
 worktree_dirty: false
 worktree_dirty_paths: []

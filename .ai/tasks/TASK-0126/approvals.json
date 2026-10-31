@@ -41,5 +41,21 @@
     "spec_sha256": "ffa877ba946514096acd359123f1610cec15af5d6dd220dcb20566351260cd90",
     "subject_commit": "79addf5acec87295554464cedc096fa21d9b7a53",
     "task_id": "TASK-0126"
+  },
+  {
+    "action_sha256": "07f92db3692244da231befcc2278c5703594c54c401ea8169d9ff395923fcfa5",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-10-31T04:13:28Z",
+    "base_commit": "1856975c94c74b267c60cfa5ee00a86cd46238d5",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-10-31T06:10:11Z",
+    "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+    "reason": "常设授权：独立Agent已批准当前copy-mode修复subject的具体一次性action，无critical/high；绑定当前新subject，仅原生隔离变异，不复用旧动作或证据",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "ffa877ba946514096acd359123f1610cec15af5d6dd220dcb20566351260cd90",
+    "subject_commit": "a6580f9143a5ddf74244a3e09c41c087d5a6d80d",
+    "task_id": "TASK-0126"
   }
 ]
