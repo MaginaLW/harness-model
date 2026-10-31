@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-10-31T03:30:10Z",
+    "base_commit": "1856975c94c74b267c60cfa5ee00a86cd46238d5",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+    "reason": "常设授权：独立Agent设计审核APPROVE，无critical/high；前置测试修复独立提交，资源源码保持真实实施前基线，完整REVIEW/V2与质量门不变",
+    "schema_version": "1.0",
+    "spec_sha256": "ffa877ba946514096acd359123f1610cec15af5d6dd220dcb20566351260cd90",
+    "subject_commit": "1856975c94c74b267c60cfa5ee00a86cd46238d5",
+    "task_id": "TASK-0126"
+  }
+]
