@@ -1,0 +1,82 @@
+allowed_scope:
+- src/aiflow/initialization.py
+- src/aiflow/initialization_git.py
+- src/aiflow/initialization_windows.py
+- src/aiflow/cli.py
+- src/aiflow/policy.py
+- tests/unit/test_initialization.py
+- tests/unit/test_initialization_windows.py
+- tests/unit/initialization_helpers.py
+- tests/unit/test_initialization_git.py
+base_commit: fb89032a69a5d9f062f168e4e0346a9237c5ab84
+branch: codex/agent-bridge-initialization
+created_at: '2026-10-31T04:55:36Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - Create new resources only in disposable synthetic repositories; anonymous public
+    build dependency acquisition; conditional reviewed same-repository delivery under
+    standing authorization. No actual agent-bridge application or cross-repository
+    publication.
+  goal: Deliver reviewed non-overwriting Windows resource initialization
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  - external_action
+  impact_scope:
+  - src/aiflow/initialization.py
+  - src/aiflow/initialization_git.py
+  - src/aiflow/initialization_windows.py
+  - src/aiflow/cli.py
+  - src/aiflow/policy.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0127
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: e2d19cda459bd20050520b7f7d2756a3e69edbfafd2d14b4e7b7b26f6f1b9298
+goal: Deliver reviewed non-overwriting Windows resource initialization
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-10-31T04:57:24Z'
+subject_commit: fb89032a69a5d9f062f168e4e0346a9237c5ab84
+task_id: TASK-0127
+updated_at: '2026-10-31T04:59:02Z'
+worktree_dirty: false
+worktree_dirty_paths: []
