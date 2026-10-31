@@ -1,19 +1,19 @@
 {
   "base_commit": "0ba0a38e65416ba387d1f5c014c6c433f8a4678a",
   "change_reason": "unchanged",
-  "classification_input_sha256": "146e534c70024c5138f200f95b6ea16f5e295e4737d02956e4135e19b23b7beb",
+  "classification_input_sha256": "3319bcc2954642b073f43fcaf124cce1d14a00b9836bbad4630737e02584c743",
   "classifications": [
     {
-      "classified_at": "2026-10-31T01:23:02Z",
+      "classified_at": "2026-10-31T01:24:51Z",
       "decision_unit_id": "DU-001",
-      "explanation": "A real external action requires review and separate action approval.",
+      "explanation": "A real external action requires review and applicable action authorization.",
       "explanations": [
-        "A real external action requires review and separate action approval.",
+        "A real external action requires review and applicable action authorization.",
         "Changes that can touch the governance surface require independent review."
       ],
       "matched_rules": [
         {
-          "explanation": "A real external action requires review and separate action approval.",
+          "explanation": "A real external action requires review and applicable action authorization.",
           "predicate_explanations": [
             "external_side_effects: not_equals -> true"
           ],
@@ -31,8 +31,8 @@
           "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE"
         }
       ],
-      "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
-      "policy_version": "2.5.0",
+      "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+      "policy_version": "2.6.0",
       "route": "REVIEW",
       "rule_id": "HARD-REVIEW-REAL-EXTERNAL-ACTION",
       "verification_blocking_reasons": [],
@@ -55,12 +55,12 @@
       ]
     }
   ],
-  "classified_at": "2026-10-31T01:23:02Z",
+  "classified_at": "2026-10-31T01:24:51Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V1",
-  "policy_sha256": "13fd009fd3d31095d255af6e110a1e41e5c9b03c2bc27837fa317c6cac28ed21",
-  "policy_version": "2.5.0",
+  "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+  "policy_version": "2.6.0",
   "schema_version": "1.0",
-  "subject_commit": "0ba0a38e65416ba387d1f5c014c6c433f8a4678a",
+  "subject_commit": "c4adc4169967f25d21915ca524d9feda4ebe5f2c",
   "task_id": "TASK-0123"
 }
