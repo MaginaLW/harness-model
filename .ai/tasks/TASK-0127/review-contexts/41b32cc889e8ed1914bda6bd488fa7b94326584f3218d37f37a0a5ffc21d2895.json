@@ -1,0 +1,47 @@
+{
+  "base_commit": "fb89032a69a5d9f062f168e4e0346a9237c5ab84",
+  "branch": "codex/agent-bridge-initialization",
+  "classification_input_sha256": "e714de3530d8fc2bc22ddb85a9015824ebffb0e72cbbae9a70dda94c70be4ff1",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/initialization.py",
+      "src/aiflow/initialization_git.py",
+      "src/aiflow/initialization_windows.py",
+      "src/aiflow/cli.py",
+      "src/aiflow/policy.py",
+      "tests/unit/test_initialization.py",
+      "tests/unit/test_initialization_windows.py",
+      "tests/unit/initialization_helpers.py",
+      "tests/unit/test_initialization_git.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Deliver reviewed non-overwriting Windows resource initialization",
+        "impact_scope": [
+          "src/aiflow/initialization.py",
+          "src/aiflow/initialization_git.py",
+          "src/aiflow/initialization_windows.py",
+          "src/aiflow/cli.py",
+          "src/aiflow/policy.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Deliver reviewed non-overwriting Windows resource initialization",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "41b32cc889e8ed1914bda6bd488fa7b94326584f3218d37f37a0a5ffc21d2895",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "e2d19cda459bd20050520b7f7d2756a3e69edbfafd2d14b4e7b7b26f6f1b9298",
+  "task_id": "TASK-0127"
+}

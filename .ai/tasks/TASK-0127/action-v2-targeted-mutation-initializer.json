@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "e714de3530d8fc2bc22ddb85a9015824ebffb0e72cbbae9a70dda94c70be4ff1",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0127",
+  "parameter_summary": "One fixed phase-02-critical native governance run for the reviewed initializer subject; five isolated disposable worktrees maximum, existing native protocol, direct Git from the same audited installation, unchanged checks and cleanup.",
+  "subject_commit": "5efb6877959eb3c2522f87941511d96861eea35e",
+  "conditions": [
+    "Independent concrete action review APPROVE with no open critical/high findings and current spec/design/classification bindings.",
+    "Only this task and exact current source subject; one launch, failure/interruption consumes the action; preserve receipts, failed evidence and unconfirmed cleanup.",
+    "Run only the existing five native safeguards in owned isolated worktrees. No actual agent-bridge application, real engines/models/WeChat/production, credential access or private-material transmission.",
+    "The same fixed native argv, 1200-second full-suite budget, two-domain 85/90 gates and safe process cleanup remain mandatory."
+  ],
+  "expires_at": "2026-10-31T07:19:06Z",
+  "single_use": true
+}

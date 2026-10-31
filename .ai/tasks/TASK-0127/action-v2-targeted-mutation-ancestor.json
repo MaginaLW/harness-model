@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "e714de3530d8fc2bc22ddb85a9015824ebffb0e72cbbae9a70dda94c70be4ff1",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0127",
+  "parameter_summary": "One fresh fixed phase-02-critical native run for ancestor-only TRAVERSE/READ_ATTRIBUTES pinning without LIST_DIRECTORY; five owned disposable worktrees maximum, unchanged native checks, audited Git and cleanup.",
+  "subject_commit": "f57ee4f1ea592aacffc94bcbd82920638ffe1b6e",
+  "conditions": [
+    "Independent concrete action review APPROVE with no open critical/high findings and current spec/design/classification bindings.",
+    "Only this task and exact current source subject; one launch, failure/interruption consumes the action; preserve receipts, failed evidence and unconfirmed cleanup.",
+    "Run only the existing five native safeguards in owned isolated worktrees. No actual agent-bridge application, real engines/models/WeChat/production, credential access or private-material transmission.",
+    "The same fixed native argv, 1200-second full-suite budget, two-domain 85/90 gates and safe process cleanup remain mandatory.",
+    "The failed e0b264 native evidence and permanently consumed 4070 action remain retained. Earlier actions never authorize this new subject; this is a new single-use binding."
+  ],
+  "expires_at": "2026-10-31T09:16:58Z",
+  "single_use": true
+}

@@ -184,7 +184,62 @@ def build_parser() -> ArgumentParser:
     sync = subparsers.add_parser("sync", help="synchronize an explicitly scoped task subject")
     sync.add_argument("task_id")
     sync.add_argument("--actor", required=True)
+    initialize = subparsers.add_parser(
+        "init", help="preview or apply reviewed repository resources"
+    )
+    init_commands = initialize.add_subparsers(dest="init_command", required=True)
+    for name in ("preview", "apply", "inspect", "migration-plan"):
+        command = init_commands.add_parser(name)
+        command.add_argument("--target", required=True, type=Path)
+        if name != "inspect":
+            command.add_argument("--bundle-root", type=Path)
+            command.add_argument("--policy-candidate-root", type=Path)
+        if name in {"preview", "migration-plan"}:
+            command.add_argument("--profile", default="native-python-v1")
+        if name == "apply":
+            command.add_argument("--preview", required=True, type=Path)
+            command.add_argument("--policy-review", required=True, type=Path)
     return parser
+
+
+def _dispatch_initialization(arguments: Namespace) -> int:
+    from aiflow import initialization
+    from aiflow.initialization_git import resolve_initialization_root
+
+    name = arguments.init_command
+    if name == "inspect":
+        result = initialization.inspect_initialization(arguments.target)
+    else:
+        options = {
+            "bundle_root": arguments.bundle_root,
+            "policy_directory": arguments.policy_candidate_root,
+        }
+        if name == "apply":
+            root = resolve_initialization_root(arguments.target)
+            if any(
+                path.resolve().is_relative_to(root)
+                for path in (arguments.preview, arguments.policy_review)
+            ):
+                raise AiflowError(
+                    "Initialization inputs must be outside the target worktree",
+                    code="INITIALIZATION_INPUT_LOCATION_INVALID",
+                )
+            result = initialization.apply_initialization(
+                arguments.target,
+                initialization.read_initialization_json(arguments.preview),
+                initialization.read_initialization_json(arguments.policy_review),
+                **options,
+            )
+        elif name == "preview":
+            result = initialization.preview_initialization(
+                arguments.target, profile=arguments.profile, **options
+            )
+        else:
+            result = initialization.plan_initialization_migration(
+                arguments.target, profile=arguments.profile, **options
+            )
+    print(json.dumps(result, sort_keys=True))
+    return 0
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -196,7 +251,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         arguments = parser.parse_args(raw_arguments)
         if arguments.command is None:
             return 0
+        if arguments.command == "init":
+            return _dispatch_initialization(arguments)
         repository_root = resolve_repository_root(Path.cwd())
+        from aiflow.initialization import require_initialization_ready
+
+        require_initialization_ready(repository_root)
         with schema_directory_context(repository_root / SCHEMA_RELATIVE_DIRECTORY):
             return _dispatch(arguments, repository_root)
     except AiflowError as error:

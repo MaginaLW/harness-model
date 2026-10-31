@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "e714de3530d8fc2bc22ddb85a9015824ebffb0e72cbbae9a70dda94c70be4ff1",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0127",
+  "parameter_summary": "One fresh fixed phase-02-critical native run for RF-001 type-sensitive canonical initialization JSON checks. Use the unchanged native CLI with durable local output capture; five owned disposable mutation worktrees maximum, audited Git and cleanup.",
+  "subject_commit": "fd5f8f461d2a1bf1c1e1f0ac317324ef04440576",
+  "conditions": [
+    "Independent concrete action review APPROVE with no open critical/high findings and current spec/design/classification bindings.",
+    "Only this task and exact current source subject; one launch, failure/interruption consumes the action; preserve receipts, failed evidence and unconfirmed cleanup.",
+    "Run only the existing five native safeguards in owned isolated worktrees. No actual agent-bridge application, real engines/models/WeChat/production, credential access or private-material transmission.",
+    "The same fixed native argv, 1200-second full-suite budget, two-domain 85/90 gates and safe process cleanup remain mandatory.",
+    "Prior failed and interrupted runs and their records remain retained. The 4070 action was consumed; 9c86 was used for an interrupted single launch without a mutation receipt and must not be reused. Neither authorizes this new subject.",
+    "The standard hidden supervisor only captures process identity, output and exit status. It does not change native CLI argv/checks, timeout or thresholds and does not certify cleanup or a passed evidence conclusion."
+  ],
+  "expires_at": "2026-10-31T10:12:46Z",
+  "single_use": true
+}

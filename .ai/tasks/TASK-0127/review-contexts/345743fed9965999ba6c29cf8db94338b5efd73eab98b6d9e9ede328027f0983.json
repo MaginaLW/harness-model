@@ -1,0 +1,299 @@
+{
+  "base_commit": "fb89032a69a5d9f062f168e4e0346a9237c5ab84",
+  "branch": "codex/agent-bridge-initialization",
+  "classification_input_sha256": "e714de3530d8fc2bc22ddb85a9015824ebffb0e72cbbae9a70dda94c70be4ff1",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/initialization.py",
+      "src/aiflow/initialization_git.py",
+      "src/aiflow/initialization_windows.py",
+      "src/aiflow/cli.py",
+      "src/aiflow/policy.py",
+      "tests/unit/test_initialization.py",
+      "tests/unit/test_initialization_windows.py",
+      "tests/unit/initialization_helpers.py",
+      "tests/unit/test_initialization_git.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Deliver reviewed non-overwriting Windows resource initialization",
+        "impact_scope": [
+          "src/aiflow/initialization.py",
+          "src/aiflow/initialization_git.py",
+          "src/aiflow/initialization_windows.py",
+          "src/aiflow/cli.py",
+          "src/aiflow/policy.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0127/action-use-4070a016ebc3aaec22774ec78248cd1b469675c843e0e51cbea0e14a12bc004d.md",
+        ".ai/tasks/TASK-0127/action-v2-targeted-mutation-ancestor.json",
+        ".ai/tasks/TASK-0127/action-v2-targeted-mutation-initializer.json",
+        ".ai/tasks/TASK-0127/action-v2-targeted-mutation-rename.json",
+        ".ai/tasks/TASK-0127/approvals.json",
+        ".ai/tasks/TASK-0127/classification.json",
+        ".ai/tasks/TASK-0127/events.jsonl",
+        ".ai/tasks/TASK-0127/evidence.json",
+        ".ai/tasks/TASK-0127/review-contexts/41b32cc889e8ed1914bda6bd488fa7b94326584f3218d37f37a0a5ffc21d2895.json",
+        ".ai/tasks/TASK-0127/review-package.md",
+        ".ai/tasks/TASK-0127/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0127/spec.md",
+        ".ai/tasks/TASK-0127/task.yaml",
+        ".ai/tasks/TASK-0127/verifier-contexts/47a13642b49ffa778eaa6711dd5258a17b28e52ff9b3cd3fc9efd0fb82583deb.json",
+        ".ai/tasks/TASK-0127/verifier-contexts/85b42bd34579c2a33d3acb191d1d6c3126b97be18d447c18e93d044c47dabae0.json",
+        "src/aiflow/cli.py",
+        "src/aiflow/initialization.py",
+        "src/aiflow/initialization_git.py",
+        "src/aiflow/initialization_windows.py",
+        "src/aiflow/policy.py",
+        "tests/unit/initialization_helpers.py",
+        "tests/unit/test_initialization.py",
+        "tests/unit/test_initialization_git.py",
+        "tests/unit/test_initialization_windows.py"
+      ],
+      "files": [
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/action-use-4070a016ebc3aaec22774ec78248cd1b469675c843e0e51cbea0e14a12bc004d.md"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/action-v2-targeted-mutation-ancestor.json"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/action-v2-targeted-mutation-initializer.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/action-v2-targeted-mutation-rename.json"
+        },
+        {
+          "additions": 63,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/approvals.json"
+        },
+        {
+          "additions": 72,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/classification.json"
+        },
+        {
+          "additions": 20,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/events.jsonl"
+        },
+        {
+          "additions": 268,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/evidence.json"
+        },
+        {
+          "additions": 47,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/review-contexts/41b32cc889e8ed1914bda6bd488fa7b94326584f3218d37f37a0a5ffc21d2895.json"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/review-package.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 197,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/spec.md"
+        },
+        {
+          "additions": 82,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/task.yaml"
+        },
+        {
+          "additions": 81,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/verifier-contexts/47a13642b49ffa778eaa6711dd5258a17b28e52ff9b3cd3fc9efd0fb82583deb.json"
+        },
+        {
+          "additions": 86,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0127/verifier-contexts/85b42bd34579c2a33d3acb191d1d6c3126b97be18d447c18e93d044c47dabae0.json"
+        },
+        {
+          "additions": 60,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 835,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/initialization.py"
+        },
+        {
+          "additions": 553,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/initialization_git.py"
+        },
+        {
+          "additions": 445,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/initialization_windows.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/policy.py"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/initialization_helpers.py"
+        },
+        {
+          "additions": 407,
+          "binary": false,
+          "deletions": 40,
+          "path": "tests/unit/test_initialization.py"
+        },
+        {
+          "additions": 771,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_initialization_git.py"
+        },
+        {
+          "additions": 255,
+          "binary": false,
+          "deletions": 3,
+          "path": "tests/unit/test_initialization_windows.py"
+        }
+      ],
+      "totals": {
+        "additions": 4428,
+        "deletions": 43,
+        "files": 24
+      }
+    },
+    "goal": "Deliver reviewed non-overwriting Windows resource initialization",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0127",
+        "--actor",
+        "independent-initializer-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "345743fed9965999ba6c29cf8db94338b5efd73eab98b6d9e9ede328027f0983",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "e2d19cda459bd20050520b7f7d2756a3e69edbfafd2d14b4e7b7b26f6f1b9298",
+  "subject_commit": "fd5f8f461d2a1bf1c1e1f0ac317324ef04440576",
+  "task_id": "TASK-0127",
+  "verification_snapshot_sha256": "c4a11c2f31637b10f5aec10cd28899e3b97659e2f984627d9c9b4f1d50f7217a"
+}
