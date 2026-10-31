@@ -11,7 +11,7 @@
 |---|---|
 | 工作约定 | 推荐起点。合并少量通用规则到目标项目已有指令入口，保留本项目原有安全与治理规则；不安装依赖、Hook 或后台服务。 |
 | 项目验证 | 沿用目标仓库已定义的测试、静态检查与 required CI。没有检查时如实标缺失，不靠复制本仓 Python 命令制造通过结果。 |
-| 完整 AI Flow | 仅在确实需要确定性任务分流、版本绑定审批与证据 Gate 时评估。当前外仓初始化、资源分发及目标 CI 适配仍有缺口，见[完整引擎边界](#完整引擎的跨仓库边界)，不是普通试点的前置条件。 |
+| 完整 AI Flow | 仅在确实需要确定性任务分流、版本绑定审批与证据 Gate 时评估。版本化[资源包](resource-bundle.md)已提供；外仓初始化及目标 CI 适配仍有缺口，见[完整引擎边界](#完整引擎的跨仓库边界)，不是普通试点的前置条件。 |
 
 推广的是“同一原则 + 项目适配”，不是向所有工具、项目复制同一套配置。
 对已有强制流程的仓库，轻量规则不能解除其任务或审核义务；冲突先按该仓规则处理。
@@ -324,8 +324,8 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 当前 `0.2.0` 的[Quickstart](quickstart.md)针对 harness-model 的完整克隆。
 仅安装 wheel 或执行 `pip install` 并不能把另一仓库变成 AI Flow 项目：
 
-- 包只分发 `src/aiflow`，运行时仍需仓库自己的 `.ai/repository-id`、Policy、Schema、
-  模板与任务存储。不得复制本仓身份、历史 task、批准、证据或维护模式标记。
+- 普通 wheel 分发 `src/aiflow` 及[版本化资源包](resource-bundle.md)：15 份 Schema、四份 Policy 种子和规格模板。
+  安装不会创建目标 `.ai`；运行时仍需目标自己的 `.ai/repository-id`、Policy、Schema、模板与任务存储。不得复制本仓身份、历史 task、批准、证据或维护模式标记。
 - 完整克隆内的业务 CLI 可从 Git 工作树根或内部子目录调用；内部任务、Policy、
   模板及默认 Schema 使用同一定位根，Schema 来自 `<root>/.ai/schemas`。
 - 新 task 在 `freeze` 与首次 `classify` 前，由 Agent 按实际情况使用 `facts` 预览和录入显式风险事实，见
@@ -334,8 +334,8 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 - 本仓 CI 命令、路径、85% / 90% 阈值及维护模式是本仓约束，不是外仓通用安装模板。
   外仓必须映射自己的质量检查与治理模式，不能通过复制 bootstrap 标记跳过原有 Gate。
 
-`facts` 只补显式风险事实的本地录入入口。因此，全引擎外仓产品化仍需独立设计和验证：
-安全且不覆盖已有配置的初始化与资源分发、新仓库身份和目标 CI 适配。源于
+`facts` 提供显式风险事实的本地录入入口，[PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付版本化资源分发。
+全引擎外仓产品化仍需独立设计和验证：安全且不覆盖已有配置的初始化、新仓库身份和目标验证及 CI 适配。源于
 [`pyproject.toml`](../../pyproject.toml)、[CLI](../../src/aiflow/cli.py)、
 [仓库身份](../../src/aiflow/git_context.py)、[Schema 加载](../../src/aiflow/contracts.py)
 和[任务存储](../../src/aiflow/storage.py)的当前实现核查，不是已存在的安装命令。
@@ -346,13 +346,13 @@ CLI 的定位与兼容边界见[仓库根定位规格](../superpowers/specs/repo
 业务命令在非 Git 或 bare 仓库中拒绝；help、version 和参数错误保持原有仓外行为。
 调用过程不 `chdir`。用户文件参数 `--input`、`--options-file`、`--output`、
 `--evidence`、`--action-file`、`--ci-run-dir` 的相对路径仍以调用目录为准。
-这项能力只补内部资源定位，不提供初始化、资源分发、身份复制或目标 CI 适配。
+根定位本身不执行初始化、目标资源写入或 CI 适配，也不授权复制源仓身份。
 
 真实项目需要这一层时再按本仓 AI Flow 创建治理变更并验证干净外仓端到端流程；
 它不阻塞轻量试点，也不授权自动恢复强制 task、阶段三/四、模型路由或可信外部执行器。
 现有 [Hook wrapper](hooks.md)仍不执行或授权 push/merge，不能拿来伪装通用安全控制面。
 
-未来的资源分发、非覆盖初始化、目标验证配置、更新恢复及启动材料，见
+已交付资源的构建与读取见[资源包用法](resource-bundle.md)；非覆盖初始化、目标验证配置、更新恢复及启动材料，见
 [完整引擎跨仓初始化方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
 同文另列[应用自管 SDK 客户端](sdk-and-engine-plan.md#应用自管-sdk-客户端)；两条路线互不依赖，
 方案记录不代表开始安装、连接或真实调用，当前状态仍以[维护收尾与待办](maintenance-status.md)为准。
