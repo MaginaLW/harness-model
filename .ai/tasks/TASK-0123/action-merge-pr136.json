@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "3319bcc2954642b073f43fcaf124cce1d14a00b9836bbad4630737e02584c743",
+  "subject_commit": "c4adc4169967f25d21915ca524d9feda4ebe5f2c",
+  "expires_at": "2026-10-31T06:24:03Z",
+  "single_use": true,
+  "action_type": "github_merge_pull_request",
+  "target": "repository=MaginaLW/harness-model;pull_request=136;base=main",
+  "parameter_summary": "head_sha=f07cae88cbd5d03b9cdeda237f9433279b005c40;base_sha=bbf9434cdf437c77d05fe30142bea51875d471ac;method=merge;match_head=true;admin=false;server_auto_deletes_merged_source_branch=true",
+  "conditions": [
+    "The owner explicitly authorized delivery of this bounded change.",
+    "Require exact PR, head and base, successful required CI and unchanged branch protection.",
+    "Require current task reviews, V1 and Gate; use merge commit without bypassing protection.",
+    "The repository automatically deletes the merged source branch; no other ref may be deleted.",
+    "Launch, failure or interruption consumes this single-use attempt; inspect any uncertain outcome."
+  ]
+}
