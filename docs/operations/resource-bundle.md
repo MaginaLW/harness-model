@@ -26,9 +26,7 @@ POSIX 环境使用 `.venv/bin/python`。已有环境中的硬链接不会仅因�
 from importlib.resources import files
 from aiflow.resource_bundle import read_bundle
 
-manifest, resources = read_bundle(
-    files("aiflow").joinpath("_bundled_resources")
-)
+manifest, resources = read_bundle(files("aiflow").joinpath("_bundled_resources"))
 ```
 
 `resources` 的键为包内相对路径，值为规范资源字节。读取先完成整个清单校验，不返回部分结果。普通安装和 `zipfile.Path` 读取均有验证；可编辑安装不提供 `_bundled_resources`，分发验收应使用实际 wheel。
