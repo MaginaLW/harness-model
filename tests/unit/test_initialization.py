@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib
 import json
 import os
@@ -121,6 +122,25 @@ def apply(repository: Path, candidate: dict, bundle: Path, decision: dict | None
         review(candidate) if decision is None else decision,
         bundle_root=bundle,
     )
+
+
+def canonical_json(value: object) -> bytes:
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+    ).encode("utf-8")
+
+
+def numeric_member(document: dict, field: str) -> tuple[dict, str]:
+    if field == "policy-size":
+        return document["policy"]["files"][0], "size"
+    if field in {"resource-size", "identity-size"}:
+        path = ".ai/templates/spec.md" if field == "resource-size" else ".ai/repository-id"
+        return next(row for row in document["objects"] if row["path"] == path), "size"
+    owner = document
+    parts = field.split(".")
+    for part in parts[:-1]:
+        owner = owner[int(part) if part.isdecimal() else part]
+    return owner, parts[-1]
 
 
 def require_windows_apply() -> None:
@@ -472,6 +492,41 @@ def test_tampered_preview_is_rejected_without_writes(
     with pytest.raises(AiflowError):
         apply(repository, candidate, bundle, decision)
     assert tree(repository) == before
+
+
+@pytest.mark.parametrize(
+    "field,number_type",
+    [
+        ("resource-size", float),
+        ("identity-size", float),
+        ("policy-size", float),
+        ("target.file_count", float),
+        ("target.python_source_count", bool),
+        ("target.untracked_count", bool),
+        ("target.root_identity.device", float),
+        ("target.ancestors.0.device", float),
+    ],
+)
+def test_rehashed_preview_rejects_equal_numbers_of_the_wrong_json_type_without_writes(
+    repository: Path, bundle: Path, field: str, number_type: type
+) -> None:
+    candidate = preview(repository, bundle)
+    owner, key = numeric_member(candidate, field)
+    original = owner[key]
+    assert type(original) is int
+    owner[key] = number_type(original)
+    assert owner[key] == original and type(owner[key]) is not int
+    candidate["preview_sha256"] = hashlib.sha256(
+        canonical_json({key: value for key, value in candidate.items() if key != "preview_sha256"})
+    ).hexdigest()
+    decision = review(candidate)
+    before = tree(repository)
+
+    with pytest.raises(AiflowError):
+        apply(repository, candidate, bundle, decision)
+
+    assert tree(repository) == before
+    assert not (repository / ".ai").exists()
 
 
 @pytest.mark.parametrize(
@@ -1179,6 +1234,34 @@ def test_malformed_nested_state_returns_domain_rejection_and_readonly_conflict(
         owner = owner[part]
     owner[parts[-1]] = value
     path.write_text(json.dumps(state), encoding="utf-8")
+    before = tree(installed_repository)
+
+    with pytest.raises(AiflowError):
+        initialization.require_initialization_ready(installed_repository)
+    inspected = initialization.inspect_initialization(installed_repository)
+
+    assert inspected["status"] == "conflict"
+    assert inspected["issues"]
+    assert tree(installed_repository) == before
+
+
+@pytest.mark.parametrize("field", ["policy-size", "resource-size", "identity-size"])
+def test_state_rejects_equal_float_sizes_even_with_a_valid_completion_digest(
+    installed_repository: Path, field: str
+) -> None:
+    state_path = installed_repository / ".ai/init-state.json"
+    state = json.loads(state_path.read_bytes())
+    owner, key = numeric_member(state, field)
+    original = owner[key]
+    assert type(original) is int
+    owner[key] = float(original)
+    assert owner[key] == original and type(owner[key]) is float
+    encoded = canonical_json(state)
+    state_path.write_bytes(encoded)
+    complete_path = installed_repository / ".ai/init-complete.json"
+    complete = json.loads(complete_path.read_bytes())
+    complete["state_sha256"] = hashlib.sha256(encoded).hexdigest()
+    complete_path.write_bytes(canonical_json(complete))
     before = tree(installed_repository)
 
     with pytest.raises(AiflowError):
