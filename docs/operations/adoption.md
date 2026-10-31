@@ -11,7 +11,7 @@
 |---|---|
 | 工作约定 | 推荐起点。合并少量通用规则到目标项目已有指令入口，保留本项目原有安全与治理规则；不安装依赖、Hook 或后台服务。 |
 | 项目验证 | 沿用目标仓库已定义的测试、静态检查与 required CI。没有检查时如实标缺失，不靠复制本仓 Python 命令制造通过结果。 |
-| 完整 AI Flow | 仅在确实需要确定性任务分流、版本绑定审批与证据 Gate 时评估。版本化[资源包](resource-bundle.md)已提供；外仓初始化及目标 CI 适配仍有缺口，见[完整引擎边界](#完整引擎的跨仓库边界)，不是普通试点的前置条件。 |
+| 完整 AI Flow | 仅在确实需要确定性任务分流、版本绑定审批与证据 Gate 时评估。版本化[资源包](resource-bundle.md)与 `native-python-v1` [非覆盖初始化](initialization.md)已交付；Node 验证、外仓 V2 和目标 CI 适配仍有缺口，见[完整引擎边界](#完整引擎的跨仓库边界)，不是普通试点的前置条件。 |
 
 推广的是“同一原则 + 项目适配”，不是向所有工具、项目复制同一套配置。
 对已有强制流程的仓库，轻量规则不能解除其任务或审核义务；冲突先按该仓规则处理。
@@ -335,10 +335,11 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
   外仓必须映射自己的质量检查与治理模式，不能通过复制 bootstrap 标记跳过原有 Gate。
 
 `facts` 提供显式风险事实的本地录入入口，[PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付版本化资源分发。
-全引擎外仓产品化仍需独立设计和验证：安全且不覆盖已有配置的初始化、新仓库身份和目标验证及 CI 适配。源于
-[`pyproject.toml`](../../pyproject.toml)、[CLI](../../src/aiflow/cli.py)、
-[仓库身份](../../src/aiflow/git_context.py)、[Schema 加载](../../src/aiflow/contracts.py)
-和[任务存储](../../src/aiflow/storage.py)的当前实现核查，不是已存在的安装命令。
+[PR #140](https://github.com/MaginaLW/harness-model/pull/140)已交付 `init preview/apply/inspect/migration-plan`：
+`native-python-v1` 面向已有提交、Python 源码及 `[project].name`、尚无 `.ai` 的普通 Git 工作树；
+apply 限 Windows x64、CPython 3.11、本地 NTFS。它生成目标自己的 UUID，不覆盖旧配置；
+精确恢复与重放边界见[初始化用法](initialization.md)。初始化不准备验证工具或依赖，
+Node 验证、installed 外仓 V2、目标 CI 适配和 agent-bridge 真实接入仍未交付。
 
 CLI 的定位与兼容边界见[仓库根定位规格](../superpowers/specs/repository-root.md)：
 无环境覆盖时使用最近 Git 工作树根；该根缺少 `.ai` 时拒绝，不借用父仓资源；
@@ -352,7 +353,7 @@ CLI 的定位与兼容边界见[仓库根定位规格](../superpowers/specs/repo
 它不阻塞轻量试点，也不授权自动恢复强制 task、阶段三/四、模型路由或可信外部执行器。
 现有 [Hook wrapper](hooks.md)仍不执行或授权 push/merge，不能拿来伪装通用安全控制面。
 
-已交付资源的构建与读取见[资源包用法](resource-bundle.md)；非覆盖初始化、目标验证配置、更新恢复及启动材料，见
+已交付资源的构建与读取见[资源包用法](resource-bundle.md)，初始化命令与恢复见[初始化用法](initialization.md)；目标验证配置、完整接入及启动材料见
 [完整引擎跨仓初始化方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
 同文另列[应用自管 SDK 客户端](sdk-and-engine-plan.md#应用自管-sdk-客户端)；两条路线互不依赖，
 方案记录不代表开始安装、连接或真实调用，当前状态仍以[维护收尾与待办](maintenance-status.md)为准。

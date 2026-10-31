@@ -31,9 +31,11 @@
 
 - TASK-0087 已由 [PR #111](https://github.com/MaginaLW/harness-model/pull/111) 合并，并由 [PR #112](https://github.com/MaginaLW/harness-model/pull/112) 发布关闭记录：交付[正式实现审核上下文后的可选 SDK 补充节点](../superpowers/specs/sdk-readonly-review.md#可选节点生成正式实现审核上下文之后)。节点默认关闭，本地模拟与原生验证通过，尚未真实触发；实际调用须另选具体任务、输入与调用范围。补充结果不创建正式审核或批准，也不形成统计样本。
 
-- [PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付[版本化资源包](resource-bundle.md)：普通 wheel 包含 15 份 Schema、四份 Policy 种子及规格模板；只读 API 校验完整清单，包升级不写入目标 `.ai`。非覆盖初始化、目标 Node 验证、外仓 V2 与 agent-bridge 真实接入仍未交付。
+- [PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付[版本化资源包](resource-bundle.md)：普通 wheel 包含 15 份 Schema、四份 Policy 种子及规格模板；只读 API 校验完整清单，包升级不写入目标 `.ai`。该资源切片不包含初始化、目标 Node 验证或外仓端到端接入。
 
-**两条新路线的入口**：[应用自管 SDK 与完整引擎跨仓初始化方案](sdk-and-engine-plan.md)保留具体步骤、材料和验收要求。单次只读客户端及一次真实工程闭环已交付；后续按实际文档需求显式调用，不自动安排新审核。完整引擎已选择 agent-bridge 为目标，资源分发已交付，跨仓初始化尚未交付；真实统计评分、自动审核安排和现有 Desktop 附着继续暂停，`T0/T1` 未设置。
+- [PR #140](https://github.com/MaginaLW/harness-model/pull/140)已合并并交付 [`native-python-v1` 非覆盖初始化](initialization.md)：普通 wheel 提供预览、受审核应用、只读检查和迁移计划，生成目标自己的 UUID；Windows x64、CPython 3.11、本地 NTFS 上可恢复同一预览的精确 partial，无历史的完整安装重放不改写文件。初始化不准备验证工具、依赖或外仓 V2 材料；Node 验证、installed 外仓 V2、目标 CI 和 agent-bridge 真实接入仍未交付。
+
+**两条新路线的入口**：[应用自管 SDK 与完整引擎跨仓初始化方案](sdk-and-engine-plan.md)保留具体步骤、材料和验收要求。单次只读客户端及一次真实工程闭环已交付；后续按实际文档需求显式调用，不自动安排新审核。完整引擎已选择 agent-bridge 为目标，资源分发及 `native-python-v1` 非覆盖初始化已交付，目标验证、installed 外仓 V2 与 CI 适配及真实应用仍未交付；真实统计评分、自动审核安排和现有 Desktop 附着继续暂停，`T0/T1` 未设置。
 
 项目所有者决定暂缓本轮 agent-bridge 的 V2 变异归因扩建；保留未合并候选、原任务和证据，出现具体需求或相关前提具备后按现行 AI Flow 重新评估。暂停不改变已有 V2 与 CI 门禁，也不代表简化方案已证明等价或完整引擎接入已完成。
 
@@ -144,7 +146,7 @@
 
 | 能力 | 启动条件与实际缺口 |
 |---|---|
-| 完整引擎跨仓产品化（E5） | 完整克隆内的根目录/子目录/worktree 定位与 Schema 作用域已具备；显式风险事实录入已由 TASK-0083 交付。已选择 agent-bridge 为目标，[资源分发](resource-bundle.md)已交付；须补非覆盖初始化、新仓库身份和目标验证及 CI 适配，完整接入尚未交付，验证核心仍有本仓命令约束。具体步骤、材料和风险见[跨仓初始化方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)，当前能力边界见[接入指南](adoption.md#完整引擎的跨仓库边界)。 |
+| 完整引擎跨仓产品化（E5） | 完整克隆内的根目录/子目录/worktree 定位与 Schema 作用域已具备；显式风险事实录入已由 TASK-0083 交付。已选择 agent-bridge 为目标，[资源分发](resource-bundle.md)及带独立 UUID 的 [`native-python-v1` 非覆盖初始化](initialization.md)已交付；须补 Node 验证、installed 外仓 V2、目标 CI 适配与真实应用，完整接入尚未交付，验证核心仍有本仓命令约束。具体步骤、材料和风险见[跨仓初始化方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)，当前能力边界见[接入指南](adoption.md#完整引擎的跨仓库边界)。 |
 | Provider 接入（E5） | [单用途 SDK 客户端](sdk-and-engine-plan.md#应用自管-sdk-客户端)已实现，并完成一次固定文档审核与真实 PR 反馈回读；它提供显式手动调用，不提供通用 provider 路由、自动评分或 Desktop 附着。新的真实用途仍须核定实际输入与调用范围；实际模型身份、完整内部上下文和实费保持 `unknown`。 |
 | 固定动作可信执行（E5） | 选择服务动作、资产与身份根；补精确参数/版本绑定、撤回/过期、原子一次消费、结果回执及结果未知时的恢复。现有 wrapper 和本地批准文本不提供此执行能力；本路线可独立于 provider。 |
 | V3 高风险验证（3-B） | 选择真实用例，明确安全检查、沙箱、故障注入、dry-run、损失边界及回滚演练；V2、定向变异或低风险影子评估不替代这些证据。 |

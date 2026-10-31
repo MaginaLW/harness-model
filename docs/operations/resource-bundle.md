@@ -2,7 +2,8 @@
 
 [PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付版本化资源分发。普通 wheel 提供 15 份 Schema、四份待目标审核的 Policy 种子和规格模板。资源来自同一份源码，清单绑定规范化 UTF-8/LF 字节、大小、SHA-256 和 CLI、资源及 Policy 版本；缺项、额外项、版本不符、损坏或不支持的文件类型均拒绝。
 
-资源包只提供分发和只读 API，不创建目标 `.ai`、身份、任务或批准，也不选择目标验证方案。Policy 种子不构成目标授权，不能把本仓常设授权或维护模式带入外仓。完整跨仓范围见[接入方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
+资源包只提供分发和只读 API，不创建目标 `.ai`、身份、任务或批准，也不选择目标验证方案。
+[PR #140](https://github.com/MaginaLW/harness-model/pull/140)另行交付[非覆盖初始化](initialization.md)，默认从普通 wheel 读取本资源包。Policy 种子不构成目标授权，不能把本仓常设授权或维护模式带入外仓。完整跨仓范围见[接入方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
 
 ## 构建
 
@@ -33,4 +34,4 @@ manifest, resources = read_bundle(files("aiflow").joinpath("_bundled_resources")
 
 构建检查其负责的源码、资源、缓存、元数据、暂存和输出路径，拒绝检测到的链接或冲突；这些检查不提供并发修改下的原子保证。
 
-资源版本为 `1.0`，兼容 CLI `0.2.0`，Policy 种子版本为 `2.6.0`。摘要证明包内一致性，不认证发行者。运行时 Schema 和 Policy 仍来自目标自己的 `.ai`，升级 Python 包不会自动替换它们。此资源切片不证明非覆盖初始化、目标 npm 验证、外仓 V2 或真实 CI 已接入。
+资源版本为 `1.0`，兼容 CLI `0.2.0`，Policy 种子版本为 `2.6.0`。摘要证明包内一致性，不认证发行者。运行时 Schema 和 Policy 仍来自目标自己的 `.ai`，升级 Python 包不会自动替换它们。非覆盖初始化已另行交付；资源分发与初始化均不证明目标 npm 验证、installed 外仓 V2、目标 CI 或 agent-bridge 真实接入已完成。
