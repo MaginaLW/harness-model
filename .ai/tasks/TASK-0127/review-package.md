@@ -30,7 +30,11 @@ initialization.py 管理固定 JSON 合同、资源/Policy、恢复/重放、rea
 
 独立权限对照确认：仅 READ_ATTRIBUTES 的句柄不能阻止目录改名，不可作为修复；TRAVERSE 加 READ_ATTRIBUTES 在系统临时目录可打开，且独立自建目录改名竞争被拒绝。后续仅祖先 pin 使用该已核验权限，真正目标根及资源目录保留原有权限/共享保护；不修改 ACL、不移动测试目录。
 
-未验证：修复后的新 source、当前完整原生 V2、正式实现审核、code 批准、Gate 和远端 required CI 仍待完成。本记录不将旧 action 批准、旧 source 或部分测试当成当前完整证据。
+祖先 pin 修复已提交为 f57ee4f1ea592aacffc94bcbd82920638ffe1b6e，独立 companion 测试在先行提交 6e3ce58。完整初始化专项 283 passed、2 项既有平台 skip（136.61 秒），原三项失败在最小环境下定向通过。新增真实系统临时目录用例先证明自建父目录可改名，再证明安装持柄期间改名被错误 32 拒绝，并核对安装、ready、inspect 和零写重放。静态检查通过。冻结规格中的 0x81 描述历史最小实证组合；后文新目录所需 LIST/TRAVERSE/ATTRIBUTES/SYNCHRONIZE 与既有 public 0x1000A1 一致。独立审核确认本次只为祖先使用 0xA0/share3，未改变目标根和安装目录保护，属于原规格内修复。
+
+f57ee4f 的普通 wheel 重验通过：SHA-256 为 37391cbee8902c8b55b05dafbbe458b8d57eddb84d1139dcd924b9a134f99e3b，47 个引擎模块逐字节对应候选。原 18 项检查、33 条记录命令全部通过；另在仅 PATH 与 SYSTEMROOT 的真实 Native 最小环境中，以同一独立安装的 wheel 在系统 Temp 自建仓完成原三项行为验收：安装/重放、七个对象保护到身份发布、CLI apply/inspect 相同目标与 UUID。报告原件仅保留本地忽略日志。
+
+新一次性 action 9c86e24612b7b9a22ceb9169fde9c5b2619368d2ee018b99c06082ae6883eafb 经独立具体审核 APPROVE、无 critical/high，已依常设授权记录批准，绑定 f57ee4f；旧失败证据与消费记录保留。未验证：当前完整原生 V2、正式实现审核、code 批准、Gate 和远端 required CI 仍待完成。本记录不将旧 action 批准、旧 source 或部分测试当成当前完整证据。
 
 ## 审核问题
 
