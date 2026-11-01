@@ -1330,6 +1330,126 @@ def test_distribution_closure_rejects_file_outside_bound_prefix(
         runtime._closure(installed, Path(model.materials["interpreter"]["prefix"]))
 
 
+BOOTSTRAP_MODULES = {
+    "plain": "def plain():\n    return 'bound'\n",
+    "contextmanager": "from contextlib import contextmanager\n"
+    "def plain():\n    return 'bound'\n"
+    "@contextmanager\ndef guard():\n    yield 'bound'\n",
+    "wrong_plain_filename": "exec(compile(\"def guard():\\n    return 'foreign'\\n\","
+    " 'foreign.py', 'exec'))\n",
+    "forged_wrapped_plain": "def generator():\n    yield 'bound'\n"
+    "exec(compile(\"def guard():\\n    return 'foreign'\\n\", 'foreign.py', 'exec'))\n"
+    "guard.__wrapped__ = generator\n",
+    "foreign_decorator": "from functools import wraps\n"
+    "def generator():\n    yield 'bound'\n"
+    "namespace={'__name__':'foreign_decorator','wraps':wraps}\n"
+    "exec(compile('def decorate(func):\\n @wraps(func)\\n"
+    " def helper(*args, **kwargs):\\n  return func(*args, **kwargs)\\n"
+    " return helper\\n', 'foreign_decorator.py', 'exec'),namespace)\n"
+    "guard=namespace['decorate'](generator)\n",
+    "foreign_wrapper_globals": "import contextlib\nfrom types import FunctionType\n"
+    "from functools import update_wrapper\n"
+    "def generator():\n    yield 'bound'\n"
+    "original=contextlib.contextmanager(generator)\n"
+    "guard=FunctionType(original.__code__,dict(vars(contextlib)),closure=original.__closure__)\n"
+    "update_wrapper(guard,generator)\n",
+    "wrong_closure": "from contextlib import contextmanager\n"
+    "@contextmanager\ndef guard():\n    yield 'bound'\n"
+    "def other():\n    yield 'bound'\n"
+    "guard.__wrapped__=other\n",
+    "nongenerator_wrapped": "from contextlib import contextmanager\n"
+    "@contextmanager\ndef guard():\n    return 'bound'\n",
+    "wrong_wrapped_filename": "from contextlib import contextmanager\n"
+    "exec(compile(\"def generator():\\n    yield 'foreign'\\n\",'foreign.py','exec'))\n"
+    "guard=contextmanager(generator)\ndel generator\n",
+    "empty_closure": "from contextlib import contextmanager\n"
+    "@contextmanager\ndef guard():\n    yield 'bound'\n"
+    "del guard.__closure__[0].cell_contents\n",
+    "nonfunction_wrapped": "from contextlib import contextmanager\n"
+    "@contextmanager\ndef guard():\n    yield 'bound'\n"
+    "guard.__wrapped__=object()\n",
+    "async_generator_wrapped": "from contextlib import contextmanager\n"
+    "@contextmanager\nasync def guard():\n    yield 'bound'\n",
+}
+
+
+@pytest.mark.parametrize("case", tuple(BOOTSTRAP_MODULES))
+def test_real_isolated_bootstrap_enforces_bound_function_origin_and_exact_wire(
+    tmp_path: Path, case: str
+) -> None:
+    """A minimal synthetic package tests bootstrap, never ordinary pair acceptance."""
+    site = tmp_path / "site"
+    package = site / "aiflow"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("", encoding="utf8")
+    (package / "guards.py").write_text(BOOTSTRAP_MODULES[case], encoding="utf8")
+    (package / "installed_probe.py").write_text(
+        "from . import guards\n"
+        "def run_probe(probe_id):\n"
+        "    assert probe_id == 'MUT-V2-001'\n"
+        "    return dict(protocol='synthetic-bootstrap-only',probe_id=probe_id,\n"
+        "        terminal='complete',\n"
+        "        cases=[dict(id='synthetic-only',setup='passed',call='passed',teardown='passed',\n"
+        "            observed={'synthetic':True},exception=None)])\n",
+        encoding="utf8",
+    )
+    cache, temporary, home = (tmp_path / name for name in ("c", "t", "h"))
+    for directory in (cache, temporary, home):
+        directory.mkdir()
+    environment = {
+        "PATH": os.defpath,
+        "HOME": str(home),
+        "USERPROFILE": str(home),
+        "TMP": str(temporary),
+        "TEMP": str(temporary),
+        "TMPDIR": str(temporary),
+    }
+    for name in ("SystemRoot", "WINDIR", "SystemDrive"):
+        if name in os.environ:
+            environment[name] = os.environ[name]
+    before = snapshot_tree(site)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-I",
+            "-S",
+            "-B",
+            "-X",
+            "pycache_prefix=" + str(cache),
+            "-c",
+            runtime._BOOTSTRAP,
+            str(site),
+            PROBE,
+            str(cache),
+        ],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        timeout=30,
+        check=False,
+    )
+    assert snapshot_tree(site) == before
+    assert not list(cache.iterdir()), "bootstrap wrote bytecode despite -B"
+    if case in {"plain", "contextmanager"}:
+        assert result.returncode == 0, result.stderr.decode("utf8", errors="replace")
+        assert result.stderr == b""
+        outer = node._json_bytes(result.stdout)
+        assert result.stdout == node._canonical(outer) + b"\n", repr(result.stdout[-8:])
+        assert result.stdout.count(b"\n") == 1
+        assert outer["probe"]["protocol"] == "synthetic-bootstrap-only"
+        assert [row["name"] for row in outer["loaded"]] == [
+            "aiflow",
+            "aiflow.guards",
+            "aiflow.installed_probe",
+        ]
+        assert outer["interpreter"]["isolated"] == outer["interpreter"]["no_site"] == 1
+        assert outer["interpreter"]["dont_write_bytecode"] is True
+        assert outer["interpreter"]["cache_prefix"] == str(cache)
+    else:
+        assert result.returncode != 0 and result.stdout == b""
+        assert b"GUARD_CODE_ORIGIN_MISMATCH" in result.stderr, result.stderr
+
+
 @pytest.mark.parametrize(
     "fault",
     [
