@@ -71,8 +71,8 @@ goal: Complete closed installed mutation execution and exact-reference current-r
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-01T12:24:20Z'
-subject_commit: 23904c4c049a870ccd55a0fa2c4f42acdcf6c9f8
+subject_commit: 71de0e953f19c0c4531a8ed349e14524f098109f
 task_id: TASK-0135
-updated_at: '2026-11-01T12:33:03Z'
+updated_at: '2026-11-01T13:10:46Z'
 worktree_dirty: false
 worktree_dirty_paths: []
