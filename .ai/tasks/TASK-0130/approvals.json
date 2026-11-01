@@ -40,5 +40,21 @@
     "spec_sha256": "eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c",
     "subject_commit": "0ff2b79ce328dc7b0b35bf3a7449044cf80b9fc2",
     "task_id": "TASK-0130"
+  },
+  {
+    "action_sha256": "6737c7a13a9b1b27bdb932cc54d557f967ec6305cf87f017eb50b70b32ffb04e",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-01T05:15:42Z",
+    "base_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-01T09:10:04.526336Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：当前e444精确fixture调用修复已独立sliceAPPROVE，原6例及612完整模块通过，RF023medium resolved；当前新动作6737c7a13a9b1b27bdb932cc54d557f967ec6305cf87f017eb50b70b32ffb04e独立APPROVE/无opencriticalhigh，原件SHA953de29e20f56fa31ec088c631591aaf1e722a3a040102e594f6311f0f6c325d，004high005medium严重度保留并resolved。本任务当前57c的49/76完全同且增量适用性SHAe71c65d62f48d09c874f02f933ed8859f64c8bcbe2b389c3607e5ca8d1921a60，原B/S/prepared/run不改；旧433b/84c仍为旧0ff失败与耗尽。仅新S一次5674/3000/14项/85总90diff/五实际变异，须fresh独立唯一count1指令后root机械前台持有。实际currentheadCI仍必需，无目标/模型/私有材料外传。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c",
+    "subject_commit": "e44486dc1217cb315d0a245ec293de54a33cdfcd",
+    "task_id": "TASK-0130"
   }
 ]
