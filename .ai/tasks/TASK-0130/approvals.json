@@ -70,5 +70,21 @@
     "spec_sha256": "eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c",
     "subject_commit": "e44486dc1217cb315d0a245ec293de54a33cdfcd",
     "task_id": "TASK-0130"
+  },
+  {
+    "action_sha256": "e2943701cef1f320145e81e9f5f1e01d3835a6601d49fa028d03b42b6ae31194",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-01T06:38:38Z",
+    "base_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-01T10:30:00Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：具体新动作 e2943701cef1f320145e81e9f5f1e01d3835a6601d49fa028d03b42b6ae31194 独立审核 APPROVE，原件 SHA420320f80cea6683223a799acfac0896480946a7ed628d5be500fd91a08e55cb，无未关闭 critical/high。当前94af的实际新8d7d wheel、sdist及49/76输入和当前消费者已由新独立 verifier 接受，证据f3bca5/f56923/3dd583；026与动作006 medium 修复保留为resolved，022仍待实际head CI。旧060850中断exit/cleanup UNKNOWN不认证、不复用；旧84c和6737耗尽。仅在当前实际独立verifier真唯一count1预检与精确指令后，由root机械持有一次foreground完整5674项3000秒/14checks/85总90diff/五真实变异；不授权目标采用、外部调用、私有材料传输或合并。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c",
+    "subject_commit": "94afbe32a599cfc66e46a1327c8df8307279d4e8",
+    "task_id": "TASK-0130"
   }
 ]
