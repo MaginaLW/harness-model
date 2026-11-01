@@ -1,0 +1,13 @@
+{
+  "context_sha256": "d9aedc2867788d772cf4afe81ce26f959a8dfc10083e419d5cf34c6a19136fd8",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-01T08:20:30Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "/root/node_ci_design",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent design review APPROVE with no findings. Reviewed the frozen TASK-0131 specification, current design context, task facts and REVIEW/V2 classification, and the actual execute/recheck/_dist/_inventory/_content/_output_check consumers. The bounded change can safely accept the existing fixed check script's successful pretest clean/rebuild without reducing the output-content gate: retain the independently verified first-build inventory, enumerate the complete safe final dist immediately after the successful fixed node_check, and require canonical content equality across every path, kind, file size and SHA-256 before replacing only dist identity. Source, dependency, runtime, original-root, receipt, cleanup and coverage protections remain unchanged. All other phases must retain full inventory identity checks; the read-only consumer must require both originals, prove their complete content equality and compare the current final dist against the retained final full inventory, so missing/tampered originals and later drift fail closed. An explicit semantic-contract binding makes old prepared materials/evidence stale under the changed rule. The proposed exact source scope is sufficient; companion tests and documentation are task-free and separate. Required validation includes a real ordinary-wheel pretest reproduction then both V0/V1 passes, unchanged no-pretest cases, non-identical/missing/additional/linked/unsafe output rejection, source/dependency/root drift, failed or incomplete check and cleanup uncertainty, original tampering and stale semantic binding, plus all unchanged native full verification, coverage and quality gates. This design approval does not establish test success, authorize actual V2 mutation execution without its separately bound action or activate installed V2/CI, target writes, permissions changes, model/WeChat execution, private export or remote settings.",
+  "task_id": "TASK-0131"
+}
