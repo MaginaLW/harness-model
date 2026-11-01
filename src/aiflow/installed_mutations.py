@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import ast
 import ctypes
+import importlib.machinery
 import os
 import re
 import secrets
+import stat
 import sys
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
@@ -23,20 +25,23 @@ from aiflow import mutation_runner as operators
 from aiflow import node_execution as node
 from aiflow.approval import (
     ApprovalContext,
+    _logical_identity,
     _utc,
     approval_is_current,
     canonical_action_sha256,
     matching_approval,
     validate_action_file,
 )
+from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import AiflowError, ContractError
 from aiflow.freshness import current_classification_input_digest
 from aiflow.git_context import collect_git_context
 from aiflow.mutation_manifest import MutationDeclaration
-from aiflow.node_verification import _path
+from aiflow.node_verification import _ordered_paths, _path
 from aiflow.policy import is_node_policy_candidate, load_policy_bundle
 from aiflow.specification import specification_digest
+from aiflow.state import replay_events
 from aiflow.storage import read_task_json, resolve_task_path
 from aiflow.task_service import read_task_record_strict, record_task_event
 from aiflow.verifier_service import (
@@ -88,6 +93,14 @@ class InstalledMutationReference:
     ref: str
     size: int
     sha256: str
+
+
+@dataclass(frozen=True)
+class InstalledMutationCurrent:
+    inputs: InstalledMutationInputs
+    reference: InstalledMutationReference
+    root_snapshot: bytes
+    allowed_git_paths: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -479,8 +492,12 @@ def _materials() -> bytes:
 
 
 def _authority(
-    root: Path, task_id: str, verifier_actor: str
+    root: Path, task_id: str, verifier_actor: str, *, executing: bool = True
 ) -> tuple[InstalledMutationInputs, dict[str, Any], dict[str, Any]]:
+    if not sys.dont_write_bytecode:
+        raise _error(
+            "Parent bytecode writes must be disabled", "INSTALLED_MUTATION_HOST_UNSUPPORTED"
+        )
     node._ancestors(root)
     record = read_task_record_strict(root, task_id)
     task = record.task
@@ -488,7 +505,7 @@ def _authority(
         root, task_id, str(task["subject_commit"])
     )
     if (
-        task["current_state"] != "IMPLEMENTING"
+        (executing and task["current_state"] != "IMPLEMENTING")
         or classification.get("effective_verification_level") != "V2"
         or is_node_policy_candidate(load_policy_bundle(root).documents)
     ):
@@ -904,6 +921,8 @@ def _receipt(
             != redact_text(data.decode("utf8", errors="replace")).encode()
         ):
             raise _error("Installed probe raw stream has changed")
+    if receipt["stderr_size"] != 0:
+        raise _error("The fixed installed probe must not write stderr")
     return cast(dict[str, Any], receipt)
 
 
@@ -959,6 +978,9 @@ def _envelope(
         original = files.get(relative)
         if (
             not isinstance(module["name"], str)
+            or not re.fullmatch(
+                r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*", module["name"]
+            )
             or original is None
             or node._canonical({key: module[key] for key in ("size", "sha256")})
             != node._canonical({key: original[key] for key in ("size", "sha256")})
@@ -979,6 +1001,11 @@ def _envelope(
             "_distutils_hack",
         }:
             raise _error("Installed probe reported an unknown module namespace")
+        stem = module["name"].replace(".", "/")
+        paths = {stem + ".py", stem + "/__init__.py"}
+        paths.update(stem + suffix for suffix in importlib.machinery.EXTENSION_SUFFIXES)
+        if relative not in paths:
+            raise _error("Installed module name differs from its bound file role")
         names.append(module["name"])
     if (
         names != sorted(set(names))
@@ -1412,59 +1439,76 @@ def record_installed_mutations(
     return reference
 
 
-def replay_installed_mutations(
-    root: Path, reference: InstalledMutationReference, *, current: InstalledMutationInputs
-) -> InstalledMutationFacts:
-    """Read originals only; the caller establishes live Git authority beforehand."""
-    results: tuple[tuple[str, str], ...] = ()
-    try:
-        root = Path(root).absolute()
-        _input_document(current)
-        if (
-            type(reference) is not InstalledMutationReference
-            or type(reference.size) is not int
-            or not 0 < reference.size <= node.MAX_JSON_BYTES
-            or not isinstance(reference.sha256, str)
-            or not _SHA.fullmatch(reference.sha256)
-        ):
-            raise _error("Installed mutation reference is invalid")
-        match = _RUN_REF.fullmatch(reference.ref)
-        if match is None or match[1] != current.task_id:
-            raise _error("Installed mutation reference is outside this task")
-        path = root / _path(reference.ref)
-        raw = node._read(path, limit=node.MAX_JSON_BYTES)
-        if len(raw) != reference.size or node._sha(raw) != reference.sha256:
-            raise _error("Installed mutation run digest differs")
-        document = _closed(
-            node._json_bytes(raw),
-            {"kind", "version", "inputs", "action", "before", "after", "pairs", "failure"},
-        )
-        if (
-            raw != node._canonical(document)
-            or document["kind"] != "installed-mutation-run-v1"
-            or type(document["version"]) is not int
-            or document["version"] != 1
-            or node._canonical(document["inputs"]) != node._canonical(_input_document(current))
-        ):
-            raise _error("Installed mutation current binding differs")
-        completion = node._json(path.parent / "completion.json")
-        expected_completion = {
-            "kind": "installed-mutation-completion-v1",
-            "version": 1,
-            "inputs_sha256": current.sha256,
-            "reference": asdict(reference),
-            "failure": document["failure"],
-        }
-        if node._canonical(completion) != node._canonical(expected_completion):
-            raise _error("Installed mutation completion is missing or differs")
-        _pure_task(root, current)
-        materials = _current_materials(current)
-        context = node._json(path.parent / "context.json")
-        validate_verifier_context(context)
-        if context_sha256(context) != current.verifier_context_sha256:
-            raise _error("Installed mutation verifier context differs")
-        _action_originals(root, current, document["action"], path.parent)
-        snapshot_keys = {
+def _reference_path(root: Path, reference: InstalledMutationReference) -> Path:
+    if (
+        type(reference) is not InstalledMutationReference
+        or type(reference.size) is not int
+        or not 0 < reference.size <= node.MAX_JSON_BYTES
+        or not isinstance(reference.sha256, str)
+        or not _SHA.fullmatch(reference.sha256)
+        or not isinstance(reference.ref, str)
+        or not _RUN_REF.fullmatch(reference.ref)
+    ):
+        raise _error("Installed mutation reference is invalid")
+    return root / _path(reference.ref)
+
+
+def _run_original(root: Path, reference: InstalledMutationReference) -> dict[str, Any]:
+    path = _reference_path(root, reference)
+    raw = node._read(path, limit=node.MAX_JSON_BYTES)
+    if len(raw) != reference.size or node._sha(raw) != reference.sha256:
+        raise _error("Installed mutation run digest differs")
+    document = _closed(
+        node._json_bytes(raw),
+        {"kind", "version", "inputs", "action", "before", "after", "pairs", "failure"},
+    )
+    if (
+        raw != node._canonical(document)
+        or document["kind"] != "installed-mutation-run-v1"
+        or type(document["version"]) is not int
+        or document["version"] != 1
+    ):
+        raise _error("Installed mutation run has an invalid protocol")
+    expected = {
+        "kind": "installed-mutation-completion-v1",
+        "version": 1,
+        "inputs_sha256": node._sha(node._canonical(document["inputs"])),
+        "reference": asdict(reference),
+        "failure": document["failure"],
+    }
+    if node._canonical(node._json(path.parent / "completion.json")) != node._canonical(expected):
+        raise _error("Installed mutation completion is missing or differs")
+    return document
+
+
+def _absolute(value: object) -> Path:
+    if not isinstance(value, str):
+        raise _error("Installed root path is invalid")
+    path = Path(value)
+    if not path.is_absolute() or str(path) != value or ".." in path.parts:
+        raise _error("Installed root path is not canonical and absolute")
+    return path
+
+
+def _snapshot_identity(value: object, *, metadata: bool = False) -> dict[str, Any]:
+    keys = {"device", "inode", "nlink", "size", "mtime_ns", "ctime_ns", "mode", "attributes"}
+    if metadata:
+        keys.add("change_time_ns")
+    identity = _closed(value, keys)
+    if (
+        any(type(item) is not int for item in identity.values())
+        or any(identity[key] < 0 for key in ("device", "inode", "size", "attributes"))
+        or identity["nlink"] < 1
+        or not (stat.S_ISREG(identity["mode"]) or stat.S_ISDIR(identity["mode"]))
+    ):
+        raise _error("Installed root identity is invalid")
+    return identity
+
+
+def _snapshot(value: object, root: Path, inputs: InstalledMutationInputs) -> dict[str, Any]:
+    snapshot = _closed(
+        value,
+        {
             "identity",
             "git",
             "files",
@@ -1473,33 +1517,349 @@ def replay_installed_mutations(
             "governance",
             "metadata",
             "git_audit",
-        }
-        _closed(document["before"], snapshot_keys)
-        _closed(document["after"], snapshot_keys)
-        if node._canonical(document["before"]) != node._canonical(document["after"]):
-            raise _error("Installed mutation changed the original task tree")
-        frozen = document["before"]["task"]
-        if any(
-            frozen.get(key) != value
-            for key, value in {
-                "repository_id": current.repository_id,
-                "branch": current.branch,
-                "base_commit": current.base_commit,
-                "subject_commit": current.subject_commit,
-                "frozen_spec_sha256": current.spec_sha256,
-            }.items()
+        },
+    )
+    _snapshot_identity(snapshot["identity"])
+    git = _closed(snapshot["git"], {"head", "tree", "index_sha256", "git_directory"})
+    if (
+        any(
+            not isinstance(git[key], str) or not re.fullmatch(r"[0-9a-f]{40}", git[key])
+            for key in ("head", "tree")
+        )
+        or not isinstance(git["index_sha256"], str)
+        or not _SHA.fullmatch(git["index_sha256"])
+    ):
+        raise _error("Historical installed Git identity is invalid")
+    git_dir = _absolute(git["git_directory"])
+    audit = _closed(snapshot["git_audit"], {"git", "common", "ref", "logs"})
+    common = _absolute(audit["common"])
+    if _absolute(audit["git"]) != git_dir or audit["ref"] != "refs/heads/" + inputs.branch:
+        raise _error("Historical installed Git roles differ")
+    _path(audit["ref"])
+    logs = _closed(audit["logs"], {str(git_dir / "logs/HEAD"), str(common / "logs" / audit["ref"])})
+    for row in logs.values():
+        row = _closed(row, {"size", "sha256"})
+        if (
+            type(row["size"]) is not int
+            or not 0 <= row["size"] <= node.MAX_JSON_BYTES
+            or not isinstance(row["sha256"], str)
+            or not _SHA.fullmatch(row["sha256"])
         ):
-            raise _error("Installed mutation original task snapshot differs")
-        for row in document["before"]["files"]:
-            _path(row["path"])
-            data = node._read(root / row["path"])
+            raise _error("Historical installed reflog prefix is invalid")
+    files = snapshot["files"]
+    if not isinstance(files, list) or len(files) > node.MAX_ENTRIES:
+        raise _error("Historical protected inventory is invalid")
+    for row in files:
+        row = _closed(row, {"path", "size", "sha256", "identity"})
+        _path(row["path"])
+        _snapshot_identity(row["identity"])
+        if (
+            type(row["size"]) is not int
+            or not 0 <= row["size"] <= node.MAX_FILE_BYTES
+            or not isinstance(row["sha256"], str)
+            or not _SHA.fullmatch(row["sha256"])
+        ):
+            raise _error("Historical protected file is invalid")
+    _ordered_paths([row["path"] for row in files])
+    metadata = snapshot["metadata"]
+    if not isinstance(metadata, list) or not 0 < len(metadata) <= node.MAX_ENTRIES:
+        raise _error("Historical complete metadata is invalid")
+    paths = []
+    for row in metadata:
+        row = _closed(row, {"path", "identity"})
+        path = _absolute(row["path"])
+        if not any(path.is_relative_to(parent) for parent in (root, git_dir, common)):
+            raise _error("Historical metadata is outside its declared roots")
+        _snapshot_identity(row["identity"], metadata=True)
+        paths.append(row["path"])
+    if (
+        paths != sorted(set(paths), key=lambda path: path.encode("utf8"))
+        or len({path.casefold() for path in paths}) != len(paths)
+        or str(root) not in paths
+    ):
+        raise _error("Historical metadata membership is invalid")
+    governance = _closed(snapshot["governance"], {"paths", "immutable", "approvals"})
+    registered = _ordered_paths(governance["paths"])
+    prefix = f".ai/tasks/{inputs.task_id}/"
+    if any(not path.startswith(prefix) for path in registered) or not isinstance(
+        governance["immutable"], dict
+    ):
+        raise _error("Historical governance roles are invalid")
+    for path, digest in governance["immutable"].items():
+        if path not in registered or not isinstance(digest, str) or not _SHA.fullmatch(digest):
+            raise _error("Historical immutable review binding is invalid")
+    if not isinstance(governance["approvals"], list):
+        raise _error("Historical approval prefix is invalid")
+    for approval in governance["approvals"]:
+        require_valid_contract("approval", approval)
+    if not isinstance(snapshot["task"], dict) or not isinstance(snapshot["events"], list):
+        raise _error("Historical task history is invalid")
+    replay_events(snapshot["events"], task_id=inputs.task_id)
+    approvals: list[Mapping[str, object]] = []
+    identities: set[str] = set()
+    for event in snapshot["events"]:
+        if event["event_type"] not in {"spec_approved", "code_approved", "approval_recorded"}:
+            continue
+        payload = event["payload"]
+        # Consumption records no approval addition. Approval retries may carry
+        # an already-present candidate with a newer approved_at; keep the first
+        # original, matching the existing approval ledger's logical identity.
+        if "approvals" not in payload and event["event_type"] == "approval_recorded":
+            continue
+        additions = payload.get("approvals")
+        if not isinstance(additions, list):
+            raise _error("Historical approval event has no valid inventory")
+        for approval in additions:
+            require_valid_contract("approval", approval)
+            identity = _logical_identity(approval)
+            if identity not in identities:
+                identities.add(identity)
+                approvals.append(approval)
+    if node._canonical(approvals) != node._canonical(governance["approvals"]):
+        raise _error("Historical approval inventory differs from its event history")
+    return snapshot
+
+
+def _root_transition(
+    root: Path,
+    inputs: InstalledMutationInputs,
+    before: Mapping[str, Any],
+    after: Mapping[str, Any],
+    allowed_git: tuple[str, ...],
+    run: Path,
+    action: Mapping[str, Any],
+) -> None:
+    consumed = before["events"][-1]
+    identity = action["receipt"]["identity"]
+    expected_consumption = {
+        "approval_type": "action",
+        "action_status": "consumed",
+        "action_sha256": action["digest"],
+        "receipt_ref": Path(action["receipt"]["path"]).relative_to(root).as_posix(),
+        "receipt_device": identity["device"],
+        "receipt_inode": identity["inode"],
+        "kind": ACTION_TYPE,
+        "inputs_sha256": inputs.sha256,
+    }
+    if (
+        consumed["event_type"] != "approval_recorded"
+        or consumed["actor"] != "aiflow-installed-mutations"
+        or consumed["from_state"] != "IMPLEMENTING"
+        or consumed["to_state"] != "IMPLEMENTING"
+        or node._canonical(consumed["payload"]) != node._canonical(expected_consumption)
+    ):
+        raise _error("Historical snapshot does not end at this action consumption")
+    if before["git"]["head"] == after["git"]["head"] and (
+        before["git"]["tree"] != after["git"]["tree"]
+        or node._canonical(before["git_audit"]) != node._canonical(after["git_audit"])
+    ):
+        raise _error("Installed unchanged HEAD has inconsistent historical Git facts")
+    for key in ("identity", "files", "task"):
+        if node._canonical(before[key]) != node._canonical(after[key]):
+            raise _error("Protected installed root input changed")
+    old, new = before["governance"], after["governance"]
+    for path, digest in old["immutable"].items():
+        if new["immutable"].get(path) != digest:
+            raise _error("An existing installed review original changed")
+    if node._canonical(new["approvals"][: len(old["approvals"])]) != node._canonical(
+        old["approvals"]
+    ):
+        raise _error("Installed approval history was rewritten")
+    events, prefix = after["events"], before["events"]
+    if node._canonical(events[: len(prefix)]) != node._canonical(prefix):
+        raise _error("Installed event history was rewritten")
+    for event in events[len(prefix) :]:
+        if event["event_type"] == "verification_started":
             if (
-                len(data) != row["size"]
-                or node._sha(data) != row["sha256"]
-                or node._canonical(node._identity(node._safe_info(root / row["path"])))
-                != node._canonical(row["identity"])
+                event["from_state"] != "IMPLEMENTING"
+                or event["to_state"] != "VERIFYING"
+                or event["actor"] != inputs.verifier_actor
+                or event["payload"] != {}
             ):
-                raise _error("Installed mutation protected original changed")
+                raise _error("Installed verification start is not the same verifier transition")
+        elif event["event_type"] not in {
+            "verification_passed",
+            "evidence_generated",
+            "final_review_required",
+            "merge_approved_automatically",
+            "code_approved",
+            "merge_recorded",
+            "review_recorded",
+            "approval_recorded",
+            "review_finding_resolved",
+        }:
+            raise _error("Unexpected installed task governance advancement")
+    # Re-derive historical review roles from its exact replayable prefix. The
+    # helper reads current approvals; their historical prefix is checked above.
+    historical = node._governance_snapshot(root, inputs.task_id, prefix)
+    if any(
+        node._canonical(old[key]) != node._canonical(historical[key])
+        for key in ("paths", "immutable")
+    ):
+        raise _error("Historical installed review inventory is incomplete")
+    allowed = {root / path for path in new["paths"]} | {Path(path) for path in allowed_git} | {run}
+    node._check_root_metadata(before["metadata"], after["metadata"], allowed)
+
+
+def _complete_current_root(
+    root: Path, inputs: InstalledMutationInputs, snapshot: Mapping[str, Any], run: Path
+) -> None:
+    """Reread complete physical membership using already authority-bound roots."""
+    roots = [root]
+    for value in (snapshot["git_audit"]["git"], snapshot["git_audit"]["common"]):
+        directory = Path(value)
+        if not any(directory.is_relative_to(parent) for parent in roots):
+            roots = [parent for parent in roots if not parent.is_relative_to(directory)]
+            roots.append(directory)
+    pending = list(roots)
+    rows: list[dict[str, Any]] = []
+    while pending:
+        path = pending.pop()
+        if path == run:
+            continue
+        if len(rows) >= node.MAX_ENTRIES:
+            raise _error("Current installed root metadata exceeds its entry budget")
+        identity = node._metadata_identity(path)
+        rows.append({"path": str(path), "identity": identity})
+        if stat.S_ISDIR(identity["mode"]):
+            with os.scandir(path) as children:
+                pending.extend(Path(child.path) for child in children)
+            if node._metadata_identity(path) != identity:
+                raise _error("Current installed directory changed during enumeration")
+    rows.sort(key=lambda row: row["path"].encode("utf8"))
+    if (
+        node._canonical(rows) != node._canonical(snapshot["metadata"])
+        or node._identity(node._safe_info(root, directory=True)) != snapshot["identity"]
+    ):
+        raise _error("Current installed root metadata changed after authority collection")
+    for row in snapshot["files"]:
+        data = node._read(root / row["path"])
+        if (
+            len(data) != row["size"]
+            or node._sha(data) != row["sha256"]
+            or node._identity(node._safe_info(root / row["path"])) != row["identity"]
+        ):
+            raise _error("Current protected installed original changed")
+    record = read_task_record_strict(root, inputs.task_id)
+    task = {
+        key: value
+        for key, value in record.task.items()
+        if key not in {"current_state", "updated_at"}
+    }
+    governance = node._governance_snapshot(root, inputs.task_id, record.events)
+    if any(
+        node._canonical(actual) != node._canonical(snapshot[key])
+        for key, actual in (
+            ("task", task),
+            ("events", list(record.events)),
+            ("governance", governance),
+        )
+    ):
+        raise _error("Current installed task facts changed after authority collection")
+
+
+def collect_installed_mutation_current(
+    root: Path, reference: InstalledMutationReference, *, verifier_actor: str
+) -> InstalledMutationCurrent:
+    """Collect exact-reference live authority without consuming, recovery or writes."""
+    root = Path(root).absolute()
+    document = _run_original(root, reference)
+    path = _reference_path(root, reference)
+    task_id = path.parents[2].name
+    inputs, _task, _context = _authority(root, task_id, verifier_actor, executing=False)
+    if node._canonical(document["inputs"]) != node._canonical(_input_document(inputs)):
+        raise _error("Installed mutation current binding differs")
+    before = _snapshot(document["before"], root, inputs)
+    _snapshot(document["after"], root, inputs)
+    if node._canonical(before) != node._canonical(document["after"]):
+        raise _error("Installed mutation changed the original root")
+    current = _snapshot(node._root_snapshot(root, task_id, path.parent), root, inputs)
+    if (
+        any(
+            before["git_audit"][key] != current["git_audit"][key]
+            for key in ("git", "common", "ref")
+        )
+        or before["git"]["git_directory"] != current["git"]["git_directory"]
+    ):
+        raise _error("Installed Git administration moved")
+    old_head, head = before["git"]["head"], current["git"]["head"]
+    if (
+        node._git(root, "rev-parse", old_head + "^{tree}").decode("utf8").strip()
+        != before["git"]["tree"]
+    ):
+        raise _error("Historical installed HEAD tree differs from its commit")
+    if old_head != head:
+        node._git(root, "merge-base", "--is-ancestor", old_head, head)
+    for args in (
+        ("diff", "--name-only", "-z", old_head, head, "--"),
+        ("diff", "--name-only", "-z", "--cached", head, "--"),
+    ):
+        changed = node._git(root, *args).decode("utf8").split("\0")
+        if any(path and path not in current["governance"]["paths"] for path in changed):
+            raise _error("Installed Git advancement changed a non-governance path")
+    allowed = tuple(sorted(str(path) for path in node._git_audit_delta(root, before, current)))
+    _action_originals(root, inputs, document["action"], path.parent)
+    _root_transition(root, inputs, before, current, allowed, path.parent, document["action"])
+    return InstalledMutationCurrent(inputs, reference, node._canonical(current), allowed)
+
+
+def replay_installed_mutations(
+    root: Path, reference: InstalledMutationReference, *, current: InstalledMutationCurrent
+) -> InstalledMutationFacts:
+    """Read originals only; the collector establishes exact-reference live authority."""
+    results: tuple[tuple[str, str], ...] = ()
+    try:
+        root = Path(root).absolute()
+        path = _reference_path(root, reference)
+        if type(current) is not InstalledMutationCurrent or current.reference != reference:
+            raise _error("Current installed authority belongs to another reference")
+        inputs = current.inputs
+        _input_document(inputs)
+        if (
+            reference.ref.split("/")[2] != inputs.task_id
+            or type(current.root_snapshot) is not bytes
+            or len(current.root_snapshot) > node.MAX_JSON_BYTES
+        ):
+            raise _error("Current installed authority has an invalid task or snapshot")
+        actual = _snapshot(node._json_bytes(current.root_snapshot), root, inputs)
+        if (
+            node._canonical(actual) != current.root_snapshot
+            or type(current.allowed_git_paths) is not tuple
+            or current.allowed_git_paths != tuple(sorted(set(current.allowed_git_paths)))
+        ):
+            raise _error("Current installed authority is not canonical")
+        git_roots = (
+            _absolute(actual["git_audit"]["git"]),
+            _absolute(actual["git_audit"]["common"]),
+        )
+        for value in current.allowed_git_paths:
+            allowed = _absolute(value)
+            if not any(
+                allowed != directory and allowed.is_relative_to(directory)
+                for directory in git_roots
+            ):
+                raise _error("Current installed Git allowance is outside its exact roles")
+            if allowed.exists():
+                node._safe_info(allowed)
+        document = _run_original(root, reference)
+        if node._canonical(document["inputs"]) != node._canonical(_input_document(inputs)):
+            raise _error("Installed mutation current binding differs")
+        before = _snapshot(document["before"], root, inputs)
+        _snapshot(document["after"], root, inputs)
+        if node._canonical(before) != node._canonical(document["after"]):
+            raise _error("Installed mutation changed the original task tree")
+        _pure_task(root, inputs)
+        native._require_no_pending_approval(root, inputs.task_id)
+        materials = _current_materials(inputs)
+        context = node._json(path.parent / "context.json")
+        validate_verifier_context(context)
+        if context_sha256(context) != inputs.verifier_context_sha256:
+            raise _error("Installed mutation verifier context differs")
+        _action_originals(root, inputs, document["action"], path.parent)
+        _complete_current_root(root, inputs, actual, path.parent)
+        _root_transition(
+            root, inputs, before, actual, current.allowed_git_paths, path.parent, document["action"]
+        )
         expected_children = {
             "context.json",
             "run.json",
