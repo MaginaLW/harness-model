@@ -11,5 +11,21 @@
     "spec_sha256": "3b7e1b1c3035cd4a09caac94775d04fb957f317083f58cfdb77cd7e8aa7277f8",
     "subject_commit": "7530f67d540548951cddc186e691e41bd84eca8d",
     "task_id": "TASK-0132"
+  },
+  {
+    "action_sha256": "d9e0323d7325bcc0cf31ed9e84969367e3c679809cecb1356070d34c1b4cef83",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-01T09:42:33Z",
+    "base_commit": "7530f67d540548951cddc186e691e41bd84eca8d",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-01T16:56:31Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：当前精确单次 action 经独立审核 APPROVE，六个真实普通 wheel 用例及源字节、进程 Job/EOF/cleanup 原件已独立接受；全部 owned focused 已终止，新验收根的原生分发预检和全部60源码 strict mypy 通过。前次自动审批拒绝要求的前置现已实际满足；只授权此候选和项目内临时根的完整 native V2，不代表其已经通过。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "3b7e1b1c3035cd4a09caac94775d04fb957f317083f58cfdb77cd7e8aa7277f8",
+    "subject_commit": "f459afc2f27c297e9728d8b9cc0c374e7a318db2",
+    "task_id": "TASK-0132"
   }
 ]
