@@ -1,6 +1,6 @@
-# Node 目标验证 profile 候选
+# Node 目标验证 profile 设计
 
-本文细化[完整引擎跨仓初始化方案](../../operations/sdk-and-engine-plan.md#完整引擎跨仓初始化)中的目标验证合同。它是待审核设计，不是已经可用的 profile、目标 Policy、CI 或接入结果。首个目标已有 Node/npm 项目检查与构建；具体目标、提交、运行环境与授权范围由接入过程核对，不写入本文。目标初始化、资源分发、Policy 采纳和真实应用分别满足各自条件，本文不授予这些动作的权限。
+本文保留[完整引擎跨仓初始化方案](../../operations/sdk-and-engine-plan.md#完整引擎跨仓初始化)中 Node profile 的设计与兼容性约束。已交付的封闭本地合同为 `agent-bridge-node@1`、目标 Policy `3.1.0`、evidence `3.1`，仅支持 Windows x64、CPython 3.11、本地 NTFS 上的 V0/V1；V0 的实际顺序为 build 先于 check，V1 的 TS line 门槛为总覆盖率 85%、变更覆盖率 90%。当前命令、材料和限制以[Node 用法](../../operations/node-verification.md)为准；下文候选描述保留设计范围，不作为运行参数。installed 外仓 V2、目标 CI 和真实 agent-bridge 采用仍未交付，初始化、Policy 采纳和真实应用分别满足各自条件，本文不授予这些动作的权限。
 
 目标是让 AI Flow 的任务分类、独立审核、批准、验证证据和 Gate 对固定的目标候选成立，同时保留目标原有检查。本仓 Python profile 与既有任务、证据和门禁语义保持不变。Node 检查运行项目代码，受信源码和受控环境是前提，不是操作系统沙箱或可信执行器；日志、版本、哈希和独立 actor 标签不认证人员、进程来源或发行方。
 
