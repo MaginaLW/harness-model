@@ -43,5 +43,19 @@
     "spec_sha256": "a3d3c780ee7830eaa567235871a4657c1f70b6835da8d70ca63032a931b2b509",
     "subject_commit": "84aaf4059da6506e793b83be24ceed7350376dc6",
     "task_id": "TASK-0135"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-01T18:25:08Z",
+    "base_commit": "23904c4c049a870ccd55a0fa2c4f42acdcf6c9f8",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "94d461b29119ff0ebd462418a2240024648610599c14e597a593a8b8e6a5ec10",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual independent implementation review REV-0006 r1 APPROVE with no findings covers the complete fixed native candidate. Current ordinary origin originals and complete native 5926-pass/9-skip verification satisfy unchanged gates; same verifier finalized the current snapshot and full final evidence. Approve this bounded source code only, with Gate and current-head required remote CI still mandatory before delivery. No Node2/private-target publication or settings authority is granted.",
+    "schema_version": "1.0",
+    "spec_sha256": "a3d3c780ee7830eaa567235871a4657c1f70b6835da8d70ca63032a931b2b509",
+    "subject_commit": "84aaf4059da6506e793b83be24ceed7350376dc6",
+    "task_id": "TASK-0135"
   }
 ]
