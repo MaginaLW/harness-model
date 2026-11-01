@@ -1292,6 +1292,11 @@ def test_material_collector_binds_copyable_distribution_and_fixed_probe_sources(
 ) -> None:
     from aiflow import installed_probe
 
+    # Equivalent JSON cannot introduce a second raw representation of the
+    # material bytes bound by preparation and its single-use action digest.
+    with pure_guard(monkeypatch), pytest.raises(AiflowError):
+        runtime._input_document(replace(model.inputs, materials=model.inputs.materials + b"\n"))
+
     interpreter = model.materials["interpreter"]
     prefix = Path(interpreter["prefix"])
     files = [runtime._file(path) for path in prefix.rglob("*") if path.is_file()]
