@@ -86,5 +86,19 @@
     "spec_sha256": "eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c",
     "subject_commit": "94afbe32a599cfc66e46a1327c8df8307279d4e8",
     "task_id": "TASK-0130"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-01T07:13:43Z",
+    "base_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "c762d7e2dd4a1d8e9b8d9c85c79233988eea23457f5dcfcb6366ac68715d3a2b",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：当前94af候选正式独立实现审核REV-0004 APPROVE，无未关闭critical/high；27发现保留原严重度，026/027medium已修复，022仍为actualexactheadCI硬条件。同一实际typing_native_verifier控制本轮start至finalize，完整5669passed5skip/14checks/两域combined85与diff90/五实际变异均通过；final raw a0d637ccb76d454d6c9966f7452ec88479fbfb4310efe6757443848a2052dc4f，snapshot65cd当前有效。审核包明确问句和唯一推荐枚举已按既有validator修正并校验有效，不改源码或门禁。仅源仓单个codex候选交付，实际requiredCI不通过不得合并。",
+    "schema_version": "1.0",
+    "spec_sha256": "eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c",
+    "subject_commit": "94afbe32a599cfc66e46a1327c8df8307279d4e8",
+    "task_id": "TASK-0130"
   }
 ]
