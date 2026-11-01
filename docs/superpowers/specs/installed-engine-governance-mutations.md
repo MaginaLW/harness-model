@@ -82,6 +82,9 @@ class InstalledMutationInputs:
     verifier_context_sha256: str
     materials: bytes
 
+    @property
+    def sha256(self) -> str: ...
+
 @dataclass(frozen=True)
 class InstalledMutationReference:
     ref: str
@@ -109,6 +112,8 @@ def replay_installed_mutations(
 ```
 
 `prepare` is a read-only authority-side operation: validate current task/Git/context and ordinary installed materials, return their canonical inputs, and neither consume an action nor create a run. `materials` contains bounded canonical JSON with exactly `kind`, `version`, `engine`, `interpreter`, `host_tools`, `probes` and `operators`; these retain full inventories and metadata, not hashes without originals. Declaration/probe/protocol/operator bytes and original distribution/RECORD bytes are part of that bound closure.
+
+`InstalledMutationInputs.sha256` hashes the canonical complete input representation, including the canonical material document. `InstalledMutationFacts` exposes `current`, `passed`, ordered fixed results and `reason_codes`; a current survived/unverified run is never passed.
 
 `record` recomputes the preparation and rejects a different expected digest before claiming the new action. Under the existing task lock it independently validates the current approval, atomically consumes it and exclusively creates a namespace-specific launch claim; interruption leaves that approval spent. It then creates fresh baseline/mutant copies and emits a separate versioned installed-mutation artifact. It does not replace native mutation evidence or publish a successful V2 evidence document.
 
