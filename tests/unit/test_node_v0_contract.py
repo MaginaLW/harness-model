@@ -1753,13 +1753,17 @@ def test_pending_marker_audit_path_requires_current_registered_bindings(
     tmp_path, code_marker_values, fault
 ) -> None:
     """Exercise the readonly audit-path loader, without consuming execution facts."""
-    from test_node_profile_contract import node_policy_directory, node_public_evidence
+    from test_node_profile_contract import (
+        node_policy_directory,
+        node_policy_seed_bytes,
+        node_public_evidence,
+    )
 
     import aiflow.node_execution as runtime
     from aiflow.review_service import _context_digest
     from aiflow.task_service import read_task_record_strict
 
-    policies = node_policy_directory.__wrapped__(tmp_path)
+    policies = node_policy_directory.__wrapped__(tmp_path, node_policy_seed_bytes.__wrapped__())
     policy = load_policy_bundle(tmp_path)
     values = code_marker_values
     task, events = values["current_task"], values["current_events"]
