@@ -39,7 +39,7 @@
 
 **两条新路线的入口**：[应用自管 SDK 与完整引擎跨仓初始化方案](sdk-and-engine-plan.md)保留具体步骤、材料和验收要求。单次只读客户端及一次真实工程闭环已交付；后续按实际文档需求显式调用，不自动安排新审核。完整引擎已选择 agent-bridge 为目标，资源分发、Python/Node 非覆盖初始化及 [Node 本地 V0/V1](node-verification.md)已交付；installed 外仓 V2、Node CI 适配及真实应用仍未交付；真实统计评分、自动审核安排和现有 Desktop 附着继续暂停，`T0/T1` 未设置。
 
-项目所有者决定暂缓本轮 agent-bridge 的 V2 变异归因扩建；保留未合并候选、原任务和证据，出现具体需求或相关前提具备后按现行 AI Flow 重新评估。暂停不改变已有 V2 与 CI 门禁，也不代表简化方案已证明等价或完整引擎接入已完成。
+项目所有者已重新开启 agent-bridge 完整接入，依次补齐 installed 引擎治理变异、Node V2 生命周期及 Node CI，再进行真实目标应用；按[当前接入计划](../superpowers/plans/agent-bridge-integration.md)与[变异设计候选](../superpowers/specs/installed-engine-governance-mutations.md)推进。目标应用等待其活动会话结束和基线、写入归属重核。旧未合并候选、原任务、证据及门禁保留；重新开启不代表新能力已交付，也不沿用失效批准。
 
 ## 剩余建设主线
 
