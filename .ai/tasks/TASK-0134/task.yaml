@@ -5,7 +5,7 @@ allowed_scope:
 base_commit: 77f086a0c93679a58e19e729bf81c115a4761766
 branch: codex/agent-bridge-installed-mutations
 created_at: '2026-11-01T10:57:55Z'
-current_state: IMPLEMENTING
+current_state: BLOCKED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -63,6 +63,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-01T10:57:55Z'
 subject_commit: 77f086a0c93679a58e19e729bf81c115a4761766
 task_id: TASK-0134
-updated_at: '2026-11-01T11:00:34Z'
+updated_at: '2026-11-01T11:50:33Z'
 worktree_dirty: false
 worktree_dirty_paths: []
