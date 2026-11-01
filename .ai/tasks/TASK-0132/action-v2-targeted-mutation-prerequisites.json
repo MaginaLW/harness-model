@@ -1,0 +1,19 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0132",
+  "parameter_summary": "One complete native V2 verification of the two-file prerequisite repair, including the five unchanged fixed source-native governance mutations in owned disposable worktrees. No installed Node V2 or CI activation.",
+  "subject_commit": "f459afc2f27c297e9728d8b9cc0c374e7a318db2",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "088bb883583ef258a0b353b5d5322ef8feb932491fae849f048be3c9838b0020",
+  "expires_at": "2026-11-01T16:56:31Z",
+  "single_use": true,
+  "conditions": [
+    "Bind repository b85e5a53-4935-4436-bdbc-c26a241bfae8, branch codex/agent-bridge-adoption, base 7530f67d540548951cddc186e691e41bd84eca8d, subject f459afc2f27c297e9728d8b9cc0c374e7a318db2, frozen spec 3b7e1b1c3035cd4a09caac94775d04fb957f317083f58cfdb77cd7e8aa7277f8, classification 088bb883583ef258a0b353b5d5322ef8feb932491fae849f048be3c9838b0020, Policy fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727, verifier context 7fa8327b0501a41f4bc5aa4d92310f43e208e9aa5abcbb2a959d5e087ce31b0a. Require current spec approval and independent exact-action review before approval; no stale or ambiguous unused action may be selected.",
+    "The actual acceptance Git clone, its own locked CPython 3.11 environment and all temporary material remain within the selected project workspace. Set parent TMPDIR/TEMP/TMP to the preflighted sibling t root before launch. Native checks receive only their fixed private temporary roles; no OS-temp exception, arbitrary environment, material selector, plugin, retired CLI or command change. Preserve run originals and every failure.",
+    "After all currently owned focused tests have terminal results, the actual independent verifier owns one foreground verify TASK-0132 --actor independent-prerequisite-verifier. Require same verifier for finalize; implementer adoption-integrator does not act as verifier. No real engines, model/SDK acceptance, WeChat, production, private upload, credentials, paid calls or target writes.",
+    "Run the complete current native V2 plan with the unchanged 3000-second shared full pytest budget, every required check, branch-enabled complete core/analysis coverage at 85 percent total and 90 percent diff, Ruff, format, strict mypy, whitespace and all five actual fixed native mutations. Do not replace it with the focused Node test report, a partial run or a mocked PASS.",
+    "Before launching, independently accept current source static checks and the actual ordinary-wheel V0/V1 no-pretest/pretest cases and output/tamper rejections. Confirm source bytes still match the current subject and expected runtime/tool roles; changed source or inputs require a fresh review and action.",
+    "Exactly one actual native verification start is permitted. Any failure, timeout, interruption or unknown exit consumes this start; retain original logs, evidence, action receipt and owned temporary directories. No automatic retry or silent action reuse; a correction requires separately current review and authorization.",
+    "Only approved local disposable execution is authorized. Preserve original checkout WIP and agent-bridge concurrent work. No authorization-file edits, threshold reductions, repository setting changes, deployment, existing-work deletion, force push or history rewriting. Remote source delivery remains subject to actual final review, verification, Gate and exact-head required CI; this action does not authorize another repository."
+  ]
+}
