@@ -89,11 +89,13 @@ class InstalledMutationInputs:
     @property
     def sha256(self) -> str: ...
 
+
 @dataclass(frozen=True)
 class InstalledMutationReference:
     ref: str
     size: int
     sha256: str
+
 
 @dataclass(frozen=True)
 class InstalledMutationCurrent:
@@ -102,6 +104,7 @@ class InstalledMutationCurrent:
     root_snapshot: bytes
     allowed_git_paths: tuple[str, ...]
 
+
 @dataclass(frozen=True)
 class InstalledMutationFacts:
     current: bool
@@ -109,17 +112,21 @@ class InstalledMutationFacts:
     results: tuple[tuple[str, str], ...]
     reason_codes: tuple[str, ...]
 
+
 def prepare_installed_mutations(
     root: Path, task_id: str, *, verifier_actor: str
 ) -> InstalledMutationInputs: ...
+
 
 def record_installed_mutations(
     root: Path, task_id: str, *, verifier_actor: str, expected_inputs_sha256: str
 ) -> InstalledMutationReference: ...
 
+
 def collect_installed_mutation_current(
     root: Path, reference: InstalledMutationReference, *, verifier_actor: str
 ) -> InstalledMutationCurrent: ...
+
 
 def replay_installed_mutations(
     root: Path, reference: InstalledMutationReference, *, current: InstalledMutationCurrent
