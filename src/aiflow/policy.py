@@ -24,6 +24,8 @@ POLICY_FILES: Mapping[str, str] = {
 NODE_POLICY_VERSION = "3.1.0"
 NODE_PROFILE_ID = "agent-bridge-node"
 NODE_PROFILE_REVISION = 1
+NODE_V2_POLICY_VERSION = "3.2.0"
+NODE_V2_PROFILE_REVISION = 2
 NODE_V0_CHECKS = (
     {"id": "contract", "required": True, "timeout_seconds": 30},
     {"id": "scope", "required": True, "timeout_seconds": 30},
@@ -39,6 +41,11 @@ NODE_V1_CHECKS = NODE_V0_CHECKS + (
 )
 NODE_V0_CHECK_IDS = tuple(str(check["id"]) for check in NODE_V0_CHECKS)
 NODE_V1_CHECK_IDS = tuple(str(check["id"]) for check in NODE_V1_CHECKS)
+NODE_V2_CHECKS = NODE_V1_CHECKS + tuple(
+    {"id": check_id, "required": True, "timeout_seconds": 30}
+    for check_id in ("acceptance", "integration", "targeted_mutation", "independent_verifier")
+)
+NODE_V2_CHECK_IDS = tuple(str(check["id"]) for check in NODE_V2_CHECKS)
 
 
 @dataclass(frozen=True)
@@ -210,7 +217,7 @@ def _load_document(
     if (
         isinstance(version, str)
         and version.split(".", 1)[0] == "3"
-        and version != NODE_POLICY_VERSION
+        and version not in {NODE_POLICY_VERSION, NODE_V2_POLICY_VERSION}
     ):
         raise PolicyError("Policy version is unsupported", code="POLICY_LEVEL_INVALID")
     errors = validate(value)
@@ -293,28 +300,74 @@ def _validate_cross_file(documents: dict[str, dict[str, Any]]) -> str:
     version = str(next(iter(versions)))
     major = version.split(".", maxsplit=1)[0]
     if is_node_policy_candidate(documents):
-        expected = {
+        if version not in {NODE_POLICY_VERSION, NODE_V2_POLICY_VERSION}:
+            raise PolicyError("Node Policy version is invalid", code="POLICY_LEVEL_INVALID")
+        node_v2 = version == NODE_V2_POLICY_VERSION
+        if node_v2 and level_ids != ["V0", "V1", "V2"]:
+            raise PolicyError("Node V2 levels are invalid", code="POLICY_LEVEL_INVALID")
+        expected: dict[str, Any] = {
             "schema_version": "1.0",
-            "policy_version": NODE_POLICY_VERSION,
+            "policy_version": version,
             "policy_kind": "verification_levels",
-            "profile": {"id": NODE_PROFILE_ID, "revision": NODE_PROFILE_REVISION},
+            "profile": {
+                "id": NODE_PROFILE_ID,
+                "revision": NODE_V2_PROFILE_REVISION if node_v2 else NODE_PROFILE_REVISION,
+            },
             "levels": [
                 {"id": "V0", "checks": list(NODE_V0_CHECKS)},
                 {"id": "V1", "checks": list(NODE_V1_CHECKS)},
             ],
         }
+        node_document = documents["verification-levels.yaml"]
+        if node_v2:
+            # Metadata and the V0/V1 declarations remain exact. The single
+            # selected extras guard below owns V2 membership and ordering.
+            expected["levels"].append({"id": "V2"})
+            node_document = {
+                **node_document,
+                "levels": [
+                    *levels[:2],
+                    {key: value for key, value in levels[2].items() if key != "checks"},
+                ],
+            }
         # Canonical bytes preserve integer types: 1, true and 1.0 are distinct.
         if (
-            version != NODE_POLICY_VERSION
-            or any(type(priority) is not int for priority in priorities)
+            any(type(priority) is not int for priority in priorities)
             or any(
                 "profile" in document
                 for name, document in documents.items()
                 if name != "verification-levels.yaml"
             )
-            or _canonical(documents["verification-levels.yaml"]) != _canonical(expected)
+            or _canonical(node_document) != _canonical(expected)
         ):
             raise PolicyError("Node Policy contract is invalid", code="POLICY_LEVEL_INVALID")
+        if node_v2:
+            node_v2_checks = levels[2]["checks"]
+            node_v2_extras = (
+                "acceptance",
+                "integration",
+                "targeted_mutation",
+                "independent_verifier",
+            )
+            if (
+                _canonical(node_v2_checks[: len(NODE_V1_CHECKS)])
+                != _canonical(list(NODE_V1_CHECKS))
+                or tuple(check["id"] for check in node_v2_checks[len(NODE_V1_CHECKS) :])
+                != node_v2_extras
+                or any(
+                    check["required"] is not True for check in node_v2_checks[len(NODE_V1_CHECKS) :]
+                )
+            ):
+                raise PolicyError(
+                    "Node V2 must retain V1 and its required extras",
+                    code="POLICY_CHECK_REFERENCE_INVALID",
+                )
+            declarations = {check["id"]: check for check in NODE_V2_CHECKS[len(NODE_V1_CHECKS) :]}
+            if any(
+                _canonical(check) != _canonical(declarations.get(check["id"]))
+                for check in node_v2_checks[len(NODE_V1_CHECKS) :]
+            ):
+                raise PolicyError("Node V2 declarations are invalid", code="POLICY_LEVEL_INVALID")
         return version
     if major == "1":
         expected_levels = ["V0", "V1"]
@@ -386,13 +439,15 @@ def is_node_policy_candidate(documents: Mapping[str, Mapping[str, Any]]) -> bool
 
 def is_node_policy(bundle: PolicyBundle) -> bool:
     """Accept only a complete, validated, digest-matched closed Node bundle."""
-    if bundle.policy_version != NODE_POLICY_VERSION or set(bundle.documents) != set(POLICY_FILES):
+    if bundle.policy_version not in {NODE_POLICY_VERSION, NODE_V2_POLICY_VERSION} or set(
+        bundle.documents
+    ) != set(POLICY_FILES):
         return False
     try:
         if any(validate_contract("policy", document) for document in bundle.documents.values()):
             return False
         return (
-            _validate_cross_file(bundle.documents) == NODE_POLICY_VERSION
+            _validate_cross_file(bundle.documents) == bundle.policy_version
             and _digest(bundle.documents) == bundle.sha256
         )
     except (PolicyError, OSError, KeyError, TypeError, ValueError, RecursionError):

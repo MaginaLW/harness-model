@@ -156,7 +156,7 @@ class Model:
 
 
 @pytest.fixture
-def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Model]:
+def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[Model]:
     recorder, process_writer, material_collector = (
         runtime.record_installed_mutations,
         node._process,
@@ -195,6 +195,14 @@ def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Model]:
     root.mkdir()
     for name in ("policy", "schemas", "templates"):
         shutil.copytree(ROOT / ".ai" / name, root / ".ai" / name)
+    if getattr(request, "param", None) == "node-v2":
+        import yaml
+        from test_node_v2_contract import node_documents
+
+        for name, document in node_documents().items():
+            (root / ".ai/policy" / name).write_text(
+                yaml.safe_dump(document, sort_keys=False), encoding="utf8"
+            )
     (root / ".ai/repository-id").write_text(str(uuid4()) + "\n", encoding="utf8")
     (root / "fixture.py").write_text("value = 1\n", encoding="utf8")
     (root / ".gitignore").write_text(".ai/tasks/*/logs/\n__pycache__/\n", encoding="utf8")
@@ -688,6 +696,222 @@ def test_valid_logical_prefix_reaches_pair_parser_without_execution_or_write(
             logical_run.model.root, logical_run.reference, current=current
         )
     assert snapshot_tree(logical_run.model.root) == before
+
+
+def stage_node_v2_code_marker(run: LogicalRun, phase: str) -> dict:
+    """Real ledger/files, synthetic public evidence; never authorize an execution."""
+    from test_node_v2_evidence import public_node_evidence
+
+    from aiflow.contracts import require_valid_contract
+    from aiflow.evidence import verification_snapshot_sha256
+    from aiflow.policy import load_policy_bundle
+    from aiflow.review_service import _context_digest
+    from aiflow.state import TRANSITIONS, create_transition_event
+    from aiflow.task_service import _persist_event_and_task, read_task_record_strict
+
+    root = run.model.root
+    directory = resolve_task_path(root, TASK)
+    # These synthetic state transitions model a stopped approval transaction;
+    # neither they nor the structural evidence substitute for runtime acceptance.
+    for target in ("VERIFYING", "VERIFIED", "WAITING_FOR_FINAL_REVIEW"):
+        record = read_task_record_strict(root, TASK)
+        rule = TRANSITIONS[(record.task["current_state"], target)]
+        transition_task_record(
+            root,
+            TASK,
+            target_state=target,
+            event_type=rule.event_type,
+            actor=ACTOR,
+            payload={},
+            satisfied_preconditions=rule.preconditions,
+        )
+    record = read_task_record_strict(root, TASK)
+    classification = node._json(directory / "classification.json")
+    policy_sha = load_policy_bundle(root).sha256
+    evidence = public_node_evidence(root)
+    for key in ("repository_id", "branch", "base_commit", "subject_commit"):
+        evidence[key] = record.task[key]
+    evidence["spec_sha256"] = record.task["frozen_spec_sha256"]
+    evidence["classification_input_sha256"] = classification["classification_input_sha256"]
+    evidence["verifier_actor"] = ACTOR
+    evidence["verifier_context_sha256"] = run.model.inputs.verifier_context_sha256
+    evidence["reproduce_command"][6] = ACTOR
+    design = node._json(directory / "reviews/REV-0001-r0001.json")
+    evidence["review_refs"]["design"] = {
+        key: design[key] for key in ("review_id", "context_sha256")
+    }
+    evidence["verification_snapshot_sha256"] = verification_snapshot_sha256(evidence)
+    context = {
+        "schema_version": "2.0",
+        "review_stage": "implementation",
+        "task_id": TASK,
+        "decision_unit_ids": ["DU-001"],
+        **{
+            key: record.task[key]
+            for key in ("repository_id", "branch", "base_commit", "subject_commit")
+        },
+        "spec_sha256": record.task["frozen_spec_sha256"],
+        "policy_sha256": policy_sha,
+        "classification_input_sha256": classification["classification_input_sha256"],
+        "verification_snapshot_sha256": evidence["verification_snapshot_sha256"],
+        "content": {},
+    }
+    context["context_sha256"] = _context_digest(context)
+    review = {
+        "schema_version": "1.0",
+        "review_id": "REV-0002",
+        "revision": 1,
+        "task_id": TASK,
+        "review_stage": "implementation",
+        "reviewer": "fixture-code-reviewer",
+        "recorded_at": datetime.now(timezone.utc).isoformat(),
+        "context_sha256": context["context_sha256"],
+        "outcome": "APPROVE",
+        "summary": "Synthetic interrupted transaction only",
+        "findings": [],
+    }
+    require_valid_contract("review-context", context)
+    require_valid_contract("review-record", review)
+    put_json(directory / f"review-contexts/{context['context_sha256']}.json", context)
+    put_json(directory / "reviews/REV-0002-r0001.json", review)
+    reference = {
+        key: review[key] for key in ("review_id", "revision", "review_stage", "context_sha256")
+    }
+    record_task_event(
+        root, TASK, event_type="review_recorded", actor=review["reviewer"], payload=reference
+    )
+    evidence["review_refs"]["implementation"] = {
+        key: review[key] for key in ("review_id", "context_sha256")
+    }
+    require_valid_contract("evidence", evidence)
+    put_json(directory / "evidence.json", evidence)
+    approvals = node._json(directory / "approvals.json")
+    record = read_task_record_strict(root, TASK)
+    instant = datetime.now(timezone.utc).isoformat()
+    candidate = {
+        **approvals[0],
+        "approval_type": "code",
+        "approved_at": instant,
+        "reason": "Logical staged transaction; no host execution claim",
+        "evidence_sha256": node._sha(node._canonical(evidence)),
+    }
+    event = create_transition_event(
+        record.task,
+        target_state="APPROVED_FOR_MERGE",
+        event_type="code_approved",
+        actor="project-owner",
+        payload={"approval_type": "code", "approvals": [candidate], "structured_review": reference},
+        sequence=len(record.events) + 1,
+        satisfied_preconditions={"code_approval_valid"},
+        occurred_at=instant,
+    )
+    marker = {
+        "schema_version": "1.0",
+        "task_id": TASK,
+        "task": {**record.task, "current_state": "APPROVED_FOR_MERGE", "updated_at": instant},
+        "event": event,
+        "approvals": [*approvals, candidate],
+    }
+    put_json(directory / "approval_pending.json", marker)
+    if phase in {"ledger_written", "event_applied"}:
+        put_json(directory / "approvals.json", marker["approvals"])
+    if phase == "event_applied":
+        _persist_event_and_task(directory, marker["task"], event)
+    return marker
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize("phase", ["pending", "ledger_written", "event_applied"])
+def test_node_v2_real_current_replays_each_valid_code_transaction_phase_without_writes(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch, phase: str
+) -> None:
+    stage_node_v2_code_marker(logical_run, phase)
+    before = snapshot_tree(logical_run.model.root)
+    current = collect(logical_run)
+    assert (
+        f".ai/tasks/{TASK}/approval_pending.json"
+        in node._json_bytes(current.root_snapshot)["governance"]["paths"]
+    )
+    parser_sentinel(monkeypatch)
+    with pure_guard(monkeypatch), pytest.raises(ParserReached):
+        runtime.replay_installed_mutations(
+            logical_run.model.root, logical_run.reference, current=current
+        )
+    assert snapshot_tree(logical_run.model.root) == before
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize("role", ["before", "after"])
+def test_node_v2_live_pending_exception_cannot_validate_a_forged_historical_role(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch, role: str
+) -> None:
+    stage_node_v2_code_marker(logical_run, "ledger_written")
+    current = collect(logical_run)
+    live = node._json_bytes(current.root_snapshot)
+    # The actual live approval inventory is ahead of its event inventory. It is
+    # valid only as Current, even when historical.events exactly equals live.
+    assert (
+        runtime._snapshot(live, logical_run.model.root, logical_run.model.inputs, current=True)
+        == live
+    )
+    with pure_guard(monkeypatch), pytest.raises(AiflowError):
+        runtime._snapshot(live, logical_run.model.root, logical_run.model.inputs)
+    document = node._json(logical_run.path)
+    document[role] = deepcopy(live)
+    reference = rewrite_run(logical_run.path, document, logical_run.model.inputs)
+    before = snapshot_tree(logical_run.model.root)
+    with pytest.raises(AiflowError):
+        collect(logical_run, reference)
+    parser_sentinel(monkeypatch)
+    with pure_guard(monkeypatch):
+        facts = runtime.replay_installed_mutations(
+            logical_run.model.root, reference, current=replace(current, reference=reference)
+        )
+    assert not facts.current and not facts.passed and facts.reason_codes
+    assert snapshot_tree(logical_run.model.root) == before
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize("finalize", [False, True])
+def test_node_v2_public_service_rejects_implementer_before_claim_or_execution(
+    model: Model, monkeypatch: pytest.MonkeyPatch, finalize: bool
+) -> None:
+    import aiflow.verification_service as service
+    from aiflow.verifier_service import validate_verifier_actor
+
+    observed, attempts = [], []
+
+    def actor_guard(implementer, verifier):
+        observed.append((implementer, verifier))
+        return validate_verifier_actor(implementer, verifier)
+
+    def forbidden(*args, **kwargs):
+        attempts.append((args, kwargs))
+        raise AssertionError("The implementer reached claim, transition or execution")
+
+    monkeypatch.setattr(service, "validate_verifier_actor", actor_guard)
+    # Host provenance and Git assessment are separate contracts. The actor
+    # decision must still be the real production validator reached via verify.
+    monkeypatch.setattr(node, "precheck_node_materials", lambda *_: None)
+    monkeypatch.setattr(service, "_ci_git_assessment", lambda *_: None)
+    monkeypatch.setattr(service, "_start_local_verification", forbidden)
+    monkeypatch.setattr(node, "claim_node_v2_run", forbidden)
+    monkeypatch.setattr(node, "execute_node_verification", forbidden)
+    before = snapshot_tree(model.root)
+    options = (
+        {"finalize": True}
+        if finalize
+        else {
+            "node_materials_sha256": "a" * 64,
+            "node_installed_mutation_run": "IMUT-0123456789abcdef",
+        }
+    )
+    with pytest.raises(AiflowError) as caught:
+        service.verify_task(model.root, TASK, actor="fixture-implementer", **options)
+    assert caught.value.code == "VERIFIER_ACTOR_NOT_INDEPENDENT"
+    assert observed == [("fixture-implementer", "fixture-implementer")]
+    assert attempts == []
+    assert snapshot_tree(model.root) == before
 
 
 def test_preparation_inputs_cannot_stand_in_for_typed_current(
@@ -1574,6 +1798,10 @@ EXTRAS = ("acceptance", "integration", "targeted_mutation", "independent_verifie
 COMPARISON = ast.parse(
     "tuple(check['id'] for check in v2_checks[len(v1_checks):]) != extras", mode="eval"
 ).body
+NODE_COMPARISON = ast.parse(
+    "tuple(check['id'] for check in node_v2_checks[len(NODE_V1_CHECKS):]) != node_v2_extras",
+    mode="eval",
+).body
 
 
 @pytest.fixture
@@ -1593,8 +1821,8 @@ def _target(tree: ast.Module) -> ast.FunctionDef:
     return matches[0]
 
 
-def _comparison(function: ast.FunctionDef) -> ast.Compare:
-    expected = ast.dump(COMPARISON, include_attributes=False)
+def _comparison(function: ast.FunctionDef, template: ast.AST = COMPARISON) -> ast.Compare:
+    expected = ast.dump(template, include_attributes=False)
     matches = [
         node
         for node in ast.walk(function)
@@ -1622,42 +1850,46 @@ def _without_check(identifier: str) -> dict:
     return documents
 
 
-def test_installed_001_changes_only_the_unique_expected_comparison(copied_policy: Path) -> None:
+def test_installed_001_changes_only_the_fixed_native_and_node_comparisons(
+    copied_policy: Path,
+) -> None:
     from aiflow import installed_mutations
 
     before = ast.parse(copied_policy.read_bytes())
     expected = deepcopy(before)
-    comparison = _comparison(_target(expected))
-    comparison.ops = [ast.NotIn()]
-    comparison.comparators = [
-        ast.Tuple(
-            elts=[
-                ast.Name(id="extras", ctx=ast.Load()),
-                ast.Tuple(
-                    elts=[
-                        ast.Constant(value=value)
-                        for value in EXTRAS
-                        if value != "targeted_mutation"
-                    ],
-                    ctx=ast.Load(),
-                ),
-            ],
-            ctx=ast.Load(),
-        )
-    ]
+    for name, template in (("extras", COMPARISON), ("node_v2_extras", NODE_COMPARISON)):
+        comparison = _comparison(_target(expected), template)
+        comparison.ops = [ast.NotIn()]
+        comparison.comparators = [
+            ast.Tuple(
+                elts=[
+                    ast.Name(id=name, ctx=ast.Load()),
+                    ast.Tuple(
+                        elts=[
+                            ast.Constant(value=value)
+                            for value in EXTRAS
+                            if value != "targeted_mutation"
+                        ],
+                        ctx=ast.Load(),
+                    ),
+                ],
+                ctx=ast.Load(),
+            )
+        ]
     installed_mutations._mutate("MUT-V2-001", copied_policy)
     after_bytes = copied_policy.read_bytes()
     after = ast.parse(after_bytes)
     assert ast.dump(after, include_attributes=False) == ast.dump(expected, include_attributes=False)
     assert _outside_target_dump(after, SYMBOL) == _outside_target_dump(before, SYMBOL)
-    assignments = [
-        node
-        for node in ast.walk(_target(after))
-        if isinstance(node, ast.Assign)
-        and any(isinstance(target, ast.Name) and target.id == "extras" for target in node.targets)
-    ]
-    assert len(assignments) == 1
-    assert ast.literal_eval(assignments[0].value) == EXTRAS
+    for name in ("extras", "node_v2_extras"):
+        assignments = [
+            node
+            for node in ast.walk(_target(after))
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name) and target.id == name for target in node.targets)
+        ]
+        assert len(assignments) == 1
+        assert ast.literal_eval(assignments[0].value) == EXTRAS
     compile(after_bytes, str(copied_policy), "exec")
 
 
@@ -1678,6 +1910,35 @@ def test_installed_001_keeps_the_positive_policy_control(copied_policy: Path) ->
     for other in ("acceptance", "integration", "independent_verifier"):
         with pytest.raises(PolicyError) as caught:
             mutant._validate_cross_file(_without_check(other))
+        assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
+
+
+def test_installed_001_has_the_same_positive_and_designated_negative_controls_for_node2(
+    copied_policy: Path,
+) -> None:
+    from test_node_v2_contract import node_documents
+
+    from aiflow import installed_mutations
+
+    def without(identifier):
+        documents = node_documents()
+        level = documents["verification-levels.yaml"]["levels"][2]
+        level["checks"] = [row for row in level["checks"] if row["id"] != identifier]
+        return documents
+
+    baseline = _load_policy(copied_policy)
+    assert baseline._validate_cross_file(node_documents()) == "3.2.0"
+    with pytest.raises(PolicyError) as caught:
+        baseline._validate_cross_file(without("targeted_mutation"))
+    assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
+    installed_mutations._mutate("MUT-V2-001", copied_policy)
+    mutant = _load_policy(copied_policy)
+    assert mutant._validate_cross_file(node_documents()) == "3.2.0"
+    # Only this intentionally injected omission is permitted by the mutant.
+    assert mutant._validate_cross_file(without("targeted_mutation")) == "3.2.0"
+    for other in ("acceptance", "integration", "independent_verifier"):
+        with pytest.raises(PolicyError) as caught:
+            mutant._validate_cross_file(without(other))
         assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
 
 
@@ -1717,6 +1978,54 @@ def test_installed_001_rejects_unknown_or_ambiguous_ast_without_writes(
     original = copied_policy.read_bytes()
     with pytest.raises(ContractError):
         installed_mutations._mutate("MUT-V2-001", copied_policy)
+    assert copied_policy.read_bytes() == original
+
+
+@pytest.mark.parametrize(
+    "shape",
+    [
+        "missing_comparison",
+        "duplicate_comparison",
+        "missing_extras",
+        "duplicate_extras",
+        "changed_extras",
+    ],
+)
+def test_installed_001_rejects_unknown_node_guard_shapes_without_writes(copied_policy, shape):
+    from aiflow import installed_mutations
+
+    tree = ast.parse(copied_policy.read_bytes())
+    function = _target(tree)
+    comparison = _comparison(function, NODE_COMPARISON)
+    extras = next(
+        node
+        for node in ast.walk(function)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "node_v2_extras"
+            for target in node.targets
+        )
+    )
+    if shape == "missing_comparison":
+        comparison.ops = [ast.Eq()]
+    elif shape == "duplicate_comparison":
+        owner = next(
+            node
+            for node in ast.walk(function)
+            if isinstance(node, ast.If) and comparison in list(ast.walk(node.test))
+        )
+        owner.test = ast.BoolOp(op=ast.Or(), values=[owner.test, deepcopy(comparison)])
+    elif shape == "duplicate_extras":
+        function.body.append(deepcopy(extras))
+    elif shape == "missing_extras":
+        extras.targets[0].id = "foreign_extras"
+    else:
+        extras.value = ast.Tuple(elts=[ast.Constant(value="unsupported")], ctx=ast.Load())
+    copied_policy.write_text(ast.unparse(ast.fix_missing_locations(tree)) + "\n", encoding="utf8")
+    original = copied_policy.read_bytes()
+    with pytest.raises(ContractError) as caught:
+        installed_mutations._mutate("MUT-V2-001", copied_policy)
+    assert caught.value.code == "INSTALLED_MUTATION_OPERATOR_INVALID"
     assert copied_policy.read_bytes() == original
 
 

@@ -20,6 +20,7 @@ from aiflow.evidence import (
     finalize_v2_evidence,
     prepare_v2_pre_evidence,
     save_evidence,
+    validate_node_evidence,
     validate_v2_snapshot,
 )
 from aiflow.freshness import current_classification_input_digest, evaluate_freshness
@@ -639,17 +640,23 @@ def _finalize_v2_task(
 ) -> VerifyResult:
     root = repository_root.resolve()
     trusted_bundle = _verification_policy(root)
-    if is_node_policy(trusted_bundle):
-        raise ContractError(
-            "Node finalization is unavailable",
-            code="VERIFY_NODE_CI_UNSUPPORTED" if ci else "NODE_CAPABILITY_UNAVAILABLE",
-        )
+    node = is_node_policy(trusted_bundle)
+    if node:
+        if ci or ci_run_dir is not None or output is not None:
+            raise ContractError("Node CI is unavailable", code="VERIFY_NODE_CI_UNSUPPORTED")
+        if (
+            trusted_bundle.policy_version != "3.2.0"
+            or _classification(root, task_id).get("effective_verification_level") != "V2"
+        ):
+            raise ContractError(
+                "Node finalization is unavailable", code="NODE_CAPABILITY_UNAVAILABLE"
+            )
     if ci or check_ids or ci_run_dir is not None or output is not None:
         raise ContractError(
             "V2 finalization cannot run checks or CI verification",
             code="VERIFY_FINALIZE_ARGUMENT_INVALID",
         )
-    record = load_task_record(root, task_id)
+    record = read_task_record_strict(root, task_id) if node else load_task_record(root, task_id)
     classification = _classification(root, task_id)
     bundle = load_policy_bundle(root)
     spec_sha256 = specification_digest(_read_spec(root, task_id))
@@ -661,6 +668,8 @@ def _finalize_v2_task(
     _ci_git_assessment(root, task_id, record)
     implementer = current_implementer_actor(record.events)
     _implementer, verifier = validate_verifier_actor(implementer, actor or "")
+    if node and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.@-]*", verifier) is None:
+        raise ContractError("Node verification actor is invalid", code="VERIFY_ACTOR_REQUIRED")
     evidence_path = resolve_task_path(root, task_id, "evidence.json")
     if not evidence_path.is_file():
         raise ContractError("V2 pre evidence is missing", code="VERIFY_FINALIZE_EVIDENCE_INVALID")
@@ -668,7 +677,7 @@ def _finalize_v2_task(
     if not isinstance(evidence, dict):
         raise ContractError("V2 pre evidence is invalid", code="VERIFY_FINALIZE_EVIDENCE_INVALID")
     if (
-        evidence.get("schema_version") != "2.0"
+        evidence.get("schema_version") != ("3.2" if node else "2.0")
         or evidence.get("verification_level") != "V2"
         or evidence.get("phase") != "pre_implementation_review"
         or evidence.get("mode") != "local"
@@ -677,7 +686,7 @@ def _finalize_v2_task(
     if evidence.get("verifier_actor") != verifier:
         raise ContractError("Verifier actor is stale", code="VERIFY_FINALIZE_ACTOR_STALE")
     validate_v2_snapshot(evidence)
-    current = {
+    current: dict[str, object] = {
         "task_id": task_id,
         "repository_id": record.task.get("repository_id"),
         "branch": record.task.get("branch"),
@@ -688,6 +697,21 @@ def _finalize_v2_task(
         "classification_input_sha256": classification.get("classification_input_sha256"),
         "verification_level": "V2",
     }
+    if node:
+        from aiflow.node_execution import recheck_node_evidence
+
+        checked = recheck_node_evidence(root, task_id, evidence)
+        if not (checked.current and checked.passed) or checked.installed_mutation_facts is None:
+            raise ContractError(
+                "Node verification originals are not current", code="NODE_EVIDENCE_STALE"
+            )
+        current.update(
+            node_policy=True,
+            node_evidence_current=checked.current,
+            node_evidence_passed=checked.passed,
+            node_materials_sha256=checked.materials_sha256,
+            node_evidence_sha256=checked.evidence_sha256,
+        )
     if evaluate_freshness("evidence", evidence, current).status != "fresh":
         raise ContractError("V2 pre evidence is stale", code="VERIFY_FINALIZE_EVIDENCE_STALE")
     context_digest = evidence.get("verifier_context_sha256")
@@ -716,6 +740,12 @@ def _finalize_v2_task(
         verification_snapshot_sha256=snapshot,
     )
     final = finalize_v2_evidence(evidence, implementation_review.record)
+    if node:
+        checked = recheck_node_evidence(root, task_id, final)
+        if not (checked.current and checked.passed) or checked.installed_mutation_facts is None:
+            raise ContractError(
+                "Final Node verification originals are not current", code="NODE_EVIDENCE_STALE"
+            )
     save_evidence(evidence_path, final)
     return VerifyResult(
         task_id,
@@ -884,12 +914,78 @@ def _verify_node_local(
     classification: Mapping[str, object],
     spec_sha256: str,
     materials: str,
+    installed_run: str | None = None,
 ) -> VerifyResult:
+    from aiflow import node_execution as node
+    from aiflow.installed_mutations import InstalledMutationReference
     from aiflow.node_execution import execute_node_verification, recheck_node_evidence
 
-    level = cast(Literal["V0", "V1"], classification["effective_verification_level"])
+    level = cast(Literal["V0", "V1", "V2"], classification["effective_verification_level"])
     run_dir = root / ".ai" / "tasks" / task_id / "logs" / context.run_id
     evidence_path = resolve_task_path(root, task_id, "evidence.json")
+    reference = None
+    claim_identity = None
+    verifier_context_sha256 = None
+    design_review = None
+    if level == "V2":
+        if (
+            bundle.policy_version != "3.2.0"
+            or not isinstance(installed_run, str)
+            or re.fullmatch(r"IMUT-[0-9a-f]{16}", installed_run) is None
+            or context.run_id != installed_run
+        ):
+            raise ContractError(
+                "Node V2 requires its exact installed mutation run",
+                code="NODE_MUTATIONS_INVALID",
+            )
+        implementer = current_implementer_actor(record.events)
+        _implementer, actor = validate_verifier_actor(implementer, actor)
+        if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.@-]*", actor) is None:
+            raise ContractError("Node verification actor is invalid", code="VERIFY_ACTOR_REQUIRED")
+        if record.task.get("current_state") != "IMPLEMENTING":
+            raise ContractError("Node V2 must start from IMPLEMENTING", code="VERIFY_STATE_INVALID")
+        current_context = build_verifier_context(root, task_id)
+        verifier_context_sha256 = str(current_context["context_sha256"])
+        # This immutable role must precede primitive preparation. Creating it
+        # here would invalidate the completed primitive's protected root.
+        stored_context = load_verifier_context(root, task_id, verifier_context_sha256)
+        validate_verifier_context_current(stored_context, current_context)
+        decision_ids = tuple(
+            str(unit["decision_unit_id"]) for unit in record.task["decision_units"]
+        )
+        design_review = latest_review_assessment(
+            root, task_id, "design", decision_unit_ids=decision_ids
+        )
+        raw = node._read(run_dir / "run.json", limit=node.MAX_JSON_BYTES)
+        reference = InstalledMutationReference(
+            (run_dir / "run.json").relative_to(root).as_posix(), len(raw), node._sha(raw)
+        )
+        binding, _bundle = node._binding(root, task_id)
+        _prepared, manifests = node._load_prepared(root, task_id, materials, binding)
+        current, installed = node._installed_for_node(
+            root,
+            task_id,
+            reference,
+            verifier_actor=actor,
+            binding=binding,
+            manifests=manifests,
+        )
+        if (
+            not installed.current
+            or not installed.passed
+            or current.inputs.verifier_context_sha256 != verifier_context_sha256
+        ):
+            raise ContractError(
+                "Node V2 installed mutations or verifier context are stale",
+                code="NODE_MUTATIONS_INVALID",
+            )
+        claim_identity = node.claim_node_v2_run(
+            root, task_id, reference=reference, verifier_actor=actor
+        )
+    elif installed_run is not None:
+        raise ContractError(
+            "Only Node V2 accepts an installed mutation run", code="NODE_MUTATIONS_INVALID"
+        )
     facts = EvidenceFacts(
         task_id,
         tuple(str(unit["decision_unit_id"]) for unit in record.task["decision_units"]),
@@ -915,18 +1011,45 @@ def _verify_node_local(
             actor,
             "--node-materials",
             materials,
+            *(("--installed-mutations", installed_run) if installed_run is not None else ()),
         ),
     )
     _start_local_verification(root, task_id, record, actor)
-    evidence = execute_node_verification(
-        root, task_id, material_sha256=materials, context=context, bundle=bundle, facts=facts
-    )
+    if level == "V2":
+        evidence = execute_node_verification(
+            root,
+            task_id,
+            material_sha256=materials,
+            context=context,
+            bundle=bundle,
+            facts=facts,
+            installed_reference=reference,
+            node_claim_identity=claim_identity,
+        )
+        assert verifier_context_sha256 is not None and design_review is not None
+        evidence.update(
+            verifier_actor=actor,
+            verifier_context_sha256=verifier_context_sha256,
+            review_refs={"design": _review_ref(design_review)},
+        )
+        evidence = prepare_v2_pre_evidence(evidence)
+        validate_node_evidence(evidence)
+    else:
+        evidence = execute_node_verification(
+            root, task_id, material_sha256=materials, context=context, bundle=bundle, facts=facts
+        )
     checked = recheck_node_evidence(root, task_id, evidence)
     if evidence["conclusion"] == "passed" and not (checked.current and checked.passed):
         raise ContractError(
             "Node verification originals are not current", code="NODE_EVIDENCE_STALE"
         )
-    save_evidence(evidence_path, evidence, archive_path=run_dir / "evidence.json")
+    if level == "V2":
+        # The primitive owns this exact parent role. It is immutable canonical
+        # JSON, unlike the existing native/rev1 pretty per-run archive.
+        node._write_new(run_dir / "evidence.json", node._canonical(evidence))
+        save_evidence(evidence_path, evidence)
+    else:
+        save_evidence(evidence_path, evidence, archive_path=run_dir / "evidence.json")
     conclusion = cast(Literal["passed", "failed"], evidence["conclusion"])
     final_state = _finish_local_verification(
         root,
@@ -953,11 +1076,40 @@ def verify_task(
     abandon: bool = False,
     reason: str | None = None,
     node_materials_sha256: str | None = None,
+    node_installed_mutation_run: str | None = None,
     version_probe: VersionProbe = _default_version_probe,
 ) -> VerifyResult:
     """Execute one governed local verification or read-only CI attestation."""
     root = repository_root.resolve()
+    if node_installed_mutation_run is not None:
+        if (
+            not isinstance(node_installed_mutation_run, str)
+            or re.fullmatch(r"IMUT-[0-9a-f]{16}", node_installed_mutation_run) is None
+        ):
+            raise ContractError(
+                "Installed mutation selector must be one exact IMUT identifier",
+                code="NODE_MUTATIONS_INVALID",
+            )
+        if (
+            ci
+            or ci_run_dir is not None
+            or output is not None
+            or check_ids
+            or provisional
+            or run_id is not None
+            or finalize
+            or abandon
+        ):
+            raise ContractError(
+                "Installed mutation selector is incompatible with this verification mode",
+                code="NODE_CAPABILITY_UNAVAILABLE",
+            )
     if finalize and not abandon and node_materials_sha256 is None:
+        if (provisional or run_id is not None) and is_node_policy(_verification_policy(root)):
+            raise ContractError(
+                "Node finalization cannot select another run or partial mode",
+                code="NODE_CAPABILITY_UNAVAILABLE",
+            )
         return _finalize_v2_task(
             root,
             task_id,
@@ -969,6 +1121,7 @@ def verify_task(
         )
     bundle = _verification_policy(root)
     node = is_node_policy(bundle)
+    node_v2 = False
     if node:
         if ci or ci_run_dir is not None or output is not None:
             raise ContractError("Node CI is unavailable", code="VERIFY_NODE_CI_UNSUPPORTED")
@@ -977,9 +1130,23 @@ def verify_task(
                 "Node verification mode is unavailable", code="NODE_CAPABILITY_UNAVAILABLE"
             )
         classification = _classification(root, task_id)
-        if classification.get("effective_verification_level") not in {"V0", "V1"}:
+        node_level = classification.get("effective_verification_level")
+        node_v2 = bundle.policy_version == "3.2.0" and node_level == "V2"
+        if node_level not in (
+            {"V0", "V1", "V2"} if bundle.policy_version == "3.2.0" else {"V0", "V1"}
+        ):
             raise ContractError(
                 "Node verification level is unavailable", code="NODE_CAPABILITY_UNAVAILABLE"
+            )
+        if node_installed_mutation_run is not None and not node_v2:
+            raise ContractError(
+                "Only Node revision2 V2 accepts installed mutations",
+                code="NODE_MUTATIONS_INVALID",
+            )
+        if node_v2 and not abandon and node_installed_mutation_run is None:
+            raise ContractError(
+                "Node V2 requires its completed installed mutation run",
+                code="NODE_MUTATIONS_INVALID",
             )
         if not abandon and (
             not isinstance(node_materials_sha256, str)
@@ -987,6 +1154,8 @@ def verify_task(
         ):
             raise ContractError("Node materials SHA is required", code="NODE_MATERIALS_REQUIRED")
         if not abandon:
+            if node_v2 and isinstance(actor, str):
+                actor = actor.strip()
             if (
                 not isinstance(actor, str)
                 or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.@-]*", actor) is None
@@ -1016,6 +1185,10 @@ def verify_task(
             from aiflow.node_execution import precheck_node_materials
 
             precheck_node_materials(root, task_id, cast(str, node_materials_sha256))
+    elif node_installed_mutation_run is not None:
+        raise ContractError(
+            "Python verification cannot use installed Node mutations", code="NODE_MUTATIONS_INVALID"
+        )
     elif node_materials_sha256 is not None:
         raise ContractError(
             "Python verification cannot use Node materials", code="NODE_MATERIALS_UNEXPECTED"
@@ -1027,7 +1200,11 @@ def verify_task(
                 code="VERIFY_ABANDON_ARGUMENT_INVALID",
             )
         return _abandon_interrupted_verification(root, task_id, actor=actor, reason=reason)
-    record = read_task_record_strict(root, task_id) if ci else load_task_record(root, task_id)
+    record = (
+        read_task_record_strict(root, task_id)
+        if ci or (node and node_v2)
+        else load_task_record(root, task_id)
+    )
     state = str(record.task.get("current_state"))
     if ci:
         if state not in {"VERIFIED", "WAITING_FOR_FINAL_REVIEW", "APPROVED_FOR_MERGE"}:
@@ -1085,6 +1262,14 @@ def verify_task(
         assessment = _ci_git_assessment(root, task_id, record)
         identifier = run_directory.name
         subject_commit = assessment.subject_commit
+    elif node and level == "V2":
+        # Completed installed originals are already bound to the subject. A
+        # verification may assess it, but must not synchronize a newer one.
+        assessment = _ci_git_assessment(root, task_id, record)
+        if assessment.subject_commit != record.task["subject_commit"]:
+            raise ContractError("Node V2 subject is stale", code="VERIFY_GIT_STALE")
+        identifier = cast(str, node_installed_mutation_run)
+        subject_commit = assessment.subject_commit
     else:
         assessment = evaluate_and_sync_verification_subject(
             root,
@@ -1119,6 +1304,7 @@ def verify_task(
             classification=classification,
             spec_sha256=spec_sha256,
             materials=cast(str, node_materials_sha256),
+            **({"installed_run": node_installed_mutation_run} if level == "V2" else {}),
         )
     full_plan = parse_verification_plan(
         bundle, context, level=cast(Literal["V0", "V1", "V2"], level)

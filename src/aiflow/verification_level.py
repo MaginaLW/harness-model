@@ -6,7 +6,12 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import cast
 
-from aiflow.policy import PolicyBundle, is_node_policy, is_node_policy_candidate
+from aiflow.policy import (
+    NODE_V2_POLICY_VERSION,
+    PolicyBundle,
+    is_node_policy,
+    is_node_policy_candidate,
+)
 from aiflow.verification import V0_CHECK_IDS
 
 V0 = "V0"
@@ -115,6 +120,8 @@ def _policy_v0_complete(bundle: PolicyBundle) -> bool:
 
 
 def _policy_v2_complete(bundle: PolicyBundle) -> bool:
+    if is_node_policy_candidate(bundle.documents):
+        return bundle.policy_version == NODE_V2_POLICY_VERSION and is_node_policy(bundle)
     document = bundle.documents.get("verification-levels.yaml")
     if not isinstance(document, Mapping) or not isinstance(document.get("levels"), list):
         return False
@@ -201,7 +208,7 @@ def determine_verification_level(
             ("V2 verification requirements are invalid; V1 is required.",),
         )
     if v2_reasons:
-        if is_node_policy_candidate(bundle.documents):
+        if is_node_policy_candidate(bundle.documents) and not _policy_v2_complete(bundle):
             return VerificationDecision(
                 decision_unit_id,
                 V2,

@@ -238,9 +238,18 @@ def build_verifier_context(repository_root: Path, task_id: str) -> dict[str, Any
             "code_map": {"allowed_scope": sorted(allowed_scope), "changed_paths": paths},
             "diff_summary": totals,
             "acceptance_conditions": _acceptance_conditions(frozen_spec, task),
-            "known_limitations": [
-                "Acceptance, integration, and targeted mutation execution are owned by Chapter 11."
-            ],
+            "known_limitations": (
+                [
+                    "Node V2 requires the complete fixed product suite, exact coverage originals, "
+                    "five installed mutation pairs and same-verifier finalization.",
+                    "Node CI and real-target application require separate acceptance.",
+                ]
+                if policy.policy_version == "3.2.0"
+                else [
+                    "Acceptance, integration, and targeted mutation execution "
+                    "are owned by Chapter 11."
+                ]
+            ),
             "reproduce_command": [
                 "python",
                 "-m",
@@ -249,6 +258,11 @@ def build_verifier_context(repository_root: Path, task_id: str) -> dict[str, Any
                 task_id,
                 "--actor",
                 "<verifier>",
+                *(
+                    ["--node-materials", "<materials-sha256>", "--installed-mutations", "<IMUT-id>"]
+                    if policy.policy_version == "3.2.0"
+                    else []
+                ),
             ],
         },
     }

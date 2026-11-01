@@ -12,7 +12,11 @@ from typing import Any
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import AiflowError, ContractError
-from aiflow.freshness import current_classification_input_digest, evaluate_freshness
+from aiflow.freshness import (
+    V2_CODE_APPROVAL_FACTS,
+    current_classification_input_digest,
+    evaluate_freshness,
+)
 from aiflow.git_context import collect_git_context
 from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.routing import ROUTE_ORDER
@@ -259,6 +263,12 @@ def _evidence_status(value: dict[str, Any] | None, current: dict[str, object]) -
     report = evaluate_freshness("evidence", value, current)
     if report.status != "fresh":
         return "stale"
+    if (
+        value.get("schema_version") == "3.2"
+        and value.get("verification_level") == "V2"
+        and value.get("phase") == "pre_implementation_review"
+    ):
+        return "awaiting_implementation_review_or_finalization"
     return "passed"
 
 
@@ -273,6 +283,8 @@ def _merge_readiness(
     """Project an approved state's current merge posture without rewriting its history."""
     if state != "APPROVED_FOR_MERGE":
         return "not_applicable"
+    if evidence == "awaiting_implementation_review_or_finalization":
+        return "not_ready"
     current = classification == "fresh" and evidence == "passed"
     if route == "REVIEW":
         current = current and approvals == "current"
@@ -313,6 +325,9 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
         "classification", classification, current, invalid=classification_invalid
     )
     evidence_value, evidence_invalid = _read_evidence(repository_root, task_id)
+    node_v2 = current.get("node_policy") is True and verification == "V2"
+    if node_v2:
+        current.update(dict.fromkeys(V2_CODE_APPROVAL_FACTS, False))
     if current.get("node_policy") is True and evidence_value is not None:
         from aiflow.node_execution import recheck_node_evidence
 
@@ -323,6 +338,32 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
             node_evidence_sha256=node_facts.evidence_sha256,
             node_materials_sha256=node_facts.materials_sha256,
         )
+        if node_v2 and node_facts.current and node_facts.passed:
+            from aiflow.gate import _v2_gate_facts
+
+            try:
+                bundle = load_policy_bundle(repository_root)
+                if is_node_policy(bundle) and bundle.policy_version == "3.2.0":
+                    checks = next(
+                        level["checks"]
+                        for level in bundle.documents["verification-levels.yaml"]["levels"]
+                        if level["id"] == "V2"
+                    )
+                    current.update(
+                        _v2_gate_facts(
+                            repository_root,
+                            task_id,
+                            evidence_value,
+                            events=record.events,
+                            policy_checks=checks,
+                            decision_unit_ids=sorted(
+                                str(unit["decision_unit_id"]) for unit in task["decision_units"]
+                            ),
+                            node_facts=node_facts,
+                        )
+                    )
+            except AiflowError:
+                pass
     evidence_status = "stale" if evidence_invalid else _evidence_status(evidence_value, current)
     approval_status = _approval_status(
         repository_root,
@@ -341,9 +382,40 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
     )
     next_events = tuple(
         sorted(
-            rule.event_type for (source, _target), rule in TRANSITIONS.items() if source == state
+            rule.event_type
+            for (source, _target), rule in TRANSITIONS.items()
+            if source == state
+            and (
+                rule.event_type != "code_approved"
+                or not node_v2
+                or all(current.get(key) is True for key in V2_CODE_APPROVAL_FACTS)
+            )
         )
     )
+    missing_conditions = MISSING_BY_STATE[state]
+    if (
+        evidence_status == "awaiting_implementation_review_or_finalization"
+        and evidence_value is not None
+    ):
+        from aiflow.review_service import latest_review_assessment
+
+        missing_conditions = ("implementation_review", "finalization")
+        try:
+            latest_review_assessment(
+                repository_root,
+                task_id,
+                "implementation",
+                decision_unit_ids=sorted(
+                    str(unit["decision_unit_id"]) for unit in task["decision_units"]
+                ),
+                verification_snapshot_sha256=evidence_value["verification_snapshot_sha256"],
+            )
+        except ContractError:
+            pass
+        else:
+            missing_conditions = ("finalization",)
+    elif merge_readiness == "reverification_required":
+        missing_conditions = ("reverification",)
     return StatusSummary(
         task_id=task_id,
         goal=str(task["goal"]),
@@ -353,9 +425,7 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
         route=route,
         verification_level=verification,
         next_events=next_events,
-        missing_conditions=("reverification",)
-        if merge_readiness == "reverification_required"
-        else MISSING_BY_STATE[state],
+        missing_conditions=missing_conditions,
         base_commit=str(task["base_commit"]),
         subject_commit=str(task["subject_commit"]) if task.get("subject_commit") else None,
         observed_head=context.head,

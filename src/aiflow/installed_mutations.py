@@ -39,7 +39,7 @@ from aiflow.freshness import current_classification_input_digest
 from aiflow.git_context import collect_git_context
 from aiflow.mutation_manifest import MutationDeclaration
 from aiflow.node_verification import _ordered_paths, _path
-from aiflow.policy import is_node_policy_candidate, load_policy_bundle
+from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.specification import specification_digest
 from aiflow.state import replay_events
 from aiflow.storage import read_task_json, resolve_task_path
@@ -188,52 +188,63 @@ def _transformed(mutation_id: str, original: bytes) -> bytes:
         outside = operators._outside_target_dump(tree, symbol)
         changed = False
         if mutation_id == "MUT-V2-001":
-            extras = [
-                item
-                for item in ast.walk(function)
-                if isinstance(item, ast.Assign)
-                and len(item.targets) == 1
-                and isinstance(item.targets[0], ast.Name)
-                and item.targets[0].id == "extras"
-            ]
-            if len(extras) != 1 or ast.literal_eval(extras[0].value) != (
-                "acceptance",
-                "integration",
-                "targeted_mutation",
-                "independent_verifier",
-            ):
-                raise ValueError("unknown complete extras")
-            expected = ast.dump(
-                ast.parse(
+            for extras_name, comparison in (
+                (
+                    "extras",
                     "tuple(check['id'] for check in v2_checks[len(v1_checks):]) != extras",
-                    mode="eval",
-                ).body,
-                include_attributes=False,
-            )
-            comparisons = [
-                item
-                for item in ast.walk(function)
-                if isinstance(item, ast.Compare)
-                and ast.dump(item, include_attributes=False) == expected
-            ]
-            if len(comparisons) != 1:
-                raise ValueError("missing or ambiguous comparison")
-            comparisons[0].ops = [ast.NotIn()]
-            comparisons[0].comparators = [
-                ast.Tuple(
-                    elts=[
-                        ast.Name(id="extras", ctx=ast.Load()),
-                        ast.Tuple(
-                            elts=[
-                                ast.Constant(value=value)
-                                for value in ("acceptance", "integration", "independent_verifier")
-                            ],
-                            ctx=ast.Load(),
-                        ),
-                    ],
-                    ctx=ast.Load(),
+                ),
+                (
+                    "node_v2_extras",
+                    "tuple(check['id'] for check in node_v2_checks[len(NODE_V1_CHECKS):]) "
+                    "!= node_v2_extras",
+                ),
+            ):
+                extras = [
+                    item
+                    for item in ast.walk(function)
+                    if isinstance(item, ast.Assign)
+                    and len(item.targets) == 1
+                    and isinstance(item.targets[0], ast.Name)
+                    and item.targets[0].id == extras_name
+                ]
+                if len(extras) != 1 or ast.literal_eval(extras[0].value) != (
+                    "acceptance",
+                    "integration",
+                    "targeted_mutation",
+                    "independent_verifier",
+                ):
+                    raise ValueError("unknown complete extras")
+                expected = ast.dump(
+                    ast.parse(comparison, mode="eval").body, include_attributes=False
                 )
-            ]
+                comparisons = [
+                    item
+                    for item in ast.walk(function)
+                    if isinstance(item, ast.Compare)
+                    and ast.dump(item, include_attributes=False) == expected
+                ]
+                if len(comparisons) != 1:
+                    raise ValueError("missing or ambiguous comparison")
+                comparisons[0].ops = [ast.NotIn()]
+                comparisons[0].comparators = [
+                    ast.Tuple(
+                        elts=[
+                            ast.Name(id=extras_name, ctx=ast.Load()),
+                            ast.Tuple(
+                                elts=[
+                                    ast.Constant(value=value)
+                                    for value in (
+                                        "acceptance",
+                                        "integration",
+                                        "independent_verifier",
+                                    )
+                                ],
+                                ctx=ast.Load(),
+                            ),
+                        ],
+                        ctx=ast.Load(),
+                    )
+                ]
             changed = True
         elif mutation_id == "MUT-V2-002":
             changed = operators._replace_guard(
@@ -491,6 +502,52 @@ def _materials() -> bytes:
     )
 
 
+def _node_v2_policy(root: Path) -> bool:
+    bundle = load_policy_bundle(root)
+    return (
+        is_node_policy_candidate(bundle.documents)
+        and bundle.policy_version == "3.2.0"
+        and is_node_policy(bundle)
+    )
+
+
+def _require_pending_approval(root: Path, task_id: str, *, executing: bool, node_v2: bool) -> None:
+    """Only read-only Node V2 replay admits the existing valid code marker."""
+    if executing or not node_v2:
+        native._require_no_pending_approval(root, task_id)
+        return
+    marker = resolve_task_path(root, task_id) / "approval_pending.json"
+    try:
+        marker.lstat()
+    except FileNotFoundError:
+        return
+    node._safe_info(marker)
+    evidence = node._json(resolve_task_path(root, task_id) / "evidence.json")
+    if (
+        not isinstance(evidence, dict)
+        or evidence.get("schema_version") != "3.2"
+        or evidence.get("verification_level") != "V2"
+        or evidence.get("phase") != "final"
+        or evidence.get("mode") != "local"
+    ):
+        raise _error("Only current Node V2 final code approval may be pending")
+    from aiflow.evidence import validate_v2_snapshot
+
+    validate_v2_snapshot(evidence)
+    classification = read_task_json(
+        root, task_id, "classification.json", contract_name="classification"
+    )
+    if (
+        not isinstance(classification, Mapping)
+        or classification.get("effective_verification_level") != "V2"
+    ):
+        raise _error("Only a Node V2 task may have this pending code approval")
+    record = read_task_record_strict(root, task_id)
+    # This helper validates the exact registered marker and review originals;
+    # it neither rebuilds review context nor replays Node or mutation evidence.
+    node._governance_snapshot(root, task_id, record.events)
+
+
 def _authority(
     root: Path, task_id: str, verifier_actor: str, *, executing: bool = True
 ) -> tuple[InstalledMutationInputs, dict[str, Any], dict[str, Any]]:
@@ -504,13 +561,19 @@ def _authority(
     task, classification, policy_sha = native._validate_bindings(
         root, task_id, str(task["subject_commit"])
     )
+    bundle = load_policy_bundle(root)
+    node_v2 = (
+        is_node_policy_candidate(bundle.documents)
+        and bundle.policy_version == "3.2.0"
+        and is_node_policy(bundle)
+    )
     if (
         (executing and task["current_state"] != "IMPLEMENTING")
         or classification.get("effective_verification_level") != "V2"
-        or is_node_policy_candidate(load_policy_bundle(root).documents)
+        or (is_node_policy_candidate(bundle.documents) and not node_v2)
     ):
-        raise _error("Installed mutation preparation requires an IMPLEMENTING native V2 task")
-    native._require_no_pending_approval(root, task_id)
+        raise _error("Installed mutation preparation requires a supported IMPLEMENTING V2 task")
+    _require_pending_approval(root, task_id, executing=executing, node_v2=node_v2)
     approvals = native._action_approvals(root, task_id)
     native._require_current_spec_approvals(
         task_id, task, classification, approvals, policy_sha256=policy_sha
@@ -1506,6 +1569,134 @@ def _run_original(root: Path, reference: InstalledMutationReference) -> dict[str
     return document
 
 
+def _validate_node_pre_archive(
+    root: Path,
+    reference: InstalledMutationReference,
+    inputs: InstalledMutationInputs,
+    run: Path,
+) -> None:
+    from aiflow.evidence import validate_node_evidence, validate_v2_snapshot
+
+    archive = run / "evidence.json"
+    raw = node._read(archive, limit=node.MAX_JSON_BYTES)
+    evidence = node._json_bytes(raw)
+    validate_node_evidence(evidence)
+    validate_v2_snapshot(evidence)
+    if (
+        raw != node._canonical(evidence)
+        or evidence["schema_version"] != "3.2"
+        or evidence["verification_level"] != "V2"
+        or evidence["mode"] != "local"
+        or evidence["phase"] != "pre_implementation_review"
+    ):
+        raise _error("Installed Node pre archive has the wrong role")
+    for key in (
+        "task_id",
+        "repository_id",
+        "branch",
+        "base_commit",
+        "subject_commit",
+        "spec_sha256",
+        "policy_sha256",
+        "classification_input_sha256",
+        "verifier_actor",
+        "verifier_context_sha256",
+    ):
+        if evidence[key] != getattr(inputs, key):
+            raise _error("Installed Node pre archive has a foreign task binding")
+    if tuple(evidence["decision_unit_ids"]) != inputs.decision_unit_ids:
+        raise _error("Installed Node pre archive has foreign decision units")
+    installed = evidence["installed_mutation"]
+    if (
+        node._canonical(installed["reference"]) != node._canonical(asdict(reference))
+        or installed["inputs_sha256"] != inputs.sha256
+        or installed["results"] != [[probe, "killed"] for probe in PROBE_IDS]
+    ):
+        raise _error("Installed Node pre archive has a foreign mutation original")
+    compact = evidence["node_binding"]
+    run_ref = compact["run"]
+    original_path = run / "node/run.json"
+    original = node._read(original_path, limit=node.MAX_JSON_BYTES)
+    if (
+        compact["subject_tree"] != inputs.subject_tree
+        or run_ref["ref"] != f"logs/{run.name}/node/run.json"
+        or run_ref["size"] != len(original)
+        or run_ref["sha256"] != node._sha(original)
+    ):
+        raise _error("Installed Node pre archive has a foreign Node run")
+    node_run = node._json_bytes(original)
+    if (
+        not isinstance(node_run, dict)
+        or node_run.get("kind") != "aiflow-node-run-3.2"
+        or node._canonical(node_run.get("installed_mutation"))
+        != node._canonical(
+            {
+                "reference": asdict(reference),
+                "inputs_sha256": inputs.sha256,
+                "results": [[probe, "killed"] for probe in PROBE_IDS],
+            }
+        )
+    ):
+        raise _error("Installed Node run does not bind this exact mutation original")
+    current = node._json(resolve_task_path(root, inputs.task_id) / "evidence.json")
+    validate_node_evidence(current)
+    validate_v2_snapshot(current)
+    if (
+        current.get("schema_version") != "3.2"
+        or current.get("verification_level") != "V2"
+        or current.get("mode") != "local"
+        or current.get("verification_snapshot_sha256") != evidence["verification_snapshot_sha256"]
+    ):
+        raise _error("Installed Node pre archive differs from the current stable snapshot")
+
+
+def _validate_run_children(root: Path, reference: InstalledMutationReference) -> None:
+    """Validate the one owned run's roles; Node replay owns its Node subtree."""
+    root = Path(root).absolute()
+    run = _reference_path(root, reference).parent
+    document = _run_original(root, reference)
+    value = dict(_closed(document["inputs"], set(InstalledMutationInputs.__dataclass_fields__)))
+    units = value["decision_unit_ids"]
+    if not isinstance(units, list):
+        raise _error("Installed original decision units are invalid")
+    value["decision_unit_ids"] = tuple(units)
+    value["materials"] = node._canonical(value["materials"])
+    inputs = InstalledMutationInputs(**value)
+    _input_document(inputs)
+    if inputs.task_id != reference.ref.split("/")[2]:
+        raise _error("Installed original belongs to a different task")
+    children = {child.name for child in run.iterdir()}
+    expected = {"context.json", "run.json", "completion.json", *(str(i) for i in range(5))}
+    if children.intersection({"node", "evidence.json"}) and _node_v2_policy(root):
+        classification = read_task_json(
+            root, inputs.task_id, "classification.json", contract_name="classification"
+        )
+        if (
+            not isinstance(classification, Mapping)
+            or classification.get("effective_verification_level") != "V2"
+        ):
+            raise _error("Only Node V2 may own additional installed run roles")
+        if "node" in children:
+            node._safe_info(run / "node", directory=True)
+            expected.add("node")
+        if "evidence.json" in children:
+            if "node" not in children:
+                raise _error("Installed Node archive has no owned Node role")
+            _validate_node_pre_archive(root, reference, inputs, run)
+            expected.add("evidence.json")
+    if children != expected:
+        raise _error("Installed run contains missing or undeclared outputs")
+    for name in ("context.json", "run.json", "completion.json"):
+        node._safe_info(run / name)
+    for index in range(5):
+        pair = run / str(index)
+        node._safe_info(pair, directory=True)
+        if {child.name for child in pair.iterdir()} != {"b", "m"}:
+            raise _error("Installed pair contains missing or undeclared phases")
+        for phase in ("b", "m"):
+            node._safe_info(pair / phase, directory=True)
+
+
 def _absolute(value: object) -> Path:
     if not isinstance(value, str):
         raise _error("Installed root path is invalid")
@@ -1530,7 +1721,9 @@ def _snapshot_identity(value: object, *, metadata: bool = False) -> dict[str, An
     return identity
 
 
-def _snapshot(value: object, root: Path, inputs: InstalledMutationInputs) -> dict[str, Any]:
+def _snapshot(
+    value: object, root: Path, inputs: InstalledMutationInputs, *, current: bool = False
+) -> dict[str, Any]:
     snapshot = _closed(
         value,
         {
@@ -1641,7 +1834,16 @@ def _snapshot(value: object, root: Path, inputs: InstalledMutationInputs) -> dic
                 identities.add(identity)
                 approvals.append(approval)
     if node._canonical(approvals) != node._canonical(governance["approvals"]):
-        raise _error("Historical approval inventory differs from its event history")
+        marker = resolve_task_path(root, inputs.task_id) / "approval_pending.json"
+        if not current or not marker.exists() or not _node_v2_policy(root):
+            raise _error("Historical approval inventory differs from its event history")
+        _require_pending_approval(root, inputs.task_id, executing=False, node_v2=True)
+        record = read_task_record_strict(root, inputs.task_id)
+        live = node._governance_snapshot(root, inputs.task_id, record.events)
+        if node._canonical(snapshot["events"]) != node._canonical(record.events) or node._canonical(
+            governance
+        ) != node._canonical(live):
+            raise _error("Current pending approval inventory is not the exact validated live state")
     return snapshot
 
 
@@ -1716,7 +1918,11 @@ def _root_transition(
             raise _error("Unexpected installed task governance advancement")
     # Re-derive historical review roles from its exact replayable prefix. The
     # helper reads current approvals; their historical prefix is checked above.
-    historical = node._governance_snapshot(root, inputs.task_id, prefix)
+    marker = resolve_task_path(root, inputs.task_id) / "approval_pending.json"
+    if marker.exists() and _node_v2_policy(root):
+        historical = node._governance_snapshot(root, inputs.task_id, prefix, include_pending=False)
+    else:
+        historical = node._governance_snapshot(root, inputs.task_id, prefix)
     if any(
         node._canonical(old[key]) != node._canonical(historical[key])
         for key in ("paths", "immutable")
@@ -1798,7 +2004,7 @@ def collect_installed_mutation_current(
     _snapshot(document["after"], root, inputs)
     if node._canonical(before) != node._canonical(document["after"]):
         raise _error("Installed mutation changed the original root")
-    current = _snapshot(node._root_snapshot(root, task_id, path.parent), root, inputs)
+    current = _snapshot(node._root_snapshot(root, task_id, path.parent), root, inputs, current=True)
     if (
         any(
             before["git_audit"][key] != current["git_audit"][key]
@@ -1846,7 +2052,7 @@ def replay_installed_mutations(
             or len(current.root_snapshot) > node.MAX_JSON_BYTES
         ):
             raise _error("Current installed authority has an invalid task or snapshot")
-        actual = _snapshot(node._json_bytes(current.root_snapshot), root, inputs)
+        actual = _snapshot(node._json_bytes(current.root_snapshot), root, inputs, current=True)
         if (
             node._canonical(actual) != current.root_snapshot
             or type(current.allowed_git_paths) is not tuple
@@ -1874,7 +2080,14 @@ def replay_installed_mutations(
         if node._canonical(before) != node._canonical(document["after"]):
             raise _error("Installed mutation changed the original task tree")
         _pure_task(root, inputs)
-        native._require_no_pending_approval(root, inputs.task_id)
+        _require_pending_approval(
+            root,
+            inputs.task_id,
+            executing=False,
+            node_v2=_node_v2_policy(root)
+            if (resolve_task_path(root, inputs.task_id) / "approval_pending.json").exists()
+            else False,
+        )
         materials = _current_materials(inputs)
         context = node._json(path.parent / "context.json")
         validate_verifier_context(context)
@@ -1885,17 +2098,7 @@ def replay_installed_mutations(
         _root_transition(
             root, inputs, before, actual, current.allowed_git_paths, path.parent, document["action"]
         )
-        expected_children = {
-            "context.json",
-            "run.json",
-            "completion.json",
-            *(str(index) for index in range(5)),
-        }
-        if {child.name for child in path.parent.iterdir()} != expected_children:
-            raise _error("Installed run contains missing or undeclared outputs")
-        for index in range(5):
-            if {child.name for child in (path.parent / str(index)).iterdir()} != {"b", "m"}:
-                raise _error("Installed pair contains missing or undeclared phases")
+        _validate_run_children(root, reference)
         pairs = document["pairs"]
         if not isinstance(pairs, list) or len(pairs) != len(PROBE_IDS):
             raise _error("Installed mutation run has an incomplete probe inventory")

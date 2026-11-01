@@ -1303,7 +1303,10 @@ def negative_material_originals(tmp_path, monkeypatch):
         "host-tools.json": deepcopy(host),
         "preflight.json": {},
     }
-    prepared = {"payload": {"path": str(payload)}, "binding": {"subject_commit": "b" * 40}}
+    prepared = {
+        "payload": {"path": str(payload)},
+        "binding": {"subject_commit": "b" * 40, "profile": runtime.PROFILE},
+    }
     preflight_root = payload.parent.parent / "node-preflight-preparation"
     environment = runtime._environment(
         node_root / "node.exe", payload / "dependencies", preflight_root, Path(host["git"]["path"])
@@ -1818,7 +1821,11 @@ def test_preparation_late_failure_never_publishes_a_usable_selection(
     payload = old_payload.with_name("late-preparation")
     old_payload.rename(payload)
     root = payload.parents[5]
-    monkeypatch.setattr(runtime, "_binding", lambda *_args: ({"subject_commit": "b" * 40}, None))
+    monkeypatch.setattr(
+        runtime,
+        "_binding",
+        lambda *_args: ({"subject_commit": "b" * 40, "profile": runtime.PROFILE}, None),
+    )
     calls = []
 
     def process(argv, *, cwd, environment, timeout, output):

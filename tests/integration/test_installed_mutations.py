@@ -75,10 +75,17 @@ class OrdinaryEngine:
     wheel: Path
     origin: str
 
-    def run(self, target: Path, code: str, *arguments: str, original_git: bool = False) -> dict:
+    def run(
+        self,
+        target: Path,
+        code: str,
+        *arguments: str,
+        original_git: bool = False,
+        instrument: bool = True,
+    ) -> dict:
         import coverage
 
-        active = coverage.Coverage.current()
+        active = coverage.Coverage.current() if instrument else None
         data_file = self.root / (".coverage-installed-" + uuid4().hex)
         if active is not None:
             installed = self.python.parents[1] / "Lib/site-packages/aiflow"
@@ -119,6 +126,7 @@ finally:
         environment["PATH"] = str(git) + os.pathsep + environment["PATH"]
         environment["GIT_CONFIG_GLOBAL"] = os.devnull
         environment["GIT_CONFIG_NOSYSTEM"] = "1"
+        environment["GIT_OPTIONAL_LOCKS"] = "0"
         environment["PYTHONDONTWRITEBYTECODE"] = "1"
         completed = subprocess.run(
             [str(self.python), "-I", "-B", "-c", *argv, str(target), *arguments],
@@ -349,7 +357,9 @@ print(json.dumps(dict(read_only=True,engine=str(Path(runtime.__file__)))))
 def test_cold_installed_import_has_no_process_or_filesystem_writes(
     ordinary_engines: dict[str, OrdinaryEngine], tmp_path: Path
 ) -> None:
-    result = ordinary_engines["direct"].run(tmp_path, COLD_IMPORT)
+    # This independent cold-import proof installs a permanent no-write audit
+    # hook, so a coverage collector cannot write its own teardown database.
+    result = ordinary_engines["direct"].run(tmp_path, COLD_IMPORT, instrument=False)
     assert result["read_only"] is True
 
 
@@ -588,10 +598,22 @@ def attempt():
     try:
         reference=runtime.record_installed_mutations(root,task,verifier_actor=actor,
             expected_inputs_sha256=inputs.sha256)
-    except (AiflowError,SimulatedInterruption) as error:
-        return type(error).__name__
-    facts=replay(reference)
-    assert not facts.passed and not facts.all_killed,'a rejected process became PASS'
+    except SimulatedInterruption:
+        return 'interrupted'
+    except AiflowError as error:
+        assert error.code=='ACTION_APPROVAL_USED',error.code
+        return 'action-used'
+    try:
+        facts=replay(reference)
+    except AiflowError as error:
+        # A deliberately failed run need not have collectible current authority.
+        # Preserve the root guard and accept only its precise retained rejection.
+        document=json.loads((root/reference.ref).read_bytes())
+        assert document['failure']=='INSTALLED_MUTATION_ROOT_CHANGED',document['failure']
+        assert error.code=='INSTALLED_MUTATION_INVALID',error.code
+        return 'authority-rejected'
+    assert not facts.passed and not facts.all_killed and facts.reason_codes,asdict(facts)
+    assert not any(outcome=='killed' for _probe,outcome in facts.results),asdict(facts)
     return 'recorded-failure'
 with ExitStack() as stack:
     for module in (runtime,node,processes):
@@ -608,15 +630,19 @@ with ExitStack() as stack:
             finally:
                 release.set()
             first_result=first.result(timeout=30)
+        assert second_result=='action-used',second_result
     else:
+        second_result=None
         first_result=attempt()
+    expected={'interrupted'} if mode=='interrupted' else {'recorded-failure','authority-rejected'}
+    assert first_result in expected,first_result
     assert len(starts)==1,'recorder skipped real authority or launched past first failure'
     count=len(starts)
     try:
         runtime.record_installed_mutations(root,task,verifier_actor=actor,
             expected_inputs_sha256=inputs.sha256)
-    except AiflowError:
-        pass
+    except AiflowError as error:
+        assert error.code=='ACTION_APPROVAL_USED',error.code
     else:
         raise AssertionError('a failed/interrupted action was reusable')
     assert len(starts)==count,'spent action reached the process wrapper'
@@ -628,7 +654,8 @@ logs=root/'.ai/tasks'/task/'logs'
 assert len(list(logs.glob('installed-action-use-*.json')))==1
 assert len(list(logs.glob('installed-action-launch-*.json')))==1
 assert read_task_yaml(root,task,'task.yaml')['current_state']=='IMPLEMENTING'
-print(json.dumps(dict(consumptions=len(uses),process_starts=len(starts),mode=mode)))
+print(json.dumps(dict(consumptions=len(uses),process_starts=len(starts),mode=mode,
+    first_result=first_result,second_result=second_result)))
 """
 )
 
@@ -641,7 +668,13 @@ def test_failed_interrupted_and_concurrent_actions_remain_single_use(
 ) -> None:
     prepared = _prepare_task(ordinary_engines["direct"], tmp_path_factory)
     result = prepared.engine.run(prepared.root, INTERRUPTED_RECORD, mode)
-    assert result == {"consumptions": 1, "process_starts": 1, "mode": mode}
+    assert result["consumptions"] == result["process_starts"] == 1
+    assert result["mode"] == mode
+    expected = (
+        {"interrupted"} if mode == "interrupted" else {"recorded-failure", "authority-rejected"}
+    )
+    assert result["first_result"] in expected
+    assert result["second_result"] == ("action-used" if mode == "concurrent" else None)
 
 
 @pytest.fixture(scope="module")

@@ -373,13 +373,14 @@ def _parse_check(
 
 def _node_plan(bundle: PolicyBundle, context: VerificationContext, level: str) -> VerificationPlan:
     """Expand fixed roles, never commands supplied by a Node Policy."""
-    from aiflow.node_execution import NODE_COVERAGE_HELPER
+    from aiflow.node_execution import NODE_COVERAGE_HELPER, NODE_ISTANBUL_HELPER
 
-    run_dir = _run_directory(context)
-    if context.ci_run_dir is not None or level == "V2":
+    revision2 = bundle.policy_version == "3.2.0"
+    if context.ci_run_dir is not None or (level == "V2" and not revision2):
         raise ContractError(
             "Node execution capability is unavailable", code="NODE_CAPABILITY_UNAVAILABLE"
         )
+    run_dir = _run_directory(context)
     roles = context.node_bindings
     if roles is None:
         raise ContractError("Node material bindings are required", code="NODE_MATERIALS_REQUIRED")
@@ -436,12 +437,12 @@ def _node_plan(bundle: PolicyBundle, context: VerificationContext, level: str) -
             None,
         ),
     ]
-    if level == "V1":
-        coverage = npm + (
+    if level in {"V1", "V2"}:
+        coverage: tuple[str, ...] = npm + (
             "test",
             "--",
             "--coverage.enabled",
-            "--coverage.provider=v8",
+            "--coverage.provider=istanbul" if revision2 else "--coverage.provider=v8",
             "--coverage.include=src/local/**/*.ts",
             "--coverage.reporter=json-summary",
             "--coverage.reporter=json",
@@ -449,11 +450,19 @@ def _node_plan(bundle: PolicyBundle, context: VerificationContext, level: str) -
             "--coverage.reportsDirectory=" + str(roles.coverage_directory),
             "--coverage.reportOnFailure",
         )
+        if revision2:
+            coverage += (
+                "--config=" + str(roles.execution_root / "vitest.config.ts"),
+                "--dangerouslyIgnoreUnhandledErrors=false",
+                "--reporter=default",
+                "--reporter=json",
+                "--outputFile.json=" + str(roles.coverage_directory.parent / "vitest.json"),
+            )
         helper = (
             roles.node_executable,
             "--input-type=module",
             "--eval",
-            NODE_COVERAGE_HELPER,
+            NODE_ISTANBUL_HELPER if revision2 else NODE_COVERAGE_HELPER,
             str(roles.source_manifest_file),
             str(roles.expected_map_file),
         )
@@ -466,6 +475,16 @@ def _node_plan(bundle: PolicyBundle, context: VerificationContext, level: str) -
         )
     elif level != "V0":
         raise ContractError("Node verification level is invalid", code="VERIFY_LEVEL_INVALID")
+    if level == "V2":
+        definitions.extend(
+            (check_id, 30, (), roles.execution_root, check_id, None)
+            for check_id in (
+                "acceptance",
+                "integration",
+                "targeted_mutation",
+                "independent_verifier",
+            )
+        )
     checks: list[VerificationCheck] = []
     executions: list[VerificationExecution] = []
     for check_id, timeout, commands, cwd, parser, threshold in definitions:
@@ -490,7 +509,9 @@ def _node_plan(bundle: PolicyBundle, context: VerificationContext, level: str) -
                     {},
                     cwd,
                     30 if check_id == "ts_coverage" and index == 1 else timeout,
-                    (check_id,),
+                    ("ts_coverage", "acceptance", "integration")
+                    if level == "V2" and check_id == "ts_coverage" and index == 0
+                    else (check_id,),
                 )
             )
     return VerificationPlan(
