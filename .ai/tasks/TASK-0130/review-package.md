@@ -30,7 +30,9 @@ Node执行/材料/Job/输出/coverage与共同evidence/review/approval/Gate消�
 
 精确修复已独立slice APPROVE：RF-023 medium记录并resolved；仅test_node_v0_contract.py局部导入原seed producer并补一个必需参数，原六case/全部断言和decorators/612IDs保留。6passed1.06秒，完整两个模块612passed140.04秒；49source/76输入完全不变，四Policy字节逐项等原producer，Ruff/format/whitespace通过。只关闭缺参测试bug，不把612当当前完整Native通过。
 
-未验证：当前subject后续完整Native、正式implementation review、同verifier finalize、code批准/Gate及exact-head required CI尚未完成。
+当前完整Native已实际通过：logs/run-20261101T051713445589Z/evidence.json与根pre字节一致，SHAd5797ef2f3d095f858a8d9bfa4f0c39b97f7a1a1bf06afa53de37b00a3adc0d4。新subjecte444全5674项完成，5669passed/原5skip，1259.63秒；全部14required通过，sharedrunner1260406ms未超3000，Ruff/format/mypy/whitespace及两Python域85总/90diff通过。core真实diff为2564/2825，analysis真零diff；五个实际固定变异全部killed。snapshotf2ba71f8a85a274baa019275c937986c295bef64cd08dfb394eacf9786c25a51/context3a69527ac78fa4940e01398add6cb42736e745cb43ef567060742cad83816231；seq26消费新6737，seq27passed/28等待正式实现审核。旧433b/84c失败事实不改。
+
+未验证：正式implementation review、同verifier finalize、code批准/Gate及exact-head required CI尚未完成。
 
 ## 审核问题
 
@@ -38,4 +40,4 @@ Node执行/材料/Job/输出/coverage与共同evidence/review/approval/Gate消�
 
 ## 推荐结论
 
-BLOCKED。完整Native已跑完但存在六个测试调用失败；保留真实失败、修复受影响消费者并重新完成当前全部门禁，不以预算改变或覆盖率通过代替整轮通过。
+APPROVE_WITH_CONDITIONS。当前新S完整Native已通过；仍需正式独立实现审核、同verifier finalize、当前full-final code批准/Gate及exact-head requiredCI通过。CI中等发现仅在实际平台结果支持后关闭，未完成这些条件前不合并。
