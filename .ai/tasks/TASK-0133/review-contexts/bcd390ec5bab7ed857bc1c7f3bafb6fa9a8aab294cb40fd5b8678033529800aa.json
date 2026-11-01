@@ -1,0 +1,301 @@
+{
+  "base_commit": "a74779f1cfd317ba32102dde9d8649f9cfe473cf",
+  "branch": "codex/agent-bridge-prerequisite-retry",
+  "classification_input_sha256": "108b858ced80732e5e782df9a11a8d380cf6657d07112cf627ab7fde22e8c333",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/node_execution.py",
+      "src/aiflow/process_runner.py",
+      ".ai/tasks/TASK-0132/action-use-d9e0323d7325bcc0cf31ed9e84969367e3c679809cecb1356070d34c1b4cef83.md",
+      ".ai/tasks/TASK-0132/action-v2-targeted-mutation-prerequisites.json",
+      ".ai/tasks/TASK-0132/approvals.json",
+      ".ai/tasks/TASK-0132/classification.json",
+      ".ai/tasks/TASK-0132/events.jsonl",
+      ".ai/tasks/TASK-0132/evidence.json",
+      ".ai/tasks/TASK-0132/review-contexts/ef5febd117119afbaf57c36d16d0be049f456393a3eca7a4c017c65a9d0826a4.json",
+      ".ai/tasks/TASK-0132/review-package.md",
+      ".ai/tasks/TASK-0132/reviews/REV-0001-r0001.json",
+      ".ai/tasks/TASK-0132/reviews/REV-0002-r0001.json",
+      ".ai/tasks/TASK-0132/spec.md",
+      ".ai/tasks/TASK-0132/task.yaml",
+      ".ai/tasks/TASK-0132/verifier-contexts/7fa8327b0501a41f4bc5aa4d92310f43e208e9aa5abcbb2a959d5e087ce31b0a.json"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Complete the unchanged agent-bridge prerequisite repair after isolated test baseline correction",
+        "impact_scope": [
+          "src/aiflow/node_execution.py",
+          "src/aiflow/process_runner.py",
+          ".ai/tasks/TASK-0132/action-use-d9e0323d7325bcc0cf31ed9e84969367e3c679809cecb1356070d34c1b4cef83.md",
+          ".ai/tasks/TASK-0132/action-v2-targeted-mutation-prerequisites.json",
+          ".ai/tasks/TASK-0132/approvals.json",
+          ".ai/tasks/TASK-0132/classification.json",
+          ".ai/tasks/TASK-0132/events.jsonl",
+          ".ai/tasks/TASK-0132/evidence.json",
+          ".ai/tasks/TASK-0132/review-contexts/ef5febd117119afbaf57c36d16d0be049f456393a3eca7a4c017c65a9d0826a4.json",
+          ".ai/tasks/TASK-0132/review-package.md",
+          ".ai/tasks/TASK-0132/reviews/REV-0001-r0001.json",
+          ".ai/tasks/TASK-0132/reviews/REV-0002-r0001.json",
+          ".ai/tasks/TASK-0132/spec.md",
+          ".ai/tasks/TASK-0132/task.yaml",
+          ".ai/tasks/TASK-0132/verifier-contexts/7fa8327b0501a41f4bc5aa4d92310f43e208e9aa5abcbb2a959d5e087ce31b0a.json"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0132/action-use-d9e0323d7325bcc0cf31ed9e84969367e3c679809cecb1356070d34c1b4cef83.md",
+        ".ai/tasks/TASK-0132/action-v2-targeted-mutation-prerequisites.json",
+        ".ai/tasks/TASK-0132/approvals.json",
+        ".ai/tasks/TASK-0132/classification.json",
+        ".ai/tasks/TASK-0132/events.jsonl",
+        ".ai/tasks/TASK-0132/evidence.json",
+        ".ai/tasks/TASK-0132/review-contexts/ef5febd117119afbaf57c36d16d0be049f456393a3eca7a4c017c65a9d0826a4.json",
+        ".ai/tasks/TASK-0132/review-package.md",
+        ".ai/tasks/TASK-0132/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0132/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0132/spec.md",
+        ".ai/tasks/TASK-0132/task.yaml",
+        ".ai/tasks/TASK-0132/verifier-contexts/7fa8327b0501a41f4bc5aa4d92310f43e208e9aa5abcbb2a959d5e087ce31b0a.json",
+        ".ai/tasks/TASK-0133/approvals.json",
+        ".ai/tasks/TASK-0133/classification.json",
+        ".ai/tasks/TASK-0133/events.jsonl",
+        ".ai/tasks/TASK-0133/review-contexts/9d3e9f8b770cfec8538c0059d0c929481d771e0563bb12837d10a8485d725b8c.json",
+        ".ai/tasks/TASK-0133/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0133/spec.md",
+        ".ai/tasks/TASK-0133/task.yaml",
+        "src/aiflow/node_execution.py",
+        "src/aiflow/process_runner.py"
+      ],
+      "files": [
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/action-use-d9e0323d7325bcc0cf31ed9e84969367e3c679809cecb1356070d34c1b4cef83.md"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/action-v2-targeted-mutation-prerequisites.json"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/classification.json"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/events.jsonl"
+        },
+        {
+          "additions": 268,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/evidence.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/review-contexts/ef5febd117119afbaf57c36d16d0be049f456393a3eca7a4c017c65a9d0826a4.json"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/review-package.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/spec.md"
+        },
+        {
+          "additions": 66,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/task.yaml"
+        },
+        {
+          "additions": 59,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0132/verifier-contexts/7fa8327b0501a41f4bc5aa4d92310f43e208e9aa5abcbb2a959d5e087ce31b0a.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0133/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0133/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0133/events.jsonl"
+        },
+        {
+          "additions": 63,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0133/review-contexts/9d3e9f8b770cfec8538c0059d0c929481d771e0563bb12837d10a8485d725b8c.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0133/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0133/spec.md"
+        },
+        {
+          "additions": 92,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0133/task.yaml"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 4,
+          "path": "src/aiflow/node_execution.py"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/process_runner.py"
+        }
+      ],
+      "totals": {
+        "additions": 1020,
+        "deletions": 6,
+        "files": 22
+      }
+    },
+    "goal": "Complete the unchanged agent-bridge prerequisite repair after isolated test baseline correction",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0133",
+        "--actor",
+        "independent-prerequisite-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "bcd390ec5bab7ed857bc1c7f3bafb6fa9a8aab294cb40fd5b8678033529800aa",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "d47dab9230837bbe0b850660336066349a4891a67504b08c5afcb00a0c2af355",
+  "subject_commit": "85cfbf91c410a3b7bddceabdb997bc15216d0e02",
+  "task_id": "TASK-0133",
+  "verification_snapshot_sha256": "d04d69f2ef5ea2076d22e01cbd2f9747235fb95ced9fba5560674c7470331ee5"
+}
