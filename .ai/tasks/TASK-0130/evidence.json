@@ -206,7 +206,7 @@
   ],
   "generated_at": "2026-11-01T05:38:34Z",
   "mode": "local",
-  "phase": "pre_implementation_review",
+  "phase": "final",
   "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
   "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
   "reproduce_command": [
@@ -222,6 +222,10 @@
     "design": {
       "context_sha256": "d0dec837f4cc7fb517e327393f38b7709e34dc555d2b7847e7d8e367d4f43f7b",
       "review_id": "REV-0002"
+    },
+    "implementation": {
+      "context_sha256": "6d47a25326b3613ba64c6eda8d08b1ed9e00e3fe498b9b7c6d9644706c07068c",
+      "review_id": "REV-0003"
     }
   },
   "schema_version": "2.0",
