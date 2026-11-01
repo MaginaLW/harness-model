@@ -59,8 +59,8 @@ goal: Remove agent-bridge verification blockers while preserving output integrit
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-01T08:46:08Z'
-subject_commit: 7530f67d540548951cddc186e691e41bd84eca8d
+subject_commit: f459afc2f27c297e9728d8b9cc0c374e7a318db2
 task_id: TASK-0132
-updated_at: '2026-11-01T08:47:43Z'
+updated_at: '2026-11-01T08:55:00Z'
 worktree_dirty: false
 worktree_dirty_paths: []
