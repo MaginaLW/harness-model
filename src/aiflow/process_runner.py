@@ -337,7 +337,7 @@ def _node_kernel() -> tuple[Any, Callable[[], int]]:
     """Private API seam: the same Win32 state machine runs with synthetic kernels in CI."""
     if os.name != "nt" or c.sizeof(c.c_void_p) != 8:
         raise OSError("Windows x64 process support unavailable")
-    return c.WinDLL("kernel32", use_last_error=True), c.get_last_error
+    return getattr(c, "WinDLL")("kernel32", use_last_error=True), getattr(c, "get_last_error")
 
 
 def run_node_process(

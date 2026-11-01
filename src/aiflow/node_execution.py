@@ -205,7 +205,7 @@ def _windows_root() -> Path:
     import ctypes
     from ctypes import wintypes
 
-    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel = getattr(ctypes, "WinDLL")("kernel32", use_last_error=True)
     kernel.GetWindowsDirectoryW.argtypes = (wintypes.LPWSTR, wintypes.UINT)
     kernel.GetWindowsDirectoryW.restype = wintypes.UINT
     buffer = ctypes.create_unicode_buffer(32768)
@@ -1713,7 +1713,7 @@ def _metadata_identity(path: Path) -> dict[str, int]:
             )
         ]
 
-    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel = getattr(ctypes, "WinDLL")("kernel32", use_last_error=True)
     kernel.CreateFileW.argtypes = (
         wintypes.LPCWSTR,
         wintypes.DWORD,
