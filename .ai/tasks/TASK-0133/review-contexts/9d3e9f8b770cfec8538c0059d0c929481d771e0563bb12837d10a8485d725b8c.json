@@ -1,0 +1,63 @@
+{
+  "base_commit": "a74779f1cfd317ba32102dde9d8649f9cfe473cf",
+  "branch": "codex/agent-bridge-prerequisite-retry",
+  "classification_input_sha256": "108b858ced80732e5e782df9a11a8d380cf6657d07112cf627ab7fde22e8c333",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/node_execution.py",
+      "src/aiflow/process_runner.py",
+      ".ai/tasks/TASK-0132/action-use-d9e0323d7325bcc0cf31ed9e84969367e3c679809cecb1356070d34c1b4cef83.md",
+      ".ai/tasks/TASK-0132/action-v2-targeted-mutation-prerequisites.json",
+      ".ai/tasks/TASK-0132/approvals.json",
+      ".ai/tasks/TASK-0132/classification.json",
+      ".ai/tasks/TASK-0132/events.jsonl",
+      ".ai/tasks/TASK-0132/evidence.json",
+      ".ai/tasks/TASK-0132/review-contexts/ef5febd117119afbaf57c36d16d0be049f456393a3eca7a4c017c65a9d0826a4.json",
+      ".ai/tasks/TASK-0132/review-package.md",
+      ".ai/tasks/TASK-0132/reviews/REV-0001-r0001.json",
+      ".ai/tasks/TASK-0132/reviews/REV-0002-r0001.json",
+      ".ai/tasks/TASK-0132/spec.md",
+      ".ai/tasks/TASK-0132/task.yaml",
+      ".ai/tasks/TASK-0132/verifier-contexts/7fa8327b0501a41f4bc5aa4d92310f43e208e9aa5abcbb2a959d5e087ce31b0a.json"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Complete the unchanged agent-bridge prerequisite repair after isolated test baseline correction",
+        "impact_scope": [
+          "src/aiflow/node_execution.py",
+          "src/aiflow/process_runner.py",
+          ".ai/tasks/TASK-0132/action-use-d9e0323d7325bcc0cf31ed9e84969367e3c679809cecb1356070d34c1b4cef83.md",
+          ".ai/tasks/TASK-0132/action-v2-targeted-mutation-prerequisites.json",
+          ".ai/tasks/TASK-0132/approvals.json",
+          ".ai/tasks/TASK-0132/classification.json",
+          ".ai/tasks/TASK-0132/events.jsonl",
+          ".ai/tasks/TASK-0132/evidence.json",
+          ".ai/tasks/TASK-0132/review-contexts/ef5febd117119afbaf57c36d16d0be049f456393a3eca7a4c017c65a9d0826a4.json",
+          ".ai/tasks/TASK-0132/review-package.md",
+          ".ai/tasks/TASK-0132/reviews/REV-0001-r0001.json",
+          ".ai/tasks/TASK-0132/reviews/REV-0002-r0001.json",
+          ".ai/tasks/TASK-0132/spec.md",
+          ".ai/tasks/TASK-0132/task.yaml",
+          ".ai/tasks/TASK-0132/verifier-contexts/7fa8327b0501a41f4bc5aa4d92310f43e208e9aa5abcbb2a959d5e087ce31b0a.json"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Complete the unchanged agent-bridge prerequisite repair after isolated test baseline correction",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "9d3e9f8b770cfec8538c0059d0c929481d771e0563bb12837d10a8485d725b8c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "d47dab9230837bbe0b850660336066349a4891a67504b08c5afcb00a0c2af355",
+  "task_id": "TASK-0133"
+}
