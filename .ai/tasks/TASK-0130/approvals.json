@@ -1,0 +1,28 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-01T03:55:01Z",
+    "base_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "4160ca760abae86e7171dec32798afbcec3110b5f603676e43383bc03dc55b35",
+    "reason": "常设授权：所有者明确批准完整pytest预算3000秒并收尾；当前冻结spec eb3e5267及独立design REV-0001 APPROVE、无未关critical/high，实际recordSHA b0a378addc474d1473f74373bb2abe270ebbce3e4d868a7afea1c4699b54de95。只实施完整Node净差异和8个timeout/单常量及companion，其他门禁不变；Policy实际SHA变后重新分类/审核/批准，不继承旧Task129或旧动作。",
+    "schema_version": "1.0",
+    "spec_sha256": "eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c",
+    "subject_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "task_id": "TASK-0130"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-01T03:58:01Z",
+    "base_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：所有者明确批准3000秒预算；新实际Policy fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727已官方重新分类，独立design REV0002 APPROVE无未关critical/high，recordSHA dd7bde5ae332fa75fea448ab3c58f1bf583d2bce14cffa34b21ee6c3077432f4/contextd0dec837。旧Policy分类/context/approval保留为历史且不沿用。规格eb3e保持完整Node分母和全部85/90、14项及五实际变异；仅当前SHA下继续新验收与收尾。",
+    "schema_version": "1.0",
+    "spec_sha256": "eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c",
+    "subject_commit": "a05037749cb9f9b301e761d77cfb3b3f54c1c9f0",
+    "task_id": "TASK-0130"
+  }
+]
