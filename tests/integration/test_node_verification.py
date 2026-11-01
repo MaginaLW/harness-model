@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "unit"))
 
 # ruff: noqa: E402 -- Shared test helper path is fixed above, never a product import path.
 from node_helpers import CHECKS, InstalledNodeEngine, node_policies, synthetic_source, tree_bytes
+from node_helpers import independent_node_git as independent_node_git
 from node_helpers import installed_node_engine as installed_node_engine
 from node_helpers import public_node_materials as public_node_materials
 from test_answer_command import specification
@@ -560,6 +561,35 @@ if evidence['verification_level']=='V0':
     assert not recheck_node_evidence(root,task,evidence).current
     missing.rename(run)
     rejected.append('missing_run')
+    # Rehash both public layers so rejection depends on the bound inventories,
+    # not merely the original run digest. No process receipt or PASS is forged.
+    evidence_path=task_directory/'evidence.json'
+    evidence_bytes=evidence_path.read_bytes()
+    run_bytes=run.read_bytes()
+    assert 'build_dist' in json.loads(run_bytes)['outputs']
+    for variant in ['missing_build_dist','build_content','final_identity','final_content']:
+        document=json.loads(run_bytes)
+        if variant=='missing_build_dist':
+            del document['outputs']['build_dist']
+        else:
+            role='build_dist' if variant=='build_content' else 'dist'
+            row=next(item for item in document['outputs'][role]['entries'] if item['kind']=='file')
+            if variant=='final_identity':
+                row['identity']['inode']+=1
+            else:
+                row['sha256']='0'*64
+        altered=runtime._canonical(document)
+        candidate=json.loads(evidence_bytes)
+        candidate['node_binding']['run'].update(size=len(altered),sha256=runtime._sha(altered))
+        candidate['node_binding_sha256']=runtime._sha(runtime._canonical(candidate['node_binding']))
+        try:
+            run.write_bytes(altered)
+            facts=recheck_node_evidence(root,task,candidate)
+            assert not facts.current and not facts.passed, (variant,facts)
+        finally:
+            run.write_bytes(run_bytes)
+        assert evidence_path.read_bytes()==evidence_bytes
+        rejected.append(variant)
     first=evidence['checks'][0]['executions'][0]['execution_id']
     receipt=run.parent/'raw'/first/'receipt.json'
     original_receipt=receipt.read_bytes()
@@ -638,17 +668,36 @@ print(json.dumps(dict(materials=materials,evidence=evidence,gate=decision.to_dic
 """
 
 
-@pytest.mark.parametrize("level,logical,processes", [("V0", 6, 8), ("V1", 9, 10)])
-def test_ordinary_wheel_real_node_lifecycle(
+def _real_node_target(
     tmp_path: Path,
     public_node_materials: Path,
     installed_node_engine: InstalledNodeEngine,
     level: str,
-    logical: int,
-    processes: int,
-) -> None:
-    repository = tmp_path / "target"
+    *,
+    pretest_build: bool,
+    dist_edit: str | None = None,
+) -> tuple[Path, Path]:
+    repository = tmp_path / "t"
     synthetic_source(repository, public_node_materials)
+    if pretest_build:
+        package_path = repository / "package.json"
+        package = json.loads(package_path.read_text(encoding="utf8"))
+        package["scripts"]["pretest"] = "npm run build"
+        package_path.write_text(json.dumps(package, indent=2) + "\n", encoding="utf8")
+    if dist_edit is not None:
+        docs = repository / "scripts/docs.mjs"
+        operation = (
+            "files.appendFileSync('dist/local/add.js', '\\n// changed output\\n');"
+            if dist_edit == "content"
+            else "files.writeFileSync('dist/undeclared.txt', 'unexpected output');"
+        )
+        docs.write_text(
+            docs.read_text(encoding="utf8")
+            + "\nimport * as files from 'node:fs';\n"
+            + operation
+            + "\n",
+            encoding="utf8",
+        )
     policies = node_policies(tmp_path / "node-policy")
     run_git(repository, "init", "-b", "feature")
     run_git(repository, "add", ".")
@@ -665,17 +714,41 @@ def test_ordinary_wheel_real_node_lifecycle(
     installed_node_engine.run(
         repository, PREPARE_TASK, level, str(policies), specification(), review_package()
     )
-    payload = repository / ".ai/tasks/TASK-0001/logs/node-payload/public-fixture"
+    payload = repository / ".ai/tasks/TASK-0001/logs/node-payload/p"
     payload.mkdir(parents=True)
-    # Exactly two independent copies per invocation (one per genuine level),
-    # rather than copying the 93 MiB Node tree for every rejection example.
+    # Each real lifecycle owns its material copies; rejection examples below
+    # never alter the session-wide public tool tree.
     shutil.copytree(public_node_materials / "node", payload / "node", copy_function=shutil.copyfile)
     shutil.copytree(
         public_node_materials / "dependencies",
         payload / "dependencies",
         copy_function=shutil.copyfile,
     )
-    outcome = installed_node_engine.run(repository, VERIFY_AND_GATE, str(payload))
+    return repository, payload
+
+
+@pytest.mark.parametrize("level,logical,processes", [("V0", 6, 8), ("V1", 9, 10)])
+@pytest.mark.parametrize("pretest_build", [False, True], ids=["single-build", "pretest-rebuild"])
+def test_ordinary_wheel_real_node_lifecycle(
+    tmp_path_factory: pytest.TempPathFactory,
+    public_node_materials: Path,
+    installed_node_engine: InstalledNodeEngine,
+    independent_node_git: Path,
+    level: str,
+    logical: int,
+    processes: int,
+    pretest_build: bool,
+) -> None:
+    repository, payload = _real_node_target(
+        tmp_path_factory.mktemp("n"),
+        public_node_materials,
+        installed_node_engine,
+        level,
+        pretest_build=pretest_build,
+    )
+    outcome = installed_node_engine.run(
+        repository, VERIFY_AND_GATE, str(payload), git_directory=independent_node_git
+    )
     evidence = outcome["evidence"]
     assert evidence["schema_version"] == "3.1"
     assert evidence["base_commit"] != evidence["subject_commit"]
@@ -702,8 +775,59 @@ def test_ordinary_wheel_real_node_lifecycle(
         assert outcome["rejected"] == [
             "raw_stream",
             "missing_run",
+            "missing_build_dist",
+            "build_content",
+            "final_identity",
+            "final_content",
             "receipt_cleanup",
             "receipt_duration",
             "receipt_eof",
             "material_extra",
         ]
+
+
+VERIFY_OUTPUT_REJECTION = r"""
+import json, sys
+from pathlib import Path
+from aiflow.node_execution import prepare_node_materials, recheck_node_evidence
+from aiflow.storage import read_task_json
+from aiflow.verification_service import verify_task
+root=Path(sys.argv[1]); task='TASK-0001'
+materials=prepare_node_materials(root,task,payload_root=Path(sys.argv[2]))
+result=verify_task(root,task,actor='verifier',node_materials_sha256=materials,run_id='output-rejection')
+evidence=read_task_json(root,task,'evidence.json',contract_name='evidence')
+assert result.conclusion=='failed', evidence
+assert evidence['conclusion']=='failed'
+assert not recheck_node_evidence(root,task,evidence).passed
+checks={item['check_id']:item for item in evidence['checks']}
+assert checks['node_build']['status']=='passed', evidence
+assert checks['node_check']['status']=='passed', evidence
+executions=[item for check in evidence['checks'] for item in check['executions']]
+assert executions
+assert all(item['returncode']==0 and item['cleanup']=='confirmed' for item in executions)
+print(json.dumps(dict(evidence=evidence)))
+"""
+
+
+@pytest.mark.parametrize("dist_edit", ["content", "extra"])
+def test_real_pretest_rebuild_rejects_changed_or_undeclared_output(
+    tmp_path_factory: pytest.TempPathFactory,
+    public_node_materials: Path,
+    installed_node_engine: InstalledNodeEngine,
+    independent_node_git: Path,
+    dist_edit: str,
+) -> None:
+    repository, payload = _real_node_target(
+        tmp_path_factory.mktemp("n"),
+        public_node_materials,
+        installed_node_engine,
+        "V0",
+        pretest_build=True,
+        dist_edit=dist_edit,
+    )
+    outcome = installed_node_engine.run(
+        repository, VERIFY_OUTPUT_REJECTION, str(payload), git_directory=independent_node_git
+    )
+    assert outcome["evidence"]["conclusion"] == "failed"
+    assert not (repository / "node_modules").exists()
+    assert not (repository / "dist").exists()

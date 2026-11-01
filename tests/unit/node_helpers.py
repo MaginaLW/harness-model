@@ -132,7 +132,13 @@ class InstalledNodeEngine:
     python: Path
     state: Path
 
-    def run(self, repository: Path, code: str, *arguments: str) -> dict:
+    def run(
+        self,
+        repository: Path,
+        code: str,
+        *arguments: str,
+        git_directory: Path | None = None,
+    ) -> dict:
         import coverage
 
         active = coverage.Coverage.current()
@@ -160,10 +166,15 @@ finally:
             argv = [wrapper, code, str(Path(coverage.__file__)), str(data_file)]
         else:
             argv = [code]
+        process_environment = environment(self.state)
+        if git_directory is not None:
+            process_environment["PATH"] = (
+                str(git_directory) + os.pathsep + process_environment["PATH"]
+            )
         completed = subprocess.run(
             [str(self.python), "-I", "-B", "-c", *argv, str(repository), *arguments],
             cwd=repository,
-            env=environment(self.state),
+            env=process_environment,
             capture_output=True,
             text=True,
             encoding="utf8",
@@ -336,3 +347,42 @@ def synthetic_source(root: Path, materials: Path) -> None:
         target = root / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(text, encoding="utf8", newline="\n")
+
+
+@pytest.fixture(scope="session")
+def independent_node_git(
+    tmp_path_factory: pytest.TempPathFactory, public_node_materials: Path
+) -> Path:
+    """Copy public Git binaries so standard installation hardlinks are not trusted.
+
+    Initialization retains its original outside-repository Git. Only subsequent
+    Node verification uses these explicit ordinary copies inside the test tree.
+    """
+    del public_node_materials  # Preserve the public-material opt-in before copying tools.
+    executable = shutil.which("git")
+    assert executable, "Git is required for installed Node verification"
+    entry = Path(executable).absolute()
+    if entry.parent.name.casefold() == "cmd":
+        source = entry.parent.parent
+    else:
+        assert entry.parent.name.casefold() == "bin"
+        assert entry.parent.parent.name.casefold() == "mingw64"
+        source = entry.parent.parent.parent
+    target = tmp_path_factory.mktemp("g")
+    for relative in ("cmd", "mingw64/bin", "usr/bin"):
+        for directory, directories, files in os.walk(source / relative, followlinks=False):
+            for name in (*directories, *files):
+                info = (Path(directory) / name).lstat()
+                assert not stat.S_ISLNK(info.st_mode)
+                assert not getattr(info, "st_file_attributes", 0) & 0x400
+        shutil.copytree(source / relative, target / relative, copy_function=shutil.copyfile)
+    for relative in (
+        "cmd/git.exe",
+        "mingw64/bin/git.exe",
+        "mingw64/bin/git-upload-pack.exe",
+        "usr/bin/sh.exe",
+    ):
+        copied = target / relative
+        assert copied.read_bytes() == (source / relative).read_bytes()
+        assert copied.lstat().st_nlink == 1
+    return target / "cmd"
