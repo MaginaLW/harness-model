@@ -2,7 +2,7 @@
 
 ## 审核目标
 
-审核 TASK-0130 当前完整 Node V0/V1 与所有者批准的3000秒完整pytest预算；true base保持无Node的a050377，当前subject0ff2b79，不隐藏Node覆盖率分母。
+审核 TASK-0130 当前完整 Node V0/V1 与所有者批准的3000秒完整pytest预算；true base保持无Node的a050377，当前subjecte44486d，不隐藏Node覆盖率分母。
 
 ## 背景
 
@@ -28,7 +28,9 @@ Node执行/材料/Job/输出/coverage与共同evidence/review/approval/Gate消�
 
 完整Native实际失败：原件logs/run-20261101T043903736967Z/evidence.json与根evidence字节一致，SHA433bde0d4fcea8ea0a856d9985da783361dda2b73a3f5d818494912472af60f3。5674项完整跑完，6 failed、5663 passed、5个原有skip，1227.86秒；没有3000秒超时，coverage数据库/XML生成且两域85总/90diff检查通过。14项为9pass/5fail，五项逻辑检查共用实际pytest失败；五实际变异killed。seq20真实消费84c，seq21记录FAILED，动作已耗尽。六个失败均为test_node_v0_contract.py:1762直接调用旧fixture签名，缺node_policy_seed_bytes；测试性能优化的跨模块消费者遗漏，尚未执行六case后续断言。失败与旧草案004high/005medium整改原件均保留，不能采信为完整通过。
 
-未验证：精确夹具调用修复、当前subject后续完整Native、正式implementation review、同verifier finalize、code批准/Gate及exact-head required CI尚未完成。
+精确修复已独立slice APPROVE：RF-023 medium记录并resolved；仅test_node_v0_contract.py局部导入原seed producer并补一个必需参数，原六case/全部断言和decorators/612IDs保留。6passed1.06秒，完整两个模块612passed140.04秒；49source/76输入完全不变，四Policy字节逐项等原producer，Ruff/format/whitespace通过。只关闭缺参测试bug，不把612当当前完整Native通过。
+
+未验证：当前subject后续完整Native、正式implementation review、同verifier finalize、code批准/Gate及exact-head required CI尚未完成。
 
 ## 审核问题
 
