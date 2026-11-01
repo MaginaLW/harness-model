@@ -221,11 +221,36 @@ def test_git_environment_injection_cannot_change_repository_selection(
 
 
 def test_nongit_and_unborn_repositories_cannot_be_initialized(tmp_path: Path) -> None:
+    # Bound discovery without relying on inherited GIT_* that the helper strips.
+    (tmp_path / ".git").write_text("gitdir: absent-fixture-git\n", encoding="utf-8")
     root = tmp_path / "unborn"
     root.mkdir()
+    assert (
+        subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=root,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        ).returncode
+        != 0
+    )
     with pytest.raises(AiflowError):
         helper.resolve_initialization_root(root)
     git(root, "init", "-b", "feature")
+    assert (root / ".git").is_dir()
+    assert Path(git(root, "rev-parse", "--show-toplevel")) == root
+    assert git(root, "symbolic-ref", "HEAD") == "refs/heads/feature"
+    assert (
+        subprocess.run(
+            ["git", "rev-parse", "--verify", "HEAD^{commit}"],
+            cwd=root,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        ).returncode
+        != 0
+    )
     before = tree(root)
     with pytest.raises(AiflowError):
         helper.observe_initialization_target(root)

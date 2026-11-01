@@ -586,10 +586,25 @@ def test_root_locator_rejects_non_worktrees_with_existing_error_contract(
     bare: bool,
     tmp_path: Path,
 ) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
     if bare:
-        run_git(tmp_path, "init", "--bare")
+        run_git(target, "init", "--bare")
+    else:
+        # Stop real Git discovery before it can borrow an enclosing test worktree.
+        (tmp_path / ".git").write_text("gitdir: absent-fixture-git\n", encoding="utf-8")
+    assert (
+        subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=target,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        ).returncode
+        != 0
+    )
     with pytest.raises(AiflowError) as caught:
-        _resolve(tmp_path)
+        _resolve(target)
     assert caught.value.code == "GIT_NOT_REPOSITORY"
 
 

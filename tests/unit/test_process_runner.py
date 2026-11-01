@@ -395,6 +395,48 @@ print(json.dumps({'private': str(private), 'file': filename}))
     assert dict(os.environ) == before
 
 
+def test_runner_rejects_private_temp_creation_failure_without_launch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "selected-temp"
+    root.mkdir()
+    marker = root / "existing.txt"
+    marker.write_bytes(b"preserved owned material")
+    identity = root.stat()
+    monkeypatch.setenv("TMPDIR", str(root))
+    before = dict(os.environ)
+    failure = OSError("synthetic temporary storage unavailable")
+    attempts = []
+
+    def unavailable(*, prefix: str, dir: Path) -> str:
+        assert prefix == "aiflow-check-"
+        attempts.append(Path(dir))
+        raise failure
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        pytest.fail("temporary creation failure reached process launch")
+
+    monkeypatch.setattr(process_runner.tempfile, "mkdtemp", unavailable)
+    monkeypatch.setattr(process_runner.subprocess, "Popen", forbidden)
+    item = check((sys.executable, "-c", "print('must not execute')"))
+    with pytest.raises(ContractError) as caught:
+        run_execution(
+            execution(item),
+            {item.check_id: item},
+            run_dir=tmp_path / "logs" / "run",
+            allowed_run_root=tmp_path / "logs",
+            repository_root=Path.cwd(),
+            sequence=1,
+        )
+    assert caught.value.code == "RUNNER_TEMP_ROOT_INVALID"
+    assert caught.value.__cause__ is failure
+    assert attempts == [root]
+    assert dict(os.environ) == before
+    assert root.is_dir() and list(root.iterdir()) == [marker]
+    assert (root.stat().st_dev, root.stat().st_ino) == (identity.st_dev, identity.st_ino)
+    assert marker.read_bytes() == b"preserved owned material"
+
+
 @pytest.mark.parametrize("key", ["TEMP", "TMP", "TMPDIR", "PYTHONPATH"])
 def test_runner_never_accepts_temp_or_injection_from_policy(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, key: str
