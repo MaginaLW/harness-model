@@ -352,6 +352,12 @@ implementation review 或 local code approval。Gate 仍逐项核对这些 curre
 
 `begin` 的治理提交兼容仅允许 `subject_commit..HEAD` 中的当前任务路径 `.ai/tasks/<TASK-ID>/**`；业务路径、其他任务路径、仓库/分支不符和超出创建时 dirty baseline 的工作树变化仍会拒绝。
 
+## 原生验证的临时目录
+
+原生检查只向子进程增加固定的 `TEMP`、`TMP`、`TMPDIR`，三者指向本次独占的 `aiflow-check-*` 目录。父进程显式标准变量按 `TMPDIR`、`TEMP`、`TMP` 顺序选根；显式根须是已存在的绝对普通目录，祖先有链接或 reparse point、相对路径、缺失或非目录时，在创建日志或启动检查前拒绝，不回退至另一个位置。未显式设置时保留系统默认选择。Policy 仍只允许 `COVERAGE_FILE`，不开放任意环境变量或额外 CLI 路径参数。
+
+需要工作区内落盘时，在运行 CLI 前将这三个标准变量设为同一已预检的项目内目录；不修改系统全局环境。分发测试还要求运行材料位于被测 checkout 之外，可将正式验收的精确 Git clone 与临时根作为同一项目目录内的同级目录。任务、源代码、解释器、验证和原件应属于这个实际验收 clone，不能将别处的 PASS 摘要复制回来充当本地验证。失败原件保留，临时目录传播不改变检查命令、超时、覆盖率阈值或批准要求。
+
 ## 阶段二基线重放
 
 阶段二的入口不是某个历史 task 在当前 `HEAD` 上继续显示 merge-ready，而是

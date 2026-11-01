@@ -317,7 +317,19 @@ def test_inventory_rejects_unusable_targets_without_git_stderr(
 ) -> None:
     target = tmp_path / kind
     if kind == "non_git":
+        # The target stays Git-free even when pytest's temp root is in a worktree.
+        (tmp_path / ".git").write_text("gitdir: absent-fixture-git\n", encoding="utf-8")
         target.mkdir()
+        assert (
+            subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"],
+                cwd=target,
+                capture_output=True,
+                check=False,
+                timeout=10,
+            ).returncode
+            != 0
+        )
     elif kind == "no_head":
         create_repository(target, commit=False)
     elif kind == "bare":

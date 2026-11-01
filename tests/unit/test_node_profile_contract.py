@@ -2427,6 +2427,7 @@ def test_transaction_setup_and_publication_faults_keep_originals_without_continu
         "execution_missing",
         "output_roles",
         "dist_binding",
+        "build_dist_content",
     ],
 )
 def test_readonly_recheck_rejects_self_rehashed_private_original_faults(
@@ -2507,6 +2508,13 @@ def test_readonly_recheck_rejects_self_rehashed_private_original_faults(
         del document["outputs"]["fixtures"]
     elif fault == "dist_binding":
         document["outputs"]["dist"]["entries"][0]["sha256"] = "0" * 64
+    elif fault == "build_dist_content":
+        initial = document["outputs"].setdefault(
+            "build_dist", deepcopy(document["outputs"]["dist"])
+        )
+        assert set(document["outputs"]) == {"build_dist", "dist", "fixtures"}
+        row = next(item for item in initial["entries"] if item["kind"] == "file")
+        row["sha256"] = "0" * 64
     if touched_document:
         raw = runtime._canonical(document) + (b"\n" if fault == "run_noncanonical" else b"")
         (node_dir / "run.json").write_bytes(raw)
@@ -2528,9 +2536,28 @@ def test_readonly_recheck_rejects_self_rehashed_private_original_faults(
         return checks(*args)
 
     monkeypatch.setattr(runtime, "_checks", unexpected_derivation)
+    rejected_errors = []
+    original_error = runtime._error
+
+    def observe_error(*args, **kwargs):
+        error = original_error(*args, **kwargs)
+        rejected_errors.append((error.code, error.message))
+        return error
+
+    if fault == "build_dist_content":
+        monkeypatch.setattr(runtime, "_error", observe_error)
     calls = tuple(settings["calls"])
+    original_bytes = (node_dir / "run.json").read_bytes()
     result = runtime.recheck_node_evidence(root, "TASK-0001", evidence)
     assert result.current is False and result.passed is False and result.reason_codes
+    assert (node_dir / "run.json").read_bytes() == original_bytes
+    if fault == "build_dist_content":
+        expected_error = (
+            ("NODE_OUTPUT_INVALID", "Initial and final Node output content differs")
+            if "dist_rebuild" in runtime.SEMANTIC_CONTRACT
+            else ("NODE_MATERIALS_INVALID", "Node run output inventory is incomplete")
+        )
+        assert rejected_errors == [expected_error]
     assert not witnessed, "Invalid originals must reject before check conclusions are recomputed"
     expected_receipts = {
         "execution_type": 2,
@@ -2540,6 +2567,7 @@ def test_readonly_recheck_rejects_self_rehashed_private_original_faults(
         "execution_missing": 9,
         "output_roles": 10,
         "dist_binding": 10,
+        "build_dist_content": 10,
     }.get(fault, 0)
     assert len(validated_receipts) == expected_receipts, (
         "A new guard rejected before the intended fault boundary"

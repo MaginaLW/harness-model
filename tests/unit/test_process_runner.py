@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
+import tempfile
 import time
 from dataclasses import replace
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -236,7 +238,7 @@ def test_runner_preserves_actual_argv_and_minimal_environment(
     )[0]
     assert received["argv"] == list(selected.argv)
     assert received["shell"] is False
-    assert set(received["env"]) <= {"PATH", "SystemRoot"}
+    assert set(received["env"]) <= {"PATH", "SystemRoot", "TEMP", "TMP", "TMPDIR"}
     assert result.conclusion == "passed"
     assert "ordinary-check" in result.command_summary
 
@@ -308,7 +310,7 @@ def test_runner_hides_known_paths_in_summary_without_changing_execution(
     assert received["shell"] is False
     environment = received["env"]
     assert isinstance(environment, dict)
-    assert set(environment) <= {"PATH", "SystemRoot", "COVERAGE_FILE"}
+    assert set(environment) <= {"PATH", "SystemRoot", "COVERAGE_FILE", "TEMP", "TMP", "TMPDIR"}
     assert "PATH" in environment
     assert {entry for entry in os.defpath.split(os.pathsep) if entry} <= set(
         environment["PATH"].split(os.pathsep)
@@ -329,6 +331,183 @@ def test_runner_hides_known_paths_in_summary_without_changing_execution(
     assert "config.toml" in result.command_summary and "coverage.xml" in result.command_summary
     assert "-c" in result.command_summary and "ordinary-check" in result.command_summary
     assert "top-secret" not in result.command_summary
+
+
+@pytest.mark.parametrize("selected", ["TMPDIR", "TEMP", "TMP", "default"])
+def test_runner_gives_each_child_a_private_temp_in_selected_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, selected: str
+) -> None:
+    roots = {key: tmp_path / key.lower() for key in ("TMPDIR", "TEMP", "TMP", "default")}
+    for root in roots.values():
+        root.mkdir()
+    order = ["TMPDIR", "TEMP", "TMP"]
+    for index, key in enumerate(order):
+        if selected == "default" or index < order.index(selected):
+            monkeypatch.delenv(key, raising=False)
+        else:
+            monkeypatch.setenv(key, str(roots[key]))
+    if selected == "default":
+        monkeypatch.setattr(tempfile, "gettempdir", lambda: str(roots["default"]))
+    blocked = ("PYTHONPATH", "PYTHONOPTIMIZE", "PYTEST_ADDOPTS", "NODE_OPTIONS", "API_TOKEN")
+    for key in blocked:
+        monkeypatch.setenv(key, "must-not-be-inherited")
+    before = dict(os.environ)
+    # Check the fixed roles before calling tempfile: on the unfixed runner this
+    # fails without tempfile probing or writing any operating-system temp path.
+    script = """
+import json, os, sys
+from pathlib import Path
+root = Path(sys.argv[1])
+roles = [os.environ.get(key) for key in ('TEMP', 'TMP', 'TMPDIR')]
+assert all(roles) and len(set(roles)) == 1, 'missing private temp roles'
+private = Path(roles[0])
+assert private.parent == root and private.name.startswith('aiflow-check-')
+assert not any(key in os.environ for key in
+    ('PYTHONPATH', 'PYTHONOPTIMIZE', 'PYTEST_ADDOPTS', 'NODE_OPTIONS', 'API_TOKEN'))
+import tempfile
+assert Path(tempfile.gettempdir()) == private
+descriptor, filename = tempfile.mkstemp()
+os.close(descriptor)
+assert Path(filename).parent == private
+print(json.dumps({'private': str(private), 'file': filename}))
+"""
+    item = check((sys.executable, "-B", "-c", script, str(roots[selected])), timeout=10)
+    observed = []
+    for sequence in (1, 2):
+        run_dir = tmp_path / "logs" / f"run-{sequence}"
+        result = run_execution(
+            execution(item),
+            {item.check_id: item},
+            run_dir=run_dir,
+            allowed_run_root=tmp_path / "logs",
+            repository_root=Path.cwd(),
+            sequence=sequence,
+        )[0]
+        stderr = (run_dir / result.stderr_log_ref).read_text(encoding="utf8")
+        assert result.conclusion == "passed", stderr
+        report = json.loads((run_dir / result.stdout_log_ref).read_text(encoding="utf8"))
+        private, created = Path(report["private"]), Path(report["file"])
+        assert private.parent == roots[selected]
+        assert not private.is_relative_to(run_dir)
+        assert private.is_dir() and created.is_file()
+        observed.append(private)
+    assert observed[0] != observed[1]
+    assert dict(os.environ) == before
+
+
+def test_runner_rejects_private_temp_creation_failure_without_launch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "selected-temp"
+    root.mkdir()
+    marker = root / "existing.txt"
+    marker.write_bytes(b"preserved owned material")
+    identity = root.stat()
+    monkeypatch.setenv("TMPDIR", str(root))
+    before = dict(os.environ)
+    failure = OSError("synthetic temporary storage unavailable")
+    attempts = []
+
+    def unavailable(*, prefix: str, dir: Path) -> str:
+        assert prefix == "aiflow-check-"
+        attempts.append(Path(dir))
+        raise failure
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        pytest.fail("temporary creation failure reached process launch")
+
+    monkeypatch.setattr(process_runner.tempfile, "mkdtemp", unavailable)
+    monkeypatch.setattr(process_runner.subprocess, "Popen", forbidden)
+    item = check((sys.executable, "-c", "print('must not execute')"))
+    with pytest.raises(ContractError) as caught:
+        run_execution(
+            execution(item),
+            {item.check_id: item},
+            run_dir=tmp_path / "logs" / "run",
+            allowed_run_root=tmp_path / "logs",
+            repository_root=Path.cwd(),
+            sequence=1,
+        )
+    assert caught.value.code == "RUNNER_TEMP_ROOT_INVALID"
+    assert caught.value.__cause__ is failure
+    assert attempts == [root]
+    assert dict(os.environ) == before
+    assert root.is_dir() and list(root.iterdir()) == [marker]
+    assert (root.stat().st_dev, root.stat().st_ino) == (identity.st_dev, identity.st_ino)
+    assert marker.read_bytes() == b"preserved owned material"
+
+
+@pytest.mark.parametrize("key", ["TEMP", "TMP", "TMPDIR", "PYTHONPATH"])
+def test_runner_never_accepts_temp_or_injection_from_policy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, key: str
+) -> None:
+    def forbidden(*args: object, **kwargs: object) -> None:
+        pytest.fail("untrusted Policy environment reached a process")
+
+    monkeypatch.setattr(process_runner.subprocess, "Popen", forbidden)
+    item = check((sys.executable, "-c", "pass"), environment={key: str(tmp_path)})
+    with pytest.raises(ContractError, match="environment"):
+        run_execution(
+            execution(item),
+            {item.check_id: item},
+            run_dir=tmp_path / "logs" / "run",
+            allowed_run_root=tmp_path / "logs",
+            repository_root=Path.cwd(),
+            sequence=1,
+        )
+
+
+@pytest.mark.parametrize("kind", ["relative", "missing", "file", "link", "linked-parent"])
+@pytest.mark.parametrize("selected", ["TMPDIR", "TEMP", "TMP"])
+def test_runner_rejects_invalid_explicit_temp_before_any_probe_mkdir_or_process(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str, selected: str
+) -> None:
+    if kind == "relative":
+        root = Path("relative-temp-root")
+    elif kind == "missing":
+        root = tmp_path / "missing"
+    elif kind == "file":
+        root = tmp_path / "file"
+        root.write_text("not a directory", encoding="utf8")
+    else:
+        actual = tmp_path / "actual"
+        actual.mkdir()
+        (actual / "child").mkdir()
+        linked = tmp_path / "linked"
+        try:
+            linked.symlink_to(actual, target_is_directory=True)
+        except (OSError, NotImplementedError) as error:
+            pytest.skip(f"directory symlinks unavailable: {error}")
+        root = linked / "child" if kind == "linked-parent" else linked
+    # Lower-priority valid roots must not turn an explicit invalid root into a
+    # successful fallback or permit logs to be created before validation.
+    order = ["TMPDIR", "TEMP", "TMP"]
+    for index, key in enumerate(order):
+        if index < order.index(selected):
+            monkeypatch.delenv(key, raising=False)
+        else:
+            monkeypatch.setenv(key, str(root if key == selected else tmp_path))
+    calls = []
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        calls.append(args)
+        pytest.fail("invalid explicit temp reached a probe, mkdir or process")
+
+    monkeypatch.setattr(process_runner.subprocess, "Popen", forbidden)
+    monkeypatch.setattr(os, "mkdir", forbidden)
+    monkeypatch.setattr(tempfile, "gettempdir", forbidden)
+    monkeypatch.setattr(tempfile, "mkdtemp", forbidden)
+    item = check((sys.executable, "-c", "pass"))
+    with pytest.raises(ContractError):
+        run_execution(
+            execution(item),
+            {item.check_id: item},
+            run_dir=tmp_path / "logs" / "run",
+            allowed_run_root=tmp_path / "logs",
+            repository_root=Path.cwd(),
+            sequence=1,
+        )
+    assert calls == []
 
 
 @pytest.mark.parametrize(
