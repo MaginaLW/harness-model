@@ -90,6 +90,12 @@ V0 = (
 SOURCE = "src/local/example.ts"
 
 
+@pytest.fixture
+def tmp_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Keep nested transaction originals within Windows pathname limits."""
+    return tmp_path_factory.mktemp("n")
+
+
 @pytest.fixture(scope="module")
 def node_policy_seed_bytes() -> tuple[tuple[str, bytes], ...]:
     seeds = []
