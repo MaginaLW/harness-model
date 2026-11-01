@@ -1,0 +1,20 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0133",
+  "parameter_summary": "One complete native V2 verification of the unchanged two-file prerequisite repair on a separate corrected test baseline, preserving the original39-line production diff and every failed original.",
+  "subject_commit": "85cfbf91c410a3b7bddceabdb997bc15216d0e02",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "108b858ced80732e5e782df9a11a8d380cf6657d07112cf627ab7fde22e8c333",
+  "expires_at": "2026-11-01T16:44:37Z",
+  "single_use": true,
+  "conditions": [
+    "Bind repository b85e5a53-4935-4436-bdbc-c26a241bfae8, branch codex/agent-bridge-prerequisite-retry, base a74779f1cfd317ba32102dde9d8649f9cfe473cf, subject 85cfbf91c410a3b7bddceabdb997bc15216d0e02, frozen spec d47dab9230837bbe0b850660336066349a4891a67504b08c5afcb00a0c2af355, classification 108b858ced80732e5e782df9a11a8d380cf6657d07112cf627ab7fde22e8c333, Policy fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727, verifier context 8ab83e91bb7f7ceca7bf469a3b5beac187f81b076fe6fa0f59a9b77555574b4a. Require current spec approval and independent exact-action review before approval; no stale or ambiguous unused action may be selected.",
+    "The actual acceptance Git clone, its own locked CPython 3.11 environment and all temporary material remain within the selected project workspace. Set parent TMPDIR/TEMP/TMP to the preflighted sibling u root before launch. Native checks receive only their fixed private temporary roles; no OS-temp exception, arbitrary environment, material selector, plugin, retired CLI or command change. Preserve run originals and every failure.",
+    "After all currently owned focused tests have terminal results, the actual independent verifier owns one foreground verify TASK-0133 --actor independent-prerequisite-verifier. Require same verifier for finalize; implementer adoption-integrator does not act as verifier. No real engines, model/SDK acceptance, WeChat, production, private upload, credentials, paid calls or target writes.",
+    "Run the complete current native V2 plan with the unchanged 3000-second shared full pytest budget, every required check, branch-enabled complete core/analysis coverage at 85 percent total and 90 percent diff, Ruff, format, strict mypy, whitespace and all five actual fixed native mutations. Do not replace it with the focused Node test report, a partial run or a mocked PASS.",
+    "Before launching, independently accept current source static checks and the actual ordinary-wheel V0/V1 no-pretest/pretest cases and output/tamper rejections. Confirm source bytes still match the current subject and expected runtime/tool roles; changed source or inputs require a fresh review and action.",
+    "Exactly one actual native verification start is permitted. Any failure, timeout, interruption or unknown exit consumes this start; retain original logs, evidence, action receipt and owned temporary directories. No automatic retry or silent action reuse; a correction requires separately current review and authorization.",
+    "Only approved local disposable execution is authorized. Preserve original checkout WIP and agent-bridge concurrent work. No authorization-file edits, threshold reductions, repository setting changes, deployment, existing-work deletion, force push or history rewriting. Remote source delivery remains subject to actual final review, verification, Gate and exact-head required CI; this action does not authorize another repository.",
+    "Use a fresh project-owned clone r and sibling temporary root u under project .venv/bridge. Preserve the prior s/t originals and BLOCKED TASK-0132 with its spent action unchanged. Before launch independently accept the five-file test-repair evidence and prove all thirteen historical files match391b7a8. The base excludes production repair, and all original39 changed executable source lines remain subject to90percent diff coverage. Prior focused wheel results may be accepted only after verifying identical production bytes; no historical approval, failure or spent action is current authority."
+  ]
+}
