@@ -103,6 +103,8 @@ The procedure above describes the delivered `agent-bridge-node@1` profile. The `
 
 For revision 2, provide the explicitly reviewed four-file Policy candidate during initialization. Keep the complete V0/V1 prefix and the fixed Istanbul producer, exact target configuration and full product-suite requirements from that contract. Prepare Node materials and save the independent verifier context before preparing installed mutations; preparation does not download dependencies or execute tests. Obtain a fresh reviewed single-use action, record all five installed mutation pairs, and retain their originals under the current task's IMUT directory.
 
+Revision 2 also enforces the contract's fixed native-helper output rule at every verification level. Both reviewed producer inputs must be present at their exact pinned versions or both absent. A successful applicable check must produce the exact two-file cache, which is sealed immediately and must remain unchanged through subsequent checks and replay. Absent inputs forbid the cache; partial or unsupported inputs reject before prepared materials are written or product processes start. Failed runs retain their actual partial diagnostics. Revision 1 keeps its existing output rules.
+
 ```text
 python -m aiflow verify TASK-ID --actor <VERIFIER> --node-materials <SHA256> --installed-mutations IMUT-<16-lowercase-hex>
 python -m aiflow verify TASK-ID --actor <SAME-VERIFIER> --finalize

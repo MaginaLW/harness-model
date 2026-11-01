@@ -16,6 +16,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 
 # ruff: noqa: E402 -- Candidate imports follow the source-absence-only guard.
 from copy import deepcopy
@@ -88,11 +89,19 @@ V0 = (
     ("diff_whitespace", 30),
 )
 SOURCE = "src/local/example.ts"
+_NATIVE_OWNERSHIP_UNIT_BYTES = {
+    "scripts/windows-owned-launcher.cs": b"// public synthetic CS role, never compiled\n",
+    "src/local/ownership/windows-native.ts": b"export const syntheticProducer = true;\n",
+}
 
 
 @pytest.fixture
-def tmp_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
+def tmp_path(tmp_path_factory: pytest.TempPathFactory, request) -> Path:
     """Keep nested transaction originals within Windows pathname limits."""
+    if getattr(request, "param", None) == "native-owned":
+        # Only new native transaction cases use a short sibling inside the same
+        # controlled runner TEMP. Preserve every original; never remove it here.
+        return Path(tempfile.mkdtemp(prefix="n", dir=tmp_path_factory.getbasetemp().parent))
     return tmp_path_factory.mktemp("n")
 
 
@@ -1876,7 +1885,9 @@ def test_preparation_late_failure_never_publishes_a_usable_selection(
 
 
 @pytest.fixture
-def negative_node_transaction(negative_material_originals, node_policy_directory, monkeypatch):
+def negative_node_transaction(
+    negative_material_originals, node_policy_directory, monkeypatch, request
+):
     """Real Git/source/copies/raw files; fake process prefix MUST end in failure.
 
     The trusted task/material and Windows API seams are controlled unit inputs.
@@ -1891,6 +1902,14 @@ def negative_node_transaction(negative_material_originals, node_policy_directory
 
     _runtime, payload, _prepared, manifests = negative_material_originals
     root = payload.parents[5]
+    revision, native_sources = getattr(request, "param", (1, False))
+    if revision == 2:
+        from test_node_v2_contract import node_documents
+
+        for name, document in node_documents().items():
+            (node_policy_directory / name).write_text(
+                yaml.safe_dump(document, sort_keys=False), encoding="utf-8"
+            )
     task_id = "TASK-0001"
     task_dir = root / ".ai/tasks" / task_id
     (task_dir / "approvals.json").write_bytes(b"[]")
@@ -1912,6 +1931,16 @@ def negative_node_transaction(negative_material_originals, node_policy_directory
         }
     }
     (root / "tsconfig.json").write_bytes(runtime._canonical(config))
+    if native_sources:
+        for name, data in _NATIVE_OWNERSHIP_UNIT_BYTES.items():
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        monkeypatch.setattr(
+            runtime,
+            "NATIVE_OWNERSHIP_INPUTS",
+            {name: runtime._sha(data) for name, data in _NATIVE_OWNERSHIP_UNIT_BYTES.items()},
+        )
     _controlled_git(root, "init", "--quiet")
     _controlled_git(root, "checkout", "-b", "codex/synthetic-transaction")
     _controlled_git(root, "config", "user.name", "Synthetic Test")
@@ -1941,7 +1970,7 @@ def negative_node_transaction(negative_material_originals, node_policy_directory
         "spec_sha256": specification_digest(spec_text),
         "policy_sha256": bundle.sha256,
         "classification_input_sha256": "b" * 64,
-        "profile": runtime.PROFILE,
+        "profile": runtime.PROFILE if revision == 1 else runtime.PROFILE_V2,
     }
     unit = json.loads((ROOT / "tests/fixtures/contracts/valid/decision-unit.json").read_text())
     record = SimpleNamespace(
@@ -1985,7 +2014,7 @@ def negative_node_transaction(negative_material_originals, node_policy_directory
     encoded = {name: runtime._canonical(manifests[name]) for name in runtime.MANIFEST_NAMES}
     prepared = {
         "schema_version": "1.0",
-        "kind": "aiflow-node-prepared-3.1",
+        "kind": "aiflow-node-prepared-3.1" if revision == 1 else "aiflow-node-prepared-3.2",
         "binding": binding,
         "payload": {"path": str(payload), "identity": runtime._identity(payload.lstat())},
         "manifests": [
@@ -1993,7 +2022,7 @@ def negative_node_transaction(negative_material_originals, node_policy_directory
             for name, data in encoded.items()
         ],
         "versions": runtime.VERSIONS,
-        "semantic_contract_sha256": runtime.SEMANTIC_CONTRACT_SHA256,
+        "semantic_contract_sha256": runtime._semantic_digest(binding),
     }
     prepared_data = runtime._canonical(prepared)
     selector = runtime._sha(prepared_data)
@@ -2044,7 +2073,7 @@ def negative_node_transaction(negative_material_originals, node_policy_directory
 
     def execute(fault="last_nonzero", level="V0"):
         settings.update(level=level, fault=fault, material_checks=0, calls=[])
-        run_id = "unit-negative-" + fault.replace("_", "-")
+        run_id = "n" if revision == 2 else "unit-negative-" + fault.replace("_", "-")
         run = task_dir / "logs" / run_id
         facts = EvidenceFacts(
             task_id,
@@ -2909,3 +2938,743 @@ def test_auxiliary_walk_stops_when_deadline_expires_between_entries(monkeypatch)
     with pytest.raises(AiflowError) as caught:
         node._auxiliary_source_map(TimedEntries(), "fnMap", ["x"], {1: {0, 1}}, 1.0)
     assert caught.value.code == "NODE_COVERAGE_TIMEOUT"
+
+
+@pytest.fixture
+def native_ownership_case(tmp_path, monkeypatch):
+    """Synthetic public bytes, not compiled output or installed-engine evidence.
+
+    Only the exact reviewed-source pin mapping is replaced for this unit input.
+    Real production pins are checked separately against the normative contract.
+    Files, links, identities, strict parsing and inventory guards remain real.
+    """
+    import aiflow.node_execution as runtime
+
+    root = tmp_path / "checkout"
+    temporary = tmp_path / "tmp"
+    root.mkdir()
+    temporary.mkdir()
+    bodies = _NATIVE_OWNERSHIP_UNIT_BYTES
+    rows = []
+    pins = {}
+    for name, data in bodies.items():
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+        pins[name] = hashlib.sha256(data).hexdigest()
+        rows.append(
+            {
+                "path": name,
+                "size": len(data),
+                "sha256": pins[name],
+                "blob": hashlib.sha1(
+                    b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+                ).hexdigest(),
+            }
+        )
+    monkeypatch.setattr(runtime, "NATIVE_OWNERSHIP_INPUTS", pins)
+    attempts = []
+
+    def forbidden(*_args, **_kwargs):
+        attempts.append("process-or-write")
+        raise AssertionError("Native output unit validation must be read only")
+
+    monkeypatch.setattr(runtime, "_process", forbidden)
+    monkeypatch.setattr(runtime, "_write_new", forbidden)
+    return SimpleNamespace(
+        runtime=runtime,
+        root=root,
+        temporary=temporary,
+        source={"files": rows},
+        pins=pins,
+        cs_sha=pins["scripts/windows-owned-launcher.cs"],
+        attempts=attempts,
+    )
+
+
+def native_ownership_cache(case, executable=b"synthetic executable bytes; never executed\n"):
+    directory = case.root / ".runtime/native-ownership"
+    directory.mkdir(parents=True)
+    binary = directory / f"own-{case.cs_sha}.exe"
+    binary.write_bytes(executable)
+    sidecar = binary.with_name(binary.name + ".json")
+    sidecar.write_bytes(
+        b'{"sourceHash":"'
+        + case.cs_sha.encode("ascii")
+        + b'","executableHash":"'
+        + hashlib.sha256(executable).hexdigest().encode("ascii")
+        + b'"}\n'
+    )
+    return directory, binary, sidecar
+
+
+def test_native_ownership_production_roles_and_pins_are_the_reviewed_norm() -> None:
+    import aiflow.node_execution as runtime
+
+    assert runtime.NATIVE_OWNERSHIP_DIRECTORY == ".runtime/native-ownership"
+    assert runtime.NATIVE_OWNERSHIP_INPUTS == {
+        "scripts/windows-owned-launcher.cs": (
+            "7972a55b7a45bd00e557eae709d228c69f04f460c8057614ea820bf18da4b8f3"
+        ),
+        "src/local/ownership/windows-native.ts": (
+            "438e19b624334a59e8346f767b5a16eaffa01b811b3b9a4238a94e038f394007"
+        ),
+    }
+
+
+def test_native_ownership_absence_grants_no_cache_or_fixture_role(native_ownership_case) -> None:
+    case = native_ownership_case
+    for row in case.source["files"]:
+        (case.root / row["path"]).unlink()
+    case.source["files"] = []
+    assert case.runtime._native_ownership_applicable(case.root, case.source) is False
+    assert case.runtime._native_ownership_inventory(case.root, case.source) is None
+    fixtures = case.runtime._fixtures(case.root, case.temporary, case.source, revision=2)
+    assert set(fixtures) == {"temporary"}
+    native_ownership_cache(case)
+    with pytest.raises(AiflowError):
+        case.runtime._native_ownership_inventory(case.root, case.source)
+    with pytest.raises(AiflowError):
+        case.runtime._fixtures(case.root, case.temporary, case.source, revision=2)
+    assert not case.attempts
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "cs_only",
+        "ts_only",
+        "untracked_cs",
+        "untracked_ts",
+        "declared_digest",
+        "actual_digest",
+        "declared_size",
+        "missing_actual",
+        "hard_link",
+        "directory",
+        "case_alias",
+    ],
+)
+def test_native_ownership_source_roles_reject_before_processes_or_material_writes(
+    native_ownership_case, fault
+) -> None:
+    case = native_ownership_case
+    cs, ts = case.source["files"]
+    path = case.root / cs["path"]
+    if fault in {"cs_only", "untracked_cs"}:
+        (case.root / ts["path"]).unlink()
+        case.source["files"] = [cs] if fault == "cs_only" else []
+    elif fault in {"ts_only", "untracked_ts"}:
+        path.unlink()
+        case.source["files"] = [ts] if fault == "ts_only" else []
+    elif fault == "declared_digest":
+        cs["sha256"] = "0" * 64
+    elif fault == "actual_digest":
+        path.write_bytes(b"changed source bytes")
+    elif fault == "declared_size":
+        cs["size"] += 1
+    elif fault == "missing_actual":
+        path.unlink()
+    elif fault == "hard_link":
+        os.link(path, case.root.parent / "source-alias")
+    elif fault == "directory":
+        path.unlink()
+        path.mkdir()
+    else:
+        cs["path"] = cs["path"].upper()
+    with pytest.raises(AiflowError):
+        case.runtime._native_ownership_applicable(case.root, case.source)
+    assert not case.attempts
+    assert not (case.root / ".runtime").exists()
+
+
+def test_native_ownership_exact_sources_require_complete_cache(native_ownership_case) -> None:
+    case = native_ownership_case
+    assert case.runtime._native_ownership_applicable(case.root, case.source) is True
+    with pytest.raises(AiflowError):
+        case.runtime._native_ownership_inventory(case.root, case.source)
+    directory, binary, sidecar = native_ownership_cache(case)
+    inventory = case.runtime._native_ownership_inventory(case.root, case.source)
+    assert inventory == case.runtime._inventory(directory)
+    assert {row["path"] for row in inventory["entries"]} == {binary.name, sidecar.name}
+    assert inventory["total_bytes"] == binary.stat().st_size + sidecar.stat().st_size
+    assert not case.attempts
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "duplicate_source",
+        "duplicate_executable",
+        "missing_source",
+        "missing_executable",
+        "extra_key",
+        "source_type",
+        "executable_type",
+        "nonfinite",
+        "wrong_source",
+        "wrong_executable",
+        "uppercase_hash",
+        "invalid_utf8",
+        "bom",
+        "crlf",
+        "no_lf",
+        "extra_lf",
+        "reversed_keys",
+        "pretty",
+        "root_list",
+    ],
+)
+def test_native_ownership_sidecar_is_exact_wire_and_cross_consistency_only(
+    native_ownership_case, fault
+) -> None:
+    case = native_ownership_case
+    _directory, _binary, sidecar = native_ownership_cache(case)
+    raw = sidecar.read_bytes()
+    document = json.loads(raw)
+    if fault == "duplicate_source":
+        raw = raw.replace(b"{", b'{"sourceHash":"' + case.cs_sha.encode() + b'",', 1)
+    elif fault == "duplicate_executable":
+        raw = raw.replace(b"{", b'{"executableHash":"' + b"0" * 64 + b'",', 1)
+    elif fault in {"missing_source", "missing_executable"}:
+        del document[
+            {"missing_source": "sourceHash", "missing_executable": "executableHash"}[fault]
+        ]
+    elif fault == "extra_key":
+        document["authority"] = True
+    elif fault in {"source_type", "executable_type"}:
+        document[{"source_type": "sourceHash", "executable_type": "executableHash"}[fault]] = 1
+    elif fault == "nonfinite":
+        raw = raw.replace(b'"' + case.cs_sha.encode() + b'"', b"NaN")
+    elif fault in {"wrong_source", "wrong_executable"}:
+        document[{"wrong_source": "sourceHash", "wrong_executable": "executableHash"}[fault]] = (
+            "0" * 64
+        )
+    elif fault == "uppercase_hash":
+        document["sourceHash"] = document["sourceHash"].upper()
+    elif fault == "invalid_utf8":
+        raw = b"\xff" + raw
+    elif fault == "bom":
+        raw = b"\xef\xbb\xbf" + raw
+    elif fault == "crlf":
+        raw = raw.replace(b"\n", b"\r\n")
+    elif fault == "no_lf":
+        raw = raw[:-1]
+    elif fault == "extra_lf":
+        raw += b"\n"
+    elif fault == "reversed_keys":
+        document = dict(reversed(list(document.items())))
+    elif fault == "pretty":
+        raw = json.dumps(document, indent=2).encode() + b"\n"
+    else:
+        document = [document]
+    if fault in {
+        "missing_source",
+        "missing_executable",
+        "extra_key",
+        "source_type",
+        "executable_type",
+        "wrong_source",
+        "wrong_executable",
+        "uppercase_hash",
+        "reversed_keys",
+        "root_list",
+    }:
+        raw = json.dumps(document, separators=(",", ":")).encode() + b"\n"
+    sidecar.write_bytes(raw)
+    with pytest.raises(AiflowError):
+        case.runtime._native_ownership_inventory(case.root, case.source)
+    assert sidecar.read_bytes() == raw and not case.attempts
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "missing_exe",
+        "missing_json",
+        "extra_file",
+        "extra_directory",
+        "wrong_name",
+        "hard_link",
+        "executable_case",
+        "sidecar_case",
+    ],
+)
+def test_native_ownership_cache_membership_and_ordinary_identity_are_closed(
+    native_ownership_case, fault
+) -> None:
+    case = native_ownership_case
+    directory, binary, sidecar = native_ownership_cache(case)
+    if fault == "missing_exe":
+        binary.unlink()
+    elif fault == "missing_json":
+        sidecar.unlink()
+    elif fault == "extra_file":
+        (directory / "build-temporary.exe").write_bytes(b"temporary")
+    elif fault == "extra_directory":
+        (directory / "neighbor").mkdir()
+    elif fault == "wrong_name":
+        binary.rename(directory / ("own-" + "0" * 64 + ".exe"))
+    elif fault == "hard_link":
+        os.link(binary, case.root.parent / "binary-alias")
+    else:
+        path = binary if fault == "executable_case" else sidecar
+        hop = directory / "case-hop"
+        path.rename(hop)
+        hop.rename(directory / path.name.upper())
+    with pytest.raises(AiflowError):
+        case.runtime._native_ownership_inventory(case.root, case.source)
+    assert not case.attempts
+
+
+@pytest.mark.parametrize("role", [".runtime", "native-ownership"])
+def test_native_ownership_actual_directory_metadata_requires_exact_case(
+    native_ownership_case, role
+) -> None:
+    case = native_ownership_case
+    directory, _binary, _sidecar = native_ownership_cache(case)
+    path = directory.parent if role == ".runtime" else directory
+    hop = path.with_name("case-hop")
+    renamed = path.with_name({".runtime": ".Runtime", "native-ownership": "Native-Ownership"}[role])
+    path.rename(hop)
+    hop.rename(renamed)
+    assert renamed.name in {entry.name for entry in renamed.parent.iterdir()}
+    with pytest.raises(AiflowError):
+        case.runtime._native_ownership_inventory(case.root, case.source)
+    assert not case.attempts
+
+
+@pytest.mark.parametrize("target", ["source", "cache", "executable", "sidecar"])
+def test_native_ownership_reparse_roles_are_not_followed(native_ownership_case, target) -> None:
+    case = native_ownership_case
+    directory, binary, sidecar = native_ownership_cache(case)
+    path = {
+        "source": case.root / "scripts/windows-owned-launcher.cs",
+        "cache": directory,
+        "executable": binary,
+        "sidecar": sidecar,
+    }[target]
+    owned = case.root.parent / ("owned-link-" + target)
+    path.rename(owned)
+    try:
+        path.symlink_to(owned, target_is_directory=target == "cache")
+    except OSError as error:
+        pytest.skip(f"Host does not allow the owned synthetic symlink: {error.errno}")
+    with pytest.raises(AiflowError):
+        case.runtime._native_ownership_inventory(case.root, case.source)
+    assert not case.attempts
+
+
+@pytest.mark.parametrize("fault", ["bytes_and_sidecar", "same_bytes_new_identity", "membership"])
+def test_native_ownership_first_seal_rejects_even_self_consistent_replacements(
+    native_ownership_case, fault
+) -> None:
+    case = native_ownership_case
+    directory, binary, sidecar = native_ownership_cache(case)
+    sealed = case.runtime._native_ownership_inventory(case.root, case.source)
+    if fault == "bytes_and_sidecar":
+        data = b"different synthetic executable, still never executed\n"
+        binary.write_bytes(data)
+        document = json.loads(sidecar.read_bytes())
+        document["executableHash"] = hashlib.sha256(data).hexdigest()
+        sidecar.write_bytes(json.dumps(document, separators=(",", ":")).encode() + b"\n")
+    elif fault == "same_bytes_new_identity":
+        replacement = case.root.parent / "replacement"
+        replacement.write_bytes(binary.read_bytes())
+        os.replace(replacement, binary)
+    else:
+        (directory / "unknown").write_bytes(b"new membership")
+    with pytest.raises(AiflowError):
+        case.runtime._unchanged(sealed)
+    assert not case.attempts
+
+
+@pytest.mark.parametrize("revision", [1, 2])
+@pytest.mark.parametrize("neighbor", [False, True])
+def test_native_ownership_output_exemption_is_only_derived_revision2_root(
+    native_ownership_case, revision, neighbor
+) -> None:
+    case = native_ownership_case
+    native_ownership_cache(case)
+    fixtures = case.runtime._fixtures(case.root, case.temporary, case.source, revision=revision)
+    if revision == 2:
+        assert fixtures["native_ownership"] == case.runtime._native_ownership_inventory(
+            case.root, case.source
+        )
+    else:
+        assert "native_ownership" not in fixtures
+    dependencies = case.root / "node_modules"
+    dependencies.mkdir()
+    dist = case.root / "dist"
+    dist.mkdir()
+    if neighbor:
+        (case.root / ".runtime/unreviewed-neighbor").mkdir()
+    arguments = (
+        case.root,
+        case.source,
+        case.runtime._inventory(dist),
+        case.runtime._inventory(dependencies),
+        fixtures,
+    )
+    if revision == 1 or neighbor:
+        with pytest.raises(AiflowError):
+            case.runtime._output_check(*arguments, revision=revision)
+    else:
+        case.runtime._output_check(*arguments, revision=revision)
+    assert not case.attempts
+
+
+def test_native_ownership_caller_inventory_cannot_grant_an_absent_source_role(
+    native_ownership_case,
+) -> None:
+    case = native_ownership_case
+    directory, _binary, _sidecar = native_ownership_cache(case)
+    forged = {
+        "native_ownership": case.runtime._inventory(directory),
+        "temporary": case.runtime._inventory(case.temporary),
+    }
+    for row in case.source["files"]:
+        (case.root / row["path"]).unlink()
+    case.source["files"] = []
+    dependencies = case.root / "node_modules"
+    dependencies.mkdir()
+    dist = case.root / "dist"
+    dist.mkdir()
+    with pytest.raises(AiflowError):
+        case.runtime._output_check(
+            case.root,
+            case.source,
+            case.runtime._inventory(dist),
+            case.runtime._inventory(dependencies),
+            forged,
+            revision=2,
+        )
+    assert not case.attempts
+
+
+@pytest.mark.parametrize("fault", ["half", "unsupported", "unsafe"])
+def test_native_ownership_preparation_rejects_invalid_roles_before_preflight_or_publication(
+    native_ownership_case, monkeypatch, fault
+) -> None:
+    case = native_ownership_case
+    payload = case.root / ".ai/tasks/TASK-0001/logs/node-payload/unit-preparation"
+    (payload / "node").mkdir(parents=True)
+    (payload / "dependencies/node_modules").mkdir(parents=True)
+    if fault == "half":
+        (case.root / case.source["files"][1]["path"]).unlink()
+        case.source["files"].pop()
+    elif fault == "unsupported":
+        case.source["files"][0]["sha256"] = "0" * 64
+    else:
+        source = case.root / case.source["files"][0]["path"]
+        os.link(source, case.root.parent / "unsafe-source-alias")
+    monkeypatch.setattr(
+        case.runtime,
+        "_binding",
+        lambda *_args: (
+            {
+                "subject_commit": "a" * 40,
+                "profile": {
+                    "id": "agent-bridge-node",
+                    "revision": 2,
+                },
+            },
+            None,
+        ),
+    )
+    monkeypatch.setattr(case.runtime, "_source", lambda *_args, **_kwargs: case.source)
+    monkeypatch.setattr(case.runtime, "_git", case.runtime._process)
+    with pytest.raises(AiflowError):
+        case.runtime.prepare_node_materials(case.root, "TASK-0001", payload_root=payload)
+    assert not case.attempts
+    logs = payload.parents[1]
+    assert {entry.name for entry in logs.iterdir()} == {"node-payload"}
+
+
+@pytest.fixture
+def native_ownership_transaction(negative_node_transaction, monkeypatch):
+    """Use existing failed-transaction seams, never compiler/Job or coverage proof.
+
+    Git setup/copy/inventories and native guards remain real. The existing
+    synthetic process receipts stay synthetic; coverage parsing is a known
+    boundary so these tests can observe the complete execution ordering.
+    """
+    runtime, root, settings, execute = negative_node_transaction
+    process = runtime._process
+    inventory = runtime._native_ownership_inventory
+    events = []
+    sealed = []
+
+    def observe_inventory(checkout, source):
+        observed = inventory(checkout, source)
+        events.append(("inventory", settings["calls"][-1]))
+        sealed.append(deepcopy(observed))
+        return observed
+
+    def controlled_process(argv, *, cwd, environment, timeout, output):
+        events.append(("process", output.name))
+        receipt = process(argv, cwd=cwd, environment=environment, timeout=timeout, output=output)
+        fault = settings["native_fault"]
+        if fault == "not_reached" and output.name == "EXEC-004":
+            case = SimpleNamespace(
+                root=output.parent.parent / "checkout",
+                cs_sha=runtime.NATIVE_OWNERSHIP_INPUTS["scripts/windows-owned-launcher.cs"],
+            )
+            _directory, _binary, sidecar = native_ownership_cache(case)
+            sidecar.unlink()
+        check = tuple(argv[-2:]) == ("run", "check")
+        if check:
+            if fault != "missing_cache":
+                case = SimpleNamespace(
+                    root=cwd,
+                    cs_sha=runtime.NATIVE_OWNERSHIP_INPUTS["scripts/windows-owned-launcher.cs"],
+                )
+                _directory, _binary, sidecar = native_ownership_cache(case)
+                if fault == "partial_cache":
+                    sidecar.unlink()
+            if fault in {"check_failed", "check_unknown", "check_bad_eof"}:
+                receipt["returncode"] = 19
+                if fault == "check_unknown":
+                    receipt.update(cleanup="unknown", execution_error=True)
+                elif fault == "check_bad_eof":
+                    receipt["returncode"] = 0
+                    receipt["receipt"]["stdout_eof"] = False
+                (output / "receipt.json").write_bytes(runtime._canonical(receipt))
+        drift = (
+            fault == "later_drift"
+            and output.name == "EXEC-006"
+            or fault == "coverage_drift"
+            and output.name == "EXEC-009"
+            or fault == "last_drift"
+            and output.name == {"V0": "EXEC-008", "V1": "EXEC-010"}[settings["level"]]
+        )
+        if drift:
+            binary = next(
+                (output.parent.parent / "checkout/.runtime/native-ownership").glob("*.exe")
+            )
+            sidecar = binary.with_name(binary.name + ".json")
+            binary.write_bytes(b"self-consistent replacement after first seal\n")
+            document = json.loads(sidecar.read_bytes())
+            document["executableHash"] = runtime._sha(binary.read_bytes())
+            sidecar.write_bytes(json.dumps(document, separators=(",", ":")).encode() + b"\n")
+        return receipt
+
+    monkeypatch.setattr(runtime, "_process", controlled_process)
+    monkeypatch.setattr(runtime, "_native_ownership_inventory", observe_inventory)
+    monkeypatch.setattr(runtime, "_coverage", lambda *_args, **_kwargs: None)
+    return SimpleNamespace(
+        runtime=runtime,
+        root=root,
+        settings=settings,
+        execute=execute,
+        events=events,
+        sealed=sealed,
+    )
+
+
+@pytest.mark.parametrize("negative_node_transaction", [(2, True)], indirect=True)
+@pytest.mark.parametrize("tmp_path", ["native-owned"], indirect=True)
+@pytest.mark.parametrize("level", ["V0", "V1"])
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "valid",
+        "missing_cache",
+        "partial_cache",
+        "check_failed",
+        "check_unknown",
+        "check_bad_eof",
+        "later_drift",
+        "last_drift",
+    ],
+)
+def test_native_ownership_transaction_seals_only_successful_check_and_never_reselects(
+    native_ownership_transaction, level, fault
+) -> None:
+    case = native_ownership_transaction
+    case.settings["native_fault"] = fault
+    evidence, directory = case.execute("late_materials", level)
+    assert evidence["conclusion"] == "failed"
+    document = case.runtime._json(directory / "run.json")
+    calls = case.settings["calls"]
+    assert calls[:7] == ["setup-clone", "setup-checkout"] + [f"EXEC-{i:03d}" for i in range(1, 6)]
+    if fault in {
+        "missing_cache",
+        "partial_cache",
+        "check_failed",
+        "check_unknown",
+        "check_bad_eof",
+    }:
+        assert calls[-1] == "EXEC-005" and document["outputs"].get("fixtures") is None
+        assert case.sealed == []
+        if fault in {"check_failed", "check_unknown"}:
+            assert document["executions"][-1]["receipt"]["returncode"] == 19
+        elif fault == "check_bad_eof":
+            receipt = document["executions"][-1]["receipt"]
+            assert receipt["returncode"] == 0 and receipt["receipt"]["stdout_eof"] is False
+        cache = directory / "checkout/.runtime/native-ownership"
+        members = len(list(cache.iterdir())) if cache.exists() else 0
+        assert (
+            members
+            == {
+                "missing_cache": 0,
+                "partial_cache": 1,
+                "check_failed": 2,
+                "check_unknown": 2,
+                "check_bad_eof": 2,
+            }[fault]
+        )
+    else:
+        first = case.events.index(("inventory", "EXEC-005"))
+        assert case.events[first - 1] == ("process", "EXEC-005")
+        assert case.events[first + 1] == ("inventory", "EXEC-005")
+        assert case.events[first + 2] == ("process", "EXEC-006")
+        if fault == "later_drift":
+            assert calls[-1] == "EXEC-006"
+            assert document["outputs"].get("fixtures") is None
+        elif fault == "last_drift":
+            assert calls[-1] == {"V0": "EXEC-008", "V1": "EXEC-010"}[level]
+            assert document["outputs"].get("fixtures") is None
+        else:
+            assert document["outputs"]["fixtures"]["native_ownership"] == case.sealed[0]
+            assert all(item == case.sealed[0] for item in case.sealed)
+            assert calls[-1] == {"V0": "EXEC-008", "V1": "EXEC-010"}[level]
+
+
+@pytest.mark.parametrize("negative_node_transaction", [(2, True)], indirect=True)
+@pytest.mark.parametrize("tmp_path", ["native-owned"], indirect=True)
+def test_native_ownership_seal_survives_second_suite_and_is_checked_before_coverage_helper(
+    native_ownership_transaction,
+) -> None:
+    case = native_ownership_transaction
+    case.settings["native_fault"] = "coverage_drift"
+    evidence, directory = case.execute("late_materials", "V1")
+    assert evidence["conclusion"] == "failed"
+    assert case.settings["calls"][-1] == "EXEC-009"
+    assert "EXEC-010" not in case.settings["calls"]
+    assert case.runtime._json(directory / "run.json")["outputs"].get("fixtures") is None
+
+
+@pytest.mark.parametrize("negative_node_transaction", [(2, True)], indirect=True)
+@pytest.mark.parametrize("tmp_path", ["native-owned"], indirect=True)
+@pytest.mark.parametrize("level", ["V0", "V1"])
+def test_native_ownership_unreached_check_retains_partial_failure_without_inventing_a_seal(
+    native_ownership_transaction, level
+) -> None:
+    case = native_ownership_transaction
+    case.settings["native_fault"] = "not_reached"
+    evidence, directory = case.execute("unknown", level)
+    assert evidence["conclusion"] == "failed"
+    assert case.settings["calls"][-1] == "EXEC-004"
+    cache = directory / "checkout/.runtime/native-ownership"
+    assert case.sealed == [] and len(list(cache.iterdir())) == 1
+    document = case.runtime._json(directory / "run.json")
+    assert document["outputs"].get("fixtures") is None
+    assert any(
+        row["path"].startswith("checkout/.runtime/native-ownership/own-")
+        and row["path"].endswith(".exe")
+        for row in document["outputs"]["node_inventory"]
+    )
+
+
+@pytest.mark.parametrize("negative_node_transaction", [(2, False)], indirect=True)
+@pytest.mark.parametrize("tmp_path", ["native-owned"], indirect=True)
+@pytest.mark.parametrize("level", ["V0", "V1"])
+@pytest.mark.parametrize("cache_present", [False, True])
+def test_native_ownership_absent_source_loop_seals_none_and_forbids_a_cache(
+    native_ownership_transaction, level, cache_present
+) -> None:
+    case = native_ownership_transaction
+    case.settings["native_fault"] = "forbidden_cache" if cache_present else "missing_cache"
+    evidence, directory = case.execute("late_materials", level)
+    assert evidence["conclusion"] == "failed"
+    document = case.runtime._json(directory / "run.json")
+    if cache_present:
+        assert case.settings["calls"][-1] == "EXEC-005" and case.sealed == []
+        assert document["outputs"].get("fixtures") is None
+        assert len(list((directory / "checkout/.runtime/native-ownership").iterdir())) == 2
+    else:
+        assert case.settings["calls"][-1] == {"V0": "EXEC-008", "V1": "EXEC-010"}[level]
+        assert len(case.sealed) > 1 and all(item is None for item in case.sealed)
+        assert "native_ownership" not in document["outputs"]["fixtures"]
+        assert not (directory / "checkout/.runtime/native-ownership").exists()
+
+
+@pytest.mark.parametrize("negative_node_transaction", [(2, True)], indirect=True)
+@pytest.mark.parametrize("tmp_path", ["native-owned"], indirect=True)
+@pytest.mark.parametrize(
+    "fault", ["untouched", "exe_and_sidecar", "caller_inventory", "failed_check"]
+)
+def test_native_ownership_readonly_recheck_uses_real_files_receipts_and_sealed_roles(
+    native_ownership_transaction, monkeypatch, fault
+) -> None:
+    """Replay real retained unit files, never certify the synthetic Job observations."""
+    case = native_ownership_transaction
+    case.settings["native_fault"] = "valid"
+    evidence, directory = case.execute("late_materials", "V0")
+    document = case.runtime._json(directory / "run.json")
+    assert document["outputs"]["fixtures"]["native_ownership"] == case.sealed[0]
+    if fault == "exe_and_sidecar":
+        binary = next((directory / "checkout/.runtime/native-ownership").glob("*.exe"))
+        sidecar = binary.with_name(binary.name + ".json")
+        binary.write_bytes(b"changed executable with a self-consistent sidecar\n")
+        content = json.loads(sidecar.read_bytes())
+        content["executableHash"] = case.runtime._sha(binary.read_bytes())
+        sidecar.write_bytes(json.dumps(content, separators=(",", ":")).encode() + b"\n")
+    elif fault == "caller_inventory":
+        foreign = directory / "home/caller-declared-cache"
+        foreign.mkdir()
+        document["outputs"]["fixtures"]["native_ownership"] = case.runtime._inventory(foreign)
+    elif fault == "failed_check":
+        receipt = document["executions"][4]["receipt"]
+        receipt["returncode"] = 19
+        (directory / "raw/EXEC-005/receipt.json").write_bytes(case.runtime._canonical(receipt))
+    binding, bundle = case.runtime._binding(case.root, "TASK-0001")
+    _prepared, manifests = case.runtime._load_prepared(
+        case.root, "TASK-0001", document["prepared_sha256"], binding
+    )
+    context = case.runtime._context(
+        case.root, "TASK-0001", directory.parent.name, binding, manifests
+    )
+    plan = parse_verification_plan(bundle, context, level="V0", tool_available=lambda _argv: True)
+    document["outputs"]["node_inventory"] = case.runtime._node_inventory(directory, "V0", plan)
+    raw = case.runtime._canonical(document)
+    (directory / "run.json").write_bytes(raw)
+    evidence["node_binding"]["run"].update(size=len(raw), sha256=case.runtime._sha(raw))
+    evidence["node_binding_sha256"] = case.runtime._sha(
+        case.runtime._canonical(evidence["node_binding"])
+    )
+    original_output_check = case.runtime._output_check
+    output_calls = []
+    errors = []
+    error = case.runtime._error
+
+    def inspect_output(*args, **kwargs):
+        output_calls.append(True)
+        return original_output_check(*args, **kwargs)
+
+    def inspect_error(*args, **kwargs):
+        result = error(*args, **kwargs)
+        errors.append((result.code, result.message))
+        return result
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError(
+            "Read-only replay must not launch product processes or write originals"
+        )
+
+    monkeypatch.setattr(case.runtime, "_output_check", inspect_output)
+    monkeypatch.setattr(case.runtime, "_error", inspect_error)
+    monkeypatch.setattr(case.runtime, "_process", forbidden)
+    monkeypatch.setattr(case.runtime, "_write_new", forbidden)
+    before = case.runtime._inventory(directory)
+    result = case.runtime.recheck_node_evidence(case.root, "TASK-0001", evidence)
+    assert not result.passed and result.reason_codes
+    assert case.runtime._inventory(directory) == before
+    if fault == "failed_check":
+        assert not output_calls
+        assert ("NODE_PROCESS_FAILED", "Process did not finish with verified cleanup") in errors
+    else:
+        assert output_calls
+        if fault in {"exe_and_sidecar", "caller_inventory"}:
+            assert any("fixture originals differ" in message for _code, message in errors)
