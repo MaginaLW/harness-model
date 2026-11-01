@@ -36,8 +36,11 @@
 - 可恢复操作：修复具体失败原因后运行 `python -m aiflow begin <TASK-ID> --actor <ACTOR> --reason "<FIX>"`，再执行全量 `verify`。
 - 禁止操作：不在没有 retry reason 时重试，不删除失败 run，不将定向 provisional 证据当作 final evidence。
 
-active Policy `2.6.0` 中，V1/V2 的全部 pytest 检查共享一次完整覆盖率执行，上限 1200 秒
+active Policy `2.6.0` 中，V1/V2 的全部 pytest 检查共享一次完整覆盖率执行，上限 3000 秒
 （该命令形状与相同超时由 `src/aiflow/verification.py` 强制）。
+Policy label 不变，但预算内容使完整 canonical SHA 改变；相同版本、不同 SHA 不等价。
+新引擎拒绝旧的 1200 秒 Native Policy。升级 wheel 不自动修改目标 `.ai`；旧目标须经受审核的
+显式 Policy 更新后再使用新引擎，不能沿用旧 SHA 的批准或证据。
 达到任一上限仍应保留为失败证据并诊断环境或性能原因；不得通过降为 V0、跳过 coverage、修改
 evidence 或重复碰运气来放行。若确需再次调整 Policy，必须建立或恢复有界 task，重新完成分类、
 规格审批、验证和 Gate。

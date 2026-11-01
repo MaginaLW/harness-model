@@ -105,14 +105,14 @@ def test_pytest_checks_share_one_full_coverage_execution(level: str, tmp_path: P
     for check_id in pytest_ids:
         check = by_id[check_id]
         assert check.argv == full_suite
-        assert check.timeout_seconds == 1200
+        assert check.timeout_seconds == 3000
         assert check.required is True
         assert check.environment == {"COVERAGE_FILE": (parsed.run_dir / ".coverage").as_posix()}
         assert check.result_parser == ("coverage_xml" if check_id == "coverage_xml" else "pytest")
     pytest_executions = [item for item in parsed.executions if "pytest" in item.argv]
     assert len(pytest_executions) == 1
     assert pytest_executions[0].check_ids == pytest_ids
-    assert pytest_executions[0].timeout_seconds == 1200
+    assert pytest_executions[0].timeout_seconds == 3000
     assert by_id["diff_coverage"].threshold == 90
 
 
@@ -182,10 +182,12 @@ def test_shared_subset_selector_is_rejected_even_when_all_pytest_checks_agree(
     }
 
 
+@pytest.mark.parametrize("level", ["V1", "V2"])
 @pytest.mark.parametrize(
     ("field", "value"),
     [
         ("timeout_seconds", 600),
+        ("timeout_seconds", 1200),
         ("environment", {"COVERAGE_FILE": "{run_dir}/other.coverage"}),
         (
             "command",
@@ -202,11 +204,11 @@ def test_shared_subset_selector_is_rejected_even_when_all_pytest_checks_agree(
     ],
 )
 def test_pytest_checks_pin_one_execution_shape_even_when_all_agree(
-    tmp_path: Path, field: str, value: object
+    tmp_path: Path, level: str, field: str, value: object
 ) -> None:
     bundle = v2_bundle()
-    for level in ("V1", "V2"):
-        for item in checks(bundle, level):
+    for level_id in ("V1", "V2"):
+        for item in checks(bundle, level_id):
             if item["id"] in {
                 "unit_tests",
                 "regression_tests",
@@ -218,7 +220,7 @@ def test_pytest_checks_pin_one_execution_shape_even_when_all_agree(
 
     with pytest.raises(ContractError) as caught:
         parse_verification_plan(
-            bundle, context(tmp_path), level="V2", tool_available=lambda _argv: True
+            bundle, context(tmp_path), level=level, tool_available=lambda _argv: True
         )
 
     assert caught.value.code in {
@@ -653,10 +655,10 @@ def test_selected_and_empty_plans_preserve_shared_execution_argv(tmp_path: Path)
     assert grouped.check_ids == ("unit_tests", "regression_tests", "coverage_xml")
     by_id = {item.check_id: item for item in parsed.checks}
     assert by_id["unit_tests"].argv == by_id["regression_tests"].argv == grouped.argv
-    assert grouped.timeout_seconds == 1200
+    assert grouped.timeout_seconds == 3000
     selected = verification_service._selected_plan(parsed, ("unit_tests",))
     assert selected.executions[0].argv == grouped.argv
-    assert selected.executions[0].timeout_seconds == 1200
+    assert selected.executions[0].timeout_seconds == 3000
     assert verification_service._empty_plan(parsed).executions == ()
 
 
