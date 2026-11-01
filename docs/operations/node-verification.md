@@ -81,7 +81,7 @@ python -m aiflow gate TASK-ID
 | V0 | contract、scope、smoke、node_build、node_check、diff_whitespace | 六项检查、八次顶层检查进程；whitespace 分别检查工作区、暂存区、base→subject |
 | V1 | 完整同序 V0，再 ts_coverage、ts_total_lines、ts_diff_lines | 九项检查、十次顶层检查进程及两项纯计算；完整 coverage suite 和零命中映射 helper 各一次 |
 
-build 先于 check，check 前后核 dist 不变，不重复 build。受核 Node 直接启动固定 npm CLI，使用本次空 user/global config 及 `--offline`；test 脚本固定为 `vitest run --no-cache --configLoader=native`。引擎净化环境并关闭 Node compile cache，不开放任意 shell、loader、NODE_OPTIONS 或自由环境；offline 不等于操作系统网络隔离。
+build 先于 check；check 中既有的 pretest 可以重建 dist，但完整路径、类型、大小及内容摘要必须与独立 build 一致，只有这个成功检查边界允许更换文件身份。两份清单均保留供只读重核，其他阶段继续要求身份不变；引擎不额外重复 build。受核 Node 直接启动固定 npm CLI，使用本次空 user/global config 及 `--offline`；test 脚本固定为 `vitest run --no-cache --configLoader=native`。引擎净化环境并关闭 Node compile cache，不开放任意 shell、loader、NODE_OPTIONS 或自由环境；offline 不等于操作系统网络隔离。
 
 V1 将 subject 全部 tracked `src/local/**/*.ts` 的可执行起始行纳入总体，包含未导入文件；type-only 零行须有真实 AST/映射。完整 coverage JSON 与 summary 必须重算一致，按整数判定总 TS line coverage ≥85%、base→subject 的 changed executable line coverage ≥90%，不按四舍五入放行。零 diff 仅在全集、映射和 diff 完备且交集为空时记 not_applicable。tests 不进入生产分母；其他生产 TS/JS/mjs/ps1/C# 或未覆盖执行入口变化为 unverified 并阻断。目标 TS line 门槛与本仓 Python branch coverage 门槛分别保留。
 

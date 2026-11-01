@@ -27,7 +27,9 @@ Suggested concurrency is **3–4 agents including the integrator**. Before imple
 - Prepare one narrowly scoped governed task for the installed mutation primitive. Keep safe companion tests/docs separate according to project rules. Verification, task facts and approvals use current CLI conclusions rather than copied historical status.
 - Exit: independently reviewed frozen scope and reproducible check commands, with all original checks and thresholds retained; no Node V2/CI capability claim.
 
-## Prerequisite: Preserve the target pretest rebuild
+## Prerequisites: Keep validation inside the workspace and preserve pretest
+
+First propagate only the three fixed standard temporary-directory roles from a validated caller-selected root into native check subprocesses. Keep Policy environment choices and verification argv closed. Use an exact acceptance clone and a sibling temporary root within the selected project workspace, and retain the complete task and originals in that acceptance clone. No system temporary-directory exception or retired CLI option is assumed.
 
 The target currently uses `pretest: npm run build`; removing it would lose its stale-build protection. Reproduce the existing fixed runner's rejection with a real ordinary-wheel fixture. In a separate source-only task, permit replacement of dist identity only after the successful fixed check and only when every path, kind, size and content digest equals the separately verified build. Retain both inventories for read-only replay; all other phases retain identity protection. Prove V0/V1 acceptance and rejection of changed/extra/missing/unsafe output before proceeding.
 
