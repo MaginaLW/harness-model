@@ -11,5 +11,21 @@
     "spec_sha256": "a3d3c780ee7830eaa567235871a4657c1f70b6835da8d70ca63032a931b2b509",
     "subject_commit": "23904c4c049a870ccd55a0fa2c4f42acdcf6c9f8",
     "task_id": "TASK-0135"
+  },
+  {
+    "action_sha256": "f9f53210629d54fcaa1a197d3b742cb45543542c3d2ec6463b64c022393bab98",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-01T15:17:26Z",
+    "base_commit": "23904c4c049a870ccd55a0fa2c4f42acdcf6c9f8",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-01T19:00:30.019461+00:00",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: independent exact native action plan APPROVE without findings; fixed source200 logical cases and complete90percent diff gate pass; direct and rebuilt each five actual pairs accepted with independent pure replay. Authorize this one local disposable complete native V2 start only; every frozen condition still applies.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "a3d3c780ee7830eaa567235871a4657c1f70b6835da8d70ca63032a931b2b509",
+    "subject_commit": "472e3394e8ab388e71628473d8abdcf8f3d0c496",
+    "task_id": "TASK-0135"
   }
 ]
