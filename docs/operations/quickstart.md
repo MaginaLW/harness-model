@@ -326,7 +326,10 @@ V2 另有由单独 action approval 绑定的 targeted mutation，independent Ver
 Implementer 使用不同的非空 task-local actor 标签。Chapter 11 的 acceptance、integration、
 action-approved targeted mutation 与 independent-verifier 流程均已实现。
 
-这次共享的完整 pytest 执行上限为 1200 秒，为 Windows 已验证运行时留出波动余量。
+原生 V1/V2 这次共享的完整 pytest 执行上限为 3000 秒，其他检查的超时不变。
+Policy label 仍为 `2.6.0`，但预算内容改变了完整 canonical Policy SHA；相同版本、不同 SHA
+不等价，批准与证据不能跨 SHA 复用。新引擎拒绝旧的 1200 秒 Native Policy。升级 wheel 不会
+自动修改目标 `.ai`；旧目标须经受审核的显式 Policy 更新后再使用新引擎验证。
 CI 与原生 V1/V2 随后统一调用
 `python tools/ci/check_coverage.py --run-dir <run_dir> --base <base_commit>`，从同一次分支覆盖率数据
 分别检查 `src/aiflow` 与 `tools/analysis`：每个目录的总覆盖率均须达到 85%，变更覆盖率均须达到

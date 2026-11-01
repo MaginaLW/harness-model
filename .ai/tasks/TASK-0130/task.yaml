@@ -1,0 +1,166 @@
+allowed_scope:
+- .ai/schemas/policy.schema.json
+- .ai/schemas/evidence.schema.json
+- src/aiflow/policy.py
+- src/aiflow/verification_level.py
+- src/aiflow/verification.py
+- src/aiflow/node_verification.py
+- src/aiflow/node_execution.py
+- src/aiflow/process_runner.py
+- src/aiflow/verification_service.py
+- src/aiflow/evidence.py
+- src/aiflow/freshness.py
+- src/aiflow/review_service.py
+- src/aiflow/approval.py
+- src/aiflow/gate.py
+- src/aiflow/status_service.py
+- src/aiflow/task_service.py
+- src/aiflow/initialization.py
+- src/aiflow/cli.py
+- tests/unit/test_node_v0_contract.py
+- tests/unit/test_node_v0_outputs.py
+- tests/unit/test_node_profile_contract.py
+- tests/integration/test_node_v0_recovery.py
+- tests/unit/test_node_process.py
+- tests/integration/test_node_verification.py
+- tests/unit/node_helpers.py
+- tests/fixtures/contracts/valid/evidence-node-31.json
+- tests/fixtures/contracts/invalid/evidence-node-31.extra.json
+- tests/fixtures/contracts/invalid/evidence-node-31.invalid.json
+- tests/fixtures/contracts/invalid/evidence-node-31.missing.json
+- src/aiflow/contracts.py
+- src/aiflow/state.py
+- src/aiflow/git_context.py
+- src/aiflow/initialization_git.py
+- tests/unit/test_contracts.py
+- tests/unit/test_state.py
+- tests/unit/test_git_context.py
+- tests/unit/test_initialization_git.py
+- tests/integration/test_sdk_context_trigger.py
+- .ai/policy/hard-rules.yaml
+- .ai/policy/permissions.yaml
+- .ai/policy/routing.yaml
+- .ai/policy/verification-levels.yaml
+- tests/unit/test_policy.py
+- tests/unit/test_verification_plan.py
+- docs/operations/quickstart.md
+- docs/operations/recovery.md
+- docs/operations/maintenance-status.md
+- .github/workflows/ai-quality-gate.yml
+base_commit: a05037749cb9f9b301e761d77cfb3b3f54c1c9f0
+branch: codex/agent-bridge-3000-delivery
+created_at: '2026-11-01T03:49:44Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - Only owned disposable public synthetic Node/Python tests and newly reviewed source-native
+    mutation verification; owner-approved3000second full suite and source-only conditional
+    delivery. No real target adoption, private export, real models/WeChat, paid calls,
+    production or repository settings.
+  goal: Deliver complete Node V0/V1 with the owner-approved 3000 second full-suite
+    budget, preserving every other quality gate
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  - external_action
+  impact_scope:
+  - .ai/schemas/policy.schema.json
+  - .ai/schemas/evidence.schema.json
+  - src/aiflow/policy.py
+  - src/aiflow/verification_level.py
+  - src/aiflow/verification.py
+  - src/aiflow/node_verification.py
+  - src/aiflow/node_execution.py
+  - src/aiflow/process_runner.py
+  - src/aiflow/verification_service.py
+  - src/aiflow/evidence.py
+  - src/aiflow/freshness.py
+  - src/aiflow/review_service.py
+  - src/aiflow/approval.py
+  - src/aiflow/gate.py
+  - src/aiflow/status_service.py
+  - src/aiflow/task_service.py
+  - src/aiflow/initialization.py
+  - src/aiflow/cli.py
+  - tests/unit/test_node_v0_contract.py
+  - tests/unit/test_node_v0_outputs.py
+  - tests/unit/test_node_profile_contract.py
+  - tests/integration/test_node_v0_recovery.py
+  - tests/unit/test_node_process.py
+  - tests/integration/test_node_verification.py
+  - tests/unit/node_helpers.py
+  - tests/fixtures/contracts/valid/evidence-node-31.json
+  - tests/fixtures/contracts/invalid/evidence-node-31.extra.json
+  - tests/fixtures/contracts/invalid/evidence-node-31.invalid.json
+  - tests/fixtures/contracts/invalid/evidence-node-31.missing.json
+  - src/aiflow/contracts.py
+  - src/aiflow/state.py
+  - src/aiflow/git_context.py
+  - src/aiflow/initialization_git.py
+  - tests/unit/test_contracts.py
+  - tests/unit/test_state.py
+  - tests/unit/test_git_context.py
+  - tests/unit/test_initialization_git.py
+  - tests/integration/test_sdk_context_trigger.py
+  - .ai/policy/hard-rules.yaml
+  - .ai/policy/permissions.yaml
+  - .ai/policy/routing.yaml
+  - .ai/policy/verification-levels.yaml
+  - tests/unit/test_policy.py
+  - tests/unit/test_verification_plan.py
+  - docs/operations/quickstart.md
+  - docs/operations/recovery.md
+  - docs/operations/maintenance-status.md
+  - .github/workflows/ai-quality-gate.yml
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0130
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: eb3e5267febc2b5964e6c90fb1a8502f659bec40fe023a7177050e2dbca9417c
+goal: Deliver complete Node V0/V1 with the owner-approved 3000 second full-suite budget,
+  preserving every other quality gate
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-01T03:53:28Z'
+subject_commit: 94afbe32a599cfc66e46a1327c8df8307279d4e8
+task_id: TASK-0130
+updated_at: '2026-11-01T07:13:44Z'
+worktree_dirty: false
+worktree_dirty_paths: []

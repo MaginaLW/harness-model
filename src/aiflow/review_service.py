@@ -14,7 +14,7 @@ from aiflow.contracts import require_valid_contract
 from aiflow.errors import ContractError, StorageError
 from aiflow.evidence import validate_v2_snapshot
 from aiflow.freshness import current_classification_input_digest
-from aiflow.policy import load_policy_bundle
+from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.specification import specification_digest
 from aiflow.state import utc_timestamp
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
@@ -208,6 +208,9 @@ def build_review_context(repository_root: Path, task_id: str, stage: str) -> Map
     task = record.task
     classification = _classification(root, task_id)
     policy = load_policy_bundle(root)
+    node_policy = is_node_policy_candidate(policy.documents)
+    if node_policy and not is_node_policy(policy):
+        raise ContractError("Node Policy cannot be trusted", code="POLICY_NODE_INVALID")
     spec_path = resolve_task_path(root, task_id, "spec.md")
     try:
         spec_sha256 = specification_digest(spec_path.read_text(encoding="utf-8"))
@@ -247,7 +250,17 @@ def build_review_context(repository_root: Path, task_id: str, stage: str) -> Map
                 "Implementation review requires passed evidence", code="REVIEW_EVIDENCE_INVALID"
             )
         context["subject_commit"] = subject
-        if evidence.get("schema_version") == "2.0":
+        if node_policy:
+            from aiflow.node_execution import recheck_node_evidence
+
+            node_facts = recheck_node_evidence(root, task_id, evidence)
+            if not node_facts.current or not node_facts.passed:
+                raise ContractError(
+                    "Implementation review requires current Node evidence",
+                    code="REVIEW_EVIDENCE_INVALID",
+                )
+            context["evidence_sha256"] = node_facts.evidence_sha256
+        elif evidence.get("schema_version") == "2.0":
             try:
                 validate_v2_snapshot(evidence)
             except ContractError as error:
@@ -272,6 +285,11 @@ def build_review_context(repository_root: Path, task_id: str, stage: str) -> Map
             )
         context["content"]["diff_summary"] = _committed_diff_summary(root, base, subject)
         context["content"]["verification_summary"] = _verification_summary(evidence)
+        if node_policy:
+            context["content"]["verification_summary"].update(
+                materials_sha256=node_facts.materials_sha256,
+                node_binding_sha256=evidence.get("node_binding_sha256"),
+            )
     context["context_sha256"] = _context_digest(context)
     require_valid_contract("review-context", context)
     return context

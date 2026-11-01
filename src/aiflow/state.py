@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence, Set
+from collections.abc import Callable, Mapping, Sequence, Set
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from types import MappingProxyType
 from typing import Any
 
-from aiflow.contracts import require_valid_contract
+from aiflow.contracts import (
+    ContractValidationError,
+    contract_validation_batch,
+    require_valid_contract,
+)
 from aiflow.errors import StateTransitionError
 
 ALL_STATES = frozenset(
@@ -278,6 +282,15 @@ def _validate_replayed_event(event: Mapping[str, object]) -> None:
 
 def replay_events(events: Sequence[Mapping[str, object]], *, task_id: str | None = None) -> str:
     """Validate and replay an append-only event sequence to its terminal state."""
+    with contract_validation_batch("event", len(events)) as validate:
+        return _replay_events(events, task_id, validate)
+
+
+def _replay_events(
+    events: Sequence[Mapping[str, object]],
+    task_id: str | None,
+    validate: Callable[[object], list[str]],
+) -> str:
     if not events:
         raise StateTransitionError(
             "Task event log is empty", code="STATE_EVENT_SEQUENCE_INVALID", details={}
@@ -285,7 +298,9 @@ def replay_events(events: Sequence[Mapping[str, object]], *, task_id: str | None
     previous_state: str | None = None
     expected_task_id = task_id
     for expected_sequence, event in enumerate(events, start=1):
-        require_valid_contract("event", event)
+        errors = validate(event)
+        if errors:
+            raise ContractValidationError("event", errors)
         event_task_id = event.get("task_id")
         if expected_task_id is None and isinstance(event_task_id, str):
             expected_task_id = event_task_id

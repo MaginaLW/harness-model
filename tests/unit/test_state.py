@@ -469,3 +469,13 @@ def test_subject_sync_recovery_rejects_unbound_staged_patch(
     with pytest.raises(StateTransitionError) as caught:
         load_task_record(tmp_path, "TASK-0001")
     assert caught.value.code == "STATE_MATERIALIZATION_MISMATCH"
+
+
+def test_replay_earlier_semantic_error_precedes_later_contract_error() -> None:
+    first = initial_event()
+    first["sequence"] = 2
+    later = dict(first)
+    later.pop("actor")
+    with pytest.raises(StateTransitionError) as caught:
+        replay_events([first, later])
+    assert caught.value.code == "STATE_EVENT_SEQUENCE_INVALID"

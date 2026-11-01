@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import stat
 import subprocess
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -18,13 +19,23 @@ from aiflow.errors import ContractError, StateTransitionError, StorageError
 from aiflow.evidence import V2_FINAL, validate_v2_snapshot
 from aiflow.freshness import current_classification_input_digest
 from aiflow.git_context import collect_git_context
-from aiflow.policy import load_policy_bundle
+from aiflow.policy import PolicyBundle, is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.review import validate_review_package
-from aiflow.review_service import ReviewAssessment, latest_review_assessment
+from aiflow.review_service import (
+    ReviewAssessment,
+    latest_review_assessment,
+    review_is_approvable,
+    validate_review_record,
+)
 from aiflow.specification import specification_digest
-from aiflow.state import create_record_event, create_transition_event, utc_timestamp
+from aiflow.state import (
+    assert_task_matches_events,
+    create_record_event,
+    create_transition_event,
+    utc_timestamp,
+)
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
-from aiflow.task_service import _persist_event_and_task, load_task_record
+from aiflow.task_service import _persist_event_and_task, load_task_record, read_task_record_strict
 from aiflow.verifier_service import (
     build_verifier_context,
     current_implementer_actor,
@@ -361,7 +372,7 @@ def _evidence(
     task: Mapping[str, object],
     classification: Mapping[str, object],
     spec_sha256: str,
-    policy_sha256: str,
+    policy: PolicyBundle,
     review_ids: set[str],
     events: Sequence[Mapping[str, object]],
     policy_checks: Sequence[Mapping[str, object]],
@@ -372,6 +383,13 @@ def _evidence(
     value = read_task_json(repository_root, task_id, "evidence.json", contract_name="evidence")
     if not isinstance(value, Mapping):
         return False, None, None
+    if is_node_policy_candidate(policy.documents):
+        from aiflow.node_execution import recheck_node_evidence
+
+        if not is_node_policy(policy):
+            raise ContractError("Node Policy cannot be trusted", code="POLICY_NODE_INVALID")
+        facts = recheck_node_evidence(repository_root, task_id, value)
+        return facts.current and facts.passed, facts.evidence_sha256, value
     checks = value.get("checks")
     current = (
         value.get("task_id") == task_id
@@ -380,7 +398,7 @@ def _evidence(
         and value.get("base_commit") == task.get("base_commit")
         and value.get("subject_commit") == task.get("subject_commit")
         and value.get("spec_sha256") == spec_sha256
-        and value.get("policy_sha256") == policy_sha256
+        and value.get("policy_sha256") == policy.sha256
         and value.get("classification_input_sha256")
         == classification.get("classification_input_sha256")
         and value.get("verification_level") == classification.get("effective_verification_level")
@@ -467,6 +485,232 @@ def _logical_identity(approval: Mapping[str, object]) -> str:
     return json.dumps(stable, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+def _marker_same(left: object, right: object) -> bool:
+    def canonical(value: object) -> str:
+        return json.dumps(
+            value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+        )
+
+    try:
+        return canonical(left) == canonical(right)
+    except (TypeError, ValueError):
+        return False
+
+
+def _validate_node_approval_marker_envelope(
+    marker: object,
+    *,
+    task_id: str,
+    current_task: Mapping[str, object],
+    current_events: Sequence[Mapping[str, object]],
+    current_approvals: Sequence[Mapping[str, object]],
+) -> tuple[Mapping[str, object], list[Mapping[str, object]]]:
+    """Validate only the existing staged approval transaction, without I/O."""
+
+    def invalid() -> ContractError:
+        return ContractError("Node approval marker is invalid", code="APPROVAL_RECOVERY_INVALID")
+
+    if (
+        not isinstance(marker, Mapping)
+        or set(marker) != {"schema_version", "task_id", "task", "event", "approvals"}
+        or marker["schema_version"] != "1.0"
+        or marker["task_id"] != task_id
+    ):
+        raise invalid()
+    task, event, final = marker["task"], marker["event"], marker["approvals"]
+    if (
+        not isinstance(task, Mapping)
+        or not isinstance(event, Mapping)
+        or not isinstance(final, list)
+    ):
+        raise invalid()
+    require_valid_contract("task", task)
+    require_valid_contract("event", event)
+    payload, sequence = event.get("payload"), event.get("sequence")
+    if not isinstance(payload, Mapping) or type(sequence) is not int:
+        raise invalid()
+    kind = payload.get("approval_type")
+    if not isinstance(kind, str) or kind not in {"spec", "code", "action"}:
+        raise invalid()
+    expected_fields = {"approval_type", "approvals"}
+    if kind != "action":
+        expected_fields.add("structured_review")
+    expected_event = {
+        "spec": "spec_approved",
+        "code": "code_approved",
+        "action": "approval_recorded",
+    }
+    additions = payload.get("approvals")
+    if (
+        set(payload) != expected_fields
+        or event.get("event_type") != expected_event[str(kind)]
+        or not isinstance(additions, list)
+        or not additions
+        or len(final) < len(additions)
+    ):
+        raise invalid()
+    if sequence == len(current_events) + 1:
+        history = [*current_events, event]
+        expected_task = {
+            **current_task,
+            "current_state": event.get("to_state"),
+            "updated_at": event.get("occurred_at"),
+        }
+    elif (
+        current_events
+        and sequence == len(current_events)
+        and _marker_same(event, current_events[-1])
+    ):
+        history = list(current_events)
+        expected_task = dict(current_task)
+        if not _marker_same(current_approvals, final):
+            raise invalid()
+    else:
+        raise invalid()
+    assert_task_matches_events(task, history)
+    if not _marker_same(task, expected_task):
+        raise invalid()
+    for approval in [*final, *current_approvals, *additions]:
+        if not isinstance(approval, Mapping):
+            raise invalid()
+        require_valid_contract("approval", approval)
+    prefix = final[: -len(additions)]
+    if (
+        not _marker_same(final[-len(additions) :], additions)
+        or not (_marker_same(current_approvals, prefix) or _marker_same(current_approvals, final))
+        or len({_logical_identity(item) for item in final}) != len(final)
+    ):
+        raise invalid()
+    candidates: list[Mapping[str, object]] = []
+    for approval in additions:
+        if (
+            not isinstance(approval, Mapping)
+            or approval.get("approval_type") != kind
+            or approval.get("task_id") != task_id
+            or approval.get("actor") != event.get("actor")
+        ):
+            raise invalid()
+        candidates.append(approval)
+    return payload, candidates
+
+
+def _validate_node_code_approval_marker(
+    marker: object,
+    *,
+    task_id: str,
+    current_task: Mapping[str, object],
+    current_events: Sequence[Mapping[str, object]],
+    current_approvals: Sequence[Mapping[str, object]],
+    policy_sha256: str,
+    classification_sha256: str,
+    evidence_sha256: str,
+    implementation_review: Mapping[str, object],
+    review_context: Mapping[str, object],
+    review_unit_ids: set[str],
+) -> None:
+    """Check a current code marker using existing replay/review facts; never recover it."""
+    payload, candidates = _validate_node_approval_marker_envelope(
+        marker,
+        task_id=task_id,
+        current_task=current_task,
+        current_events=current_events,
+        current_approvals=current_approvals,
+    )
+
+    def invalid() -> ContractError:
+        return ContractError("Node code marker is stale", code="APPROVAL_RECOVERY_INVALID")
+
+    reference = payload.get("structured_review")
+    if (
+        payload.get("approval_type") != "code"
+        or not isinstance(reference, Mapping)
+        or set(reference) != {"review_id", "revision", "review_stage", "context_sha256"}
+        or type(reference.get("revision")) is not int
+        or reference.get("review_stage") != "implementation"
+        or not review_unit_ids
+    ):
+        raise invalid()
+    for key in ("review_id", "revision", "review_stage", "context_sha256"):
+        if not _marker_same(reference.get(key), implementation_review.get(key)):
+            raise invalid()
+    stages: dict[str, str] = {}
+    revisions: dict[str, int] = {}
+    registrations: list[tuple[str, int]] = []
+    for event in current_events:
+        event_kind = event.get("event_type")
+        if event_kind not in {"review_recorded", "review_finding_resolved"}:
+            continue
+        review_payload = event.get("payload")
+        if (
+            not isinstance(review_payload, Mapping)
+            or not isinstance(review_payload.get("review_id"), str)
+            or type(review_payload.get("revision")) is not int
+        ):
+            raise invalid()
+        identifier = str(review_payload["review_id"])
+        revision = int(review_payload["revision"])
+        if not re.fullmatch(r"REV-\d{4,}", identifier) or revision < 1:
+            raise invalid()
+        if event_kind == "review_recorded":
+            stage = review_payload.get("review_stage")
+            if not isinstance(stage, str) or stage not in {"design", "implementation"}:
+                raise invalid()
+            stages[identifier] = str(stage)
+        elif identifier not in stages:
+            raise invalid()
+        revisions[identifier] = max(revisions.get(identifier, 0), revision)
+        registrations.append((identifier, revision))
+    selected = next(
+        (
+            entry
+            for entry in reversed(registrations)
+            if stages[entry[0]] == "implementation" and entry[1] == revisions[entry[0]]
+        ),
+        None,
+    )
+    if selected != (reference["review_id"], reference["revision"]):
+        raise invalid()
+    validate_review_record(implementation_review, review_context)
+    if not review_is_approvable(implementation_review):
+        raise invalid()
+    expected_context = {
+        "task_id": task_id,
+        "review_stage": "implementation",
+        "repository_id": current_task.get("repository_id"),
+        "branch": current_task.get("branch"),
+        "base_commit": current_task.get("base_commit"),
+        "subject_commit": current_task.get("subject_commit"),
+        "spec_sha256": current_task.get("frozen_spec_sha256"),
+        "policy_sha256": policy_sha256,
+        "classification_input_sha256": classification_sha256,
+        "evidence_sha256": evidence_sha256,
+    }
+    if any(not _marker_same(review_context.get(k), value) for k, value in expected_context.items()):
+        raise invalid()
+    context_units = review_context.get("decision_unit_ids")
+    if not isinstance(context_units, list) or not review_unit_ids.issubset(set(context_units)):
+        raise invalid()
+    if {candidate.get("decision_unit_id") for candidate in candidates} != review_unit_ids or len(
+        candidates
+    ) != len(review_unit_ids):
+        raise invalid()
+    expected_approval = {
+        "approval_type": "code",
+        "task_id": task_id,
+        "base_commit": current_task.get("base_commit"),
+        "subject_commit": current_task.get("subject_commit"),
+        "spec_sha256": current_task.get("frozen_spec_sha256"),
+        "policy_sha256": policy_sha256,
+        "evidence_sha256": evidence_sha256,
+    }
+    if any(
+        not _marker_same(candidate.get(key), value)
+        for candidate in candidates
+        for key, value in expected_approval.items()
+    ):
+        raise invalid()
+
+
 def _remove_marker(path: Path) -> None:
     try:
         path.unlink(missing_ok=True)
@@ -477,6 +721,10 @@ def _remove_marker(path: Path) -> None:
 
 
 def _complete_marker(repository_root: Path, task_id: str) -> ApprovalResult:
+    policy = load_policy_bundle(repository_root)
+    node_policy = is_node_policy_candidate(policy.documents)
+    if node_policy and not is_node_policy(policy):
+        raise ContractError("Node Policy cannot be trusted", code="POLICY_NODE_INVALID")
     marker_path = resolve_task_path(repository_root, task_id, APPROVAL_MARKER)
     marker = read_task_json(repository_root, task_id, APPROVAL_MARKER)
     if not isinstance(marker, dict) or marker.get("task_id") != task_id:
@@ -492,8 +740,49 @@ def _complete_marker(repository_root: Path, task_id: str) -> ApprovalResult:
     require_valid_contract("event", event)
     for approval in approvals:
         require_valid_contract("approval", approval)
+    if node_policy:
+        current_record = read_task_record_strict(repository_root, task_id)
+        _validate_node_approval_marker_envelope(
+            marker,
+            task_id=task_id,
+            current_task=current_record.task,
+            current_events=current_record.events,
+            current_approvals=_load_approvals(repository_root, task_id),
+        )
+        payload = event.get("payload")
+        if not isinstance(payload, Mapping) or not isinstance(payload.get("approvals"), list):
+            raise ContractError("Node approval marker is invalid", code="APPROVAL_RECOVERY_INVALID")
+        evidence_digest = None
+        if payload.get("approval_type") == "code":
+            from aiflow.node_execution import recheck_node_evidence
+
+            evidence = read_task_json(
+                repository_root, task_id, "evidence.json", contract_name="evidence"
+            )
+            if not isinstance(evidence, Mapping):
+                raise ContractError("Node evidence is unavailable", code="CODE_EVIDENCE_STALE")
+            facts = recheck_node_evidence(repository_root, task_id, evidence)
+            if not facts.current or not facts.passed:
+                raise ContractError("Node evidence is not current", code="CODE_EVIDENCE_STALE")
+            evidence_digest = facts.evidence_sha256
+        for candidate in payload["approvals"]:
+            if (
+                not isinstance(candidate, Mapping)
+                or candidate.get("policy_sha256") != policy.sha256
+                or candidate.get("spec_sha256") != current_record.task.get("frozen_spec_sha256")
+                or candidate.get("base_commit") != current_record.task.get("base_commit")
+                or evidence_digest is not None
+                and candidate.get("evidence_sha256") != evidence_digest
+            ):
+                raise ContractError(
+                    "Node approval marker is stale", code="APPROVAL_RECOVERY_INVALID"
+                )
     atomic_write_json(resolve_task_path(repository_root, task_id, "approvals.json"), approvals)
-    record = load_task_record(repository_root, task_id)
+    record = (
+        read_task_record_strict(repository_root, task_id)
+        if node_policy
+        else load_task_record(repository_root, task_id)
+    )
     recorded = next(
         (item for item in record.events if item.get("sequence") == event.get("sequence")), None
     )
@@ -527,10 +816,28 @@ def approve_task(
         raise ContractError(
             "Only action approvals accept an action file", code="ACTION_FILE_NOT_ALLOWED"
         )
-    marker = resolve_task_path(repository_root, task_id, APPROVAL_MARKER)
-    if marker.is_file():
+    marker = resolve_task_path(repository_root, task_id) / APPROVAL_MARKER
+    try:
+        info = marker.lstat()
+    except FileNotFoundError:
+        info = None
+    if info is not None and (
+        not stat.S_ISREG(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400
+    ):
+        raise ContractError(
+            "Approval recovery marker is not a regular file", code="APPROVAL_RECOVERY_INVALID"
+        )
+    policy = load_policy_bundle(repository_root)
+    node_policy = is_node_policy_candidate(policy.documents)
+    if node_policy and not is_node_policy(policy):
+        raise ContractError("Node Policy cannot be trusted", code="POLICY_NODE_INVALID")
+    if info is not None:
         return _complete_marker(repository_root, task_id)
-    record = load_task_record(repository_root, task_id)
+    record = (
+        read_task_record_strict(repository_root, task_id)
+        if node_policy
+        else load_task_record(repository_root, task_id)
+    )
     spec_sha256 = record.task.get("frozen_spec_sha256")
     if not isinstance(spec_sha256, str):
         raise ContractError(
@@ -545,7 +852,6 @@ def approve_task(
         ) from error
     if current_spec != spec_sha256:
         raise ContractError("Approval specification is stale", code="APPROVAL_SPEC_STALE")
-    policy = load_policy_bundle(repository_root)
     classification = read_task_json(
         repository_root, task_id, "classification.json", contract_name="classification"
     )
@@ -606,7 +912,7 @@ def approve_task(
             task=record.task,
             classification=classification,
             spec_sha256=spec_sha256,
-            policy_sha256=policy.sha256,
+            policy=policy,
             review_ids=review_ids,
             events=record.events,
             policy_checks=[check for check in v2_checks if isinstance(check, Mapping)]

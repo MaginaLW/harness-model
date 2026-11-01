@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
@@ -133,6 +133,10 @@ def _safe_schema_errors(
         format_checker=FormatChecker(),
         registry=_schema_registry(schema_directory),
     )
+    return _validator_errors(validator, value)
+
+
+def _validator_errors(validator: Draft202012Validator, value: object) -> list[str]:
     errors: list[str] = []
     for error in validator.iter_errors(value):
         if error.validator == "required":
@@ -143,6 +147,84 @@ def _safe_schema_errors(
             pointer = _pointer(list(error.absolute_path))
             errors.append(f"{pointer}: contract constraint failed ({error.validator})")
     return errors
+
+
+def _schema_contents(directory: Path) -> dict[str, bytes | None]:
+    return {
+        name: (path.read_bytes() if path.is_file() else None)
+        for name, filename in SCHEMA_FILES.items()
+        for path in (directory / filename,)
+    }
+
+
+@contextmanager
+def contract_validation_batch(
+    contract_name: str, count: int
+) -> Iterator[Callable[[object], list[str]]]:
+    """Validate a no-write batch against fresh resources, checking them before return.
+
+    The callable is local to this block. Callers must complete only reads and
+    validation inside it; persistence must follow successful block exit.
+    Preparation is lazy so earlier parsing/semantic failures retain their order.
+    """
+    active = True
+    if count < 2:
+
+        def validate_single(value: object) -> list[str]:
+            if not active:
+                raise ContractError("Validation batch is closed", code="CONTRACT_BATCH_CLOSED")
+            return validate_contract(contract_name, value)
+
+        try:
+            yield validate_single
+        finally:
+            active = False
+        return
+    filename = SCHEMA_FILES[contract_name]
+    directory = _effective_schema_directory(None)
+    contents: dict[str, bytes | None] | None = None
+    validator: Draft202012Validator | None = None
+
+    def validate(value: object) -> list[str]:
+        nonlocal contents, validator
+        if not active:
+            raise ContractError("Validation batch is closed", code="CONTRACT_BATCH_CLOSED")
+        if validator is None:
+            contents = _schema_contents(directory)
+            root = contents[contract_name]
+            if root is None:
+                # Retain the single-value loader's required-root failure.
+                load_schema(contract_name, directory)
+                raise FileNotFoundError(directory / filename)
+            schema = json.loads(root.decode("utf-8"))
+            if not isinstance(schema, dict):
+                raise TypeError(f"Schema {contract_name} must contain a JSON object")
+            resources: list[tuple[str, Resource[Any]]] = []
+            for raw in contents.values():
+                if raw is None:
+                    continue
+                resource = json.loads(raw.decode("utf-8"))
+                if isinstance(resource, dict) and isinstance(resource.get("$id"), str):
+                    resources.append((resource["$id"], Resource.from_contents(resource)))
+            validator = Draft202012Validator(
+                schema,
+                format_checker=FormatChecker(),
+                registry=Registry().with_resources(resources),
+            )
+        return sorted(
+            set(_validator_errors(validator, value) + _cross_field_errors(contract_name, value))
+        )
+
+    try:
+        yield validate
+        if contents is not None and _schema_contents(directory) != contents:
+            raise ContractError(
+                "Contract resources changed during validation",
+                code="CONTRACT_RESOURCES_CHANGED",
+                details={},
+            )
+    finally:
+        active = False
 
 
 def _cross_field_errors(contract_name: str, value: object) -> list[str]:

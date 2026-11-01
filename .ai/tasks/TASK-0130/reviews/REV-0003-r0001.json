@@ -1,0 +1,603 @@
+{
+  "context_sha256": "6d47a25326b3613ba64c6eda8d08b1ed9e00e3fe498b9b7c6d9644706c07068c",
+  "findings": [
+    {
+      "evidence_refs": [
+        "src/aiflow/contracts.py::SCHEMA_FILES",
+        "src/aiflow/node_execution.py::_governance_snapshot",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 1900,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Governance snapshots request the registered review-record contract and validate registered review/context/event bindings. Current actual Task130 ordinary-wheel V0/V1 legally include design and implementation review events. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Unknown review contract blocks legal lifecycle"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_engine",
+        "tests/unit/test_node_profile_contract.py::test_ordinary_engine_rejects_incomplete_or_mutated_installation",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 780,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Installed engine inventories complete recorded installation bytes, actual package trees including bytecode, distribution metadata, runtime dependencies and loaded origin membership; unrecorded entries reject. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Installed engine inventory omitted executable installation inputs"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_dependency_shims",
+        "src/aiflow/node_execution.py::_dependencies",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 1083,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Locked package bin owners derive the complete nested shim inventory and official bytes; unknown shim files/directories or ambiguous owners reject. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Unknown npm bin shim accepted as prepared dependency"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_check_materials",
+        "src/aiflow/node_execution.py::_validate_receipt",
+        "tests/unit/test_node_profile_contract.py::test_material_recheck_rejects_role_and_preflight_rebindings",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 1519,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Replay rebuilds the fixed node/npm preflight roles, argv, cwd, environment, exact timeout and expected versions, validates typed closed receipts and raw bytes; self-consistent unrelated successful receipts are insufficient. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Preflight receipt not bound to fixed material roles"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/verification_service.py::verify_task",
+        "src/aiflow/node_execution.py::precheck_node_materials",
+        "tests/unit/test_node_v0_contract.py::test_material_selection_is_rechecked_before_recovery_or_state_write",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-005",
+      "location": {
+        "line": 941,
+        "path": "src/aiflow/verification_service.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Read-only materials selection/precheck precedes recovery-capable loading, subject synchronization and verification state writes. Invalid/missing/stale selectors cannot start the lifecycle. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Invalid material selector reached state writes before rejection"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_coverage_originals",
+        "src/aiflow/node_execution.py::execute_node_verification",
+        "src/aiflow/node_execution.py::recheck_node_evidence",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-006",
+      "location": {
+        "line": 2495,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Run binds exact fixed refs/sizes/digests for both coverage reports, independent map, source diff and source manifest; consumers compare originals and independently recompute semantics. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Coverage originals were not transitively bound to evidence"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_take_budget",
+        "src/aiflow/node_execution.py::prepare_node_materials",
+        "src/aiflow/node_execution.py::_check_materials",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-007",
+      "location": {
+        "line": 290,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "One remaining-entry/byte budget spans all fixed source/runtime/dependency/engine/host roles during preparation and replay; independent per-role limits cannot bypass whole-material bounds. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Whole-material budget was enforced separately per role"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_identity",
+        "src/aiflow/node_execution.py::_safe_info",
+        "src/aiflow/node_execution.py::_read",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-008",
+      "location": {
+        "line": 187,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Windows identity comparison masks only filename-inferred execute bits. Ordinary type, reparse/link count, physical identity, size and timestamps remain enforced; ordinary current wheel npm shim reads succeeded. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Windows path-inferred executable bits caused false material drift"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_load_prepared",
+        "src/aiflow/node_execution.py::_check_materials",
+        "src/aiflow/node_execution.py::_context",
+        "tests/unit/test_node_profile_contract.py::test_material_recheck_rejects_role_and_preflight_rebindings",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-009",
+      "location": {
+        "line": 1519,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Prepared runtime/dependency roots are exact owned payload children; closed node/npm manifests bind selected executable, full nested package, official shim and complete runtime union. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Prepared runtime and npm roles could escape the fixed payload"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_verification.py::validate_node_line_coverage",
+        "src/aiflow/node_verification.py::_position",
+        "src/aiflow/node_execution.py::_coverage",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-010",
+      "location": {
+        "line": 210,
+        "path": "src/aiflow/node_verification.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Pure coverage chain enforces fixed monotonic deadlines with cached bounded UTF16 boundary work, rather than treating timeout metadata as execution enforcement. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Pure coverage check deadlines were metadata only"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_engine",
+        "tests/unit/test_node_profile_contract.py::test_unrecorded_site_startup_hooks_invalidate_bound_engine_materials",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-011",
+      "location": {
+        "line": 661,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Effective prefix/site roots and pyvenv configuration bytes/identity are bound; enabled user sites, unknown pth/custom startup modules reject, with only the exact RECORD-owned setuptools startup hook/payload accepted. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Ordinary engine material excludes site startup execution inputs"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_host_tools",
+        "src/aiflow/node_execution.py::_git",
+        "src/aiflow/node_execution.py::execute_node_verification",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-012",
+      "location": {
+        "line": 894,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Fixed Git entry/backend/upload-pack/shell catalog is bound under the shared budget and controlled environment/exec path. This closes executable-role drift within the trusted-host scope without claiming OS/DLL authentication. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Fixed Git material binds entry while actual clone uses unbound executables"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_root_snapshot",
+        "src/aiflow/node_execution.py::_check_root",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-013",
+      "location": {
+        "line": 2161,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Complete original-root and Git/common administration metadata is checked; only exact owned/replayed governance paths and strict all-parent intermediate commit deltas are allowed. Immutable review/event/approval prefixes remain protected; byte-identical index refresh does not exempt arbitrary metadata. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Original task root ignores nested untracked and ignored file output drift"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_execution.py::_environment",
+        "src/aiflow/node_execution.py::_fixtures",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-014",
+      "location": {
+        "line": 393,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Generated environment and semantic contract fix NODE_DISABLE_COMPILE_CACHE=1; no new compile-cache output exemption was introduced. Actual current engine V0/V1 lifecycle/output checks passed before tampering. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Official npm compile-cache output prevents the fixed ordinary-wheel V0 lifecycle"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/node_verification.py::_position",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-015",
+      "location": {
+        "line": 252,
+        "path": "src/aiflow/node_verification.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Only enumerated statement/function/branch source-range end columns derive null from original finite UTF16 line end. Other nulls, bool/float, invalid ranges/surrogate boundaries reject; original report hashes, start-line max-hit semantics and exact85/90 thresholds remain. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Strict integer coverage coordinates reject the bound converter null end-column representation"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/approval.py::_complete_marker",
+        "src/aiflow/node_execution.py::_governance_snapshot",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-016",
+      "location": {
+        "line": 597,
+        "path": "src/aiflow/approval.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Pending marker validation keeps the closed transaction envelope, exact task/event/approval replay, latest registered implementation review and current spec/Policy/subject/evidence bindings. Recovery freshly reloads actual Policy and rechecks evidence; the corrected cross-module consumer now executes all six real marker cases. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "A valid code-approval transaction marker self-blocks the shared Node root guard"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/contracts.py",
+        "src/aiflow/contracts.py::contract_validation_batch",
+        "tests/unit/test_contracts.py::test_batch_callable_cannot_escape_lifetime",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-017",
+      "location": {
+        "line": 161,
+        "path": "src/aiflow/contracts.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "[RF-BATCH-001] Single/multi validator callables enforce active lifetime, with finally invalidation after normal or exceptional exit. Independent six count0/1/2 by normal/error probes rejected escape; no whole CLI/persistence is wrapped in a stale Schema snapshot. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-BATCH-001] Batch validator callable could escape resource-snapshot lifetime"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/git_context.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-018",
+      "location": {
+        "line": 164,
+        "path": "src/aiflow/git_context.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "[RF-GIT-001] Legal fullref names including @, leading dash and literal marker branches are accepted. Retained symbolic-ref disambiguates detached markers/upstream and ambiguous tag shortening; actual detached with forged tracking and inconsistent observations still reject. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-GIT-001] Porcelain aggregation rejects legal literal Git branch names"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/git_context.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-019",
+      "location": {
+        "line": 178,
+        "path": "src/aiflow/git_context.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "[RF-GIT-002] Universal task-Schema drive-prefix/path escapes remain rejected; remaining colon/ADS rejection applies only on Windows, preserving legal POSIX literals. Runtime-module os proxy avoids mutating global pathlib platform state. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-GIT-002] Shared Git status parser rejects existing legal POSIX colon paths"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/git_context.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-020",
+      "location": {
+        "line": 321,
+        "path": "src/aiflow/git_context.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "[RF-GIT-003] Only failed aggregate status queries replay original HEAD/hash/branch diagnostics before bare-reraising the original status error; normal path remains three queries and inherited environment is not stripped. Existing relative-Git integration assertion is unchanged. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-GIT-003] Failed aggregate query changed existing relative Git environment error priority"
+    },
+    {
+      "evidence_refs": [
+        "tests/unit/test_git_context.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-applicability-e44486d.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-021",
+      "location": {
+        "line": 448,
+        "path": "tests/unit/test_git_context.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "[RF-TEST-001] Synthetic merge adds only explicit test user.name/email via -c so stripped Native environments reach the intended conflict. Original exit/dirty-path assertions remain, and current full suite includes the real conflict regression. Independently reassessed against current Task130 source e444, fresh Task130 engine/wheel/sdist proof within unchanged current-byte scope, and current accepted full Native pre. Historical Task128/129 records/approvals/results confer no authority; original severity is retained.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-TEST-001] Synthetic merge-conflict regression depended on ambient Git identity"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0129/logs/bootstrap/ci-pr142-run41254542361.log",
+        ".ai/tasks/TASK-0130/logs/bootstrap/independent-implementation-review-notes.json",
+        "tests/unit/test_node_v0_outputs.py"
+      ],
+      "finding_id": "RF-022",
+      "location": {
+        "line": 470,
+        "path": "tests/unit/test_node_v0_outputs.py"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "[RF-CI-001] Actual exact-current-head Ubuntu required diff coverage remains pending"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/logs/run-20261101T043903736967Z/unit_tests-006.stdout.log",
+        ".ai/tasks/TASK-0130/logs/bootstrap/fixture-consumer-fix/six-pytest.log",
+        ".ai/tasks/TASK-0130/logs/bootstrap/fixture-consumer-fix/modules-pytest.log",
+        ".ai/tasks/TASK-0130/logs/bootstrap/fixture-consumer-fix/summary.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T051713445589Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-023",
+      "location": {
+        "line": 1766,
+        "path": "tests/unit/test_node_v0_contract.py"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Actual +6/-2 changes only the existing test function local import and explicit immutable-seed producer argument. The original6 IDs/decorators/all80 assertions and other functions remain. Directory/seed/public-evidence direct wrappers now have2/0/2 arguments matching actual signatures; all tests/src __wrapped__ call sites independently searched with no other omissions. Actual original6 red cases now6passed1.06s, and both complete modules612passed140.04s with472profile cases retained. All49 source/76 current wheel input bytes remain exact, including unchanged source policy and unchanged profile fixture file. This closes this specific missing-argument bug only; old complete Native433bde remains FAILED and no full-current-Native or CI PASS is inferred. Current e444 full Native now actually passed5669+5, including these restored six cases, under the owner-approved3000budget. Earlier fixture-only audit missed this direct consumer; original433b full failure remains FAILED and84c spent. This finding closes without reclassifying that failure.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "Direct fixture consumer omitted newly required immutable Policy seed argument"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-action-preliminary-review.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-action-independent-review.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-action-review.json",
+        ".ai/tasks/TASK-0130/action-v2-targeted-mutation-fixture-consumer.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-024",
+      "location": {
+        "path": ".ai/tasks/TASK-0130/action-v2-targeted-mutation-fixture-consumer.json"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "The exact unsupported key was removed from the action input without weakening approval.py closed allowed-key validation. Current6737 official validate_action_file succeeds and canonical digest matches6737; spec remains in condition1 and current approval/context binding. The original preliminary rejected draft/high finding and old84c failed consumption remain historical. Current6737 is separately reviewed, approved and consumed; no old authority is transferred. Original action finding ID is retained in the title; RF024/RF025 avoid collision with earlier source findings RF004/RF005 and preserve high/medium severity.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "[NATIVE-ACTION-004] Initial unapproved action draft contained unsupported top-level spec_sha256"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-action-preliminary-review.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-action-independent-review.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-action-review.json",
+        ".ai/tasks/TASK-0130/action-v2-targeted-mutation-fixture-consumer.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-fixture-consumer-verifier-observations.json"
+      ],
+      "finding_id": "RF-025",
+      "location": {
+        "path": ".ai/tasks/TASK-0130/action-v2-targeted-mutation-fixture-consumer.json"
+      },
+      "resolution": {
+        "actor": "independent-node-completion-implementation-reviewer",
+        "reason": "Condition4 was corrected to preserve original case logic while explicitly documenting that three original V2 rejection rows become V1/V2 times four rows including legacy1200 rejection: eight IDs replace three, net plus five. Existing row/rejection assertions remain; caller-only repair preserves current5674 IDs and current full Native actually executed5674 total. Exact6737 inherits the corrected wording, not the false old-ID subset claim. Original action finding ID is retained in the title; RF024/RF025 avoid collision with earlier source findings RF004/RF005 and preserve high/medium severity.",
+        "resolved_at": "2026-11-01T05:46:54.761400+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[NATIVE-ACTION-005] Action condition overstated literal old test-nodeID inclusion"
+    }
+  ],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-01T05:46:54.761400+00:00",
+  "review_id": "REV-0003",
+  "review_stage": "implementation",
+  "reviewer": "independent-node-completion-implementation-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent current implementation review for TASK0130 sourcee44486dc1217cb315d0a245ec293de54a33cdfcd from true Node-free maina050377, spec eb3e5267, new Policyfac8afbe and schema2 context6d47a253. Actual reviewer instance /root/performance_candidate_impl_review did not author candidate source/tests; actor labels and source/import/byte observations are not role or machine-code authentication. APPROVE with one explicitly open medium RF022. Preserve all21 original resolved source findings, RF023 resolved fixture-consumer regression, plus NATIVE-ACTION004high and005medium as RF024/025resolved without severity reduction. No open critical/high remains. RF022 is not resolved by Windows Native success, the budget extension or predicted coverage gains. Actual exact-current-head Ubuntu required CI must pass before merge; after real CI evidence, only the official append-only resolve may close RF022. A subsequent pushed governance head still requires its own current-head required checks. Independently inspected complete Node/schema/companion replay and current source. All49 engine sources remain the reviewed complete source, with the sole new Native FULL_SUITE_TIMEOUT_SECONDS1200to3000 constant change relative to cfbf; full Node remains in base-to-subject diff. Active verification Policy changes exactly eight pytest timeouts, three V1/five V2, to3000. Other three Policy documents/permissions are unchanged; label2.6.0 does not equate old4160 SHA with newfac8 SHA. Read-only plan checks enforce one shared full pytest3000 for both Native levels and reject uniformly old1200 Policy. Node product versions/command/timeout/materials and closed V0/V1 semantics remain unchanged; V2/CI product capability still blocks before unsupported recovery/write/start. Workflow change is only a comment, retaining90minute job and original commands/check thresholds. Budget tests/docs accurately describe same-version/different-SHA and explicit reviewed target update; no implicit migration, xdist, test subset, weaker threshold or compatibility framework was added. Original closed installation/startup/Git/host roles, strict source/output/root governance protection, fixed build-before-check, complete TS mapping/exact85/90 integer calculations and common read-only evidence recheck remain. Local no-write batch validation checks full fixed resource bytes/existence before return, retains per-value/event/Policy semantics/fresh single APIs and closes escaped callable lifetime. Git preserves fullref/POSIX paths, Windows ADS rejection and prior error priority; shared SDK fixture copies only known synthetic V1 prefixes with fresh consumers. Both bounded fixture optimizations preserve per-case independent policy files/immutable seed bytes and genuine consumer checks. Cached checkout frame exists only in explicit late_materials/V0 failed-original preparation, with real first/final full-frame comparisons, all nine deep-copied inputs, independent output copies and both functions restored before consumers; unabridged matrices/assertions remain. Module timing gains8.84/10.02seconds were local observations, not full-budget proof. The actual missing direct fixture seed argument was separately fixed and verified6green/612module tests and now the full current suite; old433b failure is not renamed PASS. Native5674 collection truthfully replaces three old budget-test IDs with eight preserving case/assertion logic, not literal all-old-ID inclusion. Current Task130 physical new wheel57c3ae54 and original real ordinary V0 sixchecks/eightprocesses and V1 ninechecks/tenprocesses plus two pure calculations were accepted. Current e71c65 applicability independently binds e444 to identical complete49 source/all76 package inputs/Git blobs and unchanged helper/method/custody, not new lifecycle execution. Independently rehashed original ZIP76/installed70/source49/resource20+manifest,18 check receipts/36 raw streams,4 prepared/run refs and14 manifests with typed Job/EOF/confirmed cleanup; original positive Gate and code approval precede six/two tamper checks. V0 retains intentional extra material/terminalSTALE, never currentPASS; V1 actual accepted read-only result is attributed to the independent verifier. Current sdist/rebuild/isolated package/API evidence ae355322 is separate proof over the same complete bytes; no extra Node lifecycle from every sdist or new physical B/S was fabricated. No oldTask129 wheel/approval/Nativepass is successor authority. Current root/archive pre rawd5797ef2, snapshotf2ba71f8 and verifiercontext3a69527a bind e444/Policyfac8/spec eb3/class2ccd. Separate actual verifier accepted this pre in terminal raw35fea6c7. All14 required checks passed; complete5674items produced5669passed/five declared skips in1259.63pytest seconds, runner1260406ms below3000000ms. Ordinary-wheel opt-in skips are covered by the separate actual current Task130 packaging/lifecycle proof; POSIX cases skip on Windows and still require real UbuntuCI. Current mutation loader independently replayed all five actual baseline0/mutant1/killed results c157400c. Original branch-enabled coverage.report per-domain totals are core89.42527317/analysis97.50390016; pure XML branch rates83.27441449/96.63265306 are separately disclosed, not claimed as a different85threshold. Core changed executable coverage2564/2825=90.76106195 and analysis zero changed executable lines satisfy unchanged checker. Ruff/format/mypy/whitespace passed in actual Native. Exact fresh6737 action was independently reviewed/approved, uniquely preflighted and consumed once at sequence26 under the nonauthor verifier instructions and source-author mechanical foreground supervision. Historical launcher cleanup is UNKNOWN, not OS process-tree certification; saved Node process receipt EOF/cleanup facts remain scoped to their actual observations. This is formal implementation review only. Same-verifier finalize, current full-final-evidence code approval/Gate, actual exact-head required CI and merge-commit delivery remain separate requirements. CurrentTask128/129 and433b/84c failures/consumptions remain preserved; no expired/spent action or old context/evidence is reused. No source/tests/spec/facts/approval/evidence edits, heavy tests, SDK/model/paid calls, new material API/catalog execution, finalize or push were performed by this reviewer.",
+  "task_id": "TASK-0130"
+}

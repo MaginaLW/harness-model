@@ -7,8 +7,10 @@ import json
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path, PurePosixPath
-from typing import Literal, cast
+from typing import Any, Literal, cast
+from uuid import UUID
 
 from aiflow.contracts import require_valid_contract
 from aiflow.errors import ContractError
@@ -285,7 +287,429 @@ def save_evidence(
     path: Path, evidence: Mapping[str, object], *, archive_path: Path | None = None
 ) -> None:
     """Persist an optional per-run copy, then atomically replace current evidence."""
+    if evidence.get("schema_version") == "3.1":
+        validate_node_evidence(evidence)
     require_valid_contract("evidence", evidence)
     if archive_path is not None:
         atomic_write_json(archive_path, evidence)
     atomic_write_json(path, evidence)
+
+
+_NODE_TOP_FIELDS = frozenset(
+    {
+        "schema_version",
+        "task_id",
+        "decision_unit_ids",
+        "repository_id",
+        "branch",
+        "base_commit",
+        "subject_commit",
+        "spec_sha256",
+        "policy_sha256",
+        "classification_input_sha256",
+        "verification_level",
+        "mode",
+        "checks",
+        "unverified_scenarios",
+        "conclusion",
+        "generated_at",
+        "reproduce_command",
+        "node_binding",
+        "node_binding_sha256",
+    }
+)
+_NODE_BINDING_FIELDS = frozenset(
+    {
+        "profile",
+        "subject_tree",
+        "prepared",
+        "run",
+        "materials_sha256",
+        "semantic_contract_sha256",
+        "execution_contract_sha256",
+        "environment_sha256",
+        "coverage",
+    }
+)
+_NODE_EXECUTION_FIELDS = frozenset(
+    {
+        "execution_id",
+        "argv_template",
+        "cwd_role",
+        "timeout_seconds",
+        "returncode",
+        "timed_out",
+        "duration_ms",
+        "stdout",
+        "stderr",
+        "stdout_overflow",
+        "stderr_overflow",
+        "cleanup",
+        "execution_error",
+    }
+)
+_NODE_COVERAGE_METHOD = "vite-8.2.1-oxc-es2024-ast-v8-to-istanbul-zero-hit-v1"
+
+
+def _node_invalid() -> ContractError:
+    return ContractError("Node evidence contract is invalid", code="NODE_EVIDENCE_INVALID")
+
+
+def _node_object(value: object, fields: frozenset[str] | set[str]) -> dict[str, Any]:
+    if not isinstance(value, dict) or set(value) != fields:
+        raise _node_invalid()
+    return value
+
+
+def _node_text(value: object, pattern: str = r"[^\x00-\x1f\x7f]+") -> str:
+    if type(value) is not str or re.fullmatch(pattern, value) is None:
+        raise _node_invalid()
+    try:
+        value.encode("utf-8")
+    except UnicodeError as error:
+        raise _node_invalid() from error
+    return value
+
+
+def _node_integer(value: object, *, minimum: int = 0, maximum: int | None = None) -> int:
+    if type(value) is not int or value < minimum or maximum is not None and value > maximum:
+        raise _node_invalid()
+    return value
+
+
+def _node_digest(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def _node_evidence_plan(level: str) -> dict[str, object]:
+    """The fixed public role contract; no Policy, materials, or executable is consulted."""
+    python = ["P", "-I", "-B", "-m", "aiflow"]
+    npm = ["N", "M", "--userconfig", "U", "--globalconfig", "C", "--offline", "run"]
+    git = [
+        "G",
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "diff",
+        "--no-ext-diff",
+        "--no-textconv",
+    ]
+    definitions: list[tuple[str, int, list[list[str]], str, int | None]] = [
+        ("contract", 30, [python + ["validate", "T"]], "original", None),
+        ("scope", 30, [python + ["scope", "T"]], "original", None),
+        ("smoke", 30, [python + ["--help"]], "original", None),
+        ("node_build", 300, [npm + ["build"]], "isolated", None),
+        ("node_check", 600, [npm + ["check"]], "isolated", None),
+        (
+            "diff_whitespace",
+            30,
+            [
+                git + ["--check", "--"],
+                git + ["--cached", "--check", "--"],
+                git + ["--check", "B", "S", "--"],
+            ],
+            "original",
+            None,
+        ),
+    ]
+    if level == "V1":
+        definitions.extend(
+            [
+                (
+                    "ts_coverage",
+                    600,
+                    [
+                        npm
+                        + [
+                            "test",
+                            "--",
+                            "--coverage.enabled",
+                            "--coverage.provider=v8",
+                            "--coverage.include=src/local/**/*.ts",
+                            "--coverage.reporter=json-summary",
+                            "--coverage.reporter=json",
+                            "--coverage.reporter=text",
+                            "--coverage.reportsDirectory=R",
+                            "--coverage.reportOnFailure",
+                        ],
+                        [
+                            "N",
+                            "--input-type=module",
+                            "--eval",
+                            "{node_map_script}",
+                            "{node_source_manifest}",
+                            "{node_expected_map}",
+                        ],
+                    ],
+                    "isolated",
+                    None,
+                ),
+                ("ts_total_lines", 30, [], "isolated", 85),
+                ("ts_diff_lines", 30, [], "isolated", 90),
+            ]
+        )
+    checks: list[dict[str, object]] = []
+    executions: list[dict[str, object]] = []
+    for check_id, timeout, commands, cwd_role, threshold in definitions:
+        checks.append(
+            {
+                "check_id": check_id,
+                "required": True,
+                "timeout_seconds": timeout,
+                "threshold": threshold,
+            }
+        )
+        for index, command in enumerate(commands):
+            executions.append(
+                {
+                    "execution_id": f"EXEC-{len(executions) + 1:03d}",
+                    "argv_template": command,
+                    "cwd_role": cwd_role,
+                    "timeout_seconds": 30 if check_id == "ts_coverage" and index == 1 else timeout,
+                    "check_ids": [check_id],
+                }
+            )
+    return {"level": level, "checks": checks, "executions": executions}
+
+
+def _node_coverage(value: object) -> dict[str, Any]:
+    coverage = _node_object(value, {"scope_files", "total", "changed", "method"})
+    _node_integer(coverage["scope_files"], minimum=1, maximum=20_000)
+    if coverage["method"] != _NODE_COVERAGE_METHOD:
+        raise _node_invalid()
+    for key, threshold in (("total", 85), ("changed", 90)):
+        fields = {"covered", "executable", "threshold"}
+        counts = _node_object(
+            coverage[key], fields | ({"applicability"} if key == "changed" else set())
+        )
+        denominator = _node_integer(counts["executable"], minimum=1 if key == "total" else 0)
+        _node_integer(counts["covered"], maximum=denominator)
+        if _node_integer(counts["threshold"]) != threshold:
+            raise _node_invalid()
+        if key == "changed" and counts["applicability"] != (
+            "applicable" if denominator else "not_applicable"
+        ):
+            raise _node_invalid()
+    if (
+        coverage["changed"]["executable"] > coverage["total"]["executable"]
+        or coverage["changed"]["covered"] > coverage["total"]["covered"]
+    ):
+        raise _node_invalid()
+    return coverage
+
+
+def _node_execution(
+    value: object,
+    fixed: Mapping[str, object],
+    *,
+    run_id: str,
+) -> bool:
+    execution = _node_object(value, _NODE_EXECUTION_FIELDS)
+    for key in ("execution_id", "cwd_role"):
+        if _node_text(execution[key]) != fixed[key]:
+            raise _node_invalid()
+    argv = execution["argv_template"]
+    if (
+        type(argv) is not list
+        or any(type(arg) is not str for arg in argv)
+        or argv != fixed["argv_template"]
+    ):
+        raise _node_invalid()
+    if _node_integer(execution["timeout_seconds"], minimum=1) != fixed["timeout_seconds"]:
+        raise _node_invalid()
+    if execution["returncode"] is not None:
+        _node_integer(execution["returncode"], maximum=0xFFFFFFFF)
+    _node_integer(execution["duration_ms"])
+    for key in ("timed_out", "stdout_overflow", "stderr_overflow", "execution_error"):
+        if type(execution[key]) is not bool:
+            raise _node_invalid()
+    if execution["cleanup"] not in ("confirmed", "unknown", "not_started"):
+        raise _node_invalid()
+    if execution["cleanup"] == "confirmed" and execution["returncode"] is None:
+        raise _node_invalid()
+    for name in ("stdout", "stderr"):
+        stream = _node_object(execution[name], {"bytes", "sha256", "raw_ref", "log_ref"})
+        size = _node_integer(stream["bytes"], maximum=1024 * 1024)
+        _node_text(stream["sha256"], r"[0-9a-f]{64}")
+        prefix = f"logs/{run_id}/node/raw/{fixed['execution_id']}/{name}"
+        if stream["raw_ref"] != prefix + ".raw" or stream["log_ref"] != prefix + ".log":
+            raise _node_invalid()
+        if size == 0 and stream["sha256"] != hashlib.sha256(b"").hexdigest():
+            raise _node_invalid()
+        if execution[f"{name}_overflow"] and size != 1024 * 1024:
+            raise _node_invalid()
+    return (
+        execution["returncode"] == 0
+        and execution["timed_out"] is False
+        and execution["stdout_overflow"] is False
+        and execution["stderr_overflow"] is False
+        and execution["cleanup"] == "confirmed"
+        and execution["execution_error"] is False
+    )
+
+
+def validate_node_evidence(
+    evidence: Mapping[str, object],
+    *,
+    require_passed: bool = False,
+) -> None:
+    """Check only the closed Node 3.1 public contract, without I/O or runtime replay.
+
+    A structurally passed document still needs the single production material recheck;
+    compact hashes and process claims cannot authenticate historical execution.
+    """
+    if not isinstance(evidence, Mapping) or set(evidence) != _NODE_TOP_FIELDS:
+        raise _node_invalid()
+    if (
+        type(require_passed) is not bool
+        or evidence["schema_version"] != "3.1"
+        or evidence["mode"] != "local"
+        or evidence["verification_level"] not in ("V0", "V1")
+        or evidence["conclusion"] not in ("passed", "failed")
+    ):
+        raise _node_invalid()
+    task_id = _node_text(evidence["task_id"], r"TASK-[0-9]{4,}")
+    units = evidence["decision_unit_ids"]
+    if type(units) is not list or not units:
+        raise _node_invalid()
+    for unit in units:
+        _node_text(unit, r"DU-[0-9]{3,}")
+    if len(units) != len(set(units)):
+        raise _node_invalid()
+    repository_id = _node_text(evidence["repository_id"])
+    generated = _node_text(evidence["generated_at"])
+    try:
+        if str(UUID(repository_id)) != repository_id or "T" not in generated:
+            raise _node_invalid()
+        if datetime.fromisoformat(generated.replace("Z", "+00:00")).tzinfo is None:
+            raise _node_invalid()
+    except ValueError as error:
+        raise _node_invalid() from error
+    _node_text(evidence["branch"])
+    for key in ("base_commit", "subject_commit"):
+        _node_text(evidence[key], r"[0-9a-f]{40}")
+    for key in (
+        "spec_sha256",
+        "policy_sha256",
+        "classification_input_sha256",
+        "node_binding_sha256",
+    ):
+        _node_text(evidence[key], r"[0-9a-f]{64}")
+    binding = _node_object(evidence["node_binding"], _NODE_BINDING_FIELDS)
+    profile = _node_object(binding["profile"], {"id", "revision"})
+    if profile["id"] != "agent-bridge-node" or _node_integer(profile["revision"]) != 1:
+        raise _node_invalid()
+    _node_text(binding["subject_tree"], r"[0-9a-f]{40}")
+    for key in (
+        "materials_sha256",
+        "semantic_contract_sha256",
+        "execution_contract_sha256",
+        "environment_sha256",
+    ):
+        _node_text(binding[key], r"[0-9a-f]{64}")
+    prepared = _node_object(binding["prepared"], {"ref", "size", "sha256"})
+    run = _node_object(binding["run"], {"ref", "size", "sha256"})
+    for item, maximum in ((prepared, 64 * 1024), (run, 16 * 1024 * 1024)):
+        _node_integer(item["size"], minimum=1, maximum=maximum)
+        _node_text(item["sha256"], r"[0-9a-f]{64}")
+    if prepared["ref"] != f"logs/node-prepared/{prepared['sha256']}/prepared.json":
+        raise _node_invalid()
+    reference = _node_text(run["ref"], r"logs/[A-Za-z0-9][A-Za-z0-9_.-]*/node/run\.json")
+    run_id = reference.split("/")[1]
+    if (
+        run_id.endswith(".")
+        or len(run_id) > 255
+        or run_id.split(".")[0].casefold()
+        in (
+            "con",
+            "prn",
+            "aux",
+            "nul",
+            *(f"{prefix}{index}" for prefix in ("com", "lpt") for index in range(1, 10)),
+        )
+    ):
+        raise _node_invalid()
+    reproduce = evidence["reproduce_command"]
+    if (
+        type(reproduce) is not list
+        or len(reproduce) != 9
+        or reproduce[:6] != ["python", "-m", "aiflow", "verify", task_id, "--actor"]
+        or reproduce[7:] != ["--node-materials", prepared["sha256"]]
+    ):
+        raise _node_invalid()
+    _node_text(reproduce[6], r"[A-Za-z0-9][A-Za-z0-9_.@-]*")
+    level = _node_text(evidence["verification_level"])
+    coverage = None
+    if binding["coverage"] is not None:
+        if level != "V1":
+            raise _node_invalid()
+        coverage = _node_coverage(binding["coverage"])
+    plan = _node_evidence_plan(level)
+    if binding["execution_contract_sha256"] != _node_digest(plan):
+        raise _node_invalid()
+    checks = evidence["checks"]
+    fixed_checks = cast(list[dict[str, object]], plan["checks"])
+    fixed_executions = cast(list[dict[str, object]], plan["executions"])
+    if type(checks) is not list or len(checks) != len(fixed_checks):
+        raise _node_invalid()
+    incomplete = stopped = False
+    all_processes = True
+    for value, fixed_check in zip(checks, fixed_checks, strict=True):
+        check = _node_object(value, {"check_id", "required", "status", "executions"})
+        if (
+            check["check_id"] != fixed_check["check_id"]
+            or check["required"] is not True
+            or check["status"] not in ("passed", "failed", "unverified")
+        ):
+            raise _node_invalid()
+        fixed = [row for row in fixed_executions if row["check_ids"] == [check["check_id"]]]
+        actual = check["executions"]
+        if type(actual) is not list or len(actual) > len(fixed):
+            raise _node_invalid()
+        succeeded = True
+        for execution, template in zip(actual, fixed, strict=False):
+            if incomplete or stopped:
+                raise _node_invalid()
+            succeeded = _node_execution(execution, template, run_id=run_id)
+            stopped = not succeeded
+        complete = len(actual) == len(fixed)
+        if fixed:
+            incomplete |= not complete
+            all_processes &= complete and succeeded
+            if not complete and check["status"] != "unverified":
+                raise _node_invalid()
+            if complete and not succeeded and check["status"] != "failed":
+                raise _node_invalid()
+            if check["status"] == "passed" and not (complete and succeeded):
+                raise _node_invalid()
+        elif actual or check["status"] == "passed" and (coverage is None or not all_processes):
+            raise _node_invalid()
+        if check["status"] == "passed" and check["check_id"] in ("ts_total_lines", "ts_diff_lines"):
+            assert coverage is not None
+            counts = coverage["total" if check["check_id"] == "ts_total_lines" else "changed"]
+            if counts["covered"] * 100 < counts["executable"] * counts["threshold"]:
+                raise _node_invalid()
+        if check["check_id"] == "ts_coverage" and check["status"] == "passed" and coverage is None:
+            raise _node_invalid()
+    expected_unverified = [check["check_id"] for check in checks if check["status"] == "unverified"]
+    if evidence["unverified_scenarios"] != expected_unverified:
+        raise _node_invalid()
+    passed = all(check["status"] == "passed" for check in checks)
+    if evidence["conclusion"] != ("passed" if passed else "failed"):
+        raise _node_invalid()
+    if coverage is not None and not all_processes:
+        raise _node_invalid()
+    if passed and (not all_processes or level == "V1" and coverage is None):
+        raise _node_invalid()
+    if evidence["node_binding_sha256"] != _node_digest(binding):
+        raise _node_invalid()
+    if require_passed and not passed:
+        raise ContractError("Node evidence has not passed", code="NODE_EVIDENCE_NOT_PASSED")

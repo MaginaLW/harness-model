@@ -24,7 +24,7 @@
         "reproduce_command"
     ],
     "properties": {
-        "schema_version": {"enum": ["1.0", "2.0"]},
+        "schema_version": {"enum": ["1.0", "2.0", "3.1"]},
         "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
         "decision_unit_ids": {
             "type": "array",
@@ -43,7 +43,7 @@
         "classification_input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "verification_level": {"enum": ["V0", "V1", "V2"]},
         "mode": {"enum": ["local", "ci"]},
-        "checks": {"type": "array", "items": {"$ref": "#/$defs/check"}},
+        "checks": {"type": "array", "items": {"anyOf": [{"$ref": "#/$defs/check"}, {"$ref": "#/$defs/node_check"}]}},
         "unverified_scenarios": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
         "conclusion": {"enum": ["passed", "failed", "provisional"]},
         "generated_at": {"type": "string", "format": "date-time"},
@@ -53,7 +53,9 @@
         "phase": {"enum": ["pre_implementation_review", "final"]},
         "verification_snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "review_refs": {"$ref": "#/$defs/review_refs"},
-        "targeted_mutation": {"$ref": "#/$defs/targeted_mutation"}
+        "targeted_mutation": {"$ref": "#/$defs/targeted_mutation"},
+        "node_binding": {"$ref": "#/$defs/node_binding"},
+        "node_binding_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
     },
     "allOf": [
         {
@@ -161,9 +163,474 @@
                     }
                 ]
             }
+        },
+        {
+            "if": {
+                "properties": {"schema_version": {"enum": ["1.0", "2.0"]}},
+                "required": ["schema_version"]
+            },
+            "then": {
+                "properties": {"checks": {"type": "array", "items": {"$ref": "#/$defs/check"}}},
+                "not": {"anyOf": [{"required": ["node_binding"]}, {"required": ["node_binding_sha256"]}]}
+            }
+        },
+        {
+            "if": {"properties": {"schema_version": {"const": "3.1"}}, "required": ["schema_version"]},
+            "then": {
+                "required": ["node_binding", "node_binding_sha256"],
+                "properties": {
+                    "mode": {"const": "local"},
+                    "verification_level": {"enum": ["V0", "V1"]},
+                    "conclusion": {"enum": ["passed", "failed"]},
+                    "checks": {
+                        "type": "array",
+                        "minItems": 6,
+                        "maxItems": 9,
+                        "items": {"$ref": "#/$defs/node_check"}
+                    }
+                },
+                "not": {
+                    "anyOf": [
+                        {"required": ["attestation_head"]},
+                        {"required": ["attestation_governance_only"]},
+                        {"required": ["verifier_actor"]},
+                        {"required": ["verifier_context_sha256"]},
+                        {"required": ["phase"]},
+                        {"required": ["verification_snapshot_sha256"]},
+                        {"required": ["review_refs"]},
+                        {"required": ["targeted_mutation"]}
+                    ]
+                },
+                "allOf": [
+                    {
+                        "if": {"properties": {"verification_level": {"const": "V0"}}},
+                        "then": {
+                            "properties": {
+                                "checks": {
+                                    "minItems": 6,
+                                    "maxItems": 6,
+                                    "prefixItems": [
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {"properties": {"check_id": {"const": "contract"}}}
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {"properties": {"check_id": {"const": "scope"}}}
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {"properties": {"check_id": {"const": "smoke"}}}
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "node_build"}}
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "node_check"}}
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "diff_whitespace"}}
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "items": false
+                                },
+                                "node_binding": {"properties": {"coverage": {"type": "null"}}}
+                            }
+                        }
+                    },
+                    {
+                        "if": {"properties": {"verification_level": {"const": "V1"}}},
+                        "then": {
+                            "properties": {
+                                "checks": {
+                                    "minItems": 9,
+                                    "maxItems": 9,
+                                    "prefixItems": [
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {"properties": {"check_id": {"const": "contract"}}}
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {"properties": {"check_id": {"const": "scope"}}}
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {"properties": {"check_id": {"const": "smoke"}}}
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "node_build"}}
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "node_check"}}
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "diff_whitespace"}}
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "ts_coverage"}}
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "ts_total_lines"}}
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {"$ref": "#/$defs/node_check"},
+                                                {
+                                                    "properties": {"check_id": {"const": "ts_diff_lines"}}
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "items": false
+                                }
+                            },
+                            "allOf": [
+                                {
+                                    "if": {"properties": {"conclusion": {"const": "passed"}}},
+                                    "then": {
+                                        "properties": {
+                                            "node_binding": {
+                                                "properties": {"coverage": {"$ref": "#/$defs/node_coverage"}}
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
         }
     ],
     "$defs": {
+        "node_stream": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["bytes", "sha256", "raw_ref", "log_ref"],
+            "properties": {
+                "bytes": {"type": "integer", "minimum": 0, "maximum": 1048576},
+                "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "raw_ref": {
+                    "type": "string",
+                    "pattern": "^logs/[A-Za-z0-9][A-Za-z0-9_.-]*/node/raw/EXEC-[0-9]{3}/(stdout|stderr)\\.raw$"
+                },
+                "log_ref": {
+                    "type": "string",
+                    "pattern": "^logs/[A-Za-z0-9][A-Za-z0-9_.-]*/node/raw/EXEC-[0-9]{3}/(stdout|stderr)\\.log$"
+                }
+            }
+        },
+        "node_execution": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "execution_id",
+                "argv_template",
+                "cwd_role",
+                "timeout_seconds",
+                "returncode",
+                "timed_out",
+                "duration_ms",
+                "stdout",
+                "stderr",
+                "stdout_overflow",
+                "stderr_overflow",
+                "cleanup",
+                "execution_error"
+            ],
+            "properties": {
+                "execution_id": {"type": "string", "pattern": "^EXEC-[0-9]{3}$"},
+                "argv_template": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+                "cwd_role": {"enum": ["original", "isolated"]},
+                "timeout_seconds": {"enum": [30, 300, 600]},
+                "returncode": {"type": ["integer", "null"], "minimum": 0, "maximum": 4294967295},
+                "timed_out": {"type": "boolean"},
+                "duration_ms": {"type": "integer", "minimum": 0},
+                "stdout": {"$ref": "#/$defs/node_stream"},
+                "stderr": {"$ref": "#/$defs/node_stream"},
+                "stdout_overflow": {"type": "boolean"},
+                "stderr_overflow": {"type": "boolean"},
+                "cleanup": {"enum": ["confirmed", "unknown", "not_started"]},
+                "execution_error": {"type": "boolean"}
+            },
+            "allOf": [
+                {
+                    "if": {"properties": {"cleanup": {"const": "confirmed"}}},
+                    "then": {"properties": {"returncode": {"type": "integer"}}}
+                }
+            ]
+        },
+        "node_check": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["check_id", "required", "status", "executions"],
+            "properties": {
+                "check_id": {
+                    "enum": [
+                        "contract",
+                        "scope",
+                        "smoke",
+                        "node_build",
+                        "node_check",
+                        "diff_whitespace",
+                        "ts_coverage",
+                        "ts_total_lines",
+                        "ts_diff_lines"
+                    ]
+                },
+                "required": {"const": true},
+                "status": {"enum": ["passed", "failed", "unverified"]},
+                "executions": {"type": "array", "maxItems": 3, "items": {"$ref": "#/$defs/node_execution"}}
+            },
+            "allOf": [
+                {
+                    "if": {"properties": {"check_id": {"const": "contract"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 1}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 1}}}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {"properties": {"check_id": {"const": "scope"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 1}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 1}}}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {"properties": {"check_id": {"const": "smoke"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 1}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 1}}}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {"properties": {"check_id": {"const": "node_build"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 1}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 1}}}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {"properties": {"check_id": {"const": "node_check"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 1}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 1}}}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {"properties": {"check_id": {"const": "diff_whitespace"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 3}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 3}}}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {"properties": {"check_id": {"const": "ts_coverage"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 2}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 2}}}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {"properties": {"check_id": {"const": "ts_total_lines"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 0}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 0}}}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {"properties": {"check_id": {"const": "ts_diff_lines"}}},
+                    "then": {
+                        "properties": {"executions": {"maxItems": 0}},
+                        "allOf": [
+                            {
+                                "if": {"properties": {"status": {"const": "passed"}}},
+                                "then": {"properties": {"executions": {"minItems": 0}}}
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "node_coverage": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scope_files", "total", "changed", "method"],
+            "properties": {
+                "scope_files": {"type": "integer", "minimum": 1, "maximum": 20000},
+                "total": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["covered", "executable", "threshold"],
+                    "properties": {
+                        "covered": {"type": "integer", "minimum": 0},
+                        "executable": {"type": "integer", "minimum": 0},
+                        "threshold": {"const": 85}
+                    }
+                },
+                "changed": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["covered", "executable", "threshold", "applicability"],
+                    "properties": {
+                        "covered": {"type": "integer", "minimum": 0},
+                        "executable": {"type": "integer", "minimum": 0},
+                        "threshold": {"const": 90},
+                        "applicability": {"enum": ["applicable", "not_applicable"]}
+                    }
+                },
+                "method": {"const": "vite-8.2.1-oxc-es2024-ast-v8-to-istanbul-zero-hit-v1"}
+            }
+        },
+        "node_binding": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "profile",
+                "subject_tree",
+                "prepared",
+                "run",
+                "materials_sha256",
+                "semantic_contract_sha256",
+                "execution_contract_sha256",
+                "environment_sha256",
+                "coverage"
+            ],
+            "properties": {
+                "profile": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "revision"],
+                    "properties": {"id": {"const": "agent-bridge-node"}, "revision": {"const": 1}}
+                },
+                "subject_tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+                "prepared": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["ref", "size", "sha256"],
+                    "properties": {
+                        "ref": {
+                            "type": "string",
+                            "pattern": "^logs/node-prepared/[0-9a-f]{64}/prepared\\.json$"
+                        },
+                        "size": {"type": "integer", "minimum": 1, "maximum": 65536},
+                        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+                    }
+                },
+                "run": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["ref", "size", "sha256"],
+                    "properties": {
+                        "ref": {
+                            "type": "string",
+                            "pattern": "^logs/[A-Za-z0-9][A-Za-z0-9_.-]*/node/run\\.json$"
+                        },
+                        "size": {"type": "integer", "minimum": 1, "maximum": 16777216},
+                        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+                    }
+                },
+                "materials_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "semantic_contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "execution_contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "environment_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "coverage": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/node_coverage"}]}
+            }
+        },
         "check": {
             "type": "object",
             "additionalProperties": false,

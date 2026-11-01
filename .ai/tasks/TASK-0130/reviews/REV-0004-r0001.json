@@ -1,0 +1,639 @@
+{
+  "context_sha256": "eae95747084ce376e30e35b80ef0ed61a47cba3beeffd83b7937aa7d31f0dc87",
+  "findings": [
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-001",
+      "location": {
+        "line": 1900,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current SCHEMA_FILES registers review-record and the governance snapshot validates registered event, review and context bindings. The fresh current ordinary-wheel V0/V1 legally complete the review/code/Gate lifecycle; current Native passes the contract and consumer regressions. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Unknown review contract blocks legal lifecycle"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-002",
+      "location": {
+        "line": 780,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current _engine binds ordinary distributions, complete installed inventories including recorded executable inputs, loaded origins, startup and RECORD facts. The independently accepted new8d7d wheel matches all49 current sources, ZIP76 and installed package70/resources21; original current consumer facts remain unchanged. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Installed engine inventory omitted executable installation inputs"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-003",
+      "location": {
+        "line": 1083,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current dependency-shim validation derives the exact locked bin owners, all three official shim forms, complete file set and bytes; unknown .bin ownership or child directories reject. Fresh current Node acceptance uses the reviewed public dependency closure. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Unknown npm bin shim accepted as prepared dependency"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-004",
+      "location": {
+        "line": 1519,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current preflight replay binds exact node/npm roles, version text, fixed argv/cwd/environment, 30-second limits and typed receipts/raw streams. The new current package evidence independently validates all preflights, manifests and18 real process receipts. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Preflight receipt not bound to fixed material roles"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/verification_service.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-005",
+      "location": {
+        "line": 941,
+        "path": "src/aiflow/verification_service.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current trusted Node capability, material selector, actor and run-ID rejection occur before recovery-capable task reads, state writes or processes. Unsupported V2/CI remains closed. Relevant current full Native rejection matrices passed. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Invalid material selector reached state writes before rejection"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-006",
+      "location": {
+        "line": 2495,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current evidence transitively binds coverage report, summary, independent expected map, source manifest and exact B-to-S diff originals. Read-only replay recomputes the complete source inventory/counts, and the fresh real V1 acceptance rejects changed map lines and float hit counts. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Coverage originals were not transitively bound to evidence"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-007",
+      "location": {
+        "line": 290,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current preparation/recheck uses one shared entry/byte budget across source, runtime, dependencies, engine and host tools, counting directory entries. Existing aggregate-boundary tests run in the actual current full Native; no per-role budget relaxation was introduced. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Whole-material budget was enforced separately per role"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-008",
+      "location": {
+        "line": 187,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current Windows identity removes only filename-inferred execute bits so lstat and fstat agree while preserving all other metadata, link and byte checks. Actual current Windows ordinary-wheel execution and Native tests validate the unchanged identity boundary. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Windows path-inferred executable bits caused false material drift"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-009",
+      "location": {
+        "line": 1519,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current selector/manifest loader and material recheck enforce the exact task-owned payload roots, selected node.exe, complete npm/runtime shape and fixed dependency root. Malformed or rebound roles fail closed before execution. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Prepared runtime and npm roles could escape the fixed payload"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_verification.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-010",
+      "location": {
+        "line": 210,
+        "path": "src/aiflow/node_verification.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current pure coverage loops enforce monotonic30-second checks, including cached UTF16/range and auxiliary traversal paths, with bounded inputs. Existing timeout regressions are part of the current complete Native, rather than relying on declared metadata alone. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Pure coverage check deadlines were metadata only"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-011",
+      "location": {
+        "line": 661,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current startup audit permits only the exact RECORD-bound distutils-precedence hook, binds complete setuptools when needed, rejects other sites/customizations and inventories complete dependency trees. Current installed-package and read-only consumer acceptance validate these exact bytes. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Ordinary engine material excludes site startup execution inputs"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-012",
+      "location": {
+        "line": 894,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current fixed Git layout closes entry, backend, upload-pack and shell roles and binds fixed API-derived OS files/configuration. Source Git configuration/hooks/attributes and environment remain constrained. Fresh real acceptance binds the actual CodeGit2.53 images separately from NativeGit2.55. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Fixed Git material binds entry while actual clone uses unbound executables"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-013",
+      "location": {
+        "line": 2161,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current root protection covers tracked bytes plus nested untracked/ignored metadata and external Git administration, using Windows handle change time without reading unknown private contents. Only exact derived governance paths, verified append transactions and the owned run may advance. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Original task root ignores nested untracked and ignored file output drift"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-014",
+      "location": {
+        "line": 393,
+        "path": "src/aiflow/node_execution.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current semantic contract and fixed process environment set NODE_DISABLE_COMPILE_CACHE=1, closing official npm compile-cache outputs without arbitrary exclusions. Fresh current ordinary-wheel V0/V1 complete with the original required process order. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Official npm compile-cache output prevents the fixed ordinary-wheel V0 lifecycle"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/node_verification.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-015",
+      "location": {
+        "line": 252,
+        "path": "src/aiflow/node_verification.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current converter-null exception is limited to recognized source-range ends and derives the original line UTF16 boundary without changing report bytes. Other nulls, booleans, floats, reversed ranges and invalid boundaries remain rejected; current real V1 and full Native tests support this scope. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "Strict integer coverage coordinates reject the bound converter null end-column representation"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/approval.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-016",
+      "location": {
+        "line": 597,
+        "path": "src/aiflow/approval.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current pending code-marker envelope is closed and replayed against exact event/task/approval prefixes, latest registered implementation review, current evidence/subject/Policy and per-unit coverage. The shared root guard permits this validated transaction and rejects forged or stale markers; fresh real code approval/Gate succeeds. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "A valid code-approval transaction marker self-blocks the shared Node root guard"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/contracts.py",
+        "tests/unit/test_contracts.py"
+      ],
+      "finding_id": "RF-017",
+      "location": {
+        "line": 161,
+        "path": "src/aiflow/contracts.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current batch validation closes the escaped callable in finally and checks the complete schema-byte snapshot before successful return. Callers remain no-write until block exit; resource/validation error order and per-event semantics are preserved in the current Native. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-BATCH-001] Batch validator callable could escape resource-snapshot lifetime"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/git_context.py",
+        "tests/unit/test_git_context.py"
+      ],
+      "finding_id": "RF-018",
+      "location": {
+        "line": 164,
+        "path": "src/aiflow/git_context.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current porcelain-v2 parsing retains legal literal branch names, upstream constraints, detached disambiguation and Git short/full spellings under ref collisions rather than guessing an abbreviation. The branch regressions and current source branch bindings are intact. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-GIT-001] Porcelain aggregation rejects legal literal Git branch names"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/git_context.py",
+        "tests/unit/test_git_context.py"
+      ],
+      "finding_id": "RF-019",
+      "location": {
+        "line": 178,
+        "path": "src/aiflow/git_context.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current universal task-Schema drive-prefix/path escapes remain rejected on every host; remaining colon/ADS rejection applies only on Windows, preserving otherwise valid POSIX literals. Tests patch the runtime os proxy without changing global pathlib platform state. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-GIT-002] Shared Git status parser rejects existing legal POSIX colon paths"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "src/aiflow/git_context.py",
+        "tests/unit/test_git_context.py"
+      ],
+      "finding_id": "RF-020",
+      "location": {
+        "line": 321,
+        "path": "src/aiflow/git_context.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current failed aggregate query replays only the original HEAD/hash/branch diagnostics before re-raising the status error, preserving inherited relative Git environment and error priority. Successful collection keeps its bounded aggregate query path. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-GIT-003] Failed aggregate query changed existing relative Git environment error priority"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "tests/unit/test_git_context.py"
+      ],
+      "finding_id": "RF-021",
+      "location": {
+        "line": 448,
+        "path": "tests/unit/test_git_context.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current synthetic merge-conflict regression supplies command-local user.name/email and has no ambient Git identity dependency. Its source assertion remains in the actual current complete Native, with actual Ubuntu coverage/quality CI still separately required. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-TEST-001] Synthetic merge-conflict regression depended on ambient Git identity"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "tests/unit/test_node_v0_outputs.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ci-pr143-run41278501102.log"
+      ],
+      "finding_id": "RF-022",
+      "location": {
+        "line": 470,
+        "path": "tests/unit/test_node_v0_outputs.py"
+      },
+      "severity": "medium",
+      "status": "open",
+      "title": "[RF-CI-001] Actual exact-current-head Ubuntu required diff coverage remains pending"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        "tests/unit/test_node_v0_contract.py"
+      ],
+      "finding_id": "RF-023",
+      "location": {
+        "line": 1766,
+        "path": "tests/unit/test_node_v0_contract.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "The direct consumer now calls the original immutable seed producer and supplies its required fixture argument, preserving decorators, IDs and assertions. Both affected modules were previously verified and all six repaired cases run in this new5674-item Native; old433b failure is preserved as historical. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "Direct fixture consumer omitted newly required immutable Policy seed argument"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        ".ai/tasks/TASK-0130/action-v2-targeted-mutation-fixture-consumer.json",
+        ".ai/tasks/TASK-0130/action-v2-targeted-mutation-linux-typing.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-action-review.json"
+      ],
+      "finding_id": "RF-024",
+      "location": {
+        "path": ".ai/tasks/TASK-0130/action-v2-targeted-mutation-fixture-consumer.json"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "The historical unapproved draft's unsupported top-level spec_sha256 was removed without weakening the closed action parser. Current e294 independently parses with valid closed fields and binds spec in condition/approval/context; old rejected draft and severity high remain in the original review history. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "high",
+      "status": "resolved",
+      "title": "[NATIVE-ACTION-004] Initial unapproved action draft contained unsupported top-level spec_sha256"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        ".ai/tasks/TASK-0130/action-v2-targeted-mutation-fixture-consumer.json",
+        ".ai/tasks/TASK-0130/action-v2-targeted-mutation-linux-typing.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-action-review.json"
+      ],
+      "finding_id": "RF-025",
+      "location": {
+        "path": ".ai/tasks/TASK-0130/action-v2-targeted-mutation-fixture-consumer.json"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "The action now accurately states that three original budget-test rows became eight V1/V2 rows, netfive added cases, preserving logic rather than claiming literal old-ID inclusion. Current94af collects the same5674 IDs as e444 and the actual full Native executes all5674. Independently reassessed for current94af with the new actual complete Native and current package proof. Earlier review/outcome/approval is historical input, not current authority; original severity is retained.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[NATIVE-ACTION-005] Action condition overstated literal old test-nodeID inclusion"
+    },
+    {
+      "evidence_refs": [
+        "src/aiflow/process_runner.py",
+        "src/aiflow/node_execution.py",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ci-pr143-run41278501102.log",
+        ".ai/tasks/TASK-0130/logs/bootstrap/windows-ctypes-typing/summary.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-independent-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/ordinary-wheel-94afbe3-current-consumers-target-cwd.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/sdist-94afbe3-independent-observations.json"
+      ],
+      "finding_id": "RF-026",
+      "location": {
+        "line": 340,
+        "path": "src/aiflow/process_runner.py"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Current94af changes only three lines/four no-default getattr lookups; inverse normalization produces the exact prior whole-source AST and other47 source files are unchanged. Windows guards, APIs/arguments, FFI signatures and exception behavior remain. Linux/default mypy each60 files passed, current actual full Native and current fresh wheel pass. The restricted334pass/one legacy kill failure, observed taskkill128 and later root original-case1pass4.27s remain separate; this repair does not assert new Ubuntu CI success.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[RF-TYPING-001] Ubuntu required mypy cannot resolve Windows-only ctypes attributes"
+    },
+    {
+      "evidence_refs": [
+        ".ai/tasks/TASK-0130/action-v2-targeted-mutation-linux-typing.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-action-preliminary-review.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-action-review.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/wheel-94afbe3-interruption-observations.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-launch-preflight.json",
+        ".ai/tasks/TASK-0130/logs/run-20261101T064500422632Z/evidence.json",
+        ".ai/tasks/TASK-0130/logs/bootstrap/native-linux-typing-verifier-observations.json"
+      ],
+      "finding_id": "RF-027",
+      "location": {
+        "line": 12,
+        "path": ".ai/tasks/TASK-0130/action-v2-targeted-mutation-linux-typing.json"
+      },
+      "resolution": {
+        "actor": "independent-node-typing-implementation-reviewer",
+        "reason": "Only condition6 was corrected before approval: current supervised wheel061727/sdist31750 require actual terminal results, while historical060850 remains interrupted/NOT_ACCEPTED_INCOMPLETE with exit and cleanup UNKNOWN. Limited current process observations certify no historical descendant cleanup; incomplete artifacts are never reused. Preliminary7732 REQUEST_CHANGES and medium severity are preserved. New e294 was separately independently approved, truly preflighted with one eligible unused approval, and consumed once at seq34 during this actual run. No false historical terminal state was substituted.",
+        "resolved_at": "2026-11-01T07:09:28.618197+00:00"
+      },
+      "severity": "medium",
+      "status": "resolved",
+      "title": "[NATIVE-ACTION-006] Initial heavy-job condition conflated historical interruption with proven terminal results"
+    }
+  ],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-01T07:09:28.618197+00:00",
+  "review_id": "REV-0004",
+  "review_stage": "implementation",
+  "reviewer": "independent-node-typing-implementation-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent current implementation review by actual new reviewer /root/typing_delivery_review (actor independent-node-typing-implementation-reviewer), not the former reviewer thread and not a source/test author. APPROVE for TASK0130 subject94afbe32a599cfc66e46a1327c8df8307279d4e8 from true Node-free basea05037749cb9f9b301e761d77cfb3b3f54c1c9f0, spec eb3e5267, classification2ccd2d3f and actual Policyfac8afbe. Current context binds snapshot65cd248dee822df2909990062017ffaf711d153af175fb2504e82abf0b89d939. All27 findings retain original IDs/severity:17high and10medium; only RF022 medium remains open, no critical/high open. RF026 current type repair and RF027 initial action-condition ambiguity are resolved without rewriting the earlier records.\n\nReviewed current complete production diff, Node material/preparation/execution/recheck, full engine/startup/RECORD and dependency/Git/host roles, typed Job/EOF/cleanup receipts, complete source/output/root metadata/governance protection, strict TS mapping/85total90diff arithmetic and shared evidence/review/approval/Gate/status/recovery consumers. Both changed Schemas and compatible Native callers were inspected. Node V2/CI still rejects before recovery/writes/processes; no installed-V2 or actual target adoption is delivered. Batch resource validation remains scoped/no-write/lifetime-closed; Git aggregation preserves supported branch/path/error semantics; fixture copies/caches retain independent source/case/assertion boundaries and real restored consumer checks. The3000change is only the shared Native pytest constant and eight V1/V2 Policy entries; other checks/deadlines/85total90diff and five actual mutants remain. Policy label2.6.0 stays while content SHA changes; old1200 is explicitly rejected without automatic migration. Workflow only changes its explanatory comment and retains90-minute job, commands, thresholds and protection.\n\nCurrent fresh ordinary wheel8d7daf8f3a4c7e0934decbd9a24c0d921582b15a85d3899935cd515528e24679 has actual real V0 six logical/eight processes and V1 nine logical/ten processes plus two pure calculations, positive Gate and six/two real tamper rejections. Independent current package acceptance f3bca5dc validates complete49 sources/76 inputs/ZIP76/installed package70/resources21/RECORD,14 manifests and18 receipts/36 raw streams. Correct target-cwd actual current consumers f56923f0 preserve original metadata: V0 retains the intentional extra and is STALE/Gatefalse; V1 is current/pass/GatePASS. Initial wrong-cwd verifier invocation remains a separate failed audit, not a renamed pass or product failure. Current sdist acceptance3dd583bc independently binds four LF/CRLF direct/rebuilt wheels, each76 payload bytes equal to the new wheel, two safe sdists and four actual isolated resource APIs; it claims no extra Node lifecycle from each rebuild. Old57c/oldTask129 and interrupted060850 provide no current authority.\n\nNew actual independent verifier /root/typing_native_verifier accepted current raw pre/archive4da827828312edb882d782d6ac228151ebc3a8b0e70ad7eee9c65e4c956c7789 in audit c922706fd3488df2f45736fc29c82db6a9f93aef1ec7755b986913d6901763b8. All14 required checks pass; all5674 collected items actually execute with5669passed/five existing skips in1022.27pytest seconds, shared runner1023062ms under3000000ms. Separate current real package proof covers the two opt-in Node skips; POSIX cases still require actual Ubuntu CI. Current branch-enabled combined totals recomputed from XML are core89.425273165percent and analysis97.503900156percent; pure branch rates83.274414494/96.632653061 are disclosed separately and not substituted for the combined85 gate. Core changed coverage is2564/2825=90.761061947percent, analysis has zero changed executable lines. Current official mutation consumer independently replayed all five actual baseline0/mutant1/killed/no-timeout logs, digest5a082d9d57338ab9743f38209b2bb17ffbe34956a8e939c8ea5e2a615dc2b3de. Ruff/format/mypy/whitespace pass. E294 approved/unique preflight/start/seq34 consumption and root mechanical foreground supervision are distinct facts; actual verifier owns this start and later same-instance finalize. Generic historical descendant cleanup remains UNKNOWN, beyond the two currently absent known PIDs; Node receipt cleanup facts are only their actual scope. Earlier433b Native, f9 old pass, old spent actions and actual PR142/PR143 CI failures remain preserved.\n\nThis record is formal implementation review only. Same actual verifier must explicitly finalize after this record; current final-evidence code approval/Gate and actual exact merge-head required ai-quality-gate CI remain mandatory. RF022 is not closed by Windows success, the prior Ubuntu coverage pass, budget extension or local Linux-typechecking. If the fixed head actually passes every required check, official append-only resolve may close RF022 locally before merging that unchanged head; the revision/task-close/docs then enter a separately checked closeout PR. A moved head always needs its own checks. No threshold waiver, owner-decision transfer, real model/SDK/WeChat/paid/production call, private export, repository settings change, action approval, finalize, code approval, Git push or merge was performed by this reviewer.",
+  "task_id": "TASK-0130"
+}

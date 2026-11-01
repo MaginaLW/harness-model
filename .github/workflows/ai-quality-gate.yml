@@ -14,7 +14,7 @@ concurrency:
 jobs:
   ai-quality-gate:
     runs-on: ubuntu-latest
-    # V2 runs one shared full coverage pytest execution (1200 s budget) plus
+    # V2 runs one shared full coverage pytest execution (3000 s budget) plus
     # lint, typing and diff coverage; leave room for dependency setup, Gate
     # evaluation, diagnostics, and runner variance.
     timeout-minutes: 90

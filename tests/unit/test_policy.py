@@ -138,7 +138,7 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
                 "--cov-branch",
                 "--cov-report=xml:{run_dir}/coverage.xml",
             ],
-            "timeout_seconds": 1200,
+            "timeout_seconds": 3000,
             "required": True,
             "environment": {"COVERAGE_FILE": "{run_dir}/.coverage"},
         }

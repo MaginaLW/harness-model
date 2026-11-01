@@ -173,6 +173,7 @@ def build_parser() -> ArgumentParser:
     verify.add_argument("--ci", action="store_true")
     verify.add_argument("--ci-run-dir", type=Path)
     verify.add_argument("--output", type=Path)
+    verify.add_argument("--node-materials", metavar="SHA256", help="bound Node material selector")
     gate = subparsers.add_parser("gate", help="evaluate the read-only merge gate")
     gate.add_argument("task_id")
     gate.add_argument("--evidence", type=Path)
@@ -553,6 +554,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             finalize=arguments.finalize,
             abandon=arguments.abandon,
             reason=arguments.reason,
+            node_materials_sha256=arguments.node_materials,
         )
         print(f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}")
     elif arguments.command == "gate":

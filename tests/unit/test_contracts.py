@@ -14,8 +14,10 @@ from jsonschema.validators import Draft202012Validator
 
 from aiflow.contracts import (
     ContractValidationError,
+    contract_validation_batch,
     load_schema,
     require_valid_contract,
+    schema_directory_context,
     validate_contract,
     validate_task_event_consistency,
 )
@@ -345,3 +347,124 @@ def test_legacy_contract_keeps_unknown_field_name_in_diagnostic() -> None:
     errors = validate_contract("observation", value)
     assert "/summary/credentials: unexpected property" in errors
     assert "SUPER_SECRET_VALUE" not in "\n".join(errors)
+
+
+@pytest.mark.parametrize("name", ["task", "event", "evidence", "ask-options"])
+def test_batch_errors_match_fresh_single_validation(name: str) -> None:
+    values = [valid_fixture(name), load_json(INVALID_ROOT / f"{name}.missing.json")]
+    expected = [validate_contract(name, value) for value in values]
+    with contract_validation_batch(name, len(values)) as validate:
+        assert [validate(value) for value in values] == expected
+
+
+@pytest.mark.parametrize("change", ["bytes", "missing", "added"])
+def test_batch_rejects_resource_drift_before_return(tmp_path: Path, change: str) -> None:
+    from aiflow.errors import ContractError
+
+    directory = tmp_path / "schemas"
+    shutil.copytree(REPOSITORY_ROOT / ".ai/schemas", directory)
+    path = directory / "approval.schema.json"
+    if change == "added":
+        path.unlink()
+    with schema_directory_context(directory):
+        with pytest.raises(ContractError, match="resources changed"):
+            with contract_validation_batch("task", 2) as validate:
+                assert validate(valid_fixture("task")) == []
+                if change == "missing":
+                    path.unlink()
+                else:
+                    path.write_text("{}", encoding="utf-8")
+                assert validate(valid_fixture("task")) == []
+
+
+def test_batch_is_context_local_and_single_api_remains_fresh(tmp_path: Path) -> None:
+    directory = tmp_path / "schemas"
+    shutil.copytree(REPOSITORY_ROOT / ".ai/schemas", directory)
+    path = directory / "task.schema.json"
+    original = path.read_bytes()
+    value = valid_fixture("task")
+    with schema_directory_context(directory):
+        with contract_validation_batch("task", 2) as validate:
+            assert validate(value) == []
+            changed = json.loads(original)
+            changed["required"].append("batch_new_requirement")
+            path.write_text(json.dumps(changed), encoding="utf-8")
+            assert any(
+                "/batch_new_requirement:" in error for error in validate_contract("task", value)
+            )
+            with schema_directory_context(REPOSITORY_ROOT / ".ai/schemas"):
+                assert validate_contract("task", value) == []
+            assert validate(value) == []
+            path.write_bytes(original)
+    assert validate_contract("task", value) == []
+
+
+@pytest.mark.parametrize("raw", [b"{", b"\xef\xbb\xbf{}", b"\xff"])
+def test_batch_does_not_ignore_bad_available_schema(tmp_path: Path, raw: bytes) -> None:
+    directory = tmp_path / "schemas"
+    shutil.copytree(REPOSITORY_ROOT / ".ai/schemas", directory)
+    (directory / "approval.schema.json").write_bytes(raw)
+    with schema_directory_context(directory):
+        with pytest.raises((ValueError, UnicodeError)):
+            with contract_validation_batch("task", 2) as validate:
+                validate(valid_fixture("task"))
+
+
+def test_batch_missing_unreferenced_schema_is_allowed_but_root_is_required(tmp_path: Path) -> None:
+    directory = tmp_path / "schemas"
+    shutil.copytree(REPOSITORY_ROOT / ".ai/schemas", directory)
+    (directory / "approval.schema.json").unlink()
+    with schema_directory_context(directory):
+        with contract_validation_batch("task", 2) as validate:
+            assert validate(valid_fixture("task")) == []
+        (directory / "task.schema.json").unlink()
+        with pytest.raises(FileNotFoundError):
+            with contract_validation_batch("task", 2) as validate:
+                validate(valid_fixture("task"))
+
+
+def test_batch_empty_does_not_read_and_single_preserves_fresh_behavior(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import aiflow.contracts as contracts
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("empty/single batch must not prepare a resource snapshot")
+
+    monkeypatch.setattr(contracts, "_schema_contents", unexpected)
+    with contract_validation_batch("task", 0):
+        pass
+    with contract_validation_batch("task", 1) as validate:
+        assert validate(valid_fixture("task")) == []
+
+
+def test_batch_rejects_bad_reference_like_single_validation(tmp_path: Path) -> None:
+    directory = tmp_path / "schemas"
+    shutil.copytree(REPOSITORY_ROOT / ".ai/schemas", directory)
+    path = directory / "task.schema.json"
+    schema = json.loads(path.read_text(encoding="utf-8"))
+    schema["$ref"] = "urn:aiflow:unavailable"
+    path.write_text(json.dumps(schema), encoding="utf-8")
+    with schema_directory_context(directory):
+        with pytest.raises(Exception) as single:
+            validate_contract("task", valid_fixture("task"))
+        with pytest.raises(type(single.value)):
+            with contract_validation_batch("task", 2) as validate:
+                validate(valid_fixture("task"))
+
+
+@pytest.mark.parametrize("count", [0, 1, 2])
+@pytest.mark.parametrize("failed", [False, True])
+def test_batch_callable_cannot_escape_lifetime(count: int, failed: bool) -> None:
+    from aiflow.errors import ContractError
+
+    try:
+        with contract_validation_batch("task", count) as validate:
+            assert validate(valid_fixture("task")) == []
+            if failed:
+                raise RuntimeError("synthetic earlier failure")
+    except RuntimeError:
+        assert failed
+    with pytest.raises(ContractError) as caught:
+        validate(valid_fixture("task"))
+    assert caught.value.code == "CONTRACT_BATCH_CLOSED"
