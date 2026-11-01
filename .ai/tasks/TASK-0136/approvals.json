@@ -11,5 +11,18 @@
     "spec_sha256": "175297e180eea6b459a6d17ef4ca3010ef759fa35abd058a9ea689bf35535fac",
     "subject_commit": "5a802cd1bb60a23d01bc0fa0a7922026176855f6",
     "task_id": "TASK-0136"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-01T22:13:40Z",
+    "base_commit": "5a802cd1bb60a23d01bc0fa0a7922026176855f6",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual independent design REV-0003 APPROVE, no open critical/high findings, covers the frozen fixed native-output supplement and unchanged complete original-base gates. Authorize only bounded implementation; no personal human review, execution action, code approval, publication or target authority is asserted.",
+    "schema_version": "1.0",
+    "spec_sha256": "f5127c3233174b10cd57aed4949a9536037dc5297041f0993bb115113edb1f7f",
+    "subject_commit": "68aed163fb165e9ef2d9b59acb5b43b4f990a2d4",
+    "task_id": "TASK-0136"
   }
 ]

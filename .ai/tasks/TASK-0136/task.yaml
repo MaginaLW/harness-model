@@ -139,14 +139,14 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 175297e180eea6b459a6d17ef4ca3010ef759fa35abd058a9ea689bf35535fac
+frozen_spec_sha256: f5127c3233174b10cd57aed4949a9536037dc5297041f0993bb115113edb1f7f
 goal: Complete the ordinary-installed local Node V2 lifecycle with exact Istanbul
   evidence and all existing gates
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-01T15:38:23Z'
-subject_commit: 2c6ca5ffccb13c0aee487144a61c3d6f252629cf
+spec_frozen_at: '2026-11-01T22:08:48Z'
+subject_commit: 68aed163fb165e9ef2d9b59acb5b43b4f990a2d4
 task_id: TASK-0136
-updated_at: '2026-11-01T20:23:28Z'
+updated_at: '2026-11-01T22:14:07Z'
 worktree_dirty: false
 worktree_dirty_paths: []
