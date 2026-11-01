@@ -717,9 +717,34 @@ def _consume_action(root: Path, inputs: InstalledMutationInputs, run_ref: str) -
 
 
 _BOOTSTRAP = r"""
-import hashlib,json,sys
+import contextlib,hashlib,json,sys
 from pathlib import Path
 from types import FunctionType
+
+def _contextmanager_template():
+    yield
+
+_contextmanager_code=contextlib.contextmanager(_contextmanager_template).__code__
+
+def _guard_origin(value,namespace,path,name):
+    if Path(value.__code__.co_filename).absolute()==path:
+        return True
+    wrapped=getattr(value,'__wrapped__',None)
+    closure=value.__closure__
+    if (value.__code__ is not _contextmanager_code
+        or value.__globals__ is not vars(contextlib)
+        or value.__code__.co_freevars!=('func',)
+        or closure is None or len(closure)!=1
+        or not isinstance(wrapped,FunctionType)):
+        return False
+    try:
+        original=closure[0].cell_contents
+    except ValueError:
+        return False
+    return (original is wrapped and wrapped.__module__==name
+        and wrapped.__globals__ is namespace
+        and bool(wrapped.__code__.co_flags & 0x20)
+        and Path(wrapped.__code__.co_filename).absolute()==path)
 site,probe_id,cache=(Path(sys.argv[1]),sys.argv[2],Path(sys.argv[3]))
 assert __debug__ and sys.implementation.name=='cpython'
 assert sys.flags.isolated==1 and sys.flags.no_site==1 and sys.flags.optimize==0
@@ -746,7 +771,7 @@ for name,module in sorted(tuple(sys.modules.items())):
     if name=='aiflow' or name.startswith('aiflow.'):
         for value in vars(module).values():
             if isinstance(value,FunctionType) and value.__module__==name:
-                if Path(value.__code__.co_filename).absolute()!=path:
+                if not _guard_origin(value,vars(module),path,name):
                     raise RuntimeError('GUARD_CODE_ORIGIN_MISMATCH')
     data=path.read_bytes()
     loaded.append({'name':name,'path':relative,'size':len(data),'sha256':hashlib.sha256(data).hexdigest()})
@@ -757,8 +782,8 @@ facts={'executable':sys.executable,'base_executable':sys._base_executable,
        'optimize':sys.flags.optimize,'dont_write_bytecode':sys.dont_write_bytecode,
        'debug':__debug__,'cache_prefix':sys.pycache_prefix}
 envelope={'kind':'installed-probe-execution-v1','probe':report,'loaded':loaded,'interpreter':facts}
-sys.stdout.write(json.dumps(envelope,ensure_ascii=False,sort_keys=True,separators=(',',':'),allow_nan=False)+'\n')
-sys.stdout.flush()
+sys.stdout.buffer.write((json.dumps(envelope,ensure_ascii=False,sort_keys=True,separators=(',',':'),allow_nan=False)+'\n').encode('utf-8'))
+sys.stdout.buffer.flush()
 ok=all(c['setup']==c['call']==c['teardown']=='passed' for c in report['cases'])
 raise SystemExit(0 if ok else 1)
 """
