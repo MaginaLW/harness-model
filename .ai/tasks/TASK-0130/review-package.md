@@ -2,42 +2,40 @@
 
 ## 审核目标
 
-审核 TASK-0130 当前完整 Node V0/V1 与所有者批准的3000秒完整pytest预算；true base保持无Node的a050377，当前subjecte44486d，不隐藏Node覆盖率分母。
+审核 TASK-0130 当前 subject 94afbe32a599cfc66e46a1327c8df8307279d4e8 的完整 Node V0/V1 实现、3000 秒共享 pytest 预算和跨平台 ctypes 类型边界修复。真实 base 为无 Node 实现的 a05037749cb9f9b301e761d77cfb3b3f54c1c9f0。
 
 ## 背景
 
-旧TASK-0128/0129及所有失败、已消费动作和旧批准保留，不提供本任务启动授权或当前通过。此次只完成Node V0/V1与预算变更并收尾。
+所有者明确选择 3000 秒并要求收尾。旧 TASK-0128/0129、旧失败、已消耗动作和旧批准完整保留，均不提供当前版本的通过或授权。当前范围只交付源仓 Node 本地 V0/V1；installed V2、Node CI、真实 agent-bridge 采用及 V2 归因扩张不在本轮实施范围。
 
 ## 代码地图
 
-Node执行/材料/Job/输出/coverage与共同evidence/review/approval/Gate消费者；contracts/state/policy和Git固定查询的既有精确批次；预算位于verification.py及verification-levels.yaml。完整Scope以task.yaml为准。
+完整范围以 task.yaml 为准：Node 执行/材料/Job/coverage，公共 evidence/review/approval/Gate 消费者，contracts/state/policy/Git 查询，以及初始化、验证预算和对应测试。全部 Node 差异始终在真实 base..subject 及覆盖率分母内。
 
 ## 语义变更
 
-普通wheel提供封闭Node3.1/@1本地V0/V1。完整Native共享pytest预算从1200改为3000秒，其他timeout、85总/90diff、完整case、14checks和五项真实变异保持。Policy label2.6.0保持但canonical SHA改变；同版本不同SHA不等价，新引擎拒绝旧1200配置，升级不自动修改目标。
+共享完整 Native pytest 固定预算由 1200 改为 3000 秒，八处 Policy 预算同步；其他超时、14 checks、85% 总覆盖率、90% diff coverage 和五个实际固定变异不变。Policy label 仍为 2.6.0，canonical SHA 已改变，新引擎拒绝旧 1200 配置，升级不自动迁移目标 Policy。
+
+最新修复只把两个源文件中的三行四次 Windows 专用 ctypes 属性访问改为无默认值 getattr。原平台 guard、API、调用参数、异常传播和 FFI 签名保持；将四 lookup 逆归一后，两份完整 AST 与旧候选相同。没有新增 ignore、类型配置或门禁变更。
 
 ## 风险
 
-可信宿主与受审引擎边界保持，不提供恶意同用户沙箱。旧PR142的89.3059percent diff coverage失败保留；新候选须取得实际平台通过。Node installedV2/CI/真实采用、真实模型和私有材料传输未交付且不属本次执行。
+RF-022 medium 仍是实际当前 PR head required CI 硬条件。首轮 PR143 的覆盖率通过但 Ubuntu mypy 失败，不得据此合并。RF-026 medium 的类型修复已独立 slice APPROVE，尚须新候选完整验证与 CI。历史通用进程清理 UNKNOWN 保留，不宣称已认证。Node 的受控进程边界不提供恶意同用户沙箱。
 
 ## 证据
 
-已验证：当前Policy重新分类及独立design REV0002 APPROVE；预算定向103passed，Ruff/format与whitespace检查通过。完整Node净重放相对旧cfbf仅verification预算常量变化，所有原Node正反例保留。
+历史失败原件与当前结果分开：0ff2 的完整 Native 为 6 failed、5663 passed、5 skipped，原始 SHA433bde0d4fcea8ea0a856d9985da783361dda2b73a3f5d818494912472af60f3；修正 fixture 实参后，e444 完整 Native 为 5669 passed、5 skipped、1259.63 秒，14 checks 和五个实际变异通过，旧 final SHAf9a9cf8d77b02c64310435ec7de3dd0805fa84de9ac237856df05ee5bdfbc9da 已另存原件。它们不转移给新 94af 候选。
 
-已完成的新原件：ordinary wheel两条实际V0/V1链通过，独立接受SHA201576c12a3bd03207bf1a311e906844edfaf7fd1505c90ad6f25f5b9c8d7547；当前API4d5886794158908f17e595b9a1b5774c7d7a3c47b9767750980f3811c6499c41保留V0末尾负例和V1 current/pass/GatePASS。新sdist/LF-CRLF direct/rebuilt及四隔离资源API通过，独立增量SHAae355322841e152ebb1975566632807ecdad201ebb6385f1203c073c7ee7ef8d，所有四包76项ZIP内容等于本轮Node验收包。
+PR143 首轮真实 head e3d010a 的 run41278501102：5633 passed、41 skipped、534.45 秒；两域 85 总覆盖率、core diff2560/2825=90.619469%、Ruff/format 通过，Ubuntu mypy 最后四处 attr-defined 失败。原始日志 logs/bootstrap/ci-pr143-run41278501102.log 保留。
 
-完整Native实际失败：原件logs/run-20261101T043903736967Z/evidence.json与根evidence字节一致，SHA433bde0d4fcea8ea0a856d9985da783361dda2b73a3f5d818494912472af60f3。5674项完整跑完，6 failed、5663 passed、5个原有skip，1227.86秒；没有3000秒超时，coverage数据库/XML生成且两域85总/90diff检查通过。14项为9pass/5fail，五项逻辑检查共用实际pytest失败；五实际变异killed。seq20真实消费84c，seq21记录FAILED，动作已耗尽。六个失败均为test_node_v0_contract.py:1762直接调用旧fixture签名，缺node_policy_seed_bytes；测试性能优化的跨模块消费者遗漏，尚未执行六case后续断言。失败与旧草案004high/005medium整改原件均保留，不能采信为完整通过。
+已验证：新三行修复 Linux/default mypy 各 60 文件通过，Ruff/format/whitespace 通过；47 个其他生产源和三个测试字节不变。受限环境三模块为 334 pass 加一个未改的旧进程树终止用例失败；诊断真实 taskkill128/operation not supported 保留，不推断完整机制。root 按当前工具批准的执行权限、同一原用例和最小环境，实际 1 pass/4.27 秒；不伪称单轮全部三模块通过。
 
-精确修复已独立slice APPROVE：RF-023 medium记录并resolved；仅test_node_v0_contract.py局部导入原seed producer并补一个必需参数，原六case/全部断言和decorators/612IDs保留。6passed1.06秒，完整两个模块612passed140.04秒；49source/76输入完全不变，四Policy字节逐项等原producer，Ruff/format/whitespace通过。只关闭缺参测试bug，不把612当当前完整Native通过。
-
-当前完整Native已实际通过：logs/run-20261101T051713445589Z/evidence.json与根pre字节一致，SHAd5797ef2f3d095f858a8d9bfa4f0c39b97f7a1a1bf06afa53de37b00a3adc0d4。新subjecte444全5674项完成，5669passed/原5skip，1259.63秒；全部14required通过，sharedrunner1260406ms未超3000，Ruff/format/mypy/whitespace及两Python域85总/90diff通过。core真实diff为2564/2825，analysis真零diff；五个实际固定变异全部killed。snapshotf2ba71f8a85a274baa019275c937986c295bef64cd08dfb394eacf9786c25a51/context3a69527ac78fa4940e01398add6cb42736e745cb43ef567060742cad83816231；seq26消费新6737，seq27passed/28等待正式实现审核。旧433b/84c失败事实不改。
-
-未验证：正式implementation review、同verifier finalize、code批准/Gate及exact-head required CI尚未完成。
+新 subject collect-only 5674 项，与 e444 完整节点逐行相同；新 verifier context a898a00a33c40ced49019af5630fd4ed0fe48b5d76e28d2b5ae2cc466d279219。当前完整 76 包输入已冻结，SHAf38ff89997801eef14fadef0e661bfe202eead2e728d85c37238248e1b81ba29。新普通 wheel 的真实 V0/V1 验收正在执行；旧 57c 轮子不提供当前 authority。未验证：新 wheel/sdist 终态、新完整 Native、新正式实现审核、same-verifier finalize、当前 code approval/Gate、当前 head required CI。
 
 ## 审核问题
 
-是否所有Node实现及预算均在真实base..subject与85/90分母？新Policy SHA是否在分类/设计/批准/材料/证据绑定中一致？所有本轮结果是否由真实新原件支持？
+确认完整 Node 范围、真 base 分母、运行时等价和 Policy/spec/classification 的真实绑定。每项通过必须有当前原始结果；保留失败、负例和 unknown，不复用旧 action、旧 wheel 或旧审核作为新版本权威。
 
 ## 推荐结论
 
-APPROVE_WITH_CONDITIONS。当前新S完整Native已通过；仍需正式独立实现审核、同verifier finalize、当前full-final code批准/Gate及exact-head requiredCI通过。CI中等发现仅在实际平台结果支持后关闭，未完成这些条件前不合并。
+APPROVE_WITH_CONDITIONS。新候选须完成上述全部适用本地验证、独立实现 APPROVE、无未关闭 critical/high、same-verifier finalize、当前 code 批准/Gate，且实际合并的精确 head required CI 全过，才允许源仓 merge commit。RF-022 的硬 CI 条件满足后可合并该未移动 head；随后用官方 resolve 与 task close 将闭合记录追加到收尾文档 PR，该 PR 自身也必须通过精确 head CI。无需仅为 RF-022 治理修订额外移动主交付 head；不得因此省略任何实际合并 head 的门禁。
