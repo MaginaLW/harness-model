@@ -145,8 +145,8 @@ goal: Complete the ordinary-installed local Node V2 lifecycle with exact Istanbu
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-01T15:38:23Z'
-subject_commit: 8255c4d596dfe403af72734ac4fcdebf3ef5d75e
+subject_commit: 2c6ca5ffccb13c0aee487144a61c3d6f252629cf
 task_id: TASK-0136
-updated_at: '2026-11-01T18:55:13Z'
+updated_at: '2026-11-01T20:23:28Z'
 worktree_dirty: false
 worktree_dirty_paths: []
