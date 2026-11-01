@@ -11,5 +11,21 @@
     "spec_sha256": "d47dab9230837bbe0b850660336066349a4891a67504b08c5afcb00a0c2af355",
     "subject_commit": "a74779f1cfd317ba32102dde9d8649f9cfe473cf",
     "task_id": "TASK-0133"
+  },
+  {
+    "action_sha256": "fb6d1d4693bec04405aa2f6c9a04562682b2d35784fab27f83a82eb4b180511c",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-01T10:53:37Z",
+    "base_commit": "a74779f1cfd317ba32102dde9d8649f9cfe473cf",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-01T16:44:37Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：独立verifier已APPROVE本次精确action与新r/u验收环境，原39行diff及13历史原件保留，修复测试与六wheel原件被独立接受，当前全静态及原生runner分发前置通过。仅批准当前候选单次完整nativeV2；不得复用旧action或掩盖失败。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "d47dab9230837bbe0b850660336066349a4891a67504b08c5afcb00a0c2af355",
+    "subject_commit": "85cfbf91c410a3b7bddceabdb997bc15216d0e02",
+    "task_id": "TASK-0133"
   }
 ]
