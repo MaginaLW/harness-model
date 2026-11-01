@@ -1,0 +1,68 @@
+allowed_scope:
+- src/aiflow/installed_mutations.py
+- src/aiflow/installed_probe.py
+- .ai/tasks/TASK-0133/**
+base_commit: 77f086a0c93679a58e19e729bf81c115a4761766
+branch: codex/agent-bridge-installed-mutations
+created_at: '2026-11-01T10:57:55Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Execute and purely replay fixed mutations against the ordinary installed engine
+    without opening Node V2
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/installed_mutations.py
+  - src/aiflow/installed_probe.py
+  - .ai/tasks/TASK-0133/**
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0134
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: e2fbd8115e4fab122cf4d328001c84fb5a00d2541171df34270fc5864f05ba8b
+goal: Execute and purely replay fixed mutations against the ordinary installed engine
+  without opening Node V2
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-01T10:57:55Z'
+subject_commit: 77f086a0c93679a58e19e729bf81c115a4761766
+task_id: TASK-0134
+updated_at: '2026-11-01T11:00:34Z'
+worktree_dirty: false
+worktree_dirty_paths: []
