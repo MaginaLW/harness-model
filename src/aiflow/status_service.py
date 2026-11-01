@@ -14,7 +14,7 @@ from aiflow.decision_units import parse_decision_units
 from aiflow.errors import AiflowError, ContractError
 from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import collect_git_context
-from aiflow.policy import load_policy_bundle
+from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.routing import ROUTE_ORDER
 from aiflow.scope import assess_governance_only_scope, collect_verification_changed_paths
 from aiflow.specification import specification_digest
@@ -131,8 +131,14 @@ def _current_facts(
         "now": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "used_action_sha256s": (),
     }
+    facts["node_policy"] = True
     try:
-        facts["policy_sha256"] = load_policy_bundle(repository_root).sha256
+        bundle = load_policy_bundle(repository_root)
+        facts["policy_sha256"] = bundle.sha256
+        candidate = is_node_policy_candidate(bundle.documents)
+        facts["node_policy"] = candidate
+        if candidate and not is_node_policy(bundle):
+            facts["policy_sha256"] = "unavailable"
     except AiflowError:
         facts["policy_sha256"] = "unavailable"
     spec_path = resolve_task_path(repository_root, task_id, "spec.md")
@@ -307,6 +313,16 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
         "classification", classification, current, invalid=classification_invalid
     )
     evidence_value, evidence_invalid = _read_evidence(repository_root, task_id)
+    if current.get("node_policy") is True and evidence_value is not None:
+        from aiflow.node_execution import recheck_node_evidence
+
+        node_facts = recheck_node_evidence(repository_root, task_id, evidence_value)
+        current.update(
+            node_evidence_current=node_facts.current,
+            node_evidence_passed=node_facts.passed,
+            node_evidence_sha256=node_facts.evidence_sha256,
+            node_materials_sha256=node_facts.materials_sha256,
+        )
     evidence_status = "stale" if evidence_invalid else _evidence_status(evidence_value, current)
     approval_status = _approval_status(
         repository_root,

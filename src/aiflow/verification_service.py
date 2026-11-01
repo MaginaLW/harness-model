@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -32,7 +33,7 @@ from aiflow.mutation_evidence import (
     consume_targeted_mutation_evidence,
     record_targeted_mutation_evidence,
 )
-from aiflow.policy import PolicyBundle, load_policy_bundle
+from aiflow.policy import PolicyBundle, is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.process_runner import ProcessResult, run_execution
 from aiflow.review_service import ReviewAssessment, latest_review_assessment
 from aiflow.specification import specification_digest
@@ -636,12 +637,18 @@ def _finalize_v2_task(
     ci_run_dir: Path | None,
     output: Path | None,
 ) -> VerifyResult:
+    root = repository_root.resolve()
+    trusted_bundle = _verification_policy(root)
+    if is_node_policy(trusted_bundle):
+        raise ContractError(
+            "Node finalization is unavailable",
+            code="VERIFY_NODE_CI_UNSUPPORTED" if ci else "NODE_CAPABILITY_UNAVAILABLE",
+        )
     if ci or check_ids or ci_run_dir is not None or output is not None:
         raise ContractError(
             "V2 finalization cannot run checks or CI verification",
             code="VERIFY_FINALIZE_ARGUMENT_INVALID",
         )
-    root = repository_root.resolve()
     record = load_task_record(root, task_id)
     classification = _classification(root, task_id)
     bundle = load_policy_bundle(root)
@@ -858,6 +865,79 @@ def _ci_v2_targeted_mutation_projection(
     )
 
 
+def _verification_policy(root: Path) -> PolicyBundle:
+    """Establish trusted capability before any recovery-capable task read."""
+    bundle = load_policy_bundle(root)
+    if is_node_policy_candidate(bundle.documents) and not is_node_policy(bundle):
+        raise ContractError("Node Policy cannot be trusted", code="VERIFICATION_POLICY_INVALID")
+    return bundle
+
+
+def _verify_node_local(
+    root: Path,
+    task_id: str,
+    *,
+    actor: str,
+    context: VerificationContext,
+    bundle: PolicyBundle,
+    record: TaskRecord,
+    classification: Mapping[str, object],
+    spec_sha256: str,
+    materials: str,
+) -> VerifyResult:
+    from aiflow.node_execution import execute_node_verification, recheck_node_evidence
+
+    level = cast(Literal["V0", "V1"], classification["effective_verification_level"])
+    run_dir = root / ".ai" / "tasks" / task_id / "logs" / context.run_id
+    evidence_path = resolve_task_path(root, task_id, "evidence.json")
+    facts = EvidenceFacts(
+        task_id,
+        tuple(str(unit["decision_unit_id"]) for unit in record.task["decision_units"]),
+        str(record.task["repository_id"]),
+        str(record.task["branch"]),
+        str(record.task["base_commit"]),
+        context.subject_commit,
+        spec_sha256,
+        bundle.sha256,
+        str(classification["classification_input_sha256"]),
+        level,
+        "local",
+        context.run_id,
+        run_dir,
+        utc_timestamp(),
+        (
+            "python",
+            "-m",
+            "aiflow",
+            "verify",
+            task_id,
+            "--actor",
+            actor,
+            "--node-materials",
+            materials,
+        ),
+    )
+    _start_local_verification(root, task_id, record, actor)
+    evidence = execute_node_verification(
+        root, task_id, material_sha256=materials, context=context, bundle=bundle, facts=facts
+    )
+    checked = recheck_node_evidence(root, task_id, evidence)
+    if evidence["conclusion"] == "passed" and not (checked.current and checked.passed):
+        raise ContractError(
+            "Node verification originals are not current", code="NODE_EVIDENCE_STALE"
+        )
+    save_evidence(evidence_path, evidence, archive_path=run_dir / "evidence.json")
+    conclusion = cast(Literal["passed", "failed"], evidence["conclusion"])
+    final_state = _finish_local_verification(
+        root,
+        task_id,
+        actor=actor,
+        conclusion=conclusion,
+        route=str(classification["effective_route"]),
+    )
+    return VerifyResult(task_id, conclusion, final_state, evidence_path, checked.reason_codes)
+
+
 def verify_task(
     repository_root: Path,
     task_id: str,
@@ -872,18 +952,12 @@ def verify_task(
     finalize: bool = False,
     abandon: bool = False,
     reason: str | None = None,
+    node_materials_sha256: str | None = None,
     version_probe: VersionProbe = _default_version_probe,
 ) -> VerifyResult:
     """Execute one governed local verification or read-only CI attestation."""
     root = repository_root.resolve()
-    if abandon:
-        if ci or check_ids or finalize or ci_run_dir is not None or output is not None:
-            raise ContractError(
-                "Abandoning a verification run cannot be combined with another mode",
-                code="VERIFY_ABANDON_ARGUMENT_INVALID",
-            )
-        return _abandon_interrupted_verification(root, task_id, actor=actor, reason=reason)
-    if finalize:
+    if finalize and not abandon and node_materials_sha256 is None:
         return _finalize_v2_task(
             root,
             task_id,
@@ -893,6 +967,66 @@ def verify_task(
             ci_run_dir=ci_run_dir,
             output=output,
         )
+    bundle = _verification_policy(root)
+    node = is_node_policy(bundle)
+    if node:
+        if ci or ci_run_dir is not None or output is not None:
+            raise ContractError("Node CI is unavailable", code="VERIFY_NODE_CI_UNSUPPORTED")
+        if check_ids or provisional or finalize:
+            raise ContractError(
+                "Node verification mode is unavailable", code="NODE_CAPABILITY_UNAVAILABLE"
+            )
+        classification = _classification(root, task_id)
+        if classification.get("effective_verification_level") not in {"V0", "V1"}:
+            raise ContractError(
+                "Node verification level is unavailable", code="NODE_CAPABILITY_UNAVAILABLE"
+            )
+        if not abandon and (
+            not isinstance(node_materials_sha256, str)
+            or re.fullmatch(r"[0-9a-f]{64}", node_materials_sha256) is None
+        ):
+            raise ContractError("Node materials SHA is required", code="NODE_MATERIALS_REQUIRED")
+        if not abandon:
+            if (
+                not isinstance(actor, str)
+                or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.@-]*", actor) is None
+            ):
+                raise ContractError(
+                    "Node verification actor is invalid", code="VERIFY_ACTOR_REQUIRED"
+                )
+            if run_id is not None:
+                from aiflow.node_verification import _path
+
+                if (
+                    not isinstance(run_id, str)
+                    or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,254}", run_id) is None
+                ):
+                    raise ContractError(
+                        "Node run ID is invalid", code="VERIFICATION_RUN_ID_INVALID"
+                    )
+                _path(run_id)
+                try:
+                    (root / ".ai/tasks" / task_id / "logs" / run_id).lstat()
+                except FileNotFoundError:
+                    pass
+                else:
+                    raise ContractError(
+                        "Node run already exists", code="VERIFICATION_RUN_ID_INVALID"
+                    )
+            from aiflow.node_execution import precheck_node_materials
+
+            precheck_node_materials(root, task_id, cast(str, node_materials_sha256))
+    elif node_materials_sha256 is not None:
+        raise ContractError(
+            "Python verification cannot use Node materials", code="NODE_MATERIALS_UNEXPECTED"
+        )
+    if abandon:
+        if ci or check_ids or finalize or ci_run_dir is not None or output is not None:
+            raise ContractError(
+                "Abandoning a verification run cannot be combined with another mode",
+                code="VERIFY_ABANDON_ARGUMENT_INVALID",
+            )
+        return _abandon_interrupted_verification(root, task_id, actor=actor, reason=reason)
     record = read_task_record_strict(root, task_id) if ci else load_task_record(root, task_id)
     state = str(record.task.get("current_state"))
     if ci:
@@ -974,6 +1108,18 @@ def verify_task(
         identifier,
         run_directory if ci else None,
     )
+    if node:
+        return _verify_node_local(
+            root,
+            task_id,
+            actor=cast(str, effective_actor),
+            context=context,
+            bundle=bundle,
+            record=record,
+            classification=classification,
+            spec_sha256=spec_sha256,
+            materials=cast(str, node_materials_sha256),
+        )
     full_plan = parse_verification_plan(
         bundle, context, level=cast(Literal["V0", "V1", "V2"], level)
     )

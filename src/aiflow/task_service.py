@@ -34,7 +34,12 @@ from aiflow.git_context import (
     evaluate_verification_git_context,
     task_numbers_in_refs,
 )
-from aiflow.policy import evaluate_action_permission, load_policy_bundle
+from aiflow.policy import (
+    evaluate_action_permission,
+    is_node_policy,
+    is_node_policy_candidate,
+    load_policy_bundle,
+)
 from aiflow.scope import (
     AutoPreflightFacts,
     assess_auto_scope,
@@ -525,6 +530,25 @@ def load_task_record(repository_root: Path, task_id: str) -> TaskRecord:
     events = _read_event_log(repository_root, task_id)
     terminal_state = replay_events(events, task_id=task_id)
     staged_path = resolve_task_path(repository_root, task_id, "task.yaml.next")
+    if staged_path.exists() and (
+        task.get("current_state") == "VERIFYING" or terminal_state == "VERIFYING"
+    ):
+        policy = load_policy_bundle(repository_root)
+        if is_node_policy_candidate(policy.documents):
+            from aiflow.node_execution import recheck_node_evidence
+
+            if not is_node_policy(policy):
+                raise ContractError("Node Policy cannot be trusted", code="POLICY_NODE_INVALID")
+            evidence = read_task_json(
+                repository_root, task_id, "evidence.json", contract_name="evidence"
+            )
+            if not isinstance(evidence, Mapping):
+                raise ContractError("Node recovery requires evidence", code="NODE_BINDING_STALE")
+            facts = recheck_node_evidence(repository_root, task_id, evidence)
+            if not facts.current or not facts.passed:
+                raise ContractError(
+                    "Node recovery requires current evidence", code="NODE_BINDING_STALE"
+                )
     if staged_path.exists() and events[-1].get("event_type") == "risk_facts_recorded":
         raise StateTransitionError(
             "Pending risk facts require the same explicit facts apply command",

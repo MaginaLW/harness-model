@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -128,6 +130,38 @@ def evaluate_freshness(
         and artifact.get("attestation_head") != current.get("attestation_head")
     ):
         reasons.append("FRESHNESS_ATTESTATION_CHANGED")
+    if artifact_type in {"evidence", "code_approval"} and current.get("node_policy") is True:
+        if (
+            current.get("node_evidence_current") is not True
+            or current.get("node_evidence_passed") is not True
+            or not isinstance(current.get("node_materials_sha256"), str)
+            or not isinstance(current.get("node_evidence_sha256"), str)
+        ):
+            reasons.append("FRESHNESS_EVIDENCE_NOT_PASSED")
+        if artifact_type == "code_approval" and artifact.get("evidence_sha256") != current.get(
+            "node_evidence_sha256"
+        ):
+            reasons.append("FRESHNESS_EVIDENCE_CHANGED")
+        if artifact_type == "evidence":
+            try:
+                digest = hashlib.sha256(
+                    json.dumps(
+                        dict(artifact),
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                        allow_nan=False,
+                    ).encode("utf-8")
+                ).hexdigest()
+            except (TypeError, ValueError):
+                digest = None
+            binding = artifact.get("node_binding")
+            if (
+                digest != current.get("node_evidence_sha256")
+                or not isinstance(binding, Mapping)
+                or binding.get("materials_sha256") != current.get("node_materials_sha256")
+            ):
+                reasons.append("FRESHNESS_EVIDENCE_CHANGED")
     if artifact_type in {"evidence", "code_approval"}:
         if current.get("governance_only") is False:
             reasons.append("FRESHNESS_GOVERNANCE_CHANGED")
