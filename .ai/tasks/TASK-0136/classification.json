@@ -1,0 +1,52 @@
+{
+  "base_commit": "5a802cd1bb60a23d01bc0fa0a7922026176855f6",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "2de2d3c652cdb3c37b7ae227dc315d298ac97dffad3227695799f72d5e1a3b6c",
+  "classifications": [
+    {
+      "classified_at": "2026-11-01T15:37:39Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Changes that can touch the governance surface require independent review.",
+      "explanations": [
+        "Changes that can touch the governance surface require independent review."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Changes that can touch the governance surface require independent review.",
+          "predicate_explanations": [
+            "impact_scope: overlaps_paths -> true"
+          ],
+          "priority": 750,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE"
+        }
+      ],
+      "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+      "policy_version": "2.6.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Acceptance verification requires V2.",
+        "Integration verification requires V2.",
+        "Targeted mutation verification requires V2.",
+        "Independent verifier evidence requires V2."
+      ],
+      "verification_level": "V2",
+      "verification_rule_ids": [
+        "VERIFICATION-V2-ACCEPTANCE-REQUIRED",
+        "VERIFICATION-V2-INTEGRATION-REQUIRED",
+        "VERIFICATION-V2-TARGETED-MUTATION-REQUIRED",
+        "VERIFICATION-V2-INDEPENDENT-VERIFIER-REQUIRED"
+      ]
+    }
+  ],
+  "classified_at": "2026-11-01T15:37:39Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V2",
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "policy_version": "2.6.0",
+  "schema_version": "2.0",
+  "subject_commit": "5a802cd1bb60a23d01bc0fa0a7922026176855f6",
+  "task_id": "TASK-0136"
+}

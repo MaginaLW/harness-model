@@ -1,0 +1,152 @@
+allowed_scope:
+- src/aiflow/policy.py
+- src/aiflow/verification_level.py
+- src/aiflow/node_verification.py
+- src/aiflow/node_execution.py
+- src/aiflow/initialization.py
+- src/aiflow/verification.py
+- src/aiflow/evidence.py
+- src/aiflow/verification_service.py
+- src/aiflow/verifier_service.py
+- src/aiflow/review_service.py
+- src/aiflow/approval.py
+- src/aiflow/gate.py
+- src/aiflow/freshness.py
+- src/aiflow/status_service.py
+- src/aiflow/installed_mutations.py
+- src/aiflow/installed_probe.py
+- src/aiflow/cli.py
+- src/aiflow/resource_bundle.py
+- .ai/schemas/policy.schema.json
+- .ai/schemas/evidence.schema.json
+- .ai/tasks/TASK-0135/**
+- tests/unit/test_node_v2_coverage.py
+- tests/unit/test_node_v2_contract.py
+- tests/unit/test_node_v2_evidence.py
+- tests/integration/test_node_v2_installed.py
+- tests/unit/test_node_profile_contract.py
+- tests/unit/test_node_verification.py
+- tests/unit/test_verification_plan.py
+- tests/unit/test_verification_level.py
+- tests/unit/test_evidence.py
+- tests/unit/test_policy.py
+- tests/unit/test_installed_probe.py
+- tests/unit/test_installed_mutation_transactions.py
+- tests/integration/test_installed_mutations.py
+- tests/unit/test_initialization.py
+- tests/unit/test_cli.py
+- tests/integration/test_node_verification.py
+- tests/integration/test_node_v0_recovery.py
+- tests/e2e/test_v2_verifier_scenario.py
+- docs/superpowers/specs/node-v2-installed-lifecycle.md
+- docs/superpowers/plans/agent-bridge-integration.md
+- docs/operations/node-verification.md
+- docs/operations/initialization.md
+- docs/operations/maintenance-status.md
+- docs/operations/adoption.md
+base_commit: 5a802cd1bb60a23d01bc0fa0a7922026176855f6
+branch: codex/agent-bridge-node-v2
+created_at: '2026-11-01T15:33:47Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Complete the ordinary-installed local Node V2 lifecycle with exact Istanbul
+    evidence and all existing gates
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/policy.py
+  - src/aiflow/verification_level.py
+  - src/aiflow/node_verification.py
+  - src/aiflow/node_execution.py
+  - src/aiflow/initialization.py
+  - src/aiflow/verification.py
+  - src/aiflow/evidence.py
+  - src/aiflow/verification_service.py
+  - src/aiflow/verifier_service.py
+  - src/aiflow/review_service.py
+  - src/aiflow/approval.py
+  - src/aiflow/gate.py
+  - src/aiflow/freshness.py
+  - src/aiflow/status_service.py
+  - src/aiflow/installed_mutations.py
+  - src/aiflow/installed_probe.py
+  - src/aiflow/cli.py
+  - src/aiflow/resource_bundle.py
+  - .ai/schemas/policy.schema.json
+  - .ai/schemas/evidence.schema.json
+  - .ai/tasks/TASK-0135/**
+  - tests/unit/test_node_v2_coverage.py
+  - tests/unit/test_node_v2_contract.py
+  - tests/unit/test_node_v2_evidence.py
+  - tests/integration/test_node_v2_installed.py
+  - tests/unit/test_node_profile_contract.py
+  - tests/unit/test_node_verification.py
+  - tests/unit/test_verification_plan.py
+  - tests/unit/test_verification_level.py
+  - tests/unit/test_evidence.py
+  - tests/unit/test_policy.py
+  - tests/unit/test_installed_probe.py
+  - tests/unit/test_installed_mutation_transactions.py
+  - tests/integration/test_installed_mutations.py
+  - tests/unit/test_initialization.py
+  - tests/unit/test_cli.py
+  - tests/integration/test_node_verification.py
+  - tests/integration/test_node_v0_recovery.py
+  - tests/e2e/test_v2_verifier_scenario.py
+  - docs/superpowers/specs/node-v2-installed-lifecycle.md
+  - docs/superpowers/plans/agent-bridge-integration.md
+  - docs/operations/node-verification.md
+  - docs/operations/initialization.md
+  - docs/operations/maintenance-status.md
+  - docs/operations/adoption.md
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0136
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 175297e180eea6b459a6d17ef4ca3010ef759fa35abd058a9ea689bf35535fac
+goal: Complete the ordinary-installed local Node V2 lifecycle with exact Istanbul
+  evidence and all existing gates
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-01T15:38:23Z'
+subject_commit: 5a802cd1bb60a23d01bc0fa0a7922026176855f6
+task_id: TASK-0136
+updated_at: '2026-11-01T15:47:21Z'
+worktree_dirty: false
+worktree_dirty_paths: []
