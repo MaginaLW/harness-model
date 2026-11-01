@@ -111,3 +111,39 @@ def test_installed_probe_selection_is_closed(probe_id: str) -> None:
 
     with pytest.raises(ValueError):
         run_probe(probe_id)
+
+
+@pytest.mark.parametrize("failed_phase", ["setup", "call", "teardown"])
+def test_probe_protocol_retains_exception_phase_and_terminal_traceback(
+    monkeypatch: pytest.MonkeyPatch, failed_phase: str
+) -> None:
+    """Fault-inject the case lifecycle, without a Job or execution-PASS claim."""
+    import aiflow.installed_probe as probe
+
+    def failure():
+        raise RuntimeError("synthetic " + failed_phase + " failure")
+
+    def setup(_probe_id, _case_id, stack, context):
+        if failed_phase == "setup":
+            failure()
+        context["observed"] = {"synthetic_protocol_fixture": True}
+        if failed_phase == "teardown":
+            stack.callback(failure)
+
+    def call(context):
+        if failed_phase == "call":
+            failure()
+
+    monkeypatch.setattr(probe, "_setup", setup)
+    monkeypatch.setitem(probe._CASE_CALLS, "policy_complete", call)
+    result = probe._run_case("MUT-V2-001", "policy_complete")
+    assert result[failed_phase] == "failed"
+    assert result["setup"] == ("failed" if failed_phase == "setup" else "passed")
+    assert (
+        result["call"] == {"setup": "not_run", "call": "failed", "teardown": "passed"}[failed_phase]
+    )
+    assert result["teardown"] == ("failed" if failed_phase == "teardown" else "passed")
+    assert result["exception"]["type"] == "RuntimeError"
+    assert result["exception"]["message"] == "synthetic " + failed_phase + " failure"
+    assert result["exception"]["frames"][-1]["function"] == "failure"
+    assert result["exception"]["frames"][-1]["path"] == __file__
