@@ -1,0 +1,78 @@
+allowed_scope:
+- src/aiflow/installed_mutations.py
+- src/aiflow/installed_probe.py
+- .ai/tasks/TASK-0134/**
+- tests/unit/test_installed_probe.py
+- tests/unit/test_installed_mutations.py
+- tests/unit/test_installed_mutation_transactions.py
+- tests/integration/test_installed_mutations.py
+- docs/superpowers/specs/installed-engine-governance-mutations.md
+base_commit: 23904c4c049a870ccd55a0fa2c4f42acdcf6c9f8
+branch: codex/installed-mutation-replay
+created_at: '2026-11-01T12:24:19Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Complete closed installed mutation execution and exact-reference current-root
+    replay with all original quality gates
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/installed_mutations.py
+  - src/aiflow/installed_probe.py
+  - .ai/tasks/TASK-0134/**
+  - tests/unit/test_installed_probe.py
+  - tests/unit/test_installed_mutations.py
+  - tests/unit/test_installed_mutation_transactions.py
+  - tests/integration/test_installed_mutations.py
+  - docs/superpowers/specs/installed-engine-governance-mutations.md
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0135
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: a3d3c780ee7830eaa567235871a4657c1f70b6835da8d70ca63032a931b2b509
+goal: Complete closed installed mutation execution and exact-reference current-root
+  replay with all original quality gates
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-01T12:24:20Z'
+subject_commit: 84aaf4059da6506e793b83be24ceed7350376dc6
+task_id: TASK-0135
+updated_at: '2026-11-01T18:25:08Z'
+worktree_dirty: false
+worktree_dirty_paths: []

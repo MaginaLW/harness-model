@@ -1,0 +1,336 @@
+{
+  "base_commit": "23904c4c049a870ccd55a0fa2c4f42acdcf6c9f8",
+  "branch": "codex/installed-mutation-replay",
+  "classification_input_sha256": "9bd438fc46bf7e868e6cdcf2760cb5af882394bed039f5a56c123fea06b12912",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/installed_mutations.py",
+      "src/aiflow/installed_probe.py",
+      ".ai/tasks/TASK-0134/**",
+      "tests/unit/test_installed_probe.py",
+      "tests/unit/test_installed_mutations.py",
+      "tests/unit/test_installed_mutation_transactions.py",
+      "tests/integration/test_installed_mutations.py",
+      "docs/superpowers/specs/installed-engine-governance-mutations.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Complete closed installed mutation execution and exact-reference current-root replay with all original quality gates",
+        "impact_scope": [
+          "src/aiflow/installed_mutations.py",
+          "src/aiflow/installed_probe.py",
+          ".ai/tasks/TASK-0134/**",
+          "tests/unit/test_installed_probe.py",
+          "tests/unit/test_installed_mutations.py",
+          "tests/unit/test_installed_mutation_transactions.py",
+          "tests/integration/test_installed_mutations.py",
+          "docs/superpowers/specs/installed-engine-governance-mutations.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0134/approvals.json",
+        ".ai/tasks/TASK-0134/classification.json",
+        ".ai/tasks/TASK-0134/events.jsonl",
+        ".ai/tasks/TASK-0134/review-contexts/3ce3c3ed552cd7decace14a0bd1179fe766450c21366a07ab467fefa6bc1d579.json",
+        ".ai/tasks/TASK-0134/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0134/spec.md",
+        ".ai/tasks/TASK-0134/task.yaml",
+        ".ai/tasks/TASK-0135/action-use-f9f53210629d54fcaa1a197d3b742cb45543542c3d2ec6463b64c022393bab98.md",
+        ".ai/tasks/TASK-0135/action-v2-targeted-mutation-installed-r2.json",
+        ".ai/tasks/TASK-0135/action-v2-targeted-mutation-installed.json",
+        ".ai/tasks/TASK-0135/approvals.json",
+        ".ai/tasks/TASK-0135/classification.json",
+        ".ai/tasks/TASK-0135/events.jsonl",
+        ".ai/tasks/TASK-0135/evidence.json",
+        ".ai/tasks/TASK-0135/review-contexts/1c77e54bbb2738bc3ba8e81c3e49cb332cafa1f9361843757ae222d48c63ff5e.json",
+        ".ai/tasks/TASK-0135/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0135/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0135/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0135/reviews/REV-0004-r0001.json",
+        ".ai/tasks/TASK-0135/spec.md",
+        ".ai/tasks/TASK-0135/task.yaml",
+        ".ai/tasks/TASK-0135/verifier-contexts/f3cf7972804bf27ca0f1cf47aca2a3be30653d4fc0a088bd255228fc05697a5e.json",
+        "docs/superpowers/specs/installed-engine-governance-mutations.md",
+        "src/aiflow/installed_mutations.py",
+        "src/aiflow/installed_probe.py",
+        "tests/integration/test_installed_mutations.py",
+        "tests/unit/test_installed_mutation_transactions.py",
+        "tests/unit/test_installed_mutations.py",
+        "tests/unit/test_installed_probe.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0134/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0134/classification.json"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0134/events.jsonl"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0134/review-contexts/3ce3c3ed552cd7decace14a0bd1179fe766450c21366a07ab467fefa6bc1d579.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0134/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0134/spec.md"
+        },
+        {
+          "additions": 68,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0134/task.yaml"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/action-use-f9f53210629d54fcaa1a197d3b742cb45543542c3d2ec6463b64c022393bab98.md"
+        },
+        {
+          "additions": 21,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/action-v2-targeted-mutation-installed-r2.json"
+        },
+        {
+          "additions": 21,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/action-v2-targeted-mutation-installed.json"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/classification.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/events.jsonl"
+        },
+        {
+          "additions": 268,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/evidence.json"
+        },
+        {
+          "additions": 49,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/review-contexts/1c77e54bbb2738bc3ba8e81c3e49cb332cafa1f9361843757ae222d48c63ff5e.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/reviews/REV-0004-r0001.json"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/spec.md"
+        },
+        {
+          "additions": 78,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/task.yaml"
+        },
+        {
+          "additions": 77,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0135/verifier-contexts/f3cf7972804bf27ca0f1cf47aca2a3be30653d4fc0a088bd255228fc05697a5e.json"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/superpowers/specs/installed-engine-governance-mutations.md"
+        },
+        {
+          "additions": 1917,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/installed_mutations.py"
+        },
+        {
+          "additions": 410,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/installed_probe.py"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 11,
+          "path": "tests/integration/test_installed_mutations.py"
+        },
+        {
+          "additions": 879,
+          "binary": false,
+          "deletions": 25,
+          "path": "tests/unit/test_installed_mutation_transactions.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 220,
+          "path": "tests/unit/test_installed_mutations.py"
+        },
+        {
+          "additions": 36,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_installed_probe.py"
+        }
+      ],
+      "totals": {
+        "additions": 4271,
+        "deletions": 257,
+        "files": 29
+      }
+    },
+    "goal": "Complete closed installed mutation execution and exact-reference current-root replay with all original quality gates",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0135",
+        "--actor",
+        "independent-installed-primitive-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "3c9e9ba5a79ceb0675ad52357bf17a79c02f19067a35468c056f81fea86b45c7",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "a3d3c780ee7830eaa567235871a4657c1f70b6835da8d70ca63032a931b2b509",
+  "subject_commit": "84aaf4059da6506e793b83be24ceed7350376dc6",
+  "task_id": "TASK-0135",
+  "verification_snapshot_sha256": "a0072b346e2682ada2c2bd6133456fb1b91e4179e3ed02a3c4b6bba9c3ca3cef"
+}

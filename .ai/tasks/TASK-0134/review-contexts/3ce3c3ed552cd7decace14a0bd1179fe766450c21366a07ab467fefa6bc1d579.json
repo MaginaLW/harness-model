@@ -1,0 +1,39 @@
+{
+  "base_commit": "77f086a0c93679a58e19e729bf81c115a4761766",
+  "branch": "codex/agent-bridge-installed-mutations",
+  "classification_input_sha256": "4537c33bfd7182331064ac72c2d2375d0b59ed3dfc45e5ddaab873ff781c183b",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/installed_mutations.py",
+      "src/aiflow/installed_probe.py",
+      ".ai/tasks/TASK-0133/**"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Execute and purely replay fixed mutations against the ordinary installed engine without opening Node V2",
+        "impact_scope": [
+          "src/aiflow/installed_mutations.py",
+          "src/aiflow/installed_probe.py",
+          ".ai/tasks/TASK-0133/**"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Execute and purely replay fixed mutations against the ordinary installed engine without opening Node V2",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "3ce3c3ed552cd7decace14a0bd1179fe766450c21366a07ab467fefa6bc1d579",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "e2fbd8115e4fab122cf4d328001c84fb5a00d2541171df34270fc5864f05ba8b",
+  "task_id": "TASK-0134"
+}
