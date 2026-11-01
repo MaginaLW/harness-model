@@ -7,8 +7,10 @@ import os
 import re
 import shutil
 import signal
+import stat
 import subprocess
 import sys
+import tempfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -93,7 +95,33 @@ def _validate_run_dir(run_dir: Path, allowed_run_root: Path) -> Path:
     return resolved
 
 
-def _environment(check: VerificationCheck, run_dir: Path) -> dict[str, str]:
+def _temporary_root() -> Path:
+    selected = next(
+        (os.environ[key] for key in ("TMPDIR", "TEMP", "TMP") if key in os.environ), None
+    )
+    root = Path(selected) if selected is not None else Path(tempfile.gettempdir())
+    if not root.is_absolute():
+        raise ContractError("Temporary root must be absolute", code="RUNNER_TEMP_ROOT_INVALID")
+    try:
+        for ancestor in (root, *root.parents):
+            info = ancestor.lstat()
+            if (
+                not stat.S_ISDIR(info.st_mode)
+                or stat.S_ISLNK(info.st_mode)
+                or getattr(info, "st_file_attributes", 0) & 0x400
+            ):
+                raise ContractError(
+                    "Temporary root must have ordinary directory ancestors",
+                    code="RUNNER_TEMP_ROOT_INVALID",
+                )
+        return root.resolve(strict=True)
+    except OSError as error:
+        raise ContractError(
+            "Temporary root is unavailable", code="RUNNER_TEMP_ROOT_INVALID"
+        ) from error
+
+
+def _environment(check: VerificationCheck, run_dir: Path, temporary_root: Path) -> dict[str, str]:
     if set(check.environment) - {"COVERAGE_FILE"}:
         raise ContractError("Verification environment is not allowed", code="RUNNER_ENV_INVALID")
     path_entries = [entry for entry in os.defpath.split(os.pathsep) if entry]
@@ -113,6 +141,13 @@ def _environment(check: VerificationCheck, run_dir: Path) -> dict[str, str]:
                 "Coverage output escapes the run directory", code="RUNNER_ENV_INVALID"
             )
         environment["COVERAGE_FILE"] = str(path)
+    try:
+        temporary = Path(tempfile.mkdtemp(prefix="aiflow-check-", dir=temporary_root))
+    except OSError as error:
+        raise ContractError(
+            "Could not create an owned temporary directory", code="RUNNER_TEMP_ROOT_INVALID"
+        ) from error
+    environment.update({key: str(temporary) for key in ("TEMP", "TMP", "TMPDIR")})
     return environment
 
 
@@ -191,8 +226,9 @@ def run_execution(
     real_cwd = execution.cwd.resolve()
     if not cwd_root.is_dir() or not real_cwd.is_dir() or not _within(real_cwd, cwd_root):
         raise ContractError("Verification working directory is invalid", code="RUNNER_CWD_INVALID")
+    temporary_root = _temporary_root()
     directory = _validate_run_dir(run_dir, allowed_run_root)
-    environment = _environment(selected[0], directory)
+    environment = _environment(selected[0], directory, temporary_root)
     if any(check.environment != selected[0].environment for check in selected):
         raise ContractError(
             "Deduplicated checks have different environments", code="RUNNER_EXECUTION_INVALID"

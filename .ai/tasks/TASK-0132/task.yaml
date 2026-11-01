@@ -1,0 +1,66 @@
+allowed_scope:
+- src/aiflow/node_execution.py
+- src/aiflow/process_runner.py
+base_commit: 7530f67d540548951cddc186e691e41bd84eca8d
+branch: codex/agent-bridge-adoption
+created_at: '2026-11-01T08:44:08Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Remove agent-bridge verification blockers while preserving output integrity
+    and workspace-local temporary execution
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/node_execution.py
+  - src/aiflow/process_runner.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0132
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 3b7e1b1c3035cd4a09caac94775d04fb957f317083f58cfdb77cd7e8aa7277f8
+goal: Remove agent-bridge verification blockers while preserving output integrity
+  and workspace-local temporary execution
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-01T08:46:08Z'
+subject_commit: 7530f67d540548951cddc186e691e41bd84eca8d
+task_id: TASK-0132
+updated_at: '2026-11-01T08:47:43Z'
+worktree_dirty: false
+worktree_dirty_paths: []

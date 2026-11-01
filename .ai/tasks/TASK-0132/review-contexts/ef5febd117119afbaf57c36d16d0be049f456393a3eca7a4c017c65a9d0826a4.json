@@ -1,0 +1,37 @@
+{
+  "base_commit": "7530f67d540548951cddc186e691e41bd84eca8d",
+  "branch": "codex/agent-bridge-adoption",
+  "classification_input_sha256": "088bb883583ef258a0b353b5d5322ef8feb932491fae849f048be3c9838b0020",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/node_execution.py",
+      "src/aiflow/process_runner.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Remove agent-bridge verification blockers while preserving output integrity and workspace-local temporary execution",
+        "impact_scope": [
+          "src/aiflow/node_execution.py",
+          "src/aiflow/process_runner.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Remove agent-bridge verification blockers while preserving output integrity and workspace-local temporary execution",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "ef5febd117119afbaf57c36d16d0be049f456393a3eca7a4c017c65a9d0826a4",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "3b7e1b1c3035cd4a09caac94775d04fb957f317083f58cfdb77cd7e8aa7277f8",
+  "task_id": "TASK-0132"
+}

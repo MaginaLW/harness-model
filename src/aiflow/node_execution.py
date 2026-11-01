@@ -63,6 +63,14 @@ SEMANTIC_CONTRACT = {
     "execution": "owned-clone-copy-offline-v1",
     "engine_startup": "only-exact-RECORD-distutils-precedence-plus-complete-setuptools-v1",
     "node_compile_cache": {"NODE_DISABLE_COMPILE_CACHE": "1"},
+    "dist_rebuild": {
+        "roles": ["node_check", "ts_coverage"],
+        "execution": "successful-exact-primary-check-argv-only",
+        "content": "canonical-complete-path-kind-size-sha256-equal-to-build-dist",
+        "initial_inventory": "outputs.build_dist",
+        "final_inventory": "outputs.dist",
+        "other_phases": "full-identity-unchanged",
+    },
     "original_root": "complete-metadata-native-change-time-exact-run-audit-git-delta-v1",
     "code_approval_marker": {
         "path": "TASK/approval_pending.json",
@@ -2828,6 +2836,10 @@ def execute_node_verification(
     failure: str | None = None
     coverage: dict[str, object] | None = None
     dist: dict[str, object] | None = None
+    build_dist: dict[str, object] | None = None
+    rebuild_commands = {
+        check.argv for check in plan.checks if check.check_id in {"node_check", "ts_coverage"}
+    }
     outputs: dict[str, object] = {}
     try:
         for execution in plan.executions:
@@ -2851,7 +2863,14 @@ def execute_node_verification(
                 failure = "NODE_PROCESS_FAILED"
                 break
             if "node_build" in execution.check_ids:
-                dist = _dist(checkout, expected_dist)
+                build_dist = dist = _dist(checkout, expected_dist)
+            elif execution.argv in rebuild_commands:
+                if build_dist is None:
+                    raise _error("Fixed build output is missing")
+                rebuilt = _dist(checkout, expected_dist)
+                if _canonical(_content(rebuilt)) != _canonical(_content(build_dist)):
+                    raise _error("Rebuilt Node output content changed", "NODE_OUTPUT_INVALID")
+                dist = rebuilt
         if failure is None:
             if facts.verification_level == "V1":
                 _changed, _deleted, raw = _changed_lines(
@@ -2866,11 +2885,11 @@ def execute_node_verification(
                     str(binding["subject_commit"]),
                     root,
                 )
-            if dist is None:
+            if dist is None or build_dist is None:
                 raise _error("Fixed build output is missing")
             fixtures = _fixtures(checkout, node_dir / "tmp", source)
             _output_check(checkout, source, dist, copied, fixtures)
-            outputs = {"dist": dist, "fixtures": fixtures}
+            outputs = {"build_dist": build_dist, "dist": dist, "fixtures": fixtures}
             _check_root(root, task_id, before, run)
             _check_materials(root, prepared, manifests)
             if _canonical(_checkout_files(checkout, source)) != _canonical(protected):
@@ -3178,11 +3197,21 @@ def recheck_node_evidence(
             )
         expected_dist = _dist_paths(roles.execution_root, source)
         outputs = document["outputs"]
-        if set(outputs) != {"dist", "fixtures"}:
+        if set(outputs) != {"build_dist", "dist", "fixtures"}:
             raise _error("Node run output inventory is incomplete")
         dist = _dist(roles.execution_root, expected_dist)
         if _canonical(dist) != _canonical(outputs["dist"]):
             raise _error("Node build outputs changed")
+        build_dist = outputs["build_dist"]
+        if (
+            not isinstance(build_dist, dict)
+            or set(build_dist) != set(dist)
+            or build_dist["root"] != dist["root"]
+            or type(build_dist["total_bytes"]) is not int
+            or build_dist["total_bytes"] != dist["total_bytes"]
+            or _canonical(_content(build_dist)) != _canonical(_content(dist))
+        ):
+            raise _error("Initial and final Node output content differs", "NODE_OUTPUT_INVALID")
         _output_check(
             roles.execution_root, source, dist, inputs["dependencies"], outputs["fixtures"]
         )
