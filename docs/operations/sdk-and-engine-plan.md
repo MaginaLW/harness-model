@@ -2,7 +2,7 @@
 
 本文记录两条路线的范围、前置条件、风险和验收要求。
 [应用自管 SDK 单次只读审核](../superpowers/specs/sdk-readonly-review.md)已由 [PR #109](https://github.com/MaginaLW/harness-model/pull/109) 交付，并完成一次真实工程审核与 PR 反馈回读；
-版本化资源与 `native-python-v1` 非覆盖初始化已交付，完整引擎跨仓接入尚未交付。当前状态以[维护收尾与待办](maintenance-status.md)为准；
+版本化资源、Python/Node 非覆盖初始化及 [Node 本地 V0/V1](node-verification.md)已交付；installed 外仓 V2、目标 CI 及真实目标采用尚未交付。当前状态以[维护收尾与待办](maintenance-status.md)为准；
 真实统计评分、自动审核安排及现有 Desktop 附着继续暂停，`T0/T1` 不因本文设置。
 
 ## 两条路线的关系
@@ -86,29 +86,29 @@
 TASK-0083 已交付显式风险事实 `facts` CLI；[PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付[版本化资源包](resource-bundle.md)，
 普通 wheel 包含 15 份 Schema、四份 Policy 种子及规格模板，并提供只读校验 API。
 [PR #140](https://github.com/MaginaLW/harness-model/pull/140)已交付 [`native-python-v1` 非覆盖初始化](initialization.md)及目标独立 UUID；
-Node 验证、installed 外仓 V2、目标 CI 适配及真实应用仍未交付，见[接入边界](adoption.md#完整引擎的跨仓库边界)。
-项目所有者已选择 agent-bridge 为完整引擎目标；目标选择不代表接入、目标验证或 V2 已交付。
+[Node 本地 V0/V1](node-verification.md)支持 `agent-bridge-node@1`、显式完整 Policy `3.1.0` 和 evidence `3.1`；installed 外仓 V2、目标 CI 适配及真实应用仍未交付，见[接入边界](adoption.md#完整引擎的跨仓库边界)。
+项目所有者已选择 agent-bridge 为完整引擎目标；目标选择与本地 V0/V1 交付不代表真实接入、目标 CI 或 V2 已交付。
 
 目标 CI 适配涉及核心验证代码，不只是修改 YAML：当前[验证器](../../src/aiflow/verification.py)
-约束了本仓覆盖率源 `aiflow`、`tools/analysis`、`tools/ci/check_coverage.py`、部分阈值与
-命令白名单。只复制 `.ai` 不能让完整验证在外仓成立，也不能承诺支持任意语言和 CI。
+的 Python 分支约束了本仓覆盖率源 `aiflow`、`tools/analysis`、`tools/ci/check_coverage.py`、部分阈值与
+命令白名单；Node 分支只提供封闭本地合同，CI 组合明确拒绝。只复制 `.ai` 不能让完整验证在外仓成立，也不能承诺支持任意语言和 CI。
 
 ### 最小分阶段交付
 
 | 阶段 | 具体范围 | 退出条件 |
 |---|---|---|
-| 0．确定目标 | 已选择 agent-bridge；核对其完整任务、审核、验证和 Gate 的需求及当前规则。已交付的 Python 初始化要求已有 Git 提交、Python 源码及 `[project].name`，首次预览时没有 `.ai`，根目录无 `package.json`。 | 目标、负责方、基线、原规则及质量要求明确；不为假设的其他目标建设通用安装框架。 |
+| 0．确定目标 | 已选择 agent-bridge；核对其完整任务、审核、验证和 Gate 的需求及当前规则。已交付的 Python 初始化要求已有 Git 提交、Python 源码及 `[project].name`，首次预览时没有 `.ai`，根目录无 `package.json`。Node 的固定 package.json 与四份候选 Policy 要求见 [Node 验证](node-verification.md#初始化与任务前置条件)。 | 目标、负责方、基线、原规则及质量要求明确；不为假设的其他目标建设通用安装框架。 |
 | 1．版本化资源 | [资源切片](resource-bundle.md)已交付：分发 15 份 Schema、四份待目标审核的 Policy 种子及规格模板；清单绑定 CLI 兼容范围、资源版本、Policy 版本及文件哈希。目标验证工具适配仍见阶段 3。 | 普通 wheel 在源码树外可校验和读取资源；直接构建及 sdist 重建不携带源仓身份或历史，不自动写入目标仓。 |
-| 2．非覆盖计划与应用 | 已交付 `native-python-v1`：`init preview` 零写入，展示 Git 基线、写入清单、UUID 及资源／Policy 摘要；`apply` 重核内容审核与原预览。写入限 Windows x64、CPython 3.11、本地 NTFS。 | 已有无关 `.ai` 拒绝拼接；精确 partial 以同一预览、同一 UUID 恢复；无历史的 complete 原样重放。命令与限制见[初始化用法](initialization.md)。 |
-| 3．指令与验证适配 | AGENTS 仅生成精确补丁供审核，与资源安装分开。为首个目标设计受约束验证配置，固定参数、检查类别、解析器、源码范围、阈值、超时、环境和输出路径。 | 配置版本及摘要绑定任务与验证证据；保留目标原规则和本仓质量门，不开放任意 shell。 |
-| 4．外仓端到端验收 | 先在可丢弃 Git 仓完成 wheel 安装、任务创建、facts、分类、规格、受控审核、验证和 Gate，再审阅真实目标应用计划。 | 不借用父仓或 harness-model 克隆资源；本地与 CI 检查同一候选并覆盖真实目标源码。 |
+| 2．非覆盖计划与应用 | 已交付 `native-python-v1` 与 `agent-bridge-node@1`；Node 须显式输入四份完整 `3.1.0` Policy。`init preview` 零写入，展示 Git 基线、写入清单、UUID 及资源／Policy 摘要；`apply` 重核内容审核与原预览。写入限 Windows x64、CPython 3.11、本地 NTFS。 | 已有无关 `.ai` 拒绝拼接；精确 partial 以同一预览、同一 UUID 恢复；无历史的 complete 原样重放。命令与限制见[初始化用法](initialization.md)。 |
+| 3．指令与验证适配 | AGENTS 与 CI 适配独立交付，与资源安装分开。已交付 [Node 本地 V0/V1](node-verification.md)的固定材料、工具、检查顺序、TS line 85/90、环境、输出及只读重核合同；installed 外仓 V2 与目标 CI 另行交付。 | 配置版本及摘要绑定任务与验证证据；保留目标原规则和本仓质量门，不开放任意 shell。 |
+| 4．外仓端到端验收 | 普通 wheel 的封闭 Node 本地 V0/V1 已具备任务至 Gate 的能力；完整接入仍须验收 installed 外仓 V2 与目标 CI，再审阅真实目标应用计划。 | 不借用父仓或 harness-model 克隆资源；本地与 CI 检查同一候选并覆盖真实目标源码。 |
 | 5．更新与恢复 | 已交付只读 `init inspect` 与 `migration-plan`，报告安装状态、资源差异和历史存在性，保留未知文件；不自动迁移或删除。 | 包升级不暗改目标资源；修改过的配置、任务、批准、事件和证据保留，实际迁移另行设计和审核。 |
 
 初始化入口已可执行，默认读取普通 wheel 的版本化资源，生成目标自己的规范 UUIDv4。
 首次预览拒绝已有 `.ai`；对已有安装，apply 仅接受同一预览绑定且精确可验证的 partial 或无历史 complete，
 不把任意已有 `.ai` 当作可恢复安装。普通治理命令允许完整安装产生目标自己的历史，
 但旧预览不能用于有历史的仓。运行时继续读取目标已安装资源，不随包升级静默切换 Schema。
-相同 remote URL 不证明属于同一授权范围；Node 和真实 agent-bridge 应用须另行适配验收。
+相同 remote URL 不证明属于同一授权范围；Node 本地 V0/V1 只覆盖其封闭合同，installed V2、目标 CI 和真实 agent-bridge 应用须另行适配验收。
 
 资源、初始化、目标 V0/V1 验证、V2 证据和真实目标应用应分别形成可审核、可验收的结果；
 每个切片实施前核对必要输入及验证路径，输出证据在对应验收前齐备。V2 的缺失条件只阻塞
@@ -154,13 +154,13 @@ AGENTS 和 CI 适配不由初始化生成或应用，须独立交付；未知文
 ## 后续依赖与项目流程
 
 SDK 单次只读客户端已交付，后续按实际文档需求维护和显式调用；不重复首轮工程验收，
-也不因已有回执自动安排新审核。完整引擎已选择目标，版本化资源与 Python 非覆盖初始化已交付，Node 验证、installed 外仓 V2、目标 CI 及真实应用尚未交付。
+也不因已有回执自动安排新审核。完整引擎已选择目标，版本化资源、Python/Node 非覆盖初始化及 Node 本地 V0/V1 已交付；installed 外仓 V2、目标 CI 及真实应用尚未交付。
 新用途或目标准备先固定共享合同和边界，再按实际独立性安排准备：
 
 | 路线 | 可并行的独立准备 |
 |---|---|
 | SDK 新用途或版本变化 | 核对与已交付合同的差异、实际 SDK 能力与版本；仅补受影响的数据/生命周期/预算及治理验证映射。 |
-| 完整引擎跨仓接入 | 已交付资源和 Python 初始化的兼容维护；目标 Node 验证、治理与 CI 映射；外仓 V2 所需材料。 |
+| 完整引擎跨仓接入 | 已交付资源、Python/Node 初始化及本地 V0/V1 的兼容维护；目标治理与 CI 映射；外仓 V2 所需材料。 |
 
 并行准备后，串行完成候选整合、独立审核和正式验证；真实调用或真实目标应用再核具体范围
 与授权。涉及 `src/aiflow/**`、`.ai/**`、打包配置、`tools/ci/**` 或 CI 的实现按

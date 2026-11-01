@@ -1,8 +1,8 @@
 # AI Flow 非覆盖初始化
 
-[PR #140](https://github.com/MaginaLW/harness-model/pull/140)已合并并交付本页命令。
+[PR #140](https://github.com/MaginaLW/harness-model/pull/140) 引入 Python 非覆盖初始化；[PR #143](https://github.com/MaginaLW/harness-model/pull/143) 增加 Node profile 和本地 V0/V1。
 
-普通 wheel 提供 `init preview`、`apply`、`inspect` 和 `migration-plan`。当前仅支持 `native-python-v1`：目标须是已有提交、包含 Python 源码及 `[project].name` 的普通 Git 工作树，首次预览时尚无 `.ai`，根目录不能有 `package.json`。写入限 Windows x64、CPython 3.11、本地 NTFS；Node 验证与 agent-bridge 的实际采用另行交付。
+普通 wheel 提供 `init preview`、`apply`、`inspect` 和 `migration-plan`，支持 `native-python-v1` 与 `agent-bridge-node@1`。目标均须是已有提交的普通 Git 工作树，首次预览尚无 `.ai`。Python profile 要求 Python 源码及 `[project].name`，根目录不能有 `package.json`；Node profile 要求根 `package.json` 的非空 name 和 check/build/test 脚本，以及显式输入的四份完整 `3.1.0` Policy。写入限 Windows x64、CPython 3.11、本地 NTFS；[Node 本地 V0/V1](node-verification.md)已提供，真实 agent-bridge 采用另行交付。
 
 先按[资源包说明](resource-bundle.md)构建并安装普通 wheel。可编辑安装没有内置资源，不会隐式读取源码仓 `.ai`。运行材料中的绝对路径只保存在本地，预览和审核文件放在目标仓之外。
 
@@ -11,6 +11,14 @@
 ```text
 python -m aiflow init preview --target <TARGET> --profile native-python-v1
 ```
+
+Node profile 必须显式使用候选 Policy：
+
+```text
+python -m aiflow init preview --target <TARGET> --profile agent-bridge-node@1 --policy-candidate-root <POLICY_DIR>
+```
+
+Node 候选目录只能包含完整同版本的 `hard-rules.yaml`、`routing.yaml`、`verification-levels.yaml`、`permissions.yaml`，只有 verification Policy 声明 Node profile。Node 不使用默认 Python 种子；apply 同时传入同一 `--policy-candidate-root <POLICY_DIR>`，migration-plan 同时传入 Node profile 和该目录。
 
 预览输出单个 JSON 对象，本身不写文件。调用者将原始 JSON 以 UTF-8、无 BOM 保存到 `<PREVIEW_JSON>`，核对目标 Git 根、HEAD、清单、拟建 UUID、资源和四份 Policy 的哈希。Windows PowerShell 的默认重定向可能使用其他编码，保存时须明确编码。若需采用候选 Policy，四份文件必须同目录、完整且相互兼容，给 preview/apply 同时传入 `--policy-candidate-root <POLICY_DIR>`；默认种子仅供审阅，不是目标授权。
 
@@ -50,6 +58,6 @@ inspect 和 migration-plan 只报告状态、文件差异与历史存在性，�
 
 Windows 句柄在创建和身份发布期间保持对象保护；祖先目录仅需 TRAVERSE/READ_ATTRIBUTES，不要求系统 Temp 的 LIST_DIRECTORY。实际目标根和安装目录保留目录访问与共享约束。
 
-初始化只校验固定验证合同的结构，不准备工具、依赖或外仓 V2 材料，不证明目标 V0/V1/V2 已可执行。
+初始化只校验固定验证合同的结构，不准备工具或依赖、不探测 Node/npm、不运行 suite，也不证明目标验证已可执行。Node 本地 V0/V1 须显式准备绑定材料并完成任务验证、审核批准及 Gate，见[Node 验证](node-verification.md)。installed 外仓 V2 和目标 CI 当前仍不受支持。
 
 这些边界不提供整棵 Git 工作树的原子锁、恶意同用户代码沙箱或断电事务保证。完整跨仓步骤见[接入方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
