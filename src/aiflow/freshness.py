@@ -12,6 +12,15 @@ from typing import Literal
 from aiflow.decision_units import classification_input_digest
 
 FreshnessStatus = Literal["fresh", "stale", "missing", "not_applicable"]
+V2_CODE_APPROVAL_FACTS = (
+    "v2_final_evidence",
+    "v2_snapshot_current",
+    "v2_verifier_independent",
+    "v2_context_current",
+    "v2_reviews_current",
+    "v2_checks_current",
+    "v2_mutation_killed",
+)
 _ORDER = (
     "FRESHNESS_ARTIFACT_INVALID",
     "FRESHNESS_SUBJECT_CHANGED",
@@ -131,6 +140,12 @@ def evaluate_freshness(
     ):
         reasons.append("FRESHNESS_ATTESTATION_CHANGED")
     if artifact_type in {"evidence", "code_approval"} and current.get("node_policy") is True:
+        if (
+            artifact_type == "code_approval"
+            and current.get("verification_level") == "V2"
+            and not all(current.get(key) is True for key in V2_CODE_APPROVAL_FACTS)
+        ):
+            reasons.append("FRESHNESS_EVIDENCE_NOT_PASSED")
         if (
             current.get("node_evidence_current") is not True
             or current.get("node_evidence_passed") is not True

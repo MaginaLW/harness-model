@@ -148,7 +148,7 @@
 
 | 能力 | 启动条件与实际缺口 |
 |---|---|
-| 完整引擎跨仓产品化（E5） | 完整克隆内的根目录/子目录/worktree 定位与 Schema 作用域已具备；显式风险事实录入已由 TASK-0083 交付。已选择 agent-bridge 为目标，[资源分发](resource-bundle.md)、带独立 UUID 的 [Python/Node 非覆盖初始化](initialization.md)及 [Node 本地 V0/V1](node-verification.md)已交付；installed 外仓 V2、Node CI 适配与真实应用仍未交付，完整接入尚未完成。所有者暂缓 V2 变异归因扩建的决定保持，未启动新的 V2 实现或验收。具体步骤、材料和风险见[跨仓初始化方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)，当前能力边界见[接入指南](adoption.md#完整引擎的跨仓库边界)。 |
+| 完整引擎跨仓产品化（E5） | 已交付资源分发、独立身份的 Python/Node 非覆盖初始化、Node 本地 V0/V1，以及 [native installed 引擎变异与只读回放](https://github.com/MaginaLW/harness-model/pull/147)。所有者已重新开启完整接入；本地 Node V2、Node CI 与真实 agent-bridge 应用仍需完整验收，完整接入尚未完成。真实目标写入等待其活动会话结束并重核基线和归属；执行边界见[当前接入计划](../superpowers/plans/agent-bridge-integration.md)。 |
 | Provider 接入（E5） | [单用途 SDK 客户端](sdk-and-engine-plan.md#应用自管-sdk-客户端)已实现，并完成一次固定文档审核与真实 PR 反馈回读；它提供显式手动调用，不提供通用 provider 路由、自动评分或 Desktop 附着。新的真实用途仍须核定实际输入与调用范围；实际模型身份、完整内部上下文和实费保持 `unknown`。 |
 | 固定动作可信执行（E5） | 选择服务动作、资产与身份根；补精确参数/版本绑定、撤回/过期、原子一次消费、结果回执及结果未知时的恢复。现有 wrapper 和本地批准文本不提供此执行能力；本路线可独立于 provider。 |
 | V3 高风险验证（3-B） | 选择真实用例，明确安全检查、沙箱、故障注入、dry-run、损失边界及回滚演练；V2、定向变异或低风险影子评估不替代这些证据。 |

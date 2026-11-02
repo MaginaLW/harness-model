@@ -156,7 +156,7 @@ class Model:
 
 
 @pytest.fixture
-def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Model]:
+def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[Model]:
     recorder, process_writer, material_collector = (
         runtime.record_installed_mutations,
         node._process,
@@ -195,6 +195,14 @@ def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Model]:
     root.mkdir()
     for name in ("policy", "schemas", "templates"):
         shutil.copytree(ROOT / ".ai" / name, root / ".ai" / name)
+    if getattr(request, "param", None) == "node-v2":
+        import yaml
+        from test_node_v2_contract import node_documents
+
+        for name, document in node_documents().items():
+            (root / ".ai/policy" / name).write_text(
+                yaml.safe_dump(document, sort_keys=False), encoding="utf8"
+            )
     (root / ".ai/repository-id").write_text(str(uuid4()) + "\n", encoding="utf8")
     (root / "fixture.py").write_text("value = 1\n", encoding="utf8")
     (root / ".gitignore").write_text(".ai/tasks/*/logs/\n__pycache__/\n", encoding="utf8")
@@ -688,6 +696,222 @@ def test_valid_logical_prefix_reaches_pair_parser_without_execution_or_write(
             logical_run.model.root, logical_run.reference, current=current
         )
     assert snapshot_tree(logical_run.model.root) == before
+
+
+def stage_node_v2_code_marker(run: LogicalRun, phase: str) -> dict:
+    """Real ledger/files, synthetic public evidence; never authorize an execution."""
+    from test_node_v2_evidence import public_node_evidence
+
+    from aiflow.contracts import require_valid_contract
+    from aiflow.evidence import verification_snapshot_sha256
+    from aiflow.policy import load_policy_bundle
+    from aiflow.review_service import _context_digest
+    from aiflow.state import TRANSITIONS, create_transition_event
+    from aiflow.task_service import _persist_event_and_task, read_task_record_strict
+
+    root = run.model.root
+    directory = resolve_task_path(root, TASK)
+    # These synthetic state transitions model a stopped approval transaction;
+    # neither they nor the structural evidence substitute for runtime acceptance.
+    for target in ("VERIFYING", "VERIFIED", "WAITING_FOR_FINAL_REVIEW"):
+        record = read_task_record_strict(root, TASK)
+        rule = TRANSITIONS[(record.task["current_state"], target)]
+        transition_task_record(
+            root,
+            TASK,
+            target_state=target,
+            event_type=rule.event_type,
+            actor=ACTOR,
+            payload={},
+            satisfied_preconditions=rule.preconditions,
+        )
+    record = read_task_record_strict(root, TASK)
+    classification = node._json(directory / "classification.json")
+    policy_sha = load_policy_bundle(root).sha256
+    evidence = public_node_evidence(root)
+    for key in ("repository_id", "branch", "base_commit", "subject_commit"):
+        evidence[key] = record.task[key]
+    evidence["spec_sha256"] = record.task["frozen_spec_sha256"]
+    evidence["classification_input_sha256"] = classification["classification_input_sha256"]
+    evidence["verifier_actor"] = ACTOR
+    evidence["verifier_context_sha256"] = run.model.inputs.verifier_context_sha256
+    evidence["reproduce_command"][6] = ACTOR
+    design = node._json(directory / "reviews/REV-0001-r0001.json")
+    evidence["review_refs"]["design"] = {
+        key: design[key] for key in ("review_id", "context_sha256")
+    }
+    evidence["verification_snapshot_sha256"] = verification_snapshot_sha256(evidence)
+    context = {
+        "schema_version": "2.0",
+        "review_stage": "implementation",
+        "task_id": TASK,
+        "decision_unit_ids": ["DU-001"],
+        **{
+            key: record.task[key]
+            for key in ("repository_id", "branch", "base_commit", "subject_commit")
+        },
+        "spec_sha256": record.task["frozen_spec_sha256"],
+        "policy_sha256": policy_sha,
+        "classification_input_sha256": classification["classification_input_sha256"],
+        "verification_snapshot_sha256": evidence["verification_snapshot_sha256"],
+        "content": {},
+    }
+    context["context_sha256"] = _context_digest(context)
+    review = {
+        "schema_version": "1.0",
+        "review_id": "REV-0002",
+        "revision": 1,
+        "task_id": TASK,
+        "review_stage": "implementation",
+        "reviewer": "fixture-code-reviewer",
+        "recorded_at": datetime.now(timezone.utc).isoformat(),
+        "context_sha256": context["context_sha256"],
+        "outcome": "APPROVE",
+        "summary": "Synthetic interrupted transaction only",
+        "findings": [],
+    }
+    require_valid_contract("review-context", context)
+    require_valid_contract("review-record", review)
+    put_json(directory / f"review-contexts/{context['context_sha256']}.json", context)
+    put_json(directory / "reviews/REV-0002-r0001.json", review)
+    reference = {
+        key: review[key] for key in ("review_id", "revision", "review_stage", "context_sha256")
+    }
+    record_task_event(
+        root, TASK, event_type="review_recorded", actor=review["reviewer"], payload=reference
+    )
+    evidence["review_refs"]["implementation"] = {
+        key: review[key] for key in ("review_id", "context_sha256")
+    }
+    require_valid_contract("evidence", evidence)
+    put_json(directory / "evidence.json", evidence)
+    approvals = node._json(directory / "approvals.json")
+    record = read_task_record_strict(root, TASK)
+    instant = datetime.now(timezone.utc).isoformat()
+    candidate = {
+        **approvals[0],
+        "approval_type": "code",
+        "approved_at": instant,
+        "reason": "Logical staged transaction; no host execution claim",
+        "evidence_sha256": node._sha(node._canonical(evidence)),
+    }
+    event = create_transition_event(
+        record.task,
+        target_state="APPROVED_FOR_MERGE",
+        event_type="code_approved",
+        actor="project-owner",
+        payload={"approval_type": "code", "approvals": [candidate], "structured_review": reference},
+        sequence=len(record.events) + 1,
+        satisfied_preconditions={"code_approval_valid"},
+        occurred_at=instant,
+    )
+    marker = {
+        "schema_version": "1.0",
+        "task_id": TASK,
+        "task": {**record.task, "current_state": "APPROVED_FOR_MERGE", "updated_at": instant},
+        "event": event,
+        "approvals": [*approvals, candidate],
+    }
+    put_json(directory / "approval_pending.json", marker)
+    if phase in {"ledger_written", "event_applied"}:
+        put_json(directory / "approvals.json", marker["approvals"])
+    if phase == "event_applied":
+        _persist_event_and_task(directory, marker["task"], event)
+    return marker
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize("phase", ["pending", "ledger_written", "event_applied"])
+def test_node_v2_real_current_replays_each_valid_code_transaction_phase_without_writes(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch, phase: str
+) -> None:
+    stage_node_v2_code_marker(logical_run, phase)
+    before = snapshot_tree(logical_run.model.root)
+    current = collect(logical_run)
+    assert (
+        f".ai/tasks/{TASK}/approval_pending.json"
+        in node._json_bytes(current.root_snapshot)["governance"]["paths"]
+    )
+    parser_sentinel(monkeypatch)
+    with pure_guard(monkeypatch), pytest.raises(ParserReached):
+        runtime.replay_installed_mutations(
+            logical_run.model.root, logical_run.reference, current=current
+        )
+    assert snapshot_tree(logical_run.model.root) == before
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize("role", ["before", "after"])
+def test_node_v2_live_pending_exception_cannot_validate_a_forged_historical_role(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch, role: str
+) -> None:
+    stage_node_v2_code_marker(logical_run, "ledger_written")
+    current = collect(logical_run)
+    live = node._json_bytes(current.root_snapshot)
+    # The actual live approval inventory is ahead of its event inventory. It is
+    # valid only as Current, even when historical.events exactly equals live.
+    assert (
+        runtime._snapshot(live, logical_run.model.root, logical_run.model.inputs, current=True)
+        == live
+    )
+    with pure_guard(monkeypatch), pytest.raises(AiflowError):
+        runtime._snapshot(live, logical_run.model.root, logical_run.model.inputs)
+    document = node._json(logical_run.path)
+    document[role] = deepcopy(live)
+    reference = rewrite_run(logical_run.path, document, logical_run.model.inputs)
+    before = snapshot_tree(logical_run.model.root)
+    with pytest.raises(AiflowError):
+        collect(logical_run, reference)
+    parser_sentinel(monkeypatch)
+    with pure_guard(monkeypatch):
+        facts = runtime.replay_installed_mutations(
+            logical_run.model.root, reference, current=replace(current, reference=reference)
+        )
+    assert not facts.current and not facts.passed and facts.reason_codes
+    assert snapshot_tree(logical_run.model.root) == before
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize("finalize", [False, True])
+def test_node_v2_public_service_rejects_implementer_before_claim_or_execution(
+    model: Model, monkeypatch: pytest.MonkeyPatch, finalize: bool
+) -> None:
+    import aiflow.verification_service as service
+    from aiflow.verifier_service import validate_verifier_actor
+
+    observed, attempts = [], []
+
+    def actor_guard(implementer, verifier):
+        observed.append((implementer, verifier))
+        return validate_verifier_actor(implementer, verifier)
+
+    def forbidden(*args, **kwargs):
+        attempts.append((args, kwargs))
+        raise AssertionError("The implementer reached claim, transition or execution")
+
+    monkeypatch.setattr(service, "validate_verifier_actor", actor_guard)
+    # Host provenance and Git assessment are separate contracts. The actor
+    # decision must still be the real production validator reached via verify.
+    monkeypatch.setattr(node, "precheck_node_materials", lambda *_: None)
+    monkeypatch.setattr(service, "_ci_git_assessment", lambda *_: None)
+    monkeypatch.setattr(service, "_start_local_verification", forbidden)
+    monkeypatch.setattr(node, "claim_node_v2_run", forbidden)
+    monkeypatch.setattr(node, "execute_node_verification", forbidden)
+    before = snapshot_tree(model.root)
+    options = (
+        {"finalize": True}
+        if finalize
+        else {
+            "node_materials_sha256": "a" * 64,
+            "node_installed_mutation_run": "IMUT-0123456789abcdef",
+        }
+    )
+    with pytest.raises(AiflowError) as caught:
+        service.verify_task(model.root, TASK, actor="fixture-implementer", **options)
+    assert caught.value.code == "VERIFIER_ACTOR_NOT_INDEPENDENT"
+    assert observed == [("fixture-implementer", "fixture-implementer")]
+    assert attempts == []
+    assert snapshot_tree(model.root) == before
 
 
 def test_preparation_inputs_cannot_stand_in_for_typed_current(
@@ -1574,6 +1798,10 @@ EXTRAS = ("acceptance", "integration", "targeted_mutation", "independent_verifie
 COMPARISON = ast.parse(
     "tuple(check['id'] for check in v2_checks[len(v1_checks):]) != extras", mode="eval"
 ).body
+NODE_COMPARISON = ast.parse(
+    "tuple(check['id'] for check in node_v2_checks[len(NODE_V1_CHECKS):]) != node_v2_extras",
+    mode="eval",
+).body
 
 
 @pytest.fixture
@@ -1593,8 +1821,8 @@ def _target(tree: ast.Module) -> ast.FunctionDef:
     return matches[0]
 
 
-def _comparison(function: ast.FunctionDef) -> ast.Compare:
-    expected = ast.dump(COMPARISON, include_attributes=False)
+def _comparison(function: ast.FunctionDef, template: ast.AST = COMPARISON) -> ast.Compare:
+    expected = ast.dump(template, include_attributes=False)
     matches = [
         node
         for node in ast.walk(function)
@@ -1622,42 +1850,46 @@ def _without_check(identifier: str) -> dict:
     return documents
 
 
-def test_installed_001_changes_only_the_unique_expected_comparison(copied_policy: Path) -> None:
+def test_installed_001_changes_only_the_fixed_native_and_node_comparisons(
+    copied_policy: Path,
+) -> None:
     from aiflow import installed_mutations
 
     before = ast.parse(copied_policy.read_bytes())
     expected = deepcopy(before)
-    comparison = _comparison(_target(expected))
-    comparison.ops = [ast.NotIn()]
-    comparison.comparators = [
-        ast.Tuple(
-            elts=[
-                ast.Name(id="extras", ctx=ast.Load()),
-                ast.Tuple(
-                    elts=[
-                        ast.Constant(value=value)
-                        for value in EXTRAS
-                        if value != "targeted_mutation"
-                    ],
-                    ctx=ast.Load(),
-                ),
-            ],
-            ctx=ast.Load(),
-        )
-    ]
+    for name, template in (("extras", COMPARISON), ("node_v2_extras", NODE_COMPARISON)):
+        comparison = _comparison(_target(expected), template)
+        comparison.ops = [ast.NotIn()]
+        comparison.comparators = [
+            ast.Tuple(
+                elts=[
+                    ast.Name(id=name, ctx=ast.Load()),
+                    ast.Tuple(
+                        elts=[
+                            ast.Constant(value=value)
+                            for value in EXTRAS
+                            if value != "targeted_mutation"
+                        ],
+                        ctx=ast.Load(),
+                    ),
+                ],
+                ctx=ast.Load(),
+            )
+        ]
     installed_mutations._mutate("MUT-V2-001", copied_policy)
     after_bytes = copied_policy.read_bytes()
     after = ast.parse(after_bytes)
     assert ast.dump(after, include_attributes=False) == ast.dump(expected, include_attributes=False)
     assert _outside_target_dump(after, SYMBOL) == _outside_target_dump(before, SYMBOL)
-    assignments = [
-        node
-        for node in ast.walk(_target(after))
-        if isinstance(node, ast.Assign)
-        and any(isinstance(target, ast.Name) and target.id == "extras" for target in node.targets)
-    ]
-    assert len(assignments) == 1
-    assert ast.literal_eval(assignments[0].value) == EXTRAS
+    for name in ("extras", "node_v2_extras"):
+        assignments = [
+            node
+            for node in ast.walk(_target(after))
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name) and target.id == name for target in node.targets)
+        ]
+        assert len(assignments) == 1
+        assert ast.literal_eval(assignments[0].value) == EXTRAS
     compile(after_bytes, str(copied_policy), "exec")
 
 
@@ -1678,6 +1910,35 @@ def test_installed_001_keeps_the_positive_policy_control(copied_policy: Path) ->
     for other in ("acceptance", "integration", "independent_verifier"):
         with pytest.raises(PolicyError) as caught:
             mutant._validate_cross_file(_without_check(other))
+        assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
+
+
+def test_installed_001_has_the_same_positive_and_designated_negative_controls_for_node2(
+    copied_policy: Path,
+) -> None:
+    from test_node_v2_contract import node_documents
+
+    from aiflow import installed_mutations
+
+    def without(identifier):
+        documents = node_documents()
+        level = documents["verification-levels.yaml"]["levels"][2]
+        level["checks"] = [row for row in level["checks"] if row["id"] != identifier]
+        return documents
+
+    baseline = _load_policy(copied_policy)
+    assert baseline._validate_cross_file(node_documents()) == "3.2.0"
+    with pytest.raises(PolicyError) as caught:
+        baseline._validate_cross_file(without("targeted_mutation"))
+    assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
+    installed_mutations._mutate("MUT-V2-001", copied_policy)
+    mutant = _load_policy(copied_policy)
+    assert mutant._validate_cross_file(node_documents()) == "3.2.0"
+    # Only this intentionally injected omission is permitted by the mutant.
+    assert mutant._validate_cross_file(without("targeted_mutation")) == "3.2.0"
+    for other in ("acceptance", "integration", "independent_verifier"):
+        with pytest.raises(PolicyError) as caught:
+            mutant._validate_cross_file(without(other))
         assert caught.value.code == "POLICY_CHECK_REFERENCE_INVALID"
 
 
@@ -1717,6 +1978,54 @@ def test_installed_001_rejects_unknown_or_ambiguous_ast_without_writes(
     original = copied_policy.read_bytes()
     with pytest.raises(ContractError):
         installed_mutations._mutate("MUT-V2-001", copied_policy)
+    assert copied_policy.read_bytes() == original
+
+
+@pytest.mark.parametrize(
+    "shape",
+    [
+        "missing_comparison",
+        "duplicate_comparison",
+        "missing_extras",
+        "duplicate_extras",
+        "changed_extras",
+    ],
+)
+def test_installed_001_rejects_unknown_node_guard_shapes_without_writes(copied_policy, shape):
+    from aiflow import installed_mutations
+
+    tree = ast.parse(copied_policy.read_bytes())
+    function = _target(tree)
+    comparison = _comparison(function, NODE_COMPARISON)
+    extras = next(
+        node
+        for node in ast.walk(function)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "node_v2_extras"
+            for target in node.targets
+        )
+    )
+    if shape == "missing_comparison":
+        comparison.ops = [ast.Eq()]
+    elif shape == "duplicate_comparison":
+        owner = next(
+            node
+            for node in ast.walk(function)
+            if isinstance(node, ast.If) and comparison in list(ast.walk(node.test))
+        )
+        owner.test = ast.BoolOp(op=ast.Or(), values=[owner.test, deepcopy(comparison)])
+    elif shape == "duplicate_extras":
+        function.body.append(deepcopy(extras))
+    elif shape == "missing_extras":
+        extras.targets[0].id = "foreign_extras"
+    else:
+        extras.value = ast.Tuple(elts=[ast.Constant(value="unsupported")], ctx=ast.Load())
+    copied_policy.write_text(ast.unparse(ast.fix_missing_locations(tree)) + "\n", encoding="utf8")
+    original = copied_policy.read_bytes()
+    with pytest.raises(ContractError) as caught:
+        installed_mutations._mutate("MUT-V2-001", copied_policy)
+    assert caught.value.code == "INSTALLED_MUTATION_OPERATOR_INVALID"
     assert copied_policy.read_bytes() == original
 
 
@@ -1766,3 +2075,336 @@ def test_installed_001_rejects_wrong_module_even_with_expected_basename(
     with pytest.raises(ContractError):
         installed_mutations._mutate("MUT-V2-001", copied_policy)
     assert copied_policy.read_bytes() == original
+
+
+def node_archive_framing(run: LogicalRun) -> SimpleNamespace:
+    """Schema/byte framing only: the primitive remains FIXTURE_NO_EXECUTION.
+
+    No Current is manufactured and this document is never submitted as runtime
+    acceptance. Each test below corrupts a specific binding and requires the
+    real archive validator to reject it without writes or process execution.
+    """
+    from test_node_v2_evidence import public_node_evidence
+
+    from aiflow.evidence import prepare_v2_pre_evidence, validate_node_evidence
+
+    inputs = run.model.inputs
+    directory = run.path.parent
+    evidence = public_node_evidence(run.model.root)
+    implementation = evidence["review_refs"]["implementation"]
+    for key in (
+        "task_id",
+        "repository_id",
+        "branch",
+        "base_commit",
+        "subject_commit",
+        "spec_sha256",
+        "policy_sha256",
+        "classification_input_sha256",
+        "verifier_actor",
+        "verifier_context_sha256",
+    ):
+        evidence[key] = getattr(inputs, key)
+    evidence["decision_unit_ids"] = list(inputs.decision_unit_ids)
+    evidence["reproduce_command"][6] = inputs.verifier_actor
+    evidence["reproduce_command"][-1] = directory.name
+    for check in evidence["checks"]:
+        for execution in check["executions"]:
+            for stream in ("stdout", "stderr"):
+                for role in ("raw_ref", "log_ref"):
+                    execution[stream][role] = execution[stream][role].replace(
+                        "IMUT-0123456789abcdef", directory.name
+                    )
+    projection = {
+        "reference": asdict(run.reference),
+        "inputs_sha256": inputs.sha256,
+        "results": [[probe, "killed"] for probe in runtime.PROBE_IDS],
+    }
+    evidence["installed_mutation"] = projection
+    node_directory = directory / "node"
+    node_directory.mkdir()
+    original = {
+        "kind": "aiflow-node-run-3.2",
+        "installed_mutation": deepcopy(projection),
+        "unit_fixture_no_execution": True,
+    }
+    put_json(node_directory / "run.json", original)
+    evidence["node_binding"]["subject_tree"] = inputs.subject_tree
+    evidence["node_binding"]["product_tests"]["report"]["ref"] = (
+        f"logs/{directory.name}/node/vitest.json"
+    )
+    evidence["node_binding"]["run"] = {
+        "ref": f"logs/{directory.name}/node/run.json",
+        "size": len(node._canonical(original)),
+        "sha256": node._sha(node._canonical(original)),
+    }
+    evidence["node_binding_sha256"] = node._sha(node._canonical(evidence["node_binding"]))
+    evidence = prepare_v2_pre_evidence(evidence)
+    validate_node_evidence(evidence)
+    archive = directory / "evidence.json"
+    current = resolve_task_path(run.model.root, TASK, "evidence.json")
+    put_json(archive, evidence)
+    put_json(current, evidence)
+    assert node._json(run.path)["failure"] == "FIXTURE_NO_EXECUTION"
+    return SimpleNamespace(
+        run=run,
+        evidence=evidence,
+        original=original,
+        archive=archive,
+        current=current,
+        implementation=implementation,
+    )
+
+
+def write_archive_framing(case: SimpleNamespace) -> None:
+    from aiflow.evidence import validate_node_evidence, verification_snapshot_sha256
+
+    evidence = case.evidence
+    evidence["node_binding_sha256"] = node._sha(node._canonical(evidence["node_binding"]))
+    evidence["verification_snapshot_sha256"] = verification_snapshot_sha256(evidence)
+    validate_node_evidence(evidence)
+    put_json(case.archive, evidence)
+    put_json(case.current, evidence)
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("final_role", "pre archive has the wrong role"),
+        ("noncanonical", "pre archive has the wrong role"),
+        ("foreign_actor", "foreign task binding"),
+        ("foreign_branch", "foreign task binding"),
+        ("foreign_units", "foreign decision units"),
+        ("mutation_reference", "foreign mutation original"),
+        ("mutation_inputs", "foreign mutation original"),
+        ("mutation_results", "foreign mutation original"),
+        ("node_size", "foreign Node run"),
+        ("subject_tree", "foreign Node run"),
+        ("node_kind", "does not bind this exact mutation original"),
+        ("node_projection", "does not bind this exact mutation original"),
+        ("current_snapshot", "differs from the current stable snapshot"),
+    ],
+)
+def test_node_archive_rejects_corrupt_framing_with_real_schema_and_byte_guards(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch, fault: str, message: str
+) -> None:
+    from aiflow.evidence import verification_snapshot_sha256
+
+    case = node_archive_framing(logical_run)
+    evidence = case.evidence
+    if fault == "final_role":
+        evidence["phase"] = "final"
+        evidence["review_refs"]["implementation"] = case.implementation
+    elif fault == "foreign_actor":
+        evidence["verifier_actor"] = "foreign-verifier"
+        evidence["reproduce_command"][6] = "foreign-verifier"
+    elif fault == "foreign_branch":
+        evidence["branch"] = "foreign-branch"
+    elif fault == "foreign_units":
+        evidence["decision_unit_ids"] = ["DU-999"]
+    elif fault == "mutation_reference":
+        evidence["installed_mutation"]["reference"]["size"] += 1
+    elif fault == "mutation_inputs":
+        evidence["installed_mutation"]["inputs_sha256"] = "a" * 64
+    elif fault == "mutation_results":
+        evidence["installed_mutation"]["results"][0][1] = "survived"
+        for check in evidence["checks"]:
+            if check["check_id"] in {"targeted_mutation", "independent_verifier"}:
+                check["status"] = "failed"
+        evidence["conclusion"] = "failed"
+    elif fault == "node_size":
+        evidence["node_binding"]["run"]["size"] += 1
+    elif fault == "subject_tree":
+        evidence["node_binding"]["subject_tree"] = "a" * 40
+    elif fault in {"node_kind", "node_projection"}:
+        if fault == "node_kind":
+            case.original["kind"] = "foreign-node-role"
+        else:
+            case.original["installed_mutation"]["inputs_sha256"] = "a" * 64
+        raw = node._canonical(case.original)
+        (logical_run.path.parent / "node/run.json").write_bytes(raw)
+        evidence["node_binding"]["run"].update(size=len(raw), sha256=node._sha(raw))
+    write_archive_framing(case)
+    if fault == "noncanonical":
+        case.archive.write_bytes(case.archive.read_bytes() + b"\n")
+    elif fault == "current_snapshot":
+        current = deepcopy(evidence)
+        current["node_binding"]["materials_sha256"] = "a" * 64
+        current["node_binding_sha256"] = node._sha(node._canonical(current["node_binding"]))
+        current["verification_snapshot_sha256"] = verification_snapshot_sha256(current)
+        put_json(case.current, current)
+    before = snapshot_tree(logical_run.model.root)
+    with pure_guard(monkeypatch), pytest.raises(AiflowError, match=message):
+        runtime._validate_node_pre_archive(
+            logical_run.model.root,
+            logical_run.reference,
+            logical_run.model.inputs,
+            logical_run.path.parent,
+        )
+    assert snapshot_tree(logical_run.model.root) == before
+    assert node._json(logical_run.path)["failure"] == "FIXTURE_NO_EXECUTION"
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("decision_units", "decision units are invalid"),
+        ("foreign_task", "belongs to a different task"),
+        ("lower_level", "Only Node V2 may own additional installed run roles"),
+        ("archive_without_node", "archive has no owned Node role"),
+        ("node_file", "directory"),
+        ("unknown_child", "missing or undeclared outputs"),
+        ("extra_phase", "missing or undeclared phases"),
+    ],
+)
+def test_node_installed_run_children_reject_invalid_inputs_or_owned_roles(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch, fault: str, message: str
+) -> None:
+    root, run = logical_run.model.root, logical_run.path.parent
+    reference = logical_run.reference
+    if fault in {"decision_units", "foreign_task"}:
+        document = node._json(logical_run.path)
+        document["inputs"]["decision_unit_ids" if fault == "decision_units" else "task_id"] = (
+            "DU-001" if fault == "decision_units" else "TASK-0002"
+        )
+        reference = rewrite_run(logical_run.path, document, logical_run.model.inputs)
+        completion = node._json(run / "completion.json")
+        completion["inputs_sha256"] = node._sha(node._canonical(document["inputs"]))
+        put_json(run / "completion.json", completion)
+    elif fault == "lower_level":
+        from aiflow.contracts import require_valid_contract
+
+        (run / "node").mkdir()
+        path = resolve_task_path(root, TASK, "classification.json")
+        classification = node._json(path)
+        classification["schema_version"] = "1.0"
+        classification["effective_verification_level"] = "V1"
+        for item in classification["classifications"]:
+            item["verification_level"] = "V1"
+        require_valid_contract("classification", classification)
+        put_json(path, classification)
+    elif fault == "archive_without_node":
+        put_json(run / "evidence.json", {})
+    elif fault == "node_file":
+        (run / "node").write_bytes(b"not a directory")
+    elif fault == "unknown_child":
+        (run / "unowned").mkdir()
+    else:
+        (run / "0/extra").mkdir()
+    before = snapshot_tree(root)
+    with pure_guard(monkeypatch), pytest.raises(AiflowError, match=message):
+        runtime._validate_run_children(root, reference)
+    assert snapshot_tree(root) == before
+    if fault in {"decision_units", "foreign_task"}:
+        with pytest.raises(AiflowError):
+            collect(logical_run, reference)
+        assert snapshot_tree(root) == before
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+def test_owned_empty_node_role_does_not_turn_a_failed_primitive_into_execution(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = logical_run.model.root
+    (logical_run.path.parent / "node").mkdir()
+    current = collect(logical_run)
+    before = snapshot_tree(root)
+    reached = []
+    parse = runtime._pair_originals
+
+    def actual_parser(*args, **kwargs):
+        reached.append(True)
+        return parse(*args, **kwargs)
+
+    monkeypatch.setattr(runtime, "_pair_originals", actual_parser)
+    with pure_guard(monkeypatch):
+        facts = runtime.replay_installed_mutations(root, logical_run.reference, current=current)
+    assert reached and not facts.passed and not facts.all_killed
+    assert facts.reason_codes and facts.results == ()
+    assert snapshot_tree(root) == before
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize("fault", ["pre_phase", "classification"])
+def test_node_pending_code_exception_rejects_wrong_phase_or_verification_strength(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch, fault: str
+) -> None:
+    stage_node_v2_code_marker(logical_run, "pending")
+    root = logical_run.model.root
+    if fault == "pre_phase":
+        path = resolve_task_path(root, TASK, "evidence.json")
+        evidence = node._json(path)
+        evidence["phase"] = "pre_implementation_review"
+        put_json(path, evidence)
+        before = snapshot_tree(root)
+        with pytest.raises(AiflowError, match="Only current Node V2 final code approval"):
+            collect(logical_run)
+    else:
+        from aiflow.contracts import require_valid_contract
+
+        path = resolve_task_path(root, TASK, "classification.json")
+        classification = node._json(path)
+        classification["schema_version"] = "1.0"
+        classification["effective_verification_level"] = "V1"
+        for item in classification["classifications"]:
+            item["verification_level"] = "V1"
+        require_valid_contract("classification", classification)
+        put_json(path, classification)
+        before = snapshot_tree(root)
+        with pure_guard(monkeypatch), pytest.raises(AiflowError, match="Only a Node V2 task"):
+            runtime._require_pending_approval(root, TASK, executing=False, node_v2=True)
+        with pytest.raises(AiflowError):
+            collect(logical_run)
+    assert snapshot_tree(root) == before
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+@pytest.mark.parametrize("fault", ["approval_inventory", "event_prefix"])
+def test_node_pending_current_rejects_a_different_valid_snapshot_without_recovery(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch, fault: str
+) -> None:
+    stage_node_v2_code_marker(logical_run, "ledger_written")
+    current = collect(logical_run)
+    snapshot = node._json_bytes(current.root_snapshot)
+    if fault == "approval_inventory":
+        snapshot["governance"]["approvals"][-1]["reason"] = "different valid approval text"
+    else:
+        snapshot["events"].pop()
+    corrupted = replace(current, root_snapshot=node._canonical(snapshot))
+    messages = []
+    error = runtime._error
+
+    def observed_error(*args, **kwargs):
+        result = error(*args, **kwargs)
+        messages.append(result.message)
+        return result
+
+    monkeypatch.setattr(runtime, "_error", observed_error)
+    before = snapshot_tree(logical_run.model.root)
+    with pure_guard(monkeypatch):
+        facts = runtime.replay_installed_mutations(
+            logical_run.model.root, logical_run.reference, current=corrupted
+        )
+    assert not facts.current and not facts.passed and facts.results == ()
+    assert "Current pending approval inventory is not the exact validated live state" in messages
+    assert snapshot_tree(logical_run.model.root) == before
+
+
+@pytest.mark.parametrize("model", ["node-v2"], indirect=True)
+def test_node_archive_dispatcher_validates_the_actual_current_snapshot(
+    logical_run: LogicalRun, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aiflow.evidence import verification_snapshot_sha256
+
+    case = node_archive_framing(logical_run)
+    current = deepcopy(case.evidence)
+    current["generated_at"] = "2026-09-01T00:00:00Z"
+    current["verification_snapshot_sha256"] = verification_snapshot_sha256(current)
+    put_json(case.current, current)
+    before = snapshot_tree(logical_run.model.root)
+    with pure_guard(monkeypatch), pytest.raises(AiflowError, match="current stable snapshot"):
+        runtime._validate_run_children(logical_run.model.root, logical_run.reference)
+    assert snapshot_tree(logical_run.model.root) == before
+    assert node._json(logical_run.path)["failure"] == "FIXTURE_NO_EXECUTION"

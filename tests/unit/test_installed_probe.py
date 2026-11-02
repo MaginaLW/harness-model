@@ -14,8 +14,14 @@ import pytest
         (
             "MUT-V2-001",
             [
-                ("policy_complete", {"version": "2.6.0"}),
-                ("policy_missing_targeted_mutation", {"error": "POLICY_CHECK_REFERENCE_INVALID"}),
+                ("policy_complete", {"version": "2.6.0", "node": {"version": "3.2.0"}}),
+                (
+                    "policy_missing_targeted_mutation",
+                    {
+                        "error": "POLICY_CHECK_REFERENCE_INVALID",
+                        "node": {"error": "POLICY_CHECK_REFERENCE_INVALID"},
+                    },
+                ),
             ],
         ),
         (
@@ -23,17 +29,40 @@ import pytest
             [
                 (
                     "verifier_blank",
-                    {"errors": ["VERIFIER_IMPLEMENTER_MISSING", "VERIFIER_ACTOR_REQUIRED"]},
+                    {
+                        "errors": ["VERIFIER_IMPLEMENTER_MISSING", "VERIFIER_ACTOR_REQUIRED"],
+                        "node_guard_linked": True,
+                    },
                 ),
-                ("verifier_distinct", {"actors": ["implementer", "independent-verifier"]}),
-                ("verifier_same", {"error": "VERIFIER_ACTOR_NOT_INDEPENDENT"}),
+                (
+                    "verifier_distinct",
+                    {"actors": ["implementer", "independent-verifier"], "node_guard_linked": True},
+                ),
+                (
+                    "verifier_same",
+                    {"error": "VERIFIER_ACTOR_NOT_INDEPENDENT", "node_guard_linked": True},
+                ),
             ],
         ),
         (
             "MUT-V2-003",
             [
-                ("approval_passing_checks", {"current": True, "mutation_calls": 1}),
-                ("approval_failed_required_check", {"current": False, "mutation_calls": 0}),
+                (
+                    "approval_passing_checks",
+                    {
+                        "current": True,
+                        "mutation_calls": 1,
+                        "node": {"current": True, "mutation_reached": True},
+                    },
+                ),
+                (
+                    "approval_failed_required_check",
+                    {
+                        "current": False,
+                        "mutation_calls": 0,
+                        "node": {"current": False, "mutation_reached": False},
+                    },
+                ),
             ],
         ),
         (
@@ -41,21 +70,41 @@ import pytest
             [
                 (
                     "gate_killed_mutations",
-                    {"checks_current": True, "mutation_killed": True, "mutation_calls": 1},
+                    {
+                        "checks_current": True,
+                        "mutation_killed": True,
+                        "mutation_calls": 1,
+                        "node": {"checks_current": True, "mutation_killed": True},
+                    },
                 ),
                 (
                     "gate_survived_mutation",
-                    {"checks_current": True, "mutation_killed": False, "mutation_calls": 1},
+                    {
+                        "checks_current": True,
+                        "mutation_killed": False,
+                        "mutation_calls": 1,
+                        "node": {"checks_current": True, "mutation_killed": False},
+                    },
                 ),
             ],
         ),
         (
             "MUT-V2-005",
             [
-                ("snapshot_unchanged", {"errors": [None, None], "same_snapshot": True}),
+                (
+                    "snapshot_unchanged",
+                    {
+                        "errors": [None, None],
+                        "same_snapshot": True,
+                        "node": {"errors": [None, None], "same_snapshot": True},
+                    },
+                ),
                 (
                     "snapshot_tampered",
-                    {"errors": ["EVIDENCE_SNAPSHOT_STALE", "EVIDENCE_SNAPSHOT_STALE"]},
+                    {
+                        "errors": ["EVIDENCE_SNAPSHOT_STALE", "EVIDENCE_SNAPSHOT_STALE"],
+                        "node": {"errors": ["EVIDENCE_SNAPSHOT_STALE"] * 5},
+                    },
                 ),
             ],
         ),

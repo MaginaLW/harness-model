@@ -22,19 +22,30 @@ from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from time import monotonic_ns
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from aiflow.errors import AiflowError, ContractError
 from aiflow.evidence import EvidenceFacts
 from aiflow.node_verification import (
+    COVERAGE_ISTANBUL_METHOD,
     COVERAGE_METHOD,
+    PRODUCT_TESTS,
     _ordered_paths,
     _path,
+    validate_node_istanbul_line_coverage,
     validate_node_line_coverage,
+    validate_node_product_tests,
 )
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.process_runner import run_node_process
 from aiflow.verification import VerificationContext, parse_verification_plan
+
+if TYPE_CHECKING:
+    from aiflow.installed_mutations import (
+        InstalledMutationCurrent,
+        InstalledMutationFacts,
+        InstalledMutationReference,
+    )
 
 MAX_ENTRIES = 20_000
 MAX_FILE_BYTES = 128 * 1024 * 1024
@@ -51,6 +62,39 @@ MANIFEST_NAMES = (
     "preflight.json",
 )
 PROFILE = {"id": "agent-bridge-node", "revision": 1}
+PROFILE_V2 = {"id": "agent-bridge-node", "revision": 2}
+NODE_V2_CONFIG_SHA256 = "74bed4fc135f16dd29e85987c221ab2d877a778fa44e774dcc5dbc4a646654ed"
+NATIVE_OWNERSHIP_DIRECTORY = ".runtime/native-ownership"
+NATIVE_OWNERSHIP_INPUTS = {
+    "scripts/windows-owned-launcher.cs": (
+        "7972a55b7a45bd00e557eae709d228c69f04f460c8057614ea820bf18da4b8f3"
+    ),
+    "src/local/ownership/windows-native.ts": (
+        "438e19b624334a59e8346f767b5a16eaffa01b811b3b9a4238a94e038f394007"
+    ),
+}
+ISTANBUL_PACKAGES = {
+    "@vitest/coverage-istanbul": "4.1.10",
+    "@babel/core": "7.29.7",
+    "@babel/parser": "7.29.12",
+    "@jridgewell/trace-mapping": "0.3.31",
+    "istanbul-lib-coverage": "3.2.2",
+    "@istanbuljs/schema": "0.1.6",
+}
+ISTANBUL_FILES = {
+    "@vitest/coverage-istanbul/dist/provider.js": (
+        "9ab927dcd749855046ed01e49d31ecde70ab900614f2e109a5b1fc4aa0a5a09b"
+    ),
+    "@babel/parser/lib/index.js": (
+        "86bfb625edc968a1bf7c7bb0caa54a94395cb1b21493ef44845e51546f701730"
+    ),
+    "@istanbuljs/schema/index.js": (
+        "197006c28b6b2073a3d379536fdeb5fde36359307725af2f531bb23b92b8e945"
+    ),
+    "vitest/dist/chunks/index.UpGiHP7g.js": (
+        "cdafaf8e508042dddba72f8c7bbae84e2836ddb6b06c7026520c35d91af4e798"
+    ),
+}
 VERSIONS = {"node": "24.20.0", "npm": "11.13.0", "vitest": "4.1.10", "vite": "8.2.1"}
 SEMANTIC_CONTRACT = {
     "profile": PROFILE,
@@ -122,7 +166,7 @@ SEMANTIC_CONTRACT["git_inputs"] = {
 
 @dataclass(frozen=True)
 class NodeEvidenceFacts:
-    """The one consumer result; obtaining it never starts a process or writes."""
+    """Original-material replay result; no check or mutation is re-executed."""
 
     current: bool
     passed: bool
@@ -130,6 +174,7 @@ class NodeEvidenceFacts:
     evidence_sha256: str | None
     materials_sha256: str | None
     run_id: str | None
+    installed_mutation_facts: InstalledMutationFacts | None = None
 
 
 def _error(message: str, code: str = "NODE_MATERIALS_INVALID") -> ContractError:
@@ -147,6 +192,50 @@ def _sha(value: bytes) -> str:
 
 
 SEMANTIC_CONTRACT_SHA256 = _sha(_canonical(SEMANTIC_CONTRACT))
+SEMANTIC_CONTRACT_V2 = {
+    **SEMANTIC_CONTRACT,
+    "profile": PROFILE_V2,
+    "coverage_method": COVERAGE_ISTANBUL_METHOD,
+    "coverage_packages": ISTANBUL_PACKAGES,
+    "coverage_files": ISTANBUL_FILES,
+    "source_config_sha256": NODE_V2_CONFIG_SHA256,
+    "product_tests": PRODUCT_TESTS,
+    "execution": "owned-imut-node-copy-offline-v2",
+    "node_inventory": "closed-path-kind-size-sha256-excluding-run-json",
+    "native_ownership_output": {
+        "directory": NATIVE_OWNERSHIP_DIRECTORY,
+        "inputs": NATIVE_OWNERSHIP_INPUTS,
+        "applicability": "both-absent-forbidden-or-exact-pair-mandatory-after-node-check",
+        "files": ["own-<source-sha256>.exe", "own-<source-sha256>.exe.json"],
+        "sidecar": "sourceHash-first-executableHash-second-compact-json-one-LF",
+        "host_roles": [
+            "powershell",
+            "powershell_config",
+            "csc",
+            "csc_config",
+            "cvtres",
+            "cvtres_config",
+        ],
+        "seal": "first-successful-fixed-node-check-unchanged-through-plan-and-replay",
+        "trust": "same-reviewed-source-tool-and-fixed-process-output-model-as-dist",
+    },
+}
+SEMANTIC_CONTRACT_V2_SHA256 = _sha(_canonical(SEMANTIC_CONTRACT_V2))
+
+
+def _profile_revision(binding: Mapping[str, Any]) -> int:
+    profile = _canonical(binding.get("profile"))
+    if profile == _canonical(PROFILE):
+        return 1
+    if profile == _canonical(PROFILE_V2):
+        return 2
+    raise _error("Node profile binding is unsupported")
+
+
+def _semantic_digest(binding: Mapping[str, Any]) -> str:
+    return (
+        SEMANTIC_CONTRACT_SHA256 if _profile_revision(binding) == 1 else SEMANTIC_CONTRACT_V2_SHA256
+    )
 
 
 def _pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -615,7 +704,8 @@ def _binding(root: Path, task_id: str) -> tuple[dict[str, Any], PolicyBundle]:
         root, task_id, "classification.json", contract_name="classification"
     )
     levels = {item.get("verification_level") for item in classification["classifications"]}
-    if "V2" in levels:
+    revision = 2 if bundle.policy_version == "3.2.0" else 1
+    if "V2" in levels and revision != 2:
         raise _error("Installed Node V2 evidence is unavailable", "VERIFY_NODE_V2_UNSUPPORTED")
     digest, _ = current_classification_input_digest(
         task, parse_decision_units(task), classification, record.events
@@ -639,7 +729,7 @@ def _binding(root: Path, task_id: str) -> tuple[dict[str, Any], PolicyBundle]:
         "spec_sha256": spec,
         "policy_sha256": bundle.sha256,
         "classification_input_sha256": digest,
-        "profile": PROFILE,
+        "profile": PROFILE if revision == 1 else PROFILE_V2,
     }, bundle
 
 
@@ -938,8 +1028,12 @@ def _host_tools(*, budget: list[int] | None = None) -> dict[str, Any]:
 
 
 def _source_contract(
-    root: Path, source: Mapping[str, Any]
+    root: Path, source: Mapping[str, Any], *, revision: int = 1
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    if type(revision) is not int or revision not in {1, 2}:
+        raise _error("Node source profile revision is unsupported")
+    if revision == 2:
+        _native_ownership_applicable(root, source)
     files = {row["path"]: row for row in source["files"]}
     configuration = _git(root, "config", "--local", "--list", "--no-includes").decode("utf-8")
     forbidden = (
@@ -1000,6 +1094,8 @@ def _source_contract(
         Path(name).name.casefold() == ".npmrc" for name in files
     ):
         raise _error("Fixed Node source inputs are missing or contain npm configuration")
+    if revision == 2 and files["vitest.config.ts"]["sha256"] != NODE_V2_CONFIG_SHA256:
+        raise _error("Revision2 Vitest configuration differs from its reviewed fixed bytes")
     package = _json_bytes(_git(root, "cat-file", "blob", files["package.json"]["blob"]))
     lock = _json_bytes(_git(root, "cat-file", "blob", files["package-lock.json"]["blob"]))
     if not isinstance(package, dict) or not isinstance(lock, dict):
@@ -1146,8 +1242,10 @@ def _dependency_shims(root: Path, packages: set[str], inventory: Mapping[str, An
 
 
 def _dependencies(
-    root: Path, lock: Mapping[str, Any], *, budget: list[int] | None = None
+    root: Path, lock: Mapping[str, Any], *, budget: list[int] | None = None, revision: int = 1
 ) -> dict[str, Any]:
+    if type(revision) is not int or revision not in {1, 2}:
+        raise _error("Node dependency profile revision is unsupported")
     inventory = _inventory(root, budget=budget)
     packages = lock.get("packages")
     if not isinstance(packages, dict):
@@ -1186,13 +1284,23 @@ def _dependencies(
             continue
         if (root / path.removeprefix("node_modules/")).exists():
             raise _error("A platform-inapplicable package is unexpectedly installed")
-    for name, version in (
-        ("vitest", VERSIONS["vitest"]),
-        ("@vitest/coverage-v8", VERSIONS["vitest"]),
-        ("vite", VERSIONS["vite"]),
-    ):
+    required_versions = dict(
+        (
+            ("vitest", VERSIONS["vitest"]),
+            ("vite", VERSIONS["vite"]),
+        )
+    )
+    if revision == 1:
+        required_versions["@vitest/coverage-v8"] = VERSIONS["vitest"]
+    else:
+        required_versions.update(ISTANBUL_PACKAGES)
+    for name, version in required_versions.items():
         if _json(root / name / "package.json").get("version") != version:
             raise _error("Required coverage dependency has the wrong version")
+    if revision == 2:
+        for name, digest in ISTANBUL_FILES.items():
+            if _sha(_read(root / name)) != digest:
+                raise _error("Revision2 coverage producer bytes differ from the reviewed closure")
     for row in inventory["entries"]:
         path = str(row["path"])
         if (
@@ -1245,7 +1353,8 @@ def prepare_node_materials(root: Path, task_id: str, *, payload_root: Path) -> s
         raise _error("Dependency payload layout is invalid")
     budget = [MAX_ENTRIES, MAX_TOTAL_BYTES]
     source = _source(root, str(binding["subject_commit"]), budget=budget)
-    _package, lock = _source_contract(root, source)
+    revision = _profile_revision(binding)
+    _package, lock = _source_contract(root, source, revision=revision)
     runtime = _inventory(payload / "node", budget=budget)
     _node_x64(payload / "node/node.exe")
     files = {str(row["path"]): row for row in runtime["entries"] if row["kind"] == "file"}
@@ -1264,7 +1373,9 @@ def prepare_node_materials(root: Path, task_id: str, *, payload_root: Path) -> s
     npm_package = _json(payload / "node/node_modules/npm/package.json")
     if npm_package.get("name") != "npm" or npm_package.get("version") != VERSIONS["npm"]:
         raise _error("The full npm package has the wrong version")
-    dependencies = _dependencies(payload / "dependencies/node_modules", lock, budget=budget)
+    dependencies = _dependencies(
+        payload / "dependencies/node_modules", lock, budget=budget, revision=revision
+    )
     engine, host = _engine(budget=budget), _host_tools(budget=budget)
     preflight_root = payload.parent.parent / ("node-preflight-" + payload.name)
     preflight_root.mkdir()
@@ -1321,7 +1432,7 @@ def prepare_node_materials(root: Path, task_id: str, *, payload_root: Path) -> s
         raise _error("Prepared JSON exceeds its limits")
     prepared = {
         "schema_version": "1.0",
-        "kind": "aiflow-node-prepared-3.1",
+        "kind": "aiflow-node-prepared-3.1" if revision == 1 else "aiflow-node-prepared-3.2",
         "binding": binding,
         "payload": {
             "path": str(payload),
@@ -1332,7 +1443,7 @@ def prepare_node_materials(root: Path, task_id: str, *, payload_root: Path) -> s
             for name in MANIFEST_NAMES
         ],
         "versions": VERSIONS,
-        "semantic_contract_sha256": SEMANTIC_CONTRACT_SHA256,
+        "semantic_contract_sha256": _semantic_digest(binding),
     }
     data = _canonical(prepared)
     if len(data) > MAX_PREPARED_BYTES:
@@ -1376,10 +1487,15 @@ def _load_prepared(
         not isinstance(prepared, dict)
         or set(prepared) != fields
         or prepared["schema_version"] != "1.0"
-        or prepared["kind"] != "aiflow-node-prepared-3.1"
+        or prepared["kind"]
+        != (
+            "aiflow-node-prepared-3.1"
+            if _profile_revision(binding) == 1
+            else "aiflow-node-prepared-3.2"
+        )
         or _canonical(prepared["binding"]) != _canonical(binding)
         or _canonical(prepared["versions"]) != _canonical(VERSIONS)
-        or prepared["semantic_contract_sha256"] != SEMANTIC_CONTRACT_SHA256
+        or prepared["semantic_contract_sha256"] != _semantic_digest(binding)
         or _canonical(prepared) != data
     ):
         raise _error("Prepared material binding is stale or invalid", "NODE_BINDING_STALE")
@@ -1571,13 +1687,14 @@ def _check_materials(root: Path, prepared: Mapping[str, Any], manifests: Mapping
     source = _source(root, str(prepared["binding"]["subject_commit"]), budget=budget)
     if _canonical(source) != _canonical(manifests["source.json"]):
         raise _error("Git source material changed", "NODE_MATERIALS_DRIFT")
-    _package, lock = _source_contract(root, source)
+    revision = _profile_revision(prepared["binding"])
+    _package, lock = _source_contract(root, source, revision=revision)
     if _canonical(_inventory(Path(runtime["root"]), budget=budget)) != _canonical(runtime):
         raise _error("Bound Node runtime changed", "NODE_MATERIALS_DRIFT")
     dependencies = manifests["dependencies.json"]
-    if _canonical(_dependencies(Path(dependencies["root"]), lock, budget=budget)) != _canonical(
-        dependencies
-    ):
+    if _canonical(
+        _dependencies(Path(dependencies["root"]), lock, budget=budget, revision=revision)
+    ) != _canonical(dependencies):
         raise _error("Bound dependencies changed", "NODE_MATERIALS_DRIFT")
     if _canonical(_engine(budget=budget)) != _canonical(manifests["engine.json"]):
         raise _error("Installed engine changed", "NODE_ENGINE_DRIFT")
@@ -1906,7 +2023,7 @@ def _check_review_resolution(
 
 
 def _governance_snapshot(
-    root: Path, task_id: str, events: Sequence[Mapping[str, Any]]
+    root: Path, task_id: str, events: Sequence[Mapping[str, Any]], *, include_pending: bool = True
 ) -> dict[str, Any]:
     """Derive exact audit paths from replayed records, never exempt a directory."""
     from aiflow.contracts import require_valid_contract
@@ -1986,7 +2103,7 @@ def _governance_snapshot(
     for approval in approvals:
         require_valid_contract("approval", approval)
     marker_path = root / prefix / "approval_pending.json"
-    if marker_path.exists():
+    if include_pending and marker_path.exists():
         from aiflow.approval import _validate_node_code_approval_marker
         from aiflow.task_service import read_task_record_strict
 
@@ -2033,6 +2150,12 @@ def _governance_snapshot(
                 for entry in classification["classifications"]
                 if entry["route"] == "REVIEW"
             },
+            **(
+                {"verification_snapshot_sha256": evidence["verification_snapshot_sha256"]}
+                if evidence.get("schema_version") == "3.2"
+                and evidence.get("verification_level") == "V2"
+                else {}
+            ),
         )
         paths.add(prefix + "approval_pending.json")
     return {"paths": sorted(paths), "immutable": immutable, "approvals": approvals}
@@ -2385,6 +2508,368 @@ await writeFile(process.argv[2], JSON.stringify(output), { flag: 'wx' });
 """.strip()
 
 
+NODE_ISTANBUL_HELPER = r"""
+
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+import { resolve, relative, join, dirname, isAbsolute } from 'node:path';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+const manifest = JSON.parse(await readFile(process.argv[1], 'utf8'));
+if (Object.keys(manifest).sort().join(',') !== 'files,root' ||
+  typeof manifest.root !== 'string' ||
+  !isAbsolute(manifest.root) ||
+  !Array.isArray(manifest.files) ||
+  !manifest.files.length ||
+  manifest.files.length > 20000)
+  throw Error('SOURCE_MANIFEST');
+const outputFile = resolve(process.argv[2]),
+  outputRoot = join(dirname(outputFile), 'domain-materials'),
+  root = resolve(manifest.root).replaceAll('\\', '/');
+await mkdir(outputRoot);
+const require = createRequire(join(root, 'package.json')),
+  {
+    parse
+  } = require('@babel/parser');
+const providerModule = await import(
+  pathToFileURL(require.resolve('@vitest/coverage-istanbul')).href);
+const {
+  transformWithOxc
+} = await import(
+  pathToFileURL(require.resolve('vite')).href);
+const versions = {
+  '@vitest/coverage-istanbul': '4.1.10',
+  'vitest': '4.1.10',
+  'vite': '8.2.1',
+  '@babel/core': '7.29.7',
+  '@babel/parser': '7.29.12',
+  '@jridgewell/trace-mapping': '0.3.31',
+  'istanbul-lib-coverage': '3.2.2',
+  '@istanbuljs/schema': '0.1.6'
+};
+for (const [name, version] of Object.entries(versions)) {
+  const packageFile = join(root, 'node_modules', name, 'package.json');
+  if (JSON.parse(await readFile(packageFile,
+     'utf8')).version !== version)
+    throw Error('PRODUCER_VERSION');
+  const resolved = resolve(require.resolve(name)).replaceAll('\\', '/').toLowerCase();
+  if (!resolved.startsWith(resolve(root,
+     'node_modules',
+     name).replaceAll('\\',
+     '/').toLowerCase() + '/'))
+    throw Error('PRODUCER_ROLE');
+}
+const provider = await providerModule.default.getProvider();
+provider.initialize({
+  version: '4.1.10',
+  config: {
+    root,
+    project: []
+  },
+  _coverageOptions: {
+    include: ['src/local/**/*.ts'],
+    exclude: [],
+    reportsDirectory: join(outputRoot, 'materials'),
+    cleanOnRerun: true
+  },
+  getProjectByName: () => ({
+    config: {
+      root
+    }
+  }),
+  logger: {
+    warn: message => {
+      throw Error(message);
+    },
+    log: () => {}
+  }
+});
+const expectedOptions = {
+  produceSourceMap: true,
+  autoWrap: false,
+  esModules: true,
+  compact: false,
+  coverageVariable: '__VITEST_COVERAGE__',
+  coverageGlobalScope: 'globalThis',
+  coverageGlobalScopeFunc: false,
+  ignoreClassMethods: [],
+  generatorOpts: {
+    importAttributesKeyword: 'with'
+  },
+  ignoreLines: true
+};
+for (const [key,
+   value] of Object.entries(expectedOptions))
+  if (JSON.stringify(provider.instrumenter.opts[key]) !== JSON.stringify(value))
+  throw Error('INSTRUMENTER_OPTIONS');
+const parserPlugins = ['asyncGenerators',
+   'bigInt',
+   'classProperties',
+   'classPrivateProperties',
+   'classPrivateMethods',
+   'dynamicImport',
+   'importMeta',
+   'numericSeparator',
+   'objectRestSpread',
+   'optionalCatchBinding',
+   'topLevelAwait',
+   ['importAttributes',
+   {
+  deprecatedAssertSyntax: true
+}]];
+if (JSON.stringify(provider.instrumenter.opts.parserPlugins) !== JSON.stringify(parserPlugins))
+  throw Error('INSTRUMENTER_PARSER');
+await mkdir(provider.coverageFilesDirectory, {
+  recursive: true
+});
+const initial = provider.createCoverageMap(),
+  sources = new Map(),
+  originals = new Map();
+const walk = (node, visit) => {
+  if (!node || typeof node !== 'object') return;
+  if (Array.isArray(node)) {
+    for (const item of node) walk(item, visit);
+    return;
+  }
+  if (typeof node.type === 'string') visit(node);
+  for (const [key,
+     value] of Object.entries(node))
+    if (!['loc',
+     'comments',
+     'leadingComments',
+     'trailingComments',
+     'innerComments',
+     'extra',
+     'tokens'].includes(key)) walk(value,
+     visit);
+};
+const keyFor = point => `${point.line}:${point.column}`;
+let previousPath = null;
+const foldedPaths = new Set();
+for (const item of manifest.files) {
+  if (Object.keys(item).sort().join(',') !== 'path,sha256' ||
+    typeof item.path !== 'string' ||
+    !item.path.startsWith('src/local/') ||
+    !item.path.endsWith('.ts') ||
+    item.path.split('/').some(x => !x ||
+    x === '.' ||
+    x === '..') ||
+    /[\\:\x00-\x1f]/.test(item.path) ||
+    typeof item.sha256 !== 'string' ||
+    !/^[0-9a-f]{64}$/.test(item.sha256))
+    throw Error('SOURCE_ENTRY');
+  if (previousPath !== null &&
+    Buffer.compare(Buffer.from(previousPath),
+     Buffer.from(item.path)) >= 0 ||
+    foldedPaths.has(item.path.toLowerCase()))
+    throw Error('SOURCE_ORDER');
+  previousPath = item.path;
+  foldedPaths.add(item.path.toLowerCase());
+  const filename = resolve(root, item.path).replaceAll('\\', '/'),
+    bytes = await readFile(filename),
+    text = new TextDecoder('utf8', {
+      fatal: true
+    }).decode(bytes);
+  if (createHash('sha256').update(bytes).digest('hex') !== item.sha256) throw Error('SOURCE_BYTES');
+  if (/(?:istanbul|v8|c8)\s+ignore/i.test(text)) throw Error('COVERAGE_IGNORE');
+  const ast = parse(text, {
+      sourceType: 'module',
+      plugins: ['typescript', 'importAttributes'],
+      tokens: true
+    }),
+    noElse = new Map();
+  walk(ast.program, node => {
+    if (node.type === 'IfStatement' && node.alternate == null) {
+      const key = keyFor(node.loc.start);
+      if (noElse.has(key)) throw Error('AMBIGUOUS_IF');
+      noElse.set(key, node);
+    }
+  });
+  sources.set(item.path, {
+    text,
+    ast,
+    noElse,
+    sha256: item.sha256
+  });
+  const transformed = await transformWithOxc(text, filename, {
+    sourcemap: true,
+    target: 'es2024'
+  });
+  const map = typeof transformed.map === 'string' ? JSON.parse(transformed.map) : transformed.map;
+  if (!map ||
+    map.version !== 3 ||
+    typeof map.mappings !== 'string' ||
+    !Array.isArray(map.sources) ||
+    map.sources.length !== 1 ||
+    !Array.isArray(map.sourcesContent) ||
+    map.sourcesContent.length !== 1 ||
+    map.sourcesContent[0] !== text)
+    throw Error('SOURCE_MAP');
+  const mapped = map.sources[0];
+  if (typeof mapped !== 'string') throw Error('SOURCE_MAP_IDENTITY');
+  const mappedPath = resolve(mapped.startsWith('file:') ?
+    fileURLToPath(mapped) :
+    isAbsolute(mapped) ?
+    mapped :
+    resolve(dirname(filename),
+     mapped)).replaceAll('\\',
+     '/');
+  if (mappedPath.toLowerCase() !== filename.toLowerCase()) throw Error('SOURCE_MAP_IDENTITY');
+  const result = provider.onFileTransform(transformed.code,
+     filename + '?vitest-uncovered-coverage=true',
+     {
+    getCombinedSourcemap: () => structuredClone(map)
+  });
+  if (!result) throw Error('SOURCE_NOT_INSTRUMENTED');
+  const zero = provider.instrumenter.lastFileCoverage();
+  for (const role of ['s',
+     'f',
+     'b'])
+    for (const count of Object.values(zero[role]))
+    if ((Array.isArray(count) ?
+    count :
+    [count]).some(n => n !== 0))
+    throw Error('DOMAIN_NOT_ZERO');
+  initial.addFileCoverage(zero);
+  originals.set(item.path, structuredClone(zero));
+}
+await provider.onAfterSuiteRun({
+  coverage: initial.toJSON(),
+  environment: 'node',
+  projectName: 'zero-domain',
+  testFiles: []
+});
+const remapped = await provider.generateCoverage({
+  allTestsRun: false
+});
+const files = {},
+  stats = {
+    kind: 'independent-istanbul-zero-hit-domain-v1',
+    sources: 0,
+    mapped_sources: 0,
+    empty_sources: [],
+    implicit_else: 0,
+    executable: 0,
+    zero_only: true,
+    runtime_report_input: false
+  };
+for (const filename of remapped.files()) {
+  const path = relative(root, filename).replaceAll('\\', '/'),
+    source = sources.get(path);
+  if (!source) throw Error('EXTRA_SOURCE');
+  const data = JSON.parse(JSON.stringify(remapped.fileCoverageFor(filename).toJSON())),
+    lineMap = remapped.fileCoverageFor(filename).getLineCoverage();
+  if (Object.values(lineMap).some(value => value !== 0)) throw Error('REMAPPED_NOT_ZERO');
+  const entry = {
+    sha256: source.sha256,
+    lines: Object.keys(lineMap).map(Number).sort((a, b) => a - b),
+    implicit_else: []
+  };
+  for (const branch of Object.values(data.branchMap))
+    for (let index = 0;
+     index < branch.locations.length;
+     index++) {
+    const location = branch.locations[index];
+    if (Object.keys(location.start).length || Object.keys(location.end).length) continue;
+    const node = source.noElse.get(keyFor(branch.loc.start));
+    if (branch.type !== 'if' ||
+      index !== 1 ||
+      branch.locations.length !== 2 ||
+      !node ||
+      node.loc.end.line !== branch.loc.end.line)
+      throw Error('IMPLICIT_ELSE_NOT_IN_TS_AST');
+    if (branch.loc.end.column === null) {
+      const lineEndIndex = source.text.indexOf('\n', node.end),
+        lineEnd = lineEndIndex < 0 ? source.text.length : lineEndIndex;
+      if (source.ast.tokens.some(token => token.start >= node.end &&
+        token.start < lineEnd &&
+        typeof token.type !== 'string' &&
+        token.type.label !== 'eof'))
+        throw Error('NULL_END_INCLUDES_CODE');
+    } else if (branch.loc.end.column !== node.loc.end.column &&
+      !(branch.loc.end.column === node.loc.end.column + 1 &&
+      source.text.split(/\r?\n/u)[node.loc.end.line - 1].slice(node.loc.end.column,
+       branch.loc.end.column) === ' '))
+      throw Error('FINITE_END_NOT_PROVEN');
+    entry.implicit_else.push({
+      parent: branch.loc,
+      locations: branch.locations,
+      type: branch.type,
+      ast_start: {
+        line: node.loc.start.line,
+        column: node.loc.start.column
+      },
+      ast_end: {
+        line: node.loc.end.line,
+        column: node.loc.end.column
+      }
+    });
+    stats.implicit_else++;
+  }
+  files[path] = entry;
+  stats.mapped_sources++;
+  stats.executable += entry.lines.length;
+}
+for (const item of manifest.files) if (!files[item.path]) {
+  const source = sources.get(item.path),
+    zero = originals.get(item.path),
+    map = zero.inputSourceMap;
+  const reexports = source.ast.program.body.length > 0 &&
+    !source.ast.program.directives.length &&
+    source.ast.program.body.every(node => node.type === 'ExportNamedDeclaration' &&
+    ['value',
+     'type'].includes(node.exportKind) &&
+    node.source?.type === 'StringLiteral' &&
+    node.declaration == null &&
+    node.specifiers.length > 0 &&
+    node.specifiers.every(s => s.type === 'ExportSpecifier' &&
+    s.local.type === 'Identifier' &&
+    s.exported.type === 'Identifier'));
+  if (!reexports ||
+    !['s',
+     'f',
+     'b',
+     'statementMap',
+     'fnMap',
+     'branchMap'].every(role => !Object.keys(zero[role]).length) ||
+    map?.sources?.length !== 1 ||
+    map?.sourcesContent?.length !== 1 ||
+    map.sourcesContent[0] !== source.text)
+    throw Error('EMPTY_DOMAIN_NOT_PROVEN');
+  files[item.path] = {
+    sha256: source.sha256,
+    lines: [],
+    implicit_else: [],
+    empty_domain: {
+      kind: 'named_source_reexports_only_v1',
+      statements: source.ast.program.body.length
+    }
+  };
+  stats.empty_sources.push(item.path);
+}
+stats.sources = Object.keys(files).length;
+stats.original_ts_no_else = [...sources.values()].reduce((sum,
+   source) => sum + source.noElse.size,
+   0);
+if (stats.implicit_else !== stats.original_ts_no_else)
+  throw Error("INCOMPLETE_IMPLICIT_ELSE_CATALOG");
+if (stats.sources !== manifest.files.length) throw Error('SOURCE_SET');
+await writeFile(outputFile, JSON.stringify({
+  kind: stats.kind,
+  producer: '@vitest/coverage-istanbul@4.1.10',
+  transform: 'vite@8.2.1-oxc-es2024',
+  typescript_parser: '@babel/parser@7.29.12',
+  files
+}), {
+  flag: 'wx'
+});
+await writeFile(join(outputRoot, 'summary.json'), JSON.stringify(stats, null, 2) + '\n', {
+  flag: 'wx'
+});
+console.log(JSON.stringify(stats));
+""".strip()
+
+
 def _coverage(
     checkout: Path,
     node_dir: Path,
@@ -2392,6 +2877,8 @@ def _coverage(
     base: str,
     subject: str,
     original: Path,
+    *,
+    revision: int = 1,
 ) -> dict[str, object]:
     started = monotonic_ns()
     directory = node_dir / "coverage"
@@ -2402,18 +2889,26 @@ def _coverage(
         "coverage-summary.json",
     }:
         raise _error("Coverage report directory has unknown entries", "NODE_COVERAGE_INVALID")
-    raw = _read(directory / "coverage-final.json", limit=32 * 1024 * 1024)
-    summary_raw = _read(directory / "coverage-summary.json", limit=32 * 1024 * 1024)
+    if type(revision) is not int or revision not in {1, 2}:
+        raise _error("Node coverage profile revision is unsupported")
+    limit = 32 * 1024 * 1024 if revision == 1 else MAX_JSON_BYTES
+    raw = _read(directory / "coverage-final.json", limit=limit)
+    summary_raw = _read(directory / "coverage-summary.json", limit=limit)
     if len(raw) + len(summary_raw) > 64 * 1024 * 1024:
         raise _error("Coverage reports exceed their aggregate byte limit")
     reports, summary = _json_bytes(raw), _json_bytes(summary_raw)
-    expected = _json(node_dir / "expected-map.json", limit=32 * 1024 * 1024)
+    expected = _json(node_dir / "expected-map.json", limit=limit)
     if (
         not isinstance(expected, dict)
-        or set(expected) != {"schema_version", "method", "files"}
-        or expected["schema_version"] != "1.0"
-        or expected["method"] != COVERAGE_METHOD
-        or not isinstance(expected["files"], dict)
+        or (
+            revision == 1
+            and (
+                set(expected) != {"schema_version", "method", "files"}
+                or expected.get("schema_version") != "1.0"
+                or expected.get("method") != COVERAGE_METHOD
+            )
+        )
+        or not isinstance(expected.get("files"), dict)
     ):
         raise _error("The independent executable map is invalid", "NODE_COVERAGE_INVALID")
     sources = {
@@ -2427,11 +2922,12 @@ def _coverage(
     for path, value in expected["files"].items():
         if (
             not isinstance(value, dict)
-            or set(value) != {"sha256", "lines"}
-            or value["sha256"] != _sha(sources[path])
+            or (revision == 1 and set(value) != {"sha256", "lines"})
+            or value.get("sha256") != _sha(sources[path])
         ):
             raise _error("The executable map source bytes differ", "NODE_COVERAGE_INVALID")
-        lines[path] = value["lines"]
+        if revision == 1:
+            lines[path] = value["lines"]
     if not isinstance(reports, dict) or not isinstance(summary, dict):
         raise _error("Coverage report is not an object", "NODE_COVERAGE_INVALID")
     normalized = {}
@@ -2461,13 +2957,22 @@ def _coverage(
     else:
         # Only the execution caller is allowed to publish this original.
         raise _error("Bound coverage diff is missing")
-    result = validate_node_line_coverage(
-        normalized,
-        tracked_sources=sources,
-        changed_lines=changed,
-        deleted_sources=deleted,
-        expected_executable_lines=lines,
-    )
+    if revision == 1:
+        result = validate_node_line_coverage(
+            normalized,
+            tracked_sources=sources,
+            changed_lines=changed,
+            deleted_sources=deleted,
+            expected_executable_lines=lines,
+        )
+    else:
+        result = validate_node_istanbul_line_coverage(
+            normalized,
+            tracked_sources=sources,
+            changed_lines=changed,
+            deleted_sources=deleted,
+            catalog=expected,
+        )
     if cast(dict[str, Any], result["total"])["executable"] == 0:
         raise _error("A real application cannot have an empty coverage denominator")
     for path, value in normalized.items():
@@ -2533,6 +3038,13 @@ def _role_template(argv: Sequence[str], context: VerificationContext) -> list[st
         str(bindings.source_manifest_file): "{node_source_manifest}",
         str(bindings.expected_map_file): "{node_expected_map}",
         NODE_COVERAGE_HELPER: "{node_map_script}",
+        NODE_ISTANBUL_HELPER: "{node_map_script}",
+        "--config="
+        + str(bindings.execution_root / "vitest.config.ts"): "--config={node_source_config}",
+        "--outputFile.json="
+        + str(
+            bindings.coverage_directory.parent / "vitest.json"
+        ): "--outputFile.json={node_product_report}",
         "--coverage.reportsDirectory="
         + str(bindings.coverage_directory): "--coverage.reportsDirectory=R",
     }
@@ -2602,13 +3114,28 @@ def _checks(
     executions: Sequence[Mapping[str, Any]],
     coverage: object,
     failure: str | None,
+    *,
+    products: Mapping[str, Any] | None = None,
+    installed: InstalledMutationFacts | None = None,
 ) -> list[dict[str, object]]:
     public = {str(item["execution_id"]): item for item in executions}
     checks = []
     for check in plan.checks:
         fixed = [item for item in plan.executions if check.check_id in item.check_ids]
         actual = [public[item.execution_id] for item in fixed if item.execution_id in public]
-        if not check.argv:
+        if check.check_id in {"acceptance", "integration"}:
+            status = (
+                "passed"
+                if products is not None
+                and failure is None
+                and len(fixed) == 1
+                and len(actual) == 1
+                and all(_successful(item) for item in actual)
+                else "unverified"
+            )
+        elif check.check_id in {"targeted_mutation", "independent_verifier"}:
+            status = "passed" if installed is not None and installed.passed else "unverified"
+        elif not check.argv:
             status = "passed" if coverage is not None and failure is None else "unverified"
         elif len(actual) != len(fixed):
             status = "unverified"
@@ -2625,6 +3152,161 @@ def _checks(
             }
         )
     return checks
+
+
+def _installed_for_node(
+    root: Path,
+    task_id: str,
+    reference: InstalledMutationReference,
+    *,
+    verifier_actor: str | None = None,
+    binding: Mapping[str, Any] | None = None,
+    manifests: Mapping[str, Any] | None = None,
+) -> tuple[InstalledMutationCurrent, InstalledMutationFacts]:
+    from aiflow import installed_mutations as installed
+
+    document = installed._run_original(root, reference)
+    actor = document["inputs"].get("verifier_actor")
+    if not isinstance(actor, str) or (verifier_actor is not None and actor != verifier_actor):
+        raise _error("Node verifier differs from the selected installed mutation run")
+    installed._validate_run_children(root, reference)
+    current = installed.collect_installed_mutation_current(root, reference, verifier_actor=actor)
+    facts = installed.replay_installed_mutations(root, reference, current=current)
+    if current.inputs.task_id != task_id:
+        raise _error(
+            "Selected installed mutations belong to another task", "NODE_MUTATIONS_INVALID"
+        )
+    if binding is not None:
+        for key in (
+            "repository_id",
+            "task_id",
+            "branch",
+            "base_commit",
+            "subject_commit",
+            "subject_tree",
+            "spec_sha256",
+            "policy_sha256",
+            "classification_input_sha256",
+        ):
+            if getattr(current.inputs, key) != binding[key]:
+                raise _error("Node and installed mutation bindings differ", "NODE_BINDING_STALE")
+    if manifests is not None:
+        material = _json_bytes(current.inputs.materials)
+        if _canonical(material["engine"]["installed"]) != _canonical(
+            manifests["engine.json"]
+        ) or _canonical(material["host_tools"]) != _canonical(manifests["host-tools.json"]):
+            raise _error("Node and installed mutations used different engine or host bytes")
+    return current, facts
+
+
+def claim_node_v2_run(
+    root: Path,
+    task_id: str,
+    *,
+    reference: InstalledMutationReference,
+    verifier_actor: str,
+) -> dict[str, int]:
+    """Exclusively reserve the one Node role before verification state changes."""
+    from aiflow.task_service import read_task_record_strict
+
+    root = root.absolute()
+    binding, bundle = _binding(root, task_id)
+    record = read_task_record_strict(root, task_id)
+    if bundle.policy_version != "3.2.0" or record.task["current_state"] != "IMPLEMENTING":
+        raise _error("Only an IMPLEMENTING revision2 V2 task may claim an IMUT Node role")
+    _current, mutation_facts = _installed_for_node(
+        root, task_id, reference, verifier_actor=verifier_actor, binding=binding
+    )
+    if not mutation_facts.passed:
+        raise _error(
+            "Selected installed mutations are not current and killed", "NODE_MUTATIONS_INVALID"
+        )
+    run = root / reference.ref
+    run = run.parent
+    if (
+        not re.fullmatch(r"IMUT-[0-9a-f]{16}", run.name)
+        or run.parent != root / ".ai/tasks" / task_id / "logs"
+    ):
+        raise _error("Selected installed run is not the exact task-relative IMUT role")
+    if (run / "node").exists() or (run / "evidence.json").exists():
+        raise _error("The selected IMUT Node role was already claimed")
+    (run / "node").mkdir()
+    return _identity(_safe_info(run / "node", directory=True))
+
+
+def _node_inventory(node_dir: Path, level: str, plan: Any) -> list[dict[str, object]]:
+    allowed = {
+        "raw",
+        "home",
+        "tmp",
+        "cache",
+        "user.npmrc",
+        "global.npmrc",
+        "checkout",
+        "source-manifest.json",
+        "run.json",
+    }
+    if level in {"V1", "V2"}:
+        allowed.update(
+            {"coverage", "expected-map.json", "source.diff", "domain-materials", "vitest.json"}
+        )
+    if not {child.name for child in node_dir.iterdir()}.issubset(allowed):
+        raise _error("Node output contains an unknown top-level role")
+    raw = node_dir / "raw"
+    expected = {"setup-clone", "setup-checkout", *(e.execution_id for e in plan.executions)}
+    if raw.exists():
+        if not {child.name for child in raw.iterdir()}.issubset(expected):
+            raise _error("Node raw outputs contain an undeclared execution")
+        for directory in raw.iterdir():
+            if {child.name for child in directory.iterdir()} != {
+                "stdout.raw",
+                "stderr.raw",
+                "stdout.log",
+                "stderr.log",
+                "receipt.json",
+            }:
+                raise _error("Node raw execution originals have unknown or missing members")
+    inventory = _inventory(node_dir)
+    return [row for row in _content(inventory) if row["path"] != "run.json"]
+
+
+def _products(node_dir: Path, source: Mapping[str, Any], checkout: Path) -> dict[str, Any]:
+    raw = _read(node_dir / "vitest.json", limit=MAX_JSON_BYTES)
+    test_sources = {
+        row["path"]: _read(checkout / row["path"])
+        for row in source["files"]
+        if row["path"].startswith("tests/local/") and row["path"].endswith(".test.ts")
+    }
+    result = validate_node_product_tests(
+        _json_bytes(raw),
+        execution_root=checkout,
+        tracked_tests=test_sources,
+        expected_coverage=_json(node_dir / "coverage/coverage-final.json"),
+    )
+    return {
+        "report": {"ref": "vitest.json", "size": len(raw), "sha256": _sha(raw)},
+        "expected_tests": [{"file": p, "sha256": _sha(v)} for p, v in sorted(test_sources.items())],
+        "result": result,
+    }
+
+
+def _product_projection(product: Mapping[str, Any], run_id: str) -> dict[str, Any]:
+    return {
+        "report": {**product["report"], "ref": f"logs/{run_id}/node/vitest.json"},
+        **{k: product["result"][k] for k in ("inventory_sha256", "acceptance", "integration")},
+    }
+
+
+def _installed_projection(
+    reference: InstalledMutationReference,
+    current: InstalledMutationCurrent,
+    facts: InstalledMutationFacts,
+) -> dict[str, Any]:
+    return {
+        "reference": asdict(reference),
+        "inputs_sha256": current.inputs.sha256,
+        "results": [list(row) for row in facts.results],
+    }
 
 
 def _context(
@@ -2656,9 +3338,137 @@ def _context(
     )
 
 
-def _fixtures(checkout: Path, temporary: Path, source: Mapping[str, Any]) -> dict[str, object]:
+def _native_ownership_applicable(root: Path, source: Mapping[str, Any]) -> bool:
+    """Derive the fixed output role from ordinary, reviewed subject inputs."""
+    _ancestors(root)
+    rows: dict[str, Mapping[str, Any]] = {}
+    for row in source["files"]:
+        if not isinstance(row, Mapping) or not isinstance(row.get("path"), str):
+            raise _error("Native ownership source inventory is invalid")
+        name = row["path"]
+        if name in NATIVE_OWNERSHIP_INPUTS:
+            if name in rows:
+                raise _error("Native ownership source role is duplicated")
+            rows[name] = row
+    if rows and set(rows) != set(NATIVE_OWNERSHIP_INPUTS):
+        raise _error("Native ownership requires both fixed source roles")
+    for relative, digest in NATIVE_OWNERSHIP_INPUTS.items():
+        # Even an absent leaf cannot hide a link or non-directory in its
+        # existing ancestors. Never follow an untracked role to read bytes.
+        location = root
+        for part in Path(relative).parts[:-1]:
+            location /= part
+            try:
+                location.lstat()
+            except FileNotFoundError:
+                break
+            except OSError as error:
+                raise _error("Native ownership source ancestor cannot be inspected") from error
+            _safe_info(location, directory=True)
+        path = root / relative
+        try:
+            path.lstat()
+        except FileNotFoundError:
+            if relative in rows:
+                raise _error("Tracked native ownership source is missing") from None
+            continue
+        except OSError as error:
+            raise _error("Native ownership source role cannot be inspected") from error
+        _safe_info(path)
+        if relative not in rows:
+            raise _error("Untracked input cannot declare a native ownership role")
+        row = rows[relative]
+        if row.get("sha256") != digest:
+            raise _error("Native ownership source differs from its reviewed fixed version")
+        data = _read(path)
+        if type(row.get("size")) is not int or row["size"] != len(data) or _sha(data) != digest:
+            raise _error("Native ownership source bytes differ from the subject")
+    return bool(rows)
+
+
+def _native_ownership_inventory(checkout: Path, source: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Validate generated bytes, never infer authority from their sidecar."""
+    applicable = _native_ownership_applicable(checkout, source)
+    runtime = checkout / ".runtime"
+    runtime_present = False
+    try:
+        runtime.lstat()
+    except FileNotFoundError:
+        pass
+    except OSError as error:
+        raise _error("Native ownership runtime ancestor cannot be inspected") from error
+    else:
+        runtime_present = True
+        _ancestors(runtime)
+    # WindowsPath equality folds case. Verify the actual two fixed directory
+    # names without following or reading any unrelated child.
+    for parent, name in ((checkout, ".runtime"), (runtime, "native-ownership")):
+        if parent == runtime and not runtime_present:
+            continue
+        before = _identity(_safe_info(parent, directory=True))
+        matches = []
+        try:
+            with os.scandir(parent) as entries:
+                for index, child in enumerate(entries):
+                    if index >= MAX_ENTRIES:
+                        raise _error("Native ownership role enumeration exceeds its item limit")
+                    if child.name.casefold() == name:
+                        matches.append(child.name)
+        except OSError as error:
+            raise _error("Native ownership role names cannot be inspected") from error
+        if before != _identity(_safe_info(parent, directory=True)):
+            raise _error("Native ownership role directory changed during enumeration")
+        if matches and matches != [name]:
+            raise _error("Native ownership role directory has a case alias")
+    directory = checkout / NATIVE_OWNERSHIP_DIRECTORY
+    try:
+        directory.lstat()
+    except FileNotFoundError:
+        if applicable:
+            raise _error(
+                "Successful Node check did not produce the native ownership cache"
+            ) from None
+        return None
+    except OSError as error:
+        raise _error("Native ownership cache cannot be inspected") from error
+    if not applicable:
+        raise _error("Native ownership cache has no reviewed source roles")
+    source_sha256 = NATIVE_OWNERSHIP_INPUTS["scripts/windows-owned-launcher.cs"]
+    executable_name = f"own-{source_sha256}.exe"
+    inventory = _inventory(directory)
+    if {row["path"] for row in inventory["entries"]} != {
+        executable_name,
+        executable_name + ".json",
+    } or any(row["kind"] != "file" for row in inventory["entries"]):
+        raise _error("Native ownership cache must contain exactly its two ordinary files")
+    executable = _read(directory / executable_name)
+    raw = _read(directory / (executable_name + ".json"), limit=MAX_JSON_BYTES)
+    sidecar = _json_bytes(raw)
+    expected = {"sourceHash": source_sha256, "executableHash": _sha(executable)}
+    wire = json.dumps(expected, separators=(",", ":"), allow_nan=False).encode("utf-8") + b"\n"
+    if (
+        not executable
+        or not isinstance(sidecar, dict)
+        or set(sidecar) != set(expected)
+        or sidecar != expected
+        or raw != wire
+    ):
+        raise _error("Native ownership sidecar differs from its fixed source/content wire")
+    _unchanged(inventory)
+    return inventory
+
+
+def _fixtures(
+    checkout: Path, temporary: Path, source: Mapping[str, Any], *, revision: int = 1
+) -> dict[str, object]:
+    if type(revision) is not int or revision not in {1, 2}:
+        raise _error("Node fixture profile revision is unsupported")
     fixture_root = checkout / ".runtime/no-zcode-p0p1/probe-test-tmp"
     fixtures: dict[str, object] = {}
+    if revision == 2:
+        native = _native_ownership_inventory(checkout, source)
+        if native is not None:
+            fixtures["native_ownership"] = native
     if fixture_root.exists():
         for item in fixture_root.iterdir():
             if not item.name.startswith("live-fake-"):
@@ -2688,7 +3498,17 @@ def _output_check(
     dist: Mapping[str, Any],
     dependencies: Mapping[str, Any],
     fixtures: Mapping[str, Any],
+    *,
+    revision: int = 1,
 ) -> None:
+    if type(revision) is not int or revision not in {1, 2}:
+        raise _error("Node output profile revision is unsupported")
+    if revision == 2:
+        # Derive all fixed roots again. A supplied inventory cannot name a
+        # foreign directory or grant an otherwise absent output role.
+        observed = _fixtures(checkout, checkout.parent / "tmp", source, revision=2)
+        if _canonical(observed) != _canonical(fixtures):
+            raise _error("Node fixture originals differ from their source-derived owned roles")
     _unchanged(dist)
     _unchanged(dependencies)
     for inventory in fixtures.values():
@@ -2717,10 +3537,23 @@ def _output_check(
         expected = checkout / ".runtime/no-zcode-p0p1/probe-test-tmp"
         for directory, names, files in os.walk(runtime, followlinks=False):
             location = Path(directory)
-            if location == expected:
+            if location == expected or (
+                revision == 2
+                and "native_ownership" in fixtures
+                and location.relative_to(checkout).as_posix() == NATIVE_OWNERSHIP_DIRECTORY
+            ):
                 names.clear()
                 continue
-            if files or any(not expected.is_relative_to(location / name) for name in names):
+            if files or any(
+                not expected.is_relative_to(location / name)
+                and not (
+                    revision == 2
+                    and "native_ownership" in fixtures
+                    and (location / name).relative_to(checkout).as_posix()
+                    == NATIVE_OWNERSHIP_DIRECTORY
+                )
+                for name in names
+            ):
                 raise _error("Checkout runtime contains an undeclared output")
 
 
@@ -2732,14 +3565,18 @@ def execute_node_verification(
     context: VerificationContext,
     bundle: PolicyBundle,
     facts: EvidenceFacts,
+    installed_reference: InstalledMutationReference | None = None,
+    node_claim_identity: Mapping[str, int] | None = None,
 ) -> dict[str, object]:
     """Execute the sole fixed plan in a new checkout, preserving failed originals."""
     root = root.absolute()
     binding, current_bundle = _binding(root, task_id)
+    revision = _profile_revision(binding)
+    v2 = facts.verification_level == "V2"
     if (
         bundle.sha256 != current_bundle.sha256
         or facts.mode != "local"
-        or facts.verification_level not in {"V0", "V1"}
+        or facts.verification_level not in ({"V0", "V1", "V2"} if revision == 2 else {"V0", "V1"})
     ):
         raise _error("Node execution facts do not match this local profile")
     prepared, manifests = _load_prepared(root, task_id, material_sha256, binding)
@@ -2747,12 +3584,53 @@ def execute_node_verification(
     if not _RUN.fullmatch(context.run_id):
         raise _error("Node run ID is invalid")
     run = root / ".ai/tasks" / task_id / "logs" / context.run_id
-    if facts.run_dir != run or run.exists():
+    node_dir = run / "node"
+    installed_current = None
+    installed_facts = None
+    installed_projection = None
+    if v2:
+        if (
+            installed_reference is None
+            or node_claim_identity is None
+            or installed_reference.ref != (run / "run.json").relative_to(root).as_posix()
+            or not re.fullmatch(r"IMUT-[0-9a-f]{16}", context.run_id)
+            or facts.run_dir != run
+            or _canonical(_identity(_safe_info(node_dir, directory=True)))
+            != _canonical(node_claim_identity)
+            or list(node_dir.iterdir())
+        ):
+            raise _error("Node V2 must use the exact exclusively claimed empty IMUT Node role")
+        from aiflow.task_service import read_task_record_strict
+
+        record = read_task_record_strict(root, task_id)
+        starts = [event for event in record.events if event["event_type"] == "verification_started"]
+        installed_current, installed_facts = _installed_for_node(
+            root, task_id, installed_reference, binding=binding, manifests=manifests
+        )
+        if not installed_facts.passed:
+            raise _error(
+                "Selected installed mutations are not current and killed", "NODE_MUTATIONS_INVALID"
+            )
+        installed_projection = _installed_projection(
+            installed_reference, installed_current, installed_facts
+        )
+        if (
+            record.task["current_state"] != "VERIFYING"
+            or not starts
+            or starts[-1]["actor"] != installed_current.inputs.verifier_actor
+        ):
+            raise _error("Node V2 verification was not started by its bound independent verifier")
+    elif (
+        installed_reference is not None
+        or node_claim_identity is not None
+        or facts.run_dir != run
+        or run.exists()
+    ):
         raise _error("A Node run must own a new task-relative directory")
     before = _root_snapshot(root, task_id, run)
-    run.mkdir()
-    node_dir = run / "node"
-    node_dir.mkdir()
+    if not v2:
+        run.mkdir()
+        node_dir.mkdir()
     for name in ("raw", "home", "tmp", "cache"):
         (node_dir / name).mkdir()
     for name in ("user.npmrc", "global.npmrc"):
@@ -2813,6 +3691,8 @@ def execute_node_verification(
         manifests["dependencies.json"],
     )
     protected = _checkout_files(checkout, source)
+    if revision == 2:
+        _native_ownership_applicable(checkout, source)
     inputs = {
         "source": source,
         "runtime": manifests["node.json"]["runtime"],
@@ -2835,8 +3715,11 @@ def execute_node_verification(
     private: list[dict[str, object]] = []
     failure: str | None = None
     coverage: dict[str, object] | None = None
+    products: dict[str, Any] | None = None
     dist: dict[str, object] | None = None
     build_dist: dict[str, object] | None = None
+    native_checked = False
+    native_seal: dict[str, Any] | None = None
     rebuild_commands = {
         check.argv for check in plan.checks if check.check_id in {"node_check", "ts_coverage"}
     }
@@ -2850,6 +3733,13 @@ def execute_node_verification(
             _unchanged(inputs["runtime"])
             if dist is not None:
                 _unchanged(dist)
+            if (
+                revision == 2
+                and native_checked
+                and _canonical(_native_ownership_inventory(checkout, source))
+                != _canonical(native_seal)
+            ):
+                raise _error("Sealed native ownership output changed", "NODE_OUTPUT_INVALID")
             receipt = _process(
                 execution.argv,
                 cwd=execution.cwd,
@@ -2862,6 +3752,18 @@ def execute_node_verification(
             if not _successful(receipt):
                 failure = "NODE_PROCESS_FAILED"
                 break
+            if revision == 2 and "node_check" in execution.check_ids:
+                # Seal the first successful check, including explicit
+                # inapplicability. Later suites never choose another cache.
+                _validate_receipt(
+                    node_dir / "raw" / execution.execution_id,
+                    receipt,
+                    argv=execution.argv,
+                    cwd=execution.cwd,
+                    environment=environment,
+                )
+                native_seal = _native_ownership_inventory(checkout, source)
+                native_checked = True
             if "node_build" in execution.check_ids:
                 build_dist = dist = _dist(checkout, expected_dist)
             elif execution.argv in rebuild_commands:
@@ -2872,7 +3774,13 @@ def execute_node_verification(
                     raise _error("Rebuilt Node output content changed", "NODE_OUTPUT_INVALID")
                 dist = rebuilt
         if failure is None:
-            if facts.verification_level == "V1":
+            if revision == 2 and (
+                not native_checked
+                or _canonical(_native_ownership_inventory(checkout, source))
+                != _canonical(native_seal)
+            ):
+                raise _error("Final native ownership output differs from its first seal")
+            if facts.verification_level in {"V1", "V2"}:
                 _changed, _deleted, raw = _changed_lines(
                     root, str(binding["base_commit"]), str(binding["subject_commit"])
                 )
@@ -2884,11 +3792,31 @@ def execute_node_verification(
                     str(binding["base_commit"]),
                     str(binding["subject_commit"]),
                     root,
+                    **({"revision": 2} if revision == 2 else {}),
                 )
+                if v2:
+                    products = _products(node_dir, source, checkout)
             if dist is None or build_dist is None:
                 raise _error("Fixed build output is missing")
-            fixtures = _fixtures(checkout, node_dir / "tmp", source)
-            _output_check(checkout, source, dist, copied, fixtures)
+            fixtures = _fixtures(
+                checkout,
+                node_dir / "tmp",
+                source,
+                **({"revision": 2} if revision == 2 else {}),
+            )
+            if revision == 2:
+                if _canonical(fixtures.get("native_ownership")) != _canonical(native_seal):
+                    raise _error("Native ownership fixture does not preserve its first seal")
+                if native_seal is not None:
+                    fixtures["native_ownership"] = native_seal
+            _output_check(
+                checkout,
+                source,
+                dist,
+                copied,
+                fixtures,
+                **({"revision": 2} if revision == 2 else {}),
+            )
             outputs = {"build_dist": build_dist, "dist": dist, "fixtures": fixtures}
             _check_root(root, task_id, before, run)
             _check_materials(root, prepared, manifests)
@@ -2896,14 +3824,30 @@ def execute_node_verification(
                 raise _error("Protected checkout source changed", "NODE_ROOT_DRIFT")
     except (AiflowError, OSError, ValueError) as error:
         failure = error.code if isinstance(error, AiflowError) else "NODE_EXECUTION_INVALID"
-    checks = _checks(plan, bound_context, public, coverage, failure)
+    if v2:
+        assert installed_reference is not None
+        installed_current, installed_facts = _installed_for_node(
+            root, task_id, installed_reference, binding=binding, manifests=manifests
+        )
+    if v2:
+        checks = _checks(
+            plan,
+            bound_context,
+            public,
+            coverage,
+            failure,
+            products=products,
+            installed=installed_facts,
+        )
+    else:
+        checks = _checks(plan, bound_context, public, coverage, failure)
     # An output/material failure invalidates a process-success check as well.
     if failure and all(check["status"] == "passed" for check in checks):
         checks[-1]["status"] = "failed"
     contract = node_execution_contract(plan, bound_context)
     run_document = {
         "schema_version": "1.0",
-        "kind": "aiflow-node-run-3.1",
+        "kind": "aiflow-node-run-3.1" if revision == 1 else "aiflow-node-run-3.2",
         "binding": binding,
         "prepared_sha256": material_sha256,
         "roots": {
@@ -2918,13 +3862,23 @@ def execute_node_verification(
         "outputs": outputs,
         "coverage": _coverage_originals(node_dir, coverage) if coverage is not None else None,
     }
+    if revision == 2:
+        outputs["node_inventory"] = _node_inventory(node_dir, facts.verification_level, plan)
+    if v2:
+        assert (
+            installed_reference is not None
+            and installed_current is not None
+            and installed_facts is not None
+        )
+        run_document["installed_mutation"] = installed_projection
+        run_document["product_tests"] = products
     run_data = _canonical(run_document)
     if len(run_data) > MAX_JSON_BYTES:
         raise _error("Run original exceeds its bounded JSON limit")
     _write_new(node_dir / "run.json", run_data)
     prepared_data = _canonical(prepared)
     node_binding = {
-        "profile": PROFILE,
+        "profile": binding["profile"],
         "subject_tree": binding["subject_tree"],
         "prepared": {
             "ref": f"logs/node-prepared/{material_sha256}/prepared.json",
@@ -2937,13 +3891,17 @@ def execute_node_verification(
             "sha256": _sha(run_data),
         },
         "materials_sha256": _sha(_canonical(inputs)),
-        "semantic_contract_sha256": SEMANTIC_CONTRACT_SHA256,
+        "semantic_contract_sha256": _semantic_digest(binding),
         "execution_contract_sha256": _sha(_canonical(contract)),
         "environment_sha256": _sha(_canonical(environment)),
         "coverage": coverage,
     }
+    if v2:
+        node_binding["product_tests"] = (
+            _product_projection(products, context.run_id) if products is not None else None
+        )
     evidence: dict[str, object] = {
-        "schema_version": "3.1",
+        "schema_version": "3.1" if revision == 1 else "3.2",
         "task_id": task_id,
         "decision_unit_ids": list(facts.decision_unit_ids),
         "repository_id": facts.repository_id,
@@ -2969,7 +3927,10 @@ def execute_node_verification(
     }
     from aiflow.evidence import validate_node_evidence
 
-    validate_node_evidence(evidence)
+    if v2:
+        evidence["installed_mutation"] = run_document["installed_mutation"]
+    else:
+        validate_node_evidence(evidence)
     return evidence
 
 
@@ -2987,6 +3948,8 @@ def recheck_node_evidence(
         evidence_digest = _sha(_canonical(evidence))
         root = root.absolute()
         binding, bundle = _binding(root, task_id)
+        revision = _profile_revision(binding)
+        v2 = evidence["verification_level"] == "V2"
         from aiflow.storage import read_task_json
         from aiflow.task_service import read_task_record_strict
 
@@ -3015,6 +3978,11 @@ def recheck_node_evidence(
             if evidence.get(key) != binding[key]:
                 raise _error("Node evidence current task binding differs", "NODE_BINDING_STALE")
         compact = cast(dict[str, Any], evidence["node_binding"])
+        if revision == 2 and (
+            compact["subject_tree"] != binding["subject_tree"]
+            or _canonical(compact["profile"]) != _canonical(binding["profile"])
+        ):
+            raise _error("Node revision2 public profile/tree binding differs", "NODE_BINDING_STALE")
         selector = compact["prepared"]["sha256"]
         prepared, manifests = _load_prepared(root, task_id, selector, binding)
         expected_prepared = f"logs/node-prepared/{selector}/prepared.json"
@@ -3055,8 +4023,10 @@ def recheck_node_evidence(
                 "outputs",
                 "coverage",
             }
+            | ({"installed_mutation", "product_tests"} if v2 else set())
             or document["schema_version"] != "1.0"
-            or document["kind"] != "aiflow-node-run-3.1"
+            or document["kind"]
+            != ("aiflow-node-run-3.1" if revision == 1 else "aiflow-node-run-3.2")
             or document["prepared_sha256"] != selector
             or _canonical(document["binding"]) != _canonical(binding)
             or _canonical(document) != raw
@@ -3100,10 +4070,9 @@ def recheck_node_evidence(
         ):
             raise _error("Execution dependency copy differs from its prepared bytes")
         materials = _sha(_canonical(inputs))
-        if (
-            compact["materials_sha256"] != materials
-            or compact["semantic_contract_sha256"] != SEMANTIC_CONTRACT_SHA256
-        ):
+        if compact["materials_sha256"] != materials or compact[
+            "semantic_contract_sha256"
+        ] != _semantic_digest(binding):
             raise _error("Node evidence material or semantic contract digest differs")
         roots = document["roots"]
         if set(roots) != {"original", "checkout", "clone", "checkout_receipt"}:
@@ -3174,6 +4143,7 @@ def recheck_node_evidence(
         if not isinstance(actual, list) or len(actual) > len(plan.executions):
             raise _error("Node run execution inventory is invalid")
         public: list[dict[str, object]] = []
+        native_check_succeeded = False
         for execution, original in zip(plan.executions, actual, strict=False):
             if (
                 set(original) != {"execution_id", "receipt"}
@@ -3190,15 +4160,30 @@ def recheck_node_evidence(
             if original["receipt"]["timeout_seconds"] != execution.timeout_seconds:
                 raise _error("Node execution deadline differs from the fixed plan")
             public.append(_public_execution(execution, original["receipt"], context))
+            if "node_check" in execution.check_ids and _successful(original["receipt"]):
+                native_check_succeeded = True
         if len(actual) != len(plan.executions):
             raise _error(
                 "Node verification did not execute every required process",
                 "NODE_EVIDENCE_NOT_PASSED",
             )
+        if revision == 2:
+            _native_ownership_applicable(roles.execution_root, source)
+            if not native_check_succeeded:
+                raise _error(
+                    "Node output replay lacks its actual successful fixed node check",
+                    "NODE_EVIDENCE_NOT_PASSED",
+                )
         expected_dist = _dist_paths(roles.execution_root, source)
         outputs = document["outputs"]
-        if set(outputs) != {"build_dist", "dist", "fixtures"}:
+        if set(outputs) != {"build_dist", "dist", "fixtures"} | (
+            {"node_inventory"} if revision == 2 else set()
+        ):
             raise _error("Node run output inventory is incomplete")
+        if revision == 2 and _canonical(
+            _node_inventory(run_dir, str(evidence["verification_level"]), plan)
+        ) != _canonical(outputs["node_inventory"]):
+            raise _error("The complete Node output content or membership changed")
         dist = _dist(roles.execution_root, expected_dist)
         if _canonical(dist) != _canonical(outputs["dist"]):
             raise _error("Node build outputs changed")
@@ -3213,10 +4198,15 @@ def recheck_node_evidence(
         ):
             raise _error("Initial and final Node output content differs", "NODE_OUTPUT_INVALID")
         _output_check(
-            roles.execution_root, source, dist, inputs["dependencies"], outputs["fixtures"]
+            roles.execution_root,
+            source,
+            dist,
+            inputs["dependencies"],
+            outputs["fixtures"],
+            **({"revision": 2} if revision == 2 else {}),
         )
         coverage = None
-        if evidence["verification_level"] == "V1":
+        if evidence["verification_level"] in {"V1", "V2"}:
             bound_coverage_originals = _coverage_originals(run_dir, compact["coverage"])
             if _canonical(bound_coverage_originals) != _canonical(document["coverage"]):
                 raise _error("Node coverage original bytes changed")
@@ -3227,6 +4217,7 @@ def recheck_node_evidence(
                 str(binding["base_commit"]),
                 str(binding["subject_commit"]),
                 root,
+                **({"revision": 2} if revision == 2 else {}),
             )
         expected_originals = (
             _coverage_originals(run_dir, coverage) if coverage is not None else None
@@ -3235,14 +4226,55 @@ def recheck_node_evidence(
             coverage
         ) != _canonical(compact["coverage"]):
             raise _error("Node coverage compact counts differ from the bound originals")
-        derived = _checks(plan, context, public, coverage, None)
+        products = None
+        installed_facts = None
+        if v2:
+            from aiflow.installed_mutations import InstalledMutationReference
+
+            projected = cast(dict[str, Any], evidence["installed_mutation"])
+            reference = InstalledMutationReference(**projected["reference"])
+            if reference.ref != (run_dir.parent / "run.json").relative_to(root).as_posix():
+                raise _error("Node and installed mutation references select different owned runs")
+            installed_current, installed_facts = _installed_for_node(
+                root,
+                task_id,
+                reference,
+                verifier_actor=str(evidence["verifier_actor"]),
+                binding=binding,
+                manifests=manifests,
+            )
+            if (
+                not installed_facts.passed
+                or installed_current.inputs.verifier_context_sha256
+                != evidence["verifier_context_sha256"]
+                or _canonical(_installed_projection(reference, installed_current, installed_facts))
+                != _canonical(projected)
+                or _canonical(document["installed_mutation"]) != _canonical(projected)
+            ):
+                raise _error(
+                    "Node installed mutation projection or verifier is stale",
+                    "NODE_MUTATIONS_INVALID",
+                )
+            products = _products(run_dir, source, roles.execution_root)
+            if _canonical(products) != _canonical(document["product_tests"]) or _canonical(
+                _product_projection(products, run_id)
+            ) != _canonical(compact["product_tests"]):
+                raise _error("Node product report projection differs from complete originals")
+        if v2:
+            derived = _checks(
+                plan, context, public, coverage, None, products=products, installed=installed_facts
+            )
+        else:
+            derived = _checks(plan, context, public, coverage, None)
         if _canonical(derived) != _canonical(evidence["checks"]):
             raise _error("Node evidence check results differ from the actual receipts")
         if evidence["conclusion"] != "passed" or evidence["unverified_scenarios"] != []:
             return NodeEvidenceFacts(
                 True, False, ("NODE_EVIDENCE_NOT_PASSED",), evidence_digest, materials, run_id
             )
-        return NodeEvidenceFacts(True, True, (), evidence_digest, materials, run_id)
+        return NodeEvidenceFacts(
+            True, True, (), evidence_digest, materials, run_id, installed_facts
+        )
     except (
         AiflowError,
         OSError,

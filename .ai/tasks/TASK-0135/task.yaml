@@ -10,7 +10,7 @@ allowed_scope:
 base_commit: 23904c4c049a870ccd55a0fa2c4f42acdcf6c9f8
 branch: codex/installed-mutation-replay
 created_at: '2026-11-01T12:24:19Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -73,6 +73,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-01T12:24:20Z'
 subject_commit: 84aaf4059da6506e793b83be24ceed7350376dc6
 task_id: TASK-0135
-updated_at: '2026-11-01T18:25:08Z'
+updated_at: '2026-11-01T18:49:59Z'
 worktree_dirty: false
 worktree_dirty_paths: []

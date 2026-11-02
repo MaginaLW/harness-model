@@ -96,3 +96,18 @@ Windows 子进程先 suspended 创建，加入禁止 breakaway 的 Job 后再运
 `recheck_node_evidence(root, task_id, evidence) -> NodeEvidenceFacts` 是 verify 消费、freshness/status、实现审核、code approval 和 Gate 共用的只读事实入口，不恢复任务、不建目录、不探测工具或运行 suite。它重核当前绑定、材料、prepared/run 原件、进程回执、输出及覆盖率。纯 `validate_node_evidence` 结构检查不能替代它；材料或宿主漂移、原件缺失或未知事实使证据失效并阻断消费，保留已有记录。另一机器仅有公共 JSON 无法重放 PASS，`gate --evidence` 不能把外部 JSON 当作 Node 成功证据。
 
 该合同依赖受审源码、可信宿主、工具和实际安装字节，不认证全部 OS/DLL，也不提供恶意同用户代码沙箱。V2 引擎证据、目标 CI 原件交接及真实目标采用仍须独立交付。
+
+## Revision 2 candidate
+
+The procedure above describes the delivered `agent-bridge-node@1` profile. The `agent-bridge-node@2` / Policy `3.2.0` source candidate follows the [installed lifecycle contract](../superpowers/specs/node-v2-installed-lifecycle.md). Its ordinary-installation lifecycle, complete native gates and remote checks still require acceptance before publication. Node CI and real-target application remain separate, unfinished stages.
+
+For revision 2, provide the explicitly reviewed four-file Policy candidate during initialization. Keep the complete V0/V1 prefix and the fixed Istanbul producer, exact target configuration and full product-suite requirements from that contract. Prepare Node materials and save the independent verifier context before preparing installed mutations; preparation does not download dependencies or execute tests. Obtain a fresh reviewed single-use action, record all five installed mutation pairs, and retain their originals under the current task's IMUT directory.
+
+Revision 2 also enforces the contract's fixed native-helper output rule at every verification level. Both reviewed producer inputs must be present at their exact pinned versions or both absent. A successful applicable check must produce the exact two-file cache, which is sealed immediately and must remain unchanged through subsequent checks and replay. Absent inputs forbid the cache; partial or unsupported inputs reject before prepared materials are written or product processes start. Failed runs retain their actual partial diagnostics. Revision 1 keeps its existing output rules.
+
+```text
+python -m aiflow verify TASK-ID --actor <VERIFIER> --node-materials <SHA256> --installed-mutations IMUT-<16-lowercase-hex>
+python -m aiflow verify TASK-ID --actor <SAME-VERIFIER> --finalize
+```
+
+Run the first command only after the installed pairs pass. It claims that IMUT's empty Node role and writes immutable pre-review evidence. Record an independent implementation review of its stable verification snapshot before finalization. Finalization replays the same originals and adds the implementation reference; it does not run the suite or mutation pairs again. Pre-review evidence cannot authorize code approval or Gate. A failed or interrupted claim remains spent and requires the existing recovery rules and a new eligible run. The selector accepts only the current task's exact IMUT identifier; paths, arbitrary JSON, CI, partial checks and a run-id override reject.

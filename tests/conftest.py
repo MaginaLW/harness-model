@@ -18,11 +18,18 @@ SOURCE_ROOT = REPOSITORY_ROOT / "src"
 @pytest.hookimpl(tryfirst=True)
 def pytest_configure(config: pytest.Config) -> None:
     """Keep each test invocation out of another invocation's numbered temp tree."""
+    sys.dont_write_bytecode = True
     if config.option.basetemp is None:
         try:
             config.option.basetemp = tempfile.mkdtemp(prefix="aiflow-pytest-")
         except OSError as error:
             raise pytest.UsageError("Could not create an isolated test temporary root") from error
+
+
+@pytest.fixture
+def tmp_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Keep nested task originals short within the unchanged owned test root."""
+    return tmp_path_factory.mktemp("t")
 
 
 @pytest.fixture

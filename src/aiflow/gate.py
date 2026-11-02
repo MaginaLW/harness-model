@@ -7,7 +7,7 @@ import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
@@ -39,6 +39,11 @@ from aiflow.verifier_service import (
     validate_verifier_actor,
     validate_verifier_context_current,
 )
+
+if TYPE_CHECKING:
+    from aiflow.installed_mutations import InstalledMutationFacts
+    from aiflow.mutation_evidence import TargetedMutationFacts
+    from aiflow.node_execution import NodeEvidenceFacts
 
 _REASON_ORDER = (
     "GATE_BLOCKED",
@@ -269,6 +274,7 @@ def _v2_gate_facts(
     policy_checks: list[Mapping[str, object]],
     decision_unit_ids: list[str],
     review_stages: tuple[str, ...] = ("design", "implementation"),
+    node_facts: NodeEvidenceFacts | None = None,
 ) -> dict[str, bool]:
     """Derive the extra V2 final-evidence predicates without changing V0/V1 paths."""
     result = {
@@ -280,7 +286,7 @@ def _v2_gate_facts(
         "v2_checks_current": False,
         "v2_mutation_killed": False,
     }
-    if not isinstance(evidence, Mapping) or evidence.get("schema_version") != "2.0":
+    if not isinstance(evidence, Mapping) or evidence.get("schema_version") not in {"2.0", "3.2"}:
         return result
     result["v2_final_evidence"] = evidence.get("phase") == V2_FINAL
     try:
@@ -315,7 +321,15 @@ def _v2_gate_facts(
                 and expected_checks.issubset(by_id)
                 and all(by_id[check_id].get("status") == "passed" for check_id in expected_checks)
             )
-        mutation_facts = consume_targeted_mutation_evidence(repository_root, task_id, evidence)
+        mutation_facts: InstalledMutationFacts | TargetedMutationFacts | None
+        if evidence.get("schema_version") == "3.2":
+            if node_facts is None or not node_facts.current or not node_facts.passed:
+                return result
+            mutation_facts = node_facts.installed_mutation_facts
+            if mutation_facts is None:
+                return result
+        else:
+            mutation_facts = consume_targeted_mutation_evidence(repository_root, task_id, evidence)
         result["v2_mutation_killed"] = mutation_facts.passed
         refs = evidence.get("review_refs")
         snapshot = evidence.get("verification_snapshot_sha256")
@@ -368,7 +382,10 @@ def evaluate_gate(
             raise ContractError(
                 "Node CI evidence is unsupported", code="VERIFY_NODE_CI_UNSUPPORTED"
             )
-        if classification.get("effective_verification_level") not in {"V0", "V1"}:
+        if classification.get("effective_verification_level") not in {"V0", "V1"} and not (
+            policy.policy_version == "3.2.0"
+            and classification.get("effective_verification_level") == "V2"
+        ):
             raise ContractError("Node V2 is unsupported", code="VERIFY_NODE_V2_UNSUPPORTED")
     spec_path = resolve_task_path(root, task_id, "spec.md")
     try:
@@ -456,6 +473,7 @@ def evaluate_gate(
         _read_external_evidence(evidence_path) if evidence_path is not None else None
     )
     evidence = external_evidence if external_evidence is not None else local_evidence
+    node_facts = None
     if node_policy and local_evidence is not None:
         from aiflow.node_execution import recheck_node_evidence
 
@@ -501,6 +519,7 @@ def evaluate_gate(
             if isinstance(v2_checks, list)
             else [],
             decision_unit_ids=sorted(expected_ids),
+            node_facts=node_facts,
         )
         if external_evidence is None:
             v2_facts = local_v2_facts
@@ -543,6 +562,7 @@ def evaluate_gate(
     )
     approval_facts = {
         **current,
+        **v2_facts,
         "evidence_sha256": _digest(local_evidence) if local_evidence is not None else None,
         "evidence_current": local_evidence_report is not None
         and local_evidence_report.status == "fresh",

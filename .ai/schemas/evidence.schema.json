@@ -24,7 +24,7 @@
         "reproduce_command"
     ],
     "properties": {
-        "schema_version": {"enum": ["1.0", "2.0", "3.1"]},
+        "schema_version": {"enum": ["1.0", "2.0", "3.1", "3.2"]},
         "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
         "decision_unit_ids": {
             "type": "array",
@@ -43,7 +43,7 @@
         "classification_input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "verification_level": {"enum": ["V0", "V1", "V2"]},
         "mode": {"enum": ["local", "ci"]},
-        "checks": {"type": "array", "items": {"anyOf": [{"$ref": "#/$defs/check"}, {"$ref": "#/$defs/node_check"}]}},
+        "checks": {"type": "array", "items": {"anyOf": [{"$ref": "#/$defs/check"}, {"$ref": "#/$defs/node_check"}, {"$ref": "#/$defs/node_check_v2"}]}},
         "unverified_scenarios": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
         "conclusion": {"enum": ["passed", "failed", "provisional"]},
         "generated_at": {"type": "string", "format": "date-time"},
@@ -54,10 +54,697 @@
         "verification_snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "review_refs": {"$ref": "#/$defs/review_refs"},
         "targeted_mutation": {"$ref": "#/$defs/targeted_mutation"},
-        "node_binding": {"$ref": "#/$defs/node_binding"},
+        "node_binding": {"anyOf": [{"$ref": "#/$defs/node_binding"}, {"$ref": "#/$defs/node_binding_v2"}]},
+        "installed_mutation": {"$ref": "#/$defs/installed_mutation"},
         "node_binding_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
     },
     "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "schema_version": {
+                        "const": "3.2"
+                    }
+                },
+                "required": [
+                    "schema_version"
+                ]
+            },
+            "then": {
+                "required": [
+                    "node_binding",
+                    "node_binding_sha256"
+                ],
+                "properties": {
+                    "mode": {
+                        "const": "local"
+                    },
+                    "verification_level": {
+                        "enum": [
+                            "V0",
+                            "V1",
+                            "V2"
+                        ]
+                    },
+                    "node_binding": {
+                        "$ref": "#/$defs/node_binding_v2"
+                    },
+                    "conclusion": {"enum": ["passed", "failed"]},
+                    "checks": {
+                        "items": {
+                            "$ref": "#/$defs/node_check_v2"
+                        }
+                    }
+                },
+                "not": {
+                    "anyOf": [
+                        {"required": ["targeted_mutation"]},
+                        {"required": ["attestation_head"]},
+                        {"required": ["attestation_governance_only"]}
+                    ]
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "verification_level": {
+                                    "const": "V0"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "checks": {
+                                    "type": "array",
+                                    "minItems": 6,
+                                    "maxItems": 6,
+                                    "prefixItems": [
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "contract"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "scope"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "smoke"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "node_build"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "node_check"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "diff_whitespace"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "items": false
+                                },
+                                "node_binding": {
+                                    "properties": {
+                                        "coverage": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "not": {
+                                        "required": [
+                                            "product_tests"
+                                        ]
+                                    }
+                                }
+                            },
+                            "not": {
+                                "anyOf": [
+                                    {
+                                        "required": [
+                                            "phase"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "verifier_actor"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "verifier_context_sha256"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "verification_snapshot_sha256"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "review_refs"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "installed_mutation"
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "verification_level": {
+                                    "const": "V1"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "checks": {
+                                    "type": "array",
+                                    "minItems": 9,
+                                    "maxItems": 9,
+                                    "prefixItems": [
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "contract"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "scope"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "smoke"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "node_build"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "node_check"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "diff_whitespace"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "ts_coverage"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "ts_total_lines"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "ts_diff_lines"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "items": false
+                                },
+                                "node_binding": {
+                                    "not": {
+                                        "required": [
+                                            "product_tests"
+                                        ]
+                                    }
+                                }
+                            },
+                            "not": {
+                                "anyOf": [
+                                    {
+                                        "required": [
+                                            "phase"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "verifier_actor"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "verifier_context_sha256"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "verification_snapshot_sha256"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "review_refs"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "installed_mutation"
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "verification_level": {
+                                    "const": "V2"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "checks": {
+                                    "type": "array",
+                                    "minItems": 13,
+                                    "maxItems": 13,
+                                    "prefixItems": [
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "contract"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "scope"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "smoke"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "node_build"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "node_check"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "diff_whitespace"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "ts_coverage"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "ts_total_lines"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "ts_diff_lines"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "acceptance"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "integration"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "targeted_mutation"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/$defs/node_check_v2"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "check_id": {
+                                                            "const": "independent_verifier"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "items": false
+                                },
+                                "node_binding": {
+                                    "required": [
+                                        "product_tests"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "phase",
+                                "verifier_actor",
+                                "verifier_context_sha256",
+                                "verification_snapshot_sha256",
+                                "review_refs",
+                                "installed_mutation"
+                            ],
+                            "allOf": [
+                                {
+                                    "if": {
+                                        "properties": {
+                                            "phase": {
+                                                "const": "pre_implementation_review"
+                                            }
+                                        },
+                                        "required": [
+                                            "phase"
+                                        ]
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "review_refs": {
+                                                "not": {
+                                                    "required": [
+                                                        "implementation"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "properties": {
+                                            "phase": {
+                                                "const": "final"
+                                            }
+                                        },
+                                        "required": [
+                                            "phase"
+                                        ]
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "review_refs": {
+                                                "required": [
+                                                    "implementation"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "schema_version": {
+                        "const": "3.1"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "node_binding": {
+                        "$ref": "#/$defs/node_binding"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "not": {
+                    "properties": {
+                        "schema_version": {
+                            "const": "3.2"
+                        }
+                    },
+                    "required": [
+                        "schema_version"
+                    ]
+                }
+            },
+            "then": {
+                "not": {
+                    "required": [
+                        "installed_mutation"
+                    ]
+                }
+            }
+        },
         {
             "if": {"properties": {"mode": {"const": "ci"}}, "required": ["mode"]},
             "then": {"required": ["attestation_head", "attestation_governance_only"]}
@@ -356,6 +1043,894 @@
         }
     ],
     "$defs": {
+        "node_coverage_v2": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "scope_files",
+                "total",
+                "changed",
+                "method"
+            ],
+            "properties": {
+                "scope_files": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20000
+                },
+                "total": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "covered",
+                        "executable",
+                        "threshold"
+                    ],
+                    "properties": {
+                        "covered": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "executable": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "threshold": {
+                            "const": 85
+                        }
+                    }
+                },
+                "changed": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "covered",
+                        "executable",
+                        "threshold",
+                        "applicability"
+                    ],
+                    "properties": {
+                        "covered": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "executable": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "threshold": {
+                            "const": 90
+                        },
+                        "applicability": {
+                            "enum": [
+                                "applicable",
+                                "not_applicable"
+                            ]
+                        }
+                    }
+                },
+                "method": {
+                    "const": "vitest-4.1.10-istanbul-vite-8.2.1-oxc-es2024-zero-hit-ts-ast-wire-v2"
+                }
+            }
+        },
+        "node_product_tests": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "report",
+                "inventory_sha256",
+                "acceptance",
+                "integration"
+            ],
+            "properties": {
+                "report": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "ref",
+                        "size",
+                        "sha256"
+                    ],
+                    "properties": {
+                        "ref": {
+                            "type": "string",
+                            "pattern": "^logs/IMUT-[0-9a-f]{16}/node/vitest\\.json$"
+                        },
+                        "size": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 16777216
+                        },
+                        "sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                        }
+                    }
+                },
+                "inventory_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                },
+                "acceptance": {
+                    "const": [
+                        {
+                            "file": "tests/local/personal-dot-integration.test.ts",
+                            "full_name": "personal dot authenticated MCP + unified WeChat host (offline) persists duplicate input once, publishes one event, executes original text once and replies to the saved conversation once"
+                        },
+                        {
+                            "file": "tests/local/personal-dot-integration.test.ts",
+                            "full_name": "personal dot authenticated MCP + unified WeChat host (offline) rejects unauthenticated event calls, foreign targets and direct submissions before any dispatch"
+                        }
+                    ]
+                },
+                "integration": {
+                    "const": [
+                        {
+                            "file": "tests/local/weixin-shared-integration.test.ts",
+                            "full_name": "synthetic Weixin, HTTP and shared runtime integration persists a polled task contract and returns its terminal result through the same shared host"
+                        },
+                        {
+                            "file": "tests/local/weixin-shared-integration.test.ts",
+                            "full_name": "synthetic Weixin, HTTP and shared runtime integration runs the isolated shared host with durable duplicate and uncertain reply handling"
+                        },
+                        {
+                            "file": "tests/local/weixin-shared-integration.test.ts",
+                            "full_name": "synthetic Weixin, HTTP and shared runtime integration shares route-bound tasks, reads, stop and client lifetime with a second client"
+                        }
+                    ]
+                }
+            }
+        },
+        "node_binding_v2": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "profile",
+                "subject_tree",
+                "prepared",
+                "run",
+                "materials_sha256",
+                "semantic_contract_sha256",
+                "execution_contract_sha256",
+                "environment_sha256",
+                "coverage"
+            ],
+            "properties": {
+                "profile": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "id",
+                        "revision"
+                    ],
+                    "properties": {
+                        "id": {
+                            "const": "agent-bridge-node"
+                        },
+                        "revision": {
+                            "type": "integer",
+                            "const": 2
+                        }
+                    }
+                },
+                "subject_tree": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{40}$"
+                },
+                "prepared": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "ref",
+                        "size",
+                        "sha256"
+                    ],
+                    "properties": {
+                        "ref": {
+                            "type": "string",
+                            "pattern": "^logs/node-prepared/[0-9a-f]{64}/prepared\\.json$"
+                        },
+                        "size": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 65536
+                        },
+                        "sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                        }
+                    }
+                },
+                "run": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "ref",
+                        "size",
+                        "sha256"
+                    ],
+                    "properties": {
+                        "ref": {
+                            "type": "string",
+                            "pattern": "^logs/[A-Za-z0-9][A-Za-z0-9_.-]*/node/run\\.json$"
+                        },
+                        "size": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 16777216
+                        },
+                        "sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                        }
+                    }
+                },
+                "materials_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                },
+                "semantic_contract_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                },
+                "execution_contract_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                },
+                "environment_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                },
+                "coverage": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "$ref": "#/$defs/node_coverage_v2"
+                        }
+                    ]
+                },
+                "product_tests": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "$ref": "#/$defs/node_product_tests"
+                        }
+                    ]
+                }
+            }
+        },
+        "installed_mutation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "reference",
+                "inputs_sha256",
+                "results"
+            ],
+            "properties": {
+                "reference": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "ref",
+                        "size",
+                        "sha256"
+                    ],
+                    "properties": {
+                        "ref": {
+                            "type": "string",
+                            "pattern": "^\\.ai/tasks/TASK-[0-9]{4,}/logs/IMUT-[0-9a-f]{16}/run\\.json$"
+                        },
+                        "size": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 16777216
+                        },
+                        "sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                        }
+                    }
+                },
+                "inputs_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                },
+                "results": {
+                    "type": "array",
+                    "minItems": 5,
+                    "maxItems": 5,
+                    "prefixItems": [
+                        {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "prefixItems": [
+                                {
+                                    "const": "MUT-V2-001"
+                                },
+                                {
+                                    "enum": [
+                                        "killed",
+                                        "survived",
+                                        "unverified"
+                                    ]
+                                }
+                            ],
+                            "items": false
+                        },
+                        {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "prefixItems": [
+                                {
+                                    "const": "MUT-V2-002"
+                                },
+                                {
+                                    "enum": [
+                                        "killed",
+                                        "survived",
+                                        "unverified"
+                                    ]
+                                }
+                            ],
+                            "items": false
+                        },
+                        {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "prefixItems": [
+                                {
+                                    "const": "MUT-V2-003"
+                                },
+                                {
+                                    "enum": [
+                                        "killed",
+                                        "survived",
+                                        "unverified"
+                                    ]
+                                }
+                            ],
+                            "items": false
+                        },
+                        {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "prefixItems": [
+                                {
+                                    "const": "MUT-V2-004"
+                                },
+                                {
+                                    "enum": [
+                                        "killed",
+                                        "survived",
+                                        "unverified"
+                                    ]
+                                }
+                            ],
+                            "items": false
+                        },
+                        {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "prefixItems": [
+                                {
+                                    "const": "MUT-V2-005"
+                                },
+                                {
+                                    "enum": [
+                                        "killed",
+                                        "survived",
+                                        "unverified"
+                                    ]
+                                }
+                            ],
+                            "items": false
+                        }
+                    ],
+                    "items": false
+                }
+            }
+        },
+        "node_check_v2": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "check_id",
+                "required",
+                "status",
+                "executions"
+            ],
+            "properties": {
+                "check_id": {
+                    "enum": [
+                        "contract",
+                        "scope",
+                        "smoke",
+                        "node_build",
+                        "node_check",
+                        "diff_whitespace",
+                        "ts_coverage",
+                        "ts_total_lines",
+                        "ts_diff_lines",
+                        "acceptance",
+                        "integration",
+                        "targeted_mutation",
+                        "independent_verifier"
+                    ]
+                },
+                "required": {
+                    "const": true
+                },
+                "status": {
+                    "enum": [
+                        "passed",
+                        "failed",
+                        "unverified"
+                    ]
+                },
+                "executions": {
+                    "type": "array",
+                    "maxItems": 3,
+                    "items": {
+                        "$ref": "#/$defs/node_execution"
+                    }
+                }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "contract"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 1
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "scope"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 1
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "smoke"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 1
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "node_build"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 1
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "node_check"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 1
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "diff_whitespace"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 3
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 3
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "ts_coverage"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 2
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 2
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "ts_total_lines"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 0
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 0
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "ts_diff_lines"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 0
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 0
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "acceptance"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 1
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "integration"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 1
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "targeted_mutation"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 0
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 0
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "check_id": {
+                                "const": "independent_verifier"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "executions": {
+                                "maxItems": 0
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "status": {
+                                            "const": "passed"
+                                        }
+                                    }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "executions": {
+                                            "minItems": 0
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "node_stream": {
             "type": "object",
             "additionalProperties": false,

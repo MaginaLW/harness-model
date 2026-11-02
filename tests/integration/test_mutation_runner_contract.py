@@ -32,7 +32,7 @@ def _mocked_run() -> MutationRun:
 
 def _write_synthetic_artifact(tmp_path: Path) -> tuple[Path, MutationEvidenceArtifact]:
     """Private mapper seam only: no task lookup, Git inspection, or runner call."""
-    root = tmp_path / "synthetic-repository"
+    root = tmp_path / "r"
     record_root = root / ".ai" / "tasks" / "TASK-0014" / "logs" / RECORD_ID
     record_root.mkdir(parents=True)
     manifest = load_mutation_manifest(REPOSITORY_ROOT)

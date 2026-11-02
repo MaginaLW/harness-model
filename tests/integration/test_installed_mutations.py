@@ -14,6 +14,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 import zipfile
 from collections.abc import Generator
 from copy import deepcopy
@@ -287,7 +288,10 @@ class PreparedTask:
 
 
 def _prepare_task(engine: OrdinaryEngine, tmp_path_factory: pytest.TempPathFactory) -> PreparedTask:
-    target = tmp_path_factory.mktemp("ir")
+    temporary = tmp_path_factory.getbasetemp().parent
+    if temporary.name.startswith("aiflow-check-"):
+        temporary = temporary.parent
+    target = Path(tempfile.mkdtemp(prefix="ir", dir=temporary))
     prepared = engine.run(target, PREPARE, str(engine.git), specification(), original_git=True)
     assert prepared["state"] == "IMPLEMENTING"
     assert len(prepared["inputs_sha256"]) == 64

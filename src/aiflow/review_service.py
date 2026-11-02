@@ -259,7 +259,15 @@ def build_review_context(repository_root: Path, task_id: str, stage: str) -> Map
                     "Implementation review requires current Node evidence",
                     code="REVIEW_EVIDENCE_INVALID",
                 )
-            context["evidence_sha256"] = node_facts.evidence_sha256
+            if (
+                evidence.get("schema_version") == "3.2"
+                and evidence.get("verification_level") == "V2"
+            ):
+                validate_v2_snapshot(evidence)
+                context["schema_version"] = "2.0"
+                context["verification_snapshot_sha256"] = evidence["verification_snapshot_sha256"]
+            else:
+                context["evidence_sha256"] = node_facts.evidence_sha256
         elif evidence.get("schema_version") == "2.0":
             try:
                 validate_v2_snapshot(evidence)

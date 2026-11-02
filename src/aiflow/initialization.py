@@ -26,6 +26,7 @@ from aiflow.errors import AiflowError
 from aiflow.initialization_windows import WindowsFilesystem
 from aiflow.policy import (
     NODE_POLICY_VERSION,
+    NODE_V2_POLICY_VERSION,
     POLICY_FILES,
     _UniqueKeyLoader,
     is_node_policy,
@@ -43,6 +44,8 @@ from aiflow.verification import VerificationContext, parse_verification_plan
 
 PROFILE = "native-python-v1"
 NODE_PROFILE = "agent-bridge-node@1"
+NODE_V2_PROFILE = "agent-bridge-node@2"
+NODE_PROFILES = (NODE_PROFILE, NODE_V2_PROFILE)
 MAX_JSON_BYTES = 64 * 1024
 STATE = ".ai/init-state.json"
 REVIEW = ".ai/policy-review.json"
@@ -137,7 +140,7 @@ def _read(path: Path, limit: int) -> bytes:
 
 
 def _profile(profile: object) -> None:
-    if not isinstance(profile, str) or profile not in (PROFILE, NODE_PROFILE):
+    if not isinstance(profile, str) or profile not in (PROFILE, *NODE_PROFILES):
         raise _error("PROFILE_UNSUPPORTED")
 
 
@@ -155,7 +158,7 @@ def _entries(directory: Path, limit: int) -> list[Path]:
 
 
 def _project(root: Path, profile: str = PROFILE) -> None:
-    if profile == NODE_PROFILE:
+    if profile in NODE_PROFILES:
         try:
             project = read_initialization_json(root / "package.json")
             name, scripts = project.get("name"), project.get("scripts")
@@ -194,7 +197,7 @@ def _source_fact(path: Path, *, directory: bool = False) -> dict[str, Any]:
 def _materials(
     root: Path, bundle_root: Path | None, policy_directory: Path | None, profile: str = PROFILE
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, bytes], list[dict[str, Any]]]:
-    if profile == NODE_PROFILE and policy_directory is None:
+    if profile in NODE_PROFILES and policy_directory is None:
         raise _error("NODE_POLICY_REQUIRED")
     candidate = (
         files("aiflow").joinpath("_bundled_resources") if bundle_root is None else bundle_root
@@ -228,9 +231,12 @@ def _materials(
             raise _error("BUNDLE_TOO_LARGE")
         with schema_directory_context(bundle / "schemas"):
             policy = load_policy_bundle(root, policy_directory=selected)
-            if profile == NODE_PROFILE:
+            if profile in NODE_PROFILES:
                 # The loader validates the entire closed contract without runtime materials.
-                if not is_node_policy(policy):
+                expected_version = (
+                    NODE_V2_POLICY_VERSION if profile == NODE_V2_PROFILE else NODE_POLICY_VERSION
+                )
+                if not is_node_policy(policy) or policy.policy_version != expected_version:
                     raise _error("TARGET_PROFILE_UNSUPPORTED")
             else:
                 if policy.policy_version.split(".", 1)[0] not in {"1", "2"}:
@@ -679,8 +685,9 @@ def _state_manifest(root: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any
             raise _error("INSTALLATION_STATE_INVALID")
     version = policy["policy_version"]
     if not isinstance(version, str) or (
-        version != NODE_POLICY_VERSION
-        if state["profile"] == NODE_PROFILE
+        version
+        != (NODE_V2_POLICY_VERSION if state["profile"] == NODE_V2_PROFILE else NODE_POLICY_VERSION)
+        if state["profile"] in NODE_PROFILES
         else not re.fullmatch(r"[12]\.[0-9]+\.[0-9]+", version)
     ):
         raise _error("INSTALLATION_STATE_INVALID")
@@ -730,7 +737,7 @@ def _installed(root: Path) -> tuple[dict[str, Any], dict[str, bytes]]:
     if (
         policy.policy_version != state["policy"]["policy_version"]
         or policy.sha256 != state["policy"]["semantic_sha256"]
-        or (state["profile"] == NODE_PROFILE) != is_node_policy(policy)
+        or (state["profile"] in NODE_PROFILES) != is_node_policy(policy)
     ):
         raise _error("POLICY_REVIEW_MISMATCH")
     decision = _review(state, read_initialization_json(root / REVIEW))

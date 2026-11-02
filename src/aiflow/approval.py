@@ -46,6 +46,7 @@ from aiflow.verifier_service import (
 
 if TYPE_CHECKING:
     from aiflow.mutation_evidence import TargetedMutationFacts
+    from aiflow.node_execution import NodeEvidenceFacts
 
 ApprovalType = Literal["spec", "code", "action"]
 _APPROVAL_STATES: Mapping[ApprovalType, str | None] = {
@@ -389,7 +390,17 @@ def _evidence(
         if not is_node_policy(policy):
             raise ContractError("Node Policy cannot be trusted", code="POLICY_NODE_INVALID")
         facts = recheck_node_evidence(repository_root, task_id, value)
-        return facts.current and facts.passed, facts.evidence_sha256, value
+        current = facts.current and facts.passed
+        if value.get("verification_level") == "V2":
+            current = current and _v2_evidence_current(
+                repository_root,
+                task_id,
+                value,
+                events=events,
+                policy_checks=policy_checks,
+                node_facts=facts,
+            )
+        return current, facts.evidence_sha256, value
     checks = value.get("checks")
     current = (
         value.get("task_id") == task_id
@@ -430,6 +441,7 @@ def _v2_evidence_current(
     *,
     events: Sequence[Mapping[str, object]],
     policy_checks: Sequence[Mapping[str, object]],
+    node_facts: NodeEvidenceFacts | None = None,
 ) -> bool:
     """Require the V2 final facts that make local code approval meaningful."""
     if evidence.get("phase") != V2_FINAL or evidence.get("mode") != "local":
@@ -464,6 +476,11 @@ def _v2_evidence_current(
         return False
     if any(by_id[identifier].get("status") != "passed" for identifier in expected):
         return False
+    if evidence.get("schema_version") == "3.2":
+        if node_facts is None or not node_facts.current or not node_facts.passed:
+            return False
+        installed = node_facts.installed_mutation_facts
+        return installed is not None and installed.passed
     return consume_targeted_mutation_evidence(repository_root, task_id, evidence).passed
 
 
@@ -607,6 +624,7 @@ def _validate_node_code_approval_marker(
     implementation_review: Mapping[str, object],
     review_context: Mapping[str, object],
     review_unit_ids: set[str],
+    verification_snapshot_sha256: str | None = None,
 ) -> None:
     """Check a current code marker using existing replay/review facts; never recover it."""
     payload, candidates = _validate_node_approval_marker_envelope(
@@ -685,6 +703,13 @@ def _validate_node_code_approval_marker(
         "classification_input_sha256": classification_sha256,
         "evidence_sha256": evidence_sha256,
     }
+    if verification_snapshot_sha256 is not None:
+        if not re.fullmatch(r"[0-9a-f]{64}", verification_snapshot_sha256):
+            raise invalid()
+        expected_context.pop("evidence_sha256")
+        expected_context.update(
+            schema_version="2.0", verification_snapshot_sha256=verification_snapshot_sha256
+        )
     if any(not _marker_same(review_context.get(k), value) for k, value in expected_context.items()):
         raise invalid()
     context_units = review_context.get("decision_unit_ids")
@@ -764,6 +789,21 @@ def _complete_marker(repository_root: Path, task_id: str) -> ApprovalResult:
             facts = recheck_node_evidence(repository_root, task_id, evidence)
             if not facts.current or not facts.passed:
                 raise ContractError("Node evidence is not current", code="CODE_EVIDENCE_STALE")
+            if evidence.get("verification_level") == "V2":
+                checks = next(
+                    level["checks"]
+                    for level in policy.documents["verification-levels.yaml"]["levels"]
+                    if level["id"] == "V2"
+                )
+                if not _v2_evidence_current(
+                    repository_root,
+                    task_id,
+                    evidence,
+                    events=current_record.events,
+                    policy_checks=checks,
+                    node_facts=facts,
+                ):
+                    raise ContractError("Node V2 evidence is stale", code="CODE_EVIDENCE_STALE")
             evidence_digest = facts.evidence_sha256
         for candidate in payload["approvals"]:
             if (
@@ -933,7 +973,9 @@ def approve_task(
     elif approval_type == "code":
         snapshot = (
             evidence_value.get("verification_snapshot_sha256")
-            if isinstance(evidence_value, Mapping) and evidence_value.get("schema_version") == "2.0"
+            if isinstance(evidence_value, Mapping)
+            and evidence_value.get("schema_version") in {"2.0", "3.2"}
+            and evidence_value.get("verification_level") == "V2"
             else None
         )
         structured_review = latest_review_assessment(
@@ -944,7 +986,11 @@ def approve_task(
             evidence_sha256=evidence_sha256 if snapshot is None else None,
             verification_snapshot_sha256=snapshot if isinstance(snapshot, str) else None,
         )
-        if isinstance(evidence_value, Mapping) and evidence_value.get("schema_version") == "2.0":
+        if (
+            isinstance(evidence_value, Mapping)
+            and evidence_value.get("schema_version") in {"2.0", "3.2"}
+            and evidence_value.get("verification_level") == "V2"
+        ):
             refs = evidence_value.get("review_refs")
             if not isinstance(refs, Mapping):
                 raise ContractError("V2 review references are invalid", code="CODE_EVIDENCE_STALE")

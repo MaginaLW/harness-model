@@ -17,7 +17,7 @@
       "required": ["id", "revision"],
       "properties": {
         "id": {"const": "agent-bridge-node"},
-        "revision": {"type": "integer", "const": 1}
+        "revision": {"type": "integer", "enum": [1, 2]}
       }
     },
     "rules": {
@@ -86,19 +86,29 @@
   "allOf": [
     {
       "if": {"properties": {"policy_version": {"pattern": "^3(?:\\.|$)"}}},
-      "then": {"properties": {"policy_version": {"const": "3.1.0"}}}
+      "then": {"properties": {"policy_version": {"enum": ["3.1.0", "3.2.0"]}}}
     },
     {
       "if": {
         "properties": {
-          "policy_version": {"const": "3.1.0"},
+          "policy_version": {"enum": ["3.1.0", "3.2.0"]},
           "policy_kind": {"const": "verification_levels"}
         },
         "required": ["policy_version", "policy_kind"]
       },
       "then": {
         "required": ["profile"],
-        "properties": {"levels": {"$ref": "#/$defs/node_levels"}},
+        "allOf": [{
+          "if": {"properties": {"policy_version": {"const": "3.2.0"}}},
+          "then": {"properties": {
+            "profile": {"properties": {"revision": {"const": 2}}},
+            "levels": {"$ref": "#/$defs/node_v2_levels"}
+          }},
+          "else": {"properties": {
+            "profile": {"properties": {"revision": {"const": 1}}},
+            "levels": {"$ref": "#/$defs/node_levels"}
+          }}
+        }],
         "not": {
           "anyOf": [
             {"required": ["allowed_placeholders"]},
@@ -151,7 +161,7 @@
     {
       "properties": {"policy_kind": {"const": "verification_levels"}},
       "required": ["levels"],
-      "if": {"properties": {"policy_version": {"const": "3.1.0"}}},
+      "if": {"properties": {"policy_version": {"enum": ["3.1.0", "3.2.0"]}}},
       "else": {
         "required": [
           "allowed_placeholders", "allowed_commands", "allowed_environment", "run_directories"
@@ -184,6 +194,217 @@
     }
   ],
   "$defs": {
+    "node_v2_extra_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "required",
+        "timeout_seconds"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "acceptance",
+            "integration",
+            "targeted_mutation",
+            "independent_verifier"
+          ]
+        },
+        "required": {
+          "const": true
+        },
+        "timeout_seconds": {
+          "const": 30
+        }
+      }
+    },
+    "node_v2_levels": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {
+          "const": {
+            "id": "V0",
+            "checks": [
+              {
+                "id": "contract",
+                "required": true,
+                "timeout_seconds": 30
+              },
+              {
+                "id": "scope",
+                "required": true,
+                "timeout_seconds": 30
+              },
+              {
+                "id": "smoke",
+                "required": true,
+                "timeout_seconds": 30
+              },
+              {
+                "id": "node_build",
+                "required": true,
+                "timeout_seconds": 300
+              },
+              {
+                "id": "node_check",
+                "required": true,
+                "timeout_seconds": 600
+              },
+              {
+                "id": "diff_whitespace",
+                "required": true,
+                "timeout_seconds": 30
+              }
+            ]
+          }
+        },
+        {
+          "const": {
+            "id": "V1",
+            "checks": [
+              {
+                "id": "contract",
+                "required": true,
+                "timeout_seconds": 30
+              },
+              {
+                "id": "scope",
+                "required": true,
+                "timeout_seconds": 30
+              },
+              {
+                "id": "smoke",
+                "required": true,
+                "timeout_seconds": 30
+              },
+              {
+                "id": "node_build",
+                "required": true,
+                "timeout_seconds": 300
+              },
+              {
+                "id": "node_check",
+                "required": true,
+                "timeout_seconds": 600
+              },
+              {
+                "id": "diff_whitespace",
+                "required": true,
+                "timeout_seconds": 30
+              },
+              {
+                "id": "ts_coverage",
+                "required": true,
+                "timeout_seconds": 600
+              },
+              {
+                "id": "ts_total_lines",
+                "required": true,
+                "timeout_seconds": 30,
+                "threshold": 85
+              },
+              {
+                "id": "ts_diff_lines",
+                "required": true,
+                "timeout_seconds": 30,
+                "threshold": 90
+              }
+            ]
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "checks"
+          ],
+          "properties": {
+            "id": {
+              "const": "V2"
+            },
+            "checks": {
+              "type": "array",
+              "minItems": 9,
+              "uniqueItems": true,
+              "prefixItems": [
+                {
+                  "const": {
+                    "id": "contract",
+                    "required": true,
+                    "timeout_seconds": 30
+                  }
+                },
+                {
+                  "const": {
+                    "id": "scope",
+                    "required": true,
+                    "timeout_seconds": 30
+                  }
+                },
+                {
+                  "const": {
+                    "id": "smoke",
+                    "required": true,
+                    "timeout_seconds": 30
+                  }
+                },
+                {
+                  "const": {
+                    "id": "node_build",
+                    "required": true,
+                    "timeout_seconds": 300
+                  }
+                },
+                {
+                  "const": {
+                    "id": "node_check",
+                    "required": true,
+                    "timeout_seconds": 600
+                  }
+                },
+                {
+                  "const": {
+                    "id": "diff_whitespace",
+                    "required": true,
+                    "timeout_seconds": 30
+                  }
+                },
+                {
+                  "const": {
+                    "id": "ts_coverage",
+                    "required": true,
+                    "timeout_seconds": 600
+                  }
+                },
+                {
+                  "const": {
+                    "id": "ts_total_lines",
+                    "required": true,
+                    "timeout_seconds": 30,
+                    "threshold": 85
+                  }
+                },
+                {
+                  "const": {
+                    "id": "ts_diff_lines",
+                    "required": true,
+                    "timeout_seconds": 30,
+                    "threshold": 90
+                  }
+                }
+              ],
+              "items": {
+                "$ref": "#/$defs/node_v2_extra_check"
+              }
+            }
+          }
+        }
+      ]
+    },
     "node_levels": {
       "const": [
         {

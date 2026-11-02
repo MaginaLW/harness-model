@@ -36,7 +36,7 @@ class EvidenceFacts:
     spec_sha256: str
     policy_sha256: str
     classification_input_sha256: str
-    verification_level: Literal["V0", "V1"]
+    verification_level: Literal["V0", "V1", "V2"]
     mode: Literal["local", "ci"]
     run_id: str
     run_dir: Path
@@ -101,7 +101,10 @@ def decide_evidence_conclusion(
 
 def verification_snapshot_sha256(evidence: Mapping[str, object]) -> str:
     """Hash the V2 verification facts that must survive review finalization."""
-    if evidence.get("schema_version") != "2.0" or evidence.get("verification_level") != "V2":
+    if (
+        evidence.get("schema_version") not in {"2.0", "3.2"}
+        or evidence.get("verification_level") != "V2"
+    ):
         raise ContractError(
             "Verification snapshot requires V2 evidence", code="EVIDENCE_SNAPSHOT_INVALID"
         )
@@ -128,7 +131,10 @@ def validate_v2_snapshot(evidence: Mapping[str, object]) -> None:
 def prepare_v2_pre_evidence(evidence: Mapping[str, object]) -> dict[str, object]:
     """Create schema-valid V2 evidence before an implementation review exists."""
     candidate = cast(dict[str, object], json.loads(json.dumps(dict(evidence))))
-    if candidate.get("schema_version") != "2.0" or candidate.get("verification_level") != "V2":
+    if (
+        candidate.get("schema_version") not in {"2.0", "3.2"}
+        or candidate.get("verification_level") != "V2"
+    ):
         raise ContractError("V2 pre evidence is invalid", code="EVIDENCE_V2_PHASE_INVALID")
     review_refs = candidate.get("review_refs")
     if not isinstance(review_refs, dict):
@@ -287,7 +293,7 @@ def save_evidence(
     path: Path, evidence: Mapping[str, object], *, archive_path: Path | None = None
 ) -> None:
     """Persist an optional per-run copy, then atomically replace current evidence."""
-    if evidence.get("schema_version") == "3.1":
+    if evidence.get("schema_version") in {"3.1", "3.2"}:
         validate_node_evidence(evidence)
     require_valid_contract("evidence", evidence)
     if archive_path is not None:
@@ -349,6 +355,9 @@ _NODE_EXECUTION_FIELDS = frozenset(
     }
 )
 _NODE_COVERAGE_METHOD = "vite-8.2.1-oxc-es2024-ast-v8-to-istanbul-zero-hit-v1"
+_NODE_ISTANBUL_COVERAGE_METHOD = (
+    "vitest-4.1.10-istanbul-vite-8.2.1-oxc-es2024-zero-hit-ts-ast-wire-v2"
+)
 
 
 def _node_invalid() -> ContractError:
@@ -389,8 +398,14 @@ def _node_digest(value: object) -> str:
     ).hexdigest()
 
 
-def _node_evidence_plan(level: str) -> dict[str, object]:
+def _node_evidence_plan(level: str, *, revision: int = 1) -> dict[str, object]:
     """The fixed public role contract; no Policy, materials, or executable is consulted."""
+    if (
+        type(revision) is not int
+        or revision not in {1, 2}
+        or level not in (("V0", "V1", "V2") if revision == 2 else ("V0", "V1"))
+    ):
+        raise _node_invalid()
     python = ["P", "-I", "-B", "-m", "aiflow"]
     npm = ["N", "M", "--userconfig", "U", "--globalconfig", "C", "--offline", "run"]
     git = [
@@ -420,7 +435,7 @@ def _node_evidence_plan(level: str) -> dict[str, object]:
             None,
         ),
     ]
-    if level == "V1":
+    if level in {"V1", "V2"}:
         definitions.extend(
             [
                 (
@@ -432,14 +447,27 @@ def _node_evidence_plan(level: str) -> dict[str, object]:
                             "test",
                             "--",
                             "--coverage.enabled",
-                            "--coverage.provider=v8",
+                            "--coverage.provider=istanbul"
+                            if revision == 2
+                            else "--coverage.provider=v8",
                             "--coverage.include=src/local/**/*.ts",
                             "--coverage.reporter=json-summary",
                             "--coverage.reporter=json",
                             "--coverage.reporter=text",
                             "--coverage.reportsDirectory=R",
                             "--coverage.reportOnFailure",
-                        ],
+                        ]
+                        + (
+                            [
+                                "--config={node_source_config}",
+                                "--dangerouslyIgnoreUnhandledErrors=false",
+                                "--reporter=default",
+                                "--reporter=json",
+                                "--outputFile.json={node_product_report}",
+                            ]
+                            if revision == 2
+                            else []
+                        ),
                         [
                             "N",
                             "--input-type=module",
@@ -455,6 +483,16 @@ def _node_evidence_plan(level: str) -> dict[str, object]:
                 ("ts_total_lines", 30, [], "isolated", 85),
                 ("ts_diff_lines", 30, [], "isolated", 90),
             ]
+        )
+    if level == "V2":
+        definitions.extend(
+            (check_id, 30, [], "isolated", None)
+            for check_id in (
+                "acceptance",
+                "integration",
+                "targeted_mutation",
+                "independent_verifier",
+            )
         )
     checks: list[dict[str, object]] = []
     executions: list[dict[str, object]] = []
@@ -474,16 +512,22 @@ def _node_evidence_plan(level: str) -> dict[str, object]:
                     "argv_template": command,
                     "cwd_role": cwd_role,
                     "timeout_seconds": 30 if check_id == "ts_coverage" and index == 1 else timeout,
-                    "check_ids": [check_id],
+                    "check_ids": (
+                        ["ts_coverage", "acceptance", "integration"]
+                        if level == "V2" and check_id == "ts_coverage" and index == 0
+                        else [check_id]
+                    ),
                 }
             )
     return {"level": level, "checks": checks, "executions": executions}
 
 
-def _node_coverage(value: object) -> dict[str, Any]:
+def _node_coverage(value: object, *, revision: int = 1) -> dict[str, Any]:
     coverage = _node_object(value, {"scope_files", "total", "changed", "method"})
     _node_integer(coverage["scope_files"], minimum=1, maximum=20_000)
-    if coverage["method"] != _NODE_COVERAGE_METHOD:
+    if coverage["method"] != (
+        _NODE_ISTANBUL_COVERAGE_METHOD if revision == 2 else _NODE_COVERAGE_METHOD
+    ):
         raise _node_invalid()
     for key, threshold in (("total", 85), ("changed", 90)):
         fields = {"covered", "executable", "threshold"}
@@ -556,23 +600,84 @@ def _node_execution(
     )
 
 
+def _node_installed_projection(value: object, *, task_id: str, run_id: str) -> dict[str, Any]:
+    installed = _node_object(value, {"reference", "inputs_sha256", "results"})
+    reference = _node_object(installed["reference"], {"ref", "size", "sha256"})
+    if (
+        re.fullmatch(r"IMUT-[0-9a-f]{16}", run_id) is None
+        or reference["ref"] != f".ai/tasks/{task_id}/logs/{run_id}/run.json"
+    ):
+        raise _node_invalid()
+    _node_integer(reference["size"], minimum=1, maximum=16 * 1024 * 1024)
+    for value in (reference["sha256"], installed["inputs_sha256"]):
+        _node_text(value, r"[0-9a-f]{64}")
+    results = installed["results"]
+    if type(results) is not list or len(results) != 5:
+        raise _node_invalid()
+    for index, row in enumerate(results, 1):
+        if (
+            type(row) is not list
+            or len(row) != 2
+            or row[0] != f"MUT-V2-{index:03d}"
+            or row[1] not in ("killed", "survived", "unverified")
+        ):
+            raise _node_invalid()
+    return installed
+
+
+def _node_product_projection(value: object, *, run_id: str) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    from aiflow.node_verification import PRODUCT_TESTS
+
+    product = _node_object(value, {"report", "inventory_sha256", "acceptance", "integration"})
+    report = _node_object(product["report"], {"ref", "size", "sha256"})
+    if report["ref"] != f"logs/{run_id}/node/vitest.json":
+        raise _node_invalid()
+    _node_integer(report["size"], minimum=1, maximum=16 * 1024 * 1024)
+    for digest in (report["sha256"], product["inventory_sha256"]):
+        _node_text(digest, r"[0-9a-f]{64}")
+    for category in ("acceptance", "integration"):
+        expected = [
+            {"file": path, "full_name": ancestor + " " + title}
+            for kind, path, ancestor, title in PRODUCT_TESTS
+            if kind == category
+        ]
+        if _node_digest(product[category]) != _node_digest(expected):
+            raise _node_invalid()
+    return product
+
+
 def validate_node_evidence(
     evidence: Mapping[str, object],
     *,
     require_passed: bool = False,
 ) -> None:
-    """Check only the closed Node 3.1 public contract, without I/O or runtime replay.
+    """Check the closed Node public versions, without I/O or runtime replay.
 
     A structurally passed document still needs the single production material recheck;
     compact hashes and process claims cannot authenticate historical execution.
     """
-    if not isinstance(evidence, Mapping) or set(evidence) != _NODE_TOP_FIELDS:
+    if not isinstance(evidence, Mapping):
+        raise _node_invalid()
+    revision = 2 if evidence.get("schema_version") == "3.2" else 1
+    lifecycle = revision == 2 and evidence.get("verification_level") == "V2"
+    lifecycle_fields = {
+        "phase",
+        "verifier_actor",
+        "verifier_context_sha256",
+        "verification_snapshot_sha256",
+        "review_refs",
+        "installed_mutation",
+    }
+    if set(evidence) != _NODE_TOP_FIELDS | (lifecycle_fields if lifecycle else set()):
         raise _node_invalid()
     if (
         type(require_passed) is not bool
-        or evidence["schema_version"] != "3.1"
+        or evidence["schema_version"] not in ("3.1", "3.2")
         or evidence["mode"] != "local"
-        or evidence["verification_level"] not in ("V0", "V1")
+        or evidence["verification_level"]
+        not in (("V0", "V1", "V2") if revision == 2 else ("V0", "V1"))
         or evidence["conclusion"] not in ("passed", "failed")
     ):
         raise _node_invalid()
@@ -603,9 +708,11 @@ def validate_node_evidence(
         "node_binding_sha256",
     ):
         _node_text(evidence[key], r"[0-9a-f]{64}")
-    binding = _node_object(evidence["node_binding"], _NODE_BINDING_FIELDS)
+    binding = _node_object(
+        evidence["node_binding"], _NODE_BINDING_FIELDS | ({"product_tests"} if lifecycle else set())
+    )
     profile = _node_object(binding["profile"], {"id", "revision"})
-    if profile["id"] != "agent-bridge-node" or _node_integer(profile["revision"]) != 1:
+    if profile["id"] != "agent-bridge-node" or _node_integer(profile["revision"]) != revision:
         raise _node_invalid()
     _node_text(binding["subject_tree"], r"[0-9a-f]{40}")
     for key in (
@@ -638,21 +745,44 @@ def validate_node_evidence(
     ):
         raise _node_invalid()
     reproduce = evidence["reproduce_command"]
+    suffix = ["--node-materials", prepared["sha256"]]
+    if lifecycle:
+        suffix += ["--installed-mutations", run_id]
     if (
         type(reproduce) is not list
-        or len(reproduce) != 9
+        or len(reproduce) != 7 + len(suffix)
         or reproduce[:6] != ["python", "-m", "aiflow", "verify", task_id, "--actor"]
-        or reproduce[7:] != ["--node-materials", prepared["sha256"]]
+        or reproduce[7:] != suffix
     ):
         raise _node_invalid()
     _node_text(reproduce[6], r"[A-Za-z0-9][A-Za-z0-9_.@-]*")
+    installed = product = None
+    if lifecycle:
+        installed = _node_installed_projection(
+            evidence["installed_mutation"], task_id=task_id, run_id=run_id
+        )
+        product = _node_product_projection(binding["product_tests"], run_id=run_id)
+        if evidence["phase"] not in (V2_PRE_IMPLEMENTATION_REVIEW, V2_FINAL):
+            raise _node_invalid()
+        if _node_text(evidence["verifier_actor"]) != reproduce[6]:
+            raise _node_invalid()
+        _node_text(evidence["verifier_context_sha256"], r"[0-9a-f]{64}")
+        refs = _node_object(
+            evidence["review_refs"],
+            {"design", "implementation"} if evidence["phase"] == V2_FINAL else {"design"},
+        )
+        for ref in refs.values():
+            item = _node_object(ref, {"review_id", "context_sha256"})
+            _node_text(item["review_id"], r"REV-[0-9]{4,}")
+            _node_text(item["context_sha256"], r"[0-9a-f]{64}")
+        validate_v2_snapshot(evidence)
     level = _node_text(evidence["verification_level"])
     coverage = None
     if binding["coverage"] is not None:
-        if level != "V1":
+        if level not in ("V1", "V2"):
             raise _node_invalid()
-        coverage = _node_coverage(binding["coverage"])
-    plan = _node_evidence_plan(level)
+        coverage = _node_coverage(binding["coverage"], revision=revision)
+    plan = _node_evidence_plan(level, revision=revision)
     if binding["execution_contract_sha256"] != _node_digest(plan):
         raise _node_invalid()
     checks = evidence["checks"]
@@ -662,6 +792,7 @@ def validate_node_evidence(
         raise _node_invalid()
     incomplete = stopped = False
     all_processes = True
+    seen_executions: dict[str, tuple[object, bool]] = {}
     for value, fixed_check in zip(checks, fixed_checks, strict=True):
         check = _node_object(value, {"check_id", "required", "status", "executions"})
         if (
@@ -670,16 +801,28 @@ def validate_node_evidence(
             or check["status"] not in ("passed", "failed", "unverified")
         ):
             raise _node_invalid()
-        fixed = [row for row in fixed_executions if row["check_ids"] == [check["check_id"]]]
+        fixed = [
+            row
+            for row in fixed_executions
+            if check["check_id"] in cast(list[str], row["check_ids"])
+        ]
         actual = check["executions"]
         if type(actual) is not list or len(actual) > len(fixed):
             raise _node_invalid()
         succeeded = True
         for execution, template in zip(actual, fixed, strict=False):
-            if incomplete or stopped:
-                raise _node_invalid()
-            succeeded = _node_execution(execution, template, run_id=run_id)
-            stopped = not succeeded
+            identity = str(template["execution_id"])
+            previous = seen_executions.get(identity)
+            if lifecycle and previous is not None:
+                if _node_digest(execution) != _node_digest(previous[0]):
+                    raise _node_invalid()
+                succeeded = previous[1]
+            else:
+                if incomplete or stopped:
+                    raise _node_invalid()
+                succeeded = _node_execution(execution, template, run_id=run_id)
+                seen_executions[identity] = (execution, succeeded)
+                stopped = not succeeded
         complete = len(actual) == len(fixed)
         if fixed:
             incomplete |= not complete
@@ -690,7 +833,20 @@ def validate_node_evidence(
                 raise _node_invalid()
             if check["status"] == "passed" and not (complete and succeeded):
                 raise _node_invalid()
-        elif actual or check["status"] == "passed" and (coverage is None or not all_processes):
+        elif actual:
+            raise _node_invalid()
+        elif check["status"] == "passed":
+            if lifecycle and check["check_id"] in ("targeted_mutation", "independent_verifier"):
+                if installed is None or any(row[1] != "killed" for row in installed["results"]):
+                    raise _node_invalid()
+            elif coverage is None or not all_processes:
+                raise _node_invalid()
+        if (
+            lifecycle
+            and check["status"] == "passed"
+            and check["check_id"] in ("acceptance", "integration")
+            and product is None
+        ):
             raise _node_invalid()
         if check["status"] == "passed" and check["check_id"] in ("ts_total_lines", "ts_diff_lines"):
             assert coverage is not None
@@ -707,7 +863,7 @@ def validate_node_evidence(
         raise _node_invalid()
     if coverage is not None and not all_processes:
         raise _node_invalid()
-    if passed and (not all_processes or level == "V1" and coverage is None):
+    if passed and (not all_processes or level in ("V1", "V2") and coverage is None):
         raise _node_invalid()
     if evidence["node_binding_sha256"] != _node_digest(binding):
         raise _node_invalid()
