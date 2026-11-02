@@ -70,5 +70,21 @@
     "spec_sha256": "1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b",
     "subject_commit": "72c2ca5ab479fe1987bde62a6c29156a6b160677",
     "task_id": "TASK-0139"
+  },
+  {
+    "action_sha256": "46c0e7caa797ae658ae24da4d0031b83f8e6a92b46de080369885844b153ab21",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-02T20:08:05Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-03T02:03:12.777185Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual independent lf_review exact-action APPROVE for canonical46c0e7caa797ae658ae24da4d0031b83f8e6a92b46de080369885844b153ab21 with no findings. Current contract validation and source72/frozen facts remain valid; authenticated isolated runtime preparation, current3601 protected payload and76 source inputs, actual native argv and cold/warm strict diagnostics were independently verified. Parent explicitly finished target work and opened one exclusive new native window. Authorize only this one new run under all14/3000/85/90/original five pairs and the pinned v3 preflight. No fourth run after same budget failure or protected-payload drift; old failed/spent artifacts retained. Preparation is not native PASS, no personal human review or external/model action asserted.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b",
+    "subject_commit": "72c2ca5ab479fe1987bde62a6c29156a6b160677",
+    "task_id": "TASK-0139"
   }
 ]
