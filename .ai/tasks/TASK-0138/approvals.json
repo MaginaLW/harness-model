@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-02T08:44:35Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：当前独立设计 REV-0001/r1 APPROVE，无未关闭 critical/high；批准既定 Node CI3.3 本地实现及有限受控验证，保持旧合同和全部门禁。A04 材料公开许可待答，目标权限及一切外部动作仍须分别核实，不由本规格批准授予。",
+    "schema_version": "1.0",
+    "spec_sha256": "62711d0c56e7a1c35584136ce66a6ba0ee36110843c57b67ac79d2b7b911049a",
+    "subject_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "task_id": "TASK-0138"
+  }
+]

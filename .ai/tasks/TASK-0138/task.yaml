@@ -1,0 +1,139 @@
+allowed_scope:
+- src/aiflow/node_ci.py
+- src/aiflow/node_execution.py
+- src/aiflow/node_verification.py
+- src/aiflow/installed_mutations.py
+- src/aiflow/installed_probe.py
+- src/aiflow/verification.py
+- src/aiflow/verification_service.py
+- src/aiflow/evidence.py
+- src/aiflow/gate.py
+- src/aiflow/freshness.py
+- src/aiflow/cli.py
+- src/aiflow/resource_bundle.py
+- src/aiflow/review_service.py
+- src/aiflow/approval.py
+- src/aiflow/status_service.py
+- src/aiflow/task_service.py
+- src/aiflow/verifier_service.py
+- .ai/schemas/node-ci.schema.json
+- .ai/schemas/evidence.schema.json
+- MANIFEST.in
+- .github/workflows/node-engine-artifacts.yml
+- tools/ci/build_node_engine.py
+- .ai/tasks/TASK-0136/**
+- docs/superpowers/specs/node-ci.md
+- docs/operations/node-verification.md
+- docs/operations/adoption.md
+- docs/operations/maintenance-status.md
+- docs/superpowers/plans/agent-bridge-integration.md
+- tests/unit/test_node_ci.py
+- tests/unit/test_node_ci_execution.py
+- tests/unit/test_node_ci_platform.py
+- tests/integration/test_node_ci_installed.py
+- tests/node_ci_helpers.py
+- tests/unit/test_evidence.py
+- tests/unit/test_cli.py
+- tests/unit/test_resource_bundle.py
+- tests/integration/test_resource_distribution.py
+base_commit: 1f748a99b97842b9eca7abf4be454d348bf78759
+branch: codex/agent-bridge-node-ci
+created_at: '2026-11-02T08:27:54Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - The new public-source Actions build and source-only artifact delivery occur only
+    after the explicit finite material permission and applicable delivery gates; no
+    external action is performed by this local preparation.
+  goal: Implement explicit Node CI3.3 execution and original-host combined Gate without
+    weakening local/native contracts
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/node_ci.py
+  - src/aiflow/node_execution.py
+  - src/aiflow/node_verification.py
+  - src/aiflow/installed_mutations.py
+  - src/aiflow/installed_probe.py
+  - src/aiflow/verification.py
+  - src/aiflow/verification_service.py
+  - src/aiflow/evidence.py
+  - src/aiflow/gate.py
+  - src/aiflow/freshness.py
+  - src/aiflow/cli.py
+  - src/aiflow/resource_bundle.py
+  - src/aiflow/review_service.py
+  - src/aiflow/approval.py
+  - src/aiflow/status_service.py
+  - src/aiflow/task_service.py
+  - src/aiflow/verifier_service.py
+  - .ai/schemas/node-ci.schema.json
+  - .ai/schemas/evidence.schema.json
+  - MANIFEST.in
+  - .github/workflows/node-engine-artifacts.yml
+  - tools/ci/build_node_engine.py
+  - .ai/tasks/TASK-0136/**
+  - docs/superpowers/specs/node-ci.md
+  - docs/operations/node-verification.md
+  - docs/operations/adoption.md
+  - docs/operations/maintenance-status.md
+  - docs/superpowers/plans/agent-bridge-integration.md
+  - tests/unit/test_node_ci.py
+  - tests/unit/test_node_ci_execution.py
+  - tests/unit/test_node_ci_platform.py
+  - tests/integration/test_node_ci_installed.py
+  - tests/node_ci_helpers.py
+  - tests/unit/test_evidence.py
+  - tests/unit/test_cli.py
+  - tests/unit/test_resource_bundle.py
+  - tests/integration/test_resource_distribution.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0138
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 62711d0c56e7a1c35584136ce66a6ba0ee36110843c57b67ac79d2b7b911049a
+goal: Implement explicit Node CI3.3 execution and original-host combined Gate without
+  weakening local/native contracts
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-02T08:27:54Z'
+subject_commit: 1f748a99b97842b9eca7abf4be454d348bf78759
+task_id: TASK-0138
+updated_at: '2026-11-02T08:44:36Z'
+worktree_dirty: false
+worktree_dirty_paths: []
