@@ -37,5 +37,18 @@
     "spec_sha256": "8239e56a1f87eecaceea484d918316724b4ae912fc2cfbaa0566a75da4cd4948",
     "subject_commit": "01af7087ccac0d0cae7534da9bb9b4c878141874",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-02T17:16:42Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：当前独立设计REV-0004/r1 APPROVE且无findings；仅消费精确139只读Git候选与三项scope transport，保持原base与REVIEW/V2，准许有限本地prereg implementation work，不把139未完成新native/final视为通过；publication/private transfer与全部最终门禁保留",
+    "schema_version": "1.0",
+    "spec_sha256": "b2f6e9b41ef08f6daf30e2f0131896f0dbc4fd5c68c69af4495348d86bc0f55b",
+    "subject_commit": "aae4670915357847f84da7d62244326d3ae089bc",
+    "task_id": "TASK-0138"
   }
 ]
