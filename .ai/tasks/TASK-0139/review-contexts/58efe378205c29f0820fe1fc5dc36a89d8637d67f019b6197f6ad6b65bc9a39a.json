@@ -1,0 +1,35 @@
+{
+  "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+  "branch": "codex/event-log-lf",
+  "classification_input_sha256": "3d7e49454176c720ebd2657878405c4cb31d0d7c1d2562d2c864a866393aa4f2",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Preserve canonical UTF-8 LF bytes when appending task events on Windows",
+        "impact_scope": [
+          "src/aiflow/task_service.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Preserve canonical UTF-8 LF bytes when appending task events on Windows",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "58efe378205c29f0820fe1fc5dc36a89d8637d67f019b6197f6ad6b65bc9a39a",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49",
+  "task_id": "TASK-0139"
+}

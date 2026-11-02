@@ -1,0 +1,45 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-02T15:10:11Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: current REVIEW/V2 facts and frozen specification pass contract validation; actual independent design review APPROVE at context58efe378 with no findings. Authorize only the scoped O_BINARY fix; all full14/85/90/five-mutation gates remain. No external action or personal human review is asserted.",
+    "schema_version": "1.0",
+    "spec_sha256": "ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49",
+    "subject_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "task_id": "TASK-0139"
+  },
+  {
+    "action_sha256": "e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-02T15:19:35Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-02T21:17:19.502464Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual independent lf_review exact-action APPROVE with no findings for e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe, current context5af7 and fixed subjectb053. Windows red/green facts32 and source-outside ordinary direct/rebuilt wheel byte/resource/Git-LF checks are observed; all14/3000/85/90/five-native-operator requirements remain. Authorize only this single fresh actual independent-verifier native invocation using the preflight-bound original-workspace outside-source fixture pool; first failure/interruption closes it, no retry or external/model action.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49",
+    "subject_commit": "b053c38f6f5fd82ddc821cac8d8943a6274ecce9",
+    "task_id": "TASK-0139"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-02T16:15:56Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "6bd1d430f28397c887d1c1e23d0b024fa8d3789b88088b21a8212e3f4cf12d04",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual current independent implementation REV-0002 APPROVE with no findings, context25ae4a4b; one complete native V2 and same-verifier final passed all14 checks,6504tests/9existing conditional skips,core90/analysis98 total,100diff and all five mutations killed. Final raw evidence81be8f760ec0f5f29f3f22428c053026e04ab0c544b907bd24eec7f312eade12 binds unchanged subjectb053. Required review package now records those verified facts and unverified root-owned delivery boundaries. No personal human review or external action is asserted.",
+    "schema_version": "1.0",
+    "spec_sha256": "ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49",
+    "subject_commit": "b053c38f6f5fd82ddc821cac8d8943a6274ecce9",
+    "task_id": "TASK-0139"
+  }
+]

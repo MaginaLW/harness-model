@@ -24,6 +24,21 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DECLARATION = {"scope": {"clear": True}, "impact_categories": [], "controlled_actions": []}
 
 
+@pytest.mark.parametrize("existing_separator", [b"\n", b"\r\n"])
+def test_event_append_preserves_existing_bytes_and_emits_one_utf8_lf(
+    tmp_path: Path, existing_separator: bytes
+) -> None:
+    path = tmp_path / "events.jsonl"
+    prefix = b'{"historical":"unchanged"}' + existing_separator
+    path.write_bytes(prefix)
+    event = {"actor": "verifier", "payload": {"message": "中文 café"}, "sequence": 2}
+
+    task_service._append_event(path, event)
+
+    appended = (json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n").encode("utf8")
+    assert path.read_bytes() == prefix + appended
+
+
 @pytest.fixture
 def draft(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
