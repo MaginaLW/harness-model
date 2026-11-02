@@ -11,5 +11,18 @@
     "spec_sha256": "62711d0c56e7a1c35584136ce66a6ba0ee36110843c57b67ac79d2b7b911049a",
     "subject_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-02T09:54:43Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：当前独立REV-0002/r1设计审核APPROVE且无未关闭critical/high；仅增加固定Schema注册和现有Windows Job有限stdout sink，保留所有旧门禁/默认限制/原件，不涉及所有者保留事项或外部发布",
+    "schema_version": "1.0",
+    "spec_sha256": "659c564c06db19d8f75d56bd814f4e5674afb0d864240ff2457be91a1916d8f7",
+    "subject_commit": "1641d85692e76b9e1f05e9fd3eed06633d6a5b31",
+    "task_id": "TASK-0138"
   }
 ]
