@@ -247,9 +247,10 @@ def test_production_git_commands_use_fixed_argument_arrays_and_timeout(
     collect_git_context(repository)
 
     assert [arguments for arguments, _kwargs in calls] == [
-        ("git", "rev-parse", "--show-toplevel"),
+        ("git", "--no-optional-locks", "rev-parse", "--show-toplevel"),
         (
             "git",
+            "--no-optional-locks",
             "status",
             "--porcelain=v2",
             "--branch",
@@ -444,7 +445,7 @@ def test_aggregate_failure_never_produces_context(
     original = git_context.subprocess.run
 
     def failed(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
-        if arguments[1] != "status":
+        if arguments[1:3] != ["--no-optional-locks", "status"]:
             return original(arguments, **kwargs)
         if outcome == "spawn":
             raise OSError("synthetic spawn failure")
@@ -775,16 +776,17 @@ def test_aggregate_failure_replays_original_head_branch_error_priority(
 
     def failed(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
         assert "env" not in kwargs
-        calls.append(tuple(arguments[1:]))
-        if arguments[1] == "rev-parse" and arguments[2] == "--show-toplevel":
+        git_arguments = arguments[2:] if arguments[1] == "--no-optional-locks" else arguments[1:]
+        calls.append(tuple(git_arguments))
+        if git_arguments == ["rev-parse", "--show-toplevel"]:
             code, output = 0, str(repository).encode() + b"\n"
-        elif arguments[1] == "status":
+        elif git_arguments[0] == "status":
             code, output = 1, b""
-        elif arguments[1] == "rev-parse":
-            assert arguments[2:] == ["HEAD"]
+        elif git_arguments[0] == "rev-parse":
+            assert git_arguments[1:] == ["HEAD"]
             code, output = head_code, head_output
         else:
-            assert arguments[1:] == ["symbolic-ref", "--short", "-q", "HEAD"]
+            assert git_arguments == ["symbolic-ref", "--short", "-q", "HEAD"]
             code, output = branch_code, b"main\n"
         return subprocess.CompletedProcess(arguments, code, stdout=output, stderr=b"private error")
 
