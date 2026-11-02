@@ -138,8 +138,8 @@ goal: Implement explicit Node CI3.3 execution and original-host combined Gate wi
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-02T09:42:00Z'
-subject_commit: 302e85a6116b04a67841c315b5ad0671b7f74c7a
+subject_commit: ea2dd82efb501b2c4b3da6d1222e835a25dd81c4
 task_id: TASK-0138
-updated_at: '2026-11-02T12:05:43Z'
+updated_at: '2026-11-02T13:25:25Z'
 worktree_dirty: false
 worktree_dirty_paths: []
