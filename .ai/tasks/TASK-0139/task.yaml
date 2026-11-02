@@ -1,9 +1,12 @@
 allowed_scope:
 - src/aiflow/task_service.py
+- src/aiflow/git_context.py
+- src/aiflow/scope.py
+- tests/unit/test_git_context.py
 base_commit: 1c23e3b12bf6431f7ad3853ef1332ab2913edd14
 branch: codex/event-log-lf
 created_at: '2026-11-02T15:04:17Z'
-current_state: APPROVED_FOR_MERGE
+current_state: IMPLEMENTING
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -16,12 +19,14 @@ decision_units:
   controlled_actions: []
   decision_unit_id: DU-001
   external_side_effects: []
-  goal: Preserve canonical UTF-8 LF bytes when appending task events on Windows
+  goal: Preserve canonical task-event bytes and genuinely read-only Git facts
   impact:
     level: medium
   impact_categories: []
   impact_scope:
   - src/aiflow/task_service.py
+  - src/aiflow/git_context.py
+  - src/aiflow/scope.py
   inputs: []
   permission_requirements:
   - action_approval
@@ -50,13 +55,13 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49
-goal: Preserve canonical UTF-8 LF bytes when appending task events on Windows
+frozen_spec_sha256: 1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b
+goal: Preserve canonical task-event bytes and genuinely read-only Git facts
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-02T15:08:44Z'
-subject_commit: b053c38f6f5fd82ddc821cac8d8943a6274ecce9
+spec_frozen_at: '2026-11-02T16:58:36Z'
+subject_commit: 5c9a7ffe6e582284082427fcb2269fbe3d82fafe
 task_id: TASK-0139
-updated_at: '2026-11-02T16:15:56Z'
+updated_at: '2026-11-02T17:02:22Z'
 worktree_dirty: false
 worktree_dirty_paths: []

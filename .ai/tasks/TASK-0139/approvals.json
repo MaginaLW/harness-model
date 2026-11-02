@@ -41,5 +41,18 @@
     "spec_sha256": "ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49",
     "subject_commit": "b053c38f6f5fd82ddc821cac8d8943a6274ecce9",
     "task_id": "TASK-0139"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-02T17:02:21Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual independent REV-0003 design APPROVE at context fada40952105ae8a85fd7f79efcb5de4c513d73478fa796f9c154676be10b35b with no findings and current contract validation. Only retain O_BINARY and add --no-optional-locks to the two read collectors after exact-head failed CI and two real Windows red cases. Full REVIEW V2, snapshots, CI and all thresholds remain mandatory; no external action or personal human review asserted.",
+    "schema_version": "1.0",
+    "spec_sha256": "1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b",
+    "subject_commit": "5c9a7ffe6e582284082427fcb2269fbe3d82fafe",
+    "task_id": "TASK-0139"
   }
 ]
