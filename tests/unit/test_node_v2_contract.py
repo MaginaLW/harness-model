@@ -620,3 +620,234 @@ def test_node2_init_replay_does_not_overwrite_modified_managed_bytes(
             target, preview, decision, bundle_root=local_bundle, policy_directory=directory
         )
     assert snapshot_tree(target) == before
+
+
+@pytest.fixture
+def node_execution_regression(tmp_path_factory, monkeypatch):
+    """Reuse real retained negative transactions in a short, project-owned leaf.
+
+    The shared process seam fabricates bounded diagnostics and always fails;
+    these cases establish rejection/retention, never Node or compiler acceptance.
+    Existing tests retain their own tmp_path fixture and placement.
+    """
+    from types import SimpleNamespace
+
+    import test_node_profile_contract as existing
+
+    import aiflow.node_execution as runtime
+
+    source_contract = runtime._source_contract
+    directory = existing.tmp_path.__wrapped__(
+        tmp_path_factory, SimpleNamespace(param="native-owned")
+    )
+    materials = existing.negative_material_originals.__wrapped__(directory, monkeypatch)
+    policy = existing.node_policy_directory.__wrapped__(
+        directory, existing.node_policy_seed_bytes.__wrapped__()
+    )
+    transaction = existing.negative_node_transaction.__wrapped__(
+        materials, policy, monkeypatch, SimpleNamespace(param=(2, True))
+    )
+    case = existing.native_ownership_transaction.__wrapped__(transaction, monkeypatch)
+    case.settings["native_fault"] = "valid"
+    case.materials = materials
+    case.source_contract = source_contract
+    return case
+
+
+@pytest.mark.parametrize(
+    "fault,message",
+    [
+        ("source_parent", "Native ownership source ancestor cannot be inspected"),
+        ("source_leaf", "Native ownership source role cannot be inspected"),
+        ("runtime_parent", "Native ownership runtime ancestor cannot be inspected"),
+        ("cache_leaf", "Native ownership cache cannot be inspected"),
+        ("enumeration", "Native ownership role names cannot be inspected"),
+        ("enumeration_race", "Native ownership role directory changed during enumeration"),
+    ],
+)
+def test_node_first_seal_io_rejects(node_execution_regression, monkeypatch, fault, message):
+    """A successful check cannot seal an unreadable or concurrently changed role."""
+    import os
+    from contextlib import contextmanager
+
+    case = node_execution_regression
+    runtime = case.runtime
+    lstat = Path.lstat
+    scandir = os.scandir
+    fired = []
+    errors = []
+    error = runtime._error
+
+    def observe_error(*args, **kwargs):
+        result = error(*args, **kwargs)
+        errors.append((result.code, result.message))
+        return result
+
+    def active(path):
+        return (
+            not fired
+            and case.settings["calls"]
+            and case.settings["calls"][-1] == "EXEC-005"
+            and "checkout" in Path(path).parts
+        )
+
+    def unreadable(path, *args, **kwargs):
+        roles = {
+            "source_parent": "checkout/scripts",
+            "source_leaf": "checkout/scripts/windows-owned-launcher.cs",
+            "runtime_parent": "checkout/.runtime",
+            "cache_leaf": "checkout/.runtime/native-ownership",
+        }
+        if active(path) and Path(path).as_posix().endswith(roles.get(fault, "/unselected")):
+            fired.append(str(path))
+            raise PermissionError("controlled one-shot role inspection failure")
+        return lstat(path, *args, **kwargs)
+
+    @contextmanager
+    def inspected(path):
+        selected = (
+            active(path)
+            and Path(path).name == "checkout"
+            and fault in {"enumeration", "enumeration_race"}
+        )
+        if selected:
+            fired.append(str(path))
+            if fault == "enumeration":
+                raise PermissionError("controlled one-shot enumeration failure")
+        with scandir(path) as entries:
+            yield entries
+        if selected:
+            info = lstat(Path(path))
+            os.utime(path, ns=(info.st_atime_ns, info.st_mtime_ns + 1_000_000_000))
+
+    monkeypatch.setattr(runtime, "_error", observe_error)
+    monkeypatch.setattr(Path, "lstat", unreadable)
+    monkeypatch.setattr(os, "scandir", inspected)
+    evidence, directory = case.execute("late_materials", "V0")
+    assert len(fired) == 1
+    assert ("NODE_MATERIALS_INVALID", message) in errors
+    assert evidence["conclusion"] == "failed"
+    assert case.settings["calls"][-1] == "EXEC-005"
+    document = runtime._json(directory / "run.json")
+    assert [row["execution_id"] for row in document["executions"]] == [
+        f"EXEC-{number:03d}" for number in range(1, 6)
+    ]
+    assert all(runtime._successful(row["receipt"]) for row in document["executions"])
+    assert "fixtures" not in document["outputs"]
+    assert evidence["checks"][-1]["status"] == "unverified"
+
+
+@pytest.mark.parametrize("fault", ["malformed", "duplicate", "profile"])
+def test_node_prepare_rejects_source_roles(node_execution_regression, monkeypatch, fault):
+    from node_helpers import tree_bytes
+
+    case = node_execution_regression
+    runtime, payload, _prepared, manifests = case.materials
+    source = deepcopy(manifests["source.json"])
+    if fault == "malformed":
+        source["files"].append({"path": 17})
+        expected = "Native ownership source inventory is invalid"
+    elif fault == "duplicate":
+        source["files"].append(
+            deepcopy(next(row for row in source["files"] if row["path"].endswith(".cs")))
+        )
+        expected = "Native ownership source role is duplicated"
+    else:
+        expected = "Node profile binding is unsupported"
+    binding, bundle = runtime._binding(case.root, "TASK-0001")
+    if fault == "profile":
+        binding["profile"] = {"id": "agent-bridge-node", "revision": 3}
+    monkeypatch.setattr(runtime, "_binding", lambda *_args: (binding, bundle))
+    monkeypatch.setattr(runtime, "_source", lambda *_args, **_kwargs: source)
+    monkeypatch.setattr(runtime, "_source_contract", case.source_contract)
+    attempts = []
+
+    def forbidden(*_args, **_kwargs):
+        attempts.append(True)
+        raise AssertionError("Rejected source must not launch or publish materials")
+
+    monkeypatch.setattr(runtime, "_process", forbidden)
+    monkeypatch.setattr(runtime, "_write_new", forbidden)
+    before = tree_bytes(case.root)
+    with pytest.raises(AiflowError, match=expected):
+        runtime.prepare_node_materials(case.root, "TASK-0001", payload_root=payload)
+    assert tree_bytes(case.root) == before and attempts == []
+
+
+def test_node_prepare_checks_istanbul_bytes(node_execution_regression, monkeypatch):
+    """Matching locked versions do not authorize a replaced coverage producer."""
+    from node_helpers import tree_bytes
+
+    case = node_execution_regression
+    runtime, payload, _prepared, _manifests = case.materials
+    dependencies = payload / "dependencies/node_modules"
+    packages = {}
+    versions = {"vitest": runtime.VERSIONS["vitest"], "vite": runtime.VERSIONS["vite"]}
+    versions.update(runtime.ISTANBUL_PACKAGES)
+    for name, version in versions.items():
+        directory = dependencies / name
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / "package.json").write_bytes(
+            runtime._canonical({"name": name, "version": version})
+        )
+        packages["node_modules/" + name] = {
+            "version": version,
+            "resolved": "https://registry.npmjs.org/public-fixture/-/fixture.tgz",
+            "integrity": "sha512-public-fixture",
+        }
+    producer = dependencies / next(iter(runtime.ISTANBUL_FILES))
+    producer.parent.mkdir(parents=True, exist_ok=True)
+    producer.write_bytes(b"unreviewed replacement despite the expected package version\n")
+    binding, bundle = runtime._binding(case.root, "TASK-0001")
+    monkeypatch.setattr(runtime, "_binding", lambda *_args: (binding, bundle))
+    monkeypatch.setattr(
+        runtime, "_source_contract", lambda *_args, **_kwargs: ({}, {"packages": packages})
+    )
+    attempts = []
+
+    def forbidden(*_args, **_kwargs):
+        attempts.append(True)
+        raise AssertionError("Replaced producer must reject before preflight/publication")
+
+    monkeypatch.setattr(runtime, "_process", forbidden)
+    monkeypatch.setattr(runtime, "_write_new", forbidden)
+    before = tree_bytes(case.root)
+    with pytest.raises(AiflowError, match="coverage producer bytes differ"):
+        runtime.prepare_node_materials(case.root, "TASK-0001", payload_root=payload)
+    assert tree_bytes(case.root) == before and attempts == []
+
+
+@pytest.mark.parametrize("fault", ["subject_tree", "retained_member"])
+def test_node_replay_rejects_role_confusion(node_execution_regression, monkeypatch, fault):
+    from node_helpers import tree_bytes
+
+    case = node_execution_regression
+    runtime = case.runtime
+    evidence, directory = case.execute("late_materials", "V0")
+    assert evidence["conclusion"] == "failed"
+    if fault == "subject_tree":
+        evidence["node_binding"]["subject_tree"] = "0" * 40
+        evidence["node_binding_sha256"] = runtime._sha(runtime._canonical(evidence["node_binding"]))
+        message = "Node revision2 public profile/tree binding differs"
+    else:
+        (directory / "cache/unbound-original.txt").write_bytes(b"retained but never sealed\n")
+        message = "The complete Node output content or membership changed"
+    errors = []
+    error = runtime._error
+
+    def inspect_error(*args, **kwargs):
+        result = error(*args, **kwargs)
+        errors.append(result.message)
+        return result
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("Read-only consumer must not execute or publish originals")
+
+    monkeypatch.setattr(runtime, "_error", inspect_error)
+    monkeypatch.setattr(runtime, "_process", forbidden)
+    monkeypatch.setattr(runtime, "_write_new", forbidden)
+    before = tree_bytes(case.root)
+    result = runtime.recheck_node_evidence(case.root, "TASK-0001", evidence)
+    assert not result.current and not result.passed
+    assert message in errors
+    assert tree_bytes(case.root) == before

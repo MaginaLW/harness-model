@@ -14,6 +14,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from test_installed_mutation_transactions import (
+    model as _governed_model,
+)
 from test_node_v0_contract import (
     code_marker_values as legacy_code_marker_values,  # noqa: F401 -- Shared pytest fixture.
 )
@@ -23,6 +26,8 @@ from aiflow.errors import AiflowError
 from aiflow.evidence import validate_v2_snapshot, verification_snapshot_sha256
 from aiflow.installed_mutations import InstalledMutationFacts
 from aiflow.node_execution import NodeEvidenceFacts
+
+consumer_model = _governed_model
 
 PRODUCT_CASES = {
     "acceptance": [
@@ -1287,3 +1292,239 @@ def test_actual_code_approval_entry_cannot_bypass_derived_installed_survival(
         )
     assert caught.value.code == "CODE_EVIDENCE_STALE"
     assert snapshot_tree(inputs.root) == before
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "missing-result",
+        "extra-result",
+        "foreign-result",
+        "unknown-outcome",
+        "non-pair-result",
+        "phase",
+        "verifier-command",
+        "unobserved-total",
+    ],
+)
+def test_public_node_v2_rejects_internally_rehashed_lifecycle_claims(public_node_v2, fault):
+    """Self-hashing cannot replace the fixed run, phase or derived check contract."""
+    from aiflow.evidence import validate_node_evidence
+
+    evidence = public_node_v2
+    results = evidence["installed_mutation"]["results"]
+    if fault == "missing-result":
+        results.pop()
+    elif fault == "extra-result":
+        results.append(["MUT-V2-006", "killed"])
+    elif fault == "foreign-result":
+        results[0][0] = "MUT-V2-999"
+    elif fault == "unknown-outcome":
+        results[0][1] = "ignored"
+    elif fault == "non-pair-result":
+        results[0] = {"id": "MUT-V2-001", "outcome": "killed"}
+    elif fault == "phase":
+        evidence["phase"] = "provisional"
+    elif fault == "verifier-command":
+        evidence["verifier_actor"] = "another-independent-verifier"
+    else:
+        evidence["node_binding"]["coverage"] = None
+        next(row for row in evidence["checks"] if row["check_id"] == "ts_coverage")["status"] = (
+            "failed"
+        )
+        evidence["conclusion"] = "failed"
+    evidence["node_binding_sha256"] = _digest(evidence["node_binding"])
+    evidence["verification_snapshot_sha256"] = verification_snapshot_sha256(evidence)
+    with pytest.raises(AiflowError) as caught:
+        validate_node_evidence(evidence)
+    assert caught.value.code == "NODE_EVIDENCE_INVALID"
+
+
+@pytest.mark.parametrize("claim_product_passed", [False, True])
+def test_public_node_v2_missing_product_report_is_a_failure_not_product_acceptance(
+    public_node_v2,
+    claim_product_passed,
+):
+    from aiflow.evidence import validate_node_evidence
+
+    evidence = public_node_v2
+    evidence["node_binding"]["product_tests"] = None
+    if not claim_product_passed:
+        for row in evidence["checks"]:
+            if row["check_id"] in {"acceptance", "integration"}:
+                row["status"] = "failed"
+        evidence["conclusion"] = "failed"
+    evidence["node_binding_sha256"] = _digest(evidence["node_binding"])
+    evidence["verification_snapshot_sha256"] = verification_snapshot_sha256(evidence)
+    if claim_product_passed:
+        with pytest.raises(AiflowError) as caught:
+            validate_node_evidence(evidence)
+        assert caught.value.code == "NODE_EVIDENCE_INVALID"
+    else:
+        # This is a truthful failed structural document, never runtime proof.
+        validate_node_evidence(evidence)
+        with pytest.raises(AiflowError) as caught:
+            validate_node_evidence(evidence, require_passed=True)
+        assert caught.value.code == "NODE_EVIDENCE_NOT_PASSED"
+
+
+@pytest.mark.parametrize("value", [None, [], "not-an-evidence-object"])
+def test_public_node_evidence_reader_rejects_nonobjects(value):
+    from aiflow.evidence import validate_node_evidence
+
+    with pytest.raises(AiflowError) as caught:
+        validate_node_evidence(value)
+    assert caught.value.code == "NODE_EVIDENCE_INVALID"
+
+
+@pytest.mark.parametrize("consumer_model", ["node-v2"], indirect=True)
+class TestNodeV2GovernedConsumerFailures:
+    @pytest.fixture
+    def tmp_path(self, tmp_path_factory):
+        """Only these new real-ledger cases use a short path at the same pytest base."""
+        return tmp_path_factory.mktemp("c")
+
+    @pytest.mark.parametrize(
+        "fault", ["missing-selector", "invalid-finalize-actor", "already-verifying", "new-subject"]
+    )
+    def test_public_verify_rejects_incomplete_or_wrong_cycle_before_execution(
+        self,
+        consumer_model,
+        monkeypatch,
+        fault,
+    ):
+        from initialization_helpers import fixture_git, snapshot_tree
+        from test_installed_mutation_transactions import ACTOR, TASK
+
+        import aiflow.node_execution as execution
+        import aiflow.verification_service as service
+        from aiflow.task_service import transition_task_record
+
+        root = consumer_model.root
+        if fault == "already-verifying":
+            transition_task_record(
+                root,
+                TASK,
+                target_state="VERIFYING",
+                event_type="verification_started",
+                actor=ACTOR,
+                payload={},
+                satisfied_preconditions={"implementation_complete"},
+            )
+        elif fault == "new-subject":
+            (root / "fixture.py").write_text("value = 2\n", encoding="utf8")
+            fixture_git(root, "add", "fixture.py")
+            fixture_git(root, "commit", "-m", "Synthetic unverified implementation")
+        if fault in {"already-verifying", "new-subject"}:
+            # Hold only host-material discovery constant. The actual state,
+            # actor, classification and read-only Git guards remain active.
+            monkeypatch.setattr(execution, "precheck_node_materials", lambda *_: None)
+        attempts = []
+
+        def forbidden(*args, **kwargs):
+            attempts.append((args, kwargs))
+            raise AssertionError("Invalid verification reached recovery, claim or execution")
+
+        for owner, name in (
+            (service, "load_task_record"),
+            (service, "_start_local_verification"),
+            (service, "save_evidence"),
+            (execution, "claim_node_v2_run"),
+            (execution, "execute_node_verification"),
+        ):
+            monkeypatch.setattr(owner, name, forbidden)
+        before = snapshot_tree(root)
+        if fault == "invalid-finalize-actor":
+            options = {"actor": "verifier/foreign-label", "finalize": True}
+            expected = "VERIFY_ACTOR_REQUIRED"
+        else:
+            options = {"actor": ACTOR, "node_materials_sha256": "a" * 64}
+            expected = "NODE_MUTATIONS_INVALID"
+            if fault in {"already-verifying", "new-subject"}:
+                options["node_installed_mutation_run"] = "IMUT-0000000000000000"
+                expected = (
+                    "VERIFY_STATE_INVALID" if fault == "already-verifying" else "VERIFY_GIT_STALE"
+                )
+        with pytest.raises(AiflowError) as caught:
+            service.verify_task(root, TASK, **options)
+        assert caught.value.code == expected
+        assert attempts == []
+        after = snapshot_tree(root)
+        if fault == "new-subject":
+            # The existing original-root contract permits a byte-identical
+            # index refresh by Git. Only that exact administration file may
+            # change inode/mtime; task files, refs and every other identity stay bound.
+            old_index, new_index = before[".git/index"], after[".git/index"]
+            assert old_index[:2] == new_index[:2]
+            assert old_index[4] == new_index[4]
+            assert {key: row for key, row in after.items() if key != ".git/index"} == {
+                key: row for key, row in before.items() if key != ".git/index"
+            }
+        else:
+            assert after == before
+
+    def test_pending_code_approval_rechecks_missing_node_originals_before_recovery_writes(
+        self,
+        consumer_model,
+        monkeypatch,
+    ):
+        from initialization_helpers import snapshot_tree
+        from test_installed_mutation_transactions import (
+            TASK,
+            action_file,
+            retained_logical_run,
+            stage_node_v2_code_marker,
+        )
+
+        import aiflow.approval as approval
+        import aiflow.node_execution as execution
+
+        action_file(consumer_model)
+        run = retained_logical_run(consumer_model)
+        original_factory = public_node_evidence
+
+        def bound_evidence(root):
+            value = original_factory(root)
+            value["node_binding"]["subject_tree"] = consumer_model.inputs.subject_tree
+            value["node_binding_sha256"] = _digest(value["node_binding"])
+            value["verification_snapshot_sha256"] = verification_snapshot_sha256(value)
+            return value
+
+        monkeypatch.setattr(sys.modules[__name__], "public_node_evidence", bound_evidence)
+        stage_node_v2_code_marker(run, "pending")
+        actual_recheck, observations, writes = execution.recheck_node_evidence, [], []
+        actual_prepared, prepared_reads = execution._load_prepared, []
+
+        def prepared(*args, **kwargs):
+            prepared_reads.append((args, kwargs))
+            return actual_prepared(*args, **kwargs)
+
+        def recheck(*args, **kwargs):
+            observed = actual_recheck(*args, **kwargs)
+            observations.append(observed)
+            return observed
+
+        def forbidden(*args, **kwargs):
+            writes.append((args, kwargs))
+            raise AssertionError("Missing Node originals reached approval recovery writes")
+
+        monkeypatch.setattr(execution, "recheck_node_evidence", recheck)
+        monkeypatch.setattr(execution, "_load_prepared", prepared)
+        for name in ("atomic_write_json", "_persist_event_and_task", "_remove_marker"):
+            monkeypatch.setattr(approval, name, forbidden)
+        before = snapshot_tree(consumer_model.root)
+        with pytest.raises(AiflowError) as caught:
+            approval.approve_task(
+                consumer_model.root,
+                TASK,
+                approval_type="code",
+                actor="project-owner",
+                reason="Missing original rejection",
+            )
+        assert caught.value.code == "CODE_EVIDENCE_STALE"
+        assert len(observations) == 1
+        assert not observations[0].current and not observations[0].passed
+        assert observations[0].reason_codes == ("NODE_MATERIALS_INVALID",)
+        assert len(prepared_reads) == 1 and prepared_reads[0][0][2] == "d" * 64
+        assert writes == []
+        assert snapshot_tree(consumer_model.root) == before
