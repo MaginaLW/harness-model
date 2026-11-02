@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import base64
 import json
+import os
 import shutil
+import subprocess
 import sys
 import tempfile
+from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
@@ -33,6 +37,25 @@ from aiflow.redaction import redact_text
 ROOT = Path(__file__).resolve().parents[2]
 
 
+@contextmanager
+def forbid_producing_paths(monkeypatch: pytest.MonkeyPatch, producing_root: Path):
+    """Historical coordinates permit lexical operations, never filesystem access."""
+    attempts = []
+    with monkeypatch.context() as patch:
+        for name in ("resolve", "stat", "lstat", "open"):
+            original = getattr(Path, name)
+
+            def observe(path, *args, _original=original, _name=name, **kwargs):
+                if Path(path).is_relative_to(producing_root):
+                    attempts.append(_name)
+                    raise AssertionError("replay inspected a historical producing path")
+                return _original(path, *args, **kwargs)
+
+            patch.setattr(Path, name, observe)
+        yield
+    assert not attempts
+
+
 def synthetic_materials(root: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
     """Real source pins around non-executable fixture interpreter/host roles."""
     prefix, base, system = root / "e", root / "b", root / "w"
@@ -49,7 +72,62 @@ def synthetic_materials(root: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
     for path in (prefix / "Scripts/python.exe", base / "python.exe", base / "python311.dll"):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"synthetic role only: never executed\n")
-    closure = node._inventory(prefix)
+    (prefix / "Scripts/aiflow.exe").write_bytes(b"synthetic distribution entrypoint\n")
+    configuration = prefix / "pyvenv.cfg"
+    configuration.write_bytes(b"include-system-site-packages = false\n")
+    metadata = site.parent / "aiflow-0.2.0.dist-info"
+    (metadata / "licenses").mkdir(parents=True)
+    (metadata / "METADATA").write_bytes(b"Metadata-Version: 2.1\nName: aiflow\nVersion: 0.2.0\n")
+    (metadata / "licenses/LICENSE").write_bytes(b"Public synthetic unimported license fixture.\n")
+    distribution_files = sorted(
+        path
+        for path in prefix.rglob("*")
+        if path.is_file() and path not in {prefix / "Scripts/python.exe", configuration}
+    )
+    record = []
+    for path in distribution_files:
+        data = path.read_bytes()
+        relative = (
+            path.relative_to(site.parent).as_posix()
+            if path.is_relative_to(site.parent)
+            else "../../" + path.relative_to(prefix).as_posix()
+        )
+        digest = base64.urlsafe_b64encode(bytes.fromhex(node._sha(data))).decode().rstrip("=")
+        record.append(f"{relative},sha256={digest},{len(data)}")
+    (metadata / "RECORD").write_text(
+        "\n".join([*record, "aiflow-0.2.0.dist-info/RECORD,,"]) + "\n", encoding="utf8"
+    )
+    distribution_files.append(metadata / "RECORD")
+    distribution_rows = [installed._file(path) for path in distribution_files]
+    script_row = next(row for row in distribution_rows if Path(row["path"]).name == "aiflow.exe")
+    # importlib.metadata preserves this ordinary RECORD spelling. Keep it in
+    # original installed metadata while the real local closure is canonical.
+    script_row["path"] = str(site.parent / "../../Scripts/aiflow.exe")
+    engine = {
+        "python": str(prefix / "Scripts/python.exe"),
+        "distributions": [
+            {
+                "name": "aiflow",
+                "version": "0.2.0",
+                "files": distribution_rows,
+            }
+        ],
+        "startup": {
+            "files": [],
+            "setuptools": False,
+            "pyvenv_configuration": installed._file(configuration),
+            "python_environment": {
+                "prefix": str(prefix),
+                "site_roots": [str(site.parent)],
+                "active_site_roots": [str(site.parent)],
+                "enable_user_site": False,
+            },
+            "site_roots": [
+                {"path": str(site.parent), "identity": node._identity(site.parent.stat())}
+            ],
+        },
+    }
+    closure = installed._closure(engine, prefix)
     probes = installed._probe_contract()
     probes["source"] = installed._file(site / "installed_probe.py")
     tools = {}
@@ -60,7 +138,7 @@ def synthetic_materials(root: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
     return {
         "kind": installed.ACTION_TYPE,
         "version": 1,
-        "engine": {"installed": {}, "closure": closure},
+        "engine": {"installed": engine, "closure": closure},
         "interpreter": {
             "executable": installed._file(prefix / "Scripts/python.exe"),
             "base_executable": installed._file(base / "python.exe"),
@@ -354,6 +432,53 @@ def test_engine_and_host_replay_opens_exact_transported_origins(
     assert not engine_root.exists() and not system_root.exists()
 
 
+@pytest.mark.parametrize("escape", [False, True])
+def test_node_engine_replay_uses_lexical_ordinary_record_script_coordinates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, escape: bool
+) -> None:
+    producing = tmp_path / "absent-engine"
+    script = tmp_path / "originals/engine/Scripts/aiflow.exe"
+    script.parent.mkdir(parents=True)
+    script.write_bytes(b"public synthetic distribution entrypoint\n")
+    cmd = tmp_path / "originals/host/cmd"
+    cmd.parent.mkdir(parents=True)
+    cmd.write_bytes(b"public host role\n")
+    raw = str(
+        producing
+        / "Lib/site-packages"
+        / ("../../../Scripts/aiflow.exe" if escape else "../../Scripts/aiflow.exe")
+    )
+    row = {"path": raw, "size": script.stat().st_size, "sha256": node._sha(script.read_bytes())}
+    windows = tmp_path / "absent-windows"
+    manifests = {
+        "engine.json": {
+            "distributions": [{"files": [row]}],
+            "startup": {"files": [], "pyvenv_configuration": None},
+        },
+        "host-tools.json": {
+            "cmd": {
+                "path": str(windows / "System32/cmd.exe"),
+                "size": cmd.stat().st_size,
+                "sha256": node._sha(cmd.read_bytes()),
+            }
+        },
+    }
+    with forbid_producing_paths(monkeypatch, producing), pure_guard(monkeypatch):
+        if escape:
+            with pytest.raises(AiflowError):
+                node._ci_engine_host_originals(
+                    tmp_path, manifests, {"engine": {"root": str(producing)}}
+                )
+        else:
+            assert (
+                node._ci_engine_host_originals(
+                    tmp_path, manifests, {"engine": {"root": str(producing)}}
+                )
+                == windows
+            )
+    assert row["path"] == raw
+
+
 def test_node_projection_excludes_only_own_run_but_transport_manifest_seals_it(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -539,7 +664,11 @@ def kernel_parser_pairs(materials: dict, attempt: Path) -> dict:
         for suffix, key in (("b", "baseline"), ("m", "mutant")):
             phase = attempt / f"pair-{index}-{suffix}"
             phase.mkdir()
-            shutil.copytree(Path(materials["engine"]["closure"]["root"]), phase / "i")
+            node._copy_tree(
+                Path(materials["engine"]["closure"]["root"]),
+                phase / "i",
+                materials["engine"]["closure"],
+            )
             relative = "Lib/site-packages/aiflow/" + installed._TARGETS[probe_id][0]
             before = (phase / "i" / relative).read_bytes()
             if suffix == "m":
@@ -583,11 +712,16 @@ def ci_kernel_case(
     are replaced. Source/dependency parsers, Git, fresh snapshots, receipts,
     catalog/product arithmetic and native ownership/seals remain production code.
     """
-    level, native = getattr(request, "param", ("V0", False))
+    parameters = getattr(request, "param", ("V0", False))
+    level, native = parameters[:2]
+    branch = parameters[2] if len(parameters) > 2 else None
     workspace = tmp_path
     source_root = workspace / "source"
     seed, base, subject = ci_source_seeds[native]
     shutil.copytree(seed, source_root)
+    if branch is not None:
+        assert fixture_git(source_root, "check-ref-format", "--branch", branch) == branch
+        fixture_git(source_root, "branch", "-m", branch)
     attempt = workspace / ".tmp/node-ci/1-1"
     (attempt / "control").mkdir(parents=True)
     payload = workspace / "payload"
@@ -630,33 +764,59 @@ def ci_kernel_case(
             {name: node._sha(data) for name, data in _NATIVE_OWNERSHIP_UNIT_BYTES.items()},
         )
     material = synthetic_materials(attempt, monkeypatch)
-    engine = {
-        "distributions": [
-            {
-                "files": [
-                    installed._file(path)
-                    for path in sorted((attempt / "e/Lib/site-packages/aiflow").iterdir())
-                ]
-            }
-        ],
-        "startup": {"files": []},
-    }
-    material["engine"]["installed"] = engine
+    engine = material["engine"]["installed"]
     host = material["host_tools"]
     host["python"] = installed._file(attempt / "b/python.exe")
     host["git"] = {**host["python"], "path": str(attempt / "g/cmd/git.exe")}
-    state = {"calls": [], "fault": None, "events": []}
-    monkeypatch.setattr(
-        node,
-        "_engine",
-        lambda **kwargs: (
+    state = {"calls": [], "fault": None, "events": [], "setup_members": {}}
+
+    def discover_engine(*, budget=None):
+        current = (
             engine
             if state["fault"] != "engine"
             or not any(call.startswith("EXEC-") for call in state["calls"])
             else {"distributions": [], "startup": {"files": []}}
-        ),
-    )
-    monkeypatch.setattr(node, "_host_tools", lambda **kwargs: host)
+        )
+        if budget is not None:
+            startup = current["startup"]
+            configuration = startup.get("pyvenv_configuration")
+            if configuration is not None:
+                node._take_budget(budget, configuration["size"])
+            for _root in startup.get("site_roots", []):
+                node._take_budget(budget)
+            startup_paths = {row["path"] for row in startup["files"]}
+            for row in startup["files"]:
+                node._take_budget(budget, row["size"])
+            site = Path(material["interpreter"]["site"])
+            for distribution in current["distributions"]:
+                roots = set()
+                for row in distribution["files"]:
+                    if row["path"] not in startup_paths:
+                        node._take_budget(budget, row["size"])
+                    path = Path(row["path"])
+                    if path.is_relative_to(site):
+                        first = path.relative_to(site).parts[0]
+                        anchor = site / first
+                        if first not in {".", ".."} and anchor.is_dir():
+                            roots.add(anchor)
+                for root in roots:
+                    inventory = node._inventory(root)
+                    node._take_budget(budget)
+                    for row in inventory["entries"]:
+                        if row["kind"] == "directory":
+                            node._take_budget(budget)
+        return current
+
+    def discover_host(*, budget=None):
+        if budget is not None:
+            # Host accounting owns exact paths, not cross-domain inode aliases.
+            paths = {row["path"]: row for row in host.values() if row is not None}
+            for row in paths.values():
+                node._take_budget(budget, row["size"])
+        return host
+
+    monkeypatch.setattr(node, "_engine", discover_engine)
+    monkeypatch.setattr(node, "_host_tools", discover_host)
     monkeypatch.setattr(installed, "_materials", lambda: node._canonical(material))
     monkeypatch.setenv("GITHUB_WORKSPACE", str(workspace))
     for name in ("TEMP", "TMP", "TMPDIR"):
@@ -675,6 +835,9 @@ def ci_kernel_case(
     )
     attested["attestation_head"] = subject
     admission["platform"].update(run_id=1, run_attempt=1, head_sha=subject)
+    if branch is not None:
+        attested["binding"]["branch"] = branch
+        admission["platform"]["workflow_ref"] = "refs/heads/" + branch
     contract = {"kind": "synthetic-unregistered-kernel-contract", "verification_level": level}
     descriptor.update(
         source_tuple_sha256=node._sha(node._canonical(attested)),
@@ -732,8 +895,10 @@ def ci_kernel_case(
             if name == "node" and state["fault"] == "version":
                 stdout = b"v0.0.0\n"
         elif name == "setup-clone":
-            fixture_git(
+            state["preclone_members"] = physical_members(attempt / "node")
+            git_setup(
                 source_root,
+                environment,
                 "clone",
                 "--no-hardlinks",
                 "--no-checkout",
@@ -743,7 +908,9 @@ def ci_kernel_case(
                 str(attempt / "node/checkout"),
             )
         elif name == "setup-checkout":
-            fixture_git(cwd, "-c", "core.autocrlf=false", "checkout", "--detach", subject)
+            git_setup(
+                cwd, environment, "-c", "core.autocrlf=false", "checkout", "--detach", subject
+            )
         elif name == "EXEC-004":
             for relative in node._dist_paths(cwd, source_manifest):
                 path = cwd / relative
@@ -801,7 +968,39 @@ def ci_kernel_case(
                 value["executableHash"] = node._sha(path.read_bytes())
                 sidecar.write_bytes(json.dumps(value, separators=(",", ":")).encode() + b"\n")
         (output / "receipt.json").write_bytes(node._canonical(receipt))
+        if name in {"setup-clone", "setup-checkout"}:
+            state["setup_members"][name] = physical_members(attempt / "node")
         return receipt
+
+    def physical_members(root: Path) -> dict[str, int]:
+        # Independent observations must not themselves enforce the production
+        # cap; otherwise a post-write overflow could falsely look preempted.
+        result = {}
+        for directory, dirs, files in os.walk(root, followlinks=False):
+            here = Path(directory)
+            for name in dirs:
+                result[(here / name).relative_to(root).as_posix()] = 0
+            for name in files:
+                path = here / name
+                result[path.relative_to(root).as_posix()] = path.stat().st_size
+        return result
+
+    def git_setup(cwd: Path, environment: dict, *arguments: str) -> None:
+        # The actual Git copy/checkout remains real. Honor the CI-only fixed
+        # committer in its actual reflogs as well as the synthetic receipt.
+        selected = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+        selected.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
+        for name in ("GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL"):
+            if name in environment:
+                selected[name] = environment[name]
+        subprocess.run(
+            ["git", "-c", "core.fsmonitor=false", *arguments],
+            cwd=cwd,
+            env=selected,
+            capture_output=True,
+            check=True,
+            timeout=30,
+        )
 
     monkeypatch.setattr(node, "_process", process)
     case = SimpleNamespace(
@@ -893,6 +1092,60 @@ def test_private_kernels_collect_and_record_the_fixed_synthetic_sequence(
     assert (run["product_tests"] is not None) == (case.level == "V2")
     assert (run["installed_mutation"] is not None) == (case.level == "V2")
     assert (case.attempt / "node/run.json").read_bytes() == node._canonical(run)
+    assert_setup_within_forecast(case, run)
+
+
+def assert_setup_within_forecast(case, run: dict) -> None:
+    allocation = node._ci_clone_allocation(
+        case.source,
+        run["roots"]["original"],
+        run["inputs"]["source"],
+        run["inputs"]["prepared_dependencies"],
+        run["environment"],
+    )
+    expected = dict(case.state["preclone_members"])
+    for name, size in allocation.items():
+        expected[name] = max(expected.get(name, 0), size)
+        for parent in Path(name).parents:
+            if str(parent) != ".":
+                expected.setdefault(parent.as_posix(), 0)
+    for phase, members in case.state["setup_members"].items():
+        assert all(name in expected and size <= expected[name] for name, size in members.items()), (
+            phase,
+            {
+                name: {"actual": size, "reserved": expected.get(name)}
+                for name, size in members.items()
+                if name not in expected or size > expected[name]
+            },
+        )
+    assert run["environment"]["GIT_COMMITTER_NAME"] == "aiflow-ci"
+    assert run["environment"]["GIT_COMMITTER_EMAIL"] == "aiflow-ci@invalid"
+    assert (
+        b"aiflow-ci <aiflow-ci@invalid>"
+        in (case.attempt / "node/checkout/.git/logs/HEAD").read_bytes()
+    )
+
+
+@pytest.mark.parametrize("ci_kernel_case", [("V0", False, "codex/fixture#semi;")], indirect=True)
+def test_clone_forecast_covers_a_valid_attached_branch_with_config_comment_characters(
+    ci_kernel_case,
+) -> None:
+    case = ci_kernel_case
+    branch = "codex/fixture#semi;"
+    assert fixture_git(case.source, "symbolic-ref", "--short", "HEAD") == branch
+    before = node._inventory(case.source)
+    prepared = case.prepare()
+    run = case.execute(prepared)
+    assert run["failure"] is None
+    assert node._inventory(case.source) == before
+    assert case.attested["binding"]["branch"] == branch
+    assert (
+        fixture_git(
+            case.attempt / "node/checkout", "config", "--local", "--get", f"branch.{branch}.merge"
+        )
+        == "refs/heads/" + branch
+    )
+    assert_setup_within_forecast(case, run)
 
 
 @pytest.mark.parametrize(
@@ -935,6 +1188,84 @@ def test_private_execution_rejects_a_self_consistent_native_replacement_after_fi
     assert run["failure"] == "NODE_OUTPUT_INVALID"
     assert case.state["calls"][-1] == "EXEC-006"
     assert "fixtures" not in run["outputs"]
+
+
+def test_node_role_cumulative_budget_is_enforced_before_copy_writes_exceed_it(
+    ci_kernel_case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A small finite cap measures the real .git/checkout/dependency write domain."""
+    case = ci_kernel_case
+    prepared = case.prepare()
+    source_bytes = node._inventory(case.source)["total_bytes"]
+    dependency_bytes = case.initial["dependencies"]["total_bytes"]
+    limit = source_bytes + dependency_bytes - 1
+    assert source_bytes < limit and dependency_bytes < limit
+    assert source_bytes + case.initial["source"]["total_bytes"] + dependency_bytes > limit
+    node_root = case.attempt / "node"
+    over_limit_writes = []
+    armed = []
+    binding, process, copy = node._ci_input_binding, node._process, node._copy_tree
+
+    def size_now() -> int:
+        return sum(
+            (Path(directory) / name).stat().st_size
+            for directory, _dirs, names in os.walk(node_root, followlinks=False)
+            for name in names
+        )
+
+    def bind_then_arm(*args, **kwargs):
+        # Keep the complete admission/input-domain check real at its unchanged
+        # production cap, then apply this finite cap to the following Node role.
+        result = binding(*args, **kwargs)
+        monkeypatch.setattr(node, "MAX_TOTAL_BYTES", limit)
+        armed.append(True)
+        return result
+
+    def observe_process(*args, **kwargs):
+        result = process(*args, **kwargs)
+        if kwargs["output"].name in {"setup-clone", "setup-checkout"}:
+            actual = size_now()
+            if actual > limit:
+                over_limit_writes.append((kwargs["output"].name, actual))
+        return result
+
+    def observe_copy(source, destination, inventory):
+        result = copy(source, destination, inventory)
+        if destination == node_root / "checkout/node_modules":
+            actual = size_now()
+            if actual > limit:
+                over_limit_writes.append(("dependencies", actual))
+        return result
+
+    monkeypatch.setattr(node, "_ci_input_binding", bind_then_arm)
+    monkeypatch.setattr(node, "_process", observe_process)
+    monkeypatch.setattr(node, "_copy_tree", observe_copy)
+    with pytest.raises(AiflowError):
+        case.execute(prepared)
+    assert armed, "the real admitted inputs must be checked before the finite Node cap is armed"
+    assert not over_limit_writes, (
+        f"Node originals were written past their cumulative cap: {over_limit_writes}"
+    )
+
+
+@pytest.mark.parametrize("limit,accepted", [(110, True), (109, False)])
+def test_node_copy_reservation_combines_git_source_and_dependency_bytes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, limit: int, accepted: bool
+) -> None:
+    root = tmp_path / "node"
+    (root / "checkout/.git/objects").mkdir(parents=True)
+    (root / "checkout/.git/objects/synthetic").write_bytes(b"g" * 40)
+    (root / "checkout/source.ts").write_bytes(b"s" * 30)
+    before = node._inventory(root)
+    monkeypatch.setattr(node, "MAX_TOTAL_BYTES", limit)
+    with pure_guard(monkeypatch):
+        if accepted:
+            node._ci_node_copy_budget(root, {"checkout/node_modules/package/index.js": 40})
+        else:
+            with pytest.raises(AiflowError):
+                node._ci_node_copy_budget(root, {"checkout/node_modules/package/index.js": 40})
+    assert node._inventory(root) == before
+    assert not (root / "checkout/node_modules").exists()
 
 
 @pytest.mark.parametrize(

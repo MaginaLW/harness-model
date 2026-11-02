@@ -31,6 +31,7 @@ try:
         _NATIVE_OWNERSHIP_UNIT_BYTES,
         ci_recorded_seeds,  # noqa: F401 -- Immutable real collector/writer protocol results.
         ci_source_seeds,  # noqa: F401 -- Immutable public synthetic Git histories.
+        forbid_producing_paths,
         synthetic_materials,
     )
 finally:
@@ -122,7 +123,10 @@ def test_retained_probe_and_operator_origins_are_bound_to_the_complete_closure(
 ) -> None:
     materials = synthetic_materials(tmp_path, monkeypatch)
     phase = tmp_path / "p"
-    shutil.copytree(Path(materials["engine"]["closure"]["root"]), phase / "i")
+    phase.mkdir()
+    node._copy_tree(
+        Path(materials["engine"]["closure"]["root"]), phase / "i", materials["engine"]["closure"]
+    )
     if variant == "probe_bytes":
         path = phase / "i/Lib/site-packages/aiflow/installed_probe.py"
         path.write_bytes(path.read_bytes() + b"\n# drift\n")
@@ -151,8 +155,8 @@ def make_pair_parser_package(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
         "schema_version": "1.0",
         "descriptor_sha256": "a" * 64,
         "platform": platform,
-        "input_materials_sha256": "b" * 64,
-        "engine_content_sha256": "c" * 64,
+        "input_materials_sha256": node._sha(node._canonical(materials)),
+        "engine_content_sha256": node._sha(node._canonical(materials["engine"]["installed"])),
         "claimed_at": "2026-11-02T00:00:00Z",
     }
     # Load and check the trusted checkout reader before the no-executable-compile
@@ -176,7 +180,11 @@ def make_pair_parser_package(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
             role = f"pair-{index}-{suffix}"
             phase = attempt / role
             phase.mkdir()
-            shutil.copytree(Path(materials["engine"]["closure"]["root"]), phase / "i")
+            node._copy_tree(
+                Path(materials["engine"]["closure"]["root"]),
+                phase / "i",
+                materials["engine"]["closure"],
+            )
             relative = "Lib/site-packages/aiflow/" + installed._TARGETS[probe_id][0]
             original = (phase / "i" / relative).read_bytes()
             if suffix == "m":
@@ -201,6 +209,9 @@ def make_pair_parser_package(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
         pairs.append(pair)
     manifests["node"] = {"id": "node", **node._inventory(attempt / "node")}
     manifests["source"] = {"id": "source", **node._inventory(source_root)}
+    engine_root = Path(materials["engine"]["closure"]["root"])
+    manifests["engine"] = {"id": "engine", **node._inventory(engine_root)}
+    shutil.copytree(engine_root, package / "originals/engine")
     document = {
         "admission_sha256": node._sha(node._canonical(admission)),
         "engine_content_sha256": admission["engine_content_sha256"],
@@ -256,6 +267,8 @@ def transported_reader_guard(package: Path, monkeypatch: pytest.MonkeyPatch):
     with monkeypatch.context() as patch:
         patch.setattr(node, "_read", package_only)
         patch.setattr(installed, "_materials", no_live_materials)
+        patch.setattr(node, "_engine", no_live_materials)
+        patch.setattr(node, "_host_tools", no_live_materials)
         patch.setattr(builtins, "compile", ast_only)
         patch.setattr(builtins, "exec", no_exec)
         with pure_guard(patch):
@@ -303,6 +316,79 @@ def test_old_pair_originals_cannot_be_retagged_to_a_new_platform_attempt(
     assert not facts["passed"], "old transported originals must not become a fresh platform attempt"
     assert facts["results"] == []
     assert facts["reason_codes"] == ["INSTALLED_MUTATION_ATTEMPT_INVALID"]
+
+
+def test_pair_copies_cannot_omit_unloaded_installed_distribution_metadata(
+    pair_parser_package: tuple, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Self-rehashed smaller copies cannot redefine the complete installed closure."""
+    package, admission, materials, pairs, manifests = pair_parser_package
+    assert replay_parser_package(pair_parser_package, monkeypatch)["passed"]
+    relative = "Lib/site-packages/aiflow-0.2.0.dist-info/licenses/LICENSE"
+    declared = [
+        row
+        for distribution in materials["engine"]["installed"]["distributions"]
+        for row in distribution["files"]
+    ]
+    assert any(
+        row["path"] == str(Path(materials["engine"]["closure"]["root"]) / relative)
+        for row in declared
+    )
+    engine_before = deepcopy((materials["engine"]["installed"], manifests["engine"]))
+    license_before = (package / "originals/engine" / relative).read_bytes()
+
+    def omit(inventory: dict, path: str) -> None:
+        row = next(row for row in inventory["entries"] if row["path"] == path)
+        inventory["entries"].remove(row)
+        inventory["total_bytes"] -= row["size"]
+
+    omit(materials["engine"]["closure"], relative)
+    for index, pair in enumerate(pairs["pairs"]):
+        for side, key in (("b", "baseline"), ("m", "mutant")):
+            role = f"pair-{index}-{side}"
+            (package / "originals" / role / "i" / relative).unlink()
+            omit(pair[key]["closure"], relative)
+            omit(manifests[role], "i/" + relative)
+            # Keep the now-empty directory originals; omission must be rejected
+            # because the declared installed file is missing, not an unrelated
+            # directory-membership or stream/loaded-module parser failure.
+            assert (package / "originals" / role / "i" / Path(relative).parent).is_dir()
+    admission["input_materials_sha256"] = node._sha(node._canonical(materials))
+    pairs["admission_sha256"] = node._sha(node._canonical(admission))
+    assert (materials["engine"]["installed"], manifests["engine"]) == engine_before
+    assert (package / "originals/engine" / relative).read_bytes() == license_before
+    facts = replay_parser_package(pair_parser_package, monkeypatch)
+    assert not facts["passed"], "ten smaller copies cannot override the complete installed file set"
+
+
+@pytest.mark.parametrize("escape", [False, True])
+def test_pair_closure_uses_lexical_ordinary_record_script_coordinates(
+    pair_parser_package: tuple, monkeypatch: pytest.MonkeyPatch, escape: bool
+) -> None:
+    package, admission, materials, pairs, _roles = pair_parser_package
+    prefix = Path(materials["interpreter"]["prefix"])
+    files = [
+        row
+        for distribution in materials["engine"]["installed"]["distributions"]
+        for row in distribution["files"]
+    ]
+    script = next(row for row in files if Path(row["path"]).name == "aiflow.exe")
+    raw = str(
+        Path(materials["interpreter"]["site"])
+        / ("../../../Scripts/aiflow.exe" if escape else "../../Scripts/aiflow.exe")
+    )
+    script["path"] = raw
+    admission["input_materials_sha256"] = node._sha(node._canonical(materials))
+    admission["engine_content_sha256"] = node._sha(
+        node._canonical(materials["engine"]["installed"])
+    )
+    pairs["admission_sha256"] = node._sha(node._canonical(admission))
+    pairs["engine_content_sha256"] = admission["engine_content_sha256"]
+    assert (package / "originals/engine/Scripts/aiflow.exe").is_file()
+    with forbid_producing_paths(monkeypatch, prefix):
+        facts = replay_parser_package(pair_parser_package, monkeypatch)
+    assert facts["passed"] is not escape, facts["reason_codes"]
+    assert script["path"] == raw, "normalization must not rewrite the retained engine metadata"
 
 
 @pytest.mark.parametrize(
