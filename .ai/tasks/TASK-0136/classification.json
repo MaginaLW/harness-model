@@ -1,10 +1,10 @@
 {
   "base_commit": "5a802cd1bb60a23d01bc0fa0a7922026176855f6",
   "change_reason": "unchanged",
-  "classification_input_sha256": "ade2a1d6cb249d095de849d0984727f3c28fd5e9f9e10f338bffb4895ada9bee",
+  "classification_input_sha256": "afb3f3b96c41337d41a8a3ccfe8bdbe6ae52ba8d8f6de26fe6c2291817d16d0f",
   "classifications": [
     {
-      "classified_at": "2026-11-02T03:52:34Z",
+      "classified_at": "2026-11-02T05:48:59Z",
       "decision_unit_id": "DU-001",
       "explanation": "Changes that can touch the governance surface require independent review.",
       "explanations": [
@@ -41,12 +41,12 @@
       ]
     }
   ],
-  "classified_at": "2026-11-02T03:52:34Z",
+  "classified_at": "2026-11-02T05:48:59Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V2",
   "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
   "policy_version": "2.6.0",
   "schema_version": "2.0",
-  "subject_commit": "69725c31ad3b4b9d8c2f355a0e0ed2f5f37ffbf2",
+  "subject_commit": "b7d893f70dba6c13c0d6b9693005e69a17db03f4",
   "task_id": "TASK-0136"
 }
