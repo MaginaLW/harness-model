@@ -39,10 +39,12 @@ allowed_scope:
 - src/aiflow/contracts.py
 - src/aiflow/process_runner.py
 - tests/unit/test_process_runner.py
+- .ai/tasks/TASK-0139/**
+- tests/unit/test_facts_recovery.py
 base_commit: 1f748a99b97842b9eca7abf4be454d348bf78759
 branch: codex/agent-bridge-node-ci
 created_at: '2026-11-02T08:27:54Z'
-current_state: IMPLEMENTING
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -104,6 +106,8 @@ decision_units:
   - src/aiflow/contracts.py
   - src/aiflow/process_runner.py
   - tests/unit/test_process_runner.py
+  - .ai/tasks/TASK-0139/**
+  - tests/unit/test_facts_recovery.py
   inputs: []
   permission_requirements:
   - action_approval
@@ -140,6 +144,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-02T09:42:00Z'
 subject_commit: ea2dd82efb501b2c4b3da6d1222e835a25dd81c4
 task_id: TASK-0138
-updated_at: '2026-11-02T13:25:25Z'
+updated_at: '2026-11-02T16:20:32Z'
 worktree_dirty: false
 worktree_dirty_paths: []
