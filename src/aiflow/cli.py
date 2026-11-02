@@ -171,6 +171,8 @@ def build_parser() -> ArgumentParser:
     verify_mode.add_argument("--abandon", action="store_true")
     verify.add_argument("--reason")
     verify.add_argument("--ci", action="store_true")
+    verify.add_argument("--node-ci", action="store_true", help="explicit Node CI3.3 producer")
+    verify.add_argument("--node-ci-payload", type=Path, help="owned provisioned Node CI inputs")
     verify.add_argument("--ci-run-dir", type=Path)
     verify.add_argument("--output", type=Path)
     verify.add_argument("--node-materials", metavar="SHA256", help="bound Node material selector")
@@ -181,6 +183,13 @@ def build_parser() -> ArgumentParser:
     gate.add_argument("task_id")
     gate.add_argument("--evidence", type=Path)
     gate.add_argument("--format", choices=["text", "json"], default="text")
+    node_ci = subparsers.add_parser("node-ci", help="consume authenticated Node CI originals")
+    node_ci_commands = node_ci.add_subparsers(dest="node_ci_command", required=True)
+    node_ci_gate = node_ci_commands.add_parser("gate", help="evaluate on the original local host")
+    node_ci_gate.add_argument("task_id")
+    node_ci_gate.add_argument("--run", required=True, type=int)
+    node_ci_gate.add_argument("--attempt", required=True, type=int)
+    node_ci_gate.add_argument("--download-dir", required=True, type=Path)
     validate = subparsers.add_parser("validate", help="validate governed task artifacts")
     validate.add_argument("task_id")
     scope = subparsers.add_parser("scope", help="validate the final task Git scope")
@@ -563,8 +572,27 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
                 if arguments.installed_mutations is not None
                 else {}
             ),
+            **(
+                {"node_ci": arguments.node_ci, "node_ci_payload": arguments.node_ci_payload}
+                if arguments.node_ci or arguments.node_ci_payload is not None
+                else {}
+            ),
         )
         print(f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}")
+        if arguments.node_ci:
+            return 0 if verify_result.conclusion == "passed" else 2
+    elif arguments.command == "node-ci":
+        from aiflow.node_ci import evaluate_node_ci_gate
+
+        combined = evaluate_node_ci_gate(
+            repository_root,
+            arguments.task_id,
+            run_id=arguments.run,
+            attempt=arguments.attempt,
+            download_dir=arguments.download_dir,
+        )
+        print(json.dumps(combined, ensure_ascii=False, sort_keys=True))
+        return 0 if combined.get("passed") is True else 2
     elif arguments.command == "gate":
         decision = evaluate_gate(
             repository_root, arguments.task_id, evidence_path=arguments.evidence

@@ -37,9 +37,11 @@ from aiflow.decision_units import parse_decision_units
 from aiflow.errors import AiflowError, ContractError
 from aiflow.freshness import current_classification_input_digest
 from aiflow.git_context import collect_git_context
+from aiflow.installed_probe import validate_probe_contract
 from aiflow.mutation_manifest import MutationDeclaration
 from aiflow.node_verification import _ordered_paths, _path
 from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
+from aiflow.redaction import redact_text
 from aiflow.specification import specification_digest
 from aiflow.state import replay_events
 from aiflow.storage import read_task_json, resolve_task_path
@@ -173,7 +175,8 @@ def _input_document(inputs: InstalledMutationInputs) -> dict[str, Any]:
     return value
 
 
-def _transformed(mutation_id: str, original: bytes) -> bytes:
+def _transformed_source(mutation_id: str, original: bytes) -> bytes:
+    """Derive the fixed source overlay without compiling transported source."""
     if mutation_id not in _TARGETS:
         raise _error("Unknown installed mutation", "INSTALLED_MUTATION_UNKNOWN")
     filename, symbol, operator = _TARGETS[mutation_id]
@@ -293,13 +296,22 @@ def _transformed(mutation_id: str, original: bytes) -> bytes:
             )
         if not changed or operators._outside_target_dump(tree, symbol) != outside:
             raise ValueError("unknown operator shape")
-        result = (ast.unparse(ast.fix_missing_locations(tree)) + "\n").encode("utf8")
-        compile(result, filename, "exec")
-        return result
+        return (ast.unparse(ast.fix_missing_locations(tree)) + "\n").encode("utf8")
     except (ValueError, TypeError, SyntaxError, UnicodeError, RecursionError) as error:
         raise _error(
             "Installed mutation operator precondition failed", "INSTALLED_MUTATION_OPERATOR_INVALID"
         ) from error
+
+
+def _transformed(mutation_id: str, original: bytes) -> bytes:
+    result = _transformed_source(mutation_id, original)
+    try:
+        compile(result, _TARGETS[mutation_id][0], "exec")
+    except (ValueError, TypeError, SyntaxError, UnicodeError, RecursionError) as error:
+        raise _error(
+            "Installed mutation operator precondition failed", "INSTALLED_MUTATION_OPERATOR_INVALID"
+        ) from error
+    return result
 
 
 def _mutate(mutation_id: str, path: Path) -> None:
@@ -853,7 +865,11 @@ raise SystemExit(0 if ok else 1)
 
 
 def _environment(phase: Path, interpreter: Mapping[str, Any]) -> dict[str, str]:
-    system = node._windows_root()
+    return _phase_environment(phase, interpreter, node._windows_root())
+
+
+def _phase_environment(phase: Path, interpreter: Mapping[str, Any], system: Path) -> dict[str, str]:
+    """The fixed environment, also checked as producing-coordinate data."""
     return {
         "SystemRoot": str(system),
         "COMSPEC": str(system / "System32/cmd.exe"),
@@ -910,7 +926,13 @@ def _current_materials(inputs: InstalledMutationInputs) -> dict[str, Any]:
 
 
 def _receipt(
-    phase: Path, stage: Mapping[str, Any], probe_id: str, materials: Mapping[str, Any]
+    phase: Path,
+    stage: Mapping[str, Any],
+    probe_id: str,
+    materials: Mapping[str, Any],
+    *,
+    producing_phase: Path | None = None,
+    environment: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
     receipt = node._json(phase / "raw/receipt.json")
     keys = {
@@ -990,16 +1012,17 @@ def _receipt(
         raise _error(
             "Installed process Job ownership is incomplete", "INSTALLED_MUTATION_PROCESS_INVALID"
         )
+    coordinates = phase if producing_phase is None else producing_phase
+    expected_environment = (
+        _environment(phase, materials["interpreter"]) if environment is None else environment
+    )
     if (
-        receipt["argv"] != list(_argv(phase, probe_id, materials))
-        or receipt["cwd"] != str(phase)
+        receipt["argv"] != list(_argv(coordinates, probe_id, materials))
+        or receipt["cwd"] != str(coordinates)
         or receipt["timeout_seconds"] != _TIMEOUT
-        or receipt["environment_sha256"]
-        != node._sha(node._canonical(_environment(phase, materials["interpreter"])))
+        or receipt["environment_sha256"] != node._sha(node._canonical(expected_environment))
     ):
         raise _error("Installed process roles differ from the fixed plan")
-    from aiflow.redaction import redact_text
-
     for stream in ("stdout", "stderr"):
         data = node._read(phase / "raw" / f"{stream}.raw", limit=1024 * 1024)
         if (
@@ -1015,16 +1038,39 @@ def _receipt(
 
 
 def _envelope(
-    phase: Path, stage: Mapping[str, Any], probe_id: str, materials: Mapping[str, Any]
+    phase: Path,
+    stage: Mapping[str, Any],
+    probe_id: str,
+    materials: Mapping[str, Any],
+    *,
+    producing_phase: Path | None = None,
+    retained_inventory: Mapping[str, Any] | None = None,
+    environment: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
     _closed(stage, {"closure", "cache", "receipt"})
-    closure = node._inventory(phase / "i")
+    coordinates = phase if producing_phase is None else producing_phase
+    closure = (
+        node._inventory(phase / "i")
+        if retained_inventory is None
+        else _ci_subinventory(retained_inventory, "i")
+    )
     if node._canonical(closure) != node._canonical(stage["closure"]):
         raise _error("Executed installed copy changed")
-    cache = node._inventory(phase / "c")
+    cache = (
+        node._inventory(phase / "c")
+        if retained_inventory is None
+        else _ci_subinventory(retained_inventory, "c")
+    )
     if cache["entries"] or node._canonical(cache) != node._canonical(stage["cache"]):
         raise _error("Installed probe bytecode cache was not isolated")
-    receipt = _receipt(phase, stage, probe_id, materials)
+    receipt = _receipt(
+        phase,
+        stage,
+        probe_id,
+        materials,
+        producing_phase=producing_phase,
+        environment=environment,
+    )
     data = node._read(phase / "raw/stdout.raw", limit=1024 * 1024)
     report = node._json_bytes(data)
     _closed(report, {"kind", "probe", "loaded", "interpreter"})
@@ -1047,7 +1093,7 @@ def _envelope(
         "optimize": 0,
         "dont_write_bytecode": True,
         "debug": True,
-        "cache_prefix": str(phase / "c"),
+        "cache_prefix": str(coordinates / "c"),
     }
     if node._canonical(report["interpreter"]) != node._canonical(expected):
         raise _error("Installed probe ran with the wrong interpreter or cache")
@@ -1154,7 +1200,8 @@ def _envelope(
     allowed_directories = {
         "i/" + item["path"] for item in closure["entries"] if item["kind"] == "directory"
     } | {"i", "c", "h", "t", "raw"}
-    for item in node._inventory(phase)["entries"]:
+    inventory = node._inventory(phase) if retained_inventory is None else retained_inventory
+    for item in inventory["entries"]:
         if item["path"] not in (allowed_files if item["kind"] == "file" else allowed_directories):
             raise _error("Installed probe created undeclared output")
     return probe
@@ -2118,3 +2165,561 @@ def replay_installed_mutations(
     except (AiflowError, OSError, ValueError, TypeError, KeyError, AttributeError) as error:
         code = error.code if isinstance(error, AiflowError) else "INSTALLED_MUTATION_INVALID"
         return InstalledMutationFacts(False, False, results, (code,))
+
+
+def _ci_inventory(value: object) -> dict[str, Any]:
+    """Validate producing metadata as data, never by opening its absolute root."""
+    inventory = _closed(value, {"root", "identity", "entries", "total_bytes"})
+    _absolute(inventory["root"])
+    identity = _snapshot_identity(inventory["identity"])
+    if (
+        not stat.S_ISDIR(identity["mode"])
+        or identity["attributes"] & 0x400
+        or identity["inode"] <= 0
+    ):
+        raise _error("CI installed inventory root is unsafe")
+    entries = inventory["entries"]
+    if not isinstance(entries, list) or len(entries) > node.MAX_ENTRIES:
+        raise _error("CI installed inventory exceeds its entry limit")
+    paths: list[str] = []
+    kinds: dict[str, str] = {}
+    total = 0
+    for row in entries:
+        if not isinstance(row, dict) or row.get("kind") not in {"directory", "file"}:
+            raise _error("CI installed inventory has an invalid member")
+        file = row["kind"] == "file"
+        _closed(row, {"path", "kind", "identity"} | ({"size", "sha256"} if file else set()))
+        relative = _path(row["path"])
+        current = _snapshot_identity(row["identity"])
+        if (
+            current["attributes"] & 0x400
+            or current["inode"] <= 0
+            or not (stat.S_ISREG(current["mode"]) if file else stat.S_ISDIR(current["mode"]))
+        ):
+            raise _error("CI installed inventory member is unsafe")
+        if file:
+            if (
+                type(row["size"]) is not int
+                or not 0 <= row["size"] <= node.MAX_FILE_BYTES
+                or row["size"] != current["size"]
+                or current["nlink"] != 1
+                or not isinstance(row["sha256"], str)
+                or _SHA.fullmatch(row["sha256"]) is None
+            ):
+                raise _error("CI installed file binding is invalid")
+            total += row["size"]
+        paths.append(relative)
+        kinds[relative] = row["kind"]
+    if (
+        paths != sorted(set(paths), key=lambda name: name.encode("utf8"))
+        or len({name.casefold() for name in paths}) != len(paths)
+        or type(inventory["total_bytes"]) is not int
+        or inventory["total_bytes"] != total
+        or total > node.MAX_TOTAL_BYTES
+    ):
+        raise _error("CI installed inventory is aliased, unordered or over budget")
+    for name in paths:
+        parent = Path(name).parent
+        while str(parent) != ".":
+            if kinds.get(parent.as_posix()) != "directory":
+                raise _error("CI installed inventory omits a directory role")
+            parent = parent.parent
+    return inventory
+
+
+def _ci_subinventory(inventory: Mapping[str, Any], name: str) -> dict[str, Any]:
+    root = next((row for row in inventory["entries"] if row["path"] == name), None)
+    if root is None or root["kind"] != "directory":
+        raise _error("CI installed phase omits a fixed directory role")
+    entries = [
+        {**row, "path": row["path"][len(name) + 1 :]}
+        for row in inventory["entries"]
+        if row["path"].startswith(name + "/")
+    ]
+    return {
+        "root": str(Path(inventory["root"]) / name),
+        "identity": root["identity"],
+        "entries": entries,
+        "total_bytes": sum(row["size"] for row in entries if row["kind"] == "file"),
+    }
+
+
+def _ci_pair_bindings(admission: Mapping[str, Any], materials: Mapping[str, Any]) -> dict[str, str]:
+    # This is trusted installed kernel code, never an imported package member.
+    from aiflow.node_ci import validate_node_ci_document
+
+    validate_node_ci_document(admission, kind="aiflow-node-ci-admission")
+    claim = _closed(
+        admission,
+        {
+            "kind",
+            "schema_version",
+            "descriptor_sha256",
+            "platform",
+            "input_materials_sha256",
+            "engine_content_sha256",
+            "claimed_at",
+        },
+    )
+    if claim["kind"] != "aiflow-node-ci-admission" or claim["schema_version"] != "1.0":
+        raise _error("Installed CI admission is unsupported")
+    for key in ("descriptor_sha256", "input_materials_sha256", "engine_content_sha256"):
+        if not isinstance(claim[key], str) or _SHA.fullmatch(claim[key]) is None:
+            raise _error("Installed CI admission digest is invalid")
+    if not isinstance(claim["platform"], dict) or not claim["platform"]:
+        raise _error("Installed CI admission omits its producing platform")
+    if not isinstance(claim["claimed_at"], str):
+        raise _error("Installed CI admission time is invalid")
+    claimed = datetime.fromisoformat(claim["claimed_at"].replace("Z", "+00:00"))
+    if claimed.utcoffset() is None:
+        raise _error("Installed CI admission time has no timezone")
+    _closed(
+        materials, {"kind", "version", "engine", "interpreter", "host_tools", "probes", "operators"}
+    )
+    if (
+        materials["kind"] != ACTION_TYPE
+        or type(materials["version"]) is not int
+        or materials["version"] != 1
+        or len(node._canonical(materials)) > node.MAX_JSON_BYTES
+    ):
+        raise _error("Installed CI materials have an invalid format")
+    engine = _closed(materials["engine"], {"installed", "closure"})
+    original = _ci_inventory(engine["closure"])
+    interpreter = _closed(
+        materials["interpreter"],
+        {
+            "executable",
+            "base_executable",
+            "runtime",
+            "prefix",
+            "site",
+            "base_prefix",
+            "implementation",
+            "version",
+            "cache_tag",
+        },
+    )
+    prefix = _absolute(interpreter["prefix"])
+    base = _absolute(interpreter["base_prefix"])
+    if (
+        original["root"] != str(prefix)
+        or prefix == base
+        or interpreter["site"] != str(prefix / "Lib/site-packages")
+        or interpreter["implementation"] != "cpython"
+        or not isinstance(interpreter["version"], list)
+        or len(interpreter["version"]) != 3
+        or any(type(number) is not int or number < 0 for number in interpreter["version"])
+        or interpreter["version"][:2] != [3, 11]
+        or interpreter["cache_tag"] != "cpython-311"
+    ):
+        raise _error("Installed CI interpreter coordinates are invalid")
+    for key, path in (
+        ("executable", prefix / "Scripts/python.exe"),
+        ("base_executable", base / "python.exe"),
+        ("runtime", base / "python311.dll"),
+    ):
+        item = _closed(interpreter[key], {"path", "size", "sha256", "identity"})
+        if item["path"] != str(path):
+            raise _error("Installed CI interpreter has the wrong fixed role")
+    operators_document = _closed(
+        materials["operators"], {"declarations", "source", "native_source", "bootstrap_sha256"}
+    )
+    if node._canonical(operators_document["declarations"]) != node._canonical(
+        _TARGETS
+    ) or operators_document["bootstrap_sha256"] != node._sha(_BOOTSTRAP.encode()):
+        raise _error("Installed CI fixed operator contract differs")
+    return {
+        "admission_sha256": node._sha(node._canonical(admission)),
+        "engine_content_sha256": claim["engine_content_sha256"],
+    }
+
+
+def _ci_attempt_coordinates(admission: Mapping[str, Any], workspace: Path) -> Path:
+    """Evaluate the fixed run recipe without opening producing paths."""
+    platform = admission["platform"]
+    return (
+        _absolute(str(workspace))
+        / ".tmp/node-ci"
+        / (f"{platform['run_id']}-{platform['run_attempt']}")
+    )
+
+
+def _ci_live_attempt(attempt: Path, admission: Mapping[str, Any]) -> None:
+    workspace = _absolute(os.environ.get("GITHUB_WORKSPACE"))
+    if attempt != _ci_attempt_coordinates(admission, workspace):
+        raise _error(
+            "Installed CI attempt differs from its actual workflow run",
+            "INSTALLED_MUTATION_ATTEMPT_INVALID",
+        )
+
+
+def _ci_system_root(materials: Mapping[str, Any]) -> Path:
+    """Derive the producing Windows root from fixed host roles without host I/O."""
+    tools = materials["host_tools"]
+    cmd = _closed(tools["cmd"], {"path", "size", "sha256", "identity"})
+    system = _absolute(cmd["path"]).parent.parent
+    for role, relative in node._OS_TOOL_PATHS.items():
+        item = _closed(tools[role], {"path", "size", "sha256", "identity"})
+        expected = system / relative
+        if item["path"] != str(expected):
+            raise _error("Installed CI host tools have inconsistent producing coordinates")
+        config = tools[role + "_config"]
+        if (
+            config is not None
+            and _closed(config, {"path", "size", "sha256", "identity"})["path"]
+            != str(expected) + ".config"
+        ):
+            raise _error("Installed CI host tool configuration has the wrong role")
+    return system
+
+
+def _ci_probe_originals(phase: Path, materials: Mapping[str, Any]) -> None:
+    source = node._read(phase / "i/Lib/site-packages/aiflow/installed_probe.py")
+    validate_probe_contract(materials["probes"], source)
+    files = {row["path"]: row for row in materials["engine"]["closure"]["entries"]}
+    prefix = Path(materials["engine"]["closure"]["root"])
+    for declared, relative in (
+        (materials["probes"]["source"], "Lib/site-packages/aiflow/installed_probe.py"),
+        (materials["operators"]["source"], "Lib/site-packages/aiflow/installed_mutations.py"),
+        (materials["operators"]["native_source"], "Lib/site-packages/aiflow/mutation_runner.py"),
+    ):
+        item = _closed(declared, {"path", "size", "sha256", "identity"})
+        if (
+            item["path"] != str(prefix / relative)
+            or relative not in files
+            or node._canonical({key: item[key] for key in ("size", "sha256", "identity")})
+            != node._canonical(
+                {key: files[relative][key] for key in ("size", "sha256", "identity")}
+            )
+        ):
+            raise _error("Installed CI probe/operator source is outside its bound closure")
+
+
+def _ci_role_inventory(phase: Path, manifest: object, role: str) -> dict[str, Any]:
+    value = _closed(manifest, {"id", "root", "identity", "entries", "total_bytes"})
+    if value["id"] != role:
+        raise _error("Installed CI phase has the wrong manifest role")
+    inventory = _ci_inventory(
+        {key: value[key] for key in ("root", "identity", "entries", "total_bytes")}
+    )
+    members = {row["path"]: row["kind"] for row in inventory["entries"]}
+    if {name: kind for name, kind in members.items() if "/" not in name} != {
+        "i": "directory",
+        "c": "directory",
+        "h": "directory",
+        "t": "directory",
+        "raw": "directory",
+        "report.json": "file",
+    } or {name for name in members if name.startswith("raw/")} != {
+        "raw/receipt.json",
+        "raw/stdout.raw",
+        "raw/stderr.raw",
+        "raw/stdout.log",
+        "raw/stderr.log",
+    }:
+        raise _error("Installed CI phase omits a fixed original or empty directory")
+    if node._canonical(node._content(node._inventory(phase))) != node._canonical(
+        node._content(inventory)
+    ):
+        raise _error("Transported installed CI phase content differs from its original")
+    return inventory
+
+
+def _ci_pair_originals(
+    baseline_path: Path,
+    mutant_path: Path,
+    pair: object,
+    probe_id: str,
+    materials: Mapping[str, Any],
+    baseline_inventory: Mapping[str, Any],
+    mutant_inventory: Mapping[str, Any],
+) -> str:
+    value = _closed(pair, {"id", "overlay", "baseline", "mutant"})
+    if value["id"] != probe_id or value["baseline"] is None or value["mutant"] is None:
+        raise _error("Installed CI mutation pair is incomplete")
+    b = _absolute(baseline_inventory["root"])
+    m = _absolute(mutant_inventory["root"])
+    baseline = value["baseline"]["closure"]
+    mutant = value["mutant"]["closure"]
+    if baseline["root"] != str(b / "i") or mutant["root"] != str(m / "i"):
+        raise _error("Installed CI execution copy has the wrong producing role")
+    original = materials["engine"]["closure"]
+    if node._canonical(node._content(baseline)) != node._canonical(node._content(original)):
+        raise _error("Installed CI baseline differs from the complete installed closure")
+    relative = "Lib/site-packages/aiflow/" + _TARGETS[probe_id][0]
+    source = node._read(baseline_path / "i" / relative)
+    transformed = _transformed_source(probe_id, source)
+    changed = node._read(mutant_path / "i" / relative)
+    expected_overlay = {
+        "path": relative,
+        "before_sha256": node._sha(source),
+        "after_sha256": node._sha(transformed),
+    }
+    if (
+        node._canonical(value["overlay"]) != node._canonical(expected_overlay)
+        or changed != transformed
+    ):
+        raise _error("Installed CI overlay differs from the fixed actual mutation")
+    expected = []
+    for row in node._content(baseline):
+        expected.append(
+            {
+                **row,
+                **(
+                    {"size": len(transformed), "sha256": node._sha(transformed)}
+                    if row["path"] == relative
+                    else {}
+                ),
+            }
+        )
+    if node._canonical(node._content(mutant)) != node._canonical(expected):
+        raise _error("Installed CI mutant contains an undeclared change")
+    _ci_probe_originals(baseline_path, materials)
+    reports = []
+    for path, stage, coordinates, inventory in (
+        (baseline_path, value["baseline"], b, baseline_inventory),
+        (mutant_path, value["mutant"], m, mutant_inventory),
+    ):
+        reports.append(
+            _envelope(
+                path,
+                stage,
+                probe_id,
+                materials,
+                producing_phase=coordinates,
+                retained_inventory=inventory,
+                environment=_phase_environment(
+                    coordinates, materials["interpreter"], _ci_system_root(materials)
+                ),
+            )
+        )
+    if not _baseline_passes(reports[0], probe_id, materials):
+        return "unverified"
+    return _derive_mutant(reports[1], probe_id, m, materials)
+
+
+def _ci_pairs_facts(
+    roots: Mapping[str, Path],
+    admission: Mapping[str, Any],
+    materials: Mapping[str, Any],
+    pairs: Mapping[str, Any],
+    role_manifests: Mapping[str, Any],
+    *,
+    producing_attempt: Path | None = None,
+) -> dict[str, Any]:
+    results: list[list[str]] = []
+    try:
+        binding = _ci_pair_bindings(admission, materials)
+        value = _closed(pairs, {"admission_sha256", "engine_content_sha256", "pairs", "failure"})
+        if any(value[key] != item for key, item in binding.items()):
+            raise _error("Installed CI pairs belong to another admission or engine")
+        failure = value["failure"]
+        if failure is not None and (
+            not isinstance(failure, str) or re.fullmatch(r"[A-Z][A-Z0-9_]{0,95}", failure) is None
+        ):
+            raise _error("Installed CI failure marker is invalid")
+        if not isinstance(value["pairs"], list) or len(value["pairs"]) != len(PROBE_IDS):
+            raise _error("Installed CI proof omits a fixed mutation pair")
+        inventories = {}
+        original = materials["engine"]["closure"]
+        if producing_attempt is None:
+            source_role = _closed(
+                role_manifests["source"], {"id", "root", "identity", "entries", "total_bytes"}
+            )
+            source = _absolute(source_role["root"])
+            node_role = _closed(
+                role_manifests["node"], {"id", "root", "identity", "entries", "total_bytes"}
+            )
+            node_root = _absolute(node_role["root"])
+            producing_attempt = _ci_attempt_coordinates(admission, source.parent)
+            if (
+                source_role["id"] != "source"
+                or source.name != "source"
+                or node_role["id"] != "node"
+                or node_root != producing_attempt / "node"
+            ):
+                raise _error(
+                    "CI pair source/Node coordinates differ from the admitted attempt",
+                    "INSTALLED_MUTATION_ATTEMPT_INVALID",
+                )
+        source_root = _absolute(original["root"])
+        identities = {
+            (row["identity"]["device"], row["identity"]["inode"]) for row in original["entries"]
+        }
+        identities.add((original["identity"]["device"], original["identity"]["inode"]))
+        budget = [node.MAX_ENTRIES, node.MAX_TOTAL_BYTES]
+        producing_roots: list[Path] = []
+        for index in range(len(PROBE_IDS)):
+            for suffix in ("b", "m"):
+                role = f"pair-{index}-{suffix}"
+                inventory = _ci_role_inventory(roots[role], role_manifests[role], role)
+                coordinates = _absolute(inventory["root"])
+                if (
+                    coordinates.name != role
+                    or coordinates.parent != producing_attempt
+                    or coordinates.is_relative_to(source_root)
+                    or source_root.is_relative_to(coordinates)
+                    or any(
+                        coordinates.is_relative_to(other) or other.is_relative_to(coordinates)
+                        for other in producing_roots
+                    )
+                ):
+                    raise _error("Installed CI producing phase roots overlap or have aliases")
+                producing_roots.append(coordinates)
+                for row in [{"identity": inventory["identity"]}, *inventory["entries"]]:
+                    identity = row["identity"]
+                    key = (identity["device"], identity["inode"])
+                    if key in identities or identity["inode"] <= 0:
+                        raise _error("Installed CI copies share producing physical identities")
+                    identities.add(key)
+                for row in _ci_subinventory(inventory, "i")["entries"]:
+                    node._take_budget(budget, row.get("size", 0))
+                inventories[role] = inventory
+        if len({path.parent for path in producing_roots}) != 1:
+            raise _error("Installed CI phases belong to different attempts")
+        for index, (probe_id, pair) in enumerate(zip(PROBE_IDS, value["pairs"], strict=True)):
+            b, m = f"pair-{index}-b", f"pair-{index}-m"
+            results.append(
+                [
+                    probe_id,
+                    _ci_pair_originals(
+                        roots[b],
+                        roots[m],
+                        pair,
+                        probe_id,
+                        materials,
+                        inventories[b],
+                        inventories[m],
+                    ),
+                ]
+            )
+        passed = failure is None and all(outcome == "killed" for _probe, outcome in results)
+        return {
+            "passed": passed,
+            "results": results,
+            "reason_codes": [] if passed else ["INSTALLED_MUTATION_NOT_KILLED"],
+        }
+    except (
+        AiflowError,
+        OSError,
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        SyntaxError,
+    ) as error:
+        code = error.code if isinstance(error, AiflowError) else "INSTALLED_MUTATION_INVALID"
+        return {"passed": False, "results": results, "reason_codes": [code]}
+
+
+def validate_ci_pair_run(
+    *,
+    attempt_root: Path,
+    admission: Mapping[str, Any],
+    materials: Mapping[str, Any],
+    pairs: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Read current producing originals; no task/action recovery or Current result."""
+    try:
+        attempt = Path(attempt_root).absolute()
+        _ci_pair_bindings(admission, materials)
+        _ci_live_attempt(attempt, admission)
+        if _materials() != node._canonical(materials):
+            raise _error("Current CI ordinary inputs differ from the recorded materials")
+        roots = {
+            f"pair-{index}-{suffix}": attempt / f"pair-{index}-{suffix}"
+            for index in range(5)
+            for suffix in ("b", "m")
+        }
+        manifests = {role: {"id": role, **node._inventory(path)} for role, path in roots.items()}
+        facts = _ci_pairs_facts(
+            roots, admission, materials, pairs, manifests, producing_attempt=attempt
+        )
+        if _materials() != node._canonical(materials):
+            raise _error("Current CI ordinary inputs changed during pair revalidation")
+        return facts
+    except (AiflowError, OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+        return {
+            "passed": False,
+            "results": [],
+            "reason_codes": [
+                error.code if isinstance(error, AiflowError) else "INSTALLED_MUTATION_INVALID"
+            ],
+        }
+
+
+def record_ci_pairs(
+    *, attempt_root: Path, admission: Mapping[str, Any], materials: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Run ten fresh ordinary copies under the already-created exclusive CI claim."""
+    attempt = Path(attempt_root).absolute()
+    binding = _ci_pair_bindings(admission, materials)
+    _ci_live_attempt(attempt, admission)
+    node._ancestors(attempt)
+    if _materials() != node._canonical(materials):
+        raise _error("CI installed inputs differ from the actual ordinary installation")
+    original = materials["engine"]["closure"]
+    if attempt.is_relative_to(Path(original["root"])):
+        raise _error("CI installed outputs overlap their ordinary input installation")
+    for index in range(5):
+        for suffix in ("b", "m"):
+            if os.path.lexists(attempt / f"pair-{index}-{suffix}"):
+                raise _error("CI installed phase was already claimed")
+    document: dict[str, Any] = {
+        **binding,
+        "pairs": [
+            {"id": probe_id, "overlay": None, "baseline": None, "mutant": None}
+            for probe_id in PROBE_IDS
+        ],
+        "failure": None,
+    }
+    budget = [node.MAX_ENTRIES, node.MAX_TOTAL_BYTES]
+    try:
+        for index, probe_id in enumerate(PROBE_IDS):
+            node._unchanged(original)
+            pair = document["pairs"][index]
+            for suffix, stage in (("b", "baseline"), ("m", "mutant")):
+                phase = attempt / f"pair-{index}-{suffix}"
+                _run_stage(phase, pair, stage, probe_id, materials, budget)
+                if stage == "baseline" and not _baseline_passes(
+                    _envelope(phase, pair[stage], probe_id, materials), probe_id, materials
+                ):
+                    raise _error(
+                        "Installed CI baseline failed", "INSTALLED_MUTATION_BASELINE_INVALID"
+                    )
+        facts = validate_ci_pair_run(
+            attempt_root=attempt, admission=admission, materials=materials, pairs=document
+        )
+        if not facts["passed"]:
+            document["failure"] = facts["reason_codes"][0]
+    except (
+        AiflowError,
+        OSError,
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        SyntaxError,
+    ) as error:
+        document["failure"] = (
+            error.code if isinstance(error, AiflowError) else "INSTALLED_MUTATION_EXECUTION_INVALID"
+        )
+    return document
+
+
+def replay_ci_pairs(
+    *,
+    package_root: Path,
+    admission: Mapping[str, Any],
+    materials: Mapping[str, Any],
+    pairs: Mapping[str, Any],
+    role_manifests: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Derive fresh-pair content facts, opening only retained package role members."""
+    package = Path(package_root).absolute()
+    roots = {
+        f"pair-{index}-{suffix}": package / "originals" / f"pair-{index}-{suffix}"
+        for index in range(5)
+        for suffix in ("b", "m")
+    }
+    return _ci_pairs_facts(roots, admission, materials, pairs, role_manifests)
