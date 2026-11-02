@@ -161,6 +161,7 @@ def test_start_rejects_non_git_directory(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    monkeypatch.setenv("GIT_CEILING_DIRECTORIES", str(tmp_path.parent))
     monkeypatch.chdir(tmp_path)
 
     assert main(["start", "--objective", "bounded", "--allow", "src/**"]) == 1

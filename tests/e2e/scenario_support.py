@@ -107,7 +107,7 @@ def prepare_task(
     monkeypatch: pytest.MonkeyPatch,
     scenario_id: str,
 ) -> tuple[Path, dict[str, Any], dict[str, Any]]:
-    prepared = prepare_scenario_repository(ROOT, tmp_path / scenario_id, scenario_id)
+    prepared = prepare_scenario_repository(ROOT, tmp_path / "repo", scenario_id)
     repository = prepared.root
     monkeypatch.chdir(repository)
     unit = scenario_input(scenario_id)
