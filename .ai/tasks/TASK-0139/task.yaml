@@ -55,8 +55,8 @@ goal: Preserve canonical UTF-8 LF bytes when appending task events on Windows
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-02T15:08:44Z'
-subject_commit: 1c23e3b12bf6431f7ad3853ef1332ab2913edd14
+subject_commit: b053c38f6f5fd82ddc821cac8d8943a6274ecce9
 task_id: TASK-0139
-updated_at: '2026-11-02T15:10:11Z'
+updated_at: '2026-11-02T15:19:35Z'
 worktree_dirty: false
 worktree_dirty_paths: []

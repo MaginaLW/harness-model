@@ -11,5 +11,21 @@
     "spec_sha256": "ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49",
     "subject_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
     "task_id": "TASK-0139"
+  },
+  {
+    "action_sha256": "e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-02T15:19:35Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-02T21:17:19.502464Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual independent lf_review exact-action APPROVE with no findings for e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe, current context5af7 and fixed subjectb053. Windows red/green facts32 and source-outside ordinary direct/rebuilt wheel byte/resource/Git-LF checks are observed; all14/3000/85/90/five-native-operator requirements remain. Authorize only this single fresh actual independent-verifier native invocation using the preflight-bound original-workspace outside-source fixture pool; first failure/interruption closes it, no retry or external/model action.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49",
+    "subject_commit": "b053c38f6f5fd82ddc821cac8d8943a6274ecce9",
+    "task_id": "TASK-0139"
   }
 ]
