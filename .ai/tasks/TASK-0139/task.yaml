@@ -60,8 +60,8 @@ goal: Preserve canonical task-event bytes and genuinely read-only Git facts
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-02T16:58:36Z'
-subject_commit: 5c9a7ffe6e582284082427fcb2269fbe3d82fafe
+subject_commit: 72c2ca5ab479fe1987bde62a6c29156a6b160677
 task_id: TASK-0139
-updated_at: '2026-11-02T17:02:22Z'
+updated_at: '2026-11-02T17:10:09Z'
 worktree_dirty: false
 worktree_dirty_paths: []
