@@ -2405,21 +2405,108 @@ def _ci_input_materials(
     from aiflow import installed_mutations as installed
     from aiflow import node_execution as node
 
-    source = node._source(source_root, source_tuple["binding"]["subject_commit"])
+    budget = [node.MAX_ENTRIES, node.MAX_TOTAL_BYTES]
+    source = node._source(source_root, source_tuple["binding"]["subject_commit"], budget=budget)
     _package, lock = node._source_contract(source_root, source, revision=2)
     return {
         "source": source,
-        "runtime": node._inventory(payload_root / "node"),
+        "runtime": node._inventory(payload_root / "node", budget=budget),
         "dependencies": node._dependencies(
-            payload_root / "dependencies/node_modules", lock, revision=2
+            payload_root / "dependencies/node_modules", lock, budget=budget, revision=2
         ),
-        "engine": node._engine(),
-        "host_tools": node._host_tools(),
+        "engine": node._engine(budget=budget),
+        "host_tools": node._host_tools(budget=budget),
         "pair_materials": _json(installed._materials())
         if source_tuple["binding"]["verification_level"] == "V2"
         else None,
         "engine_artifact": dict(source_tuple["engine_artifact"]),
     }
+
+
+def _check_shared_input_budget(inputs: Mapping[str, Any], engine_role: Mapping[str, Any]) -> None:
+    """Recount the original five-domain budget from validated portable metadata.
+
+    Match the existing local collectors, including their local path-based
+    de-duplication. Imported coordinates are data and are never opened here.
+    Git administration, copied executions and V2 pairs retain their own budgets.
+    """
+    from aiflow import node_execution as node
+
+    budget = [node.MAX_ENTRIES, node.MAX_TOTAL_BYTES]
+
+    def take_file(row: Mapping[str, Any]) -> None:
+        node._take_budget(budget, _integer(row["size"], maximum=MAX_FILE_BYTES))
+
+    source_directories: set[str] = set()
+    for row in _list(inputs["source"]["files"]):
+        for parent in PurePosixPath(_path(row["path"])).parents:
+            name = parent.as_posix()
+            if name != "." and name not in source_directories:
+                node._take_budget(budget)
+                source_directories.add(name)
+        take_file(row)
+    for name in ("runtime", "dependencies"):
+        inventory = _inventory(inputs[name])
+        for row in inventory["entries"]:
+            if row["kind"] == "file":
+                take_file(row)
+            else:
+                node._take_budget(budget)
+    engine = inputs["engine"]
+    startup = engine["startup"]
+    if startup["pyvenv_configuration"] is not None:
+        take_file(startup["pyvenv_configuration"])
+    for _root in _list(startup["site_roots"]):
+        node._take_budget(budget)
+    startup_files = {}
+    for row in _list(startup["files"]):
+        startup_path_text = _text(row["path"], limit=4096)
+        if startup_path_text in startup_files:
+            raise _error("CI engine startup has duplicate physical declarations")
+        startup_files[startup_path_text] = row
+        take_file(row)
+    sites = _list(startup["python_environment"]["active_site_roots"])
+    if len(sites) != 1:
+        raise _error("CI installed engine has no unique ordinary site root")
+    site = Path(_text(sites[0], limit=4096))
+    engine_root = Path(engine_role["root"])
+    directories = {engine_root} | {
+        engine_root / row["path"] for row in engine_role["entries"] if row["kind"] == "directory"
+    }
+    for distribution in _list(engine["distributions"]):
+        package_roots = set()
+        for row in _list(distribution["files"]):
+            path_text = _text(row["path"], limit=4096)
+            if path_text in startup_files:
+                if _canonical(row) != _canonical(startup_files[path_text]):
+                    raise _error("CI engine startup/distribution originals conflict")
+            else:
+                take_file(row)
+            path = Path(path_text)
+            if path.is_relative_to(site):
+                parts = path.relative_to(site).parts
+                if parts and parts[0] not in {".", ".."} and site / parts[0] in directories:
+                    package_roots.add(site / parts[0])
+        for anchor in package_roots:
+            node._take_budget(budget)
+            for path in directories:
+                if path != anchor and path.is_relative_to(anchor):
+                    node._take_budget(budget)
+    host_paths: dict[Path, Mapping[str, Any]] = {}
+    for row in inputs["host_tools"].values():
+        if row is None:
+            continue
+        path = Path(_text(row["path"], limit=4096))
+        if path in host_paths:
+            if _canonical(
+                {key: value for key, value in row.items() if key != "path"}
+            ) != _canonical(
+                {key: value for key, value in host_paths[path].items() if key != "path"}
+            ):
+                raise _error("CI host aliases declare conflicting originals")
+        else:
+            take_file(row)
+            host_paths[path] = row
 
 
 def _attempt_coordinates(source_root: Path, attempt: Path, platform: Mapping[str, Any]) -> None:
@@ -2780,6 +2867,7 @@ def validate_ci_originals(
     facts = replay_ci_node(
         package_root=package_root, prepared=prepared, run=run, role_manifests=manifests
     )
+    _check_shared_input_budget(inputs, manifests["engine"])
     if (
         facts["checks"] != evidence["checks"]
         or facts["node_binding"] != evidence["node_binding"]
@@ -3172,6 +3260,70 @@ def _source_identity(source_tuple: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _reject_source_git_authentication(source_root: Path) -> None:
+    """Inspect actual local Git keys without following configuration includes."""
+    from urllib.parse import urlsplit
+
+    from aiflow.node_execution import _git
+
+    _read(source_root / ".git/config", limit=MAX_JSON_BYTES)
+    raw = _git(source_root, "config", "--null", "--local", "--list", "--no-includes")
+    if len(raw) > MAX_JSON_BYTES:
+        raise _error("CI source Git configuration exceeds its limit", "NODE_CI_LIMIT_EXCEEDED")
+    if raw and not raw.endswith(b"\0"):
+        raise _error("CI source Git configuration is malformed")
+
+    def reject() -> None:
+        raise _error("CI source administration contains persisted authentication")
+
+    def check_url(value: str, *, proxy: bool = False) -> None:
+        try:
+            candidate = value.strip() if proxy else value
+            if proxy and "://" not in candidate and not candidate.startswith("//"):
+                candidate = "//" + candidate
+            parsed = urlsplit(candidate)
+            if (
+                parsed.password is not None
+                or (proxy and parsed.username is not None)
+                or (
+                    parsed.scheme.casefold() in {"http", "https"}
+                    and (not parsed.netloc or parsed.username is not None)
+                )
+            ):
+                reject()
+        except ValueError:
+            raise _error("CI source administration contains persisted authentication") from None
+
+    for entry in raw.split(b"\0")[:-1]:
+        key_bytes, _separator, value_bytes = entry.partition(b"\n")
+        try:
+            key, value = key_bytes.decode("utf-8"), value_bytes.decode("utf-8")
+        except UnicodeError:
+            raise _error("CI source Git configuration is not valid UTF-8") from None
+        folded = key.casefold()
+        variable = folded.rsplit(".", 1)[-1]
+        if (
+            folded.startswith(("include.", "includeif.", "credential."))
+            or folded == "extensions.worktreeconfig"
+        ):
+            reject()
+        if folded.startswith("http.") and variable in {
+            "extraheader",
+            "authorization",
+            "proxyauthorization",
+        }:
+            reject()
+        if folded.startswith("remote.") and variable in {"url", "pushurl", "proxy"}:
+            check_url(value, proxy=variable == "proxy")
+        if folded.startswith("url.") and variable in {"insteadof", "pushinsteadof"}:
+            check_url(key[4 : -(len(variable) + 1)])
+        if folded.startswith("http."):
+            if variable == "proxy":
+                check_url(value, proxy=True)
+            if key.rsplit(".", 1)[0].casefold() != "http":
+                check_url(key[5 : -(len(variable) + 1)])
+
+
 def verify_node_ci(
     source_root: Path, task_id: str, *, run_dir: Path, output: Path, payload_root: Path
 ) -> dict[str, Any]:
@@ -3218,12 +3370,7 @@ def verify_node_ci(
         raise _error("CI provisioned runtime/engine are outside fixed attempt roles")
     if {path.name for path in attempt.iterdir()} != {"artifact", "engine", "payload"}:
         raise _error("CI attempt has unknown or previously spent neighbors")
-    config = _read(source_root / ".git/config", limit=MAX_JSON_BYTES).lower()
-    if any(
-        value in config
-        for value in (b"extraheader", b"credential", b"oauth", b"access_token", b"x-access-token")
-    ):
-        raise _error("CI source administration contains persisted authentication")
+    _reject_source_git_authentication(source_root)
     _authenticate_engine(source_tuple["engine_artifact"], _capture=api_capture)
     source_archive = attempt / "artifact/engine-source.zip"
     inputs = _ci_input_materials(source_root, payload_root, source_tuple)
