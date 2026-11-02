@@ -14,9 +14,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.metadata
+import io
 import json
 import os
 import re
+import shutil
 import stat
 import subprocess
 import sys
@@ -24,7 +26,10 @@ import tarfile
 import tomllib
 import zipfile
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import TYPE_CHECKING, Any, BinaryIO
+
+if TYPE_CHECKING:
+    from aiflow.process_runner import NodeProcessResult
 
 SOURCE_REPOSITORY_ID = 1319293089
 SOURCE_FULL_NAME = "MaginaLW/harness-model"
@@ -41,6 +46,7 @@ PAYLOADS = (
 MAX_FILE_BYTES = 128 * 1024 * 1024
 MAX_TOTAL_BYTES = 512 * 1024 * 1024
 MAX_ENTRIES = 20_000
+_STDOUT_LIMIT = 16 * 1024 * 1024
 BUILD_TOOLS = (
     "build",
     "setuptools",
@@ -83,10 +89,143 @@ def _ordinary(path: Path, *, directory: bool) -> None:
             _require(stat.S_ISDIR(info.st_mode), "Not an ordinary directory")
 
 
+class _JobFailure(ValueError):
+    """Actual finite process originals awaiting retention by the authenticated caller."""
+
+    def __init__(
+        self,
+        message: str,
+        result: NodeProcessResult,
+        stdout: bytes | None = None,
+        *,
+        retained: bool = False,
+    ) -> None:
+        super().__init__(message)
+        self.result = result
+        self.stdout = stdout
+        self.stderr = result.stderr
+        self.retained = retained
+
+
+def _run_job(
+    argv: tuple[str, ...],
+    *,
+    cwd: Path,
+    environment: dict[str, str],
+    timeout_seconds: int,
+    stdout_sink: BinaryIO,
+) -> NodeProcessResult:
+    """Use the existing Job/pipe/teardown state machine, with its fixed stderr cap."""
+    from aiflow import process_runner
+
+    expected = Path(__file__).resolve().parents[2] / "src/aiflow/process_runner.py"
+    _require(
+        Path(process_runner.__file__).resolve() == expected, "Unexpected process runner origin"
+    )
+    return process_runner.run_node_process(
+        argv,
+        cwd=cwd,
+        environment=environment,
+        timeout_seconds=timeout_seconds,
+        stdout_sink=stdout_sink,
+        stdout_limit=_STDOUT_LIMIT,
+    )
+
+
+def _job_succeeded(result: NodeProcessResult) -> bool:
+    receipt = result.receipt
+    pid = receipt.get("process_id") if receipt is not None else None
+    created = receipt.get("creation_time_filetime") if receipt is not None else None
+    return (
+        type(result.returncode) is int
+        and result.returncode == 0
+        and result.stdout == b""
+        and result.timed_out is False
+        and result.stdout_overflow is False
+        and result.stderr_overflow is False
+        and result.execution_error is False
+        and result.cleanup == "confirmed"
+        and receipt is not None
+        and type(pid) is int
+        and pid > 0
+        and type(created) is int
+        and created > 0
+        and all(
+            receipt.get(key) is True
+            for key in (
+                "created_suspended",
+                "assigned",
+                "initial_membership",
+                "resumed",
+                "job_empty",
+                "stdout_eof",
+                "stderr_eof",
+                "closed",
+            )
+        )
+        and receipt.get("terminate_requested") is False
+    )
+
+
+def _retain_job(
+    work: Path, label: str, result: NodeProcessResult, stdout: bytes | None = None
+) -> None:
+    """Keep actual bounded raw partials and the unchanged closed Job receipt."""
+    _ordinary(work, directory=True)
+    stdout_path = work / (label + ".stdout.raw")
+    stderr_path = work / (label + ".stderr.raw")
+    if stdout is not None:
+        _require(len(stdout) <= _STDOUT_LIMIT, "Git output exceeded its finite sink")
+        with stdout_path.open("xb") as stream:
+            stream.write(stdout)
+    _ordinary(stdout_path, directory=False)
+    _require(stdout_path.stat().st_size <= _STDOUT_LIMIT, "Build output exceeded its finite sink")
+    _require(len(result.stderr) <= 1024 * 1024, "Build stderr exceeded its fixed bound")
+    with stderr_path.open("xb") as stream:
+        stream.write(result.stderr)
+    value = {
+        "returncode": result.returncode,
+        "timed_out": result.timed_out,
+        "stdout_overflow": result.stdout_overflow,
+        "stderr_overflow": result.stderr_overflow,
+        "execution_error": result.execution_error,
+        "cleanup": result.cleanup,
+        "receipt": dict(result.receipt) if result.receipt is not None else None,
+        "stdout": {
+            "path": stdout_path.name,
+            "size": stdout_path.stat().st_size,
+            "sha256": _sha(stdout_path.read_bytes()),
+        },
+        "stderr": {
+            "path": stderr_path.name,
+            "size": len(result.stderr),
+            "sha256": _sha(result.stderr),
+        },
+    }
+    with (work / (label + ".receipt.json")).open("xb") as stream:
+        stream.write(_canonical(value))
+
+
 def _git(source: Path, *arguments: str) -> bytes:
-    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
-    for name in ("GH_TOKEN", "GITHUB_TOKEN"):
-        environment.pop(name, None)
+    environment = {
+        key: os.environ[key]
+        for key in (
+            "PATH",
+            "SystemRoot",
+            "COMSPEC",
+            "PATHEXT",
+            "TEMP",
+            "TMP",
+            "TMPDIR",
+            "HOME",
+            "USERPROFILE",
+            "APPDATA",
+            "LOCALAPPDATA",
+            "XDG_CACHE_HOME",
+            "PYTHONDONTWRITEBYTECODE",
+        )
+        if key in os.environ
+    }
     environment.update(
         GIT_CONFIG_GLOBAL=os.devnull,
         GIT_CONFIG_NOSYSTEM="1",
@@ -94,17 +233,27 @@ def _git(source: Path, *arguments: str) -> bytes:
         GIT_TERMINAL_PROMPT="0",
         GIT_NO_REPLACE_OBJECTS="1",
     )
-    result = subprocess.run(
-        ["git", "--no-optional-locks", "-c", "core.fsmonitor=false", *arguments],
-        cwd=source,
-        env=environment,
-        capture_output=True,
-        timeout=30,
-        check=False,
-    )
-    _require(result.returncode == 0, "Committed source Git query failed")
-    _require(len(result.stdout) <= 16 * 1024 * 1024, "Source Git response exceeds bound")
-    return result.stdout
+    executable = shutil.which("git", path=environment.get("PATH"))
+    _require(executable is not None, "Git executable is unavailable")
+    assert executable is not None
+    with io.BytesIO() as sink:
+        result = _run_job(
+            (
+                str(Path(executable).absolute()),
+                "--no-optional-locks",
+                "-c",
+                "core.fsmonitor=false",
+                *arguments,
+            ),
+            cwd=source,
+            environment=environment,
+            timeout_seconds=30,
+            stdout_sink=sink,
+        )
+        raw = sink.getvalue()
+    if not _job_succeeded(result):
+        raise _JobFailure("Committed source Git Job failed", result, raw)
+    return raw
 
 
 def _positive_selector(name: str) -> int:
@@ -175,29 +324,32 @@ def _locked_tools(lock: bytes, project: bytes) -> dict[str, str]:
 
 def _build(source: Path, output: Path, kind: str, work: Path, environment: dict[str, str]) -> None:
     output.mkdir()
-    with (work / (output.name + ".stdout.log")).open("xb") as stdout:
-        with (work / (output.name + ".stderr.log")).open("xb") as stderr:
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    "-I",
-                    "-B",
-                    "-m",
-                    "build",
-                    "--no-isolation",
-                    "--" + kind,
-                    "--outdir",
-                    str(output),
-                    str(source),
-                ],
-                cwd=work,
-                env=environment,
-                stdout=stdout,
-                stderr=stderr,
-                timeout=180,
-                check=False,
-            )
-    _require(result.returncode == 0, "Ordinary package build failed; retain its build logs")
+    with (work / (output.name + ".stdout.raw")).open("xb", buffering=0) as stdout:
+        result = _run_job(
+            (
+                sys.executable,
+                "-I",
+                "-B",
+                "-m",
+                "build",
+                "--no-isolation",
+                "--" + kind,
+                "--outdir",
+                str(output),
+                str(source),
+            ),
+            cwd=work,
+            environment=environment,
+            timeout_seconds=180,
+            stdout_sink=stdout,
+        )
+        stdout.flush()
+        os.fsync(stdout.fileno())
+    _retain_job(work, output.name, result)
+    if not _job_succeeded(result):
+        raise _JobFailure(
+            "Ordinary package build Job failed; retain its originals", result, retained=True
+        )
     expected = WHEEL if kind == "wheel" else SDIST
     _require({path.name for path in output.iterdir()} == {expected}, "Unexpected build output")
     _ordinary(output / expected, directory=False)
@@ -341,120 +493,134 @@ def build_engine(output_dir: Path) -> dict[str, Any]:
         attempt=attempt,
         completed=False,
     )
-    head = _git(source, "rev-parse", "HEAD").decode("ascii").strip()
-    _require(platform["head_sha"] == head, "Authenticated PR/run and checkout heads differ")
-    branch = os.environ.get("GITHUB_HEAD_REF", "")
-    _git(source, "check-ref-format", "--branch", branch)
-    _require(
-        _git(source, "symbolic-ref", "--short", "HEAD").decode("utf-8").strip() == branch,
-        "Exact PR branch is not attached",
-    )
-    _require(
-        platform["workflow_path"] == WORKFLOW_PATH and platform["job_key"] == JOB_KEY,
-        "Unexpected authenticated workflow/job",
-    )
-    _require(_git(source, "diff", "--name-only") == b"", "Dirty source checkout")
-    _require(_git(source, "diff", "--cached", "--name-only") == b"", "Dirty source index")
-    _require(
-        _git(source, "ls-files", "--others", "--exclude-standard", "-z") == b"",
-        "Unregistered source files",
-    )
-    workflow = _git(source, "show", head + ":" + WORKFLOW_PATH)
-    _require(
-        _sha(workflow) == platform["workflow_sha256"], "Executing workflow differs from source"
-    )
-    lock = _git(source, "show", head + ":uv.lock")
-    files = _source_files(source, head, {".ai/" + name for name in RESOURCE_KINDS})
-    versions = _locked_tools(lock, files["pyproject.toml"])
-    timestamp = _git(source, "show", "-s", "--format=%ct", head).decode("ascii").strip()
-    _require(timestamp.isdecimal() and int(timestamp) >= 315532800, "Invalid source timestamp")
-
-    attempt_root.mkdir(parents=True)
     work = attempt_root / "build"
-    work.mkdir()
-    output_dir.mkdir()
-    staging = work / "source"
-    staging.mkdir()
-    for name, raw in files.items():
-        target = staging.joinpath(*PurePosixPath(name).parts)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        with target.open("xb") as stream:
-            stream.write(raw)
-    environment = {
-        key: os.environ[key]
-        for key in (
-            "PATH",
-            "SystemRoot",
-            "COMSPEC",
-            "PATHEXT",
-            "TEMP",
-            "TMP",
-            "TMPDIR",
-            "HOME",
-            "USERPROFILE",
-            "APPDATA",
-            "LOCALAPPDATA",
-            "XDG_CACHE_HOME",
+    created_here = False
+    try:
+        head = _git(source, "rev-parse", "HEAD").decode("ascii").strip()
+        _require(platform["head_sha"] == head, "Authenticated PR/run and checkout heads differ")
+        branch = os.environ.get("GITHUB_HEAD_REF", "")
+        _git(source, "check-ref-format", "--branch", branch)
+        _require(
+            _git(source, "symbolic-ref", "--short", "HEAD").decode("utf-8").strip() == branch,
+            "Exact PR branch is not attached",
         )
-        if key in os.environ
-    }
-    environment.update(
-        PYTHONDONTWRITEBYTECODE="1",
-        SOURCE_DATE_EPOCH=timestamp,
-        PIP_NO_INDEX="1",
-        PIP_CONFIG_FILE=os.devnull,
-    )
-    _build(staging, output_dir / "direct", "wheel", work, environment)
-    _build(staging, output_dir / "sdist", "sdist", work, environment)
-    rebuilt_source = _unpack_sdist(output_dir / "sdist" / SDIST, work / "unpacked", set(files))
-    _build(rebuilt_source, output_dir / "sdist-rebuilt", "wheel", work, environment)
-    direct = inspect_engine_wheel(output_dir / "direct" / WHEEL)
-    rebuilt = inspect_engine_wheel(output_dir / "sdist-rebuilt" / WHEEL)
-    _require(direct == rebuilt, "Direct and rebuilt package/resource payloads differ")
-    members = []
-    for name, origin in PAYLOADS:
-        raw = (output_dir / name).read_bytes()
-        members.append({"path": name, "origin": origin, "size": len(raw), "sha256": _sha(raw)})
-    manifest = {
-        "kind": "aiflow-node-engine-build",
-        "schema_version": "1.0",
-        "repository_id": SOURCE_REPOSITORY_ID,
-        "source_head": head,
-        "workflow_path": WORKFLOW_PATH,
-        "workflow_blob_sha256": _sha(workflow),
-        "job_key": JOB_KEY,
-        "run_id": run_id,
-        "run_attempt": attempt,
-        "python_version": list(sys.version_info[:3]),
-        "setuptools_version": versions["setuptools"],
-        "members": members,
-        "package_payload_sha256": direct["package_payload_sha256"],
-        "resource_manifest_sha256": direct["resource_manifest_sha256"],
-    }
-    validate_node_ci_document(manifest, kind="aiflow-node-engine-build")
-    with (output_dir / "build-manifest.json").open("xb") as stream:
-        stream.write(_canonical(manifest))
-    expected = {name for name, _ in PAYLOADS} | {"build-manifest.json"}
-    _require(
-        {p.relative_to(output_dir).as_posix() for p in output_dir.rglob("*") if p.is_file()}
-        == expected,
-        "Engine artifact membership is not closed",
-    )
-    # Validate the exact upload container with the same portable reader used by
-    # admission/selection. This local ZIP is outside the four-member artifact.
-    archive_path = work / "engine-artifact.zip"
-    with zipfile.ZipFile(archive_path, "x", compression=zipfile.ZIP_STORED) as archive:
-        for name in sorted(expected):
-            archive.write(output_dir / name, name)
-    validate_engine_artifact_archive(archive_path)
-    _require(_git(source, "rev-parse", "HEAD").decode().strip() == head, "Source head changed")
-    _require(_git(source, "diff", "--name-only") == b"", "Source changed during build")
-    _require(_git(source, "diff", "--cached", "--name-only") == b"", "Source index changed")
-    _require(
-        _git(source, "ls-files", "--others", "--exclude-standard", "-z") == b"",
-        "Source acquired unregistered files during build",
-    )
-    return manifest
+        _require(
+            platform["workflow_path"] == WORKFLOW_PATH and platform["job_key"] == JOB_KEY,
+            "Unexpected authenticated workflow/job",
+        )
+        _require(_git(source, "diff", "--name-only") == b"", "Dirty source checkout")
+        _require(_git(source, "diff", "--cached", "--name-only") == b"", "Dirty source index")
+        _require(
+            _git(source, "ls-files", "--others", "--exclude-standard", "-z") == b"",
+            "Unregistered source files",
+        )
+        workflow = _git(source, "show", head + ":" + WORKFLOW_PATH)
+        _require(
+            _sha(workflow) == platform["workflow_sha256"], "Executing workflow differs from source"
+        )
+        lock = _git(source, "show", head + ":uv.lock")
+        files = _source_files(source, head, {".ai/" + name for name in RESOURCE_KINDS})
+        versions = _locked_tools(lock, files["pyproject.toml"])
+        timestamp = _git(source, "show", "-s", "--format=%ct", head).decode("ascii").strip()
+        _require(timestamp.isdecimal() and int(timestamp) >= 315532800, "Invalid source timestamp")
+
+        attempt_root.mkdir(parents=True)
+        created_here = True
+        work.mkdir()
+        output_dir.mkdir()
+        staging = work / "source"
+        staging.mkdir()
+        for name, raw in files.items():
+            target = staging.joinpath(*PurePosixPath(name).parts)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with target.open("xb") as stream:
+                stream.write(raw)
+        environment = {
+            key: os.environ[key]
+            for key in (
+                "PATH",
+                "SystemRoot",
+                "COMSPEC",
+                "PATHEXT",
+                "TEMP",
+                "TMP",
+                "TMPDIR",
+                "HOME",
+                "USERPROFILE",
+                "APPDATA",
+                "LOCALAPPDATA",
+                "XDG_CACHE_HOME",
+            )
+            if key in os.environ
+        }
+        environment.update(
+            PYTHONDONTWRITEBYTECODE="1",
+            SOURCE_DATE_EPOCH=timestamp,
+            PIP_NO_INDEX="1",
+            PIP_CONFIG_FILE=os.devnull,
+        )
+        _build(staging, output_dir / "direct", "wheel", work, environment)
+        _build(staging, output_dir / "sdist", "sdist", work, environment)
+        rebuilt_source = _unpack_sdist(output_dir / "sdist" / SDIST, work / "unpacked", set(files))
+        _build(rebuilt_source, output_dir / "sdist-rebuilt", "wheel", work, environment)
+        direct = inspect_engine_wheel(output_dir / "direct" / WHEEL)
+        rebuilt = inspect_engine_wheel(output_dir / "sdist-rebuilt" / WHEEL)
+        _require(direct == rebuilt, "Direct and rebuilt package/resource payloads differ")
+        members = []
+        for name, origin in PAYLOADS:
+            raw = (output_dir / name).read_bytes()
+            members.append({"path": name, "origin": origin, "size": len(raw), "sha256": _sha(raw)})
+        manifest = {
+            "kind": "aiflow-node-engine-build",
+            "schema_version": "1.0",
+            "repository_id": SOURCE_REPOSITORY_ID,
+            "source_head": head,
+            "workflow_path": WORKFLOW_PATH,
+            "workflow_blob_sha256": _sha(workflow),
+            "job_key": JOB_KEY,
+            "run_id": run_id,
+            "run_attempt": attempt,
+            "python_version": list(sys.version_info[:3]),
+            "setuptools_version": versions["setuptools"],
+            "members": members,
+            "package_payload_sha256": direct["package_payload_sha256"],
+            "resource_manifest_sha256": direct["resource_manifest_sha256"],
+        }
+        validate_node_ci_document(manifest, kind="aiflow-node-engine-build")
+        with (output_dir / "build-manifest.json").open("xb") as stream:
+            stream.write(_canonical(manifest))
+        expected = {name for name, _ in PAYLOADS} | {"build-manifest.json"}
+        _require(
+            {p.relative_to(output_dir).as_posix() for p in output_dir.rglob("*") if p.is_file()}
+            == expected,
+            "Engine artifact membership is not closed",
+        )
+        # Validate the exact upload container with the same portable reader used by
+        # admission/selection. This local ZIP is outside the four-member artifact.
+        archive_path = work / "engine-artifact.zip"
+        with zipfile.ZipFile(archive_path, "x", compression=zipfile.ZIP_STORED) as archive:
+            for name in sorted(expected):
+                archive.write(output_dir / name, name)
+        validate_engine_artifact_archive(archive_path)
+        _require(_git(source, "rev-parse", "HEAD").decode().strip() == head, "Source head changed")
+        _require(_git(source, "diff", "--name-only") == b"", "Source changed during build")
+        _require(_git(source, "diff", "--cached", "--name-only") == b"", "Source index changed")
+        _require(
+            _git(source, "ls-files", "--others", "--exclude-standard", "-z") == b"",
+            "Source acquired unregistered files during build",
+        )
+        return manifest
+    except _JobFailure as error:
+        if not error.retained:
+            # Authentication and exact workspace/output validation already passed.
+            # An exclusive creation avoids touching another invocation's attempt.
+            if not created_here:
+                attempt_root.mkdir(parents=True)
+                work.mkdir()
+            _require(error.stdout is not None, "Missing bounded Git failure originals")
+            _retain_job(work, "git-failure", error.result, error.stdout)
+            error.retained = True
+        raise
 
 
 def main() -> int:
