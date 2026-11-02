@@ -5,12 +5,15 @@ from __future__ import annotations
 import base64
 import csv
 import hashlib
+import importlib.util
 import io
 import json
 import os
 import stat
 import subprocess
+import sys
 import tarfile
+import time
 import zipfile
 from copy import deepcopy
 from dataclasses import replace
@@ -2399,3 +2402,222 @@ def test_complete_source_archive_rejects_existing_payload_and_producer_binding_g
         node_ci.validate_engine_artifact_archive(archive, selection)
     assert archive.read_bytes() == raw
     assert list(tmp_path.iterdir()) == [archive]
+
+
+@pytest.fixture
+def source_helper_real_child(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+    """Substitute only public argv; both old subprocess and new Job run real children."""
+    if os.name != "nt":
+        pytest.skip("real Windows Job originals require a Windows host")
+    helper_path = Path(__file__).resolve().parents[2] / "tools/ci/build_node_engine.py"
+    spec = importlib.util.spec_from_file_location("synthetic_source_build_job", helper_path)
+    assert spec is not None and spec.loader is not None
+    helper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helper)
+    script = tmp_path / "public_child.py"
+    script.write_text(
+        "import os, subprocess, sys, time\n"
+        "from pathlib import Path\n"
+        "mode, output, marker = sys.argv[1:]\n"
+        "if mode != 'git-output':\n"
+        "    (Path(output) / 'aiflow-0.2.0-py3-none-any.whl').write_bytes(b'public placeholder')\n"
+        "if mode in ('git-output', 'build-stdout'):\n"
+        "    for _ in range(272): os.write(1, b'x' * 65536)\n"
+        "elif mode == 'build-stderr':\n"
+        "    for _ in range(17): os.write(2, b'e' * 65536)\n"
+        "elif mode in ('build-timeout', 'build-failed'):\n"
+        "    os.write(1, b'public-partial-stdout'); os.write(2, b'public-partial-stderr')\n"
+        "    if mode == 'build-failed': sys.exit(7)\n"
+        "    time.sleep(4); Path(marker).write_text('late-parent')\n"
+        "elif mode == 'build-descendant':\n"
+        "    code = 'import time; from pathlib import Path; time.sleep(1); Path('"
+        " + repr(marker) + ').write_text(\"descendant-finished\")'\n"
+        "    subprocess.Popen([sys.executable, '-I', '-B', '-c', code])\n",
+        encoding="utf-8",
+    )
+    source, work = tmp_path / "s", tmp_path / "w"
+    source.mkdir()
+    work.mkdir()
+    output, marker = work / "ordinary", work / "descendant.txt"
+    real_subprocess_run = subprocess.run
+    real_run_job = getattr(helper, "_run_job", None)
+    observed: dict[str, Any] = {"mode": "", "job_calls": 0, "legacy_calls": []}
+
+    def public_argv(original: object) -> tuple[str, ...]:
+        arguments = tuple(original)
+        if observed["mode"] == "git-output":
+            assert arguments[1:] == (
+                "--no-optional-locks",
+                "-c",
+                "core.fsmonitor=false",
+                "synthetic-read-only",
+            )
+        else:
+            assert arguments[1:] == (
+                "-I",
+                "-B",
+                "-m",
+                "build",
+                "--no-isolation",
+                "--wheel",
+                "--outdir",
+                str(output),
+                str(source),
+            )
+        return (sys.executable, "-I", "-B", str(script), observed["mode"], str(output), str(marker))
+
+    def legacy_adapter(argv: object, **options: Any) -> subprocess.CompletedProcess[bytes]:
+        command = public_argv(argv)
+        observed["legacy_calls"].append({"capture_output": options.get("capture_output", False)})
+        if observed["mode"] == "build-timeout":
+            assert options["timeout"] == 180
+            options["timeout"] = 1  # Fixture-only deadline; production remains 180 seconds.
+        result = real_subprocess_run(command, **options)
+        observed["legacy_calls"][-1]["stdout_bytes"] = len(result.stdout or b"")
+        return result
+
+    def job_adapter(argv: tuple[str, ...], **options: Any) -> NodeProcessResult:
+        command = public_argv(argv)
+        observed["job_calls"] += 1
+        assert real_run_job is not None
+        if observed["mode"] == "build-timeout":
+            assert options["timeout_seconds"] == 180
+            options["timeout_seconds"] = 1
+        return real_run_job(command, **options)
+
+    monkeypatch.setattr(helper.subprocess, "run", legacy_adapter)
+    monkeypatch.setattr(helper, "_run_job", job_adapter, raising=False)
+    environment = {
+        key: value
+        for key, value in os.environ.items()
+        if key in {"SystemRoot", "WINDIR", "PATH", "TEMP", "TMP", "TMPDIR"}
+    }
+    return {
+        "helper": helper,
+        "source": source,
+        "work": work,
+        "output": output,
+        "marker": marker,
+        "environment": environment,
+        "observed": observed,
+    }
+
+
+def _source_build_receipt(case: dict[str, Any]) -> dict[str, Any]:
+    receipt = json.loads((case["work"] / "ordinary.receipt.json").read_bytes())
+    assert receipt["cleanup"] == "confirmed"
+    job = receipt["receipt"]
+    assert all(
+        job[name] is True
+        for name in (
+            "created_suspended",
+            "assigned",
+            "initial_membership",
+            "resumed",
+            "job_empty",
+            "stdout_eof",
+            "stderr_eof",
+            "closed",
+        )
+    )
+    for stream, limit in (("stdout", 16 * 1024 * 1024), ("stderr", 1024 * 1024)):
+        reference = receipt[stream]
+        assert reference["path"] == "ordinary." + stream + ".raw"
+        raw = (case["work"] / reference["path"]).read_bytes()
+        assert len(raw) <= limit
+        assert reference["size"] == len(raw)
+        assert reference["sha256"] == hashlib.sha256(raw).hexdigest()
+    assert case["observed"]["job_calls"] == 1
+    assert case["observed"]["legacy_calls"] == []
+    return receipt
+
+
+def test_source_git_output_is_bounded_during_real_job_capture(
+    source_helper_real_child: dict[str, Any],
+) -> None:
+    case = source_helper_real_child
+    case["observed"]["mode"] = "git-output"
+    with pytest.raises(ValueError) as caught:
+        case["helper"]._git(case["source"], "synthetic-read-only")
+    result = getattr(caught.value, "result", None)
+    assert result is not None
+    assert result.stdout_overflow is True
+    assert result.cleanup == "confirmed"
+    assert result.receipt["job_empty"] is True
+    assert result.receipt["stdout_eof"] is True
+    assert result.receipt["stderr_eof"] is True
+    assert result.receipt["closed"] is True
+    assert len(caught.value.stdout) <= 16 * 1024 * 1024
+    assert len(caught.value.stderr) <= 1024 * 1024
+    assert case["observed"]["job_calls"] == 1
+    assert case["observed"]["legacy_calls"] == []
+
+
+@pytest.mark.parametrize("stream", ["stdout", "stderr"])
+def test_source_build_stream_overflow_rejects_with_real_bounded_partial_originals(
+    source_helper_real_child: dict[str, Any], stream: str
+) -> None:
+    case = source_helper_real_child
+    case["observed"]["mode"] = "build-" + stream
+    with pytest.raises(ValueError):
+        case["helper"]._build(
+            case["source"], case["output"], "wheel", case["work"], case["environment"]
+        )
+    receipt = _source_build_receipt(case)
+    assert receipt[stream + "_overflow"] is True
+    assert receipt["timed_out"] is False
+
+
+def test_source_build_timeout_retains_real_partial_eof_and_job_cleanup(
+    source_helper_real_child: dict[str, Any],
+) -> None:
+    case = source_helper_real_child
+    case["observed"]["mode"] = "build-timeout"
+    with pytest.raises(ValueError):
+        case["helper"]._build(
+            case["source"], case["output"], "wheel", case["work"], case["environment"]
+        )
+    receipt = _source_build_receipt(case)
+    assert receipt["timed_out"] is True
+    assert receipt["receipt"]["terminate_requested"] is True
+    assert (case["work"] / "ordinary.stdout.raw").read_bytes() == b"public-partial-stdout"
+    assert (case["work"] / "ordinary.stderr.raw").read_bytes() == b"public-partial-stderr"
+    assert not case["marker"].exists()
+
+
+def test_source_build_success_waits_for_owned_descendant_and_both_pipe_eofs(
+    source_helper_real_child: dict[str, Any],
+) -> None:
+    case = source_helper_real_child
+    case["observed"]["mode"] = "build-descendant"
+    completed_before_return = False
+    try:
+        case["helper"]._build(
+            case["source"], case["output"], "wheel", case["work"], case["environment"]
+        )
+        completed_before_return = case["marker"].exists()
+    finally:
+        # The pre-fix public child is finite. Wait out that exact owned child even on RED.
+        deadline = time.monotonic() + 5
+        while not case["marker"].exists() and time.monotonic() < deadline:
+            time.sleep(0.02)
+    assert completed_before_return is True
+    receipt = _source_build_receipt(case)
+    assert receipt["returncode"] == 0
+    assert receipt["timed_out"] is False
+
+
+def test_source_build_failed_exit_keeps_real_bounded_raw_and_job_receipt(
+    source_helper_real_child: dict[str, Any],
+) -> None:
+    case = source_helper_real_child
+    case["observed"]["mode"] = "build-failed"
+    with pytest.raises(ValueError):
+        case["helper"]._build(
+            case["source"], case["output"], "wheel", case["work"], case["environment"]
+        )
+    receipt = _source_build_receipt(case)
+    assert receipt["returncode"] == 7
+    assert receipt["timed_out"] is False
+    assert (case["work"] / "ordinary.stdout.raw").read_bytes() == b"public-partial-stdout"
+    assert (case["work"] / "ordinary.stderr.raw").read_bytes() == b"public-partial-stderr"
