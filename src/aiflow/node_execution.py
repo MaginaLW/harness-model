@@ -4534,7 +4534,127 @@ def _ci_environment(
     system = Path(host["cmd"]["path"]).parent.parent
     result = _bound_node_environment(node, checkout, run, git, system, windows=True)
     result["TMPDIR"] = str(run / "tmp")
+    result["GIT_COMMITTER_NAME"] = "aiflow-ci"
+    result["GIT_COMMITTER_EMAIL"] = "aiflow-ci@invalid"
     return result
+
+
+def _ci_reserve_member(projected: dict[str, int], name: str, size: int) -> None:
+    name = _path(name)
+    path = Path(name)
+    for item in (path, *path.parents):
+        if str(item) == ".":
+            continue
+        relative = item.as_posix()
+        if relative not in projected and len(projected) >= MAX_ENTRIES:
+            raise _error("CI Node copy inventory exceeds its entry budget")
+        projected[relative] = max(projected.get(relative, 0), size if item == path else 0)
+
+
+def _ci_node_copy_budget(node_dir: Path, additions: Mapping[str, int]) -> None:
+    """Reserve cumulative physical copies before writing into the Node role."""
+    projected = {row["path"]: row.get("size", 0) for row in _inventory(node_dir)["entries"]}
+    for name, size in additions.items():
+        _ci_reserve_member(projected, name, size)
+    budget = [MAX_ENTRIES, MAX_TOTAL_BYTES]
+    for size in projected.values():
+        _take_budget(budget, size)
+
+
+def _ci_clone_allocation(
+    source_root: Path,
+    original: Mapping[str, Any],
+    source: Mapping[str, Any],
+    dependencies: Mapping[str, Any],
+    environment: Mapping[str, str],
+) -> dict[str, int]:
+    """Conservatively derive the fixed clone/checkout's future physical members."""
+    # Keep the entire original checkout, including all .git objects/admin,
+    # occupied even when clone will not copy some of its working files.
+    projected = {
+        "checkout/" + row["path"]: row.get("size", 0) for row in original["inventory"]["entries"]
+    }
+
+    def reserve(name: str, size: int) -> None:
+        _ci_reserve_member(projected, name, size)
+
+    for row in source["files"]:
+        reserve("checkout/" + row["path"], row["size"])
+    reserve("checkout/node_modules", 0)
+    for row in dependencies["entries"]:
+        reserve("checkout/node_modules/" + row["path"], row.get("size", 0))
+
+    refs = _git(source_root, "for-each-ref", "--format=%(refname)").decode("utf-8").splitlines()
+    if len(refs) > MAX_ENTRIES:
+        raise _error("CI clone reference inventory exceeds its entry budget")
+    refs = [_path(name) for name in refs]
+    head = _read(source_root / ".git/HEAD", limit=MAX_JSON_BYTES).decode("utf-8").strip()
+    head_ref = _path(head[5:]) if head.startswith("ref: ") else None
+    if head_ref is not None and head_ref not in refs:
+        raise _error("CI source symbolic HEAD differs from its frozen reference inventory")
+    mapped = {
+        "refs/remotes/origin/" + name.removeprefix("refs/heads/")
+        if name.startswith("refs/heads/")
+        else name
+        for name in refs
+    }
+    for name in set(refs) | mapped:
+        reserve("checkout/.git/" + _path(name), len(source["subject_commit"]) + 1)
+    packed = len(b"# pack-refs with: peeled fully-peeled sorted \n") + sum(
+        len(name.encode("utf-8")) + 2 * (len(source["subject_commit"]) + 2) for name in mapped
+    )
+    # Each optional peeled row includes its own 40-hex object ID. All original
+    # objects/admin remain occupied above; newly generated index is separately
+    # reserved at the existing binary per-file ceiling, never the JSON ceiling.
+    reserve("checkout/.git/packed-refs", packed)
+    reserve("checkout/.git/index", MAX_FILE_BYTES)
+    reserve("checkout/.git/HEAD", max(len(head.encode("utf-8")) + 1, 41))
+    reserve("checkout/.git/ORIG_HEAD", 41)
+    branch = (
+        head_ref.removeprefix("refs/heads/")
+        if head_ref is not None and head_ref.startswith("refs/heads/")
+        else None
+    )
+    if branch is not None:
+        remote_head = "ref: refs/remotes/origin/" + branch + "\n"
+        reserve("checkout/.git/refs/remotes/origin/HEAD", len(remote_head.encode("utf-8")))
+
+    # Include every fixed clone config field, with the longer Windows boolean
+    # spelling and quoted/escaped path and branch strings as conservative bounds.
+    escaped_root = str(source_root).replace("\\", "\\\\").replace('"', '\\"')
+    config = (
+        "[core]\n\trepositoryformatversion = 0\n\tfilemode = false\n\tbare = false\n"
+        "\tlogallrefupdates = true\n\tsymlinks = false\n\tignorecase = false\n"
+        '[remote "origin"]\n\turl = "' + escaped_root + '"\n'
+        "\tfetch = +refs/heads/*:refs/remotes/origin/*\n"
+    )
+    if branch is not None:
+        config += (
+            '[branch "' + branch + '"]\n\tremote = origin\n\tmerge = "refs/heads/' + branch + '"\n'
+        )
+    reserve("checkout/.git/config", len(config.encode("utf-8")))
+
+    # clone writes HEAD and, for a symbolic source HEAD, its local branch and
+    # origin/HEAD reflogs; checkout appends one HEAD record. Identity is fixed.
+    identity = environment["GIT_COMMITTER_NAME"] + " <" + environment["GIT_COMMITTER_EMAIL"] + ">"
+    record = len(("0" * 40 + " " + "0" * 40 + " " + identity + " ").encode("utf-8"))
+    record += len(str(-(1 << 63))) + len(" +0000\t\n")
+    clone_log = record + len(("clone: from " + str(source_root)).encode("utf-8"))
+    checkout_log = record + len(
+        ("checkout: moving from " + (head_ref or head) + " to " + source["subject_commit"]).encode(
+            "utf-8"
+        )
+    )
+    reserve("checkout/.git/logs/HEAD", clone_log + checkout_log)
+    if branch is not None:
+        reserve("checkout/.git/logs/refs/heads/" + branch, clone_log)
+        reserve("checkout/.git/logs/refs/remotes/origin/HEAD", clone_log)
+    for setup in ("setup-clone", "setup-checkout"):
+        for stream in ("stdout", "stderr"):
+            reserve("raw/" + setup + "/" + stream + ".raw", 1024 * 1024)
+            reserve("raw/" + setup + "/" + stream + ".log", 8 * 1024 * 1024)
+        reserve("raw/" + setup + "/receipt.json", MAX_JSON_BYTES)
+    return projected
 
 
 def _ci_public_execution(
@@ -4814,6 +4934,17 @@ def _execute_ci_node_kernel(
         str(source_root),
         str(roles.execution_root),
     )
+    _ci_node_copy_budget(
+        node_dir,
+        _ci_clone_allocation(
+            source_root,
+            before,
+            manifests["source.json"],
+            manifests["dependencies.json"],
+            environment,
+        ),
+    )
+    _unchanged(before["inventory"])
     clone = _process(
         clone_argv,
         cwd=source_root,
@@ -4828,6 +4959,7 @@ def _execute_ci_node_kernel(
         cwd=source_root,
         environment=environment,
     )
+    _ci_node_copy_budget(node_dir, {})
     checkout_argv = (
         roles.git_executable,
         *_GIT_OPTIONS,
@@ -4853,6 +4985,16 @@ def _execute_ci_node_kernel(
     )
     if any((roles.execution_root / name).exists() for name in ("node_modules", "dist", ".runtime")):
         raise _error("CI tracked input collides with an execution output")
+    _ci_node_copy_budget(
+        node_dir,
+        {
+            "checkout/node_modules": 0,
+            **{
+                "checkout/node_modules/" + row["path"]: row.get("size", 0)
+                for row in manifests["dependencies.json"]["entries"]
+            },
+        },
+    )
     copied = _copy_tree(
         Path(manifests["dependencies.json"]["root"]),
         roles.execution_root / "node_modules",
@@ -5226,7 +5368,10 @@ def _ci_engine_host_originals(
     if engine["startup"].get("pyvenv_configuration") is not None:
         files.append(engine["startup"]["pyvenv_configuration"])
     for row in files:
-        path = Path(row["path"])
+        raw = row["path"]
+        if not isinstance(raw, str) or not Path(raw).is_absolute():
+            raise _error("CI installed engine file path is not absolute")
+        path = Path(os.path.normpath(raw))
         if not path.is_relative_to(engine_root):
             raise _error("CI installed engine file leaves its ordinary prefix")
         data = _ci_original(package_root, "engine", path.relative_to(engine_root).as_posix())

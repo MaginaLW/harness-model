@@ -2244,6 +2244,49 @@ def _ci_subinventory(inventory: Mapping[str, Any], name: str) -> dict[str, Any]:
     }
 
 
+def _ci_engine_closure(engine: Mapping[str, Any], prefix: Path, closure: Mapping[str, Any]) -> None:
+    """Derive the complete ordinary closure without opening producing paths."""
+    files = [row for distribution in engine["distributions"] for row in distribution["files"]]
+    startup = engine["startup"]
+    files.extend(startup["files"])
+    if startup["pyvenv_configuration"] is not None:
+        files.append(startup["pyvenv_configuration"])
+    expected: dict[str, dict[str, Any]] = {}
+    directories: set[str] = set()
+    for value in files:
+        row = _closed(value, {"path", "size", "sha256", "identity"})
+        raw = row["path"]
+        if not isinstance(raw, str) or not Path(raw).is_absolute():
+            raise _error("CI installed file path is not absolute")
+        try:
+            relative = _path(_absolute(os.path.normpath(raw)).relative_to(prefix).as_posix())
+        except ValueError as error:
+            raise _error("CI installed file escapes its ordinary prefix") from error
+        if not (
+            relative.startswith("Lib/site-packages/")
+            or relative.startswith("Scripts/")
+            or relative == "pyvenv.cfg"
+        ):
+            raise _error("CI installed closure has an unsupported file role")
+        projected = {
+            "path": relative,
+            "kind": "file",
+            **{key: row[key] for key in ("size", "sha256", "identity")},
+        }
+        if relative in expected and expected[relative] != projected:
+            raise _error("CI installed file has conflicting distribution owners")
+        expected[relative] = projected
+        directories.update(
+            parent.as_posix() for parent in Path(relative).parents if str(parent) != "."
+        )
+    if {row["path"]: row for row in closure["entries"] if row["kind"] == "file"} != expected or {
+        row["path"] for row in closure["entries"] if row["kind"] == "directory"
+    } != directories:
+        raise _error(
+            "CI installed closure differs from the complete distribution and startup files"
+        )
+
+
 def _ci_pair_bindings(admission: Mapping[str, Any], materials: Mapping[str, Any]) -> dict[str, str]:
     # This is trusted installed kernel code, never an imported package member.
     from aiflow.node_ci import validate_node_ci_document
@@ -2313,6 +2356,7 @@ def _ci_pair_bindings(admission: Mapping[str, Any], materials: Mapping[str, Any]
         or interpreter["cache_tag"] != "cpython-311"
     ):
         raise _error("Installed CI interpreter coordinates are invalid")
+    _ci_engine_closure(engine["installed"], prefix, original)
     for key, path in (
         ("executable", prefix / "Scripts/python.exe"),
         ("base_executable", base / "python.exe"),
@@ -2523,6 +2567,20 @@ def _ci_pairs_facts(
         inventories = {}
         original = materials["engine"]["closure"]
         if producing_attempt is None:
+            engine_role = _closed(
+                role_manifests["engine"], {"id", "root", "identity", "entries", "total_bytes"}
+            )
+            retained = _ci_inventory(
+                {key: engine_role[key] for key in ("root", "identity", "entries", "total_bytes")}
+            )
+            retained_rows = {row["path"]: row for row in retained["entries"]}
+            if (
+                engine_role["id"] != "engine"
+                or original["root"] != retained["root"]
+                or original["identity"] != retained["identity"]
+                or any(row != retained_rows.get(row["path"]) for row in original["entries"])
+            ):
+                raise _error("CI installed closure differs from its complete retained engine role")
             source_role = _closed(
                 role_manifests["source"], {"id", "root", "identity", "entries", "total_bytes"}
             )
