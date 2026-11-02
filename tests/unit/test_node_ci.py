@@ -2161,24 +2161,83 @@ def producer_coordination(
         return {}, {"synthetic": "dependency-lock"}
 
     monkeypatch.setattr(node, "_source_contract", source_contract)
-    monkeypatch.setattr(
-        node,
-        "_dependencies",
-        lambda root, lock, revision: {
-            **node._inventory(root),
-            "lock": lock,
-            "revision": revision,
-        },
-    )
-    monkeypatch.setattr(node, "_engine", lambda: {"synthetic": "ordinary-engine-seam"})
+
+    def dependencies(root: Path, lock: Any, *, revision: int, budget: Any = None) -> Any:
+        assert root == attempt / "payload/dependencies/node_modules"
+        assert lock == {"synthetic": "dependency-lock"} and revision == 2
+        return node._inventory(root, budget=budget)
+
+    monkeypatch.setattr(node, "_dependencies", dependencies)
+    site = attempt / "engine/Lib/site-packages"
+    engine_members = {
+        "aiflow/__init__.py": b"# Public engine discovery seam, never imported.\n",
+        "aiflow-0.2.0.dist-info/METADATA": b"Metadata-Version: 2.1\nName: aiflow\nVersion: 0.2.0\n",
+    }
+    for name, data in engine_members.items():
+        path = site / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+    configuration = attempt / "engine/pyvenv.cfg"
+    configuration.write_bytes(b"include-system-site-packages = false\n")
+
+    def engine_file(path: Path) -> Any:
+        return {
+            "path": str(path),
+            "size": path.stat().st_size,
+            "sha256": node_ci._sha(path.read_bytes()),
+            "identity": node._identity(node._safe_info(path)),
+        }
+
+    def engine(*, budget: Any = None) -> Any:
+        if budget is None:
+            budget = [node.MAX_ENTRIES, node.MAX_TOTAL_BYTES]
+        node._take_budget(budget, configuration.stat().st_size)
+        node._take_budget(budget)
+        files = [engine_file(site / name) for name in engine_members]
+        for row in files:
+            node._take_budget(budget, row["size"])
+        for directory in (site / "aiflow", site / "aiflow-0.2.0.dist-info"):
+            assert directory.is_dir()
+            node._take_budget(budget)
+        return {
+            "python": str(attempt / "engine/python.exe"),
+            "distributions": [{"name": "aiflow", "version": "0.2.0", "files": files}],
+            "startup": {
+                "files": [],
+                "setuptools": False,
+                "site_roots": [
+                    {
+                        "path": str(site),
+                        "identity": node._identity(node._safe_info(site, directory=True)),
+                    }
+                ],
+                "pyvenv_configuration": engine_file(configuration),
+                "python_environment": {
+                    "prefix": str(attempt / "engine"),
+                    "base_prefix": str(attempt / "engine"),
+                    "site_roots": [str(site)],
+                    "active_site_roots": [str(site)],
+                    "enable_user_site": False,
+                },
+            },
+        }
+
+    monkeypatch.setattr(node, "_engine", engine)
     tool = attempt / "artifact/tool.exe"
     tool.write_bytes(b"public host tool")
     tool_ref = {
         "path": str(tool),
         "size": tool.stat().st_size,
         "sha256": node_ci._sha(tool.read_bytes()),
+        "identity": node._identity(node._safe_info(tool)),
     }
-    monkeypatch.setattr(node, "_host_tools", lambda: {"synthetic-tool": tool_ref, "absent": None})
+
+    def host_tools(*, budget: Any = None) -> Any:
+        if budget is not None:
+            node._take_budget(budget, tool_ref["size"])
+        return {"synthetic-tool": tool_ref, "absent": None}
+
+    monkeypatch.setattr(node, "_host_tools", host_tools)
     pair_materials = {
         "interpreter": {key: dict(tool_ref) for key in ("base_executable", "runtime")}
     }
@@ -2549,3 +2608,217 @@ def test_public_producer_preserves_partial_package_and_rejects_writer_faults(
         assert (case.attempt / "package/originals/source/fixture.py").read_bytes() != (
             case.source / "fixture.py"
         ).read_bytes()
+
+
+@pytest.mark.parametrize("authorization", ["url-userinfo", "authorization-header"])
+def test_public_producer_rejects_real_git_authorization_before_engine_or_claim(
+    producer_coordination: Any, monkeypatch: pytest.MonkeyPatch, authorization: str
+) -> None:
+    from initialization_helpers import fixture_git
+
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    case = producer_coordination
+    if authorization == "url-userinfo":
+        fixture_git(
+            case.source,
+            "config",
+            "remote.origin.url",
+            "https://synthetic-user:synthetic-pass@github.com/example/synthetic-target.git",
+        )
+    else:
+        fixture_git(
+            case.source,
+            "config",
+            "http.https://github.com/.extraHeader",
+            "Authorization: Basic c3ludGhldGljOnB1YmxpYy1maXh0dXJl",
+        )
+    config = case.source / ".git/config"
+    original = config.read_bytes()
+    attempted_engine: list[bool] = []
+
+    def forbid_engine(*_args: Any, **_kwargs: Any) -> None:
+        attempted_engine.append(True)
+        raise AssertionError("Persisted Git authorization passed admission; no package produced")
+
+    monkeypatch.setattr(node_ci, "_authenticate_engine", forbid_engine)
+    with pytest.raises(ContractError) as caught:
+        node_ci.verify_node_ci(
+            case.source,
+            "TASK-0001",
+            run_dir=case.attempt,
+            output=case.attempt / "evidence.json",
+            payload_root=case.attempt / "payload",
+        )
+    assert "persisted authentication" in str(caught.value)
+    assert attempted_engine == [] and case.steps == []
+    assert case.content_bindings == [] and case.source_contract_calls == []
+    assert config.read_bytes() == original
+    assert not (case.attempt / "control").exists()
+    assert not (case.attempt / "package").exists()
+    assert not (case.attempt / "evidence.json").exists()
+
+
+@pytest.mark.parametrize("bound", ["entries", "bytes", "exact-boundary"])
+def test_ci_input_collectors_share_actual_physical_inventory_budget(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, bound: str
+) -> None:
+    from initialization_helpers import fixture_git
+
+    from aiflow import installed_mutations, node_ci
+    from aiflow import node_execution as node
+    from aiflow.errors import ContractError
+
+    source = tmp_path / "source"
+    payload = tmp_path / "payload"
+    roots = {
+        "source": source,
+        "runtime": payload / "node",
+        "dependencies": payload / "dependencies/node_modules",
+        "engine": tmp_path / "engine",
+        "host_tools": tmp_path / "host",
+    }
+    public_bytes = b"x" * 256
+    for root in roots.values():
+        root.mkdir(parents=True)
+        (root / "public.txt").write_bytes(public_bytes)
+    fixture_git(source, "init", "-b", "codex/public-budget")
+    fixture_git(source, "config", "user.name", "Public Fixture")
+    fixture_git(source, "config", "user.email", "fixture@example.invalid")
+    fixture_git(source, "add", "public.txt")
+    fixture_git(source, "commit", "-m", "Public bounded inventory fixture")
+    subject = node._git(source, "rev-parse", "HEAD").decode().strip()
+    monkeypatch.setattr(node, "MAX_ENTRIES", 4 if bound == "entries" else 5)
+    total_bytes = 5 * len(public_bytes)
+    monkeypatch.setattr(node, "MAX_TOTAL_BYTES", total_bytes - (bound == "bytes"))
+    actual_source, actual_inventory = node._source, node._inventory
+    received: list[tuple[str, Any]] = []
+
+    def read_source(root: Path, selected: str, *, budget: Any = None) -> Any:
+        assert root == source and selected == subject
+        received.append(("source", budget))
+        return actual_source(root, selected, budget=budget)
+
+    def inventory(root: Path, *, budget: Any = None) -> Any:
+        assert root == roots["runtime"]
+        received.append(("runtime", budget))
+        return actual_inventory(root, budget=budget)
+
+    def dependencies(root: Path, lock: Any, *, revision: int, budget: Any = None) -> Any:
+        assert root == roots["dependencies"] and lock == {"public": "lock"} and revision == 2
+        received.append(("dependencies", budget))
+        return actual_inventory(root, budget=budget)
+
+    def engine(*, budget: Any = None) -> Any:
+        received.append(("engine", budget))
+        return actual_inventory(roots["engine"], budget=budget)
+
+    def host(*, budget: Any = None) -> Any:
+        received.append(("host_tools", budget))
+        return actual_inventory(roots["host_tools"], budget=budget)
+
+    def contract(root: Path, value: Any, *, revision: int) -> Any:
+        assert root == source and value["subject_commit"] == subject and revision == 2
+        return {}, {"public": "lock"}
+
+    def no_pairs() -> None:
+        raise AssertionError("V1 must not enter the separate installed-pair materials domain")
+
+    monkeypatch.setattr(node, "_source", read_source)
+    monkeypatch.setattr(node, "_inventory", inventory)
+    monkeypatch.setattr(node, "_source_contract", contract)
+    monkeypatch.setattr(node, "_dependencies", dependencies)
+    monkeypatch.setattr(node, "_engine", engine)
+    monkeypatch.setattr(node, "_host_tools", host)
+    monkeypatch.setattr(installed_mutations, "_materials", no_pairs)
+    inputs = {
+        "binding": {"subject_commit": subject, "verification_level": "V1"},
+        "engine_artifact": {"synthetic": "not-executed"},
+    }
+    if bound == "exact-boundary":
+        collected = node_ci._ci_input_materials(source, payload, inputs)
+        assert collected["pair_materials"] is None
+    else:
+        with pytest.raises(ContractError, match="Combined material inventory exceeds"):
+            node_ci._ci_input_materials(source, payload, inputs)
+    assert [role for role, _ in received] == list(roots)
+    shared = received[0][1]
+    assert shared is not None and all(budget is shared for _, budget in received)
+    if bound == "exact-boundary":
+        assert shared == [0, 0]
+
+
+@pytest.mark.parametrize(
+    "config_key,config_value",
+    [
+        ("remote.origin.proxy", "https://synthetic-user:synthetic-pass@proxy.example:8080"),
+        ("http.proxy", "synthetic-user:synthetic-pass@proxy.example:8080"),
+    ],
+    ids=["remote-proxy", "http-proxy-without-scheme"],
+)
+def test_public_producer_rejects_actual_git_proxy_credentials_before_claim(
+    producer_coordination: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    config_key: str,
+    config_value: str,
+) -> None:
+    from initialization_helpers import fixture_git
+
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    case = producer_coordination
+    fixture_git(case.source, "config", config_key, config_value)
+    config = case.source / ".git/config"
+    original = config.read_bytes()
+    attempted_engine: list[bool] = []
+
+    def forbid_engine(*_args: Any, **_kwargs: Any) -> None:
+        attempted_engine.append(True)
+        raise AssertionError(
+            "Persisted Git proxy credentials passed admission; no package produced"
+        )
+
+    monkeypatch.setattr(node_ci, "_authenticate_engine", forbid_engine)
+    with pytest.raises(ContractError) as caught:
+        node_ci.verify_node_ci(
+            case.source,
+            "TASK-0001",
+            run_dir=case.attempt,
+            output=case.attempt / "evidence.json",
+            payload_root=case.attempt / "payload",
+        )
+    assert "persisted authentication" in str(caught.value)
+    assert attempted_engine == [] and case.steps == []
+    assert case.content_bindings == [] and case.source_contract_calls == []
+    assert config.read_bytes() == original
+    assert not (case.attempt / "control").exists()
+    assert not (case.attempt / "package").exists()
+    assert not (case.attempt / "evidence.json").exists()
+
+
+@pytest.mark.parametrize(
+    "config_key,config_value",
+    [
+        ("remote.origin.url", "git@github.com:example/synthetic-target.git"),
+        ("remote.origin.proxy", "https://proxy.example:8080"),
+        ("http.proxy", "proxy.example:8080"),
+    ],
+    ids=["passwordless-scp", "anonymous-remote-proxy", "anonymous-schemeless-proxy"],
+)
+def test_actual_git_authentication_guard_allows_noncredential_url_forms(
+    tmp_path: Path, config_key: str, config_value: str
+) -> None:
+    from initialization_helpers import fixture_git
+
+    from aiflow.node_ci import _reject_source_git_authentication
+
+    source = tmp_path / "source"
+    source.mkdir()
+    fixture_git(source, "init", "-b", "codex/public-proxy")
+    fixture_git(source, "config", config_key, config_value)
+    config = source / ".git/config"
+    original = config.read_bytes()
+    assert _reject_source_git_authentication(source) is None
+    assert config.read_bytes() == original
