@@ -1,0 +1,62 @@
+allowed_scope:
+- src/aiflow/task_service.py
+base_commit: 1c23e3b12bf6431f7ad3853ef1332ab2913edd14
+branch: codex/event-log-lf
+created_at: '2026-11-02T15:04:17Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Preserve canonical UTF-8 LF bytes when appending task events on Windows
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/task_service.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0139
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49
+goal: Preserve canonical UTF-8 LF bytes when appending task events on Windows
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-02T15:08:44Z'
+subject_commit: 1c23e3b12bf6431f7ad3853ef1332ab2913edd14
+task_id: TASK-0139
+updated_at: '2026-11-02T15:10:11Z'
+worktree_dirty: false
+worktree_dirty_paths: []
