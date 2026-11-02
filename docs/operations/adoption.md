@@ -11,7 +11,7 @@
 |---|---|
 | 工作约定 | 推荐起点。合并少量通用规则到目标项目已有指令入口，保留本项目原有安全与治理规则；不安装依赖、Hook 或后台服务。 |
 | 项目验证 | 沿用目标仓库已定义的测试、静态检查与 required CI。没有检查时如实标缺失，不靠复制本仓 Python 命令制造通过结果。 |
-| 完整 AI Flow | 仅在确实需要确定性任务分流、版本绑定审批与证据 Gate 时评估。版本化[资源包](resource-bundle.md)、Python/Node [非覆盖初始化](initialization.md)及 [Node 本地 V0/V1](node-verification.md)已交付；installed 外仓 V2、目标 CI 和真实接入仍待交付，见[完整引擎边界](#完整引擎的跨仓库边界)，不是普通试点的前置条件。 |
+| 完整 AI Flow | 仅在确实需要确定性任务分流、版本绑定审批与证据 Gate 时评估。版本化[资源包](resource-bundle.md)、Python/Node [非覆盖初始化](initialization.md)、[Node 本地 V0/V1](node-verification.md)及 [installed 本地 @2 V2](https://github.com/MaginaLW/harness-model/pull/148)已交付；Node CI3.3 容量未注册、未发布验收，真实接入尚未应用，见[完整引擎边界](#完整引擎的跨仓库边界)，不是普通试点的前置条件。 |
 
 推广的是“同一原则 + 项目适配”，不是向所有工具、项目复制同一套配置。
 对已有强制流程的仓库，轻量规则不能解除其任务或审核义务；冲突先按该仓规则处理。
@@ -339,7 +339,7 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 `native-python-v1` 面向已有提交、Python 源码及 `[project].name`、尚无 `.ai` 的普通 Git 工作树；
 apply 限 Windows x64、CPython 3.11、本地 NTFS。它生成目标自己的 UUID，不覆盖旧配置；
 精确恢复与重放边界见[初始化用法](initialization.md)。初始化不准备验证工具或依赖，
-[Node 本地 V0/V1](node-verification.md)及 Node 非覆盖初始化已交付；installed 外仓 V2、目标 CI 适配和 agent-bridge 真实接入仍未交付。
+[Node 本地 V0/V1](node-verification.md)、Node 非覆盖初始化及 [installed 本地 @2 V2](https://github.com/MaginaLW/harness-model/pull/148)已交付；Node CI3.3 容量未注册、未发布验收，agent-bridge 真实接入尚未应用。
 
 CLI 的定位与兼容边界见[仓库根定位规格](../superpowers/specs/repository-root.md)：
 无环境覆盖时使用最近 Git 工作树根；该根缺少 `.ai` 时拒绝，不借用父仓资源；
