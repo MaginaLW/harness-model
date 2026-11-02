@@ -16,6 +16,7 @@ from aiflow import git_context
 from aiflow.contracts import validate_contract
 from aiflow.errors import AiflowError
 from aiflow.git_context import GIT_TIMEOUT_SECONDS, collect_git_context, task_numbers_in_refs
+from aiflow.scope import collect_verification_changed_paths
 
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -66,6 +67,34 @@ def test_collect_clean_repository_context(tmp_path: Path) -> None:
     assert context.head == run_git(repository, "rev-parse", "HEAD")
     assert context.worktree_dirty is False
     assert context.dirty_paths == ()
+
+
+@pytest.mark.parametrize("collector", ["context", "scope"])
+def test_read_only_collectors_preserve_stale_index_even_if_optional_locks_are_enabled(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, collector: str
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    head = run_git(repository, "rev-parse", "HEAD")
+    tracked = repository / "tracked.txt"
+    previous = tracked.stat()
+    os.utime(tracked, ns=(previous.st_atime_ns, previous.st_mtime_ns + 5_000_000_000))
+    monkeypatch.setenv("GIT_OPTIONAL_LOCKS", "1")
+    index = repository / ".git/index"
+
+    def snapshot() -> tuple[bytes, int, int, int, int]:
+        state = index.stat()
+        return index.read_bytes(), state.st_dev, state.st_ino, state.st_mtime_ns, state.st_ctime_ns
+
+    before = snapshot()
+    if collector == "context":
+        assert collect_git_context(repository).worktree_dirty is False
+    else:
+        changes = collect_verification_changed_paths(
+            repository, base_commit=head, subject_commit=head, head_commit=head
+        )
+        assert changes.committed == changes.attestation == changes.worktree == ()
+    assert snapshot() == before
+    assert not (repository / ".git/index.lock").exists()
 
 
 def test_collect_dirty_paths_are_relative_normalized_and_sorted(tmp_path: Path) -> None:
