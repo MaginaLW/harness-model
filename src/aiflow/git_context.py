@@ -65,7 +65,7 @@ def _error(message: str, code: str, **details: object) -> AiflowError:
 
 
 def _run_git(cwd: Path, arguments: tuple[str, ...], *, failure_code: str) -> str:
-    command = ["git", *arguments]
+    command = ["git", "--no-optional-locks", *arguments]
     try:
         result = subprocess.run(
             command,
