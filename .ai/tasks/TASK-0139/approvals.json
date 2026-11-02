@@ -54,5 +54,21 @@
     "spec_sha256": "1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b",
     "subject_commit": "5c9a7ffe6e582284082427fcb2269fbe3d82fafe",
     "task_id": "TASK-0139"
+  },
+  {
+    "action_sha256": "bd2281b6631ee961ce401e2819a7a948ed60633a62eb90465d1e603ad617f5aa",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-02T17:14:09Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-02T23:12:01.469679Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual independent lf_review exact-action APPROVE with no findings for bd2281b6631ee961ce401e2819a7a948ed60633a62eb90465d1e603ad617f5aa, fresh context7c483dfa and fixed source72c2ca5. Observed focused396passed/1existingWindowsSkip, lint/format, source independent pre-review, ordinary direct and sdist-rebuilt actual installed byte/index/resource tests. Retain all14/3000/85/90/five60sPairs; authorize only this one actual independent native run in preflight-bound v2 outside-source pool, first failure closes, old spent/history retained, no external/model or personal human review asserted.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b",
+    "subject_commit": "72c2ca5ab479fe1987bde62a6c29156a6b160677",
+    "task_id": "TASK-0139"
   }
 ]
