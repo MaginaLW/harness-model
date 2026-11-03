@@ -86,5 +86,34 @@
     "spec_sha256": "1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b",
     "subject_commit": "72c2ca5ab479fe1987bde62a6c29156a6b160677",
     "task_id": "TASK-0139"
+  },
+  {
+    "action_sha256": "6c4c40ea6075fd07d783737970758f160a7b54bb300b54325a8532d243ce8c52",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-03T11:04:42Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-03T13:52:26Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：A06/A07/A08 对同一 Sandbox 的限定执行授权，以及实际独立 lf_review 对当前 action canonical6c4c40ea6075fd07d783737970758f160a7b54bb300b54325a8532d243ce8c52、raw e160fa81d0d6945d8e70cfcd151716999308537606e64dfcd690cb32b169c560 的 APPROVE，无未关闭 critical/high 发现。实际新环境准备及 action 原件校验写入均 rc0 且前后保护通过；fresh context7c483dfa 实际生成，旧 action 自然过期，原 spec 与14/3000/85/90/五原变异保持。仅批准一次由实际独立 verifier 执行的完整原 native CLI 操作；其正式结果失败、执行异常或受保护字节漂移后立即停止后续且不重试。准备或控制器 rc0 不代表 native PASS，不声称项目所有者亲自审核，不含模型、微信、私有传输或 push/merge。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b",
+    "subject_commit": "72c2ca5ab479fe1987bde62a6c29156a6b160677",
+    "task_id": "TASK-0139"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-03T13:59:19Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权: actual independent REV-0004-r0001 design APPROVE with no findings at current context53470adcfd0670dbd54909684926ba8f84684b67a3b22f4be37e596147533169, frozen specfbde450eef330f5bf82f1bbce24f7ba77ecaee2e53cce7ae3b6e96c20cf8af91 and subjectb8cc97c55c872c3435b241f5f4f38f519392ed4e. Add only the separately committed safe integration-test transport path; DU-001 production scope and REVIEW/V2 gates remain unchanged. Retain the original failed A08 evidence and consumed action. This records specification readiness only, not personal owner review, a new native cycle, action approval, code approval, finalization, Gate success or external delivery.",
+    "schema_version": "1.0",
+    "spec_sha256": "fbde450eef330f5bf82f1bbce24f7ba77ecaee2e53cce7ae3b6e96c20cf8af91",
+    "subject_commit": "b8cc97c55c872c3435b241f5f4f38f519392ed4e",
+    "task_id": "TASK-0139"
   }
 ]
