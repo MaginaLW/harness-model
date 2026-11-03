@@ -1,0 +1,77 @@
+{
+  "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+  "branch": "codex/event-log-lf",
+  "classification_input_sha256": "bb7acf5ff179d7bae3fa48980c016b3bae583c380daf2afb570810fbe95cc12e",
+  "content": {
+    "acceptance_conditions": [
+      "On the actual Windows host the new byte-level test must fail before the fix and pass after it for both existing LF and CRLF prefixes, with Unicode UTF-8 content and exactly one new LF. Existing prefixes must remain byte-for-byte unchanged. Run the entire event/facts recovery tests and Git context/scope tests, including both forced-stale-index cases with inherited optional locks enabled, exact argv assertions and the existing full snapshot rejection assertions. Preserve index bytes, device/inode, mtime and ctime and absence of index.lock without ignoring any Git administration path. The full eight-case required-CI failure cohort must be rechecked; use local Windows evidence honestly and require actual exact-head Linux CI before merge. Run full source pytest with both coverage domains, at least85percent total and90percent complete diff coverage, Ruff, format, strict mypy, whitespace and all unchanged native V2 checks and five original mutation operators under a fresh independently reviewed single-use action. The decision unit explicitly declares action_approval for this existing local targeted-mutation requirement; no external permission is requested. Record independent implementation review, same-verifier finalization, code approval and a passing local Gate. Build ordinary wheel and sdist-rebuilt wheel; verify their resource manifests and run the regression against ordinary installed bytes outside source imports. Root integration still separately owns exact-head required CI, publication and actual target acceptance."
+    ],
+    "code_map": {
+      "allowed_scope": [
+        "src/aiflow/git_context.py",
+        "src/aiflow/scope.py",
+        "src/aiflow/task_service.py",
+        "tests/integration/test_resource_bundle_distribution.py",
+        "tests/unit/test_git_context.py"
+      ],
+      "changed_paths": [
+        ".ai/tasks/TASK-0139/action-use-bd2281b6631ee961ce401e2819a7a948ed60633a62eb90465d1e603ad617f5aa.md",
+        ".ai/tasks/TASK-0139/action-use-e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe.md",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151333Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151719Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round2-20261102T171201Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round3-20261102T200312Z.json",
+        ".ai/tasks/TASK-0139/approvals.json",
+        ".ai/tasks/TASK-0139/classification.json",
+        ".ai/tasks/TASK-0139/events.jsonl",
+        ".ai/tasks/TASK-0139/evidence.json",
+        ".ai/tasks/TASK-0139/review-contexts/25ae4a4b4a8489a68fbf9e6bf7ece57f748f3d986d7960769d0f8cdc28d85a72.json",
+        ".ai/tasks/TASK-0139/review-contexts/58efe378205c29f0820fe1fc5dc36a89d8637d67f019b6197f6ad6b65bc9a39a.json",
+        ".ai/tasks/TASK-0139/review-contexts/fada40952105ae8a85fd7f79efcb5de4c513d73478fa796f9c154676be10b35b.json",
+        ".ai/tasks/TASK-0139/review-package.md",
+        ".ai/tasks/TASK-0139/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0139/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0139/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0139/spec.md",
+        ".ai/tasks/TASK-0139/task.yaml",
+        ".ai/tasks/TASK-0139/verifier-contexts/5af7e5028c17a5cf075497b24ad1fcb47fa4129d6f2187f034f47b5f9e5c8f72.json",
+        ".ai/tasks/TASK-0139/verifier-contexts/7c483dfabd1ce7785bbe6515fe1430132ca7f2c0839aad634aafc11700ee0503.json",
+        "src/aiflow/git_context.py",
+        "src/aiflow/scope.py",
+        "src/aiflow/task_service.py",
+        "tests/integration/test_resource_bundle_distribution.py",
+        "tests/unit/test_git_context.py"
+      ]
+    },
+    "diff_summary": {
+      "additions": 1269,
+      "binary_files": 0,
+      "deletions": 11,
+      "files": 26
+    },
+    "frozen_spec": "# Task Specification\n\n## 目标\n\nAppend the already encoded canonical UTF-8 task-event JSON plus exactly one LF on Windows and POSIX, and collect Git context/scope without optional index writes. Eliminate Windows CRT newline translation and the required Linux CI failure caused by Git refreshing the index during a supposedly read-only rejection.\n\n## 范围\n\nRetain the accepted src/aiflow/task_service.py O_BINARY-only repair. Extend only src/aiflow/git_context.py and src/aiflow/scope.py: their read-only Git subprocess argv must explicitly include Git's --no-optional-locks global option, so inherited GIT_OPTIONAL_LOCKS=1 cannot enable opportunistic index refreshes. Keep all command arguments, observed protocol, errors, timeouts and snapshot/index assertions otherwise intact; symbolic-ref reads need no additional write protection. No Git configuration or caller environment is changed. The task-free tests in tests/unit/test_facts_recovery.py and tests/unit/test_git_context.py are separately authored safe companions; the latter is allowed transport only and is not approved as governed implementation by this task.\n\nAdditional safe test transport: independently authored task-free commit b8cc97c55c872c3435b241f5f4f38f519392ed4e changes only tests/integration/test_resource_bundle_distribution.py. Its wheelhouse helper excludes only the exact distribution metadata entry <dist-info>/uv_cache.json from portable wheel payload; nested metadata and ordinary package files retain their existing validation and handling. The companion regressions are transported by this task but are not governed production implementation. DU-001 retains only the original three production paths; no production behavior or verification contract is broadened. This preparation does not authorize a new native invocation. Any later complete cycle still requires a newly authorized limit and action, all original 14 checks, the unchanged shared 3000-second budget, 85-percent total and 90-percent diff coverage, and five original baseline/mutant pairs with 60-second child limits. All existing prohibited actions and failed originals remain preserved.\n\nRequired-CI follow-up evidence: PR149 run41480071597 job125395713349 has eight installed-mutation transaction failures, all differing only in .git/index identity/stat cache after a rejected read-only query. Retain that failed job and its original log. Actual Windows forced-stale-index red tests independently reproduce both collectors changing index bytes/identity while reporting no content change. Local WSL is unavailable; Linux claims must come only from the actual exact-head required CI.\n\nSerial dependencies: actual Windows red regressions, frozen facts/specification and independent design review, spec approval, minimal flag change and green regression, fixed candidate independent verifier/action, complete native V2, independent implementation review, same-verifier finalization, code approval and Gate, then ordinary direct and sdist-rebuilt wheel verification. Suggested concurrency is three: implementer plus independent reviewer and verifier; source writes remain single-owner.\n\n## 非目标\n\nNo rewriting or normalizing existing event records, Policy, schema, Git configuration, Git attributes, approvals or evidence. No threshold reduction, relaxed stderr handling, new storage abstraction, model/SDK/WeChat calls, private transfer, source publication, remote changes or target installation.\n\n## 验收条件\n\nOn the actual Windows host the new byte-level test must fail before the fix and pass after it for both existing LF and CRLF prefixes, with Unicode UTF-8 content and exactly one new LF. Existing prefixes must remain byte-for-byte unchanged. Run the entire event/facts recovery tests and Git context/scope tests, including both forced-stale-index cases with inherited optional locks enabled, exact argv assertions and the existing full snapshot rejection assertions. Preserve index bytes, device/inode, mtime and ctime and absence of index.lock without ignoring any Git administration path. The full eight-case required-CI failure cohort must be rechecked; use local Windows evidence honestly and require actual exact-head Linux CI before merge. Run full source pytest with both coverage domains, at least85percent total and90percent complete diff coverage, Ruff, format, strict mypy, whitespace and all unchanged native V2 checks and five original mutation operators under a fresh independently reviewed single-use action. The decision unit explicitly declares action_approval for this existing local targeted-mutation requirement; no external permission is requested. Record independent implementation review, same-verifier finalization, code approval and a passing local Gate. Build ordinary wheel and sdist-rebuilt wheel; verify their resource manifests and run the regression against ordinary installed bytes outside source imports. Root integration still separately owns exact-head required CI, publication and actual target acceptance.\n\n## 禁止动作\n\nDo not alter previous events, failed runs, reviews, approval history, spent actions, source maintenance mode, authorization files, unrelated worktrees or user WIP. Do not change Git/index protection, skip tests, weaken whitespace or coverage, copy credentials, run models, upload private material, push, merge or force-update refs.\n\n## 错误行为\n\nPreserve all failures and original bytes. A short write, fsync/open/close error, stale fact or missing approval remains rejected under existing behavior. Do not reinterpret or repair historical records or reuse spent authority. Diagnose new validation failures and fix only direct blockers, retaining every original gate.\n\n## 回滚\n\nUse an ordinary reviewed revert of only the relevant flag changes when necessary; retain the byte regression and append-only task/review/action/evidence records. Do not reset or delete historical task events or other work.\n",
+    "goal": "Preserve canonical task-event bytes and genuinely read-only Git facts",
+    "known_limitations": [
+      "Acceptance, integration, and targeted mutation execution are owned by Chapter 11."
+    ],
+    "reproduce_command": [
+      "python",
+      "-m",
+      "aiflow",
+      "verify",
+      "TASK-0139",
+      "--actor",
+      "<verifier>"
+    ]
+  },
+  "context_sha256": "bef9772c7281078b2ccca52536d168e4f3b469e7770469cec56927e99158a9cd",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "schema_version": "1.0",
+  "spec_sha256": "fbde450eef330f5bf82f1bbce24f7ba77ecaee2e53cce7ae3b6e96c20cf8af91",
+  "subject_commit": "b8cc97c55c872c3435b241f5f4f38f519392ed4e",
+  "task_id": "TASK-0139"
+}

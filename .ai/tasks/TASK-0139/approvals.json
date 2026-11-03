@@ -115,5 +115,35 @@
     "spec_sha256": "fbde450eef330f5bf82f1bbce24f7ba77ecaee2e53cce7ae3b6e96c20cf8af91",
     "subject_commit": "b8cc97c55c872c3435b241f5f4f38f519392ed4e",
     "task_id": "TASK-0139"
+  },
+  {
+    "action_sha256": "d1b002f7ec89377b5e6db573000909fd6d0441206b2804539599b90b2a5fb96d",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-03T16:33:06Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-03T22:30:00Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：依据本会话所有者 A09（call_f46e207f06f54e7daabb1319d49a385b/question0）及项目本地 action 代签常设授权记录。实际独立 lf_review 已审核新 action raw969855b83c5da0cfacb4f4f8f162905c169147f10a57d0293fc45a445766a675/canonicald1b002f7ec89377b5e6db573000909fd6d0441206b2804539599b90b2a5fb96d、packer6741290358b0a693501f5078478ddf210330bc15f8effa3b82b7286188ff7072、native80066/bootstrap55a236，结论 APPROVE，无未关闭 critical/high 或其他 actionable findings。实际 inline status 成功且当前分类/批准新鲜；新 action 单次原字节落地 Host0/Guest0/operation0，receipt7d5c91a8b550c75722b27f15e00c844b13fdd42913f22d89dee45112cba24a6b，前后原保护与内存/归档身份均通过。仅以 project-owner 代理记录，不声称人类本人审核；批准不是 native PASS 或执行。真实独立 lf_verify 已恢复，后续须另获唯一 Guest 权才可执行唯一剩余 native。原 14/8/3000/85+85/90/五原60秒/outer5400 保持；旧 d0c/4474 未批准并保留，旧 FAILED0bf/STOP750d 未动。无模型、SDK、微信、付费、私有传输、目标接入、push/merge 授权。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "fbde450eef330f5bf82f1bbce24f7ba77ecaee2e53cce7ae3b6e96c20cf8af91",
+    "subject_commit": "b8cc97c55c872c3435b241f5f4f38f519392ed4e",
+    "task_id": "TASK-0139"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-03T18:04:23Z",
+    "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "07713c767680a3124be61b6d712d80d66570520e0ea356a4a9d20a04b764cf35",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：依据所有者 A09 与项目 Agent 代为记录 code 批准常设授权。实际独立正式实施审核 REV-0005-r0001 raw a344ed0278477541ad8fd8fa09f186597ce371a63dae00c53c2d6ba4d5918bad/context404ced22be10b913358faee6228ae25c2c7fc9653f0feb5b55b73c9fafebc80b 为 APPROVE/findings=[]；真实同一独立 lf-independent-verifier 已完成本轮一次 native 与 finalize，final evidence raw e11e607858f8a108037c3dfad6dbdab207f72de168097ac640c0e345085948bb 为 final/local/passed，snapshotcc95b020dbafd6fddaebbb05a267831a04168b9191a22270501d51fb64c332fc，保留原14检查及五组变异对象无重跑。当前 Guest87份原件5935100字节逐hash匹配；真实CLI status仅Missing code_approval，subjectb8cc97c/HEAD3ad343b9、分类fresh、证据passed。此 project-owner 为常设授权代理记录，不声称人类本人审核、Guest/Host Gate 已通过或 ordinary/真实目标验收已完成；不授权模型/SDK/微信/付费/私有传输/目标初始化/push/merge。本次仅代码批准，后续独立执行现有只读 Gate。",
+    "schema_version": "1.0",
+    "spec_sha256": "fbde450eef330f5bf82f1bbce24f7ba77ecaee2e53cce7ae3b6e96c20cf8af91",
+    "subject_commit": "b8cc97c55c872c3435b241f5f4f38f519392ed4e",
+    "task_id": "TASK-0139"
   }
 ]
