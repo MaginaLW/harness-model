@@ -45,10 +45,13 @@ allowed_scope:
 - src/aiflow/scope.py
 - tests/unit/test_git_context.py
 - tests/integration/test_resource_bundle_distribution.py
+- src/aiflow/initialization.py
+- tests/unit/test_initialization.py
+- docs/operations/initialization.md
 base_commit: 1f748a99b97842b9eca7abf4be454d348bf78759
 branch: codex/agent-bridge-node-ci
 created_at: '2026-11-02T08:27:54Z'
-current_state: IMPLEMENTING
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -116,6 +119,9 @@ decision_units:
   - src/aiflow/scope.py
   - tests/unit/test_git_context.py
   - tests/integration/test_resource_bundle_distribution.py
+  - src/aiflow/initialization.py
+  - tests/unit/test_initialization.py
+  - docs/operations/initialization.md
   inputs: []
   permission_requirements:
   - action_approval
@@ -152,6 +158,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-04T16:30:17Z'
 subject_commit: 151ccc84b931460b93642a1caebfeb6ad9dba4cc
 task_id: TASK-0138
-updated_at: '2026-11-04T19:43:58Z'
+updated_at: '2026-11-04T20:12:05Z'
 worktree_dirty: false
 worktree_dirty_paths: []
