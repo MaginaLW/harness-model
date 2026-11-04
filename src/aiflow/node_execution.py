@@ -4453,6 +4453,10 @@ def _ci_input_binding(
     if (
         _read(attempt / "control/input-materials.json", limit=MAX_JSON_BYTES) != raw
         or _sha(raw) != admission["input_materials_sha256"]
+        or _read(attempt / "control/provision.json", limit=MAX_JSON_BYTES)
+        != _canonical(material["python_provision"])
+        or _read(attempt / "control/provision/uv.lock", limit=MAX_JSON_BYTES)
+        != _read(attempt / "artifact/inputs/uv.lock", limit=MAX_JSON_BYTES)
     ):
         raise _error(
             "CI provisioned inputs changed after exclusive admission", "NODE_MATERIALS_DRIFT"
@@ -5511,7 +5515,7 @@ def _replay_ci_node_kernel(
     """Byte kernel only: content validity cannot authenticate platform/LOCAL proof."""
     from aiflow import installed_mutations as installed
     from aiflow.evidence import _node_evidence_plan
-    from aiflow.node_ci import validate_node_ci_document
+    from aiflow.node_ci import _python_provision, validate_node_ci_document
     from aiflow.verification import _bound_node_plan
 
     try:
@@ -5593,9 +5597,20 @@ def _replay_ci_node_kernel(
                 "host_tools",
                 "pair_materials",
                 "engine_artifact",
+                "python_provision",
             }
         ):
             raise _error("CI provisioned input digest differs from admission")
+        provision = _python_provision(
+            source_tuple, package_root / "originals/artifact", initial["engine"]
+        )
+        if (
+            initial["python_provision"] != provision
+            or _ci_original(package_root, "control", "provision.json") != _canonical(provision)
+            or _ci_original(package_root, "control", "provision/uv.lock")
+            != _ci_original(package_root, "artifact", "inputs/uv.lock")
+        ):
+            raise _error("CI transported Python lock/provision association differs")
         for key, manifest_name in (
             ("source", "source.json"),
             ("dependencies", "dependencies.json"),

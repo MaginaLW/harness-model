@@ -17,6 +17,7 @@ import re
 import stat
 import sys
 import tarfile
+import tomllib
 import zipfile
 from collections.abc import Mapping
 from datetime import datetime, timezone
@@ -2408,18 +2409,241 @@ def _ci_input_materials(
     budget = [node.MAX_ENTRIES, node.MAX_TOTAL_BYTES]
     source = node._source(source_root, source_tuple["binding"]["subject_commit"], budget=budget)
     _package, lock = node._source_contract(source_root, source, revision=2)
+    engine = node._engine(budget=budget)
     return {
         "source": source,
         "runtime": node._inventory(payload_root / "node", budget=budget),
         "dependencies": node._dependencies(
             payload_root / "dependencies/node_modules", lock, budget=budget, revision=2
         ),
-        "engine": node._engine(budget=budget),
+        "engine": engine,
         "host_tools": node._host_tools(budget=budget),
         "pair_materials": _json(installed._materials())
         if source_tuple["binding"]["verification_level"] == "V2"
         else None,
         "engine_artifact": dict(source_tuple["engine_artifact"]),
+        "python_provision": _python_provision(
+            source_tuple, payload_root.parent / "artifact", engine
+        ),
+    }
+
+
+def _python_provision(
+    source_tuple: Mapping[str, Any], artifact_root: Path, engine: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Bind retained locked wheels and install originals without executing them.
+
+    This is a content check, not source authentication. The producer separately
+    compares the raw lock with the selected public head through the GH adapter.
+    The same check opens only transported members during portable replay.
+    """
+    selection = source_tuple["engine_artifact"]
+
+    def original(name: str, *, limit: int = MAX_FILE_BYTES) -> tuple[bytes, dict[str, Any]]:
+        data = _read(artifact_root / _path(name), limit=limit)
+        return data, {"ref": "artifact/" + name, "size": len(data), "sha256": _sha(data)}
+
+    lock_raw, lock_ref = original("inputs/uv.lock", limit=MAX_JSON_BYTES)
+    try:
+        lock = tomllib.loads(lock_raw.decode("utf-8"))
+    except (ValueError, UnicodeError) as error:
+        raise _error("CI Python source lock is invalid") from error
+    names = {
+        "attrs",
+        "jsonschema",
+        "jsonschema-specifications",
+        "pyyaml",
+        "referencing",
+        "rpds-py",
+        "typing-extensions",
+    }
+
+    def normalized(name: str) -> str:
+        return re.sub(r"[-_.]+", "-", name).lower()
+
+    packages = {}
+    for row in _list(lock.get("package")):
+        if isinstance(row, dict) and row.get("name") in names:
+            if row["name"] in packages:
+                raise _error("CI Python source lock repeats a runtime package")
+            packages[row["name"]] = row
+    if set(packages) != names:
+        raise _error("CI Python source lock lacks the fixed runtime packages")
+    requirements_raw, requirements_ref = original(
+        "inputs/runtime-requirements.txt", limit=MAX_JSON_BYTES
+    )
+    requirements = {}
+    try:
+        for line in requirements_raw.decode("utf-8").splitlines():
+            if not line.strip():
+                continue
+            match = re.fullmatch(r"([a-z0-9-]+)==([^\s]+) --hash=sha256:([0-9a-f]{64})", line)
+            if match is None or match[1] in requirements:
+                raise _error("CI Python runtime requirements are not closed exact hashes")
+            requirements[match[1]] = (match[2], match[3])
+    except UnicodeError as error:
+        raise _error("CI Python runtime requirements are not UTF-8") from error
+    if set(requirements) != names:
+        raise _error("CI Python runtime requirements differ from the fixed seven packages")
+    sites = engine["startup"]["python_environment"]["active_site_roots"]
+    if not isinstance(sites, list) or len(sites) != 1:
+        raise _error("CI Python runtime installation has no unique site root")
+    site = Path(sites[0])
+    distributions = {normalized(row["name"]): row for row in engine["distributions"]}
+    if len(distributions) != len(engine["distributions"]):
+        raise _error("CI installed Python distributions repeat normalized names")
+    wheel_root = artifact_root / "inputs/wheels"
+    _ordinary(wheel_root, directory=True)
+    wheel_names = {path.name for path in wheel_root.iterdir()}
+    wheels = []
+    selected_names = set()
+    for name in sorted(names):
+        version, digest = requirements[name]
+        package = packages[name]
+        if version != package.get("version"):
+            raise _error("CI Python requirement differs from selected source lock version")
+        candidates = [
+            row
+            for row in _list(package.get("wheels"))
+            if isinstance(row, dict) and row.get("hash") == "sha256:" + digest
+        ]
+        if len(candidates) != 1:
+            raise _error("CI Python wheel hash is absent or ambiguous in selected source lock")
+        locked_wheel = candidates[0]
+        filename = _path(_text(locked_wheel.get("url"), limit=4096).rsplit("/", 1)[-1])
+        if "/" in filename or not filename.endswith(".whl") or filename not in wheel_names:
+            raise _error("CI retained Python wheel differs from selected lock filename")
+        raw, reference = original("inputs/wheels/" + filename)
+        if reference["sha256"] != digest or reference["size"] != _integer(
+            locked_wheel.get("size"), maximum=MAX_FILE_BYTES
+        ):
+            raise _error("CI retained Python wheel differs from selected source lock bytes")
+        selected_names.add(filename)
+        distribution = distributions.get(name)
+        if distribution is None or distribution["version"] != version:
+            raise _error("CI installed Python dependency differs from selected source lock")
+        installed_files = {row["path"]: row for row in distribution["files"]}
+        with zipfile.ZipFile(io.BytesIO(raw)) as wheel:
+            files = _zip_files(wheel, entries=MAX_ENTRIES, total=MAX_ROLE_BYTES)
+            for member, info in files.items():
+                if member.endswith(".dist-info/RECORD"):
+                    continue  # pip's actual installed RECORD remains in the engine role.
+                data = _zip_read(wheel, info)
+                installed = installed_files.get(str(site / member))
+                if (
+                    installed is None
+                    or installed["size"] != len(data)
+                    or installed["sha256"] != _sha(data)
+                ):
+                    raise _error(
+                        "CI installed Python dependency differs from retained wheel payload"
+                    )
+        wheels.append({"name": name, "version": version, "wheel": reference})
+    if selected_names != wheel_names:
+        raise _error("CI Python wheelhouse has missing or extra members")
+    prefix = Path(engine["startup"]["python_environment"]["prefix"])
+    producing_artifact = prefix.parent / "artifact"
+    commands = {
+        "runtime-install": [
+            str(prefix / "Scripts/python.exe"),
+            "-I",
+            "-B",
+            "-m",
+            "pip",
+            "install",
+            "--no-index",
+            "--no-cache-dir",
+            "--find-links",
+            str(producing_artifact / "inputs/wheels"),
+            "--require-hashes",
+            "-r",
+            str(producing_artifact / "inputs/runtime-requirements.txt"),
+        ],
+        "engine-install": [
+            str(prefix / "Scripts/python.exe"),
+            "-I",
+            "-B",
+            "-m",
+            "pip",
+            "install",
+            "--no-index",
+            "--no-cache-dir",
+            "--no-deps",
+            str(producing_artifact / selection["wheel"]["member"]),
+        ],
+    }
+    provision = []
+    for command, argv in commands.items():
+        receipt_raw, receipt_ref = original(
+            "provision/" + command + ".receipt.json", limit=MAX_JSON_BYTES
+        )
+        receipt = _json(receipt_raw)
+        receipt = _obj(
+            receipt,
+            {
+                "argv",
+                "cleanup",
+                "cwd",
+                "duration_ms",
+                "environment_sha256",
+                "execution_error",
+                "receipt",
+                "returncode",
+                "stderr_overflow",
+                "stderr_sha256",
+                "stderr_size",
+                "stdout_overflow",
+                "stdout_sha256",
+                "stdout_size",
+                "timed_out",
+                "timeout_seconds",
+            },
+        )
+        _digest(receipt["environment_sha256"])
+        _integer(receipt["duration_ms"])
+        _integer(receipt["timeout_seconds"], minimum=1, maximum=180)
+        if not Path(_text(receipt["cwd"], limit=4096)).is_absolute():
+            raise _error("CI Python install receipt has no absolute producing cwd")
+        if (
+            receipt.get("argv") != argv
+            or type(receipt.get("returncode")) is not int
+            or receipt["returncode"] != 0
+            or receipt.get("cleanup") != "confirmed"
+            or any(
+                receipt.get(key) is not False
+                for key in ("timed_out", "execution_error", "stdout_overflow", "stderr_overflow")
+            )
+        ):
+            raise _error("CI Python provision does not bind the fixed successful install")
+        _api_receipt(receipt.get("receipt"))
+        provision.append(receipt_ref)
+        for stream in ("stdout", "stderr"):
+            data, reference = original(
+                "provision/" + command + "." + stream + ".raw", limit=1024 * 1024
+            )
+            if (
+                type(receipt.get(stream + "_size")) is not int
+                or receipt[stream + "_size"] != len(data)
+                or receipt.get(stream + "_sha256") != _sha(data)
+            ):
+                raise _error("CI Python provision stream differs from install receipt")
+            provision.append(reference)
+    return {
+        "kind": "aiflow-node-ci-python-provision",
+        "schema_version": "1.0",
+        "source": {
+            "repository_id": selection["source_repository_id"],
+            "full_name": selection["source_full_name"],
+            "head": selection["source_head"],
+            "path": "uv.lock",
+            "git_blob_sha": hashlib.sha1(
+                b"blob " + str(len(lock_raw)).encode() + b"\0" + lock_raw
+            ).hexdigest(),
+            "raw": lock_ref,
+        },
+        "requirements": requirements_ref,
+        "wheels": wheels,
+        "provision": provision,
     }
 
 
@@ -2610,6 +2834,135 @@ def _transport_totals(
         "manifest_bytes": manifest_bytes,
         "index_bytes": len(index_bytes),
     }
+
+
+def _admit_known_ci_materials(
+    source_root: Path,
+    attempt: Path,
+    payload_root: Path,
+    inputs: Mapping[str, Any],
+    control_files: Mapping[str, bytes],
+    host_files: Mapping[str, bytes],
+    *,
+    level: str,
+) -> dict[str, int]:
+    """Reject known aggregate tier overflow before creating any claimed output.
+
+    Existing roles use their complete physical inventories, including source
+    Git administration and the whole interpreter prefix. Future control/host
+    members use their actual bytes plus bounded metadata/envelopes, never a
+    fabricated role manifest accepted as proof. Later incremental/final checks
+    still cover the outputs that do not yet exist.
+    """
+    from aiflow import node_execution as node
+
+    caps = _caps(level)
+    roots = {
+        "source": source_root,
+        "artifact": attempt / "artifact",
+        "engine": Path(sys.prefix).absolute(),
+        "runtime": payload_root / "node",
+        "dependencies": payload_root / "dependencies/node_modules",
+        **{role: attempt / role for role in role_ids(level)[5:]},
+    }
+    inventories = {
+        "source": node._inventory(source_root),
+        "artifact": node._inventory(roots["artifact"]),
+        "engine": node._inventory(roots["engine"]),
+        "runtime": inputs["runtime"],
+        "dependencies": inputs["dependencies"],
+    }
+    _check_shared_input_budget(inputs, inventories["engine"])
+    entries = 4 + 2 * len(roots)
+    original_bytes = manifest_bytes = 0
+    names = ["originals/", "manifests/", "index.json"]
+    # Every admissible identity integer is bounded by the existing closed model.
+    identity_bytes = len(_canonical({key: (1 << 63) - 1 for key in _IDENTITY_FIELDS}))
+    for role, root in roots.items():
+        names.extend(("originals/" + role + "/", "manifests/" + role + ".json"))
+        if role in inventories:
+            inventory = inventories[role]
+            _inventory(inventory)
+            role_bytes = inventory["total_bytes"]
+            members = {row["path"]: row.get("size", 0) for row in inventory["entries"]}
+            raw_size = len(_canonical({"id": role, **inventory}))
+            directories = {
+                row["path"] for row in inventory["entries"] if row["kind"] == "directory"
+            }
+        else:
+            files = control_files if role == "control" else host_files if role == "host" else {}
+            members = {}
+            directories = set()
+            for name, data in files.items():
+                _integer(len(data), maximum=MAX_JSON_BYTES if role == "control" else MAX_FILE_BYTES)
+                node._ci_reserve_member(members, _path(name), len(data))
+                directories.update(
+                    parent.as_posix()
+                    for parent in PurePosixPath(name).parents
+                    if parent.as_posix() != "."
+                )
+            if directories.intersection(files) or len({name.casefold() for name in members}) != len(
+                members
+            ):
+                raise _error("CI planned originals have aliased or conflicting paths")
+            role_bytes = sum(members.values())
+            # Size-only canonical metadata envelope; no identities or manifests
+            # are synthesized, written or presented to any proof reader.
+            raw_size = len(_canonical({"id": role, "root": str(root), "total_bytes": role_bytes}))
+            raw_size += len('"identity":,"entries":[]') + identity_bytes + 1
+            for name, size in members.items():
+                row: dict[str, Any] = {
+                    "path": name,
+                    "kind": "directory" if name in directories else "file",
+                }
+                if name not in directories:
+                    row.update(size=size, sha256="0" * 64)
+                raw_size += len(_canonical(row)) + len('"identity":') + identity_bytes + 2
+        if len(members) > MAX_ENTRIES or role_bytes > MAX_ROLE_BYTES or raw_size > MAX_JSON_BYTES:
+            raise _error("CI known role exceeds its original bound", "NODE_CI_LIMIT_EXCEEDED")
+        entries += len(members)
+        original_bytes += role_bytes
+        manifest_bytes += raw_size
+        names.extend(
+            "originals/" + role + "/" + name + ("/" if name in directories else "")
+            for name in members
+        )
+
+    # Fixed outer index fields and every tier role are counted even before their
+    # future Ref sizes are known. The ordinary JSON bound limits those sizes.
+    def envelope_ref(name: str) -> dict[str, Any]:
+        return {"ref": name, "size": MAX_JSON_BYTES, "sha256": "0" * 64}
+
+    index_bytes = len(
+        _canonical(
+            {
+                "kind": "aiflow-node-ci-originals",
+                "schema_version": "1.0",
+                "evidence": envelope_ref("control/evidence.json"),
+                "descriptor": envelope_ref("control/descriptor.json"),
+                "source_tuple": envelope_ref("control/source-tuple.json"),
+                "roles": [
+                    {"id": role, "manifest": envelope_ref("manifests/" + role + ".json")}
+                    for role in roots
+                ],
+            }
+        )
+    )
+    archive_bytes = 1024 + original_bytes + manifest_bytes + index_bytes
+    archive_bytes += sum(2 * len(name.encode("utf-8")) + 256 for name in names)
+    totals = (entries, original_bytes, manifest_bytes, index_bytes, archive_bytes)
+    if (
+        any(value > bound for value, bound in zip(totals, caps, strict=True))
+        or index_bytes > MAX_JSON_BYTES
+    ):
+        raise _error("CI known originals exceed the registered tier", "NODE_CI_LIMIT_EXCEEDED")
+    return dict(
+        zip(
+            ("entries", "original_bytes", "manifest_bytes", "index_bytes", "archive_bytes"),
+            totals,
+            strict=True,
+        )
+    )
 
 
 def _write_package(
@@ -3373,6 +3726,12 @@ def verify_node_ci(
     _reject_source_git_authentication(source_root)
     _authenticate_engine(source_tuple["engine_artifact"], _capture=api_capture)
     source_archive = attempt / "artifact/engine-source.zip"
+    selection = source_tuple["engine_artifact"]
+    trusted_lock = _github_file(
+        selection["source_full_name"], "uv.lock", selection["source_head"], _capture=api_capture
+    )
+    if _read(attempt / "artifact/inputs/uv.lock", limit=MAX_JSON_BYTES) != trusted_lock:
+        raise _error("CI provisioned Python lock differs from trusted selected source blob")
     inputs = _ci_input_materials(source_root, payload_root, source_tuple)
     engine_content = _installed_wheel_binding(
         source_archive,
@@ -3380,18 +3739,6 @@ def verify_node_ci(
         inputs,
         descriptor["execution_contract_sha256"],
     )
-    control = attempt / "control"
-    control.mkdir()
-    for name, data in blobs.items():
-        _write_new(attempt / name, data)
-    for name, value in (
-        ("descriptor", descriptor),
-        ("source-tuple", source_tuple),
-        ("input-materials", inputs),
-    ):
-        _write_new(control / (name + ".json"), _canonical(value))
-    if level == "V2":
-        _write_new(control / "pair-materials.json", _canonical(inputs["pair_materials"]))
     admission = validate_node_ci_document(
         {
             "kind": "aiflow-node-ci-admission",
@@ -3403,26 +3750,66 @@ def verify_node_ci(
             "claimed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         }
     )
-    _write_new(control / "admission.json", _canonical(admission))
-    _write_api_observations(attempt, api_capture, seal=False)
-    host = attempt / "host"
-    host.mkdir()
+    control_files = {name.removeprefix("control/"): data for name, data in blobs.items()}
+    control_files.update(
+        {
+            "descriptor.json": _canonical(descriptor),
+            "source-tuple.json": _canonical(source_tuple),
+            "input-materials.json": _canonical(inputs),
+            "admission.json": _canonical(admission),
+            "provision.json": _canonical(inputs["python_provision"]),
+            "provision/uv.lock": trusted_lock,
+        }
+    )
+    if level == "V2":
+        control_files["pair-materials.json"] = _canonical(inputs["pair_materials"])
+    api_files = {
+        item["entry"][name]["ref"].removeprefix("control/"): item[name]
+        for item in api_capture["observations"]
+        for name in ("response", "receipt")
+    }
+    api_files["api-observations.json"] = _canonical(
+        {
+            "kind": "aiflow-node-ci-api-observations",
+            "schema_version": "1.0",
+            "observations": [item["entry"] for item in api_capture["observations"]],
+        }
+    )
+    host_files = {}
     for slot, row in inputs["host_tools"].items():
         if row is not None:
             data = node._read(
                 Path(row["path"]), os_role=slot if slot in node._os_tool_paths() else None
             )
             if len(data) != row["size"] or _sha(data) != row["sha256"]:
-                raise _error("CI host input changed after exclusive claim")
-            _write_new(host / slot, data)
-    _write_new(host / "gh", _read(_gh_executable()))
+                raise _error("CI host input changed before exclusive claim")
+            host_files[slot] = data
+    host_files["gh"] = _read(_gh_executable())
     if level == "V2":
         for key in ("base_executable", "runtime"):
             row = inputs["pair_materials"]["interpreter"][key]
             data = _read(Path(row["path"]))
             if len(data) != row["size"] or _sha(data) != row["sha256"]:
-                raise _error("CI interpreter input changed after exclusive claim")
-            _write_new(host / ("python_" + key), data)
+                raise _error("CI interpreter input changed before exclusive claim")
+            host_files["python_" + key] = data
+    _admit_known_ci_materials(
+        source_root,
+        attempt,
+        payload_root,
+        inputs,
+        {**control_files, **api_files},
+        host_files,
+        level=level,
+    )
+    control = attempt / "control"
+    control.mkdir()
+    for name, data in control_files.items():
+        _write_new(control / name, data)
+    _write_api_observations(attempt, api_capture, seal=False)
+    host = attempt / "host"
+    host.mkdir()
+    for name, data in host_files.items():
+        _write_new(host / name, data)
     prepared = node.prepare_ci_materials(
         source_root,
         payload_root,
@@ -3563,6 +3950,11 @@ def evaluate_node_ci_gate(
         if facts["evidence"]["platform"] != platform:
             raise _error("CI originals belong to another authenticated producer")
         _authenticate_engine(historical["engine_artifact"], _capture=api_capture)
+        selection = historical["engine_artifact"]
+        if _github_file(
+            selection["source_full_name"], "uv.lock", selection["source_head"], _capture=api_capture
+        ) != _read(package / "originals/artifact/inputs/uv.lock", limit=MAX_JSON_BYTES):
+            raise _error("CI retained Python lock differs from trusted selected source blob")
         inputs = _json(
             _read(package / "originals/control/input-materials.json", limit=MAX_JSON_BYTES)
         )
