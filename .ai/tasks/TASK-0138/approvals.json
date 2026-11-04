@@ -95,5 +95,18 @@
     "spec_sha256": "1046464ad1448b098f4c4ffde20b8ba8f996f2e40444ffa087ccaa4046c5dd41",
     "subject_commit": "151ccc84b931460b93642a1caebfeb6ad9dba4cc",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-04T20:26:06Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "Standing authorization: current independent design REV-0006 APPROVE with no findings; task and unchanged-original-base scope checks passed. Permit only exact public legacy20 read-only compatibility, preserving all current21 guards, original REVIEW/V2 and quality thresholds. No target migration, authorization file, external action or costly campaign approval.",
+    "schema_version": "1.0",
+    "spec_sha256": "cf027c98613d5352edfefd5246e268c499e05511df1a623049176b17218236ec",
+    "subject_commit": "d9152ce8fee5929a4ecadf1ede650097ace68ff9",
+    "task_id": "TASK-0138"
   }
 ]

@@ -51,7 +51,7 @@ allowed_scope:
 base_commit: 1f748a99b97842b9eca7abf4be454d348bf78759
 branch: codex/agent-bridge-node-ci
 created_at: '2026-11-02T08:27:54Z'
-current_state: ESCALATED
+current_state: IMPLEMENTING
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -150,14 +150,14 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 1046464ad1448b098f4c4ffde20b8ba8f996f2e40444ffa087ccaa4046c5dd41
+frozen_spec_sha256: cf027c98613d5352edfefd5246e268c499e05511df1a623049176b17218236ec
 goal: Implement explicit Node CI3.3 execution and original-host combined Gate without
   weakening local/native contracts
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-04T16:30:17Z'
-subject_commit: 151ccc84b931460b93642a1caebfeb6ad9dba4cc
+spec_frozen_at: '2026-11-04T20:21:18Z'
+subject_commit: d9152ce8fee5929a4ecadf1ede650097ace68ff9
 task_id: TASK-0138
-updated_at: '2026-11-04T20:12:05Z'
+updated_at: '2026-11-04T20:26:07Z'
 worktree_dirty: false
 worktree_dirty_paths: []
