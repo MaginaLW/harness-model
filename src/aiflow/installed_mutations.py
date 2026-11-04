@@ -2734,7 +2734,10 @@ def record_ci_pairs(
     budget = [node.MAX_ENTRIES, node.MAX_TOTAL_BYTES]
     try:
         for index, probe_id in enumerate(PROBE_IDS):
-            node._unchanged(original)
+            if _materials() != node._canonical(materials):
+                raise _error(
+                    "CI installed inputs changed before a fresh pair", "NODE_MATERIALS_DRIFT"
+                )
             pair = document["pairs"][index]
             for suffix, stage in (("b", "baseline"), ("m", "mutant")):
                 phase = attempt / f"pair-{index}-{suffix}"
