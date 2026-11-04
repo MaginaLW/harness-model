@@ -1,0 +1,19 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "8bf232616efa18b6f2c06c2cf06b33384621849850ad941e4f331675683d9adc",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0139",
+  "parameter_summary": "One fresh foreground complete native V2 verification of the canonical-event/read-only-Git candidate by actual independent actor lf-independent-verifier; full14 unchanged checks, complete shared pytest with both branch coverage domains85total/90diff, original five baseline/mutant pairs at60seconds per process; fresh verifier context 7c483dfabd1ce7785bbe6515fe1430132ca7f2c0839aad634aafc11700ee0503",
+  "subject_commit": "72c2ca5ab479fe1987bde62a6c29156a6b160677",
+  "conditions": [
+    "Execute only after actual independent exact-action APPROVE and current project-owner action recording under existing standing authority.",
+    "Bind current base 1c23e3b12bf6431f7ad3853ef1332ab2913edd14, frozen spec 1aef85aaa0830484ffb8bea1a288fbbf2b1860d373ce40d2313393b7be512b1b, policy fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727, classification 8bf232616efa18b6f2c06c2cf06b33384621849850ad941e4f331675683d9adc.",
+    "Use actual independent verifier lf-independent-verifier distinct from event-lf-implementer and exact fresh verifier context 7c483dfabd1ce7785bbe6515fe1430132ca7f2c0839aad634aafc11700ee0503.",
+    "Preserve all14 native V2 required declarations, full-suite timeout3000seconds, mypy300seconds, lint/format/diffcoverage120seconds, small checks30seconds, and each original mutation child60seconds; do not skip, lower or extend gates.",
+    "Maximum one full verification invocation and its five original mutation pairs for this newly bound candidate; a failed or interrupted result closes this authorization and retains spent receipts and all failed originals; no automatic retry. Prior candidate final evidence and spent actions remain historical and cannot authorize this candidate.",
+    "Logs and verifier/action/evidence records remain in this source task; the only outside-source temporary/cache/pytest pool is the original user-selected workspace-relative build/lf-native-temp/v2, required by the unchanged ordinary-installation outside-source assertion. Exact workspace preflight is retained in build/lf/external-temp-preflight-round2.json raw SHA256 4c72cfc83845835450a9eb0310e41d301b3b1f5d0ca11354b5d44b5f911afe6a. No original-workspace source or WIP changes are authorized. No personal credentials, models, SDK/WeChat acceptance, private transfer, public upload, push, merge or repository settings.",
+    "Canonical mutation manifest .ai/mutations/phase-02-critical-manifest.json raw SHA256 c7df2f0549822ed527d5712acb425adbc9dab90c72016abb482c1ef18e8bf50a."
+  ],
+  "expires_at": "2026-11-02T23:12:01.469679Z",
+  "single_use": true
+}
