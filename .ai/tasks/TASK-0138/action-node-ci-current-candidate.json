@@ -1,0 +1,17 @@
+{
+  "action_type": "node_ci_preregistration_measurement",
+  "classification_input_sha256": "b32ec1df4cd0bc76feb3eef38efb0f421f33d1e7b5640702608fad80f02a64c0",
+  "conditions": [
+    "Original A06 deadline remains 2026-11-05T01:54:32.975482Z; total original cumulative material ceiling remains 192 GiB. Old canonical actions stay spent.",
+    "Only six unstarted proof groups and one unstarted current source native V2 remain available. This fresh pre-kernel preparation consumes one of two existing recovery slots.",
+    "Use exact independently reviewed current helpers, new ordinary direct/rebuilt artifact bytes and the unchanged target source. All original thresholds, timeouts, file/JSON/role/shared and process guards remain.",
+    "Any kernel/native, unknown, budget, ownership or cleanup failure stops. Keep all old and new originals; no automatic proof retry.",
+    "No target a4 write, publication, push/merge, private transfer, credentials, paid, production, model, SDK or WeChat action."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T01:54:32.975482Z",
+  "parameter_summary": "Current-candidate continuation of owner-approved A06 after authorized direct compatibility repair and current same-task instruction. Exact build/cn/continuation.json SHA256 44f381355035b0c4549acc8afd99ceb00d2999e7f052866719af9ff2a09e2c20. No new budget or remote authority.",
+  "single_use": true,
+  "subject_commit": "54160ec11d05520b09790ed7dddd2797a6571673",
+  "target": "TASK-0138"
+}
