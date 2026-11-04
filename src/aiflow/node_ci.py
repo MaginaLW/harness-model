@@ -3188,6 +3188,7 @@ def validate_ci_originals(
             "host_tools",
             "pair_materials",
             "engine_artifact",
+            "python_provision",
         },
     )
     expected_host = {key: value for key, value in inputs["host_tools"].items() if value is not None}
