@@ -193,6 +193,85 @@ def installed_repository(tmp_path: Path, complete_installation_seed: Path) -> Pa
     return root
 
 
+@pytest.fixture
+def legacy20_installation(repository: Path, bundle: Path, tmp_path: Path) -> Path:
+    """Public c60 bundle layout, installed with synthetic unit-fixture identity/review."""
+    legacy_kinds = {
+        **{
+            f"schemas/{name}.schema.json": "schema"
+            for name in (
+                "approval",
+                "ask-options",
+                "classification",
+                "decision-unit",
+                "event",
+                "evidence",
+                "mutation-evidence",
+                "mutation-manifest",
+                "observation",
+                "observation-decision",
+                "policy",
+                "review-context",
+                "review-record",
+                "task",
+                "verifier-context",
+            )
+        },
+        **{
+            f"policy/{name}": "policy"
+            for name in (
+                "hard-rules.yaml",
+                "permissions.yaml",
+                "routing.yaml",
+                "verification-levels.yaml",
+            )
+        },
+        "templates/spec.md": "template",
+    }
+    assert len(legacy_kinds) == 20
+    assert set(RESOURCE_KINDS) == {*legacy_kinds, "schemas/node-ci.schema.json"}
+    legacy_bundle = tmp_path / "legacy-twenty-bundle"
+    legacy_bundle.mkdir()
+    entries = []
+    for relative, kind in sorted(legacy_kinds.items()):
+        raw = (bundle / relative).read_bytes()
+        path = legacy_bundle / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        entries.append(
+            {
+                "path": relative,
+                "kind": kind,
+                "size": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+            }
+        )
+    manifest = {
+        "schema_version": "1.0",
+        "bundle_version": "1.0",
+        "compatible_cli_versions": ["0.2.0"],
+        "policy_version": "2.6.0",
+        "files": entries,
+    }
+    # This is the ordinary source wheel's public manifest, not target installation data.
+    assert hashlib.sha256(canonical_json(manifest)).hexdigest() == (
+        "39ab1e3b6314e3cdebcf331e460630b62ba73d93e70b2f2dc54bfa35ce4d9c04"
+    )
+    (legacy_bundle / "manifest.json").write_bytes(canonical_json(manifest))
+    resource_bundle = importlib.import_module("aiflow.resource_bundle")
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(initialization, "RESOURCE_KINDS", legacy_kinds)
+        patch.setattr(resource_bundle, "RESOURCE_KINDS", legacy_kinds)
+        candidate = preview(repository, legacy_bundle)
+        assert apply(repository, candidate, legacy_bundle)["phase"] == "installed"
+        initialization.require_initialization_ready(repository)
+    state = json.loads((repository / ".ai/init-state.json").read_bytes())
+    assert len(state["objects"]) == 29
+    assert len(initialization.RESOURCE_KINDS) == 21
+    assert not (repository / ".ai/schemas/node-ci.schema.json").exists()
+    return repository
+
+
 def test_preview_is_read_only_and_binds_a_fresh_uuid(repository: Path, bundle: Path) -> None:
     before, bundle_before = tree(repository), tree(bundle)
     first, second = preview(repository, bundle), preview(repository / "folder", bundle)
@@ -929,6 +1008,172 @@ def test_inspect_and_migration_plan_are_read_only(repository: Path, bundle: Path
     serialized = json.dumps(migration)
     assert candidate["repository_id"] in serialized
     assert "readonly" in serialized.lower() or "read_only" in serialized.lower()
+
+
+def test_known_legacy20_installation_remains_ready_without_migration(
+    legacy20_installation: Path, bundle: Path
+) -> None:
+    root = legacy20_installation
+    before, bundle_before = tree(root), tree(bundle)
+
+    initialization.require_initialization_ready(root)
+    inspected = initialization.inspect_initialization(root)
+    planned = initialization.plan_initialization_migration(root, bundle_root=bundle)
+
+    assert inspected["status"] == "complete"
+    assert inspected["issues"] == []
+    assert planned["status"] == "complete" and planned["read_only"] is True
+    assert {"path": ".ai/schemas/node-ci.schema.json", "status": "missing"} in [
+        {"path": row["path"], "status": row["status"]} for row in planned["files"]
+    ]
+    assert all(
+        row["status"] == "unchanged"
+        for row in planned["files"]
+        if row["path"] != ".ai/schemas/node-ci.schema.json"
+    )
+    assert tree(root) == before
+    assert tree(bundle) == bundle_before
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "resource",
+        "missing_resource",
+        "review",
+        "review_noncanonical",
+        "complete",
+        "missing_complete",
+        "pending",
+        "state_noncanonical",
+        "state_objects",
+        "hardlink",
+    ],
+)
+def test_known_legacy20_installation_rejects_tampering(
+    legacy20_installation: Path, bundle: Path, tmp_path: Path, change: str
+) -> None:
+    root = legacy20_installation
+    state_path = root / ".ai/init-state.json"
+    complete_path = root / ".ai/init-complete.json"
+    if change == "resource":
+        (root / ".ai/templates/spec.md").write_bytes(b"changed legacy resource\n")
+    elif change == "missing_resource":
+        (root / ".ai/schemas/task.schema.json").unlink()
+    elif change in {"review", "review_noncanonical"}:
+        path = root / ".ai/policy-review.json"
+        decision = json.loads(path.read_bytes())
+        if change == "review":
+            decision["reviewer"] = "changed-test-reviewer"
+            path.write_bytes(canonical_json(decision))
+        else:
+            path.write_text(json.dumps(decision, indent=2), encoding="utf-8")
+    elif change == "complete":
+        complete = json.loads(complete_path.read_bytes())
+        complete["resources_sha256"] = "0" * 64
+        complete_path.write_bytes(canonical_json(complete))
+    elif change == "missing_complete":
+        complete_path.unlink()
+    elif change == "pending":
+        (root / ".ai/.repository-id.pending").write_bytes((root / ".ai/repository-id").read_bytes())
+    elif change == "hardlink":
+        os.link(root / ".ai/templates/spec.md", tmp_path / "legacy-resource-link.md")
+    else:
+        state = json.loads(state_path.read_bytes())
+        if change == "state_objects":
+            state["objects"].reverse()
+            encoded = canonical_json(state)
+        else:
+            encoded = json.dumps(state, indent=2).encode()
+        state_path.write_bytes(encoded)
+        complete = json.loads(complete_path.read_bytes())
+        complete["state_sha256"] = hashlib.sha256(encoded).hexdigest()
+        complete_path.write_bytes(canonical_json(complete))
+    before, bundle_before = tree(root), tree(bundle)
+
+    with pytest.raises(AiflowError):
+        initialization.require_initialization_ready(root)
+    assert initialization.inspect_initialization(root)["status"] == "conflict"
+    planned = initialization.plan_initialization_migration(root, bundle_root=bundle)
+    assert planned["status"] == "conflict" and planned["read_only"] is True
+    assert tree(root) == before
+    assert tree(bundle) == bundle_before
+
+
+def test_unknown_legacy20_manifest_is_not_legacy(legacy20_installation: Path, bundle: Path) -> None:
+    root = legacy20_installation
+    state_path = root / ".ai/init-state.json"
+    state = json.loads(state_path.read_bytes())
+    state["bundle"]["manifest_sha256"] = "0" * 64
+    encoded = canonical_json(state)
+    state_path.write_bytes(encoded)
+    complete_path = root / ".ai/init-complete.json"
+    complete = json.loads(complete_path.read_bytes())
+    complete["state_sha256"] = hashlib.sha256(encoded).hexdigest()
+    complete_path.write_bytes(canonical_json(complete))
+    before = tree(root)
+
+    with pytest.raises(AiflowError):
+        initialization.require_initialization_ready(root)
+    assert initialization.inspect_initialization(root)["status"] == "conflict"
+    planned = initialization.plan_initialization_migration(root, bundle_root=bundle)
+    assert planned["read_only"] is True
+    assert tree(root) == before
+
+
+@pytest.mark.parametrize("remove_row", [False, True])
+def test_current21_installation_cannot_downgrade_when_schema_is_missing(
+    installed_repository: Path, bundle: Path, remove_row: bool
+) -> None:
+    root = installed_repository
+    (root / ".ai/schemas/node-ci.schema.json").unlink()
+    if remove_row:
+        state_path = root / ".ai/init-state.json"
+        state = json.loads(state_path.read_bytes())
+        state["objects"] = [
+            row for row in state["objects"] if row["path"] != ".ai/schemas/node-ci.schema.json"
+        ]
+        encoded = canonical_json(state)
+        state_path.write_bytes(encoded)
+        complete_path = root / ".ai/init-complete.json"
+        complete = json.loads(complete_path.read_bytes())
+        complete["state_sha256"] = hashlib.sha256(encoded).hexdigest()
+        complete["resources_sha256"] = hashlib.sha256(
+            canonical_json(
+                {
+                    name: hashlib.sha256((root / ".ai" / name).read_bytes()).hexdigest()
+                    for name in RESOURCE_KINDS
+                    if name != "schemas/node-ci.schema.json"
+                }
+            )
+        ).hexdigest()
+        complete_path.write_bytes(canonical_json(complete))
+    before, bundle_before = tree(root), tree(bundle)
+
+    with pytest.raises(AiflowError):
+        initialization.require_initialization_ready(root)
+    assert initialization.inspect_initialization(root)["status"] == "conflict"
+    planned = initialization.plan_initialization_migration(root, bundle_root=bundle)
+    assert planned["read_only"] is True
+    assert tree(root) == before
+    assert tree(bundle) == bundle_before
+
+
+def test_current21_installation_is_complete_and_read_only(
+    installed_repository: Path, bundle: Path
+) -> None:
+    root = installed_repository
+    assert len(RESOURCE_KINDS) == 21
+    assert (root / ".ai/schemas/node-ci.schema.json").is_file()
+    before, bundle_before = tree(root), tree(bundle)
+
+    initialization.require_initialization_ready(root)
+    assert initialization.inspect_initialization(root)["status"] == "complete"
+    planned = initialization.plan_initialization_migration(root, bundle_root=bundle)
+    assert planned["read_only"] is True
+    assert all(row["status"] == "unchanged" for row in planned["files"])
+    assert tree(root) == before
+    assert tree(bundle) == bundle_before
 
 
 def test_persistent_installer_metadata_has_no_machine_paths(repository: Path, bundle: Path) -> None:
