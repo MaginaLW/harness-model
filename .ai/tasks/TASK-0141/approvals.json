@@ -11,5 +11,35 @@
     "spec_sha256": "de7a1f81584bb19373bb32f4ac0257602dd863a23a214b5bbf1886024171cb6c",
     "subject_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
     "task_id": "TASK-0141"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-04T17:55:56Z",
+    "base_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "7a32780f85acd6811c0482391d508f7d1d72b5de00209ad2e11969e96ef5e484",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "依据项目常设授权及本聊天项目所有者直接全局部署并完成的明确授权代录，非所有者亲自审查。独立实施审核 REV-0003 r0001 APPROVE，当前实现 context034cd483b36c3c12a39ac5b76fb6ac9fcb01ec0e7ec96b9796cd754feca52874；唯一V1 run-20261104T165906252120Z passed，6502 passed/9 skipped，十类必需检查通过。仅接受冻结同仓两段规则及本地部署证据，不批准其他WIP、生产、设备、科学或付费动作。review package仅补已验证/未验证标签及既有范围限制。",
+    "schema_version": "1.0",
+    "spec_sha256": "de7a1f81584bb19373bb32f4ac0257602dd863a23a214b5bbf1886024171cb6c",
+    "subject_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
+    "task_id": "TASK-0141"
+  },
+  {
+    "action_sha256": "76e632a7d745945aa3b060e35edfe4b646d395b1a4e95704e7cef39a2f58c92f",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-04T17:58:34Z",
+    "base_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-04T18:57:00Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "按当前聊天项目所有者明确要求直接全局部署并完成的真实授权代录，仅一次接受并完成冻结规格中已披露的同仓两段本地规则候选。实际独立设计REV-0002与实现REV-0003均APPROVE、V1 passed、code批准及当前Gate PASS；非所有者亲自审查。deploy源自Policy禁止自动动作默认，required_approval为action，本记录满足具体动作要求，不撤销或修改forbidden_actions、不授权任意自动部署，不回填声称候选此前已有CLI许可；其余WIP及生产边界保留。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "de7a1f81584bb19373bb32f4ac0257602dd863a23a214b5bbf1886024171cb6c",
+    "subject_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
+    "task_id": "TASK-0141"
   }
 ]

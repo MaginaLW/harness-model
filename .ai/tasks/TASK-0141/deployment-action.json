@@ -1,0 +1,18 @@
+{
+  "action_type": "deploy",
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "62a957fd9e02da6f86d687896ad1fecb461d9300be982810f2878a4b676dc812",
+  "target": "same repository active checkout refs/heads/codex/agent-bridge-phased-adoption: AGENTS.md exception-reporting bullet and docs/operations/low-intervention.md item 5 only",
+  "parameter_summary": "Accept and finalize the owner's already authorized two-paragraph local rule deployment candidate from main 39898f30b8914402d737fab9f59bebf8d8656f53. The candidate was applied before this record as declared in the frozen spec; this is not a claim of prior CLI approval. Preserve target CRLF and every other byte and WIP; no production or product deployment.",
+  "subject_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
+  "conditions": [
+    "Current TASK-0141 Gate PASS, independent REV-0002 design and REV-0003 implementation APPROVE, and passing V1 evidence remain applicable.",
+    "Source paragraph SHA256: AGENTS 05cc3c782be2cf1a2dc6c32af06f3120b5854e3fd7f1db4d1c771799296e2acd; low-intervention baf336869b58dcd308b8fd8c356cc1628e77b95c19182d996f48fc132b51ebd5.",
+    "Target raw paragraph SHA256: AGENTS 97eda7538de0299c05c56b37c7b0fdcac8de477bd35a1ce06a4c132f4de4b5a3; low-intervention c422eda9c67d215a7dea912988899c11bed0c05dcdfe9fe41e92f98fc7de6eb3. Only existing CRLF to LF canonicalization is permitted.",
+    "Target whole-file raw SHA256: AGENTS bc786fc1bbb270b6a70400485ded970cb99ef4cdc55c0246fa38b75c38621521; low-intervention 88299ff76858ab3161df74c418387e680d72e68e4ab27dbd5ae5be411b8a844a.",
+    "Eight unrelated staged product files and staged diff SHA256 3f4c4c617123c8e1bdcc609601434fe99ef14362875c307003b9e25d4cdbdd89 stay unchanged. Commit only the two rule files, preserving all unrelated untracked work.",
+    "No change to Policy, thresholds, source code, other authority clauses or other task evidence; no merge, direct main push, force push, deletion, credentials, paid, device, solver or production action. Any drift pauses this action."
+  ],
+  "expires_at": "2026-11-04T18:57:00Z",
+  "single_use": true
+}
