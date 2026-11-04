@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-04T16:55:15Z",
+    "base_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "Record the human user instruction in this chat to execute and complete the described full global rollout with highest available session permissions. This specifically covers deploying the two existing accepted rule paragraphs to this repository, required validation, commits and normal branch push; it does not waive the Policy, Gate, independent review, or authorize unrelated effects.",
+    "schema_version": "1.0",
+    "spec_sha256": "de7a1f81584bb19373bb32f4ac0257602dd863a23a214b5bbf1886024171cb6c",
+    "subject_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
+    "task_id": "TASK-0141"
+  }
+]

@@ -1,0 +1,71 @@
+allowed_scope:
+- AGENTS.md
+- docs/operations/low-intervention.md
+base_commit: 39898f30b8914402d737fab9f59bebf8d8656f53
+branch: codex/deploy-main-exception-rules
+created_at: '2026-11-04T16:50:15Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: true
+    regression_risk: true
+  controlled_actions:
+  - deploy
+  decision_unit_id: DU-001
+  external_side_effects:
+  - local_rule_file_deployment
+  goal: Govern the authorized local deployment of the two accepted exception-reporting
+    paragraphs from main 39898f30b8914402d737fab9f59bebf8d8656f53 to this repository
+    active rule entrypoints; preserve all other text, product code, Policy, gates
+    and unrelated WIP.
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  - external_action
+  impact_scope:
+  - AGENTS.md
+  - docs/operations/low-intervention.md
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0141
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: de7a1f81584bb19373bb32f4ac0257602dd863a23a214b5bbf1886024171cb6c
+goal: Govern the authorized local deployment of the two accepted exception-reporting
+  paragraphs from main 39898f30b8914402d737fab9f59bebf8d8656f53 to this repository
+  active rule entrypoints; preserve all other text, product code, Policy, gates and
+  unrelated WIP.
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-04T16:53:46Z'
+subject_commit: 39898f30b8914402d737fab9f59bebf8d8656f53
+task_id: TASK-0141
+updated_at: '2026-11-04T16:57:19Z'
+worktree_dirty: false
+worktree_dirty_paths: []

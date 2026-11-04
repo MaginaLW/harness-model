@@ -1,0 +1,37 @@
+{
+  "base_commit": "39898f30b8914402d737fab9f59bebf8d8656f53",
+  "branch": "codex/deploy-main-exception-rules",
+  "classification_input_sha256": "62a957fd9e02da6f86d687896ad1fecb461d9300be982810f2878a4b676dc812",
+  "content": {
+    "allowed_scope": [
+      "AGENTS.md",
+      "docs/operations/low-intervention.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Govern the authorized local deployment of the two accepted exception-reporting paragraphs from main 39898f30b8914402d737fab9f59bebf8d8656f53 to this repository active rule entrypoints; preserve all other text, product code, Policy, gates and unrelated WIP.",
+        "impact_scope": [
+          "AGENTS.md",
+          "docs/operations/low-intervention.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Govern the authorized local deployment of the two accepted exception-reporting paragraphs from main 39898f30b8914402d737fab9f59bebf8d8656f53 to this repository active rule entrypoints; preserve all other text, product code, Policy, gates and unrelated WIP.",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "a132a4a03d61c30dd738291f446d859198e29a8f53a34c98e87747377a92730b",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "de7a1f81584bb19373bb32f4ac0257602dd863a23a214b5bbf1886024171cb6c",
+  "task_id": "TASK-0141"
+}
