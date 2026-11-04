@@ -50,5 +50,18 @@
     "spec_sha256": "b2f6e9b41ef08f6daf30e2f0131896f0dbc4fd5c68c69af4495348d86bc0f55b",
     "subject_commit": "aae4670915357847f84da7d62244326d3ae089bc",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-04T16:34:01Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "Standing authorization: independent current design REV-0005 APPROVE with no findings; task validate and exact original-base scope checks passed. This prerequisite transport revision changes no production code or external effect; original base, REVIEW/V2, thresholds and finite-execution/material permission requirements remain. No costly action or publication approval is recorded.",
+    "schema_version": "1.0",
+    "spec_sha256": "1046464ad1448b098f4c4ffde20b8ba8f996f2e40444ffa087ccaa4046c5dd41",
+    "subject_commit": "151ccc84b931460b93642a1caebfeb6ad9dba4cc",
+    "task_id": "TASK-0138"
   }
 ]
