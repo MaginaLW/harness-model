@@ -63,6 +63,8 @@ The package payload digest is SHA256 of the canonical UTF-8-path-sorted list of 
 
 Provisioning reuses approved public locked installation. If Python dependencies require uv.lock, read its trusted Git blob at the selected public source_head and bind raw blob SHA in control/provision inputs and admission input_materials_sha256. Node dependencies use the approved subject-bound package-lock. Neither lock, wheelhouse nor dependency payload becomes a fifth public artifact member; no lock service or package registry publication.
 
+The fixed Python runtime provision uses the seven locked runtime wheels and requirements under the local artifact role's `inputs/` directory. Its eighth input-material member, `python_provision`, has the closed fields `kind`, `schema_version`, `source`, `requirements`, `wheels` and `provision`. The source binds repository ID/name, selected source head, `uv.lock` path, Git blob SHA and raw Ref; ordered wheel rows bind name, version and raw wheel Ref. Retain the runtime/engine install receipt and stdout/stderr Refs, and check the locked wheel payloads against the actual installed distribution inventory. Publish the canonical association as `control/provision.json` and retain the same lock bytes at `control/provision/uv.lock`. Producer and original-host consumer compare the lock with the existing authenticated public-source Git blob reader; portable replay opens only retained members and derives content validity. No provisioning metadata grants platform authentication or LOCAL Current.
+
 Select/download the actual immutable artifact **before target LOCAL acceptance**. Both hosts install the same raw wheel with independent checks. Version/commit/equal payload/rebuild/normalization cannot substitute; direct/rebuilt origins remain distinct. Prove authorized download from both hosts; no credential export or new release/mirror/storage workaround.
 
 ## 3. Closed data model
@@ -268,6 +270,8 @@ That first measurement has a finite source-owned envelope, only for the controll
 Independent review inspects actual full-kernel candidate/inputs/roles/members/bytes/index/manifests, ordinary/runtime/Job/original proof and bounded local ZIP measurements. Retain immutable originals/review record; bind concrete code/Norm/frozen-spec values and reserve rationale **before final source verification/packaging and remote acceptance**. No unresolved registered values. Changed candidate bytes require current-candidate proof; over-cap needs measured independent amendment, never automatic growth/drop/retry.
 
 Admission, proof/package writer, download/ZIP/manifest/inventory/content readers enforce the **same installed tier table** before allocation/writes, incrementally and at completion. Bound actual compressed/expanded bytes/entries/metadata; provider size is not actual size. One valid role cannot validate an over-limit package. Missing/over-cap rejects with bounded diagnostics/spent claim; no private knob or remote-first cycle.
+
+Production admission inventories complete known source/Git, artifact and ordinary interpreter roots, plus runtime/dependencies, and counts the actual prospective control, host and captured API originals before creating control/host or entering proof. Use the same five-dimensional table and fixed role envelopes for this size calculation; a forecast is neither an authoritative role manifest nor a substitute for later incremental and completed original-package checks.
 
 ## 7. CLI, platform and final consumer
 
