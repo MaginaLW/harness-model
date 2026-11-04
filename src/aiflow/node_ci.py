@@ -2523,21 +2523,24 @@ def _python_provision(
         if distribution is None or distribution["version"] != version:
             raise _error("CI installed Python dependency differs from selected source lock")
         installed_files = {row["path"]: row for row in distribution["files"]}
-        with zipfile.ZipFile(io.BytesIO(raw)) as wheel:
-            files = _zip_files(wheel, entries=MAX_ENTRIES, total=MAX_ROLE_BYTES)
-            for member, info in files.items():
-                if member.endswith(".dist-info/RECORD"):
-                    continue  # pip's actual installed RECORD remains in the engine role.
-                data = _zip_read(wheel, info)
-                installed = installed_files.get(str(site / member))
-                if (
-                    installed is None
-                    or installed["size"] != len(data)
-                    or installed["sha256"] != _sha(data)
-                ):
-                    raise _error(
-                        "CI installed Python dependency differs from retained wheel payload"
-                    )
+        try:
+            with zipfile.ZipFile(io.BytesIO(raw)) as wheel:
+                files = _zip_files(wheel, entries=MAX_ENTRIES, total=MAX_ROLE_BYTES)
+                for member, info in files.items():
+                    if member.endswith(".dist-info/RECORD"):
+                        continue  # pip's actual installed RECORD remains in the engine role.
+                    data = _zip_read(wheel, info)
+                    installed = installed_files.get(str(site / member))
+                    if (
+                        installed is None
+                        or installed["size"] != len(data)
+                        or installed["sha256"] != _sha(data)
+                    ):
+                        raise _error(
+                            "CI installed Python dependency differs from retained wheel payload"
+                        )
+        except zipfile.BadZipFile as error:
+            raise _error("CI retained Python wheel archive is invalid") from error
         wheels.append({"name": name, "version": version, "wheel": reference})
     if selected_names != wheel_names:
         raise _error("CI Python wheelhouse has missing or extra members")
