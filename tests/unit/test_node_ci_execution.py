@@ -161,6 +161,106 @@ def synthetic_materials(root: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
     }
 
 
+@pytest.mark.parametrize("drift", [None, "distribution", "configuration", "interpreter", "host"])
+def test_record_ci_pairs_rechecks_declared_materials_without_rejecting_prefix_neighbors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, drift: str | None
+) -> None:
+    """Mocked phases only: no interpreter, native Job, or mutation probe executes."""
+    materials = synthetic_materials(tmp_path / "inputs", monkeypatch)
+    prefix = Path(materials["engine"]["closure"]["root"])
+    neighbors = {
+        prefix / "Lib/site-packages/pip/__init__.py": b"ordinary unrelated pip package\n",
+        prefix / "Scripts/pip.exe": b"ordinary unrelated pip entrypoint\n",
+    }
+    for path, raw in neighbors.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+    for role, relative in node._OS_TOOL_PATHS.items():
+        path = tmp_path / "inputs/w" / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"synthetic unexecuted host role\n")
+        materials["host_tools"][role] = installed._file(path)
+    materials["engine"]["closure"] = installed._closure(materials["engine"]["installed"], prefix)
+
+    def current_materials() -> bytes:
+        # Replace discovery only; hash the actual declared fixture files afresh.
+        # Neighbors are outside the declared installed/startup closure.
+        current = deepcopy(materials)
+        engine = current["engine"]["installed"]
+        for distribution in engine["distributions"]:
+            distribution["files"] = [
+                installed._file(Path(row["path"])) for row in distribution["files"]
+            ]
+        startup = engine["startup"]
+        startup["pyvenv_configuration"] = installed._file(prefix / "pyvenv.cfg")
+        current["engine"]["closure"] = installed._closure(engine, prefix)
+        for key in ("executable", "base_executable", "runtime"):
+            current["interpreter"][key] = installed._file(Path(current["interpreter"][key]["path"]))
+        for role, row in current["host_tools"].items():
+            if row is not None:
+                current["host_tools"][role] = installed._file(Path(row["path"]))
+        return node._canonical(current)
+
+    assert current_materials() == node._canonical(materials)
+    assert set(neighbors).isdisjoint(
+        prefix / row["path"] for row in materials["engine"]["closure"]["entries"]
+    )
+    admission = _documents("V2")["Admission"]
+    attempt = installed._ci_attempt_coordinates(admission, tmp_path)
+    attempt.mkdir(parents=True)
+    monkeypatch.setenv("GITHUB_WORKSPACE", str(tmp_path))
+    monkeypatch.setattr(installed, "_materials", current_materials)
+    phases = []
+    originals = {}
+
+    def mocked_stage(phase, pair, stage, probe_id, _materials, _budget):
+        phase.mkdir()
+        path = phase / "synthetic-original.raw"
+        path.write_bytes(f"unexecuted {probe_id} {stage}\n".encode())
+        originals[path] = path.read_bytes()
+        pair[stage] = {"synthetic": phase.name}
+        phases.append(phase.name)
+        if len(phases) == 2 and drift is not None:
+            targets = {
+                "distribution": prefix / "Lib/site-packages/aiflow/__init__.py",
+                "configuration": prefix / "pyvenv.cfg",
+                "interpreter": Path(materials["interpreter"]["runtime"]["path"]),
+                "host": Path(materials["host_tools"]["cmd"]["path"]),
+            }
+            target = targets[drift]
+            target.write_bytes(target.read_bytes() + b"changed bound material\n")
+
+    validations = []
+
+    def mocked_pair_validation(**kwargs):
+        validations.append(kwargs["pairs"])
+        return {"passed": True, "reason_codes": []}
+
+    monkeypatch.setattr(installed, "_run_stage", mocked_stage)
+    monkeypatch.setattr(installed, "_envelope", lambda *_: {})
+    monkeypatch.setattr(installed, "_baseline_passes", lambda *_: True)
+    monkeypatch.setattr(installed, "validate_ci_pair_run", mocked_pair_validation)
+    result = installed.record_ci_pairs(
+        attempt_root=attempt, admission=admission, materials=materials
+    )
+
+    if drift is None:
+        assert result["failure"] is None
+        assert len(phases) == 10 and len(validations) == 1
+        assert all(pair["baseline"] and pair["mutant"] for pair in result["pairs"])
+        assert current_materials() == node._canonical(materials)
+    else:
+        assert result["failure"] == "NODE_MATERIALS_DRIFT"
+        assert phases == ["pair-0-b", "pair-0-m"] and not validations
+        assert result["pairs"][0]["baseline"] and result["pairs"][0]["mutant"]
+        assert all(
+            pair["baseline"] is None and pair["mutant"] is None for pair in result["pairs"][1:]
+        )
+        assert not any(attempt.glob("pair-[1-4]-*"))
+    assert {path: path.read_bytes() for path in originals} == originals
+    assert {path: path.read_bytes() for path in neighbors} == neighbors
+
+
 def receipt_input(root: Path) -> tuple[dict, dict, dict, list[str], dict]:
     """A parser input only: no claim that this synthetic process ever ran."""
     streams = {"stdout": b"synthetic output\xff\n", "stderr": b""}
