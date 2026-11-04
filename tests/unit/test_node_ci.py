@@ -45,6 +45,128 @@ CHECK_IDS = (
 )
 
 
+def synthetic_python_provision(artifact: Path, source_tuple: dict, engine: dict) -> Any:
+    """Tiny public wheel/install originals; no pip, Python, SDK, or Job executes."""
+    import io
+    import zipfile
+    from types import SimpleNamespace
+
+    from test_node_ci_platform import _job_receipt
+
+    from aiflow import installed_mutations, node_ci
+    from aiflow import node_execution as node
+
+    site = Path(engine["startup"]["python_environment"]["active_site_roots"][0])
+    prefix = Path(engine["startup"]["python_environment"]["prefix"])
+    names = (
+        "attrs",
+        "jsonschema",
+        "jsonschema-specifications",
+        "pyyaml",
+        "referencing",
+        "rpds-py",
+        "typing-extensions",
+    )
+    wheels, requirements, packages = [], [], []
+    for name in names:
+        normalized, version = name.replace("-", "_"), "1.0"
+        metadata = f"{normalized}-{version}.dist-info"
+        members = {
+            f"{normalized}/__init__.py": b"# Public synthetic dependency, never imported.\n",
+            f"{metadata}/METADATA": (
+                f"Metadata-Version: 2.1\nName: {name}\nVersion: {version}\n".encode()
+            ),
+            f"{metadata}/WHEEL": b"Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
+            f"{metadata}/RECORD": b"",
+        }
+        output = io.BytesIO()
+        with zipfile.ZipFile(output, "w") as archive:
+            for member, raw in members.items():
+                archive.writestr(zipfile.ZipInfo(member, (2020, 1, 1, 0, 0, 0)), raw)
+        raw = output.getvalue()
+        filename = f"{normalized}-{version}-py3-none-any.whl"
+        path = artifact / "inputs/wheels" / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        files = []
+        for member, content in members.items():
+            installed = site / member
+            installed.parent.mkdir(parents=True, exist_ok=True)
+            installed.write_bytes(content)
+            files.append(installed_mutations._file(installed))
+        engine["distributions"].append({"name": name, "version": version, "files": files})
+        requirements.append(f"{name}=={version} --hash=sha256:{node_ci._sha(raw)}")
+        packages.append(
+            f'[[package]]\nname = "{name}"\nversion = "{version}"\n'
+            f'wheels = [{{ url = "https://files.pythonhosted.org/public/{filename}", '
+            f'hash = "sha256:{node_ci._sha(raw)}", size = {len(raw)} }}]\n'
+        )
+        wheels.append(path)
+    lock_raw = ("version = 1\n" + "\n".join(packages)).encode()
+    (artifact / "inputs/uv.lock").write_bytes(lock_raw)
+    (artifact / "inputs/runtime-requirements.txt").write_text(
+        "\n".join(requirements) + "\n", encoding="utf8", newline="\n"
+    )
+    commands = {
+        "runtime-install": [
+            str(prefix / "Scripts/python.exe"),
+            "-I",
+            "-B",
+            "-m",
+            "pip",
+            "install",
+            "--no-index",
+            "--no-cache-dir",
+            "--find-links",
+            str(prefix.parent / "artifact/inputs/wheels"),
+            "--require-hashes",
+            "-r",
+            str(prefix.parent / "artifact/inputs/runtime-requirements.txt"),
+        ],
+        "engine-install": [
+            str(prefix / "Scripts/python.exe"),
+            "-I",
+            "-B",
+            "-m",
+            "pip",
+            "install",
+            "--no-index",
+            "--no-cache-dir",
+            "--no-deps",
+            str(prefix.parent / "artifact" / source_tuple["engine_artifact"]["wheel"]["member"]),
+        ],
+    }
+    (artifact / "provision").mkdir()
+    for name, argv in commands.items():
+        stdout, stderr = b"Synthetic installation transcript only.\n", b""
+        receipt = {
+            "argv": argv,
+            "returncode": 0,
+            "cleanup": "confirmed",
+            "receipt": _job_receipt(),
+            "cwd": str(prefix.parent),
+            "duration_ms": 1,
+            "environment_sha256": node_ci._sha(b"public synthetic install environment"),
+            "timeout_seconds": 180,
+            **dict.fromkeys(
+                ("timed_out", "execution_error", "stdout_overflow", "stderr_overflow"), False
+            ),
+            "stdout_size": len(stdout),
+            "stdout_sha256": node_ci._sha(stdout),
+            "stderr_size": len(stderr),
+            "stderr_sha256": node_ci._sha(stderr),
+        }
+        for suffix, raw in (
+            ("receipt.json", node_ci._canonical(receipt)),
+            ("stdout.raw", stdout),
+            ("stderr.raw", stderr),
+        ):
+            (artifact / "provision" / f"{name}.{suffix}").write_bytes(raw)
+    for row in engine["startup"]["site_roots"]:
+        row["identity"] = node._identity(node._safe_info(Path(row["path"]), directory=True))
+    return SimpleNamespace(lock_raw=lock_raw, wheels=wheels, engine=engine, artifact=artifact)
+
+
 @pytest.fixture(scope="module")
 def node_ci_schema() -> dict[str, Any]:
     # Intentionally independent of the deferred contracts.SCHEMA_FILES registration.
@@ -961,6 +1083,8 @@ def test_unregistered_caps_reject_before_planning_or_any_proof(
     from aiflow import evidence, node_ci
     from aiflow.errors import ContractError
 
+    monkeypatch.setattr(node_ci, "CI_CAPS_REGISTERED", False)
+    monkeypatch.setattr(node_ci, "CI_CAPS", dict.fromkeys(("V0", "V1", "V2"), (0, 0, 0, 0, 0)))
     assert node_ci.CI_CAPS_REGISTERED is False
     assert node_ci.CI_CAPS == dict.fromkeys(("V0", "V1", "V2"), (0, 0, 0, 0, 0))
     attempts = []
@@ -1765,6 +1889,8 @@ def test_production_entry_points_reject_unregistered_table_before_any_authority_
     from aiflow import gate, installed_mutations, node_ci, node_execution
     from aiflow.errors import ContractError
 
+    monkeypatch.setattr(node_ci, "CI_CAPS_REGISTERED", False)
+    monkeypatch.setattr(node_ci, "CI_CAPS", dict.fromkeys(("V0", "V1", "V2"), (0, 0, 0, 0, 0)))
     assert node_ci.CI_CAPS_REGISTERED is False
     assert all(row == (0, 0, 0, 0, 0) for row in node_ci.CI_CAPS.values())
     attempts = []
@@ -2188,6 +2314,8 @@ def producer_coordination(
             "identity": node._identity(node._safe_info(path)),
         }
 
+    runtime_distributions = []
+
     def engine(*, budget: Any = None) -> Any:
         if budget is None:
             budget = [node.MAX_ENTRIES, node.MAX_TOTAL_BYTES]
@@ -2199,9 +2327,18 @@ def producer_coordination(
         for directory in (site / "aiflow", site / "aiflow-0.2.0.dist-info"):
             assert directory.is_dir()
             node._take_budget(budget)
+        for distribution in runtime_distributions:
+            for row in distribution["files"]:
+                node._take_budget(budget, row["size"])
+            roots = {Path(row["path"]).relative_to(site).parts[0] for row in distribution["files"]}
+            for _directory in roots:
+                node._take_budget(budget)
         return {
             "python": str(attempt / "engine/python.exe"),
-            "distributions": [{"name": "aiflow", "version": "0.2.0", "files": files}],
+            "distributions": [
+                {"name": "aiflow", "version": "0.2.0", "files": files},
+                *deepcopy(runtime_distributions),
+            ],
             "startup": {
                 "files": [],
                 "setuptools": False,
@@ -2222,6 +2359,10 @@ def producer_coordination(
             },
         }
 
+    provision = synthetic_python_provision(attempt / "artifact", attested, engine())
+    runtime_distributions.extend(provision.engine["distributions"][1:])
+    lock_endpoint = f"repos/{repository}/contents/uv.lock?ref={selected_head}"
+    transcript[lock_endpoint] = _blob(provision.lock_raw)
     monkeypatch.setattr(node, "_engine", engine)
     tool = attempt / "artifact/tool.exe"
     tool.write_bytes(b"public host tool")
@@ -2278,15 +2419,17 @@ def producer_coordination(
         inputs = content_bindings[0]
         manifest_documents = {
             "source": inputs["source"],
-            "node": inputs["runtime"],
+            "node": {"runtime": inputs["runtime"]},
             "npm": node._inventory(attempt / "payload/node"),
             "dependencies": inputs["dependencies"],
             "engine": inputs["engine"],
             "host_tools": inputs["host_tools"],
             "preflight": node._inventory(attempt / "preflight"),
         }
-        for key, value in manifest_documents.items():
-            path = attempt / "control" / (key + ".json")
+        for (key, value), filename in zip(
+            manifest_documents.items(), node.MANIFEST_NAMES, strict=True
+        ):
+            path = attempt / "control" / filename
             node_ci._write_new(path, node_ci._canonical(value))
             document["manifests"][key] = node_ci._file_ref(path, attempt)
         node_ci._write_new(attempt / "control/prepared.json", node_ci._canonical(document))
@@ -2316,7 +2459,15 @@ def producer_coordination(
         }
         document["inputs"]["prepared_dependencies"] = inputs["dependencies"]
         document["roots"] = {
-            "original": node._git_state(source),
+            "original": {
+                "root": str(source),
+                "inventory": node._inventory(source),
+                "git": node._git_state(source),
+                "binding": {
+                    **attested["binding"],
+                    "attestation_head": attested["attestation_head"],
+                },
+            },
             "clone": None,
             "checkout": None,
             "checkout_receipt": None,
@@ -2366,6 +2517,7 @@ def producer_coordination(
             "reason_codes": ["SYNTHETIC_NOT_EXECUTED"],
         }
 
+    replay_reader = node.replay_ci_node
     monkeypatch.setattr(node, "prepare_ci_materials", prepare)
     monkeypatch.setattr(node, "execute_ci_node", execute)
     monkeypatch.setattr(node, "replay_ci_node", replay)
@@ -2382,6 +2534,9 @@ def producer_coordination(
         attested=attested,
         content_bindings=content_bindings,
         source_contract_calls=source_contract_calls,
+        provision=provision,
+        lock_endpoint=lock_endpoint,
+        replay_reader=replay_reader,
         before=snapshot_tree(source),
         snapshot=snapshot_tree,
     )
@@ -2540,7 +2695,7 @@ def test_public_producer_rejects_invalid_provision_before_kernel_or_reuse(
         )
     assert case.steps == []
     assert not (case.attempt / "evidence.json").exists()
-    assert (case.attempt / "control/admission.json").exists() is (fault == "host-changed")
+    assert not (case.attempt / "control/admission.json").exists()
 
 
 @pytest.mark.parametrize(
@@ -2660,6 +2815,255 @@ def test_public_producer_rejects_real_git_authorization_before_engine_or_claim(
     assert not (case.attempt / "evidence.json").exists()
 
 
+@pytest.mark.parametrize(
+    "dimension", range(5), ids=("entries", "bytes", "manifests", "index", "archive")
+)
+def test_public_producer_rejects_known_tier_aggregate_before_any_claim_or_kernel(
+    producer_coordination: Any, monkeypatch: pytest.MonkeyPatch, dimension: int
+) -> None:
+    from aiflow import installed_mutations, node_ci
+    from aiflow import node_execution as node
+    from aiflow.errors import ContractError
+
+    case = producer_coordination
+    admit = node_ci._admit_known_ci_materials
+    observations, forbidden_calls = [], []
+
+    def reject_aggregate(*args: Any, **kwargs: Any) -> Any:
+        totals = admit(*args, **kwargs)
+        observations.append(totals)
+        inventories = [
+            node._inventory(root)
+            for root in (
+                case.source,
+                case.attempt / "artifact",
+                case.attempt / "engine",
+                case.attempt / "payload/node",
+                case.attempt / "payload/dependencies/node_modules",
+            )
+        ]
+        assert all(len(value["entries"]) < totals["entries"] - 1 for value in inventories)
+        assert all(value["total_bytes"] < totals["original_bytes"] - 1 for value in inventories)
+        assert totals["original_bytes"] == sum(value["total_bytes"] for value in inventories) + sum(
+            len(raw) for files in args[4:6] for raw in files.values()
+        )
+        caps = list(node_ci.CI_CAPS[kwargs["level"]])
+        caps[dimension] = list(totals.values())[dimension] - 1
+        assert caps[dimension] > 0
+        monkeypatch.setattr(node_ci, "CI_CAPS", {**node_ci.CI_CAPS, kwargs["level"]: tuple(caps)})
+        return admit(*args, **kwargs)
+
+    def forbidden(*_args: Any, **_kwargs: Any) -> None:
+        forbidden_calls.append("write-or-kernel")
+        raise AssertionError("Known aggregate overflow reached writes or a physical phase")
+
+    monkeypatch.setattr(node_ci, "_admit_known_ci_materials", reject_aggregate)
+    for module, names in (
+        (node_ci, ("_write_new",)),
+        (node, ("_write_new", "prepare_ci_materials", "execute_ci_node")),
+        (installed_mutations, ("record_ci_pairs",)),
+    ):
+        for name in names:
+            monkeypatch.setattr(module, name, forbidden)
+    before = case.snapshot(case.attempt)
+    with pytest.raises(ContractError) as caught:
+        node_ci.verify_node_ci(
+            case.source,
+            "TASK-0001",
+            run_dir=case.attempt,
+            output=case.attempt / "evidence.json",
+            payload_root=case.attempt / "payload",
+        )
+    assert caught.value.code == "NODE_CI_LIMIT_EXCEEDED"
+    assert observations and all(value > 0 for value in observations[0].values())
+    assert forbidden_calls == case.steps == []
+    assert case.snapshot(case.attempt) == before
+    assert not (case.attempt / "control").exists() and not (case.attempt / "host").exists()
+
+
+@pytest.mark.parametrize("fault", ["missing", "wrong-head", "blob-sha", "different-blob"])
+def test_public_producer_authenticates_the_exact_python_lock_before_any_claim(
+    producer_coordination: Any, fault: str
+) -> None:
+    from test_node_ci_platform import _blob
+
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    case = producer_coordination
+    if fault in {"missing", "wrong-head"}:
+        case.transcript[case.lock_endpoint] = {"message": "Not Found"}
+        if fault == "wrong-head":
+            other = case.lock_endpoint.rsplit("=", 1)[0] + "=" + "9" * 40
+            case.transcript[other] = _blob(case.provision.lock_raw)
+    elif fault == "blob-sha":
+        case.transcript[case.lock_endpoint]["sha"] = "0" * 40
+    else:
+        case.transcript[case.lock_endpoint] = _blob(
+            case.provision.lock_raw + b"# other source blob\n"
+        )
+    with pytest.raises(ContractError):
+        node_ci.verify_node_ci(
+            case.source,
+            "TASK-0001",
+            run_dir=case.attempt,
+            output=case.attempt / "evidence.json",
+            payload_root=case.attempt / "payload",
+        )
+    assert case.lock_endpoint in case.calls
+    assert case.steps == [] and not (case.attempt / "control").exists()
+    assert not (case.attempt / "host").exists()
+
+
+@pytest.mark.parametrize("fault", [None, "missing", "extra"])
+def test_public_original_reader_closes_the_eight_provisioned_input_roles(
+    producer_coordination: Any, monkeypatch: pytest.MonkeyPatch, fault: str | None
+) -> None:
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    case = producer_coordination
+    write_package, public_reader = node_ci._write_package, node_ci.validate_ci_originals
+    observed = []
+
+    def package_with_input_variant(*args: Any, **kwargs: Any) -> Any:
+        path = case.attempt / "control/input-materials.json"
+        inputs = json.loads(path.read_bytes())
+        if fault == "missing":
+            del inputs["python_provision"]
+        elif fault == "extra":
+            inputs["unbound_extra"] = inputs["python_provision"]
+        path.write_bytes(node_ci._canonical(inputs))
+        return write_package(*args, **kwargs)
+
+    def observe_public(*args: Any, **kwargs: Any) -> Any:
+        inputs = json.loads((args[0] / "originals/control/input-materials.json").read_bytes())
+        observed.append(set(inputs))
+        return public_reader(*args, **kwargs)
+
+    monkeypatch.setattr(node_ci, "_write_package", package_with_input_variant)
+    monkeypatch.setattr(node_ci, "validate_ci_originals", observe_public)
+
+    def invoke() -> Any:
+        return node_ci.verify_node_ci(
+            case.source,
+            "TASK-0001",
+            run_dir=case.attempt,
+            output=case.attempt / "evidence.json",
+            payload_root=case.attempt / "payload",
+        )
+
+    if fault is None:
+        invoke()
+        inputs = case.content_bindings[0]
+        assert observed == [set(inputs)] and len(inputs) == 8
+        assert (
+            inputs["python_provision"]["source"]["head"]
+            == case.attested["engine_artifact"]["source_head"]
+        )
+        assert (case.attempt / "control/provision.json").read_bytes() == node_ci._canonical(
+            inputs["python_provision"]
+        )
+        assert (case.attempt / "control/provision/uv.lock").read_bytes() == case.provision.lock_raw
+        admission = json.loads((case.attempt / "control/admission.json").read_bytes())
+        assert admission["input_materials_sha256"] == node_ci._sha(node_ci._canonical(inputs))
+    else:
+        with pytest.raises(ContractError):
+            invoke()
+        assert observed and ("python_provision" in observed[0]) is (fault == "extra")
+        assert not (case.attempt / "evidence.json").exists()
+
+
+@pytest.mark.parametrize(
+    "fault", [None, "head", "blob", "wheel-ref", "requirements-ref", "control-lock"]
+)
+def test_public_original_reader_recomputes_portable_python_provision_associations(
+    producer_coordination: Any, monkeypatch: pytest.MonkeyPatch, fault: str | None
+) -> None:
+    from test_installed_mutation_transactions import pure_guard
+    from test_node_ci_execution import forbid_producing_paths
+
+    from aiflow import node_ci
+    from aiflow import node_execution as node
+    from aiflow.errors import ContractError
+
+    case = producer_coordination
+    writer, reader = node_ci._write_package, node_ci.validate_ci_originals
+    reached, provision_reads, control_reads = [], [], []
+
+    class ProvisionRelationsPassed(Exception):
+        pass
+
+    def downstream_context(*_args: Any, **_kwargs: Any) -> None:
+        reached.append(True)
+        raise ProvisionRelationsPassed
+
+    def mutate_control(*args: Any, **kwargs: Any) -> Any:
+        path = case.attempt / "control/provision.json"
+        document = json.loads(path.read_bytes())
+        if fault == "head":
+            document["source"]["head"] = "9" * 40
+        elif fault == "blob":
+            document["source"]["git_blob_sha"] = "0" * 40
+        elif fault == "wheel-ref":
+            document["wheels"][0]["wheel"]["ref"] = document["requirements"]["ref"]
+        elif fault == "requirements-ref":
+            document["requirements"]["ref"] = document["source"]["raw"]["ref"]
+        elif fault == "control-lock":
+            (case.attempt / "control/provision/uv.lock").write_bytes(
+                case.provision.lock_raw + b"\n"
+            )
+        path.write_bytes(node_ci._canonical(document))
+        return writer(*args, **kwargs)
+
+    def portable_public(*args: Any, **kwargs: Any) -> Any:
+        # Public closed-input parsing, physical Ref/role validation, and the
+        # actual pure replay/provision association all remain production code.
+        monkeypatch.setattr(node, "replay_ci_node", case.replay_reader)
+        monkeypatch.setattr(node, "_ci_context", downstream_context)
+        provision_reader, original_reader = node_ci._python_provision, node._ci_original
+
+        def read_provision(*values: Any, **options: Any) -> Any:
+            result = provision_reader(*values, **options)
+            provision_reads.append(result)
+            return result
+
+        def read_original(package: Path, role: str, name: str) -> bytes:
+            data = original_reader(package, role, name)
+            if role == "control" and name.startswith("provision"):
+                control_reads.append(name)
+            return data
+
+        monkeypatch.setattr(node_ci, "_python_provision", read_provision)
+        monkeypatch.setattr(node, "_ci_original", read_original)
+        with forbid_producing_paths(monkeypatch, case.attempt / "engine"), pure_guard(monkeypatch):
+            return reader(*args, **kwargs)
+
+    monkeypatch.setattr(node_ci, "_write_package", mutate_control)
+    monkeypatch.setattr(node_ci, "validate_ci_originals", portable_public)
+
+    def invoke() -> Any:
+        return node_ci.verify_node_ci(
+            case.source,
+            "TASK-0001",
+            run_dir=case.attempt,
+            output=case.attempt / "evidence.json",
+            payload_root=case.attempt / "payload",
+        )
+
+    if fault is None:
+        with pytest.raises(ProvisionRelationsPassed):
+            invoke()
+        assert reached == [True]
+    else:
+        with pytest.raises(ContractError):
+            invoke()
+        assert reached == []
+    assert len(provision_reads) == 1 and "provision.json" in control_reads
+    if fault in {None, "control-lock"}:
+        assert "provision/uv.lock" in control_reads
+
+
 @pytest.mark.parametrize("bound", ["entries", "bytes", "exact-boundary"])
 def test_ci_input_collectors_share_actual_physical_inventory_budget(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, bound: str
@@ -2732,6 +3136,9 @@ def test_ci_input_collectors_share_actual_physical_inventory_budget(
     monkeypatch.setattr(node, "_engine", engine)
     monkeypatch.setattr(node, "_host_tools", host)
     monkeypatch.setattr(installed_mutations, "_materials", no_pairs)
+    # This isolated five-domain accounting fixture supplies inventories rather
+    # than installed metadata; Python provision has its own real-byte tests.
+    monkeypatch.setattr(node_ci, "_python_provision", lambda *_: {"synthetic": "separate-domain"})
     inputs = {
         "binding": {"subject_commit": subject, "verification_level": "V1"},
         "engine_artifact": {"synthetic": "not-executed"},
@@ -2742,7 +3149,13 @@ def test_ci_input_collectors_share_actual_physical_inventory_budget(
     else:
         with pytest.raises(ContractError, match="Combined material inventory exceeds"):
             node_ci._ci_input_materials(source, payload, inputs)
-    assert [role for role, _ in received] == list(roots)
+    assert [role for role, _ in received] == [
+        "source",
+        "engine",
+        "runtime",
+        "dependencies",
+        "host_tools",
+    ]
     shared = received[0][1]
     assert shared is not None and all(budget is shared for _, budget in received)
     if bound == "exact-boundary":

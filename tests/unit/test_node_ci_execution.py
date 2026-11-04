@@ -17,7 +17,7 @@ from types import SimpleNamespace
 import pytest
 from initialization_helpers import fixture_git
 from test_installed_mutation_transactions import parser_phase, pure_guard
-from test_node_ci import _documents
+from test_node_ci import _documents, synthetic_python_provision
 from test_node_profile_contract import (
     _NATIVE_OWNERSHIP_UNIT_BYTES,
     _negative_process_original,
@@ -259,6 +259,87 @@ def test_record_ci_pairs_rechecks_declared_materials_without_rejecting_prefix_ne
         assert not any(attempt.glob("pair-[1-4]-*"))
     assert {path: path.read_bytes() for path in originals} == originals
     assert {path: path.read_bytes() for path in neighbors} == neighbors
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        None,
+        "missing",
+        "extra-requirement",
+        "duplicate-requirement",
+        "wheel-bytes",
+        "installed-payload",
+        "install-argv",
+        "install-stream",
+        "bad-zip",
+    ],
+)
+def test_python_provision_reader_binds_the_exact_locked_transported_installation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fault: str | None
+) -> None:
+    """Real wheel/lock/receipt byte readers around unexecuted synthetic files."""
+    producing = tmp_path / "producing"
+    materials = synthetic_materials(producing, monkeypatch)
+    source_tuple = _documents("V0")["AttestedSource"]
+    engine = materials["engine"]["installed"]
+    fixture = synthetic_python_provision(producing / "artifact", source_tuple, engine)
+    expected = node_ci._python_provision(source_tuple, fixture.artifact, engine)
+    transported = tmp_path / "originals/artifact"
+    shutil.copytree(fixture.artifact, transported)
+    requirements = transported / "inputs/runtime-requirements.txt"
+    wheel = transported / "inputs/wheels" / fixture.wheels[0].name
+    if fault == "missing":
+        (transported / "inputs/uv.lock").unlink()
+    elif fault == "extra-requirement":
+        requirements.write_bytes(
+            requirements.read_bytes() + b"unbound==1 --hash=sha256:" + b"0" * 64 + b"\n"
+        )
+    elif fault == "duplicate-requirement":
+        requirements.write_bytes(
+            requirements.read_bytes() + requirements.read_bytes().splitlines(keepends=True)[0]
+        )
+    elif fault == "wheel-bytes":
+        wheel.write_bytes(wheel.read_bytes() + b"changed retained wheel\n")
+    elif fault == "installed-payload":
+        engine["distributions"][1]["files"][0]["sha256"] = "0" * 64
+    elif fault == "install-argv":
+        path = transported / "provision/runtime-install.receipt.json"
+        receipt = json.loads(path.read_bytes())
+        receipt["argv"][-1] = "unbound-requirements.txt"
+        path.write_bytes(node._canonical(receipt))
+    elif fault == "install-stream":
+        (transported / "provision/engine-install.stdout.raw").write_bytes(b"changed raw stream")
+    elif fault == "bad-zip":
+        before, raw = (
+            wheel.read_bytes(),
+            b"not a ZIP, with fully rebound lock and requirement hashes\n",
+        )
+        wheel.write_bytes(raw)
+        requirements.write_bytes(
+            requirements.read_bytes().replace(node._sha(before).encode(), node._sha(raw).encode())
+        )
+        path = transported / "inputs/uv.lock"
+        path.write_bytes(
+            path.read_bytes()
+            .replace(node._sha(before).encode(), node._sha(raw).encode())
+            .replace(f"size = {len(before)}".encode(), f"size = {len(raw)}".encode(), 1)
+        )
+    with forbid_producing_paths(monkeypatch, producing), pure_guard(monkeypatch):
+        if fault is None:
+            actual = node_ci._python_provision(source_tuple, transported, engine)
+            assert actual == expected
+            assert actual["source"]["head"] == source_tuple["engine_artifact"]["source_head"]
+            assert len(actual["wheels"]) == 7 and len(actual["provision"]) == 6
+            assert all(
+                row["wheel"]["ref"].startswith("artifact/inputs/wheels/")
+                for row in actual["wheels"]
+            )
+        else:
+            with pytest.raises(FileNotFoundError if fault == "missing" else AiflowError) as caught:
+                node_ci._python_provision(source_tuple, transported, engine)
+            if fault == "bad-zip":
+                assert "archive is invalid" in str(caught.value)
 
 
 def receipt_input(root: Path) -> tuple[dict, dict, dict, list[str], dict]:
@@ -603,6 +684,8 @@ def test_node_projection_excludes_only_own_run_but_transport_manifest_seals_it(
 def test_unregistered_public_entrypoints_never_enter_physical_kernels(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, level: str, entrypoint: str
 ) -> None:
+    monkeypatch.setattr(node_ci, "CI_CAPS_REGISTERED", False)
+    monkeypatch.setattr(node_ci, "CI_CAPS", dict.fromkeys(("V0", "V1", "V2"), (0, 0, 0, 0, 0)))
     assert node_ci.CI_CAPS_REGISTERED is False
     documents = _documents(level)
     attested = documents["AttestedSource"]
@@ -824,7 +907,7 @@ def ci_kernel_case(
         fixture_git(source_root, "branch", "-m", branch)
     attempt = workspace / ".tmp/node-ci/1-1"
     (attempt / "control").mkdir(parents=True)
-    payload = workspace / "payload"
+    payload = attempt / "payload"
     npm = payload / "node/node_modules/npm"
     (npm / "bin").mkdir(parents=True)
     header = bytearray(128)
@@ -927,6 +1010,10 @@ def ci_kernel_case(
     monkeypatch.delenv("NODE_OPTIONS", raising=False)
     docs = _documents(level)
     attested, descriptor, admission = docs["AttestedSource"], docs["Descriptor"], docs["Admission"]
+    provision = synthetic_python_provision(payload.parent / "artifact", attested, engine)
+    material["engine"]["closure"] = installed._closure(
+        engine, Path(material["interpreter"]["prefix"])
+    )
     attested["binding"].update(
         base_commit=base,
         subject_commit=subject,
@@ -954,8 +1041,11 @@ def ci_kernel_case(
         ("admission", admission),
         ("input-materials", initial),
         ("pair-materials", material),
+        ("provision", initial["python_provision"]),
     ):
         (attempt / "control" / (name + ".json")).write_bytes(node._canonical(value))
+    (attempt / "control/provision").mkdir()
+    (attempt / "control/provision/uv.lock").write_bytes(provision.lock_raw)
     pairs = kernel_parser_pairs(material, attempt) if level == "V2" else None
     if pairs is not None:
         pairs.update(
@@ -1370,6 +1460,51 @@ def test_node_copy_reservation_combines_git_source_and_dependency_bytes(
 
 @pytest.mark.parametrize(
     "variant",
+    [None, "input-missing", "input-extra", "admission-digest", "provision-ref", "control-lock"],
+)
+def test_ci_admission_rebinds_python_provision_before_any_preparation(
+    ci_kernel_case, variant: str | None
+) -> None:
+    case = ci_kernel_case
+    path = case.attempt / "control/input-materials.json"
+    initial = json.loads(path.read_bytes())
+    assert len(initial) == 8 and "python_provision" in initial
+    if variant in {"input-missing", "input-extra"}:
+        if variant == "input-missing":
+            del initial["python_provision"]
+        else:
+            initial["unbound"] = initial["python_provision"]
+        path.write_bytes(node._canonical(initial))
+    elif variant == "admission-digest":
+        case.admission["input_materials_sha256"] = "0" * 64
+    elif variant == "provision-ref":
+        path = case.attempt / "control/provision.json"
+        document = json.loads(path.read_bytes())
+        document["requirements"]["ref"] = document["source"]["raw"]["ref"]
+        path.write_bytes(node._canonical(document))
+    elif variant == "control-lock":
+        path = case.attempt / "control/provision/uv.lock"
+        path.write_bytes(path.read_bytes() + b"\n")
+
+    def invoke() -> dict:
+        return node._ci_input_binding(
+            case.source, case.payload, case.attempt, case.attested, case.admission
+        )
+
+    if variant is None:
+        actual = invoke()
+        assert actual == initial
+        assert node._sha(node._canonical(actual)) == case.admission["input_materials_sha256"]
+    else:
+        with pytest.raises(AiflowError) as caught:
+            invoke()
+        assert caught.value.code == "NODE_MATERIALS_DRIFT"
+    assert case.state["calls"] == []
+    assert not (case.attempt / "control/prepared.json").exists()
+
+
+@pytest.mark.parametrize(
+    "variant",
     ["workspace", "platform", "control", "input_digest", "head", "version", "preparation_source"],
 )
 def test_private_preparation_rejects_rebinding_or_drift_without_publishing_a_selection(
@@ -1391,11 +1526,17 @@ def test_private_preparation_rejects_rebinding_or_drift_without_publishing_a_sel
         fixture_git(case.source, "checkout", "--detach", case.attested["binding"]["base_commit"])
     else:
         case.state["fault"] = variant
-    with pytest.raises(AiflowError):
+    with pytest.raises(AiflowError) as caught:
         case.prepare()
     assert not (case.attempt / "control/prepared.json").exists()
     assert not (case.attempt / "control/source.json").exists()
-    if variant not in {"version", "preparation_source"}:
+    if variant == "version":
+        assert caught.value.code == "NODE_PREFLIGHT_FAILED"
+        assert case.state["calls"] == ["node"]
+    elif variant == "preparation_source":
+        assert caught.value.code == "NODE_ROOT_DRIFT"
+        assert case.state["calls"] == ["node", "npm"]
+    else:
         assert case.state["calls"] == []
 
 
