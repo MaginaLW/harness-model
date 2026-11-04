@@ -152,6 +152,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-04T16:30:17Z'
 subject_commit: 151ccc84b931460b93642a1caebfeb6ad9dba4cc
 task_id: TASK-0138
-updated_at: '2026-11-04T16:34:02Z'
+updated_at: '2026-11-04T19:43:58Z'
 worktree_dirty: false
 worktree_dirty_paths: []

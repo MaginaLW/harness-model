@@ -1,0 +1,18 @@
+{
+  "action_type": "node_ci_preregistration_measurement",
+  "classification_input_sha256": "8e7f475c54bcdfcf1d97098ef00dba6aa4182ad9a56d90bc0b9cb9701ea3f087",
+  "conditions": [
+    "Explicit owner reply: A05 authorized. Preserve A05 authorization and original proposal; no rating was provided.",
+    "Measurement scripts must retain the exact reviewed SHA256 values in the proposal. Source and selected engine artifact remain bound to the proposal.",
+    "Six-hour and 192-GiB new-material envelope; one heavy process instance; first preparation or verification failure stops the campaign, retains all originals and permits no retry or alternate root.",
+    "Never rerun unchanged accepted TASK-0139 or Stage A tests. All original 85/90, timeout, file/JSON/role/shared/process and physical retention constraints remain.",
+    "Registration requires actual complete measurements and independent cap review. Future current-subject native mutation action is recorded separately under this same finite owner authorization before its one allowed native cycle.",
+    "No publication, push, merge, private transfer, credential export, model, SDK, WeChat, paid or production action."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T01:43:53.550361Z",
+  "parameter_summary": "Owner-authorized A05 local campaign. Exact ignored proposal build/cm/campaign-proposal.json SHA256 0abef4a54fb0f9ed53568659c64feddedb4510042af0ecf2218da697781b8c3a. Six serial direct/rebuilt V0/V1/V2 fresh groups; independently reviewed registration and at most one current original-base source V2 cycle. No remote or model actions.",
+  "single_use": true,
+  "subject_commit": "151ccc84b931460b93642a1caebfeb6ad9dba4cc",
+  "target": "TASK-0138"
+}
