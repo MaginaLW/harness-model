@@ -935,6 +935,72 @@ def test_role_manifest_rejects_unsafe_identity_entries_and_counts(
     assert not _contract(node_ci_schema).is_valid(document)
 
 
+@pytest.mark.parametrize("contents", [b"", b"abc", b"x" * 17])
+@pytest.mark.parametrize("grow_during_read", [False, True])
+def test_original_reader_bounds_allocation_and_still_rejects_growth(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    contents: bytes,
+    grow_during_read: bool,
+) -> None:
+    from contextlib import contextmanager
+
+    from aiflow import node_ci
+    from aiflow.errors import AiflowError
+
+    original = tmp_path / "original.bin"
+    original.write_bytes(contents)
+    real_open = Path.open
+    requests: list[int] = []
+
+    @contextmanager
+    def observed_open(path, *args, **kwargs):
+        with real_open(path, *args, **kwargs) as handle:
+            if path != original:
+                yield handle
+                return
+
+            class ObservedReader:
+                def fileno(self):
+                    return handle.fileno()
+
+                def read(self, size):
+                    requests.append(size)
+                    assert size <= len(contents) + 1
+                    if grow_during_read:
+                        with real_open(original, "ab") as writer:
+                            writer.write(b"!")
+                    return handle.read(size)
+
+            yield ObservedReader()
+
+    monkeypatch.setattr(Path, "open", observed_open)
+    if grow_during_read:
+        with pytest.raises(AiflowError, match="CI original changed during reading"):
+            node_ci._read(original)
+    else:
+        assert node_ci._read(original) == contents
+    assert requests == [len(contents) + 1]
+
+
+def test_original_reader_rejects_oversize_before_opening(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aiflow import node_ci
+    from aiflow.errors import AiflowError
+
+    original = tmp_path / "oversize.bin"
+    original.write_bytes(b"ab")
+
+    def unexpected_open(*args, **kwargs):
+        pytest.fail("An oversized original must be rejected before opening")
+
+    monkeypatch.setattr(Path, "open", unexpected_open)
+    with pytest.raises(AiflowError) as caught:
+        node_ci._read(original, limit=1)
+    assert caught.value.code == "NODE_CI_LIMIT_EXCEEDED"
+
+
 def test_role_manifest_enforces_entry_limit(node_ci_schema: dict[str, Any]) -> None:
     document = _documents()["Manifest"]
     document["entries"] = [document["entries"][0]] * 20001

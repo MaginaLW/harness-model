@@ -881,7 +881,7 @@ def _read(path: Path, *, limit: int = MAX_FILE_BYTES) -> bytes:
             before.st_size,
         ):
             raise _error("CI file changed while opening")
-        data = stream.read(limit + 1)
+        data = stream.read(before.st_size + 1)
         after = os.fstat(stream.fileno())
     current = path.lstat()
     if len(data) > limit or any(
