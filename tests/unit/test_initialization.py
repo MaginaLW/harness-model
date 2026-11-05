@@ -1614,3 +1614,168 @@ def test_migration_reports_unknown_files_and_preserves_task_history(
     assert planned["read_only"] is True
     assert {"path": ".ai/owner-note.txt", "code": "unknown"} in planned["issues"]
     assert tree(installed_repository) == before
+
+
+@pytest.fixture
+def managed_node_installation(request: pytest.FixtureRequest, bundle: Path, tmp_path: Path):
+    """Real public installer calls with synthetic policy review and portable filesystem."""
+    from test_node_v2_contract import node_documents, target_project, write_policy
+
+    from aiflow.contracts import schema_directory_context
+
+    layout = getattr(request, "param", "current21")
+    selected_bundle = bundle
+    if layout == "legacy20":
+        request.getfixturevalue("legacy20_installation")
+        selected_bundle = tmp_path / "legacy-twenty-bundle"
+    target = tmp_path / "managed-node"
+    target_project(target)
+    revision = 1 if layout == "node1" else 2
+    policy = write_policy(tmp_path / "node-policy-candidate", node_documents(revision))
+    with (
+        schema_directory_context(selected_bundle / "schemas"),
+        pytest.MonkeyPatch.context() as patch,
+    ):
+        if layout == "legacy20":
+            kinds = {
+                name: kind
+                for name, kind in RESOURCE_KINDS.items()
+                if name != "schemas/node-ci.schema.json"
+            }
+            patch.setattr(initialization, "RESOURCE_KINDS", kinds)
+            patch.setattr(
+                importlib.import_module("aiflow.resource_bundle"), "RESOURCE_KINDS", kinds
+            )
+        candidate = initialization.preview_initialization(
+            target,
+            bundle_root=selected_bundle,
+            policy_directory=policy,
+            profile=f"agent-bridge-node@{revision}",
+        )
+        result = initialization.apply_initialization(
+            target,
+            candidate,
+            review(candidate),
+            bundle_root=selected_bundle,
+            policy_directory=policy,
+        )
+    assert result["phase"] == "installed"
+    return target, candidate, selected_bundle, policy
+
+
+def managed_ci_declaration(root: Path) -> dict:
+    from test_node_ci import _documents
+
+    document = _documents()["StaticDeclaration"]
+    document["repository"]["repository_id"] = (root / ".ai/repository-id").read_text().strip()
+    return document
+
+
+@pytest.mark.parametrize("managed_node_installation", ["current21", "legacy20"], indirect=True)
+def test_managed_node_ci_declaration_reaches_public_cli_without_rewriting_installation(
+    managed_node_installation,
+) -> None:
+    from aiflow.contracts import schema_directory_context
+
+    root, _candidate, _bundle, _policy = managed_node_installation
+    declaration = root / ".ai/node-ci-producer.json"
+    declaration.write_bytes(canonical_json(managed_ci_declaration(root)))
+    history = root / ".ai/tasks/TASK-7777/events.jsonl"
+    history.parent.mkdir(parents=True)
+    history.write_bytes(b'{"synthetic":"retained history; no task acceptance claimed"}\n')
+    before = tree(root)
+
+    with schema_directory_context(root / ".ai/schemas"):
+        initialization.require_initialization_ready(root)
+        inspected = initialization.inspect_initialization(root)
+    assert inspected["status"] == "complete" and inspected["issues"] == []
+    result = run_cli(root, "status", "TASK-9999", "--format", "json")
+
+    # The real missing-task boundary proves normal dispatch, not a fabricated passing task.
+    assert result.returncode == 1 and result.stdout == ""
+    assert json.loads(result.stderr)["code"] == "STORAGE_READ_FAILED"
+    assert tree(root) == before
+
+
+@pytest.mark.parametrize(
+    ("change", "error_code"),
+    [
+        ("foreign_uuid", "INITIALIZATION_NODE_CI_DECLARATION_INVALID"),
+        ("profile", "NODE_CI_INVALID"),
+        ("policy", "NODE_CI_INVALID"),
+        ("unknown_field", "NODE_CI_INVALID"),
+        ("duplicate_key", "INITIALIZATION_JSON_DUPLICATE_KEY"),
+        ("oversized", "INITIALIZATION_READ_TOO_LARGE"),
+        ("hardlink", "INITIALIZATION_PATH_TYPE"),
+        ("unknown_neighbor", "INITIALIZATION_UNKNOWN_INSTALLATION_OBJECT"),
+    ],
+)
+def test_managed_node_ci_declaration_rejects_unsafe_or_foreign_inputs_before_dispatch(
+    managed_node_installation, tmp_path: Path, change: str, error_code: str
+) -> None:
+    from aiflow.contracts import schema_directory_context
+
+    root, _candidate, _bundle, _policy = managed_node_installation
+    document = managed_ci_declaration(root)
+    if change == "foreign_uuid":
+        document["repository"]["repository_id"] = "00000000-0000-4000-8000-000000000000"
+    elif change == "profile":
+        document["profile"]["revision"] = 1
+    elif change == "policy":
+        document["policy_version"] = "3.1.0"
+    elif change == "unknown_field":
+        document["unrecognized"] = True
+    raw = canonical_json(document)
+    if change == "duplicate_key":
+        raw = b'{"kind":"aiflow-node-ci-producer",' + raw[1:]
+    elif change == "oversized":
+        raw += b" " * (initialization.MAX_JSON_BYTES + 1)
+    path = root / ".ai/node-ci-producer.json"
+    path.write_bytes(raw)
+    if change == "hardlink":
+        os.link(path, tmp_path / "linked-declaration.json")
+    elif change == "unknown_neighbor":
+        (root / ".ai/owner-note.txt").write_bytes(b"preserve unknown owner material\n")
+    before = tree(root)
+
+    with schema_directory_context(root / ".ai/schemas"), pytest.raises(AiflowError) as caught:
+        initialization.require_initialization_ready(root)
+    assert caught.value.code == error_code
+    result = run_cli(root, "status", "TASK-9999", "--format", "json")
+    assert result.returncode == 1 and result.stdout == ""
+    assert json.loads(result.stderr)["code"] == error_code
+    assert tree(root) == before
+
+
+@pytest.mark.parametrize("managed_node_installation", ["node1"], indirect=True)
+def test_managed_node_ci_declaration_is_not_an_exception_for_other_profiles(
+    managed_node_installation, installed_repository: Path
+) -> None:
+    from aiflow.contracts import schema_directory_context
+
+    node1, _candidate, _bundle, _policy = managed_node_installation
+    for root in (node1, installed_repository):
+        (root / ".ai/node-ci-producer.json").write_bytes(
+            canonical_json(managed_ci_declaration(root))
+        )
+        before = tree(root)
+        with schema_directory_context(root / ".ai/schemas"), pytest.raises(AiflowError) as caught:
+            initialization.require_initialization_ready(root)
+        assert caught.value.code == "INITIALIZATION_UNKNOWN_INSTALLATION_OBJECT"
+        assert tree(root) == before
+
+
+def test_managed_node_ci_declaration_does_not_relax_initial_apply_inventory(
+    managed_node_installation,
+) -> None:
+    from aiflow.contracts import schema_directory_context
+
+    root, candidate, bundle, policy = managed_node_installation
+    (root / ".ai/node-ci-producer.json").write_bytes(canonical_json(managed_ci_declaration(root)))
+    before = tree(root)
+    with schema_directory_context(root / ".ai/schemas"), pytest.raises(AiflowError) as caught:
+        initialization.apply_initialization(
+            root, candidate, review(candidate), bundle_root=bundle, policy_directory=policy
+        )
+    assert caught.value.code == "INITIALIZATION_UNKNOWN_INSTALLATION_OBJECT"
+    assert tree(root) == before

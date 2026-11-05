@@ -447,6 +447,24 @@ def _inventory(root: Path, *, allow_history: bool = False) -> dict[str, Path]:
         for path in entries:
             relative = path.relative_to(root).as_posix()
             info = _plain(path)
+            if allow_history and directory == ai and path.name == "node-ci-producer.json":
+                # This target-owned runtime declaration is not a seed resource.
+                # Preserve exact installed bytes/state/history; all other extra
+                # neighbors and every unsafe file still use the existing guards.
+                state, _resources = _state_manifest(root)
+                if state["profile"] != NODE_V2_PROFILE:
+                    raise _error("UNKNOWN_INSTALLATION_OBJECT")
+                from aiflow.node_ci import validate_node_ci_document
+
+                declaration = validate_node_ci_document(
+                    read_initialization_json(path), kind="aiflow-node-ci-producer"
+                )
+                if (
+                    declaration["repository"]["repository_id"] != state["repository_id"]
+                    or declaration["policy_version"] != state["policy"]["policy_version"]
+                ):
+                    raise _error("NODE_CI_DECLARATION_INVALID")
+                continue
             if stat.S_ISDIR(info.st_mode):
                 if allow_history and directory == ai and path.name in RUNTIME_DIRECTORIES:
                     continue
