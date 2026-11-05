@@ -454,7 +454,7 @@ def transport_kernel_case(case) -> tuple[Path, dict]:
         "control": case.attempt / "control",
         "node": case.attempt / "node",
     }
-    roots["artifact"].mkdir()
+    roots["artifact"].mkdir(exist_ok=True)
     roots["host"].mkdir()
     for name, row in case.material["host_tools"].items():
         if row is not None:

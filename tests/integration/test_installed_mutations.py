@@ -47,8 +47,16 @@ def _copy_git(root: Path) -> Path:
         source = entry.parent.parent
     else:
         assert entry.parent.name.casefold() == "bin"
-        assert entry.parent.parent.name.casefold() == "mingw64"
+        assert entry.parent.parent.name.casefold() in {"mingw64", "ucrt64"}
         source = entry.parent.parent.parent
+    if not (source / "mingw64/bin").is_dir():
+        assert (source / "ucrt64/bin").is_dir(), "Unsupported installed Git layout"
+        import winreg
+
+        # Select a real installation supported by the unchanged host adapter.
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\GitForWindows") as key:
+            source = Path(winreg.QueryValueEx(key, "InstallPath")[0])
+        assert source.is_absolute() and (source / "mingw64/bin/git.exe").is_file()
     for relative in ("cmd", "mingw64/bin", "usr/bin"):
         for directory, names, files in os.walk(source / relative, followlinks=False):
             for name in (*names, *files):
