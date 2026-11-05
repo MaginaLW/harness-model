@@ -665,9 +665,9 @@ def test_offline_distributions_are_complete_and_exclude_source_identity(tmp_path
             if path.is_file()
         } == before
     assert all(item == resources[0] for item in resources)
-    assert len(resources[0]) == 21  # 20 inputs and manifest.json
+    assert len(resources[0]) == 22  # 21 inputs and manifest.json
     assert all(item == manifests[0] for item in manifests)
-    assert len(manifests[0]["paths"]) == 20
+    assert len(manifests[0]["paths"]) == 21
 
 
 def test_incomplete_source_distribution_cannot_build_wheel(tmp_path: Path) -> None:
@@ -1338,7 +1338,7 @@ def test_repeated_build_reuses_identical_bundle_without_rewriting_it(tmp_path: P
     _run(*arguments, cwd=source)
     bundle = build_lib / "aiflow/_bundled_resources"
     files = [path for path in bundle.rglob("*") if path.is_file()]
-    assert len(files) == 21
+    assert len(files) == 22
     fixed_time = 946684800_000_000_000
     for path in files:
         os.utime(path, ns=(fixed_time, fixed_time))

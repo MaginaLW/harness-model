@@ -1773,9 +1773,16 @@ def test_managed_node_ci_declaration_does_not_relax_initial_apply_inventory(
     root, candidate, bundle, policy = managed_node_installation
     (root / ".ai/node-ci-producer.json").write_bytes(canonical_json(managed_ci_declaration(root)))
     before = tree(root)
+    # Reapply first rejects the stale preview; exercise its actual inventory
+    # boundary separately so that this check cannot pass only on freshness.
+    with schema_directory_context(root / ".ai/schemas"):
+        _state, payloads = initialization._installed(root)
+        with pytest.raises(AiflowError) as caught:
+            initialization._existing(root, payloads, allow_partial=True)
+    assert caught.value.code == "INITIALIZATION_UNKNOWN_INSTALLATION_OBJECT"
     with schema_directory_context(root / ".ai/schemas"), pytest.raises(AiflowError) as caught:
         initialization.apply_initialization(
             root, candidate, review(candidate), bundle_root=bundle, policy_directory=policy
         )
-    assert caught.value.code == "INITIALIZATION_UNKNOWN_INSTALLATION_OBJECT"
+    assert caught.value.code == "INITIALIZATION_PREVIEW_STALE"
     assert tree(root) == before

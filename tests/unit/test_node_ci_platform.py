@@ -1173,6 +1173,12 @@ def gate_composition_seams(
     control = package / "originals/control"
     control.mkdir(parents=True)
     (control / "task.yaml").write_bytes(blobs["control/task.yaml"])
+    python_lock = b"# Public synthetic selected-source lock; composition seams only.\n"
+    artifact_inputs = package / "originals/artifact/inputs"
+    artifact_inputs.mkdir(parents=True)
+    (artifact_inputs / "uv.lock").write_bytes(python_lock)
+    # Transport/replay validity is the explicit validate_ci_originals seam here;
+    # this projection only supplies the wheel-binding input and its raw digest.
     inputs = b"{}"
     (control / "input-materials.json").write_bytes(inputs)
     facts = {
@@ -1197,6 +1203,7 @@ def gate_composition_seams(
     content_reader = Mock(return_value=facts)
     download = Mock()
     extract = Mock(return_value=package)
+    python_lock_reader = Mock(return_value=python_lock)
     wheel = Mock(return_value=SHA)
     real_wheel_binding = node_ci._installed_wheel_binding
     real_local_binding = node_ci._local_wheel_binding
@@ -1215,6 +1222,7 @@ def gate_composition_seams(
     monkeypatch.setattr(node_ci, "_download_artifact", download)
     monkeypatch.setattr(node_ci, "_extract_package", extract)
     monkeypatch.setattr(node_ci, "_authenticate_engine", Mock())
+    monkeypatch.setattr(node_ci, "_github_file", python_lock_reader)
     monkeypatch.setattr(node_ci, "_installed_wheel_binding", wheel)
     monkeypatch.setattr(node_ci, "_current_local_engine", current_engine)
     monkeypatch.setattr(node_ci, "_local_wheel_binding", local_binding)
@@ -1233,6 +1241,7 @@ def gate_composition_seams(
         "extract": extract,
         "wheel": wheel,
         "content_reader": content_reader,
+        "python_lock_reader": python_lock_reader,
         "current_engine": current_engine,
         "local_binding": local_binding,
         "real_wheel_binding": real_wheel_binding,
@@ -1255,7 +1264,7 @@ def test_combined_gate_requires_both_live_local_boundaries_under_mocked_ci_obser
 ) -> None:
     seams = gate_composition_seams
     decision = _compose_gate(seams)
-    assert decision["passed"] is True
+    assert decision["passed"] is True, decision["reason_codes"]
     assert all(
         decision[key] is True
         for key in (
@@ -1278,11 +1287,30 @@ def test_combined_gate_requires_both_live_local_boundaries_under_mocked_ci_obser
     )
     assert capture["prefix"] == "api-observations"
     assert capture["sealed"] is True
+    selection = seams["source"]["engine_artifact"]
+    seams["python_lock_reader"].assert_called_once_with(
+        selection["source_full_name"], "uv.lock", selection["source_head"], _capture=capture
+    )
     assert seams["platform_reader"].call_args_list[0].kwargs["_capture"] is capture
     assert (seams["download_dir"] / "api-observations.json").is_file()
     assert seams["wheel"].call_args.args[1] == seams["source"]["engine_artifact"]
     assert (seams["root"] / "sentinel").read_bytes() == b"protected source unchanged"
     assert list(seams["root"].iterdir()) == [seams["root"] / "sentinel"]
+
+
+def test_combined_gate_rejects_a_foreign_selected_source_lock_before_wheel_binding(
+    gate_composition_seams: dict[str, Any],
+) -> None:
+    seams = gate_composition_seams
+    seams["python_lock_reader"].return_value = b"foreign selected-source lock\n"
+
+    decision = _compose_gate(seams)
+
+    assert decision["passed"] is False
+    assert "NODE_CI_INVALID" in decision["reason_codes"]
+    seams["wheel"].assert_not_called()
+    assert seams["local"].call_count == 2
+    assert (seams["download_dir"] / "api-observations.json").is_file()
 
 
 def test_later_local_tamper_rejects_even_with_mocked_green_platform_and_content(
@@ -2143,7 +2171,7 @@ def _real_local_and_ci_wheels(
         }
     archive_bytes, selection = _source_archive_for_wheel(selected, payload, resources)
     artifact = seams["package"] / "originals/artifact/engine-source.zip"
-    artifact.parent.mkdir(parents=True)
+    artifact.parent.mkdir(parents=True, exist_ok=True)
     artifact.write_bytes(archive_bytes)
     chosen = artifact.parent / selection["wheel"]["member"]
     chosen.parent.mkdir(parents=True)
