@@ -289,6 +289,8 @@ Production admission inventories complete known source/Git, artifact and ordinar
 
 ## 7. CLI, platform and final consumer
 
+For managed agent-bridge-node@2 readiness/history-aware reads, the fixed optional .ai/node-ci-producer.json is target-owned runtime configuration rather than an immutable seed resource. Read it through the existing at-most-64-KiB ordinary/non-reparse/nlink-one, identity-stable and duplicate-key-rejecting JSON reader and the existing closed Node CI declaration validator. Require the installed @2 profile, declaration UUID equal to installed state and matching Policy version. Preserve every seed/state/review/marker/hash/identity/history guard and reject all other unknown, unsafe or aliased objects. This recognition grants no producer execution, authenticated selection, Current or Gate authority; those remain the unchanged downstream checks. No target resource/state migration is required.
+
 Explicit production opt-in:
 
 ```text

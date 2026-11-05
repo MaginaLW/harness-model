@@ -51,7 +51,7 @@ allowed_scope:
 base_commit: 1f748a99b97842b9eca7abf4be454d348bf78759
 branch: codex/agent-bridge-node-ci
 created_at: '2026-11-02T08:27:54Z'
-current_state: FAILED
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -158,6 +158,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-05T00:39:49Z'
 subject_commit: 4defb9579502d998f4120b648f0544d8aeffa9a5
 task_id: TASK-0138
-updated_at: '2026-11-05T06:48:10Z'
+updated_at: '2026-11-05T13:47:48Z'
 worktree_dirty: false
 worktree_dirty_paths: []
