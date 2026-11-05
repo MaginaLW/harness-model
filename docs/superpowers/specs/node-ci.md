@@ -254,14 +254,28 @@ Fixed table columns, each tier:
 
 Expanded bytes≤original+manifest+index limits. Count role roots/envelopes/members, outer metadata separately, not nested projections twice. Index/each JSON≤16MiB; table values cannot grow role sets.
 
-Unregistered source state is an explicit non-runnable constant, not an unknown accepted configuration:
+The registered source-owned capacities are fixed literals:
 
 ```text
-CI_CAPS_REGISTERED = False
-CI_CAPS = {"V0":(0,0,0,0,0),"V1":(0,0,0,0,0),"V2":(0,0,0,0,0)}
+CI_CAPS_REGISTERED = True
+CI_CAPS = {
+    "V0": (24576, 603979776, 10485760, 4096, 671088640),
+    "V1": (28672, 637534208, 12582912, 4096, 704643072),
+    "V2": (40960, 805306368, 16777216, 8192, 905969664),
+}
 ```
 
-The table has exactly those three rows/five columns. Registration replaces them with reviewed concrete positive integers and sets the literal flag true; missing/nonpositive/unregistered values reject production admission. There is no automatic registration or runtime lookup service. The exact cap table, registration flag and fixed role/check contracts enter the execution-contract digest and selected cap-bearing engine artifact. All consumers must be complete before public `--node-ci` activation. Static artifact_policy keeps only name/retention/visibility; it never silently acquires limit fields.
+The table has exactly those three rows/five columns. Missing/nonpositive/unregistered values reject production admission. There is no automatic registration or runtime lookup service. The exact cap table, registration flag and fixed role/check contracts enter the execution-contract digest and selected cap-bearing engine artifact. All consumers must be complete before public `--node-ci` activation. Static artifact_policy keeps only name/retention/visibility; it never silently acquires limit fields.
+
+The independently reviewed complete rebuilt fixture baseline at engine source `20604941107ac150f752a9b51d4f510a74eedc5b` measured the following maxima. Successful older direct measurements retain their own original versions; the current direct ordinary-input association covers the shared input change without relabelling older kernels. These local fixtures are unauthenticated and establish no CI Current or combined Gate.
+
+| Tier | Physical entries | Original bytes | Manifest bytes | Index bytes | STORE forecast bytes | Actual ZIP bytes |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| V0 | 21130 | 471052193 | 6761712 | 1826 | 486116977 | 482312755 |
+| V1 | 23906 | 486795931 | 7646258 | 1827 | 503903122 | 499599220 |
+| V2 | 33984 | 660357094 | 11023070 | 3360 | 685045746 | 678927804 |
+
+Each original-byte reserve allocates the existing 16 MiB hard bound for the complete captured API collection, plus 96 MiB for source/Git differences, actual root/ID widths and final cap-bearing ordinary-wheel/input/control/evidence differences. The 96 MiB is allocated reserve, not a measured upper bound on unknown future materials. Entry and manifest reserves separately accommodate API response/receipt members and path/identity widths; the closed nine/nineteen-role index has 4/8 KiB. Archive reserve covers the deterministic STORE forecast including originals, manifests, entries and names. The five caps are simultaneous independent limits, not a guarantee that arbitrary maxima can be combined. Final cap-bearing direct/rebuilt ordinary artifacts must retain their actual byte/input/control differences and account for repeated role projections within all five remaining reserves. Pure cap/flag/Norm metadata changes reuse the unchanged physical operations; changes to physical plans, roles, shared input purpose or a direct-only execution branch require corresponding new proof. Actual known, incremental or completed over-cap material fails closed; no automatic growth, member dropping or retry. Original per-file/JSON/role/shared/ten-copy bounds remain unchanged, and actual authenticated API/root acceptance remains separate.
 
 Before registration, a controlled Windows **implementation measurement** may directly exercise the fixed fresh physical kernels under an isolated, explicitly labelled fixture platform. It runs complete actual fixed operations/new pairs and retains every physical original. Fixture observations are never authenticated GitHub Current, accepted CI, a passing combined Gate or production admission. No production flag admits fixture credentials/Current, and no remote run must first succeed to measure.
 
