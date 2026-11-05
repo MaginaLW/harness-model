@@ -256,5 +256,21 @@
     "spec_sha256": "fd92ebf484ff657bb56f6937d4ad25bee7f842a4568accc149139ff51f1a966f",
     "subject_commit": "0f0843124b4b0855cd72f21b76063d82595dec95",
     "task_id": "TASK-0138"
+  },
+  {
+    "action_sha256": "cf64b89320463ce4445856657c12c4bc9eefb5f3c96643f96e7b36c56c74f851",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-05T19:08:23Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-05T22:08:07.636033+00:00",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "Actual direct owner approval of A12-time remaining A11 full slot2; authorization c73245084c92ad598f74bc1406176ad5037ef37977a89940260611bbf75b432f; no external actions or new slots.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "fd92ebf484ff657bb56f6937d4ad25bee7f842a4568accc149139ff51f1a966f",
+    "subject_commit": "0f0843124b4b0855cd72f21b76063d82595dec95",
+    "task_id": "TASK-0138"
   }
 ]
