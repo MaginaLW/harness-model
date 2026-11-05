@@ -1569,8 +1569,12 @@ def test_synthetic_fixture_does_not_change_the_production_byte_pins_or_registrat
             "cdafaf8e508042dddba72f8c7bbae84e2836ddb6b06c7026520c35d91af4e798"
         ),
     }
-    assert node_ci.CI_CAPS_REGISTERED is False
-    assert all(values == (0, 0, 0, 0, 0) for values in node_ci.CI_CAPS.values())
+    assert node_ci.CI_CAPS_REGISTERED is True
+    assert node_ci.CI_CAPS == {
+        "V0": (24576, 603979776, 10485760, 4096, 671088640),
+        "V1": (28672, 637534208, 12582912, 4096, 704643072),
+        "V2": (40960, 805306368, 16777216, 8192, 905969664),
+    }
 
 
 @pytest.mark.parametrize(
