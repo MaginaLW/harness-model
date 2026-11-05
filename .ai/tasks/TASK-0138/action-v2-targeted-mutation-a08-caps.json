@@ -1,0 +1,17 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "c80c00f3b8caa1eba34723e04b9dd6bef8526334d1c00d6b9b02b7815722ddbd",
+  "conditions": [
+    "Explicit owner A08 approval; original cumulative 6h/192GiB ceiling and cutoff unchanged.",
+    "Preserve original base, all 14 checks, full 3000s pytest, both 85% total/90% diff domains and five fixed native mutation pairs.",
+    "One complete native invocation only; any true native failure stops, no retry.",
+    "No target write, publication, push/merge, private transfer, model/SDK/WeChat or paid call.",
+    "Verifier context dc6f9064824d35df0aab7d0555d467fabfde0516034bece3271306c93cd004bc"
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T01:54:32.975482Z",
+  "parameter_summary": "Exactly one complete source native V2 and five original native mutation pairs for A08 final fixed-cap candidate; same-verifier finalize without rerun.",
+  "single_use": true,
+  "subject_commit": "4defb9579502d998f4120b648f0544d8aeffa9a5",
+  "target": "TASK-0138"
+}

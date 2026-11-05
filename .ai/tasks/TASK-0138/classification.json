@@ -1,10 +1,10 @@
 {
   "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
   "change_reason": "unchanged",
-  "classification_input_sha256": "21a2ced2d217fac22e6e6e540bfc7c841998d1c40a69ae401d8ba9db7d107c5c",
+  "classification_input_sha256": "c80c00f3b8caa1eba34723e04b9dd6bef8526334d1c00d6b9b02b7815722ddbd",
   "classifications": [
     {
-      "classified_at": "2026-11-04T22:55:16Z",
+      "classified_at": "2026-11-05T00:39:48Z",
       "decision_unit_id": "DU-001",
       "explanation": "A real external action requires review and applicable action authorization.",
       "explanations": [
@@ -51,12 +51,12 @@
       ]
     }
   ],
-  "classified_at": "2026-11-04T22:55:16Z",
+  "classified_at": "2026-11-05T00:39:48Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V2",
   "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
   "policy_version": "2.6.0",
   "schema_version": "2.0",
-  "subject_commit": "1f5f75a8d3d82641f63cece1d26b01c6735030fd",
+  "subject_commit": "4defb9579502d998f4120b648f0544d8aeffa9a5",
   "task_id": "TASK-0138"
 }

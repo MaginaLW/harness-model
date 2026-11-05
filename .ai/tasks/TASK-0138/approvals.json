@@ -169,5 +169,34 @@
     "spec_sha256": "0d0f5e4f7396a53bf7a3c584e875fe8a9f8873de77d6484a1e009385fe8432d6",
     "subject_commit": "1f5f75a8d3d82641f63cece1d26b01c6735030fd",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-05T00:43:42Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "Record explicit owner A08 approval of the two contract completions, independently reviewed fixed-cap registration and bounded final source V2; current formal design APPROVE. No target, remote or live-model action.",
+    "schema_version": "1.0",
+    "spec_sha256": "a8a057516fba8dc5f4e4e37fd954a1d4e2696f7cebb8d2ac89290684cf62ea84",
+    "subject_commit": "4defb9579502d998f4120b648f0544d8aeffa9a5",
+    "task_id": "TASK-0138"
+  },
+  {
+    "action_sha256": "19d6c8ecfdb52a215a389758d5c6c32d58d45665eda26bca8cc3a9af8a726d58",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-05T00:43:43Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-05T01:54:32.975482Z",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "Record explicit A08 grant for at most one full source native V2/Gate within its existing cutoff and budget; this exact unused final-cap subject/context action is bound before any complete verify.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "a8a057516fba8dc5f4e4e37fd954a1d4e2696f7cebb8d2ac89290684cf62ea84",
+    "subject_commit": "4defb9579502d998f4120b648f0544d8aeffa9a5",
+    "task_id": "TASK-0138"
   }
 ]

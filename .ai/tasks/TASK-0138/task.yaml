@@ -150,14 +150,14 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 0d0f5e4f7396a53bf7a3c584e875fe8a9f8873de77d6484a1e009385fe8432d6
+frozen_spec_sha256: a8a057516fba8dc5f4e4e37fd954a1d4e2696f7cebb8d2ac89290684cf62ea84
 goal: Implement explicit Node CI3.3 execution and original-host combined Gate without
   weakening local/native contracts
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-04T22:55:32Z'
-subject_commit: 1f5f75a8d3d82641f63cece1d26b01c6735030fd
+spec_frozen_at: '2026-11-05T00:39:49Z'
+subject_commit: 4defb9579502d998f4120b648f0544d8aeffa9a5
 task_id: TASK-0138
-updated_at: '2026-11-04T23:01:54Z'
+updated_at: '2026-11-05T00:43:43Z'
 worktree_dirty: false
 worktree_dirty_paths: []
