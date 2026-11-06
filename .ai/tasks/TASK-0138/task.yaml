@@ -50,10 +50,11 @@ allowed_scope:
 - docs/operations/initialization.md
 - tests/unit/test_resource_bundle_preflight.py
 - tests/integration/test_installed_mutations.py
+- tests/unit/test_installed_mutation_transactions.py
 base_commit: 1f748a99b97842b9eca7abf4be454d348bf78759
 branch: codex/agent-bridge-node-ci
 created_at: '2026-11-02T08:27:54Z'
-current_state: FAILED
+current_state: ESCALATED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -126,6 +127,7 @@ decision_units:
   - docs/operations/initialization.md
   - tests/unit/test_resource_bundle_preflight.py
   - tests/integration/test_installed_mutations.py
+  - tests/unit/test_installed_mutation_transactions.py
   inputs: []
   permission_requirements:
   - action_approval
@@ -162,6 +164,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-05T15:57:44Z'
 subject_commit: 0f0843124b4b0855cd72f21b76063d82595dec95
 task_id: TASK-0138
-updated_at: '2026-11-05T20:00:42Z'
+updated_at: '2026-11-06T00:06:21Z'
 worktree_dirty: false
 worktree_dirty_paths: []
