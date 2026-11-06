@@ -272,5 +272,18 @@
     "spec_sha256": "fd92ebf484ff657bb56f6937d4ad25bee7f842a4568accc149139ff51f1a966f",
     "subject_commit": "0f0843124b4b0855cd72f21b76063d82595dec95",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-06T00:18:13Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "Actual owner A13-source approval covers the exact reviewed closure-read repair, regression transport and mechanical recovery; current independent design REV-0011 APPROVE, frozen spec1705583f and class2d34. Preserve original base Norm Policy REVIEW/V2 and all thresholds; no external actions.",
+    "schema_version": "1.0",
+    "spec_sha256": "1705583f92440a4e407bf65e062302ba1372ee413af091228abe77f6a6c226c9",
+    "subject_commit": "b8f166b2830a478be2dd4ecc39685d3cdc5fac20",
+    "task_id": "TASK-0138"
   }
 ]
