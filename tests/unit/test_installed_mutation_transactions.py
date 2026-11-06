@@ -1341,6 +1341,102 @@ def test_closed_report_parser_reads_valid_synthetic_protocol_without_side_effect
     assert snapshot_tree(fixture.phase) == before
 
 
+@pytest.mark.parametrize("role", ["i", "c"])
+def test_closed_parser_rejects_root_change_after_parent_identity_sample(
+    phase_fixture: PhaseFixture, monkeypatch: pytest.MonkeyPatch, role: str
+) -> None:
+    fixture = phase_fixture
+    before = snapshot_tree(fixture.phase)
+    root = fixture.phase / role
+    actual_lstat = Path.lstat
+    sampled = False
+
+    def changing_root(path: Path, *args, **kwargs):
+        nonlocal sampled
+        info = actual_lstat(path, *args, **kwargs)
+        if path != root:
+            return info
+        if not sampled:
+            # The parent inventory captures the original identity first.
+            sampled = True
+            return info
+        # Model one later stable metadata change without writing in pure_guard.
+        changed = SimpleNamespace(
+            **{name: getattr(info, name) for name in dir(info) if name.startswith("st_")}
+        )
+        changed.st_mtime_ns += 1
+        return changed
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "lstat", changing_root)
+        with pure_guard(monkeypatch), pytest.raises(AiflowError):
+            runtime._envelope(fixture.phase, fixture.stage, PROBE, fixture.materials)
+    assert sampled, "the root identity fault was not reached"
+    assert snapshot_tree(fixture.phase) == before
+
+
+def test_retained_parser_never_queries_unavailable_producing_filesystem(
+    phase_fixture: PhaseFixture, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fixture = phase_fixture
+    phase = fixture.phase
+    producing = tmp_path / "unavailable-producing-phase"
+    assert not producing.exists()
+    stage = deepcopy(fixture.stage)
+    stage["closure"]["root"] = str(producing / "i")
+    stage["cache"]["root"] = str(producing / "c")
+    environment = runtime._environment(producing, fixture.materials["interpreter"])
+    outer = node._json(phase / "report.json")
+    outer["interpreter"]["cache_prefix"] = str(producing / "c")
+    raw = node._canonical(outer) + b"\n"
+    receipt = stage["receipt"]
+    receipt.update(
+        argv=list(runtime._argv(producing, PROBE, fixture.materials)),
+        cwd=str(producing),
+        environment_sha256=node._sha(node._canonical(environment)),
+        stdout_sha256=node._sha(raw),
+        stdout_size=len(raw),
+    )
+    # These are still synthetic parser inputs, never a relocated Job execution.
+    put_json(phase / "report.json", outer)
+    for name in ("stdout.raw", "stdout.log"):
+        (phase / "raw" / name).write_bytes(raw)
+    put_json(phase / "raw/receipt.json", receipt)
+    retained = node._inventory(phase)
+    retained["root"] = str(producing)
+    before = snapshot_tree(phase)
+    attempts = []
+
+    def only_transported(operation):
+        def checked(path: Path, *args, **kwargs):
+            if path == producing or path.is_relative_to(producing):
+                attempts.append(str(path))
+                raise AssertionError("retained parser queried a producing coordinate")
+            return operation(path, *args, **kwargs)
+
+        return checked
+
+    # Include all metadata and payload entry points used by the real parser.
+    with monkeypatch.context() as patch:
+        for name in ("lstat", "stat", "open"):
+            patch.setattr(Path, name, only_transported(getattr(Path, name)))
+        with pure_guard(monkeypatch):
+            report = runtime._envelope(
+                phase,
+                stage,
+                PROBE,
+                fixture.materials,
+                producing_phase=producing,
+                retained_inventory=retained,
+                environment=environment,
+            )
+    assert report == fixture.report
+    assert runtime._baseline_passes(report, PROBE, fixture.materials)
+    assert not attempts, "the reader caught a producing-path query instead of avoiding it"
+    assert snapshot_tree(phase) == before
+    assert not producing.exists()
+
+
 def make_parser_pair(
     model: Model, run: Path, probe_id: str, monkeypatch: pytest.MonkeyPatch, *, index=0
 ) -> dict:
