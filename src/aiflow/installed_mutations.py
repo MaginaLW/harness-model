@@ -1049,20 +1049,6 @@ def _envelope(
 ) -> dict[str, Any]:
     _closed(stage, {"closure", "cache", "receipt"})
     coordinates = phase if producing_phase is None else producing_phase
-    closure = (
-        node._inventory(phase / "i")
-        if retained_inventory is None
-        else _ci_subinventory(retained_inventory, "i")
-    )
-    if node._canonical(closure) != node._canonical(stage["closure"]):
-        raise _error("Executed installed copy changed")
-    cache = (
-        node._inventory(phase / "c")
-        if retained_inventory is None
-        else _ci_subinventory(retained_inventory, "c")
-    )
-    if cache["entries"] or node._canonical(cache) != node._canonical(stage["cache"]):
-        raise _error("Installed probe bytecode cache was not isolated")
     receipt = _receipt(
         phase,
         stage,
@@ -1097,6 +1083,17 @@ def _envelope(
     }
     if node._canonical(report["interpreter"]) != node._canonical(expected):
         raise _error("Installed probe ran with the wrong interpreter or cache")
+    inventory = node._inventory(phase) if retained_inventory is None else retained_inventory
+    closure = _ci_subinventory(inventory, "i")
+    if node._canonical(closure) != node._canonical(stage["closure"]):
+        raise _error("Executed installed copy changed")
+    cache = _ci_subinventory(inventory, "c")
+    if cache["entries"] or node._canonical(cache) != node._canonical(stage["cache"]):
+        raise _error("Installed probe bytecode cache was not isolated")
+    if retained_inventory is None:
+        for name, subtree in (("i", closure), ("c", cache)):
+            if node._identity(node._safe_info(phase / name, directory=True)) != subtree["identity"]:
+                raise _error("Installed probe directory identity changed")
     files = {
         item["path"].removeprefix("Lib/site-packages/"): item
         for item in closure["entries"]
@@ -1200,7 +1197,6 @@ def _envelope(
     allowed_directories = {
         "i/" + item["path"] for item in closure["entries"] if item["kind"] == "directory"
     } | {"i", "c", "h", "t", "raw"}
-    inventory = node._inventory(phase) if retained_inventory is None else retained_inventory
     for item in inventory["entries"]:
         if item["path"] not in (allowed_files if item["kind"] == "file" else allowed_directories):
             raise _error("Installed probe created undeclared output")
