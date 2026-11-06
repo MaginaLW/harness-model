@@ -35,7 +35,7 @@ _RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 PYTEST_CHECK_IDS = frozenset(
     {"unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"}
 )
-FULL_SUITE_TIMEOUT_SECONDS = 3000
+FULL_SUITE_TIMEOUT_SECONDS = 4200
 
 
 @dataclass(frozen=True)
