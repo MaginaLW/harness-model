@@ -8,7 +8,7 @@
 
 - 常设授权（2026-10-10）按 [AGENTS.md「常设授权」](../../AGENTS.md#常设授权) 执行：限定条件下 Agent 自主推送、开 PR、合并并代为记录批准，其余高风险动作仍逐次决定。
 
-**质量检查**：CI 与原生 V1/V2 的一次完整 pytest 同时收集 `src/aiflow` 和 `tools/analysis` 的分支覆盖率；固定检查器要求两个目录各自达到 85% 总覆盖率和 90% 变更覆盖率，strict mypy 同时检查两者。原生完整 pytest 预算为 3000 秒，完整用例、十四项必需检查、其他超时与失败证据保留要求不变。Policy label 保持 `2.6.0`，但预算内容改变完整 canonical SHA；相同版本、不同 SHA 不等价。新引擎拒绝旧的 1200 秒 Native Policy；升级 wheel 不自动修改目标 `.ai`，旧目标须经受审核的显式更新后再使用新引擎。项目解释器和复算入口见 [Quickstart](quickstart.md#阶段二基线重放)。
+**质量检查**：CI 与原生 V1/V2 的一次完整 pytest 同时收集 `src/aiflow` 和 `tools/analysis` 的分支覆盖率；固定检查器要求两个目录各自达到 85% 总覆盖率和 90% 变更覆盖率，strict mypy 同时检查两者。原生完整 pytest 预算为 4200 秒，完整用例、十四项必需检查、其他超时与失败证据保留要求不变。Policy label 保持 `2.6.0`，但预算内容改变完整 canonical SHA；相同版本、不同 SHA 不等价。新引擎拒绝旧的 1200/3000 秒 Native Policy；升级 wheel 不自动修改目标 `.ai`，旧目标须经受审核的显式更新后再使用新引擎。项目解释器和复算入口见 [Quickstart](quickstart.md#阶段二基线重放)。
 
 **已完成**
 

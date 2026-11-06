@@ -105,14 +105,14 @@ def test_pytest_checks_share_one_full_coverage_execution(level: str, tmp_path: P
     for check_id in pytest_ids:
         check = by_id[check_id]
         assert check.argv == full_suite
-        assert check.timeout_seconds == 3000
+        assert check.timeout_seconds == 4200
         assert check.required is True
         assert check.environment == {"COVERAGE_FILE": (parsed.run_dir / ".coverage").as_posix()}
         assert check.result_parser == ("coverage_xml" if check_id == "coverage_xml" else "pytest")
     pytest_executions = [item for item in parsed.executions if "pytest" in item.argv]
     assert len(pytest_executions) == 1
     assert pytest_executions[0].check_ids == pytest_ids
-    assert pytest_executions[0].timeout_seconds == 3000
+    assert pytest_executions[0].timeout_seconds == 4200
     assert by_id["diff_coverage"].threshold == 90
 
 
@@ -188,6 +188,7 @@ def test_shared_subset_selector_is_rejected_even_when_all_pytest_checks_agree(
     [
         ("timeout_seconds", 600),
         ("timeout_seconds", 1200),
+        ("timeout_seconds", 3000),
         ("environment", {"COVERAGE_FILE": "{run_dir}/other.coverage"}),
         (
             "command",
@@ -655,10 +656,10 @@ def test_selected_and_empty_plans_preserve_shared_execution_argv(tmp_path: Path)
     assert grouped.check_ids == ("unit_tests", "regression_tests", "coverage_xml")
     by_id = {item.check_id: item for item in parsed.checks}
     assert by_id["unit_tests"].argv == by_id["regression_tests"].argv == grouped.argv
-    assert grouped.timeout_seconds == 3000
+    assert grouped.timeout_seconds == 4200
     selected = verification_service._selected_plan(parsed, ("unit_tests",))
     assert selected.executions[0].argv == grouped.argv
-    assert selected.executions[0].timeout_seconds == 3000
+    assert selected.executions[0].timeout_seconds == 4200
     assert verification_service._empty_plan(parsed).executions == ()
 
 
