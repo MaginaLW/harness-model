@@ -372,5 +372,21 @@
     "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
     "subject_commit": "8c0228763b1827880347b9559bce6b8608822d9b",
     "task_id": "TASK-0138"
+  },
+  {
+    "action_sha256": "07586f0f8517ce5419bfbaa4cf165ab7663f502570cc39c76861834a1185fc74",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-06T23:44:33Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-07T02:43:40.897846+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Actual owner A17/A18/A19/A20 grants; exact current candidate, R5 successful readiness and unique 10800-second activation; one native8 full, unchanged gates and budget.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "8c0228763b1827880347b9559bce6b8608822d9b",
+    "task_id": "TASK-0138"
   }
 ]

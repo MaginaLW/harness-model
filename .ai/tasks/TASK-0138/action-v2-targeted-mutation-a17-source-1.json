@@ -1,0 +1,21 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "4e9b3541a57db20bc61bc8c618ec906dacd1352a7f6ebcf04d5901ab411b1fc2",
+  "conditions": [
+    "Actual A17 one-full grant a52ca36bd3a8b61d89bff55dec2c7a658e788a1c7a79b4842af3dd8837b3f25c;exact A18probe1 exception 2f7a8310bad86769a9528a379bd109f3dfe690c9f3950124a3ad8ea9ed9b4aaf;actual A19 outer-readiness direction e054a4a699f32fd1951e77da6b75aa2842b07266a61d87614e2a2389fad8b221;actual A20 remaining-original-preparation-budget recovery 433694177d9eb8b20c66eb651f7144fcad6e9ef8a0ed86758ae2ec1bc51463bd.",
+    "One immutable readiness activation 1edfc4d5d744d210dfdb899b848f2d68bb59f8c453dc333061ea4ffe87c1f3b0;shared10800seconds;fullouter4500;launchremaining>=6300;no reset/renewal or another full.",
+    "Current candidate 6e49ec4bd372a9db4c4f44320e2dff3a81e36c47fb16710e84d2505f59b63963;original subject/spec/class/Policy/Norm preserved;semantic verifiercontext 85223e3d29795ae1bd1992b0fb7d8587a8d274399772361048a1a8e10816c64f.",
+    "Exact actual readiness 409b4c9d136f644424789490ec040c8efc6be0c3239d647cb7a525699200c1d8;separate-tool-call release 4d596cc16811f2a5a5d9e06c1e509c764483d92dbf09ecc72d260a4bac452072;sealed same actual verifier worker/publicactor native-host-recovery-verifier for full/final.",
+    "Original14checks/all7304+21testcases and real collection,4200pytest with branch coverage,both85total/90completeoriginalbasediff domains,strictmypy/whitespace/Ruff/format and five original fixed native mutation groups.",
+    "Cumulative256GiB274877906944bytes including retained old192GiB and both oldnative64GiB reserves;newnative8reserve64GiB;all failed partial data/time retained,no credit or deletion.",
+    "No new dependency environment,37dependency/import/RECORD/pip/standalone-mypy precheck,ordinaryset or capacitykernel;reuse F6actual ordinary/cap and original successful native1 dependencies.",
+    "Any actual new full failure/interruption ends this single extra slot. Successful full plus current-snapshot independent implementationAPPROVE closes every fullslot;final/code/sourceGate follow without full rerun for mechanical closeout.",
+    "No a4write,publication,push,PR,merge,remoteCI,privatetransfer,paid/production,realmodelSDKGrokWeChat,credentials,ACL,executionpolicy,settings,deletion/reset/rebase/force/historyrewrite."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-07T02:43:40.897846+00:00",
+  "parameter_summary": "A17 one additional current-source native8 V2;A14-origin campaign invocation3,A17local1;complete4200-second branch pytest,all14checks,both85/90originalbase domains and five original native mutations.",
+  "single_use": true,
+  "subject_commit": "8c0228763b1827880347b9559bce6b8608822d9b",
+  "target": "TASK-0138"
+}
