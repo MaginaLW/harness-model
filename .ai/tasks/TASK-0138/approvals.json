@@ -356,5 +356,21 @@
     "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
     "subject_commit": "8c0228763b1827880347b9559bce6b8608822d9b",
     "task_id": "TASK-0138"
+  },
+  {
+    "action_sha256": "92a56145c4cfc8879ffb864dd9f766a2a7cafac6975fdf4e8f4ce159e572c7db",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-06T14:28:44Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-06T17:15:06.542444+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Actual owner A15 scope3063585f and A16 time569111d0 approve this one remaining original native7 V2 with4200pytest;immutable activationaac00400 expires17:15:06Z;actual F6 c945999e and independent cap e0477991,actual native6 FAILED plus corrected recovery79aec84d independently approved b611ead7;current specf755/context8522 and original base preserved. No extra fullslot,environment,remote,target,publication or paid action.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "8c0228763b1827880347b9559bce6b8608822d9b",
+    "task_id": "TASK-0138"
   }
 ]
