@@ -51,6 +51,13 @@ allowed_scope:
 - tests/unit/test_resource_bundle_preflight.py
 - tests/integration/test_installed_mutations.py
 - tests/unit/test_installed_mutation_transactions.py
+- .ai/policy/verification-levels.yaml
+- .ai/schemas/policy.schema.json
+- tests/unit/test_verification_plan.py
+- tests/unit/test_policy.py
+- .github/workflows/ai-quality-gate.yml
+- docs/operations/quickstart.md
+- docs/operations/recovery.md
 base_commit: 1f748a99b97842b9eca7abf4be454d348bf78759
 branch: codex/agent-bridge-node-ci
 created_at: '2026-11-02T08:27:54Z'
@@ -128,6 +135,13 @@ decision_units:
   - tests/unit/test_resource_bundle_preflight.py
   - tests/integration/test_installed_mutations.py
   - tests/unit/test_installed_mutation_transactions.py
+  - .ai/policy/verification-levels.yaml
+  - .ai/schemas/policy.schema.json
+  - tests/unit/test_verification_plan.py
+  - tests/unit/test_policy.py
+  - .github/workflows/ai-quality-gate.yml
+  - docs/operations/quickstart.md
+  - docs/operations/recovery.md
   inputs: []
   permission_requirements:
   - action_approval
@@ -156,14 +170,14 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 1705583f92440a4e407bf65e062302ba1372ee413af091228abe77f6a6c226c9
+frozen_spec_sha256: fdd3d41e5d0c29b1110dbcd388560e6baf9844e40758a015197d13205f89e695
 goal: Implement explicit Node CI3.3 execution and original-host combined Gate without
   weakening local/native contracts
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-06T00:14:14Z'
-subject_commit: a15bf60d4263d47afe620660e12d86374209b616
+spec_frozen_at: '2026-11-06T10:04:45Z'
+subject_commit: 479d1a4079bf105acdc0f5b545aa6b5998923034
 task_id: TASK-0138
-updated_at: '2026-11-06T09:54:29Z'
+updated_at: '2026-11-06T10:08:25Z'
 worktree_dirty: false
 worktree_dirty_paths: []
