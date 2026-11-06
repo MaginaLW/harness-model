@@ -233,8 +233,25 @@ def legacy20_installation(repository: Path, bundle: Path, tmp_path: Path) -> Pat
     legacy_bundle = tmp_path / "legacy-twenty-bundle"
     legacy_bundle.mkdir()
     entries = []
+    # Exact public historical canonical bytes, before the A15 native-budget change.
+    # The remaining eighteen resources still come from the current unchanged bundle.
+    historical = Path(__file__).resolve().parents[1] / "fixtures/legacy20"
+    historical_sha256 = {
+        "schemas/policy.schema.json": (
+            "29c605b367319519a40cd1d2f96aca39f6a7baba9f67679515ade0cc569531ac"
+        ),
+        "policy/verification-levels.yaml": (
+            "1922de1c89a03e1ff4af4811c90b93d50fcbb045b686253e90c243291af25cf1"
+        ),
+    }
     for relative, kind in sorted(legacy_kinds.items()):
-        raw = (bundle / relative).read_bytes()
+        if relative in historical_sha256:
+            # Git may use CRLF in a Windows checkout; bundle canonicalization is LF.
+            raw = (historical / relative).read_bytes().replace(b"\r\n", b"\n")
+            assert b"\r" not in raw
+            assert hashlib.sha256(raw).hexdigest() == historical_sha256[relative]
+        else:
+            raw = (bundle / relative).read_bytes()
         path = legacy_bundle / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(raw)
@@ -259,12 +276,18 @@ def legacy20_installation(repository: Path, bundle: Path, tmp_path: Path) -> Pat
     )
     (legacy_bundle / "manifest.json").write_bytes(canonical_json(manifest))
     resource_bundle = importlib.import_module("aiflow.resource_bundle")
+    verification = importlib.import_module("aiflow.verification")
+    current_budget = verification.FULL_SUITE_TIMEOUT_SECONDS
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(initialization, "RESOURCE_KINDS", legacy_kinds)
         patch.setattr(resource_bundle, "RESOURCE_KINDS", legacy_kinds)
+        # Create this historical installation under its actual old engine budget.
+        # Current-engine readiness/migration below run after all patches restore.
+        patch.setattr(verification, "FULL_SUITE_TIMEOUT_SECONDS", 3000)
         candidate = preview(repository, legacy_bundle)
         assert apply(repository, candidate, legacy_bundle)["phase"] == "installed"
         initialization.require_initialization_ready(repository)
+    assert verification.FULL_SUITE_TIMEOUT_SECONDS == current_budget
     state = json.loads((repository / ".ai/init-state.json").read_bytes())
     assert len(state["objects"]) == 29
     assert len(initialization.RESOURCE_KINDS) == 21
@@ -1026,10 +1049,12 @@ def test_known_legacy20_installation_remains_ready_without_migration(
     assert {"path": ".ai/schemas/node-ci.schema.json", "status": "missing"} in [
         {"path": row["path"], "status": row["status"]} for row in planned["files"]
     ]
+    modified = {".ai/schemas/policy.schema.json", ".ai/policy/verification-levels.yaml"}
+    assert {row["path"] for row in planned["files"] if row["status"] == "modified"} == modified
     assert all(
         row["status"] == "unchanged"
         for row in planned["files"]
-        if row["path"] != ".ai/schemas/node-ci.schema.json"
+        if row["path"] not in {".ai/schemas/node-ci.schema.json", *modified}
     )
     assert tree(root) == before
     assert tree(bundle) == bundle_before
