@@ -272,6 +272,50 @@ def _model_task_seed(request: pytest.FixtureRequest, *, node_v2: bool) -> Path:
     return seeds[node_v2][0]
 
 
+def _model_materials(tmp_path: Path) -> dict:
+    # The sole positive host seam: ordinary fixture files instead of Windows
+    # interpreter/distribution discovery. No probe or process result is supplied.
+    prefix, base = tmp_path / "engine", tmp_path / "base"
+    site = prefix / "Lib/site-packages/aiflow"
+    site.mkdir(parents=True)
+    for name in (
+        "__init__.py",
+        "policy.py",
+        "verifier_service.py",
+        "approval.py",
+        "gate.py",
+        "evidence.py",
+        "errors.py",
+        "installed_probe.py",
+        "installed_mutations.py",
+    ):
+        shutil.copyfile(ROOT / "src/aiflow" / name, site / name)
+    (prefix / "Scripts").mkdir()
+    base.mkdir()
+    for path in (prefix / "Scripts/python.exe", base / "python.exe", base / "python311.dll"):
+        path.write_bytes(b"public fixture, not an executable\n")
+    interpreter = dict(
+        executable=runtime._file(prefix / "Scripts/python.exe"),
+        base_executable=runtime._file(base / "python.exe"),
+        runtime=runtime._file(base / "python311.dll"),
+        prefix=str(prefix),
+        site=str(site.parent),
+        base_prefix=str(base),
+        implementation="cpython",
+        version=[3, 11, 0],
+        cache_tag="cpython-311",
+    )
+    return dict(
+        kind=runtime.ACTION_TYPE,
+        version=1,
+        engine={"installed": {}, "closure": node._inventory(prefix)},
+        interpreter=interpreter,
+        host_tools={},
+        probes=runtime._probe_contract(),
+        operators={},
+    )
+
+
 @pytest.fixture
 def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[Model]:
     recorder, process_writer, material_collector = (
@@ -323,47 +367,7 @@ def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[
     verifier_context = build_verifier_context(root, TASK)
     save_verifier_context(root, TASK, verifier_context)
 
-    # The sole positive host seam: ordinary fixture files instead of Windows
-    # interpreter/distribution discovery. No probe or process result is supplied.
-    prefix, base = tmp_path / "engine", tmp_path / "base"
-    site = prefix / "Lib/site-packages/aiflow"
-    site.mkdir(parents=True)
-    for name in (
-        "__init__.py",
-        "policy.py",
-        "verifier_service.py",
-        "approval.py",
-        "gate.py",
-        "evidence.py",
-        "errors.py",
-        "installed_probe.py",
-        "installed_mutations.py",
-    ):
-        shutil.copyfile(ROOT / "src/aiflow" / name, site / name)
-    (prefix / "Scripts").mkdir()
-    base.mkdir()
-    for path in (prefix / "Scripts/python.exe", base / "python.exe", base / "python311.dll"):
-        path.write_bytes(b"public fixture, not an executable\n")
-    interpreter = dict(
-        executable=runtime._file(prefix / "Scripts/python.exe"),
-        base_executable=runtime._file(base / "python.exe"),
-        runtime=runtime._file(base / "python311.dll"),
-        prefix=str(prefix),
-        site=str(site.parent),
-        base_prefix=str(base),
-        implementation="cpython",
-        version=[3, 11, 0],
-        cache_tag="cpython-311",
-    )
-    material = dict(
-        kind=runtime.ACTION_TYPE,
-        version=1,
-        engine={"installed": {}, "closure": node._inventory(prefix)},
-        interpreter=interpreter,
-        host_tools={},
-        probes=runtime._probe_contract(),
-        operators={},
-    )
+    material = _model_materials(tmp_path)
     monkeypatch.setattr(runtime, "_materials", lambda: node._canonical(material))
     monkeypatch.setattr(node, "_windows_root", lambda: tmp_path / "public-windows-role")
     inputs = runtime.prepare_installed_mutations(root, TASK, verifier_actor=ACTOR)
@@ -592,8 +596,9 @@ def test_recorder_rejects_stale_preparation_before_action_consumption(model: Mod
 
 @pytest.mark.parametrize("probe_id", runtime.PROBE_IDS)
 def test_stage_copies_and_fixed_overlay_stop_at_process_boundary(
-    model: Model, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, probe_id: str
+    material_model: SimpleNamespace, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, probe_id: str
 ) -> None:
+    model = material_model
     original = snapshot_tree(Path(model.materials["engine"]["closure"]["root"]))
     pair = dict(id=probe_id, overlay=None, baseline=None, mutant=None)
     calls = []
@@ -1238,9 +1243,44 @@ class PhaseFixture:
 
 
 @pytest.fixture
-def phase_fixture(model: Model, tmp_path: Path) -> PhaseFixture:
+def material_model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[SimpleNamespace]:
+    """Independent real source materials, without unused governance preparation."""
+    attempts: list[str] = []
+
+    def no_execution(*args, **kwargs):
+        attempts.append("record-or-probe")
+        raise AssertionError("parser fixture must not record or launch a process")
+
+    class NoProcessPopen(subprocess.Popen):
+        # Keep Popen a class: Windows asyncio subclasses it during cold imports.
+        def __init__(self, *args, **kwargs):
+            no_execution(*args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "Popen", NoProcessPopen)
+    for name in ("run", "call", "check_call", "check_output"):
+        monkeypatch.setattr(subprocess, name, no_execution)
+    monkeypatch.setattr(runtime, "record_installed_mutations", no_execution)
+    for name in OS_PROCESS_APIS:
+        if hasattr(os, name):
+            monkeypatch.setattr(os, name, no_execution)
+    for module, names in (
+        (node, ("run_node_process", "_process")),
+        (processes, ("run_node_process", "run_execution")),
+    ):
+        for name in names:
+            monkeypatch.setattr(module, name, no_execution)
+    try:
+        materials = _model_materials(tmp_path)
+        monkeypatch.setattr(node, "_windows_root", lambda: tmp_path / "public-windows-role")
+        yield SimpleNamespace(materials=materials)
+    finally:
+        assert not attempts, "a caught launch attempt must not make a parser test pass"
+
+
+@pytest.fixture
+def phase_fixture(material_model: SimpleNamespace, tmp_path: Path) -> PhaseFixture:
     """Exact parser input files, not an assertion that their synthetic Job ran."""
-    return parser_phase(model, tmp_path / "parser-phase", PROBE)
+    return parser_phase(material_model, tmp_path / "parser-phase", PROBE)
 
 
 def parser_phase(
@@ -1535,8 +1575,9 @@ def test_synthetic_logical_failure_cannot_become_execution_pass(
 
 @pytest.mark.parametrize("probe_id", runtime.PROBE_IDS)
 def test_synthetic_pair_protocol_binds_real_fixed_overlay_without_claiming_execution(
-    model: Model, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, probe_id: str
+    material_model: SimpleNamespace, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, probe_id: str
 ) -> None:
+    model = material_model
     run = tmp_path / "synthetic-parser-run"
     pair = make_parser_pair(model, run, probe_id, monkeypatch)
     before = snapshot_tree(run)
@@ -1552,8 +1593,9 @@ def test_synthetic_pair_protocol_binds_real_fixed_overlay_without_claiming_execu
     "fault", ["overlay", "role", "baseline_bytes", "extra_mutant_change", "shared_identity"]
 )
 def test_pair_parser_rejects_bound_copy_or_overlay_substitution(
-    model: Model, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fault: str
+    material_model: SimpleNamespace, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fault: str
 ) -> None:
+    model = material_model
     run = tmp_path / "synthetic-parser-run"
     pair = make_parser_pair(model, run, PROBE, monkeypatch)
     if fault == "overlay":
@@ -1582,8 +1624,9 @@ def test_pair_parser_rejects_bound_copy_or_overlay_substitution(
 
 
 def test_failed_positive_control_in_synthetic_pair_is_unverified(
-    model: Model, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    material_model: SimpleNamespace, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    model = material_model
     run = tmp_path / "synthetic-parser-run"
     pair = make_parser_pair(model, run, PROBE, monkeypatch)
     phase = run / "0/b"
@@ -1618,8 +1661,9 @@ def interpreter_layout(model: Model, monkeypatch: pytest.MonkeyPatch) -> dict:
 
 
 def test_supported_layout_parser_binds_all_interpreter_file_bytes(
-    model: Model, monkeypatch: pytest.MonkeyPatch
+    material_model: SimpleNamespace, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    model = material_model
     interpreter_layout(model, monkeypatch)
     with pure_guard(monkeypatch):
         facts = runtime._interpreter()
@@ -1630,8 +1674,9 @@ def test_supported_layout_parser_binds_all_interpreter_file_bytes(
     "fault", ["bytecode_enabled", "base_install", "wrong_executable", "wrong_version"]
 )
 def test_layout_parser_rejects_unsupported_or_write_enabled_parent(
-    model: Model, monkeypatch: pytest.MonkeyPatch, fault: str
+    material_model: SimpleNamespace, monkeypatch: pytest.MonkeyPatch, fault: str
 ) -> None:
+    model = material_model
     facts = interpreter_layout(model, monkeypatch)
     if fault == "bytecode_enabled":
         facts["dont_write_bytecode"] = False
@@ -1682,8 +1727,9 @@ def test_material_collector_binds_copyable_distribution_and_fixed_probe_sources(
 
 
 def test_distribution_closure_rejects_file_outside_bound_prefix(
-    model: Model, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    material_model: SimpleNamespace, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    model = material_model
     outside = tmp_path / "outside.py"
     outside.write_bytes(b"unbound = True\n")
     installed = dict(

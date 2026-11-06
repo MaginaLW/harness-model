@@ -15,6 +15,7 @@ import json
 import os
 import re
 import stat
+import subprocess
 import sys
 import tarfile
 import tomllib
@@ -1772,9 +1773,25 @@ def _git_blob(root: Path, head: str, name: str) -> bytes:
 
     _digest(head, commit=True)
     _path(name)
-    oid = _git(root, "rev-parse", f"{head}:{name}").decode().strip()
-    _digest(oid, commit=True)
-    size = int(_git(root, "cat-file", "-s", oid).decode().strip())
+    metadata: tuple[str, int] | None = None
+    try:
+        listing = _git(root, "ls-tree", "-lz", "--full-tree", head, "--", ":(literal)" + name)
+        entries = listing.split(b"\0") if isinstance(listing, bytes) else []
+        if len(entries) == 2 and not entries[1]:
+            fields, raw_name = entries[0].split(b"\t", 1)
+            _mode, kind, raw_oid, raw_size = fields.split()
+            if raw_name == name.encode("utf-8") and kind == b"blob":
+                candidate_oid = raw_oid.decode("ascii")
+                _digest(candidate_oid, commit=True)
+                metadata = candidate_oid, int(raw_size.decode("ascii"))
+    except (ContractError, OSError, TypeError, ValueError, subprocess.SubprocessError):
+        pass  # Optional query failure must retain the original scalar/error chain.
+    if metadata is None:
+        oid = _git(root, "rev-parse", f"{head}:{name}").decode().strip()
+        _digest(oid, commit=True)
+        size = int(_git(root, "cat-file", "-s", oid).decode().strip())
+    else:
+        oid, size = metadata
     if not 0 <= size <= MAX_JSON_BYTES:
         raise _error("Committed CI control blob is oversized", "NODE_CI_LIMIT_EXCEEDED")
     data = _git(root, "cat-file", "blob", oid)

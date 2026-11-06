@@ -3301,3 +3301,205 @@ def test_actual_git_authentication_guard_allows_noncredential_url_forms(
     original = config.read_bytes()
     assert _reject_source_git_authentication(source) is None
     assert config.read_bytes() == original
+
+
+@pytest.fixture
+def control_blob_git(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Any:
+    import hashlib
+    from types import SimpleNamespace
+
+    from aiflow import node_execution
+
+    data = b'{"control":"raw bytes"}\n'
+    oid = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+    name, head = ".ai/tasks/TASK-0001/spec.md", "1" * 40
+    row = (
+        b"100644 blob "
+        + oid.encode()
+        + b" "
+        + str(len(data)).encode()
+        + b"\t"
+        + name.encode()
+        + b"\0"
+    )
+    state = dict(listing=row, body=data, scalar_size=len(data), scalar_error=None, calls=[])
+
+    def git(root: Path, *arguments: str) -> bytes:
+        assert root == tmp_path
+        state["calls"].append(arguments)
+        if arguments[0] == "ls-tree":
+            assert arguments == ("ls-tree", "-lz", "--full-tree", head, "--", ":(literal)" + name)
+            value = state["listing"]
+            if isinstance(value, BaseException):
+                raise value
+            return value
+        if arguments == ("rev-parse", head + ":" + name):
+            if state["scalar_error"] is not None:
+                raise state["scalar_error"]
+            return oid.encode() + b"\n"
+        if arguments == ("cat-file", "-s", oid):
+            return str(state["scalar_size"]).encode() + b"\n"
+        assert arguments == ("cat-file", "blob", oid)
+        return state["body"]
+
+    monkeypatch.setattr(node_execution, "_git", git)
+    return SimpleNamespace(
+        root=tmp_path, head=head, name=name, oid=oid, data=data, row=row, state=state
+    )
+
+
+def test_control_blob_consumes_fresh_size_and_authenticates_body_with_two_queries(
+    control_blob_git: Any,
+) -> None:
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    case = control_blob_git
+    assert node_ci._git_blob(case.root, case.head, case.name) == case.data
+    assert len(case.state["calls"]) == 2
+    assert case.state["calls"][-1] == ("cat-file", "blob", case.oid)
+    # A later consumption must obtain its own size, even at the same immutable head.
+    case.state["listing"] = case.row.replace(
+        b" " + str(len(case.data)).encode() + b"\t",
+        b" " + str(node_ci.MAX_JSON_BYTES + 1).encode() + b"\t",
+    )
+    with pytest.raises(ContractError) as caught:
+        node_ci._git_blob(case.root, case.head, case.name)
+    assert caught.value.code == "NODE_CI_LIMIT_EXCEEDED"
+    assert [call[0] for call in case.state["calls"]] == ["ls-tree", "cat-file", "ls-tree"]
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "empty",
+        "not-bytes",
+        "unterminated",
+        "multiple",
+        "missing-tab",
+        "bad-fields",
+        "foreign-path",
+        "nonblob",
+        "bad-oid",
+        "bad-size",
+        "nonascii-oid",
+        "transport",
+        "timeout",
+    ],
+)
+def test_control_blob_metadata_failure_preserves_the_original_scalar_chain(
+    control_blob_git: Any, fault: str
+) -> None:
+    import subprocess
+
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    case = control_blob_git
+    case.state["listing"] = {
+        "empty": b"",
+        "not-bytes": None,
+        "unterminated": case.row[:-1],
+        "multiple": case.row + case.row,
+        "missing-tab": b"broken\0",
+        "bad-fields": b"broken\t" + case.name.encode() + b"\0",
+        "foreign-path": case.row.replace(case.name.encode(), b"other.md"),
+        "nonblob": case.row.replace(b" blob ", b" tree "),
+        "bad-oid": case.row.replace(case.oid.encode(), b"g" * 40),
+        "bad-size": case.row.replace(b" " + str(len(case.data)).encode() + b"\t", b" invalid\t"),
+        "nonascii-oid": case.row.replace(case.oid.encode(), b"\xff" * 40),
+        "transport": ContractError("Optional Git query unavailable", code="NODE_GIT_INVALID"),
+        "timeout": subprocess.TimeoutExpired("git", 30),
+    }[fault]
+    assert node_ci._git_blob(case.root, case.head, case.name) == case.data
+    assert case.state["calls"][1:] == [
+        ("rev-parse", case.head + ":" + case.name),
+        ("cat-file", "-s", case.oid),
+        ("cat-file", "blob", case.oid),
+    ]
+    case.state["scalar_error"] = ContractError("Original fact unavailable", code="NODE_GIT_INVALID")
+    with pytest.raises(ContractError, match="Original fact unavailable"):
+        node_ci._git_blob(case.root, case.head, case.name)
+
+
+@pytest.mark.parametrize("fault", ["negative-size", "oversize", "body-length", "body-hash"])
+def test_control_blob_metadata_keeps_pre_read_limits_and_raw_git_identity(
+    control_blob_git: Any, fault: str
+) -> None:
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    case = control_blob_git
+    before_body = fault in {"negative-size", "oversize"}
+    if before_body:
+        size = -1 if fault == "negative-size" else node_ci.MAX_JSON_BYTES + 1
+        case.state["listing"] = case.row.replace(
+            b" " + str(len(case.data)).encode() + b"\t", b" " + str(size).encode() + b"\t"
+        )
+    elif fault == "body-length":
+        case.state["body"] = case.data + b"x"
+    else:
+        case.state["body"] = b"[" + case.data[1:]
+    with pytest.raises(ContractError) as caught:
+        node_ci._git_blob(case.root, case.head, case.name)
+    assert caught.value.code == ("NODE_CI_LIMIT_EXCEEDED" if before_body else "NODE_CI_INVALID")
+    assert len(case.state["calls"]) == (1 if before_body else 2)
+
+
+def test_control_blob_argument_validation_still_precedes_git_queries(
+    control_blob_git: Any,
+) -> None:
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    case = control_blob_git
+    with pytest.raises(ContractError):
+        node_ci._git_blob(case.root, "invalid", case.name)
+    with pytest.raises(ContractError):
+        node_ci._git_blob(case.root, case.head, "../outside")
+    assert not case.state["calls"]
+
+
+def test_control_blob_actual_git_literal_path_uses_only_metadata_and_body_queries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import hashlib
+
+    from initialization_helpers import fixture_git
+
+    from aiflow import node_ci, node_execution
+
+    source = tmp_path / "committed"
+    source.mkdir()
+    (source / ".ai").mkdir()
+    name = ".ai/control[proof].json"
+    data = b"first\r\nsecond\n\0raw"
+    (source / name).write_bytes(data)
+    (source / ".ai/controlp.json").write_bytes(b"different glob candidate")
+    fixture_git(source, "init", "-b", "fixture")
+    fixture_git(source, "add", ".")
+    fixture_git(
+        source,
+        "-c",
+        "user.name=Public Fixture",
+        "-c",
+        "user.email=fixture@example.invalid",
+        "commit",
+        "-m",
+        "Retain exact control bytes",
+    )
+    head = fixture_git(source, "rev-parse", "HEAD")
+    original = node_execution._git
+    calls = []
+
+    def observe(root: Path, *arguments: str) -> bytes:
+        calls.append(arguments)
+        return original(root, *arguments)
+
+    monkeypatch.setattr(node_execution, "_git", observe)
+    assert node_ci._git_blob(source, head, name) == data
+    oid = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+    assert calls == [
+        ("ls-tree", "-lz", "--full-tree", head, "--", ":(literal)" + name),
+        ("cat-file", "blob", oid),
+    ]
