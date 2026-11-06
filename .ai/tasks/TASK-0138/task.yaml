@@ -175,9 +175,9 @@ goal: Implement explicit Node CI3.3 execution and original-host combined Gate wi
   weakening local/native contracts
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-06T10:04:45Z'
-subject_commit: 479d1a4079bf105acdc0f5b545aa6b5998923034
+spec_frozen_at: '2026-11-06T10:12:32Z'
+subject_commit: 7b4b118d7fdc16329890294b525bca4e6c6837e8
 task_id: TASK-0138
-updated_at: '2026-11-06T10:08:25Z'
+updated_at: '2026-11-06T10:15:25Z'
 worktree_dirty: false
 worktree_dirty_paths: []

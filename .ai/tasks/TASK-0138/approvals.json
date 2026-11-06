@@ -330,5 +330,18 @@
     "spec_sha256": "fdd3d41e5d0c29b1110dbcd388560e6baf9844e40758a015197d13205f89e695",
     "subject_commit": "479d1a4079bf105acdc0f5b545aa6b5998923034",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-06T10:15:24Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Actual owner A15 approval and frozen-spec Policy-self-invalidation provision: unchanged specification fdd3 and REVIEW/V2; independent current new-Policy design REV0013 APPROVE. Rebind under actual Policy389239e0; no added execution time.",
+    "schema_version": "1.0",
+    "spec_sha256": "fdd3d41e5d0c29b1110dbcd388560e6baf9844e40758a015197d13205f89e695",
+    "subject_commit": "7b4b118d7fdc16329890294b525bca4e6c6837e8",
+    "task_id": "TASK-0138"
   }
 ]
