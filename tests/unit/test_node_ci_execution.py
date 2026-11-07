@@ -891,10 +891,20 @@ def ci_kernel_case(
 ):
     """Same-body CI protocol fixture. All tools and Job observations are synthetic.
 
-    Only tool discovery/process boundaries and explicit public fixture byte pins
-    are replaced. Source/dependency parsers, Git, fresh snapshots, receipts,
-    catalog/product arithmetic and native ownership/seals remain production code.
+    Only synthetic host identity, tool discovery/process boundaries and explicit
+    public fixture byte pins are replaced. Source/dependency parsers, Git, fresh
+    snapshots, receipts, catalog/product arithmetic and native ownership/seals
+    remain production code.
     """
+    kernel_inputs = node._ci_kernel_inputs
+
+    def synthetic_kernel_inputs(*args, **kwargs):
+        # Model the guard's host name only; inventories keep actual OS modes.
+        with monkeypatch.context() as host:
+            host.setattr(node, "os", SimpleNamespace(**{**vars(node.os), "name": "nt"}))
+            return kernel_inputs(*args, **kwargs)
+
+    monkeypatch.setattr(node, "_ci_kernel_inputs", synthetic_kernel_inputs)
     parameters = getattr(request, "param", ("V0", False))
     level, native = parameters[:2]
     branch = parameters[2] if len(parameters) > 2 else None

@@ -2229,6 +2229,9 @@ def producer_coordination(
     from aiflow import installed_mutations, node_ci, process_runner
     from aiflow import node_execution as node
 
+    # The transcript models Windows; leave the global os module/pathlib intact.
+    monkeypatch.setattr(node_ci, "os", SimpleNamespace(**{**vars(node_ci.os), "name": "nt"}))
+
     baseline = producer_authority_baseline
     model = deepcopy(baseline.model)
     workspace = tmp_path
