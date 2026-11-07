@@ -434,5 +434,19 @@
     "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
     "subject_commit": "4665993c23fa6c1c623184ea7fc0eee64833dfe9",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-07T17:39:29Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "1dffa4a622db099cf6865e98f5587b4afc26c28c3105db41b13141d05fe389b9",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit owner A25 authorization: the exact fixture portability repair and required lifecycle, after independent implementation REV-0016 APPROVE and successful same-verifier native10 final; retain A23/A25 finite publication, target and non-merge boundaries.",
+    "schema_version": "1.0",
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "4665993c23fa6c1c623184ea7fc0eee64833dfe9",
+    "task_id": "TASK-0138"
   }
 ]
