@@ -18,6 +18,7 @@ from aiflow.verification import (
     VerificationContext,
     _required_ids,
     parse_check_result,
+    parse_node_ci_plan,
     parse_verification_plan,
 )
 
@@ -60,6 +61,50 @@ def checks(bundle: PolicyBundle, level: str) -> list[dict[str, object]]:
     document = bundle.documents["verification-levels.yaml"]
     selected = next(item for item in document["levels"] if item["id"] == level)
     return selected["checks"]
+
+
+@pytest.mark.parametrize(
+    "revision,ci_caller,level",
+    [
+        pytest.param(None, True, "V0", id="native-policy"),
+        pytest.param(1, True, "V0", id="legacy-node-policy"),
+        pytest.param(2, False, "V0", id="local-caller"),
+        pytest.param(2, True, "V3", id="unsupported-tier"),
+    ],
+)
+def test_ci_plan_rejects_unsupported_policy_caller_and_tier(
+    tmp_path: Path, revision: int | None, ci_caller: bool, level: str
+) -> None:
+    from test_node_v2_contract import node_documents, write_policy
+
+    bundle = (
+        bundle_copy()
+        if revision is None
+        else load_policy_bundle(
+            tmp_path, policy_directory=write_policy(tmp_path, node_documents(revision))
+        )
+    )
+    ci_root = tmp_path / "ci"
+    with pytest.raises(ContractError) as caught:
+        parse_node_ci_plan(
+            bundle, context(tmp_path, ci_run_dir=ci_root if ci_caller else None), level=level
+        )
+    assert caught.value.code == "NODE_CAPABILITY_UNAVAILABLE"
+    assert not ci_root.exists()
+
+
+@pytest.mark.parametrize("revision", [1, 2])
+def test_local_node_parser_cannot_accept_a_ci_caller(tmp_path: Path, revision: int) -> None:
+    from test_node_v2_contract import node_documents, write_policy
+
+    bundle = load_policy_bundle(
+        tmp_path, policy_directory=write_policy(tmp_path, node_documents(revision))
+    )
+    ci_root = tmp_path / "ci"
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(bundle, context(tmp_path, ci_run_dir=ci_root), level="V0")
+    assert caught.value.code == "NODE_CAPABILITY_UNAVAILABLE"
+    assert not ci_root.exists()
 
 
 @pytest.mark.parametrize("level", ["V0", "V1"])

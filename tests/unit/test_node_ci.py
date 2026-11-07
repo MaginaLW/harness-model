@@ -1078,6 +1078,23 @@ def test_runtime_wire_reader_rejects_ambiguous_or_nonfinite_bytes(raw: bytes) ->
         node_ci._json(raw)
 
 
+@pytest.mark.parametrize("fault", ["unknown-kind", "future-version"])
+def test_runtime_document_rejects_unsupported_wire_format(fault: str) -> None:
+    from aiflow import node_ci
+    from aiflow.errors import ContractError
+
+    document = _documents()["Descriptor"]
+    if fault == "unknown-kind":
+        document["kind"] = "aiflow-node-ci-unrecognized-format"
+        reason = "Unknown CI document kind"
+    else:
+        document["schema_version"] = "9.9"
+        reason = "CI document version is unsupported"
+    with pytest.raises(ContractError, match=reason) as caught:
+        node_ci.validate_node_ci_document(document)
+    assert caught.value.code == "NODE_CI_INVALID"
+
+
 @pytest.mark.parametrize(
     "name",
     [
