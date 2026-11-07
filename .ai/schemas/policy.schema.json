@@ -552,7 +552,7 @@
           "minItems": 1,
           "items": {"type": "string"}
         },
-        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 3600},
+        "timeout_seconds": {"type": "integer", "minimum": 1},
         "required": {"type": "boolean"},
         "result_parser": {"enum": ["exit_zero", "pytest", "coverage_xml", "diff_cover"]},
         "environment": {
@@ -563,7 +563,20 @@
           }
         },
         "threshold": {"type": "integer", "minimum": 0, "maximum": 100}
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "enum": ["unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"]
+              }
+            }
+          },
+          "then": {"properties": {"timeout_seconds": {"maximum": 4200}}},
+          "else": {"properties": {"timeout_seconds": {"maximum": 3600}}}
+        }
+      ]
     },
     "verification_level": {
       "type": "object",

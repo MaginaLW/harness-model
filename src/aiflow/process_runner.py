@@ -15,7 +15,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from time import monotonic, sleep
-from typing import Any, Literal
+from typing import Any, BinaryIO, Literal
 
 from aiflow.errors import ContractError
 from aiflow.redaction import redact_command_summary, redact_text
@@ -382,12 +382,18 @@ def run_node_process(
     cwd: Path,
     environment: Mapping[str, str],
     timeout_seconds: int,
+    stdout_sink: BinaryIO | None = None,
+    stdout_limit: int = 1024 * 1024,
 ) -> NodeProcessResult:
     """Run a caller-authenticated command in a new Windows Job with bounded output.
 
     This contains owned descendants, not hostile tools or OS components. The caller
     authenticates argv, environment, executable and materials before entering here,
     and must block dependent work unless cleanup is confirmed.
+    An optional caller-owned binary sink streams stdout without retaining it in
+    memory. The caller authenticates its destination and limit; the default
+    in-memory limit and stderr limit remain one MiB. This function never closes
+    the sink, including on failure.
     """
     unavailable = NodeProcessResult(None, False, b"", b"", False, False, "not_started", True)
     try:
@@ -401,6 +407,10 @@ def run_node_process(
             or "\0" in str(cwd)
             or type(timeout_seconds) is not int
             or timeout_seconds <= 0
+            or type(stdout_limit) is not int
+            or not 0 < stdout_limit <= (1 << 63) - 1
+            or (stdout_sink is None and stdout_limit != 1024 * 1024)
+            or (stdout_sink is not None and not callable(getattr(stdout_sink, "write", None)))
             or not isinstance(environment, Mapping)
             or any(
                 not isinstance(key, str)
@@ -604,9 +614,12 @@ def run_node_process(
     execution_error = timed_out = False
     overflow = [False, False]
     outputs = [bytearray(), bytearray()]
+    retained_counts = [0, 0]
+    sink_failed = False
     eof = [False, False]
     returncode = None
     limit = 1024 * 1024
+    stream_limits = (stdout_limit, limit)
     receipt: dict[str, object] = {
         "process_id": None,
         "creation_time_filetime": None,
@@ -622,6 +635,7 @@ def run_node_process(
     }
 
     def drain() -> None:
+        nonlocal sink_failed
         # Peek makes each ReadFile nonblocking. Alternate streams rather than waiting
         # for EOF on either; after overflow discard bounded chunks so EOF is observable.
         for index, reader_handle in enumerate(reads):
@@ -634,14 +648,30 @@ def run_node_process(
                     continue
                 raise OSError("Pipe observation failed")
             if available.value:
-                remaining = limit - len(outputs[index])
+                remaining = stream_limits[index] - retained_counts[index]
                 count = min(available.value, 16384, remaining + 1 if remaining else 16384)
                 buffer = c.create_string_buffer(count)
                 got = dword()
                 require(read(reader_handle, buffer, count, c.byref(got), None))
                 if not 0 < got.value <= count:
                     raise OSError("Pipe read count is invalid")
-                outputs[index].extend(buffer.raw[: min(got.value, remaining)])
+                retained = buffer.raw[: min(got.value, remaining)]
+                retained_counts[index] += len(retained)
+                if index == 0 and stdout_sink is not None:
+                    if retained and not sink_failed:
+                        try:
+                            written = stdout_sink.write(retained)
+                            if type(written) is not int or written != len(retained):
+                                raise OSError(
+                                    "Binary output sink did not retain the complete chunk"
+                                )
+                        except Exception:
+                            # Teardown must still drain both pipes to observe EOF,
+                            # but it must never write to this failed sink again.
+                            sink_failed = True
+                            raise
+                else:
+                    outputs[index].extend(retained)
                 overflow[index] |= got.value > remaining
 
     def completed() -> bool:

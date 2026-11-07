@@ -55,6 +55,9 @@ IDENTITY = ".ai/repository-id"
 DIRECTORIES = (".ai", ".ai/policy", ".ai/schemas", ".ai/templates")
 RUNTIME_DIRECTORIES = frozenset({"tasks", "mutations"})
 _HEX = re.compile(r"[0-9a-f]{64}\Z")
+# The public seed manifest before node-ci was added. This selects a fixed
+# historical layout; it does not authenticate the publisher or grant authority.
+_LEGACY_20_MANIFEST_SHA256 = "39ab1e3b6314e3cdebcf331e460630b62ba73d93e70b2f2dc54bfa35ce4d9c04"
 
 
 def _error(reason: str) -> AiflowError:
@@ -444,6 +447,24 @@ def _inventory(root: Path, *, allow_history: bool = False) -> dict[str, Path]:
         for path in entries:
             relative = path.relative_to(root).as_posix()
             info = _plain(path)
+            if allow_history and directory == ai and path.name == "node-ci-producer.json":
+                # This target-owned runtime declaration is not a seed resource.
+                # Preserve exact installed bytes/state/history; all other extra
+                # neighbors and every unsafe file still use the existing guards.
+                state, _resources = _state_manifest(root)
+                if state["profile"] != NODE_V2_PROFILE:
+                    raise _error("UNKNOWN_INSTALLATION_OBJECT")
+                from aiflow.node_ci import validate_node_ci_document
+
+                declaration = validate_node_ci_document(
+                    read_initialization_json(path), kind="aiflow-node-ci-producer"
+                )
+                if (
+                    declaration["repository"]["repository_id"] != state["repository_id"]
+                    or declaration["policy_version"] != state["policy"]["policy_version"]
+                ):
+                    raise _error("NODE_CI_DECLARATION_INVALID")
+                continue
             if stat.S_ISDIR(info.st_mode):
                 if allow_history and directory == ai and path.name in RUNTIME_DIRECTORIES:
                     continue
@@ -692,12 +713,20 @@ def _state_manifest(root: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any
     ):
         raise _error("INSTALLATION_STATE_INVALID")
     rows = state["objects"]
-    expected = _objects({name: b"" for name in RESOURCE_KINDS}, identifier)
+    resource_names = tuple(RESOURCE_KINDS)
+    if (
+        bundle["bundle_version"] == "1.0"
+        and bundle["manifest_sha256"] == _LEGACY_20_MANIFEST_SHA256
+    ):
+        resource_names = tuple(
+            name for name in resource_names if name != "schemas/node-ci.schema.json"
+        )
+    expected = _objects({name: b"" for name in resource_names}, identifier)
     if not isinstance(rows, list) or len(rows) != len(expected):
         raise _error("INSTALLATION_STATE_INVALID")
     resources: dict[str, dict[str, Any]] = {}
     for actual, planned in zip(rows, expected, strict=True):
-        if planned["path"].removeprefix(".ai/") in RESOURCE_KINDS:
+        if planned["path"].removeprefix(".ai/") in resource_names:
             row = _mapping(actual, {"path", "type", "size", "sha256"})
             if (
                 type(row["size"]) is not int
@@ -729,7 +758,7 @@ def _state_manifest(root: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any
 def _installed(root: Path) -> tuple[dict[str, Any], dict[str, bytes]]:
     state, planned = _state_manifest(root)
     identifier = state["repository_id"]
-    resources = {name: _read(root / ".ai" / name, planned[name]["size"]) for name in RESOURCE_KINDS}
+    resources = {name: _read(root / ".ai" / name, row["size"]) for name, row in planned.items()}
     if _json(state["objects"]) != _json(_objects(resources, identifier)):
         raise _error("INSTALLATION_BYTES_CHANGED")
     with schema_directory_context(root / ".ai/schemas"):
@@ -776,7 +805,7 @@ def _inspection_issues(root: Path) -> tuple[list[dict[str, str]], str]:
             found[REVIEW], MAX_JSON_BYTES
         ) != _json(decision):
             issues.append({"path": REVIEW, "code": "modified"})
-        if COMPLETE in found and len(actual_resources) == len(RESOURCE_KINDS):
+        if COMPLETE in found and len(actual_resources) == len(resources):
             expected_complete = _payloads(state, decision, actual_resources)[COMPLETE]
             if _read(found[COMPLETE], MAX_JSON_BYTES) != expected_complete:
                 issues.append({"path": COMPLETE, "code": "modified"})

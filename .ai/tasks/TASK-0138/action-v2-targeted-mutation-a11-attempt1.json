@@ -1,0 +1,19 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "dc8b86897acd5cdbde65ba8d6e15f014ce4f7bee9c8e21caf7ce7726948ce774",
+  "conditions": [
+    "Actual owner A11 approval; no reopening/reset of A09/A10 usage, deadlines, original base or failed evidence.",
+    "Preserve all14 checks, complete3000-second branch suite, both85% total/90% diff domains and five original native mutation pairs.",
+    "Same immutable A11 activation ends2026-11-05T16:46:47.782001Z. First accepted snapshot closes remaining full slots; second only under diagnosed independently reviewed correction and explicit existing A11 eligibility bounds.",
+    "No target write/reinstall, publication, push/merge, remote workflow/private transfer, live model/SDK/Grok/WeChat, paid/production action, credential export, ACL/execution-policy/authorization-source edit or destructive/history rewrite.",
+    "Independent verifier context 8734d6fca18575fc7478b8c448f753ec8f624969c8da30f74246444cab2999b7",
+    "A11 authorization raw SHA256 0ee57f8004a293eaf83e55799efe6294eec4e28b525b61c16104fe6e0992335a",
+    "Activation raw SHA256 f0ff7dae5774251c9fc28c6eee490dffa9b9e0f871821fcab5b25f1565456528"
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T16:46:47.782001+00:00",
+  "parameter_summary": "A11 first additional complete source native V2 including all five original native mutation pairs for the exact governed repaired candidate; this action is single-use and consumes one of at most two additional full invocations.",
+  "single_use": true,
+  "subject_commit": "06bf732effd6ae2b05859a556f552efa5ef4b6b6",
+  "target": "TASK-0138"
+}

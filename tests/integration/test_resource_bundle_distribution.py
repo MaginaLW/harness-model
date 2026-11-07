@@ -199,6 +199,8 @@ def _record_files(
             raise ValueError("unknown RECORD path")
         if path.parts[0] == dist_info:
             meta = path.parts[1:]
+            if meta == ("uv_cache.json",):
+                continue  # UV installer-local cache is not portable wheel payload.
             if not meta or (
                 meta[0] not in {"licenses", "sboms"}
                 and (
@@ -663,9 +665,9 @@ def test_offline_distributions_are_complete_and_exclude_source_identity(tmp_path
             if path.is_file()
         } == before
     assert all(item == resources[0] for item in resources)
-    assert len(resources[0]) == 21  # 20 inputs and manifest.json
+    assert len(resources[0]) == 22  # 21 inputs and manifest.json
     assert all(item == manifests[0] for item in manifests)
-    assert len(manifests[0]["paths"]) == 20
+    assert len(manifests[0]["paths"]) == 21
 
 
 def test_incomplete_source_distribution_cannot_build_wheel(tmp_path: Path) -> None:
@@ -759,6 +761,7 @@ def test_editable_install_does_not_write_bundle_into_source(tmp_path: Path) -> N
         "data",
         "script",
         "unknown_metadata",
+        "nested_uv_cache",
         "missing_record",
     ],
 )
@@ -792,6 +795,8 @@ def test_record_rejects_invalid_inputs_without_reading_outside(tmp_path: Path, c
         rows[0][0] = "../../Scripts/unrecognized.exe"
     elif case == "unknown_metadata":
         rows[0][0] = "toy-1.dist-info/direct_url.json"
+    elif case == "nested_uv_cache":
+        rows[0][0] = "toy-1.dist-info/nested/uv_cache.json"
     elif case == "missing_record":
         rows.pop()
     output = io.StringIO(newline="")
@@ -799,6 +804,49 @@ def test_record_rejects_invalid_inputs_without_reading_outside(tmp_path: Path, c
     with pytest.raises(ValueError):
         _record_files(site, "toy-1.dist-info", output.getvalue(), {"toy"}, {"known"})
     assert outside.read_bytes() == b"preserve\n"
+
+
+@pytest.mark.parametrize("installer", ["pip", "uv-hashed", "uv-unhashed"])
+def test_record_excludes_only_uv_installer_cache_from_portable_payload(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, installer: str
+) -> None:
+    site = tmp_path / "site"
+    (site / "toy").mkdir(parents=True)
+    (site / "toy/uv_cache.json").write_bytes(b"safe\n")
+    dist_info = "toy-1.dist-info"
+    (site / dist_info).mkdir()
+    digest = base64.urlsafe_b64encode(hashlib.sha256(b"safe\n").digest()).decode().rstrip("=")
+    rows = [["toy/uv_cache.json", f"sha256={digest}", "5"], [f"{dist_info}/RECORD", "", ""]]
+    cache = site / dist_info / "uv_cache.json"
+    cache_data = b'{"source":"file:///installer-only-cache"}\n'
+    if installer != "pip":
+        cache.write_bytes(cache_data)
+        cache_digest = (
+            base64.urlsafe_b64encode(hashlib.sha256(cache_data).digest()).decode().rstrip("=")
+        )
+        rows.append(
+            [
+                f"{dist_info}/uv_cache.json",
+                f"sha256={cache_digest}" if installer == "uv-hashed" else "",
+                str(len(cache_data)) if installer == "uv-hashed" else "",
+            ]
+        )
+    output = io.StringIO(newline="")
+    csv.writer(output, lineterminator="\n").writerows(rows)
+    original_read = _regular_bytes
+    read_paths: list[str] = []
+
+    def record_read(root: Path, relative: str) -> bytes:
+        read_paths.append(relative)
+        return original_read(root, relative)
+
+    monkeypatch.setitem(globals(), "_regular_bytes", record_read)
+    assert _record_files(site, dist_info, output.getvalue(), {"toy"}, set()) == {
+        "toy/uv_cache.json": b"safe\n"
+    }
+    assert read_paths == ["toy/uv_cache.json"]
+    if installer != "pip":
+        assert cache.read_bytes() == cache_data
 
 
 def test_record_rejects_linked_distribution_file(tmp_path: Path) -> None:
@@ -1290,7 +1338,7 @@ def test_repeated_build_reuses_identical_bundle_without_rewriting_it(tmp_path: P
     _run(*arguments, cwd=source)
     bundle = build_lib / "aiflow/_bundled_resources"
     files = [path for path in bundle.rglob("*") if path.is_file()]
-    assert len(files) == 21
+    assert len(files) == 22
     fixed_time = 946684800_000_000_000
     for path in files:
         os.utime(path, ns=(fixed_time, fixed_time))

@@ -1,0 +1,19 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "3d7e49454176c720ebd2657878405c4cb31d0d7c1d2562d2c864a866393aa4f2",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0139",
+  "parameter_summary": "One foreground complete native V2 verification by actual independent actor lf-independent-verifier; full14 unchanged checks, complete shared pytest with both branch coverage domains85total/90diff, original five baseline/mutant pairs at60seconds per process; verifier context 5af7e5028c17a5cf075497b24ad1fcb47fa4129d6f2187f034f47b5f9e5c8f72",
+  "subject_commit": "b053c38f6f5fd82ddc821cac8d8943a6274ecce9",
+  "conditions": [
+    "Execute only after actual independent exact-action APPROVE and current project-owner action recording under existing standing authority.",
+    "Bind current base 1c23e3b12bf6431f7ad3853ef1332ab2913edd14, frozen spec ab072023db9d30c8149aeee15d29a1d6654801637dbec026ff5ac52880735d49, policy fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727, classification 3d7e49454176c720ebd2657878405c4cb31d0d7c1d2562d2c864a866393aa4f2.",
+    "Use actual independent verifier lf-independent-verifier distinct from event-lf-implementer and exact verifier context 5af7e5028c17a5cf075497b24ad1fcb47fa4129d6f2187f034f47b5f9e5c8f72.",
+    "Preserve all14 native V2 required declarations, full-suite timeout3000seconds, mypy300seconds, lint/format/diffcoverage120seconds, small checks30seconds, and each original mutation child60seconds; do not skip, lower or extend gates.",
+    "Maximum one full verification invocation and its five original mutation pairs; a failed or interrupted result closes this authorization and retains spent receipts and all failed originals; no automatic retry.",
+    "Logs and verifier/action/evidence records remain in this source task; the only outside-source temporary/cache/pytest pool is the original user-selected workspace-relative build/lf-native-temp/v1, required by the unchanged ordinary-installation outside-source assertion. Parent-performed exact workspace preflight is retained in build/lf/external-temp-preflight.json raw SHA256 243f7ec46fdacb5b34b32977478f450b7499f6149c8ebfe100c6128f5e7ec0b3. No original-workspace source or WIP changes are authorized. No personal credentials, models, SDK/WeChat acceptance, private transfer, public upload, push, merge or repository settings.",
+    "Canonical mutation manifest .ai/mutations/phase-02-critical-manifest.json raw SHA256 c7df2f0549822ed527d5712acb425adbc9dab90c72016abb482c1ef18e8bf50a."
+  ],
+  "expires_at": "2026-11-02T21:17:19.502464Z",
+  "single_use": true
+}

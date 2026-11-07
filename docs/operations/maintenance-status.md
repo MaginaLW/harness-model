@@ -8,7 +8,7 @@
 
 - 常设授权（2026-10-10）按 [AGENTS.md「常设授权」](../../AGENTS.md#常设授权) 执行：限定条件下 Agent 自主推送、开 PR、合并并代为记录批准，其余高风险动作仍逐次决定。
 
-**质量检查**：CI 与原生 V1/V2 的一次完整 pytest 同时收集 `src/aiflow` 和 `tools/analysis` 的分支覆盖率；固定检查器要求两个目录各自达到 85% 总覆盖率和 90% 变更覆盖率，strict mypy 同时检查两者。原生完整 pytest 预算为 3000 秒，完整用例、十四项必需检查、其他超时与失败证据保留要求不变。Policy label 保持 `2.6.0`，但预算内容改变完整 canonical SHA；相同版本、不同 SHA 不等价。新引擎拒绝旧的 1200 秒 Native Policy；升级 wheel 不自动修改目标 `.ai`，旧目标须经受审核的显式更新后再使用新引擎。项目解释器和复算入口见 [Quickstart](quickstart.md#阶段二基线重放)。
+**质量检查**：CI 与原生 V1/V2 的一次完整 pytest 同时收集 `src/aiflow` 和 `tools/analysis` 的分支覆盖率；固定检查器要求两个目录各自达到 85% 总覆盖率和 90% 变更覆盖率，strict mypy 同时检查两者。原生完整 pytest 预算为 4200 秒，完整用例、十四项必需检查、其他超时与失败证据保留要求不变。Policy label 保持 `2.6.0`，但预算内容改变完整 canonical SHA；相同版本、不同 SHA 不等价。新引擎拒绝旧的 1200/3000 秒 Native Policy；升级 wheel 不自动修改目标 `.ai`，旧目标须经受审核的显式更新后再使用新引擎。项目解释器和复算入口见 [Quickstart](quickstart.md#阶段二基线重放)。
 
 **已完成**
 
@@ -35,11 +35,11 @@
 
 - [PR #140](https://github.com/MaginaLW/harness-model/pull/140)已合并并交付 [`native-python-v1` 非覆盖初始化](initialization.md)：普通 wheel 提供预览、受审核应用、只读检查和迁移计划，生成目标自己的 UUID；Windows x64、CPython 3.11、本地 NTFS 上可恢复同一预览的精确 partial，无历史的完整安装重放不改写文件。初始化不准备验证工具、依赖或外仓 V2 材料，也不证明目标验证或真实接入完成。
 
-- 普通 wheel 已交付 [Node 本地 V0/V1](node-verification.md)及 `agent-bridge-node@1` 非覆盖初始化：目标显式采用完整 Policy `3.1.0`，Node evidence 为 `3.1`；运行限 Windows x64、CPython 3.11、本地 NTFS，保留 TS line 总覆盖率 85%／变更覆盖率 90% 及目标自己的身份、审核和批准。installed 外仓 V2、Node CI 与 agent-bridge 真实采用仍未交付，本地 V0/V1 不代表完整引擎接入完成。
+- 普通 wheel 已交付 [Node 本地 V0/V1](node-verification.md)及 `agent-bridge-node@1` 非覆盖初始化：目标显式采用完整 Policy `3.1.0`，Node evidence 为 `3.1`；运行限 Windows x64、CPython 3.11、本地 NTFS，保留 TS line 总覆盖率 85%／变更覆盖率 90% 及目标自己的身份、审核和批准。[installed 本地 @2 V2](https://github.com/MaginaLW/harness-model/pull/148)已交付；Node CI 与 agent-bridge 真实采用仍未完成，本地能力不代表完整引擎接入完成。
 
-**两条新路线的入口**：[应用自管 SDK 与完整引擎跨仓初始化方案](sdk-and-engine-plan.md)保留具体步骤、材料和验收要求。单次只读客户端及一次真实工程闭环已交付；后续按实际文档需求显式调用，不自动安排新审核。完整引擎已选择 agent-bridge 为目标，资源分发、Python/Node 非覆盖初始化及 [Node 本地 V0/V1](node-verification.md)已交付；installed 外仓 V2、Node CI 适配及真实应用仍未交付；真实统计评分、自动审核安排和现有 Desktop 附着继续暂停，`T0/T1` 未设置。
+**两条新路线的入口**：[应用自管 SDK 与完整引擎跨仓初始化方案](sdk-and-engine-plan.md)保留具体步骤、材料和验收要求。单次只读客户端及一次真实工程闭环已交付；后续按实际文档需求显式调用，不自动安排新审核。完整引擎已选择 agent-bridge 为目标，资源分发、Python/Node 非覆盖初始化及 [Node 本地 V0/V1](node-verification.md)已交付；installed 本地 @2 V2 也已由 [PR #148](https://github.com/MaginaLW/harness-model/pull/148)交付，Node CI 适配及真实应用仍未完成；真实统计评分、自动审核安排和现有 Desktop 附着继续暂停，`T0/T1` 未设置。
 
-项目所有者已重新开启 agent-bridge 完整接入，依次补齐 installed 引擎治理变异、Node V2 生命周期及 Node CI，再进行真实目标应用；按[当前接入计划](../superpowers/plans/agent-bridge-integration.md)与[变异设计候选](../superpowers/specs/installed-engine-governance-mutations.md)推进。目标应用等待其活动会话结束和基线、写入归属重核。旧未合并候选、原任务、证据及门禁保留；重新开启不代表新能力已交付，也不沿用失效批准。
+项目所有者已重新开启 agent-bridge 完整接入；installed 引擎治理变异及本地 Node V2 生命周期已交付，继续完成 Node CI 和真实目标应用，按[当前接入计划](../superpowers/plans/agent-bridge-integration.md)推进。目标 chat 已暂停；实际应用前须完成源端 CI 引擎验证，并重新核对目标基线、WIP 和写入归属；实际私有 CI 与原主机组合 Gate 在目标声明及新 LOCAL 证明后验收。旧未合并候选、原任务、证据及门禁保留，不沿用失效批准。
 
 ## 剩余建设主线
 
@@ -148,7 +148,7 @@
 
 | 能力 | 启动条件与实际缺口 |
 |---|---|
-| 完整引擎跨仓产品化（E5） | 已交付资源分发、独立身份的 Python/Node 非覆盖初始化、Node 本地 V0/V1，以及 [native installed 引擎变异与只读回放](https://github.com/MaginaLW/harness-model/pull/147)。所有者已重新开启完整接入；本地 Node V2、Node CI 与真实 agent-bridge 应用仍需完整验收，完整接入尚未完成。真实目标写入等待其活动会话结束并重核基线和归属；执行边界见[当前接入计划](../superpowers/plans/agent-bridge-integration.md)。 |
+| 完整引擎跨仓产品化（E5） | 已交付资源分发、独立身份的 Python/Node 非覆盖初始化、Node 本地 V0/V1、[native installed 引擎变异与只读回放](https://github.com/MaginaLW/harness-model/pull/147)及 [installed 本地 Node @2 V2](https://github.com/MaginaLW/harness-model/pull/148)。所有者已重新开启完整接入；Node CI3.3 容量未注册、未发布验收，真实 agent-bridge 尚未应用。目标 chat 已暂停，既有基线与 WIP 复核未变；应用前须完成源端 CI 引擎验证及新的基线和归属核对；实际私有 CI 与组合 Gate 随目标采用验收。执行边界见[当前接入计划](../superpowers/plans/agent-bridge-integration.md)。 |
 | Provider 接入（E5） | [单用途 SDK 客户端](sdk-and-engine-plan.md#应用自管-sdk-客户端)已实现，并完成一次固定文档审核与真实 PR 反馈回读；它提供显式手动调用，不提供通用 provider 路由、自动评分或 Desktop 附着。新的真实用途仍须核定实际输入与调用范围；实际模型身份、完整内部上下文和实费保持 `unknown`。 |
 | 固定动作可信执行（E5） | 选择服务动作、资产与身份根；补精确参数/版本绑定、撤回/过期、原子一次消费、结果回执及结果未知时的恢复。现有 wrapper 和本地批准文本不提供此执行能力；本路线可独立于 provider。 |
 | V3 高风险验证（3-B） | 选择真实用例，明确安全检查、沙箱、故障注入、dry-run、损失边界及回滚演练；V2、定向变异或低风险影子评估不替代这些证据。 |

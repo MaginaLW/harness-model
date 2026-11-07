@@ -18,6 +18,7 @@ from aiflow.verification import (
     VerificationContext,
     _required_ids,
     parse_check_result,
+    parse_node_ci_plan,
     parse_verification_plan,
 )
 
@@ -60,6 +61,50 @@ def checks(bundle: PolicyBundle, level: str) -> list[dict[str, object]]:
     document = bundle.documents["verification-levels.yaml"]
     selected = next(item for item in document["levels"] if item["id"] == level)
     return selected["checks"]
+
+
+@pytest.mark.parametrize(
+    "revision,ci_caller,level",
+    [
+        pytest.param(None, True, "V0", id="native-policy"),
+        pytest.param(1, True, "V0", id="legacy-node-policy"),
+        pytest.param(2, False, "V0", id="local-caller"),
+        pytest.param(2, True, "V3", id="unsupported-tier"),
+    ],
+)
+def test_ci_plan_rejects_unsupported_policy_caller_and_tier(
+    tmp_path: Path, revision: int | None, ci_caller: bool, level: str
+) -> None:
+    from test_node_v2_contract import node_documents, write_policy
+
+    bundle = (
+        bundle_copy()
+        if revision is None
+        else load_policy_bundle(
+            tmp_path, policy_directory=write_policy(tmp_path, node_documents(revision))
+        )
+    )
+    ci_root = tmp_path / "ci"
+    with pytest.raises(ContractError) as caught:
+        parse_node_ci_plan(
+            bundle, context(tmp_path, ci_run_dir=ci_root if ci_caller else None), level=level
+        )
+    assert caught.value.code == "NODE_CAPABILITY_UNAVAILABLE"
+    assert not ci_root.exists()
+
+
+@pytest.mark.parametrize("revision", [1, 2])
+def test_local_node_parser_cannot_accept_a_ci_caller(tmp_path: Path, revision: int) -> None:
+    from test_node_v2_contract import node_documents, write_policy
+
+    bundle = load_policy_bundle(
+        tmp_path, policy_directory=write_policy(tmp_path, node_documents(revision))
+    )
+    ci_root = tmp_path / "ci"
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(bundle, context(tmp_path, ci_run_dir=ci_root), level="V0")
+    assert caught.value.code == "NODE_CAPABILITY_UNAVAILABLE"
+    assert not ci_root.exists()
 
 
 @pytest.mark.parametrize("level", ["V0", "V1"])
@@ -105,14 +150,14 @@ def test_pytest_checks_share_one_full_coverage_execution(level: str, tmp_path: P
     for check_id in pytest_ids:
         check = by_id[check_id]
         assert check.argv == full_suite
-        assert check.timeout_seconds == 3000
+        assert check.timeout_seconds == 4200
         assert check.required is True
         assert check.environment == {"COVERAGE_FILE": (parsed.run_dir / ".coverage").as_posix()}
         assert check.result_parser == ("coverage_xml" if check_id == "coverage_xml" else "pytest")
     pytest_executions = [item for item in parsed.executions if "pytest" in item.argv]
     assert len(pytest_executions) == 1
     assert pytest_executions[0].check_ids == pytest_ids
-    assert pytest_executions[0].timeout_seconds == 3000
+    assert pytest_executions[0].timeout_seconds == 4200
     assert by_id["diff_coverage"].threshold == 90
 
 
@@ -188,6 +233,7 @@ def test_shared_subset_selector_is_rejected_even_when_all_pytest_checks_agree(
     [
         ("timeout_seconds", 600),
         ("timeout_seconds", 1200),
+        ("timeout_seconds", 3000),
         ("environment", {"COVERAGE_FILE": "{run_dir}/other.coverage"}),
         (
             "command",
@@ -655,10 +701,10 @@ def test_selected_and_empty_plans_preserve_shared_execution_argv(tmp_path: Path)
     assert grouped.check_ids == ("unit_tests", "regression_tests", "coverage_xml")
     by_id = {item.check_id: item for item in parsed.checks}
     assert by_id["unit_tests"].argv == by_id["regression_tests"].argv == grouped.argv
-    assert grouped.timeout_seconds == 3000
+    assert grouped.timeout_seconds == 4200
     selected = verification_service._selected_plan(parsed, ("unit_tests",))
     assert selected.executions[0].argv == grouped.argv
-    assert selected.executions[0].timeout_seconds == 3000
+    assert selected.executions[0].timeout_seconds == 4200
     assert verification_service._empty_plan(parsed).executions == ()
 
 

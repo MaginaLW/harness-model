@@ -56,8 +56,16 @@ apply 重核原预览和材料，只创建固定清单内的新对象，以最�
 
 inspect 和 migration-plan 只报告状态、文件差异与历史存在性，不自动恢复、迁移或删除。升级 Python 包不会暗改目标 Policy 或 Schema。未知或修改后的对象需要目标负责人按当前规则处理。
 
+已登记的旧版 20 项资源安装，仅在公开的既定 bundle manifest 摘要及完整性检查均匹配时继续接受只读核验；新安装仍必须登记全部 21 项资源。旧安装缺少新增的 `node-ci.schema.json` 时，`migration-plan` 只列出该缺项，不补文件，也不改写安装状态、UUID 或历史。原有登记文件、完成标记、Policy 审核、规范编码和防篡改检查继续生效；未知旧清单或不完整的新安装不能借此降格通过。
+
 Windows 句柄在创建和身份发布期间保持对象保护；祖先目录仅需 TRAVERSE/READ_ATTRIBUTES，不要求系统 Temp 的 LIST_DIRECTORY。实际目标根和安装目录保留目录访问与共享约束。
 
 初始化只校验固定验证合同的结构，不准备工具或依赖、不探测 Node/npm、不运行 suite，也不证明目标验证已可执行。Node 本地 V0/V1 须显式准备绑定材料并完成任务验证、审核批准及 Gate，见[Node 验证](node-verification.md)。installed 外仓 V2 和目标 CI 当前仍不受支持。
 
 这些边界不提供整棵 Git 工作树的原子锁、恶意同用户代码沙箱或断电事务保证。完整跨仓步骤见[接入方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
+
+## Managed Node CI declaration
+
+For an installed agent-bridge-node@2 root, .ai/node-ci-producer.json is an optional target-owned runtime configuration. Readiness and inspection validate it without changing any installed resource, state, review marker, repository identity or task history. The fixed file must be ordinary, have one link, fit the existing 64-KiB input bound, contain strict duplicate-free JSON accepted by the closed Node CI model, and match the installed UUID and Policy version.
+
+This does not upgrade the resource manifest or make init apply a migration command. Other profiles, unknown neighbors, aliases, links and altered immutable resources still reject. Valid configuration alone grants no CI execution, source/provider authentication, Current or Gate; the existing producer and original-host consumer checks still decide those facts.

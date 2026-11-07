@@ -1,0 +1,23 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "2d34a476b42b74a8034ff441debe8a275c0ac989fb06fcc1b4c533ad17f94099",
+  "conditions": [
+    "Actual owner A14-source-performance approval; first of at most two conditional complete V2 invocations. Accepted snapshot closes all remaining slots.",
+    "Authorization raw SHA256 543ba16c681974a666a974c54b4654b59a4e15a9e6dbe6b64eae16f52a0bc824",
+    "Immutable activation raw SHA256 5d8a2e6add8c7c65be95c5fdd7b653d7426b780ba51dc923960434f707ed5389 expires 2026-11-06T10:28:19.839603+00:00",
+    "Independent verifier context 47eda2bd7f8e9b72c7a11f41a9b2baa1bb17f9a4774d560a613497e1d41a57e0; actual thread /root/native_verifier.",
+    "Candidate raw SHA256 975ce8a0b1e9e45d4be35fc2c5e3c72299a4efd770d67ed520ee40f91452e171",
+    "Actual F5 result raw SHA256 18047889f50dca4a4ec1aed559090c8882147d03087575c56d30b46137883db8 and independent positive cap APPROVE raw SHA256 f025c5db6807bfc6f48132f2906a9d72c2234b9f16594789d5457473fc278779",
+    "Full14checks,complete3000second pytest with branch coverage,both85total/90original-base-diff domains and five unchanged native mutation groups; no selected/CI/installed substitute.",
+    "Reuse successful native environment; no fresh dependency preparation/import/37dependency RECORD/pip/mypy precheck or new capacity kernel.",
+    "Shared14400seconds,outer4500seconds,launchminimum6300seconds,reservedcloseout1800seconds,cumulative192GiB; no window renewal.",
+    "Conditional second slot only after actual diagnosis,correction,affected evidence,independent approval and remaining budget; not mechanical closeout.",
+    "No a4 writes,publication,push,merge,remoteCI,private transfer,paid/production,real model/SDK/Grok/WeChat,credentials,ACL/execution-policy/settings,deletion/reset/rebase/history rewrite."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-06T10:28:19.839603+00:00",
+  "parameter_summary": "A14 first complete current-source native V2; original14 checks,3000-second branch pytest,both85/90domains and five unchanged native mutations.",
+  "single_use": true,
+  "subject_commit": "a15bf60d4263d47afe620660e12d86374209b616",
+  "target": "TASK-0138"
+}

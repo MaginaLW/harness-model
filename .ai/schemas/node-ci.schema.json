@@ -1,0 +1,3780 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiflow.local/schemas/node-ci.schema.json",
+  "title": "Node CI 3.3 transport documents",
+  "$comment": "Structural transport validation is necessary, not sufficient. Installed fixed-kernel, attested-source, authenticated-platform, resource-budget and original-host live Gate readers remain mandatory.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/StaticDeclaration"
+    },
+    {
+      "$ref": "#/$defs/AttestedSource"
+    },
+    {
+      "$ref": "#/$defs/Descriptor"
+    },
+    {
+      "$ref": "#/$defs/Admission"
+    },
+    {
+      "$ref": "#/$defs/Prepared"
+    },
+    {
+      "$ref": "#/$defs/Run"
+    },
+    {
+      "$ref": "#/$defs/Evidence"
+    },
+    {
+      "$ref": "#/$defs/Index"
+    },
+    {
+      "$ref": "#/$defs/Manifest"
+    },
+    {
+      "$ref": "#/$defs/BuildManifest"
+    }
+  ],
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 134217728
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "ReviewRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record",
+        "context",
+        "review_id",
+        "revision",
+        "context_sha256"
+      ],
+      "properties": {
+        "record": {
+          "$ref": "#/$defs/Ref"
+        },
+        "context": {
+          "$ref": "#/$defs/Ref"
+        },
+        "review_id": {
+          "type": "string",
+          "pattern": "^REV-[0-9]{4,}(?![\\s\\S])"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "context_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "SpecApprovalRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_sha256",
+        "decision_unit_id",
+        "approval_type"
+      ],
+      "properties": {
+        "record_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "decision_unit_id": {
+          "type": "string",
+          "pattern": "^DU-[0-9]{3,}(?![\\s\\S])"
+        },
+        "approval_type": {
+          "const": "spec"
+        }
+      }
+    },
+    "CodeApprovalRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_sha256",
+        "decision_unit_id",
+        "approval_type",
+        "evidence_sha256"
+      ],
+      "properties": {
+        "record_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "decision_unit_id": {
+          "type": "string",
+          "pattern": "^DU-[0-9]{3,}(?![\\s\\S])"
+        },
+        "approval_type": {
+          "const": "code"
+        },
+        "evidence_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "GitBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_id",
+        "task_id",
+        "branch",
+        "base_commit",
+        "subject_commit",
+        "subject_tree",
+        "policy_sha256",
+        "spec_sha256",
+        "classification_input_sha256",
+        "decision_unit_ids",
+        "verification_level"
+      ],
+      "properties": {
+        "repository_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^TASK-[0-9]{4,}(?![\\s\\S])"
+        },
+        "branch": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+        },
+        "base_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        },
+        "subject_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        },
+        "subject_tree": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        },
+        "policy_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "spec_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "classification_input_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "decision_unit_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^DU-[0-9]{3,}(?![\\s\\S])"
+          },
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true
+        },
+        "verification_level": {
+          "enum": [
+            "V0",
+            "V1",
+            "V2"
+          ]
+        }
+      }
+    },
+    "Profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision"
+      ],
+      "properties": {
+        "id": {
+          "const": "agent-bridge-node"
+        },
+        "revision": {
+          "const": 2,
+          "type": "integer"
+        }
+      }
+    },
+    "Member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "member",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "member": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 134217728
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "ChosenEngineArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "source_repository_id",
+        "source_full_name",
+        "workflow_id",
+        "workflow_path",
+        "workflow_ref",
+        "workflow_sha256",
+        "source_head",
+        "run_id",
+        "run_attempt",
+        "job_id",
+        "artifact_id",
+        "artifact_name",
+        "artifact_digest",
+        "wheel",
+        "sdist",
+        "build_manifest"
+      ],
+      "properties": {
+        "origin": {
+          "enum": [
+            "direct",
+            "sdist_rebuilt"
+          ]
+        },
+        "source_repository_id": {
+          "const": 1319293089,
+          "type": "integer"
+        },
+        "source_full_name": {
+          "const": "MaginaLW/harness-model"
+        },
+        "workflow_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "workflow_path": {
+          "const": ".github/workflows/node-engine-artifacts.yml"
+        },
+        "workflow_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+        },
+        "workflow_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "source_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        },
+        "run_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "run_attempt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "job_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "artifact_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "artifact_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+        },
+        "artifact_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "wheel": {
+          "$ref": "#/$defs/Member"
+        },
+        "sdist": {
+          "$ref": "#/$defs/Member"
+        },
+        "build_manifest": {
+          "$ref": "#/$defs/Member"
+        }
+      }
+    },
+    "StaticDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "repository",
+        "profile",
+        "policy_version",
+        "workflow",
+        "producer",
+        "tier_contracts",
+        "engine_source",
+        "engine_artifact",
+        "artifact_policy"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-ci-producer"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "repository": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repository_id",
+            "provider_repository_id",
+            "full_name"
+          ],
+          "properties": {
+            "repository_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "provider_repository_id": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "full_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?![\\s\\S])"
+            }
+          }
+        },
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "policy_version": {
+          "const": "3.2.0"
+        },
+        "workflow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "ref",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "const": ".github/workflows/aiflow-node-ci.yml"
+            },
+            "ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            }
+          }
+        },
+        "producer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "job_key",
+            "check_name",
+            "app_id",
+            "event"
+          ],
+          "properties": {
+            "job_key": {
+              "const": "aiflow-node-ci"
+            },
+            "check_name": {
+              "const": "aiflow-node-ci"
+            },
+            "app_id": {
+              "const": 15368,
+              "type": "integer"
+            },
+            "event": {
+              "const": "pull_request"
+            }
+          }
+        },
+        "tier_contracts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "V0",
+            "V1",
+            "V2"
+          ],
+          "properties": {
+            "V0": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            },
+            "V1": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            },
+            "V2": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            }
+          }
+        },
+        "engine_source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repository_id",
+            "full_name",
+            "workflow_path",
+            "workflow_ref",
+            "workflow_sha256",
+            "job_key",
+            "artifact_name"
+          ],
+          "properties": {
+            "repository_id": {
+              "const": 1319293089,
+              "type": "integer"
+            },
+            "full_name": {
+              "const": "MaginaLW/harness-model"
+            },
+            "workflow_path": {
+              "const": ".github/workflows/node-engine-artifacts.yml"
+            },
+            "workflow_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+            },
+            "workflow_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            },
+            "job_key": {
+              "const": "node-engine-artifacts"
+            },
+            "artifact_name": {
+              "const": "aiflow-node-engine-<run_id>-<run_attempt>"
+            }
+          }
+        },
+        "engine_artifact": {
+          "$ref": "#/$defs/ChosenEngineArtifact"
+        },
+        "artifact_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ci_artifact_name",
+            "retention_days",
+            "visibility_scope"
+          ],
+          "properties": {
+            "ci_artifact_name": {
+              "const": "aiflow-node-ci-<run_id>-<run_attempt>"
+            },
+            "retention_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90
+            },
+            "visibility_scope": {
+              "const": "private_target_repository"
+            }
+          }
+        }
+      }
+    },
+    "AttestedSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "binding",
+        "attestation_head",
+        "static_declaration",
+        "engine_artifact",
+        "source_evidence",
+        "task",
+        "events",
+        "classification",
+        "spec",
+        "policy_members",
+        "approvals",
+        "applicable_spec_approvals",
+        "applicable_code_approvals",
+        "v2"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-ci-attested-source"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "binding": {
+          "$ref": "#/$defs/GitBinding"
+        },
+        "attestation_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        },
+        "static_declaration": {
+          "$ref": "#/$defs/Ref"
+        },
+        "engine_artifact": {
+          "$ref": "#/$defs/ChosenEngineArtifact"
+        },
+        "source_evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "original",
+            "canonical_sha256"
+          ],
+          "properties": {
+            "original": {
+              "$ref": "#/$defs/Ref"
+            },
+            "canonical_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            }
+          }
+        },
+        "task": {
+          "$ref": "#/$defs/Ref"
+        },
+        "events": {
+          "$ref": "#/$defs/Ref"
+        },
+        "classification": {
+          "$ref": "#/$defs/Ref"
+        },
+        "spec": {
+          "$ref": "#/$defs/Ref"
+        },
+        "policy_members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "approvals": {
+          "$ref": "#/$defs/Ref"
+        },
+        "applicable_spec_approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SpecApprovalRef"
+          },
+          "minItems": 0,
+          "maxItems": 1000
+        },
+        "applicable_code_approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CodeApprovalRef"
+          },
+          "minItems": 0,
+          "maxItems": 1000
+        },
+        "v2": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "snapshot_sha256",
+                "verifier_actor",
+                "verifier_context",
+                "design",
+                "implementation"
+              ],
+              "properties": {
+                "snapshot_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+                },
+                "verifier_actor": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+                },
+                "verifier_context": {
+                  "$ref": "#/$defs/Ref"
+                },
+                "design": {
+                  "$ref": "#/$defs/ReviewRef"
+                },
+                "implementation": {
+                  "$ref": "#/$defs/ReviewRef"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "properties": {
+                  "verification_level": {
+                    "const": "V2"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "v2": {
+                "type": "object"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "v2": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "source_tuple_sha256",
+        "static_declaration_sha256",
+        "engine_artifact_sha256",
+        "execution_contract_sha256",
+        "verification_level",
+        "attestation_head"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-ci-descriptor"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "source_tuple_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "static_declaration_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "engine_artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "execution_contract_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "verification_level": {
+          "enum": [
+            "V0",
+            "V1",
+            "V2"
+          ]
+        },
+        "attestation_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        }
+      }
+    },
+    "RuntimePlatform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "repository_id",
+        "full_name",
+        "workflow_id",
+        "workflow_path",
+        "workflow_ref",
+        "workflow_sha256",
+        "event",
+        "head_sha",
+        "run_id",
+        "run_attempt",
+        "job_id",
+        "job_key",
+        "check_run_id",
+        "check_name",
+        "app_id"
+      ],
+      "properties": {
+        "provider": {
+          "const": "github"
+        },
+        "repository_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "full_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?![\\s\\S])"
+        },
+        "workflow_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "workflow_path": {
+          "const": ".github/workflows/aiflow-node-ci.yml"
+        },
+        "workflow_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+        },
+        "workflow_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "event": {
+          "const": "pull_request"
+        },
+        "head_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        },
+        "run_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "run_attempt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "job_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "job_key": {
+          "const": "aiflow-node-ci"
+        },
+        "check_run_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "check_name": {
+          "const": "aiflow-node-ci"
+        },
+        "app_id": {
+          "const": 15368,
+          "type": "integer"
+        }
+      }
+    },
+    "Admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "descriptor_sha256",
+        "platform",
+        "input_materials_sha256",
+        "engine_content_sha256",
+        "claimed_at"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-ci-admission"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "descriptor_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "platform": {
+          "$ref": "#/$defs/RuntimePlatform"
+        },
+        "input_materials_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "engine_content_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "claimed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Prepared": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "descriptor",
+        "source_tuple",
+        "admission",
+        "platform",
+        "profile",
+        "verification_level",
+        "execution_contract_sha256",
+        "manifests"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-ci-prepared-3.3"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "descriptor": {
+          "$ref": "#/$defs/Ref"
+        },
+        "source_tuple": {
+          "$ref": "#/$defs/Ref"
+        },
+        "admission": {
+          "$ref": "#/$defs/Ref"
+        },
+        "platform": {
+          "$ref": "#/$defs/RuntimePlatform"
+        },
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "verification_level": {
+          "enum": [
+            "V0",
+            "V1",
+            "V2"
+          ]
+        },
+        "execution_contract_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "manifests": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "node",
+            "npm",
+            "dependencies",
+            "engine",
+            "host_tools",
+            "preflight"
+          ],
+          "properties": {
+            "source": {
+              "$ref": "#/$defs/Ref"
+            },
+            "node": {
+              "$ref": "#/$defs/Ref"
+            },
+            "npm": {
+              "$ref": "#/$defs/Ref"
+            },
+            "dependencies": {
+              "$ref": "#/$defs/Ref"
+            },
+            "engine": {
+              "$ref": "#/$defs/Ref"
+            },
+            "host_tools": {
+              "$ref": "#/$defs/Ref"
+            },
+            "preflight": {
+              "$ref": "#/$defs/Ref"
+            }
+          }
+        }
+      }
+    },
+    "InheritedNodeObject": {
+      "type": "object",
+      "$comment": "The fixed existing Node2 byte-kernel validators enforce all subobject members, process/environment/coverage/output semantics and physical limits; this transport schema does not grant authority to an arbitrary object."
+    },
+    "Pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "overlay",
+        "baseline",
+        "mutant"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MUT-V2-00[1-5](?![\\s\\S])"
+        },
+        "overlay": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "before_sha256",
+                "after_sha256"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+                },
+                "before_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+                },
+                "after_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+                }
+              }
+            }
+          ]
+        },
+        "baseline": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/InheritedNodeObject"
+            }
+          ]
+        },
+        "mutant": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/InheritedNodeObject"
+            }
+          ]
+        }
+      }
+    },
+    "CiPairs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "admission_sha256",
+        "engine_content_sha256",
+        "pairs",
+        "failure"
+      ],
+      "properties": {
+        "admission_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "engine_content_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "pairs": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/Pair"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "const": "MUT-V2-001"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/Pair"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "const": "MUT-V2-002"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/Pair"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "const": "MUT-V2-003"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/Pair"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "const": "MUT-V2-004"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/Pair"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "const": "MUT-V2-005"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "items": false
+        },
+        "failure": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+            }
+          ]
+        }
+      }
+    },
+    "Run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "prepared",
+        "descriptor_sha256",
+        "platform",
+        "inputs",
+        "environment",
+        "roots",
+        "executions",
+        "coverage",
+        "product_tests",
+        "installed_mutation",
+        "outputs",
+        "failure"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-ci-run-3.3"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "prepared": {
+          "$ref": "#/$defs/Ref"
+        },
+        "descriptor_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "platform": {
+          "$ref": "#/$defs/RuntimePlatform"
+        },
+        "inputs": {
+          "$ref": "#/$defs/InheritedNodeObject"
+        },
+        "environment": {
+          "$ref": "#/$defs/InheritedNodeObject"
+        },
+        "roots": {
+          "$ref": "#/$defs/InheritedNodeObject"
+        },
+        "executions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InheritedNodeObject"
+          },
+          "minItems": 0,
+          "maxItems": 12
+        },
+        "coverage": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/InheritedNodeObject"
+            }
+          ]
+        },
+        "product_tests": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/InheritedNodeObject"
+            }
+          ]
+        },
+        "installed_mutation": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/CiPairs"
+            }
+          ]
+        },
+        "outputs": {
+          "$ref": "#/$defs/InheritedNodeObject"
+        },
+        "failure": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+            }
+          ]
+        }
+      }
+    },
+    "node_check_v2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "required",
+        "status",
+        "executions"
+      ],
+      "properties": {
+        "check_id": {
+          "enum": [
+            "contract",
+            "scope",
+            "smoke",
+            "node_build",
+            "node_check",
+            "diff_whitespace",
+            "ts_coverage",
+            "ts_total_lines",
+            "ts_diff_lines",
+            "acceptance",
+            "integration",
+            "targeted_mutation",
+            "independent_verifier"
+          ]
+        },
+        "required": {
+          "const": true
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "unverified"
+          ]
+        },
+        "executions": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/node_execution"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "contract"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 1
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "scope"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 1
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "smoke"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 1
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "node_build"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 1
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "node_check"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 1
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "diff_whitespace"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 3
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 3
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "ts_coverage"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 2
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 2
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "ts_total_lines"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 0
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "ts_diff_lines"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 0
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "acceptance"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 1
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "integration"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 1
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "targeted_mutation"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 0
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "check_id": {
+                "const": "independent_verifier"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executions": {
+                "maxItems": 0
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "status": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "executions": {
+                      "minItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "node_execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_id",
+        "argv_template",
+        "cwd_role",
+        "timeout_seconds",
+        "returncode",
+        "timed_out",
+        "duration_ms",
+        "stdout",
+        "stderr",
+        "stdout_overflow",
+        "stderr_overflow",
+        "cleanup",
+        "execution_error"
+      ],
+      "properties": {
+        "execution_id": {
+          "type": "string",
+          "pattern": "^EXEC-[0-9]{3}(?![\\s\\S])"
+        },
+        "argv_template": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "cwd_role": {
+          "enum": [
+            "original",
+            "isolated"
+          ]
+        },
+        "timeout_seconds": {
+          "enum": [
+            30,
+            300,
+            600
+          ]
+        },
+        "returncode": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "timed_out": {
+          "type": "boolean"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stdout": {
+          "$ref": "#/$defs/node_stream"
+        },
+        "stderr": {
+          "$ref": "#/$defs/node_stream"
+        },
+        "stdout_overflow": {
+          "type": "boolean"
+        },
+        "stderr_overflow": {
+          "type": "boolean"
+        },
+        "cleanup": {
+          "enum": [
+            "confirmed",
+            "unknown",
+            "not_started"
+          ]
+        },
+        "execution_error": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "cleanup": {
+                "const": "confirmed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "returncode": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "node_stream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytes",
+        "sha256",
+        "raw_ref",
+        "log_ref"
+      ],
+      "properties": {
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048576
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "raw_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^node/raw/EXEC-[0-9]{3}/(?:stdout|stderr)\\.raw(?![\\s\\S])"
+        },
+        "log_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^node/raw/EXEC-[0-9]{3}/(?:stdout|stderr)\\.log(?![\\s\\S])"
+        }
+      }
+    },
+    "node_binding_v2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "subject_tree",
+        "prepared",
+        "run",
+        "materials_sha256",
+        "semantic_contract_sha256",
+        "execution_contract_sha256",
+        "environment_sha256",
+        "coverage"
+      ],
+      "properties": {
+        "profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "revision"
+          ],
+          "properties": {
+            "id": {
+              "const": "agent-bridge-node"
+            },
+            "revision": {
+              "type": "integer",
+              "const": 2
+            }
+          }
+        },
+        "subject_tree": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        },
+        "prepared": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ref",
+            "size",
+            "sha256"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65536
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            }
+          }
+        },
+        "run": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ref",
+            "size",
+            "sha256"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16777216
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            }
+          }
+        },
+        "materials_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "semantic_contract_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "execution_contract_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "environment_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "coverage": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/node_coverage_v2"
+            }
+          ]
+        },
+        "product_tests": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/node_product_tests"
+            }
+          ]
+        }
+      }
+    },
+    "node_coverage_v2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_files",
+        "total",
+        "changed",
+        "method"
+      ],
+      "properties": {
+        "scope_files": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20000
+        },
+        "total": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "covered",
+            "executable",
+            "threshold"
+          ],
+          "properties": {
+            "covered": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "executable": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "threshold": {
+              "const": 85
+            }
+          }
+        },
+        "changed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "covered",
+            "executable",
+            "threshold",
+            "applicability"
+          ],
+          "properties": {
+            "covered": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "executable": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "threshold": {
+              "const": 90
+            },
+            "applicability": {
+              "enum": [
+                "applicable",
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "method": {
+          "const": "vitest-4.1.10-istanbul-vite-8.2.1-oxc-es2024-zero-hit-ts-ast-wire-v2"
+        }
+      }
+    },
+    "node_product_tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report",
+        "inventory_sha256",
+        "acceptance",
+        "integration"
+      ],
+      "properties": {
+        "report": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ref",
+            "size",
+            "sha256"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16777216
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+            }
+          }
+        },
+        "inventory_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "acceptance": {
+          "const": [
+            {
+              "file": "tests/local/personal-dot-integration.test.ts",
+              "full_name": "personal dot authenticated MCP + unified WeChat host (offline) persists duplicate input once, publishes one event, executes original text once and replies to the saved conversation once"
+            },
+            {
+              "file": "tests/local/personal-dot-integration.test.ts",
+              "full_name": "personal dot authenticated MCP + unified WeChat host (offline) rejects unauthenticated event calls, foreign targets and direct submissions before any dispatch"
+            }
+          ]
+        },
+        "integration": {
+          "const": [
+            {
+              "file": "tests/local/weixin-shared-integration.test.ts",
+              "full_name": "synthetic Weixin, HTTP and shared runtime integration persists a polled task contract and returns its terminal result through the same shared host"
+            },
+            {
+              "file": "tests/local/weixin-shared-integration.test.ts",
+              "full_name": "synthetic Weixin, HTTP and shared runtime integration runs the isolated shared host with durable duplicate and uncertain reply handling"
+            },
+            {
+              "file": "tests/local/weixin-shared-integration.test.ts",
+              "full_name": "synthetic Weixin, HTTP and shared runtime integration shares route-bound tasks, reads, stop and client lifetime with a second client"
+            }
+          ]
+        }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "mode",
+        "binding",
+        "generated_at",
+        "conclusion",
+        "source_binding_kind",
+        "source_tuple",
+        "descriptor",
+        "platform",
+        "prepared",
+        "run",
+        "checks",
+        "node_binding",
+        "installed_mutation",
+        "reproduce_command",
+        "known_limitations"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-ci-evidence"
+        },
+        "schema_version": {
+          "const": "3.3"
+        },
+        "mode": {
+          "const": "ci"
+        },
+        "binding": {
+          "$ref": "#/$defs/GitBinding"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "conclusion": {
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        },
+        "source_binding_kind": {
+          "const": "attested_committed_tuple"
+        },
+        "source_tuple": {
+          "$ref": "#/$defs/Ref"
+        },
+        "descriptor": {
+          "$ref": "#/$defs/Ref"
+        },
+        "platform": {
+          "$ref": "#/$defs/RuntimePlatform"
+        },
+        "prepared": {
+          "$ref": "#/$defs/Ref"
+        },
+        "run": {
+          "$ref": "#/$defs/Ref"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node_check_v2"
+          },
+          "minItems": 6,
+          "maxItems": 13
+        },
+        "node_binding": {
+          "$ref": "#/$defs/node_binding_v2"
+        },
+        "installed_mutation": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/CiPairs"
+            }
+          ]
+        },
+        "reproduce_command": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+          },
+          "minItems": 1,
+          "maxItems": 30
+        },
+        "known_limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+          },
+          "minItems": 1,
+          "maxItems": 10
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "properties": {
+                  "verification_level": {
+                    "const": "V0"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "checks": {
+                "minItems": 6,
+                "maxItems": 6,
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "contract"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "scope"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "smoke"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "node_build"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "node_check"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "diff_whitespace"
+                      }
+                    }
+                  }
+                ],
+                "items": false
+              },
+              "installed_mutation": {
+                "type": "null"
+              },
+              "node_binding": {
+                "properties": {
+                  "coverage": {
+                    "type": "null"
+                  },
+                  "product_tests": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "properties": {
+                  "verification_level": {
+                    "const": "V1"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "checks": {
+                "minItems": 9,
+                "maxItems": 9,
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "contract"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "scope"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "smoke"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "node_build"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "node_check"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "diff_whitespace"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "ts_coverage"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "ts_total_lines"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "ts_diff_lines"
+                      }
+                    }
+                  }
+                ],
+                "items": false
+              },
+              "installed_mutation": {
+                "type": "null"
+              },
+              "node_binding": {
+                "properties": {
+                  "product_tests": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "conclusion": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "node_binding": {
+                      "properties": {
+                        "coverage": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "properties": {
+                  "verification_level": {
+                    "const": "V2"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "checks": {
+                "minItems": 13,
+                "maxItems": 13,
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "contract"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "scope"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "smoke"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "node_build"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "node_check"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "diff_whitespace"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "ts_coverage"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "ts_total_lines"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "ts_diff_lines"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "acceptance"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "integration"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "targeted_mutation"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "check_id": {
+                        "const": "independent_verifier"
+                      }
+                    }
+                  }
+                ],
+                "items": false
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "conclusion": {
+                      "const": "passed"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "node_binding": {
+                      "properties": {
+                        "coverage": {
+                          "type": "object"
+                        },
+                        "product_tests": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "product_tests"
+                      ]
+                    },
+                    "installed_mutation": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "Identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "device",
+        "inode",
+        "nlink",
+        "size",
+        "mtime_ns",
+        "ctime_ns",
+        "mode",
+        "attributes"
+      ],
+      "properties": {
+        "device": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inode": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nlink": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mtime_ns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ctime_ns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mode": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "attributes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "DirectoryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "kind",
+        "identity"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+        },
+        "kind": {
+          "const": "directory"
+        },
+        "identity": {
+          "$ref": "#/$defs/Identity"
+        }
+      }
+    },
+    "FileEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "kind",
+        "identity",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+        },
+        "kind": {
+          "const": "file"
+        },
+        "identity": {
+          "$ref": "#/$defs/Identity"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 134217728
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "RoleId": {
+      "enum": [
+        "source",
+        "artifact",
+        "engine",
+        "runtime",
+        "dependencies",
+        "host",
+        "preflight",
+        "control",
+        "node",
+        "pair-0-b",
+        "pair-0-m",
+        "pair-1-b",
+        "pair-1-m",
+        "pair-2-b",
+        "pair-2-m",
+        "pair-3-b",
+        "pair-3-m",
+        "pair-4-b",
+        "pair-4-m"
+      ]
+    },
+    "Manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "root",
+        "identity",
+        "entries",
+        "total_bytes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/RoleId"
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+        },
+        "identity": {
+          "$ref": "#/$defs/Identity"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/DirectoryEntry"
+              },
+              {
+                "$ref": "#/$defs/FileEntry"
+              }
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 20000
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 536870912
+        }
+      }
+    },
+    "Index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "evidence",
+        "descriptor",
+        "source_tuple",
+        "roles"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-ci-originals"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Ref"
+        },
+        "descriptor": {
+          "$ref": "#/$defs/Ref"
+        },
+        "source_tuple": {
+          "$ref": "#/$defs/Ref"
+        },
+        "roles": {
+          "oneOf": [
+            {
+              "type": "array",
+              "minItems": 9,
+              "maxItems": 9,
+              "prefixItems": [
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "source"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "artifact"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "engine"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "runtime"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "dependencies"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "host"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "preflight"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "control"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "node"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "items": false
+            },
+            {
+              "type": "array",
+              "minItems": 19,
+              "maxItems": 19,
+              "prefixItems": [
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "source"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "artifact"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "engine"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "runtime"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "dependencies"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "host"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "preflight"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "control"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "node"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-0-b"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-0-m"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-1-b"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-1-m"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-2-b"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-2-m"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-3-b"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-3-m"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-4-b"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "manifest"
+                      ],
+                      "properties": {
+                        "id": {
+                          "$ref": "#/$defs/RoleId"
+                        },
+                        "manifest": {
+                          "$ref": "#/$defs/Ref"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "pair-4-m"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "items": false
+            }
+          ]
+        }
+      }
+    },
+    "BuildMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "origin",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*(?![\\s\\S])"
+        },
+        "origin": {
+          "enum": [
+            "direct",
+            "source",
+            "sdist_rebuilt"
+          ]
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 134217728
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "BuildManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "schema_version",
+        "repository_id",
+        "source_head",
+        "workflow_path",
+        "workflow_blob_sha256",
+        "job_key",
+        "run_id",
+        "run_attempt",
+        "python_version",
+        "setuptools_version",
+        "members",
+        "package_payload_sha256",
+        "resource_manifest_sha256"
+      ],
+      "properties": {
+        "kind": {
+          "const": "aiflow-node-engine-build"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "repository_id": {
+          "const": 1319293089,
+          "type": "integer"
+        },
+        "source_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        },
+        "workflow_path": {
+          "const": ".github/workflows/node-engine-artifacts.yml"
+        },
+        "workflow_blob_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "job_key": {
+          "const": "node-engine-artifacts"
+        },
+        "run_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "run_attempt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "python_version": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {
+              "const": 3
+            },
+            {
+              "const": 11
+            },
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          ],
+          "items": false
+        },
+        "setuptools_version": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[0-9]+(?:\\.[0-9]+)*(?:[A-Za-z0-9.+-]*)(?![\\s\\S])"
+        },
+        "members": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/BuildMember"
+                },
+                {
+                  "properties": {
+                    "path": {
+                      "const": "direct/aiflow-0.2.0-py3-none-any.whl"
+                    },
+                    "origin": {
+                      "const": "direct"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/BuildMember"
+                },
+                {
+                  "properties": {
+                    "path": {
+                      "const": "sdist/aiflow-0.2.0.tar.gz"
+                    },
+                    "origin": {
+                      "const": "source"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/BuildMember"
+                },
+                {
+                  "properties": {
+                    "path": {
+                      "const": "sdist-rebuilt/aiflow-0.2.0-py3-none-any.whl"
+                    },
+                    "origin": {
+                      "const": "sdist_rebuilt"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "items": false
+        },
+        "package_payload_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "resource_manifest_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    }
+  }
+}

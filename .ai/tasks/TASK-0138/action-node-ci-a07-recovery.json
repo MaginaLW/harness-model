@@ -1,0 +1,16 @@
+{
+  "action_type": "node_ci_preregistration_measurement",
+  "classification_input_sha256": "b32ec1df4cd0bc76feb3eef38efb0f421f33d1e7b5640702608fad80f02a64c0",
+  "conditions": [
+    "Owner-approved A07 finite product-repair recovery; exact build/cn/A07-proposal.json SHA256 b6af9fca9d79f0d33e6e03d5edf785597abbea38831b43fd7f48b93f880033d4.",
+    "Only new direct/V2 and unstarted rebuilt/V0,V1,V2 groups under build/co; retain 56c2 direct/V0,V1 as old-candidate evidence and check actual new ordinary material delta.",
+    "Original cumulative cutoff 2026-11-05T01:54:32.975482Z and 192 GiB; no new budget, one preparation per group, no automatic retry; any preparation/kernel/native/product/budget/ownership/cleanup failure stops.",
+    "Keep all failed originals; unchanged target a4 is read-only. No publication/push/merge/private transfer/credentials/paid/production/live model/SDK/WeChat action."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T01:54:32.975482Z",
+  "parameter_summary": "Execute the independently reviewed V2-only installed-material comparison recovery within exact owner A07 bounds; previous A06 campaign remains closed.",
+  "single_use": true,
+  "subject_commit": "f02bdb770174f36744041dc9b0a8cf217b7c17a3",
+  "target": "TASK-0138"
+}

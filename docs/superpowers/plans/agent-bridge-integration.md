@@ -4,7 +4,7 @@
 
 **Goal:** Deliver installed-engine V2, Node CI and a reviewed, non-overwriting agent-bridge application using that repository's own identity, rules, tasks and checks.
 
-**Approach:** Reuse delivered resource distribution, initialization and Node local V0/V1. First establish fixed installed-engine mutation execution/replay, then connect the complete Node V2 lifecycle, then implement same-candidate CI and real-target acceptance. The owner has explicitly reopened this complete scope; real target application waits for the active target session to finish and a fresh ownership/baseline check.
+**Approach:** Reuse delivered resource distribution, initialization, Node local V0/V1 and the installed local Node V2 lifecycle. Next complete same-candidate CI and real-target acceptance. The owner has reopened this complete scope and paused the target chat; target application follows source CI-engine validation and a fresh ownership/baseline check. The target declaration and new LOCAL proof precede its actual private CI run and original-host combined Gate.
 
 **Materials:** [Installed-engine mutation design candidate](../specs/installed-engine-governance-mutations.md), [Node verification](../../operations/node-verification.md), [initialization](../../operations/initialization.md), [resource bundle](../../operations/resource-bundle.md), [cross-repository boundaries](../../operations/sdk-and-engine-plan.md#完整引擎跨仓初始化), current source and target `AGENTS.md`, target `package.json` and `docs/local-bridge.md`.
 
@@ -14,7 +14,7 @@
 
 ## Dependencies and ownership
 
-The strong serial chain is current candidate/contracts → pretest rebuild compatibility → installed mutation primitive/replay → complete Node V2 consumers → CI original-material handoff → disposable end-to-end acceptance → target application after target-session completion. Do not open a public capability before all its consumers are ready. A V0/V1 success is not complete V2/CI support.
+The strong serial chain is current candidate/contracts → pretest rebuild compatibility → installed mutation primitive/replay → complete Node V2 consumers → CI original-material handoff → disposable end-to-end acceptance → target application after fresh ownership/baseline checks → actual private CI and original-host combined Gate. Do not open a public capability before all its consumers are ready. A V0/V1 success is not complete V2/CI support.
 
 Suggested concurrency is **3–4 agents including the integrator**. Before implementation, mutation/probe research and Node lifecycle/CI consumer mapping may run independently. After contracts freeze, divide source writing by module; keep shared Schema/Policy, snapshot and consumer integration with one integrator. Companion tests/docs may use a separate owner only after signatures stabilize. Independent reviewer/verifier receives a fixed candidate and does not edit its implementation. Final integration, reviews, verification and commits are serial.
 
@@ -33,7 +33,7 @@ First propagate only the three fixed standard temporary-directory roles from a v
 
 The target currently uses `pretest: npm run build`; removing it would lose its stale-build protection. Reproduce the existing fixed runner's rejection with a real ordinary-wheel fixture. In a separate source-only task, permit replacement of dist identity only after the successful fixed check and only when every path, kind, size and content digest equals the separately verified build. Retain both inventories for read-only replay; all other phases retain identity protection. Prove V0/V1 acceptance and rejection of changed/extra/missing/unsafe output before proceeding.
 
-The target also needs the fixed test flags and the exact coverage provider expected by the supported profile. Prepare these as a separate target diff after its active session finishes. Its current instructions do not declare coverage thresholds: the profile's 85% total/90% changed TS line thresholds are proposed new target requirements and must be explicitly included in the reviewed target Policy, not described as pre-existing gates.
+The target also needs the fixed test flags and the exact coverage provider expected by the supported profile. Prepare these as a separate target diff under Task 5's coordination conditions. Its current instructions do not declare coverage thresholds: the profile's 85% total/90% changed TS line thresholds are proposed new target requirements and must be explicitly included in the reviewed target Policy, not described as pre-existing gates.
 
 ## Task 2: Execute and replay fixed installed-engine mutations
 
@@ -46,7 +46,7 @@ The target also needs the fixed test flags and the exact coverage provider expec
 
 ## Task 3: Connect the entire local Node V2 lifecycle
 
-**Artifacts / Locations:** Governed Policy/Schema, verification and Node execution, evidence/snapshot, verifier/review, approval/recovery, freshness/status and Gate consumers; separate companion lifecycle tests and use documentation. Follow the explicit [Node V2 installed lifecycle contract](../specs/node-v2-installed-lifecycle.md). The native installed-engine primitive is delivered in [PR #147](https://github.com/MaginaLW/harness-model/pull/147), with both ordinary origins, independent native verification, implementation review, Gate and current-head required CI accepted. Preserve its immutable acceptance originals. The separate local Node V2 candidate still requires its complete ordinary-installed lifecycle and its own source gates before publication.
+**Artifacts / Locations:** Governed Policy/Schema, verification and Node execution, evidence/snapshot, verifier/review, approval/recovery, freshness/status and Gate consumers; separate companion lifecycle tests and use documentation. Follow the explicit [Node V2 installed lifecycle contract](../specs/node-v2-installed-lifecycle.md). The native installed-engine primitive is delivered in [PR #147](https://github.com/MaginaLW/harness-model/pull/147), with both ordinary origins, independent native verification, implementation review, Gate and current-head required CI accepted. Preserve its immutable acceptance originals. The installed local `agent-bridge-node@2` / Policy `3.2.0` lifecycle is delivered in [PR #148](https://github.com/MaginaLW/harness-model/pull/148). Preserve original-base/full-scope verification and all failed proof originals. Supplemental direct/rebuilt ordinary evidence retains its original binding and does not establish acceptance of a later CI engine.
 
 - Implement the reviewed new profile/evidence version while preserving existing Node V0/V1 and native Python contracts. Full V1 remains the prefix; fixed target acceptance/integration, actual installed mutations and independent verifier are required.
 - Extend the five probes to the real Node V2 guard paths and verify their public-consumer reachability. Do not count probes against only the native evidence branch as Node protection.
@@ -56,18 +56,18 @@ The target also needs the fixed test flags and the exact coverage provider expec
 
 ## Task 4: Add Node CI with reproducible originals
 
-**Artifacts / Locations:** Fixed artifact transport/CI consumer and target workflow candidate; preserve existing source CI and its thresholds.
+**Artifacts / Locations:** Fixed artifact transport/CI consumer and target workflow candidate; preserve existing source CI and its thresholds. CI3.3 capacity remains unregistered, its implementation remains unpublished, and physical/remote/original-host acceptance is unfinished. The source artifact workflow is still WIP; no published artifact is available from this work.
 
 - Freeze the exact content inventory, relative references, limits and local-versus-CI host identities. Do not rewrite local absolute paths/inodes into fictitious current facts. Review authorized material transfer separately from artifact validation.
 - Build/install the same declared engine content and prepare fresh CI materials. Check the exact target subject, full checks, coverage and actual engine mutations; retain receipts and originals for read-only replay.
 - Bind CI to current local-final evidence, verifier/context and design/implementation reviews. Gate requires both; missing originals, public-summary-only input, wrong head or changed engine/dependencies must reject.
-- Run supported-runner local/CI fixtures and independent review, native verification and required CI. Exit: actual same-candidate CI acceptance and rejection results, with no assumption that remote branch protection is configured.
+- Run complete supported-runner physical fixtures, independent capacity review, ordinary/native verification and source required CI. Publish and authenticate the selected source artifact. Actual private CI and original-host combined Gate follow the target-owned declaration and new LOCAL lifecycle in Task 5; do not assume remote branch protection is configured.
 
-## Task 5: Apply to agent-bridge after target work finishes
+## Task 5: Apply to agent-bridge after source-engine validation and ownership checks
 
 **Artifacts / Locations:** Target's exact initialization preview/review, `.ai` installation and separately reviewed instruction/workflow diffs; preserve target history and WIP.
 
-- Wait for the active target session, then re-read its instructions, Git identity/branch/HEAD, `.ai`, scripts, CI and worktree ownership. Do not stash/reset/overwrite or include other work in integration commits. If ownership remains uncertain, retain a reviewable candidate and withhold target writes.
+- The owner has paused the target chat; its checked baseline and WIP remain unchanged. After source CI-engine validation, re-read its instructions, Git identity/branch/HEAD, `.ai`, scripts, CI and worktree ownership. Do not stash/reset/overwrite or include other work in integration commits. If ownership remains uncertain, retain a reviewable candidate and withhold target writes.
 - Rehearse the exact target Policy/profile against the independently installed wheel and disposable source snapshot. Preserve original target checks and verify unsupported inputs, conflict, interrupted init, stale evidence and full V2/CI failure paths.
 - Review and apply the non-overwriting initialization; instruction and workflow changes remain explicit diffs. Establish a new target identity, not this repository's UUID, maintenance marker, approvals or standing authorization.
 - Use a naturally occurring target task for full acceptance. If none is available, mark real-task acceptance incomplete instead of manufacturing a business change. Run both repositories' applicable original checks; inspect actual target CI and remote protection without treating local Gate as their substitute.

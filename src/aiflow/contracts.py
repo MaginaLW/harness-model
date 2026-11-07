@@ -28,6 +28,7 @@ SCHEMA_FILES = {
     "evidence": "evidence.schema.json",
     "mutation-evidence": "mutation-evidence.schema.json",
     "mutation-manifest": "mutation-manifest.schema.json",
+    "node-ci": "node-ci.schema.json",
     "observation": "observation.schema.json",
     "observation-decision": "observation-decision.schema.json",
     "policy": "policy.schema.json",

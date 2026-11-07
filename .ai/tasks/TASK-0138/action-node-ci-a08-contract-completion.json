@@ -1,0 +1,18 @@
+{
+  "action_type": "node_ci_preregistration_measurement",
+  "classification_input_sha256": "21a2ced2d217fac22e6e6e540bfc7c841998d1c40a69ae401d8ba9db7d107c5c",
+  "conditions": [
+    "Explicit owner-approved A08 proposal SHA7581be71801e013bf22bc9df0b0e265b8e621c41629b6bce19d02c7e05cf5428, exact two repaired input/admission contracts and their local validation only.",
+    "At most three unstarted full groups: rebuilt V0/V1/V2 under build/co/n. Direct fresh ordinary association may inspect and transport inputs but executes no Node/pair/taskproof kernel.",
+    "Keep old successful direct results at their true source versions; retain all old originals and failures, no relabeling or rewrite.",
+    "Original cumulative cutoff 2026-11-05T01:54:32.975482Z and 192 GiB; no new budget. An actual preparation/kernel/native, ownership, budget or cleanup execution failure stops affected campaign, with no automatic kernel/native retry.",
+    "Within the two contract repairs ordinary code/unit/helper corrections and independent re-review continue without round-count approval; fixed physical plans/roles/copy/retention, all quality and material bounds remain unchanged.",
+    "No accepted target a4 writes/reinstallation, publication/push/merge/remote workflow/private transfer/credential export/paid/production/live model/SDK/WeChat action."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T01:54:32.975482Z",
+  "parameter_summary": "Owner A08 contract-complete current-candidate association and three remaining rebuilt measurements. Original base retained; final complete source native V2 remains a separate single invocation with its own current mutation action.",
+  "single_use": true,
+  "subject_commit": "1f5f75a8d3d82641f63cece1d26b01c6735030fd",
+  "target": "TASK-0138"
+}

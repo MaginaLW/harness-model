@@ -1,0 +1,19 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "d65c6c5a3d92e44ed44b1a2dad99288ae87ca1f0c677b61aa17c75641558e5a3",
+  "conditions": [
+    "Actual owner A12-time approval inherits A11 remaining full slot2 only; no new full slots or fresh preparation.",
+    "All14 checks, complete3000-second branch suite, both85%total/90%diff domains, five unchanged mutation pairs remain mandatory.",
+    "Independent verifier context 54bbdd2d02ec9525862adfbbc26020b82fe85310902993300bb5724fbbec5d0a",
+    "A12 authorization raw SHA256 c73245084c92ad598f74bc1406176ad5037ef37977a89940260611bbf75b432f",
+    "A12 activation raw SHA256 88dc25c08df156cf73ca9358cba7984cafc1951391835d08919432ce539aec61",
+    "Single immutable10800second window; first accepted snapshot closes all slots; actual full failure exhausts this allowance.",
+    "No target write/reinstall, publication,push/merge,remote workflow/private transfer,paid/production,live model/SDK/Grok/WeChat,credentials,ACL/execution-policy/authorization-source/repository settings,deletion/reset/rebase/history rewrite."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T22:08:07.636033+00:00",
+  "parameter_summary": "Sole remaining A11 complete source native V2 slot2 under approved A12 time-only continuation; exact current repaired candidate and unchanged original quality gates.",
+  "single_use": true,
+  "subject_commit": "0f0843124b4b0855cd72f21b76063d82595dec95",
+  "target": "TASK-0138"
+}

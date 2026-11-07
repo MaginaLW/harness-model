@@ -1,0 +1,18 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "c80c00f3b8caa1eba34723e04b9dd6bef8526334d1c00d6b9b02b7815722ddbd",
+  "conditions": [
+    "Explicit owner A09 scope approval and A10 one-shot 7200-second time grant; preserve original source base and all full checks.",
+    "Keep 3000-second complete branch pytest, both 85% total/90% diff domains, strict mypy and all five original native pairs.",
+    "The shared activation deadline cannot be renewed or reset; no retry after actual native failure.",
+    "No target write, source publication, push/merge, private transfer, model/SDK/WeChat, paid call or execution-policy change.",
+    "Verifier context dc6f9064824d35df0aab7d0555d467fabfde0516034bece3271306c93cd004bc",
+    "Activation raw SHA256 cf05c90eae808c5bbc81f762067c0567b189b280d0fd0dd2fbe9a29ab08b3861"
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T07:40:41.790380+00:00",
+  "parameter_summary": "At most one complete source native V2, including five original native mutation pairs, for the current registered-cap candidate under real A09 scope and A10 single execution window.",
+  "single_use": true,
+  "subject_commit": "4defb9579502d998f4120b648f0544d8aeffa9a5",
+  "target": "TASK-0138"
+}

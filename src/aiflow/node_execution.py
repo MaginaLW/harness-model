@@ -489,12 +489,19 @@ def _git_role_paths(entry: Path) -> dict[str, Path]:
 
 def _environment(node: Path, checkout: Path, run: Path, git: Path) -> dict[str, str]:
     system = _windows_root() if os.name == "nt" else Path("/unsupported-windows-host")
-    git_roles = _git_role_paths(git) if os.name == "nt" else {"git": git}
+    return _bound_node_environment(node, checkout, run, git, system, windows=os.name == "nt")
+
+
+def _bound_node_environment(
+    node: Path, checkout: Path, run: Path, git: Path, system: Path, *, windows: bool
+) -> dict[str, str]:
+    """Construct the producing environment using lexical, already-bound roles."""
+    git_roles = _git_role_paths(git) if windows else {"git": git}
     git_directories = tuple(dict.fromkeys(path.parent for path in git_roles.values()))
     home = run / "home"
     temporary = run / "tmp"
     environment = {
-        "PATH": os.pathsep.join(
+        "PATH": (";" if windows else ":").join(
             map(
                 str,
                 (
@@ -520,7 +527,7 @@ def _environment(node: Path, checkout: Path, run: Path, git: Path) -> dict[str, 
         "npm_config_audit": "false",
         "npm_config_fund": "false",
         "GIT_CONFIG_NOSYSTEM": "1",
-        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_CONFIG_GLOBAL": "nul" if windows else "/dev/null",
         "GIT_TERMINAL_PROMPT": "0",
         "GIT_OPTIONAL_LOCKS": "0",
         "GIT_TEMPLATE_DIR": "",
@@ -530,7 +537,7 @@ def _environment(node: Path, checkout: Path, run: Path, git: Path) -> dict[str, 
         "PYTHONDONTWRITEBYTECODE": "1",
         "NODE_DISABLE_COMPILE_CACHE": "1",
     }
-    if os.name == "nt":
+    if windows:
         environment["GIT_EXEC_PATH"] = str(git_roles["git_backend"].parent)
     return environment
 
@@ -1546,6 +1553,26 @@ def _validate_receipt(
     environment: Mapping[str, str] | None = None,
 ) -> None:
     receipt = _json(directory / "receipt.json")
+    _validate_receipt_metadata(receipt, expected, argv=argv, cwd=cwd, environment=environment)
+    for stream in ("stdout", "stderr"):
+        data = _read(directory / f"{stream}.raw", limit=1024 * 1024)
+        if len(data) != receipt[f"{stream}_size"] or _sha(data) != receipt[f"{stream}_sha256"]:
+            raise _error("Raw process stream has changed", "NODE_RECEIPT_INVALID")
+        from aiflow.redaction import redact_text
+
+        display = redact_text(data.decode("utf-8", errors="replace")).encode()
+        if _read(directory / f"{stream}.log", limit=8 * 1024 * 1024) != display:
+            raise _error("Process display log differs from the bound raw stream")
+
+
+def _validate_receipt_metadata(
+    receipt: object,
+    expected: Mapping[str, object],
+    *,
+    argv: Sequence[str] | None = None,
+    cwd: Path | None = None,
+    environment: Mapping[str, str] | None = None,
+) -> None:
     if not isinstance(receipt, dict) or set(receipt) != {
         "returncode",
         "timed_out",
@@ -1629,14 +1656,34 @@ def _validate_receipt(
         _canonical(environment)
     ):
         raise _error("Process environment differs from its fixed roles", "NODE_RECEIPT_INVALID")
-    for stream in ("stdout", "stderr"):
-        data = _read(directory / f"{stream}.raw", limit=1024 * 1024)
-        if len(data) != receipt[f"{stream}_size"] or _sha(data) != receipt[f"{stream}_sha256"]:
-            raise _error("Raw process stream has changed", "NODE_RECEIPT_INVALID")
-        from aiflow.redaction import redact_text
 
+
+def validate_receipt_originals(
+    expected: Mapping[str, object],
+    *,
+    receipt: object,
+    streams: Mapping[str, bytes],
+    logs: Mapping[str, bytes],
+    argv: Sequence[str] | None = None,
+    cwd: Path | None = None,
+    environment: Mapping[str, str] | None = None,
+) -> None:
+    """Validate producing coordinates and exact bytes, without opening old paths."""
+    _validate_receipt_metadata(receipt, expected, argv=argv, cwd=cwd, environment=environment)
+    if set(streams) != {"stdout", "stderr"} or set(logs) != set(streams):
+        raise _error("Process stream roles are incomplete", "NODE_RECEIPT_INVALID")
+    bound = cast(dict[str, Any], receipt)
+    from aiflow.redaction import redact_text
+
+    for name, data in streams.items():
+        if (
+            len(data) > 1024 * 1024
+            or len(data) != bound[name + "_size"]
+            or _sha(data) != bound[name + "_sha256"]
+        ):
+            raise _error("Raw process stream has changed", "NODE_RECEIPT_INVALID")
         display = redact_text(data.decode("utf-8", errors="replace")).encode()
-        if _read(directory / f"{stream}.log", limit=8 * 1024 * 1024) != display:
+        if logs[name] != display:
             raise _error("Process display log differs from the bound raw stream")
 
 
@@ -2423,6 +2470,11 @@ def _changed_lines(
         subject,
         "--",
     )
+    return _parse_changed_lines(raw)
+
+
+def _parse_changed_lines(raw: bytes) -> tuple[dict[str, list[int]], tuple[str, ...], bytes]:
+    """Parse the retained fixed Git diff without running a transported Git tree."""
     changed: dict[str, list[int]] = {}
     deleted = []
     current: str | None = None
@@ -2896,8 +2948,50 @@ def _coverage(
     summary_raw = _read(directory / "coverage-summary.json", limit=limit)
     if len(raw) + len(summary_raw) > 64 * 1024 * 1024:
         raise _error("Coverage reports exceed their aggregate byte limit")
-    reports, summary = _json_bytes(raw), _json_bytes(summary_raw)
     expected = _json(node_dir / "expected-map.json", limit=limit)
+    sources = {
+        row["path"]: _read(checkout / row["path"])
+        for row in source["files"]
+        if row["path"].startswith("src/local/") and row["path"].endswith(".ts")
+    }
+    changed, deleted, diff = _changed_lines(original, base, subject)
+    diff_path = node_dir / "source.diff"
+    if diff_path.exists():
+        if _read(diff_path) != diff:
+            raise _error("Bound coverage diff changed")
+    else:
+        # Only the execution caller is allowed to publish this original.
+        raise _error("Bound coverage diff is missing")
+    result = _coverage_from_originals(
+        checkout, sources, raw, summary_raw, expected, diff, revision=revision
+    )
+    if monotonic_ns() - started > 30_000_000_000:
+        raise _error("TypeScript coverage calculation timed out", "NODE_COVERAGE_TIMEOUT")
+    return result
+
+
+def _coverage_from_originals(
+    checkout: Path,
+    sources: Mapping[str, bytes],
+    raw: bytes,
+    summary_raw: bytes,
+    expected: object,
+    diff: bytes,
+    *,
+    revision: int = 2,
+) -> dict[str, object]:
+    """Replay coverage/catalog arithmetic on retained bytes and lexical coordinates."""
+    started = monotonic_ns()
+    if type(revision) is not int or revision not in {1, 2}:
+        raise _error("Node coverage profile revision is unsupported")
+    limit = 32 * 1024 * 1024 if revision == 1 else MAX_JSON_BYTES
+    if (
+        len(raw) > limit
+        or len(summary_raw) > limit
+        or len(raw) + len(summary_raw) > 64 * 1024 * 1024
+    ):
+        raise _error("Coverage reports exceed their aggregate byte limit")
+    reports, summary = _json_bytes(raw), _json_bytes(summary_raw)
     if (
         not isinstance(expected, dict)
         or (
@@ -2911,11 +3005,6 @@ def _coverage(
         or not isinstance(expected.get("files"), dict)
     ):
         raise _error("The independent executable map is invalid", "NODE_COVERAGE_INVALID")
-    sources = {
-        row["path"]: _read(checkout / row["path"])
-        for row in source["files"]
-        if row["path"].startswith("src/local/") and row["path"].endswith(".ts")
-    }
     if set(expected["files"]) != set(sources):
         raise _error("The executable map source set is incomplete", "NODE_COVERAGE_INVALID")
     lines = {}
@@ -2949,14 +3038,7 @@ def _coverage(
         summary_normalized[relative] = summary[original_path]
     if set(summary) != set(reports) | {"total"}:
         raise _error("Coverage summary inventory differs from the complete report")
-    changed, deleted, diff = _changed_lines(original, base, subject)
-    diff_path = node_dir / "source.diff"
-    if diff_path.exists():
-        if _read(diff_path) != diff:
-            raise _error("Bound coverage diff changed")
-    else:
-        # Only the execution caller is allowed to publish this original.
-        raise _error("Bound coverage diff is missing")
+    changed, deleted, _raw = _parse_changed_lines(diff)
     if revision == 1:
         result = validate_node_line_coverage(
             normalized,
@@ -3116,7 +3198,7 @@ def _checks(
     failure: str | None,
     *,
     products: Mapping[str, Any] | None = None,
-    installed: InstalledMutationFacts | None = None,
+    installed: InstalledMutationFacts | Mapping[str, Any] | None = None,
 ) -> list[dict[str, object]]:
     public = {str(item["execution_id"]): item for item in executions}
     checks = []
@@ -3134,7 +3216,12 @@ def _checks(
                 else "unverified"
             )
         elif check.check_id in {"targeted_mutation", "independent_verifier"}:
-            status = "passed" if installed is not None and installed.passed else "unverified"
+            mutation_passed = (
+                installed.get("passed") is True
+                if isinstance(installed, Mapping)
+                else installed is not None and installed.passed
+            )
+            status = "passed" if mutation_passed else "unverified"
         elif not check.argv:
             status = "passed" if coverage is not None and failure is None else "unverified"
         elif len(actual) != len(fixed):
@@ -4286,3 +4373,1677 @@ def recheck_node_evidence(
     ) as error:
         reason = error.code if isinstance(error, AiflowError) else "NODE_EVIDENCE_INVALID"
         return NodeEvidenceFacts(False, False, (reason,), evidence_digest, materials, run_id)
+
+
+def _ci_ref(path: Path, attempt: Path) -> dict[str, Any]:
+    data = _read(path, limit=MAX_JSON_BYTES)
+    return {"ref": path.relative_to(attempt).as_posix(), "size": len(data), "sha256": _sha(data)}
+
+
+def _ci_attempt_coordinate(source_root: Path, platform: Mapping[str, Any]) -> Path:
+    if (
+        not source_root.is_absolute()
+        or source_root.name != "source"
+        or any(
+            type(platform.get(key)) is not int or platform[key] < 1
+            for key in ("run_id", "run_attempt")
+        )
+    ):
+        raise _error("CI source/platform coordinates are invalid", "NODE_CI_BINDING_INVALID")
+    return source_root.parent / ".tmp/node-ci" / f"{platform['run_id']}-{platform['run_attempt']}"
+
+
+def _ci_kernel_inputs(
+    source_root: Path,
+    attempt: Path,
+    admission: Mapping[str, Any],
+    source_tuple: Mapping[str, Any],
+    descriptor: Mapping[str, Any],
+) -> None:
+    """Physical coherence is required even for non-authorizing finite measurement."""
+    if (
+        os.name != "nt"
+        or sys.implementation.name != "cpython"
+        or sys.version_info[:2] != (3, 11)
+        or sys.maxsize <= 2**32
+        or not sys.dont_write_bytecode
+        or not __debug__
+    ):
+        raise _error(
+            "CI Node kernels require Windows x64 CPython3.11 with bytecode disabled",
+            "NODE_HOST_UNSUPPORTED",
+        )
+    workspace = os.environ.get("GITHUB_WORKSPACE")
+    if (
+        not workspace
+        or not Path(workspace).is_absolute()
+        or source_root != Path(workspace).absolute() / "source"
+        or attempt != _ci_attempt_coordinate(source_root, admission["platform"])
+    ):
+        raise _error(
+            "CI physical attempt differs from authenticated coordinates", "NODE_CI_BINDING_INVALID"
+        )
+    _ancestors(attempt)
+    for name, value in (
+        ("admission", admission),
+        ("source-tuple", source_tuple),
+        ("descriptor", descriptor),
+    ):
+        if _read(attempt / "control" / (name + ".json"), limit=MAX_JSON_BYTES) != _canonical(value):
+            raise _error("CI kernel control selection changed", "NODE_CI_BINDING_INVALID")
+    if (
+        _sha(_canonical(descriptor)) != admission["descriptor_sha256"]
+        or descriptor["source_tuple_sha256"] != _sha(_canonical(source_tuple))
+        or admission["platform"]["head_sha"] != source_tuple["attestation_head"]
+    ):
+        raise _error("CI kernel immutable input binding changed", "NODE_CI_BINDING_INVALID")
+
+
+def _ci_input_binding(
+    source_root: Path,
+    payload_root: Path,
+    attempt: Path,
+    source_tuple: Mapping[str, Any],
+    admission: Mapping[str, Any],
+) -> dict[str, Any]:
+    from aiflow.node_ci import _ci_input_materials
+
+    material = _ci_input_materials(source_root, payload_root, source_tuple)
+    raw = _canonical(material)
+    if (
+        _read(attempt / "control/input-materials.json", limit=MAX_JSON_BYTES) != raw
+        or _sha(raw) != admission["input_materials_sha256"]
+        or _read(attempt / "control/provision.json", limit=MAX_JSON_BYTES)
+        != _canonical(material["python_provision"])
+        or _read(attempt / "control/provision/uv.lock", limit=MAX_JSON_BYTES)
+        != _read(attempt / "artifact/inputs/uv.lock", limit=MAX_JSON_BYTES)
+    ):
+        raise _error(
+            "CI provisioned inputs changed after exclusive admission", "NODE_MATERIALS_DRIFT"
+        )
+    return material
+
+
+def _ci_bound_control(
+    attempt: Path, admission: Mapping[str, Any], source_tuple: Mapping[str, Any]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    from aiflow.node_ci import node_ci_execution_contract, validate_node_ci_document
+
+    _ancestors(attempt)
+    validate_node_ci_document(dict(admission), kind="aiflow-node-ci-admission")
+    validate_node_ci_document(dict(source_tuple), kind="aiflow-node-ci-attested-source")
+    for name, value in (("admission", admission), ("source-tuple", source_tuple)):
+        if _read(attempt / "control" / (name + ".json"), limit=MAX_JSON_BYTES) != _canonical(value):
+            raise _error(
+                "CI control original differs from its selected object", "NODE_CI_BINDING_INVALID"
+            )
+    descriptor = _json(attempt / "control/descriptor.json")
+    if (
+        not isinstance(descriptor, dict)
+        or _sha(_canonical(descriptor)) != admission["descriptor_sha256"]
+        or descriptor["source_tuple_sha256"] != _sha(_canonical(source_tuple))
+        or admission["platform"]["head_sha"] != source_tuple["attestation_head"]
+        or descriptor["attestation_head"] != source_tuple["attestation_head"]
+    ):
+        raise _error("CI admission does not bind this source tuple", "NODE_CI_BINDING_INVALID")
+    contract = node_ci_execution_contract(source_tuple["binding"]["verification_level"])
+    if descriptor["execution_contract_sha256"] != _sha(_canonical(contract)):
+        raise _error("CI fixed execution contract is stale", "NODE_CI_BINDING_INVALID")
+    return descriptor, contract
+
+
+def _ci_source_snapshot(root: Path, binding: Mapping[str, Any]) -> dict[str, Any]:
+    """Actual producing checkout facts, without local-original freshness claims."""
+    if _git(root, "rev-parse", "HEAD").decode().strip() != binding["attestation_head"]:
+        raise _error("CI source HEAD changed", "NODE_ROOT_DRIFT")
+    return {
+        "root": str(root),
+        "inventory": _inventory(root),
+        "git": _git_state(root),
+        "binding": dict(binding),
+    }
+
+
+def _ci_context(
+    source_root: Path, node_dir: Path, binding: Mapping[str, Any], manifests: Mapping[str, Any]
+) -> VerificationContext:
+    from aiflow.verification import NodePlanBindings
+
+    runtime = Path(manifests["node.json"]["runtime"]["root"])
+    return VerificationContext(
+        source_root,
+        binding["task_id"],
+        binding["base_commit"],
+        binding["subject_commit"],
+        manifests["host-tools.json"]["python"]["path"],
+        "node-ci",
+        ci_run_dir=node_dir,
+        node_bindings=NodePlanBindings(
+            str(runtime / "node.exe"),
+            str(runtime / "node_modules/npm/bin/npm-cli.js"),
+            manifests["host-tools.json"]["git"]["path"],
+            node_dir / "checkout",
+            node_dir / "user.npmrc",
+            node_dir / "global.npmrc",
+            node_dir / "coverage",
+            node_dir / "expected-map.json",
+            node_dir / "source-manifest.json",
+        ),
+    )
+
+
+def _ci_environment(
+    node: Path, checkout: Path, run: Path, git: Path, host: Mapping[str, Any]
+) -> dict[str, str]:
+    system = Path(host["cmd"]["path"]).parent.parent
+    result = _bound_node_environment(node, checkout, run, git, system, windows=True)
+    result["TMPDIR"] = str(run / "tmp")
+    result["GIT_COMMITTER_NAME"] = "aiflow-ci"
+    result["GIT_COMMITTER_EMAIL"] = "aiflow-ci@invalid"
+    return result
+
+
+def _ci_reserve_member(projected: dict[str, int], name: str, size: int) -> None:
+    name = _path(name)
+    path = Path(name)
+    for item in (path, *path.parents):
+        if str(item) == ".":
+            continue
+        relative = item.as_posix()
+        if relative not in projected and len(projected) >= MAX_ENTRIES:
+            raise _error("CI Node copy inventory exceeds its entry budget")
+        projected[relative] = max(projected.get(relative, 0), size if item == path else 0)
+
+
+def _ci_node_copy_budget(node_dir: Path, additions: Mapping[str, int]) -> None:
+    """Reserve cumulative physical copies before writing into the Node role."""
+    projected = {row["path"]: row.get("size", 0) for row in _inventory(node_dir)["entries"]}
+    for name, size in additions.items():
+        _ci_reserve_member(projected, name, size)
+    budget = [MAX_ENTRIES, MAX_TOTAL_BYTES]
+    for size in projected.values():
+        _take_budget(budget, size)
+
+
+def _ci_clone_allocation(
+    source_root: Path,
+    original: Mapping[str, Any],
+    source: Mapping[str, Any],
+    dependencies: Mapping[str, Any],
+    environment: Mapping[str, str],
+) -> dict[str, int]:
+    """Conservatively derive the fixed clone/checkout's future physical members."""
+    # Keep the entire original checkout, including all .git objects/admin,
+    # occupied even when clone will not copy some of its working files.
+    projected = {
+        "checkout/" + row["path"]: row.get("size", 0) for row in original["inventory"]["entries"]
+    }
+
+    def reserve(name: str, size: int) -> None:
+        _ci_reserve_member(projected, name, size)
+
+    for row in source["files"]:
+        reserve("checkout/" + row["path"], row["size"])
+    reserve("checkout/node_modules", 0)
+    for row in dependencies["entries"]:
+        reserve("checkout/node_modules/" + row["path"], row.get("size", 0))
+
+    refs = _git(source_root, "for-each-ref", "--format=%(refname)").decode("utf-8").splitlines()
+    if len(refs) > MAX_ENTRIES:
+        raise _error("CI clone reference inventory exceeds its entry budget")
+    refs = [_path(name) for name in refs]
+    head = _read(source_root / ".git/HEAD", limit=MAX_JSON_BYTES).decode("utf-8").strip()
+    head_ref = _path(head[5:]) if head.startswith("ref: ") else None
+    if head_ref is not None and head_ref not in refs:
+        raise _error("CI source symbolic HEAD differs from its frozen reference inventory")
+    mapped = {
+        "refs/remotes/origin/" + name.removeprefix("refs/heads/")
+        if name.startswith("refs/heads/")
+        else name
+        for name in refs
+    }
+    for name in set(refs) | mapped:
+        reserve("checkout/.git/" + _path(name), len(source["subject_commit"]) + 1)
+    packed = len(b"# pack-refs with: peeled fully-peeled sorted \n") + sum(
+        len(name.encode("utf-8")) + 2 * (len(source["subject_commit"]) + 2) for name in mapped
+    )
+    # Each optional peeled row includes its own 40-hex object ID. All original
+    # objects/admin remain occupied above; newly generated index is separately
+    # reserved at the existing binary per-file ceiling, never the JSON ceiling.
+    reserve("checkout/.git/packed-refs", packed)
+    reserve("checkout/.git/index", MAX_FILE_BYTES)
+    reserve("checkout/.git/HEAD", max(len(head.encode("utf-8")) + 1, 41))
+    reserve("checkout/.git/ORIG_HEAD", 41)
+    branch = (
+        head_ref.removeprefix("refs/heads/")
+        if head_ref is not None and head_ref.startswith("refs/heads/")
+        else None
+    )
+    if branch is not None:
+        remote_head = "ref: refs/remotes/origin/" + branch + "\n"
+        reserve("checkout/.git/refs/remotes/origin/HEAD", len(remote_head.encode("utf-8")))
+
+    # Include every fixed clone config field, with the longer Windows boolean
+    # spelling and quoted/escaped path and branch strings as conservative bounds.
+    escaped_root = str(source_root).replace("\\", "\\\\").replace('"', '\\"')
+    config = (
+        "[core]\n\trepositoryformatversion = 0\n\tfilemode = false\n\tbare = false\n"
+        "\tlogallrefupdates = true\n\tsymlinks = false\n\tignorecase = false\n"
+        '[remote "origin"]\n\turl = "' + escaped_root + '"\n'
+        "\tfetch = +refs/heads/*:refs/remotes/origin/*\n"
+    )
+    if branch is not None:
+        config += (
+            '[branch "' + branch + '"]\n\tremote = origin\n\tmerge = "refs/heads/' + branch + '"\n'
+        )
+    reserve("checkout/.git/config", len(config.encode("utf-8")))
+
+    # clone writes HEAD and, for a symbolic source HEAD, its local branch and
+    # origin/HEAD reflogs; checkout appends one HEAD record. Identity is fixed.
+    identity = environment["GIT_COMMITTER_NAME"] + " <" + environment["GIT_COMMITTER_EMAIL"] + ">"
+    record = len(("0" * 40 + " " + "0" * 40 + " " + identity + " ").encode("utf-8"))
+    record += len(str(-(1 << 63))) + len(" +0000\t\n")
+    clone_log = record + len(("clone: from " + str(source_root)).encode("utf-8"))
+    checkout_log = record + len(
+        ("checkout: moving from " + (head_ref or head) + " to " + source["subject_commit"]).encode(
+            "utf-8"
+        )
+    )
+    reserve("checkout/.git/logs/HEAD", clone_log + checkout_log)
+    if branch is not None:
+        reserve("checkout/.git/logs/refs/heads/" + branch, clone_log)
+        reserve("checkout/.git/logs/refs/remotes/origin/HEAD", clone_log)
+    for setup in ("setup-clone", "setup-checkout"):
+        for stream in ("stdout", "stderr"):
+            reserve("raw/" + setup + "/" + stream + ".raw", 1024 * 1024)
+            reserve("raw/" + setup + "/" + stream + ".log", 8 * 1024 * 1024)
+        reserve("raw/" + setup + "/receipt.json", MAX_JSON_BYTES)
+    return projected
+
+
+def _ci_public_execution(
+    execution: Any, receipt: Mapping[str, Any], context: VerificationContext
+) -> dict[str, Any]:
+    result = _public_execution(execution, receipt, context)
+    for name in ("stdout", "stderr"):
+        stream = cast(dict[str, Any], result[name])
+        for key in ("raw_ref", "log_ref"):
+            stream[key] = str(stream[key]).replace("logs/node-ci/node/", "node/", 1)
+    return result
+
+
+def _ci_manifests(attempt: Path, prepared: Mapping[str, Any]) -> dict[str, Any]:
+    names = ("source", "node", "npm", "dependencies", "engine", "host_tools", "preflight")
+    if set(prepared["manifests"]) != set(names):
+        raise _error("CI prepared material roles differ")
+    result = {}
+    for key, name in zip(names, MANIFEST_NAMES, strict=True):
+        ref = prepared["manifests"][key]
+        if ref["ref"] != "control/" + name:
+            raise _error("CI manifest reference is not its fixed role")
+        data = _read(attempt / ref["ref"], limit=MAX_JSON_BYTES)
+        if len(data) != ref["size"] or _sha(data) != ref["sha256"]:
+            raise _error("CI material original changed", "NODE_MATERIALS_DRIFT")
+        result[name] = _json_bytes(data)
+    return result
+
+
+def prepare_ci_materials(
+    source_root: Path,
+    payload_root: Path,
+    *,
+    attempt_root: Path,
+    admission: Mapping[str, Any],
+    source_tuple: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Collect actual CI inputs and version probes, writing only the claimed root."""
+    descriptor, _contract = _ci_bound_control(attempt_root.absolute(), admission, source_tuple)
+    return _prepare_ci_materials_kernel(
+        source_root,
+        payload_root,
+        attempt_root=attempt_root,
+        admission=admission,
+        source_tuple=source_tuple,
+        descriptor=descriptor,
+    )
+
+
+def _prepare_ci_materials_kernel(
+    source_root: Path,
+    payload_root: Path,
+    *,
+    attempt_root: Path,
+    admission: Mapping[str, Any],
+    source_tuple: Mapping[str, Any],
+    descriptor: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Fixed physical kernel; direct unregistered measurement proves no authority."""
+    source_root, payload_root, attempt = (
+        source_root.absolute(),
+        payload_root.absolute(),
+        attempt_root.absolute(),
+    )
+    _ci_kernel_inputs(source_root, attempt, admission, source_tuple, descriptor)
+    if source_root == attempt or source_root in attempt.parents or attempt in source_root.parents:
+        raise _error("CI attempt and source checkout must be disjoint")
+    if (attempt / "control/prepared.json").exists():
+        raise _error("CI material preparation was already attempted")
+    _ancestors(payload_root)
+    if {path.name for path in payload_root.iterdir()} != {"node", "dependencies"} or {
+        path.name for path in (payload_root / "dependencies").iterdir()
+    } != {"node_modules"}:
+        raise _error("CI provisioned payload has unknown roles")
+    binding = source_tuple["binding"]
+    before = _ci_source_snapshot(
+        source_root, {**binding, "attestation_head": source_tuple["attestation_head"]}
+    )
+    initial = _ci_input_binding(source_root, payload_root, attempt, source_tuple, admission)
+    source = initial["source"]
+    if source["subject_tree"] != binding["subject_tree"]:
+        raise _error("CI subject tree differs", "NODE_BINDING_STALE")
+    _source_contract(source_root, source, revision=2)
+    runtime = initial["runtime"]
+    _node_x64(payload_root / "node/node.exe")
+    if any(
+        row["path"] not in {"node.exe", "npm.cmd", "node_modules", "node_modules/npm"}
+        and not row["path"].startswith("node_modules/npm/")
+        for row in runtime["entries"]
+    ):
+        raise _error("CI Node runtime contains an unowned neighbor")
+    npm_root = payload_root / "node/node_modules/npm"
+    npm = _json(npm_root / "package.json")
+    if (
+        npm.get("name") != "npm"
+        or npm.get("version") != VERSIONS["npm"]
+        or _read(payload_root / "node/npm.cmd") != _read(npm_root / "bin/npm.cmd")
+    ):
+        raise _error("CI npm package/shim differs from its fixed version")
+    manifests = {
+        "source.json": source,
+        "node.json": {"runtime": runtime, "selected": "node.exe"},
+        "npm.json": {
+            "runtime_sha256": _sha(_canonical(runtime)),
+            "entry": "node_modules/npm/bin/npm-cli.js",
+            "shim": "npm.cmd",
+            "package": npm,
+        },
+        "dependencies.json": initial["dependencies"],
+        "engine.json": initial["engine"],
+        "host-tools.json": initial["host_tools"],
+        "preflight.json": {},
+    }
+    preflight = attempt / "preflight"
+    preflight.mkdir(exist_ok=True)
+    if list(preflight.iterdir()):
+        raise _error("CI preflight role is already spent")
+    for name in ("home", "tmp", "cache"):
+        (preflight / name).mkdir()
+    node = payload_root / "node/node.exe"
+    environment = _ci_environment(
+        node,
+        payload_root / "dependencies",
+        preflight,
+        Path(manifests["host-tools.json"]["git"]["path"]),
+        manifests["host-tools.json"],
+    )
+    for name, argv, expected in (
+        ("node", (str(node), "--version"), "v" + VERSIONS["node"]),
+        ("npm", (str(node), str(npm_root / "bin/npm-cli.js"), "--version"), VERSIONS["npm"]),
+    ):
+        directory = preflight / name
+        receipt = _process(
+            argv, cwd=payload_root, environment=environment, timeout=30, output=directory
+        )
+        _validate_receipt(directory, receipt, argv=argv, cwd=payload_root, environment=environment)
+        if _read(directory / "stdout.raw").decode().strip() != expected:
+            raise _error("CI fixed version probe failed", "NODE_PREFLIGHT_FAILED")
+        manifests["preflight.json"][name] = {
+            "directory": str(directory),
+            "receipt": receipt,
+            "expected": expected,
+        }
+    _ci_closed_preflight_roles(_inventory(preflight))
+    for inventory in (runtime, manifests["dependencies.json"]):
+        _unchanged(inventory)
+    if _canonical(before) != _canonical(_ci_source_snapshot(source_root, before["binding"])):
+        raise _error("CI source changed during material preparation", "NODE_ROOT_DRIFT")
+    _ci_input_binding(source_root, payload_root, attempt, source_tuple, admission)
+    refs = {}
+    for key, name in zip(
+        ("source", "node", "npm", "dependencies", "engine", "host_tools", "preflight"),
+        MANIFEST_NAMES,
+        strict=True,
+    ):
+        _write_new(attempt / "control" / name, _canonical(manifests[name]))
+        refs[key] = _ci_ref(attempt / "control" / name, attempt)
+    prepared = {
+        "kind": "aiflow-node-ci-prepared-3.3",
+        "schema_version": "1.0",
+        "descriptor": _ci_ref(attempt / "control/descriptor.json", attempt),
+        "source_tuple": _ci_ref(attempt / "control/source-tuple.json", attempt),
+        "admission": _ci_ref(attempt / "control/admission.json", attempt),
+        "platform": dict(admission["platform"]),
+        "profile": dict(PROFILE_V2),
+        "verification_level": binding["verification_level"],
+        "execution_contract_sha256": descriptor["execution_contract_sha256"],
+        "manifests": refs,
+    }
+    _write_new(attempt / "control/prepared.json", _canonical(prepared))
+    return prepared
+
+
+def execute_ci_node(
+    source_root: Path,
+    task_id: str,
+    *,
+    attempt_root: Path,
+    admission: Mapping[str, Any],
+    prepared: Mapping[str, Any],
+    source_tuple: Mapping[str, Any],
+    pairs: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Run the unchanged fixed Node2 operations in a new CI-owned physical role."""
+    descriptor, _contract = _ci_bound_control(attempt_root.absolute(), admission, source_tuple)
+    return _execute_ci_node_kernel(
+        source_root,
+        task_id,
+        attempt_root=attempt_root,
+        admission=admission,
+        prepared=prepared,
+        source_tuple=source_tuple,
+        descriptor=descriptor,
+        pairs=pairs,
+    )
+
+
+def _execute_ci_node_kernel(
+    source_root: Path,
+    task_id: str,
+    *,
+    attempt_root: Path,
+    admission: Mapping[str, Any],
+    prepared: Mapping[str, Any],
+    source_tuple: Mapping[str, Any],
+    descriptor: Mapping[str, Any],
+    pairs: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """The same fixed operations for production and explicitly non-authorizing proof."""
+    from aiflow import installed_mutations as installed
+    from aiflow.verification import parse_node_ci_plan
+
+    source_root, attempt = source_root.absolute(), attempt_root.absolute()
+    _ci_kernel_inputs(source_root, attempt, admission, source_tuple, descriptor)
+    if _read(attempt / "control/prepared.json", limit=MAX_JSON_BYTES) != _canonical(prepared):
+        raise _error("CI prepared original differs")
+    binding = source_tuple["binding"]
+    if (
+        task_id != binding["task_id"]
+        or prepared["verification_level"] != binding["verification_level"]
+    ):
+        raise _error("CI task/tier binding differs", "NODE_BINDING_STALE")
+    level = binding["verification_level"]
+    if (level == "V2") != (pairs is not None):
+        raise _error("CI pair applicability differs", "NODE_MUTATIONS_INVALID")
+    manifests = _ci_manifests(attempt, prepared)
+    payload_root = Path(manifests["node.json"]["runtime"]["root"]).parent
+    _ci_input_binding(source_root, payload_root, attempt, source_tuple, admission)
+    pair_materials = _json_bytes(installed._materials()) if pairs is not None else None
+    if pairs is not None:
+        assert pair_materials is not None
+        if _canonical(pair_materials["engine"]["installed"]) != _canonical(
+            manifests["engine.json"]
+        ) or _canonical(pair_materials["host_tools"]) != _canonical(manifests["host-tools.json"]):
+            raise _error("CI Node/pair engine or host roles differ", "NODE_MUTATIONS_INVALID")
+        fact = installed.validate_ci_pair_run(
+            attempt_root=attempt, admission=admission, materials=pair_materials, pairs=pairs
+        )
+        if not fact["passed"]:
+            raise _error("CI installed pairs are not current and killed", "NODE_MUTATIONS_INVALID")
+    pair_snapshots = (
+        [_inventory(attempt / f"pair-{index}-{role}") for index in range(5) for role in ("b", "m")]
+        if pairs is not None
+        else []
+    )
+    node_dir = attempt / "node"
+    node_dir.mkdir(exist_ok=True)
+    if list(node_dir.iterdir()):
+        raise _error("CI Node role is already spent")
+    before = _ci_source_snapshot(
+        source_root, {**binding, "attestation_head": source_tuple["attestation_head"]}
+    )
+    for name in ("raw", "home", "tmp", "cache"):
+        (node_dir / name).mkdir()
+    for name in ("user.npmrc", "global.npmrc"):
+        _write_new(node_dir / name, b"")
+    context = _ci_context(source_root, node_dir, binding, manifests)
+    roles = context.node_bindings
+    assert roles is not None
+    bundle = load_policy_bundle(source_root)
+    plan = parse_node_ci_plan(bundle, context, level=level)
+    environment = _ci_environment(
+        Path(roles.node_executable),
+        roles.execution_root,
+        node_dir,
+        Path(roles.git_executable),
+        manifests["host-tools.json"],
+    )
+    clone_argv = (
+        roles.git_executable,
+        *_GIT_OPTIONS,
+        "clone",
+        "--no-hardlinks",
+        "--no-checkout",
+        "--local",
+        "--",
+        str(source_root),
+        str(roles.execution_root),
+    )
+    _ci_node_copy_budget(
+        node_dir,
+        _ci_clone_allocation(
+            source_root,
+            before,
+            manifests["source.json"],
+            manifests["dependencies.json"],
+            environment,
+        ),
+    )
+    _unchanged(before["inventory"])
+    clone = _process(
+        clone_argv,
+        cwd=source_root,
+        environment=environment,
+        timeout=30,
+        output=node_dir / "raw/setup-clone",
+    )
+    _validate_receipt(
+        node_dir / "raw/setup-clone",
+        clone,
+        argv=clone_argv,
+        cwd=source_root,
+        environment=environment,
+    )
+    _ci_node_copy_budget(node_dir, {})
+    checkout_argv = (
+        roles.git_executable,
+        *_GIT_OPTIONS,
+        "-c",
+        "core.autocrlf=false",
+        "checkout",
+        "--detach",
+        binding["subject_commit"],
+    )
+    checkout_receipt = _process(
+        checkout_argv,
+        cwd=roles.execution_root,
+        environment=environment,
+        timeout=30,
+        output=node_dir / "raw/setup-checkout",
+    )
+    _validate_receipt(
+        node_dir / "raw/setup-checkout",
+        checkout_receipt,
+        argv=checkout_argv,
+        cwd=roles.execution_root,
+        environment=environment,
+    )
+    if any((roles.execution_root / name).exists() for name in ("node_modules", "dist", ".runtime")):
+        raise _error("CI tracked input collides with an execution output")
+    _ci_node_copy_budget(
+        node_dir,
+        {
+            "checkout/node_modules": 0,
+            **{
+                "checkout/node_modules/" + row["path"]: row.get("size", 0)
+                for row in manifests["dependencies.json"]["entries"]
+            },
+        },
+    )
+    copied = _copy_tree(
+        Path(manifests["dependencies.json"]["root"]),
+        roles.execution_root / "node_modules",
+        manifests["dependencies.json"],
+    )
+    source = manifests["source.json"]
+    protected = _checkout_files(roles.execution_root, source)
+    _native_ownership_applicable(roles.execution_root, source)
+    _write_new(
+        roles.source_manifest_file,
+        _canonical(
+            {
+                "root": str(roles.execution_root),
+                "files": [
+                    {"path": row["path"], "sha256": row["sha256"]}
+                    for row in source["files"]
+                    if row["path"].startswith("src/local/") and row["path"].endswith(".ts")
+                ],
+            }
+        ),
+    )
+    expected_dist = _dist_paths(roles.execution_root, source)
+    executions = []
+    coverage: dict[str, object] | None = None
+    products: dict[str, Any] | None = None
+    outputs: dict[str, Any] | None = None
+    dist = build_dist = native_seal = None
+    native_checked = False
+    failure = None
+    try:
+        for execution in plan.executions:
+            _unchanged(before["inventory"])
+            if _canonical(_checkout_files(roles.execution_root, source)) != _canonical(protected):
+                raise _error("Protected CI checkout source changed", "NODE_ROOT_DRIFT")
+            for inventory in (
+                copied,
+                manifests["node.json"]["runtime"],
+                manifests["dependencies.json"],
+            ):
+                _unchanged(inventory)
+            if dist is not None:
+                _unchanged(dist)
+            if native_checked and _canonical(
+                _native_ownership_inventory(roles.execution_root, source)
+            ) != _canonical(native_seal):
+                raise _error("CI native ownership first seal changed", "NODE_OUTPUT_INVALID")
+            receipt = _process(
+                execution.argv,
+                cwd=execution.cwd,
+                environment=environment,
+                timeout=execution.timeout_seconds,
+                output=node_dir / "raw" / execution.execution_id,
+            )
+            executions.append({"execution_id": execution.execution_id, "receipt": receipt})
+            if not _successful(receipt):
+                failure = "NODE_PROCESS_FAILED"
+                break
+            _validate_receipt(
+                node_dir / "raw" / execution.execution_id,
+                receipt,
+                argv=execution.argv,
+                cwd=execution.cwd,
+                environment=environment,
+            )
+            if "node_check" in execution.check_ids:
+                native_seal = _native_ownership_inventory(roles.execution_root, source)
+                native_checked = True
+            if "node_build" in execution.check_ids:
+                build_dist = dist = _dist(roles.execution_root, expected_dist)
+            elif execution.argv in {
+                check.argv
+                for check in plan.checks
+                if check.check_id in {"node_check", "ts_coverage"}
+            }:
+                rebuilt = _dist(roles.execution_root, expected_dist)
+                if build_dist is None or _canonical(_content(rebuilt)) != _canonical(
+                    _content(build_dist)
+                ):
+                    raise _error("CI rebuilt output content changed", "NODE_OUTPUT_INVALID")
+                dist = rebuilt
+        if failure is None:
+            if not native_checked or _canonical(
+                _native_ownership_inventory(roles.execution_root, source)
+            ) != _canonical(native_seal):
+                raise _error("CI final native ownership output differs from first seal")
+            if level != "V0":
+                _changed, _deleted, diff = _changed_lines(
+                    source_root, binding["base_commit"], binding["subject_commit"]
+                )
+                _write_new(node_dir / "source.diff", diff)
+                coverage = _coverage(
+                    roles.execution_root,
+                    node_dir,
+                    source,
+                    binding["base_commit"],
+                    binding["subject_commit"],
+                    source_root,
+                    revision=2,
+                )
+            if level == "V2":
+                products = _products(node_dir, source, roles.execution_root)
+            if dist is None or build_dist is None:
+                raise _error("CI fixed build output is missing")
+            fixtures = _fixtures(roles.execution_root, node_dir / "tmp", source, revision=2)
+            if _canonical(fixtures.get("native_ownership")) != _canonical(native_seal):
+                raise _error("CI native fixture differs from first seal")
+            _output_check(roles.execution_root, source, dist, copied, fixtures, revision=2)
+            outputs = {"build_dist": build_dist, "dist": dist, "fixtures": fixtures}
+            _unchanged(before["inventory"])
+            if _canonical(_engine()) != _canonical(manifests["engine.json"]) or _canonical(
+                _host_tools()
+            ) != _canonical(manifests["host-tools.json"]):
+                raise _error("CI engine/host materials changed", "NODE_MATERIALS_DRIFT")
+            _ci_input_binding(source_root, payload_root, attempt, source_tuple, admission)
+    except (AiflowError, OSError, ValueError, TypeError, KeyError) as error:
+        failure = error.code if isinstance(error, AiflowError) else "NODE_EXECUTION_INVALID"
+    if pairs is not None:
+        assert pair_materials is not None
+        for inventory in pair_snapshots:
+            _unchanged(inventory)
+        fact = installed.validate_ci_pair_run(
+            attempt_root=attempt, admission=admission, materials=pair_materials, pairs=pairs
+        )
+        if not fact["passed"]:
+            failure = "NODE_MUTATIONS_INVALID"
+    output_document: dict[str, Any] = outputs or {}
+    output_document["node_inventory"] = _node_inventory(node_dir, level, plan)
+    run = {
+        "kind": "aiflow-node-ci-run-3.3",
+        "schema_version": "1.0",
+        "prepared": _ci_ref(attempt / "control/prepared.json", attempt),
+        "descriptor_sha256": _sha(_canonical(descriptor)),
+        "platform": dict(admission["platform"]),
+        "inputs": {
+            "source": source,
+            "runtime": manifests["node.json"]["runtime"],
+            "dependencies": copied,
+            "prepared_dependencies": manifests["dependencies.json"],
+            "engine": manifests["engine.json"],
+            "host_tools": manifests["host-tools.json"],
+        },
+        "environment": environment,
+        "roots": {
+            "original": before,
+            "checkout": protected,
+            "clone": clone,
+            "checkout_receipt": checkout_receipt,
+        },
+        "executions": executions,
+        "coverage": _coverage_originals(node_dir, coverage) if coverage is not None else None,
+        "product_tests": products,
+        "installed_mutation": pairs,
+        "outputs": output_document,
+        "failure": failure,
+    }
+    data = _canonical(run)
+    if len(data) > MAX_JSON_BYTES:
+        raise _error("CI Node run exceeds its JSON budget")
+    _write_new(node_dir / "run.json", data)
+    return run
+
+
+def _ci_original(package_root: Path, role: str, relative: str) -> bytes:
+    """Open only the new package's ordinary member, never a producing path."""
+    _path(role)
+    _path(relative)
+    return _read(package_root / "originals" / role / relative)
+
+
+def _ci_transport_ref(package_root: Path, reference: Mapping[str, Any]) -> Any:
+    if set(reference) != {"ref", "size", "sha256"}:
+        raise _error("CI original reference has unknown fields")
+    role, separator, relative = _path(reference["ref"]).partition("/")
+    if (
+        not separator
+        or type(reference["size"]) is not int
+        or not 0 < reference["size"] <= MAX_JSON_BYTES
+    ):
+        raise _error("CI original reference lacks its role")
+    raw = _ci_original(package_root, role, relative)
+    if (
+        type(reference["size"]) is not int
+        or len(raw) != reference["size"]
+        or _sha(raw) != reference["sha256"]
+    ):
+        raise _error("CI transported original differs", "NODE_MATERIALS_DRIFT")
+    document = _json_bytes(raw)
+    if _canonical(document) != raw:
+        raise _error("CI transported JSON is noncanonical")
+    return document
+
+
+def _ci_verify_role(package_root: Path, role: str, manifest: Mapping[str, Any]) -> None:
+    if (
+        set(manifest) != {"id", "root", "identity", "entries", "total_bytes"}
+        or manifest["id"] != role
+    ):
+        raise _error("CI role manifest has an invalid closed shape")
+    identity_fields = {
+        "device",
+        "inode",
+        "nlink",
+        "size",
+        "mtime_ns",
+        "ctime_ns",
+        "mode",
+        "attributes",
+    }
+    if not isinstance(manifest["root"], str) or not Path(manifest["root"]).is_absolute():
+        raise _error("CI producing role root is not an absolute coordinate")
+    entries = manifest["entries"]
+    if not isinstance(entries, list) or len(entries) > MAX_ENTRIES:
+        raise _error("CI role inventory exceeds its entry budget")
+    if any(not isinstance(row, dict) for row in entries):
+        raise _error("CI role inventory has a nonobject member")
+    identities = [manifest["identity"], *(row.get("identity") for row in entries)]
+    for identity in identities:
+        if (
+            not isinstance(identity, dict)
+            or set(identity) != identity_fields
+            or any(type(value) is not int or value < 0 for value in identity.values())
+        ):
+            raise _error("CI producing identity facts are malformed")
+    paths = []
+    total = 0
+    for row in entries:
+        path = _path(row["path"])
+        paths.append(path)
+        if row["kind"] not in {"file", "directory"} or set(row) != {"path", "kind", "identity"} | (
+            {"size", "sha256"} if row["kind"] == "file" else set()
+        ):
+            raise _error("CI role member has an invalid closed shape")
+        if row["kind"] == "file":
+            data = _ci_original(package_root, role, path)
+            if (
+                type(row["size"]) is not int
+                or len(data) != row["size"]
+                or _sha(data) != row["sha256"]
+            ):
+                raise _error("CI original member bytes changed", "NODE_MATERIALS_DRIFT")
+            total += len(data)
+        else:
+            _safe_info(package_root / "originals" / role / path, directory=True)
+    if paths != sorted(set(paths), key=lambda value: value.encode("utf8")) or len(
+        set(path.casefold() for path in paths)
+    ) != len(paths):
+        raise _error("CI original paths are duplicate or aliased")
+    if (
+        type(manifest["total_bytes"]) is not int
+        or total != manifest["total_bytes"]
+        or total > MAX_TOTAL_BYTES
+    ):
+        raise _error("CI original inventory byte budget differs")
+    actual = _inventory(package_root / "originals" / role)
+    if _canonical(_content(actual)) != _canonical(_content(manifest)):
+        raise _error("CI transported role has missing or extra members")
+
+
+def _ci_inventory_in_role(inventory: Mapping[str, Any], role: Mapping[str, Any]) -> None:
+    """Compare original identity facts to their sealed role, not to this host."""
+    root, full_root = Path(inventory["root"]), Path(role["root"])
+    if not root.is_relative_to(full_root):
+        raise _error("CI inventory points outside its declared producing role")
+    prefix = root.relative_to(full_root).as_posix()
+    prefix = "" if prefix == "." else prefix + "/"
+    selected = []
+    for row in role["entries"]:
+        if row["path"].startswith(prefix) and row["path"] != prefix.rstrip("/"):
+            selected.append({**row, "path": row["path"][len(prefix) :]})
+    if (
+        _canonical(selected) != _canonical(inventory["entries"])
+        or sum(row.get("size", 0) for row in selected) != inventory["total_bytes"]
+    ):
+        raise _error("CI inventory differs from complete retained originals")
+    expected_identity = (
+        role["identity"]
+        if not prefix
+        else next(
+            (row["identity"] for row in role["entries"] if row["path"] == prefix.rstrip("/")), None
+        )
+    )
+    if _canonical(expected_identity) != _canonical(inventory["identity"]):
+        raise _error("CI producing inventory identity differs from its retained role")
+
+
+def _ci_retained_receipt(
+    package_root: Path,
+    role: str,
+    relative: str,
+    receipt: Mapping[str, Any],
+    *,
+    argv: Sequence[str],
+    cwd: Path,
+    environment: Mapping[str, str],
+) -> None:
+    raw = _ci_original(package_root, role, relative + "/receipt.json")
+    parsed = _json_bytes(raw)
+    if _canonical(parsed) != raw:
+        raise _error("CI process receipt is noncanonical")
+    validate_receipt_originals(
+        receipt,
+        receipt=parsed,
+        streams={
+            name: _ci_original(package_root, role, relative + "/" + name + ".raw")
+            for name in ("stdout", "stderr")
+        },
+        logs={
+            name: _ci_original(package_root, role, relative + "/" + name + ".log")
+            for name in ("stdout", "stderr")
+        },
+        argv=argv,
+        cwd=cwd,
+        environment=environment,
+    )
+
+
+def _ci_native_originals(
+    package_root: Path,
+    source: Mapping[str, Any],
+    fixtures: Mapping[str, Any],
+    node_role: Mapping[str, Any],
+) -> None:
+    rows = {row["path"]: row for row in source["files"] if row["path"] in NATIVE_OWNERSHIP_INPUTS}
+    if rows and set(rows) != set(NATIVE_OWNERSHIP_INPUTS):
+        raise _error("CI native ownership source applicability is partial")
+    for name, row in rows.items():
+        if (
+            row["sha256"] != NATIVE_OWNERSHIP_INPUTS[name]
+            or _sha(_ci_original(package_root, "node", "checkout/" + name))
+            != NATIVE_OWNERSHIP_INPUTS[name]
+        ):
+            raise _error("CI native ownership source differs from reviewed bytes")
+    native = fixtures.get("native_ownership")
+    if bool(rows) != (native is not None):
+        raise _error("CI native ownership output applicability differs")
+    if native is None:
+        return
+    _ci_inventory_in_role(native, node_role)
+    source_sha = NATIVE_OWNERSHIP_INPUTS["scripts/windows-owned-launcher.cs"]
+    executable = "own-" + source_sha + ".exe"
+    if {row["path"] for row in native["entries"]} != {executable, executable + ".json"} or any(
+        row["kind"] != "file" for row in native["entries"]
+    ):
+        raise _error("CI native ownership cache is not the exact two files")
+    prefix = "checkout/" + NATIVE_OWNERSHIP_DIRECTORY + "/"
+    binary = _ci_original(package_root, "node", prefix + executable)
+    sidecar = _ci_original(package_root, "node", prefix + executable + ".json")
+    expected = {"sourceHash": source_sha, "executableHash": _sha(binary)}
+    if (
+        not binary
+        or sidecar != json.dumps(expected, separators=(",", ":"), allow_nan=False).encode() + b"\n"
+    ):
+        raise _error("CI native ownership sidecar source/content wire differs")
+
+
+def _ci_engine_host_originals(
+    package_root: Path, manifests: Mapping[str, Any], role_manifests: Mapping[str, Any]
+) -> Path:
+    host = manifests["host-tools.json"]
+    system = Path(host["cmd"]["path"]).parent.parent
+    for name, row in host.items():
+        if row is None:
+            continue
+        data = _ci_original(package_root, "host", name)
+        if len(data) != row["size"] or _sha(data) != row["sha256"]:
+            raise _error("CI retained host slot differs from bound original bytes")
+    engine = manifests["engine.json"]
+    engine_root = Path(role_manifests["engine"]["root"])
+    files = [file for distribution in engine["distributions"] for file in distribution["files"]]
+    files.extend(engine["startup"]["files"])
+    if engine["startup"].get("pyvenv_configuration") is not None:
+        files.append(engine["startup"]["pyvenv_configuration"])
+    for row in files:
+        raw = row["path"]
+        if not isinstance(raw, str) or not Path(raw).is_absolute():
+            raise _error("CI installed engine file path is not absolute")
+        path = Path(os.path.normpath(raw))
+        if not path.is_relative_to(engine_root):
+            raise _error("CI installed engine file leaves its ordinary prefix")
+        data = _ci_original(package_root, "engine", path.relative_to(engine_root).as_posix())
+        if len(data) != row["size"] or _sha(data) != row["sha256"]:
+            raise _error("CI installed engine original bytes changed")
+    return system
+
+
+def _ci_runtime_originals(
+    package_root: Path, manifests: Mapping[str, Any], role: Mapping[str, Any]
+) -> None:
+    node = manifests["node.json"]
+    npm = manifests["npm.json"]
+    if (
+        set(node) != {"runtime", "selected"}
+        or node["selected"] != "node.exe"
+        or set(npm) != {"runtime_sha256", "entry", "shim", "package"}
+    ):
+        raise _error("CI Node/npm material roles differ")
+    inventory = node["runtime"]
+    if (
+        npm["runtime_sha256"] != _sha(_canonical(inventory))
+        or npm["entry"] != "node_modules/npm/bin/npm-cli.js"
+        or npm["shim"] != "npm.cmd"
+    ):
+        raise _error("CI npm selection differs from its fixed role")
+    base = (
+        package_root / "originals/runtime" / Path(inventory["root"]).relative_to(Path(role["root"]))
+    )
+    _node_x64(base / "node.exe")
+    package = _json(base / "node_modules/npm/package.json")
+    if (
+        package != npm["package"]
+        or package.get("name") != "npm"
+        or package.get("version") != VERSIONS["npm"]
+        or _read(base / "npm.cmd") != _read(base / "node_modules/npm/bin/npm.cmd")
+    ):
+        raise _error("CI transported npm/shim content differs")
+    if any(
+        row["path"] not in {"node.exe", "npm.cmd", "node_modules", "node_modules/npm"}
+        and not row["path"].startswith("node_modules/npm/")
+        for row in inventory["entries"]
+    ):
+        raise _error("CI Node runtime contains an undeclared neighbor")
+
+
+def _ci_closed_node_roles(manifest: Mapping[str, Any], level: str, plan: Any) -> None:
+    allowed = {
+        "raw",
+        "home",
+        "tmp",
+        "cache",
+        "user.npmrc",
+        "global.npmrc",
+        "checkout",
+        "source-manifest.json",
+        "run.json",
+    }
+    if level != "V0":
+        allowed.update(
+            {"coverage", "expected-map.json", "source.diff", "domain-materials", "vitest.json"}
+        )
+    paths = {row["path"] for row in manifest["entries"]}
+    if {path.split("/", 1)[0] for path in paths} != allowed:
+        # Optional domain materials are retained whenever the fixed helper produced them.
+        top = {path.split("/", 1)[0] for path in paths}
+        if not top.issubset(allowed) or not (allowed - {"domain-materials"}).issubset(top):
+            raise _error("CI Node output has missing or foreign top-level roles")
+    executions = {"setup-clone", "setup-checkout", *(item.execution_id for item in plan.executions)}
+    observed = {path.split("/")[1] for path in paths if path.startswith("raw/")}
+    if observed != executions:
+        raise _error("CI Node raw execution membership differs from fixed plan")
+    for execution in executions:
+        children = {
+            path.removeprefix("raw/" + execution + "/")
+            for path in paths
+            if path.startswith("raw/" + execution + "/")
+        }
+        if children != {"receipt.json", "stdout.raw", "stderr.raw", "stdout.log", "stderr.log"}:
+            raise _error("CI raw process has missing or additional originals")
+
+
+def _ci_closed_preflight_roles(manifest: Mapping[str, Any]) -> None:
+    paths = {row["path"] for row in manifest["entries"]}
+    if {path.split("/", 1)[0] for path in paths} != {"node", "npm", "home", "tmp", "cache"}:
+        raise _error("CI preflight has foreign or missing output roles")
+    for name in ("node", "npm"):
+        children = {path.removeprefix(name + "/") for path in paths if path.startswith(name + "/")}
+        if children != {"receipt.json", "stdout.raw", "stderr.raw", "stdout.log", "stderr.log"}:
+            raise _error("CI preflight has foreign or missing raw process originals")
+
+
+def replay_ci_node(
+    *,
+    package_root: Path,
+    prepared: Mapping[str, Any],
+    run: Mapping[str, Any],
+    role_manifests: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Recompute fresh-CI proof from transported bytes; original paths are data."""
+    from aiflow.node_ci import node_ci_execution_contract, validate_node_ci_document
+
+    try:
+        contract = node_ci_execution_contract(prepared["verification_level"])
+        for key, kind in (
+            ("source_tuple", "aiflow-node-ci-attested-source"),
+            ("descriptor", "aiflow-node-ci-descriptor"),
+            ("admission", "aiflow-node-ci-admission"),
+        ):
+            validate_node_ci_document(_ci_transport_ref(package_root, prepared[key]), kind=kind)
+        return _replay_ci_node_kernel(
+            package_root=package_root,
+            prepared=prepared,
+            run=run,
+            role_manifests=role_manifests,
+            execution_contract=contract,
+        )
+    except (AiflowError, ValueError, TypeError, KeyError) as error:
+        return {
+            "passed": False,
+            "checks": [],
+            "node_binding": None,
+            "reason_codes": [
+                error.code if isinstance(error, AiflowError) else "NODE_EVIDENCE_INVALID"
+            ],
+        }
+
+
+def _replay_ci_node_kernel(
+    *,
+    package_root: Path,
+    prepared: Mapping[str, Any],
+    run: Mapping[str, Any],
+    role_manifests: Mapping[str, Any],
+    execution_contract: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Byte kernel only: content validity cannot authenticate platform/LOCAL proof."""
+    from aiflow import installed_mutations as installed
+    from aiflow.evidence import _node_evidence_plan
+    from aiflow.node_ci import _python_provision, validate_node_ci_document
+    from aiflow.verification import _bound_node_plan
+
+    try:
+        validate_node_ci_document(dict(prepared), kind="aiflow-node-ci-prepared-3.3")
+        validate_node_ci_document(dict(run), kind="aiflow-node-ci-run-3.3")
+        for key, relative in (
+            ("source_tuple", "source-tuple"),
+            ("descriptor", "descriptor"),
+            ("admission", "admission"),
+        ):
+            if prepared[key]["ref"] != "control/" + relative + ".json":
+                raise _error("CI control selection is not its fixed path")
+        if run["prepared"]["ref"] != "control/prepared.json":
+            raise _error("CI preparation selection is not its fixed path")
+        source_tuple = _ci_transport_ref(package_root, prepared["source_tuple"])
+        descriptor = _ci_transport_ref(package_root, prepared["descriptor"])
+        admission = _ci_transport_ref(package_root, prepared["admission"])
+        if _ci_transport_ref(package_root, run["prepared"]) != prepared or _ci_original(
+            package_root, "node", "run.json"
+        ) != _canonical(run):
+            raise _error("CI public selections do not identify retained originals")
+        binding = source_tuple["binding"]
+        level = binding["verification_level"]
+        contract = execution_contract
+        if (
+            _sha(_canonical(descriptor)) != run["descriptor_sha256"]
+            or admission["descriptor_sha256"] != run["descriptor_sha256"]
+            or descriptor["source_tuple_sha256"] != _sha(_canonical(source_tuple))
+            or descriptor["execution_contract_sha256"] != _sha(_canonical(contract))
+            or prepared["execution_contract_sha256"] != descriptor["execution_contract_sha256"]
+            or prepared["verification_level"] != level
+            or prepared["profile"] != PROFILE_V2
+            or _canonical(run["platform"]) != _canonical(admission["platform"])
+            or _canonical(prepared["platform"]) != _canonical(admission["platform"])
+            or admission["platform"]["head_sha"] != source_tuple["attestation_head"]
+            or descriptor["attestation_head"] != source_tuple["attestation_head"]
+        ):
+            raise _error(
+                "CI source/descriptor/admission/platform bindings differ", "NODE_CI_BINDING_INVALID"
+            )
+        required = {
+            "source",
+            "artifact",
+            "engine",
+            "runtime",
+            "dependencies",
+            "host",
+            "preflight",
+            "control",
+            "node",
+        }
+        if level == "V2":
+            required.update(f"pair-{index}-{role}" for index in range(5) for role in ("b", "m"))
+        if set(role_manifests) != required:
+            raise _error("CI complete tier roles differ")
+        for role, manifest in role_manifests.items():
+            _ci_verify_role(package_root, role, manifest)
+        names = ("source", "node", "npm", "dependencies", "engine", "host_tools", "preflight")
+        if set(prepared["manifests"]) != set(names):
+            raise _error("CI prepared manifest roles differ")
+        manifests = {
+            name: _ci_transport_ref(package_root, prepared["manifests"][key])
+            for key, name in zip(names, MANIFEST_NAMES, strict=True)
+        }
+        for key, name in zip(names, MANIFEST_NAMES, strict=True):
+            if prepared["manifests"][key]["ref"] != "control/" + name:
+                raise _error("CI prepared manifest path differs")
+        initial_raw = _ci_original(package_root, "control", "input-materials.json")
+        initial = _json_bytes(initial_raw)
+        if (
+            _canonical(initial) != initial_raw
+            or _sha(initial_raw) != admission["input_materials_sha256"]
+            or set(initial)
+            != {
+                "source",
+                "runtime",
+                "dependencies",
+                "engine",
+                "host_tools",
+                "pair_materials",
+                "engine_artifact",
+                "python_provision",
+            }
+        ):
+            raise _error("CI provisioned input digest differs from admission")
+        provision = _python_provision(
+            source_tuple, package_root / "originals/artifact", initial["engine"]
+        )
+        if (
+            initial["python_provision"] != provision
+            or _ci_original(package_root, "control", "provision.json") != _canonical(provision)
+            or _ci_original(package_root, "control", "provision/uv.lock")
+            != _ci_original(package_root, "artifact", "inputs/uv.lock")
+        ):
+            raise _error("CI transported Python lock/provision association differs")
+        for key, manifest_name in (
+            ("source", "source.json"),
+            ("dependencies", "dependencies.json"),
+            ("engine", "engine.json"),
+            ("host_tools", "host-tools.json"),
+        ):
+            if initial[key] != manifests[manifest_name]:
+                raise _error("CI prepared material differs from admitted inputs")
+        if (
+            initial["runtime"] != manifests["node.json"]["runtime"]
+            or initial["engine_artifact"] != source_tuple["engine_artifact"]
+        ):
+            raise _error("CI selected runtime/artifact differs from admitted inputs")
+        inputs = run["inputs"]
+        if set(inputs) != {
+            "source",
+            "runtime",
+            "dependencies",
+            "prepared_dependencies",
+            "engine",
+            "host_tools",
+        }:
+            raise _error("CI Node input roles differ")
+        for name, manifest in (
+            ("source", "source.json"),
+            ("prepared_dependencies", "dependencies.json"),
+            ("engine", "engine.json"),
+            ("host_tools", "host-tools.json"),
+        ):
+            if _canonical(inputs[name]) != _canonical(manifests[manifest]):
+                raise _error("CI Node input differs from preparation")
+        if _canonical(inputs["runtime"]) != _canonical(manifests["node.json"]["runtime"]):
+            raise _error("CI Node runtime differs from preparation")
+        roots = run["roots"]
+        if set(roots) != {"original", "checkout", "clone", "checkout_receipt"} or set(
+            roots["original"]
+        ) != {"root", "inventory", "git", "binding"}:
+            raise _error("CI Node root roles differ")
+        original_root = Path(roots["original"]["root"])
+        node_dir = Path(role_manifests["node"]["root"])
+        expected_attempt = _ci_attempt_coordinate(
+            Path(role_manifests["source"]["root"]), admission["platform"]
+        )
+        if (
+            original_root != Path(role_manifests["source"]["root"])
+            or node_dir != expected_attempt / "node"
+            or Path(role_manifests["control"]["root"]) != expected_attempt / "control"
+            or Path(role_manifests["preflight"]["root"]) != expected_attempt / "preflight"
+        ):
+            raise _error(
+                "CI original roots were retagged to another attempt", "NODE_CI_BINDING_INVALID"
+            )
+        context = _ci_context(original_root, node_dir, binding, manifests)
+        roles = context.node_bindings
+        assert roles is not None
+        if roots["original"]["binding"] != {
+            **binding,
+            "attestation_head": source_tuple["attestation_head"],
+        }:
+            raise _error("CI producing source snapshot binds a different subject")
+        if (
+            roots["original"]["git"]["head"] != source_tuple["attestation_head"]
+            or roots["checkout"]["git"]["head"] != binding["subject_commit"]
+            or roots["checkout"]["git"]["tree"] != binding["subject_tree"]
+        ):
+            raise _error("CI source/checkout Git coordinates differ")
+        if roots["original"]["git"]["git_directory"] != str(original_root / ".git") or roots[
+            "checkout"
+        ]["git"]["git_directory"] != str(node_dir / "checkout/.git"):
+            raise _error("CI Git administration points outside its owned clone")
+        if (
+            _sha(_ci_original(package_root, "source", ".git/index"))
+            != roots["original"]["git"]["index_sha256"]
+            or _sha(_ci_original(package_root, "node", "checkout/.git/index"))
+            != roots["checkout"]["git"]["index_sha256"]
+        ):
+            raise _error("CI retained Git index differs")
+        _ci_inventory_in_role(roots["original"]["inventory"], role_manifests["source"])
+        for inventory, role in (
+            (inputs["runtime"], "runtime"),
+            (inputs["prepared_dependencies"], "dependencies"),
+            (inputs["dependencies"], "node"),
+            (roots["checkout"]["administration"], "node"),
+        ):
+            _ci_inventory_in_role(inventory, role_manifests[role])
+        _ci_runtime_originals(package_root, manifests, role_manifests["runtime"])
+        if Path(
+            inputs["dependencies"]["root"]
+        ) != roles.execution_root / "node_modules" or _canonical(
+            _content(inputs["dependencies"])
+        ) != _canonical(_content(inputs["prepared_dependencies"])):
+            raise _error("CI copied dependencies differ from their selected bytes")
+        source = manifests["source.json"]
+        if (
+            source["subject_commit"] != binding["subject_commit"]
+            or source["subject_tree"] != binding["subject_tree"]
+        ):
+            raise _error("CI source tree binding differs")
+        if roots["checkout"]["root"] != str(roles.execution_root) or len(
+            roots["checkout"]["files"]
+        ) != len(source["files"]):
+            raise _error("CI checkout source membership differs")
+        node_rows = {row["path"]: row for row in role_manifests["node"]["entries"]}
+        for source_row, observed in zip(source["files"], roots["checkout"]["files"], strict=True):
+            row = node_rows["checkout/" + source_row["path"]]
+            data = _ci_original(package_root, "node", "checkout/" + source_row["path"])
+            if (
+                observed
+                != {
+                    "path": source_row["path"],
+                    "size": source_row["size"],
+                    "sha256": source_row["sha256"],
+                    "identity": row["identity"],
+                }
+                or len(data) != source_row["size"]
+                or _sha(data) != source_row["sha256"]
+                or hashlib.sha1(
+                    b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+                ).hexdigest()
+                != source_row["blob"]
+            ):
+                raise _error("CI checkout bytes/identity differ from the subject")
+        if (
+            _sha(_ci_original(package_root, "node", "checkout/vitest.config.ts"))
+            != NODE_V2_CONFIG_SHA256
+        ):
+            raise _error("CI Vitest configuration differs from the fixed revision2 bytes")
+        _ci_engine_host_originals(package_root, manifests, role_manifests)
+        expected_environment = _ci_environment(
+            Path(roles.node_executable),
+            roles.execution_root,
+            node_dir,
+            Path(roles.git_executable),
+            manifests["host-tools.json"],
+        )
+        if _canonical(run["environment"]) != _canonical(expected_environment):
+            raise _error("CI fixed Node environment differs")
+        for name in ("user.npmrc", "global.npmrc"):
+            if _ci_original(package_root, "node", name) != b"":
+                raise _error("CI owned npm configuration is not empty")
+        old_preflight = Path(role_manifests["preflight"]["root"])
+        _ci_closed_preflight_roles(role_manifests["preflight"])
+        runtime_root = Path(manifests["node.json"]["runtime"]["root"])
+        payload_root = runtime_root.parent
+        probe_environment = _ci_environment(
+            runtime_root / "node.exe",
+            payload_root / "dependencies",
+            old_preflight,
+            Path(roles.git_executable),
+            manifests["host-tools.json"],
+        )
+        for name, argv, expected in (
+            ("node", (str(runtime_root / "node.exe"), "--version"), "v" + VERSIONS["node"]),
+            (
+                "npm",
+                (
+                    str(runtime_root / "node.exe"),
+                    str(runtime_root / "node_modules/npm/bin/npm-cli.js"),
+                    "--version",
+                ),
+                VERSIONS["npm"],
+            ),
+        ):
+            probe = manifests["preflight.json"][name]
+            if (
+                probe["directory"] != str(old_preflight / name)
+                or probe["expected"] != expected
+                or probe["receipt"]["timeout_seconds"] != 30
+            ):
+                raise _error("CI fixed preflight coordinates/version differ")
+            _ci_retained_receipt(
+                package_root,
+                "preflight",
+                name,
+                probe["receipt"],
+                argv=argv,
+                cwd=payload_root,
+                environment=probe_environment,
+            )
+            if (
+                _ci_original(package_root, "preflight", name + "/stdout.raw").decode().strip()
+                != expected
+            ):
+                raise _error("CI preflight version stream differs")
+        source_mapping = {
+            "root": str(roles.execution_root),
+            "files": [
+                {"path": row["path"], "sha256": row["sha256"]}
+                for row in source["files"]
+                if row["path"].startswith("src/local/") and row["path"].endswith(".ts")
+            ],
+        }
+        if _ci_original(package_root, "node", "source-manifest.json") != _canonical(source_mapping):
+            raise _error("CI source map input differs from full subject inventory")
+        plan = _bound_node_plan(context, level, revision2=True, run_dir=node_dir)
+        _ci_closed_node_roles(role_manifests["node"], level, plan)
+        if node_execution_contract(plan, context) != _node_evidence_plan(level, revision=2):
+            raise _error("CI fixed plan differs from the public tier contract")
+        clone_argv = (
+            roles.git_executable,
+            *_GIT_OPTIONS,
+            "clone",
+            "--no-hardlinks",
+            "--no-checkout",
+            "--local",
+            "--",
+            str(original_root),
+            str(roles.execution_root),
+        )
+        checkout_argv = (
+            roles.git_executable,
+            *_GIT_OPTIONS,
+            "-c",
+            "core.autocrlf=false",
+            "checkout",
+            "--detach",
+            binding["subject_commit"],
+        )
+        _ci_retained_receipt(
+            package_root,
+            "node",
+            "raw/setup-clone",
+            roots["clone"],
+            argv=clone_argv,
+            cwd=original_root,
+            environment=expected_environment,
+        )
+        _ci_retained_receipt(
+            package_root,
+            "node",
+            "raw/setup-checkout",
+            roots["checkout_receipt"],
+            argv=checkout_argv,
+            cwd=roles.execution_root,
+            environment=expected_environment,
+        )
+        public = []
+        actual = run["executions"]
+        if not isinstance(actual, list) or len(actual) != len(plan.executions):
+            raise _error(
+                "CI Node did not execute every required process", "NODE_EVIDENCE_NOT_PASSED"
+            )
+        for execution, original in zip(plan.executions, actual, strict=True):
+            if (
+                set(original) != {"execution_id", "receipt"}
+                or original["execution_id"] != execution.execution_id
+                or original["receipt"]["timeout_seconds"] != execution.timeout_seconds
+            ):
+                raise _error("CI Node execution order/deadline differs")
+            _ci_retained_receipt(
+                package_root,
+                "node",
+                "raw/" + execution.execution_id,
+                original["receipt"],
+                argv=execution.argv,
+                cwd=execution.cwd,
+                environment=expected_environment,
+            )
+            public.append(_ci_public_execution(execution, original["receipt"], context))
+        outputs = run["outputs"]
+        if set(outputs) != {"build_dist", "dist", "fixtures", "node_inventory"}:
+            raise _error("CI successful output roles are incomplete")
+        expected_inventory = [
+            row for row in _content(role_manifests["node"]) if row["path"] != "run.json"
+        ]
+        if outputs["node_inventory"] != expected_inventory:
+            raise _error("CI complete Node content/membership changed")
+        for inventory in (outputs["dist"], *outputs["fixtures"].values()):
+            _ci_inventory_in_role(inventory, role_manifests["node"])
+        if outputs["build_dist"]["root"] != outputs["dist"]["root"] or _content(
+            outputs["build_dist"]
+        ) != _content(outputs["dist"]):
+            raise _error("CI rebuilt dist content differs")
+        _ci_native_originals(package_root, source, outputs["fixtures"], role_manifests["node"])
+        transported_checkout = package_root / "originals/node/checkout"
+        transported_dependencies = (
+            package_root
+            / "originals/dependencies"
+            / Path(inputs["prepared_dependencies"]["root"]).relative_to(
+                Path(role_manifests["dependencies"]["root"])
+            )
+        )
+        lock = _json(transported_checkout / "package-lock.json")
+        checked_dependencies = _dependencies(transported_dependencies, lock, revision=2)
+        if _content(checked_dependencies) != _content(inputs["prepared_dependencies"]):
+            raise _error("CI transported dependencies differ from the locked closure")
+        physical_dist = _dist(transported_checkout, _dist_paths(transported_checkout, source))
+        physical_copied = _inventory(transported_checkout / "node_modules")
+        physical_fixtures = _fixtures(
+            transported_checkout, package_root / "originals/node/tmp", source, revision=2
+        )
+        if (
+            _content(physical_dist) != _content(outputs["dist"])
+            or _content(physical_copied) != _content(inputs["dependencies"])
+            or set(physical_fixtures) != set(outputs["fixtures"])
+        ):
+            raise _error("CI transported output or fixture roles differ")
+        for key in physical_fixtures:
+            fixture = physical_fixtures[key]
+            if not isinstance(fixture, Mapping) or _content(fixture) != _content(
+                outputs["fixtures"][key]
+            ):
+                raise _error("CI transported fixture content differs")
+        _output_check(
+            transported_checkout,
+            source,
+            physical_dist,
+            physical_copied,
+            physical_fixtures,
+            revision=2,
+        )
+        coverage = None
+        if level != "V0":
+            sources = {
+                row["path"]: _ci_original(package_root, "node", "checkout/" + row["path"])
+                for row in source["files"]
+                if row["path"].startswith("src/local/") and row["path"].endswith(".ts")
+            }
+            coverage = _coverage_from_originals(
+                roles.execution_root,
+                sources,
+                _ci_original(package_root, "node", "coverage/coverage-final.json"),
+                _ci_original(package_root, "node", "coverage/coverage-summary.json"),
+                _json_bytes(_ci_original(package_root, "node", "expected-map.json")),
+                _ci_original(package_root, "node", "source.diff"),
+            )
+            originals = [
+                {"ref": name, "size": len(data), "sha256": _sha(data)}
+                for name in (
+                    "coverage/coverage-final.json",
+                    "coverage/coverage-summary.json",
+                    "expected-map.json",
+                    "source.diff",
+                    "source-manifest.json",
+                )
+                for data in [_ci_original(package_root, "node", name)]
+            ]
+            if run["coverage"] != {"originals": originals, "result": coverage}:
+                raise _error("CI coverage originals/projection differ")
+        elif run["coverage"] is not None:
+            raise _error("CI V0 cannot acquire coverage projection")
+        products: dict[str, Any] | None = None
+        pair_facts: dict[str, Any] | None = None
+        if level == "V2":
+            materials = _json_bytes(_ci_original(package_root, "control", "pair-materials.json"))
+            if materials != initial["pair_materials"]:
+                raise _error("CI pair materials differ from admitted inputs")
+            if (
+                materials["engine"]["installed"] != manifests["engine.json"]
+                or materials["host_tools"] != manifests["host-tools.json"]
+            ):
+                raise _error("CI pair and Node installed materials differ")
+            pair_facts = installed.replay_ci_pairs(
+                package_root=package_root,
+                admission=admission,
+                materials=materials,
+                pairs=run["installed_mutation"],
+                role_manifests=role_manifests,
+            )
+            if not pair_facts["passed"]:
+                raise _error("CI fresh installed mutations failed", "NODE_MUTATIONS_INVALID")
+            raw_product = _ci_original(package_root, "node", "vitest.json")
+            tests = {
+                row["path"]: _ci_original(package_root, "node", "checkout/" + row["path"])
+                for row in source["files"]
+                if row["path"].startswith("tests/local/") and row["path"].endswith(".test.ts")
+            }
+            product_result = validate_node_product_tests(
+                _json_bytes(raw_product),
+                execution_root=roles.execution_root,
+                tracked_tests=tests,
+                expected_coverage=_json_bytes(
+                    _ci_original(package_root, "node", "coverage/coverage-final.json")
+                ),
+            )
+            products = {
+                "report": {
+                    "ref": "vitest.json",
+                    "size": len(raw_product),
+                    "sha256": _sha(raw_product),
+                },
+                "expected_tests": [
+                    {"file": path, "sha256": _sha(data)} for path, data in sorted(tests.items())
+                ],
+                "result": product_result,
+            }
+            if run["product_tests"] != products:
+                raise _error("CI product original/projection differs")
+        elif (
+            run["product_tests"] is not None
+            or run["installed_mutation"] is not None
+            or initial["pair_materials"] is not None
+        ):
+            raise _error("CI lower tier cannot acquire V2 facts")
+        checks = _checks(
+            plan, context, public, coverage, run["failure"], products=products, installed=pair_facts
+        )
+        passed = run["failure"] is None and all(row["status"] == "passed" for row in checks)
+        node_binding = {
+            "profile": dict(PROFILE_V2),
+            "subject_tree": binding["subject_tree"],
+            "prepared": dict(run["prepared"]),
+            "run": {
+                "ref": "node/run.json",
+                "size": len(_canonical(run)),
+                "sha256": _sha(_canonical(run)),
+            },
+            "materials_sha256": _sha(_canonical(inputs)),
+            "semantic_contract_sha256": SEMANTIC_CONTRACT_V2_SHA256,
+            "execution_contract_sha256": prepared["execution_contract_sha256"],
+            "environment_sha256": _sha(_canonical(expected_environment)),
+            "coverage": coverage,
+        }
+        if products is not None:
+            node_binding["product_tests"] = {
+                "report": {**products["report"], "ref": "node/vitest.json"},
+                **{
+                    key: products["result"][key]
+                    for key in ("inventory_sha256", "acceptance", "integration")
+                },
+            }
+        return {
+            "passed": passed,
+            "checks": checks,
+            "node_binding": node_binding,
+            "reason_codes": [] if passed else ["NODE_EVIDENCE_NOT_PASSED"],
+        }
+    except (AiflowError, OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+        return {
+            "passed": False,
+            "checks": [],
+            "node_binding": None,
+            "reason_codes": [
+                error.code if isinstance(error, AiflowError) else "NODE_EVIDENCE_INVALID"
+            ],
+        }

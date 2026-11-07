@@ -1,0 +1,307 @@
+{
+  "base_commit": "1c23e3b12bf6431f7ad3853ef1332ab2913edd14",
+  "branch": "codex/event-log-lf",
+  "classification_input_sha256": "bb7acf5ff179d7bae3fa48980c016b3bae583c380daf2afb570810fbe95cc12e",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "src/aiflow/git_context.py",
+      "src/aiflow/scope.py",
+      "tests/unit/test_git_context.py",
+      "tests/integration/test_resource_bundle_distribution.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Preserve canonical task-event bytes and genuinely read-only Git facts",
+        "impact_scope": [
+          "src/aiflow/task_service.py",
+          "src/aiflow/git_context.py",
+          "src/aiflow/scope.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0139/action-use-bd2281b6631ee961ce401e2819a7a948ed60633a62eb90465d1e603ad617f5aa.md",
+        ".ai/tasks/TASK-0139/action-use-e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe.md",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151333Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151719Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round2-20261102T171201Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round3-20261102T200312Z.json",
+        ".ai/tasks/TASK-0139/approvals.json",
+        ".ai/tasks/TASK-0139/classification.json",
+        ".ai/tasks/TASK-0139/events.jsonl",
+        ".ai/tasks/TASK-0139/evidence.json",
+        ".ai/tasks/TASK-0139/review-contexts/25ae4a4b4a8489a68fbf9e6bf7ece57f748f3d986d7960769d0f8cdc28d85a72.json",
+        ".ai/tasks/TASK-0139/review-contexts/58efe378205c29f0820fe1fc5dc36a89d8637d67f019b6197f6ad6b65bc9a39a.json",
+        ".ai/tasks/TASK-0139/review-contexts/fada40952105ae8a85fd7f79efcb5de4c513d73478fa796f9c154676be10b35b.json",
+        ".ai/tasks/TASK-0139/review-package.md",
+        ".ai/tasks/TASK-0139/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0139/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0139/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0139/spec.md",
+        ".ai/tasks/TASK-0139/task.yaml",
+        ".ai/tasks/TASK-0139/verifier-contexts/5af7e5028c17a5cf075497b24ad1fcb47fa4129d6f2187f034f47b5f9e5c8f72.json",
+        ".ai/tasks/TASK-0139/verifier-contexts/7c483dfabd1ce7785bbe6515fe1430132ca7f2c0839aad634aafc11700ee0503.json",
+        "src/aiflow/git_context.py",
+        "src/aiflow/scope.py",
+        "src/aiflow/task_service.py",
+        "tests/integration/test_resource_bundle_distribution.py",
+        "tests/unit/test_git_context.py"
+      ],
+      "files": [
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-use-bd2281b6631ee961ce401e2819a7a948ed60633a62eb90465d1e603ad617f5aa.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-use-e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe.md"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151333Z.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151719Z.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round2-20261102T171201Z.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round3-20261102T200312Z.json"
+        },
+        {
+          "additions": 90,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/classification.json"
+        },
+        {
+          "additions": 42,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/events.jsonl"
+        },
+        {
+          "additions": 268,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/evidence.json"
+        },
+        {
+          "additions": 175,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-contexts/25ae4a4b4a8489a68fbf9e6bf7ece57f748f3d986d7960769d0f8cdc28d85a72.json"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-contexts/58efe378205c29f0820fe1fc5dc36a89d8637d67f019b6197f6ad6b65bc9a39a.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-contexts/fada40952105ae8a85fd7f79efcb5de4c513d73478fa796f9c154676be10b35b.json"
+        },
+        {
+          "additions": 76,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-package.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/spec.md"
+        },
+        {
+          "additions": 67,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/task.yaml"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/verifier-contexts/5af7e5028c17a5cf075497b24ad1fcb47fa4129d6f2187f034f47b5f9e5c8f72.json"
+        },
+        {
+          "additions": 71,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/verifier-contexts/7c483dfabd1ce7785bbe6515fe1430132ca7f2c0839aad634aafc11700ee0503.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/git_context.py"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/scope.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_resource_bundle_distribution.py"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 8,
+          "path": "tests/unit/test_git_context.py"
+        }
+      ],
+      "totals": {
+        "additions": 1269,
+        "deletions": 11,
+        "files": 26
+      }
+    },
+    "goal": "Preserve canonical task-event bytes and genuinely read-only Git facts",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0139",
+        "--actor",
+        "lf-independent-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "404ced22be10b913358faee6228ae25c2c7fc9653f0feb5b55b73c9fafebc80b",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "fbde450eef330f5bf82f1bbce24f7ba77ecaee2e53cce7ae3b6e96c20cf8af91",
+  "subject_commit": "b8cc97c55c872c3435b241f5f4f38f519392ed4e",
+  "task_id": "TASK-0139",
+  "verification_snapshot_sha256": "cc95b020dbafd6fddaebbb05a267831a04168b9191a22270501d51fb64c332fc"
+}

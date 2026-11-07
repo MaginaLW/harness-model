@@ -1,0 +1,68 @@
+allowed_scope:
+- src/aiflow/task_service.py
+- src/aiflow/git_context.py
+- src/aiflow/scope.py
+- tests/unit/test_git_context.py
+- tests/integration/test_resource_bundle_distribution.py
+base_commit: 1c23e3b12bf6431f7ad3853ef1332ab2913edd14
+branch: codex/event-log-lf
+created_at: '2026-11-02T15:04:17Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Preserve canonical task-event bytes and genuinely read-only Git facts
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/task_service.py
+  - src/aiflow/git_context.py
+  - src/aiflow/scope.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0139
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: fbde450eef330f5bf82f1bbce24f7ba77ecaee2e53cce7ae3b6e96c20cf8af91
+goal: Preserve canonical task-event bytes and genuinely read-only Git facts
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-03T13:52:44Z'
+subject_commit: b8cc97c55c872c3435b241f5f4f38f519392ed4e
+task_id: TASK-0139
+updated_at: '2026-11-03T18:04:24Z'
+worktree_dirty: false
+worktree_dirty_paths: []

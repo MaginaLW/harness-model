@@ -1,0 +1,22 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "2d34a476b42b74a8034ff441debe8a275c0ac989fb06fcc1b4c533ad17f94099",
+  "conditions": [
+    "Actual owner A13-source approval only; one new complete verification plan, no second full after actual failure; all historical usage/originals retained.",
+    "Independent verifier context 215bea0de2f93cf481e70182b3006679c192450bea70f5b941aec7e51d8e4229",
+    "Authorization raw SHA256 e49dad1dba0a86f7b154015e791ff252112e499a44ad8f5cadd07933cdd73fe3",
+    "Activation raw SHA256 825d4f4e14317e6a6faf1b34f83ff520710054040277e1a655b90d72e052b1b9 expires 2026-11-06T03:32:50.627298+00:00",
+    "Candidate raw SHA256 046e1a9a71f781ad0daf252c6144bb1ecccbc651d14ab00bbf42d222f1195638",
+    "Actual F4 ordinary result raw SHA256 3b62148271da9b888e23b8690362050f40e1ca1cf399b861319938a241d2f7f6 and independent five-dimensional positive cap APPROVE raw SHA256 d03e14fe3f3f98b84a117ec3efc51abe1ae7a7b4809e9f9d6863ef08ef5ab6d8",
+    "Full14checks, complete3000-second pytest with branch coverage, both source domains85total/90complete-original-base-diff, all5unchanged native mutation pairs; no selected/CI/installed substitutes.",
+    "Rebind existing successful native environment proof only; no third native environment prepare/import/37dependency RECORD/pip/mypy precheck.",
+    "Shared10800second window, outermax4500/launchmin3480/finalreserve180, cumulative192GiB. Actual accepted snapshot closes full slot before same-verifier final.",
+    "No targetwrite/reinstall,publication,push/merge,remote workflow,private transfer,paid/production,model/SDK/Grok/WeChat,credential export,ACL/execution-policy/authorization-source/repository-setting edits,deletion/reset/rebase/history rewrite."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-06T03:32:50.627298+00:00",
+  "parameter_summary": "A13-source sole new complete native source V2 for the exact repaired candidate, with all14checks/full3000s branch suite/both85total90diff/five original native mutations; single-use.",
+  "single_use": true,
+  "subject_commit": "53a399d47bcb144c7c1c1201b5e63391473a1fc8",
+  "target": "TASK-0138"
+}

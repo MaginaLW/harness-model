@@ -1,0 +1,22 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0138",
+  "decision_unit_id": "DU-001",
+  "subject_commit": "8c0228763b1827880347b9559bce6b8608822d9b",
+  "classification_input_sha256": "4e9b3541a57db20bc61bc8c618ec906dacd1352a7f6ebcf04d5901ab411b1fc2",
+  "single_use": true,
+  "expires_at": "2026-11-06T17:15:06.542444+00:00",
+  "parameter_summary": "A15/A16 remaining original slot2: current-source complete14-check V2;4200-second branch pytest,both85total/90original-base-diff domains and five original native mutation groups.",
+  "conditions": [
+    "Actual owner A15scope authorization 3063585f9714a6e85dd404d8231534ba1b22d6f3721c0affbc21ea0c281ac68a;A16 time-only authorization 569111d0daa8cb21e52c7f6afbbab436a675b544df1226262d5de16910a04786.",
+    "Immutable one activation aac00400b3de1a475e2ad9ce0c2ff29fc3c2a66c21d4e747e4e2973aa90cc732 expires 2026-11-06T17:15:06.542444+00:00;old activation and all old spent time retained.",
+    "Candidate 6e49ec4bd372a9db4c4f44320e2dff3a81e36c47fb16710e84d2505f59b63963;same native-independent-verifier context 85223e3d29795ae1bd1992b0fb7d8587a8d274399772361048a1a8e10816c64f and actual thread /root/native_verifier.",
+    "Actual F6ordinary result c945999e5de1d086425b75b0a030a74ccec359022a81274971004d1243fc1eb5;independent capacity APPROVE e04779913902cbeeee523157789c5da5908b4af908ed9e2ac3936b90af99a09c.",
+    "Actual safe failed native6 and reviewed correction recovery 79aec84de164161f2b60a3dc6d375b0fba3dc177ad514c1d69144577ce1e9969;native6 slot already spent;one remaining full only;actual full failure ends allowance;no third invocation.",
+    "Complete4200second full branch pytest,all original7304 plus21boundary cases;actual collection required;all14checks,both85/90domains from unchanged original base,strictmypy,whitespace,Ruff/format and five unchanged native mutations.",
+    "Shared10800second nonrenewable window;fullouter4500seconds;full launch remaining>=6300=4500+1800closeout;192GiB cumulative206158430208bytes;diagnostic1186.062/3600alreadyspent;all old usage/reservations retained.",
+    "Reuse successful native1 original37dependency environment;no new dependency preparation/import/RECORD/pip/standalone-mypy precheck,new ordinaryset or capacitykernel.",
+    "After actual fullPASS,formal current-snapshot independent implementationAPPROVE with no opencritical/high closes every remaining fullslot;only sameverifier final/code/sourceGate follows;no mechanical-closeout full.",
+    "No a4 write/reinstall,targetdevelopment,publication,push,merge,remoteCI,privatetransfer,paid/production,realmodelSDKGrokWeChat,credentials,ACL,executionpolicy,settings,deletion,reset,rebase,force or historyrewrite."
+  ]
+}

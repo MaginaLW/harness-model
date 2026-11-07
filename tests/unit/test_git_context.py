@@ -16,6 +16,7 @@ from aiflow import git_context
 from aiflow.contracts import validate_contract
 from aiflow.errors import AiflowError
 from aiflow.git_context import GIT_TIMEOUT_SECONDS, collect_git_context, task_numbers_in_refs
+from aiflow.scope import collect_verification_changed_paths
 
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -66,6 +67,34 @@ def test_collect_clean_repository_context(tmp_path: Path) -> None:
     assert context.head == run_git(repository, "rev-parse", "HEAD")
     assert context.worktree_dirty is False
     assert context.dirty_paths == ()
+
+
+@pytest.mark.parametrize("collector", ["context", "scope"])
+def test_read_only_collectors_preserve_stale_index_even_if_optional_locks_are_enabled(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, collector: str
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    head = run_git(repository, "rev-parse", "HEAD")
+    tracked = repository / "tracked.txt"
+    previous = tracked.stat()
+    os.utime(tracked, ns=(previous.st_atime_ns, previous.st_mtime_ns + 5_000_000_000))
+    monkeypatch.setenv("GIT_OPTIONAL_LOCKS", "1")
+    index = repository / ".git/index"
+
+    def snapshot() -> tuple[bytes, int, int, int, int]:
+        state = index.stat()
+        return index.read_bytes(), state.st_dev, state.st_ino, state.st_mtime_ns, state.st_ctime_ns
+
+    before = snapshot()
+    if collector == "context":
+        assert collect_git_context(repository).worktree_dirty is False
+    else:
+        changes = collect_verification_changed_paths(
+            repository, base_commit=head, subject_commit=head, head_commit=head
+        )
+        assert changes.committed == changes.attestation == changes.worktree == ()
+    assert snapshot() == before
+    assert not (repository / ".git/index.lock").exists()
 
 
 def test_collect_dirty_paths_are_relative_normalized_and_sorted(tmp_path: Path) -> None:
@@ -218,9 +247,10 @@ def test_production_git_commands_use_fixed_argument_arrays_and_timeout(
     collect_git_context(repository)
 
     assert [arguments for arguments, _kwargs in calls] == [
-        ("git", "rev-parse", "--show-toplevel"),
+        ("git", "--no-optional-locks", "rev-parse", "--show-toplevel"),
         (
             "git",
+            "--no-optional-locks",
             "status",
             "--porcelain=v2",
             "--branch",
@@ -415,7 +445,7 @@ def test_aggregate_failure_never_produces_context(
     original = git_context.subprocess.run
 
     def failed(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
-        if arguments[1] != "status":
+        if arguments[1:3] != ["--no-optional-locks", "status"]:
             return original(arguments, **kwargs)
         if outcome == "spawn":
             raise OSError("synthetic spawn failure")
@@ -746,16 +776,17 @@ def test_aggregate_failure_replays_original_head_branch_error_priority(
 
     def failed(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
         assert "env" not in kwargs
-        calls.append(tuple(arguments[1:]))
-        if arguments[1] == "rev-parse" and arguments[2] == "--show-toplevel":
+        git_arguments = arguments[2:] if arguments[1] == "--no-optional-locks" else arguments[1:]
+        calls.append(tuple(git_arguments))
+        if git_arguments == ["rev-parse", "--show-toplevel"]:
             code, output = 0, str(repository).encode() + b"\n"
-        elif arguments[1] == "status":
+        elif git_arguments[0] == "status":
             code, output = 1, b""
-        elif arguments[1] == "rev-parse":
-            assert arguments[2:] == ["HEAD"]
+        elif git_arguments[0] == "rev-parse":
+            assert git_arguments[1:] == ["HEAD"]
             code, output = head_code, head_output
         else:
-            assert arguments[1:] == ["symbolic-ref", "--short", "-q", "HEAD"]
+            assert git_arguments == ["symbolic-ref", "--short", "-q", "HEAD"]
             code, output = branch_code, b"main\n"
         return subprocess.CompletedProcess(arguments, code, stdout=output, stderr=b"private error")
 

@@ -10,8 +10,11 @@ import time
 from dataclasses import replace
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from types import SimpleNamespace
+from typing import BinaryIO
 
 import pytest
+from test_node_process import FakeKernel
+from test_node_process import execute as execute_node
 
 from aiflow import process_runner
 from aiflow.errors import ContractError
@@ -636,3 +639,321 @@ def test_summary_path_boundaries_and_longest_match(
         )
         == expected
     )
+
+
+@pytest.fixture
+def streaming_kernel(monkeypatch: pytest.MonkeyPatch) -> FakeKernel:
+    """Use the existing synthetic Win32 API with the actual runner state machine."""
+    fake = FakeKernel()
+    monkeypatch.setattr(process_runner, "_node_kernel", lambda: (fake, lambda: fake.error))
+    monkeypatch.setattr(process_runner, "monotonic", lambda: fake.clock)
+    monkeypatch.setattr(process_runner, "sleep", fake.sleep)
+    return fake
+
+
+class StreamingSink:
+    """A caller-owned real file, recording bounded writes without storing their payload."""
+
+    def __init__(
+        self, raw: BinaryIO, kernel: FakeKernel, *, fault: str | None = None, fault_call: int = 2
+    ) -> None:
+        self.raw = raw
+        self.kernel = kernel
+        self.fault = fault
+        self.fault_call = fault_call
+        self.chunks: list[int] = []
+        self.remaining_at_write: list[int] = []
+        self.closed_by_runner = False
+
+    def write(self, data: bytes) -> int | None:
+        assert type(data) is bytes and 0 < len(data) <= 16 * 1024
+        self.chunks.append(len(data))
+        self.remaining_at_write.append(len(self.kernel.output[0]))
+        if self.fault is not None and len(self.chunks) >= self.fault_call:
+            assert len(self.chunks) == self.fault_call, "teardown wrote to a failed sink again"
+            if self.fault in {"short", "none", "exception"}:
+                count = self.raw.write(data[:7])
+                if self.fault == "exception":
+                    raise OSError("synthetic private sink error; must not enter the receipt")
+                return count if self.fault == "short" else None
+            if self.fault in {"true", "false"}:
+                self.raw.write(data)
+                return self.fault == "true"
+            if self.fault == "negative":
+                return -1
+            if self.fault == "large":
+                return len(data) + 1
+            raise AssertionError("unknown test sink fault")
+        return self.raw.write(data)
+
+    def close(self) -> None:
+        self.closed_by_runner = True
+        self.raw.close()
+
+
+def assert_stream_receipt(result: process_runner.NodeProcessResult) -> None:
+    """Streaming never adds fields to the existing closed process receipt."""
+    assert result.receipt is not None
+    assert set(result.receipt) == {
+        "process_id",
+        "creation_time_filetime",
+        "created_suspended",
+        "assigned",
+        "initial_membership",
+        "resumed",
+        "job_empty",
+        "stdout_eof",
+        "stderr_eof",
+        "terminate_requested",
+        "closed",
+    }
+    assert result.receipt["process_id"] == 300
+    assert result.receipt["creation_time_filetime"] == 132537600000000001
+    assert result.receipt["created_suspended"] is True
+    assert result.receipt["assigned"] is True
+    assert result.receipt["initial_membership"] is True
+    assert result.receipt["resumed"] is True
+
+
+@pytest.mark.parametrize("size", [1, 16384, 16385, 1024 * 1024 + 32771])
+def test_streaming_node_exact_limit_uses_bounded_incremental_caller_owned_writes(
+    streaming_kernel: FakeKernel, tmp_path: Path, size: int
+) -> None:
+    fake = streaming_kernel
+    fake.output = [bytearray(b"s" * size), bytearray(b"stderr")]
+    destination = tmp_path / "stdout.bin"
+    with destination.open("wb", buffering=0) as raw:
+        sink = StreamingSink(raw, fake)
+        result = execute_node(tmp_path, stdout_sink=sink, stdout_limit=size, timeout_seconds=1200)
+        assert not raw.closed and not sink.closed_by_runner
+        assert sum(sink.chunks) == size and max(sink.chunks) <= 16384
+        if size > 16384:
+            assert sink.remaining_at_write[0] > 0, (
+                "stdout was buffered until the entire pipe drained"
+            )
+            assert len(sink.chunks) > 1
+        assert destination.read_bytes() == b"s" * size
+    assert result.stdout == b"" and result.stderr == b"stderr"
+    assert result.returncode == 0 and not result.timed_out and not result.execution_error
+    assert not result.stdout_overflow and not result.stderr_overflow
+    assert result.cleanup == "confirmed"
+    assert_stream_receipt(result)
+    assert result.receipt["stdout_eof"] is True and result.receipt["stderr_eof"] is True
+    assert result.receipt["job_empty"] is True and result.receipt["closed"] is True
+    assert result.receipt["terminate_requested"] is False
+    assert not fake.terminated and not fake.handles
+
+
+def test_streaming_node_over_limit_stops_before_writing_an_overflowing_chunk(
+    streaming_kernel: FakeKernel, tmp_path: Path
+) -> None:
+    fake = streaming_kernel
+    limit = 32768
+    fake.output = [bytearray(b"s" * (limit + 16384)), bytearray(b"stderr")]
+    destination = tmp_path / "overflow.bin"
+    with destination.open("wb", buffering=0) as raw:
+        sink = StreamingSink(raw, fake)
+        result = execute_node(tmp_path, stdout_sink=sink, stdout_limit=limit, timeout_seconds=1200)
+        assert not raw.closed and not sink.closed_by_runner
+        assert sink.chunks == [16384, 16384]
+        assert destination.read_bytes() == b"s" * limit
+    assert result.stdout == b"" and result.stdout_overflow
+    assert not result.stderr_overflow and not result.timed_out
+    assert result.cleanup == "confirmed" and fake.terminated and not fake.handles
+    assert_stream_receipt(result)
+    assert result.receipt["terminate_requested"] is True
+    assert result.receipt["stdout_eof"] is True and result.receipt["stderr_eof"] is True
+    assert result.receipt["closed"] is True
+
+
+@pytest.mark.parametrize("fault", ["short", "none", "exception", "negative", "large"])
+def test_streaming_node_sink_failure_preserves_partial_then_discards_during_real_teardown(
+    streaming_kernel: FakeKernel, tmp_path: Path, fault: str
+) -> None:
+    fake = streaming_kernel
+    fake.output = [bytearray(b"s" * 65536), bytearray(b"stderr")]
+    destination = tmp_path / "partial.bin"
+    with destination.open("wb", buffering=0) as raw:
+        sink = StreamingSink(raw, fake, fault=fault)
+        result = execute_node(tmp_path, stdout_sink=sink, stdout_limit=65536, timeout_seconds=1200)
+        assert not raw.closed and not sink.closed_by_runner
+        assert sink.chunks == [16384, 16384]
+        expected = 16384 + (7 if fault in {"short", "none", "exception"} else 0)
+        assert destination.read_bytes() == b"s" * expected
+    assert result.stdout == b"" and result.execution_error and not result.stdout_overflow
+    assert result.cleanup == "confirmed" and fake.terminated and not fake.handles
+    assert_stream_receipt(result)
+    assert result.receipt["job_empty"] is True
+    assert result.receipt["stdout_eof"] is True and result.receipt["stderr_eof"] is True
+    assert result.receipt["closed"] is True and result.receipt["terminate_requested"] is True
+    assert "private" not in str(result.receipt)
+
+
+@pytest.mark.parametrize("fault", ["true", "false"])
+def test_streaming_node_boolean_write_count_is_not_an_integer_count(
+    streaming_kernel: FakeKernel, tmp_path: Path, fault: str
+) -> None:
+    fake = streaming_kernel
+    fake.output = [bytearray(b"s"), bytearray()]
+    destination = tmp_path / "boolean.bin"
+    with destination.open("wb", buffering=0) as raw:
+        sink = StreamingSink(raw, fake, fault=fault, fault_call=1)
+        result = execute_node(tmp_path, stdout_sink=sink, stdout_limit=1)
+        assert sink.chunks == [1]
+        assert not raw.closed and not sink.closed_by_runner
+        assert destination.read_bytes() == b"s"
+    assert result.stdout == b"" and result.execution_error
+    assert result.cleanup == "confirmed" and fake.terminated and not fake.handles
+    assert_stream_receipt(result)
+    assert result.receipt["terminate_requested"] is True
+
+
+def test_streaming_node_sink_error_cannot_replace_unobserved_eof_with_confirmed_cleanup(
+    streaming_kernel: FakeKernel, tmp_path: Path
+) -> None:
+    fake = streaming_kernel
+    fake.output = [bytearray(b"s" * 65536), bytearray(b"stderr")]
+    fake.pipe_held = True
+    destination = tmp_path / "held-partial.bin"
+    with destination.open("wb", buffering=0) as raw:
+        sink = StreamingSink(raw, fake, fault="exception")
+        result = execute_node(tmp_path, stdout_sink=sink, stdout_limit=65536, timeout_seconds=1200)
+        assert not raw.closed and not sink.closed_by_runner
+        assert sink.chunks == [16384, 16384]
+        assert destination.read_bytes() == b"s" * (16384 + 7)
+    assert result.stdout == b"" and result.execution_error and not result.timed_out
+    assert result.cleanup == "unknown" and fake.terminated and not fake.handles
+    assert_stream_receipt(result)
+    assert result.receipt["job_empty"] is True and result.receipt["terminate_requested"] is True
+    assert result.receipt["stdout_eof"] is False and result.receipt["stderr_eof"] is False
+    assert result.receipt["closed"] is True
+
+
+@pytest.mark.parametrize("limit", [None, True, False, 1.0, "1", 0, -1])
+@pytest.mark.parametrize("with_sink", [False, True])
+def test_streaming_node_invalid_limit_rejects_before_any_kernel_entry(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, limit: object, with_sink: bool
+) -> None:
+    def forbidden():
+        pytest.fail("invalid streaming inputs reached the Win32 kernel")
+
+    monkeypatch.setattr(process_runner, "_node_kernel", forbidden)
+    with (tmp_path / "unused.bin").open("wb", buffering=0) as raw:
+        result = execute_node(tmp_path, stdout_sink=raw if with_sink else None, stdout_limit=limit)
+        assert not raw.closed
+    assert result == process_runner.NodeProcessResult(
+        None, False, b"", b"", False, False, "not_started", True, None
+    )
+
+
+@pytest.mark.parametrize("sink", [object(), False, 0, SimpleNamespace(write=None)])
+def test_streaming_node_invalid_sink_rejects_before_any_kernel_entry(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, sink: object
+) -> None:
+    def forbidden():
+        pytest.fail("invalid sink reached the Win32 kernel")
+
+    monkeypatch.setattr(process_runner, "_node_kernel", forbidden)
+    result = execute_node(tmp_path, stdout_sink=sink)
+    assert result == process_runner.NodeProcessResult(
+        None, False, b"", b"", False, False, "not_started", True, None
+    )
+
+
+@pytest.mark.parametrize("limit", [1, 1048575, 1048577, 4 * 1048576])
+def test_streaming_node_nondefault_limit_cannot_raise_or_change_the_no_sink_contract(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, limit: int
+) -> None:
+    def forbidden():
+        pytest.fail("a caller limit without a sink reached the kernel")
+
+    monkeypatch.setattr(process_runner, "_node_kernel", forbidden)
+    result = execute_node(tmp_path, stdout_limit=limit)
+    assert result == process_runner.NodeProcessResult(
+        None, False, b"", b"", False, False, "not_started", True, None
+    )
+
+
+@pytest.mark.parametrize("extra", [0, 1])
+@pytest.mark.parametrize("explicit_default", [False, True])
+def test_streaming_node_no_sink_preserves_the_original_in_memory_one_mib_contract(
+    streaming_kernel: FakeKernel, tmp_path: Path, extra: int, explicit_default: bool
+) -> None:
+    fake = streaming_kernel
+    fake.output = [bytearray(b"s" * (1048576 + extra)), bytearray(b"stderr")]
+    kwargs = {"stdout_limit": 1048576} if explicit_default else {}
+    result = execute_node(tmp_path, timeout_seconds=1200, **kwargs)
+    assert result.stdout == b"s" * 1048576 and result.stderr == b"stderr"
+    assert result.stdout_overflow is bool(extra) and not result.stderr_overflow
+    assert result.cleanup == "confirmed" and not result.timed_out and not result.execution_error
+    assert fake.terminated is bool(extra) and not fake.handles
+    assert_stream_receipt(result)
+
+
+def test_streaming_node_stderr_retains_its_fixed_one_mib_limit(
+    streaming_kernel: FakeKernel, tmp_path: Path
+) -> None:
+    fake = streaming_kernel
+    fake.output = [bytearray(b"s"), bytearray(b"e" * 1048577)]
+    destination = tmp_path / "stdout.bin"
+    with destination.open("wb", buffering=0) as raw:
+        sink = StreamingSink(raw, fake)
+        result = execute_node(
+            tmp_path, stdout_sink=sink, stdout_limit=4 * 1048576, timeout_seconds=1200
+        )
+        assert not raw.closed and not sink.closed_by_runner
+        assert destination.read_bytes() == b"s"
+    assert result.stdout == b"" and result.stderr == b"e" * 1048576
+    assert result.stderr_overflow and not result.stdout_overflow
+    assert result.cleanup == "confirmed" and fake.terminated and not fake.handles
+    assert_stream_receipt(result)
+
+
+@pytest.mark.parametrize("mode", ["alive", "children", "pipe"])
+def test_streaming_node_timeout_still_requires_actual_job_empty_and_both_pipe_eofs(
+    streaming_kernel: FakeKernel, tmp_path: Path, mode: str
+) -> None:
+    fake = streaming_kernel
+    fake.alive, fake.children, fake.pipe_held = mode == "alive", mode == "children", mode == "pipe"
+    destination = tmp_path / "partial.bin"
+    with destination.open("wb", buffering=0) as raw:
+        sink = StreamingSink(raw, fake)
+        result = execute_node(tmp_path, stdout_sink=sink)
+        assert not raw.closed and not sink.closed_by_runner
+        assert destination.read_bytes() == b"stdout"
+    assert result.stdout == b"" and result.timed_out and fake.terminated and not fake.handles
+    assert result.cleanup == ("unknown" if mode == "pipe" else "confirmed")
+    assert result.execution_error is (mode == "pipe")
+    assert_stream_receipt(result)
+    assert result.receipt["job_empty"] is True and result.receipt["terminate_requested"] is True
+    assert result.receipt["closed"] is True
+    assert result.receipt["stdout_eof"] is (mode != "pipe")
+    assert result.receipt["stderr_eof"] is (mode != "pipe")
+
+
+@pytest.mark.parametrize("persistent", [False, True])
+def test_streaming_node_failed_handle_release_never_claims_confirmed_cleanup(
+    streaming_kernel: FakeKernel, tmp_path: Path, persistent: bool
+) -> None:
+    fake = streaming_kernel
+    if persistent:
+        original = fake.call
+
+        def failed_close(name, arguments):
+            if name == "CloseHandle" and fake.handle(arguments[0]) == 10:
+                return 0
+            return original(name, arguments)
+
+        fake.call = failed_close
+    else:
+        fake.fail = "CloseHandle", 3
+    destination = tmp_path / "stdout.bin"
+    with destination.open("wb", buffering=0) as raw:
+        sink = StreamingSink(raw, fake)
+        result = execute_node(tmp_path, stdout_sink=sink)
+        assert not raw.closed and not sink.closed_by_runner
+        assert destination.read_bytes() == b"stdout"
+    assert result.stdout == b"" and result.execution_error and result.cleanup == "unknown"
+    assert_stream_receipt(result)
+    assert result.receipt["closed"] is not persistent
+    assert fake.handles == ({10} if persistent else set())
