@@ -418,5 +418,21 @@
     "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
     "subject_commit": "2b0125494b18148300955cc3bfead00a45ceadd0",
     "task_id": "TASK-0138"
+  },
+  {
+    "action_sha256": "3c21399ab76812a2562779f7349122c6f17507c0b42b16f850359032d91fcf43",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-07T16:02:26Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-08T15:59:01.112931+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Actual owner A25 approval in this conversation covers exactly the reviewed two-fixture source correction and one current native10 V2, with 4200-second pytest,4500-second outer Job,all14 checks,both85/90domains and five original mutations. Existing37-distribution/F6 proofs retain actual origins; affected control-helper review and current positive-capacity/identity bindings remain mandatory before launch. Old failures and consumed slots remain; no additional full or target round is granted.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "4665993c23fa6c1c623184ea7fc0eee64833dfe9",
+    "task_id": "TASK-0138"
   }
 ]
