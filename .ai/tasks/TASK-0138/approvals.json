@@ -404,5 +404,19 @@
     "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
     "subject_commit": "2b0125494b18148300955cc3bfead00a45ceadd0",
     "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-07T04:04:31Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "d38d6c9dda32454bf93fd65af857d1de0a01286fb6aa5afeb590bf3d0dc29948",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "常设授权；A22 actual native9 complete V2 passed at snapshot 64093d50157bbb9a48b06716384f267a03220dc95abb81f9625334481c756978, independent implementation REV-0015 APPROVE with no findings, and same-verifier final passed. Required review package now records those actual results. Source-local closeout only; no publication or target action.",
+    "schema_version": "1.0",
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "2b0125494b18148300955cc3bfead00a45ceadd0",
+    "task_id": "TASK-0138"
   }
 ]

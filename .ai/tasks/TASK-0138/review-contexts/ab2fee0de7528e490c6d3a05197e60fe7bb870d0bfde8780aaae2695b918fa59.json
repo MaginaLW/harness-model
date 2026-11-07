@@ -1,0 +1,1226 @@
+{
+  "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+  "branch": "codex/agent-bridge-node-ci",
+  "classification_input_sha256": "4e9b3541a57db20bc61bc8c618ec906dacd1352a7f6ebcf04d5901ab411b1fc2",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/node_ci.py",
+      "src/aiflow/node_execution.py",
+      "src/aiflow/node_verification.py",
+      "src/aiflow/installed_mutations.py",
+      "src/aiflow/installed_probe.py",
+      "src/aiflow/verification.py",
+      "src/aiflow/verification_service.py",
+      "src/aiflow/evidence.py",
+      "src/aiflow/gate.py",
+      "src/aiflow/freshness.py",
+      "src/aiflow/cli.py",
+      "src/aiflow/resource_bundle.py",
+      "src/aiflow/review_service.py",
+      "src/aiflow/approval.py",
+      "src/aiflow/status_service.py",
+      "src/aiflow/task_service.py",
+      "src/aiflow/verifier_service.py",
+      ".ai/schemas/node-ci.schema.json",
+      ".ai/schemas/evidence.schema.json",
+      "MANIFEST.in",
+      ".github/workflows/node-engine-artifacts.yml",
+      "tools/ci/build_node_engine.py",
+      ".ai/tasks/TASK-0136/**",
+      "docs/superpowers/specs/node-ci.md",
+      "docs/operations/node-verification.md",
+      "docs/operations/adoption.md",
+      "docs/operations/maintenance-status.md",
+      "docs/superpowers/plans/agent-bridge-integration.md",
+      "tests/unit/test_node_ci.py",
+      "tests/unit/test_node_ci_execution.py",
+      "tests/unit/test_node_ci_platform.py",
+      "tests/integration/test_node_ci_installed.py",
+      "tests/node_ci_helpers.py",
+      "tests/unit/test_evidence.py",
+      "tests/unit/test_cli.py",
+      "tests/unit/test_resource_bundle.py",
+      "tests/integration/test_resource_distribution.py",
+      "src/aiflow/contracts.py",
+      "src/aiflow/process_runner.py",
+      "tests/unit/test_process_runner.py",
+      ".ai/tasks/TASK-0139/**",
+      "tests/unit/test_facts_recovery.py",
+      "src/aiflow/git_context.py",
+      "src/aiflow/scope.py",
+      "tests/unit/test_git_context.py",
+      "tests/integration/test_resource_bundle_distribution.py",
+      "src/aiflow/initialization.py",
+      "tests/unit/test_initialization.py",
+      "docs/operations/initialization.md",
+      "tests/unit/test_resource_bundle_preflight.py",
+      "tests/integration/test_installed_mutations.py",
+      "tests/unit/test_installed_mutation_transactions.py",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/schemas/policy.schema.json",
+      "tests/unit/test_verification_plan.py",
+      "tests/unit/test_policy.py",
+      ".github/workflows/ai-quality-gate.yml",
+      "docs/operations/quickstart.md",
+      "docs/operations/recovery.md",
+      "tests/fixtures/legacy20/schemas/policy.schema.json",
+      "tests/fixtures/legacy20/policy/verification-levels.yaml"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Implement explicit Node CI3.3 execution and original-host combined Gate without weakening local/native contracts",
+        "impact_scope": [
+          "src/aiflow/node_ci.py",
+          "src/aiflow/node_execution.py",
+          "src/aiflow/node_verification.py",
+          "src/aiflow/installed_mutations.py",
+          "src/aiflow/installed_probe.py",
+          "src/aiflow/verification.py",
+          "src/aiflow/verification_service.py",
+          "src/aiflow/evidence.py",
+          "src/aiflow/gate.py",
+          "src/aiflow/freshness.py",
+          "src/aiflow/cli.py",
+          "src/aiflow/resource_bundle.py",
+          "src/aiflow/review_service.py",
+          "src/aiflow/approval.py",
+          "src/aiflow/status_service.py",
+          "src/aiflow/task_service.py",
+          "src/aiflow/verifier_service.py",
+          ".ai/schemas/node-ci.schema.json",
+          ".ai/schemas/evidence.schema.json",
+          "MANIFEST.in",
+          ".github/workflows/node-engine-artifacts.yml",
+          "tools/ci/build_node_engine.py",
+          ".ai/tasks/TASK-0136/**",
+          "docs/superpowers/specs/node-ci.md",
+          "docs/operations/node-verification.md",
+          "docs/operations/adoption.md",
+          "docs/operations/maintenance-status.md",
+          "docs/superpowers/plans/agent-bridge-integration.md",
+          "tests/unit/test_node_ci.py",
+          "tests/unit/test_node_ci_execution.py",
+          "tests/unit/test_node_ci_platform.py",
+          "tests/integration/test_node_ci_installed.py",
+          "tests/node_ci_helpers.py",
+          "tests/unit/test_evidence.py",
+          "tests/unit/test_cli.py",
+          "tests/unit/test_resource_bundle.py",
+          "tests/integration/test_resource_distribution.py",
+          "src/aiflow/contracts.py",
+          "src/aiflow/process_runner.py",
+          "tests/unit/test_process_runner.py",
+          ".ai/tasks/TASK-0139/**",
+          "tests/unit/test_facts_recovery.py",
+          "src/aiflow/git_context.py",
+          "src/aiflow/scope.py",
+          "tests/unit/test_git_context.py",
+          "tests/integration/test_resource_bundle_distribution.py",
+          "src/aiflow/initialization.py",
+          "tests/unit/test_initialization.py",
+          "docs/operations/initialization.md",
+          "tests/unit/test_resource_bundle_preflight.py",
+          "tests/integration/test_installed_mutations.py",
+          "tests/unit/test_installed_mutation_transactions.py",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/schemas/policy.schema.json",
+          "tests/unit/test_verification_plan.py",
+          "tests/unit/test_policy.py",
+          ".github/workflows/ai-quality-gate.yml",
+          "docs/operations/quickstart.md",
+          "docs/operations/recovery.md",
+          "tests/fixtures/legacy20/schemas/policy.schema.json",
+          "tests/fixtures/legacy20/policy/verification-levels.yaml"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/verification-levels.yaml",
+        ".ai/schemas/node-ci.schema.json",
+        ".ai/schemas/policy.schema.json",
+        ".ai/tasks/TASK-0136/events.jsonl",
+        ".ai/tasks/TASK-0136/task.yaml",
+        ".ai/tasks/TASK-0138/action-node-ci-a07-recovery.json",
+        ".ai/tasks/TASK-0138/action-node-ci-a08-contract-completion.json",
+        ".ai/tasks/TASK-0138/action-node-ci-current-candidate.json",
+        ".ai/tasks/TASK-0138/action-node-ci-measurement-a05.json",
+        ".ai/tasks/TASK-0138/action-node-ci-measurement-a06.json",
+        ".ai/tasks/TASK-0138/action-use-07586f0f8517ce5419bfbaa4cf165ab7663f502570cc39c76861834a1185fc74.md",
+        ".ai/tasks/TASK-0138/action-use-310f299f212a68a84d707e30b277c85f176973d0000023e9d01434ca45ed852c.md",
+        ".ai/tasks/TASK-0138/action-use-488542c47e54b231d82d76470703f1caff62bec3cf8eb6e6f48566eda78c8d4d.md",
+        ".ai/tasks/TASK-0138/action-use-55fd64f91788cc807d0b612c28975f72478f2a009c72e620088c0164bdfa095f.md",
+        ".ai/tasks/TASK-0138/action-use-8d8c1c53e352914a7044dc7d3257d6300b69e95aa44135f50be4f14a50b7af16.md",
+        ".ai/tasks/TASK-0138/action-use-ce81b77aad1fa46fdb0922ca2a052d3bbd88e007166830ef8d9bdb0b0f159f76.md",
+        ".ai/tasks/TASK-0138/action-use-cf64b89320463ce4445856657c12c4bc9eefb5f3c96643f96e7b36c56c74f851.md",
+        ".ai/tasks/TASK-0138/action-use-e93327a9997f245a41288bc6fa5dc124c279d89ce6e0d5517cb494acb7eb5ad5.md",
+        ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a08-caps.json",
+        ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a10-window.json",
+        ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a11-attempt1.json",
+        ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a12-slot2.json",
+        ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a13-source.json",
+        ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a14-source-1.json",
+        ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a15-source-2.json",
+        ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a17-source-1.json",
+        ".ai/tasks/TASK-0138/approvals.json",
+        ".ai/tasks/TASK-0138/classification.json",
+        ".ai/tasks/TASK-0138/events.jsonl",
+        ".ai/tasks/TASK-0138/evidence.json",
+        ".ai/tasks/TASK-0138/review-contexts/0c5080fb4ffe3e7e22b289560246337e1a73c4a6a3f35db7284ed31a0b5e8757.json",
+        ".ai/tasks/TASK-0138/review-contexts/0d2d69229960430e3f23a3bbfc3048d612ab8e7c456c19af9355e1966fa7c416.json",
+        ".ai/tasks/TASK-0138/review-contexts/164fe2a41539867b71dc7228055579a6b88474a7aca3f3d871ff46c50fbcd47a.json",
+        ".ai/tasks/TASK-0138/review-contexts/18168dae671000cc74a610f38f7f4c2ac91c50081fe4b24c329413223caddec7.json",
+        ".ai/tasks/TASK-0138/review-contexts/20699aeb3f2bad5d9aaa7603a3e366b1d3298ce282a305c73b8c9d89e6e30af7.json",
+        ".ai/tasks/TASK-0138/review-contexts/22c8175e4ff54f59fad51906e7bbd003cd5cf3aa1be18e5197f325f47d7de539.json",
+        ".ai/tasks/TASK-0138/review-contexts/44afd17a37ec0ced3a931331ce7195baeaaf89d63a03c4b5bd089f9a7674929c.json",
+        ".ai/tasks/TASK-0138/review-contexts/4d1248cd7ea28c1a5b43161b4e34d79f0aa6663613497caf7a5337e01de0974c.json",
+        ".ai/tasks/TASK-0138/review-contexts/99a88cc8daf2758a53409c39df224c8e41f77918da330ee37d51e5767ee791a7.json",
+        ".ai/tasks/TASK-0138/review-contexts/a2f3769aa56cb98ad042698b4f88aea5bf057894258a128998c352bf280ee1bb.json",
+        ".ai/tasks/TASK-0138/review-contexts/b51b154de0fcb5d090c7fb79700a2448cd6692932316c6b90e4e9a0fa9a77e00.json",
+        ".ai/tasks/TASK-0138/review-contexts/b907df2d5dc34e9625a87f20b9ff5dbe0959bde668ee71283d518320592ce3a9.json",
+        ".ai/tasks/TASK-0138/review-contexts/f31e7c3b898fe3029cad2c91d62e0aaeb48a17738aa9a1ba2b284c25a67c1245.json",
+        ".ai/tasks/TASK-0138/review-contexts/fba6c553b722c2c0083c127ca40c5d638d90acfcfdba6f202f836d56d4d215ba.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0004-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0005-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0006-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0007-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0008-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0009-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0010-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0011-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0012-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0013-r0001.json",
+        ".ai/tasks/TASK-0138/reviews/REV-0014-r0001.json",
+        ".ai/tasks/TASK-0138/spec.md",
+        ".ai/tasks/TASK-0138/task.yaml",
+        ".ai/tasks/TASK-0138/verifier-contexts/215bea0de2f93cf481e70182b3006679c192450bea70f5b941aec7e51d8e4229.json",
+        ".ai/tasks/TASK-0138/verifier-contexts/37d2cb0f772349f180ac9fba4e3b9b3d07067491f46c1aabc1a8ab4ba0e081fc.json",
+        ".ai/tasks/TASK-0138/verifier-contexts/47eda2bd7f8e9b72c7a11f41a9b2baa1bb17f9a4774d560a613497e1d41a57e0.json",
+        ".ai/tasks/TASK-0138/verifier-contexts/54bbdd2d02ec9525862adfbbc26020b82fe85310902993300bb5724fbbec5d0a.json",
+        ".ai/tasks/TASK-0138/verifier-contexts/85223e3d29795ae1bd1992b0fb7d8587a8d274399772361048a1a8e10816c64f.json",
+        ".ai/tasks/TASK-0138/verifier-contexts/8734d6fca18575fc7478b8c448f753ec8f624969c8da30f74246444cab2999b7.json",
+        ".ai/tasks/TASK-0138/verifier-contexts/dc6f9064824d35df0aab7d0555d467fabfde0516034bece3271306c93cd004bc.json",
+        ".ai/tasks/TASK-0139/action-use-6c4c40ea6075fd07d783737970758f160a7b54bb300b54325a8532d243ce8c52.md",
+        ".ai/tasks/TASK-0139/action-use-bd2281b6631ee961ce401e2819a7a948ed60633a62eb90465d1e603ad617f5aa.md",
+        ".ai/tasks/TASK-0139/action-use-d1b002f7ec89377b5e6db573000909fd6d0441206b2804539599b90b2a5fb96d.md",
+        ".ai/tasks/TASK-0139/action-use-e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe.md",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-a09-inline.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-a09.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151333Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151719Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round2-20261102T171201Z.json",
+        ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round3-20261102T200312Z.json",
+        ".ai/tasks/TASK-0139/approvals.json",
+        ".ai/tasks/TASK-0139/classification.json",
+        ".ai/tasks/TASK-0139/events.jsonl",
+        ".ai/tasks/TASK-0139/evidence.json",
+        ".ai/tasks/TASK-0139/review-contexts/25ae4a4b4a8489a68fbf9e6bf7ece57f748f3d986d7960769d0f8cdc28d85a72.json",
+        ".ai/tasks/TASK-0139/review-contexts/404ced22be10b913358faee6228ae25c2c7fc9653f0feb5b55b73c9fafebc80b.json",
+        ".ai/tasks/TASK-0139/review-contexts/53470adcfd0670dbd54909684926ba8f84684b67a3b22f4be37e596147533169.json",
+        ".ai/tasks/TASK-0139/review-contexts/58efe378205c29f0820fe1fc5dc36a89d8637d67f019b6197f6ad6b65bc9a39a.json",
+        ".ai/tasks/TASK-0139/review-contexts/fada40952105ae8a85fd7f79efcb5de4c513d73478fa796f9c154676be10b35b.json",
+        ".ai/tasks/TASK-0139/review-package.md",
+        ".ai/tasks/TASK-0139/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0139/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0139/reviews/REV-0003-r0001.json",
+        ".ai/tasks/TASK-0139/reviews/REV-0004-r0001.json",
+        ".ai/tasks/TASK-0139/reviews/REV-0005-r0001.json",
+        ".ai/tasks/TASK-0139/spec.md",
+        ".ai/tasks/TASK-0139/task.yaml",
+        ".ai/tasks/TASK-0139/verifier-contexts/5af7e5028c17a5cf075497b24ad1fcb47fa4129d6f2187f034f47b5f9e5c8f72.json",
+        ".ai/tasks/TASK-0139/verifier-contexts/7c483dfabd1ce7785bbe6515fe1430132ca7f2c0839aad634aafc11700ee0503.json",
+        ".ai/tasks/TASK-0139/verifier-contexts/bef9772c7281078b2ccca52536d168e4f3b469e7770469cec56927e99158a9cd.json",
+        ".github/workflows/ai-quality-gate.yml",
+        ".github/workflows/node-engine-artifacts.yml",
+        "MANIFEST.in",
+        "docs/operations/adoption.md",
+        "docs/operations/initialization.md",
+        "docs/operations/maintenance-status.md",
+        "docs/operations/node-verification.md",
+        "docs/operations/quickstart.md",
+        "docs/operations/recovery.md",
+        "docs/superpowers/plans/agent-bridge-integration.md",
+        "docs/superpowers/specs/node-ci.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/contracts.py",
+        "src/aiflow/git_context.py",
+        "src/aiflow/initialization.py",
+        "src/aiflow/installed_mutations.py",
+        "src/aiflow/installed_probe.py",
+        "src/aiflow/node_ci.py",
+        "src/aiflow/node_execution.py",
+        "src/aiflow/process_runner.py",
+        "src/aiflow/resource_bundle.py",
+        "src/aiflow/scope.py",
+        "src/aiflow/task_service.py",
+        "src/aiflow/verification.py",
+        "src/aiflow/verification_service.py",
+        "tests/fixtures/legacy20/policy/verification-levels.yaml",
+        "tests/fixtures/legacy20/schemas/policy.schema.json",
+        "tests/integration/test_installed_mutations.py",
+        "tests/integration/test_node_ci_installed.py",
+        "tests/integration/test_resource_bundle_distribution.py",
+        "tests/unit/test_cli.py",
+        "tests/unit/test_facts_recovery.py",
+        "tests/unit/test_git_context.py",
+        "tests/unit/test_initialization.py",
+        "tests/unit/test_installed_mutation_transactions.py",
+        "tests/unit/test_node_ci.py",
+        "tests/unit/test_node_ci_execution.py",
+        "tests/unit/test_node_ci_platform.py",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_process_runner.py",
+        "tests/unit/test_resource_bundle.py",
+        "tests/unit/test_resource_bundle_preflight.py",
+        "tests/unit/test_verification_plan.py",
+        "tools/ci/build_node_engine.py"
+      ],
+      "files": [
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 8,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 3780,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/schemas/node-ci.schema.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 2,
+          "path": ".ai/schemas/policy.schema.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0136/events.jsonl"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": ".ai/tasks/TASK-0136/task.yaml"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-node-ci-a07-recovery.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-node-ci-a08-contract-completion.json"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-node-ci-current-candidate.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-node-ci-measurement-a05.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-node-ci-measurement-a06.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-use-07586f0f8517ce5419bfbaa4cf165ab7663f502570cc39c76861834a1185fc74.md"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-use-310f299f212a68a84d707e30b277c85f176973d0000023e9d01434ca45ed852c.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-use-488542c47e54b231d82d76470703f1caff62bec3cf8eb6e6f48566eda78c8d4d.md"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-use-55fd64f91788cc807d0b612c28975f72478f2a009c72e620088c0164bdfa095f.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-use-8d8c1c53e352914a7044dc7d3257d6300b69e95aa44135f50be4f14a50b7af16.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-use-ce81b77aad1fa46fdb0922ca2a052d3bbd88e007166830ef8d9bdb0b0f159f76.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-use-cf64b89320463ce4445856657c12c4bc9eefb5f3c96643f96e7b36c56c74f851.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-use-e93327a9997f245a41288bc6fa5dc124c279d89ce6e0d5517cb494acb7eb5ad5.md"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a08-caps.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a10-window.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a11-attempt1.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a12-slot2.json"
+        },
+        {
+          "additions": 22,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a13-source.json"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a14-source-1.json"
+        },
+        {
+          "additions": 22,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a15-source-2.json"
+        },
+        {
+          "additions": 21,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/action-v2-targeted-mutation-a17-source-1.json"
+        },
+        {
+          "additions": 392,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/approvals.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/classification.json"
+        },
+        {
+          "additions": 172,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/events.jsonl"
+        },
+        {
+          "additions": 268,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/evidence.json"
+        },
+        {
+          "additions": 137,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/0c5080fb4ffe3e7e22b289560246337e1a73c4a6a3f35db7284ed31a0b5e8757.json"
+        },
+        {
+          "additions": 113,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/0d2d69229960430e3f23a3bbfc3048d612ab8e7c456c19af9355e1966fa7c416.json"
+        },
+        {
+          "additions": 135,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/164fe2a41539867b71dc7228055579a6b88474a7aca3f3d871ff46c50fbcd47a.json"
+        },
+        {
+          "additions": 107,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/18168dae671000cc74a610f38f7f4c2ac91c50081fe4b24c329413223caddec7.json"
+        },
+        {
+          "additions": 151,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/20699aeb3f2bad5d9aaa7603a3e366b1d3298ce282a305c73b8c9d89e6e30af7.json"
+        },
+        {
+          "additions": 131,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/22c8175e4ff54f59fad51906e7bbd003cd5cf3aa1be18e5197f325f47d7de539.json"
+        },
+        {
+          "additions": 131,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/44afd17a37ec0ced3a931331ce7195baeaaf89d63a03c4b5bd089f9a7674929c.json"
+        },
+        {
+          "additions": 117,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/4d1248cd7ea28c1a5b43161b4e34d79f0aa6663613497caf7a5337e01de0974c.json"
+        },
+        {
+          "additions": 125,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/99a88cc8daf2758a53409c39df224c8e41f77918da330ee37d51e5767ee791a7.json"
+        },
+        {
+          "additions": 155,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/a2f3769aa56cb98ad042698b4f88aea5bf057894258a128998c352bf280ee1bb.json"
+        },
+        {
+          "additions": 131,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/b51b154de0fcb5d090c7fb79700a2448cd6692932316c6b90e4e9a0fa9a77e00.json"
+        },
+        {
+          "additions": 151,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/b907df2d5dc34e9625a87f20b9ff5dbe0959bde668ee71283d518320592ce3a9.json"
+        },
+        {
+          "additions": 123,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/f31e7c3b898fe3029cad2c91d62e0aaeb48a17738aa9a1ba2b284c25a67c1245.json"
+        },
+        {
+          "additions": 131,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/review-contexts/fba6c553b722c2c0083c127ca40c5d638d90acfcfdba6f202f836d56d4d215ba.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0004-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0005-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0006-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0007-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0008-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0009-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0010-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0011-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0012-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0013-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/reviews/REV-0014-r0001.json"
+        },
+        {
+          "additions": 135,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/spec.md"
+        },
+        {
+          "additions": 187,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/task.yaml"
+        },
+        {
+          "additions": 215,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/verifier-contexts/215bea0de2f93cf481e70182b3006679c192450bea70f5b941aec7e51d8e4229.json"
+        },
+        {
+          "additions": 239,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/verifier-contexts/37d2cb0f772349f180ac9fba4e3b9b3d07067491f46c1aabc1a8ab4ba0e081fc.json"
+        },
+        {
+          "additions": 220,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/verifier-contexts/47eda2bd7f8e9b72c7a11f41a9b2baa1bb17f9a4774d560a613497e1d41a57e0.json"
+        },
+        {
+          "additions": 208,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/verifier-contexts/54bbdd2d02ec9525862adfbbc26020b82fe85310902993300bb5724fbbec5d0a.json"
+        },
+        {
+          "additions": 246,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/verifier-contexts/85223e3d29795ae1bd1992b0fb7d8587a8d274399772361048a1a8e10816c64f.json"
+        },
+        {
+          "additions": 201,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/verifier-contexts/8734d6fca18575fc7478b8c448f753ec8f624969c8da30f74246444cab2999b7.json"
+        },
+        {
+          "additions": 192,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0138/verifier-contexts/dc6f9064824d35df0aab7d0555d467fabfde0516034bece3271306c93cd004bc.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-use-6c4c40ea6075fd07d783737970758f160a7b54bb300b54325a8532d243ce8c52.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-use-bd2281b6631ee961ce401e2819a7a948ed60633a62eb90465d1e603ad617f5aa.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-use-d1b002f7ec89377b5e6db573000909fd6d0441206b2804539599b90b2a5fb96d.md"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-use-e43678e7132f81bbd9350acd6176ba6f834db1a33889eb636fa8041a989809fe.md"
+        },
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-a09-inline.json"
+        },
+        {
+          "additions": 22,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-a09.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151333Z.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-20261102T151719Z.json"
+        },
+        {
+          "additions": 19,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round2-20261102T171201Z.json"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/action-v2-targeted-mutation-lf-round3-20261102T200312Z.json"
+        },
+        {
+          "additions": 149,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/classification.json"
+        },
+        {
+          "additions": 63,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/events.jsonl"
+        },
+        {
+          "additions": 272,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/evidence.json"
+        },
+        {
+          "additions": 175,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-contexts/25ae4a4b4a8489a68fbf9e6bf7ece57f748f3d986d7960769d0f8cdc28d85a72.json"
+        },
+        {
+          "additions": 307,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-contexts/404ced22be10b913358faee6228ae25c2c7fc9653f0feb5b55b73c9fafebc80b.json"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-contexts/53470adcfd0670dbd54909684926ba8f84684b67a3b22f4be37e596147533169.json"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-contexts/58efe378205c29f0820fe1fc5dc36a89d8637d67f019b6197f6ad6b65bc9a39a.json"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-contexts/fada40952105ae8a85fd7f79efcb5de4c513d73478fa796f9c154676be10b35b.json"
+        },
+        {
+          "additions": 85,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/review-package.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/reviews/REV-0003-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/reviews/REV-0004-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/reviews/REV-0005-r0001.json"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/spec.md"
+        },
+        {
+          "additions": 68,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/task.yaml"
+        },
+        {
+          "additions": 55,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/verifier-contexts/5af7e5028c17a5cf075497b24ad1fcb47fa4129d6f2187f034f47b5f9e5c8f72.json"
+        },
+        {
+          "additions": 71,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/verifier-contexts/7c483dfabd1ce7785bbe6515fe1430132ca7f2c0839aad634aafc11700ee0503.json"
+        },
+        {
+          "additions": 77,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0139/verifier-contexts/bef9772c7281078b2ccca52536d168e4f3b469e7770469cec56927e99158a9cd.json"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".github/workflows/ai-quality-gate.yml"
+        },
+        {
+          "additions": 151,
+          "binary": false,
+          "deletions": 0,
+          "path": ".github/workflows/node-engine-artifacts.yml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "MANIFEST.in"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/adoption.md"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/initialization.md"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 5,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 5,
+          "path": "docs/operations/node-verification.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "docs/operations/recovery.md"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 8,
+          "path": "docs/superpowers/plans/agent-bridge-integration.md"
+        },
+        {
+          "additions": 24,
+          "binary": false,
+          "deletions": 4,
+          "path": "docs/superpowers/specs/node-ci.md"
+        },
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/git_context.py"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 4,
+          "path": "src/aiflow/initialization.py"
+        },
+        {
+          "additions": 684,
+          "binary": false,
+          "deletions": 22,
+          "path": "src/aiflow/installed_mutations.py"
+        },
+        {
+          "additions": 48,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/installed_probe.py"
+        },
+        {
+          "additions": 4082,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/node_ci.py"
+        },
+        {
+          "additions": 1787,
+          "binary": false,
+          "deletions": 26,
+          "path": "src/aiflow/node_execution.py"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/process_runner.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/resource_bundle.py"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/scope.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 26,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/verification_service.py"
+        },
+        {
+          "additions": 259,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/legacy20/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 582,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/fixtures/legacy20/schemas/policy.schema.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 4,
+          "path": "tests/integration/test_installed_mutations.py"
+        },
+        {
+          "additions": 770,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_node_ci_installed.py"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 3,
+          "path": "tests/integration/test_resource_bundle_distribution.py"
+        },
+        {
+          "additions": 291,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_cli.py"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_facts_recovery.py"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 8,
+          "path": "tests/unit/test_git_context.py"
+        },
+        {
+          "additions": 442,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_initialization.py"
+        },
+        {
+          "additions": 227,
+          "binary": false,
+          "deletions": 46,
+          "path": "tests/unit/test_installed_mutation_transactions.py"
+        },
+        {
+          "additions": 3522,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_node_ci.py"
+        },
+        {
+          "additions": 1800,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_node_ci_execution.py"
+        },
+        {
+          "additions": 2651,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_node_ci_platform.py"
+        },
+        {
+          "additions": 68,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 321,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_process_runner.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_resource_bundle.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_resource_bundle_preflight.py"
+        },
+        {
+          "additions": 50,
+          "binary": false,
+          "deletions": 4,
+          "path": "tests/unit/test_verification_plan.py"
+        },
+        {
+          "additions": 652,
+          "binary": false,
+          "deletions": 0,
+          "path": "tools/ci/build_node_engine.py"
+        }
+      ],
+      "totals": {
+        "additions": 29552,
+        "deletions": 169,
+        "files": 141
+      }
+    },
+    "goal": "Implement explicit Node CI3.3 execution and original-host combined Gate without weakening local/native contracts",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0138",
+        "--actor",
+        "native-coverage-recovery-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "ab2fee0de7528e490c6d3a05197e60fe7bb870d0bfde8780aaae2695b918fa59",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+  "subject_commit": "2b0125494b18148300955cc3bfead00a45ceadd0",
+  "task_id": "TASK-0138",
+  "verification_snapshot_sha256": "64093d50157bbb9a48b06716384f267a03220dc95abb81f9625334481c756978"
+}
