@@ -1,0 +1,18 @@
+{
+  "action_type": "source_ci_final_publication",
+  "classification_input_sha256": "4e9b3541a57db20bc61bc8c618ec906dacd1352a7f6ebcf04d5901ab411b1fc2",
+  "decision_unit_id": "DU-001",
+  "target": "MaginaLW/harness-model:refs/heads/codex/agent-bridge-node-ci#150",
+  "subject_commit": "4ea9cd02a9c7beadb9acc0a92561d18e8b278786",
+  "parameter_summary": "A26 final stage only: one non-forced metadata synchronization to the same PR150 and one final primary Ubuntu quality/Windows artifact pair. Only this final accepted source tuple may be selected for unchanged A23 target integration.",
+  "conditions": [
+    "Direct owner A26 grant3857455df54a3bc919a9793dbe3e5466726eb54f92761eaacfe3f00ae6960f43; this is the second/final synchronization, not a new source PR or additional primary quota.",
+    "Both early workflows succeeded; current source complete native11 V2, independent REV-0017, same-verifier final, code approval and local Gate have actually passed. Preserve their original version facts and all historical failures.",
+    "Use only the same codex/agent-bridge-node-ci branch and PR150 with a normal fast-forward push; keep source PR open. Primary quality/artifact limits remain90/15minutes; both final exact-head workflows must succeed before target execution.",
+    "Any deterministic final CI failure blocks target. Each workflow's existing one unused diagnosed-transient same-head extra is shared across the A26 early/final stages, with no new recovery quota.",
+    "No new full,merge,close,force push,history rewrite,repository setting,credential or live model/SDK/Grok/WeChat action is granted. Existing A23 target LOCAL/private/combined counts and private failure-stop remain unchanged.",
+    "Preserve old416GiB plus independent A26 source64GiB/cumulative480GiB and separate StageB32GiB; retain the original US$3 single/cumulative Actions service budget and14-day source artifact retention."
+  ],
+  "expires_at": "2026-11-09T00:40:00+00:00",
+  "single_use": true
+}

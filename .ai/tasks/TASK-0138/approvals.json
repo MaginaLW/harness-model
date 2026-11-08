@@ -464,5 +464,51 @@
     "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
     "subject_commit": "4ea9cd02a9c7beadb9acc0a92561d18e8b278786",
     "task_id": "TASK-0138"
+  },
+  {
+    "action_sha256": "d1d80255725568428e1cf24c948eb3f815ef5a443416b361ca238345acc2642f",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-08T00:43:09Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-09T00:40:00+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Actual A26 owner approval for exactly one native11 source full after both early source workflows succeed, all14/original85-90/five mutations and4200/4500 retained. Grant3857455…; original usage/counts remain. This public action record is preparatory and does not start a full or bypass the required early CI success.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "4ea9cd02a9c7beadb9acc0a92561d18e8b278786",
+    "task_id": "TASK-0138"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-08T02:28:57Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "c9d2cb7a539e6d540b8a778d648611d654e77e74c940de63bbd0ceafad5cb064",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Direct owner A26 approval: exact two-line synthetic host-role fixture correction, both real early source workflows succeeded, current native11 all14/original85-90/five mutations passed, independent implementation REV-0017 APPROVE and successful same-verifier final. Retain A26 final source publication and all unchanged A23 target counts, privacy, budget and non-merge boundaries.",
+    "schema_version": "1.0",
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "4ea9cd02a9c7beadb9acc0a92561d18e8b278786",
+    "task_id": "TASK-0138"
+  },
+  {
+    "action_sha256": "d877220469ae234f03319c4b7d95b255426eb8733f7b9911f958302ac95436eb",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-08T02:30:59Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-09T00:40:00+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Direct A26 owner approval for the one final source metadata synchronization and its exact-head primary quality/artifact pair, after actual early CI and current native11 full/REV-0017/same-verifier final/code/local Gate all passed. No extra full, source PR, money, target attempt, merge or history rewrite.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "4ea9cd02a9c7beadb9acc0a92561d18e8b278786",
+    "task_id": "TASK-0138"
   }
 ]

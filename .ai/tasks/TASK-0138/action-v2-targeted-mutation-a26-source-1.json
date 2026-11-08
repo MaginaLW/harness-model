@@ -1,0 +1,20 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "4e9b3541a57db20bc61bc8c618ec906dacd1352a7f6ebcf04d5901ab411b1fc2",
+  "conditions": [
+    "Actual owner A26 grant3857455df54a3bc919a9793dbe3e5466726eb54f92761eaacfe3f00ae6960f43; exactly one additional current-source native11 full, campaign invocation6/newgrant1; failure or interruption closes this full allowance.",
+    "Hard prerequisite: actual early quality run42430794236 and artifact run42430794253 at head957d3a3668c0502ed5d12262e650841f93676f3c must both be completed success, same PR150/base39898f30b8914402d737fab9f59bebf8d8656f53/mergeea984f60f408e2ee4a591889bd5cd65bec202da6 with current provider associations. Approval recording is preparation, not permission to execute before those successful originals.",
+    "Current business subject4ea9cd02a9c7beadb9acc0a92561d18e8b278786; unchanged frozen specf7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a; actual context0668f3a56c953b1234f80c060928a979c3d4c3b1a614b27577719ab6f946f45f; verifier native-host-roles-verifier is independent from implementer codex.",
+    "All14 checks, complete4200-second branch-enabled pytest, original-base core/analysis85total90diff domains and five original native mutation groups. Preserve4500-second outer Job and all other check timeouts, assertions,skip/xfail,Policy,Norm,lock,workflows and production bytes.",
+    "Retain actual37-distribution source environment and F6 ordinary/capacity at their true origins. Bind current test-only source equivalence,positive source/Git/material growth,current Git bytes and affected independent helper review. No new dependency installation,capacity kernel or readiness probe.",
+    "Preserve complete old416GiB usage/reservations plus new independent source64GiB; cumulative480GiB515396075520bytes. StageB32GiB remains separate; no negative credit,deletion,old-reservation borrowing or invocation reset.",
+    "Use the already active A26 event2026-11-08T00:40:00.495423+00:00; no reactivation,new global window or invented remaining seconds. Actual process/EOF/job-empty/closed/cleanup must be proven by current receipts.",
+    "This local action performs no further push,PR,remote CI,private upload,merge,close,model/SDK/Grok/WeChat,credential export or settings change. Later final source synchronization/workflows and unchanged A23 target chain retain their separate counted scope."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-09T00:40:00+00:00",
+  "parameter_summary": "A26 one current-source native11 V2;campaign invocation6/newgrant1;complete4200-second branch pytest,all14checks,both85/90original-base domains and five original native mutations,only after both early source workflows succeed.",
+  "single_use": true,
+  "subject_commit": "4ea9cd02a9c7beadb9acc0a92561d18e8b278786",
+  "target": "TASK-0138"
+}

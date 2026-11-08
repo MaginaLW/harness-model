@@ -2,36 +2,41 @@
 
 ## 审核目标
 
-裁决 subject `4665993c23fa6c1c623184ea7fc0eee64833dfe9` 的源端实现是否满足冻结规格，支持 A25 范围内的本地 code 批准与源 Gate。
+裁决 subject `4ea9cd02a9c7beadb9acc0a92561d18e8b278786` 的当前实现是否满足冻结规格，支持 A26 的同 verifier final、code 批准与源 Gate。
 
 ## 背景
 
-本任务实现 Node CI 普通安装、真实平台关联与完整原件回放合同。冻结规格见 `spec.md`，原比较基线为 `1f748a99b97842b9eca7abf4be454d348bf78759`。A22 补两测试文件的八项拒绝边界回归；A25 仅修复两个合成 fixture 的宿主可移植性，保留真实宿主拒绝门。旧失败、用量及版本归属保留。
+冻结规格见 spec.md，原基线仍为 `1f748a99b97842b9eca7abf4be454d348bf78759`。A25 的两 fixture 修复在 Linux 留下 26 项真实失败；A26 仅在 producer_coordination 增加两行，明确合成工具库存不声明 API-derived OS roles。先通过真实早期 Linux CI，随后执行 native11；所有旧失败和次数保留。
 
 ## 代码地图
 
-主要入口为 `src/aiflow/node_ci.py`、`node_execution.py`、`installed_mutations.py`、`initialization.py` 和验证服务；权威合同见 `docs/superpowers/specs/node-ci.md`。精确范围与依赖见冻结规格、分类和正式设计审核 REV-0014。复用 `reviews/REV-0015-r0001.json` 已覆盖的未变生产代码审查；本次需要绑定新 subject、两 fixture 修复及完整快照的正式实施审核。
+生产入口为 src/aiflow/node_ci.py、node_execution.py、installed_mutations.py、initialization.py 和验证服务；权威合同见 docs/superpowers/specs/node-ci.md。复用冻结设计 REV-0014 及 REV-0016 已覆盖的未变生产审查；本次差异仅 tests/unit/test_node_ci.py 的合成 fixture。普通 synthetic-tool 原件仍经过实际字节、size、SHA、identity、nlink 检查，独立真实宿主/API 负例保留。
 
 ## 语义变更
 
-提供闭合声明、普通安装与生产 admission、固定运行角色、完整材料验证及原 LOCAL 主机的联合 Gate；仅允许 managed @2 的精确可选声明，保持现有资源和历史完整性。A22、A25 不改生产代码、Policy、schema、Norm、锁或门槛；A25 的局部 OS 代理仅作用于合成测试 fixture，不替换全局 OS 或 pathlib，不修改断言、skip 或 xfail。
+实现普通安装、真实平台关联、闭合角色原件及原 LOCAL 主机联合 Gate。A26 不改生产代码、Policy、schema、Norm、锁、工作流、断言、skip/xfail 或门槛；只使合成 fixture 在 Linux 到达原定事务边界。
 
 ## 风险
 
-平台认证、原件来源、版本新鲜度、容量与进程归属由既有拒绝合同约束。REV-0015 已评价历史 managed declaration 缺陷已解决；本次受影响审核须核实该结论在新快照仍成立。旧源 quality CI 的 Linux fixture 失败是真实失败，本机通过不代替修复后的 Linux CI。外部动作仍遵守 A23、A25 的范围、次数和停止条件。
+当前实施裁决必须绑定新快照，不能重贴 native10 或 F6 的旧版本证明。37-distribution 环境、F6 普通安装与容量只按真实旧归属和已审生产等价复用。先前 Linux 失败及首次认证准备的目录 guard 失败原件均保留；原进程/EOF/Job/cleanup、85/90 和单次额度不放松。
 
 ## 证据
 
-已验证：native10 的 `run-20261107T162343895705Z` 完整 V2，14 项检查通过；7324 passed、9 项原条件跳过，pytest 用时 4099.71 秒，五组原变异全部 killed。core 完整 diff 为 2857/3172，90.0693568726%；双域 combined total 均超过 85%，analysis 无适用变更行。正式 Job cleanup confirmed，八项生命周期标记均真，完整调用 4128.469 秒且未超时。快照为 `d36aad3ed0f4337d05e61b94ca8c2444d37ea232dcd517744057d6b3affd7d3b`，由 `native-ci-portability-verifier` 实际产生，当前阶段为 pre_implementation_review。完整复现入口为公共 `verify TASK-0138`；本次完整额度已经消费，不重复运行。旧 native9、失败原件及 F6 普通安装与容量证据保留，F6 仅按其真实旧版本及已审 production-equivalence 复用。
+已验证：早期 head `957d3a3668c0502ed5d12262e650841f93676f3c` 的 quality run 42430794236 与 artifact run 42430794253 均成功。Ubuntu 为 7250 passed、83 项原跳过，982.74 秒，原 26 项失败全部消失；完整质量门通过。早期产物不用于目标。
 
-未验证及待完成：当前快照正式实施审核、同 verifier final、code 批准与源 Gate；随后向既有 PR #150 正常同步一次并核实新两项源 CI。目标新任务 LOCAL/CI 及原主机 combined Gate 尚未验收。不得以本地 fixture、旧安装或源端 PASS 替代这些事实。
+已验证：native11 的 `run-20261108T011237961379Z` 完整 V2，14 项全部通过，7324 passed、9 项原跳过，pytest 4126.21 秒，原五组变异全部 killed。原基线 core diff 为 2857/3172，即 90.0693568726%；两域 combined total 均超过 85%，analysis 无适用 diff。正式外层调用 4161.578 秒、returncode 0、cleanup confirmed，无超时或流溢出，八项生命周期标记均真。
+
+当前 pre_implementation_review 快照为 `93981945c70ad54c73ad6d9916189ab7b4cb7045cdfa9e96b67506183eba3eaa`；evidence SHA `cb3183790392a9caeb69a541809e91cd0af6a1f87f7142ecd6b57ae88548bb78`。verifier 为 native-host-roles-verifier，context 为 `0668f3a56c953b1234f80c060928a979c3d4c3b1a614b27577719ab6f946f45f`。公共复现入口为 verify TASK-0138；本次 full 额度已消费，不重复运行。
+
+未验证及待完成：当前正式实施审核、同 verifier final、code 批准和源 Gate；随后唯一最终 metadata 同步及最终 source quality/artifact 两项 CI。目标 LOCAL、私有 CI、原主机 combined Gate 尚未开始；本地或早期 PASS 不能替代它们。
 
 ## 审核问题
 
-- 当前完整快照、冻结规格和实施审核是否绑定同一 subject 与原基线？
-- 历史声明缺陷是否仍由当前代码及永久回归解决，A25 是否只修复合成 fixture，且所有旧失败和质量门槛保留？
-- 源端结论与尚未发生的发布、目标接入是否明确区分？
+- 当前证据、冻结规格、原基线与正式实施审核是否绑定同一新 subject 和快照？
+- 两行修复是否保留普通工具原件检查、全部原断言与独立真实宿主/API 负例？
+- 未变生产实现及历史 managed declaration 修复的既有结论是否仍覆盖当前状态？
+- 是否保留旧失败、原预算和次数，并清楚区分当前源结论与尚未完成的最终发行、目标链路？
 
 ## 推荐结论
 
-建议 APPROVE，须由独立审核者对当前快照正式裁决；同 verifier final、code 批准和源 Gate 仍需实际完成。此包不授予发布、目标写入、私传或付费许可；相关许可仅来自已收到的 A23、A25。
+建议 APPROVE，须由独立审核者对当前实际快照正式裁决；同 verifier final、code 批准和源 Gate 仍需实际通过。本包不新增权限，执行只依照 A23/A25/A26 的真实范围、预算、次数和停止条件。
