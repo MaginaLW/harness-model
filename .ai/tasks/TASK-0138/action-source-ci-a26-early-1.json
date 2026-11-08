@@ -1,0 +1,18 @@
+{
+  "action_type": "source_ci_validation",
+  "classification_input_sha256": "4e9b3541a57db20bc61bc8c618ec906dacd1352a7f6ebcf04d5901ab411b1fc2",
+  "decision_unit_id": "DU-001",
+  "target": "MaginaLW/harness-model:refs/heads/codex/agent-bridge-node-ci#150",
+  "subject_commit": "4ea9cd02a9c7beadb9acc0a92561d18e8b278786",
+  "parameter_summary": "A26 early validation only: one non-forced same-PR source synchronization and one primary Ubuntu quality plus Windows artifact run at this business subject's governance-only publication descendant; target selection forbidden until later local full/final/Gate and final-source CI.",
+  "conditions": [
+    "Direct owner A26 authorization 3857455df54a3bc919a9793dbe3e5466726eb54f92761eaacfe3f00ae6960f43, bound proposal152cae389b7e89e8e5fe1b0ec0739f2349f29fdb1f0f33bf4afe4f5e1a1b5101 and exact two-line patcha9890f9273d37f3626650b7dca0811eaca9f254b22f86b79a944a168a916c1ac.",
+    "The first synchronization explicitly precedes the current candidate's new local full/final/Gate solely for real Linux validation. Prior native10 remains historical at its actual subject; no fresh code approval or Gate is claimed here.",
+    "Use the existing source PR150, base main and branch codex/agent-bridge-node-ci; preserve all pushed commits. Standard public runners only, unchanged workflows and 90/15-minute limits. No merge,close,force push,settings or credentials changes.",
+    "Both early workflows must actually succeed before the sole new complete source V2. Deterministic early failure closes this candidate's validation. Existing same-head diagnosed-transient extras remain at most one per workflow, shared with the final stage; no new quota.",
+    "Retain all original usage and reservations; A26 separate source64GiB and cumulative480GiB; keep A23 StageB32GiB separate and original US$3 single/cumulative service budget, with no new money or target counts.",
+    "This action does not run the local full,select an early artifact for target,create a target PR or start private CI. Final source metadata synchronization and its two final primary workflows remain separately counted within A26."
+  ],
+  "expires_at": "2026-11-09T00:40:00+00:00",
+  "single_use": true
+}

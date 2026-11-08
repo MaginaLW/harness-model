@@ -448,5 +448,21 @@
     "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
     "subject_commit": "4665993c23fa6c1c623184ea7fc0eee64833dfe9",
     "task_id": "TASK-0138"
+  },
+  {
+    "action_sha256": "707b1a957eb6ac68ca361933e05d5fea1bb53f74a4eabe4be351c08b8e38068f",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-08T00:37:30Z",
+    "base_commit": "1f748a99b97842b9eca7abf4be454d348bf78759",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-09T00:40:00+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Direct owner A26 approval explicitly permits one early source validation synchronization before new local full/final/Gate; exact reviewed two-line patch, same PR150, primary quality/artifact 90/15 minutes each, unchanged limits and no target execution. This records external action permission, not current code approval or Gate.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a",
+    "subject_commit": "4ea9cd02a9c7beadb9acc0a92561d18e8b278786",
+    "task_id": "TASK-0138"
   }
 ]
