@@ -11,5 +11,50 @@
     "spec_sha256": "d64d70971d4e7020b4501f98440014f2eee444653dce0f598902e90abcaf583f",
     "subject_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
     "task_id": "TASK-0142"
+  },
+  {
+    "action_sha256": "28359b52410fedb3b74f980e78b474e339ba0c1a955e7bc98691c14056ddba6f",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-08T15:10:17Z",
+    "base_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-09T15:10:16.706031+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit A33 owner approval; primary source Native transaction and original mutation pairs within approved limits.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "d64d70971d4e7020b4501f98440014f2eee444653dce0f598902e90abcaf583f",
+    "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+    "task_id": "TASK-0142"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-08T16:00:41Z",
+    "base_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit owner A33 continuous scope covers this independently approved native-host admission and source2 binding clarification; no product/Norm/check/cap expansion.",
+    "schema_version": "1.0",
+    "spec_sha256": "6807c5c917b17b2a1fef36e54434fb56a401f15442161976ff2db5c71a79c2ae",
+    "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+    "task_id": "TASK-0142"
+  },
+  {
+    "action_sha256": "e52415b3cae5f9bd7ed124229bd4e6c7559006427fc35a151483ada724d91570",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-08T16:03:08Z",
+    "base_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-09T16:03:08.190697+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit A33 approved bounded source2 recovery after diagnosed primary admission interruption, confirmed cleanup and affected independent review; no new allowance.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "6807c5c917b17b2a1fef36e54434fb56a401f15442161976ff2db5c71a79c2ae",
+    "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+    "task_id": "TASK-0142"
   }
 ]

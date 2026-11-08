@@ -1,0 +1,18 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0142",
+  "decision_unit_id": "DU-001",
+  "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+  "classification_input_sha256": "94fcf5b21f3afe07a8a6715c02f7343be02e3b6935116c8911f867684915c225",
+  "parameter_summary": "A33 separately numbered source2 complete Native V2, same terminal-semicolon candidate, all14checks and5fresh mutation pairs. Whole verify3000seconds and automatic recorder1199seconds, no further source retry.",
+  "conditions": [
+    "Actual direct owner A33 grant5588e999c03980424d731b603290821cbd44aadd0d3255db58a1debdcdecd2b8; source primary1 consumed/closed with confirmed cleanup, this is the sole remaining source recovery2of2. No extra source transaction after failure.",
+    "Independently approved admission/spec correction frozen6807c5c917b17b2a1fef36e54434fb56a401f15442161976ff2db5c71a79c2ae; independent verifier source-map-verifier context6bdc0c6fb103783361c1f62e49d4b7fca5edc3525ba4b3eafab941588b14276f; implementer source-map-author. Preserve unused primary action under its original stale spec binding; never modify or fabricate its consumption.",
+    "Use approved fixed source recovery root/runtime and original6b5base/currente585subject, all original14checks and85/90. Product candidate unchanged; primary full history merged ordinarily and failed original retained.",
+    "Before launch require actual native-host visibility, no concurrent full software checks, current material/ownership admission and original90minute cumulative known-occupancy wait. A sandbox-empty process list is insufficient; never stop another task.",
+    "Actual outer Windows Job caps the complete phase at3000seconds and nested Job caps automatic recording at1199seconds; unchanged five baseline/mutant pairs and ten60second children. All protected spec/classification/action/context exactHEAD/index/worktree before execution.",
+    "This local action publishes nothing and invokes no source/privateCI, targetLOCAL,combined,merge,settings,credentials,model/SDK/device action. Failure/unknowncleanup closes source2; no automatic retry."
+  ],
+  "expires_at": "2026-11-09T16:03:08.190697+00:00",
+  "single_use": true
+}

@@ -1,0 +1,40 @@
+{
+  "base_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
+  "branch": "codex/agent-bridge-node-ci",
+  "classification_input_sha256": "94fcf5b21f3afe07a8a6715c02f7343be02e3b6935116c8911f867684915c225",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/node_execution.py",
+      "src/aiflow/node_verification.py",
+      "docs/superpowers/specs/node-v2-installed-lifecycle.md",
+      "tests/unit/test_node_v2_coverage.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prove the exact terminal-semicolon implicit-else boundary in the governed Node supplier and explicitly rebind its finite-end contract",
+        "impact_scope": [
+          "src/aiflow/node_execution.py",
+          "src/aiflow/node_verification.py",
+          "docs/superpowers/specs/node-v2-installed-lifecycle.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Prove the exact terminal-semicolon implicit-else boundary in the governed Node supplier and explicitly rebind its finite-end contract",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "b76d0af8a3a27e5a97577e01bdd473dbe9fd0896eebdfb3eb68674c9e57b4f0a",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "6807c5c917b17b2a1fef36e54434fb56a401f15442161976ff2db5c71a79c2ae",
+  "task_id": "TASK-0142"
+}
