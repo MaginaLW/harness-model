@@ -587,7 +587,13 @@ def validate_node_istanbul_line_coverage(
             column = parent["end"]["column"]
             if column is not None and column != end[1]:
                 text = lines[end[0] - 1].encode("utf-16-le")
-                if column != end[1] + 1 or text[end[1] * 2 : column * 2] != b" \x00":
+                trailing_space = column == end[1] + 1 and text[end[1] * 2 : column * 2] == b" \x00"
+                # The fixed authenticated producer proves the AST/token identity;
+                # this pure reader checks the same bound source's UTF-16 geometry.
+                terminal_semicolon = (
+                    column == end[1] - 1 and text[column * 2 : end[1] * 2] == b";\x00"
+                )
+                if not trailing_space and not terminal_semicolon:
                     raise _coverage_invalid("Implicit-else mapped end is not proved trivia")
             key = _node_json({k: certificate[k] for k in ("parent", "locations", "type")})
             if key in allowed:

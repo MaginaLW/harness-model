@@ -199,6 +199,13 @@ SEMANTIC_CONTRACT_V2 = {
     "coverage_packages": ISTANBUL_PACKAGES,
     "coverage_files": ISTANBUL_FILES,
     "source_config_sha256": NODE_V2_CONFIG_SHA256,
+    "implicit_else_finite_end": {
+        "exact": "original-ts-if-end",
+        "one_space_after": "original-ts-if-end+1-only-U+0020",
+        "semicolon_before": "original-ts-if-end-1-only-U+003B-final-Babel-semicolon-token",
+        "token_span": "[node.end-1,node.end)",
+        "reader_trust": "authenticated-fixed-producer-AST-span-and-bound-source-UTF16-geometry",
+    },
     "product_tests": PRODUCT_TESTS,
     "execution": "owned-imut-node-copy-offline-v2",
     "node_inventory": "closed-path-kind-size-sha256-excluding-run-json",
@@ -2841,8 +2848,14 @@ for (const filename of remapped.files()) {
     } else if (branch.loc.end.column !== node.loc.end.column &&
       !(branch.loc.end.column === node.loc.end.column + 1 &&
       source.text.split(/\r?\n/u)[node.loc.end.line - 1].slice(node.loc.end.column,
-       branch.loc.end.column) === ' '))
-      throw Error('FINITE_END_NOT_PROVEN');
+       branch.loc.end.column) === ' ')) {
+      const terminalSemicolon = branch.loc.end.column === node.loc.end.column - 1 &&
+        source.text.split(/\r?\n/u)[node.loc.end.line - 1].slice(branch.loc.end.column,
+          node.loc.end.column) === ';' &&
+        source.ast.tokens.some(token => typeof token.type !== 'string' &&
+          token.type.label === ';' && token.start === node.end - 1 && token.end === node.end);
+      if (!terminalSemicolon) throw Error('FINITE_END_NOT_PROVEN');
+    }
     entry.implicit_else.push({
       parent: branch.loc,
       locations: branch.locations,

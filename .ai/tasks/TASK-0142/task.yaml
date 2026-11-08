@@ -1,61 +1,14 @@
-schema_version: '1.0'
-task_id: TASK-0142
-goal: Prove the exact terminal-semicolon implicit-else boundary in the governed Node
-  supplier and explicitly rebind its finite-end contract
-repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
-branch: codex/agent-bridge-node-ci
-base_commit: 6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61
-subject_commit: 6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61
-worktree_dirty: false
-worktree_dirty_paths: []
 allowed_scope:
 - src/aiflow/node_execution.py
 - src/aiflow/node_verification.py
 - docs/superpowers/specs/node-v2-installed-lifecycle.md
 - tests/unit/test_node_v2_coverage.py
-forbidden_actions:
-- deploy
-- delete
-- secret_export
-- paid_external_call
-current_state: WAITING_FOR_SPEC_REVIEW
+base_commit: 6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61
+branch: codex/agent-bridge-node-ci
 created_at: '2026-11-08T13:40:34Z'
-updated_at: '2026-11-08T14:40:42Z'
+current_state: IMPLEMENTING
 decision_units:
-- schema_version: '1.0'
-  task_id: TASK-0142
-  decision_unit_id: DU-001
-  goal: Prove the exact terminal-semicolon implicit-else boundary in the governed
-    Node supplier and explicitly rebind its finite-end contract
-  inputs: []
-  planned_actions:
-  - Implement the bounded task objective
-  impact_scope:
-  - src/aiflow/node_execution.py
-  - src/aiflow/node_verification.py
-  - docs/superpowers/specs/node-v2-installed-lifecycle.md
-  reversibility: reversible
-  verification_methods:
-  - Define and run executable verification
-  external_side_effects: []
-  permission_requirements:
-  - spec_approval
-  - code_approval
-  - action_approval
-  scope:
-    clear: true
-  impact:
-    level: medium
-  protections:
-    dry_run: false
-    verified_backup: false
-  verification:
-    automatic: true
-    tools_missing: false
-  impact_categories:
-  - ci
-  controlled_actions: []
-  business_direction_count: 1
+- business_direction_count: 1
   change_characteristics:
     behavior_changed: true
     code_modified: true
@@ -63,10 +16,57 @@ decision_units:
     interaction_scope: cross_file
     mechanical: false
     regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Prove the exact terminal-semicolon implicit-else boundary in the governed
+    Node supplier and explicitly rebind its finite-end contract
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  impact_scope:
+  - src/aiflow/node_execution.py
+  - src/aiflow/node_verification.py
+  - docs/superpowers/specs/node-v2-installed-lifecycle.md
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0142
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
     integration_required: true
     targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
 frozen_spec_sha256: d64d70971d4e7020b4501f98440014f2eee444653dce0f598902e90abcaf583f
+goal: Prove the exact terminal-semicolon implicit-else boundary in the governed Node
+  supplier and explicitly rebind its finite-end contract
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
 spec_frozen_at: '2026-11-08T14:36:44Z'
+subject_commit: 6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61
+task_id: TASK-0142
+updated_at: '2026-11-08T15:04:50Z'
+worktree_dirty: false
+worktree_dirty_paths: []
