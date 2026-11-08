@@ -56,5 +56,34 @@
     "spec_sha256": "6807c5c917b17b2a1fef36e54434fb56a401f15442161976ff2db5c71a79c2ae",
     "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
     "task_id": "TASK-0142"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-08T18:09:29Z",
+    "base_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit A34 owner approval including768GiB and source3/conditional4; actual independent designREV-0003 APPROVE covers original4200/4500 source timings and preserved closed history.",
+    "schema_version": "1.0",
+    "spec_sha256": "8ca05af6bc495809d3cebde8c141518edabb7655b4443f483fc94a482e6fd35a",
+    "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+    "task_id": "TASK-0142"
+  },
+  {
+    "action_sha256": "1083b892318a0c071cd880dcbdbd1b19f684f022fec80770fd4f814be51cc5fe",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-08T18:11:36Z",
+    "base_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-09T18:11:35.600976+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit owner A34 approval of source3 primary and positive768GiB budget; actual independent design/context and closed A33 counters retained.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8ca05af6bc495809d3cebde8c141518edabb7655b4443f483fc94a482e6fd35a",
+    "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+    "task_id": "TASK-0142"
   }
 ]
