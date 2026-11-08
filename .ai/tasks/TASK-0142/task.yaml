@@ -65,8 +65,8 @@ goal: Prove the exact terminal-semicolon implicit-else boundary in the governed 
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-08T14:36:44Z'
-subject_commit: 6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61
+subject_commit: e585da65ee160b6925421a4b608b21d0ef7efb90
 task_id: TASK-0142
-updated_at: '2026-11-08T15:04:50Z'
+updated_at: '2026-11-08T15:10:17Z'
 worktree_dirty: false
 worktree_dirty_paths: []
