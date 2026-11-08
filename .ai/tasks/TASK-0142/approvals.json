@@ -85,5 +85,21 @@
     "spec_sha256": "8ca05af6bc495809d3cebde8c141518edabb7655b4443f483fc94a482e6fd35a",
     "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
     "task_id": "TASK-0142"
+  },
+  {
+    "action_sha256": "c6488274c19e196b2ed16431f4e5011d7beded1c53e184dbe2f43fef54f9fc6c",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-08T19:25:59Z",
+    "base_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-09T19:25:59.456418+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit owner A34 conditional source4 authorization; complete diagnosis and actual independent recovery APPROVE b3274397, confirmed source3 cleanup/closed history. Same original scope and counters; current independent verifier context and corrected locked environment.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "8ca05af6bc495809d3cebde8c141518edabb7655b4443f483fc94a482e6fd35a",
+    "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+    "task_id": "TASK-0142"
   }
 ]
