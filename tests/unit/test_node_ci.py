@@ -2465,6 +2465,8 @@ def producer_coordination(
         return {"synthetic-tool": tool_ref, "absent": None}
 
     monkeypatch.setattr(node, "_host_tools", host_tools)
+    # This fixture advertises ordinary synthetic tool originals, not OS roles.
+    monkeypatch.setattr(node, "_os_tool_paths", lambda: {})
     pair_materials = {
         "interpreter": {key: dict(tool_ref) for key in ("base_executable", "runtime")}
     }
