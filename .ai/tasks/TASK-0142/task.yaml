@@ -6,7 +6,7 @@ allowed_scope:
 base_commit: 6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61
 branch: codex/agent-bridge-node-ci
 created_at: '2026-11-08T13:40:34Z'
-current_state: IMPLEMENTING
+current_state: WAITING_FOR_SPEC_REVIEW
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -59,14 +59,14 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: d64d70971d4e7020b4501f98440014f2eee444653dce0f598902e90abcaf583f
+frozen_spec_sha256: 6807c5c917b17b2a1fef36e54434fb56a401f15442161976ff2db5c71a79c2ae
 goal: Prove the exact terminal-semicolon implicit-else boundary in the governed Node
   supplier and explicitly rebind its finite-end contract
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-08T14:36:44Z'
-subject_commit: 6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61
+spec_frozen_at: '2026-11-08T15:56:19Z'
+subject_commit: e585da65ee160b6925421a4b608b21d0ef7efb90
 task_id: TASK-0142
-updated_at: '2026-11-08T15:04:50Z'
+updated_at: '2026-11-08T15:56:19Z'
 worktree_dirty: false
 worktree_dirty_paths: []
