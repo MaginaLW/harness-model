@@ -1,0 +1,17 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "decision_unit_id": "DU-001",
+  "target": "TASK-0142",
+  "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+  "classification_input_sha256": "e61aa61c0ce8b915ffb605e32a0af0c7432484c17d91a9efe7da4908215f8448",
+  "parameter_summary": "A33 source primary complete Native V2, fourteen unchanged checks, five fresh baseline/mutant pairs; actual whole verify Job bounded at3000seconds, stricter than grant3600 outer.",
+  "conditions": [
+    "Direct owner A33 grant5588e999c03980424d731b603290821cbd44aadd0d3255db58a1debdcdecd2b8; primary source transaction1of2 maximum. Recovery is a separately numbered diagnosed in-scope successor, never a restart.",
+    "Keep all14 required checks and thresholds85/90; original shared pytest plan remains4200seconds but actual whole verify Job deadline3000seconds enforces stricter A33 shared budget without Policy or runner alteration.",
+    "Existing automatic source mutation recorder only; five fresh pairs, ten children each60seconds, complete originals and confirmed cleanup. No separate duplicate record invocation.",
+    "Actual independent source-map-verifier context0a3c2f68a152acc7bf94ef3000b95ba2382e2b54c05bc21399b5096c288e448a; source-map-author is implementer. All protected spec/classification/action/context exactHEAD/index/worktree committed before execution.",
+    "Failure/unknown cleanup preserves originals and closes primary transaction; only actual A33 diagnosed bounded recovery may follow. No target LOCAL, source publication/CI, privateCI,combined,merge or model/device invocation inside this action."
+  ],
+  "expires_at": "2026-11-09T15:10:16.706031+00:00",
+  "single_use": true
+}
