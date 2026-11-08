@@ -1,4 +1,4 @@
-"""Portable, synthetic data tests for the fixed Node revision-2 report contracts.
+"""Portable synthetic reports and original-file drift checks for Node revision 2.
 
 These tests do not establish producer provenance or execute product acceptance.
 The ordinary execution service binds those inputs and real process originals.
@@ -147,6 +147,138 @@ def test_implicit_parent_ends_use_only_fixed_wire_conventions(null_end: bool) ->
     reports[SOURCE]["branchMap"]["0"]["loc"]["end"]["column"] = end
     expected["files"][SOURCE]["implicit_else"][0]["parent"]["end"]["column"] = end
     assert calculate(reports, sources, expected)["total"]["covered"] == 1
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "    if (Array.isArray(items)) for (const entry of items) if (entry) seen.add(entry);",
+        "    for (const entry of items) if (entry\n      && entry === one) seen.add(entry);",
+    ],
+    ids=["synthetic-nested-for-if", "synthetic-multiline-if"],
+)
+def test_authenticated_terminal_semicolon_end_preserves_report_bytes(body: str) -> None:
+    # Neutral synthetic shapes, not private application source. This pure reader
+    # consumes trusted catalog data; it does not parse TS or prove token identity.
+    reports, sources, expected = coverage_fixture()
+    sources[SOURCE] = ("export function run(enabled: boolean) {\n" + body + "\n}\n").encode()
+    body_lines = body.splitlines()
+    start_column = body_lines[0].index("if (entry")
+    end_line = len(body_lines) + 1
+    end_column = len(body_lines[-1])
+    parent = {
+        "start": {"line": 2, "column": start_column},
+        "end": {"line": end_line, "column": end_column - 1},
+    }
+    report = reports[SOURCE]
+    report["statementMap"]["0"] = deepcopy(parent)
+    report["fnMap"]["0"]["loc"]["end"]["line"] = end_line + 1
+    report["branchMap"]["0"]["loc"] = deepcopy(parent)
+    report["branchMap"]["0"]["locations"] = [deepcopy(parent), {"start": {}, "end": {}}]
+    row = expected["files"][SOURCE]
+    row["sha256"] = hashlib.sha256(sources[SOURCE]).hexdigest()
+    row["implicit_else"] = [
+        {
+            "parent": deepcopy(parent),
+            "locations": deepcopy(report["branchMap"]["0"]["locations"]),
+            "type": "if",
+            "ast_start": deepcopy(parent["start"]),
+            "ast_end": {"line": end_line, "column": end_column},
+        }
+    ]
+    original = deepcopy((reports, sources, expected))
+    result = calculate(reports, sources, expected)
+    assert result["total"] == {"covered": 1, "executable": 1, "threshold": 85}
+    assert result["changed"] == {
+        "covered": 1,
+        "executable": 1,
+        "threshold": 90,
+        "applicability": "applicable",
+    }
+    assert (reports, sources, expected) == original
+
+
+@pytest.mark.parametrize("wrong_end", [")", "x", " "])
+def test_short_finite_end_does_not_accept_non_semicolon(wrong_end: str) -> None:
+    reports, sources, expected = coverage_fixture()
+    sources[SOURCE] = sources[SOURCE].replace(
+        b"execute();\n", b"execute()" + wrong_end.encode() + b"\n"
+    )
+    expected["files"][SOURCE]["sha256"] = hashlib.sha256(sources[SOURCE]).hexdigest()
+    reports[SOURCE]["branchMap"]["0"]["loc"]["end"]["column"] = 24
+    expected["files"][SOURCE]["implicit_else"][0]["parent"]["end"]["column"] = 24
+    with pytest.raises(AiflowError):
+        calculate(reports, sources, expected)
+
+
+@pytest.mark.parametrize("fault", ["two-unit-gap", "different-end-line", "wrong-slot"])
+def test_terminal_semicolon_does_not_broaden_ranges_or_branch_shape(fault: str) -> None:
+    reports, sources, expected = coverage_fixture()
+    reports[SOURCE]["branchMap"]["0"]["loc"]["end"]["column"] = 24
+    certificate = expected["files"][SOURCE]["implicit_else"][0]
+    certificate["parent"]["end"]["column"] = 24
+    if fault == "two-unit-gap":
+        reports[SOURCE]["branchMap"]["0"]["loc"]["end"]["column"] = 23
+        certificate["parent"]["end"]["column"] = 23
+    elif fault == "different-end-line":
+        certificate["ast_end"]["line"] = 1
+    else:
+        certificate["locations"].reverse()
+    with pytest.raises(AiflowError):
+        calculate(reports, sources, expected)
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        '  if (enabled) execute("x;y");',
+        "  if (enabled) execute(/* x;y */);",
+        "  if (enabled) execute(); other();",
+    ],
+    ids=["string-semicolon", "comment-semicolon", "other-statement-semicolon"],
+)
+def test_forged_token_claim_cannot_replace_the_bound_catalog_original(
+    tmp_path: Path, body: str
+) -> None:
+    from aiflow.node_execution import _inventory, _unchanged
+
+    # Token identity belongs to the real Babel producer, not this pure reader.
+    # Even self-consistent forged AST coordinates cannot replace its bound file.
+    _reports, sources, expected = coverage_fixture()
+    sources[SOURCE] = ("export function run(enabled: boolean) {\n" + body + "\n}\n").encode()
+    row = expected["files"][SOURCE]
+    row["sha256"] = hashlib.sha256(sources[SOURCE]).hexdigest()
+    certificate = row["implicit_else"][0]
+    true_end = body.index("; other();") + 1 if "other();" in body else len(body)
+    certificate["ast_end"]["column"] = true_end
+    certificate["parent"]["end"]["column"] = true_end
+    path = tmp_path / "expected-map.json"
+    path.write_bytes(node._node_json(expected))
+    bound = _inventory(tmp_path)
+    forged_end = len(body) if "other();" in body else body.index(";") + 1
+    certificate["ast_end"]["column"] = forged_end
+    certificate["parent"]["end"]["column"] = forged_end - 1
+    path.write_bytes(node._node_json(expected))
+    with pytest.raises(AiflowError) as caught:
+        _unchanged(bound)
+    assert caught.value.code == "NODE_MATERIALS_DRIFT"
+
+
+@pytest.mark.parametrize("level", ["V0", "V1", "V2"])
+def test_finite_end_case_is_bound_in_every_ci_execution_contract(level: str) -> None:
+    from aiflow.node_ci import node_ci_execution_contract
+    from aiflow.node_execution import SEMANTIC_CONTRACT_V2_SHA256
+
+    current = node_ci_execution_contract(level)
+    legacy = deepcopy(current)
+    del legacy["node"]["implicit_else_finite_end"]
+    assert (
+        hashlib.sha256(node._node_json(current["node"])).hexdigest() == SEMANTIC_CONTRACT_V2_SHA256
+    )
+    assert (
+        hashlib.sha256(node._node_json(current)).digest()
+        != hashlib.sha256(node._node_json(legacy)).digest()
+    )
 
 
 def test_revision1_still_rejects_empty_else_without_broadening_its_ranges() -> None:
