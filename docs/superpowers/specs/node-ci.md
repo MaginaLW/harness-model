@@ -149,6 +149,8 @@ RuntimePlatform is:
 
 `head_sha` is the actual declared PR/checkout/execution head. Authenticate provider run/Check head and workflow-code coordinates separately. `GITHUB_SHA` can identify a synthetic merge and is not assumed equal. Status/conclusion/expiry are live authenticated facts, not fields accepted from caller JSON. The producer can authenticate an in-progress identity but cannot certify its future completed Check.
 
+PR and exact-attempt `base.sha` values are matching association snapshots, not the current base-branch tip. Require their same-repository SHA association and matching valid `base.ref`; authenticate that repository's exact `git/ref/heads/<base.ref>` commit, then require the live pull merge reference/PR merge SHA and exactly two merge parents: the authenticated current base tip and the PR head. Reobserve both references before returning and reject drift or unavailable/mismatched facts. This shared rule applies to public engine selection, the target producer and the completed original-host consumer; it adds no caller authority, transport fields or retry permission.
+
 Admission is:
 
 ```text

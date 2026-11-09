@@ -394,6 +394,7 @@ def _endpoints(*, source: bool = False) -> dict[str, str]:
         "workflow": root + "/actions/workflows/" + filename,
         "run": root + "/actions/runs/42/attempts/2",
         "pr": root + "/pulls/7",
+        "base_ref": root + "/git/ref/heads/main",
         "merge_ref": root + "/git/ref/pull/7/merge",
         "merge_commit": root + "/git/commits/" + MERGE,
         "merge_workflow": root + f"/contents/{workflow}?ref={MERGE}",
@@ -440,6 +441,7 @@ def _workflow_transcript(*, completed: bool, source: bool = False) -> dict[str, 
             "base": deepcopy(base),
             "merge_commit_sha": MERGE,
         },
+        "base_ref": {"ref": "refs/heads/main", "object": {"type": "commit", "sha": BASE}},
         "merge_ref": {"ref": "refs/pull/7/merge", "object": {"type": "commit", "sha": MERGE}},
         "merge_commit": {"sha": MERGE, "parents": [{"sha": BASE}, {"sha": HEAD}]},
         "merge_workflow": _blob(WORKFLOW_BYTES),
@@ -504,6 +506,75 @@ def test_workflow_transcript_binds_actual_pr_merge_workflow_attempt_job_and_chec
     assert list(tmp_path.iterdir()) == []
 
 
+@pytest.mark.parametrize("source", [False, True])
+@pytest.mark.parametrize("completed", [False, True])
+def test_workflow_snapshot_base_uses_actual_named_branch_tip_for_merge_parents(
+    monkeypatch: pytest.MonkeyPatch, source: bool, completed: bool
+) -> None:
+    transcript = _workflow_transcript(completed=completed, source=source)
+    endpoints = _endpoints(source=source)
+    actual_tip = "4" * 40
+    branch = "release/maintenance"
+    transcript[endpoints["pr"]]["base"]["ref"] = branch
+    transcript[endpoints["run"]]["pull_requests"][0]["base"]["ref"] = branch
+    base = transcript.pop(endpoints["base_ref"])
+    base["ref"] = "refs/heads/" + branch
+    base["object"]["sha"] = actual_tip
+    base_endpoint = endpoints["base_ref"].removesuffix("main") + branch
+    transcript[base_endpoint] = base
+    transcript[endpoints["merge_commit"]]["parents"] = [{"sha": actual_tip}, {"sha": HEAD}]
+    request = _install_transcript(monkeypatch, transcript)
+    observed = node_ci.authenticate_workflow(
+        1319293089 if source else 42,
+        "MaginaLW/harness-model" if source else REPOSITORY,
+        ".github/workflows/node-engine-artifacts.yml" if source else WORKFLOW,
+        "node-engine-artifacts" if source else "aiflow-node-ci",
+        run_id=42,
+        attempt=2,
+        completed=completed,
+    )
+    assert observed["head_sha"] == HEAD
+    assert transcript[endpoints["pr"]]["base"]["sha"] == BASE != actual_tip
+    assert transcript[endpoints["run"]]["pull_requests"][0]["base"]["sha"] == BASE
+    assert sum(call.args[0] == base_endpoint for call in request.call_args_list) == 2
+    assert sum(call.args[0] == endpoints["merge_ref"] for call in request.call_args_list) == 2
+    assert set(call.args[0] for call in request.call_args_list) == set(transcript)
+
+
+@pytest.mark.parametrize("source", [False, True])
+@pytest.mark.parametrize("moving_ref", ["base_ref", "merge_ref"])
+def test_workflow_rejects_actual_reference_drift_during_authentication(
+    monkeypatch: pytest.MonkeyPatch, source: bool, moving_ref: str
+) -> None:
+    transcript = _workflow_transcript(completed=True, source=source)
+    endpoint_to_move = _endpoints(source=source)[moving_ref]
+    request = _install_transcript(monkeypatch, transcript)
+    stable_get = request.side_effect
+    reads = 0
+
+    def get(endpoint: str, *, paginate: bool = False) -> object:
+        nonlocal reads
+        value = stable_get(endpoint, paginate=paginate)
+        if endpoint == endpoint_to_move:
+            reads += 1
+            if reads == 2:
+                value["object"]["sha"] = "4" * 40
+        return value
+
+    request.side_effect = get
+    with pytest.raises(ContractError, match="reference changed during authentication"):
+        node_ci.authenticate_workflow(
+            1319293089 if source else 42,
+            "MaginaLW/harness-model" if source else REPOSITORY,
+            ".github/workflows/node-engine-artifacts.yml" if source else WORKFLOW,
+            "node-engine-artifacts" if source else "aiflow-node-ci",
+            run_id=42,
+            attempt=2,
+            completed=True,
+        )
+    assert reads == 2
+
+
 @pytest.mark.parametrize(
     "record,path,value",
     [
@@ -519,6 +590,13 @@ def test_workflow_transcript_binds_actual_pr_merge_workflow_attempt_job_and_chec
         ("pr", ("base", "repo", "id"), 99),
         ("pr", ("head", "sha"), BASE),
         ("pr", ("base", "sha"), HEAD),
+        ("pr", ("base", "ref"), "release"),
+        ("pr", ("base", "ref"), "main?ref=foreign"),
+        ("run", ("pull_requests", 0, "base", "ref"), "release"),
+        ("base_ref", ("ref",), "refs/heads/foreign"),
+        ("base_ref", ("object", "type"), "tag"),
+        ("base_ref", ("object", "sha"), "not-a-commit"),
+        ("base_ref", ("object", "sha"), "4" * 40),
         ("pr", ("merge_commit_sha",), HEAD),
         ("merge_ref", ("object", "sha"), HEAD),
         ("merge_commit", ("parents",), [{"sha": BASE}]),
@@ -1766,7 +1844,7 @@ def test_capture_propagates_through_actual_workflow_graph_and_artifact_selectors
     assert (
         node_ci._select_artifact(platform, name="aiflow-node-ci-42-2", _capture=capture)["id"] == 46
     )
-    assert runner.call_count == len(documents)
+    assert runner.call_count == len(documents) + 2
     assert {item["entry"]["endpoint"] for item in capture["observations"]} == set(documents)
     node_ci._write_api_observations(tmp_path, capture)
     node_ci._validate_api_observations(tmp_path)
