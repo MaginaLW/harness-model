@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-09T10:19:57Z",
+    "base_commit": "f4a9844bb3ba53c0c0e058e08374d98ff696ddf9",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit owner A38 source authentication repair; actual independent design REV-0001 APPROVE/no findings, preserve all Native and publication bounds",
+    "schema_version": "1.0",
+    "spec_sha256": "e6542851d716948b3dd13732acb2b1b8071c5c0b497cbeb9a5d68490a49a81c8",
+    "subject_commit": "84a32cf4c526b69de2a1399ded6917e5a11c8175",
+    "task_id": "TASK-0143"
+  }
+]

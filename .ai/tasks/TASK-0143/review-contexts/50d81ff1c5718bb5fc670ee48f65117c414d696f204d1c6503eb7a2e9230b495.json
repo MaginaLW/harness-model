@@ -1,0 +1,35 @@
+{
+  "base_commit": "f4a9844bb3ba53c0c0e058e08374d98ff696ddf9",
+  "branch": "codex/agent-bridge-node-ci",
+  "classification_input_sha256": "1032c86c5d144de1d889d5de748b37c6210ea0eba3d98aceb010763cf3cfd251",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/node_ci.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Authenticate workflow merge parents against the validated current base branch while preserving historical PR and run snapshots",
+        "impact_scope": [
+          "src/aiflow/node_ci.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Authenticate workflow merge parents against the validated current base branch while preserving historical PR and run snapshots",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "50d81ff1c5718bb5fc670ee48f65117c414d696f204d1c6503eb7a2e9230b495",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "e6542851d716948b3dd13732acb2b1b8071c5c0b497cbeb9a5d68490a49a81c8",
+  "task_id": "TASK-0143"
+}
