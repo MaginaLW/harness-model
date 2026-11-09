@@ -1532,6 +1532,8 @@ def authenticate_workflow(
     _capture: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Obtain an actual exact-attempt observation, never authenticate caller JSON."""
+    from aiflow.git_context import _valid_branch
+
     _integer(repository_id, minimum=1)
     _integer(run_id, minimum=1)
     _integer(attempt, minimum=1)
@@ -1608,7 +1610,21 @@ def authenticate_workflow(
         _digest(selected.get("sha"), commit=True)
     if pr["head"]["sha"] != head or pr["head"].get("ref") != run.get("head_branch"):
         raise _error("Actual PR branch/head differs from workflow")
-    merge = _observed_get(f"repos/{full_name}/git/ref/pull/{number}/merge", _capture=_capture)
+    base_branch = _text(pr["base"].get("ref"))
+    if not _valid_branch(base_branch) or base_branch != pulls[0]["base"].get("ref"):
+        raise _error("Actual PR and exact-attempt base branch differ")
+    base_endpoint = f"repos/{full_name}/git/ref/heads/{base_branch}"
+    base = _observed_get(base_endpoint, _capture=_capture)
+    if (
+        not isinstance(base, dict)
+        or base.get("ref") != f"refs/heads/{base_branch}"
+        or base.get("object", {}).get("type") != "commit"
+    ):
+        raise _error("Actual base branch reference is unavailable")
+    # PR/run base.sha values bind their snapshots, not the current branch tip.
+    base_sha = _digest(base["object"].get("sha"), commit=True)
+    merge_endpoint = f"repos/{full_name}/git/ref/pull/{number}/merge"
+    merge = _observed_get(merge_endpoint, _capture=_capture)
     if (
         not isinstance(merge, dict)
         or merge.get("ref") != f"refs/pull/{number}/merge"
@@ -1625,8 +1641,7 @@ def authenticate_workflow(
         or commit.get("sha") != merge_sha
         or not isinstance(parents, list)
         or len(parents) != 2
-        or {parent.get("sha") for parent in parents if isinstance(parent, dict)}
-        != {head, pr["base"]["sha"]}
+        or {parent.get("sha") for parent in parents if isinstance(parent, dict)} != {head, base_sha}
     ):
         raise _error("Workflow merge execution has different parents")
     if run.get("referenced_workflows"):
@@ -1681,6 +1696,11 @@ def authenticate_workflow(
     data = _github_file(full_name, workflow_path, head, _capture=_capture)
     if data != _github_file(full_name, workflow_path, merge_sha, _capture=_capture):
         raise _error("Executed merge workflow differs from declared PR workflow")
+    if (
+        _observed_get(base_endpoint, _capture=_capture) != base
+        or _observed_get(merge_endpoint, _capture=_capture) != merge
+    ):
+        raise _error("Workflow base or merge reference changed during authentication")
     platform = {
         "provider": "github",
         "repository_id": repository_id,
