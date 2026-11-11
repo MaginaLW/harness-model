@@ -5,7 +5,7 @@ allowed_scope:
 base_commit: 6559014be43727a38cf2aaf4ce0a9efe707c217b
 branch: codex/delegation-global-context
 created_at: '2026-11-11T22:55:58Z'
-current_state: IMPLEMENTING
+current_state: FAILED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -55,8 +55,8 @@ goal: Complete delegation policy delivery with read-only Git context that preser
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-11T22:56:34Z'
-subject_commit: 6559014be43727a38cf2aaf4ce0a9efe707c217b
+subject_commit: 26c8adc319b7aeba3ed8a68a601168e9db532e36
 task_id: TASK-0144
-updated_at: '2026-11-11T22:59:41Z'
+updated_at: '2026-11-11T23:16:56Z'
 worktree_dirty: false
 worktree_dirty_paths: []
