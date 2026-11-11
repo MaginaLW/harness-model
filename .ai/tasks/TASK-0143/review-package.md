@@ -22,7 +22,11 @@ AGENTS.md「开发与协作」三条为规范入口，docs/operations/maintenanc
 
 ## 证据
 
-全新独立设计 APPROVE、候选独立预审无发现、git diff --check 与 main 后段/范围条款一致性检查通过。当前 V1 run-20261111T132104658352Z 失败：共享完整 pytest 收集 6511 项，在日志进度 77% 时达到 3000 秒上限，duration_ms=3000141、RUNNER_TIMEOUT；现有输出未观察到失败标记，但未完成项与总覆盖率仍未知，不能记为通过。contract、scope、Ruff、format、smoke、mypy 六项 passed；三项 pytest 投影 timeout，diff coverage 因 coverage database missing 失败。正式 implementation 通过结论、code approval 与 Gate 均未获得；不延长超时、不机械重跑、不借用历史 PASS。原始日志与失败 evidence 保留。子进程三项标准临时变量指向已预检且位于被测 checkout 之外的项目独占目录；原 root staged WIP 保持。未运行真实模型、SDK 审核、native probe、压力测试或外部发布。
+全新独立设计 APPROVE、候选独立预审无发现、git diff --check 与 main 后段/范围条款一致性检查通过。Windows V1 run-20261111T132104658352Z 共享完整 pytest 收集 6511 项，在日志进度 77% 时达到 3000 秒上限，duration_ms=3000141、RUNNER_TIMEOUT；contract、scope、Ruff、format、smoke、mypy 六项 passed，三项 pytest 投影 timeout，diff coverage 因 coverage database missing 失败。Windows 慢因仍 UNKNOWN，原始日志与失败提交保留。
+
+用户授权准备受支持 Linux 环境后，当前同 source、Policy、锁与规格的 Ubuntu ext4 V1 run-20261111T152719013634Z 完整执行 809128ms，未超时，结果为 93 failed、6321 passed、77 skipped、20 errors。contract、scope、Ruff、format、smoke、mypy、diff coverage 七项 passed；三项 pytest 投影失败。首批共同根为原 runner 默认 PATH 先选中经 merged-usr 别名的 Git，严格无链接祖先守卫拒绝该路径；已有原始 trace 与同一真实 Git 二进制的只读路径选择复现，不将各失败数解释为独立缺陷。没有改变源码、守卫、Policy、默认路径或超时，没有把另一诊断 PATH 的成功当作正式验证。
+
+当前正式 implementation 通过结论、code approval 与 Gate 均未获得；两轮失败 evidence、事件与各自 ignored 原始日志保留。后续只在受支持的真实标准环境满足相同守卫后正规恢复，不机械重跑。原 root staged WIP 保持。未运行真实模型、SDK 审核、native probe、压力测试或外部发布。
 
 ## 审核问题
 
