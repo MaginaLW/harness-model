@@ -68,6 +68,25 @@ def test_collect_clean_repository_context(tmp_path: Path) -> None:
     assert context.dirty_paths == ()
 
 
+def test_collect_context_preserves_index_after_tracked_stat_changes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    tracked = repository / "tracked.txt"
+    tracked_stat = tracked.stat()
+    os.utime(tracked, ns=(tracked_stat.st_atime_ns, tracked_stat.st_mtime_ns + 2_000_000_000))
+    monkeypatch.setenv("GIT_OPTIONAL_LOCKS", "1")
+    index = repository / ".git" / "index"
+    before = (index.stat().st_ino, index.stat().st_mtime_ns, index.read_bytes())
+
+    context = collect_git_context(repository)
+
+    assert context.worktree_dirty is False
+    assert context.dirty_paths == ()
+    assert (index.stat().st_ino, index.stat().st_mtime_ns, index.read_bytes()) == before
+    assert os.environ["GIT_OPTIONAL_LOCKS"] == "1"
+
+
 def test_collect_dirty_paths_are_relative_normalized_and_sorted(tmp_path: Path) -> None:
     repository = create_repository(tmp_path / "repository")
     (repository / "tracked.txt").write_text("changed\n", encoding="utf-8")
@@ -199,11 +218,15 @@ def test_production_git_commands_use_fixed_argument_arrays_and_timeout(
     repository = tmp_path / "repository"
     (repository / ".ai").mkdir(parents=True)
     (repository / ".ai" / "repository-id").write_text(f"{REPOSITORY_ID}\n", encoding="utf-8")
+    monkeypatch.setenv("GIT_OPTIONAL_LOCKS", "1")
+    monkeypatch.setenv("AIFLOW_TEST_INHERITED", "preserved")
+    parent_environment = dict(os.environ)
     responses = iter(
         [
             (0, f"{repository}\n".encode()),
             (0, b"# branch.oid " + b"1" * 40 + b"\0# branch.head main\0"),
             (0, b"main\n"),
+            (0, b""),
         ]
     )
     calls: list[tuple[tuple[str, ...], dict[str, Any]]] = []
@@ -216,6 +239,7 @@ def test_production_git_commands_use_fixed_argument_arrays_and_timeout(
     monkeypatch.setattr(git_context.subprocess, "run", fake_run)
 
     collect_git_context(repository)
+    assert git_context._is_ancestor(repository, "1" * 40, "2" * 40)
 
     assert [arguments for arguments, _kwargs in calls] == [
         ("git", "rev-parse", "--show-toplevel"),
@@ -229,10 +253,14 @@ def test_production_git_commands_use_fixed_argument_arrays_and_timeout(
             "--untracked-files=all",
         ),
         ("git", "symbolic-ref", "--short", "-q", "HEAD"),
+        ("git", "merge-base", "--is-ancestor", "1" * 40, "2" * 40),
     ]
     assert all(kwargs["timeout"] == 10 for _arguments, kwargs in calls)
     assert all(kwargs["cwd"] == repository for _arguments, kwargs in calls)
-    assert all("env" not in kwargs and "shell" not in kwargs for _arguments, kwargs in calls)
+    assert all("shell" not in kwargs for _arguments, kwargs in calls)
+    expected_environment = {**parent_environment, "GIT_OPTIONAL_LOCKS": "0"}
+    assert all(kwargs["env"] == expected_environment for _arguments, kwargs in calls)
+    assert dict(os.environ) == parent_environment
 
 
 def _commit_all(repository: Path, message: str) -> None:
@@ -509,7 +537,7 @@ def test_collection_preserves_environment_and_optional_lock_behavior(
 
     def observe(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
         calls.append((arguments, kwargs))
-        assert "env" not in kwargs
+        assert kwargs["env"] == {**os.environ, "GIT_OPTIONAL_LOCKS": "0"}
         assert os.environ["GIT_OPTIONAL_LOCKS"] == "0"
         return original(arguments, **kwargs)
 
@@ -745,7 +773,7 @@ def test_aggregate_failure_replays_original_head_branch_error_priority(
     calls = []
 
     def failed(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
-        assert "env" not in kwargs
+        assert kwargs["env"] == {**os.environ, "GIT_OPTIONAL_LOCKS": "0"}
         calls.append(tuple(arguments[1:]))
         if arguments[1] == "rev-parse" and arguments[2] == "--show-toplevel":
             code, output = 0, str(repository).encode() + b"\n"
