@@ -1,0 +1,68 @@
+allowed_scope:
+- AGENTS.md
+- docs/operations/maintenance-status.md
+base_commit: 39898f30b8914402d737fab9f59bebf8d8656f53
+branch: codex/delegation-global-context
+created_at: '2026-11-11T13:16:57Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: false
+    error_detectability: high
+    interaction_scope: local
+    mechanical: false
+    regression_risk: false
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Align project delegation and staged context guidance with the global working
+    agreement on the complete main baseline
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - AGENTS.md
+  - docs/operations/maintenance-status.md
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0143
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 0e40d6dca284ffc9d3f58b85fec99c516518a9fd9b307d102d4c494555e0ef20
+goal: Align project delegation and staged context guidance with the global working
+  agreement on the complete main baseline
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-11T13:17:37Z'
+subject_commit: 39898f30b8914402d737fab9f59bebf8d8656f53
+task_id: TASK-0143
+updated_at: '2026-11-11T13:19:51Z'
+worktree_dirty: false
+worktree_dirty_paths: []
