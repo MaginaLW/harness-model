@@ -30,7 +30,9 @@ Alpine 3.22.8 原标准环境 V1 run-20261111T161951058402Z 完整执行 925578m
 
 按授权使用同一官方锁定 sdist（SHA256 1cebd1337c242e4ec2293e541f712b2da849b29f48f0c293684b71c0632625d4）和标准隔离 PEP517 默认构建，25.14s 一次成功。Cargo.lock 与官方原件 SHA256 相同；同版本 native wheel SHA256 为 c6830ce73616f428c42583e4125a12dccbad2204cc8ef6da7fa7f641797217dc。其首次消费者因正常 uv 安装附加的可选 uv_build.json 失败；原输出保留在工具记录，不伪造日志或重跑该失败。随后核实 uv 0.12.5 官方全局 --no-installer-metadata，仅通过正常 uv pip install 一次 offline/no-build/no-deps 重装该同哈希 wheel，未重建。9 条 installed RECORD 自洽、8 个 wheel payload 逐字节一致、标准 METADATA/WHEEL/RECORD 保留，真实 rpds 操作、uv lock --check 和 pip check 通过；原失败消费者一次通过（1 passed in 22.86s）。源码、版本与 uv.lock 未变。外部构建缓存保留 sdist、wheel、Cargo.lock、原始构建/安装/消费者日志及摘要，不纳入仓库。
 
-官方接口依据：[uv 0.12.5 全局参数](https://github.com/astral-sh/uv/blob/0.12.5/crates/uv-cli/src/lib.rs#L339-L342)、[可选 installer metadata 与标准 RECORD 分离](https://github.com/astral-sh/uv/blob/0.12.5/crates/uv-install-wheel/src/install.rs#L138-L153)。当前正式 implementation 通过结论、code approval 与 Gate 均未获得；三轮 V1 失败证据、事件、各自原始日志及两次消费者失败输出保留。原 root staged WIP 保持。未运行真实模型、SDK 审核、native probe、压力测试或外部发布。
+同版恢复后的正式 V1 run-20261111T171424393588Z 为 FAIL：pytest exit 1、809086ms、未超时，2 failed、6432 passed、77 skipped，其余七项检查 passed。原 rpds 离线分发消费者本轮不再失败；新失败仅为 test_authority_rejects_drift_before_consumption 的 actor/state 两例在 snapshot_tree 比较中发现 .git/index inode/mtime 元数据变化。只读源码路径在拒绝前调用 Git context 的普通 git status，未显式禁止 Git 官方文档说明的可选 index refresh；本轮没有逐调用 writer trace，具体首个写入调用仍 UNKNOWN。首次 Alpine 同 Git 环境下这两例曾通过，不将新失败归因于编译器安装或 Git 版本变化。没有设置测试专用 flags、修改 Git config、时间戳、inode 或断言，没有重试。完整运行已终止，owned 后代无剩余；保留当前 FAILED 与原始日志。该现有只读契约问题的产品修复超出本次文档范围，尚未实施。
+
+官方接口依据：[uv 0.12.5 全局参数](https://github.com/astral-sh/uv/blob/0.12.5/crates/uv-cli/src/lib.rs#L339-L342)、[可选 installer metadata 与标准 RECORD 分离](https://github.com/astral-sh/uv/blob/0.12.5/crates/uv-install-wheel/src/install.rs#L138-L153)。当前正式 implementation 通过结论、code approval 与 Gate 均未获得；四轮 V1 失败证据、事件、各自原始日志及两次消费者失败输出保留。原 root staged WIP 保持。未运行真实模型、SDK 审核、native probe、压力测试或外部发布。
 
 ## 审核问题
 
