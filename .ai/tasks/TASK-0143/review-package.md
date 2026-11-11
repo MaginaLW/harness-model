@@ -26,7 +26,11 @@ AGENTS.md「开发与协作」三条为规范入口，docs/operations/maintenanc
 
 用户授权准备受支持 Linux 环境后，当前同 source、Policy、锁与规格的 Ubuntu ext4 V1 run-20261111T152719013634Z 完整执行 809128ms，未超时，结果为 93 failed、6321 passed、77 skipped、20 errors。contract、scope、Ruff、format、smoke、mypy、diff coverage 七项 passed；三项 pytest 投影失败。首批共同根为原 runner 默认 PATH 先选中经 merged-usr 别名的 Git，严格无链接祖先守卫拒绝该路径；已有原始 trace 与同一真实 Git 二进制的只读路径选择复现，不将各失败数解释为独立缺陷。没有改变源码、守卫、Policy、默认路径或超时，没有把另一诊断 PATH 的成功当作正式验证。
 
-当前正式 implementation 通过结论、code approval 与 Gate 均未获得；两轮失败 evidence、事件与各自 ignored 原始日志保留。后续只在受支持的真实标准环境满足相同守卫后正规恢复，不机械重跑。原 root staged WIP 保持。未运行真实模型、SDK 审核、native probe、压力测试或外部发布。
+Alpine 3.22.8 原标准环境 V1 run-20261111T161951058402Z 完整执行 925578ms，未超时，结果为 1 failed、6433 passed、77 skipped；其余七项检查 passed。唯一失败为离线分发消费者：官方锁定 rpds-py 2026.6.3 musllinux wheel 的真实 rpds_py.libs/libgcc_s 文件不在既有 fixture 运行时顶层集合内。原 wheel、RECORD、WHEEL 与该轮 ignored 原始日志保留；没有删除库文件、修改 fixture、守卫、Policy 或锁文件。
+
+按授权使用同一官方锁定 sdist（SHA256 1cebd1337c242e4ec2293e541f712b2da849b29f48f0c293684b71c0632625d4）和标准隔离 PEP517 默认构建，25.14s 一次成功。Cargo.lock 与官方原件 SHA256 相同；同版本 native wheel SHA256 为 c6830ce73616f428c42583e4125a12dccbad2204cc8ef6da7fa7f641797217dc。其首次消费者因正常 uv 安装附加的可选 uv_build.json 失败；原输出保留在工具记录，不伪造日志或重跑该失败。随后核实 uv 0.12.5 官方全局 --no-installer-metadata，仅通过正常 uv pip install 一次 offline/no-build/no-deps 重装该同哈希 wheel，未重建。9 条 installed RECORD 自洽、8 个 wheel payload 逐字节一致、标准 METADATA/WHEEL/RECORD 保留，真实 rpds 操作、uv lock --check 和 pip check 通过；原失败消费者一次通过（1 passed in 22.86s）。源码、版本与 uv.lock 未变。外部构建缓存保留 sdist、wheel、Cargo.lock、原始构建/安装/消费者日志及摘要，不纳入仓库。
+
+官方接口依据：[uv 0.12.5 全局参数](https://github.com/astral-sh/uv/blob/0.12.5/crates/uv-cli/src/lib.rs#L339-L342)、[可选 installer metadata 与标准 RECORD 分离](https://github.com/astral-sh/uv/blob/0.12.5/crates/uv-install-wheel/src/install.rs#L138-L153)。当前正式 implementation 通过结论、code approval 与 Gate 均未获得；三轮 V1 失败证据、事件、各自原始日志及两次消费者失败输出保留。原 root staged WIP 保持。未运行真实模型、SDK 审核、native probe、压力测试或外部发布。
 
 ## 审核问题
 
