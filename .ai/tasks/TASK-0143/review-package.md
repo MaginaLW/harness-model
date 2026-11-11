@@ -22,7 +22,7 @@ AGENTS.md「开发与协作」三条为规范入口，docs/operations/maintenanc
 
 ## 证据
 
-全新独立设计 APPROVE、git diff --check 与 main 后段/范围条款一致性检查通过。完整 V1 与正式 implementation 审核、code approval 和 Gate 待推进，实际结论以本任务 evidence/reviews 和 CLI Gate 为准。共享完整 pytest 遵守当前3000秒上限，子进程三项标准临时变量指向已预检且位于被测 checkout 之外的项目独占目录；原 root staged WIP 保持。未运行真实模型、SDK 审核、native probe、压力测试或外部发布。
+全新独立设计 APPROVE、候选独立预审无发现、git diff --check 与 main 后段/范围条款一致性检查通过。当前 V1 run-20261111T132104658352Z 失败：共享完整 pytest 收集 6511 项，在日志进度 77% 时达到 3000 秒上限，duration_ms=3000141、RUNNER_TIMEOUT；现有输出未观察到失败标记，但未完成项与总覆盖率仍未知，不能记为通过。contract、scope、Ruff、format、smoke、mypy 六项 passed；三项 pytest 投影 timeout，diff coverage 因 coverage database missing 失败。正式 implementation 通过结论、code approval 与 Gate 均未获得；不延长超时、不机械重跑、不借用历史 PASS。原始日志与失败 evidence 保留。子进程三项标准临时变量指向已预检且位于被测 checkout 之外的项目独占目录；原 root staged WIP 保持。未运行真实模型、SDK 审核、native probe、压力测试或外部发布。
 
 ## 审核问题
 
