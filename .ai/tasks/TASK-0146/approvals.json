@@ -1,0 +1,15 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-12T05:00:34Z",
+    "base_commit": "a231941b59a021448678e2a77ce46b28062d5dfb",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit owner A48/A03 complete-chain approval; actual independent formal design REV-0001 APPROVE/no findings; one source6 and all original cumulative budgets/stops retained",
+    "schema_version": "1.0",
+    "spec_sha256": "04fbfd12686c9c91e5d935d89aa5d7b8dad2641fbb05dee9e22ebcadcedce81a",
+    "subject_commit": "a231941b59a021448678e2a77ce46b28062d5dfb",
+    "task_id": "TASK-0146"
+  }
+]
