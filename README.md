@@ -1,6 +1,6 @@
 # AI 代码协同系统
 
-一个面向人类、Codex、Claude Code 及其他模型的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
+一个面向人类、Codex 及其他编码助手的可执行协同治理系统。项目通过确定性分流、任务状态机、版本绑定证据和 CI 门禁，让低风险工作可自动推进、高风险工作可审阅且可追踪。
 
 > 当前治理模式：仓库维护模式，task-free 例外已启用。是否需要 task、哪些要求不放松，均以 [AGENTS.md](AGENTS.md) 为唯一权威。
 
@@ -43,7 +43,7 @@
 | 文档 | 用途 |
 |---|---|
 | [Agent 规则](AGENTS.md) | 所有 Agent 的唯一共同权威与维护模式升级清单 |
-| [Claude Code 规则](CLAUDE.md) | Claude Code 平台适配入口 |
+| [AI Flow Skill](.agents/skills/ai-flow/SKILL.md) | Codex 可发现的通用 AI Flow 工作流 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
 | [接入现有 AI 工作流](docs/operations/adoption.md) | 只读盘点、可合并规则和分批推广；区分轻量接入与完整引擎 |
 | [SDK 客户端与跨仓初始化方案](docs/operations/sdk-and-engine-plan.md) | 已交付 SDK 的使用与后续边界，以及已选 agent-bridge 但尚未交付的跨仓初始化方案 |
@@ -70,7 +70,7 @@ Chapters 1–7（工程基线、任务状态、分流与验证、治理交互、
 
 ## 开始参与
 
-1. 先阅读 [AGENTS.md](AGENTS.md)；使用 Claude Code 时，再阅读其[平台适配入口](CLAUDE.md)。
+1. 先阅读 [AGENTS.md](AGENTS.md)；Codex 可按任务需要使用 [AI Flow Skill](.agents/skills/ai-flow/SKILL.md)。
 2. 按 AGENTS.md 的升级清单判断是否需要 task；日常维护按[低干预工作方式](docs/operations/low-intervention.md)推进。
 3. 使用 AI Flow 时，运行 `python -m aiflow --help`，以 CLI、active Policy 与当前 task ledger 的确定性结论为准。
 

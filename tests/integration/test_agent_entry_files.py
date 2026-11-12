@@ -8,7 +8,11 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-ENTRY_FILES = (ROOT / "AGENTS.md", ROOT / "CLAUDE.md", ROOT / "README.md")
+ENTRY_FILES = (
+    ROOT / "AGENTS.md",
+    ROOT / ".agents/skills/ai-flow/SKILL.md",
+    ROOT / "README.md",
+)
 LINK_PATTERN = re.compile(r"\[[^]]+\]\(([^)]+)\)")
 
 
@@ -21,7 +25,7 @@ def test_entry_file_relative_links_exist(entry_file: Path) -> None:
         if "://" in link:
             continue
         target = link.split("#", 1)[0]
-        assert not target or (ROOT / target).exists(), link
+        assert not target or (entry_file.parent / target).exists(), link
 
 
 def test_documented_startup_command_is_available() -> None:

@@ -9,7 +9,7 @@ import yaml
 from aiflow.cli import build_parser
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILL = ROOT / ".claude" / "skills" / "ai-flow" / "SKILL.md"
+SKILL = ROOT / ".agents" / "skills" / "ai-flow" / "SKILL.md"
 COMMAND_PATTERN = re.compile(r"`aiflow\s+([a-z-]+)\b")
 LINK_PATTERN = re.compile(r"\[[^]]+\]\(([^)]+)\)")
 
