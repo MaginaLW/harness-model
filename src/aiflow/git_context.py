@@ -73,6 +73,7 @@ def _run_git(cwd: Path, arguments: tuple[str, ...], *, failure_code: str) -> str
             capture_output=True,
             check=False,
             timeout=GIT_TIMEOUT_SECONDS,
+            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
         )
     except subprocess.TimeoutExpired as error:
         raise _error(
@@ -133,6 +134,7 @@ def _read_branch(repository_root: Path) -> str:
             capture_output=True,
             check=False,
             timeout=GIT_TIMEOUT_SECONDS,
+            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
         )
     except subprocess.TimeoutExpired as error:
         raise _error(
@@ -380,6 +382,7 @@ def _is_ancestor(repository_root: Path, ancestor: str, descendant: str) -> bool:
             capture_output=True,
             check=False,
             timeout=GIT_TIMEOUT_SECONDS,
+            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
         )
     except (OSError, subprocess.TimeoutExpired):
         return False

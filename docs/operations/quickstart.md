@@ -358,6 +358,12 @@ implementation review 或 local code approval。Gate 仍逐项核对这些 curre
 
 需要工作区内落盘时，在运行 CLI 前将这三个标准变量设为同一已预检的项目内目录；不修改系统全局环境。分发测试还要求运行材料位于被测 checkout 之外，可将正式验收的精确 Git clone 与临时根作为同一项目目录内的同级目录。任务、源代码、解释器、验证和原件应属于这个实际验收 clone，不能将别处的 PASS 摘要复制回来充当本地验证。失败原件保留，临时目录传播不改变检查命令、超时、覆盖率阈值或批准要求。
 
+### 严格本地验证的环境适配
+
+当 Windows 完整验证因环境问题失败或超时，先保留该轮原件，再在隔离 Linux 克隆中核对解释器、依赖元数据及路径形状，不将 CI 通过替代本地正式 Gate。TASK-0145 已在 WSL Alpine、CPython 3.11.16 / musl、uv 0.12.5、Git 2.49.1 上完成 6435 passed / 77 skipped 和本地 Gate PASS，证据见 [任务 evidence](../../.ai/tasks/TASK-0145/evidence.json)；这只证明该固定候选及环境可用。
+
+该轮发现 Ubuntu 的 `/bin` 链接与现有严格普通目录守卫冲突，使用 `/bin` 为真实目录的隔离发行版完成验证，没有改写系统目录或放松守卫。锁定的 `rpds-py==2026.6.3` 在 musl 下由官方 sdist 按默认 maturin 流程构建；分发夹具对安装元数据有要求时，使用官方 uv 的 `--no-installer-metadata` 安装同一个构建 wheel，保留构建来源，不手改包、`RECORD`、测试或锁文件。此为该轮已验证的条件与做法，不能推定所有发行版均需要同样处理。
+
 ## 阶段二基线重放
 
 阶段二的入口不是某个历史 task 在当前 `HEAD` 上继续显示 merge-ready，而是

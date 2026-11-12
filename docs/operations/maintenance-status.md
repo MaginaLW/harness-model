@@ -2,15 +2,21 @@
 
 ## 当前状态
 
-更新于 2026-10-31。本节是当前状态的唯一摘要；逐窗口的历史记录见文末指针，旧窗口文字不作为当前指令。
+更新于 2026-11-12。本节是当前状态的唯一摘要；逐窗口的历史记录见文末指针，旧窗口文字不作为当前指令。
 
 **治理模式**：仓库维护模式，task-free 例外已启用；规则以 [AGENTS.md](../../AGENTS.md) 为唯一权威。CI 质量门禁与 `main` 分支保护不放松。
+
+**协作约定**：复杂任务积极委派并按需扩展；并发额度、主 Agent 计数与扩展审批继承全局工作约定，整棵委派树共享且受实际宿主限制。上下文按阶段最小加载，在阶段切换、新证据或冲突时更新；具体规则见 [AGENTS.md](../../AGENTS.md#开发与协作)。
+
+**只读 Git 采集**：上下文与 scope 采集的现有 Git 子进程均局部设置 `GIT_OPTIONAL_LOCKS=0`，避免读取时刷新 index，保留父进程环境、既有错误合同与严格非消费断言。协作规则与修复已由 [PR #151](https://github.com/MaginaLW/harness-model/pull/151) 以 merge commit `663f239b581d2f56552ee5fd620ea6a63236882b` 合入 `main`，TASK-0145 已通过正式 `close` 接口记录为 `MERGED`；TASK-0143/0144 原失败与证据保留，首次 index 写入者仍为 UNKNOWN。
 
 - 常设授权（2026-10-10）按 [AGENTS.md「常设授权」](../../AGENTS.md#常设授权) 执行：限定条件下 Agent 自主推送、开 PR、合并并代为记录批准，其余高风险动作仍逐次决定。
 
 **质量检查**：CI 与原生 V1/V2 的一次完整 pytest 同时收集 `src/aiflow` 和 `tools/analysis` 的分支覆盖率；固定检查器要求两个目录各自达到 85% 总覆盖率和 90% 变更覆盖率，strict mypy 同时检查两者。原生完整 pytest 预算为 4200 秒，完整用例、十四项必需检查、其他超时与失败证据保留要求不变。Policy label 保持 `2.6.0`，但预算内容改变完整 canonical SHA；相同版本、不同 SHA 不等价。新引擎拒绝旧的 1200/3000 秒 Native Policy；升级 wheel 不自动修改目标 `.ai`，旧目标须经受审核的显式更新后再使用新引擎。项目解释器和复算入口见 [Quickstart](quickstart.md#阶段二基线重放)。
 
 **已完成**
+
+- TASK-0145 已由 [PR #151](https://github.com/MaginaLW/harness-model/pull/151) 合并并关闭：继承全局委派额度、按需扩展与阶段上下文更新，并修复只读 Git 查询刷新 index 的问题。独立设计/实现审核均 APPROVE，本地 Gate PASS，10 项必需检查全部通过；完整测试为 6435 passed / 77 skipped / 0 failed。精确 head `30b81700ce7f95dce42cfd428e407b3216b93666` 的 required `ai-quality-gate` 首次执行通过（[run 43124034087](https://github.com/MaginaLW/harness-model/actions/runs/43124034087)，check `130871451070` / app `15368`）；合并父链、树与远端 `main` 已核对。工作流仅在 PR 触发，不声称另有合并后 CI；本次未执行 50 路模型并发实测。原始日志、旧失败和其他工作树 WIP 保持原状，关闭事件见 [TASK-0145](../../.ai/tasks/TASK-0145/events.jsonl)。
 
 - 阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 已于 2026-08-30 完成；源码包收口版本 `0.2.0`，active Policy `2.6.0`（V1/V2 的 pytest 检查共享一次完整覆盖率执行；`impact_scope` 触及治理面的决策单元至少走 REVIEW）。`docs/superpowers/state/*.yaml` 是当时冻结的历史投影，不再更新。
 - 已交付工作及其限制分别见[本地辅助工具](local-tools-closeout-2026-09-22.md)、[自托管执行基础设施](self-hosted-runners.md)（历史试点；runner、诊断与证据移交工具已于 2026-10-10 删除）、[E4 启动前收尾](e4-preflight-closeout-2026-09-23.md)；外仓试点按[按需反馈与回灌](feedback-loop.md)处理，无实质问题即 no-op。

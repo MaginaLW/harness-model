@@ -1,38 +1,35 @@
 allowed_scope:
-- src/aiflow/node_ci.py
-base_commit: f4a9844bb3ba53c0c0e058e08374d98ff696ddf9
-branch: codex/agent-bridge-node-ci
-created_at: '2026-11-09T10:13:00Z'
-current_state: APPROVED_FOR_MERGE
+- AGENTS.md
+- docs/operations/maintenance-status.md
+base_commit: 39898f30b8914402d737fab9f59bebf8d8656f53
+branch: codex/delegation-global-context
+created_at: '2026-11-11T13:16:57Z'
+current_state: FAILED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
     behavior_changed: true
-    code_modified: true
+    code_modified: false
     error_detectability: high
-    interaction_scope: cross_file
+    interaction_scope: local
     mechanical: false
-    regression_risk: true
+    regression_risk: false
   controlled_actions: []
   decision_unit_id: DU-001
-  external_side_effects:
-  - 'Explicit owner A38: bounded source Native verification and ordinary publication
-    to the existing public source PR, preserving originals and all quality gates.
-    Public content contains only code, synthetic tests, generic Norm and ordinary
-    governance.'
-  goal: Authenticate workflow merge parents against the validated current base branch
-    while preserving historical PR and run snapshots
+  external_side_effects: []
+  goal: Align project delegation and staged context guidance with the global working
+    agreement on the complete main baseline
   impact:
     level: medium
   impact_categories:
-  - ci
+  - documentation
   impact_scope:
-  - src/aiflow/node_ci.py
+  - AGENTS.md
+  - docs/operations/maintenance-status.md
   inputs: []
   permission_requirements:
   - spec_approval
   - code_approval
-  - action_approval
   planned_actions:
   - Implement the bounded task objective
   protections:
@@ -49,23 +46,23 @@ decision_units:
   verification_methods:
   - Define and run executable verification
   verification_requirements:
-    acceptance_required: true
-    independent_verifier_required: true
-    integration_required: true
-    targeted_mutation_required: true
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
 forbidden_actions:
 - deploy
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: e6542851d716948b3dd13732acb2b1b8071c5c0b497cbeb9a5d68490a49a81c8
-goal: Authenticate workflow merge parents against the validated current base branch
-  while preserving historical PR and run snapshots
+frozen_spec_sha256: 0e40d6dca284ffc9d3f58b85fec99c516518a9fd9b307d102d4c494555e0ef20
+goal: Align project delegation and staged context guidance with the global working
+  agreement on the complete main baseline
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-09T10:13:03Z'
-subject_commit: 84a32cf4c526b69de2a1399ded6917e5a11c8175
+spec_frozen_at: '2026-11-11T13:17:37Z'
+subject_commit: 82758f11b71072b666d417a212d584c73725608f
 task_id: TASK-0143
-updated_at: '2026-11-09T12:08:12Z'
+updated_at: '2026-11-11T17:27:57Z'
 worktree_dirty: false
 worktree_dirty_paths: []

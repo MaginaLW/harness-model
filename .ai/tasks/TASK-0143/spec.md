@@ -1,28 +1,33 @@
-# Authenticate PR merge parents against the actual base branch
+# Task Specification
 
 ## 目标
-Repair the demonstrated distinction between a historical PR/run base SHA snapshot and the live base branch tip. Authenticate an actual merge execution using the validated current base ref and retain strict source/target workflow provenance. Complete the same governed software integration without claiming production or device effectiveness.
+
+在完整 main 基线上，使项目协作入口积极委派可独立工作并按需扩展，继承全局并发额度与审批约定，按阶段更新最小必要上下文。
 
 ## 范围
-Apply only the reviewed node_ci.authenticate_workflow correction, directly affected synthetic platform regressions and Node CI Norm clarification. Preserve the existing PR/run historical snapshot SHA association, repository identities, head/branch/attempt/workflow/job/Check/App assertions, closed platform fields, API receipts/capture caps, roles, wire version, dependencies, Policy and all quality thresholds. Validate shared base.ref using the existing branch validator; query the repository heads ref; require merge parents to equal actual tip plus head; re-read base and merge refs before returning and reject drift. Shared source and target, in-progress and completed paths use this same function.
 
-Use the complete published source history at884b5d6905de8a85af699692d6a8c7ad46669cc9 as the unchanged source baseline. Actual fresh task IDs and protected facts are allocated and bound by the public lifecycle, not invented in this specification. Preserve every earlier task/proof; an old successful original is not relabelled failed. Candidate preparation is not authority; execution requires a separately recorded explicit A38 grant.
+仅修改 AGENTS.md「开发与协作」的计划、委派和上下文三条，以及 docs/operations/maintenance-status.md 的既有当前状态简记；治理记录只追加本任务目录。完整 base 为 39898f30b8914402d737fab9f59bebf8d8656f53，使用 app 隔离工作树与对应锁文件环境。原 TASK-0142 与首次失败原件留在原隔离根，不恢复旧轮、不复制旧批准，也不带入原工作树的 staged WIP。
 
-Public changes contain only implementation, synthetic fixtures, generic Norm and their ordinary governance. No real private CI logs, private commit identifiers, credentials or local absolute paths are included in public source. No application, platform setting, credential, permission or workflow change is included.
+## 非目标
+
+不修改常设授权、Policy、CI、代码、模型选择、宿主限制或已有范围控制条款；不在项目复制全局并发数字；不启动真实模型、SDK 审核、native probe 或压力测试。外部发布与合并由主会话在完整交付核验后按既有授权统一处理，本子任务暂不执行。
 
 ## 验收条件
-1. Independent design/spec approval, real distinct verifier context saved and read back before fresh mutation inputs, one single-use approved action per actually admitted source round, exact protected inputs committed before proof baseline. Preserve historical originals, no later subject rebind.
-2. Meaningful synthetic regression accepts a stale PR/run snapshot with correct actual base-ref merge parents, across source/target and running/completed contexts. Reject mismatched refs, wrong actual tips or parents, and base/merge drift. Source must not substitute private observations into public fixtures.
-3. Keep all14 source checks, complete current source suite,85% total and90% applicable diff coverage, five fresh killed mutation pairs and confirmed real ownership/cleanup. No waived check or lowered threshold. Use the ordinary locked isolated development environment and existing source Native protocol; no shared editable environment is passed off as an installed consumer.
-4. At most one primary source Native and one diagnosed same-scope conditional recovery under A38. Each record <=1200seconds; Native shared execution budget <=5100seconds and verify outer supervisor <=5400seconds, with all existing individual fixed mutation limits preserved. Unknown cause/cleanup or out-of-scope repair stops the affected chain. Complete source success includes same-head required CI and usable authenticated source originals, closing unused recovery.
-5. Ordinary nonforce publication only to the existing authorized source PR branch, maximum2 new pushes. Existing quality and engine-artifact workflows each maximum2 new attempts including retries, existing90/15minute job limits and14day artifact retention. Source code changes require fresh applicable Native proof before publication; a diagnosed same-head infrastructure retry consumes a workflow slot. No additional source round starts when remaining publication/CI slots cannot finish its cycle.
-6. All three actual rebuilt tier contracts and actual direct/sdist/rebuilt source artifact facts are revalidated. Existing execution-contract bytes have no platform-authentication field, so do not fabricate a version, digest field or tier change; new actual wheel/artifact identities and the explicit revised Norm carry the authenticated code change. Only a fresh qualified source tuple may feed the subsequent target acceptance.
+
+1. 复杂任务必要摸底后积极委派独立工作，按实际交付收益、独立工作量及资源调整和扩展；简单或强依赖步骤不为凑并行而拆分。
+2. 并发额度、主 Agent 计数及扩展审批继承当前全局工作约定，整棵委派树共享，并受当前会话和宿主实际限制；删除旧项目固定十个含主的文字。
+3. 入口保留关键规则和导航；阶段切换、关键新证据或冲突时更新相关上下文、假设、限制与待办，复用已核实且未变化的材料。
+4. AGENTS 从当前治理模式标题起后全文保持完整 main 原样；现有范围控制条款不变。独立 design/implementation 审核通过，按真实行为改变事实分类 REVIEW/V1，现行 Policy 的完整 verify 与 Gate 通过；git diff --check 通过，原 root WIP 保留。
+5. 按当前 Quickstart 准备独占临时根：同项目已授权 ignored build 中的精确任务目录位于被测 checkout 之外，三项子进程 TEMP/TMP/TMPDIR 指向同一已预检目录；不改全局环境或 Codex 自管父目录。对应 Policy 的共享完整 pytest 只运行一次，3000 秒上限不变，保留原始失败和日志。
 
 ## 禁止动作
-No threshold/check reduction, permission/dependency/Policy/schema/wire/role/cap expansion, model/SDK/Grok/device/F1/production activation, newlogin or credential export, billing/platform setting change, force/rebase/history rewrite, old root/raw deletion, PR retarget/closure/merge or extra Native/CI/publication slot. Do not use a PR-cache workaround or claim that HTTP504 repair alone fixes merge authentication.
+
+不得修改授权段、Policy、CI、源码或其他任务历史；不得借用 WIP 或历史 PASS 代替本次验证；不得运行真实模型、SDK 审核、native probe、压力测试、部署、删除数据、导出凭据或付费调用。本子任务暂不 push/merge，不自设额外永久交付禁令。
 
 ## 错误行为
-Preserve every real failure and stop that round. The conditional recovery is not a blind retry: require a diagnosed direct same-scope correction, confirmed cleanup, affected independent APPROVE and all remaining budgets. Preparation and observations do not grant execution. New source success is not by itself a target LOCAL, private CI or original-host combined acceptance. Keep UNKNOWN evidence explicit.
+
+范围或风险事实变化、门禁失败或独立审核发现缺陷时保留证据并按当前 CLI 修复；重复同因失败无新证据停止相关路径，不降低分类或门禁，不重写历史。必要方向决定或授权缺失只暂停受影响动作。
 
 ## 回滚
-Retain full history and all old and new proof originals. An ordinary reviewed revert is the reversible code option; no automatic remote rollback or history rewrite. A failed bounded chain remains unfinished and does not reopen spent rounds.
+
+本任务在独立隔离分支，可通过后续普通恢复提交撤回协作规则与状态简记；追加式治理记录、首次失败分支和原始日志保留，不改写已发布历史。

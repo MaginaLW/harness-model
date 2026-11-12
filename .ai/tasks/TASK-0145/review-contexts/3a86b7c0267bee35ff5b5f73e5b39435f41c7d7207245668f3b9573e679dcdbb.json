@@ -1,0 +1,177 @@
+{
+  "base_commit": "12f15a3b7feaf365cf60d019a1b0417ce27407cf",
+  "branch": "codex/delegation-global-context",
+  "classification_input_sha256": "1e02f984f0f3fce1e50f37ccd71ebf32534c37c610e21818908703e8124b968e",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/scope.py",
+      "tests/unit/test_scope.py",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Complete delegation policy delivery with read-only Git context and scope collection",
+        "impact_scope": [
+          "src/aiflow/scope.py",
+          "tests/unit/test_scope.py",
+          "docs/operations/maintenance-status.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0145/approvals.json",
+        ".ai/tasks/TASK-0145/classification.json",
+        ".ai/tasks/TASK-0145/events.jsonl",
+        ".ai/tasks/TASK-0145/review-contexts/49242714f4285726e3e73666ec6aa12c66963611f58114ed584f15fe1473d9fd.json",
+        ".ai/tasks/TASK-0145/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0145/spec.md",
+        ".ai/tasks/TASK-0145/task.yaml",
+        "docs/operations/maintenance-status.md",
+        "src/aiflow/scope.py",
+        "tests/unit/test_scope.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0145/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0145/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0145/events.jsonl"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0145/review-contexts/49242714f4285726e3e73666ec6aa12c66963611f58114ed584f15fe1473d9fd.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0145/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 34,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0145/spec.md"
+        },
+        {
+          "additions": 60,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0145/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/scope.py"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_scope.py"
+        }
+      ],
+      "totals": {
+        "additions": 242,
+        "deletions": 3,
+        "files": 10
+      }
+    },
+    "goal": "Complete delegation policy delivery with read-only Git context and scope collection",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0145",
+        "--actor",
+        "delegation-scope-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "3a86b7c0267bee35ff5b5f73e5b39435f41c7d7207245668f3b9573e679dcdbb",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "4e2f1475dde41e069f4ffe375d1c0aee235f36d18d666c1060f04bd20b5d1704",
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "1bfb86a73aa37f94dcc5e9c695b0eae501e96b17d899dd4f9ad34b5920b2ef53",
+  "subject_commit": "8150fea295e246f6b9d41b4ba7fe495660c34324",
+  "task_id": "TASK-0145"
+}
