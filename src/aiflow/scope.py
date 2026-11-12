@@ -215,7 +215,7 @@ def assess_auto_scope(
 def _run_git(root: Path, arguments: Sequence[str]) -> bytes:
     try:
         result = subprocess.run(
-            ["git", *arguments],
+            ["git", "--no-optional-locks", *arguments],
             cwd=root,
             capture_output=True,
             check=False,

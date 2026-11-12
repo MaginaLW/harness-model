@@ -1,0 +1,22 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "4e9b3541a57db20bc61bc8c618ec906dacd1352a7f6ebcf04d5901ab411b1fc2",
+  "conditions": [
+    "Actual A22 owner authorization 89ae8b6d81fdf13c32baca0935e14ae57ac10ef34f8df829981f175bf5586b2d;proposal cb281f9deb5d1e083bc7ce26cfc2bcf699d9fed7e8308b9f485e020cc82e0625.",
+    "Once-only10800-second activation 89e106a1a2428f6f05b59c3787beaad4bb753697b592c1540c2d7c10c030937f;no reset;full launch remaining>=6300.",
+    "Exact current candidate 8f6d1dcd76af5e84e4d17ffd605c8fa3cbdccf04c39b4c563ce1a0de8d2a542c and public verifier context 57f0f9c4501b886751e1a1eae288737c1ee2f4eb46014eb6a4780836cc1ee0dc.",
+    "Tests-only production equivalence c7a609c69b7084fa298c88353b4f615be0d149f426bce1895e637cc67cd55258;oldF6/capacity retain true8c/68c origins;capacity approval b141a22bf876cbda147984a5110079bc9bf1e2ff7147de7490ae2491abaa11b4.",
+    "All14checks,both85total/90completeoriginal-base diff with branch coverage,all oldcases plus eight new,strictmypy/whitespace/Ruff/format,and five original native mutations.",
+    "Actual same sealed verifier worker for full/final/Gate;current snapshot independent implementationAPPROVE then final/code/Gate;no extra full for mechanical closeout.",
+    "Retain all failed originals/time/material reservations;old256GiB plus new64GiB,total320GiB343597383680bytes;positive growth,no negative or dedup credit.",
+    "Reuse original37dependencyenvironment,F6ordinary/capacity/affectedtests and actualR5OSproof;no new environment,ordinaryset,capacitykernel or probe.",
+    "Any actual native9 full failure/interruption ends this sole new slot;no retry under old grants.",
+    "No a4write,publication,push,PR,merge,remoteCI,privatetransfer,paid/production,realmodelSDKGrokWeChat,credentials,ACL,executionpolicy,service,settings,deletion/reset/rebase/force/historyrewrite."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-07T05:50:18.145513+00:00",
+  "parameter_summary": "A22 sole new native9 complete V2 for exact eight-case tests-only repair;A14-campaign invocation4/grant1;unchanged14checks,4200pytest/4500outer,85/90original-base and five native mutation groups.",
+  "single_use": true,
+  "subject_commit": "2b0125494b18148300955cc3bfead00a45ceadd0",
+  "target": "TASK-0138"
+}

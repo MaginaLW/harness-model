@@ -1,0 +1,18 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0143",
+  "decision_unit_id": "DU-001",
+  "subject_commit": "84a32cf4c526b69de2a1399ded6917e5a11c8175",
+  "classification_input_sha256": "1032c86c5d144de1d889d5de748b37c6210ea0eba3d98aceb010763cf3cfd251",
+  "parameter_summary": "Explicit owner A38 source5 primary: all14 Native V2 checks, complete current suite, shared5100/nonrecordouter5400/completeCLI6600seconds, five fresh mutation pairs with original children limits, record1200/watchdog1199; no automatic restart of this transaction.",
+  "conditions": [
+    "Explicit owner A38 grant b00604096166fc1adb5024a787bb63fea02777ca685c63ecb9352c133fbeb75f; source5 is a new transaction, four historical rounds stay closed and preserved. Conditional source6 has separate diagnosis, cleanup and independent review requirements, never an automatic restart.",
+    "Current independently reviewed source base-ref authentication correction only. Source task base f4a9844bb3ba53c0c0e058e08374d98ff696ddf9 includes separately committed regression and generic Norm; actual subject84a32cf4c526b69de2a1399ded6917e5a11c8175 and frozen specification stay bound. Public content contains no private originals.",
+    "Independent source-map-verifier context 632d8cbca67c286342425bb66522ba888f41aacd018078023b01d28572df8c25 saved and read back before this action and any Native mutation inputs. Implementer remains source-base-ref-author. Commit exact spec/classification/action/context raw HEAD/index/worktree before proof baseline.",
+    "Use fixed source-checkout-base-ref/source-base-ref/source-runtime-base-ref and ordinary attributed s5t inside the same full64GiB source5 envelope; offline hash-locked no-compile development dependencies and pinned existing native Git. No Policy, dependency, permission or test/coverage threshold change.",
+    "Retain all14 checks/full suite/85total and90applicable diff/fivefreshkilledpairs/real ownership and confirmed cleanup. Shared execution5100seconds, nonrecordverify5400, complete CLI6600, automatic record1199 watchdog within1200, original individual product limits remain. Failure or unknown cleanup closes this round.",
+    "Retain all old positive charges and UNKNOWN history. Full A38 positive960836878848bytes below896GiB; no refund/counter/wait reset. This action only authorizes source Native, not publication, CI, target execution, merge, credential, model, device or production operations."
+  ],
+  "expires_at": "2026-11-10T10:29:30.090575+00:00",
+  "single_use": true
+}

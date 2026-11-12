@@ -7,9 +7,11 @@ complete target lifecycle. The parent runner binds copies, imports and reports.
 from __future__ import annotations
 
 import ast
+import hashlib
 import inspect
+import json
 import traceback
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from contextlib import ExitStack
 from copy import deepcopy
 from importlib.resources import files
@@ -609,3 +611,48 @@ def run_probe(probe_id: str) -> dict[str, object]:
         "cases": [_run_case(probe_id, case_id) for case_id, _observed in CASE_SPECS[probe_id]],
         "terminal": "complete",
     }
+
+
+def validate_probe_contract(contract: Mapping[str, Any], source: bytes) -> None:
+    """Check retained assertion coordinates and observations without importing a copy."""
+
+    def invalid() -> ContractError:
+        return ContractError(
+            "Retained installed probe contract differs from the fixed detectors",
+            code="INSTALLED_MUTATION_INVALID",
+        )
+
+    if set(contract) != {"protocol", "source", "cases", "mutant_observations", "anchors"}:
+        raise invalid()
+    original = contract["source"]
+    if (
+        not isinstance(original, dict)
+        or set(original) != {"path", "size", "sha256", "identity"}
+        or type(original["size"]) is not int
+        or original["size"] != len(source)
+        or original["sha256"] != hashlib.sha256(source).hexdigest()
+        or contract["protocol"] != PROTOCOL
+    ):
+        raise invalid()
+    for observed, expected in (
+        (contract["cases"], CASE_SPECS),
+        (contract["mutant_observations"], MUTANT_OBSERVATIONS),
+    ):
+        if json.dumps(observed, sort_keys=True, allow_nan=False) != json.dumps(
+            expected, sort_keys=True, allow_nan=False
+        ):
+            raise invalid()
+    tree = ast.parse(source)
+    anchors = {}
+    for probe_id, name in ASSERTION_ANCHORS.items():
+        functions = [
+            item for item in tree.body if isinstance(item, ast.FunctionDef) and item.name == name
+        ]
+        if len(functions) != 1:
+            raise invalid()
+        assertions = [item for item in ast.walk(functions[0]) if isinstance(item, ast.Assert)]
+        if len(assertions) != 1:
+            raise invalid()
+        anchors[probe_id] = {"function": name, "line": assertions[0].lineno}
+    if contract["anchors"] != anchors:
+        raise invalid()

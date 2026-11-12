@@ -1,0 +1,18 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0142",
+  "decision_unit_id": "DU-001",
+  "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+  "classification_input_sha256": "94fcf5b21f3afe07a8a6715c02f7343be02e3b6935116c8911f867684915c225",
+  "parameter_summary": "A34 source4 conditional recovery after independently diagnosed source3 environment failure and confirmed cleanup; all14 Native V2 checks, shared4200/outer4500seconds, five fresh mutation pairs/ten60second children, automatic recorder1200seconds. Final source transaction4of4; no automatic retry.",
+  "conditions": [
+    "Explicit owner A34 grant792451718ed490b4273a151a5a54a0c9f35410c8becb7414322a3b9137febc30; separately numbered source4of4 after source3 FAILED and consumed action1083b892318a0c071cd880dcbdbd1b19f684f022fec80770fd4f814be51cc5fe. All source1/2/3 originals and full history remain closed and preserved. Affected recovery reviewb3274397b360aabc39de3e8b58a58c65e168eb4dd4e63e2f1ebcb38c1ddbd288 is APPROVE with no open findings.",
+    "Unchanged frozen spec8ca05af6bc495809d3cebde8c141518edabb7655b4443f483fc94a482e6fd35a, original6b5base and actuale585subject/classification. Independent source-map-verifier freshly rebuilt/saved/read back current context54baf645a4c46fafd63f159d4986931fa9c2b146423b52cadc415e5eac77fc12 in the fixed source4 root; source-map-author remains implementer.",
+    "Same reviewed four-file product/Norm/test candidate, no spec/subject/Policy change. Correct only diagnosed environment preparation: same hash-locked35 distributions installed --no-compile; existing external native11 Git with verified SHA20d0dde30a65afb6e5810a883700a94dcd77fbf3b44b32868d45bf7c9b30137c; ordinary attributed build/co/campaign/s4t for source4 TEMP/TMP/TMPDIR. Actual seven installed dependency RECORD closures checked. No product guard, test selection, global setting, alias or prefix workaround.",
+    "Use fixed source-checkout-finite-end-75m-recovery, source-finite-end-75m-recovery and source-runtime-finite-end-75m-recovery, plus explicitly attributed s4t charged together inside original source4 full64GiB envelope. Preserve full positive819102958080bytes against owner-approved768GiB, no refund. Target32GiB/US3 and all publication/CI/target counters unchanged.",
+    "Preserve every14check, full shared pytest4200seconds, whole owned WindowsJob4500seconds, automatic record watchdog1199seconds within1200, ten mutation children60seconds, total85/diff90. No partial verification, separate duplicate record or retry. New source4 failure or unknown cleanup closes remaining source execution.",
+    "Commit exact spec/classification/this action/verifiercontext HEAD/index/worktree before any mutation baseline. Authoritative fresh native-host visibility/exclusivity and current positive material admission including all four source4 scopes required. Original resource wait carries1792.4120992seconds spent,3607.5879008remaining; no reset or termination of other tasks. This action does not push, invoke CI/target LOCAL/private/combined, merge, alter settings/credentials or call models/SDK/devices."
+  ],
+  "expires_at": "2026-11-09T19:25:59.456418+00:00",
+  "single_use": true
+}

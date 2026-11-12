@@ -1077,9 +1077,61 @@ def verify_task(
     reason: str | None = None,
     node_materials_sha256: str | None = None,
     node_installed_mutation_run: str | None = None,
+    node_ci: bool = False,
+    node_ci_payload: Path | None = None,
     version_probe: VersionProbe = _default_version_probe,
 ) -> VerifyResult:
     """Execute one governed local verification or read-only CI attestation."""
+    if node_ci or node_ci_payload is not None:
+        # This disjoint mode must dispatch before any local recovery, transition,
+        # finalization, or installed-action consumer can run.
+        if (
+            node_ci is not True
+            or ci is not True
+            or node_ci_payload is None
+            or ci_run_dir is None
+            or output is None
+            or actor is not None
+            or check_ids
+            or provisional
+            or run_id is not None
+            or finalize
+            or abandon
+            or reason is not None
+            or node_materials_sha256 is not None
+            or node_installed_mutation_run is not None
+        ):
+            raise ContractError(
+                "Node CI requires its complete explicit producer mode",
+                code="NODE_CI_MODE_INVALID",
+            )
+        root = repository_root.resolve()
+        bundle = _verification_policy(root)
+        if not is_node_policy(bundle) or bundle.policy_version != "3.2.0":
+            raise ContractError(
+                "Node CI requires the revision2 Node policy", code="NODE_CI_PROFILE_INVALID"
+            )
+        from aiflow.node_ci import verify_node_ci
+
+        evidence = verify_node_ci(
+            root,
+            task_id,
+            run_dir=ci_run_dir,
+            output=output,
+            payload_root=node_ci_payload,
+        )
+        conclusion = evidence.get("conclusion")
+        if conclusion not in {"passed", "failed"}:
+            raise ContractError(
+                "Node CI returned an invalid conclusion", code="NODE_CI_EVIDENCE_INVALID"
+            )
+        return VerifyResult(
+            task_id,
+            cast(Literal["passed", "failed"], conclusion),
+            None,
+            output.resolve(),
+            () if conclusion == "passed" else ("NODE_CI_VERIFICATION_FAILED",),
+        )
     root = repository_root.resolve()
     if node_installed_mutation_run is not None:
         if (

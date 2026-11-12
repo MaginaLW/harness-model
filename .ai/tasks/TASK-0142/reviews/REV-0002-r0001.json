@@ -1,0 +1,13 @@
+{
+  "context_sha256": "b76d0af8a3a27e5a97577e01bdd473dbe9fd0896eebdfb3eb68674c9e57b4f0a",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-08T15:59:35.503951+00:00",
+  "review_id": "REV-0002",
+  "review_stage": "design",
+  "reviewer": "source-map-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent affected design re-review APPROVE for the newly frozen specification. Added acceptance clause8 corrects actual host admission and recovery binding: native-host visibility is required, a sandbox empty census cannot establish exclusivity, other tasks are never termination targets, the original cumulative90-minute wait remains, the closed primary remains consumed, and source2 needs its distinct root/runtime, newly reviewed spec/context and new action while preserving the unused primary action/originals. Four product candidate files are byte-identical to the earlier reviewed primary; prior terminal-semicolon/Norm/semantic/trust-boundary review is reused. Original6b5 base,14 checks,85/90 and all owner counters/caps remain. The recovered history is an ordinary merge with the complete primary closeout as ancestor and its event bytes preserved as a prefix. Public spec_changed escalation/resolution/reclassification/refreeze binds the real changed requirement rather than fabricated code or subject. No new product case, permission, budget, runtime PASS or source2 launch readiness is asserted.",
+  "task_id": "TASK-0142"
+}

@@ -1,0 +1,151 @@
+name: node-engine-artifacts
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  node-engine-artifacts:
+    name: node-engine-artifacts
+    if: >-
+      github.repository_id == '1319293089' &&
+      github.repository == 'MaginaLW/harness-model' &&
+      github.event.pull_request.head.repo.id == github.event.repository.id
+    runs-on: windows-2025
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ${{ github.workspace }}
+    env:
+      TEMP: ${{ github.workspace }}/.tmp
+      TMP: ${{ github.workspace }}/.tmp
+      TMPDIR: ${{ github.workspace }}/.tmp
+      HOME: ${{ github.workspace }}/home
+      USERPROFILE: ${{ github.workspace }}/home
+      APPDATA: ${{ github.workspace }}/home/appdata
+      LOCALAPPDATA: ${{ github.workspace }}/home/local
+      XDG_CACHE_HOME: ${{ github.workspace }}/cache
+      UV_CACHE_DIR: ${{ github.workspace }}/cache/uv
+      UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/tools/build-env
+      UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}/tools/python
+      UV_TOOL_DIR: ${{ github.workspace }}/tools/uv-tools
+      UV_TOOL_BIN_DIR: ${{ github.workspace }}/tools/uv-bin
+      UV_PYTHON_DOWNLOADS: never
+      GH_CONFIG_DIR: ${{ github.workspace }}/home/gh
+      AIFLOW_GH_EXE: ${{ github.workspace }}/tools/gh/bin/gh.exe
+      PYTHONDONTWRITEBYTECODE: "1"
+      PIP_CONFIG_FILE: NUL
+      GIT_CONFIG_GLOBAL: NUL
+      GIT_CONFIG_NOSYSTEM: "1"
+      GIT_OPTIONAL_LOCKS: "0"
+      GIT_TERMINAL_PROMPT: "0"
+    steps:
+      - name: Establish owned workspace and actual Windows host
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $os = Get-CimInstance Win32_OperatingSystem
+          if ($os.Caption -notmatch 'Windows Server 2025' -or $os.BuildNumber -ne '26100' -or
+              -not [Environment]::Is64BitOperatingSystem) {
+            throw 'Unsupported actual Windows host'
+          }
+          foreach ($relative in @('.tmp/node-ci', 'home/appdata', 'home/local', 'home/gh',
+              'cache/uv', 'tools/uv', 'tools/gh', 'tools/python', 'tools/uv-tools', 'tools/uv-bin')) {
+            New-Item -ItemType Directory -Path (Join-Path $env:GITHUB_WORKSPACE $relative) -Force | Out-Null
+          }
+          & py.exe -3.11 -I -B -c "import struct,sys; assert sys.platform == 'win32' and sys.version_info[:2] == (3,11) and struct.calcsize('P') == 8"
+          if ($LASTEXITCODE -ne 0) { throw 'Approved preinstalled CPython 3.11 x64 unavailable' }
+      - uses: actions/checkout@v7
+        with:
+          path: source
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+          set-safe-directory: false
+      - name: Attach exact PR branch without stored credentials
+        env:
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        working-directory: ${{ github.workspace }}/source
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & git check-ref-format --branch $env:PR_HEAD_REF
+          if ($LASTEXITCODE -ne 0) { throw 'Invalid PR branch' }
+          if ((& git rev-parse HEAD) -ne $env:PR_HEAD_SHA) { throw 'Checkout head mismatch' }
+          & git switch --create $env:PR_HEAD_REF $env:PR_HEAD_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Could not attach exact PR branch' }
+          if ((& git symbolic-ref --short HEAD) -ne $env:PR_HEAD_REF) { throw 'Attached branch mismatch' }
+          if ((& git rev-parse HEAD) -ne $env:PR_HEAD_SHA) { throw 'Attached head mismatch' }
+          & git config --local --name-only --get-regexp '^http\..*\.extraheader$'
+          if ($LASTEXITCODE -ne 1) { throw 'Unexpected stored Git authentication header' }
+          exit 0
+      - name: Provision the fixed official uv in the owned tools root
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $name = 'uv-x86_64-pc-windows-msvc.zip'
+          $release = 'https://github.com/astral-sh/uv/releases/download/0.12.5/'
+          $archive = Join-Path $env:GITHUB_WORKSPACE ".tmp/$name"
+          $checksums = Join-Path $env:GITHUB_WORKSPACE '.tmp/uv-0.12.5.sha256'
+          & curl.exe --fail --silent --show-error --location --max-redirs 3 --max-time 120 --max-filesize 67108864 --output $archive "$release$name"
+          if ($LASTEXITCODE -ne 0) { throw 'Official uv download failed' }
+          & curl.exe --fail --silent --show-error --location --max-redirs 3 --max-time 60 --max-filesize 4096 --output $checksums "$release$name.sha256"
+          if ($LASTEXITCODE -ne 0) { throw 'Official uv checksum download failed' }
+          $line = (Get-Content -LiteralPath $checksums -Raw).Trim()
+          $expected = '4c4d49d8738847d9b71ba319e49a5688c93eac0fe6204b1df24e98528dddf39a'
+          if ($line -notmatch "^[0-9a-f]{64} \*$([regex]::Escape($name))$" -or
+              $line.Substring(0, 64) -ne $expected -or
+              (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) {
+            throw 'Official uv archive integrity mismatch'
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath "$env:GITHUB_WORKSPACE/tools/uv"
+          $version = (& "$env:GITHUB_WORKSPACE/tools/uv/uv.exe" --version)
+          if ($LASTEXITCODE -ne 0 -or $version -notmatch '^uv 0\.12\.5(?: |$)') { throw 'Unsupported uv' }
+      - name: Install only the locked build-tools environment
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $python = (& py.exe -3.11 -I -B -c 'import sys; print(sys.executable)').Trim()
+          if ($LASTEXITCODE -ne 0 -or -not $python) { throw 'Approved Python unavailable' }
+          & "$env:GITHUB_WORKSPACE/tools/uv/uv.exe" sync --locked --extra dev --no-install-project --python $python --project "$env:GITHUB_WORKSPACE/source"
+          if ($LASTEXITCODE -ne 0) { throw 'Locked build-tools provisioning failed' }
+      - name: Provision integrity-checked official GitHub CLI
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $name = 'gh_2.103.3_windows_amd64.zip'
+          $release = 'https://github.com/cli/cli/releases/download/v2.103.3/'
+          $archive = Join-Path $env:GITHUB_WORKSPACE ".tmp/$name"
+          $checksums = Join-Path $env:GITHUB_WORKSPACE '.tmp/gh_2.103.3_checksums.txt'
+          & curl.exe --fail --silent --show-error --location --max-redirs 3 --max-time 120 --max-filesize 67108864 --output $archive "$release$name"
+          if ($LASTEXITCODE -ne 0) { throw 'Official GitHub CLI download failed' }
+          & curl.exe --fail --silent --show-error --location --max-redirs 3 --max-time 60 --max-filesize 1048576 --output $checksums "${release}gh_2.103.3_checksums.txt"
+          if ($LASTEXITCODE -ne 0) { throw 'Official checksum download failed' }
+          $rows = @(Get-Content -LiteralPath $checksums | Where-Object { $_ -match "^[0-9a-f]{64}  $([regex]::Escape($name))$" })
+          if ($rows.Count -ne 1) { throw 'Missing or ambiguous official checksum' }
+          $expected = $rows[0].Substring(0, 64)
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) {
+            throw 'Official GitHub CLI archive integrity mismatch'
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath "$env:GITHUB_WORKSPACE/tools/gh"
+          $expectedExe = 'd303d8ac3f5e9438bf7c977b64dd6425513eae46218f8881d30694f28c1d0dfd'
+          if ((Get-FileHash -LiteralPath $env:AIFLOW_GH_EXE -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedExe) {
+            throw 'Official GitHub CLI executable integrity mismatch'
+          }
+      - name: Authenticate and build ordinary direct and sdist-rebuilt payloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $attempt = "$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)"
+          & "$env:GITHUB_WORKSPACE/tools/build-env/Scripts/python.exe" -I -B "$env:GITHUB_WORKSPACE/source/tools/ci/build_node_engine.py" --output-dir "$env:GITHUB_WORKSPACE/.tmp/node-ci/$attempt/artifact"
+          if ($LASTEXITCODE -ne 0) { throw 'Authenticated engine build failed' }
+      - name: Upload the exact four-member source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aiflow-node-engine-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ github.workspace }}/.tmp/node-ci/${{ github.run_id }}-${{ github.run_attempt }}/artifact/
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 14

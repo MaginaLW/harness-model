@@ -1,0 +1,201 @@
+{
+  "base_commit": "6b5e6e20d0bbfcf48cf1c0a39aea8d9f81314b61",
+  "branch": "codex/agent-bridge-node-ci",
+  "classification_input_sha256": "94fcf5b21f3afe07a8a6715c02f7343be02e3b6935116c8911f867684915c225",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/node_execution.py",
+      "src/aiflow/node_verification.py",
+      "docs/superpowers/specs/node-v2-installed-lifecycle.md",
+      "tests/unit/test_node_v2_coverage.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prove the exact terminal-semicolon implicit-else boundary in the governed Node supplier and explicitly rebind its finite-end contract",
+        "impact_scope": [
+          "src/aiflow/node_execution.py",
+          "src/aiflow/node_verification.py",
+          "docs/superpowers/specs/node-v2-installed-lifecycle.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0142/approvals.json",
+        ".ai/tasks/TASK-0142/classification.json",
+        ".ai/tasks/TASK-0142/events.jsonl",
+        ".ai/tasks/TASK-0142/review-contexts/b82005d567f464d2afc9e7f9cda5ec9504846e8ff235924f2d40704c3f9f063d.json",
+        ".ai/tasks/TASK-0142/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0142/spec.md",
+        ".ai/tasks/TASK-0142/task.yaml",
+        "docs/superpowers/specs/node-v2-installed-lifecycle.md",
+        "src/aiflow/node_execution.py",
+        "src/aiflow/node_verification.py",
+        "tests/unit/test_node_v2_coverage.py"
+      ],
+      "files": [
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0142/approvals.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0142/classification.json"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0142/events.jsonl"
+        },
+        {
+          "additions": 40,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0142/review-contexts/b82005d567f464d2afc9e7f9cda5ec9504846e8ff235924f2d40704c3f9f063d.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0142/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0142/spec.md"
+        },
+        {
+          "additions": 72,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0142/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/superpowers/specs/node-v2-installed-lifecycle.md"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/node_execution.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/node_verification.py"
+        },
+        {
+          "additions": 133,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_node_v2_coverage.py"
+        }
+      ],
+      "totals": {
+        "additions": 410,
+        "deletions": 5,
+        "files": 11
+      }
+    },
+    "goal": "Prove the exact terminal-semicolon implicit-else boundary in the governed Node supplier and explicitly rebind its finite-end contract",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0142",
+        "--actor",
+        "source-map-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "db263be6bbb491e77d46cf302172f4413a2248372a9ecfce6d08e02853ccea91",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "8ca05af6bc495809d3cebde8c141518edabb7655b4443f483fc94a482e6fd35a",
+  "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+  "task_id": "TASK-0142",
+  "verification_snapshot_sha256": "9e29e51437121b335d0ce09261c3c42b845b5220d8e9187117f3461d2aada80c"
+}

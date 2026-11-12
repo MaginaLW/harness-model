@@ -1,0 +1,133 @@
+{
+  "base_commit": "f4a9844bb3ba53c0c0e058e08374d98ff696ddf9",
+  "branch": "codex/agent-bridge-node-ci",
+  "classification_input_sha256": "1032c86c5d144de1d889d5de748b37c6210ea0eba3d98aceb010763cf3cfd251",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/node_ci.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Authenticate workflow merge parents against the validated current base branch while preserving historical PR and run snapshots",
+        "impact_scope": [
+          "src/aiflow/node_ci.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0143/spec.md",
+        "src/aiflow/node_ci.py"
+      ],
+      "files": [
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0143/spec.md"
+        },
+        {
+          "additions": 23,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/node_ci.py"
+        }
+      ],
+      "totals": {
+        "additions": 51,
+        "deletions": 3,
+        "files": 2
+      }
+    },
+    "goal": "Authenticate workflow merge parents against the validated current base branch while preserving historical PR and run snapshots",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0143",
+        "--actor",
+        "source-map-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "06793d37be30e1e46d64d0b5e1191ab80972657062a960783a9fb900231d1570",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "e6542851d716948b3dd13732acb2b1b8071c5c0b497cbeb9a5d68490a49a81c8",
+  "subject_commit": "84a32cf4c526b69de2a1399ded6917e5a11c8175",
+  "task_id": "TASK-0143",
+  "verification_snapshot_sha256": "604d5c4e0cb64e91a0c2710d8aa468c1fdf8626412cb442897a3bb4bda352c88"
+}

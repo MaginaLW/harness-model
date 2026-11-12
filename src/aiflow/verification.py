@@ -35,7 +35,7 @@ _RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 PYTEST_CHECK_IDS = frozenset(
     {"unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"}
 )
-FULL_SUITE_TIMEOUT_SECONDS = 3000
+FULL_SUITE_TIMEOUT_SECONDS = 4200
 
 
 @dataclass(frozen=True)
@@ -373,14 +373,21 @@ def _parse_check(
 
 def _node_plan(bundle: PolicyBundle, context: VerificationContext, level: str) -> VerificationPlan:
     """Expand fixed roles, never commands supplied by a Node Policy."""
-    from aiflow.node_execution import NODE_COVERAGE_HELPER, NODE_ISTANBUL_HELPER
-
     revision2 = bundle.policy_version == "3.2.0"
     if context.ci_run_dir is not None or (level == "V2" and not revision2):
         raise ContractError(
             "Node execution capability is unavailable", code="NODE_CAPABILITY_UNAVAILABLE"
         )
     run_dir = _run_directory(context)
+    return _bound_node_plan(context, level, revision2=revision2, run_dir=run_dir)
+
+
+def _bound_node_plan(
+    context: VerificationContext, level: str, *, revision2: bool, run_dir: Path
+) -> VerificationPlan:
+    """Bind the fixed commands without observing historical paths during replay."""
+    from aiflow.node_execution import NODE_COVERAGE_HELPER, NODE_ISTANBUL_HELPER
+
     roles = context.node_bindings
     if roles is None:
         raise ContractError("Node material bindings are required", code="NODE_MATERIALS_REQUIRED")
@@ -517,6 +524,22 @@ def _node_plan(bundle: PolicyBundle, context: VerificationContext, level: str) -
     return VerificationPlan(
         level, run_dir, tuple(checks), tuple(executions), (), (), context.subject_commit
     )
+
+
+def parse_node_ci_plan(
+    bundle: PolicyBundle, context: VerificationContext, *, level: str
+) -> VerificationPlan:
+    """Admit only the new explicit revision-2 CI caller; local parsing is unchanged."""
+    from aiflow.policy import is_node_policy
+
+    if (
+        not is_node_policy(bundle)
+        or bundle.policy_version != "3.2.0"
+        or context.ci_run_dir is None
+        or level not in {"V0", "V1", "V2"}
+    ):
+        raise ContractError("Node CI plan is unsupported", code="NODE_CAPABILITY_UNAVAILABLE")
+    return _bound_node_plan(context, level, revision2=True, run_dir=_run_directory(context))
 
 
 def parse_verification_plan(

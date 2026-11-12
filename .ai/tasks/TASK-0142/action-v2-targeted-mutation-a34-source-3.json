@@ -1,0 +1,18 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0142",
+  "decision_unit_id": "DU-001",
+  "subject_commit": "e585da65ee160b6925421a4b608b21d0ef7efb90",
+  "classification_input_sha256": "94fcf5b21f3afe07a8a6715c02f7343be02e3b6935116c8911f867684915c225",
+  "parameter_summary": "A34 source3 complete Native V2 primary, source1/2closed remain consumed; original14checks shared4200seconds and actual outer4500seconds, five fresh mutation pairs/ten60second children, automatic recorder1200seconds bound.",
+  "conditions": [
+    "Explicit owner A34 grant792451718ed490b4273a151a5a54a0c9f35410c8becb7414322a3b9137febc30; source3of4 cumulative sinceA33, not reopening source1/2. Source4 only under its separately diagnosed/cleanupconfirmed/independently reviewed conditional scope.",
+    "Actual frozen spec8ca05af6bc495809d3cebde8c141518edabb7655b4443f483fc94a482e6fd35a; independent source-map-verifier context54baf645a4c46fafd63f159d4986931fa9c2b146423b52cadc415e5eac77fc12; source-map-author implementer. Original6b5base and actuale585subject; full closed history retained by ordinary merge.",
+    "Preserve unchanged source Policy4200 shared full pytest and every14check/85total90diff; whole owned WindowsJob4500seconds, nested automatic-record watch1199seconds within1200, ten mutation children60seconds. No partial verification or duplicate record invocation.",
+    "Use the fixed source3 original/runtime/owner before fresh bindings; authoritative native-host exclusivity and admission required, sandbox empty list is insufficient. Original90minute cumulative normal-resource wait carries1792.4120992seconds spent, no reset. Never terminate another task.",
+    "A34 explicit768GiB positive ledger fully retains A26 old projection, all four64GiB source envelopes and32GiB reconciliation buffer; no retirement/refund, no retroactive claim of old480compliance. Target32GiB andUS3 remain separate unchanged. Unassigned/over-bound material or ownership uncertainty stops affected launch.",
+    "Commit spec/classification/action/verifiercontext exactHEAD/index/worktree before this single-use recording. Preserve every old action/receipt and failed root. This local action does no push/CI/targetLOCAL/private/combined/merge/settings/credentials/model/SDK/device call."
+  ],
+  "expires_at": "2026-11-09T18:11:35.600976+00:00",
+  "single_use": true
+}

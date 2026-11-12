@@ -1,0 +1,19 @@
+{
+  "action_type": "node_ci_preregistration_measurement",
+  "classification_input_sha256": "8e7f475c54bcdfcf1d97098ef00dba6aa4182ad9a56d90bc0b9cb9701ea3f087",
+  "conditions": [
+    "Six fresh proof groups maximum, one source native V2 maximum; no already executed failed kernel or native cycle may retry.",
+    "At most two additional fresh preparation attempts only for diagnosed pre-kernel helper/observation defects; each exact minimal correction requires actual independent review and preserved originals.",
+    "Unknown cause, source drift, product/kernel/content/budget/ownership/cleanup failure or recovery quota exhaustion closes the campaign.",
+    "Cumulative six-hour and 192-GiB ceilings include A05; current remaining wall seconds 21406 and material bytes 206091321344. One heavy execution instance.",
+    "Preserve all previous thresholds, timeouts, file/JSON/role/shared-copy/process budgets, complete origins/physical roles and raw originals. Reuse unchanged TASK-0139 and stage-A proof.",
+    "Actual measurements and independent review precede cap registration; future native mutation action is bound to its then-current subject under this same owner-approved finite scope.",
+    "No target a4 write, source publication, push/merge, private transfer, credential, model, SDK, WeChat, paid or production action."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-05T01:54:32.975482Z",
+  "parameter_summary": "Explicit owner A06 recovery approval, exact proposal build/cm/A06-proposal.json SHA256 fff2c85cf2c317f262e9e8d73a88351b24655a0f21b1eacfbe1b52cce97979d2. Preserve spent A05/d0; fresh d0r and remaining five groups, original cumulative budget and all gates.",
+  "single_use": true,
+  "subject_commit": "151ccc84b931460b93642a1caebfeb6ad9dba4cc",
+  "target": "TASK-0138"
+}

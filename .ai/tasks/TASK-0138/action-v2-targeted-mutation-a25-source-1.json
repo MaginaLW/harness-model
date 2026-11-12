@@ -1,0 +1,20 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "classification_input_sha256": "4e9b3541a57db20bc61bc8c618ec906dacd1352a7f6ebcf04d5901ab411b1fc2",
+  "conditions": [
+    "Actual owner A25 grant 7009003056315257934b29c3bcda047587b295a43282da1678194598f6c09949; exactly one new complete native10 full, campaign invocation5/local1; no full retry after actual failure/interruption.",
+    "Current subject4665993c23fa6c1c623184ea7fc0eee64833dfe9; unchanged frozen spec f7555a4217d9bc7e6d30f369c13c877e79ad3efd89e64d2a9110ef094c9fe34a; exact context1ad5bed2a3a10053c0b44338ecd037d8ca8f2e652595274ffd7688a13435b54e; same native-ci-portability-verifier worker for full/final.",
+    "All14 checks, complete4200-second branch pytest, original five native mutations and both85total/90original-base diff domains; outer Job4500seconds; no threshold, Policy, Norm, lock, workflow or production changes.",
+    "Retain actual37-distribution source environment and F6 ordinary/capacity at their true origins; separately bind test-only equivalence, positive source/Git/material growth and current Git inputs. No new environment install, dependency precheck, capacity kernel or readiness probe.",
+    "A25 separate source64GiB; retained old352GiB including A23 separate StageB32GiB; cumulative416GiB446676598784bytes; no old reservation borrowing, deletion, negative credit or counter reset.",
+    "Actual focused sandbox Git-clone failure and owned cleanup retained under build/co/focus25; do not fabricate focused PASS. New full uses the reviewed existing native ownership/inner-Job mechanism after affected helper review and current guard checks.",
+    "One readiness activation and exclusive actual-full use claim; no new fixed global window or invented remaining seconds. Preserve child timeouts, actual process/EOF/Job-empty/closed/cleanup requirements and all failure originals.",
+    "This local action performs no push/PR/remote CI/private upload/merge/close/model/SDK/Grok/WeChat/credential export/settings/global permission change; later source publication and the unconsumed target chain retain their separate explicit A25/A23 scope."
+  ],
+  "decision_unit_id": "DU-001",
+  "expires_at": "2026-11-08T15:59:01.112931+00:00",
+  "parameter_summary": "A25 one additional current-source native10 V2;campaign invocation5/local1;complete4200-second branch pytest,all14checks,both85/90original-base domains and five original native mutations.",
+  "single_use": true,
+  "subject_commit": "4665993c23fa6c1c623184ea7fc0eee64833dfe9",
+  "target": "TASK-0138"
+}

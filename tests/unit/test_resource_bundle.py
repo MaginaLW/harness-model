@@ -49,6 +49,7 @@ SCHEMAS = {
     "evidence",
     "mutation-evidence",
     "mutation-manifest",
+    "node-ci",
     "observation",
     "observation-decision",
     "policy",

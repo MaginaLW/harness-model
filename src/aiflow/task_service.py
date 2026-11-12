@@ -403,7 +403,7 @@ def _append_event(path: Path, event: Mapping[str, object]) -> None:
     content = (json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
     descriptor: int | None = None
     try:
-        descriptor = os.open(path, os.O_APPEND | os.O_WRONLY)
+        descriptor = os.open(path, os.O_APPEND | os.O_WRONLY | getattr(os, "O_BINARY", 0))
         written = os.write(descriptor, content)
         if written != len(content):
             raise OSError("partial event append")

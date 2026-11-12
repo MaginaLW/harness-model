@@ -81,7 +81,7 @@ levels:
           - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
-        timeout_seconds: 3000
+        timeout_seconds: 4200
         required: true
         result_parser: pytest
         environment:
@@ -95,7 +95,7 @@ levels:
           - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
-        timeout_seconds: 3000
+        timeout_seconds: 4200
         required: true
         result_parser: pytest
         environment:
@@ -114,7 +114,7 @@ levels:
           - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
-        timeout_seconds: 3000
+        timeout_seconds: 4200
         required: true
         result_parser: coverage_xml
         environment:
@@ -168,7 +168,7 @@ levels:
           - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
-        timeout_seconds: 3000
+        timeout_seconds: 4200
         required: true
         result_parser: pytest
         environment:
@@ -182,7 +182,7 @@ levels:
           - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
-        timeout_seconds: 3000
+        timeout_seconds: 4200
         required: true
         result_parser: pytest
         environment:
@@ -201,7 +201,7 @@ levels:
           - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
-        timeout_seconds: 3000
+        timeout_seconds: 4200
         required: true
         result_parser: coverage_xml
         environment:
@@ -228,7 +228,7 @@ levels:
           - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
-        timeout_seconds: 3000
+        timeout_seconds: 4200
         required: true
         result_parser: pytest
         environment:
@@ -242,7 +242,7 @@ levels:
           - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
-        timeout_seconds: 3000
+        timeout_seconds: 4200
         required: true
         result_parser: pytest
         environment:

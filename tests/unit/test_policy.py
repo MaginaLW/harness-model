@@ -138,7 +138,7 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
                 "--cov-branch",
                 "--cov-report=xml:{run_dir}/coverage.xml",
             ],
-            "timeout_seconds": 3000,
+            "timeout_seconds": 4200,
             "required": True,
             "environment": {"COVERAGE_FILE": "{run_dir}/.coverage"},
         }
@@ -165,6 +165,73 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
             "threshold": 90,
         }
         assert by_id["mypy"]["command"] == ["{python}", "-m", "mypy", "src", "tools/analysis"]
+
+
+@pytest.mark.parametrize(
+    "check_id", ["unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"]
+)
+@pytest.mark.parametrize("timeout_seconds", [4200, 4201])
+def test_native_full_pytest_schema_timeout_boundary(
+    tmp_path: Path, check_id: str, timeout_seconds: int
+) -> None:
+    directory = copy_policy(tmp_path)
+    path = directory / "verification-levels.yaml"
+    document = read(path)
+    matches = [
+        check
+        for level in document["levels"]
+        for check in level["checks"]
+        if check["id"] == check_id
+    ]
+    assert matches
+    for check in matches:
+        check["timeout_seconds"] = timeout_seconds
+    write(path, document)
+    if timeout_seconds == 4201:
+        with pytest.raises(PolicyError) as caught:
+            load_policy_bundle(tmp_path, policy_directory=directory)
+        assert caught.value.code == "POLICY_SCHEMA_INVALID"
+    else:
+        loaded = load_policy_bundle(tmp_path, policy_directory=directory)
+        assert all(
+            check["timeout_seconds"] == 4200
+            for level in loaded.documents["verification-levels.yaml"]["levels"]
+            for check in level["checks"]
+            if check["id"] == check_id
+        )
+
+
+@pytest.mark.parametrize(
+    "check_id",
+    [
+        "contract",
+        "scope",
+        "ruff_check",
+        "ruff_format_check",
+        "smoke",
+        "mypy",
+        "diff_coverage",
+        "targeted_mutation",
+        "independent_verifier",
+    ],
+)
+def test_native_non_pytest_schema_keeps_3600_second_ceiling(tmp_path: Path, check_id: str) -> None:
+    directory = copy_policy(tmp_path)
+    path = directory / "verification-levels.yaml"
+    document = read(path)
+    matches = [
+        check
+        for level in document["levels"]
+        for check in level["checks"]
+        if check["id"] == check_id
+    ]
+    assert matches
+    for check in matches:
+        check["timeout_seconds"] = 3601
+    write(path, document)
+    with pytest.raises(PolicyError) as caught:
+        load_policy_bundle(tmp_path, policy_directory=directory)
+    assert caught.value.code == "POLICY_SCHEMA_INVALID"
 
 
 def test_legacy_v1_policy_branch_remains_valid() -> None:

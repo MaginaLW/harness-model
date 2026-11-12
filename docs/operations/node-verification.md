@@ -2,7 +2,7 @@
 
 普通 wheel 支持封闭 profile `agent-bridge-node@1`、完整目标 Policy `3.1.0` 和 Node evidence `3.1`。运行限 Windows x64、CPython 3.11、本地 NTFS，只支持本地 V0/V1。Policy `3.0` 不受支持，不回退到 Python profile；现有 Python 合同及本仓门禁保持不变。
 
-本页说明固定目标合同。installed 外仓 V2、Node CI 和真实 agent-bridge 采用尚未交付。本地 V0/V1 不代表完整跨仓接入完成，也不扩大推送、合并、部署或私有材料传输权限。后续依赖见[接入方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
+本页前半说明固定的 @1 目标合同；已交付的 installed 本地 @2 V2 见[后文](#revision-2-local-delivery)。Node CI3.3 容量尚未注册、未发布验收，真实 agent-bridge 尚未应用。完整跨仓接入仍未完成，也不扩大推送、合并、部署或私有材料传输权限；后续依赖见[接入方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
 
 ## 初始化与任务前置条件
 
@@ -19,7 +19,7 @@ python -m aiflow init migration-plan --target <TARGET> --profile agent-bridge-no
 
 初始化只校验结构，不准备依赖、不探测 Node/npm、不运行 suite。后续使用目标自己的 task、真实 base/subject、风险 facts、分类、冻结规格及所需审核批准；可编辑安装或以当前目录、`PYTHONPATH` 替换引擎不满足普通安装材料合同。
 
-先依据事实分类，再核对能力。要求 V2 时保留 V2 并阻断，不能降为 V1。Node 不支持 `--check` 部分检查、V2 finalize，或任何带 `--ci`、`--ci-run-dir`、`--output` 的验证组合；这些组合拒绝，不产生 Node 成功证据。
+先依据事实分类，再核对能力。在上述 @1 profile 下，要求 V2 时保留 V2 并阻断，不能降为 V1。@1 不支持 `--check` 部分检查、V2 finalize，或任何带 `--ci`、`--ci-run-dir`、`--output` 的验证组合；这些组合拒绝，不产生 Node 成功证据。
 
 ## 显式准备并选择材料
 
@@ -95,11 +95,11 @@ Windows 子进程先 suspended 创建，加入禁止 breakaway 的 Job 后再运
 
 `recheck_node_evidence(root, task_id, evidence) -> NodeEvidenceFacts` 是 verify 消费、freshness/status、实现审核、code approval 和 Gate 共用的只读事实入口，不恢复任务、不建目录、不探测工具或运行 suite。它重核当前绑定、材料、prepared/run 原件、进程回执、输出及覆盖率。纯 `validate_node_evidence` 结构检查不能替代它；材料或宿主漂移、原件缺失或未知事实使证据失效并阻断消费，保留已有记录。另一机器仅有公共 JSON 无法重放 PASS，`gate --evidence` 不能把外部 JSON 当作 Node 成功证据。
 
-该合同依赖受审源码、可信宿主、工具和实际安装字节，不认证全部 OS/DLL，也不提供恶意同用户代码沙箱。V2 引擎证据、目标 CI 原件交接及真实目标采用仍须独立交付。
+该合同依赖受审源码、可信宿主、工具和实际安装字节，不认证全部 OS/DLL，也不提供恶意同用户代码沙箱。上述 @1 合同不支持 V2 或 Node CI；@2 的本地交付见下文，目标 CI 原件交接及真实目标采用仍未完成。
 
-## Revision 2 candidate
+## Revision 2 local delivery
 
-The procedure above describes the delivered `agent-bridge-node@1` profile. The `agent-bridge-node@2` / Policy `3.2.0` source candidate follows the [installed lifecycle contract](../superpowers/specs/node-v2-installed-lifecycle.md). Its ordinary-installation lifecycle, complete native gates and remote checks still require acceptance before publication. Node CI and real-target application remain separate, unfinished stages.
+The procedure above describes the delivered `agent-bridge-node@1` profile. The installed local `agent-bridge-node@2` / Policy `3.2.0` lifecycle is delivered in [PR #148](https://github.com/MaginaLW/harness-model/pull/148) and follows the [installed lifecycle contract](../superpowers/specs/node-v2-installed-lifecycle.md). Original-base/full-scope verification and failed proof originals remain retained. Node CI3.3 remains unpublished and unaccepted, with capacity unregistered; real-target application remains unfinished.
 
 For revision 2, provide the explicitly reviewed four-file Policy candidate during initialization. Keep the complete V0/V1 prefix and the fixed Istanbul producer, exact target configuration and full product-suite requirements from that contract. Prepare Node materials and save the independent verifier context before preparing installed mutations; preparation does not download dependencies or execute tests. Obtain a fresh reviewed single-use action, record all five installed mutation pairs, and retain their originals under the current task's IMUT directory.
 

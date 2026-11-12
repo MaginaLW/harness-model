@@ -47,8 +47,16 @@ def _copy_git(root: Path) -> Path:
         source = entry.parent.parent
     else:
         assert entry.parent.name.casefold() == "bin"
-        assert entry.parent.parent.name.casefold() == "mingw64"
+        assert entry.parent.parent.name.casefold() in {"mingw64", "ucrt64"}
         source = entry.parent.parent.parent
+    if not (source / "mingw64/bin").is_dir():
+        assert (source / "ucrt64/bin").is_dir(), "Unsupported installed Git layout"
+        import winreg
+
+        # Select a real installation supported by the unchanged host adapter.
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\GitForWindows") as key:
+            source = Path(winreg.QueryValueEx(key, "InstallPath")[0])
+        assert source.is_absolute() and (source / "mingw64/bin/git.exe").is_file()
     for relative in ("cmd", "mingw64/bin", "usr/bin"):
         for directory, names, files in os.walk(source / relative, followlinks=False):
             for name in (*names, *files):
@@ -384,7 +392,6 @@ from aiflow.storage import read_task_yaml
 root=Path(sys.argv[1]); task='TASK-0001'; actor='fixture-independent-verifier'
 assert Path(aiflow.__file__).is_relative_to(Path(sys.prefix))
 assert Path(runtime.__file__).is_relative_to(Path(sys.prefix))
-inputs=runtime.prepare_installed_mutations(root,task,verifier_actor=actor)
 def snapshot():
     result={}
     for path in root.rglob('*'):
@@ -441,6 +448,7 @@ def replay(reference):
     assert snapshot()==before,'pure replay changed retained originals'
     return facts
 def approve_fixture_action():
+    inputs=runtime.prepare_installed_mutations(root,task,verifier_actor=actor)
     action=root/'.ai/tasks'/task/'action-installed-engine-mutation-fixture.json'
     value=json.loads(action.read_text())
     summary=json.loads(value['parameter_summary'])
@@ -448,6 +456,7 @@ def approve_fixture_action():
     assert value['classification_input_sha256']==inputs.classification_input_sha256
     approve_task(root,task,approval_type='action',actor='project-owner',
         reason='Reviewed public synthetic installed-engine fixture action only',action_file=action)
+    return inputs
 """
 
 
@@ -494,7 +503,7 @@ def test_pure_reader_rejects_missing_or_invalid_references_without_processes_or_
 REAL_PAIRS = (
     CURRENT
     + r"""
-approve_fixture_action()
+inputs=approve_fixture_action()
 reference=runtime.record_installed_mutations(root,task,verifier_actor=actor,
     expected_inputs_sha256=inputs.sha256)
 facts=replay(reference)
@@ -585,7 +594,7 @@ INTERRUPTED_RECORD = (
     + r"""
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
-approve_fixture_action()
+inputs=approve_fixture_action()
 mode=sys.argv[2]
 entered=Event(); release=Event(); starts=[]
 class SimulatedInterruption(BaseException):

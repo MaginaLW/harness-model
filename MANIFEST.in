@@ -6,6 +6,7 @@ include .ai/schemas/event.schema.json
 include .ai/schemas/evidence.schema.json
 include .ai/schemas/mutation-evidence.schema.json
 include .ai/schemas/mutation-manifest.schema.json
+include .ai/schemas/node-ci.schema.json
 include .ai/schemas/observation.schema.json
 include .ai/schemas/observation-decision.schema.json
 include .ai/schemas/policy.schema.json
