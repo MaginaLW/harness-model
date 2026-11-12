@@ -27,5 +27,19 @@
     "spec_sha256": "04fbfd12686c9c91e5d935d89aa5d7b8dad2641fbb05dee9e22ebcadcedce81a",
     "subject_commit": "547ab50b9937a71664c19ccb866c5ff059638f02",
     "task_id": "TASK-0146"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-12T09:39:37Z",
+    "base_commit": "a231941b59a021448678e2a77ce46b28062d5dfb",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "0c90b8008221a4606d2fd473886c9764fe183fe4864c8ec6bc034df867f5303a",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit owner A48 and standing authorization; real independent REV-0002 APPROVE with zero findings, complete source6 Native and same-verifier finalization passed. Review package now states the matching APPROVE recommendation. Both PRs remain open and unmerged.",
+    "schema_version": "1.0",
+    "spec_sha256": "04fbfd12686c9c91e5d935d89aa5d7b8dad2641fbb05dee9e22ebcadcedce81a",
+    "subject_commit": "547ab50b9937a71664c19ccb866c5ff059638f02",
+    "task_id": "TASK-0146"
   }
 ]
