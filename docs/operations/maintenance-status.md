@@ -2,179 +2,64 @@
 
 ## 当前状态
 
-更新于 2026-11-12。本节是当前状态的唯一摘要；逐窗口的历史记录见文末指针，旧窗口文字不作为当前指令。
+本页只回答当前能力、版本、阻塞和下一步边界；规则以 [AGENTS.md](../../AGENTS.md) 为唯一权威，操作流程见[低干预工作方式](low-intervention.md)。历史计划和 NEW/BLOCKED 任务不是执行队列。
 
-**治理模式**：仓库维护模式，task-free 例外已启用；规则以 [AGENTS.md](../../AGENTS.md) 为唯一权威。CI 质量门禁与 `main` 分支保护不放松。
+**当前方向：先治理仓库。** 本轮压缩入口并核对真实重复成本；Stage B、旧 mutation 加固、真实评分、自动审核、Desktop 附着及 Phase 3/4 继续暂停。治理完成不自动恢复这些工作。源码、Policy、授权和质量阈值未因文档治理改变。
 
-**协作约定**：复杂任务积极委派并按需扩展；并发额度、主 Agent 计数与扩展审批继承全局工作约定，整棵委派树共享且受实际宿主限制。上下文按阶段最小加载，在阶段切换、新证据或冲突时更新；具体规则见 [AGENTS.md](../../AGENTS.md#开发与协作)。
+### 版本与用途
 
-**只读 Git 采集**：上下文与 scope 采集的现有 Git 子进程均局部设置 `GIT_OPTIONAL_LOCKS=0`，避免读取时刷新 index，保留父进程环境、既有错误合同与严格非消费断言。协作规则与修复已由 [PR #151](https://github.com/MaginaLW/harness-model/pull/151) 以 merge commit `663f239b581d2f56552ee5fd620ea6a63236882b` 合入 `main`，TASK-0145 已通过正式 `close` 接口记录为 `MERGED`；TASK-0143/0144 原失败与证据保留，首次 index 写入者仍为 UNKNOWN。
+| 对象 | 固定版本与用途 | 可用结论及限制 |
+|---|---|---|
+| 本轮维护基线 | main `5b82fc78987a63b686357c272f6dfdd4e0c6e96a`；治理分支唯一写入者负责文档集成。 | 已合并代码与下述候选分开；源码包与安装包不能只按相同版本号互相认证。 |
+| 原主根与旧 WIP | `codex/agent-bridge-phased-adoption` / `4ab57ce5b0291ec2841c90782a751c920e284403`；仍属原任务，非本轮写入对象。 | 八个暂存 mutation/schema 文件、TASK-0094/0095/0124 及三份未跟踪建议稿保留。本轮已核对路径和内容校验值；不得整文件覆盖、stash、reset、clean 或当作重复删除。 |
+| 已验收本地候选 | 普通安装候选 `c60b663427e73ca2d551d7a9aca2dc68b443c954`；Stage A 自有治理根。 | 原记录报告本地采用通过，不代表本维护基线含有全部候选代码，也不代表 Stage B 验收。 |
+| source6 发布候选 | `5ce4cbd841a4656d346c9b17938a0b42d5f1d897`；[PR #150](https://github.com/MaginaLW/harness-model/pull/150)。 | 原记录报告 Native、7354 项测试/9 项跳过、变异及源 Gate/CI 通过；本轮未重验，不扩大为 main 或目标消费成功。 |
+| 已停止消费候选 | agent-bridge TASK-0017 / REVIEW / V2；原独立目标根及原任务所有者保留现场。 | 原记录为 BLOCKED，Missing: block_resolution；历史干净封账 `d1fbd37a7df351610021b0a4a509073a573d8cab` 属较早窗口，不冒称 probe5 后新 HEAD。 |
 
-**编码助手入口**：Claude 专用入口已退役；通用 [AI Flow Skill](../../.agents/skills/ai-flow/SKILL.md) 由 Codex 按需发现。共享治理、历史任务与归档标签保持不变。
+### agent-bridge 阶段 B 当前收尾
 
-- 常设授权（2026-10-10）按 [AGENTS.md「常设授权」](../../AGENTS.md#常设授权) 执行：限定条件下 Agent 自主推送、开 PR、合并并代为记录批准，其余高风险动作仍逐次决定。
+**完整接入未完成，最新手动主探针5失败后已封账停止。** 最新失败为 L exit1、空 `AssertionError`，仅能定位至启动身份/绑定区域；具体断言和根因仍 UNKNOWN。临时 Process 策略已恢复；N 不存在、L 退出不能证明 carrier 独立性或 owned cleanup。
 
-**质量检查**：CI 与原生 V1/V2 的一次完整 pytest 同时收集 `src/aiflow` 和 `tools/analysis` 的分支覆盖率；固定检查器要求两个目录各自达到 85% 总覆盖率和 90% 变更覆盖率，strict mypy 同时检查两者。原生完整 pytest 预算为 3000 秒，完整用例、十四项必需检查、其他超时与失败证据保留要求不变。Policy label 保持 `2.6.0`，但预算内容改变完整 canonical SHA；相同版本、不同 SHA 不等价。新引擎拒绝旧的 1200 秒 Native Policy；升级 wheel 不自动修改目标 `.ai`，旧目标须经受审核的显式更新后再使用新引擎。项目解释器和复算入口见 [Quickstart](quickstart.md#阶段二基线重放)。
+累计 probe5/5、policy7/8、Set14/16。LOCAL14、产品 record/verify、PR3 新同步、私有 CI 和 combined Gate 均未启动。源/目标的旧消耗、失败、UNKNOWN 与全部资源上界保留，剩余预算和未用槽位不恢复执行许可；不修复后重跑、不提出新恢复轮。PR150/PR3 在原停止记录中保持打开，本文不冒称已合并或实时远端状态。
 
-**已完成**
-
-- TASK-0145 已由 [PR #151](https://github.com/MaginaLW/harness-model/pull/151) 合并并关闭：继承全局委派额度、按需扩展与阶段上下文更新，并修复只读 Git 查询刷新 index 的问题。独立设计/实现审核均 APPROVE，本地 Gate PASS，10 项必需检查全部通过；完整测试为 6435 passed / 77 skipped / 0 failed。精确 head `30b81700ce7f95dce42cfd428e407b3216b93666` 的 required `ai-quality-gate` 首次执行通过（[run 43124034087](https://github.com/MaginaLW/harness-model/actions/runs/43124034087)，check `130871451070` / app `15368`）；合并父链、树与远端 `main` 已核对。工作流仅在 PR 触发，不声称另有合并后 CI；本次未执行 50 路模型并发实测。原始日志、旧失败和其他工作树 WIP 保持原状，关闭事件见 [TASK-0145](../../.ai/tasks/TASK-0145/events.jsonl)。
-
-- 阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13 已于 2026-08-30 完成；源码包收口版本 `0.2.0`，active Policy `2.6.0`（V1/V2 的 pytest 检查共享一次完整覆盖率执行；`impact_scope` 触及治理面的决策单元至少走 REVIEW）。`docs/superpowers/state/*.yaml` 是当时冻结的历史投影，不再更新。
-- 已交付工作及其限制分别见[本地辅助工具](local-tools-closeout-2026-09-22.md)、[自托管执行基础设施](self-hosted-runners.md)（历史试点；runner、诊断与证据移交工具已于 2026-10-10 删除）、[E4 启动前收尾](e4-preflight-closeout-2026-09-23.md)；外仓试点按[按需反馈与回灌](feedback-loop.md)处理，无实质问题即 no-op。
-- 2026-10-10 架构精简（PR #46）已合并并关闭 TASK-0072/0073/0074：V1/V2 只运行一次完整覆盖率 pytest、`src/aiflow` 净减约 1040 行、删除未接入的工具试点、任务 ID 分配跳过其他分支已用编号。PR #46 以 squash 合并为 `0f5aa4c`，任务证据绑定的原始提交由标签 `archive/claude-simplify-architecture` 保留。未完成的 TASK-0063～0071 所在分支已归档为本地 `archive/codex-*` 标签，未合并。
-- TASK-0075 的治理面 REVIEW 下限已由 PR #51 合并，账本已关闭：Policy 2.5.0 覆盖 `.github/**`、`.ai/**`、`src/aiflow/**`、`tools/ci/**` 及 Agent 入口、依赖与 Git 配置文件；准入以当前 Policy 和 CLI 结论为准。
-- TASK-0076 已由 PR #52 合并，账本已关闭：退役外部审核导入与 `verify --pytest-temp-root`，合并八处相同的 UTC 时间戳辅助函数，同步退役说明与治理清单。原生 V1 完整验证、两份独立实现审核、Gate 与远端 required CI 均通过；历史任务、失败记录和恢复来源保留。
-- TASK-0078 已由 PR #55 合并并关闭：完整克隆内的 CLI 根目录、子目录与 worktree 定位，以及默认 Schema 资源作用域已交付。它是 TASK-0077 的后继，原阻断记录保留；这不提供完整引擎的外仓初始化或资源分发。
-- TASK-0081 已由 [PR #74](https://github.com/MaginaLW/harness-model/pull/74) 合并并关闭：完成精确清单内的本地测试夹具、缓存、冗余工作副本和重复工具清理。完整恢复演练、独立审核、原生验证与 required CI 均通过；失败证据、恢复材料、原任务记录和 Git refs 保留。历史归档异常原因及 ACL 等价性仍未核实。
-- TASK-0082 已由 [PR #75](https://github.com/MaginaLW/harness-model/pull/75) 合并，[PR #76](https://github.com/MaginaLW/harness-model/pull/76) 已发布关闭记录：退役本地 `.reasonix` 及精确清单内的缓存，完整原文件字节恢复与独立比对通过，原生验证、独立审核和 required CI 均通过。恢复包及历史失败保留；本地清理不证明历史执行可重放或卸载完整性。
-
-- TASK-0083 已由 [PR #102](https://github.com/MaginaLW/harness-model/pull/102) 合并并关闭：交付[分类前风险事实录入](quickstart.md#分类前风险事实录入)，以 `facts` 的只读预览、受审计更新和受限恢复替代手编 task YAML。仅覆盖原 Git 绑定下、未冻结／未分类的 `NEW` 任务；保留省略事实，不推断真实风险，不改变路由、批准或执行权限。完整原生 V1 与 required CI 均为 3793 项测试通过，独立设计／实现审核和 Gate 通过；首轮临时 Git 超时失败记录保留。应用自管 SDK 客户端和完整引擎跨仓初始化均未启动；真实评分、自动审核安排和宿主连接继续暂停，`T0/T1` 保持未设置。
-
-- TASK-0084 已由 [PR #105](https://github.com/MaginaLW/harness-model/pull/105) 合并并关闭：修复 Unicode 事件误拆行、ASCII/GBK 管道中的 facts 输出异常，以及 U+0085 的 YAML 数据丢失。新 YAML 写入使用标准字符转义，解码值精确保留，不重写历史文件。独立设计／实现审核、完整原生 V1、Gate 与 required CI 均通过；完整测试为 3835 项，core/analysis 总覆盖率为 89%/97%，两域变更覆盖率均为 100%。旧候选因发现数据丢失而中断的验证记录保留。
-
-- TASK-0085 已由 [PR #107](https://github.com/MaginaLW/harness-model/pull/107) 合并并关闭：[`close` 的本地合并核对](quickstart.md#记录已完成的合并)要求至少两个父提交，且至少一个非第一父包含 `base → subject` 链；普通或无关提交、空缺候选及不可用的必要 Git 事实均拒绝关闭。复用既有祖先检查，无新增模块、依赖、配置或权限，历史 `MERGED` 记录保留。独立设计／实现审核、完整原生 V1、Gate 与 required CI 均通过；完整测试为 3858 项，core/analysis 总覆盖率为 89%/97%，core 变更覆盖率为 100%，analysis 源码未变更。该检查不认证 PR、目标分支、远端完成状态或 required CI，发布时仍分别核对。
-
-- TASK-0086 已由 [PR #109](https://github.com/MaginaLW/harness-model/pull/109) 合并并关闭：交付可选、固定版本的[SDK 单次只读文档审核](../superpowers/specs/sdk-readonly-review.md#使用)，默认不导入或启动 SDK，显式执行才使用既有 ChatGPT 登录和自有运行时。独立设计／实现审核、完整原生 V1、Gate 与 required CI 均通过；3959 项测试通过，core/analysis 总覆盖率为 89%/97%，core 变更覆盖率为 95.7%。一次真实订阅审核返回有效 `APPROVE`、零发现，原报告已发布到该 PR，并经实际 connector 与既有反馈读取器回读。原文档候选与实现 head 不同的提示保留；被审文档 blob 相同不扩大审核范围。原失败保留，不形成统计样本或效果证明。
-
-- TASK-0087 已由 [PR #111](https://github.com/MaginaLW/harness-model/pull/111) 合并，并由 [PR #112](https://github.com/MaginaLW/harness-model/pull/112) 发布关闭记录：交付[正式实现审核上下文后的可选 SDK 补充节点](../superpowers/specs/sdk-readonly-review.md#可选节点生成正式实现审核上下文之后)。节点默认关闭，本地模拟与原生验证通过，尚未真实触发；实际调用须另选具体任务、输入与调用范围。补充结果不创建正式审核或批准，也不形成统计样本。
-
-- [PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付[版本化资源包](resource-bundle.md)：普通 wheel 包含 15 份 Schema、四份 Policy 种子及规格模板；只读 API 校验完整清单，包升级不写入目标 `.ai`。该资源切片不包含初始化、目标 Node 验证或外仓端到端接入。
-
-- [PR #140](https://github.com/MaginaLW/harness-model/pull/140)已合并并交付 [`native-python-v1` 非覆盖初始化](initialization.md)：普通 wheel 提供预览、受审核应用、只读检查和迁移计划，生成目标自己的 UUID；Windows x64、CPython 3.11、本地 NTFS 上可恢复同一预览的精确 partial，无历史的完整安装重放不改写文件。初始化不准备验证工具、依赖或外仓 V2 材料，也不证明目标验证或真实接入完成。
-
-- 普通 wheel 已交付 [Node 本地 V0/V1](node-verification.md)及 `agent-bridge-node@1` 非覆盖初始化：目标显式采用完整 Policy `3.1.0`，Node evidence 为 `3.1`；运行限 Windows x64、CPython 3.11、本地 NTFS，保留 TS line 总覆盖率 85%／变更覆盖率 90% 及目标自己的身份、审核和批准。installed 外仓 V2、Node CI 与 agent-bridge 真实采用仍未交付，本地 V0/V1 不代表完整引擎接入完成。
-
-**两条新路线的入口**：[应用自管 SDK 与完整引擎跨仓初始化方案](sdk-and-engine-plan.md)保留具体步骤、材料和验收要求。单次只读客户端及一次真实工程闭环已交付；后续按实际文档需求显式调用，不自动安排新审核。完整引擎已选择 agent-bridge 为目标，资源分发、Python/Node 非覆盖初始化及 [Node 本地 V0/V1](node-verification.md)已交付；installed 外仓 V2、Node CI 适配及真实应用仍未交付；真实统计评分、自动审核安排和现有 Desktop 附着继续暂停，`T0/T1` 未设置。
-
-项目所有者已重新开启 agent-bridge 完整接入，依次补齐 installed 引擎治理变异、Node V2 生命周期及 Node CI，再进行真实目标应用；按[当前接入计划](../superpowers/plans/agent-bridge-integration.md)与[变异设计候选](../superpowers/specs/installed-engine-governance-mutations.md)推进。目标应用等待其活动会话结束和基线、写入归属重核。旧未合并候选、原任务、证据及门禁保留；重新开启不代表新能力已交付，也不沿用失效批准。
+本地失败原件：`build/co/campaign/stage-b/target-subject-recovery/probe-failure-closeout.json`（忽略目录，不能随公开文档发布）。旧根、空 worker 目录和全部原件不动。精确历史计数、额度、候选与 Windows 边界见[接入计划](../superpowers/plans/agent-bridge-integration.md)，两者均不批准恢复。
 
 ## 剩余建设主线
 
-后续按有效能力推进，顺序以 [S0–S5 路线](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)为设计输入。项目所有者已选择 **B：3-A 低风险建议与校准、3-B 高风险 V3 独立准入和验收**，首场景为本仓自然治理任务的只读建议，首用途已选**追加机器审核，并基于审核结果积累认识**，范围见[置信度反馈设计](../superpowers/specs/confidence-feedback.md)。当前范围的准备与常规实施按 [AGENTS.md](../../AGENTS.md) 准入；样本充分性、统计接受标准、隐私、保留期和风险用途参数尚未全部冻结，路线和用途选择不批准新私密采集、provider 或执行动作。
-
-已具备[固定 HEAD 的账本事实快照](effect-observations.md#固定提交的事实快照)，以及复用当前原生 status 与适用状态 Gate 的[非评分只读建议](review-advisory.md)。
-快照保守核对同 task 审核 context 与 review/event 引用，关联状态和子记录计数不提供新验收或独立样本；原失败及历史完整性等 `unknown` 保留。
-同一工具的[四目标证据可用性](effect-observations.md#四目标证据可用性)模式复用该快照，区分已投影、白名单中至少一件所需原件缺失、未投影字段和关系未知；已有原值与冲突保留，任务事实覆盖计数不是估计分母或独立样本。
-矩阵保持 `method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`；[方法候选](../superpowers/specs/readonly-confidence-method.md)不代表 S1 全部冻结或生产评分准入。
-建议的 `native_status` 提供 `base_commit`、`subject_commit`、`observed_head` 和受限 `missing_conditions`；`advice_basis` 通过 `advice`、`source` 及 `missing_condition` 或 `state` 记录已有建议的具体依据。
-建议固定 `probability_status=unestimated`、`execution_allowed=false`；概率未估计，不给执行权限。
-`SOURCE_READ_ATOMICITY_NOT_ESTABLISHED` 明确多次原生读取尚未证明原子一致性，版本投影不代表固定的原子观察窗口。
-任务建议在原生读取前后比较有限相关输入，变化或检查不可用仅分别追加 `SOURCE_INPUTS_CHANGED_DURING_READ`、`SOURCE_INPUT_CHANGE_CHECK_UNAVAILABLE`；不改变原生 status/Gate、报告形状或退出码，不自动重试。实际覆盖与限制见[只读任务准备建议](review-advisory.md)：前后相同不证明原子快照，ABA 与范围外变化仍可能遗漏，原子性 unknown 始终保留。
-这些能力属于 S0/S1 准备，不证明生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
-数据与方法合同、可靠身份、人时、独立缺陷真值、统一 telemetry、评分/校准、真实 shadow 与宿主接入仍需各自证据和准入。
-
-项目所有者已允许最初评分参考公开排名网站；[初始外部参考工具](benchmark-reference.md)已提供离线配置相对评分、完整原指标/来源/日期、缺失处理、可复算输入 hash，以及 SWE-bench、Aider 和 Arena 的少量示例。多源比较只针对同一声明配置集合；相对分不是本仓成功或检错概率，不认证实际运行身份，也不接入审核路由。真实本仓反馈沿用既有审核与 PR 收尾；不以外部分数替代方法、样本、真值与质量条件。
-
-[审核结果回读](review-feedback.md)已将固定 tracked `HEAD` 的正式账本审核修订、Finding 状态和已有验证原值汇总，并提供 commit/path/blob/locator 原件引用。它复用快照白名单，默认 snapshot/availability 保持不变。[公开 PR 回读](pr-feedback.md)另接受显式选定的 task-free 来源，保留当前描述中的各轮协调者摘要、原生集合数量及所见 workflow 原值；v2 将处置、修复候选和复核引用声明精确关联原 Finding，平铺保留，并对缺来源、候选冲突或角色声明问题提出非评分核对。v1 原报告形状与全部原失败保留，来源包仍为 1.0。两者可并列外部参考；声明关联不认证作者实际采纳、独立复核、actual diff、实际模型配置或 required check 完整性。当前补齐声明处理链与来源核对，真实模型评分更新及自动审核安排仍未实现，尚未形成真实评分反馈闭环；原失败与未知继续保留。
-
-[来源与尝试链合同候选](../superpowers/specs/readonly-confidence-data-contract.md)将固定原件、关系依据、缺失和 task-free 标识分别定义；[方法协议候选](../superpowers/specs/readonly-confidence-method.md)与[效果口径候选](effect-observations.md)明确目标单位与估计条件。[追加机器专项审核与反馈候选](../superpowers/specs/supplemental-machine-review.md)承接已选用途，具体化“专项审核→处理→复核→结果反馈”的来源和停止边界。首目标协议按 `review_detection` [具体化](../superpowers/specs/review-detection-protocol.md)：针对本仓自然契约专项审核，预声明候选、契约对象与缺陷类别机会，再核独立正真值及报告匹配。项目所有者已采用粗略研究精度：95% 覆盖，等尾双侧 `alpha=0.05`（每尾 `0.025`），区间总宽 `U-L<=0.20`（20 个百分点）；不是 ±20 个百分点、模型 95% 可靠或能力阈值。有限研究总体、公开来源/职责、相关组选择、30 日窗口、原预算及风险回退已整体采用；实际原件、独立真值/裁定、提示、预算端点及组间条件仍待核定；条件性样本规划只是设计需求，不是实际合格 N、充分性或新预算。已采用规则不新增私密来源或采集，也不构成 3-A/S3 真实准入；原件、实际身份及真值无法证明时保留未知，Phase 3 仍为 `not_started`。
-
-项目所有者已采用[有限研究范围](../superpowers/specs/review-detection-admission.md)，不重复请求同一范围、用途或精度决定。[首个离线数学工具](review-detection.md)按独立合同接受 synthetic 计数，提供已选区间、空样本未知和数值域拒绝；它不把账本条数变成样本，不接入真实原件、模型评分或审核安排。真实数据/质量事实与 `T0/T1` 尚待核定，30 日窗口未启动。
-
-[真实观察准备流程](review-detection-preparation.md)已提供原件定位、候选/机会预声明模板、职责与输入边界、独立裁定/匹配/关闭和未知回退。实际自然工作才提供对应事实；本轮准备未登记真实机会、裁定或窗口入口，保持真实评分未准入。已采用规则继续有效，机械核对由 Agent 完成，来源、范围或风险实质变化才集中决定。
-
-[观察输入检查](review-detection-input.md)提供独立的离线来源声明接口，检查供给时间、候选版本、引用与相关组首项选择，保留原值、冲突和待核事项。完整声明也保持来源认证与观察准入未知，不把记录数转换为统计单位。PR 回读与任务建议提供 `--format text` 摘要，默认 JSON 兼容；PR 用法列出既有 connector 的内存组包顺序。这些能力补齐机械准备与使用入口，真实统计分析、模型评分更新及观察窗口仍未启动。
-
-[记录级合成分析](review-detection-analysis.md)复用原声明与数学接口，补齐记录级输入、预选项的必要条件、整批不足回退及条件计数／区间的离线处理。独立性等仅为合成情景假设；关键未知阻断整批，不删项或替换首项。它拒绝非 synthetic 来源，不读取原件、宿主或时钟，真实分析启用、评分与窗口继续未准入。
-
-[合成反馈演练](review-feedback-simulation.md)另提供评分更新、校准与反馈路由的三接口：重算完整快照并保留旧失败，拟合显式分箱后在独立留出声明上诊断，检查估计／拟合／留出组隔离和时序后给三种模拟建议。空箱、缺失、冲突及恶化保留不足；阈值只作显式合成输入，不设生产默认值。它不修改原区间或现行路由，不启用真实评分、自动审核、宿主或观察窗口，原研究范围保持不变。
-
-[独立本地 Git 原件核对](review-detection-input.md#本地-git-原件核对)复用同一声明包，对显式 `docs/**` 引用实际读取固定 commit 的精确普通 blob，比较声明绑定并核对字节。旧声明工具保持 no-I/O；PR、范围外、非普通文件、缺失、冲突和资源限额分别保留。对象命中不认证 semantic locator、公开性、身份、真实预声明、独立真值或准入，也不关闭其他 `VERIFY_*` 待核；尚无真实研究单位、评分或窗口因此启动。
-
-[精确行跨度定位](review-detection-input.md#精确行跨度定位)以显式 opt-in 核对固定原件内的行范围及预期字节 hash，默认 v1 兼容；精确位置、语义适用、真实预声明与研究准入分开。真实合同工作已有先发布准备声明、回读再派发首次专项审核的可执行顺序；可变描述历史、公开派发原件与实际输入时序仍需对应证据。独立真值、预算端点及其他条件未核定，`T0/T1` 仍未设置，观察窗口未启动。
-
-固定 Git 原件与[正式账本反馈](review-feedback.md)工具均将根路径解析失败（含 Python 3.11 的循环符号链接异常）转为各自既有安全错误，不回显 traceback 或本地路径，不降级换源或重试。原件工具的默认与行跨度模式、反馈工具的正常投影、读取范围和未知准入保持原合同。
-
-[账本统计与快照](effect-observations.md#固定提交的事实快照)也将根解析失败及 JSON／YAML／事件行的解析能力超限转为输入错误，保留原文件／行定位，不输出部分成功报告。[只读盘点](adoption.md#先做只读盘点)与账本工具的 JSON 使用 ASCII 转义保留 Unicode 原值；text 仅转义当前输出编码无法表示的字符。两者不改变数据读取范围、统计含义或真实准入状态。
-
-原件工具按原值核对合法根目录名末尾的 Unicode 空白，避免将其误删后拒绝有效仓库；默认与行跨度模式共用此检查，显式工作树根及原件范围限制继续适用。
-
-原件正文读取在管道层执行声明大小上界，另最多读取一个超量探测字节；1 MiB 接收上限保持不变，损坏 Git 对象不能凭小头部触发无界正文捕获。读取和等待退出共用 30 秒期限，失败保留未知来源与既有错误，不改变默认快照或反馈范围。
-
-[逐端点核对](review-detection-preparation.md#逐项核对公开时序裁定和预算端点)补充 GitHub 原生描述编辑历史的只读查询、变化摘要限制及派发／报告／裁定／匹配／预算关闭的原件要求。复用已有来源与输入接口，不新增采集器或结果库；公开版本命中不能认证宿主派发、独立真值或完整预算覆盖，观察入口继续未准入。
-
-[宿主只读证据边界](../superpowers/specs/review-detection-host-evidence.md)已区分官方协议能力、本地 CLI 静态基线与当前 Desktop 实际返回。所有者批准的一轮有界读取已结束：当前原生接口未返回可用 goal 对象，线程列表无匹配可调用通道，依约停止而未扩大来源。未取得实际派发／输入、独立性、时间／费用预算端点；批准不等于证据齐备，未使用次数不供自动重试，窗口继续未启动。
-
-[后续最小接入候选](../superpowers/specs/review-detection-host-evidence.md#5-后续最小接入候选)已列通道可用性、五类端点原件和新增授权边界。当前仅为准备：缺真实宿主通道与完整输入／费用来源，不提出空白读取请求，不重试上一轮；来源与数据／方法／质量条件未核定前继续不启动观察窗口。
-
-[通道与握手候选](../superpowers/specs/review-detection-host-evidence.md#6-通道核定与单次握手授权候选)进一步区分 CLI 静态版本、当前可调用工具面和实际宿主绑定；固定一次握手的请求及必需含路径的返回面。真实端点、server 版本、绑定和接收前限额未核定，尚不可执行；不连接、不复用旧次数，窗口仍未启动。
-
-[通道支持关系核对](../superpowers/specs/review-detection-host-evidence.md#7-已核通道的选择与落实顺序)已完成官方文档、本机静态帮助及当前工具定义的比对。App Server 有集成协议，proxy、终端 UI、执行宿主出站连接和设备配对各有不同职责；当前仍无能绑定此 Desktop 且满足返回范围／接收前限额的原始证据通道。现有检查器已配[可直接运行的空声明演练与反例入口](review-detection-preparation.md#不依赖真实任务的离线演练)，不新增采集器、结果库或 Schema。后续依赖宿主提供方的真实通道资料及自然任务证据，实际连接、读取和研究窗口均未启动。
-
-[资料获取与人工移交](../superpowers/specs/review-detection-host-evidence.md#8-资料获取安装版本与人工移交)已区分系统 CLI `0.152.1`、注册 Desktop 包 `26.1013.4894.0` 及包内 CLI `0.163.0-alpha.10.2`，后者的帮助和静态 Schema 已另核；运行 server 版本及 Desktop 绑定仍未知。用户已只读确认 Connections 页面仅有远程访问／配对入口，并已报告提交应用内反馈；该反馈未有已确认的回复邮箱或工单查询入口，不据此承诺会收到回复。经用户审阅并批准，已创建 [Codex issue #55904](https://github.com/openai/codex/issues/55904)，询问既有 Windows Desktop 的只读接入、实例绑定、运行版本及初始化返回范围和限制；2026-10-21 核对时 issue 开放、暂无评论。公开提问已提交不表示维护方已确认支持。未运行完整 doctor 或实际 daemon version。64 KiB／5 秒仍为本仓候选约束，未当作平台既有保证，连接与观察窗口继续未启动。
-
 ### 当前能力进度
 
-按实际接口和证据判断进度，不将章节、任务、测试或 Finding 数折算成整体完成百分比。下表的局部交付不表示 S0/S1 或 S2 整阶段退出。
-
-| 能力／阶段 | 当前交付 | 尚未完成 |
+| 能力 | 已有结果 | 尚缺或保持暂停 |
 |---|---|---|
-| 治理与质量基础（Phase 1/2） | 确定性分流、版本绑定、结构化审核、独立 verifier、V2 与 required CI 已交付，日常低风险维护可按常设授权推进。 | V3、通用命令拦截、OS 沙箱及可信执行器不在已有能力内；push/merge 的授权遵守过程约定，尚无可信执行器强制落实。 |
-| 事实与非评分建议（S0/S1） | 固定 HEAD 快照、四目标证据可用性、正式账本／公开 PR 回读、原生 status/Gate 准备建议已实现。 | 实际模型身份、人时／费用、独立真值及统一版本化度量未闭合；原子性和来源认证仍有 unknown，原值计数不是效果或独立样本。 |
-| 首研究合同与观察准备（S1） | B、首用途、`review_detection` 目标、95%／20 个百分点精度及有限研究范围已采用；预声明、裁定／匹配和关闭流程已有说明。 | 真实候选、实际职责／原预算、输入与派发时序、独立性和端点仍须核定；不重复请求已采用的范围决定。其他目标或评分用途不因此定稿。 |
-| 离线工具（S2 局部） | 外部相对参考、观察声明检查、Git 原件与行跨度定位、synthetic 检出区间、记录级分析，以及评分更新／校准／反馈路由的合成接口与反例已交付；有可直接运行的示例。 | 真实数据分析、真实评分更新／校准和审核策略接入未启用；synthetic 入口不能改标后接收真实记录或计数。 |
-| 真实影子评估（S3） | 仅有流程与不足回退准备；真实评分／shadow 未准入，`T0/T1` 未设置。 | 对应真实分析实现与质量验证、自然原件及方法条件成立后，才固定窗口并评估真实结局；需区分估计、校准和独立留出用途。 |
-| 单场景有限处理（S4） | 路线与权限边界已说明；未启动真实宿主审批接管或有限自动处理试点。 | S3 支持该场景、正式宿主 adapter、动作／授权映射、停止恢复及可比质量／人工介入证据。当前不能宣称减少弹窗或人工时间。 |
-| 按效果扩展（S5） | 仅有条件性路线，未启动。 | S4 真实退出后按目标逐项准入和验收；provider、完整引擎跨仓、可信执行与编排各有独立依赖。 |
+| Phase 1/2 治理基础 | 确定性分流、版本绑定、结构化审核、V2、独立 verifier、required CI；维护模式以 AGENTS 为准。 | 无 V3、通用命令拦截、OS 沙箱或可信动作执行；批准文字不是运行时强制。 |
+| 非评分准备（S0/S1） | [事实快照](effect-observations.md#固定提交的事实快照)、[正式账本回读](review-feedback.md)、[PR 回读](pr-feedback.md)、[只读建议](review-advisory.md)。 | 来源认证、实际身份、人时/费用、独立真值和原子一致性仍有 unknown；记录数不是独立样本。 |
+| 离线工具（S2 局部） | [公开外部参考](benchmark-reference.md)、[输入检查与原件定位](review-detection-input.md)、[区间计算](review-detection.md)、[合成分析](review-detection-analysis.md)、[合成反馈](review-feedback-simulation.md)。 | synthetic 结果不能改标为真实数据；尚无生产评分、校准或自动路由效果证明。 |
+| SDK | [单次文档审核及可选上下文节点](../superpowers/specs/sdk-readonly-review.md#使用)已交付。 | 默认关闭；一次真实审核不证明长期效果，新实际调用需明确任务、输入与范围。 |
+| 跨仓引擎 | main 已合并[资源包](resource-bundle.md)、[非覆盖初始化](initialization.md)、[Node 本地 V0/V1](node-verification.md)与 [installed 变异切片](https://github.com/MaginaLW/harness-model/pull/147)。 | 后续本地 V2/source6/Stage A 按上表独立候选读取；Node CI 与目标 combined 验收未闭合。 |
 
 ### 既定离线范围的收口
 
-当前已约定的只读事实准备与 synthetic 分析范围已完成接口、实现、示例、反例及兼容性修复，可转入按需维护；当前无已确认且尚未关闭的必修问题。收口依据及复用入口如下，不再将真实状态中的 `not_implemented`、`design_pending` 或 `unknown` 当作新增离线模块的待办。
-
-| 核对项 | 已有交付与验收边界 |
-|---|---|
-| 事实与来源准备 | [工具入口](../../README.md#按需求选工具)覆盖固定事实回读、声明检查、Git 原件／字节定位和非评分建议；各工具继续遵守自身来源范围，不把事实计数换成独立样本。 |
-| 合成分析链 | [记录级分析](review-detection-analysis.md)及[合成反馈演练](review-feedback-simulation.md)覆盖预选、条件计数／区间、完整快照更新、分开的拟合／留出诊断及模拟建议；示例、未知／冲突回退和权限反例已有实现。 |
-| 兼容性与质量 | [PR #98](https://github.com/MaginaLW/harness-model/pull/98)关闭已复现的解析超限、根解析及 Unicode 输出问题；其候选本地与 required CI 均通过 3677 项测试，core／analysis 覆盖率分别约 89%／97%，16 行变更覆盖率 100%，静态与格式检查通过。该证据绑定该候选，不替代后续变更的验证。 |
-| 后续移交准备 | [自然任务配合清单](review-detection-preparation.md#自然任务出现后的配合与核对清单)按入口、事前约定、实际开始、报告、裁定和预算收尾列明用户保留与 Agent 核对事项；[维护方回复步骤](../superpowers/specs/review-detection-host-evidence.md#维护方回复后的核对步骤)按来源、支持／绑定、版本／返回面、接收前限制和查询命令依次核对，明确不足及不支持时的处理，不缺额外空白模板或批准开关。 |
-
-这一收口仅针对上述已约定范围，不表示整个 S2、3-A 或 Phase 3 退出，也不证明真实输入、校准方法或审核策略已就绪。后续只有具体需求、输入／运行环境变化或可复现问题出现时，才维护对应实现、反例与用法；不因外部事实尚缺而新增采集器、Schema、后台检查或重复验证。真实统计评分、自动审核安排和现有 Desktop 附着继续未启动，`T0/T1` 仍未设置。
+现有离线范围已交付；没有新增必做准备队列。具体新需求或可复现问题才触发受影响部分的修改和检查；复用现有接口，不为填队列增加采集器、Schema 或服务。
 
 ### 剩余缺口与推进条件
 
-当前有两个独立卡点：**宿主接入**尚缺受支持的既有 Desktop 端点、实例绑定、实际运行版本、完整返回范围及接收前限制，公开跟进入口为上文的 issue #55904；**真实评价**尚缺自然契约任务在首次非作者专项审核前固定的候选、旧契约、实际输入、职责和原预算，以及后续完整报告、独立裁定与预算关闭原件。维护方资料不能代替自然任务证据，普通开发和现有审核流程可以继续；不为取证制造任务、追加审核或重启已关闭读取。
-
-**真实评分、自动审核和宿主连接继续暂停**，`T0/T1` 保持未设置，观察窗口未启动。收到回复、自然任务出现或材料齐备均只触发既有范围内的来源核对与准备状态更新，不自动解除暂停、执行握手或启用真实分析。
-
-| 依赖类型 | 仍缺什么 | 下一步及关闭条件 |
-|---|---|---|
-| 收口后的独立维护 | 现有离线范围已交付；实现、反例、用法和当前状态需随具体变化保持一致，目前没有新增必做准备项。 | 有具体新需求、输入／环境变化或可复现问题时，定位受影响部分、完成必要修改并通过对应质量门；复用已有入口，不为填队列新增采集器或 Schema，不把模拟配置转作生产参数。 |
-| 等维护方资料 | 既有受支持通道、端点取得办法、当前 Desktop 绑定、实际运行 server／协议版本、全部成功／错误／通知／服务器请求返回面，以及接收前累计字节限制。 | issue #55904 是已建立的公开回复入口，不重复提交同一问题。收到新材料时按[回复核对步骤](../superpowers/specs/review-detection-host-evidence.md#维护方回复后的核对步骤)核对；若明确不支持，记录限制。资料齐备后也保持暂停，后续再填实一次连接范围并取得所需决定；回复不自动授权握手或后续对象读取。 |
-| 等自然任务与入口原件 | 未来自然发生的纯 `docs/**` 且含 `docs/superpowers/specs/**` 契约变更；首次非作者专项审核前的候选、旧契约、机会预选、实际输入、职责及原预算。 | 按[配合清单](review-detection-preparation.md#自然任务出现后的配合与核对清单)提供原入口，核事前约定、回读及正常流程已有的原件；不为取证追加审核，不追溯纳入旧报告、不先设置窗口。后续派发是条件性流程，当前三项暂停不因新材料解除；宿主资料或握手不证明自然任务事实。 |
-| 等裁定与真实结局 | 独立且未读被测报告的裁定原件、同候选语义匹配、完整报告范围、原预算及关闭依据；组间可比性、相关性和缺失条件。 | 仅在原职责／预算覆盖下取得事实，按[裁定、匹配与关闭流程](review-detection-preparation.md#固定报告后独立裁定再匹配与关闭)核对；不足保留 unknown。维护方回复、APPROVE、resolved 或 CI 通过均不代填真值和预算。 |
-| 真实分析启用与反馈接入 | 记录级分析、评分快照更新、校准及模拟路由的离线接口与合成验证已提供；真实来源／方法准入、输入启用及审核策略接入未完成。 | 按[真实分析边界](review-detection-preparation.md#关闭后回读原值条件满足才推进评分)核真实输入与实现、方法适用性、兼容性及 Policy 影响；校准另需结局前预测、固定方法和独立留出，路由另核用途与风险参数。合成验证或真实事实到齐均不自动启用评分或改变审核安排。 |
-| 未来范围或新风险决定 | 3-B V3 的真实高风险用例／资产／沙箱／恢复边界；E5 各线的实际目标；Phase 4 的整体阶段依赖与协调需求。 | 按下节分别选择目标、核风险与授权并验收。它们不是当前 3-A 非评分准备的前置条件；旧 Windows 设计和归档任务不自动恢复。 |
-
-依赖顺序为 **S0/S1 基线与合同准备 → S2 离线实现及独立反例验证 → S3 真实影子评估 → S4 单场景试点 → S5 按效果扩展**。准备材料可以继续；共享合同、路线准入、候选整合、正式验证与真实动作依次串行。
-
-[阶段三进入输入](../implementation/phase-03-entry-inputs.md)保留原三门基线：样本门为 `partial`，真实 V3 用例与统一版本化度量均为 `not_met`。B 已采用；3-A 非评分准备可先推进，生产估计与真实 shadow 仍须满足自身样本、数据隐私、方法用途和治理准入，3-B 真实 V3 独立准入。两包尚未完成实际实现准入，Phase 3 仍为 `not_started`；整体完成须两包各自退出并完成共同验收映射。
+- **真实观察**：B（3-A 非评分准备、3-B 独立 V3）、首用途、`review_detection`、95% 等尾区间/总宽不超过20个百分点及有限研究范围已采用，不重复请求这些决定。真实自然任务的预声明候选、旧契约、实际输入/职责/原预算、完整报告、独立裁定与预算关闭原件仍缺；`T0/T1` 未设置，不制造样本、不启动30日窗口。见[观察准备](review-detection-preparation.md)、[准入](../superpowers/specs/review-detection-admission.md)。
+- **宿主接入**：仍缺受支持的既有 Desktop 通道、实例绑定、实际 server/协议版本、全部返回面及接收前累计限制。既有[issue #55904](https://github.com/openai/codex/issues/55904)是回复入口，未在本轮重查回复；不重复提问、不重启已关闭读取。新材料按[核对步骤](../superpowers/specs/review-detection-host-evidence.md#维护方回复后的核对步骤)处理，齐备也不自动连接。
+- **Phase 3/4**：Phase 3 仍 `not_started`；[进入输入](../implementation/phase-03-entry-inputs.md)的样本门 partial、真实 V3/统一度量 not_met 保留。3-A 单独完成不打开整体退出或 Phase 4。
+- **旧 mutation 加固**：TASK-0094 范围扩大后 BLOCKED；TASK-0095 尚待规格审核，私有 CI 原件传递/重放、Ubuntu 进程树约束和旧账本隔离三个 medium 发现未关闭。旧核对仅证明 c60b663/a231941 未覆盖八文件 WIP；本轮未独立比较 source6，不能推断可丢弃；旧探针绑定有漂移，恢复前须重新核定规格、材料与消费者。TASK-0124 的资源包目标已有后继交付，旧 NEW 不倒填成功。
+- **恢复决策**：本轮只完成治理；是否恢复 Stage B 或旧加固，由所有者另行决定具体目标、基线、风险和额度。治理过程中没有新授权缺口需要用旧预算填补。
 
 ## 条件性能力
 
-以下能力按真实目标与依赖分别立项，不作为所有低风险准备的前置条件，也不因旧蓝图存在而自动启动。
-
-| 能力 | 启动条件与实际缺口 |
-|---|---|
-| 完整引擎跨仓产品化（E5） | 已交付资源分发、独立身份的 Python/Node 非覆盖初始化、Node 本地 V0/V1，以及 [native installed 引擎变异与只读回放](https://github.com/MaginaLW/harness-model/pull/147)。所有者已重新开启完整接入；本地 Node V2、Node CI 与真实 agent-bridge 应用仍需完整验收，完整接入尚未完成。真实目标写入等待其活动会话结束并重核基线和归属；执行边界见[当前接入计划](../superpowers/plans/agent-bridge-integration.md)。 |
-| Provider 接入（E5） | [单用途 SDK 客户端](sdk-and-engine-plan.md#应用自管-sdk-客户端)已实现，并完成一次固定文档审核与真实 PR 反馈回读；它提供显式手动调用，不提供通用 provider 路由、自动评分或 Desktop 附着。新的真实用途仍须核定实际输入与调用范围；实际模型身份、完整内部上下文和实费保持 `unknown`。 |
-| 固定动作可信执行（E5） | 选择服务动作、资产与身份根；补精确参数/版本绑定、撤回/过期、原子一次消费、结果回执及结果未知时的恢复。现有 wrapper 和本地批准文本不提供此执行能力；本路线可独立于 provider。 |
-| V3 高风险验证（3-B） | 选择真实用例，明确安全检查、沙箱、故障注入、dry-run、损失边界及回滚演练；V2、定向变异或低风险影子评估不替代这些证据。 |
-| Phase 4 独立编排器 | 依赖整体 Phase 3（3-A 与 3-B）真实退出、稳定接口和实测协调需求；再建设持久队列、锁/租约、资源调度、暂停恢复及跨主机协调。3-A 单独退出不打开此门，当前会话并发上限不等于这些能力。 |
-
-E5、样本、V3 与 Phase 4 的历史设计输入见[合同提案](phase-entry-proposals-2026-10-04.md)；其中历史现场状态、编号和批准仅适用于各自窗口。
+完整引擎产品化、provider、固定动作可信执行及 V3 均按真实需求分别准入，详见[合同提案](phase-entry-proposals-2026-10-04.md)与[两条路线](sdk-and-engine-plan.md)。Phase 4 另依赖整体 Phase 3 退出、稳定接口及实测协调需求。旧蓝图与宿主并发额度不是实现或运行许可。
 
 ## 旧工作线与证据边界
 
-- [七项后续待办](follow-up-backlog-2026-09-22.md)的历史退出条件未全部验收，整体目标未完成；它们不再是默认执行队列。原范围与证据核对见[完整范围核对](follow-up-completion-audit-2026-10-09.md)。
-- TASK-0063～0071 未完成，其工作线已归档为本地 `archive/codex-*` 标签，不再推进。若新的真实需求需要其中能力，应先确定当前范围、恢复来源与准入，不能直接续用历史动作。
-- 四条历史验收分支 `pilot/ask-report`、`pilot/auto-doc`、`pilot/block-dry-run` 和 `pilot/review-policy` 按原提交保留；[阶段一验收报告](../implementation/phase-01-acceptance-report.md#四个真实受控试点)引用其 attestation HEAD，不能仅因落后 `main` 而清理或作为待合并队列。
-- 本地 `archive/local-task0079-private-evidence` 分支保留 TASK-0079 的两次失败证据，当前无其他分支或标签保全其 tip，不直接合并或公开推送。既有 `archive/*` 标签全部保留；其中 `archive/claude-simplify-architecture` 已有远端副本，其余归档标签当前仅在本地，保全范围不可混同。
-- `external-review`、`verify --pytest-temp-root` 及 runner/诊断/证据移交工具已退役。F 的旧导入验收及 A/B 选择不作为默认待执行方向；新的报告获取或宿主接入需求须按现有能力重新定义。
-- 原失败、SPENT、partial、unknown 结论、用户草稿、既有批准和历史治理编号保持；后继成功或新方案不改写原件。当前批准覆盖以实际 CLI `status` / `gate` 为准，已消费或过期动作不因继续建设而恢复。
-
-**指针**：[执行记录](next-plan-execution-2026-10-08.md) · [完整范围核对](follow-up-completion-audit-2026-10-09.md) · [低干预工作方式](low-intervention.md) · [文档归档](../archive/README.md)
+TASK-0063～0071 已归档，历史七项未全部验收，均不默认续跑。四条 pilot 验收分支、全部 archive refs、用户草稿、原失败/SPENT/partial/unknown、既有批准及编号保留。`archive/local-task0079-private-evidence` 含私有失败材料，不直接合并或公开推送。历史工具退役不授权恢复或删除原件；见[范围核对](follow-up-completion-audit-2026-10-09.md)。
 
 ## 历史记录
 
-2026-09 至 2026-10-09 的逐窗口记录已原样移至[维护状态历史记录](../archive/operations/maintenance-status-history.md)。
+不新建逐窗口台账。原账本、原件与固定 Git 版本保持可追溯：
+
+- [本轮维护基线原状态全文](https://github.com/MaginaLW/harness-model/blob/5b82fc78987a63b686357c272f6dfdd4e0c6e96a/docs/operations/maintenance-status.md)：各 PR、离线合同及旧方向。
+- 停止现场原状态仅在保留的原主根可读：`git show 4ab57ce5b0291ec2841c90782a751c920e284403:docs/operations/maintenance-status.md`。Stage A、A11–A50、失败/额度与 WIP 边界；正文中旧“先接入后瘦身”已由当前治理方向取代。
+- [较早维护历史](../archive/operations/maintenance-status-history.md)与[归档索引](../archive/README.md)。main 原文也可用 `git show <固定提交>:docs/operations/maintenance-status.md` 读取。停止工作线提交尚未公开，远端不能检出；保留原本地分支和对象，不为导航公开其历史/私有原件。对象缺失时报精确缺口，不改写为成功。
