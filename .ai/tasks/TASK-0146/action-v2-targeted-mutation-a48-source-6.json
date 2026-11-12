@@ -1,0 +1,18 @@
+{
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0146",
+  "decision_unit_id": "DU-001",
+  "subject_commit": "547ab50b9937a71664c19ccb866c5ff059638f02",
+  "classification_input_sha256": "e4cddc9b778c0ea29b43b4de1e7d1f20d312721f4f29b748428dc99faef5c68e",
+  "parameter_summary": "Explicit owner A48 sole source6: all14 Native V2 checks, complete current4200-second suite, shared5100/verifyouter5400/completeCLI6600, five fresh mutation pairs with original child limits, record1200/watchdog1199; no source7 or retry.",
+  "conditions": [
+    "Explicit A48/A03 grant64fd6866594ded478d34dab88936ea0a9db546b6ed7d46e92d689ce0ab849704 reopens only retained source6 as one new current-main primary. Prior source1-5, old closure and failures remain; maximum cumulative source Native6, no recovery or source7.",
+    "Current independently reviewed integrated source subject547ab50b9937a71664c19ccb866c5ff059638f02 with ordinary merge ancestry and unchanged frozen spec04fbfd12686c9c91e5d935d89aa5d7b8dad2641fbb05dee9e22ebcadcedce81a. Both historical TASK143 chains are preserved without event or approval translation; explicit allowed scopes and verified recovery stay binding.",
+    "Independent source-current-main-verifier context8cea740a6813b0d0a4b423c2307031fb555aeb2290fed2dc3208864f26843681 saved/load/readback/current before this action or any Native inputs. Implementer source-current-main-author is distinct. Exact spec/classification/action/context raw HEAD/index/worktree committed before proof.",
+    "Use only the selected ordinary source6 checkout/development runtime/owner/s6t and actual producer fixed ENV raw e1ebdde4d00530f2743db9fe4eb8fd9fab742b5bc0c9ea0287f061f0a4170591. No shadow installed consumer, helper bypass, Policy/dependency/permission/threshold change or fabricated contract version.",
+    "Retain14 required checks/full current suite/85total90applicable diff/five fresh killed pairs and confirmed owned cleanup. Shared execution5100, nonrecordverify5400, totalrecordplusverify6600, recordouter1200/watchdog1199; all fixed individual child limits unchanged. Unknown result/cleanup, failure or exhausted cap closes the one Native round.",
+    "All source6 roles, including developer and separate ordinary new wheel runtime, share retained64GiB and combinedsource2M entries. Globalpositive965202100736 under899GiB and every old positive/UNKNOWN remain, no refund/reset. New sourceprep1200 is separate from legacy target preparation; original wait and serviceUSD10/full8.99 unchanged. This action authorizes only local source Native, not publication/CI/target/merge/model/device/production; those use their separately explicit A48/original bounds."
+  ],
+  "expires_at": "2026-11-13T05:29:46.601181+00:00",
+  "single_use": true
+}

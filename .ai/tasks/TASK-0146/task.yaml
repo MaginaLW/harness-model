@@ -144,8 +144,8 @@ goal: Integrate reviewed current main with PR150 while preserving both colliding
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-12T04:52:30Z'
-subject_commit: a231941b59a021448678e2a77ce46b28062d5dfb
+subject_commit: 547ab50b9937a71664c19ccb866c5ff059638f02
 task_id: TASK-0146
-updated_at: '2026-11-12T05:00:34Z'
+updated_at: '2026-11-12T06:21:09Z'
 worktree_dirty: false
 worktree_dirty_paths: []

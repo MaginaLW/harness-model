@@ -11,5 +11,21 @@
     "spec_sha256": "04fbfd12686c9c91e5d935d89aa5d7b8dad2641fbb05dee9e22ebcadcedce81a",
     "subject_commit": "a231941b59a021448678e2a77ce46b28062d5dfb",
     "task_id": "TASK-0146"
+  },
+  {
+    "action_sha256": "b43d2d35ec36457273a8d8832f9957f4268e9c635508796928abf632364059be",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-12T06:21:09Z",
+    "base_commit": "a231941b59a021448678e2a77ce46b28062d5dfb",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-13T05:29:46.601181+00:00",
+    "policy_sha256": "389239e0f44ccd654834a487a18e4f1d60f6b429b654fb83ff1445df0a24cb89",
+    "reason": "Explicit owner A48/A03 sole source6; actual action independent APPROVE5ad17c81/no findings, distinct saved context before inputs and unchanged complete source Native bounds",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "04fbfd12686c9c91e5d935d89aa5d7b8dad2641fbb05dee9e22ebcadcedce81a",
+    "subject_commit": "547ab50b9937a71664c19ccb866c5ff059638f02",
+    "task_id": "TASK-0146"
   }
 ]
