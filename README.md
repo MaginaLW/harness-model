@@ -46,7 +46,7 @@
 | [AI Flow Skill](.agents/skills/ai-flow/SKILL.md) | Codex 可发现的通用 AI Flow 工作流 |
 | [Quickstart](docs/operations/quickstart.md) | 从干净克隆安装、测试并运行无外部动作示例 |
 | [接入现有 AI 工作流](docs/operations/adoption.md) | 只读盘点、可合并规则和分批推广；区分轻量接入与完整引擎 |
-| [SDK 客户端与跨仓初始化方案](docs/operations/sdk-and-engine-plan.md) | 已交付 SDK 的使用与后续边界，以及已选 agent-bridge 但尚未交付的跨仓初始化方案 |
+| [SDK 客户端与跨仓初始化方案](docs/operations/sdk-and-engine-plan.md) | SDK 使用、跨仓初始化边界与后续验收 |
 | [低干预工作方式](docs/operations/low-intervention.md) | Agent 连续推进与必要人工决定的边界 |
 | [Hooks](docs/operations/hooks.md) | 本地 wrapper、`aiflow observe` 协议与平台证据边界 |
 | [故障恢复](docs/operations/recovery.md) | 半创建、损坏状态、FAILED/BLOCK、stale evidence 与精确清理边界 |
@@ -60,13 +60,9 @@
 
 Chapters 1–7（工程基线、任务状态、分流与验证、治理交互、证据闭环、Agent/Hooks/CI、试点验收）按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)完成；Chapters 8–13（结构化审核、V2 contracts、独立 Verifier、acceptance/mutation、运行期观测与 Hooks、自举 REVIEW 试点）按[阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md)完成。计划中的未来能力不能当作已经可用。
 
-剩余建设以数据与效果基线、任务分层置信度、反馈驱动审核和最小宿主接入为主线，按 **S0/S1 准备 → S2 离线验证 → S3 真实影子评估 → S4 单场景试点 → S5 按效果扩展** 推进。项目所有者已选择 **B：3-A 低风险建议与校准、3-B 高风险 V3 独立准入和验收**，首场景为本仓自然治理任务的只读建议，见[置信度反馈设计](docs/superpowers/specs/confidence-feedback.md)。有效能力清单和旧工作线边界见[维护收尾与待办](docs/operations/maintenance-status.md#剩余建设主线)，设计输入见[多层审核与置信度反馈分阶段计划](docs/superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)。当前范围的准备与常规实施仍按 AGENTS.md 准入；数据、统计、隐私和风险用途参数尚未全部冻结。
+当前先完成仓库治理；Stage B 最新探针失败后停止，旧 mutation 加固、真实评分、自动审核与宿主连接保持暂停。候选版本、停止原因、WIP 归属和下一步缺项只在[维护收尾与待办](docs/operations/maintenance-status.md)查找；旧计划不是执行队列。
 
-阶段三仍为 `not_started`，实际实现准入尚未完成。[阶段三进入输入](docs/implementation/phase-03-entry-inputs.md)保留原三门，并明确两包关系：3-A 非评分准备可先做，生产估计与真实 shadow 先满足自身数据、方法和用途条件；3-B 独立验证真实 V3。整体 Phase 3 须两包各自退出；Phase 4 编排继续依赖整体退出、稳定接口与实测协调需求。完整引擎跨仓产品化、provider 和固定动作可信执行按真实需求分别准入。旧七项是历史未验收范围，TASK-0063～0071 已归档、不再默认续跑；未来能力与历史通过均不能当作当前可用能力。
-
-现有 S0/S1 准备工具包括[固定 HEAD 事实快照](docs/operations/effect-observations.md#固定提交的事实快照)和[只读任务准备建议](docs/operations/review-advisory.md)。
-建议复用当前原生 status 与适用状态的 Gate，固定 `probability_status=unestimated`、`execution_allowed=false`，不给执行权限。
-这些能力不代表生产评分、真实 shadow、模型身份认证、独立样本充分或阶段退出。
+Phase 3 仍为 `not_started`，Phase 4 依赖其整体退出。既定研究决定与具体进入条件见[维护状态](docs/operations/maintenance-status.md#剩余缺口与推进条件)，历史设计见[归档索引](docs/archive/README.md)；当前治理不自动开启后续路线。
 
 ## 开始参与
 

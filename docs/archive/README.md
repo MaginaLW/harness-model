@@ -126,3 +126,7 @@
 ## 已移除的试点工具（2026-10-10）
 
 - [自托管执行基础设施](../operations/self-hosted-runners.md)、[Runner 盘点与健康检查](../operations/runner-health-checks.md)、[执行回执](../operations/runner-receipts.md)、[受控工具发现](../operations/controlled-tool-discovery.md)、[本地证据移交](../operations/evidence-handoff.md)：对应工具已删除，文档保留历史事实或恢复指引。
+
+## 当前入口的固定历史
+
+维护状态与 agent-bridge 接入计划已缩为当前摘要；原全文由 Git 固定版本保留，不另复制窗口叙事。main 基线 `5b82fc78987a63b686357c272f6dfdd4e0c6e96a` 与停止工作线 `4ab57ce5b0291ec2841c90782a751c920e284403` 的链接和本地 `git show` 用法见[维护状态历史导航](../operations/maintenance-status.md#历史记录)与[接入计划固定合同](../superpowers/plans/agent-bridge-integration.md#fixed-contracts-and-history)。原任务账本、失败原件和 archive refs 保留，历史下一步与额度不自动恢复执行。
