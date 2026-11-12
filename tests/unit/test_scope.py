@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -119,7 +120,9 @@ def test_change_collection_includes_commit_and_worktree_sources(
     )
 
 
-def test_change_collection_preserves_deleted_and_both_rename_paths(tmp_path: Path) -> None:
+def test_change_collection_preserves_deleted_and_both_rename_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     repository = tmp_path / "repository"
     repository.mkdir()
 
@@ -165,6 +168,13 @@ def test_change_collection_preserves_deleted_and_both_rename_paths(tmp_path: Pat
     subject = git("rev-parse", "HEAD")
     (repository / "src" / "tracked.py").write_text("after\n", encoding="utf-8")
     (repository / "src" / "untracked.py").write_text("new\n", encoding="utf-8")
+    monkeypatch.setenv("GIT_OPTIONAL_LOCKS", "1")
+    tracked = repository / "src" / "new.py"
+    tracked_stat = tracked.stat()
+    os.utime(tracked, ns=(tracked_stat.st_atime_ns, tracked_stat.st_mtime_ns + 2_000_000_000))
+    index = repository / ".git" / "index"
+    index_before = (index.stat().st_ino, index.stat().st_mtime_ns, index.read_bytes())
+    parent_environment = dict(os.environ)
 
     changed = collect_changed_paths(
         repository,
@@ -179,6 +189,8 @@ def test_change_collection_preserves_deleted_and_both_rename_paths(tmp_path: Pat
         "src/tracked.py",
         "src/untracked.py",
     )
+    assert (index.stat().st_ino, index.stat().st_mtime_ns, index.read_bytes()) == index_before
+    assert dict(os.environ) == parent_environment
 
 
 def test_auto_preflight_requires_all_guardrails_in_safety_order() -> None:

@@ -1,0 +1,39 @@
+{
+  "base_commit": "12f15a3b7feaf365cf60d019a1b0417ce27407cf",
+  "branch": "codex/delegation-global-context",
+  "classification_input_sha256": "1e02f984f0f3fce1e50f37ccd71ebf32534c37c610e21818908703e8124b968e",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/scope.py",
+      "tests/unit/test_scope.py",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Complete delegation policy delivery with read-only Git context and scope collection",
+        "impact_scope": [
+          "src/aiflow/scope.py",
+          "tests/unit/test_scope.py",
+          "docs/operations/maintenance-status.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Complete delegation policy delivery with read-only Git context and scope collection",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "49242714f4285726e3e73666ec6aa12c66963611f58114ed584f15fe1473d9fd",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "1bfb86a73aa37f94dcc5e9c695b0eae501e96b17d899dd4f9ad34b5920b2ef53",
+  "task_id": "TASK-0145"
+}

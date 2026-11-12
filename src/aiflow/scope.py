@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import fnmatch
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path, PureWindowsPath
@@ -214,7 +215,12 @@ def assess_auto_scope(
 def _run_git(root: Path, arguments: Sequence[str]) -> bytes:
     try:
         result = subprocess.run(
-            ["git", *arguments], cwd=root, capture_output=True, check=False, timeout=10
+            ["git", *arguments],
+            cwd=root,
+            capture_output=True,
+            check=False,
+            timeout=10,
+            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
         )
     except (OSError, subprocess.TimeoutExpired) as error:
         raise StorageError(
