@@ -22,6 +22,8 @@
 
 **完整接入未完成，最新手动主探针5失败后已封账停止。** 最新失败为 L exit1、空 `AssertionError`，仅能定位至启动身份/绑定区域；具体断言和根因仍 UNKNOWN。临时 Process 策略已恢复；N 不存在、L 退出不能证明 carrier 独立性或 owned cleanup。
 
+原件静态核对已确认，准备材料的前驱链声明与 supervisor、controller 两处检查引用的前驱层级不一致。在固定维护基线 `bdd4fef3e1ae4a331c738e07e932c4749cd05c0c` 的 `src`、`tools`、`tests` 中按精确名称核对，未发现这些私有 helper 的生产消费者，本轮 P3 生产代码修改不实施。私有修复留待原工作线恢复时核定。原执行缺少 traceback，历史实际首个异常断言仍为 UNKNOWN。静态诊断回执保留在原主根的 `build/co/campaign/stage-b/target-subject-recovery/diagnosis/static-binding-review.json`。
+
 累计 probe5/5、policy7/8、Set14/16。LOCAL14、产品 record/verify、PR3 新同步、私有 CI 和 combined Gate 均未启动。源/目标的旧消耗、失败、UNKNOWN 与全部资源上界保留，剩余预算和未用槽位不恢复执行许可；不修复后重跑、不提出新恢复轮。PR150/PR3 在原停止记录中保持打开，本文不冒称已合并或实时远端状态。
 
 本地失败原件：`build/co/campaign/stage-b/target-subject-recovery/probe-failure-closeout.json`（忽略目录，不能随公开文档发布）。旧根、空 worker 目录和全部原件不动。精确历史计数、额度、候选与 Windows 边界见[接入计划](../superpowers/plans/agent-bridge-integration.md)，两者均不批准恢复。
