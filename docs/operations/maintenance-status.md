@@ -24,7 +24,7 @@
 
 [草稿 #128](https://github.com/MaginaLW/harness-model/pull/128)和[草稿 #131](https://github.com/MaginaLW/harness-model/pull/131)已由上述交付替代并关闭，未合并旧候选，原分支和失败材料保留。配置隔离不提供 OS 沙箱，也不清除所选 HEAD 自身可达的历史；超时不证明全部后代已停止。
 
-[PR #149](https://github.com/MaginaLW/harness-model/pull/149)仍为 HOLD，未合并。其 LF 修复已有独立后继交付，但其只读 Git 改动及 TASK-0139 的失败、缺失验收和禁止合并边界继续保留；TASK-0149 的证据不能移用于该候选。[PR #150](https://github.com/MaginaLW/harness-model/pull/150)仍打开且未合并，目标 LOCAL、私有 CI 与 combined 验收仍未完成。
+[PR #149](https://github.com/MaginaLW/harness-model/pull/149)已因后继替代而关闭，未合并：只读 Git 保护已由 [PR #151](https://github.com/MaginaLW/harness-model/pull/151)以子进程环境 `GIT_OPTIONAL_LOCKS=0` 交付，LF 修复由 PR #157 交付。旧分支、TASK-0139 的 FAILED 状态、失败原件和缺失验收继续保留；关闭不表示旧候选验收通过，后继证据不能移用于该候选。[PR #150](https://github.com/MaginaLW/harness-model/pull/150)仍打开且未合并，目标 LOCAL、私有 CI 与 combined 验收仍未完成。
 
 ### agent-bridge 阶段 B 当前收尾
 
