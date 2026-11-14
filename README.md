@@ -60,7 +60,7 @@
 
 Chapters 1–7（工程基线、任务状态、分流与验证、治理交互、证据闭环、Agent/Hooks/CI、试点验收）按[阶段一实施目录](docs/superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)完成；Chapters 8–13（结构化审核、V2 contracts、独立 Verifier、acceptance/mutation、运行期观测与 Hooks、自举 REVIEW 试点）按[阶段二实施目录](docs/superpowers/plans/2026-08-22-phase-02-review-verification-implementation-directory.md)完成。计划中的未来能力不能当作已经可用。
 
-当前先完成仓库治理；Stage B 最新探针失败后停止，旧 mutation 加固、真实评分、自动审核与宿主连接保持暂停。候选版本、停止原因、WIP 归属和下一步缺项只在[维护收尾与待办](docs/operations/maintenance-status.md)查找；旧计划不是执行队列。
+仓库治理与已授权的维护收口已完成，后续按具体需求或可复现问题推进；Stage B 最新探针失败后停止，旧 mutation 加固、真实评分、自动审核与宿主连接保持暂停。候选版本、停止原因、WIP 归属和下一步缺项只在[维护收尾与待办](docs/operations/maintenance-status.md)查找；旧计划不是执行队列。
 
 Phase 3 仍为 `not_started`，Phase 4 依赖其整体退出。既定研究决定与具体进入条件见[维护状态](docs/operations/maintenance-status.md#剩余缺口与推进条件)，历史设计见[归档索引](docs/archive/README.md)；当前治理不自动开启后续路线。
 
