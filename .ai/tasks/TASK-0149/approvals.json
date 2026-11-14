@@ -11,5 +11,19 @@
     "spec_sha256": "bae524b9a19fff4bab365830d810dd1c537cc4a84a6f0f4ffacd533f6013a0b9",
     "subject_commit": "e3a41ee842baab6afb713a521aef784851d0c52a",
     "task_id": "TASK-0149"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-14T02:30:13Z",
+    "base_commit": "e3a41ee842baab6afb713a521aef784851d0c52a",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "0a381b4f1a905c94c9bcbc634eb0f6c2867666f3b83f21ba3596911c6c77b98d",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：当前独立实施审核REV-0002为APPROVE且无发现，Windows原生V1全部10项通过；未触及授权文件、Policy、权限或暂停线。仅记录当前subject的code批准，随后另核Gate和当前PR head required CI。",
+    "schema_version": "1.0",
+    "spec_sha256": "bae524b9a19fff4bab365830d810dd1c537cc4a84a6f0f4ffacd533f6013a0b9",
+    "subject_commit": "97e9d334ccaa3cff943d522ea8ec2244a60b99ff",
+    "task_id": "TASK-0149"
   }
 ]
