@@ -4,7 +4,7 @@
 
 本页只回答当前能力、版本、阻塞和下一步边界；规则以 [AGENTS.md](../../AGENTS.md) 为唯一权威，操作流程见[低干预工作方式](low-intervention.md)。历史计划和 NEW/BLOCKED 任务不是执行队列。
 
-**当前方向：先治理仓库。** 本轮压缩入口并核对真实重复成本；Stage B、旧 mutation 加固、真实评分、自动审核、Desktop 附着及 Phase 3/4 继续暂停。治理完成不自动恢复这些工作。源码、Policy、授权和质量阈值未因文档治理改变。
+**当前方向：仓库维护。** 入口治理和已授权的维护收口已完成，后续按具体需求或可复现问题推进；Stage B、旧 mutation 加固、真实评分、自动审核、Desktop 附着及 Phase 3/4 继续暂停。维护交付不自动恢复这些工作，Policy、授权和质量阈值保持不变。
 
 **治理资料归属**：[治理建议](HARNESS_MODEL_GOVERNANCE_RECOMMENDATIONS.md)与[执行计划](HARNESS_MODEL_GOVERNANCE_EXECUTION_PLAN.md)已从 dotfiles 归入本仓，原文按规划时点保留；其中“待执行”“本次未执行”描述原文编写阶段。实际治理已由 [PR #154](https://github.com/MaginaLW/harness-model/pull/154) 合入：P0/P1/P2/P5 收口，P3/P4 按证据不实施；入口固定集合字符减少 53.62%，实际 token 与自然任务工时效果未测。Stage B 与旧加固仍停止。
 
@@ -12,11 +12,19 @@
 
 | 对象 | 固定版本与用途 | 可用结论及限制 |
 |---|---|---|
-| 本轮维护基线 | main `5b82fc78987a63b686357c272f6dfdd4e0c6e96a`；治理分支唯一写入者负责文档集成。 | 已合并代码与下述候选分开；源码包与安装包不能只按相同版本号互相认证。 |
+| 状态核对基线 | main `94fa84dce452a08e682a838ffd8b1a8d2b84e571`，已含 PR #157 的维护变更与 PR #158 的任务关闭记录。 | 已合并代码与下述候选分开；源码包与安装包不能只按相同版本号互相认证。 |
 | 原主根与旧 WIP | `codex/agent-bridge-phased-adoption` / `4ab57ce5b0291ec2841c90782a751c920e284403`；仍属原任务，非本轮写入对象。 | 八个暂存 mutation/schema 文件、TASK-0094/0095/0124 及三份未跟踪建议稿保留。本轮已核对路径和内容校验值；不得整文件覆盖、stash、reset、clean 或当作重复删除。 |
 | 已验收本地候选 | 普通安装候选 `c60b663427e73ca2d551d7a9aca2dc68b443c954`；Stage A 自有治理根。 | 原记录报告本地采用通过，不代表本维护基线含有全部候选代码，也不代表 Stage B 验收。 |
 | source6 发布候选 | `5ce4cbd841a4656d346c9b17938a0b42d5f1d897`；[PR #150](https://github.com/MaginaLW/harness-model/pull/150)。 | 原记录报告 Native、7354 项测试/9 项跳过、变异及源 Gate/CI 通过；本轮未重验，不扩大为 main 或目标消费成功。 |
 | 已停止消费候选 | agent-bridge TASK-0017 / REVIEW / V2；原独立目标根及原任务所有者保留现场。 | 原记录为 BLOCKED，Missing: block_resolution；历史干净封账 `d1fbd37a7df351610021b0a4a509073a573d8cab` 属较早窗口，不冒称 probe5 后新 HEAD。 |
+
+### 已完成的维护收口
+
+[PR #157](https://github.com/MaginaLW/harness-model/pull/157)已合并 Windows 新任务事件的规范 UTF-8/LF 字节修复、clean-checkout 的 Git/构建/安装/CLI 配置隔离及离线 wheel 验收，并保留资源包规范化与大小限制说明。TASK-0149 的独立设计与实现审核通过，原生 Windows V1 的十项检查通过（6507 passed、9 项条件跳过），本地 Gate 与当前候选 required CI 通过；[PR #158](https://github.com/MaginaLW/harness-model/pull/158)已合并任务关闭记录，账本状态为 MERGED。证据见[任务记录](../../.ai/tasks/TASK-0149/task.yaml)与[验收索引](../../.ai/tasks/TASK-0149/evidence.json)，原始日志仍在实际验收克隆中。
+
+[草稿 #128](https://github.com/MaginaLW/harness-model/pull/128)和[草稿 #131](https://github.com/MaginaLW/harness-model/pull/131)已由上述交付替代并关闭，未合并旧候选，原分支和失败材料保留。配置隔离不提供 OS 沙箱，也不清除所选 HEAD 自身可达的历史；超时不证明全部后代已停止。
+
+[PR #149](https://github.com/MaginaLW/harness-model/pull/149)仍为 HOLD，未合并。其 LF 修复已有独立后继交付，但其只读 Git 改动及 TASK-0139 的失败、缺失验收和禁止合并边界继续保留；TASK-0149 的证据不能移用于该候选。[PR #150](https://github.com/MaginaLW/harness-model/pull/150)仍打开且未合并，目标 LOCAL、私有 CI 与 combined 验收仍未完成。
 
 ### agent-bridge 阶段 B 当前收尾
 
