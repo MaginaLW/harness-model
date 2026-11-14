@@ -352,3 +352,16 @@ def test_exact_subject_sync_staged_recovery_cannot_hide_unmaterialized_risk_fact
         load_task_record(repository, "TASK-0001")
     assert replacements == []
     assert _artifacts(repository) == before
+
+
+def test_risk_fact_events_preserve_canonical_utf8_bytes(draft: tuple[Path, Path]) -> None:
+    repository, _ = draft
+    _apply(draft, actor="审阅者")
+    path = resolve_task_path(repository, "TASK-0001", "events.jsonl")
+    raw = path.read_bytes()
+    events = [json.loads(line) for line in raw.splitlines()]
+    expected = b"".join(
+        (json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
+        for event in events
+    )
+    assert raw == expected
