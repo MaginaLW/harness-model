@@ -1,6 +1,6 @@
 # AI Flow 资源包
 
-[PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付版本化资源分发。普通 wheel 提供 15 份 Schema、四份待目标审核的 Policy 种子和规格模板。资源来自同一份源码，清单绑定规范化 UTF-8/LF 字节、大小、SHA-256 和 CLI、资源及 Policy 版本；缺项、额外项、版本不符、损坏或不支持的文件类型均拒绝。
+[PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付版本化资源分发。普通 wheel 提供 15 份 Schema、四份待目标审核的 Policy 种子和规格模板。资源来自同一份源码，清单绑定规范化 UTF-8/LF 字节、大小、SHA-256 和 CLI、资源及 Policy 版本；缺项、额外项、版本不符、损坏或不支持的文件类型均拒绝。构建将 CRLF 规范为 LF，拒绝裸 CR 和无效 UTF-8，不修改源文件。
 
 资源包只提供分发和只读 API，不创建目标 `.ai`、身份、任务或批准，也不选择目标验证方案。
 [PR #140](https://github.com/MaginaLW/harness-model/pull/140)另行交付[非覆盖初始化](initialization.md)，默认从普通 wheel 读取本资源包。Policy 种子不构成目标授权，不能把本仓常设授权或维护模式带入外仓。完整跨仓范围见[接入方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
@@ -30,7 +30,7 @@ from aiflow.resource_bundle import read_bundle
 manifest, resources = read_bundle(files("aiflow").joinpath("_bundled_resources"))
 ```
 
-`resources` 的键为包内相对路径，值为规范资源字节。读取先完成整个清单校验，不返回部分结果。普通安装和 `zipfile.Path` 读取均有验证；可编辑安装不提供 `_bundled_resources`，分发验收应使用实际 wheel。
+`resources` 的键为包内相对路径，值为规范资源字节。读取先完成整个清单校验，不返回部分结果。读取上限为 manifest 64 KiB、单项资源 1 MiB、资源总量 4 MiB。普通安装和 `zipfile.Path` 读取均有验证；可编辑安装不提供 `_bundled_resources`，分发验收应使用实际 wheel。
 
 构建检查其负责的源码、资源、缓存、元数据、暂存和输出路径，拒绝检测到的链接或冲突；这些检查不提供并发修改下的原子保证。
 
