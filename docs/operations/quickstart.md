@@ -358,6 +358,8 @@ implementation review 或 local code approval。Gate 仍逐项核对这些 curre
 
 需要工作区内落盘时，在运行 CLI 前将这三个标准变量设为同一已预检的项目内目录；不修改系统全局环境。分发测试还要求运行材料位于被测 checkout 之外，可将正式验收的精确 Git clone 与临时根作为同一项目目录内的同级目录。任务、源代码、解释器、验证和原件应属于这个实际验收 clone，不能将别处的 PASS 摘要复制回来充当本地验证。失败原件保留，临时目录传播不改变检查命令、超时、覆盖率阈值或批准要求。
 
+clean-checkout 回归使用真实单分支传输克隆（`--no-local --single-branch --no-tags`），固定并核对源 HEAD；不复制无关分支/tag 的私有对象，但该 HEAD 自身可达历史仍会传输，环境隔离不等于历史隐私清除。构建使用锁定开发环境已有依赖（`build --no-isolation`），再以 `pip --no-index --no-deps` 安装本次 wheel；缺少构建依赖时失败，不自动联网补齐。Git、构建、安装及示例 CLI 的 HOME、配置、缓存与临时目录均限于本次测试根，继承凭据与代理不传入。此为配置隔离，不是 OS 沙箱；超时不证明全部后代已停止，失败测试根须保留至确认终止。
+
 ### 严格本地验证的环境适配
 
 当 Windows 完整验证因环境问题失败或超时，先保留该轮原件，再在隔离 Linux 克隆中核对解释器、依赖元数据及路径形状，不将 CI 通过替代本地正式 Gate。TASK-0145 已在 WSL Alpine、CPython 3.11.16 / musl、uv 0.12.5、Git 2.49.1 上完成 6435 passed / 77 skipped 和本地 Gate PASS，证据见 [任务 evidence](../../.ai/tasks/TASK-0145/evidence.json)；这只证明该固定候选及环境可用。
