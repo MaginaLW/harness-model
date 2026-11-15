@@ -26,6 +26,8 @@
 
 [PR #149](https://github.com/MaginaLW/harness-model/pull/149)已因后继替代而关闭，未合并：只读 Git 保护已由 [PR #151](https://github.com/MaginaLW/harness-model/pull/151)以子进程环境 `GIT_OPTIONAL_LOCKS=0` 交付，LF 修复由 PR #157 交付。旧分支、TASK-0139 的 FAILED 状态、失败原件和缺失验收继续保留；关闭不表示旧候选验收通过，后继证据不能移用于该候选。[PR #150](https://github.com/MaginaLW/harness-model/pull/150)仍打开且未合并，目标 LOCAL、私有 CI 与 combined 验收仍未完成。
 
+[PR #161](https://github.com/MaginaLW/harness-model/pull/161)（合并提交 `5599ad6e`，Ubuntu `ai-quality-gate` 通过）与 [PR #162](https://github.com/MaginaLW/harness-model/pull/162)（合并提交 `5afe908b`，Ubuntu `ai-quality-gate` [run 43676489608](https://github.com/MaginaLW/harness-model/actions/runs/43676489608) 通过）已完成工程克制与低打断规范的两阶段内化，分别合入 [低干预工作方式](low-intervention.md)、[效果观察口径](effect-observations.md)、[项目规则采用示例](../../examples/adoption/project-rules.md)、[AGENTS.md](../../AGENTS.md)、AI Flow 模板及 [ai-flow 技能](../../.agents/skills/ai-flow/SKILL.md)。[TASK-0154](../../.ai/tasks/TASK-0154/task.yaml) 原件保留在合并树中，因本机 Windows `V1` `pytest --cov-branch` 触发 3000s `RUNNER_TIMEOUT`（另预存 `test_incomplete_source_distribution_cannot_build_wheel` 在中文 Windows GBK 解码下失败）而保持 `BLOCKED`（`verification_unavailable`）历史状态，不回填本地 `VERIFIED`；PR #162 已由项目所有者审阅后基于远端 Ubuntu CI 全量通过授权合并，见 [审核包](../../.ai/tasks/TASK-0154/review-package.md)。
+
 ### agent-bridge 阶段 B 当前收尾
 
 **完整接入未完成，最新手动主探针5失败后已封账停止。** 最新失败为 L exit1、空 `AssertionError`，仅能定位至启动身份/绑定区域；具体断言和根因仍 UNKNOWN。临时 Process 策略已恢复；N 不存在、L 退出不能证明 carrier 独立性或 owned cleanup。
