@@ -10,7 +10,7 @@
 
 ## 代码地图
 
-- `AGENTS.md`（仅 `## 开发与协作` L7–8 与 `## AI Flow 规则` 第 8 条 L48；`## 当前治理模式` 与 `## 常设授权` 全节保持原样未改）
+- `AGENTS.md`（仅 `## 开发与协作` L7–8 与 `## AI Flow 规则` 第 8 条 L47；`## 当前治理模式` 与 `## 常设授权` 全节保持原样未改）
 - `.ai/templates/spec.md`（在 `## 范围` 与 `## 非目标` 内补充已有能力复用核查、外部边界防卫与拒绝推测性抽象）
 - `.ai/templates/ask.md`（补充 `A01` 编号及可选 `0–3` 打断评分提示与 `0/1` 当轮规则 diff 处理边界；完整保留 `2—4` 与六个选项字段）
 - `.ai/templates/review-package.md`（在 `## 语义变更` 与 `## 审核问题` 内嵌入 Practical DRY 三条件、边界防卫核查与交付边界五项自检 + `S/Q/U/H` 汇总说明）
@@ -69,4 +69,4 @@
 
 ## 推荐结论
 
-**`APPROVE_WITH_CONDITIONS`（代码/文案整合可接受，但流程门禁处于 `ESCALATED / verification_unavailable`，需所有者裁决）**：文件内容已通过全部直接关联契约测试、静态检查（`ruff`、`mypy`、`git diff --check`）及独立审核员复核；因本机 Windows `V1` `pytest --cov-branch` 耗尽 3000s 预算并受 `test_incomplete_source_distribution_cannot_build_wheel` 预存编码异常影响，建议由项目所有者审阅 `AGENTS.md` 变更并批准推送开 PR，借助远端 Ubuntu required CI 完成全量 `V1` 与覆盖率验证后再决定合并与进入阶段 3（`agent-bridge`）。
+**`APPROVE_WITH_CONDITIONS`（代码/文案整合可接受，但流程门禁处于 `BLOCKED / verification_unavailable`，需所有者裁决）**：文件内容已通过全部直接关联契约测试、静态检查（`ruff`、`mypy`、`git diff --check`）及独立审核员复核；因本机 Windows `V1` `pytest --cov-branch` 耗尽 3000s 预算并受 `test_incomplete_source_distribution_cannot_build_wheel` 预存编码异常影响，建议由项目所有者审阅 `AGENTS.md` 变更并批准推送开 PR，借助远端 Ubuntu required CI 完成全量 `V1` 与覆盖率验证后再决定合并与进入阶段 3（`agent-bridge`）。
