@@ -9,7 +9,7 @@ allowed_scope:
 base_commit: b489233a26c31e193929c5d1973eae36571ba058
 branch: codex/core-git-and-status-consolidation
 created_at: '2026-11-15T16:01:26Z'
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -68,8 +68,8 @@ goal: Eliminate redundant Git subprocesses and unify status_service and gate V2,
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-15T17:25:00Z'
-subject_commit: 4fbecd2185dde066268518be37fdc195bf2888f6
+subject_commit: 86f3c053afe051fae39e4372a18bf458a0236e5d
 task_id: TASK-0155
-updated_at: '2026-11-15T17:27:24Z'
+updated_at: '2026-11-15T18:14:34Z'
 worktree_dirty: false
 worktree_dirty_paths: []
