@@ -1,0 +1,43 @@
+{
+  "base_commit": "cbd16a0c98cb3b739ae68076ac8cc7ec38905292",
+  "branch": "codex/integrate-boring-approval-governance",
+  "classification_input_sha256": "a29647ff0b22f608ddb4933ff2f9d6f16e470601bef063b40c93820f6e646963",
+  "content": {
+    "allowed_scope": [
+      "AGENTS.md",
+      ".ai/templates/spec.md",
+      ".ai/templates/ask.md",
+      ".ai/templates/review-package.md",
+      ".agents/skills/ai-flow/SKILL.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Integrate engineering restraint, A01+0-3 low-interruption protocol, and delivery boundary checks into AGENTS.md, AI Flow templates, and ai-flow skill",
+        "impact_scope": [
+          "AGENTS.md",
+          ".ai/templates/spec.md",
+          ".ai/templates/ask.md",
+          ".ai/templates/review-package.md",
+          ".agents/skills/ai-flow/SKILL.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Integrate engineering restraint, A01+0-3 low-interruption protocol, and delivery boundary checks into AGENTS.md, AI Flow templates, and ai-flow skill",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "69728bc481acbac5871457dff849acec1a06f1039166bc7f9ca486f80cf7dec3",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "36f8f873da88eb2d5470380bb0200a6d1d84d6c3df1066d086988991156aab9a",
+  "task_id": "TASK-0154"
+}

@@ -1,0 +1,67 @@
+allowed_scope:
+- AGENTS.md
+- .ai/templates/spec.md
+- .ai/templates/ask.md
+- .ai/templates/review-package.md
+- .agents/skills/ai-flow/SKILL.md
+base_commit: cbd16a0c98cb3b739ae68076ac8cc7ec38905292
+branch: codex/integrate-boring-approval-governance
+created_at: '2026-11-14T22:23:10Z'
+current_state: BLOCKED
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: false
+    code_modified: false
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: false
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Integrate engineering restraint, A01+0-3 low-interruption protocol, and delivery
+    boundary checks into AGENTS.md, AI Flow templates, and ai-flow skill
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - AGENTS.md
+  - .ai/templates/spec.md
+  - .ai/templates/ask.md
+  - .ai/templates/review-package.md
+  - .agents/skills/ai-flow/SKILL.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0154
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 36f8f873da88eb2d5470380bb0200a6d1d84d6c3df1066d086988991156aab9a
+goal: Integrate engineering restraint, A01+0-3 low-interruption protocol, and delivery
+  boundary checks into AGENTS.md, AI Flow templates, and ai-flow skill
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-14T22:24:35Z'
+subject_commit: 7d4907713a2e1f23bd2056e1993206de2640616f
+task_id: TASK-0154
+updated_at: '2026-11-15T03:53:00Z'
+worktree_dirty: false
+worktree_dirty_paths: []
