@@ -60,8 +60,8 @@ goal: Integrate engineering restraint, A01+0-3 low-interruption protocol, and de
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-14T22:24:35Z'
-subject_commit: cbd16a0c98cb3b739ae68076ac8cc7ec38905292
+subject_commit: 670eb2c8d9b0fb05e1dd5df9ca65525dfca3d75f
 task_id: TASK-0154
-updated_at: '2026-11-14T22:26:04Z'
+updated_at: '2026-11-15T03:51:51Z'
 worktree_dirty: false
 worktree_dirty_paths: []
