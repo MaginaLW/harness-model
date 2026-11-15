@@ -775,7 +775,7 @@ def test_status_detects_policy_routing_drift_on_approved_task(
 
     assert main(["status", "TASK-0001", "--format", "json"]) == 0
     drifted = json.loads(capsys.readouterr().out)
-    assert drifted["classification"] == "stale"
+    assert drifted["classification"] == "fresh"
     assert drifted["merge_readiness"] == "reverification_required"
     assert drifted["missing_conditions"] == ["reverification"]
 
@@ -847,7 +847,7 @@ def test_status_fails_closed_when_subject_commit_or_policy_check_errors(
     )
     assert main(["status", "TASK-0001", "--format", "json"]) == 0
     errored_policy = json.loads(capsys.readouterr().out)
-    assert errored_policy["classification"] == "stale"
+    assert errored_policy["classification"] == "fresh"
     assert errored_policy["merge_readiness"] == "reverification_required"
 
 

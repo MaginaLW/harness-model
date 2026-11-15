@@ -356,6 +356,7 @@ def _merge_readiness(
     classification: str,
     approvals: str,
     evidence: str,
+    policy_ready: bool = True,
     repository_ready: bool = True,
     scope_ready: bool = True,
 ) -> str:
@@ -365,7 +366,11 @@ def _merge_readiness(
     if evidence == "awaiting_implementation_review_or_finalization":
         return "not_ready"
     current = (
-        classification == "fresh" and evidence == "passed" and repository_ready and scope_ready
+        classification == "fresh"
+        and evidence == "passed"
+        and policy_ready
+        and repository_ready
+        and scope_ready
     )
     if route == "REVIEW":
         current = current and approvals == "current"
@@ -408,11 +413,7 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
     classification_report = evaluate_freshness(
         "classification", classification, current, invalid=classification_invalid
     )
-    classification_status = (
-        "stale"
-        if current.get("classification_policy_current") is False
-        else classification_report.status
-    )
+    classification_status = classification_report.status
     is_v2 = verification == "V2"
     node_v2 = current.get("node_policy") is True and is_v2
     if node_v2:
@@ -464,6 +465,7 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
         classification=classification_status,
         approvals=approval_status,
         evidence=evidence_status,
+        policy_ready=current.get("classification_policy_current") is not False,
         repository_ready=current.get("merge_repository_current") is not False,
         scope_ready=current.get("merge_scope_current") is not False,
     )

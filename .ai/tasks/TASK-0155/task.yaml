@@ -62,14 +62,14 @@ forbidden_actions:
 - delete
 - secret_export
 - paid_external_call
-frozen_spec_sha256: 68403b2d6e2c62446a4efe4320b1f494760243c150e226778f9d07c26ddbacd5
+frozen_spec_sha256: 6124fbf839cfcbda8465992bc8ab33058cb8a03613852f1d90cbfca049185c9a
 goal: Eliminate redundant Git subprocesses and unify status_service and gate V2, policy,
   and scope freshness checks
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-15T16:04:55Z'
-subject_commit: b489233a26c31e193929c5d1973eae36571ba058
+spec_frozen_at: '2026-11-15T17:25:00Z'
+subject_commit: 4fbecd2185dde066268518be37fdc195bf2888f6
 task_id: TASK-0155
-updated_at: '2026-11-15T16:14:34Z'
+updated_at: '2026-11-15T17:27:24Z'
 worktree_dirty: false
 worktree_dirty_paths: []

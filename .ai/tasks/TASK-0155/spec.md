@@ -33,14 +33,14 @@
    - 在 `summarize_task` 中：
      - 先读取 `evidence_value, evidence_invalid` 并传入 `_current_facts(..., context=context, evidence=evidence_value)`；
      - 同步处理原生 V2 与 Node V2 的 `V2_CODE_APPROVAL_FACTS` 及 `code_approved` 的 `next_events` 守卫；
-     - 若 `current.get("classification_policy_current") is False`，将分类新鲜度投影为 `"stale"`；
+     - 保持 `StatusSummary.classification` 为产物摘要指纹新鲜度（`evaluate_freshness("classification", ...)`），不覆写既有合成夹具契约；
      - 在 `_evidence_status` 中**先**判定 `schema_version in {"2.0", "3.2"}` 且 `verification_level == "V2"` 且 `phase == "pre_implementation_review"` 返回 `"awaiting_implementation_review_or_finalization"`，**再**在 `verification_level == "V2"` 且任一 `V2_CODE_APPROVAL_FACTS` 为 `False` 时返回 `"stale"`；
      - 在 `_approval_status` 中当 `evidence is not None` 时以 `_evidence_status(evidence, current) == "passed"` 作为 `approval_facts["evidence_current"]`，使原生 V2 `"2.0"` 在快照/检查/变异/评审漂移时同步使 `code` 批准失效；
-     - 扩展 `_merge_readiness(..., repository_ready: bool = True, scope_ready: bool = True)` 并将 `merge_repository_current` 与 `merge_scope_current` 纳入 `gate_required` / `reverification_required` 判定。
+     - 扩展 `_merge_readiness(..., policy_ready: bool = True, repository_ready: bool = True, scope_ready: bool = True)` 并将 `classification_policy_current`、`merge_repository_current` 与 `merge_scope_current` 一并纳入 `gate_required` / `reverification_required` 判定。
 
 5. 测试扩展边界
    - `tests/unit/test_git_context.py`：25+ 分支 `task_numbers_in_refs`（`<= 3` 次 Git 调用、含无 `.ai/tasks` 分支、共享树与失败关闭）、`worktree_scope_paths`（含 `git mv` 源与目标）、`commits_are_ancestral`（1 次短路与无效 SHA 拒绝）。
-   - `tests/integration/test_status_command.py`：原生 V2 `"2.0"` `pre_implementation_review` 与篡改/失败/未杀灭场景、策略漂移使 `classification == "stale"`、工作树越界脏文件使 `APPROVED_FOR_MERGE` 的 `merge_readiness == "reverification_required"`。
+   - `tests/integration/test_status_command.py`：原生 V2 `"2.0"` `pre_implementation_review` 与篡改/失败/未杀灭场景、策略漂移保持产物摘要新鲜但使 `APPROVED_FOR_MERGE` 的 `merge_readiness == "reverification_required"`、工作树越界脏文件使 `APPROVED_FOR_MERGE` 的 `merge_readiness == "reverification_required"`。
    - `tests/integration/test_gate_parity.py`：端到端核对 `(status.merge_readiness == "gate_required") == gate.passed` 在干净就绪、工作树越界、策略漂移与原生 V2 `"2.0"` 篡改下的一致性。
 
 ## 非目标

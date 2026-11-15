@@ -11,5 +11,18 @@
     "spec_sha256": "68403b2d6e2c62446a4efe4320b1f494760243c150e226778f9d07c26ddbacd5",
     "subject_commit": "b489233a26c31e193929c5d1973eae36571ba058",
     "task_id": "TASK-0155"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-15T17:27:23Z",
+    "base_commit": "b489233a26c31e193929c5d1973eae36571ba058",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+    "reason": "常设授权：独立 Agent 设计复审结论为 APPROVE，无未关闭 critical/high 发现，无外部副作用，不触及授权文件",
+    "schema_version": "1.0",
+    "spec_sha256": "6124fbf839cfcbda8465992bc8ab33058cb8a03613852f1d90cbfca049185c9a",
+    "subject_commit": "4fbecd2185dde066268518be37fdc195bf2888f6",
+    "task_id": "TASK-0155"
   }
 ]
