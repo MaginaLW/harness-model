@@ -290,6 +290,7 @@ def collect_changed_paths(
     base_commit: str,
     subject_commit: str,
     head_commit: str | None = None,
+    worktree_paths: Sequence[str] | None = None,
 ) -> ChangedPaths:
     """Collect committed, attestation, tracked, untracked, deleted, and renamed paths."""
     changes = collect_verification_changed_paths(
@@ -297,6 +298,7 @@ def collect_changed_paths(
         base_commit=base_commit,
         subject_commit=subject_commit,
         head_commit=head_commit,
+        worktree_paths=worktree_paths,
     )
     return ChangedPaths(
         tuple(sorted(set(changes.committed) | set(changes.attestation) | set(changes.worktree)))
@@ -309,6 +311,7 @@ def collect_verification_changed_paths(
     base_commit: str,
     subject_commit: str,
     head_commit: str | None = None,
+    worktree_paths: Sequence[str] | None = None,
 ) -> VerificationChangedPaths:
     """Collect range, attestation, and worktree paths without collapsing their meanings."""
     root = repository_root.resolve()
@@ -342,8 +345,12 @@ def collect_verification_changed_paths(
                 ),
             )
         )
-    worktree = _status_paths(
-        _run_git(root, ("status", "--porcelain=v1", "-z", "--untracked-files=all"))
+    worktree = (
+        {normalize_repository_path(item) for item in worktree_paths}
+        if worktree_paths is not None
+        else _status_paths(
+            _run_git(root, ("status", "--porcelain=v1", "-z", "--untracked-files=all"))
+        )
     )
     return VerificationChangedPaths(
         committed=tuple(sorted(committed)),

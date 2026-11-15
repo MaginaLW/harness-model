@@ -33,6 +33,7 @@ class GitContext:
     head: str
     worktree_dirty: bool
     dirty_paths: tuple[str, ...]
+    worktree_scope_paths: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -64,17 +65,35 @@ def _error(message: str, code: str, **details: object) -> AiflowError:
     return AiflowError(message, code=code, details=details)
 
 
-def _run_git(cwd: Path, arguments: tuple[str, ...], *, failure_code: str) -> str:
+def _run_git_bytes(
+    cwd: Path,
+    arguments: tuple[str, ...],
+    *,
+    failure_code: str,
+    stdin: bytes | None = None,
+) -> bytes:
     command = ["git", *arguments]
+    env = {**os.environ, "GIT_OPTIONAL_LOCKS": "0"}
     try:
-        result = subprocess.run(
-            command,
-            cwd=cwd,
-            capture_output=True,
-            check=False,
-            timeout=GIT_TIMEOUT_SECONDS,
-            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
-        )
+        if stdin is None:
+            result = subprocess.run(
+                command,
+                cwd=cwd,
+                capture_output=True,
+                check=False,
+                timeout=GIT_TIMEOUT_SECONDS,
+                env=env,
+            )
+        else:
+            result = subprocess.run(
+                command,
+                cwd=cwd,
+                capture_output=True,
+                check=False,
+                timeout=GIT_TIMEOUT_SECONDS,
+                env=env,
+                input=stdin,
+            )
     except subprocess.TimeoutExpired as error:
         raise _error(
             "Git command timed out",
@@ -92,8 +111,13 @@ def _run_git(cwd: Path, arguments: tuple[str, ...], *, failure_code: str) -> str
             command=arguments,
             returncode=result.returncode,
         )
+    return result.stdout
+
+
+def _run_git(cwd: Path, arguments: tuple[str, ...], *, failure_code: str) -> str:
+    stdout = _run_git_bytes(cwd, arguments, failure_code=failure_code)
     try:
-        return result.stdout.decode("utf-8").rstrip("\r\n")
+        return stdout.decode("utf-8").rstrip("\r\n")
     except UnicodeDecodeError as error:
         raise _error(
             "Git output is not valid UTF-8",
@@ -191,13 +215,16 @@ def _normalize_status_path(path: str) -> str:
     return path
 
 
-def _parse_status(status: str) -> tuple[str, str, tuple[str, ...], bool]:
-    """Validate the fixed porcelain-v2 protocol, including every changed path."""
+def _parse_status_with_scope_paths(
+    status: str,
+) -> tuple[str, str, tuple[str, ...], bool, tuple[str, ...]]:
+    """Validate porcelain-v2 output, tracking dirty paths plus rename/copy sources for scope."""
     if not status.endswith("\0"):
         raise _error("Git status records are incomplete", "GIT_STATUS_INVALID")
     records = iter(status[:-1].split("\0"))
     headers: dict[str, str] = {}
     paths: set[str] = set()
+    scope_paths: set[str] = set()
     in_paths = False
     for record in records:
         if record.startswith("# "):
@@ -244,8 +271,8 @@ def _parse_status(status: str) -> tuple[str, str, tuple[str, ...], bool]:
                 score = fields[8]
                 if re.fullmatch(r"[RC](?:100|[1-9]?[0-9])", score) is None or score[0] not in xy:
                     raise _error("Git status rename score is invalid", "GIT_STATUS_INVALID")
-                original = next(records, "")
-                _normalize_status_path(original)
+                original = _normalize_status_path(next(records, ""))
+                scope_paths.add(original)
             path = fields[-1]
         else:
             raise _error("Git status record is unknown", "GIT_STATUS_INVALID")
@@ -253,6 +280,7 @@ def _parse_status(status: str) -> tuple[str, str, tuple[str, ...], bool]:
         if path in paths:
             raise _error("Git status path is duplicated", "GIT_STATUS_INVALID")
         paths.add(path)
+        scope_paths.add(path)
 
     head = headers.get("branch.oid")
     if head is None or head == "(initial)":
@@ -270,29 +298,114 @@ def _parse_status(status: str) -> tuple[str, str, tuple[str, ...], bool]:
         or (ahead_behind is not None and re.fullmatch(r"\+[0-9]+ -[0-9]+", ahead_behind) is None)
     ):
         raise _error("Git status tracking headers are invalid", "GIT_STATUS_INVALID")
-    return head, branch, tuple(sorted(paths)), upstream is not None
+    return head, branch, tuple(sorted(paths)), upstream is not None, tuple(sorted(scope_paths))
+
+
+def _parse_status(status: str) -> tuple[str, str, tuple[str, ...], bool]:
+    """Validate the fixed porcelain-v2 protocol, including every changed path."""
+    head, branch, paths, has_upstream, _scope_paths = _parse_status_with_scope_paths(status)
+    return head, branch, paths, has_upstream
+
+
+def _parse_tree_task_numbers(payload: bytes, *, hash_bytes: int, code: str) -> set[int]:
+    numbers: set[int] = set()
+    index = 0
+    total = len(payload)
+    while index < total:
+        space = payload.find(b" ", index)
+        nul = payload.find(b"\x00", index)
+        if space == -1 or nul == -1 or space <= index or space > nul:
+            raise _error("Git tree entry header is invalid", code)
+        if not payload[index:space].isdigit():
+            raise _error("Git tree entry mode is invalid", code)
+        name_bytes = payload[space + 1 : nul]
+        end = nul + 1 + hash_bytes
+        if not name_bytes or end > total:
+            raise _error("Git tree entry object is invalid", code)
+        try:
+            name = name_bytes.decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise _error("Git tree entry name is not valid UTF-8", code) from error
+        match = TASK_ID_PATTERN.fullmatch(name)
+        if match is not None:
+            numbers.add(int(match.group("number")))
+        index = end
+    return numbers
+
+
+def _parse_cat_file_batch_tasks(output: bytes, *, expected_count: int, code: str) -> frozenset[int]:
+    numbers: set[int] = set()
+    seen_trees: set[str] = set()
+    offset = 0
+    total = len(output)
+    parsed = 0
+    while offset < total:
+        newline = output.find(b"\n", offset)
+        if newline == -1:
+            raise _error("Git cat-file header is incomplete", code)
+        try:
+            header_line = output[offset:newline].decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise _error("Git cat-file header is not valid UTF-8", code) from error
+        offset = newline + 1
+        parsed += 1
+        if header_line.endswith(" missing"):
+            continue
+        parts = header_line.split(" ")
+        if len(parts) != 3:
+            raise _error("Git cat-file header is invalid", code)
+        oid, object_type, size_text = parts
+        if (
+            re.fullmatch(r"[0-9a-f]{40,64}", oid) is None
+            or len(oid) % 2 != 0
+            or not size_text.isdigit()
+        ):
+            raise _error("Git cat-file object metadata is invalid", code)
+        size = int(size_text)
+        payload_end = offset + size
+        if payload_end >= total or output[payload_end : payload_end + 1] != b"\n":
+            raise _error("Git cat-file payload is truncated", code)
+        payload = output[offset:payload_end]
+        offset = payload_end + 1
+        if object_type == "tree" and oid not in seen_trees:
+            seen_trees.add(oid)
+            numbers.update(_parse_tree_task_numbers(payload, hash_bytes=len(oid) // 2, code=code))
+    if parsed != expected_count:
+        raise _error("Git cat-file response count mismatch", code)
+    return frozenset(numbers)
 
 
 def task_numbers_in_refs(repository_root: Path) -> frozenset[int]:
     """Return TASK numbers under ``.ai/tasks`` in every local and remote-tracking branch."""
     code = "GIT_TASK_REFS_UNAVAILABLE"
-    refs = _run_git(
-        repository_root,
-        ("for-each-ref", "--format=%(objectname)", "refs/heads", "refs/remotes"),
-        failure_code=code,
-    )
-    numbers: set[int] = set()
-    for commit in sorted(set(refs.split())):
-        listing = _run_git(
+    try:
+        refs = _run_git(
             repository_root,
-            ("ls-tree", "--full-tree", "--name-only", commit, ".ai/tasks/"),
+            ("for-each-ref", "--format=%(objectname)", "refs/heads", "refs/remotes"),
             failure_code=code,
         )
-        for line in listing.splitlines():
-            match = TASK_ID_PATTERN.fullmatch(line.rsplit("/", 1)[-1])
-            if match is not None:
-                numbers.add(int(match.group("number")))
-    return frozenset(numbers)
+    except AiflowError as error:
+        if error.code == "GIT_COMMAND_TIMEOUT":
+            raise _error("Could not inspect Git branch task refs before timeout", code) from error
+        raise
+    commits = sorted(set(refs.split()))
+    if not commits:
+        return frozenset()
+    if any(re.fullmatch(r"[0-9a-f]{40,64}", commit) is None for commit in commits):
+        raise _error("Git ref object ID is invalid", code)
+    batch_input = "".join(f"{commit}^{{tree}}:.ai/tasks\n" for commit in commits).encode("ascii")
+    try:
+        batch_output = _run_git_bytes(
+            repository_root,
+            ("cat-file", "--batch"),
+            failure_code=code,
+            stdin=batch_input,
+        )
+    except AiflowError as error:
+        if error.code == "GIT_COMMAND_TIMEOUT":
+            raise _error("Could not inspect Git branch task trees before timeout", code) from error
+        raise
+    return _parse_cat_file_batch_tasks(batch_output, expected_count=len(commits), code=code)
 
 
 def resolve_repository_root(path: Path) -> Path:
@@ -350,7 +463,9 @@ def collect_git_context(path: Path) -> GitContext:
             raise _error("Git HEAD is not a 40-character commit", "GIT_HEAD_INVALID")
         _read_branch(repository_root)
         raise
-    head, status_branch, dirty_paths, has_upstream = _parse_status(status)
+    head, status_branch, dirty_paths, has_upstream, scope_paths = _parse_status_with_scope_paths(
+        status
+    )
     # Git's --short spelling may include heads/ or refs/heads/ when tags collide.
     # Keep that existing fact instead of implementing Git's abbreviation algorithm.
     branch = _read_branch(repository_root)
@@ -369,6 +484,7 @@ def collect_git_context(path: Path) -> GitContext:
         head=head,
         worktree_dirty=bool(dirty_paths),
         dirty_paths=dirty_paths,
+        worktree_scope_paths=scope_paths,
     )
 
 
@@ -393,6 +509,10 @@ def commits_are_ancestral(
     repository_root: Path, *, base_commit: str, subject_commit: str, head_commit: str
 ) -> bool:
     """Require the fixed verification chain base -> subject -> observed HEAD."""
+    if base_commit == subject_commit:
+        return _is_ancestor(repository_root, subject_commit, head_commit)
+    if subject_commit == head_commit:
+        return _is_ancestor(repository_root, base_commit, subject_commit)
     return _is_ancestor(repository_root, base_commit, subject_commit) and _is_ancestor(
         repository_root, subject_commit, head_commit
     )
