@@ -56,28 +56,28 @@
 - [多层审核与置信度反馈分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)：后续排序提案，不授权实施
 - 按日期的运营记录（证据与追溯；当前状态只以[维护收尾与待办](../operations/maintenance-status.md)为准）：
   - [维护状态历史记录](operations/maintenance-status-history.md)（原 `maintenance-status.md` 的逐窗口日记）
-  - [follow-up-preparation-2026-09-13.md](../operations/follow-up-preparation-2026-09-13.md)
+  - [follow-up-preparation-2026-09-13.md](operations/follow-up-preparation-2026-09-13.md)
   - [zcode-retrospective-2026-09-20.md](../operations/zcode-retrospective-2026-09-20.md)
   - [follow-up-backlog-2026-09-22.md](../operations/follow-up-backlog-2026-09-22.md)
   - [local-tools-closeout-2026-09-22.md](../operations/local-tools-closeout-2026-09-22.md)
   - [pilot-evidence-review-2026-09-22.md](../operations/pilot-evidence-review-2026-09-22.md)
   - [e4-gap-assessment-2026-09-23.md](../operations/e4-gap-assessment-2026-09-23.md)
   - [e4-preflight-closeout-2026-09-23.md](../operations/e4-preflight-closeout-2026-09-23.md)
-  - [self-hosted-runner-inventory-2026-09-12.md](../operations/self-hosted-runner-inventory-2026-09-12.md)
+  - [self-hosted-runner-inventory-2026-09-12.md](operations/self-hosted-runner-inventory-2026-09-12.md)
   - [next-stage-start-conditions-2026-10-02.md](../operations/next-stage-start-conditions-2026-10-02.md)
   - [zcode-next-stage-assignments-2026-10-02.md](../operations/zcode-next-stage-assignments-2026-10-02.md)
-  - [f-real-import-acceptance-2026-10-03.md](../operations/f-real-import-acceptance-2026-10-03.md)
-  - [zcode-report-recovery-2026-10-03.md](../operations/zcode-report-recovery-2026-10-03.md)
-  - [backlog-execution-2026-10-04.md](../operations/backlog-execution-2026-10-04.md)
-  - [external-follow-up-evidence-2026-10-04.md](../operations/external-follow-up-evidence-2026-10-04.md)
-  - [f-successor-decision-2026-10-04.md](../operations/f-successor-decision-2026-10-04.md)
-  - [phase-entry-proposals-2026-10-04.md](../operations/phase-entry-proposals-2026-10-04.md)
-  - [publication-package-2026-10-04.md](../operations/publication-package-2026-10-04.md)
+  - [f-real-import-acceptance-2026-10-03.md](operations/f-real-import-acceptance-2026-10-03.md)
+  - [zcode-report-recovery-2026-10-03.md](operations/zcode-report-recovery-2026-10-03.md)
+  - [backlog-execution-2026-10-04.md](operations/backlog-execution-2026-10-04.md)
+  - [external-follow-up-evidence-2026-10-04.md](operations/external-follow-up-evidence-2026-10-04.md)
+  - [f-successor-decision-2026-10-04.md](operations/f-successor-decision-2026-10-04.md)
+  - [phase-entry-proposals-2026-10-04.md](operations/phase-entry-proposals-2026-10-04.md)
+  - [publication-package-2026-10-04.md](operations/publication-package-2026-10-04.md)
   - [verification-budget-decision-2026-10-04.md](../operations/verification-budget-decision-2026-10-04.md)
-  - [windows-private-timeout-repair-2026-10-04.md](../operations/windows-private-timeout-repair-2026-10-04.md)
-  - [windows-production-design-2026-10-04.md](../operations/windows-production-design-2026-10-04.md)
-  - [next-plan-execution-2026-10-08.md](../operations/next-plan-execution-2026-10-08.md)
-  - [follow-up-completion-audit-2026-10-09.md](../operations/follow-up-completion-audit-2026-10-09.md)
+  - [windows-private-timeout-repair-2026-10-04.md](operations/windows-private-timeout-repair-2026-10-04.md)
+  - [windows-production-design-2026-10-04.md](operations/windows-production-design-2026-10-04.md)
+  - [next-plan-execution-2026-10-08.md](operations/next-plan-execution-2026-10-08.md)
+  - [follow-up-completion-audit-2026-10-09.md](operations/follow-up-completion-audit-2026-10-09.md)
 
 ## 路径映射
 
@@ -122,10 +122,25 @@
 | `docs/superpowers/plans/2026-08-21-chapter-06-task-6-4-execution.md` | [2026-08-21-chapter-06-task-6-4-execution.md](plans/2026-08-21-chapter-06-task-6-4-execution.md) |
 | `docs/superpowers/plans/2026-08-21-chapter-06-task-6-5-execution.md` | [2026-08-21-chapter-06-task-6-5-execution.md](plans/2026-08-21-chapter-06-task-6-5-execution.md) |
 | `docs/superpowers/plans/2026-08-21-chapter-07-task-7-1-execution.md` | [2026-08-21-chapter-07-task-7-1-execution.md](plans/2026-08-21-chapter-07-task-7-1-execution.md) |
+| `docs/operations/follow-up-preparation-2026-09-13.md` | [follow-up-preparation-2026-09-13.md](operations/follow-up-preparation-2026-09-13.md) |
+| `docs/operations/self-hosted-runner-inventory-2026-09-12.md` | [self-hosted-runner-inventory-2026-09-12.md](operations/self-hosted-runner-inventory-2026-09-12.md) |
+| `docs/operations/self-hosted-runners.md` | [self-hosted-runners.md](operations/self-hosted-runners.md) |
+| `docs/operations/runner-receipts.md` | [runner-receipts.md](operations/runner-receipts.md) |
+| `docs/operations/f-real-import-acceptance-2026-10-03.md` | [f-real-import-acceptance-2026-10-03.md](operations/f-real-import-acceptance-2026-10-03.md) |
+| `docs/operations/zcode-report-recovery-2026-10-03.md` | [zcode-report-recovery-2026-10-03.md](operations/zcode-report-recovery-2026-10-03.md) |
+| `docs/operations/backlog-execution-2026-10-04.md` | [backlog-execution-2026-10-04.md](operations/backlog-execution-2026-10-04.md) |
+| `docs/operations/external-follow-up-evidence-2026-10-04.md` | [external-follow-up-evidence-2026-10-04.md](operations/external-follow-up-evidence-2026-10-04.md) |
+| `docs/operations/f-successor-decision-2026-10-04.md` | [f-successor-decision-2026-10-04.md](operations/f-successor-decision-2026-10-04.md) |
+| `docs/operations/phase-entry-proposals-2026-10-04.md` | [phase-entry-proposals-2026-10-04.md](operations/phase-entry-proposals-2026-10-04.md) |
+| `docs/operations/publication-package-2026-10-04.md` | [publication-package-2026-10-04.md](operations/publication-package-2026-10-04.md) |
+| `docs/operations/windows-private-timeout-repair-2026-10-04.md` | [windows-private-timeout-repair-2026-10-04.md](operations/windows-private-timeout-repair-2026-10-04.md) |
+| `docs/operations/windows-production-design-2026-10-04.md` | [windows-production-design-2026-10-04.md](operations/windows-production-design-2026-10-04.md) |
+| `docs/operations/next-plan-execution-2026-10-08.md` | [next-plan-execution-2026-10-08.md](operations/next-plan-execution-2026-10-08.md) |
+| `docs/operations/follow-up-completion-audit-2026-10-09.md` | [follow-up-completion-audit-2026-10-09.md](operations/follow-up-completion-audit-2026-10-09.md) |
 
 ## 已移除的试点工具（2026-10-10）
 
-- [自托管执行基础设施](../operations/self-hosted-runners.md)、[Runner 盘点与健康检查](../operations/runner-health-checks.md)、[执行回执](../operations/runner-receipts.md)、[受控工具发现](../operations/controlled-tool-discovery.md)、[本地证据移交](../operations/evidence-handoff.md)：对应工具已删除，文档保留历史事实或恢复指引。
+- [自托管执行基础设施](operations/self-hosted-runners.md)、[Runner 盘点与健康检查](../operations/runner-health-checks.md)、[执行回执](operations/runner-receipts.md)、[受控工具发现](../operations/controlled-tool-discovery.md)、[本地证据移交](../operations/evidence-handoff.md)：对应工具已删除，文档保留历史事实或恢复指引。
 
 ## 当前入口的固定历史
 

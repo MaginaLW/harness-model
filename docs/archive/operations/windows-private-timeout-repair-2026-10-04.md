@@ -105,4 +105,4 @@ performance worktree HEAD `ef5943b29514ad1d13121023610bf4c2c4dcb408`；这是本
 版本记录，GitContext source c7 与 S507 保持。
 TASK-0064 为 FAILED / REVIEW / V2，Missing `retry_reason_or_escalation`，action SPENT；
 TASK-0063 为 BLOCKED，旧 paid source/action 不可复用。没有新付费、push、merge 或部署权限。
-旧原生失败和新私有结果分别见[当前维护状态](maintenance-status.md)及[原件回收记录](zcode-report-recovery-2026-10-03.md)。
+旧原生失败和新私有结果分别见[当前维护状态](../../operations/maintenance-status.md)及[原件回收记录](zcode-report-recovery-2026-10-03.md)。

@@ -37,7 +37,7 @@ SHA-256 `fab6ed1462050837944f4f5c856b19d7c14033bf0560e752b10234e8ba13dcf0`。
 
 | 阶段 | 完整退出要求 | 当前证据与待办 |
 | --- | --- | --- |
-| I0 | 吸收真实试点，明确目标/费用/信任/平台和回退 | 原始 Windows CI 与 POSIX 阻断已核对；[运维入口](../../operations/self-hosted-runners.md)固定选择边界，计费 unknown 保留 |
+| I0 | 吸收真实试点，明确目标/费用/信任/平台和回退 | 原始 Windows CI 与 POSIX 阻断已核对；[运维入口](../../archive/operations/self-hosted-runners.md)固定选择边界，计费 unknown 保留 |
 | I1 | 可重跑运维、依赖与身份、停止/恢复、真实重启后业务验证 | 正式只读工具与手册已实现并通过独立修复复核；实际 Windows 观察仍不足以判为 HEALTHY，服务账号权限、重启和恢复仍待验证 |
 | I2 | 每个实际接入项有原检查清单、等价性、安全、真实 job/runner/SHA 和回退 | 真实 Linux guest 启动、固定依赖、低权限身份和只读源码已建立；隔离验收和 root fixture 仍在推进，尚未注册 Linux runner；采用与同 SHA 双 lane 未完成 |
 | I3 | 版本化 Profile/Receipt，错误/过期/遗漏/自报不能误放行，旧接口可继续使用 | 独立契约与纯校验器已提交并通过完整本仓检查；不修改旧 additionalProperties=false Schema 或另造 Gate；真实 CI 回执关联随 I2/I4 验证 |

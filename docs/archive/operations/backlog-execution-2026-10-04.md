@@ -6,7 +6,7 @@
 
 ## 2026-10-09 原七项与S0–S5逐项核对完成
 
-[完成条件与剩余依赖矩阵](follow-up-completion-audit-2026-10-09.md)保留原七项及S0–S5全部退出条件，区分F历史恢复/新导入路线与真实Apply、I1/I2、E5/Phase3/4、发布缺项。[S1补充](../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)已形成版本兼容、预算来源/停止残余和三个synthetic例子，两非作者修复后均0；Root实际核40封闭成员、7追加回执和14保护输入无差异，Git EOF机械修正保留已审原件。没有为未选目标新造模板或将用户草稿变为执行指令。
+[完成条件与剩余依赖矩阵](follow-up-completion-audit-2026-10-09.md)保留原七项及S0–S5全部退出条件，区分F历史恢复/新导入路线与真实Apply、I1/I2、E5/Phase3/4、发布缺项。[S1补充](../../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)已形成版本兼容、预算来源/停止残余和三个synthetic例子，两非作者修复后均0；Root实际核40封闭成员、7追加回执和14保护输入无差异，Git EOF机械修正保留已审原件。没有为未选目标新造模板或将用户草稿变为执行指令。
 
 当前新4a6单次诊断批准仍待回复，原生FAILED/SPENT、既有批准current/Missing retry_reason_or_escalation及完整门禁保持；没有新grant、资源/claim或业务执行。AI Flow规则4的具体动作授权后仍须完成真实绑定、准备、独审、独立一次观察与根因驱动的新范围/完整验证。七项待办和全目标尚未完成；本轮责任与封存记录见[执行记录](next-plan-execution-2026-10-08.md)，下述历史窗口保留。
 
@@ -1277,7 +1277,7 @@ collector、wrapper、VM 或 guest IO，同次身份与内部关闭接口仍未�
 
 所有者本次要求读取待办、设立持续目标并完成任务，授权必要的常规本地工作。持续目标已经
 设立；本文件记录实际执行顺序、写入归属和完成条件。来源为
-[当前七项待办](follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)，
+[当前七项待办](../../operations/follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)，
 不将历史收尾窗口的“不启动”描述套用为本轮禁止准备。
 
 本轮初读核定：主检出为 `f9deb7b`，分支 `codex/e4-followup-status`；三个用户未跟踪计划
@@ -1618,7 +1618,7 @@ E5/I5 准备和外仓只读核查可与本地设计并行；后继实施只在�
   离线符合既有主动停用约定，受控恢复接单的实际材料仍在核查。
 - [后续阶段合同提案](phase-entry-proposals-2026-10-04.md)已形成，阈值/资产/保留期等
   未冻结；[干净发布包](publication-package-2026-10-04.md)静态列明历史 32 路径及排除524。
-- [预算决策](verification-budget-decision-2026-10-04.md)保留 schema/deepcopy 候选
+- [预算决策](../../operations/verification-budget-decision-2026-10-04.md)保留 schema/deepcopy 候选
   NO_GO；新脚本两名 reviewer 静态 PASS，唯一启动因绑定 workspace 不可用失败，
   未生成 claim/result/guard，速度 UNKNOWN，无换解释器或重试。原性能业务目录已
   不存在，F 业务目录为空，原 refs 仍在；消失原因 UNKNOWN。独立资产清单确认 F

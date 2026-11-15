@@ -204,8 +204,8 @@ I1 冷启动前两次 fresh host gate。树外 leaf 为
 receipt 祖先、copy→image→launch 守卫和绝对绑定 SSH。原草案及 review 原件保留，后继
 准备写入新独占 runtime 目录；实际批准和执行均未发生。
 
-本记录刷新[待办第 4、5 项](follow-up-backlog-2026-09-22.md)的事实窗口，沿用
-[下阶段启动条件](next-stage-start-conditions-2026-10-02.md)。它是只读核查结果，不是
+本记录刷新[待办第 4、5 项](../../operations/follow-up-backlog-2026-09-22.md)的事实窗口，沿用
+[下阶段启动条件](../../operations/next-stage-start-conditions-2026-10-02.md)。它是只读核查结果，不是
 runner 恢复、CI 重跑、Apply、部署或扩仓执行单；原历史失败、取消与准入边界保留。
 
 ## 来源与观察窗口
@@ -334,7 +334,7 @@ offline 加当前 POSIX 零执行构成真实恢复需求。可以为既有实�
   尚未选定其他安装、更新或恢复范围，不另造 harness-env 工作。
 - I2：本轮没有选定新的可信仓库或平台；dotfiles 当前侧未发现新 I2 缺项，既有方法回灌
   no-op 保持。恢复既有 runner、补 r3s 当前双通道属于试点收尾，不构成新增扩仓完成。
-- [TASK-0048 历史验收](../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)
+- [TASK-0048 历史验收](../../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)
   的注册、同仓双通道、采用与恢复成果不重开；历史在线/成功也不证明当前实例或候选状态。
 - 真正剩余的是 r3s 恢复执行单与准确 SHA 双通道完整结果、dotfiles 计划审查及具体 Apply/
   环境选择，以及若要扩仓时由所有者指定的真实目标和独立准入。上述项目仍未完成。
@@ -379,9 +379,9 @@ POSIX 执行。准确 SHA 完整双通道仍缺。
 | `evidence/stage60-final-stop-independent-001/review-receipt.json` | 1776 bytes；SHA256 `17d3d77af45b6d88af90241b89f9f204b7b171d08e2d01ab80b178d8a1fdd001` | 旧最终停用回执；与主仓历史引用一致，不证明当前 guest 状态 |
 | `evidence/stage60-reboot-relaunch-001/launch.json` | 1813 bytes；SHA256 `698abba5e23ac70df96b804d417b046643abbf95355f22f69e6fd60eec86ff2a` | 旧 QEMU launch/出生身份；同目录保留当次冷态工具、输入、copy/image/check 原件 |
 
-[任务 02 最终运行约定](../implementation/task02-runtime-integration.md#本轮试验复盘与最终运行约定)
+[任务 02 最终运行约定](../../implementation/task02-runtime-integration.md#本轮试验复盘与最终运行约定)
 明确最终默认 Windows 接单，Linux 注册及 guest 保留、runner 服务 disabled/offline；再次
-切换必须重核 busy/Worker 与两端状态。[最终串行交接](../implementation/task02-runtime-integration.md#重启后真实业务验收与最终串行交接)
+切换必须重核 busy/Worker 与两端状态。[最终串行交接](../../implementation/task02-runtime-integration.md#重启后真实业务验收与最终串行交接)
 记录当时 Linux inactive/dead/disabled、MainPID/ControlPID 0、无 Runner/容器/pod 残留，
 随后恢复 Windows。故上文将 offline 称为故障需求的表述在本节收窄：**本轮可确认的是
 既有实例受控恢复接单需求；当前 offline 不能单独证明新故障，旧主动停用约定与当前

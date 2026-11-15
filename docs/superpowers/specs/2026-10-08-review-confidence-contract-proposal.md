@@ -2,7 +2,7 @@
 
 日期：2026-10-08。提案版本：`s1-contract-proposal-v0`。状态：合同准备；数值参数、拆分路线和实施准入尚未冻结。
 
-本稿承接[分阶段计划 S1](../plans/2026-10-08-confidence-driven-approval-roadmap.md#5-s1多层审核置信度与最小接入合同)，将审核、概率、样本与最小 adapter 的接口整理为可评审方案。固定文档输入为主工作区 `codex/e4-followup-status` 的 `f7f3324b8cc72e935a1426cd5f8eb97bf7d4700a`；当时本地 `main` ref 为 `db3efabab562971aef1a6eb1317b679d42eeadb9`。原[阶段三进入门](../../implementation/phase-03-entry-inputs.md)、[样本与 telemetry 提案](../../operations/phase-entry-proposals-2026-10-04.md)及现行 [AGENTS.md](../../../AGENTS.md) 继续适用。
+本稿承接[分阶段计划 S1](../plans/2026-10-08-confidence-driven-approval-roadmap.md#5-s1多层审核置信度与最小接入合同)，将审核、概率、样本与最小 adapter 的接口整理为可评审方案。固定文档输入为主工作区 `codex/e4-followup-status` 的 `f7f3324b8cc72e935a1426cd5f8eb97bf7d4700a`；当时本地 `main` ref 为 `db3efabab562971aef1a6eb1317b679d42eeadb9`。原[阶段三进入门](../../implementation/phase-03-entry-inputs.md)、[样本与 telemetry 提案](../../archive/operations/phase-entry-proposals-2026-10-04.md)及现行 [AGENTS.md](../../../AGENTS.md) 继续适用。
 
 ## 1. 最小目标与共同语义
 

@@ -48,7 +48,7 @@
 
 以下 2026-10-04 文本保留为早期仅文档发布路径的历史材料，其范围与远端查询窗口不作为方案 A 的当前准入或授权。
 
-本页落实[待办第 7 项](follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)的静态发布清单。
+本页落实[待办第 7 项](../../operations/follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)的静态发布清单。
 只读核验和材料准备已完成；尚未创建 publisher Task、工作区或发布候选，未 cherry-pick、
 更新 refs、推送、写入 PR 或合并。实际候选及其新批准、完整验证和远端证明仍待执行。
 
@@ -185,7 +185,7 @@ f9deb7b10983084cf58df78c23ac2b1dafb263f5
 
 ## 新 publisher 的准入与完成条件
 
-外部发布和任务账本属于 [AGENTS.md](../../AGENTS.md) 的 AI Flow 升级清单。
+外部发布和任务账本属于 [AGENTS.md](../../../AGENTS.md) 的 AI Flow 升级清单。
 后续真实分配新 publisher Task，固定准确 source/base/head 与上述累计 scope，
 另列其自身治理路径、实际外部动作和禁入项。按当前 CLI/Policy classify、freeze，
 完成真实独立审核及所选完整原生检查；请求人类决定前先读 status，只补实际 `Missing:`。
@@ -220,7 +220,7 @@ TASK-0053 保持 push-only；0058/0059/0060 的三个准确 head CI 失败、006
 保留，不因新成功变为 MERGED。
 TASK-0063 的 BLOCKED、TASK-0064 的 FAILED / SPENT 和 TASK-0028 Option C 依据各自原记录
 保留，不能借本发布包或新 CI 验收生产修复、完整预算或 F。
-状态和动作解释见[当前维护状态](maintenance-status.md)、
+状态和动作解释见[当前维护状态](../../operations/maintenance-status.md)、
 [原件回收记录](zcode-report-recovery-2026-10-03.md)及
 [私有 qualification 限制](windows-private-timeout-repair-2026-10-04.md)。
 

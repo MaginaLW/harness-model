@@ -182,6 +182,28 @@ def ordinary_engines(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Ordi
     for origin, wheel in (("direct", direct), ("rebuilt", rebuilt)):
         prefix = root / origin
         _installed_bundle(wheel, wheels, locked, prefix, root)
+        if origin == "direct":
+            # Keep setuptools installed in "rebuilt" for _engine_startup coverage, and drop
+            # build-only tools from "direct" so installed closures stay lean during replay.
+            subprocess.run(
+                [
+                    str(prefix / "Scripts/python.exe"),
+                    "-I",
+                    "-m",
+                    "pip",
+                    "uninstall",
+                    "-y",
+                    "pip",
+                    "setuptools",
+                ],
+                cwd=root,
+                env=_environment(root),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                check=True,
+                timeout=60,
+            )
         result[origin] = OrdinaryEngine(prefix / "Scripts/python.exe", root, git, wheel, origin)
     return result
 
@@ -367,7 +389,7 @@ def test_cold_installed_import_has_no_process_or_filesystem_writes(
     assert result["read_only"] is True
 
 
-CURRENT = r"""
+REPLAY_BASE = r"""
 import builtins, hashlib, io, json, os, subprocess, sys
 from contextlib import ExitStack
 from dataclasses import asdict, replace
@@ -384,7 +406,6 @@ from aiflow.storage import read_task_yaml
 root=Path(sys.argv[1]); task='TASK-0001'; actor='fixture-independent-verifier'
 assert Path(aiflow.__file__).is_relative_to(Path(sys.prefix))
 assert Path(runtime.__file__).is_relative_to(Path(sys.prefix))
-inputs=runtime.prepare_installed_mutations(root,task,verifier_actor=actor)
 def snapshot():
     result={}
     for path in root.rglob('*'):
@@ -394,12 +415,21 @@ def snapshot():
                 info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns,
                 hashlib.sha256(path.read_bytes()).hexdigest())
     return result
+def fast_snapshot():
+    result={}
+    for path in root.rglob('*'):
+        info=path.lstat()
+        if path.is_file():
+            result[str(path.relative_to(root))]=(
+                info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns)
+    return result
 attempts=[]
 def forbidden(*args,**kwargs):
     attempts.append((args,kwargs))
     raise AssertionError('pure replay attempted a process or filesystem write')
-def replay(reference):
-    before=snapshot()
+def replay(reference,*,full_hash=True):
+    snap=snapshot if full_hash else fast_snapshot
+    before=snap()
     # Live authority may use read-only Git collectors, never a probe or a write.
     # Install the broader process prohibition only after authority is complete.
     try:
@@ -410,7 +440,7 @@ def replay(reference):
             current=runtime.collect_installed_mutation_current(root,reference,verifier_actor=actor)
     finally:
         assert not attempts,'authority attempted a probe launch'
-        assert snapshot()==before,'authority changed retained originals'
+        assert snap()==before,'authority changed retained originals'
     with ExitStack() as stack:
         for module,name in [(subprocess,'Popen'),(subprocess,'run'),
                 (subprocess,'call'),(subprocess,'check_call'),(subprocess,'check_output'),
@@ -438,8 +468,15 @@ def replay(reference):
         stack.enter_context(patch.object(builtins,'open',read_only_io_open))
         facts=runtime.replay_installed_mutations(root,reference,current=current)
     assert not attempts,'pure reader caught a forbidden side effect instead of avoiding it'
-    assert snapshot()==before,'pure replay changed retained originals'
+    assert snap()==before,'pure replay changed retained originals'
     return facts
+"""
+
+
+CURRENT = (
+    REPLAY_BASE
+    + r"""
+inputs=runtime.prepare_installed_mutations(root,task,verifier_actor=actor)
 def approve_fixture_action():
     action=root/'.ai/tasks'/task/'action-installed-engine-mutation-fixture.json'
     value=json.loads(action.read_text())
@@ -449,10 +486,11 @@ def approve_fixture_action():
     approve_task(root,task,approval_type='action',actor='project-owner',
         reason='Reviewed public synthetic installed-engine fixture action only',action_file=action)
 """
+)
 
 
 MISSING_REFERENCE = (
-    CURRENT
+    REPLAY_BASE
     + r"""
 value=sys.argv[2]
 reference=runtime.InstalledMutationReference(value,1,'0'*64)
@@ -552,7 +590,8 @@ def recorded_runs(
     for prepared, result in runs.values():
         checked = prepared.engine.run(
             prepared.root,
-            CURRENT + "\nreference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))"
+            REPLAY_BASE
+            + "\nreference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))"
             "\nfacts=replay(reference)\nassert facts.passed,asdict(facts)"
             "\nprint(json.dumps(dict(passed=facts.passed)))",
             json.dumps(result["reference"]),
@@ -794,166 +833,187 @@ def test_pure_outcome_projection_rejects_other_failures(
     )
 
 
-REHASHED_FAULT = (
-    CURRENT
+FAULTS = (
+    "missing_report",
+    "missing_receipt",
+    "missing_completion",
+    "closure_binding",
+    "root_snapshot_rows",
+    "root_snapshot_metadata",
+    "context_binding",
+    "extra_report_field",
+    "duplicate_json_key",
+    "wrong_loaded_origin",
+    "loaded_name_path_mismatch",
+    "unreported_stderr",
+    "wrong_observation",
+    "unrelated_assertion",
+    "setup_error",
+    "teardown_error",
+    "survived",
+    "receipt_cleanup",
+    "receipt_eof",
+    "process_timeout",
+    "output_overflow",
+)
+
+
+REHASHED_FAULTS_BATCH = (
+    REPLAY_BASE
     + r"""
 from copy import deepcopy
 from aiflow.redaction import redact_text
 reference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))
-fault=sys.argv[3]
+faults=json.loads(sys.argv[3])
 path=root/reference.ref; run=path.parent; phase=run/'0/m'
-document=json.loads(path.read_bytes())
-stage=document['pairs'][0]['mutant']
-originals={}
-moved=None
+base_document=json.loads(path.read_bytes())
+base_completion=json.loads((run/'completion.json').read_bytes())
+base_outer=json.loads((phase/'raw/stdout.raw').read_bytes())
+base_survived_probe=deepcopy(json.loads((run/'0/b/report.json').read_bytes())['probe'])
 def canonical(value):
     return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':'),
         allow_nan=False).encode()
-def put(filename,data):
-    if filename not in originals:
-        originals[filename]=filename.read_bytes()
-    filename.write_bytes(data)
-candidate=reference
-try:
-    if fault in ('missing_report','missing_receipt','missing_completion'):
-        missing={'missing_report':phase/'report.json',
-            'missing_receipt':phase/'raw/receipt.json',
-            'missing_completion':run/'completion.json'}[fault]
-        held=run/'held-original'
-        assert not held.exists()
-        missing.rename(held)
-        moved=(held,missing)
-    else:
-        if fault in ('root_snapshot_rows','root_snapshot_metadata'):
-            key='files' if fault=='root_snapshot_rows' else 'metadata'
-            assert document['before'][key]
-            document['before'][key]=[]
-            document['after'][key]=[]
-        elif fault=='closure_binding':
-            stage['closure']['entries'][0]['identity']['inode']+=1
-        elif fault=='context_binding':
-            document['inputs']['verifier_context_sha256']='0'*64
-        elif fault in ('receipt_cleanup','receipt_eof','process_timeout','output_overflow',
-                'unreported_stderr'):
-            receipt=deepcopy(stage['receipt'])
-            if fault=='receipt_cleanup':
-                receipt['cleanup']='unknown'
-            elif fault=='receipt_eof':
-                receipt['receipt']['stdout_eof']=False
-            elif fault=='process_timeout':
-                receipt['timed_out']=True
-            elif fault=='output_overflow':
-                receipt['stdout_overflow']=True
-            else:
-                stderr=b'Traceback (most recent call last):\nRuntimeError: unrelated error\n'
-                put(phase/'raw/stderr.raw',stderr)
-                put(phase/'raw/stderr.log',redact_text(stderr.decode()).encode())
-                receipt.update(stderr_size=len(stderr),stderr_sha256=hashlib.sha256(stderr).hexdigest())
-            stage['receipt']=receipt
-            put(phase/'raw/receipt.json',canonical(receipt))
-        else:
-            outer=json.loads((phase/'raw/stdout.raw').read_bytes())
-            negative=outer['probe']['cases'][-1]
-            if fault=='extra_report_field':
-                outer['probe']['unbound']=True
-            elif fault=='wrong_loaded_origin':
-                row=next(row for row in outer['loaded'] if row['name']=='aiflow.policy')
-                row['path']='aiflow/unbound.py'
-            elif fault=='loaded_name_path_mismatch':
-                row=next(row for row in outer['loaded'] if row['name']=='aiflow.policy')
-                original=next(entry for entry in stage['closure']['entries']
-                    if entry['path']=='Lib/site-packages/aiflow/errors.py')
-                row.update(path='aiflow/errors.py',size=original['size'],sha256=original['sha256'])
-            elif fault=='wrong_observation':
-                negative['observed']={'error':'unrelated'}
-            elif fault=='unrelated_assertion':
-                negative['exception']['frames'][-1]['function']='different_assertion'
-            elif fault=='setup_error':
-                negative.update(setup='failed',call='not_run',observed=None)
-            elif fault=='teardown_error':
-                negative['teardown']='failed'
-            elif fault=='survived':
-                outer['probe']=deepcopy(json.loads((run/'0/b/report.json').read_bytes())['probe'])
-            elif fault!='duplicate_json_key':
-                raise AssertionError('unknown fault')
-            wire=canonical(outer)
-            put(phase/'report.json',wire)
-            if fault=='duplicate_json_key':
-                wire=b'{"kind":"installed-probe-execution-v1",'+wire[1:]
-            wire+=b'\n'
-            put(phase/'raw/stdout.raw',wire)
-            put(phase/'raw/stdout.log',redact_text(wire.decode()).encode())
-            receipt=deepcopy(stage['receipt'])
-            receipt.update(stdout_size=len(wire),stdout_sha256=hashlib.sha256(wire).hexdigest())
-            if fault=='survived':
-                receipt['returncode']=0
-            stage['receipt']=receipt
-            put(phase/'raw/receipt.json',canonical(receipt))
-        raw=canonical(document)
-        candidate=replace(reference,size=len(raw),sha256=hashlib.sha256(raw).hexdigest())
-        put(path,raw)
-        completion=json.loads((run/'completion.json').read_bytes())
-        completion['reference']=asdict(candidate)
-        put(run/'completion.json',canonical(completion))
-    outcome_faults=('survived','wrong_observation','unrelated_assertion','setup_error','teardown_error')
-    try:
-        facts=replay(candidate)
-    except AiflowError as error:
-        assert fault not in outcome_faults,(fault,error)
-        assert error.code
-        passed=False; is_current=False; rejected_by='authority'
-    else:
-        assert not facts.all_killed and not facts.passed, (fault,asdict(facts))
-        if fault=='survived':
-            assert facts.current and facts.results[0]==('MUT-V2-001','survived'),asdict(facts)
-        elif fault in outcome_faults:
-            assert facts.current and facts.results[0]==('MUT-V2-001','unverified'),asdict(facts)
-        else:
-            assert not facts.current and facts.reason_codes,(fault,asdict(facts))
-        passed=facts.passed; is_current=facts.current; rejected_by='reader'
-finally:
-    if moved is not None:
-        moved[0].rename(moved[1])
-    for filename,data in originals.items():
+def content_snapshot():
+    return {k:(v[0],v[1],v[2],v[4]) for k,v in snapshot().items()}
+initial=content_snapshot()
+results={}
+for fault in faults:
+    document=deepcopy(base_document)
+    stage=document['pairs'][0]['mutant']
+    originals={}
+    moved=None
+    def put(filename,data):
+        if filename not in originals:
+            originals[filename]=filename.read_bytes()
         filename.write_bytes(data)
-    assert all(filename.read_bytes()==data for filename,data in originals.items())
-assert hashlib.sha256(path.read_bytes()).hexdigest()==reference.sha256
-print(json.dumps(dict(fault=fault,passed=passed,current=is_current,rejected_by=rejected_by)))
+    candidate=reference
+    try:
+        if fault in ('missing_report','missing_receipt','missing_completion'):
+            missing={'missing_report':phase/'report.json',
+                'missing_receipt':phase/'raw/receipt.json',
+                'missing_completion':run/'completion.json'}[fault]
+            held=run/'held-original'
+            assert not held.exists()
+            missing.rename(held)
+            moved=(held,missing)
+        else:
+            if fault in ('root_snapshot_rows','root_snapshot_metadata'):
+                key='files' if fault=='root_snapshot_rows' else 'metadata'
+                assert document['before'][key]
+                document['before'][key]=[]
+                document['after'][key]=[]
+            elif fault=='closure_binding':
+                stage['closure']['entries'][0]['identity']['inode']+=1
+            elif fault=='context_binding':
+                document['inputs']['verifier_context_sha256']='0'*64
+            elif fault in ('receipt_cleanup','receipt_eof','process_timeout','output_overflow',
+                    'unreported_stderr'):
+                receipt=deepcopy(stage['receipt'])
+                if fault=='receipt_cleanup':
+                    receipt['cleanup']='unknown'
+                elif fault=='receipt_eof':
+                    receipt['receipt']['stdout_eof']=False
+                elif fault=='process_timeout':
+                    receipt['timed_out']=True
+                elif fault=='output_overflow':
+                    receipt['stdout_overflow']=True
+                else:
+                    stderr=b'Traceback (most recent call last):\nRuntimeError: unrelated error\n'
+                    put(phase/'raw/stderr.raw',stderr)
+                    put(phase/'raw/stderr.log',redact_text(stderr.decode()).encode())
+                    receipt.update(stderr_size=len(stderr),stderr_sha256=hashlib.sha256(stderr).hexdigest())
+                stage['receipt']=receipt
+                put(phase/'raw/receipt.json',canonical(receipt))
+            else:
+                outer=deepcopy(base_outer)
+                negative=outer['probe']['cases'][-1]
+                if fault=='extra_report_field':
+                    outer['probe']['unbound']=True
+                elif fault=='wrong_loaded_origin':
+                    row=next(row for row in outer['loaded'] if row['name']=='aiflow.policy')
+                    row['path']='aiflow/unbound.py'
+                elif fault=='loaded_name_path_mismatch':
+                    row=next(row for row in outer['loaded'] if row['name']=='aiflow.policy')
+                    original=next(entry for entry in stage['closure']['entries']
+                        if entry['path']=='Lib/site-packages/aiflow/errors.py')
+                    row.update(path='aiflow/errors.py',size=original['size'],sha256=original['sha256'])
+                elif fault=='wrong_observation':
+                    negative['observed']={'error':'unrelated'}
+                elif fault=='unrelated_assertion':
+                    negative['exception']['frames'][-1]['function']='different_assertion'
+                elif fault=='setup_error':
+                    negative.update(setup='failed',call='not_run',observed=None)
+                elif fault=='teardown_error':
+                    negative['teardown']='failed'
+                elif fault=='survived':
+                    outer['probe']=deepcopy(base_survived_probe)
+                elif fault!='duplicate_json_key':
+                    raise AssertionError('unknown fault')
+                wire=canonical(outer)
+                put(phase/'report.json',wire)
+                if fault=='duplicate_json_key':
+                    wire=b'{"kind":"installed-probe-execution-v1",'+wire[1:]
+                wire+=b'\n'
+                put(phase/'raw/stdout.raw',wire)
+                put(phase/'raw/stdout.log',redact_text(wire.decode()).encode())
+                receipt=deepcopy(stage['receipt'])
+                receipt.update(stdout_size=len(wire),stdout_sha256=hashlib.sha256(wire).hexdigest())
+                if fault=='survived':
+                    receipt['returncode']=0
+                stage['receipt']=receipt
+                put(phase/'raw/receipt.json',canonical(receipt))
+            raw=canonical(document)
+            candidate=replace(reference,size=len(raw),sha256=hashlib.sha256(raw).hexdigest())
+            put(path,raw)
+            completion=deepcopy(base_completion)
+            completion['reference']=asdict(candidate)
+            put(run/'completion.json',canonical(completion))
+        outcome_faults=('survived','wrong_observation','unrelated_assertion','setup_error','teardown_error')
+        try:
+            facts=replay(candidate,full_hash=False)
+        except AiflowError as error:
+            assert fault not in outcome_faults,(fault,error)
+            assert error.code
+            passed=False; is_current=False; rejected_by='authority'
+        else:
+            assert not facts.all_killed and not facts.passed, (fault,asdict(facts))
+            if fault=='survived':
+                assert facts.current and facts.results[0]==('MUT-V2-001','survived'),asdict(facts)
+            elif fault in outcome_faults:
+                assert facts.current and facts.results[0]==('MUT-V2-001','unverified'),asdict(facts)
+            else:
+                assert not facts.current and facts.reason_codes,(fault,asdict(facts))
+            passed=facts.passed; is_current=facts.current; rejected_by='reader'
+    finally:
+        if moved is not None:
+            moved[0].rename(moved[1])
+        for filename,data in originals.items():
+            filename.write_bytes(data)
+        assert all(filename.read_bytes()==data for filename,data in originals.items())
+    assert hashlib.sha256(path.read_bytes()).hexdigest()==reference.sha256
+    results[fault]=dict(fault=fault,passed=passed,current=is_current,rejected_by=rejected_by)
+assert content_snapshot()==initial
+print(json.dumps(results))
 """
 )
 
 
-@pytest.mark.parametrize(
-    "fault",
-    [
-        "missing_report",
-        "missing_receipt",
-        "missing_completion",
-        "closure_binding",
-        "root_snapshot_rows",
-        "root_snapshot_metadata",
-        "context_binding",
-        "extra_report_field",
-        "duplicate_json_key",
-        "wrong_loaded_origin",
-        "loaded_name_path_mismatch",
-        "unreported_stderr",
-        "wrong_observation",
-        "unrelated_assertion",
-        "setup_error",
-        "teardown_error",
-        "survived",
-        "receipt_cleanup",
-        "receipt_eof",
-        "process_timeout",
-        "output_overflow",
-    ],
-)
-def test_real_originals_reject_missing_or_self_rehashed_tampering(
-    recorded_runs: dict[str, tuple[PreparedTask, dict]], fault: str
-) -> None:
+@pytest.fixture(scope="module")
+def rehashed_fault_results(
+    recorded_runs: dict[str, tuple[PreparedTask, dict]],
+) -> dict[str, dict]:
     prepared, result = recorded_runs["direct"]
-    checked = prepared.engine.run(
-        prepared.root, REHASHED_FAULT, json.dumps(result["reference"]), fault
+    return prepared.engine.run(
+        prepared.root,
+        REHASHED_FAULTS_BATCH,
+        json.dumps(result["reference"]),
+        json.dumps(list(FAULTS)),
     )
+
+
+@pytest.mark.parametrize("fault", FAULTS)
+def test_real_originals_reject_missing_or_self_rehashed_tampering(
+    rehashed_fault_results: dict[str, dict], fault: str
+) -> None:
+    checked = rehashed_fault_results[fault]
     assert checked["fault"] == fault and checked["passed"] is False

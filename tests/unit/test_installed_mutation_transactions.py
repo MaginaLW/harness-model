@@ -16,6 +16,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
@@ -155,47 +156,17 @@ class Model:
     material_collector: Callable
 
 
-@pytest.fixture
-def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[Model]:
-    recorder, process_writer, material_collector = (
-        runtime.record_installed_mutations,
-        node._process,
-        runtime._materials,
-    )
-    attempts: list[str] = []
+_MODEL_SEEDS: dict[str, tuple[tempfile.TemporaryDirectory[str], dict[str, object]]] = {}
 
-    def no_execution(*args, **kwargs):
-        attempts.append("record-or-probe")
-        raise AssertionError("portable logic fixture must not record or launch a probe")
 
-    actual_popen = subprocess.Popen
-
-    class GitOnlyPopen(actual_popen):
-        # Keep Popen a class: Windows asyncio subclasses it during cold imports.
-        def __init__(self, argv, *args, **kwargs):
-            if not isinstance(argv, (tuple, list)) or Path(argv[0]).name.casefold() not in {
-                "git",
-                "git.exe",
-            }:
-                no_execution(argv)
-            super().__init__(argv, *args, **kwargs)
-
-    monkeypatch.setattr(subprocess, "Popen", GitOnlyPopen)
-    monkeypatch.setattr(runtime, "record_installed_mutations", no_execution)
-    for name in OS_PROCESS_APIS:
-        if hasattr(os, name):
-            monkeypatch.setattr(os, name, no_execution)
-    for module, names in (
-        (node, ("run_node_process", "_process")),
-        (processes, ("run_node_process", "run_execution")),
-    ):
-        for name in names:
-            monkeypatch.setattr(module, name, no_execution)
-    root = tmp_path / "task"
+def _build_model_seed(variant: str) -> tuple[tempfile.TemporaryDirectory[str], dict[str, object]]:
+    seed_dir = tempfile.TemporaryDirectory(prefix="aiflow-model-seed-", ignore_cleanup_errors=True)
+    seed_base = Path(seed_dir.name)
+    root = seed_base / "task"
     root.mkdir()
     for name in ("policy", "schemas", "templates"):
         shutil.copytree(ROOT / ".ai" / name, root / ".ai" / name)
-    if getattr(request, "param", None) == "node-v2":
+    if variant == "node-v2":
         import yaml
         from test_node_v2_contract import node_documents
 
@@ -245,7 +216,7 @@ def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[
             independent_verifier_required=True,
         ),
     )
-    facts_path = tmp_path / "facts.json"
+    facts_path = seed_base / "facts.json"
     put_json(facts_path, facts)
     record_risk_facts(
         root, TASK, decision_unit_id="DU-001", input_path=facts_path, actor="fixture-classifier"
@@ -283,6 +254,58 @@ def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[
     begin_task(root, TASK, actor="fixture-implementer")
     verifier_context = build_verifier_context(root, TASK)
     save_verifier_context(root, TASK, verifier_context)
+    return seed_dir, verifier_context
+
+
+@pytest.fixture
+def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[Model]:
+    recorder, process_writer, material_collector = (
+        runtime.record_installed_mutations,
+        node._process,
+        runtime._materials,
+    )
+    attempts: list[str] = []
+
+    def no_execution(*args, **kwargs):
+        attempts.append("record-or-probe")
+        raise AssertionError("portable logic fixture must not record or launch a probe")
+
+    actual_popen = subprocess.Popen
+
+    class GitOnlyPopen(actual_popen):
+        # Keep Popen a class: Windows asyncio subclasses it during cold imports.
+        def __init__(self, argv, *args, **kwargs):
+            if not isinstance(argv, (tuple, list)) or Path(argv[0]).name.casefold() not in {
+                "git",
+                "git.exe",
+            }:
+                no_execution(argv)
+            super().__init__(argv, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "Popen", GitOnlyPopen)
+    monkeypatch.setattr(runtime, "record_installed_mutations", no_execution)
+    for name in OS_PROCESS_APIS:
+        if hasattr(os, name):
+            monkeypatch.setattr(os, name, no_execution)
+    for module, names in (
+        (node, ("run_node_process", "_process")),
+        (processes, ("run_node_process", "run_execution")),
+    ):
+        for name in names:
+            monkeypatch.setattr(module, name, no_execution)
+    variant = "node-v2" if getattr(request, "param", None) == "node-v2" else "default"
+    if variant not in _MODEL_SEEDS:
+        _MODEL_SEEDS[variant] = _build_model_seed(variant)
+    seed_dir, seed_verifier_context = _MODEL_SEEDS[variant]
+    root = Path(shutil.copytree(Path(seed_dir.name) / "task", tmp_path / "task"))
+    subprocess.run(
+        ["git", "-c", "core.fsmonitor=false", "update-index", "--refresh", "-q"],
+        cwd=root,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    verifier_context = deepcopy(seed_verifier_context)
 
     # The sole positive host seam: ordinary fixture files instead of Windows
     # interpreter/distribution discovery. No probe or process result is supplied.

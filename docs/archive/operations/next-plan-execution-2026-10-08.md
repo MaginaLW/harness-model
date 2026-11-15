@@ -1,6 +1,6 @@
 # 后续计划执行与固定来源：2026-10-08
 
-本页承接[分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
+本页承接[分阶段计划](../../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，记录本次实际推进与剩余依赖。历史原件和旧窗口保持；本页不提供动作权限，不替代当前原生状态。
 
 ## 2026-10-09 会话收尾：诊断提案到期
 
@@ -14,7 +14,7 @@
 
 本轮重新核对原七项待办与S0–S5，形成[完成条件与依赖核对](follow-up-completion-audit-2026-10-09.md)，保留各线的真实退出条件、FAILED/SPENT/取消/partial/unknown及历史原件。F后继明确区分仅承接历史事实的恢复范围与选定新真实导入的范围：只有后者需要匹配新来源/context/preflight/record，不将来源重取作为两条路共有的附加门。I1原件在本轮获准有限目录未定位，不据此推断全局不存在或当前资格；三份用户草稿不是当前Apply目标。选定来源的进一步核对未识别可独立完成的新实质准备，不补造目标、字段或重复模板。
 
-[S1合同兼容与审核预算](../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)补齐带版本pins的提案/设计/实际C71 API适用关系、预算来源与停止残余包，以及三个synthetic正交例子。它不新增数值预算、产品字段、第二状态机、每轮签字或3-A/3-B采纳。两名非作者原审发现同一spec raw/canonical措辞问题，定点修复后均0未解决项；本例raw、实际frozen_spec及相应批准字段同值，读件pin本身不认证批准。已审17656字节原件另存，Root为Git必需whitespace仅去掉末尾1个LF，不改正文。旧审报告和原件保留。
+[S1合同兼容与审核预算](../../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)补齐带版本pins的提案/设计/实际C71 API适用关系、预算来源与停止残余包，以及三个synthetic正交例子。它不新增数值预算、产品字段、第二状态机、每轮签字或3-A/3-B采纳。两名非作者原审发现同一spec raw/canonical措辞问题，定点修复后均0未解决项；本例raw、实际frozen_spec及相应批准字段同值，读件pin本身不认证批准。已审17656字节原件另存，Root为Git必需whitespace仅去掉末尾1个LF，不改正文。旧审报告和原件保留。
 
 Root实际复核7封包的40个封闭payload、7个追加回执及14个当前C71保护输入，均无差异；fresh owner仍a223/FAILED、既有批准current、Missing retry_reason_or_escalation。汇合报告 `${EXECUTION_ROOT}/full-goal-requirement-reconciliation-001/precommit-report.json` SHA256 `fb464a1bd1d1bd7b8e04fda6cb216a32458ef3c81231045d5036d7f119b28333`，其whitespace字段仅是行尾空白检查的窗口，随后实际Git检查额外发现并修正上述EOF空行；最终格式/提交检查另追加记录，不改该封存报告。3名sub-agent分别核1–3、4–7、S0–S5；1名S1作者后接2名非作者审查，Root串行汇合、入口和提交。普通文档检查不等于CI/Gate或业务验收。
 
@@ -250,7 +250,7 @@ Task63 的三份 HOLD_BACK 原件仍在私有整合树与历史中完整保留�
 
 ## S1 已交付与后续顺序
 
-[非评分离线状态解释设计](../superpowers/specs/2026-10-08-advisory-status-explanation-design.md)已交付闭合输入/输出、六类建议、来源和绑定规则、22 个 synthetic 反例及固定历史间接引用。两路非作者独审后，A20 来源标签与 Task69 历史窗口歧义已定点修复，最终文件 SHA256 为 `c6476576c50ecafa9bc4326691b30ff8643b7204e7d3a24387225b97a4a9862a`；结论仅 APPROVE_FOR_DESIGN_PREPARATION_ONLY。
+[非评分离线状态解释设计](../../superpowers/specs/2026-10-08-advisory-status-explanation-design.md)已交付闭合输入/输出、六类建议、来源和绑定规则、22 个 synthetic 反例及固定历史间接引用。两路非作者独审后，A20 来源标签与 Task69 历史窗口歧义已定点修复，最终文件 SHA256 为 `c6476576c50ecafa9bc4326691b30ff8643b7204e7d3a24387225b97a4a9862a`；结论仅 APPROVE_FOR_DESIGN_PREPARATION_ONLY。
 
 该设计不产概率或模型分数，不执行建议，不改权限、账本、现行 strict Schema 或阶段门。CreateNew 真实宿主场景留待 S4。未来新 advisory 源码另建治理 task；正式评分仍须原 Phase 3 门或正式采纳的新路线，不借 Task69 的整合规格实施。
 

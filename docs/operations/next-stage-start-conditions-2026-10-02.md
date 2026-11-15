@@ -4,7 +4,7 @@
 
 Root 在各自工作区用固定公共 CLI 只读核对，七个 HEAD 前后相同：TASK-0063/0064/0067 仍 `BLOCKED` / Missing `block_resolution`；0065 为 `FAILED` / Missing `retry_reason_or_escalation`；0066/0068 仍 `IMPLEMENTING` / Missing `implementation_result`；0069 为 `WAITING_FOR_SPEC_REVIEW` / Missing `spec_approval`。Action005 已消费且整体 FAILED，旧批准不重问，也不授权新验证。Task69 的现有规格问题仍待答复，未开始整合实现。
 
-发布 A 已选择；两份普通文档派生稿已作本地阶段提交 `cb8d524409a53cb67808cf77d96577962c056cf0`，实际 Git 字节与已独审内容一致。原件和暂不公开历史保留，具体文件身份及后续 publisher 边界见[发布工作包](publication-package-2026-10-04.md#2026-10-08-两份派生文档已固定为本地-git-候选)。
+发布 A 已选择；两份普通文档派生稿已作本地阶段提交 `cb8d524409a53cb67808cf77d96577962c056cf0`，实际 Git 字节与已独审内容一致。原件和暂不公开历史保留，具体文件身份及后续 publisher 边界见[发布工作包](../archive/operations/publication-package-2026-10-04.md#2026-10-08-两份派生文档已固定为本地-git-候选)。
 
 外仓本轮 21 个不同 endpoint 各明确 GET 一次，两个 main 前后分别相同：dotfiles `3a41b37d987214487b1690f14c035d3001b1d90c` 的 [Validate run 37702050986](https://github.com/MaginaLW/ai-agent-dotfiles/actions/runs/37702050986) actual attempt 1，4 jobs／4 同 suite checks 全部 completed/success；r3s `929a17bdd74a578b868c512d9630e7d04100f251` 的 [offline-verify run 37702047743](https://github.com/MaginaLW/r3s-VPS/actions/runs/37702047743) actual attempt 1，Windows 成功、POSIX queued／零 steps／runner_id 0。本次 runner API 只返回一个 Windows online/idle 注册项，不证明 Linux 宿主故障或全局不可用。
 
@@ -249,7 +249,7 @@ status IMPLEMENTING/implementation_result/fresh/current/clean。重复CLI输出�
 targeted80和完整V2按资源依赖串行，必须准备自己的真实动作批准、独立Verifier和全部
 14项/原预算/85+90；不能复制Task65 grant或以局部输出解除进入门。
 F63/64、Task67、I1/I2/E5/I5/Phase3/4、七项目标和发布条件保持。
-详见[当前执行记录](backlog-execution-2026-10-04.md)；下方保留历史状态。
+详见[当前执行记录](../archive/operations/backlog-execution-2026-10-04.md)；下方保留历史状态。
 
 ## 2026-10-07 Action004 实际启动与 Task68 安全验证closure
 
@@ -261,40 +261,40 @@ Action004 新具体人类批准已原生event29登记，最终批准HEAD7853d52�
 Task68 同spec与生产源未变；旧Policy安全fixture独立task-free阶段只增加精确验证closure，
 真实event9临时BLOCK。其actual sync/resolution/current分类/Design/修复后测试仍待完成。
 七项、F63/64、Task67、I1/I2/E5/I5/Phase3/4及远端发布门均未据此关闭。
-详见[当前执行记录](backlog-execution-2026-10-04.md)；下方保留历史状态。
+详见[当前执行记录](../archive/operations/backlog-execution-2026-10-04.md)；下方保留历史状态。
 
 2026-10-07 定向结果补记：Task68 source0dc233c已原生sync/event8，账本14fe42f；
 80项实际77PASS/3FAIL、20新契约及真实junction通过，旧Policy dirty fixture兼容待解。
 有限源码独审与static通过不当完整V2或解除Task67 BLOCK/I1资格；Task65 Action004
 once001计数NO_GO、002仅最小修订准备，新grant/完整V2仍无。见
-[当前定向结果](backlog-execution-2026-10-04.md#2026-10-07-task-0068-定向回归-7780旧-policy-fixture-兼容待解)。
+[当前定向结果](../archive/operations/backlog-execution-2026-10-04.md#2026-10-07-task-0068-定向回归-7780旧-policy-fixture-兼容待解)。
 
 2026-10-07 规格回复后补记：Task68当前spec已获真实用户批准，native event6/7与阶段
 f48243c/e30fa8f已完成；当前IMPLEMENTING/implementation_result。单源码恢复入口修复已实现，
 Ruff/format/mypy通过，targeted回归与源码独审进行中；不是完整V2、Task67解除BLOCK或I1资格。
 Task65 Action004新动作及once入口独审仍待，不解除下方阶段/发布门。见
-[当前Task68](backlog-execution-2026-10-04.md#2026-10-07-task-0068-当前规格已批准并进入实现)。
+[当前Task68](../archive/operations/backlog-execution-2026-10-04.md#2026-10-07-task-0068-当前规格已批准并进入实现)。
 
 2026-10-07 封包补记：Task65 Action004 revision002仅完成非作者具体封包独审，
 50有效检查/5 DTO拒绝向量通过，必要finding0；680新增pyc语义UNKNOWN、007仍为有限历史资格。
 当前Task65 IMPLEMENTING/implementation_result，Task67 BLOCKED/block_resolution，
 Task68 WAITING_FOR_SPEC_REVIEW/spec_approval且classifier未改。尚无新动作批准/完整V2；
 once launcher、真实final HEAD与fresh launch条件仍准备，不解除I1或下方任何阶段门。见
-[Action004封包](backlog-execution-2026-10-04.md#2026-10-07-action004-封包独审通过尚未批准或执行)。
+[Action004封包](../archive/operations/backlog-execution-2026-10-04.md#2026-10-07-action004-封包独审通过尚未批准或执行)。
 
 2026-10-07 后续补记：一次prefix005普通诊断越过原review-record写入点并在原测试103行
 的verify_task入口 STOP，未进入producer；Task65随后仅完成native机械begin/event28，
 阶段41d6b59、当前IMPLEMENTING/Missing implementation_result。新Action004尚在fresh
 环境与绑定准备，旧FAILED/SPENT保留，没有完整重试或I1资格完成。Task68仍待当前规格
 决定且classifier未改，Task67仍BLOCK；不解除本页其余阶段门。见
-[前缀与重试准备](backlog-execution-2026-10-04.md#2026-10-07-短路径前缀到达验证入口task-0065-重试准备)。
+[前缀与重试准备](../archive/operations/backlog-execution-2026-10-04.md#2026-10-07-短路径前缀到达验证入口task-0065-重试准备)。
 
 2026-10-07 追加：独立恢复任务 TASK-0068 当前 frozen REVIEW/V2 设计已通过独审并原生记录，
 治理阶段提交 `c233b33`，clean/fresh、WAITING_FOR_SPEC_REVIEW / Missing `spec_approval`。
 基线契约6 RED/14 PASS是实现前缺口，生产源码未改；它不解除 Task67 BLOCK、Task65失败或 I1 资格门。
 普通 file-API 对照支持 review-record 临时写入的路径命名空间因素，完整超时共同根因仍未知；
 新普通短父目录仅当前结构准入，未发生完整重试。真实规格、诊断和后续限制见
-[本轮新增核定](backlog-execution-2026-10-04.md#2026-10-07-task-0068-设计已审查短路径诊断继续)。
+[本轮新增核定](../archive/operations/backlog-execution-2026-10-04.md#2026-10-07-task-0068-设计已审查短路径诊断继续)。
 
 2026-10-07 当前窗口补记：TASK-0067 已获批执行完整V2但原生 FAILED（10/14），
 随后 BLOCKED / Missing `block_resolution`。I1公开接口已有实现不等于实际 lifecycle
@@ -307,11 +307,11 @@ latest Validate run37575131851 attempt1 已 completed/success，4/4 jobs success
 r3s 当前 main `8898f48c…` 的 run37499267909 queued，POSIX queued、Windows success。
 这个精确 workflow 成功不表示所有 required CI、可信 backend、I2 扩仓或实际 Apply 完成。
 下方2026-10-03“dotfiles当前准确CI”是历史窗口；来源及当前限制见
-[008窗口](external-follow-up-evidence-2026-10-04.md#2026-10-07-当前-sha-的-dotfiles-validate-已成功r3s-仍排队)
-和[当前待办](backlog-execution-2026-10-04.md#2026-10-07-task-0067-获批执行失败声明恢复已-block)。
+[008窗口](../archive/operations/external-follow-up-evidence-2026-10-04.md#2026-10-07-当前-sha-的-dotfiles-validate-已成功r3s-仍排队)
+和[当前待办](../archive/operations/backlog-execution-2026-10-04.md#2026-10-07-task-0067-获批执行失败声明恢复已-block)。
 
-2026-10-03：[报告回收](zcode-report-recovery-2026-10-03.md)完成指定核查，三份终稿附勘误，
-ZN-02 取消/无报告，独立评估不替代原报告。[F 具体规格](f-real-import-acceptance-2026-10-03.md)
+2026-10-03：[报告回收](../archive/operations/zcode-report-recovery-2026-10-03.md)完成指定核查，三份终稿附勘误，
+ZN-02 取消/无报告，独立评估不替代原报告。[F 具体规格](../archive/operations/f-real-import-acceptance-2026-10-03.md)
 用新 design 目标承接受审对象，实际准入/context 及匹配来源仍依下列条件串行办理。
 dotfiles 当前准确 CI 已补证成功；r3s 缺当前 SHA 的 POSIX 执行，不解除 I2 或阶段门。
 

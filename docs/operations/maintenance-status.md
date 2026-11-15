@@ -64,11 +64,11 @@
 
 ## 条件性能力
 
-完整引擎产品化、provider、固定动作可信执行及 V3 均按真实需求分别准入，详见[合同提案](phase-entry-proposals-2026-10-04.md)与[两条路线](sdk-and-engine-plan.md)。Phase 4 另依赖整体 Phase 3 退出、稳定接口及实测协调需求。旧蓝图与宿主并发额度不是实现或运行许可。
+完整引擎产品化、provider、固定动作可信执行及 V3 均按真实需求分别准入，详见[合同提案](../archive/operations/phase-entry-proposals-2026-10-04.md)与[两条路线](sdk-and-engine-plan.md)。Phase 4 另依赖整体 Phase 3 退出、稳定接口及实测协调需求。旧蓝图与宿主并发额度不是实现或运行许可。
 
 ## 旧工作线与证据边界
 
-TASK-0063～0071 已归档，历史七项未全部验收，均不默认续跑。四条 pilot 验收分支、全部 archive refs、用户草稿、原失败/SPENT/partial/unknown、既有批准及编号保留。`archive/local-task0079-private-evidence` 含私有失败材料，不直接合并或公开推送。历史工具退役不授权恢复或删除原件；见[范围核对](follow-up-completion-audit-2026-10-09.md)。
+TASK-0063～0071 已归档，历史七项未全部验收，均不默认续跑。四条 pilot 验收分支、全部 archive refs、用户草稿、原失败/SPENT/partial/unknown、既有批准及编号保留。`archive/local-task0079-private-evidence` 含私有失败材料，不直接合并或公开推送。历史工具退役不授权恢复或删除原件；见[范围核对](../archive/operations/follow-up-completion-audit-2026-10-09.md)。
 
 ## 历史记录
 
