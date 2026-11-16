@@ -278,14 +278,16 @@ def test_quality_replay_keeps_coverage_artifacts_out_of_repository_root() -> Non
     assert "Join-Path ([System.IO.Path]::GetTempPath()) $runId" in quickstart
     assert "$env:COVERAGE_FILE = $coverageFile" in quickstart
     assert '--cov-report="xml:$coverageXml"' in quickstart
-    assert "--cov=aiflow --cov=tools/analysis --cov-branch" in replay
+    assert "--cov=aiflow --cov-branch" in replay
+    assert "--cov=tools/analysis" not in replay
     assert "tools/ci/check_coverage.py --run-dir $runDir --base $baseCommit" in replay
     assert "coverage-core.xml" in replay
-    assert "coverage-analysis.xml" in replay
-    assert "每个目录均须" in replay
+    assert "coverage-analysis.xml" not in replay
+    assert "核心域须" in replay
     assert "总分支覆盖率不低于 85%" in replay
     assert "变更覆盖率不低于 90%" in replay
-    assert "-m mypy src tools/analysis" in replay
+    assert "-m mypy src" in replay
+    assert "mypy src tools/analysis" not in replay
     assert "Remove-Item Env:COVERAGE_FILE -ErrorAction SilentlyContinue" in quickstart
     assert unsafe_coverage_command not in quickstart
 

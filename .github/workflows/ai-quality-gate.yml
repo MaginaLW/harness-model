@@ -74,7 +74,7 @@ jobs:
         run: |
           COVERAGE_FILE="$RUNNER_TEMP/.coverage" \
             uv run --locked python -m pytest -q \
-            --cov=aiflow --cov=tools/analysis --cov-branch \
+            --cov=aiflow --cov-branch \
             --cov-report=term-missing \
             --cov-report="xml:$RUNNER_TEMP/coverage.xml"
           uv run --locked python tools/ci/check_coverage.py --run-dir "$RUNNER_TEMP" --base "$BASE_SHA"

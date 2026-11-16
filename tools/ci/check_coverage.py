@@ -1,4 +1,4 @@
-"""Require independent core and analysis coverage from one full-suite database."""
+"""Require core branch and diff coverage from one full-suite database."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from pathlib import Path
 
 from coverage import Coverage
 
-DOMAINS = (("core", "src/aiflow"), ("analysis", "tools/analysis"))
+DOMAINS = (("core", "src/aiflow"),)
 
 
 def check_coverage(repository: Path, run_dir: Path, base: str) -> int:

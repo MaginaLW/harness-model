@@ -97,7 +97,6 @@ def test_pytest_checks_share_one_full_coverage_execution(level: str, tmp_path: P
         "-m",
         "pytest",
         "--cov=aiflow",
-        "--cov=tools/analysis",
         "--cov-branch",
         f"--cov-report=xml:{(parsed.run_dir / 'coverage.xml').as_posix()}",
     )
@@ -196,7 +195,6 @@ def test_shared_subset_selector_is_rejected_even_when_all_pytest_checks_agree(
                 "-m",
                 "pytest",
                 "--cov=aiflow",
-                "--cov=tools/analysis",
                 "--cov-branch",
                 "--cov-report=xml:{run_dir}/coverage.xml",
             ],
@@ -492,7 +490,7 @@ def test_coverage_and_diff_cover_must_share_run_dir_base_and_threshold(tmp_path:
         )
     assert caught.value.code == "VERIFICATION_COVERAGE_CONFIG_INVALID"
 
-    for required_argument in ("--cov=aiflow", "--cov=tools/analysis", "--cov-branch"):
+    for required_argument in ("--cov=aiflow", "--cov-branch"):
         bundle = bundle_copy()
         coverage_check = next(item for item in checks(bundle, "V1") if item["id"] == "coverage_xml")
         coverage_check["command"].remove(required_argument)

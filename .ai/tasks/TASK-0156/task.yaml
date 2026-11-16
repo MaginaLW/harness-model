@@ -1,0 +1,124 @@
+allowed_scope:
+- tools/analysis/**
+- pyproject.toml
+- .github/workflows/ai-quality-gate.yml
+- tools/ci/check_coverage.py
+- src/aiflow/verification.py
+- .ai/policy/verification-levels.yaml
+- docs/operations/quickstart.md
+- tests/integration/test_approval_overhead.py
+- tests/integration/test_repository_readiness.py
+- tests/integration/test_acceptance_traceability.py
+- tests/integration/test_coverage_gates.py
+- tests/integration/test_github_workflow.py
+- tests/unit/test_benchmark_reference.py
+- tests/unit/test_check_coverage.py
+- tests/unit/test_confidence_availability.py
+- tests/unit/test_feedback_text.py
+- tests/unit/test_policy.py
+- tests/unit/test_pr_feedback.py
+- tests/unit/test_pr_feedback_followups.py
+- tests/unit/test_review_advisory.py
+- tests/unit/test_review_detection.py
+- tests/unit/test_review_detection_analysis.py
+- tests/unit/test_review_detection_input.py
+- tests/unit/test_review_detection_sources.py
+- tests/unit/test_review_feedback.py
+- tests/unit/test_review_feedback_calibration.py
+- tests/unit/test_review_feedback_projection.py
+- tests/unit/test_review_feedback_score.py
+- tests/unit/test_snapshot_git_bounded.py
+- tests/unit/test_telemetry_snapshot.py
+- tests/unit/test_verification_plan.py
+base_commit: a376ad4c94b6608e9a2a492f3f870e456be2618e
+branch: codex/retire-analysis-extension
+created_at: '2026-11-16T14:28:13Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Retire unintegrated tools/analysis peripheral extension and align CI/V1/V2
+    coverage and mypy gates to core src/aiflow
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  impact_scope:
+  - tools/analysis/**
+  - pyproject.toml
+  - .github/workflows/ai-quality-gate.yml
+  - tools/ci/check_coverage.py
+  - src/aiflow/verification.py
+  - .ai/policy/verification-levels.yaml
+  - docs/operations/quickstart.md
+  - tests/integration/test_approval_overhead.py
+  - tests/integration/test_repository_readiness.py
+  - tests/integration/test_acceptance_traceability.py
+  - tests/integration/test_coverage_gates.py
+  - tests/integration/test_github_workflow.py
+  - tests/unit/test_benchmark_reference.py
+  - tests/unit/test_check_coverage.py
+  - tests/unit/test_confidence_availability.py
+  - tests/unit/test_feedback_text.py
+  - tests/unit/test_policy.py
+  - tests/unit/test_pr_feedback.py
+  - tests/unit/test_pr_feedback_followups.py
+  - tests/unit/test_review_advisory.py
+  - tests/unit/test_review_detection.py
+  - tests/unit/test_review_detection_analysis.py
+  - tests/unit/test_review_detection_input.py
+  - tests/unit/test_review_detection_sources.py
+  - tests/unit/test_review_feedback.py
+  - tests/unit/test_review_feedback_calibration.py
+  - tests/unit/test_review_feedback_projection.py
+  - tests/unit/test_review_feedback_score.py
+  - tests/unit/test_snapshot_git_bounded.py
+  - tests/unit/test_telemetry_snapshot.py
+  - tests/unit/test_verification_plan.py
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0156
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 078491d3d06793205544f8f8372f1c062ec39e57efdea259dee1f2e5d1ad7323
+goal: Retire unintegrated tools/analysis peripheral extension and align CI/V1/V2 coverage
+  and mypy gates to core src/aiflow
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-16T14:31:38Z'
+subject_commit: a376ad4c94b6608e9a2a492f3f870e456be2618e
+task_id: TASK-0156
+updated_at: '2026-11-16T14:38:54Z'
+worktree_dirty: false
+worktree_dirty_paths: []
