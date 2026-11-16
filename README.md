@@ -41,10 +41,7 @@
 
 | 需求 | 工具与用法 | 输入与结论边界 |
 |---|---|---|
-| 定位当前任务的准备缺项 | [只读任务建议](docs/operations/review-advisory.md) | 完整克隆及真实 `TASK-ID`；只给建议、不授执行权 |
-| 查看正式账本 / 公开 PR 审核历史 | [审核结果回读](docs/operations/review-feedback.md) / [公开 PR 回读](docs/operations/pr-feedback.md) | 固定 `HEAD` 或公开 JSON；保留未知、不重算 Gate |
-| 校验文档引用与本地 Git 行跨度 | [观察输入检查](docs/operations/review-detection-input.md)（含 [Git 原件核对](docs/operations/review-detection-input.md#本地-git-原件核对) 与 [行跨度定位](docs/operations/review-detection-input.md#精确行跨度定位)） | 标准输入声明包与本地 Git 根目录；不认证语义与准入 |
-| 演练合成检出区间与校准反馈 | [离线区间计算](docs/operations/review-detection.md) / [记录级合成分析](docs/operations/review-detection-analysis.md) / [合成反馈演练](docs/operations/review-feedback-simulation.md) / [初始外部参考](docs/operations/benchmark-reference.md) | synthetic 计数或虚构快照；窗口准备见[观察流程](docs/operations/review-detection-preparation.md) |
+| 已退场的外围分析与回读说明（`tools/analysis/*`） | [已归档的离线分析与合成演练说明](docs/archive/README.md#已退场的离线分析与合成演练工具) | 对应 `tools/analysis/*` 脚本已于 PR #166（`TASK-0156`）退场，文档仅保留历史参考 |
 | 显式执行单次 SDK 只读文档审核 | [单次只读审核](docs/superpowers/specs/sdk-readonly-review.md#使用) | 默认关闭；需可选 SDK 与明确任务输入范围 |
 
 ## 许可证

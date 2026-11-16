@@ -1,6 +1,6 @@
 # 契约检出研究的真实观察准备
 
-本页把[已采用的起步范围](../superpowers/specs/review-detection-admission.md)转为后续自然工作的移交流程。当前交付仅为准备：本轮未登记或核定实际合格候选、真实机会或裁定记录，`T0/T1` 未设置，30 日窗口尚未启动。[离线数学工具](review-detection.md)只接受 synthetic 计数，不接收真实记录；准备完成不把它升级为真实评分接口。
+本页把[已采用的起步范围](../../superpowers/specs/review-detection-admission.md)转为后续自然工作的移交流程。当前交付仅为准备：本轮未登记或核定实际合格候选、真实机会或裁定记录，`T0/T1` 未设置，30 日窗口尚未启动。[离线数学工具](review-detection.md)只接受 synthetic 计数，不接收真实记录；准备完成不把它升级为真实评分接口。
 
 ## 自然任务出现后的配合与核对清单
 
@@ -19,7 +19,7 @@
 
 原件继续保存在原 Git／PR／CLI 位置，只移交链接和必要的脱敏摘要，不另存聊天、私有指令、身份或诊断包。实际输入不能公开复核时保留未知，不要求导出受保护内容。后续报告、裁定或关闭原件尚未自然产生时列为待补；本次核对只形成“已核原件、具体缺口、下一步所需材料”的摘要，不登记合格观察、向 synthetic 工具送入真实数据或改变审核安排。
 
-维护方回复另按[回复后的核对步骤](../superpowers/specs/review-detection-host-evidence.md#维护方回复后的核对步骤)处理；宿主资料不能代替本清单的自然任务证据。
+维护方回复另按[回复后的核对步骤](../../superpowers/specs/review-detection-host-evidence.md#维护方回复后的核对步骤)处理；宿主资料不能代替本清单的自然任务证据。
 
 ## 不依赖真实任务的离线演练
 
@@ -49,11 +49,11 @@ if ($LASTEXITCODE -ne 0) { throw 'Source rehearsal failed' }
 .\.venv\Scripts\python.exe -B -m pytest tests/unit/test_review_detection_input.py tests/unit/test_review_detection_sources.py tests/unit/test_snapshot_git_bounded.py tests/unit/test_review_detection.py -q
 ```
 
-测试会在测试临时目录创建可丢弃夹具，pytest 可写忽略的缓存；这不是零写入命令。失败先诊断并保留结果，不改用宿主对象验证。演练完成后，可独立完成的入口和机械反例已有实现；下一步按[通道核定结果](../superpowers/specs/review-detection-host-evidence.md#7-已核通道的选择与落实顺序)补宿主资料，并在自然任务出现时按下节固定真实候选。不要把本次准备工作或旧审核追溯纳入未来窗口。
+测试会在测试临时目录创建可丢弃夹具，pytest 可写忽略的缓存；这不是零写入命令。失败先诊断并保留结果，不改用宿主对象验证。演练完成后，可独立完成的入口和机械反例已有实现；下一步按[通道核定结果](../../superpowers/specs/review-detection-host-evidence.md#7-已核通道的选择与落实顺序)补宿主资料，并在自然任务出现时按下节固定真实候选。不要把本次准备工作或旧审核追溯纳入未来窗口。
 
 ## 准备候选与来源
 
-等本仓自然发生仅含 `docs/**` 普通文档、且包含 `docs/superpowers/specs/**` 契约内容的工作，再核对其首次非作者专项审核。不得为凑样本创建任务、制造缺陷、追加审核或追溯纳入已有报告。直接矛盾类的可检验要求、先前适用契约及版本，以[协议](../superpowers/specs/review-detection-protocol.md#2-机会裁定审核与匹配的顺序)为准。
+等本仓自然发生仅含 `docs/**` 普通文档、且包含 `docs/superpowers/specs/**` 契约内容的工作，再核对其首次非作者专项审核。不得为凑样本创建任务、制造缺陷、追加审核或追溯纳入已有报告。直接矛盾类的可检验要求、先前适用契约及版本，以[协议](../../superpowers/specs/review-detection-protocol.md#2-机会裁定审核与匹配的顺序)为准。
 
 协调者复用该工作的既有公开 Git／PR 原件。正式 task 仍按原 CLI、context 和 strict Schema 使用；task-free 工作在同一 PR 描述追加匿名来源摘要。可读原件沿用 `commit/path/blob/locator` 或真实公开锚点，先实际核对目标，再记录关系。原报告不存在公开锚点时保留未知；协调者摘要不冒充原报告，也不证明当时输入、机会或报告已固定。
 
@@ -70,11 +70,11 @@ git show <CANDIDATE_COMMIT>:<REPO_RELATIVE_PATH>
 
 明确供给的 Git 文档引用可用[独立本地原件核对](review-detection-input.md#本地-git-原件核对)检查 commit、精确路径、普通 blob 和实际字节。它不解析 semantic locator，不核定自然变更范围、真实时序、独立真值或准入，PR 与未支持来源继续保留缺口。
 
-不另存审核输入、capture、原聊天、身份、会话日志或 oracle，不新增结果库、采集器或 Schema。公开保存仍按[既有边界](effect-observations.md#保存与隐私边界)执行；本页模板只供原 PR／CLI 流程中的人工语义说明，不是新增必填接口，也不能把模板字段送入现有 v2 块或 CLI Schema。
+不另存审核输入、capture、原聊天、身份、会话日志或 oracle，不新增结果库、采集器或 Schema。公开保存仍按[既有边界](../../operations/effect-observations.md#保存与隐私边界)执行；本页模板只供原 PR／CLI 流程中的人工语义说明，不是新增必填接口，也不能把模板字段送入现有 v2 块或 CLI Schema。
 
 ## 核对入口事实，再声明机会与窗口
 
-准备声明须在本次实际候选的首次非作者专项审核前发布到原 PR／CLI 位置。先固定候选 SHA 和 baseline，列出逐件原件与可重读定位、机会形成及排除规则、完整边界和预选顺序、允许材料、实际职责及已有预算来源；发布成功后回读同一原件，确认候选及声明，再派发审核。真实执行这个顺序可以补齐本次准备动作的证据，不能回溯认证旧报告。精确定位的有界接口见[定位合同](../superpowers/specs/review-detection-locators.md)。
+准备声明须在本次实际候选的首次非作者专项审核前发布到原 PR／CLI 位置。先固定候选 SHA 和 baseline，列出逐件原件与可重读定位、机会形成及排除规则、完整边界和预选顺序、允许材料、实际职责及已有预算来源；发布成功后回读同一原件，确认候选及声明，再派发审核。真实执行这个顺序可以补齐本次准备动作的证据，不能回溯认证旧报告。精确定位的有界接口见[定位合同](../../superpowers/specs/review-detection-locators.md)。
 
 分别记录发布、回读、派发与报告原件；PR 可变描述及 hash 不是历史固定的充分证据，报告完成时间也不是开始时间。派发原件或版本历史不可公开复核时，真实输入及先后时序继续 unknown，不为补证保存聊天副本。没有独立真值、预算端点等条件时仍不登记合格单位或设置窗口。
 
@@ -82,7 +82,7 @@ git show <CANDIDATE_COMMIT>:<REPO_RELATIVE_PATH>
 
 被测审核与独立裁定分别使用新上下文和最小允许材料列表，避免继承含根因、报告、答案、修复或后继结果的完整聊天历史。这是减少提示的操作办法，不是未提示的充分证明；实际输入及暴露时序无法复核时仍为未知。
 
-按[采用范围第 4 节](../superpowers/specs/review-detection-admission.md#4-相关组选择与不足处理)在结局揭示前形成机会列表、实例粒度、唯一定位和相关组依据。每组只取本窗口第一个预声明候选中，按契约引用／对象引用／缺陷类别排序的第一项。跨 TASK／PR 的同任务、候选／修复链、共同输入、共同缺陷来源和共享故障也须关联；排序键无法消歧就保持未知。选中项后来为负或未知，不换正例；每组一项本身不证明组间独立或条件可比。
+按[采用范围第 4 节](../../superpowers/specs/review-detection-admission.md#4-相关组选择与不足处理)在结局揭示前形成机会列表、实例粒度、唯一定位和相关组依据。每组只取本窗口第一个预声明候选中，按契约引用／对象引用／缺陷类别排序的第一项。跨 TASK／PR 的同任务、候选／修复链、共同输入、共同缺陷来源和共享故障也须关联；排序键无法消歧就保持未知。选中项后来为负或未知，不换正例；每组一项本身不证明组间独立或条件可比。
 
 以下是可复制的准备声明。所有尖括号均为未填写占位，`unknown` 是当前缺口；删除占位或填写引用不产生就绪结论。真实事实核对及实现、数据／方法／质量条件成立后，才在原流程明确 UTC 的 `T0` 与 `T1=T0+30 days`，入口为 `[T0,T1)`。采用日、准备提交日或模板粘贴日都不自动成为 `T0`。
 
@@ -106,7 +106,7 @@ git show <CANDIDATE_COMMIT>:<REPO_RELATIVE_PATH>
 未满足事实及下一项机械核对：<缺口、原来源与责任>
 ```
 
-复用[已有职责与预算](../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md#3-有界审核预算与职责合同候选)和自然工作自身的真实授权。数值上限、实际投入和剩余分别引用；未知不补零或无限。独立裁定未被原安排覆盖时，不据本模板增加一轮盲审、付费调用或补样本审核，先保留该缺口。已授权范围内的机械缺项由 Agent 补齐，不重复请求已采用的用途、精度或范围决定；真实来源、范围或风险变化才按现有规则集中交所有者。
+复用[已有职责与预算](../../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md#3-有界审核预算与职责合同候选)和自然工作自身的真实授权。数值上限、实际投入和剩余分别引用；未知不补零或无限。独立裁定未被原安排覆盖时，不据本模板增加一轮盲审、付费调用或补样本审核，先保留该缺口。已授权范围内的机械缺项由 Agent 补齐，不重复请求已采用的用途、精度或范围决定；真实来源、范围或风险变化才按现有规则集中交所有者。
 
 ## 逐项核对公开时序、裁定和预算端点
 
@@ -138,13 +138,13 @@ gh api graphql -f 'query={repository(owner:"OWNER",name:"REPOSITORY"){pullReques
 
 平台编辑历史可以补证某项声明／报告文字的公开时序；本地 `review_recorded` 只证明本地录入，不能当宿主审核开始事件。独立裁定和预算关闭各有自己的原件要求，不由前一端点的命中传递成立。
 
-[宿主只读接入边界](../superpowers/specs/review-detection-host-evidence.md)固定了已核 CLI 协议能力、版本差异及所有者明确批准过的一轮读取范围；当前 `scope_decision=approved_once`、`read_state=closed`。该轮已结束，不形成重试或常设权限，不授权读取私密会话或启用遥测；实际派发、完整输入、独立性和货币端点仍未因此取得。
+[宿主只读接入边界](../../superpowers/specs/review-detection-host-evidence.md)固定了已核 CLI 协议能力、版本差异及所有者明确批准过的一轮读取范围；当前 `scope_decision=approved_once`、`read_state=closed`。该轮已结束，不形成重试或常设权限，不授权读取私密会话或启用遥测；实际派发、完整输入、独立性和货币端点仍未因此取得。
 
-[后续最小接入候选](../superpowers/specs/review-detection-host-evidence.md#5-后续最小接入候选)单独保持 pending／not_started：先核真实通道、宿主绑定和必然返回范围，再形成含对象、次数／页数／字节上限及停止条件的一次授权。当前没有可执行宿主读取请求，不复用已关闭额度；派发、完整输入、独立性、时间与费用端点分别验原件，缺口不由候选获批关闭。
+[后续最小接入候选](../../superpowers/specs/review-detection-host-evidence.md#5-后续最小接入候选)单独保持 pending／not_started：先核真实通道、宿主绑定和必然返回范围，再形成含对象、次数／页数／字节上限及停止条件的一次授权。当前没有可执行宿主读取请求，不复用已关闭额度；派发、完整输入、独立性、时间与费用端点分别验原件，缺口不由候选获批关闭。
 
-[单次握手候选](../superpowers/specs/review-detection-host-evidence.md#6-通道核定与单次握手授权候选)已固定请求内容、四个必需返回字段和拟议次数／字节／时限；实际 Desktop 端点、绑定、server 版本及接收前范围限制仍缺。CLI 版本与 proxy 帮助不补这些事实，当前不连接、不请求空白握手批准；握手也不继承后续任务读取许可。
+[单次握手候选](../../superpowers/specs/review-detection-host-evidence.md#6-通道核定与单次握手授权候选)已固定请求内容、四个必需返回字段和拟议次数／字节／时限；实际 Desktop 端点、绑定、server 版本及接收前范围限制仍缺。CLI 版本与 proxy 帮助不补这些事实，当前不连接、不请求空白握手批准；握手也不继承后续任务读取许可。
 
-[已核通道的选择与落实顺序](../superpowers/specs/review-detection-host-evidence.md#7-已核通道的选择与落实顺序)区分 App Server 协议、proxy、终端 UI、Code Mode 出站连接、设备配对及当前应用工具。静态核对已完成，实际接入保持未启动；先补既有入口的宿主绑定、版本、返回面与接收前限额，再形成具体一次范围，不通过启动新 server、读取配置或探测 socket 补缺。
+[已核通道的选择与落实顺序](../../superpowers/specs/review-detection-host-evidence.md#7-已核通道的选择与落实顺序)区分 App Server 协议、proxy、终端 UI、Code Mode 出站连接、设备配对及当前应用工具。静态核对已完成，实际接入保持未启动；先补既有入口的宿主绑定、版本、返回面与接收前限额，再形成具体一次范围，不通过启动新 server、读取配置或探测 socket 补缺。
 
 ### 先核职责覆盖，再取得独立裁定
 

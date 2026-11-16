@@ -4,13 +4,13 @@
 
 ## 1. 固定输入与引用
 
-当前自动投影复用 `tools/analysis/approval_overhead.py` 的 `--snapshot` / `--availability`；[审核结果回读](../../operations/review-feedback.md)调用同一 `build_snapshot(..., include_feedback=True)`，只增加受限 Finding 字段，不增加另一个原件解析器。默认统计、snapshot 与 availability 保持原格式。先固定 tracked `HEAD` 的提交，再读该提交的普通 Git blob；未提交材料不进入历史快照。live 当前建议仍依赖当时的原生读取，不能用快照替代原生状态、批准新鲜度或 Gate。
+当前自动投影复用 `tools/analysis/approval_overhead.py` 的 `--snapshot` / `--availability`；[审核结果回读](../../archive/operations/review-feedback.md)调用同一 `build_snapshot(..., include_feedback=True)`，只增加受限 Finding 字段，不增加另一个原件解析器。默认统计、snapshot 与 availability 保持原格式。先固定 tracked `HEAD` 的提交，再读该提交的普通 Git blob；未提交材料不进入历史快照。live 当前建议仍依赖当时的原生读取，不能用快照替代原生状态、批准新鲜度或 Gate。
 
 每个可复核声明定位到 `source_commit`、仓内 `path`、`git_blob` 与 semantic locator。原 snapshot 的前三项由 `source_commit`、`sources[].ref/git_blob` 对应，未增加 locator 字段；新反馈报告的来源引用包含上述四项，其中 `locator` 用已有对象 ID、修订或事件 sequence 定位。YAML/JSON 用字段名与已有对象 ID，JSONL 用 `task_id + sequence`，review 用 `review_id + revision`，Finding 再附 `finding_id`。行号可辅助阅读，不能单独标识修订。引用必须指向实际读取的原件，只有哈希而没有可读原件时不能补成证据。
 
 `executed_tool_sha256` 标识实际执行工具的字节，不保证工具与来源提交同版，也不认证来源声明。复算应同时固定来源提交与工具版本，并保留各自标识；本稿不执行历史复算。
 
-[Task-free PR 回读](../../operations/pr-feedback.md)是独立来源接口：显式输入选定公开 connector capture，记录实际输入 bytes hash 与输入 locator，不扩大以下 Git 白名单。PR 描述反馈块只投影协调者声明，原生 reviews/threads 仅列数量，workflow 只保留所见运行与查询引用。v2 块另以 `record_id + review_id + finding_id` 显式定位原发现，关联作者处置、修复候选和二元复核引用；同名 Finding 不自动合并。目标不在当前 capture 中时保留声明与 `not_in_capture`，候选未知或冲突不补当前 head，所引用原件仍未抓取。当前描述的多个块、捕获时间和 hash 不证明原子一致性或完整追加历史。TASK-ID 为 `not_applicable`，实际身份、独立复核、真值与 required check 完整性保持未知；关联成功不提供评分更新资格。v1-only 输出保持原形状，含 v2 块的输出明确使用报告版本 `2.0`。
+[Task-free PR 回读](../../archive/operations/pr-feedback.md)是独立来源接口：显式输入选定公开 connector capture，记录实际输入 bytes hash 与输入 locator，不扩大以下 Git 白名单。PR 描述反馈块只投影协调者声明，原生 reviews/threads 仅列数量，workflow 只保留所见运行与查询引用。v2 块另以 `record_id + review_id + finding_id` 显式定位原发现，关联作者处置、修复候选和二元复核引用；同名 Finding 不自动合并。目标不在当前 capture 中时保留声明与 `not_in_capture`，候选未知或冲突不补当前 head，所引用原件仍未抓取。当前描述的多个块、捕获时间和 hash 不证明原子一致性或完整追加历史。TASK-ID 为 `not_applicable`，实际身份、独立复核、真值与 required check 完整性保持未知；关联成功不提供评分更新资格。v1-only 输出保持原形状，含 v2 块的输出明确使用报告版本 `2.0`。
 
 ## 2. 现有 Git 白名单与字段映射
 

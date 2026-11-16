@@ -1,6 +1,6 @@
 # 评分更新、校准与反馈路由的合成演练
 
-`tools/analysis/review_feedback_simulation.py` 提供评分快照重算、固定分箱校准和反馈路由的离线接口。所有输入必须是虚构的 synthetic 情景；真实评分、自动审核、宿主连接与观察窗口均未启用。字段、时序和不足回退详见[接口合同](../superpowers/specs/review-feedback-simulation.md)。
+`tools/analysis/review_feedback_simulation.py` 提供评分快照重算、固定分箱校准和反馈路由的离线接口。所有输入必须是虚构的 synthetic 情景；真实评分、自动审核、宿主连接与观察窗口均未启用。字段、时序和不足回退详见[接口合同](../../superpowers/specs/review-feedback-simulation.md)。
 
 ## 运行示例
 
@@ -33,7 +33,7 @@ Get-Content -Raw -Encoding UTF8 docs/operations/examples/review-feedback-simulat
 
 分箱为左闭右开，最后一箱包含 1；空拟合箱保持 null，不借值或插值。留出记录落入空箱时保留全部记录与 raw 全集诊断，mapped 全集诊断为 null，路由不足。空 heldout 可以保留拟合结果，但不能通过路由。其他关键未知、组重复或时序冲突阻断整包拟合与评估，不删行后计算。
 
-映射预测仅用于留出诊断，不改写原计数的比例或 CP 区间。Brier 变化不单独证明校准改善；同一留出集若参与选择分箱、方法或阈值，后续不能继续作为独立评估。此演练不改变[有限研究协议](../superpowers/specs/review-detection-admission.md)的一次分析约定，也不提供连续监测保证。
+映射预测仅用于留出诊断，不改写原计数的比例或 CP 区间。Brier 变化不单独证明校准改善；同一留出集若参与选择分箱、方法或阈值，后续不能继续作为独立评估。此演练不改变[有限研究协议](../../superpowers/specs/review-detection-admission.md)的一次分析约定，也不提供连续监测保证。
 
 ## 错误与复算
 
@@ -53,4 +53,4 @@ CLI 只读 stdin、自身和四个直接／间接依赖源码，不读原件、�
 
 真实分析需可复核的自然候选、实际配置、独立真值、预算与关闭端点及方法适用性；校准另需真实结局前预测、固定方法和独立留出证据。真实路由需明确用途、风险参数、权限映射及兼容性验证。不能把真实材料改标 synthetic，也不能加一个批准开关就启用这套入口。
 
-这些条件按[观察准备流程](review-detection-preparation.md#关闭后回读原值条件满足才推进评分)和[阶段进入关系](../implementation/phase-03-entry-inputs.md)核定；[宿主资料](../superpowers/specs/review-detection-host-evidence.md#8-资料获取安装版本与人工移交)仍待维护方回复。当前不设置 `T0/T1`、不启动真实评分、审核调度或连接，Phase 3 保持 `not_started`。
+这些条件按[观察准备流程](review-detection-preparation.md#关闭后回读原值条件满足才推进评分)和[阶段进入关系](../../implementation/phase-03-entry-inputs.md)核定；[宿主资料](../../superpowers/specs/review-detection-host-evidence.md#8-资料获取安装版本与人工移交)仍待维护方回复。当前不设置 `T0/T1`、不启动真实评分、审核调度或连接，Phase 3 保持 `not_started`。

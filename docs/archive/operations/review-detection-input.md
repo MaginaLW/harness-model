@@ -1,6 +1,6 @@
 # 观察声明的输入检查
 
-`tools/analysis/review_detection_input.py` 回读显式提供的候选、机会和原件引用，列出时间、版本及选择关系的机械冲突和来源缺口。它支持描述真实来源，但不会抓取或认证引用，也不计算真实检出率。[输入合同](../superpowers/specs/review-detection-input.md)给出完整字段与检查代码。
+`tools/analysis/review_detection_input.py` 回读显式提供的候选、机会和原件引用，列出时间、版本及选择关系的机械冲突和来源缺口。它支持描述真实来源，但不会抓取或认证引用，也不计算真实检出率。[输入合同](../../superpowers/specs/review-detection-input.md)给出完整字段与检查代码。
 
 ## 使用
 
@@ -39,7 +39,7 @@ OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_input.
 
 ## 本地 Git 原件核对
 
-需要实际核对明确供给的 Git 文档引用时，使用[独立原件合同](../superpowers/specs/review-detection-sources.md)定义的显式入口：
+需要实际核对明确供给的 Git 文档引用时，使用[独立原件合同](../../superpowers/specs/review-detection-sources.md)定义的显式入口：
 
 ```console
 OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_sources.py <LOCAL_REPOSITORY_ROOT>
@@ -61,7 +61,7 @@ OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_source
 
 ## 精确行跨度定位
 
-默认原件报告保持 v1；需要核对固定字节位置时，显式使用[有界定位合同](../superpowers/specs/review-detection-locators.md)的 opt-in：
+默认原件报告保持 v1；需要核对固定字节位置时，显式使用[有界定位合同](../../superpowers/specs/review-detection-locators.md)的 opt-in：
 
 ```console
 OBSERVATION_DECLARATIONS_JSON | python -B tools/analysis/review_detection_sources.py <LOCAL_REPOSITORY_ROOT> --resolve-locators

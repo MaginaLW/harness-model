@@ -55,7 +55,7 @@ python -m aiflow.sdk_review --candidate <CANDIDATE-SHA> --reference <REFERENCE-S
 
 每次显式执行使用新的 ignored `build/` 子目录，先保留 `receipt.json` 的 started 状态。只有收到有效终局报告并通过位置／形状验证才记为 completed；failed／unknown 不可重用目录自动重放。回执中的 token 是用量，实费与实际模型身份没有独立来源时仍 unknown。
 
-报告的 outcome 和 Finding 摘要由协调者按[既有 PR 反馈格式](../../operations/pr-feedback.md#pr-描述中的可选反馈块)放到真实 PR，再用实际 connector capture 回读。报告不是 GitHub 原生 review，SDK 工程验收也不自动形成统计观察或审核触发规则。
+报告的 outcome 和 Finding 摘要由协调者按[既有 PR 反馈格式](../../archive/operations/pr-feedback.md#pr-描述中的可选反馈块)放到真实 PR，再用实际 connector capture 回读。报告不是 GitHub 原生 review，SDK 工程验收也不自动形成统计观察或审核触发规则。
 
 ## 可选节点：生成正式实现审核上下文之后
 

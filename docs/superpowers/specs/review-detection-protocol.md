@@ -163,4 +163,4 @@ for n in count(1):
 - 审核前看到裁定答案或修复：记录提示条件，不混为未受提示检出；public-only 不证明没有泄漏。
 - 原链接非空但未读取、预算或关闭依据缺失：处理声明可回读，预算内检出仍未知。
 
-本轮验收是协议的一致性、原件边界、精度规划的独立复算、既有 CLI 用法、引用/链接、上述反例的独立技术审核及仓库 required CI。文档准备不新增镜像单元测试，也不生成实际评分或真实样本。既有[账本回读](../../operations/review-feedback.md)、[PR 回读](../../operations/pr-feedback.md)与[外部参考](../../operations/benchmark-reference.md)保持当前接口和含义；`model_score_update_status=not_implemented`，Phase 3 仍为 `not_started`，现行 route、Gate、批准及 CI 阈值保持。
+本轮验收是协议的一致性、原件边界、精度规划的独立复算、既有 CLI 用法、引用/链接、上述反例的独立技术审核及仓库 required CI。文档准备不新增镜像单元测试，也不生成实际评分或真实样本。既有[账本回读](../../archive/operations/review-feedback.md)、[PR 回读](../../archive/operations/pr-feedback.md)与[外部参考](../../archive/operations/benchmark-reference.md)保持当前接口和含义；`model_score_update_status=not_implemented`，Phase 3 仍为 `not_started`，现行 route、Gate、批准及 CI 阈值保持。

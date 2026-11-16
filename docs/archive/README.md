@@ -137,10 +137,24 @@
 | `docs/operations/windows-production-design-2026-10-04.md` | [windows-production-design-2026-10-04.md](operations/windows-production-design-2026-10-04.md) |
 | `docs/operations/next-plan-execution-2026-10-08.md` | [next-plan-execution-2026-10-08.md](operations/next-plan-execution-2026-10-08.md) |
 | `docs/operations/follow-up-completion-audit-2026-10-09.md` | [follow-up-completion-audit-2026-10-09.md](operations/follow-up-completion-audit-2026-10-09.md) |
+| `docs/operations/benchmark-reference.md` | [benchmark-reference.md](operations/benchmark-reference.md) |
+| `docs/operations/pr-feedback.md` | [pr-feedback.md](operations/pr-feedback.md) |
+| `docs/operations/review-advisory.md` | [review-advisory.md](operations/review-advisory.md) |
+| `docs/operations/review-detection.md` | [review-detection.md](operations/review-detection.md) |
+| `docs/operations/review-detection-analysis.md` | [review-detection-analysis.md](operations/review-detection-analysis.md) |
+| `docs/operations/review-detection-input.md` | [review-detection-input.md](operations/review-detection-input.md) |
+| `docs/operations/review-detection-preparation.md` | [review-detection-preparation.md](operations/review-detection-preparation.md) |
+| `docs/operations/review-feedback.md` | [review-feedback.md](operations/review-feedback.md) |
+| `docs/operations/review-feedback-simulation.md` | [review-feedback-simulation.md](operations/review-feedback-simulation.md) |
+| `docs/operations/examples/**` | `docs/archive/operations/examples/**` |
 
 ## 已移除的试点工具（2026-10-10）
 
 - [自托管执行基础设施](operations/self-hosted-runners.md)、[Runner 盘点与健康检查](../operations/runner-health-checks.md)、[执行回执](operations/runner-receipts.md)、[受控工具发现](../operations/controlled-tool-discovery.md)、[本地证据移交](../operations/evidence-handoff.md)：对应工具已删除，文档保留历史事实或恢复指引。
+
+## 已退场的离线分析与合成演练工具
+
+- [只读建议](operations/review-advisory.md)、[审核结果回读](operations/review-feedback.md)、[公开 PR 回读](operations/pr-feedback.md)、[初始外部参考](operations/benchmark-reference.md)、[观察输入检查](operations/review-detection-input.md)、[离线区间计算](operations/review-detection.md)、[记录级合成分析](operations/review-detection-analysis.md)、[合成反馈演练](operations/review-feedback-simulation.md)、[观察准备流程](operations/review-detection-preparation.md)及配套示例夹具 `docs/archive/operations/examples/**`：外围 `tools/analysis/*` Python 脚本及其专属测试已于 PR #166（`TASK-0156`）正式退场；此处文档仅作历史设计与接口上下文归档。
 
 ## 当前入口的固定历史
 

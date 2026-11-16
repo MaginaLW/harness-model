@@ -1,6 +1,6 @@
 # 检出区间的离线数学计算
 
-`tools/analysis/review_detection.py` 按[固定接口合同](../superpowers/specs/review-detection-offline.md)计算 synthetic 计数下的条件检出比例及区间。它交付首个有界 S2 数学模块；[已采用的起步范围](../superpowers/specs/review-detection-admission.md)仍须完成真实来源、方法与质量准入，30 日观察窗口的 `T0` 尚未启动。
+`tools/analysis/review_detection.py` 按[固定接口合同](../../superpowers/specs/review-detection-offline.md)计算 synthetic 计数下的条件检出比例及区间。它交付首个有界 S2 数学模块；[已采用的起步范围](../../superpowers/specs/review-detection-admission.md)仍须完成真实来源、方法与质量准入，30 日观察窗口的 `T0` 尚未启动。
 
 后续自然工作的候选、机会、输入、职责和预算端点按[真实观察准备流程](review-detection-preparation.md)核对。该流程提供可复制的说明模板；实际事实未核定时只保留来源与缺口，不把真实计数改标 synthetic 输入本工具。
 
@@ -43,7 +43,7 @@ Write-Output '{"schema_version":"1.0","record_origin":"synthetic","n":0,"k":0}' 
 
 布尔值、浮点数或字符串不能代替整数。缺字段、额外字段、重复 JSON key、NaN／Infinity、非法 JSON 以及越界计数均失败；错误退出码为 `2`，不输出部分报告，也不回显原输入。正常退出码为 `0`。
 
-104 是当前实现已验证的数值域上界，也是[协议中条件性精度规划](../superpowers/specs/review-detection-protocol.md#51-条件性精度规划与复算)的最小最坏宽度规划值。它不限制自然观察数量，不是已有合格样本数、任务配额或补样本目标。更大输入明确拒绝；不能截断或拆分真实计数以绕过能力边界。扩展计算域须先完成相应边界验证。
+104 是当前实现已验证的数值域上界，也是[协议中条件性精度规划](../../superpowers/specs/review-detection-protocol.md#51-条件性精度规划与复算)的最小最坏宽度规划值。它不限制自然观察数量，不是已有合格样本数、任务配额或补样本目标。更大输入明确拒绝；不能截断或拆分真实计数以绕过能力边界。扩展计算域须先完成相应边界验证。
 
 标签与计数均由供给者声明，工具不能核验它们确实来自 synthetic 输入。真实或历史审核计数不能换成 `synthetic` 标签以获得本仓估计；[反馈回读](review-feedback.md)及[公开 PR 回读](pr-feedback.md)中的来源条数、Finding、APPROVE 或 CI 成功也不能直接作为 `n` 或 `k`。
 
