@@ -2,7 +2,7 @@
 
 ## 2026-10-08 提案的后续排序
 
-本文已有 E5 三线、样本/隐私、telemetry、V3 和 Phase 4 材料作为[新分阶段计划](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)的设计输入。新计划优先具体化多层机器审核和低风险能力反馈，明确先合同、再离线、再影子、再有限实用的顺序；保留各项实际准入与历史全文，本文不作为逐章自动启动的队列。
+本文已有 E5 三线、样本/隐私、telemetry、V3 和 Phase 4 材料作为[新分阶段计划](../../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)的设计输入。新计划优先具体化多层机器审核和低风险能力反馈，明确先合同、再离线、再影子、再有限实用的顺序；保留各项实际准入与历史全文，本文不作为逐章自动启动的队列。
 
 ## 2026-10-06 I1 原生当前状态补充
 
@@ -17,7 +17,7 @@ clean。下文“WAITING_FOR_SPEC_REVIEW / Missing spec_approval”是早期窗�
 runner/服务/新 CI 路径、超出 OwnTask 的 NativeGit 源码 seam、I2/E5 新目标与
 Phase 3/4 进入仍须各自明确范围和前置条件。目前没有 cold copy、VM、SSH、
 服务或新 CI 执行，也没有完整 V2。原提案、失败和已消费动作按各自窗口保留。
-详见[当前权威队列](follow-up-backlog-2026-09-22.md#2026-10-06-当前核定原生实施状态与局部结果边界)。
+详见[当前权威队列](../../operations/follow-up-backlog-2026-09-22.md#2026-10-06-当前核定原生实施状态与局部结果边界)。
 
 ## 2026-10-05 取消范围核查已完成
 
@@ -39,15 +39,15 @@ Windows 通道仍 success，dotfiles 四 jobs / 29 steps 仍 success。查询窗
 
 状态：`proposal / not_frozen / implementation_not_started`。
 
-本文件承接[当前待办第 5、6 项](follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)，
+本文件承接[当前待办第 5、6 项](../../operations/follow-up-backlog-2026-09-22.md#2026-10-04-收尾核定与下次待办)，
 给出 I1/I2、E5、I5 / Phase 3 和 Phase 4 的具体可审查材料。它是准备提案，不是治理
 Task、冻结规格、Policy、采集许可或执行计划。其后的 I1 原生 Task 与本提案分开，见下节。
 数值阈值、观察窗口、保留期、预算与具体
 执行资产仍待决定；不以提案完成宣布进入门已经满足。
 
-权威入口为[独立启动条件](next-stage-start-conditions-2026-10-02.md)、
-[阶段三进入输入](../implementation/phase-03-entry-inputs.md)、
-[原实施目录的阶段三/四](../superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)
+权威入口为[独立启动条件](../../operations/next-stage-start-conditions-2026-10-02.md)、
+[阶段三进入输入](../../implementation/phase-03-entry-inputs.md)、
+[原实施目录的阶段三/四](../../superpowers/plans/2026-08-01-ai-code-collaboration-mvp-implementation-directory.md)
 与当前原生 Policy。既有任务、批准、取消、失败原件和已消费动作保持追加式保留。
 
 ## 1. 当前需求与证据矩阵
@@ -179,7 +179,7 @@ guided 方式缺哪项能力”。未选目标时保留需求待决，不制造�
 | `recovery` | 已消费但结果未知、部分完成、重入和恢复责任；不自动重新消费 | 未冻结 |
 
 候选验收应覆盖错误目标/版本、过期/撤销、参数漂移、重复消费、授权后版本变化及消费
-窗口崩溃；当前[Hook 边界](hooks.md)和本地 actor/approval 不证明上述能力已存在。
+窗口崩溃；当前[Hook 边界](../../operations/hooks.md)和本地 actor/approval 不证明上述能力已存在。
 可信执行不依赖 provider 必然先落地，也不因 runner 已接入而自动完成。
 
 ## 3. Phase 3 样本、隐私与偏差合同草案
@@ -206,7 +206,7 @@ guided 方式缺哪项能力”。未选目标时保留需求待决，不制造�
 因果结论。多个名字不证明独立执行者，同一模型换角色也不证明错误不相关。历史/current、
 local/CI、pass/fail/skip/未执行分别保留。
 
-隐私草案沿用[现有边界](effect-observations.md#保存与隐私边界)：tracked 文档只放方法、
+隐私草案沿用[现有边界](../../operations/effect-observations.md#保存与隐私边界)：tracked 文档只放方法、
 可公开脱敏摘要和提交/PR 引用；原始聊天、身份、凭据、逐次会话和运行日志留受控材料，
 不提交机器名、用户名或本机绝对路径。该草案不新增私密采集、身份采集或费用采集。
 
@@ -236,17 +236,17 @@ local/CI、pass/fail/skip/未执行分别保留。
 timeout、取消、partial、未启动和 unknown。分类保留原 status/原因与证据，不用后来
 成功覆盖原失败；真实超时必须同时核对值、单位和当时阈值。
 
-依据包括[现有观察模板](effect-observations.md#下一批真实工作如何观察)、
-[review Schema](../../.ai/schemas/review-record.schema.json)、
-[evidence Schema](../../.ai/schemas/evidence.schema.json)及
-[外部报告 Schema](../../.ai/schemas/external-review.schema.json)。现有 Schema 严格拒绝
+依据包括[现有观察模板](../../operations/effect-observations.md#下一批真实工作如何观察)、
+[review Schema](../../../.ai/schemas/review-record.schema.json)、
+[evidence Schema](../../../.ai/schemas/evidence.schema.json)及
+[外部报告 Schema](../../../.ai/schemas/external-review.schema.json)。现有 Schema 严格拒绝
 未声明字段，本草案不改变其含义。费用、模型身份、真实返工、人类工时缺证据时保持
 unknown；不通过读取旧私密聊天或重新调用模型补齐。
 
 ## 5. 真实 V3 用例、损失与恢复选项
 
-现行[verification Policy](../../.ai/policy/verification-levels.yaml)与
-[evidence Schema](../../.ai/schemas/evidence.schema.json)只提供 V0/V1/V2，当前不存在
+现行[verification Policy](../../../.ai/policy/verification-levels.yaml)与
+[evidence Schema](../../../.ai/schemas/evidence.schema.json)只提供 V0/V1/V2，当前不存在
 可直接运行的原生 V3 检查链。候选用例必须在进入设计时评估 Policy、Schema、原生
 验证/批准与兼容性；V2、定向变异、Hook、元数据和私有 qualification 不称为 V3。
 
@@ -269,21 +269,21 @@ unknown；不通过读取旧私密聊天或重新调用模型补齐。
 | --- | --- | --- |
 | Phase 3 完整真实退出 | `MISSING` | Phase 3 not_started，未有真实 V3/回滚、可审计模型选择与退出记录 |
 | Phase 1–3 接口稳定 | `PARTIAL / NOT_MET` | 当前阶段二接口可作基础；未来 Phase 3 尚未设计/发布，不能证明整体稳定 |
-| 量化人工协调成本 | `MISSING` | [效果观察](effect-observations.md#尚不能得出的结论)明确人类打断、工作分钟、真实返工与缺陷率 unknown；账本数字不是人工协调成本 |
+| 量化人工协调成本 | `MISSING` | [效果观察](../../operations/effect-observations.md#尚不能得出的结论)明确人类打断、工作分钟、真实返工与缺陷率 unknown；账本数字不是人工协调成本 |
 | 真实暂停/恢复和集中审批需求 | `PARTIAL / NOT_MET` | 有历史恢复与当前离线事实；尚无按统一窗口归因的需求记录与充分性证明 |
 | 单机控制面/真实 adapter 强制能力 | `MISSING` | 已有设计蓝图不是执行结果，也不证明队列、锁、租约、调度或配额继承 |
 | 独立规格与 scope decision | `MISSING` | 当前只整理准备提案，不创建阶段四治理 Task |
 
-[本机防护蓝图](../superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md#2-不可越过的进入门)
+[本机防护蓝图](../../superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md#2-不可越过的进入门)
 保留既有初始标准：连续 30 天或 30 个受治理任务的协调记录，并满足过载事件、协调
 时间比例或资源争用比例之一；至少三个真实暂停恢复/集中审批需求，以及两个兼容发布
 候选等。当前未找到其满足证据。本提案不改变这些既有数值，也不把它们挪用为 Phase 3
 的已冻结样本阈值。进一步的窗口、度量和接受口径需要明确当前适用决定；Agent 不自行
 降低旧标准或以样本计数替代实际协调成本。
 
-[自适应蓝图](../superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md)
+[自适应蓝图](../../superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md)
 还有控制面试点、真实 adapter、held-out 资源样本和身份/费用注册表等额外门，均不能
-提前实施。旧固定主/子型号及档位的处理依[当前型号规则](model-selection.md#历史记录)，
+提前实施。旧固定主/子型号及档位的处理依[当前型号规则](../../operations/model-selection.md#历史记录)，
 不为解除历史漂移恢复旧型号，也不因此把阶段三/四门判为通过。
 
 ## 7. 待决项与下一顺序

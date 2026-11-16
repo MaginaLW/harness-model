@@ -86,7 +86,15 @@ def create_repository(path: Path) -> Path:
         )
         _populate_repository(Path(template.name))
         _TEMPLATE.append(template)
-    return Path(shutil.copytree(_TEMPLATE[0].name, path))
+    copied = Path(shutil.copytree(_TEMPLATE[0].name, path))
+    subprocess.run(
+        ["git", "update-index", "--refresh", "-q"],
+        cwd=copied,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    return copied
 
 
 def start(repository: Path, monkeypatch: pytest.MonkeyPatch) -> None:

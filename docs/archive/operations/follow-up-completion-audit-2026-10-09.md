@@ -1,6 +1,6 @@
 # 后续计划完整范围验收核对：2026-10-09
 
-本轮结论：完整目标尚未完成。核对范围保留[原七项待办](follow-up-backlog-2026-09-22.md)及[分阶段计划 S0–S5](../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，不以文档提交、一个非评分模块或局部通过代替原退出条件。本文是证据与依赖的汇总，不产生路线采纳、实施或执行权限。
+本轮结论：完整目标尚未完成。核对范围保留[原七项待办](../../operations/follow-up-backlog-2026-09-22.md)及[分阶段计划 S0–S5](../../superpowers/plans/2026-10-08-confidence-driven-approval-roadmap.md)，不以文档提交、一个非评分模块或局部通过代替原退出条件。本文是证据与依赖的汇总，不产生路线采纳、实施或执行权限。
 
 ## 1. 当前证据与观察范围
 
@@ -18,7 +18,7 @@
 | --- | --- | --- | --- |
 | 1 Windows候选生产化：精确支持/所有权/恢复边界、独立治理实现、完整验证及OS异常证据 | 已有设计、生产源码、mock/定向资格及安全故障测试；TASK-0065 Action005真实闭合结果为12/14、两项超时、动作消费 | 完整验收失败；mock、9项安全测试和其他task通过不证明OS异常、crash/orphan边界或原超时解决。未找到范围内有证据的新直接修复 | 按实际候选及失败形成所需恢复/新动作；71诊断结论只适用于其当次，不回填65根因 |
 | 2 TASK-0064完整预算：定位真实超时、合法恢复范围/依赖、固定候选完整14项及原85%/90% | 闭合薄诊断、真实new_dependencies/BLOCK记录及原失败保持；较早普通retry-entry不是最新推进许可 | 原regression/integration无节点或栈，根因UNKNOWN；coverage的预算内sentinel失败是独立问题，不改称GitContext调用。未采纳schema原型或旧profile不能解除依赖 | 有依据的范围/依赖决定及真实原生恢复；新单次动作和原完整门。当前71观察不自动证明64已修复 |
-| 3 F/TASK-0063：合法恢复scope/依赖及原生收尾；若选新真实导入，另须匹配未改原件/context、零写preflight、record/no-op/拒绝 | F33真实导入命令、原context和原报告只证明旧窗口；原FAILED/SPENT、范围外路径、HEAD/subject差异与缺detector streams保留 | 旧目标未验收；publication A选择不等于F后继A/B决定，报告hash不认证来源。后继新目标尚未准入；若选B，新匹配原件未取得，不能换标签或用synthetic代替 | 先确定F scope/依赖和后继方向：A仅新目标的历史核定与当前完整质量收尾，不重取/重标旧来源、不追认旧F通过；B新真实导入才按[启动门](next-stage-start-conditions-2026-10-02.md)取得匹配新context原件→preflight/record；各自按当前native准入收尾 |
+| 3 F/TASK-0063：合法恢复scope/依赖及原生收尾；若选新真实导入，另须匹配未改原件/context、零写preflight、record/no-op/拒绝 | F33真实导入命令、原context和原报告只证明旧窗口；原FAILED/SPENT、范围外路径、HEAD/subject差异与缺detector streams保留 | 旧目标未验收；publication A选择不等于F后继A/B决定，报告hash不认证来源。后继新目标尚未准入；若选B，新匹配原件未取得，不能换标签或用synthetic代替 | 先确定F scope/依赖和后继方向：A仅新目标的历史核定与当前完整质量收尾，不重取/重标旧来源、不追认旧F通过；B新真实导入才按[启动门](../../operations/next-stage-start-conditions-2026-10-02.md)取得匹配新context原件→preflight/record；各自按当前native准入收尾 |
 | 4 r3s双通道及外仓应用：准确候选完整等价检查、目标项目准入、Apply/部署与回退 | 历史dotfiles固定run/job成功；最后限定GET窗口的新main与其SHA不同。r3s更早Windows成功/POSIX取消与后继404均保留 | 当前准确SHA完整CI/双通道未核定，404原因UNKNOWN；没有可继续等待的已确认live句柄。旧成功不证明当前Apply或POSIX恢复 | 实际目标需求、目标项目准入、当前源合同与候选；恢复/重跑/Apply等动作分别按具体授权执行，不能自动扩展旧单次读取 |
 | 5 I1/I2：实际生命周期或新可信目标、明确范围/保护对象/幂等/回退、业务完整验收 | I1文档记载root-held fake backend与26 mock方法通过，仅为下一步准备；现有试点方法不等于I2扩仓 | 精确I1原件包在本轮获准有限目录未定位，当前实现/资格不能据文档转述独立确认。I2新目标未选，生命周期真实边界与结果缺证 | 获准可读原件及实际需求/所有权；各自冻结范围、准入和业务动作。保留unknown，不创建无需求工作 |
 | 6 E5/I5/Phase3/4：三线具体需求与准入；充分样本、真实V3、版本度量三门；Phase3退出和真实协调需求 | 引擎/provider/可信执行及样本、telemetry、V3、协调需求已有合同提案。原进入门继续有效 | 方向/数据责任/数值边界未冻结，模型身份/缺陷真值/校准缺证；无真实V3/回滚退出。非评分解释和V2不是评分、V3或Phase4证据 | 集中具体路线/数据/用途/风险决定及相应准入；不先执行未准入阶段来补进入门 |
@@ -37,7 +37,7 @@
 
 ## 4. 本轮可以闭合的工作与剩余依赖
 
-不依赖诊断批准的实质工作是[合同适用与审核预算补充](../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)：区分旧CreateNew/shadow、后继offline解释和实际C71 API；定义预算来源与停止后残余包；用三个synthetic例子区分原生验收、精确动作决定、执行能力和结果。它不新增数值预算、每轮签字、产品字段、第二状态机或路线采纳。
+不依赖诊断批准的实质工作是[合同适用与审核预算补充](../../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)：区分旧CreateNew/shadow、后继offline解释和实际C71 API；定义预算来源与停止后残余包；用三个synthetic例子区分原生验收、精确动作决定、执行能力和结果。它不新增数值预算、每轮签字、产品字段、第二状态机或路线采纳。
 
 本轮并行职责为3名sub-agent分别核原1–3项、4–7项、S0–S5；S1补充由1名独占作者完成后交2名非作者并行审目标/低干预与权限/来源。Root串行消费封包、修复、统一入口和阶段提交。文档检查仅证明UTF-8、引用、scope和whitespace，不称CI/Gate或业务通过。
 

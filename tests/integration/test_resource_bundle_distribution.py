@@ -434,7 +434,14 @@ def _environment(cwd: Path) -> dict[str, str]:
 
 def _run(*arguments: str, cwd: Path) -> None:
     result = subprocess.run(
-        arguments, cwd=cwd, env=_environment(cwd), capture_output=True, text=True, timeout=180
+        arguments,
+        cwd=cwd,
+        env=_environment(cwd),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=180,
     )
     assert result.returncode == 0, (
         f"command failed: {arguments!r}\n{result.stdout}\n{result.stderr}"
@@ -592,6 +599,8 @@ def _installed_bundle(
         env=_environment(cwd),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=30,
     )
     assert result.returncode == 0, result.stderr
@@ -623,6 +632,8 @@ def _installed_bundle(
         env=_environment(cwd),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=30,
     )
     assert result.returncode == 0, result.stderr
@@ -703,6 +714,8 @@ def test_incomplete_source_distribution_cannot_build_wheel(tmp_path: Path) -> No
         env=_environment(tmp_path),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=180,
     )
     assert result.returncode != 0
@@ -870,6 +883,8 @@ def test_scripts_directory_rejects_links_without_reading_external_files(
             ["cmd", "/c", "mklink", "/J", str(link), str(outside)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         if result.returncode:
@@ -987,6 +1002,8 @@ def test_build_rejects_linked_output_before_writing_outside(
             ["cmd", "/c", "mklink", "/J", str(link), str(outside)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         if created.returncode:
@@ -1012,6 +1029,8 @@ def test_build_rejects_linked_output_before_writing_outside(
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         after = {
@@ -1058,6 +1077,8 @@ def test_build_rejects_linked_python_output_before_writing_outside(tmp_path: Pat
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         assert outside.read_bytes() == before, "build modified the linked outside file"
@@ -1081,6 +1102,8 @@ def test_build_rejects_preexisting_manifest_without_rewriting_it(tmp_path: Path)
         env=_environment(tmp_path),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=180,
     )
     assert result.returncode != 0
@@ -1103,6 +1126,8 @@ def test_build_rejects_different_python_output_without_overwriting_it(tmp_path: 
         env=_environment(tmp_path),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=180,
     )
     assert result.returncode != 0
@@ -1124,6 +1149,8 @@ def test_direct_wheel_rejects_existing_output_without_overwriting_it(tmp_path: P
         env=_environment(tmp_path),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=180,
     )
     assert result.returncode != 0
@@ -1145,6 +1172,8 @@ def test_direct_sdist_rejects_existing_archive_without_overwriting_it(tmp_path: 
         env=_environment(tmp_path),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=180,
     )
     assert result.returncode != 0
@@ -1184,6 +1213,8 @@ def test_build_rejects_hardlinked_output_without_modifying_external_file(
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         expected = (
@@ -1322,6 +1353,8 @@ def test_build_rejects_parent_traversal_without_writing_outside(tmp_path: Path) 
         env=_environment(tmp_path),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=180,
     )
     assert result.returncode != 0
@@ -1353,6 +1386,8 @@ def test_build_does_not_execute_linked_resource_helper(tmp_path: Path, kind: str
             ["cmd", "/c", "mklink", "/J", str(link), str(outside.parent)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         if created.returncode:
@@ -1379,6 +1414,8 @@ def test_build_does_not_execute_linked_resource_helper(tmp_path: Path, kind: str
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         output = result.stdout + result.stderr
@@ -1411,6 +1448,8 @@ def test_sdist_rejects_existing_staging_without_modification(tmp_path: Path, kin
                 ["cmd", "/c", "mklink", "/J", str(stage), str(outside)],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=10,
             )
             if created.returncode:
@@ -1431,6 +1470,8 @@ def test_sdist_rejects_existing_staging_without_modification(tmp_path: Path, kin
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         assert result.returncode != 0
@@ -1461,6 +1502,8 @@ def test_wheel_rejects_linked_package_before_discovery(tmp_path: Path, kind: str
             ["cmd", "/c", "mklink", "/J", str(link), str(outside)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         if result.returncode:
@@ -1478,6 +1521,8 @@ def test_wheel_rejects_linked_package_before_discovery(tmp_path: Path, kind: str
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         assert result.returncode != 0
@@ -1507,6 +1552,8 @@ def test_wheel_rejects_linked_sibling_package_before_discovery(tmp_path: Path, k
             ["cmd", "/c", "mklink", "/J", str(link), str(outside)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         if created.returncode:
@@ -1524,6 +1571,8 @@ def test_wheel_rejects_linked_sibling_package_before_discovery(tmp_path: Path, k
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         assert result.returncode != 0
@@ -1553,6 +1602,8 @@ def test_build_rejects_unknown_cached_file_without_modification(
         env=_environment(tmp_path),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=180,
     )
     assert result.returncode != 0
@@ -1580,6 +1631,8 @@ def test_wheel_rejects_existing_staging_without_modification(tmp_path: Path, kin
                 ["cmd", "/c", "mklink", "/J", str(stage), str(outside)],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=10,
             )
             if result.returncode:
@@ -1608,6 +1661,8 @@ def test_wheel_rejects_existing_staging_without_modification(tmp_path: Path, kin
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         assert result.returncode != 0
@@ -1677,6 +1732,8 @@ def test_metadata_refuses_links_before_any_outside_write(
             ["cmd", "/c", "mklink", "/J", str(link), str(outside)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         if created.returncode:
@@ -1711,6 +1768,8 @@ def test_metadata_refuses_links_before_any_outside_write(
             env=_environment(tmp_path),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=180,
         )
         if command == "sdist":

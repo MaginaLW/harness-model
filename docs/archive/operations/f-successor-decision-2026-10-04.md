@@ -5,7 +5,7 @@
 付费报告；后继目标的当前质量和原生流程仍须独立完成。本文是可复核的承接方案，
 尚未创建后继任务、恢复旧任务、运行新 V2、消费动作或取得新来源。
 
-入口：[当前待办](follow-up-backlog-2026-09-22.md)、
+入口：[当前待办](../../operations/follow-up-backlog-2026-09-22.md)、
 [原 F 规格](f-real-import-acceptance-2026-10-03.md)、
 [私有 Windows 修复的资格与边界](windows-private-timeout-repair-2026-10-04.md)。
 本次读取了 F 隔离目标的原任务与证据；这些原件当前保留在该目标自己的任务树中，
@@ -77,10 +77,10 @@ BLOCK 向原 REVIEW 恢复还要求真实人工的版本绑定授权，不能把
 - `tests/integration/repository_fixture.py`
 - `tests/integration/test_repository_fixture.py`
 
-[分类服务](../../src/aiflow/classification_service.py)在恢复时要求 actual HEAD 与 task
+[分类服务](../../../src/aiflow/classification_service.py)在恢复时要求 actual HEAD 与 task
 subject 精确相等；目前 HEAD `166fe313...` 与 subject `f59aa254...` 不同。
-[Git 验证](../../src/aiflow/git_context.py)及
-[subject 同步](../../src/aiflow/task_service.py)同时累计核 base 到新 subject/HEAD 的 scope。
+[Git 验证](../../../src/aiflow/git_context.py)及
+[subject 同步](../../../src/aiflow/task_service.py)同时累计核 base 到新 subject/HEAD 的 scope。
 即使先记录 resolution，以上 Git/scope 前置仍未满足；直接 sync 也不能接纳五个测试路径。
 引入 ProcessRunner、contracts/schema 解析或其他性能源码会继续扩大累计差异，
 不能因它们来自独立任务就排除这些路径，更不能改旧 base 来隐藏它们。

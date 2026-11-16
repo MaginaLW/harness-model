@@ -303,7 +303,7 @@ context 和合法状态保持，旧 token `7ef6aef2` 以 `EXTERNAL_REVIEW_PREFLI
 
 ## 来源与回收
 
-仅查询[任务安排](zcode-next-stage-assignments-2026-10-02.md)中的四个 ID。索引 DB/WAL
+仅查询[任务安排](../../operations/zcode-next-stage-assignments-2026-10-02.md)中的四个 ID。索引 DB/WAL
 复制前后源与副本哈希相同。会话 DB 的前两次全窗口检查因并发 WAL 更新拒绝，未查询，
 失败原件保留；第三次分开取证：数据库在 WAL 取得前后完整哈希相同，WAL 自己的
 before/copy/after 哈希相同。SQLite 仅以只读连接查询副本的指定 session/message/part。
@@ -375,8 +375,8 @@ PROVEN。本轮重算四项入口/workflow manifest 哈希一致，它不替代 
 现在 Windows 成功已实证，POSIX 缺执行；恢复 runner 后仍须准确 SHA 的实际完整结果。
 本轮不改外仓业务、不操作主机或触发 CI。
 
-第六项统一映射[接入方法](adoption.md#真实任务的执行与收尾)的实现前方案/实现后 diff 评审，
-不是 R1-W06、终审或定向复审。I2 按[启动条件](next-stage-start-conditions-2026-10-02.md)
+第六项统一映射[接入方法](../../operations/adoption.md#真实任务的执行与收尾)的实现前方案/实现后 diff 评审，
+不是 R1-W06、终审或定向复审。I2 按[启动条件](../../operations/next-stage-start-conditions-2026-10-02.md)
 分别核需求、单一可信目标、权限/平台、等价检查、准确 CI、回退和准入。现有收尾不表示
 扩仓完成；无新增实质方法缺口，回灌保持 no-op。
 
@@ -392,9 +392,9 @@ PROVEN。本轮重算四项入口/workflow manifest 哈希一致，它不替代 
 | I5 / Phase 3 | 样本充分性/分层/隐私偏差、真实 V3 沙箱损失/回滚、版本化度量合同未冻结，仍 not_started |
 | Phase 4 | 缺 Phase 3 退出、稳定接口、量化协调/暂停恢复/集中审批需求，仍 not_started |
 
-来源：[task02 验收](../implementation/task02-runtime-integration.md)、[阶段三输入](../implementation/phase-03-entry-inputs.md)、
-[启动条件](next-stage-start-conditions-2026-10-02.md)、[Hooks](hooks.md)。overall.yaml 的旧
-Sol/max 与 Sol/high 漂移保留历史；[当前型号规则](model-selection.md#历史记录)明确不恢复
+来源：[task02 验收](../../implementation/task02-runtime-integration.md)、[阶段三输入](../../implementation/phase-03-entry-inputs.md)、
+[启动条件](../../operations/next-stage-start-conditions-2026-10-02.md)、[Hooks](../../operations/hooks.md)。overall.yaml 的旧
+Sol/max 与 Sol/high 漂移保留历史；[当前型号规则](../../operations/model-selection.md#历史记录)明确不恢复
 任一固定值，其余门不因此解除。可并行准备样本/V3/度量提案，方向决定、冻结和准入串行。
 未定阈值、身份和费用保留未知，不补造充分性或改善结论。历史任务、失败、批准、配置及
 三份用户草稿保留，本轮记录仅本地。

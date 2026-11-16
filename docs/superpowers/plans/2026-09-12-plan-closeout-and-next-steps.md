@@ -150,7 +150,7 @@ Windows runner，完成只读环境检查、最小候选脚本/workflow、必要
 ## 6. 后续实际执行入口（2026-09-13）
 
 已按本索引开始 I1/I2 只读候选、E1 证据核查和 E2 最小设计，见
-[本轮执行记录](../../operations/follow-up-preparation-2026-09-13.md)与
+[本轮执行记录](../../archive/operations/follow-up-preparation-2026-09-13.md)与
 [E2 guided 设计](../specs/2026-09-13-cross-agent-review-fix-loop.md)。
 核查期间私有试点已由另一任务推进 main；所有者明确本轮保持只读候选准备。
 以上“未进入 main”及运行状态保留为原收尾快照，当前采用结果由该目标持有者核定。

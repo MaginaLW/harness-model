@@ -13,7 +13,7 @@
 | 非评分设计 v0 | 文档 SHA256 `c6476576c50ecafa9bc4326691b30ff8643b7204e7d3a24387225b97a4a9862a`，21953 bytes | 固定记录解释、六类建议、22 synthetic 设计例子及 CreateNew 后移；候选文字不替代冻结技术合同。 |
 | TASK-0071 实际 owner 规格 | 逻辑路径 `${TASK71_OWNER}/.ai/tasks/TASK-0071/spec.md`，working raw SHA256 `0f519ee5d853e3dc1268386081129d4610a16f837675483320d04b0ca183673e`，12297 bytes；本次全文只读 | 选中003合同、唯一 source DU、14 required、85/native B90/累计 F90、非目标及准入边界；两路非作者静态核对所见，本例 raw SHA256 与实际 native task.yaml 的 frozen_spec_sha256、approvals.json 相应 spec 字段同值。读件 pin 只固定本次读取输入，本身不认证或替代原生冻结/批准，不据此判失效或重复请求。 |
 | TASK-0071 实际 owner 源码 | 逻辑路径 `${TASK71_OWNER}/src/aiflow/advisory_status.py`，working raw SHA256 `da181a0772f546a71ac6d9373d58f3af791baf6b172744bb15961f22bc501a1e`，89122 bytes；只读协议字段、常量和 public API 局部 | 所选模块的实际字段/API及固定无效果输出；没有 import、调用 API、执行测试或审查全部调用路径。 |
-| 执行记录 | [执行页](../../operations/next-plan-execution-2026-10-08.md)的前45行固定窗口；按LF连接并保留末尾换行的选中内容 SHA256 `2df2a7982100ee1953a9ce41da33c82f696391ac00c18d80f6088ff174671e9b` | 记录一次实际 V2 的12/14、格式/集成失败、累计比较未运行、诊断尚待单独决定；不是本稿重新核定原生终态。 |
+| 执行记录 | [执行页](../../archive/operations/next-plan-execution-2026-10-08.md)的前45行固定窗口；按LF连接并保留末尾换行的选中内容 SHA256 `2df2a7982100ee1953a9ce41da33c82f696391ac00c18d80f6088ff174671e9b` | 记录一次实际 V2 的12/14、格式/集成失败、累计比较未运行、诊断尚待单独决定；不是本稿重新核定原生终态。 |
 
 本次主 agent 另提供原生只读窗口 `a58bb0`：owner HEAD `a2237c2a78acb08144810e65f32a65e9b6eeec4f`，subject `589843a8beab11616c1dc3027cb64f6fa3d20388`，FAILED/REVIEW/V2、classification fresh、既有批准 current、evidence stale、Missing `retry_reason_or_escalation`，dirty 限定 private evidence/context。该信息来自主 agent 的实际读取，不是本作者新执行的 CLI，也不保证以后仍然当前。本稿不拿主检出缺席的源码替代实际 owner，不将安全 Doc foundation 的 clean 当作 owner clean。
 

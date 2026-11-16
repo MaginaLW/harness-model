@@ -10,7 +10,7 @@
 
 依据为[原始分流与模型路由设计](../../architecture/AI代码协同分流与模型路由设计_V0.1.md)中的条件信任度、内部历史表现、硬规则之外的评分及剩余风险。现有实现见[分流 Policy](../../../.ai/policy/routing.yaml)、[Gate](../../../src/aiflow/gate.py)、[低干预工作方式](../../operations/low-intervention.md)和[Hooks 边界](../../operations/hooks.md)。
 
-本计划作为新的后续工作排序入口。旧 E/F/I、七项待办及原 Phase 1–4 编号保持；下文 S0–S5 仅表示本计划执行阶段，不等于原 Phase 3/4 已启动。旧[待办](../../operations/follow-up-backlog-2026-09-22.md)、[执行记录](../../operations/backlog-execution-2026-10-04.md)、[进入门](../../operations/next-stage-start-conditions-2026-10-02.md)和[合同提案](../../operations/phase-entry-proposals-2026-10-04.md)继续提供原件、现行条件和设计输入。
+本计划作为新的后续工作排序入口。旧 E/F/I、七项待办及原 Phase 1–4 编号保持；下文 S0–S5 仅表示本计划执行阶段，不等于原 Phase 3/4 已启动。旧[待办](../../operations/follow-up-backlog-2026-09-22.md)、[执行记录](../../archive/operations/backlog-execution-2026-10-04.md)、[进入门](../../operations/next-stage-start-conditions-2026-10-02.md)和[合同提案](../../archive/operations/phase-entry-proposals-2026-10-04.md)继续提供原件、现行条件和设计输入。
 
 文档整合与已有获准范围内的只读准备可以立即推进。涉及 `src/aiflow/**`、Policy、Schema、CI、任务账本和外部副作用的实施仍按 [AGENTS.md](../../../AGENTS.md) 准入。本计划不取消现行 REVIEW 所需批准，不扩展旧 action，不改变维护模式、CI、分支保护或阶段进入门。阶段衔接以产出和验证为主，不新增逐步人工打卡。
 
@@ -187,12 +187,12 @@ S1 拆分路线被正式采用前，S2/S3 的评分实施仍须满足原 Phase 3
 
 ## 14. 非评分设计与整合实施（2026-10-08 追加）
 
-[执行记录](../../operations/next-plan-execution-2026-10-08.md)区分当前机器步骤、已存在决定与原件未知。TASK-0069 规格已实际获批并原生 begin；非评分[状态解释设计](../specs/2026-10-08-advisory-status-explanation-design.md)已完成两路独审和定点修复。设计只解释固定已有记录，不产分数或执行建议；CreateNew 真宿主场景后移 S4。原 S1 提案、3-A/3-B 正式采纳、原 Phase3 门及新源码治理准入仍分别处理，不以本次普通文档或 Task69 批准代替。
+[执行记录](../../archive/operations/next-plan-execution-2026-10-08.md)区分当前机器步骤、已存在决定与原件未知。TASK-0069 规格已实际获批并原生 begin；非评分[状态解释设计](../specs/2026-10-08-advisory-status-explanation-design.md)已完成两路独审和定点修复。设计只解释固定已有记录，不产分数或执行建议；CreateNew 真宿主场景后移 S4。原 S1 提案、3-A/3-B 正式采纳、原 Phase3 门及新源码治理准入仍分别处理，不以本次普通文档或 Task69 批准代替。
 
 ## 15. 全目标核对与S1兼容/审核预算（2026-10-09追加）
 
 [S1补充](../specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)给出提案、非评分设计和实际冻结C71 API的版本适用映射、预算来源/职责/停止残余格式，以及三个synthetic正交例子；不填造数值、不增加每轮签字或产品字段，不代替3-A/3-B采纳。两非作者定点复核后0未解决项，Root只修Git EOF空行并保留已审原件。普通文档准备不证明真实数据、校准、自动处理或阶段退出。
 
-[全范围完成核对](../../operations/follow-up-completion-audit-2026-10-09.md)逐项承接原七项与S0–S5。S2已有实际非评分实现和一次完整V2尝试，但必需检查失败/F累计未运行，不能沿用旧窗口的“未实施”来描述当前，也不能称完整S2或评分链完成。其他阶段继续依赖真实需求、数据/身份/真值、适用准入与效果证据。F历史恢复与新真实导入范围分别核依赖，未选目标及有限未定位原件保持unknown。
+[全范围完成核对](../../archive/operations/follow-up-completion-audit-2026-10-09.md)逐项承接原七项与S0–S5。S2已有实际非评分实现和一次完整V2尝试，但必需检查失败/F累计未运行，不能沿用旧窗口的“未实施”来描述当前，也不能称完整S2或评分链完成。其他阶段继续依赖真实需求、数据/身份/真值、适用准入与效果证据。F历史恢复与新真实导入范围分别核依赖，未选目标及有限未定位原件保持unknown。
 
-本轮3名sub-agent并行核1–3、4–7、S0–S5，1名S1作者后交2名非作者并行审；Root串行汇合入口和提交。新诊断精确动作仍待批准，后续真实绑定/资源与actor/final审查/一次观察/根因/新源码规格及完整验证须串行；各业务线和远端发布不自动获准。当前任务状态、封闭成员与14保护输入窗口见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。原计划正文和历史状态保留，整体目标未完成。
+本轮3名sub-agent并行核1–3、4–7、S0–S5，1名S1作者后交2名非作者并行审；Root串行汇合入口和提交。新诊断精确动作仍待批准，后续真实绑定/资源与actor/final审查/一次观察/根因/新源码规格及完整验证须串行；各业务线和远端发布不自动获准。当前任务状态、封闭成员与14保护输入窗口见[执行记录](../../archive/operations/next-plan-execution-2026-10-08.md)。原计划正文和历史状态保留，整体目标未完成。

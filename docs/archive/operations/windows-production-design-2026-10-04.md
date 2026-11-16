@@ -1,6 +1,6 @@
 # Windows 超时处理生产设计提案：2026-10-04
 
-本文保留旧 Windows 工作线的历史设计与执行窗口，正文中的状态和动作仅适用于当时。当前 TASK-0063～0071 已归档，不作为默认执行队列，也不恢复旧批准或已消费动作；新的真实需求须先核定当前范围、恢复来源与准入，见[维护状态中的旧工作线与证据边界](maintenance-status.md#旧工作线与证据边界)。以下历史失败和原件保持原值。
+本文保留旧 Windows 工作线的历史设计与执行窗口，正文中的状态和动作仅适用于当时。当前 TASK-0063～0071 已归档，不作为默认执行队列，也不恢复旧批准或已消费动作；新的真实需求须先核定当前范围、恢复来源与准入，见[维护状态中的旧工作线与证据边界](../../operations/maintenance-status.md#旧工作线与证据边界)。以下历史失败和原件保持原值。
 
 ## 2026-10-05 资格 003 的实际失败
 
@@ -146,4 +146,4 @@ Task classify/freeze/context → 独立 Design Review → native status 的实�
 
 原失败和 SPENT action 不重写或复用。局部 OS qualification 只证明本次案例，真实
 OS 故障未出现的范围仍 UNKNOWN；完整测试预算问题另见
-[预算决策](verification-budget-decision-2026-10-04.md)。
+[预算决策](../../operations/verification-budget-decision-2026-10-04.md)。

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -37,8 +38,7 @@ def run_git(repository: Path, *arguments: str) -> str:
     return result.stdout.rstrip("\r\n")
 
 
-def create_repository(path: Path) -> Path:
-    path.mkdir()
+def _populate_repository(path: Path) -> Path:
     run_git(path, "init", "-b", "main")
     ai_root = path / ".ai"
     ai_root.mkdir()
@@ -59,6 +59,27 @@ def create_repository(path: Path) -> Path:
         "initial",
     )
     return path
+
+
+_TEMPLATE: list[tempfile.TemporaryDirectory[str]] = []
+
+
+def create_repository(path: Path) -> Path:
+    if not _TEMPLATE:
+        template = tempfile.TemporaryDirectory(
+            prefix="aiflow-start-template-", ignore_cleanup_errors=True
+        )
+        _populate_repository(Path(template.name))
+        _TEMPLATE.append(template)
+    copied = Path(shutil.copytree(_TEMPLATE[0].name, path))
+    subprocess.run(
+        ["git", "update-index", "--refresh", "-q"],
+        cwd=copied,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    return copied
 
 
 def load_task(repository: Path, task_id: str = "TASK-0001") -> dict[str, object]:

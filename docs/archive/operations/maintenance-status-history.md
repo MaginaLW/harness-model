@@ -4,63 +4,63 @@
 
 ## 2026-10-09 会话收尾与到期动作
 
-文档阶段 `1a1dbea` 已提交，当前status仍a223/FAILED、既有批准current、Missing retry_reason_or_escalation。新4a6诊断提案于新加坡时间当日18:00到期；本会话未收到新批准或执行该动作，后续须重新绑定具体动作/期限并核当前批准与最终准备。原失败/消费、七项与S0–S5缺项保持，全目标blocked；三份用户草稿及失败原件保留，不进行重试/远端动作/清理。准确收尾窗口见[执行记录](../../operations/next-plan-execution-2026-10-08.md)，下述为历史窗口。
+文档阶段 `1a1dbea` 已提交，当前status仍a223/FAILED、既有批准current、Missing retry_reason_or_escalation。新4a6诊断提案于新加坡时间当日18:00到期；本会话未收到新批准或执行该动作，后续须重新绑定具体动作/期限并核当前批准与最终准备。原失败/消费、七项与S0–S5缺项保持，全目标blocked；三份用户草稿及失败原件保留，不进行重试/远端动作/清理。准确收尾窗口见[执行记录](next-plan-execution-2026-10-08.md)，下述为历史窗口。
 
 ## 2026-10-09 全范围退出条件与独立文档准备完成
 
-已形成[七项待办及S0–S5完成核对](../../operations/follow-up-completion-audit-2026-10-09.md)和[S1合同兼容/审核预算补充](../../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)。补充给出固定版本适用、预算归属/停止残余包和三个synthetic例子；两名非作者定点复核后0未解决项，Root仅追加末尾空行格式修正，原件保留。Root核40封闭成员、7追加回执和14当前保护输入无差异。F历史恢复与新真实导入的依赖分别列明，I1有限原件缺席保持unknown，用户草稿不当作当前Apply目标。普通文档交付不提供生产评分、执行权限或完整质量验收。
+已形成[七项待办及S0–S5完成核对](follow-up-completion-audit-2026-10-09.md)和[S1合同兼容/审核预算补充](../../superpowers/specs/2026-10-09-s1-contract-compatibility-and-review-budget.md)。补充给出固定版本适用、预算归属/停止残余包和三个synthetic例子；两名非作者定点复核后0未解决项，Root仅追加末尾空行格式修正，原件保留。Root核40封闭成员、7追加回执和14当前保护输入无差异。F历史恢复与新真实导入的依赖分别列明，I1有限原件缺席保持unknown，用户草稿不当作当前Apply目标。普通文档交付不提供生产评分、执行权限或完整质量验收。
 
-新4a6诊断精确批准仍待回复，原生FAILED/SPENT、既有批准current和Missing retry_reason_or_escalation保持；AI Flow规则4要求独立动作批准，无新资源/claim/pytest/Job。已完成的安全准备与未满足的业务/阶段/发布条件分别保留，整体未完成。并行职责、串行门和封存依据见[执行记录](../../operations/next-plan-execution-2026-10-08.md)；下述为此前窗口。
+新4a6诊断精确批准仍待回复，原生FAILED/SPENT、既有批准current和Missing retry_reason_or_escalation保持；AI Flow规则4要求独立动作批准，无新资源/claim/pytest/Job。已完成的安全准备与未满足的业务/阶段/发布条件分别保留，整体未完成。并行职责、串行门和封存依据见[执行记录](next-plan-execution-2026-10-08.md)；下述为此前窗口。
 
 ## 2026-10-09 新诊断已具备审批材料，原生历史基础完成
 
 新单次integration诊断提案及外部记录方案窄提交为 `a2237c2`，canonical `4a6de2408f9f21d669a785113f6eb956066e128c351bcb6badb496deb114ee88`；两路实际绑定独审均0，仅支持精确批准请求。fresh原生状态仍FAILED/REVIEW/V2、已有批准current、Missing retry_reason_or_escalation、scope/schema有效而Gate拒绝；新grant为0，请求已发出。诊断限定完整integration一次600秒、节点/阶段计时、540秒一次无locals父栈及自有进程/Job5秒有界清理，目录保留、失败不重跑；18:00（UTC+8）到期且启动余留15分钟。Rule4需单独动作授权，Rule1外部记录不伪造原生消费或验收。未创建新parent/capture/claim或启动pytest/Job，旧V2 FAILED/SPENT及全部门禁保持。
 
-安全Doc新基础 `a425c41` 从真实历史 `7cfa783` 形成，仅应用同一排版候选，format-check通过、clean、源码缺席，19份历史71文件不变；旧f90基础分支保留。新基础最高task namespace71，避免旧f90最高70导致原生分配重复；未实际分配新task/规格/批准，历史快照不代替当前owner。2名sub-agent分别窄核诊断封包和Doc封包，Root串行维护状态文档；批准后真实资源/actor准备、两路final审查、独立单次执行和新源码规格仍需按依赖完成，详见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。整体未完成；下述为此前窗口。
+安全Doc新基础 `a425c41` 从真实历史 `7cfa783` 形成，仅应用同一排版候选，format-check通过、clean、源码缺席，19份历史71文件不变；旧f90基础分支保留。新基础最高task namespace71，避免旧f90最高70导致原生分配重复；未实际分配新task/规格/批准，历史快照不代替当前owner。2名sub-agent分别窄核诊断封包和Doc封包，Root串行维护状态文档；批准后真实资源/actor准备、两路final审查、独立单次执行和新源码规格仍需按依赖完成，详见[执行记录](next-plan-execution-2026-10-08.md)。整体未完成；下述为此前窗口。
 
 ## 2026-10-09 失败终局已提交，格式安全基础完成
 
-TASK-0071独立终局审计已CLOSED，Root核109封包成员无差异。终局账本窄提交 `6b0baf7` 仅含events/task/action-use；subject/spec/source/F5与有效批准保持。提交后实际FAILED/REVIEW/V2、classification fresh、approvals current、Missing retry_reason_or_escalation，scope/validate有效，Gate拒绝；private evidence/context原件保留未跟踪，不能称clean。完整整体89.4136468%、nativeB diff91.4972274%均达标，但14项仍12通过、格式失败、集成600秒超时，原action SPENT，F累计NOT_RUN。安全source-free文档基础 `f90ae85` 只改第二Python示例排版、实际format-check通过且postcommit clean，无新增源码、不覆盖旧失败。下一串行门为新诊断机制/两路独审/具体动作批准后的一次600秒integration节点/阶段/540秒stack观察；当前无新grant或执行，根因UNKNOWN。证据与并行责任见[执行记录](../../operations/next-plan-execution-2026-10-08.md)；整体未完成，下述为此前窗口。
+TASK-0071独立终局审计已CLOSED，Root核109封包成员无差异。终局账本窄提交 `6b0baf7` 仅含events/task/action-use；subject/spec/source/F5与有效批准保持。提交后实际FAILED/REVIEW/V2、classification fresh、approvals current、Missing retry_reason_or_escalation，scope/validate有效，Gate拒绝；private evidence/context原件保留未跟踪，不能称clean。完整整体89.4136468%、nativeB diff91.4972274%均达标，但14项仍12通过、格式失败、集成600秒超时，原action SPENT，F累计NOT_RUN。安全source-free文档基础 `f90ae85` 只改第二Python示例排版、实际format-check通过且postcommit clean，无新增源码、不覆盖旧失败。下一串行门为新诊断机制/两路独审/具体动作批准后的一次600秒integration节点/阶段/540秒stack观察；当前无新grant或执行，根因UNKNOWN。证据与并行责任见[执行记录](next-plan-execution-2026-10-08.md)；整体未完成，下述为此前窗口。
 
 ## 2026-10-09 TASK-0071 单次验证失败及后续诊断准备
 
-实际原14为12 passed/2 failed：基础文档format exit1/328ms，以及integration RUNNER_TIMEOUT600015ms/nullrc。事件15实际消费本次action，事件16FAILED，五固定mutation均killed；原预算和门禁保持，无retry。累计helper唯一Start后按native失败拒绝，内部Git/diff producer未运行，原F90未知。外部关闭见证与实际status/Gate由独立终局审计继续核，Root不提前finalize/Review/code或改当前C71。文档候选独立安全修订与匿名集成超时诊断分开，后者node/stack/根因UNKNOWN，先准备新受限诊断而不盲重跑完整V2。证据与并行职责见[执行记录](../../operations/next-plan-execution-2026-10-08.md)，整体未完成；下述运行中文字属旧窗口。
+实际原14为12 passed/2 failed：基础文档format exit1/328ms，以及integration RUNNER_TIMEOUT600015ms/nullrc。事件15实际消费本次action，事件16FAILED，五固定mutation均killed；原预算和门禁保持，无retry。累计helper唯一Start后按native失败拒绝，内部Git/diff producer未运行，原F90未知。外部关闭见证与实际status/Gate由独立终局审计继续核，Root不提前finalize/Review/code或改当前C71。文档候选独立安全修订与匿名集成超时诊断分开，后者node/stack/根因UNKNOWN，先准备新受限诊断而不盲重跑完整V2。证据与并行职责见[执行记录](next-plan-execution-2026-10-08.md)，整体未完成；下述运行中文字属旧窗口。
 
 ## 2026-10-09 TASK-0071 运行中发现基础文档格式缺口
 
-同次闭合日志已有unit2342 passed、完整regression3426 passed/1已有POSIX skip及47源码mypy通过；coverage和剩余检查仍执行。原生format stdout指出基础文档Python示例需要排版；私有修复候选已独审0未解决问题，正文/AST/token语义相同且未应用，F5/source/spec仍冻结。局部检查未覆盖该文档的缺口与原失败线索均保留，不以候选覆盖required失败或宣称V2验收。终局后按真实status/Missing/Gate协调最小安全修订，具体证据与并行职责见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。
+同次闭合日志已有unit2342 passed、完整regression3426 passed/1已有POSIX skip及47源码mypy通过；coverage和剩余检查仍执行。原生format stdout指出基础文档Python示例需要排版；私有修复候选已独审0未解决问题，正文/AST/token语义相同且未应用，F5/source/spec仍冻结。局部检查未覆盖该文档的缺口与原失败线索均保留，不以候选覆盖required失败或宣称V2验收。终局后按真实status/Missing/Gate协调最小安全修订，具体证据与并行职责见[执行记录](next-plan-execution-2026-10-08.md)。
 
 ## 2026-10-09 TASK-0071 获批单次验证已启动
 
-真实独立verifier按原grant执行一次冻结launcher，ready输入 `0ea0687f…55ee7` 获两路最终窄审0后由Root明确派发。guard进程实际唯一Start/exit0/双EOF及关闭回执齐全；UTC 00:23:48原生事件14进入VERIFYING，暂无终局或验收。具体证据及1名executor/1名终局审计者的串行依赖见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。原预算、85/90、额外F90共享120秒及无retry保持，旧失败/消费与整体未完成不变。下述尚未启动文字只属旧窗口。
+真实独立verifier按原grant执行一次冻结launcher，ready输入 `0ea0687f…55ee7` 获两路最终窄审0后由Root明确派发。guard进程实际唯一Start/exit0/双EOF及关闭回执齐全；UTC 00:23:48原生事件14进入VERIFYING，暂无终局或验收。具体证据及1名executor/1名终局审计者的串行依赖见[执行记录](next-plan-execution-2026-10-08.md)。原预算、85/90、额外F90共享120秒及无retry保持，旧失败/消费与整体未完成不变。下述尚未启动文字只属旧窗口。
 
 ## 2026-10-09 TASK-0071 单次动作已批准并入账
 
-所有者已批准精确canonical `3e920e01…66e10e7`；原生批准事件13及三份own-task账本提交为 `0848db7`，S589保持。当前clean/fresh、approvals current、IMPLEMENTING REVIEW/V2 sole Missing implementation_result，scope/validate有效。真实postgrant admission、并行职责及后续final packet/两路窄审/独立单次启动依赖见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。完整V2尚未运行、最终激活未完成；旧失败和消费保持，整体目标未完成。下述待动作批准文字为旧窗口，有效批准不重复请求。
+所有者已批准精确canonical `3e920e01…66e10e7`；原生批准事件13及三份own-task账本提交为 `0848db7`，S589保持。当前clean/fresh、approvals current、IMPLEMENTING REVIEW/V2 sole Missing implementation_result，scope/validate有效。真实postgrant admission、并行职责及后续final packet/两路窄审/独立单次启动依赖见[执行记录](next-plan-execution-2026-10-08.md)。完整V2尚未运行、最终激活未完成；旧失败和消费保持，整体目标未完成。下述待动作批准文字为旧窗口，有效批准不重复请求。
 
 ## 2026-10-09 TASK-0071 具体单次动作待批准
 
-新精确动作已材化并窄提交 `1911e5d`，canonical `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`；两路机制/权限独审最终0未解决问题，旧四问题及blocked机制保留。fresh status为clean、IMPLEMENTING REVIEW/V2、spec批准current，sole Missing implementation_result，scope/schema有效。范围为实际S589的一次完整V2、原14预算/85%/nativeB90/五mutation及同轮额外F90共享120秒比较；准确新owned资源/进程/Job有界清理单独绑定，没有push/merge/provider。当前无action grant、完整验证、parent创建/probe或消费；按规则2/4请求这一具体动作，规格不重复请求。完整选定材料、实际工具/规范化日志边界和后批准串行合同见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。
+新精确动作已材化并窄提交 `1911e5d`，canonical `3e920e01e8a6341ab034a93c8511f7bb7560888eced21fb802842852c66e10e7`；两路机制/权限独审最终0未解决问题，旧四问题及blocked机制保留。fresh status为clean、IMPLEMENTING REVIEW/V2、spec批准current，sole Missing implementation_result，scope/schema有效。范围为实际S589的一次完整V2、原14预算/85%/nativeB90/五mutation及同轮额外F90共享120秒比较；准确新owned资源/进程/Job有界清理单独绑定，没有push/merge/provider。当前无action grant、完整验证、parent创建/probe或消费；按规则2/4请求这一具体动作，规格不重复请求。完整选定材料、实际工具/规范化日志边界和后批准串行合同见[执行记录](next-plan-execution-2026-10-08.md)。
 
 ## 2026-10-09 TASK-0071 规格批准与当前源码阶段
 
 所有者已批准新71当前冻结0f519规格，native approve/begin记录提交 `7cfa783`；实际source唯一新增模块提交 `589843a`，两元数据subject同步提交 `2084e50`，旧事件前缀保持。提交后clean、classification fresh、spec approval current，IMPLEMENTING / REVIEW / V2，sole Missing implementation_result，scope/validate有效。两路当前新71源码内容独审均0未解决问题，actual新71源的224节点局部通过，Ruff实际0.16.5/check+format及47源码mypy通过；冻结F5、规格和七合同不变。module行91.497227%、line-plus-branch88.908046%只为局部诊断，不是完整85%/90%、V2、正式Review或合并验收。
 
-新动作机制和实际非实现者工具/身份准备正在绑定上述真实S；原14预算、85%整体、B→S native90、原F→同S累计90和五组mutation保持。新完整动作尚未获批或运行，短parent未创建/probe；旧70批准/history、Task69FAILED/SPENT及整体未完成保持。固定证据与并行/串行责任见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。下面新71待spec文字仅为较早窗口，不重复请求仍current的规格批准。
+新动作机制和实际非实现者工具/身份准备正在绑定上述真实S；原14预算、85%整体、B→S native90、原F→同S累计90和五组mutation保持。新完整动作尚未获批或运行，短parent未创建/probe；旧70批准/history、Task69FAILED/SPENT及整体未完成保持。固定证据与并行/串行责任见[执行记录](next-plan-execution-2026-10-08.md)。下面新71待spec文字仅为较早窗口，不重复请求仍current的规格批准。
 
 ## 2026-10-09 源码局部阶段完成，新的安全B与TASK-0071
 
 TASK-0070源阶段 `fe2ec4e` / 同步元数据 `f4f18bd` 已提交；实际ownerclean/fresh、原规格批准current、IMPLEMENTING / REVIEW / V2、sole Missing implementation_result。两路源码独审0未关闭项，冻结147节点及静态检查通过；原独立反例的3个引用构造错误已保留后修正，3项通过。
 
-新的独立source-free安全B `12abb0d` 只新增77节点边界测试，原F4和旧任务历史保持；最终两路静态审查0未关闭项。以原已授权源码为QA owner的224节点局部通过，module行91.497227%、line-plus-branch88.908046%，不等于整体85/native90/累计90/fullCI。实际新TASK-0071已分配/材化/freeze/classify，首轮Design的覆盖率措辞REQUEST_CHANGES已原生登记并保留旧冻结全文；澄清后新冻结为 `0f519ee5d853e3dc1268386081129d4610a16f837675483320d04b0ca183673e`，两份当前Design APPROVE且0未关闭项，own-task治理提交 `29a5ba1` 后clean/fresh、WAITING_FOR_SPEC_REVIEW / REVIEW / V2、sole Missing spec_approval，scope/schema有效。待批准该新冻结规格，spec/action不从70转移，71尚无源码实施；c44批准仍current不重复请求。原14预算、85%/90%及五mutation保持，同时要求原F→新S累计90。固定事实、证据、角色与串行依赖见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。原Task69FAILED/SPENT和整体未完成保持。
+新的独立source-free安全B `12abb0d` 只新增77节点边界测试，原F4和旧任务历史保持；最终两路静态审查0未关闭项。以原已授权源码为QA owner的224节点局部通过，module行91.497227%、line-plus-branch88.908046%，不等于整体85/native90/累计90/fullCI。实际新TASK-0071已分配/材化/freeze/classify，首轮Design的覆盖率措辞REQUEST_CHANGES已原生登记并保留旧冻结全文；澄清后新冻结为 `0f519ee5d853e3dc1268386081129d4610a16f837675483320d04b0ca183673e`，两份当前Design APPROVE且0未关闭项，own-task治理提交 `29a5ba1` 后clean/fresh、WAITING_FOR_SPEC_REVIEW / REVIEW / V2、sole Missing spec_approval，scope/schema有效。待批准该新冻结规格，spec/action不从70转移，71尚无源码实施；c44批准仍current不重复请求。原14预算、85%/90%及五mutation保持，同时要求原F→新S累计90。固定事实、证据、角色与串行依赖见[执行记录](next-plan-execution-2026-10-08.md)。原Task69FAILED/SPENT和整体未完成保持。
 
 ## 2026-10-08 TASK-0070 已获规格批准并 begin
 
-所有者新规格批准已实际登记，三份元数据提交 `f81494e`；提交后clean/fresh、spec批准current、IMPLEMENTING / REVIEW / V2，sole Missing implementation_result，scope/schema有效。四路源码/reader/技术/隐私职责与独立verifier准备见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。F安全基础和合同保持，新完整动作尚未获批或运行，产品验收与整体目标未完成；下述spec待答仅保留较早窗口。
+所有者新规格批准已实际登记，三份元数据提交 `f81494e`；提交后clean/fresh、spec批准current、IMPLEMENTING / REVIEW / V2，sole Missing implementation_result，scope/schema有效。四路源码/reader/技术/隐私职责与独立verifier准备见[执行记录](next-plan-execution-2026-10-08.md)。F安全基础和合同保持，新完整动作尚未获批或运行，产品验收与整体目标未完成；下述spec待答仅保留较早窗口。
 
 ## 2026-10-08 九项维护故障测试局部通过
 
-独立维护分支安全提交 `d7e972e` 只追加一个unit文件315行，原测试前缀、源码和任务历史保持。2名sub-agent完成编写和独审，Root串行一次执行九个fake节点，9 passed / 0 failed，计划15缺行全部实测命中；859–860保留且未命中。Ruff、format、whitespace通过，工作区干净，封闭coverage副本与10件原件校核通过；这仅为局部软件验证，完整V2和累计diff90仍未证明。具体原件与边界见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。
+独立维护分支安全提交 `d7e972e` 只追加一个unit文件315行，原测试前缀、源码和任务历史保持。2名sub-agent完成编写和独审，Root串行一次执行九个fake节点，9 passed / 0 failed，计划15缺行全部实测命中；859–860保留且未命中。Ruff、format、whitespace通过，工作区干净，封闭coverage副本与10件原件校核通过；这仅为局部软件验证，完整V2和累计diff90仍未证明。具体原件与边界见[执行记录](next-plan-execution-2026-10-08.md)。
 
 新鲜只读status仍为TASK-0070 WAITING_FOR_SPEC_REVIEW、sole Missing spec_approval，具体新规格请求待答；TASK-0069仍FAILED、Missing retry_reason_or_escalation、原spec current，旧动作SPENT。未begin Task70、retry Task69、probe短路径或执行新完整动作。后续目标尚未全部完成。
 
@@ -68,25 +68,25 @@ TASK-0070源阶段 `fe2ec4e` / 同步元数据 `f4f18bd` 已提交；实际owner
 
 独立安全基础 `fb6837d` 已提交四份测试/fixture/说明，全部52项为synthetic计划场景，只有静态校核通过，pytest未执行、产品API尚未实现。原生TASK-0070以该实际base分配，sole source为`src/aiflow/advisory_status.py`；冻结、分类和两份当前Design APPROVE/零发现已登记，治理提交 `dcf24ac` 后工作区干净，classification fresh，WAITING_FOR_SPEC_REVIEW / REVIEW / V2，唯一Missing是spec_approval，已请求该具体新规格决定。
 
-冻结SHA256 `c44b8574099e46ee1a2a357e78e50ac898f08a9a86244ce937cb1b1c6fb5de53`；完整合同和实际职责、静态边界见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。尚无begin、源码实施或新验证动作。独立维护恢复候选仅封存路径算术与故障测试计划，未probe/retry；TASK-0069 FAILED/SPENT、14required及85%/90%保持。整体后续目标尚未完成。
+冻结SHA256 `c44b8574099e46ee1a2a357e78e50ac898f08a9a86244ce937cb1b1c6fb5de53`；完整合同和实际职责、静态边界见[执行记录](next-plan-execution-2026-10-08.md)。尚无begin、源码实施或新验证动作。独立维护恢复候选仅封存路径算术与故障测试计划，未probe/retry；TASK-0069 FAILED/SPENT、14required及85%/90%保持。整体后续目标尚未完成。
 
 ## 2026-10-08 TASK-0069 终局失败，单次动作已消费
 
 完整 V2 已终局 FAILED：14项 required 中10通过，regression900秒超时、integration600秒超时、coverage_xml含11个测试失败、diff coverage78%低于90%。同轮总覆盖率88.945%达到85%，固定五组mutation均killed，均不能抵销必需失败。终局提交 `b0c18f5` 只保存3项任务元数据；源码与历史原件保持。
 
-提交后 status 为 FAILED，Missing `retry_reason_or_escalation`；原spec current，evidence因未通过而stale，scope/validate有效，Gate REJECT。旧动作SPENT，不重跑或执行Recovery提示。长路径假说有8个traceback支持但未复现，两项超时节点/根因仍UNKNOWN。完整报告、同轮覆盖率、私有新原件和后续并行职责见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。下述“已启动/尚无终局”等文字只保留此前窗口；完整验收与发布尚未完成。
+提交后 status 为 FAILED，Missing `retry_reason_or_escalation`；原spec current，evidence因未通过而stale，scope/validate有效，Gate REJECT。旧动作SPENT，不重跑或执行Recovery提示。长路径假说有8个traceback支持但未复现，两项超时节点/根因仍UNKNOWN。完整报告、同轮覆盖率、私有新原件和后续并行职责见[执行记录](next-plan-execution-2026-10-08.md)。下述“已启动/尚无终局”等文字只保留此前窗口；完整验收与发布尚未完成。
 
 ## 2026-10-08 外仓固定句柄刷新
 
-UTC 12:01:40–12:01:45 的七个指定 GET 已各一次读取并保存 HTTP/body 原件。dotfiles main 已到 `3a41b37d987214487b1690f14c035d3001b1d90c`，旧成功 run/job 仍绑定 `7c0aab19`，新 main 的 CI 未核定；r3s-VPS 四项 HTTP404，当前状态及原因 UNKNOWN。细节与固定原件见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。下面外仓成功、cancelled 或 runner 状态只属于旧窗口，未重试或远端写入。
+UTC 12:01:40–12:01:45 的七个指定 GET 已各一次读取并保存 HTTP/body 原件。dotfiles main 已到 `3a41b37d987214487b1690f14c035d3001b1d90c`，旧成功 run/job 仍绑定 `7c0aab19`，新 main 的 CI 未核定；r3s-VPS 四项 HTTP404，当前状态及原因 UNKNOWN。细节与固定原件见[执行记录](next-plan-execution-2026-10-08.md)。下面外仓成功、cancelled 或 runner 状态只属于旧窗口，未重试或远端写入。
 
 ## 2026-10-08 TASK-0069 单次完整验证已启动
 
-已批准的新动作由真实独立 verifier 单次启动，原生 event 11 为 VERIFYING，run `run-20261008T114710177182Z`；当前尚无终局。具体绑定和并行审查职责见[执行记录](../../operations/next-plan-execution-2026-10-08.md)。下面 IMPLEMENTING、尚未启动等文字保留各自较早观察窗口；历史失败、已消费动作和公开发布边界不变。
+已批准的新动作由真实独立 verifier 单次启动，原生 event 11 为 VERIFYING，run `run-20261008T114710177182Z`；当前尚无终局。具体绑定和并行审查职责见[执行记录](next-plan-execution-2026-10-08.md)。下面 IMPLEMENTING、尚未启动等文字保留各自较早观察窗口；历史失败、已消费动作和公开发布边界不变。
 
 ## 2026-10-08 新规格已批准，后续执行进入实际整合
 
-TASK-0069 冻结规格 e785ed663af145f006995980ec146c3ac13bd89568d38e09c203838a551110f1 已在本轮 fresh status 后获得人类批准，原生 approve/begin 成功；当前 IMPLEMENTING，Missing implementation_result。源码与 canonical 历史恢复、S0 归因及非评分设计详见[本次执行记录](../../operations/next-plan-execution-2026-10-08.md)。完整验证、公开投影和发布尚未完成。下述 Task69 待审、Action005 待批准或 A/B 待选等旧窗口不作为当前指令，旧正文保持。
+TASK-0069 冻结规格 e785ed663af145f006995980ec146c3ac13bd89568d38e09c203838a551110f1 已在本轮 fresh status 后获得人类批准，原生 approve/begin 成功；当前 IMPLEMENTING，Missing implementation_result。源码与 canonical 历史恢复、S0 归因及非评分设计详见[本次执行记录](next-plan-execution-2026-10-08.md)。完整验证、公开投影和发布尚未完成。下述 Task69 待审、Action005 待批准或 A/B 待选等旧窗口不作为当前指令，旧正文保持。
 
 
 ## 2026-10-08 后续工作排序已整合
@@ -164,7 +164,7 @@ current、失败 evidence stale，原预算/检查/85%/90%及 SPENT 保留。
 219相对目标有效、工作区 clean；仅覆盖 source `e214999`，不含上述 TASK-0064
 后继。完整 required CI、发布治理及远端动作仍未进行，发布方向问题和 Task65
 新具体批准尚待答复；七项目标 active。详见
-[诊断、原生阻断与候选核定](../../operations/backlog-execution-2026-10-04.md#2026-10-06-task-0064-范围外依赖已原生阻断)。
+[诊断、原生阻断与候选核定](backlog-execution-2026-10-04.md#2026-10-06-task-0064-范围外依赖已原生阻断)。
 
 ## 2026-10-06 最新：TASK-0064 恢复入口已登记
 
@@ -178,14 +178,14 @@ current、失败 evidence stale，原预算/检查/85%/90%及 SPENT 保留。
 真实63。完整账本迁入或共享分配器治理的方向问题已提交，具体 action 仍未准入。
 本地同步固定 source `e214999`，不自动追认后续状态追加。两名 sub-agent 分别薄核
 原失败与同步文档，root 串行整合；七项目标 active。详见
-[真实恢复与基线核查](../../operations/backlog-execution-2026-10-04.md#2026-10-06-task-0064-原生机械恢复与发布基线核查)。
+[真实恢复与基线核查](backlog-execution-2026-10-04.md#2026-10-06-task-0064-原生机械恢复与发布基线核查)。
 
 ## 2026-10-06 最新：文档候选独立核定
 
 候选 `51563af` 的独立审查为 `GO_LOCAL_DOCS_CANDIDATE_ONLY`，必要 Finding 0；
 十五份文档及必要原件读回稳定，215 个相对链接有效，工作区 clean。
 该核定仅覆盖 source `bc5de09`，不含随后限定后处理追加或 required CI/发布治理。
-详见[候选独立核定](../../operations/backlog-execution-2026-10-04.md#2026-10-06-本地文档候选独立核定)。
+详见[候选独立核定](backlog-execution-2026-10-04.md#2026-10-06-本地文档候选独立核定)。
 
 ## 2026-10-06 最新：限定后处理完成，原冻结失败保持
 
@@ -199,7 +199,7 @@ current、失败 evidence stale，原预算/检查/85%/90%及 SPENT 保留。
 链接有效，未带入本机配置祖先，required CI/原生发布治理/远端操作尚未进行。
 最新限定结果位于独立证据目录，不追认旧 scope 或复用已消费动作。Task65 新
 具体批准仍待回复，七项目标 active。详见
-[限定后处理实际记录](../../operations/backlog-execution-2026-10-04.md#2026-10-06-限定后处理单次完成原失败保持)。
+[限定后处理实际记录](backlog-execution-2026-10-04.md#2026-10-06-限定后处理单次完成原失败保持)。
 
 独立实际读回已核十二个选定原件，两次 SHA/stat 稳定，十七检查无 Finding；
 原正确正面位置仍缺席。读回不重扫全部闭包，亦不重跑 consumer 或 native。
@@ -214,7 +214,7 @@ root hook 记录实际含五条 `{directory, pth_filenames}`；资格记录另�
 own Job 已空、六个 native handle 单次关闭，root 输出复制完成；raw file
 关闭次数仍未知。三个报告及 root 五件工具原件均已封存。新的 qualified
 后处理只在独立副本准备，尚未消费；原 007 不重试、完整 V2 仍未通过。
-详见[实际读回与契约根因](../../operations/backlog-execution-2026-10-04.md#2026-10-06-诊断-007-读回与契约根因封存)。
+详见[实际读回与契约根因](backlog-execution-2026-10-04.md#2026-10-06-诊断-007-读回与契约根因封存)。
 
 ## 2026-10-06 最新：007 局部运行完成，冻结 consumer 拒绝
 
@@ -228,14 +228,14 @@ own Job 已空、六个 native handle 单次关闭，root 输出复制完成；r
 封存，不重跑已消费的 007、不改原 consumer、不覆盖所需失败。三名 sub-agent
 并行核对入口、生命周期和源契约，root 串行整合；尚无局部验收或新完整 V2。
 TASK-0065 Action003 revision002 仍待具体批准，七项目标 active。详见
-[007 实际记录](../../operations/backlog-execution-2026-10-04.md#2026-10-06-诊断-007-完成与冻结-consumer-拒绝)。
+[007 实际记录](backlog-execution-2026-10-04.md#2026-10-06-诊断-007-完成与冻结-consumer-拒绝)。
 
 ## 2026-10-05 最新：006 两份实际读回封存
 
 独立读回确认局部诊断失败；目标 own Job 收尾闭合有实际账本，root stream
 capture 仍未知，未重试、补清理或升级验收。41 条已记录意图全部来自首节点 setup；
 失败 call 意图未获准入。旧失败 archive 哈希保持，Task65 新动作仍待批准。
-详见[封存读回](../../operations/backlog-execution-2026-10-04.md#2026-10-05-诊断-006-实际读回已封存)。
+详见[封存读回](backlog-execution-2026-10-04.md#2026-10-05-诊断-006-实际读回已封存)。
 
 ## 2026-10-05 最新：诊断 006 实际失败，冷启动范围保留
 
@@ -248,7 +248,7 @@ call FAILED，其余两节点未完成；41 条已记录 Git 预启动意图不�
 已封存的取消范围薄核明确：cancelled 阻断原 attempt 的自然 CI 验收路径，
 不撤销 TASK-0066 的 cold BOOT spec；009 不读取 CI 状态，仍因真实 admission、
 生命周期资格等独立条件未就绪。TASK-0065 Action003 revision002 仍待具体批准。
-详见[本轮执行](../../operations/backlog-execution-2026-10-04.md#2026-10-05-诊断-006-与取消范围核定)。
+详见[本轮执行](backlog-execution-2026-10-04.md#2026-10-05-诊断-006-与取消范围核定)。
 
 ## 2026-10-05 最新：外仓原 POSIX run 已终态取消
 
@@ -257,7 +257,7 @@ completed/cancelled，POSIX 仍 runner 0 / 0 steps；Windows 保持七 steps suc
 两仓 main SHA 未变，dotfiles 四 jobs / 29 steps 仍 success。取消原因未知。
 原排队接取路径已不可用，I1 后继需重新冻结合法 job/action；尚无新 CI 或 VM 动作。
 TASK-0065 仍 IMPLEMENTING，新 Action003 revision002 请求未回答，旧失败/SPENT 保留。
-详见[外仓实际刷新](../../operations/external-follow-up-evidence-2026-10-04.md#2026-10-05-晚间只读刷新原-posix-job-已取消)。
+详见[外仓实际刷新](external-follow-up-evidence-2026-10-04.md#2026-10-05-晚间只读刷新原-posix-job-已取消)。
 
 ## 2026-10-05 最新：原生重试已登记，新动作待具体批准
 
@@ -271,7 +271,7 @@ Action003 revision002 已通过独立请求审查，canonical SHA256 为
 具体单次批准请求已提交，尚未收到新批准；完整 V2 未再次启动。短 pytest parent
 只针对确认的路径问题，其他原因仍待实际检查。counter 新 source004 仅纯词法准备，
 两名非作者审查进行中；I1 同次身份协议仍为纯模型，真实能力未绑定。七项目标 active。
-详见[重试登记与后继准备](../../operations/backlog-execution-2026-10-04.md#2026-10-05-原生重试登记与后继准备)。
+详见[重试登记与后继准备](backlog-execution-2026-10-04.md#2026-10-05-原生重试登记与后继准备)。
 
 ## 2026-10-05 最新：完整 V2 已结束，原生仍 FAILED
 
@@ -288,7 +288,7 @@ native Missing `retry_reason_or_escalation`，Gate REJECT；独立失败归因�
 当前 I1 observer 纯虚拟检查通过，NativeGit 模型保持 BLOCKED；真实同次身份、
 内部资源关闭、具体冷启动 action 和 fresh host gates 仍待补齐。发布候选 `bbc1a25`
 仅具有本地 15 文档审查，新主文档追加需重新纳入候选核查。七项目标 active。
-详见[完整 V2 实际结果](../../operations/backlog-execution-2026-10-04.md#2026-10-05-完整-v2-实际失败与行动消费)。
+详见[完整 V2 实际结果](backlog-execution-2026-10-04.md#2026-10-05-完整-v2-实际失败与行动消费)。
 
 ## 2026-10-05 最新：单次预算诊断失败，原件保留
 
@@ -301,7 +301,7 @@ root stream copy-completion 仍为 false / UNKNOWN；目标 Job 收尾另做独�
 归一化实际工具原件 `budget-current-c7-root-actual-failure-001/root-real-tool-receipt.json`
 SHA256 `c24c88d4db53eb4d27430921a95dc0c61f88d93082d08f2eac95aa05ad75e62d`。
 TASK-0065 完整 V2 尚未启动，Action002 未消费。详见
-[单次失败与接续](../../operations/backlog-execution-2026-10-04.md#2026-10-05-单次预算诊断实际失败)。
+[单次失败与接续](backlog-execution-2026-10-04.md#2026-10-05-单次预算诊断实际失败)。
 
 ## 2026-10-05 最新：历史资产已恢复，本地准备候选已封存
 
@@ -329,7 +329,7 @@ VM、SSH 或服务动作仍没有具体执行批准。完整 V2、mutation 与�
 `1cd2ff8bebd4b7e3696cea9ec3895b7beddd98ad70c28179e26fa805036e8b4a`。
 尚无 TASK-0067、完整 CI 或远端写入；此审查不自动覆盖随后主文档追加，也不构成
 发布验收。七项目标仍 active；下列旧“待批准”表述保留其记录窗口。详见
-[本轮恢复与当前七项状态](../../operations/backlog-execution-2026-10-04.md#2026-10-05-历史资产恢复与本地准备封存)。
+[本轮恢复与当前七项状态](backlog-execution-2026-10-04.md#2026-10-05-历史资产恢复与本地准备封存)。
 
 ## 2026-10-05 最新：具体行动和 I1 规格已批准
 
@@ -341,7 +341,7 @@ VM、SSH 或服务动作仍没有具体执行批准。完整 V2、mutation 与�
 
 预算入口草案独立纯检查通过；外层发现强引用与异常主因保留的两个必要缺口，
 001 封存 NO_GO，002 正在独立修订。原 007 的限定接纳与旧失败保留，七项目标
-仍 active。详见[实际批准及下一步](../../operations/backlog-execution-2026-10-04.md#2026-10-05-实际批准登记与准备推进)。
+仍 active。详见[实际批准及下一步](backlog-execution-2026-10-04.md#2026-10-05-实际批准登记与准备推进)。
 
 ## 2026-10-05 最新：资格 007 限定通过，完整 V2 待具体行动批准
 
@@ -349,7 +349,7 @@ VM、SSH 或服务动作仍没有具体执行批准。完整 V2、mutation 与�
 通过，两路非作者实际复核无阻断 finding。两项 console 保持 UNMEASURED，
 异常 OS fault 收尾及未测平台仍为 UNKNOWN；29 份正常释放回执的
 `cleanup_complete=false` 不改写。旧 003、005、006 失败及单次原件全部保留。
-详见[实际矩阵与封存依据](../../operations/backlog-execution-2026-10-04.md#2026-10-05-单次资格-007-的限定矩阵接纳)。
+详见[实际矩阵与封存依据](backlog-execution-2026-10-04.md#2026-10-05-单次资格-007-的限定矩阵接纳)。
 
 新的 fixed-five mutation 提案已通过独立 `GO_FOR_REQUEST` 审查，具体行动及
 本次原生临时清理仍待真实批准；完整 V2、行动消费与 mutation 未启动。
@@ -366,7 +366,7 @@ VM、SSH 或服务动作仍没有具体执行批准。完整 V2、mutation 与�
 stderr 空不代表没有失败，实际 JSON 主因及 283 个原件已封存；7191 固定输入
 和 28 prepared 文件的前后 snapshot 字节相同。两次独立 stdlib 解析确认同 source
 在两个 parser 下 default AST dump hash 不同，正在按字段/表示差异核查新修复。
-原测试、时序、支持范围及旧失败不改写。详见[实际局部结果与证据](../../operations/backlog-execution-2026-10-04.md#2026-10-05-单次资格-006-的局部结果与-parser-比较失败)。
+原测试、时序、支持范围及旧失败不改写。详见[实际局部结果与证据](backlog-execution-2026-10-04.md#2026-10-05-单次资格-006-的局部结果与-parser-比较失败)。
 
 另立的干净发布准备工作区只投影并暂存 15 文档，五处缺失链接依赖尚待处理，
 没有提交为完整发布包；24 历史治理账本和三个用户未跟踪计划未复制。新外仓
@@ -380,7 +380,7 @@ stderr 空不代表没有失败，实际 JSON 主因及 283 个原件已封存�
 7128 固定输入和 27 prepared 文件的前后 snapshot 字节相同，25 实际原件保持。
 失败控制的 scoped resource receipt 报告已知句柄单次关闭，不据此接受整体资格。
 005 原件和单次请求封存，新 006 只修事件函数形参，生产源码与原测试保持。
-详见[实际退出、证据位置及修复归属](../../operations/backlog-execution-2026-10-04.md#2026-10-05-单次资格-005-失败事件参数冲突另立修复)。
+详见[实际退出、证据位置及修复归属](backlog-execution-2026-10-04.md#2026-10-05-单次资格-005-失败事件参数冲突另立修复)。
 
 I1 revision009 独立差异审查通过准备合同，仍无 copy/VM/SSH 执行。最新 native status
 为 TASK-0065 IMPLEMENTING、Missing `implementation_result`；TASK-0066
@@ -399,7 +399,7 @@ Missing `implementation_result`。
 这一登记路径；失败 003、原 timeout 节点、生产源码及各冻结原件均保留。预算 002
 独审只通过准备合同，真实三个节点测量及完整 V2 未启动。I1 的日志失败路径正在
 新 revision009 修订；TASK-0066 仍待既有 spec 批准请求的真实回复。详见
-[本阶段证据和并发归属](../../operations/backlog-execution-2026-10-04.md#2026-10-05-验证环境隔离及资格-004-静审)。
+[本阶段证据和并发归属](backlog-execution-2026-10-04.md#2026-10-05-验证环境隔离及资格-004-静审)。
 七项目标继续 active，没有以静审或来源诊断代替验收。
 
 ## 2026-10-05 当前：资格 003 失败，TASK-0066 待规格批准
@@ -416,7 +416,7 @@ TASK-0066 已实际 classify/freeze、记录正式非作者 Design APPROVE并提
 spec SHA256 为 `dcd67fa8220ad10a4c0cc62c5975a5c4f2cfe77b523e9c714b5fe21e4f5eec7f`。
 已请求该 spec 决定，未收到新的批准；cold copy/VM/SSH/服务/CI 仍未授权或执行。
 既有 TASK-0065 spec 批准不代替新 task 决定。实际证据位置及准入基线纠正见
-[执行记录](../../operations/backlog-execution-2026-10-04.md#2026-10-05-单次真实资格失败及-i1-原生准入)。
+[执行记录](backlog-execution-2026-10-04.md#2026-10-05-单次真实资格失败及-i1-原生准入)。
 七项完整完成条件保留，目标 active，旧 FAILED/SPENT 不改写。
 
 ## 2026-10-05 I1 只读身份取得及公开样本盘点
@@ -432,7 +432,7 @@ VM/SSH/服务动作，execution_authorized=false。实际 streams 与 terminal �
 
 Phase 3 公开快照完成 61 个 tracked task 的覆盖/缺失盘点，780 输入前后和 root 回读
 hash 匹配；只绑定 `8ef4e723` 与自己的时间窗口。没有以 task 数、完成标签或失败后
-成功判定充分性，也未补私密模型身份、人类分钟、费用。详见[公开样本边界](../../operations/phase-entry-proposals-2026-10-04.md#新增公开样本盘点2026-10-05只绑定该快照)。
+成功判定充分性，也未补私密模型身份、人类分钟、费用。详见[公开样本边界](phase-entry-proposals-2026-10-04.md#新增公开样本盘点2026-10-05只绑定该快照)。
 真实 Windows 资格执行包仍在修订独立审查发现的失败证据及期限缺口；源码保持冻结，
 完整 V2 和高风险动作尚未执行，持续目标保持 active。
 
@@ -467,7 +467,7 @@ POSIX 仍 queued/0 steps，22 offline/idle、21 online/idle。服务运行且可
 ## 2026-10-04 新执行窗口：持续目标启动，安全基线已提交
 
 所有者要求读取待办、设立完成目标并授权必要工作；持续目标已设立为 active。
-[本轮执行文件](../../operations/backlog-execution-2026-10-04.md)覆盖当前七项待办及并行/串行依赖。
+[本轮执行文件](backlog-execution-2026-10-04.md)覆盖当前七项待办及并行/串行依赖。
 原收尾章节仍为历史窗口，不限制本轮已授权的准备和常规本地推进。
 
 - 安全维护基线 `d4f72ac`（治理工作区同内容提交 `ab07bcd`）新增一个 fake-only
@@ -485,13 +485,13 @@ POSIX 仍 queued/0 steps，22 offline/idle、21 online/idle。服务运行且可
   失败。脚本未启动，无计时/result/guard，未换解释器或重试，完整V2仍未重跑。
   新绑定002已实测并独立复核，局部paired收益不足，不继续两种表示生产化；原结果/
   guard限度/cold事件字段问题保留。完整预算下一步为已有profile的offline caller分区。
-- [F承接方案](../../operations/f-successor-decision-2026-10-04.md)确认五test路径范围冲突及
+- [F承接方案](f-successor-decision-2026-10-04.md)确认五test路径范围冲突及
   HEAD/subject不同，不能直接恢复旧F后吸收新源码；历史导入33命令保持已执行。
-- [外仓现场核定](../../operations/external-follow-up-evidence-2026-10-04.md)已更新新SHA和准确CI窗口；
+- [外仓现场核定](external-follow-up-evidence-2026-10-04.md)已更新新SHA和准确CI窗口；
   dotfiles完整CI成功，r3s新窗口Windows success/POSIXqueued且Linuxrunner离线；既有
   约定主动停用Linux服务，正在核对受控交接材料，不能直接判定为故障。
-  [后续进入门提案](../../operations/phase-entry-proposals-2026-10-04.md)与
-  [干净发布包](../../operations/publication-package-2026-10-04.md)已形成，实施和发布尚未完成。
+  [后续进入门提案](phase-entry-proposals-2026-10-04.md)与
+  [干净发布包](publication-package-2026-10-04.md)已形成，实施和发布尚未完成。
 
 初读的旧 TASK-0064 FAILED/Missing `retry_reason_or_escalation`、TASK-0063 BLOCKED/Missing
 `block_resolution` 保持；后续发现原性能业务目录不存在、F业务目录为空，Git注册清单
@@ -514,7 +514,7 @@ BLOCKED / REVIEW / V2，Missing `block_resolution`。两者 approvals current、
 
 ## 2026-10-04 当前核定：私有 Windows 候选 qualification 完成，生产仍未准入
 
-- 本轮显式私有修复授权下，封存候选执行了一次 qualification，实际 **9 passed / 10.37 秒 / rc 0**：5 项真实 Windows 案例、4 项 safe mock。独立终态审计已封存，结论为 `CONFIRMED_PRIVATE_QUALIFICATION_ONLY`，无数据阻断；确认范围仅为本次私有 qualification，不是 native 验收或生产批准。候选、审计哈希和后续提纲见[私有超时修复记录](../../operations/windows-private-timeout-repair-2026-10-04.md)。
+- 本轮显式私有修复授权下，封存候选执行了一次 qualification，实际 **9 passed / 10.37 秒 / rc 0**：5 项真实 Windows 案例、4 项 safe mock。独立终态审计已封存，结论为 `CONFIRMED_PRIVATE_QUALIFICATION_ONLY`，无数据阻断；确认范围仅为本次私有 qualification，不是 native 验收或生产批准。候选、审计哈希和后续提纲见[私有超时修复记录](windows-private-timeout-repair-2026-10-04.md)。
 - 实际候选使用自有 Win32 Job、suspended create → assign → resume，以及 per-instance FunctionType 私有代理；没有共享全局 patch，也不设置 kill-on-close。两个真实 timeout 记录 active 0、parent signaled、drain/threads complete、owned handles closed；正常 zero/nonzero 保持原结果，正常 live-child 在 release 记录 active 2 后自然结束，无额外 kill。
 - 4 项故障 mock 只验证控制流，不是 OS 故障/清理证据；terminate/drain 故障保留 errors、retained handles 和未验证清理状态，不能说所有清理成功。outer supervisor 实际 11.128385 秒、自有 Job active 0、parent reaped、handles closed、cleanup CONFIRMED，无额外 survivor cleanup。
 - 脚本指定保护集合为 396 个 entry（333 file、61 directory、2 absent），字节/目录状态及身份前后相同，raw-before 已私有留存；manifest 实际排除 6 个 `__pycache__` 目录，这些目录、整个 main 业务树和 host temp 的完整证明未采集。原 test/source 与 1/5/2/10/3 秒时序不变，public signature/result fields 及隔离绑定恢复字段为 true。只覆盖绑定 CPython 3.13.15 的受控调用，不是通用安全 sandbox 或外部 crash 的 orphan 保证。
@@ -581,7 +581,7 @@ BLOCKED / REVIEW / V2，Missing `block_resolution`。两者 approvals current、
 - 请求与保存输入仅差末尾一个 LF，双方哈希和首次提取失败记录分别保留；仅从已有行离线完成提取，没有重发或重跑源快照。六项源观察保持 pending，三条勘误另附，原文不改。
 - 真正 ready 检查点之后完成新的独立 Design Review 004 并原生记录；context `165c5dc2` 和合法状态保持。旧 token 实际 `EXTERNAL_REVIEW_PREFLIGHT_STALE` 零写拒绝，新预检后仅首次创建一份 import，重复 `already_recorded/no_op` 全树字节不变。
 - 实际验收共33条命令，十组反例各执行 preflight/record，共20次按预期零写拒绝；全任务树目录与缓存字节比较、原事件前缀和完整回执保留在私有证据中。两名 sub-agent 正并行审计封存证据。
-- 完整原生 V2、implementation Review/finalize、code approval 和 Gate 尚未完成；单次本地变异批准仍未消费。导入不授予上述结论，发布及条件路线边界保持。具体来源与限制见[回收记录](../../operations/zcode-report-recovery-2026-10-03.md#task-0063-新的匹配来源与导入边界)。以下执行窗口保留为历史。
+- 完整原生 V2、implementation Review/finalize、code approval 和 Gate 尚未完成；单次本地变异批准仍未消费。导入不授予上述结论，发布及条件路线边界保持。具体来源与限制见[回收记录](zcode-report-recovery-2026-10-03.md#task-0063-新的匹配来源与导入边界)。以下执行窗口保留为历史。
 
 ## 2026-10-03 补充授权已落实，单次来源审查进行中
 
@@ -597,20 +597,20 @@ BLOCKED / REVIEW / V2，Missing `block_resolution`。两者 approvals current、
 - 隔离候选 `f59aa2544701bc4e00644fd291e16b97314c41a6` 已由真实文档更正和 native sync 固定；实际 new_permissions 升级后为 BLOCKED，Missing block_resolution。恢复 REVIEW/V2 和单次固定五项本地变异的具体提案已独立复核，等待新增授权；不重复请求仍 current 的规格批准。
 - 原始 native 字节因任务树强制 LF 改写直接 ZIP，失败试存保留；canonical ASCII base64 档案从 Git blob 解码后七项大小/哈希全部一致。隔离 editable 环境 MINENV 导入正确，工具计划齐备；这不是 V2 已通过。
 - 私有实际导入验收脚本的输出路径防护缺口已修正，两位非作者静态复核均 APPROVE；版本 SHA256 `00e91e44fada2cdfae657489eba79a72adc750bad670fbd945d8157f9bcb7a14`，原版本保留。完整任务树字节快照及 create-only/no-op/stale-token 逻辑保留，脚本尚未执行；静态复核不替代真实验收。
-- F 实际导入、V2/action 消费及新付费发送均未执行。本轮仅本地；原外仓/条件阶段/发布边界保持。具体[待办定位](../../operations/follow-up-backlog-2026-09-22.md)及[执行说明](../../operations/f-real-import-acceptance-2026-10-03.md)追加保留历史。
+- F 实际导入、V2/action 消费及新付费发送均未执行。本轮仅本地；原外仓/条件阶段/发布边界保持。具体[待办定位](../../operations/follow-up-backlog-2026-09-22.md)及[执行说明](f-real-import-acceptance-2026-10-03.md)追加保留历史。
 
 ## 2026-10-03 最终交接：本地质量通过，F 新目标准备完成
 
-- 文档候选 `3d65282` 的完整本地检查通过：3008 passed/1 POSIX FIFO skip，总覆盖率 89.05%；90% diff 门执行成功（文档差异无可覆盖行），contracts 185 passed、lock/Ruff/format/mypy/whitespace 通过。具体来源与限制见[回收记录](../../operations/zcode-report-recovery-2026-10-03.md#本地验证与新目标准备)。这不是 TASK-0063 的原生 V2 验收或远端 CI。
+- 文档候选 `3d65282` 的完整本地检查通过：3008 passed/1 POSIX FIFO skip，总覆盖率 89.05%；90% diff 门执行成功（文档差异无可覆盖行），contracts 185 passed、lock/Ruff/format/mypy/whitespace 通过。具体来源与限制见[回收记录](zcode-report-recovery-2026-10-03.md#本地验证与新目标准备)。这不是 TASK-0063 的原生 V2 验收或远端 CI。
 - 新隔离分支 `codex/f-real-import-acceptance` 的 TASK-0063 已分类 REVIEW/V2、冻结并完成独立设计技术审查；当前 WAITING_FOR_SPEC_REVIEW，CLI 只缺 spec_approval。冻结链接修正的原版本及旧 context/Review 保留。
 - 新匹配报告提示词和独立获取方案已具体准备，未授权/未发送。人类规格批准与一次新 ZCode 付费只读审查须分别批准；F 实际导入及后续原生验收待此依赖。
 - r3s runner API 窗口显示 Linux 22 offline、Windows 21 online，均 busy=false；恢复和重跑须进入目标项目单独准入，完整双通道结果仍缺。其余条件路线及本地发布边界保持。
 
 ## 2026-10-03 接续：报告回收与证据复核完成
 
-- [回收核定](../../operations/zcode-report-recovery-2026-10-03.md)：ZN-01/03/04 完整终稿附勘误；ZN-02 实际取消/无终稿。独立门评估补齐，原记录保留，未重发。
+- [回收核定](zcode-report-recovery-2026-10-03.md)：ZN-01/03/04 完整终稿附勘误；ZN-02 实际取消/无终稿。独立门评估补齐，原记录保留，未重发。
 - dotfiles 当前准确 SHA 的 gates + 3 shards 全成功；r3s Windows 7 步成功、POSIX 0 步取消，双通道缺项保持。原报告记载与本轮 GET/源码补证分别保留。
-- [F 规格](../../operations/f-real-import-acceptance-2026-10-03.md)明确新 design 目标、真实来源、预检/消费/no-op/拒绝及原生收尾；实际准入按 CLI，真实匹配原件未取得。
+- [F 规格](f-real-import-acceptance-2026-10-03.md)明确新 design 目标、真实来源、预检/消费/no-op/拒绝及原生收尾；实际准入按 CLI，真实匹配原件未取得。
 - E5/I5/Phase 3/4 和 I1/I2 实际需求门保持；第六项为实现前方案/实现后 diff 审查。旧型号漂移不恢复固定值。
 - 3 名 sub-agent 并行只读审查，主 agent 串行取证、记录、验证和本地提交。历史任务、配置、草稿和失败保留；以下为历史快照。
 
@@ -1480,13 +1480,13 @@ TASK-0048 为 REVIEW/V2、`Missing: implementation_result`；TASK-0028 仍需重
 
 2026-09-13 所有者已明确授权完成任务 02。完整范围、验收矩阵和当次事实见
 [基础设施执行记录](../../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)，
-运维与工具入口见[自托管执行基础设施](../../operations/self-hosted-runners.md)。当前推进只读盘点、
+运维与工具入口见[自托管执行基础设施](self-hosted-runners.md)。当前推进只读盘点、
 独立回执契约和真实 Linux 环境；整体仍为 `IN_PROGRESS`。下文此前只读准备和迁移
 结果均保留原观察时点，不代表本轮完整退出，也不覆盖新的执行记录。
 
 ## 已完成
 
-2026-09-13 后续执行：[E1 核查、E2 设计与 Linux 候选准备](../../operations/follow-up-preparation-2026-09-13.md)。
+2026-09-13 后续执行：[E1 核查、E2 设计与 Linux 候选准备](follow-up-preparation-2026-09-13.md)。
 dotfiles 历史 Step 3 的两个固定提交已取回 37/37 成功 CI，原本地日志缺失仍保留；
 私有试点在核查中已由另一任务推进 main，采用结果由其当前持有者核定。
 本轮完成 E2 最小 guided 设计与树外 Linux 候选，按所有者确认保持目标只读。
