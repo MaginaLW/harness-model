@@ -7,6 +7,8 @@ package 已发布到外部 registry。
 
 ### Changed
 
+- 退场未接入核心运行时的 `tools/analysis/*` 外围分析脚本（11 个模块）及 18 个专属测试文件，将覆盖率与 strict `mypy` 收敛至单核心域 `src/aiflow`（保持 85% 总分支覆盖率与 90% diff coverage 门禁不变），并将 9 篇关联运维说明及示例夹具归档至 `docs/archive/operations/`（TASK-0156，PR #166 / #167）。
+- 将 `git_context` 分支任务扫描改为 `git cat-file --batch` 批量读取并复用单次工作树状态，统一 `status_service` 与 `gate` 的策略、范围及原生 V2 证据新鲜度判定；同时归档 15 篇过期运维记录并精简 17 处 Windows 测试夹具消除 3000s 超时（TASK-0155，PR #164 / #165）。
 - 退役 `aiflow external-review` 与 `aiflow verify --pytest-temp-root`，合并八处相同的 UTC 时间戳辅助函数；同步退役说明、Policy 2.5.0 治理面升级清单与当前维护状态，保留历史记录（TASK-0076）。
 - active Policy 升至 `2.4.0`：V1/V2 的 pytest 检查共享一次完整覆盖率 pytest 执行（TASK-0072）。
 - 精简 `src/aiflow`：YAML 读取加缓存、场景 runner 移到 tests、删除死代码（TASK-0073）。

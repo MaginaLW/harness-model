@@ -90,7 +90,7 @@ TASK-0083 已交付显式风险事实 `facts` CLI；[PR #138](https://github.com
 项目所有者已选择 agent-bridge 为完整引擎目标；目标选择与本地 V0/V1 交付不代表真实接入、目标 CI 或 V2 已交付。
 
 目标 CI 适配涉及核心验证代码，不只是修改 YAML：当前[验证器](../../src/aiflow/verification.py)
-的 Python 分支约束了本仓覆盖率源 `aiflow`、`tools/analysis`、`tools/ci/check_coverage.py`、部分阈值与
+的 Python 分支约束了本仓覆盖率源 `aiflow`、`tools/ci/check_coverage.py`、部分阈值与
 命令白名单；Node 分支只提供封闭本地合同，CI 组合明确拒绝。只复制 `.ai` 不能让完整验证在外仓成立，也不能承诺支持任意语言和 CI。
 
 ### 最小分阶段交付

@@ -150,7 +150,9 @@ Gate 本身不构成授权：push、merge 按常设授权执行，deploy 等动�
 
 ## 复算开销
 
-在仓库环境中运行只读报告：
+> 注：外围 `tools/analysis/approval_overhead.py` 已随 PR #166（`TASK-0156`）退场；下列只读命令仅用于在历史基线提交（如 `1f28583` / `8ee402d1`）的隔离检出中复算当年口径，当前活跃工作树状态与准备缺项统一使用 `python -m aiflow status <TASK-ID>` 与 `.ai/tasks/` 查询。
+
+在历史对应提交的隔离检出中运行只读报告：
 
 ```sh
 python tools/analysis/approval_overhead.py --format text

@@ -49,7 +49,7 @@
 
 ## 历史/未授权，不是当前待办
 
-以下文档保持原位置，**不是当前待办，也不构成实施授权**：
+以下文档仅用于历史追溯与证据核对，**不是当前待办，也不构成实施授权**：
 
 - 阶段三/四预进入蓝图（未授权实施）：[资源感知多智能体调度设计](../superpowers/specs/2026-08-13-resource-aware-agent-scheduling-design.md) · [本机过载防护预进入蓝图](../superpowers/specs/2026-08-13-local-agent-overload-protection-blueprint.md) · [自适应多智能体编排预进入蓝图](../superpowers/specs/2026-08-13-adaptive-agent-orchestration-blueprint.md)
 - [阶段三进入输入](../implementation/phase-03-entry-inputs.md)：只整理进入事实，进入门未满足
