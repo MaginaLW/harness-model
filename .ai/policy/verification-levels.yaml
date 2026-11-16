@@ -78,7 +78,6 @@ levels:
           - -m
           - pytest
           - --cov=aiflow
-          - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
         timeout_seconds: 3000
@@ -92,7 +91,6 @@ levels:
           - -m
           - pytest
           - --cov=aiflow
-          - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
         timeout_seconds: 3000
@@ -101,7 +99,7 @@ levels:
         environment:
           COVERAGE_FILE: "{run_dir}/.coverage"
       - id: mypy
-        command: ["{python}", -m, mypy, src, tools/analysis]
+        command: ["{python}", -m, mypy, src]
         timeout_seconds: 300
         required: true
         result_parser: exit_zero
@@ -111,7 +109,6 @@ levels:
           - -m
           - pytest
           - --cov=aiflow
-          - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
         timeout_seconds: 3000
@@ -165,7 +162,6 @@ levels:
           - -m
           - pytest
           - --cov=aiflow
-          - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
         timeout_seconds: 3000
@@ -179,7 +175,6 @@ levels:
           - -m
           - pytest
           - --cov=aiflow
-          - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
         timeout_seconds: 3000
@@ -188,7 +183,7 @@ levels:
         environment:
           COVERAGE_FILE: "{run_dir}/.coverage"
       - id: mypy
-        command: ["{python}", -m, mypy, src, tools/analysis]
+        command: ["{python}", -m, mypy, src]
         timeout_seconds: 300
         required: true
         result_parser: exit_zero
@@ -198,7 +193,6 @@ levels:
           - -m
           - pytest
           - --cov=aiflow
-          - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
         timeout_seconds: 3000
@@ -225,7 +219,6 @@ levels:
           - -m
           - pytest
           - --cov=aiflow
-          - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
         timeout_seconds: 3000
@@ -239,7 +232,6 @@ levels:
           - -m
           - pytest
           - --cov=aiflow
-          - --cov=tools/analysis
           - --cov-branch
           - "--cov-report=xml:{run_dir}/coverage.xml"
         timeout_seconds: 3000

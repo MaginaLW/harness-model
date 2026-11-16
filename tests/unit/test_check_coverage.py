@@ -18,19 +18,17 @@ BASE = "a" * 40
 @pytest.fixture
 def setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     repository = tmp_path / "repository"
-    files = []
-    for relative in ("src/aiflow/example.py", "tools/analysis/example.py"):
-        path = repository / relative
-        path.parent.mkdir(parents=True)
-        path.write_text("value = 1\n", encoding="utf-8")
-        files.append(path.resolve())
+    path = repository / "src/aiflow/example.py"
+    path.parent.mkdir(parents=True)
+    path.write_text("value = 1\n", encoding="utf-8")
+    files = [path.resolve()]
     run_dir = tmp_path / "run"
     run_dir.mkdir()
     (run_dir / ".coverage").write_bytes(b"fixture")
     coverage = Mock()
-    coverage.get_data.return_value.measured_files.return_value = {str(path) for path in files}
+    coverage.get_data.return_value.measured_files.return_value = {str(item) for item in files}
     coverage.get_data.return_value.has_arcs.return_value = True
-    coverage.report.side_effect = [100.0, 100.0]
+    coverage.report.side_effect = [100.0]
     factory = Mock(return_value=coverage)
     run = Mock(return_value=subprocess.CompletedProcess([], 0))
     monkeypatch.setattr(checker, "Coverage", factory)
@@ -39,9 +37,9 @@ def setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     return repository, run_dir, coverage, factory, run
 
 
-def test_fixed_domains_include_unmeasured_nested_files_and_isolate_reports(setup) -> None:
+def test_fixed_domain_includes_unmeasured_nested_files_and_writes_core_report(setup) -> None:
     repository, run_dir, coverage, factory, run = setup
-    unmeasured = repository / "tools/analysis/nested/unimported.py"
+    unmeasured = repository / "src/aiflow/nested/unimported.py"
     unmeasured.parent.mkdir()
     unmeasured.write_text("not_executed = 1\n", encoding="utf-8")
 
@@ -49,64 +47,65 @@ def test_fixed_domains_include_unmeasured_nested_files_and_isolate_reports(setup
 
     factory.assert_called_once_with(data_file=str(run_dir / ".coverage"), config_file=False)
     coverage.load.assert_called_once_with()
-    for index, (name, relative) in enumerate(checker.DOMAINS):
-        expected = sorted(str(path.resolve()) for path in (repository / relative).rglob("*.py"))
-        assert coverage.report.call_args_list[index].kwargs == {
-            "morfs": expected,
-            "include": [],
-            "omit": [],
-            "ignore_errors": False,
-        }
-        xml = run_dir / f"coverage-{name}.xml"
-        assert coverage.xml_report.call_args_list[index].kwargs == {
-            "morfs": expected,
-            "outfile": str(xml),
-            "include": [],
-            "omit": [],
-            "ignore_errors": False,
-        }
-        assert run.call_args_list[index].args == (
-            [
-                sys.executable,
-                "-m",
-                "diff_cover.diff_cover_tool",
-                str(xml),
-                "--compare-branch",
-                BASE,
-                "--fail-under=90",
-            ],
-        )
-        assert run.call_args_list[index].kwargs == {
-            "cwd": repository.resolve(),
-            "shell": False,
-            "check": False,
-            "timeout": 45,
-        }
+    assert len(checker.DOMAINS) == 1
+    name, relative = checker.DOMAINS[0]
+    assert (name, relative) == ("core", "src/aiflow")
+    expected = sorted(str(path.resolve()) for path in (repository / relative).rglob("*.py"))
+    assert coverage.report.call_args_list[0].kwargs == {
+        "morfs": expected,
+        "include": [],
+        "omit": [],
+        "ignore_errors": False,
+    }
+    xml = run_dir / f"coverage-{name}.xml"
+    assert coverage.xml_report.call_args_list[0].kwargs == {
+        "morfs": expected,
+        "outfile": str(xml),
+        "include": [],
+        "omit": [],
+        "ignore_errors": False,
+    }
+    assert run.call_args_list[0].args == (
+        [
+            sys.executable,
+            "-m",
+            "diff_cover.diff_cover_tool",
+            str(xml),
+            "--compare-branch",
+            BASE,
+            "--fail-under=90",
+        ],
+    )
+    assert run.call_args_list[0].kwargs == {
+        "cwd": repository.resolve(),
+        "shell": False,
+        "check": False,
+        "timeout": 45,
+    }
 
 
 @pytest.mark.parametrize(
     ("totals", "expected"),
     [
-        ([85.0, 85.0], 0),
-        ([84.9999999, 100.0], 1),
-        ([100.0, 84.9999999], 1),
-        ([float("nan"), 100.0], 1),
-        ([100.0, float("inf")], 1),
+        ([85.0], 0),
+        ([84.9999999], 1),
+        ([float("nan")], 1),
+        ([float("inf")], 1),
     ],
 )
-def test_raw_total_thresholds_cannot_round_up_or_compensate(setup, totals, expected) -> None:
+def test_raw_total_thresholds_cannot_round_up(setup, totals, expected) -> None:
     repository, run_dir, coverage, _, run = setup
     coverage.report.side_effect = totals
     assert checker.check_coverage(repository, run_dir, BASE) == expected
-    assert coverage.report.call_count == run.call_count == 2
+    assert coverage.report.call_count == run.call_count == 1
 
 
-@pytest.mark.parametrize("codes", [(1, 0), (0, 1), (2, 2)])
-def test_either_diff_failure_fails_without_skipping_the_other_domain(setup, codes) -> None:
+@pytest.mark.parametrize("code", [1, 2])
+def test_diff_failure_fails_closed(setup, code) -> None:
     repository, run_dir, _, _, run = setup
-    run.side_effect = [subprocess.CompletedProcess([], code) for code in codes]
+    run.side_effect = [subprocess.CompletedProcess([], code)]
     assert checker.check_coverage(repository, run_dir, BASE) == 1
-    assert run.call_count == 2
+    assert run.call_count == 1
 
 
 @pytest.mark.parametrize("base", ["main", "a" * 39, "A" * 40, "g" * 40, "--help", ""])
@@ -130,9 +129,7 @@ def test_missing_database_fails(setup, missing: str) -> None:
     run.assert_not_called()
 
 
-@pytest.mark.parametrize(
-    "invalid", ["empty", "statement_only", "unmeasured_core", "unmeasured_analysis"]
-)
+@pytest.mark.parametrize("invalid", ["empty", "statement_only", "unmeasured_core"])
 def test_missing_measurements_and_non_branch_data_fail(setup, invalid: str) -> None:
     repository, run_dir, coverage, _, run = setup
     data = coverage.get_data.return_value
@@ -141,22 +138,16 @@ def test_missing_measurements_and_non_branch_data_fail(setup, invalid: str) -> N
     elif invalid == "statement_only":
         data.has_arcs.return_value = False
     else:
-        missing = "src/aiflow" if invalid == "unmeasured_core" else "tools/analysis"
-        data.measured_files.return_value = {
-            path
-            for path in data.measured_files.return_value
-            if missing not in Path(path).as_posix()
-        }
+        data.measured_files.return_value = {str(repository / "tests/example_test.py")}
     with pytest.raises(ValueError, match="branch coverage|no measured source"):
         checker.check_coverage(repository, run_dir, BASE)
     coverage.report.assert_not_called()
     run.assert_not_called()
 
 
-@pytest.mark.parametrize("relative", ["src/aiflow", "tools/analysis"])
-def test_missing_domain_inventory_fails(setup, relative: str) -> None:
+def test_missing_domain_inventory_fails(setup) -> None:
     repository, run_dir, coverage, _, run = setup
-    (repository / relative / "example.py").unlink()
+    (repository / "src/aiflow/example.py").unlink()
     with pytest.raises(ValueError, match="inventory is empty"):
         checker.check_coverage(repository, run_dir, BASE)
     coverage.report.assert_not_called()
@@ -185,10 +176,7 @@ def test_cli_fails_closed_for_database_report_and_subprocess_errors(setup, capsy
 
 def test_relative_measurements_are_resolved_against_repository(setup) -> None:
     repository, run_dir, coverage, _, _ = setup
-    coverage.get_data.return_value.measured_files.return_value = {
-        "src/aiflow/example.py",
-        "tools/analysis/example.py",
-    }
+    coverage.get_data.return_value.measured_files.return_value = {"src/aiflow/example.py"}
     assert checker.check_coverage(repository, run_dir, BASE) == 0
 
 
@@ -207,12 +195,7 @@ def test_real_database_rejection_preserves_input(setup, monkeypatch, capsys, kin
     if kind == "statement_only":
         data_file.unlink()
         data = CoverageData(basename=str(data_file))
-        data.add_lines(
-            {
-                str(repository / "src/aiflow/example.py"): {1},
-                str(repository / "tools/analysis/example.py"): {1},
-            }
-        )
+        data.add_lines({str(repository / "src/aiflow/example.py"): {1}})
         data.write()
     original = data_file.read_bytes()
     monkeypatch.setattr(checker, "Coverage", Coverage)

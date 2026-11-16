@@ -276,7 +276,8 @@ def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
     assert "if: steps.governance.outputs.bootstrap_active == 'true'" in text
     assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 5
     assert 'COVERAGE_FILE="$RUNNER_TEMP/.coverage"' in text
-    assert "--cov=aiflow --cov=tools/analysis --cov-branch" in text
+    assert "--cov=aiflow --cov-branch" in text
+    assert "--cov=tools/analysis" not in text
     assert "--cov-report=term-missing" in text
     assert '--cov-report="xml:$RUNNER_TEMP/coverage.xml"' in text
     assert coverage_command in text

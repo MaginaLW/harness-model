@@ -1,0 +1,64 @@
+{
+  "base_commit": "a376ad4c94b6608e9a2a492f3f870e456be2618e",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "d54ef3321591c0177f24b00e3102e9858bfc556e30b6910c2d7f0721fd57e00a",
+  "classifications": [
+    {
+      "classified_at": "2026-11-16T14:48:51Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "CI or CD behavior changes require review.",
+      "explanations": [
+        "CI or CD behavior changes require review.",
+        "Changes that can touch the governance surface require independent review."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "CI or CD behavior changes require review.",
+          "predicate_explanations": [
+            "impact_categories: contains_any -> true"
+          ],
+          "priority": 780,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-CI-CD"
+        },
+        {
+          "explanation": "Changes that can touch the governance surface require independent review.",
+          "predicate_explanations": [
+            "impact_scope: overlaps_paths -> true"
+          ],
+          "priority": 750,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE"
+        }
+      ],
+      "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+      "policy_version": "2.6.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-CI-CD",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Cross-module interaction requires V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-CROSS-MODULE",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-11-16T14:48:51Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "policy_version": "2.6.0",
+  "schema_version": "1.0",
+  "subject_commit": "e112514570fff25f45003ad628eb69a872b33b27",
+  "task_id": "TASK-0156"
+}

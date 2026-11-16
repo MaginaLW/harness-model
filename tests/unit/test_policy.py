@@ -134,7 +134,6 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
                 "-m",
                 "pytest",
                 "--cov=aiflow",
-                "--cov=tools/analysis",
                 "--cov-branch",
                 "--cov-report=xml:{run_dir}/coverage.xml",
             ],
@@ -164,7 +163,7 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
             "result_parser": "exit_zero",
             "threshold": 90,
         }
-        assert by_id["mypy"]["command"] == ["{python}", "-m", "mypy", "src", "tools/analysis"]
+        assert by_id["mypy"]["command"] == ["{python}", "-m", "mypy", "src"]
 
 
 def test_legacy_v1_policy_branch_remains_valid() -> None:

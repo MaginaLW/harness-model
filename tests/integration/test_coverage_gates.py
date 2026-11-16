@@ -13,7 +13,7 @@ import pytest
 from coverage import Coverage
 
 CHECKER = Path(__file__).resolve().parents[2] / "tools" / "ci" / "check_coverage.py"
-DOMAINS = ("src/aiflow", "tools/analysis")
+DOMAINS = ("src/aiflow",)
 MODULES = tuple(f"{domain}/{name}" for domain in DOMAINS for name in ("same.py", "nested/same.py"))
 COLLECT_SCRIPT = """
 import runpy
@@ -158,7 +158,7 @@ def test_coverage_gates_accept_no_added_measurable_lines(tmp_path: Path, change:
 
     assert result.returncode == 0, result.stdout + result.stderr
     assert _git(repository, "status", "--porcelain") == ""
-    for name, domain in zip(("core", "analysis"), DOMAINS, strict=True):
+    for name, domain in zip(("core",), DOMAINS, strict=True):
         assert _reported_files(repository, run_dir / f"coverage-{name}.xml") == {
             path.resolve() for path in (repository / domain).rglob("*.py")
         }
@@ -177,53 +177,47 @@ def test_coverage_gates_map_changed_top_level_and_nested_same_names(tmp_path: Pa
     result = _check(repository, run_dir, base)
 
     assert result.returncode == 0, result.stdout + result.stderr
-    for name, domain in zip(("core", "analysis"), DOMAINS, strict=True):
+    for name, domain in zip(("core",), DOMAINS, strict=True):
         assert _reported_files(repository, run_dir / f"coverage-{name}.xml") == {
             (repository / domain / name).resolve() for name in ("same.py", "nested/same.py")
         }
 
 
 @pytest.mark.parametrize("domain", DOMAINS)
-def test_coverage_gates_fail_each_total_with_no_changed_source(tmp_path: Path, domain: str) -> None:
+def test_coverage_gates_fail_total_with_no_changed_source(tmp_path: Path, domain: str) -> None:
     repository, run_dir, _ = _repository(tmp_path)
     (repository / domain / "unexecuted.py").write_text(
-        "".join(f"missed_{index} = {index}\n" for index in range(20)), encoding="utf-8"
+        "".join(f"missed_{index} = {index}\n" for index in range(25)), encoding="utf-8"
     )
     base = _commit(repository, "baseline includes unexecuted source")
     (repository / "README.md").write_text("Documentation change.\n", encoding="utf-8")
     _commit(repository, "documentation only")
     _collect(repository, run_dir)
-    other = next(item for item in DOMAINS if item != domain)
     assert _total(repository, run_dir, (domain,)) < 85
-    assert _total(repository, run_dir, (other,)) == 100
-    assert _total(repository, run_dir, DOMAINS) >= 85
 
     result = _check(repository, run_dir, base)
 
     assert result.returncode == 1, result.stdout + result.stderr
     assert "total coverage is below 85 percent" in result.stderr
-    assert result.stdout.count("No lines with coverage information in this diff.") == 2
+    assert result.stdout.count("No lines with coverage information in this diff.") == 1
 
 
 @pytest.mark.parametrize("domain", DOMAINS)
-def test_coverage_gates_count_unexecuted_files_in_each_domain(tmp_path: Path, domain: str) -> None:
+def test_coverage_gates_count_unexecuted_files_in_domain(tmp_path: Path, domain: str) -> None:
     repository, run_dir, base = _repository(tmp_path)
     unexecuted = repository / domain / "unexecuted.py"
     unexecuted.write_text(
-        "".join(f"missed_{index} = {index}\n" for index in range(20)), encoding="utf-8"
+        "".join(f"missed_{index} = {index}\n" for index in range(25)), encoding="utf-8"
     )
     _commit(repository, "add unexecuted source")
     _collect(repository, run_dir)
-    other = next(item for item in DOMAINS if item != domain)
     assert _total(repository, run_dir, (domain,)) < 85
-    assert _total(repository, run_dir, (other,)) == 100
-    assert _total(repository, run_dir, DOMAINS) >= 85
 
     result = _check(repository, run_dir, base)
 
     assert result.returncode == 1, result.stdout + result.stderr
     assert "total coverage is below 85 percent" in result.stderr
-    report = run_dir / f"coverage-{'core' if domain == DOMAINS[0] else 'analysis'}.xml"
+    report = run_dir / "coverage-core.xml"
     assert unexecuted.resolve() in _reported_files(repository, report)
     assert "Coverage: 0%" in result.stdout
 
@@ -239,13 +233,6 @@ def test_coverage_gates_fail_each_changed_file_with_passing_totals(
         + "\ndef not_called(flag):\n    if flag:\n        return 1\n    return 0\n",
         encoding="utf-8",
     )
-    other = next(domain for domain in DOMAINS if not relative.startswith(f"{domain}/"))
-    covered = repository / other / "same.py"
-    covered.write_text(
-        covered.read_text(encoding="utf-8")
-        + "".join(f"changed_{index} = {index}\n" for index in range(40)),
-        encoding="utf-8",
-    )
     _commit(repository, "add uncovered function")
     _collect(repository, run_dir)
     for domain in DOMAINS:
@@ -257,7 +244,6 @@ def test_coverage_gates_fail_each_changed_file_with_passing_totals(
     assert "total coverage is below 85 percent" not in result.stderr
     assert relative in result.stdout
     assert "Coverage: 25%" in result.stdout
-    assert "Coverage: 100%" in result.stdout
 
 
 @pytest.mark.parametrize("domain", DOMAINS)
@@ -272,21 +258,14 @@ def test_coverage_gates_reject_uncovered_hidden_changes(
     unexecuted.write_text(
         "".join(f"missed_{index} = {index}\n" for index in range(4)), encoding="utf-8"
     )
-    other = next(item for item in DOMAINS if item != domain)
-    covered = repository / other / "same.py"
-    covered.write_text(
-        covered.read_text(encoding="utf-8")
-        + "".join(f"changed_{index} = {index}\n" for index in range(40)),
-        encoding="utf-8",
-    )
-    _commit(repository, "add uncovered hidden source and covered opposite-domain lines")
+    _commit(repository, "add uncovered hidden source")
     _collect(repository, run_dir)
     totals = {item: _total(repository, run_dir, (item,)) for item in DOMAINS}
     assert all(total >= 85 for total in totals.values())
 
     result = _check(repository, run_dir, base)
 
-    report = run_dir / f"coverage-{'core' if domain == DOMAINS[0] else 'analysis'}.xml"
+    report = run_dir / "coverage-core.xml"
     assert unexecuted.resolve() in _reported_files(repository, report)
     hidden_class = next(
         element
@@ -304,4 +283,3 @@ def test_coverage_gates_reject_uncovered_hidden_changes(
     assert "total coverage is below 85 percent" not in result.stderr
     assert relative in result.stdout
     assert "Coverage: 0%" in result.stdout
-    assert "Coverage: 100%" in result.stdout

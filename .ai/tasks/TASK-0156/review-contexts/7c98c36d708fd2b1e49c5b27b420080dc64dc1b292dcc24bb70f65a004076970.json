@@ -1,0 +1,499 @@
+{
+  "base_commit": "a376ad4c94b6608e9a2a492f3f870e456be2618e",
+  "branch": "codex/retire-analysis-extension",
+  "classification_input_sha256": "d54ef3321591c0177f24b00e3102e9858bfc556e30b6910c2d7f0721fd57e00a",
+  "content": {
+    "allowed_scope": [
+      "tools/analysis/**",
+      "pyproject.toml",
+      ".github/workflows/ai-quality-gate.yml",
+      "tools/ci/check_coverage.py",
+      "src/aiflow/verification.py",
+      ".ai/policy/verification-levels.yaml",
+      "docs/operations/quickstart.md",
+      "tests/integration/test_approval_overhead.py",
+      "tests/integration/test_repository_readiness.py",
+      "tests/integration/test_acceptance_traceability.py",
+      "tests/integration/test_coverage_gates.py",
+      "tests/integration/test_github_workflow.py",
+      "tests/unit/test_benchmark_reference.py",
+      "tests/unit/test_check_coverage.py",
+      "tests/unit/test_confidence_availability.py",
+      "tests/unit/test_feedback_text.py",
+      "tests/unit/test_policy.py",
+      "tests/unit/test_pr_feedback.py",
+      "tests/unit/test_pr_feedback_followups.py",
+      "tests/unit/test_review_advisory.py",
+      "tests/unit/test_review_detection.py",
+      "tests/unit/test_review_detection_analysis.py",
+      "tests/unit/test_review_detection_input.py",
+      "tests/unit/test_review_detection_sources.py",
+      "tests/unit/test_review_feedback.py",
+      "tests/unit/test_review_feedback_calibration.py",
+      "tests/unit/test_review_feedback_projection.py",
+      "tests/unit/test_review_feedback_score.py",
+      "tests/unit/test_snapshot_git_bounded.py",
+      "tests/unit/test_telemetry_snapshot.py",
+      "tests/unit/test_verification_plan.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Retire unintegrated tools/analysis peripheral extension and align CI/V1/V2 coverage and mypy gates to core src/aiflow",
+        "impact_scope": [
+          "tools/analysis/**",
+          "pyproject.toml",
+          ".github/workflows/ai-quality-gate.yml",
+          "tools/ci/check_coverage.py",
+          "src/aiflow/verification.py",
+          ".ai/policy/verification-levels.yaml",
+          "docs/operations/quickstart.md",
+          "tests/integration/test_approval_overhead.py",
+          "tests/integration/test_repository_readiness.py",
+          "tests/integration/test_acceptance_traceability.py",
+          "tests/integration/test_coverage_gates.py",
+          "tests/integration/test_github_workflow.py",
+          "tests/unit/test_benchmark_reference.py",
+          "tests/unit/test_check_coverage.py",
+          "tests/unit/test_confidence_availability.py",
+          "tests/unit/test_feedback_text.py",
+          "tests/unit/test_policy.py",
+          "tests/unit/test_pr_feedback.py",
+          "tests/unit/test_pr_feedback_followups.py",
+          "tests/unit/test_review_advisory.py",
+          "tests/unit/test_review_detection.py",
+          "tests/unit/test_review_detection_analysis.py",
+          "tests/unit/test_review_detection_input.py",
+          "tests/unit/test_review_detection_sources.py",
+          "tests/unit/test_review_feedback.py",
+          "tests/unit/test_review_feedback_calibration.py",
+          "tests/unit/test_review_feedback_projection.py",
+          "tests/unit/test_review_feedback_score.py",
+          "tests/unit/test_snapshot_git_bounded.py",
+          "tests/unit/test_telemetry_snapshot.py",
+          "tests/unit/test_verification_plan.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/verification-levels.yaml",
+        ".ai/tasks/TASK-0156/approvals.json",
+        ".ai/tasks/TASK-0156/classification.json",
+        ".ai/tasks/TASK-0156/events.jsonl",
+        ".ai/tasks/TASK-0156/review-contexts/c45b87669e5f4d2d9d902e502807c9bcf610ab84c493bfdf31b46223d7926b44.json",
+        ".ai/tasks/TASK-0156/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0156/spec.md",
+        ".ai/tasks/TASK-0156/task.yaml",
+        ".github/workflows/ai-quality-gate.yml",
+        "docs/operations/quickstart.md",
+        "pyproject.toml",
+        "src/aiflow/verification.py",
+        "tests/integration/test_acceptance_traceability.py",
+        "tests/integration/test_approval_overhead.py",
+        "tests/integration/test_coverage_gates.py",
+        "tests/integration/test_github_workflow.py",
+        "tests/integration/test_repository_readiness.py",
+        "tests/unit/test_benchmark_reference.py",
+        "tests/unit/test_check_coverage.py",
+        "tests/unit/test_confidence_availability.py",
+        "tests/unit/test_feedback_text.py",
+        "tests/unit/test_policy.py",
+        "tests/unit/test_pr_feedback.py",
+        "tests/unit/test_pr_feedback_followups.py",
+        "tests/unit/test_review_advisory.py",
+        "tests/unit/test_review_detection.py",
+        "tests/unit/test_review_detection_analysis.py",
+        "tests/unit/test_review_detection_input.py",
+        "tests/unit/test_review_detection_sources.py",
+        "tests/unit/test_review_feedback.py",
+        "tests/unit/test_review_feedback_calibration.py",
+        "tests/unit/test_review_feedback_projection.py",
+        "tests/unit/test_review_feedback_score.py",
+        "tests/unit/test_snapshot_git_bounded.py",
+        "tests/unit/test_telemetry_snapshot.py",
+        "tests/unit/test_verification_plan.py",
+        "tools/analysis/approval_overhead.py",
+        "tools/analysis/benchmark_reference.py",
+        "tools/analysis/pr_feedback.py",
+        "tools/analysis/repository_readiness.py",
+        "tools/analysis/review_advisory.py",
+        "tools/analysis/review_detection.py",
+        "tools/analysis/review_detection_analysis.py",
+        "tools/analysis/review_detection_input.py",
+        "tools/analysis/review_detection_sources.py",
+        "tools/analysis/review_feedback.py",
+        "tools/analysis/review_feedback_simulation.py",
+        "tools/ci/check_coverage.py"
+      ],
+      "files": [
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 10,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0156/approvals.json"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0156/classification.json"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0156/events.jsonl"
+        },
+        {
+          "additions": 95,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0156/review-contexts/c45b87669e5f4d2d9d902e502807c9bcf610ab84c493bfdf31b46223d7926b44.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0156/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 87,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0156/spec.md"
+        },
+        {
+          "additions": 124,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0156/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".github/workflows/ai-quality-gate.yml"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 9,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "pyproject.toml"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 4,
+          "path": "tests/integration/test_acceptance_traceability.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 559,
+          "path": "tests/integration/test_approval_overhead.py"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 33,
+          "path": "tests/integration/test_coverage_gates.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_github_workflow.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 465,
+          "path": "tests/integration/test_repository_readiness.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 620,
+          "path": "tests/unit/test_benchmark_reference.py"
+        },
+        {
+          "additions": 59,
+          "binary": false,
+          "deletions": 76,
+          "path": "tests/unit/test_check_coverage.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 777,
+          "path": "tests/unit/test_confidence_availability.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 305,
+          "path": "tests/unit/test_feedback_text.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/unit/test_policy.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1010,
+          "path": "tests/unit/test_pr_feedback.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 841,
+          "path": "tests/unit/test_pr_feedback_followups.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1031,
+          "path": "tests/unit/test_review_advisory.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 387,
+          "path": "tests/unit/test_review_detection.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 829,
+          "path": "tests/unit/test_review_detection_analysis.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 876,
+          "path": "tests/unit/test_review_detection_input.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1416,
+          "path": "tests/unit/test_review_detection_sources.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 991,
+          "path": "tests/unit/test_review_feedback.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 662,
+          "path": "tests/unit/test_review_feedback_calibration.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 459,
+          "path": "tests/unit/test_review_feedback_projection.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 814,
+          "path": "tests/unit/test_review_feedback_score.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 325,
+          "path": "tests/unit/test_snapshot_git_bounded.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 971,
+          "path": "tests/unit/test_telemetry_snapshot.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 3,
+          "path": "tests/unit/test_verification_plan.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 1210,
+          "path": "tools/analysis/approval_overhead.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 222,
+          "path": "tools/analysis/benchmark_reference.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 690,
+          "path": "tools/analysis/pr_feedback.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 327,
+          "path": "tools/analysis/repository_readiness.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 326,
+          "path": "tools/analysis/review_advisory.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 114,
+          "path": "tools/analysis/review_detection.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 259,
+          "path": "tools/analysis/review_detection_analysis.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 424,
+          "path": "tools/analysis/review_detection_input.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 263,
+          "path": "tools/analysis/review_detection_sources.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 262,
+          "path": "tools/analysis/review_feedback.py"
+        },
+        {
+          "additions": 0,
+          "binary": false,
+          "deletions": 540,
+          "path": "tools/analysis/review_feedback_simulation.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "tools/ci/check_coverage.py"
+        }
+      ],
+      "totals": {
+        "additions": 501,
+        "deletions": 18119,
+        "files": 48
+      }
+    },
+    "goal": "Retire unintegrated tools/analysis peripheral extension and align CI/V1/V2 coverage and mypy gates to core src/aiflow",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0156",
+        "--actor",
+        "verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "7c98c36d708fd2b1e49c5b27b420080dc64dc1b292dcc24bb70f65a004076970",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "c18208f37247f54f932aaae3b8d7b4b5462733b0e9949656dc0d821150c9f8be",
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "078491d3d06793205544f8f8372f1c062ec39e57efdea259dee1f2e5d1ad7323",
+  "subject_commit": "e112514570fff25f45003ad628eb69a872b33b27",
+  "task_id": "TASK-0156"
+}

@@ -261,7 +261,6 @@ def _require_output_semantics(
             "-m",
             "pytest",
             "--cov=aiflow",
-            "--cov=tools/analysis",
             "--cov-branch",
             f"--cov-report=xml:{(run_dir / 'coverage.xml').as_posix()}",
         )
