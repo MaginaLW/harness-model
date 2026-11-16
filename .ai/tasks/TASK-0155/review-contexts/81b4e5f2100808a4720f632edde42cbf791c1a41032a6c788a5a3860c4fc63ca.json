@@ -1,0 +1,47 @@
+{
+  "base_commit": "b489233a26c31e193929c5d1973eae36571ba058",
+  "branch": "codex/core-git-and-status-consolidation",
+  "classification_input_sha256": "9048a4a6b08272460e445831d02afb071098525dbfa58a70b5f2484336ca753f",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/git_context.py",
+      "src/aiflow/scope.py",
+      "src/aiflow/gate.py",
+      "src/aiflow/status_service.py",
+      "tests/unit/test_git_context.py",
+      "tests/integration/test_status_command.py",
+      "tests/integration/test_gate_parity.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Eliminate redundant Git subprocesses and unify status_service and gate V2, policy, and scope freshness checks",
+        "impact_scope": [
+          "src/aiflow/git_context.py",
+          "src/aiflow/scope.py",
+          "src/aiflow/gate.py",
+          "src/aiflow/status_service.py",
+          "tests/unit/test_git_context.py",
+          "tests/integration/test_status_command.py",
+          "tests/integration/test_gate_parity.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Eliminate redundant Git subprocesses and unify status_service and gate V2, policy, and scope freshness checks",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "81b4e5f2100808a4720f632edde42cbf791c1a41032a6c788a5a3860c4fc63ca",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "6124fbf839cfcbda8465992bc8ab33058cb8a03613852f1d90cbfca049185c9a",
+  "task_id": "TASK-0155"
+}

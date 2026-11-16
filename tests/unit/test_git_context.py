@@ -803,3 +803,144 @@ def test_aggregate_failure_replays_original_head_branch_error_priority(
         assert caught.value.details["command"] == calls[1]
         assert caught.value.details["returncode"] == 1
     assert "private error" not in str(caught.value.to_dict())
+
+
+def test_task_numbers_in_refs_batches_many_branches_within_three_calls(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    run_git(repository, "switch", "-c", "no-tasks")
+    (repository / "plain.txt").write_text("no tasks here\n", encoding="utf-8")
+    _commit_all(repository, "branch without tasks")
+    no_tasks_head = run_git(repository, "rev-parse", "HEAD")
+    for idx in range(1, 8):
+        run_git(repository, "branch", f"plain-{idx:02d}", no_tasks_head)
+
+    expected: set[int] = set()
+    for idx in range(1, 20):
+        run_git(repository, "switch", "-c", f"task-{idx:02d}", "main")
+        number = 100 + idx
+        expected.add(number)
+        task_dir = repository / ".ai" / "tasks" / f"TASK-{number:04d}"
+        task_dir.mkdir(parents=True)
+        (task_dir / "task.yaml").write_text("{}\n", encoding="utf-8")
+        _commit_all(repository, f"add TASK-{number:04d}")
+    run_git(repository, "switch", "main")
+
+    calls: list[tuple[str, ...]] = []
+    real_run = git_context.subprocess.run
+
+    def counting_run(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        calls.append(tuple(arguments[1:]))
+        return real_run(arguments, **kwargs)
+
+    monkeypatch.setattr(git_context.subprocess, "run", counting_run)
+
+    observed = task_numbers_in_refs(repository)
+
+    assert observed == frozenset(expected)
+    assert len(calls) <= 3
+    assert calls[0][0] == "for-each-ref"
+    assert calls[1] == ("cat-file", "--batch")
+
+    unborn = tmp_path / "empty-repo"
+    unborn.mkdir()
+    run_git(unborn, "init", "-b", "main")
+    assert task_numbers_in_refs(unborn) == frozenset()
+
+
+@pytest.mark.parametrize(
+    ("mode", "payload"),
+    [
+        ("timeout_refs", b""),
+        ("timeout_batch", b""),
+        ("batch_failed", b""),
+        ("invalid_oid", b"not-a-commit\n"),
+        ("truncated_count", b""),
+        ("incomplete_cat_header", b"a" * 40 + b" tree 0"),
+        ("bad_cat_header", b"only two\n"),
+        ("bad_cat_oid", b"zzzzzzzz tree 0\n\n"),
+        ("truncated_payload", b"a" * 40 + b" tree 99\n40000 TASK-0001\x00"),
+        ("bad_tree", b"a" * 40 + b" tree 5\n12345\n"),
+        ("bad_tree_mode", b"a" * 40 + b" tree 30\nmode TASK-0001\x00" + b"\x00" * 20 + b"\n"),
+        ("bad_tree_entry", b"a" * 40 + b" tree 7\n40000 \x00\n"),
+    ],
+)
+def test_task_numbers_in_refs_fails_closed_on_timeout_and_corrupt_streams(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mode: str,
+    payload: bytes,
+) -> None:
+    def fake_run(arguments: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        cmd = arguments[1]
+        if cmd == "for-each-ref":
+            if mode == "timeout_refs":
+                raise subprocess.TimeoutExpired(arguments, GIT_TIMEOUT_SECONDS)
+            stdout = payload if mode == "invalid_oid" else (b"a" * 40 + b"\n")
+            return subprocess.CompletedProcess(arguments, 0, stdout=stdout, stderr=b"")
+        assert cmd == "cat-file"
+        if mode == "timeout_batch":
+            raise subprocess.TimeoutExpired(arguments, GIT_TIMEOUT_SECONDS)
+        if mode == "batch_failed":
+            return subprocess.CompletedProcess(arguments, 1, stdout=b"", stderr=b"bad cat-file")
+        return subprocess.CompletedProcess(arguments, 0, stdout=payload, stderr=b"")
+
+    monkeypatch.setattr(git_context.subprocess, "run", fake_run)
+
+    with pytest.raises(AiflowError) as caught:
+        task_numbers_in_refs(tmp_path)
+    assert caught.value.code == "GIT_TASK_REFS_UNAVAILABLE"
+
+
+def test_collect_git_context_worktree_scope_paths_includes_rename_source_and_scope_reuses_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aiflow import scope
+
+    repository = create_repository(tmp_path / "repository")
+    run_git(repository, "mv", "tracked.txt", "renamed.txt")
+    context = collect_git_context(repository)
+
+    assert context.dirty_paths == ("renamed.txt",)
+    assert context.worktree_scope_paths == ("renamed.txt", "tracked.txt")
+
+    def forbid_status(*_args: Any, **_kwargs: Any) -> bytes:
+        raise AssertionError("collect_changed_paths should reuse worktree_paths without git status")
+
+    monkeypatch.setattr(scope, "_status_paths", forbid_status)
+    changed = scope.collect_changed_paths(
+        repository,
+        base_commit=context.head,
+        subject_commit=context.head,
+        head_commit=context.head,
+        worktree_paths=context.worktree_scope_paths,
+    )
+    assert changed.paths == ("renamed.txt", "tracked.txt")
+
+
+def test_commits_are_ancestral_short_circuits_identical_commits_and_rejects_invalid_sha(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    h0 = "1" * 40
+    h1 = "2" * 40
+    calls: list[tuple[str, ...]] = []
+
+    def fake_run(arguments: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        calls.append(tuple(arguments[1:]))
+        return subprocess.CompletedProcess(arguments, 0, stdout=b"", stderr=b"")
+
+    monkeypatch.setattr(git_context.subprocess, "run", fake_run)
+
+    assert git_context.commits_are_ancestral(
+        tmp_path, base_commit=h0, subject_commit=h0, head_commit=h1
+    )
+    assert len(calls) == 1
+    assert git_context.commits_are_ancestral(
+        tmp_path, base_commit=h0, subject_commit=h1, head_commit=h1
+    )
+    assert len(calls) == 2
+    assert not git_context.commits_are_ancestral(
+        tmp_path, base_commit="bad", subject_commit="bad", head_commit=h1
+    )
+    assert len(calls) == 2

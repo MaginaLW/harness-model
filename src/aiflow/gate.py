@@ -16,7 +16,7 @@ from aiflow.evidence import V2_FINAL, V2_PRE_IMPLEMENTATION_REVIEW, validate_v2_
 from aiflow.freshness import current_classification_input_digest, evaluate_freshness
 from aiflow.git_context import collect_git_context, commits_are_ancestral
 from aiflow.mutation_evidence import consume_targeted_mutation_evidence
-from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
+from aiflow.policy import PolicyBundle, is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.review_service import latest_review_assessment
 from aiflow.routing import ROUTE_ORDER, entry_requires_ask, route_task
 from aiflow.scope import (
@@ -360,6 +360,62 @@ def _v2_gate_facts(
     return result
 
 
+def classification_matches_policy(
+    task: Mapping[str, Any], classification: Mapping[str, Any], policy: PolicyBundle
+) -> bool:
+    """Return whether persisted classification routing and verification still match Policy."""
+    recomputed_routes = route_task(task, policy)
+    recomputed_verification = verification_for_task(task, policy)
+    route_by_id = {
+        decision.decision_unit_id: decision.effective_route
+        for decision in recomputed_routes.unit_decisions
+    }
+    verification_by_id = {
+        decision.decision_unit_id: decision.level
+        for decision in recomputed_verification.unit_decisions
+    }
+    entries = classification.get("classifications")
+    if not isinstance(entries, list):
+        raise ContractError("Gate classification is invalid", code="GATE_INPUT_INVALID")
+    entry_ids = {
+        str(entry.get("decision_unit_id")) for entry in entries if isinstance(entry, Mapping)
+    }
+    return (
+        recomputed_routes.effective_route == classification.get("effective_route")
+        and recomputed_verification.level == classification.get("effective_verification_level")
+        and len(entries) == len(entry_ids)
+        and entry_ids == set(route_by_id) == set(verification_by_id)
+        and all(
+            isinstance(entry, Mapping)
+            and route_by_id.get(str(entry.get("decision_unit_id"))) == entry.get("route")
+            and verification_by_id.get(str(entry.get("decision_unit_id")))
+            == entry.get("verification_level")
+            for entry in entries
+        )
+    )
+
+
+def policy_v2_checks(policy: PolicyBundle) -> list[Mapping[str, object]]:
+    """Return configured V2 checks from the loaded policy verification levels."""
+    verification_levels = policy.documents.get("verification-levels.yaml")
+    levels = verification_levels.get("levels") if isinstance(verification_levels, Mapping) else None
+    if not isinstance(levels, list):
+        return []
+    v2_checks: object = next(
+        (
+            level.get("checks")
+            for level in levels
+            if isinstance(level, Mapping) and level.get("id") == "V2"
+        ),
+        [],
+    )
+    return (
+        [check for check in v2_checks if isinstance(check, Mapping)]
+        if isinstance(v2_checks, list)
+        else []
+    )
+
+
 def evaluate_gate(
     repository_root: Path, task_id: str, *, evidence_path: Path | None = None
 ) -> GateDecision:
@@ -403,7 +459,11 @@ def evaluate_gate(
     if not isinstance(subject, str) or not isinstance(base, str):
         raise ContractError("Gate Git binding is invalid", code="GATE_INPUT_INVALID")
     changes = collect_verification_changed_paths(
-        root, base_commit=base, subject_commit=subject, head_commit=context.head
+        root,
+        base_commit=base,
+        subject_commit=subject,
+        head_commit=context.head,
+        worktree_paths=getattr(context, "worktree_scope_paths", None),
     )
     allowed_scope = task.get("allowed_scope")
     if not isinstance(allowed_scope, list) or not all(
@@ -436,38 +496,10 @@ def evaluate_gate(
         "governance_only": governance_scope.passed,
         "attestation_governance_only": governance_scope.passed,
     }
-    classification_current = (
-        evaluate_freshness("classification", classification, current).status == "fresh"
-    )
-    recomputed_routes = route_task(task, policy)
-    recomputed_verification = verification_for_task(task, policy)
-    route_by_id = {
-        decision.decision_unit_id: decision.effective_route
-        for decision in recomputed_routes.unit_decisions
-    }
-    verification_by_id = {
-        decision.decision_unit_id: decision.level
-        for decision in recomputed_verification.unit_decisions
-    }
-    entries = classification.get("classifications")
-    if not isinstance(entries, list):
-        raise ContractError("Gate classification is invalid", code="GATE_INPUT_INVALID")
-    entry_ids = {
-        str(entry.get("decision_unit_id")) for entry in entries if isinstance(entry, Mapping)
-    }
-    classification_current = classification_current and (
-        recomputed_routes.effective_route == classification.get("effective_route")
-        and recomputed_verification.level == classification.get("effective_verification_level")
-        and len(entries) == len(entry_ids)
-        and entry_ids == set(route_by_id) == set(verification_by_id)
-        and all(
-            isinstance(entry, Mapping)
-            and route_by_id.get(str(entry.get("decision_unit_id"))) == entry.get("route")
-            and verification_by_id.get(str(entry.get("decision_unit_id")))
-            == entry.get("verification_level")
-            for entry in entries
-        )
-    )
+    classification_current = evaluate_freshness(
+        "classification", classification, current
+    ).status == "fresh" and classification_matches_policy(task, classification, policy)
+    entries = classification["classifications"]
     local_evidence = _read_local_evidence(root, task_id)
     external_evidence = (
         _read_external_evidence(evidence_path) if evidence_path is not None else None
@@ -497,27 +529,13 @@ def evaluate_gate(
     )
     v2_facts: dict[str, bool] = {}
     if classification.get("effective_verification_level") == "V2":
-        levels = policy.documents["verification-levels.yaml"].get("levels")
-        v2_checks: object = (
-            next(
-                (
-                    level.get("checks")
-                    for level in levels
-                    if isinstance(level, Mapping) and level.get("id") == "V2"
-                ),
-                [],
-            )
-            if isinstance(levels, list)
-            else []
-        )
+        v2_policy_checks = policy_v2_checks(policy)
         local_v2_facts = _v2_gate_facts(
             root,
             task_id,
             local_evidence,
             events=record.events,
-            policy_checks=[check for check in v2_checks if isinstance(check, Mapping)]
-            if isinstance(v2_checks, list)
-            else [],
+            policy_checks=v2_policy_checks,
             decision_unit_ids=sorted(expected_ids),
             node_facts=node_facts,
         )
@@ -532,9 +550,7 @@ def evaluate_gate(
                 task_id,
                 external_evidence,
                 events=record.events,
-                policy_checks=[check for check in v2_checks if isinstance(check, Mapping)]
-                if isinstance(v2_checks, list)
-                else [],
+                policy_checks=v2_policy_checks,
                 decision_unit_ids=sorted(expected_ids),
                 review_stages=("design",),
             )
@@ -592,6 +608,10 @@ def evaluate_gate(
         isinstance(entry, Mapping) and entry.get("route") == "BLOCK" for entry in entries
     )
     unfinished_units = [unit for unit in units if unit.get("completed") is not True]
+    route_by_id = {
+        decision.decision_unit_id: decision.effective_route
+        for decision in route_task(task, policy).unit_decisions
+    }
     unfinished_routes = tuple(
         route_by_id.get(str(unit["decision_unit_id"]), "BLOCK") for unit in unfinished_units
     )

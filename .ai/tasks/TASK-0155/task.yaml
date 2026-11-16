@@ -1,0 +1,75 @@
+allowed_scope:
+- src/aiflow/git_context.py
+- src/aiflow/scope.py
+- src/aiflow/gate.py
+- src/aiflow/status_service.py
+- tests/unit/test_git_context.py
+- tests/integration/test_status_command.py
+- tests/integration/test_gate_parity.py
+base_commit: b489233a26c31e193929c5d1973eae36571ba058
+branch: codex/core-git-and-status-consolidation
+created_at: '2026-11-15T16:01:26Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Eliminate redundant Git subprocesses and unify status_service and gate V2,
+    policy, and scope freshness checks
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/git_context.py
+  - src/aiflow/scope.py
+  - src/aiflow/gate.py
+  - src/aiflow/status_service.py
+  - tests/unit/test_git_context.py
+  - tests/integration/test_status_command.py
+  - tests/integration/test_gate_parity.py
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0155
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 6124fbf839cfcbda8465992bc8ab33058cb8a03613852f1d90cbfca049185c9a
+goal: Eliminate redundant Git subprocesses and unify status_service and gate V2, policy,
+  and scope freshness checks
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-15T17:25:00Z'
+subject_commit: 86f3c053afe051fae39e4372a18bf458a0236e5d
+task_id: TASK-0155
+updated_at: '2026-11-15T18:14:34Z'
+worktree_dirty: false
+worktree_dirty_paths: []
