@@ -116,9 +116,9 @@ goal: Retire unintegrated tools/analysis peripheral extension and align CI/V1/V2
   and mypy gates to core src/aiflow
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-16T14:31:38Z'
-subject_commit: a376ad4c94b6608e9a2a492f3f870e456be2618e
+spec_frozen_at: '2026-11-16T14:48:52Z'
+subject_commit: e112514570fff25f45003ad628eb69a872b33b27
 task_id: TASK-0156
-updated_at: '2026-11-16T14:38:54Z'
+updated_at: '2026-11-16T14:50:25Z'
 worktree_dirty: false
 worktree_dirty_paths: []

@@ -11,5 +11,18 @@
     "spec_sha256": "078491d3d06793205544f8f8372f1c062ec39e57efdea259dee1f2e5d1ad7323",
     "subject_commit": "a376ad4c94b6608e9a2a492f3f870e456be2618e",
     "task_id": "TASK-0156"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-16T14:50:24Z",
+    "base_commit": "a376ad4c94b6608e9a2a492f3f870e456be2618e",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权及项目所有者 A02 明确批准：当前 Policy 2.6.0 新 SHA 绑定下独立设计审核 REV-0002 为 APPROVE 且无发现，继续执行验证。",
+    "schema_version": "1.0",
+    "spec_sha256": "078491d3d06793205544f8f8372f1c062ec39e57efdea259dee1f2e5d1ad7323",
+    "subject_commit": "e112514570fff25f45003ad628eb69a872b33b27",
+    "task_id": "TASK-0156"
   }
 ]

@@ -1,10 +1,10 @@
 {
   "base_commit": "a376ad4c94b6608e9a2a492f3f870e456be2618e",
   "change_reason": "unchanged",
-  "classification_input_sha256": "e22b985e0e083c41648b7edabd0ea63ca3ac602b94593e03889340af837228e2",
+  "classification_input_sha256": "d54ef3321591c0177f24b00e3102e9858bfc556e30b6910c2d7f0721fd57e00a",
   "classifications": [
     {
-      "classified_at": "2026-11-16T14:31:38Z",
+      "classified_at": "2026-11-16T14:48:51Z",
       "decision_unit_id": "DU-001",
       "explanation": "CI or CD behavior changes require review.",
       "explanations": [
@@ -31,7 +31,7 @@
           "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE"
         }
       ],
-      "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+      "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
       "policy_version": "2.6.0",
       "route": "REVIEW",
       "rule_id": "HARD-REVIEW-CI-CD",
@@ -53,12 +53,12 @@
       ]
     }
   ],
-  "classified_at": "2026-11-16T14:31:38Z",
+  "classified_at": "2026-11-16T14:48:51Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V1",
-  "policy_sha256": "fac8afbe8e1f671338eadc02697a66a3c6aa9ca5494eb25ea97b80812bce4727",
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
   "policy_version": "2.6.0",
   "schema_version": "1.0",
-  "subject_commit": "a376ad4c94b6608e9a2a492f3f870e456be2618e",
+  "subject_commit": "e112514570fff25f45003ad628eb69a872b33b27",
   "task_id": "TASK-0156"
 }
