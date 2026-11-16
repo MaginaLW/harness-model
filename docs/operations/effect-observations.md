@@ -6,6 +6,8 @@
 
 ## 可重放的起点
 
+> 注：`tools/analysis/approval_overhead.py` 已随 PR #166（`TASK-0156`）从活跃 `main` 退场。本页下列 `approval_overhead.py` 命令均为**固定历史提交的隔离检出重放口令**（`8ee402d1be781d94a73b215a225837c77ef8d1c8` 对应下表基线，`75cb3198daf02ebd440097dc4b127460a314fd00` 对应 `--snapshot` / `--availability` 覆盖参考），不应在当前活跃 `HEAD` 直接执行该路径；当前活跃任务状态统一通过 `python -m aiflow status <TASK-ID>` 查询。
+
 固定基线与统计工具版本均为 `8ee402d1be781d94a73b215a225837c77ef8d1c8`，
 已包含 PR #31 的修复与 PR #32 的关闭记录。在该版本的独立、干净检出中运行：
 
@@ -33,14 +35,14 @@ JSON 按工具原始单行输出、UTF-8、一个 LF 结尾归一化后的 SHA-2
 
 ## 固定提交的事实快照
 
-同一工具提供可选的只读快照；原有默认 text/json 账本统计格式保持不变：
+在固定历史提交（如 `75cb3198daf02ebd440097dc4b127460a314fd00`）的独立检出中，同一历史工具提供可选的只读快照；原有默认 text/json 账本统计格式保持不变：
 
 ```sh
 python tools/analysis/approval_overhead.py --snapshot --format text
 python tools/analysis/approval_overhead.py --snapshot --format json
 ```
 
-当前工具的 JSON 使用 ASCII 转义，解码后字段和原文字保持不变；默认 text 仅将当前输出编码无法表示的字符转义，正常 UTF-8 文本保持原样。上文历史版本的原始输出与 hash 仍按该固定版本复算。
+该版本工具的 JSON 使用 ASCII 转义，解码后字段和原文字保持不变；默认 text 仅将当前输出编码无法表示的字符转义，正常 UTF-8 文本保持原样。上文历史版本的原始输出与 hash 仍按该固定版本复算。
 
 账本 JSON／YAML／事件行超出解析器整数或嵌套能力时，停止报告并按原文件／行定位返回输入错误；默认统计、快照和可用性模式均不输出 traceback 或部分成功报告。根路径无法解析时也返回固定路径错误，不回显路径或换用其他根重试。错误退出码为 `2`，stdout 为空；这些错误不改变账本、批准或原结果。
 
@@ -84,7 +86,7 @@ REQUEST_CHANGES 后追加 resolved 不提供独立缺陷真值，也不证明重
 
 ## 四目标证据可用性
 
-同一工具可输出非评分的证据可用性矩阵：
+在对应固定历史提交的独立检出中，同一历史工具可输出非评分的证据可用性矩阵：
 
 ```sh
 python tools/analysis/approval_overhead.py --availability --format text

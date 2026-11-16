@@ -18,31 +18,11 @@
 
 ## 先做只读盘点
 
-在可信的 harness-model 检出中运行，使用 Python 3.11+ 和 Git，不要求在目标项目安装 aiflow：
+历史独立盘点脚本 `tools/analysis/repository_readiness.py` 已随 PR #166（`TASK-0156`）退场（仅保留在 `3f51bd04` 之前的 Git 历史中）。接入新项目前，改为由 Agent 在已授权的目标工作区范围内以只读方式核对：
 
-```powershell
-# 从 harness-model 根目录运行；把占位符换成目标项目或其中一个子目录。
-.\.venv\Scripts\python.exe -I -B tools/analysis/repository_readiness.py --repo "<TARGET_REPO>" --format text
-```
-
-```sh
-.venv/bin/python -I -B tools/analysis/repository_readiness.py --repo "<TARGET_REPO>" --format json
-```
-
-工具仅盘点本地 Git 状态和有限的常见入口，不输出配置正文、不运行目标项目代码、
-Hook 或测试，不安装或写入文件，不调用模型或网络。它不是安全沙箱：目标 Git 配置
-仍可能影响 Git 自身的读取行为，应使用可信 Git 与获准检查的本地仓库。
-输出包含本地路径，只供本地判断；不要将原始输出、身份、路径或配置内容直接提交。
-
-JSON 使用 ASCII 转义，解码后保留原路径、分支和其他文字，兼容受限的管道编码。text 按当前输出编码显示；无法表示的字符使用反斜杠转义，正常 UTF-8 文本保持原样。需要精确原值时读取并解码 JSON，不把 text 中的转义文字直接作为路径。
-
-退出码 `0` 只表示盘点完成，不是准入、质量通过或动作授权；`2` 表示盘点失败。
-存在指令、CI 目录或 `.ai` 资产也不证明它们有效、已被 Agent 加载或远端保护已启用。
-工具不扫描所有嵌套规则和自定义 CI，不判断付费权限，也不自动选择验证命令。
-请传入不含 `..` 的直接路径；目录链接或重解析点会被拒绝，固定入口中的链接只标记而不跟随。
-Git 盘点隔离用户级/系统级配置，不包含子模块内部脏状态，因此不是日常 Git 状态的完整替代。
-若本地、include 或 worktree 配置包含 clean/process filter，工具只查键名，跳过状态计算，
-将脏状态标为 `unknown`，避免只读检查意外运行过滤器；它不会把未知当作干净。
+- 本地 Git 工作区根目录、`HEAD` 提交与现有分支/工作树状态（不更改文件或运行未受信任的 clean/process filter、Hook 或外部安装命令）；
+- 目标仓已有指令入口（如 `AGENTS.md`）、CI 配置及现有质量检查/测试命令；
+- 若目标仓已存在 `.ai/` 引擎目录，可使用内置只读命令 `python -m aiflow init inspect` 查看安装布局与版本状态。
 
 随后由 Agent 在已授权的目标范围内阅读相关规则与 CI，确认三个事实：
 实际工作区根目录、可执行的原有质量命令、哪些动作确实需要人类决定。
