@@ -1,6 +1,6 @@
 # 本仓审核结果回读
 
-`tools/analysis/review_feedback.py` 从固定 tracked `HEAD` 的正式账本原件，汇总审核修订、Finding 状态和已有验证结果，支持追加机器审核后的事实反馈。它复用[事实快照](effect-observations.md#固定提交的事实快照)的 Git 白名单，不读 PR、会话或私密来源，不新增采集器或结果库。Task-free 来源另由[公开 PR 反馈回读](pr-feedback.md)支持，并可形成下一轮非评分核对问题；其 v2 块还可显式关联 Finding、作者处置、修复候选和复核声明，不改本工具的来源或未知字段。真实模型分数更新及自动审核安排尚未实现；另有[合成反馈演练](review-feedback-simulation.md)，不构成真实评分反馈闭环。
+`tools/analysis/review_feedback.py` 从固定 tracked `HEAD` 的正式账本原件，汇总审核修订、Finding 状态和已有验证结果，支持追加机器审核后的事实反馈。它复用[事实快照](../../operations/effect-observations.md#固定提交的事实快照)的 Git 白名单，不读 PR、会话或私密来源，不新增采集器或结果库。Task-free 来源另由[公开 PR 反馈回读](pr-feedback.md)支持，并可形成下一轮非评分核对问题；其 v2 块还可显式关联 Finding、作者处置、修复候选和复核声明，不改本工具的来源或未知字段。真实模型分数更新及自动审核安排尚未实现；另有[合成反馈演练](review-feedback-simulation.md)，不构成真实评分反馈闭环。
 
 ## 使用
 
@@ -32,7 +32,7 @@ python -B tools/analysis/review_feedback.py --task TASK-0077 --reference-input d
 
 按 `task_id + review_id` 保留每一份已观测修订；同一审核内按 `finding_id` 关联 Finding 的已观测状态，跨审核的同名 Finding 不自动合并。每个版本的原 outcome、严重度、状态、时间及来源分别保留。`observed_first_revision`、`observed_latest_revision` 只表示当前固定提交能读到的首次与末次，不证明全历史起点或完整性。
 
-原生 `resolve` 只改变 Finding 状态并追加 review 修订，不把原 `REQUEST_CHANGES` 改成 `APPROVE`。例如 TASK-0077 的 REV-0001：r0001 的 RF-001 为 open，r0002 为 resolved，两份 outcome 均为 REQUEST_CHANGES。报告应保留两份原件，不能据 resolved 宣称审核通过、修复成功或任务解除阻断；后继 TASK-0078 的结果也不能覆盖它。固定历史来源例子见[数据合同](../superpowers/specs/readonly-confidence-data-contract.md#6-固定来源链例子task-0077--task-0078)。
+原生 `resolve` 只改变 Finding 状态并追加 review 修订，不把原 `REQUEST_CHANGES` 改成 `APPROVE`。例如 TASK-0077 的 REV-0001：r0001 的 RF-001 为 open，r0002 为 resolved，两份 outcome 均为 REQUEST_CHANGES。报告应保留两份原件，不能据 resolved 宣称审核通过、修复成功或任务解除阻断；后继 TASK-0078 的结果也不能覆盖它。固定历史来源例子见[数据合同](../../superpowers/specs/readonly-confidence-data-contract.md#6-固定来源链例子task-0077--task-0078)。
 
 `review_histories` 按审核列出 `observed_revisions` 与 `history_issues`，修订缺号、同一审核 stage/context 变化在有无 Finding 时均保留。`finding_histories` 继续列各 Finding 的状态观察及严重度变化、重开或某修订缺少已有 Finding 等异常。异常与原值一起保留，不把缺号补齐、把消失当解决、把末次结果回填到前次。没有异常也不认证全历史完整；当前 evidence 与历史尝试的对应仍按原快照保留未知。
 
@@ -54,4 +54,4 @@ python -B tools/analysis/review_feedback.py --task TASK-0077 --reference-input d
 
 当前维持 `method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`，无权限或账本效果；route、Gate、CI、批准和原审核流程继续按现行规则执行。只读回读属于 S0/S1 事实准备，其普通源码实施按现行维护授权完成；生产概率、真实评分 shadow 或策略接入的 3-A/S2–S4 条件不成为这份非评分摘要的额外逐次审批。
 
-结果可帮助协调者识别尚缺哪个来源、哪些原失败仍需保留、下一份具体专项问题应核对什么。再按[专项审核流程](../superpowers/specs/supplemental-machine-review.md)引用原候选、处理与复核；未来评分更新和实际安排须有可用身份、目标/机会集或真值、相关组、质量及用途规则支持。没有这些事实时继续描述观察与缺口，不宣称额外审核降低返工、人工成本或缺陷率。
+结果可帮助协调者识别尚缺哪个来源、哪些原失败仍需保留、下一份具体专项问题应核对什么。再按[专项审核流程](../../superpowers/specs/supplemental-machine-review.md)引用原候选、处理与复核；未来评分更新和实际安排须有可用身份、目标/机会集或真值、相关组、质量及用途规则支持。没有这些事实时继续描述观察与缺口，不宣称额外审核降低返工、人工成本或缺陷率。

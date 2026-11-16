@@ -1,6 +1,6 @@
 # 真实观察来源声明的离线输入合同
 
-状态：`review-detection-input-v0.1`。本合同承接[已采用的有限研究范围](review-detection-admission.md)与[准备流程](../../operations/review-detection-preparation.md)，定义来源声明的机械校验、原值回读和缺口汇总。它允许描述真实来源，但不认证原件、登记合格单位、启动观察或计算真实评分；[数学工具](review-detection-offline.md)仍仅接受 synthetic 计数。
+状态：`review-detection-input-v0.1`。本合同承接[已采用的有限研究范围](review-detection-admission.md)与[准备流程](../../archive/operations/review-detection-preparation.md)，定义来源声明的机械校验、原值回读和缺口汇总。它允许描述真实来源，但不认证原件、登记合格单位、启动观察或计算真实评分；[数学工具](review-detection-offline.md)仍仅接受 synthetic 计数。
 
 ## 1. 接口与固定边界
 

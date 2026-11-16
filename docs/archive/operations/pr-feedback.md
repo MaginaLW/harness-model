@@ -165,7 +165,7 @@ Finding/recheck 引用命中分别为 `matched_reported`，当前 capture 中未
 
 Workflow 来源限于 connector 首页及 PR 触发运行。原行没有可认证的 run head，`requested_commit_sha` 是 `query_reference`，不能据此认证运行原始 head、全部历史或合并提交检查。原 status/conclusion 分别保留；全部已见运行成功仍不证明 required check 集合完整，`required_checks_status=unknown`。
 
-`next_review_questions` 是确定性的非评分准备建议：定位缺失来源与候选绑定、具体未解决的已报告 Finding、检查诊断或尚未结束的运行。每条附对应输入定位和范围；它不执行审核、为积累样本制造新一轮、把未知认作失败，或凭计数选择模型。实际是否追加及其范围继续按[专项审核流程](../superpowers/specs/supplemental-machine-review.md)和当前授权判断。
+`next_review_questions` 是确定性的非评分准备建议：定位缺失来源与候选绑定、具体未解决的已报告 Finding、检查诊断或尚未结束的运行。每条附对应输入定位和范围；它不执行审核、为积累样本制造新一轮、把未知认作失败，或凭计数选择模型。实际是否追加及其范围继续按[专项审核流程](../../superpowers/specs/supplemental-machine-review.md)和当前授权判断。
 
 | 问题 code | 来源中满足的条件与建议范围 |
 |---|---|

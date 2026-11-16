@@ -19,7 +19,7 @@
 
 ## 2. 来源、职责与保存
 
-当前已有[固定 Git 账本回读](../../operations/review-feedback.md)和[公开 PR 回读](../../operations/pr-feedback.md)，但它们输出的是受限原值与声明关联。独立真值、语义匹配、实际身份、审核信息／预算及完整关闭依据没有被自动认证。来源条数、`APPROVE`、`resolved`、修复或 CI 成功不能补成样本或真值。
+当前已有[固定 Git 账本回读](../../archive/operations/review-feedback.md)和[公开 PR 回读](../../archive/operations/pr-feedback.md)，但它们输出的是受限原值与声明关联。独立真值、语义匹配、实际身份、审核信息／预算及完整关闭依据没有被自动认证。来源条数、`APPROVE`、`resolved`、修复或 CI 成功不能补成样本或真值。
 
 采用的获准范围限于本仓**既有可公开 Git／PR 原件**中本研究必要的契约、候选、审核原报告、裁定依据和入口／关闭引用，由协调者维护来源关系与脱敏摘要。Agent 在既有允许范围内承担协调、非作者裁定和匹配职责；没有相应职责与原件就保留缺口，不代为任命新个人或机构。
 
@@ -66,4 +66,4 @@ Agent 在该范围内完成对应实现输入合同、来源／质量条件与 P
 
 当前仍为 `method_status=design_pending`、`probability_status=unestimated`、`execution_allowed=false`，模型评分更新未实现；3-A 真实评分／shadow 与 Phase 3 仍未准入。采用决定也不满足 3-B V3 或 Phase 3 整体退出，不提前启动 Phase 4。
 
-[真实观察准备流程](../../operations/review-detection-preparation.md)将上述已采用规则落实为原件定位、职责移交、可复用声明与不足处理；它不登记真实单位、不设置 `T0/T1`，填写模板或技术审核不提供真实入口事实。
+[真实观察准备流程](../../archive/operations/review-detection-preparation.md)将上述已采用规则落实为原件定位、职责移交、可复用声明与不足处理；它不登记真实单位、不设置 `T0/T1`，填写模板或技术审核不提供真实入口事实。

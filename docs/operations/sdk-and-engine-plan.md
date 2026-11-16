@@ -175,5 +175,5 @@ SDK 单次只读客户端已交付，后续按实际文档需求维护和显式�
 不放松；目标仓保留自己的质量门，不能复制 bootstrap 标记绕过治理。
 
 真实评分、自动审核安排、宿主连接及 Phase 3/4 的准入各自保持原边界。SDK 记录不替代
-[实际输入、独立裁定和预算关闭材料](review-detection-preparation.md)，跨仓初始化也不提供
+[实际输入、独立裁定和预算关闭材料](../archive/operations/review-detection-preparation.md)，跨仓初始化也不提供
 [固定动作可信执行能力](hooks.md)。方案完成、离线通过或外仓 CI 通过都不自动解除暂停。

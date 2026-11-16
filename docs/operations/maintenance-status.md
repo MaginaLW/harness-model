@@ -12,7 +12,7 @@
 
 | 对象 | 固定版本与用途 | 可用结论及限制 |
 |---|---|---|
-| 状态核对基线 | main `94fa84dce452a08e682a838ffd8b1a8d2b84e571`，已含 PR #157 的维护变更与 PR #158 的任务关闭记录。 | 已合并代码与下述候选分开；源码包与安装包不能只按相同版本号互相认证。 |
+| 状态核对基线 | main `3f51bd044cee5a1f2314821474f1df3cbe9e2e2b`（含 PR #157–#166，以及随本轮 PR 关闭的 `TASK-0155` / `TASK-0156` 记录）。 | 已合并代码与下述候选分开；源码包与安装包不能只按相同版本号互相认证。 |
 | 原主根与旧 WIP | `codex/agent-bridge-phased-adoption` / `4ab57ce5b0291ec2841c90782a751c920e284403`；仍属原任务，非本轮写入对象。 | 八个暂存 mutation/schema 文件、TASK-0094/0095/0124 及三份未跟踪建议稿保留。本轮已核对路径和内容校验值；不得整文件覆盖、stash、reset、clean 或当作重复删除。 |
 | 已验收本地候选 | 普通安装候选 `c60b663427e73ca2d551d7a9aca2dc68b443c954`；Stage A 自有治理根。 | 原记录报告本地采用通过，不代表本维护基线含有全部候选代码，也不代表 Stage B 验收。 |
 | source6 发布候选 | `5ce4cbd841a4656d346c9b17938a0b42d5f1d897`；[PR #150](https://github.com/MaginaLW/harness-model/pull/150)。 | 原记录报告 Native、7354 项测试/9 项跳过、变异及源 Gate/CI 通过；本轮未重验，不扩大为 main 或目标消费成功。 |
@@ -27,6 +27,8 @@
 [PR #149](https://github.com/MaginaLW/harness-model/pull/149)已因后继替代而关闭，未合并：只读 Git 保护已由 [PR #151](https://github.com/MaginaLW/harness-model/pull/151)以子进程环境 `GIT_OPTIONAL_LOCKS=0` 交付，LF 修复由 PR #157 交付。旧分支、TASK-0139 的 FAILED 状态、失败原件和缺失验收继续保留；关闭不表示旧候选验收通过，后继证据不能移用于该候选。[PR #150](https://github.com/MaginaLW/harness-model/pull/150)仍打开且未合并，目标 LOCAL、私有 CI 与 combined 验收仍未完成。
 
 [PR #161](https://github.com/MaginaLW/harness-model/pull/161)（合并提交 `5599ad6e`，Ubuntu `ai-quality-gate` 通过）与 [PR #162](https://github.com/MaginaLW/harness-model/pull/162)（合并提交 `5afe908b`，Ubuntu `ai-quality-gate` [run 43676489608](https://github.com/MaginaLW/harness-model/actions/runs/43676489608) 通过）已完成工程克制与低打断规范的两阶段内化，分别合入 [低干预工作方式](low-intervention.md)、[效果观察口径](effect-observations.md)、[项目规则采用示例](../../examples/adoption/project-rules.md)、[AGENTS.md](../../AGENTS.md)、AI Flow 模板及 [ai-flow 技能](../../.agents/skills/ai-flow/SKILL.md)。[TASK-0154](../../.ai/tasks/TASK-0154/task.yaml) 原件保留在合并树中，因本机 Windows `V1` `pytest --cov-branch` 触发 3000s `RUNNER_TIMEOUT`（另预存 `test_incomplete_source_distribution_cannot_build_wheel` 在中文 Windows GBK 解码下失败）而保持 `BLOCKED`（`verification_unavailable`）历史状态，不回填本地 `VERIFIED`；PR #162 已由项目所有者审阅后基于远端 Ubuntu CI 全量通过授权合并，见 [审核包](../../.ai/tasks/TASK-0154/review-package.md)。
+
+[PR #164](https://github.com/MaginaLW/harness-model/pull/164)（合并提交 `509941b9`）、[PR #165](https://github.com/MaginaLW/harness-model/pull/165)（`TASK-0155`，合并提交 `a376ad4c`）与 [PR #166](https://github.com/MaginaLW/harness-model/pull/166)（`TASK-0156`，合并提交 `3f51bd04`）已完成项目瘦身与过度建设治理收口：归档 `15` 篇未引用运维记录与精简 `17` 处 Windows 临时测试夹具，将 `git_context.py` 分支任务检索批量化（`git cat-file --batch`）并统一 `status_service` / `gate` 策略及范围新鲜度校验，正式退场从未接入主引擎的 `11` 个外围 `tools/analysis/*.py` 脚本及 `18` 个专属测试文件（`-18,119` 行，测试套件精简至 `4,742 passed`、`core` 总分支覆盖率 `90% >= 85%`、`diff_coverage >= 90%` 与 `mypy`/`ruff` 门禁阈值不变）。`TASK-0155` 与 `TASK-0156` 均已完成独立设计与实施审核（`APPROVE`）、本地原生 V1 全项通过及远端 `ai-quality-gate` 通过并按 `MERGED` 关闭账本。
 
 ### agent-bridge 阶段 B 当前收尾
 
@@ -45,8 +47,8 @@
 | 能力 | 已有结果 | 尚缺或保持暂停 |
 |---|---|---|
 | Phase 1/2 治理基础 | 确定性分流、版本绑定、结构化审核、V2、独立 verifier、required CI；维护模式以 AGENTS 为准。 | 无 V3、通用命令拦截、OS 沙箱或可信动作执行；批准文字不是运行时强制。 |
-| 非评分准备（S0/S1） | [事实快照](effect-observations.md#固定提交的事实快照)、[正式账本回读](review-feedback.md)、[PR 回读](pr-feedback.md)、[只读建议](review-advisory.md)。 | 来源认证、实际身份、人时/费用、独立真值和原子一致性仍有 unknown；记录数不是独立样本。 |
-| 离线工具（S2 局部） | [公开外部参考](benchmark-reference.md)、[输入检查与原件定位](review-detection-input.md)、[区间计算](review-detection.md)、[合成分析](review-detection-analysis.md)、[合成反馈](review-feedback-simulation.md)。 | synthetic 结果不能改标为真实数据；尚无生产评分、校准或自动路由效果证明。 |
+| 非评分准备（S0/S1） | [事实快照](effect-observations.md#固定提交的事实快照)；[正式账本回读](../archive/operations/review-feedback.md)、[PR 回读](../archive/operations/pr-feedback.md)、[只读建议](../archive/operations/review-advisory.md)已归档（脚本于 PR #166 退场）。 | 来源认证、实际身份、人时/费用、独立真值和原子一致性仍有 unknown；记录数不是独立样本。 |
+| 离线工具（S2 局部，已归档） | [公开外部参考](../archive/operations/benchmark-reference.md)、[输入检查与原件定位](../archive/operations/review-detection-input.md)、[区间计算](../archive/operations/review-detection.md)、[合成分析](../archive/operations/review-detection-analysis.md)、[合成反馈](../archive/operations/review-feedback-simulation.md)（对应脚本于 PR #166 退场）。 | synthetic 结果不能改标为真实数据；尚无生产评分、校准或自动路由效果证明。 |
 | SDK | [单次文档审核及可选上下文节点](../superpowers/specs/sdk-readonly-review.md#使用)已交付。 | 默认关闭；一次真实审核不证明长期效果，新实际调用需明确任务、输入与范围。 |
 | 跨仓引擎 | main 已合并[资源包](resource-bundle.md)、[非覆盖初始化](initialization.md)、[Node 本地 V0/V1](node-verification.md)与 [installed 变异切片](https://github.com/MaginaLW/harness-model/pull/147)。 | 后续本地 V2/source6/Stage A 按上表独立候选读取；Node CI 与目标 combined 验收未闭合。 |
 
@@ -56,7 +58,7 @@
 
 ### 剩余缺口与推进条件
 
-- **真实观察**：B（3-A 非评分准备、3-B 独立 V3）、首用途、`review_detection`、95% 等尾区间/总宽不超过20个百分点及有限研究范围已采用，不重复请求这些决定。真实自然任务的预声明候选、旧契约、实际输入/职责/原预算、完整报告、独立裁定与预算关闭原件仍缺；`T0/T1` 未设置，不制造样本、不启动30日窗口。见[观察准备](review-detection-preparation.md)、[准入](../superpowers/specs/review-detection-admission.md)。
+- **真实观察**：B（3-A 非评分准备、3-B 独立 V3）、首用途、`review_detection`、95% 等尾区间/总宽不超过20个百分点及有限研究范围已采用，不重复请求这些决定。真实自然任务的预声明候选、旧契约、实际输入/职责/原预算、完整报告、独立裁定与预算关闭原件仍缺；`T0/T1` 未设置，不制造样本、不启动30日窗口。见[观察准备](../archive/operations/review-detection-preparation.md)、[准入](../superpowers/specs/review-detection-admission.md)。
 - **宿主接入**：仍缺受支持的既有 Desktop 通道、实例绑定、实际 server/协议版本、全部返回面及接收前累计限制。既有[issue #55904](https://github.com/openai/codex/issues/55904)是回复入口，未在本轮重查回复；不重复提问、不重启已关闭读取。新材料按[核对步骤](../superpowers/specs/review-detection-host-evidence.md#维护方回复后的核对步骤)处理，齐备也不自动连接。
 - **Phase 3/4**：Phase 3 仍 `not_started`；[进入输入](../implementation/phase-03-entry-inputs.md)的样本门 partial、真实 V3/统一度量 not_met 保留。3-A 单独完成不打开整体退出或 Phase 4。
 - **旧 mutation 加固**：TASK-0094 范围扩大后 BLOCKED；TASK-0095 尚待规格审核，私有 CI 原件传递/重放、Ubuntu 进程树约束和旧账本隔离三个 medium 发现未关闭。旧核对仅证明 c60b663/a231941 未覆盖八文件 WIP；本轮未独立比较 source6，不能推断可丢弃；旧探针绑定有漂移，恢复前须重新核定规格、材料与消费者。TASK-0124 的资源包目标已有后继交付，旧 NEW 不倒填成功。

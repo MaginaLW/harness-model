@@ -123,7 +123,7 @@ S1 的数据、方法、用途、隐私和质量条件仍须分别形成并准�
 
 ## 审核结果回读
 
-[审核结果回读工具](review-feedback.md)复用上述固定 Git 白名单，以显式反馈投影增加
+[审核结果回读工具](../archive/operations/review-feedback.md)复用上述固定 Git 白名单，以显式反馈投影增加
 Finding 的 ID、严重度、状态和解决时间，以及解决事件的 Finding ID；原默认统计、snapshot
 与 availability 的字段和格式保持不变。它保留 review 各修订的原 outcome、
 受限 context/event 引用、验证尝试和 evidence 原值，输出原件的 commit/path/blob/locator。

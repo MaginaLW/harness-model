@@ -1,6 +1,6 @@
 # 记录级条件分析的合成演练
 
-`tools/analysis/review_detection_analysis.py` 把记录级声明、机械预选、必要条件和既有区间计算串起来，供真实输入分析的接口与实现准备。当前仅接受 synthetic envelope，不接真实数据、Git／PR 回读报告或宿主，不启动评分、窗口或审核策略。详细字段与回退规则见[实现合同](../superpowers/specs/review-detection-analysis.md)。
+`tools/analysis/review_detection_analysis.py` 把记录级声明、机械预选、必要条件和既有区间计算串起来，供真实输入分析的接口与实现准备。当前仅接受 synthetic envelope，不接真实数据、Git／PR 回读报告或宿主，不启动评分、窗口或审核策略。详细字段与回退规则见[实现合同](../../superpowers/specs/review-detection-analysis.md)。
 
 ## 运行示例
 
@@ -43,4 +43,4 @@ CLI 只读取 stdin 和本脚本、三项依赖的源码，不读取时钟或原
 
 所有报告都保持来源真实性、历史完整性、观察准入和统计独立性 `unknown`，真实概率 `unestimated`、评分更新 `not_implemented`、`execution_allowed=false`。假设填全与 `conditional_synthetic` 均不认证真实分析就绪。
 
-未来真实分析需另核对应来源／方法／质量与实现准入，复用记录结构和已验证处理逻辑，不能给此入口增加一个批准布尔值就接真实数据。实际候选、独立裁定、输入与预算端点、窗口及[宿主资料](../superpowers/specs/review-detection-host-evidence.md)的缺口保持，按[观察准备流程](review-detection-preparation.md)推进；本次演练不登记真实机会或设置 `T0/T1`。
+未来真实分析需另核对应来源／方法／质量与实现准入，复用记录结构和已验证处理逻辑，不能给此入口增加一个批准布尔值就接真实数据。实际候选、独立裁定、输入与预算端点、窗口及[宿主资料](../../superpowers/specs/review-detection-host-evidence.md)的缺口保持，按[观察准备流程](review-detection-preparation.md)推进；本次演练不登记真实机会或设置 `T0/T1`。
