@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import time
 import uuid
 from copy import deepcopy
 from pathlib import Path
@@ -12,6 +13,7 @@ from typing import Any
 import pytest
 from jsonschema.validators import Draft202012Validator
 
+from aiflow import contracts
 from aiflow.contracts import (
     ContractValidationError,
     contract_validation_batch,
@@ -234,6 +236,35 @@ def test_code_approval_requires_subject_commit() -> None:
 
     errors = validate_contract("approval", approval)
     assert any(error.startswith("/subject_commit:") for error in errors)
+
+
+def test_approval_contract_with_authorization_mode() -> None:
+    # Omitted authorization_mode is valid (backward compatible)
+    approval_omitted = valid_fixture("approval")
+    assert "authorization_mode" not in approval_omitted
+    assert validate_contract("approval", approval_omitted) == []
+
+    # direct_human is valid
+    approval_direct = valid_fixture("approval")
+    approval_direct["authorization_mode"] = "direct_human"
+    assert validate_contract("approval", approval_direct) == []
+
+    # standing_delegation is valid
+    approval_standing = valid_fixture("approval")
+    approval_standing["authorization_mode"] = "standing_delegation"
+    assert validate_contract("approval", approval_standing) == []
+
+    # invalid mode string is rejected
+    approval_invalid = valid_fixture("approval")
+    approval_invalid["authorization_mode"] = "unauthorized_proxy"
+    errors = validate_contract("approval", approval_invalid)
+    assert any("/authorization_mode:" in error for error in errors)
+
+    # non-string type is rejected
+    approval_wrong_type = valid_fixture("approval")
+    approval_wrong_type["authorization_mode"] = 42
+    errors = validate_contract("approval", approval_wrong_type)
+    assert any("/authorization_mode:" in error for error in errors)
 
 
 def test_ci_evidence_requires_attestation_head() -> None:
@@ -468,3 +499,40 @@ def test_batch_callable_cannot_escape_lifetime(count: int, failed: bool) -> None
     with pytest.raises(ContractError) as caught:
         validate(valid_fixture("task"))
     assert caught.value.code == "CONTRACT_BATCH_CLOSED"
+
+
+def test_schema_validator_and_registry_are_cached_and_invalidated_on_modification(
+    tmp_path: Path,
+) -> None:
+    directory = tmp_path / "schemas"
+    shutil.copytree(REPOSITORY_ROOT / ".ai" / "schemas", directory)
+    with schema_directory_context(directory):
+        # Initial validation builds cache
+        assert validate_contract("task", valid_fixture("task")) == []
+
+        file_fp = contracts._file_stat_fingerprint(directory / "task.schema.json")
+        assert file_fp is not None
+        composite_fp = contracts._composite_directory_fingerprint(directory.resolve())
+        cache_key = ("task", directory.resolve(), file_fp, composite_fp)
+        assert cache_key in contracts._VALIDATOR_CACHE
+        cached_validator = contracts._VALIDATOR_CACHE[cache_key]
+
+        # Repeated validation reuses identical validator instance
+        assert validate_contract("task", valid_fixture("task")) == []
+        assert contracts._VALIDATOR_CACHE[cache_key] is cached_validator
+
+        # Mutate schema file on disk
+        path = directory / "task.schema.json"
+        content = json.loads(path.read_text(encoding="utf-8"))
+        content["description"] = "schema cache invalidation test modification"
+        time.sleep(0.01)
+        path.write_text(json.dumps(content), encoding="utf-8")
+
+        # Subsequent validation detects file change, invalidates old key, compiles new validator
+        assert validate_contract("task", valid_fixture("task")) == []
+        new_file_fp = contracts._file_stat_fingerprint(path)
+        assert new_file_fp != file_fp
+        new_composite_fp = contracts._composite_directory_fingerprint(directory.resolve())
+        new_cache_key = ("task", directory.resolve(), new_file_fp, new_composite_fp)
+        assert new_cache_key in contracts._VALIDATOR_CACHE
+        assert contracts._VALIDATOR_CACHE[new_cache_key] is not cached_validator

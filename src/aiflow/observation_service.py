@@ -87,16 +87,16 @@ def _current_facts(
         "BLOCKED",
     }:
         raise _invalid("OBSERVATION_STATE_INVALID")
+    base = task.get("base_commit")
+    subject = task.get("subject_commit") or base
     if (
         task.get("task_id") != task_id
         or observation.task_id != task_id
-        or observation.base_commit != task.get("base_commit")
-        or observation.subject_commit != task.get("subject_commit")
+        or observation.base_commit != base
+        or observation.subject_commit != subject
     ):
         raise _invalid("OBSERVATION_BINDING_STALE")
     context = collect_git_context(repository_root)
-    base = task.get("base_commit")
-    subject = task.get("subject_commit")
     if (
         context.repository_id != task.get("repository_id")
         or context.branch != task.get("branch")

@@ -227,3 +227,27 @@ def test_review_package_requires_an_explicit_question() -> None:
     content = package().replace("- 是否满足规格？", "请审核上述内容")
     assessment = assess_review_package(content)
     assert "REVIEW_QUESTION_MISSING" in {issue.code for issue in assessment.issues}
+
+
+def test_prepare_approval_with_authorization_mode() -> None:
+    for mode in ("direct_human", "standing_delegation"):
+        prepared = prepare_approval(
+            approval_type="spec",
+            context=context(task_state="WAITING_FOR_SPEC_REVIEW"),
+            actor="human",
+            reason="valid reason",
+            approved_at=NOW,
+            authorization_mode=mode,
+        )
+        assert prepared.record.get("authorization_mode") == mode
+
+    with pytest.raises(ContractError) as exc_info:
+        prepare_approval(
+            approval_type="spec",
+            context=context(task_state="WAITING_FOR_SPEC_REVIEW"),
+            actor="human",
+            reason="valid reason",
+            approved_at=NOW,
+            authorization_mode="invalid_mode",
+        )
+    assert exc_info.value.code == "APPROVAL_AUTHORIZATION_MODE_INVALID"

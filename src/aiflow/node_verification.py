@@ -32,7 +32,7 @@ def _invalid(message: str) -> ContractError:
     return ContractError(message, code="NODE_OUTPUT_INVALID")
 
 
-def _path(value: object) -> str:
+def validate_canonical_path(value: object) -> str:
     if not isinstance(value, str) or not value:
         raise _invalid("Node output path must be a canonical relative file path")
     if len(value) > MAX_PATH_BYTES:
@@ -60,12 +60,12 @@ def _path(value: object) -> str:
     return value
 
 
-def _ordered_paths(paths: object) -> tuple[str, ...]:
+def validate_ordered_paths(paths: object) -> tuple[str, ...]:
     if not isinstance(paths, (tuple, list)):
         raise _invalid("Node output paths must be an array")
     if len(paths) > MAX_PATHS:
         raise _invalid("Node path list exceeds the item limit")
-    result = tuple(_path(item) for item in paths)
+    result = tuple(validate_canonical_path(item) for item in paths)
     if result != tuple(sorted(set(result), key=lambda path: path.encode("utf-8"))):
         raise _invalid("Node output paths must be UTF-8 sorted and unique")
     folded = [path.casefold() for path in result]
@@ -77,6 +77,10 @@ def _ordered_paths(paths: object) -> tuple[str, ...]:
         if any("/".join(segments[:index]) in folded_set for index in range(1, len(segments))):
             raise _invalid("Node output paths cannot contain one another")
     return result
+
+
+_path = validate_canonical_path
+_ordered_paths = validate_ordered_paths
 
 
 def _output_paths(paths: object) -> tuple[str, ...]:

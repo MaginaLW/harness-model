@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -425,3 +426,146 @@ def test_wrapper_help_is_executable(script: str) -> None:
 
     assert result.returncode == 0, result.stderr
     assert "usage:" in result.stdout
+
+
+def test_pre_command_subdirectory_resolves_repository_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task = _pre_command_task()
+    observed_root: list[Path] = []
+    monkeypatch.setattr(
+        pre_command,
+        "read_task_record_strict",
+        lambda root, _task_id: SimpleNamespace(task=task),
+    )
+    monkeypatch.setattr(
+        pre_command,
+        "apply_observation",
+        lambda root, _task, _obs, **_kw: observed_root.append(root),
+    )
+    sub = ROOT / "tools" / "hooks"
+    passed, reasons = pre_command.check_pre_command(sub, "push", "origin/main", "TASK-0001")
+    assert passed is False
+    assert observed_root == [ROOT]
+
+
+def test_pre_commit_subdirectory_resolves_repository_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_pre_commit_facts(
+        monkeypatch, scope=SimpleNamespace(passed=False, out_of_scope=("src/out.py",))
+    )
+    observed_root: list[Path] = []
+    monkeypatch.setattr(
+        pre_commit,
+        "apply_observation",
+        lambda root, _task, _obs, **_kw: observed_root.append(root),
+    )
+    sub = ROOT / "tools" / "hooks"
+    passed, reasons = pre_commit.check_pre_commit(sub, "TASK-0001")
+    assert passed is False
+    assert observed_root == [ROOT]
+
+
+def test_hooks_resolve_active_task_via_git_changes_when_multiple_tasks_exist(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    task_root = tmp_path / ".ai" / "tasks"
+    (task_root / "TASK-0001").mkdir(parents=True)
+    (task_root / "TASK-0002").mkdir()
+    (task_root / "TASK-0003").mkdir()
+    states = {"TASK-0001": "IMPLEMENTING", "TASK-0002": "IMPLEMENTING", "TASK-0003": "IMPLEMENTING"}
+    monkeypatch.setattr(
+        pre_commit,
+        "read_task_record_strict",
+        lambda _root, task_id: SimpleNamespace(task={"current_state": states[task_id]}),
+    )
+    monkeypatch.setattr(
+        pre_command,
+        "read_task_record_strict",
+        lambda _root, task_id: SimpleNamespace(task={"current_state": states[task_id]}),
+    )
+    monkeypatch.setattr(pre_commit, "_git_candidate_tasks", lambda _root: {"TASK-0002"})
+    monkeypatch.setattr(pre_command, "_git_candidate_tasks", lambda _root: {"TASK-0002"})
+
+    assert pre_commit._resolve_task_id(tmp_path, None) == "TASK-0002"
+    assert pre_command._resolve_task_id(tmp_path, None) == "TASK-0002"
+
+
+def test_pre_commit_and_pre_command_fallback_subject_commit_when_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    base = "1" * 40
+    task = {
+        "current_state": "IMPLEMENTING",
+        "base_commit": base,
+        "subject_commit": None,
+        "allowed_scope": ["src/**"],
+    }
+    applied: list[dict[str, object]] = []
+
+    def record_apply(_root: Path, _task_id: str, observation: object, **_kwargs: object) -> None:
+        applied.append(serialize_observation(observation))
+
+    monkeypatch.setattr(
+        pre_command,
+        "read_task_record_strict",
+        lambda _root, _task_id: SimpleNamespace(task=task),
+    )
+    monkeypatch.setattr(pre_command, "apply_observation", record_apply)
+    pre_command.check_pre_command(ROOT, "push", "origin/main", "TASK-0001")
+    assert applied[-1]["subject_commit"] == base
+
+    monkeypatch.setattr(
+        pre_commit,
+        "read_task_record_strict",
+        lambda _root, _task_id: SimpleNamespace(task=task),
+    )
+    monkeypatch.setattr(
+        pre_commit,
+        "summarize_task",
+        lambda _root, _task_id: SimpleNamespace(current_state="IMPLEMENTING", observed_head=base),
+    )
+    monkeypatch.setattr(
+        pre_commit,
+        "collect_changed_paths",
+        lambda *args, **kwargs: SimpleNamespace(paths=("src/bad.py",)),
+    )
+    monkeypatch.setattr(
+        pre_commit,
+        "assess_scope",
+        lambda *args, **kwargs: SimpleNamespace(passed=False, out_of_scope=("src/bad.py",)),
+    )
+    monkeypatch.setattr(pre_commit, "apply_observation", record_apply)
+    pre_commit.check_pre_commit(ROOT, "TASK-0001")
+    assert applied[-1]["subject_commit"] == base
+
+
+def test_pre_commit_subprocess_from_nested_subdirectory_resolves_schema_cleanly(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aiflow.cli import main as cli_main
+    from tests.integration.test_begin_close_commands import create_repository, make_ready
+
+    repo = create_repository(tmp_path / "repo")
+    monkeypatch.chdir(repo)
+    assert cli_main(["start", "--objective", "bounded", "--allow", "tracked.txt"]) == 0
+    make_ready(repo)
+    assert cli_main(["begin", "TASK-0001", "--actor", "tester"]) == 0
+
+    sub = repo / "tools" / "hooks"
+    sub.mkdir(parents=True)
+    env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "hooks" / "pre_commit.py"), "--task", "TASK-0001"],
+        cwd=sub,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=15,
+        env=env,
+    )
+
+    assert result.returncode == 0, f"stdout: {result.stdout}, stderr: {result.stderr}"
+    assert "pre-commit allowed" in result.stdout
+    assert result.stderr == ""

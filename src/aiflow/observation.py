@@ -107,6 +107,13 @@ def _parse_error() -> ContractError:
 
 def parse_observation(value: object) -> Observation:
     """Validate one JSON-compatible observation and return an immutable value."""
+    if (
+        isinstance(value, dict)
+        and value.get("subject_commit") is None
+        and value.get("base_commit") is not None
+    ):
+        value = dict(value)
+        value["subject_commit"] = value["base_commit"]
     require_valid_contract("observation", value)
     if not isinstance(value, dict):  # schema validation makes this defensive only.
         raise _parse_error()

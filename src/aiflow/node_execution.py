@@ -30,11 +30,11 @@ from aiflow.node_verification import (
     COVERAGE_ISTANBUL_METHOD,
     COVERAGE_METHOD,
     PRODUCT_TESTS,
-    _ordered_paths,
-    _path,
+    validate_canonical_path,
     validate_node_istanbul_line_coverage,
     validate_node_line_coverage,
     validate_node_product_tests,
+    validate_ordered_paths,
 )
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.process_runner import run_node_process
@@ -46,6 +46,9 @@ if TYPE_CHECKING:
         InstalledMutationFacts,
         InstalledMutationReference,
     )
+
+_path = validate_canonical_path
+_ordered_paths = validate_ordered_paths
 
 MAX_ENTRIES = 20_000
 MAX_FILE_BYTES = 128 * 1024 * 1024
@@ -355,7 +358,9 @@ def _ancestors(path: Path) -> None:
         _safe_info(ancestor, directory=True)
 
 
-def _read(path: Path, *, limit: int = MAX_FILE_BYTES, os_role: str | None = None) -> bytes:
+def read_material_bytes(
+    path: Path, *, limit: int = MAX_FILE_BYTES, os_role: str | None = None
+) -> bytes:
     _ancestors(path.parent)
     before = _safe_info(path, os_role=os_role)
     if before.st_size > limit:
@@ -380,8 +385,14 @@ def _read(path: Path, *, limit: int = MAX_FILE_BYTES, os_role: str | None = None
     return b"".join(chunks)
 
 
-def _json(path: Path, *, limit: int = MAX_JSON_BYTES) -> Any:
-    return _json_bytes(_read(path, limit=limit))
+_read = read_material_bytes
+
+
+def read_material_json(path: Path, *, limit: int = MAX_JSON_BYTES) -> Any:
+    return _json_bytes(read_material_bytes(path, limit=limit))
+
+
+_json = read_material_json
 
 
 def _take_budget(budget: list[int], size: int = 0) -> None:
@@ -2104,7 +2115,7 @@ def _governance_snapshot(
         require_valid_contract("approval", approval)
     marker_path = root / prefix / "approval_pending.json"
     if include_pending and marker_path.exists():
-        from aiflow.approval import _validate_node_code_approval_marker
+        from aiflow.approval import validate_node_code_approval_marker
         from aiflow.task_service import read_task_record_strict
 
         marker = _json(marker_path)
@@ -2134,7 +2145,7 @@ def _governance_snapshot(
         require_valid_contract("classification", classification)
         evidence = _json(root / prefix / "evidence.json")
         require_valid_contract("evidence", evidence)
-        _validate_node_code_approval_marker(
+        validate_node_code_approval_marker(
             marker,
             task_id=task_id,
             current_task=current.task,

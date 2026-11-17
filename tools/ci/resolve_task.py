@@ -21,6 +21,7 @@ def _git_paths(root: Path, base: str, head: str) -> tuple[str, ...]:
         capture_output=True,
         check=False,
         timeout=20,
+        env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
     )
     if result.returncode != 0:
         raise ValueError(result.stderr.decode("utf-8", errors="replace").strip())

@@ -177,3 +177,39 @@ SDK 单次只读客户端已交付，后续按实际文档需求维护和显式�
 真实评分、自动审核安排、宿主连接及 Phase 3/4 的准入各自保持原边界。SDK 记录不替代
 [实际输入、独立裁定和预算关闭材料](../archive/operations/review-detection-preparation.md)，跨仓初始化也不提供
 [固定动作可信执行能力](hooks.md)。方案完成、离线通过或外仓 CI 通过都不自动解除暂停。
+
+## 维护与退役触发条件
+
+为保持仓库代码边界清晰并控制长期维护开销，本方案所涉及的 Codex SDK 客户端与 Node/installed 完整引擎模块按以下条件触发维护或退役：
+
+### 1. 维护触发条件（何时主动更新）
+
+1. **上游 SDK 与 App-Server 协议变动**：
+   - 官方 Python Codex SDK 或 app-server 发生 breaking change、认证流程调整或协议废弃（当前固定为 `0.163.0`）。
+   - 触发动作：在受控分支进行最小兼容适配，核对数据/权限边界，运行模拟测试与单次只读审核验收。
+2. **治理 Policy 或 Schema 版本升级**：
+   - 本仓 Policy 规范或 Schema 发生主版本递增，影响到 Node profile（`agent-bridge-node@1`）或 Policy 候选（`3.1.0`）。
+   - 触发动作：更新 `resource-bundle.py` 与 `node_verification.py` 中的兼容版本映射与校验规则。
+3. **真实外仓消费需求明确**：
+   - 目标消费仓（如 `agent-bridge`）正式启动 Stage B 联合验收并提供完整 Node CI 与跨主机证据前置条件。
+   - 触发动作：按阶段交付 installed V2 与 CI 适配，走正式 AI Flow 治理流程。
+4. **安全漏洞与运行时修复**：
+   - 依赖项暴露 CVE 或安全阻断，影响 Node 沙箱或文件安全读取（`safe_read_bytes` / `validate_canonical_path`）。
+
+### 2. 退役与归档触发条件（何时冻结或移除）
+
+1. **外仓接入长期停滞或方向调整**：
+   - 目标仓明确放弃完整引擎接入，改用轻量规则模式（`adoption.md`），或 Stage B 超过 6 个月无有效活跃推进。
+   - 触发动作：启动退役评估，保留 Stage A 历史事实，停止为未交付的 Node CI 消耗测试预算。
+2. **轻量协同机制完全取代重型引擎**：
+   - 实践证明基于 Git、PR 门禁与轻量规则协同已满足跨仓质量需求，无需在目标仓复刻本地 Node V2 引擎。
+   - 触发动作：将 `src/aiflow/node_*` 与 `src/aiflow/installed_*` 标记为 deprecated，后续归档。
+3. **维护成本超过工程收益**：
+   - 若 Node 模块与 installed 变异测试持续导致 CI 超时、测试脆性或代码体积膨胀，且无生产调用。
+   - 触发动作：创建退役任务，仿照 PR #46（runner/tools 退役）与 PR #166（analysis tools 退役）模式，将代码与测试精简，保留历史账本与恢复指南。
+
+### 3. 退役执行与现场保全规程
+
+1. 文档移至 `docs/archive/operations/`，活跃文档（`README.md`、`maintenance-status.md`）添加归档说明与墓碑指针。
+2. 不重写历史任务记录（`.ai/tasks/**`）及历史证据哈希。
+3. 提供清晰的恢复命令与历史提交 SHA，保证历史事实完全可追溯。

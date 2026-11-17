@@ -120,9 +120,9 @@ def test_workflow_attaches_exact_event_head_to_the_pr_source_branch() -> None:
     assert governance_index < attachment_index < identity_index < task_index
 
     attachment = steps[attachment_index]
-    assert attachment["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert attachment["if"] == "steps.governance.outputs.category == 'formal_governed'"
     contracts = steps[names.index("Validate contracts")]
-    assert contracts["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert contracts["if"] == "steps.governance.outputs.category == 'formal_governed'"
     assert governance_index < names.index("Validate contracts")
     assert attachment["env"] == {
         "PR_HEAD_REF": "${{ github.head_ref }}",
@@ -247,7 +247,7 @@ def test_resolved_task_output_flows_to_verify_and_gate() -> None:
     upload = next(step for step in steps if step.get("name") == "Upload AI Flow diagnostics")
 
     assert "task_id=" in (ROOT / "tools" / "ci" / "resolve_task.py").read_text(encoding="utf-8")
-    assert verify["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert verify["if"] == "steps.governance.outputs.category == 'formal_governed'"
     assert verify["env"] == {
         "TASK_ID": "${{ steps.task.outputs.task_id }}",
         "TMPDIR": "${{ runner.temp }}",
@@ -257,7 +257,7 @@ def test_resolved_task_output_flows_to_verify_and_gate() -> None:
     assert 'run_dir="$RUNNER_TEMP/aiflow"' not in verify["run"]
     assert 'uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir"' in text
     assert gate_command in text
-    assert upload["if"] == "always() && steps.governance.outputs.bootstrap_active != 'true'"
+    assert upload["if"] == "always() && steps.governance.outputs.category == 'formal_governed'"
     assert upload["with"]["path"] == "${{ runner.temp }}/aiflow"
 
 
@@ -268,13 +268,14 @@ def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
         '--run-dir "$RUNNER_TEMP" --base "$BASE_SHA"'
     )
 
-    assert "mode: bootstrap_auto" in text
-    assert "status: active" in text
-    assert "BASE_SHA: ${{ github.event.pull_request.base.sha }}" in text
-    assert 'git show "${BASE_SHA}:.ai/bootstrap-mode.yaml"' in text
-    assert "bootstrap_active=true" in text
-    assert "if: steps.governance.outputs.bootstrap_active == 'true'" in text
-    assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 5
+    assert "tools/ci/route_pr.py" in text
+    assert '--base "${{ github.event.pull_request.base.sha }}"' in text
+    assert '--head "${{ github.event.pull_request.head.sha }}"' in text
+    assert '--output "$GITHUB_OUTPUT"' in text
+    assert "if: steps.governance.outputs.category != 'formal_governed'" in text
+    assert "if: steps.governance.outputs.category == 'task_closeout'" in text
+    assert text.count("if: steps.governance.outputs.category == 'formal_governed'") == 5
+    assert 'tools/ci/verify_closeout.py --task "$TASK_ID"' in text
     assert 'COVERAGE_FILE="$RUNNER_TEMP/.coverage"' in text
     assert "--cov=aiflow --cov-branch" in text
     assert "--cov=tools/analysis" not in text
@@ -288,7 +289,7 @@ def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
     assert "uv run --locked ruff check ." in text
     assert "uv run --locked ruff format --check ." in text
     assert "uv run --locked mypy" in text
-    assert "always() && steps.governance.outputs.bootstrap_active != 'true'" in text
+    assert "always() && steps.governance.outputs.category == 'formal_governed'" in text
 
 
 @pytest.mark.parametrize(

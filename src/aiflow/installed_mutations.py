@@ -25,11 +25,11 @@ from aiflow import mutation_runner as operators
 from aiflow import node_execution as node
 from aiflow.approval import (
     ApprovalContext,
-    _logical_identity,
-    _utc,
     approval_is_current,
     canonical_action_sha256,
+    logical_identity,
     matching_approval,
+    parse_utc_iso,
     validate_action_file,
 )
 from aiflow.contracts import require_valid_contract
@@ -38,7 +38,7 @@ from aiflow.errors import AiflowError, ContractError
 from aiflow.freshness import current_classification_input_digest
 from aiflow.git_context import collect_git_context
 from aiflow.mutation_manifest import MutationDeclaration
-from aiflow.node_verification import _ordered_paths, _path
+from aiflow.node_verification import validate_canonical_path, validate_ordered_paths
 from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.specification import specification_digest
 from aiflow.state import replay_events
@@ -310,7 +310,7 @@ def _mutate(mutation_id: str, path: Path) -> None:
         raise _error(
             "Installed mutation file target differs", "INSTALLED_MUTATION_OPERATOR_INVALID"
         )
-    original = node._read(path)
+    original = node.read_material_bytes(path)
     expected = _transformed(mutation_id, original)
     if mutation_id != "MUT-V2-001":
         declaration = MutationDeclaration(
@@ -328,7 +328,7 @@ def _mutate(mutation_id: str, path: Path) -> None:
             raise _error(
                 "Installed mutation operator failed", "INSTALLED_MUTATION_OPERATOR_INVALID"
             ) from error
-        if node._read(path) != expected:
+        if node.read_material_bytes(path) != expected:
             raise _error("Native operator differs from the fixed installed transformation")
     else:
         before = node._safe_info(path)
@@ -342,7 +342,7 @@ def _mutate(mutation_id: str, path: Path) -> None:
 
 
 def _file(path: Path) -> dict[str, Any]:
-    data = node._read(path)
+    data = node.read_material_bytes(path)
     return {
         "path": str(path),
         "size": len(data),
@@ -355,7 +355,7 @@ def _probe_contract() -> dict[str, Any]:
     from aiflow import installed_probe
 
     path = Path(installed_probe.__file__).absolute()
-    tree = ast.parse(node._read(path))
+    tree = ast.parse(node.read_material_bytes(path))
     anchors = {}
     for probe_id in PROBE_IDS:
         name = installed_probe.ASSERTION_ANCHORS[probe_id]
@@ -430,7 +430,7 @@ def _closure(engine: Mapping[str, Any], prefix: Path) -> dict[str, Any]:
     for absolute, row in files.items():
         path = Path(absolute).resolve(strict=True)
         try:
-            relative = _path(path.relative_to(prefix).as_posix())
+            relative = validate_canonical_path(path.relative_to(prefix).as_posix())
         except ValueError as error:
             raise _error("Declared installed file escapes the fixed environment") from error
         if not (
@@ -522,7 +522,7 @@ def _require_pending_approval(root: Path, task_id: str, *, executing: bool, node
     except FileNotFoundError:
         return
     node._safe_info(marker)
-    evidence = node._json(resolve_task_path(root, task_id) / "evidence.json")
+    evidence = node.read_material_json(resolve_task_path(root, task_id) / "evidence.json")
     if (
         not isinstance(evidence, dict)
         or evidence.get("schema_version") != "3.2"
@@ -646,7 +646,9 @@ def _approval_context(
 def _normalize_action(
     root: Path, path: Path, inputs: InstalledMutationInputs, *, now: str
 ) -> Mapping[str, object]:
-    action = validate_action_file(node._json(path), subject_commit=inputs.subject_commit, now=now)
+    action = validate_action_file(
+        node.read_material_json(path), subject_commit=inputs.subject_commit, now=now
+    )
     record = read_task_record_strict(root, inputs.task_id)
     units = {str(unit["decision_unit_id"]): unit for unit in parse_decision_units(record.task)}
     unit = units.get(str(action.get("decision_unit_id")))
@@ -676,7 +678,7 @@ def _select_action(
     found = []
     spent = False
     for path in sorted(task_dir.glob("action-installed-engine-mutation-*.json")):
-        raw = node._json(path)
+        raw = node.read_material_json(path)
         if not isinstance(raw, dict):
             raise _error("Installed mutation action is invalid", "ACTION_FILE_INVALID")
         if not isinstance(raw.get("subject_commit"), str):
@@ -889,7 +891,7 @@ def _argv(phase: Path, probe_id: str, materials: Mapping[str, Any]) -> tuple[str
 def _retained_file(row: object, *, os_role: str | None = None) -> None:
     item = _closed(row, {"path", "size", "sha256", "identity"})
     path = Path(item["path"])
-    data = node._read(path, os_role=os_role)
+    data = node.read_material_bytes(path, os_role=os_role)
     if (
         len(data) != item["size"]
         or node._sha(data) != item["sha256"]
@@ -912,7 +914,7 @@ def _current_materials(inputs: InstalledMutationInputs) -> dict[str, Any]:
 def _receipt(
     phase: Path, stage: Mapping[str, Any], probe_id: str, materials: Mapping[str, Any]
 ) -> dict[str, Any]:
-    receipt = node._json(phase / "raw/receipt.json")
+    receipt = node.read_material_json(phase / "raw/receipt.json")
     keys = {
         "returncode",
         "timed_out",
@@ -1001,11 +1003,11 @@ def _receipt(
     from aiflow.redaction import redact_text
 
     for stream in ("stdout", "stderr"):
-        data = node._read(phase / "raw" / f"{stream}.raw", limit=1024 * 1024)
+        data = node.read_material_bytes(phase / "raw" / f"{stream}.raw", limit=1024 * 1024)
         if (
             receipt[stream + "_size"] != len(data)
             or receipt[stream + "_sha256"] != node._sha(data)
-            or node._read(phase / "raw" / f"{stream}.log", limit=1024 * 1024)
+            or node.read_material_bytes(phase / "raw" / f"{stream}.log", limit=1024 * 1024)
             != redact_text(data.decode("utf8", errors="replace")).encode()
         ):
             raise _error("Installed probe raw stream has changed")
@@ -1025,13 +1027,16 @@ def _envelope(
     if cache["entries"] or node._canonical(cache) != node._canonical(stage["cache"]):
         raise _error("Installed probe bytecode cache was not isolated")
     receipt = _receipt(phase, stage, probe_id, materials)
-    data = node._read(phase / "raw/stdout.raw", limit=1024 * 1024)
+    data = node.read_material_bytes(phase / "raw/stdout.raw", limit=1024 * 1024)
     report = node._json_bytes(data)
     _closed(report, {"kind", "probe", "loaded", "interpreter"})
     if (
         report["kind"] != "installed-probe-execution-v1"
         or data != node._canonical(report) + b"\n"
-        or node._read(phase / "report.json", limit=1024 * 1024) != node._canonical(report)
+        or (
+            node.read_material_bytes(phase / "report.json", limit=1024 * 1024)
+            != node._canonical(report)
+        )
     ):
         raise _error("Installed probe report is missing, ambiguous or noncanonical")
     expected_interpreter = materials["interpreter"]
@@ -1062,7 +1067,7 @@ def _envelope(
     names = []
     for module in loaded:
         _closed(module, {"name", "path", "size", "sha256"})
-        relative = _path(module["path"])
+        relative = validate_canonical_path(module["path"])
         original = files.get(relative)
         if (
             not isinstance(module["name"], str)
@@ -1228,9 +1233,9 @@ def _run_stage(
     if role == "mutant":
         relative = "Lib/site-packages/aiflow/" + _TARGETS[probe_id][0]
         target = phase / "i" / relative
-        original = node._read(target)
+        original = node.read_material_bytes(target)
         _mutate(probe_id, target)
-        changed = node._read(target)
+        changed = node.read_material_bytes(target)
         pair["overlay"] = {
             "path": relative,
             "before_sha256": node._sha(original),
@@ -1247,7 +1252,7 @@ def _run_stage(
         timeout=_TIMEOUT,
         output=phase / "raw",
     )
-    raw = node._read(phase / "raw/stdout.raw", limit=1024 * 1024)
+    raw = node.read_material_bytes(phase / "raw/stdout.raw", limit=1024 * 1024)
     parsed = node._json_bytes(raw)
     node._write_new(phase / "report.json", node._canonical(parsed))
     _envelope(phase, stage, probe_id, materials)
@@ -1317,7 +1322,7 @@ def _action_originals(
     _retained_file(action["receipt"])
     _retained_file(action["claim"])
     claim = _closed(
-        node._json(claim_path),
+        node.read_material_json(claim_path),
         {
             "kind",
             "version",
@@ -1345,7 +1350,7 @@ def _action_originals(
     }
     if node._canonical(claim) != node._canonical(expected_claim):
         raise _error("Installed action launch claim differs")
-    path = root / _path(action["action_ref"])
+    path = root / validate_canonical_path(action["action_ref"])
     task_dir = resolve_task_path(root, inputs.task_id)
     if (
         path.parent != task_dir
@@ -1357,7 +1362,7 @@ def _action_originals(
     unit = str(normalized["decision_unit_id"])
     if canonical_action_sha256(normalized) != digest or unit != action["decision_unit_id"]:
         raise _error("Installed action bytes changed")
-    use = node._json(receipt_path)
+    use = node.read_material_json(receipt_path)
     expected_use = {
         "kind": ACTION_TYPE,
         "version": 1,
@@ -1390,7 +1395,7 @@ def _action_originals(
         or not approval_is_current(
             selected[0], _approval_context(inputs, unit, digest), now=claim["claimed_at"]
         )
-        or _utc(cast(str, selected[0]["approved_at"])) > _utc(claim["claimed_at"])
+        or parse_utc_iso(cast(str, selected[0]["approved_at"])) > parse_utc_iso(claim["claimed_at"])
     ):
         raise _error("Installed action approval is missing or stale")
 
@@ -1411,9 +1416,9 @@ def _pair_originals(
     if node._canonical(node._content(baseline)) != node._canonical(node._content(original)):
         raise _error("Baseline copy differs from the installed closure")
     relative = "Lib/site-packages/aiflow/" + _TARGETS[probe_id][0]
-    source = node._read(b / "i" / relative)
+    source = node.read_material_bytes(b / "i" / relative)
     transformed = _transformed(probe_id, source)
-    changed = node._read(m / "i" / relative)
+    changed = node.read_material_bytes(m / "i" / relative)
     overlay = {
         "path": relative,
         "before_sha256": node._sha(source),
@@ -1538,12 +1543,12 @@ def _reference_path(root: Path, reference: InstalledMutationReference) -> Path:
         or not _RUN_REF.fullmatch(reference.ref)
     ):
         raise _error("Installed mutation reference is invalid")
-    return root / _path(reference.ref)
+    return root / validate_canonical_path(reference.ref)
 
 
 def _run_original(root: Path, reference: InstalledMutationReference) -> dict[str, Any]:
     path = _reference_path(root, reference)
-    raw = node._read(path, limit=node.MAX_JSON_BYTES)
+    raw = node.read_material_bytes(path, limit=node.MAX_JSON_BYTES)
     if len(raw) != reference.size or node._sha(raw) != reference.sha256:
         raise _error("Installed mutation run digest differs")
     document = _closed(
@@ -1564,7 +1569,8 @@ def _run_original(root: Path, reference: InstalledMutationReference) -> dict[str
         "reference": asdict(reference),
         "failure": document["failure"],
     }
-    if node._canonical(node._json(path.parent / "completion.json")) != node._canonical(expected):
+    completion_data = node.read_material_json(path.parent / "completion.json")
+    if node._canonical(completion_data) != node._canonical(expected):
         raise _error("Installed mutation completion is missing or differs")
     return document
 
@@ -1578,7 +1584,7 @@ def _validate_node_pre_archive(
     from aiflow.evidence import validate_node_evidence, validate_v2_snapshot
 
     archive = run / "evidence.json"
-    raw = node._read(archive, limit=node.MAX_JSON_BYTES)
+    raw = node.read_material_bytes(archive, limit=node.MAX_JSON_BYTES)
     evidence = node._json_bytes(raw)
     validate_node_evidence(evidence)
     validate_v2_snapshot(evidence)
@@ -1616,7 +1622,7 @@ def _validate_node_pre_archive(
     compact = evidence["node_binding"]
     run_ref = compact["run"]
     original_path = run / "node/run.json"
-    original = node._read(original_path, limit=node.MAX_JSON_BYTES)
+    original = node.read_material_bytes(original_path, limit=node.MAX_JSON_BYTES)
     if (
         compact["subject_tree"] != inputs.subject_tree
         or run_ref["ref"] != f"logs/{run.name}/node/run.json"
@@ -1638,7 +1644,7 @@ def _validate_node_pre_archive(
         )
     ):
         raise _error("Installed Node run does not bind this exact mutation original")
-    current = node._json(resolve_task_path(root, inputs.task_id) / "evidence.json")
+    current = node.read_material_json(resolve_task_path(root, inputs.task_id) / "evidence.json")
     validate_node_evidence(current)
     validate_v2_snapshot(current)
     if (
@@ -1753,7 +1759,7 @@ def _snapshot(
     common = _absolute(audit["common"])
     if _absolute(audit["git"]) != git_dir or audit["ref"] != "refs/heads/" + inputs.branch:
         raise _error("Historical installed Git roles differ")
-    _path(audit["ref"])
+    validate_canonical_path(audit["ref"])
     logs = _closed(audit["logs"], {str(git_dir / "logs/HEAD"), str(common / "logs" / audit["ref"])})
     for row in logs.values():
         row = _closed(row, {"size", "sha256"})
@@ -1769,7 +1775,7 @@ def _snapshot(
         raise _error("Historical protected inventory is invalid")
     for row in files:
         row = _closed(row, {"path", "size", "sha256", "identity"})
-        _path(row["path"])
+        validate_canonical_path(row["path"])
         _snapshot_identity(row["identity"])
         if (
             type(row["size"]) is not int
@@ -1778,7 +1784,7 @@ def _snapshot(
             or not _SHA.fullmatch(row["sha256"])
         ):
             raise _error("Historical protected file is invalid")
-    _ordered_paths([row["path"] for row in files])
+    validate_ordered_paths([row["path"] for row in files])
     metadata = snapshot["metadata"]
     if not isinstance(metadata, list) or not 0 < len(metadata) <= node.MAX_ENTRIES:
         raise _error("Historical complete metadata is invalid")
@@ -1797,7 +1803,7 @@ def _snapshot(
     ):
         raise _error("Historical metadata membership is invalid")
     governance = _closed(snapshot["governance"], {"paths", "immutable", "approvals"})
-    registered = _ordered_paths(governance["paths"])
+    registered = validate_ordered_paths(governance["paths"])
     prefix = f".ai/tasks/{inputs.task_id}/"
     if any(not path.startswith(prefix) for path in registered) or not isinstance(
         governance["immutable"], dict
@@ -1829,7 +1835,7 @@ def _snapshot(
             raise _error("Historical approval event has no valid inventory")
         for approval in additions:
             require_valid_contract("approval", approval)
-            identity = _logical_identity(approval)
+            identity = logical_identity(approval)
             if identity not in identities:
                 identities.add(identity)
                 approvals.append(approval)
@@ -1964,7 +1970,7 @@ def _complete_current_root(
     ):
         raise _error("Current installed root metadata changed after authority collection")
     for row in snapshot["files"]:
-        data = node._read(root / row["path"])
+        data = node.read_material_bytes(root / row["path"])
         if (
             len(data) != row["size"]
             or node._sha(data) != row["sha256"]
@@ -2089,7 +2095,7 @@ def replay_installed_mutations(
             else False,
         )
         materials = _current_materials(inputs)
-        context = node._json(path.parent / "context.json")
+        context = node.read_material_json(path.parent / "context.json")
         validate_verifier_context(context)
         if context_sha256(context) != inputs.verifier_context_sha256:
             raise _error("Installed mutation verifier context differs")

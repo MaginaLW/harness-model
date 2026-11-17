@@ -193,3 +193,11 @@ def test_serialization_rejects_an_unknown_summary_type() -> None:
         serialize_observation(invalid)
 
     assert caught.value.code == "OBSERVATION_INVALID"
+
+
+def test_parse_observation_falls_back_to_base_commit_when_subject_commit_is_none() -> None:
+    payload = _payload("scope_out_of_bounds", {"paths": ["src/a.py"]})
+    payload["subject_commit"] = None
+    parsed = parse_observation(payload)
+    assert parsed.subject_commit == payload["base_commit"]
+    assert parsed.base_commit == "1" * 40

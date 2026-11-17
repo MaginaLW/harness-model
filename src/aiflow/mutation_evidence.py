@@ -940,6 +940,9 @@ def _authorize_targeted_mutation_runner_launch(
         ) from error
 
 
+authorize_targeted_mutation_runner_launch = _authorize_targeted_mutation_runner_launch
+
+
 def _reserve_record_root(root: Path, task_id: str, now: datetime) -> tuple[str, Path]:
     try:
         lexical_logs = task_root(root) / task_id / "logs"

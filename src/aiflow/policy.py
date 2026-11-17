@@ -119,6 +119,9 @@ class _UniqueKeyLoader(yaml.SafeLoader):
             self._flattening_mappings.remove(node)
 
 
+UniqueKeyLoader = _UniqueKeyLoader
+
+
 def evaluate_action_permission(bundle: PolicyBundle, action: str) -> ActionPermission:
     """Evaluate one normalized action without performing it or consuming approval."""
     normalized = action.strip().casefold()

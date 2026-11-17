@@ -35,7 +35,7 @@ from aiflow.state import (
     utc_timestamp,
 )
 from aiflow.storage import atomic_write_json, read_task_json, resolve_task_path
-from aiflow.task_service import _persist_event_and_task, load_task_record, read_task_record_strict
+from aiflow.task_service import load_task_record, persist_event_and_task, read_task_record_strict
 from aiflow.verifier_service import (
     build_verifier_context,
     current_implementer_actor,
@@ -47,6 +47,8 @@ from aiflow.verifier_service import (
 if TYPE_CHECKING:
     from aiflow.mutation_evidence import TargetedMutationFacts
     from aiflow.node_execution import NodeEvidenceFacts
+
+_persist_event_and_task = persist_event_and_task
 
 ApprovalType = Literal["spec", "code", "action"]
 _APPROVAL_STATES: Mapping[ApprovalType, str | None] = {
@@ -110,7 +112,7 @@ def _require_nonempty(value: str, code: str) -> str:
     return normalized
 
 
-def _utc(value: str) -> datetime:
+def parse_utc_iso(value: str) -> datetime:
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as error:
@@ -118,6 +120,9 @@ def _utc(value: str) -> datetime:
     if parsed.tzinfo is None:
         raise _invalid("Approval timestamp is invalid", "APPROVAL_TIMESTAMP_INVALID")
     return parsed.astimezone(timezone.utc)
+
+
+_utc = parse_utc_iso
 
 
 def validate_action_file(
@@ -212,6 +217,7 @@ def prepare_approval(
     worktree_governance_only: bool = False,
     subject_commit_current: bool = True,
     action_file: Mapping[str, object] | None = None,
+    authorization_mode: str | None = None,
 ) -> ApprovalPreparation:
     """Prepare one independent, version-bound approval without writing it."""
     expected_state = _APPROVAL_STATES.get(approval_type)
@@ -256,6 +262,12 @@ def prepare_approval(
         "subject_commit": context.subject_commit,
         "approved_at": approved_at,
     }
+    if authorization_mode is not None:
+        if authorization_mode not in {"direct_human", "standing_delegation"}:
+            raise _invalid(
+                "Approval authorization mode is invalid", "APPROVAL_AUTHORIZATION_MODE_INVALID"
+            )
+        raw_record["authorization_mode"] = authorization_mode
     if action is not None:
         action_sha256 = canonical_action_sha256(action)
         raw_record.update(
@@ -497,9 +509,12 @@ def _load_approvals(repository_root: Path, task_id: str) -> list[dict[str, objec
     return result
 
 
-def _logical_identity(approval: Mapping[str, object]) -> str:
+def logical_identity(approval: Mapping[str, object]) -> str:
     stable = {key: value for key, value in approval.items() if key != "approved_at"}
     return json.dumps(stable, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+_logical_identity = logical_identity
 
 
 def _marker_same(left: object, right: object) -> bool:
@@ -611,7 +626,7 @@ def _validate_node_approval_marker_envelope(
     return payload, candidates
 
 
-def _validate_node_code_approval_marker(
+def validate_node_code_approval_marker(
     marker: object,
     *,
     task_id: str,
@@ -736,6 +751,9 @@ def _validate_node_code_approval_marker(
         raise invalid()
 
 
+_validate_node_code_approval_marker = validate_node_code_approval_marker
+
+
 def _remove_marker(path: Path) -> None:
     try:
         path.unlink(missing_ok=True)
@@ -850,6 +868,7 @@ def approve_task(
     actor: str,
     reason: str,
     action_file: Path | None = None,
+    authorization_mode: str | None = None,
 ) -> ApprovalResult:
     """Validate and persist one independent approval type without executing actions."""
     if approval_type != "action" and action_file is not None:
@@ -1074,6 +1093,7 @@ def approve_task(
             worktree_governance_only=governance_only,
             subject_commit_current=governance_only,
             action_file=action_value,
+            authorization_mode=authorization_mode,
         )
         candidate = dict(prepared.record)
         if evidence_sha256 is not None:

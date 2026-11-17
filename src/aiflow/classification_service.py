@@ -27,6 +27,9 @@ def _stable_input(task: Mapping[str, object], units: tuple[dict[str, Any], ...])
     return classification_input_digest(task, units)
 
 
+stable_classification_input = _stable_input
+
+
 def _scope_allowed(impact: object, allowed: object) -> bool:
     if not isinstance(impact, list) or not isinstance(allowed, list):
         return False

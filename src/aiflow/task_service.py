@@ -449,6 +449,9 @@ def _persist_event_and_task(
         ) from error
 
 
+persist_event_and_task = _persist_event_and_task
+
+
 def _is_subject_sync_staged_patch(
     raw_task: Mapping[str, object], staged_task: Mapping[str, object], event: Mapping[str, object]
 ) -> bool:

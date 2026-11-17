@@ -156,6 +156,9 @@ def _issue_runner_authorization(
     )
 
 
+issue_runner_authorization = _issue_runner_authorization
+
+
 def _validate_authoritative_runner_launch(
     authorization: _MutationRunnerAuthorization,
 ) -> None:

@@ -81,17 +81,51 @@ def load_schema(contract_name: str, schema_directory: Path | None = None) -> Jso
     return value
 
 
+_REGISTRY_CACHE: dict[tuple[Path, tuple[tuple[str, int, int], ...]], Registry[Any]] = {}
+_VALIDATOR_CACHE: dict[
+    tuple[str, Path, tuple[int, int], tuple[tuple[str, int, int], ...]],
+    Draft202012Validator,
+] = {}
+
+
+def _file_stat_fingerprint(path: Path) -> tuple[int, int] | None:
+    try:
+        st = path.stat()
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return None
+
+
+def _composite_directory_fingerprint(
+    directory: Path,
+) -> tuple[tuple[str, int, int], ...]:
+    entries: list[tuple[str, int, int]] = []
+    for filename in sorted(set(SCHEMA_FILES.values())):
+        fp = _file_stat_fingerprint(directory / filename)
+        if fp is not None:
+            entries.append((filename, fp[0], fp[1]))
+    return tuple(entries)
+
+
 def _schema_registry(schema_directory: Path | None = None) -> Registry[Any]:
-    schema_directory = _effective_schema_directory(schema_directory)
+    directory = _effective_schema_directory(schema_directory).resolve()
+    composite_fp = _composite_directory_fingerprint(directory)
+    cache_key = (directory, composite_fp)
+    cached = _REGISTRY_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
     resources: list[tuple[str, Resource[Any]]] = []
     for filename in SCHEMA_FILES.values():
-        path = schema_directory / filename
+        path = directory / filename
         if not path.is_file():
             continue
         schema = json.loads(path.read_text(encoding="utf-8"))
         if isinstance(schema, dict) and isinstance(schema.get("$id"), str):
             resources.append((schema["$id"], Resource.from_contents(schema)))
-    return Registry().with_resources(resources)
+    registry = Registry().with_resources(resources)
+    _REGISTRY_CACHE[cache_key] = registry
+    return registry
 
 
 def _escape_pointer_part(part: object) -> str:
@@ -127,12 +161,29 @@ def _safe_schema_errors(
     value: object,
     schema_directory: Path | None = None,
 ) -> list[str]:
-    schema_directory = _effective_schema_directory(schema_directory)
-    validator = Draft202012Validator(
-        load_schema(contract_name, schema_directory),
-        format_checker=FormatChecker(),
-        registry=_schema_registry(schema_directory),
-    )
+    directory = _effective_schema_directory(schema_directory).resolve()
+    filename = SCHEMA_FILES.get(contract_name)
+    file_fp = _file_stat_fingerprint(directory / filename) if filename else None
+    if file_fp is None:
+        validator = Draft202012Validator(
+            load_schema(contract_name, directory),
+            format_checker=FormatChecker(),
+            registry=_schema_registry(directory),
+        )
+        return _validator_errors(validator, value)
+
+    composite_fp = _composite_directory_fingerprint(directory)
+    cache_key = (contract_name, directory, file_fp, composite_fp)
+    validator = _VALIDATOR_CACHE.get(cache_key)
+    if validator is None:
+        schema = load_schema(contract_name, directory)
+        registry = _schema_registry(directory)
+        validator = Draft202012Validator(
+            schema,
+            format_checker=FormatChecker(),
+            registry=registry,
+        )
+        _VALIDATOR_CACHE[cache_key] = validator
     return _validator_errors(validator, value)
 
 
@@ -302,6 +353,9 @@ def _require_valid_contract_with_schema_directory(
     errors = _validate_contract_with_schema_directory(contract_name, value, schema_directory)
     if errors:
         raise ContractValidationError(contract_name, errors)
+
+
+require_valid_contract_with_schema_directory = _require_valid_contract_with_schema_directory
 
 
 def require_valid_contract(contract_name: str, value: object) -> None:

@@ -35,20 +35,13 @@ jobs:
           uv sync --locked --all-extras
       - name: Detect repository governance mode
         id: governance
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        shell: bash
-        run: |
-          marker="$RUNNER_TEMP/base-bootstrap-mode.yaml"
-          if git show "${BASE_SHA}:.ai/bootstrap-mode.yaml" > "$marker" 2>/dev/null \
-            && grep -qx 'mode: bootstrap_auto' "$marker" \
-            && grep -qx 'status: active' "$marker"; then
-            echo "bootstrap_active=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "bootstrap_active=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: >-
+          uv run --locked python tools/ci/route_pr.py
+          --base "${{ github.event.pull_request.base.sha }}"
+          --head "${{ github.event.pull_request.head.sha }}"
+          --output "$GITHUB_OUTPUT"
       - name: Attach exact PR head branch
-        if: steps.governance.outputs.bootstrap_active != 'true'
+        if: steps.governance.outputs.category == 'formal_governed'
         env:
           PR_HEAD_REF: ${{ github.head_ref }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -62,12 +55,12 @@ jobs:
           test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
       - name: Validate contracts
         # Bootstrap mode runs the full suite below; formal V0 runs no pytest.
-        if: steps.governance.outputs.bootstrap_active != 'true'
+        if: steps.governance.outputs.category == 'formal_governed'
         run: >-
           uv run --locked python -m pytest
           tests/unit/test_contracts.py tests/integration/test_templates_and_policy.py -q
-      - name: Bootstrap quality checks
-        if: steps.governance.outputs.bootstrap_active == 'true'
+      - name: Quality checks
+        if: steps.governance.outputs.category != 'formal_governed'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -82,11 +75,19 @@ jobs:
           uv run --locked ruff check .
           uv run --locked ruff format --check .
           uv run --locked mypy
+      - name: Validate task closeout
+        if: steps.governance.outputs.category == 'task_closeout'
+        env:
+          TASK_ID: ${{ steps.governance.outputs.task_id }}
+        run: |
+          uv run --locked python -m pytest tests/unit/test_contracts.py tests/integration/test_templates_and_policy.py -q
+          uv run --locked python -m aiflow validate "$TASK_ID"
+          uv run --locked python tools/ci/verify_closeout.py --task "$TASK_ID"
       - name: Read repository identity
-        if: steps.governance.outputs.bootstrap_active != 'true'
+        if: steps.governance.outputs.category == 'formal_governed'
         run: test -s .ai/repository-id && sha256sum .ai/repository-id
       - name: Resolve task
-        if: steps.governance.outputs.bootstrap_active != 'true'
+        if: steps.governance.outputs.category == 'formal_governed'
         id: task
         env:
           AI_FLOW_TASK_ID: ${{ vars.AI_FLOW_TASK_ID }}
@@ -97,7 +98,7 @@ jobs:
           --task "$AI_FLOW_TASK_ID"
           --output "$GITHUB_OUTPUT"
       - name: Verify and Gate
-        if: steps.governance.outputs.bootstrap_active != 'true'
+        if: steps.governance.outputs.category == 'formal_governed'
         env:
           TASK_ID: ${{ steps.task.outputs.task_id }}
           TMPDIR: ${{ runner.temp }}
@@ -107,7 +108,7 @@ jobs:
           uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir" --output "$run_dir/evidence.json"
           uv run --locked python -m aiflow gate "$TASK_ID" --evidence "$run_dir/evidence.json" --format json > "$run_dir/gate.json"
       - name: Upload AI Flow diagnostics
-        if: always() && steps.governance.outputs.bootstrap_active != 'true'
+        if: always() && steps.governance.outputs.category == 'formal_governed'
         uses: actions/upload-artifact@v4
         with:
           name: ai-flow-${{ steps.task.outputs.task_id }}

@@ -11,7 +11,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
-from aiflow.classification_service import _stable_input
+from aiflow.classification_service import stable_classification_input
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
 from aiflow.errors import ContractError, StateTransitionError, StorageError
@@ -20,7 +20,10 @@ from aiflow.routing import entry_requires_ask
 from aiflow.specification import SpecificationAssessment, validate_specification
 from aiflow.state import create_transition_event, utc_timestamp
 from aiflow.storage import atomic_write_json, atomic_write_text, read_task_json, resolve_task_path
-from aiflow.task_service import TransitionResult, _persist_event_and_task, load_task_record
+from aiflow.task_service import TransitionResult, load_task_record, persist_event_and_task
+
+_persist_event_and_task = persist_event_and_task
+_stable_input = stable_classification_input
 
 FROZEN_DECISIONS_HEADING = "已冻结决策"
 ANSWER_MARKER = "answer_pending.json"
@@ -335,7 +338,7 @@ def answer_task(
     if not isinstance(classification, dict) or classification.get("task_id") != task_id:
         raise ContractError("ASK classification is invalid", code="ASK_CLASSIFICATION_INVALID")
     policy = load_policy_bundle(repository_root)
-    expected_input = _stable_input(record.task, parse_decision_units(record.task))
+    expected_input = stable_classification_input(record.task, parse_decision_units(record.task))
     if (
         classification.get("classification_input_sha256") != expected_input
         or classification.get("policy_sha256") != policy.sha256
