@@ -37,7 +37,7 @@ allowed_scope:
 base_commit: 5ad71cf845e1253a0ca821f6d68790f4cc4116c4
 branch: codex/governance-main-aligned
 created_at: '2026-11-18T15:56:53Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -133,6 +133,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-18T15:57:36Z'
 subject_commit: 8012c41584193276147f0762c1c316dc5bd84010
 task_id: TASK-0162
-updated_at: '2026-11-18T16:13:30Z'
+updated_at: '2026-11-18T16:27:17Z'
 worktree_dirty: false
 worktree_dirty_paths: []
