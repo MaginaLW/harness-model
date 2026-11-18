@@ -6,10 +6,15 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from test_begin_close_commands import commit_all, create_repository, make_ready, run_git, start
 
+from aiflow.cli import main as cli_main
+from aiflow.decision_units import classification_input_digest, parse_decision_units
 from aiflow.errors import ContractError
 from aiflow.observation import serialize_observation
 from aiflow.policy import evaluate_action_permission, load_policy_bundle
+from aiflow.storage import atomic_write_json, atomic_write_yaml, read_task_json
+from aiflow.task_service import load_task_record
 from tools.hooks import pre_command, pre_commit
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -78,7 +83,7 @@ def test_pre_command_unknown_action_rejects_without_task_or_observation(
 ) -> None:
     monkeypatch.setattr(
         pre_command,
-        "_resolve_task_id",
+        "resolve_hook_task_id",
         lambda *_args: pytest.fail("unknown action must not resolve a task"),
     )
     monkeypatch.setattr(
@@ -103,7 +108,7 @@ def test_pre_command_unknown_action_main_uses_refusal_exit_without_task_access(
 ) -> None:
     monkeypatch.setattr(
         pre_command,
-        "_resolve_task_id",
+        "resolve_hook_task_id",
         lambda *_args: pytest.fail("unknown action must not resolve a task"),
     )
     monkeypatch.setattr(
@@ -126,7 +131,7 @@ def test_pre_command_empty_action_is_policy_error_before_task_access(
 ) -> None:
     monkeypatch.setattr(
         pre_command,
-        "_resolve_task_id",
+        "resolve_hook_task_id",
         lambda *_args: pytest.fail("empty action must not resolve a task"),
     )
     monkeypatch.setattr(
@@ -251,45 +256,62 @@ def test_pre_command_observation_failure_propagates_to_fail_closed_main(
     assert capsys.readouterr().err == "observation persistence failed\n"
 
 
-def test_pre_command_task_resolver_requires_unique_active_task(tmp_path: Path) -> None:
-    with pytest.raises(ContractError, match="Exactly one active task"):
-        pre_command._resolve_task_id(tmp_path, None)
-
-
-def test_pre_command_task_resolver_accepts_one_active_task(
+def test_hook_resolver_uses_branch_and_worktree_tasks(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    task_root = tmp_path / ".ai" / "tasks"
-    (task_root / "TASK-0001").mkdir(parents=True)
-    (task_root / "TASK-0002").mkdir()
-    states = {"TASK-0001": "MERGED", "TASK-0002": "IMPLEMENTING"}
-    monkeypatch.setattr(
-        pre_command,
-        "read_task_record_strict",
-        lambda _root, task_id: SimpleNamespace(task={"current_state": states[task_id]}),
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    start(repository, monkeypatch)
+    commit_all(repository, "start two tasks on main")
+    run_git(repository, "switch", "-c", "feature")
+    with pytest.raises(ContractError, match="Exactly one active task"):
+        pre_command.resolve_hook_task_id(repository, None)
+
+    tasks = repository / ".ai/tasks"
+    (tasks / "TASK-0002/spec.md").write_text("branch candidate", encoding="utf-8")
+    commit_all(repository, "update task 2")
+    assert pre_commit.resolve_hook_task_id(repository, None) == "TASK-0002"
+    (tasks / "TASK-0001/spec.md").write_text("another candidate", encoding="utf-8")
+    with pytest.raises(ContractError, match="Exactly one active task"):
+        pre_command.resolve_hook_task_id(repository, None)
+    (tasks / "TASK-0001/task.yaml").write_text("{}", encoding="utf-8")
+    with pytest.raises(ContractError, match="Invalid task contract"):
+        pre_commit.resolve_hook_task_id(repository, None)
+    assert pre_command.main(["--action", "push", "--target", "origin/main", "--task", ""]) == 1
+
+
+@pytest.mark.parametrize("hook", ["pre_commit", "pre_command"])
+def test_nested_hook_with_legacy_subject_records_base_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, hook: str
+) -> None:
+    repository = create_repository(tmp_path / "repository")
+    start(repository, monkeypatch)
+    make_ready(repository, route="AUTO")
+    assert cli_main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    directory = repository / ".ai/tasks/TASK-0001"
+    task = load_task_record(repository, "TASK-0001").task
+    task["subject_commit"] = None
+    atomic_write_yaml(directory / "task.yaml", task)
+    classification = read_task_json(repository, "TASK-0001", "classification.json")
+    classification["classification_input_sha256"] = classification_input_digest(
+        task, parse_decision_units(task)
     )
-
-    assert pre_command._resolve_task_id(tmp_path, None) == "TASK-0002"
-
-
-def test_pre_command_task_resolver_rejects_ambiguous_or_empty_explicit_task(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    task_root = tmp_path / ".ai" / "tasks"
-    (task_root / "TASK-0001").mkdir(parents=True)
-    (task_root / "TASK-0002").mkdir()
-
-    def read(_root: Path, task_id: str) -> SimpleNamespace:
-        if task_id == "":
-            raise ContractError("Task is required", code="STATE_TASK_ID_INVALID")
-        return SimpleNamespace(task={"current_state": "IMPLEMENTING"})
-
-    monkeypatch.setattr(pre_command, "read_task_record_strict", read)
-
-    with pytest.raises(ContractError, match="Exactly one active task"):
-        pre_command._resolve_task_id(tmp_path, None)
-    with pytest.raises(ContractError, match="Task is required"):
-        pre_command._resolve_task_id(tmp_path, "")
+    atomic_write_json(directory / "classification.json", classification)
+    nested = repository / "outside"
+    nested.mkdir()
+    (nested / "change.txt").write_text("out of scope", encoding="utf-8")
+    with monkeypatch.context() as local:
+        local.chdir(nested)
+        if hook == "pre_commit":
+            assert pre_commit.main([]) == 2
+        else:
+            assert pre_command.main(["--action", "push", "--target", "origin/main"]) == 2
+    events = load_task_record(repository, "TASK-0001").events
+    observed = [
+        event["payload"]["observation"] for event in events if "observation" in event["payload"]
+    ]
+    assert observed[-1]["source"] == "hook_" + hook
+    assert observed[-1]["subject_commit"] == task["base_commit"]
 
 
 def _pre_commit_task() -> dict[str, object]:
@@ -303,7 +325,7 @@ def _pre_commit_task() -> dict[str, object]:
 
 def _install_pre_commit_facts(monkeypatch: pytest.MonkeyPatch, *, scope: object) -> None:
     task = _pre_commit_task()
-    monkeypatch.setattr(pre_commit, "_resolve_task_id", lambda root, task_id: "TASK-0001")
+    monkeypatch.setattr(pre_commit, "resolve_hook_task_id", lambda root, task_id: "TASK-0001")
     monkeypatch.setattr(
         pre_commit, "read_task_record_strict", lambda root, task_id: SimpleNamespace(task=task)
     )
@@ -405,8 +427,9 @@ def test_pre_commit_observation_failure_propagates_to_fail_closed_main(
 
 
 def test_pre_commit_rejects_missing_or_ambiguous_task(tmp_path: Path) -> None:
+    repository = create_repository(tmp_path / "repository")
     with pytest.raises(ContractError, match="Exactly one active task"):
-        pre_commit._resolve_task_id(tmp_path, None)
+        pre_commit.resolve_hook_task_id(repository, None)
 
 
 @pytest.mark.parametrize(

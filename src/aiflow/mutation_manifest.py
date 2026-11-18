@@ -18,7 +18,7 @@ from referencing.exceptions import CannotDetermineSpecification, Unresolvable
 
 from aiflow.contracts import (
     ContractValidationError,
-    _require_valid_contract_with_schema_directory,
+    require_valid_contract_with_schema_directory,
 )
 from aiflow.errors import ContractError
 
@@ -210,7 +210,7 @@ def _split_detector(detector: str) -> tuple[str, str]:
 def _require_valid_manifest_contract(value: object, schema_directory: Path) -> None:
     """Validate with the contained schema while preserving manifest reason codes."""
     try:
-        _require_valid_contract_with_schema_directory("mutation-manifest", value, schema_directory)
+        require_valid_contract_with_schema_directory("mutation-manifest", value, schema_directory)
     except ContractValidationError:
         raise
     except (

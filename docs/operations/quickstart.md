@@ -284,6 +284,8 @@ python -m aiflow review show <TASK-ID> --stage implementation --format json
 python -m aiflow approve <TASK-ID> --type code --actor <APPROVER> --reason "implementation approved"
 ```
 
+需要记录批准来源时，给 `approve` 加上 `--authorization-mode direct_human`（本人批准）或 `--authorization-mode standing_delegation`（依常设授权代记）。该字段可省略，批准的适用条件仍由对应任务和 Policy 决定。
+
 `review record` 不覆盖历史；需关闭发现时使用 `review resolve` 追加 revision。code approval 仍同时要求现有八节 `review-package.md` 和通过的本地 evidence。
 
 新生成 evidence 的命令摘要中，已知的 Python 解释器、仓库根目录和运行目录分别以 `${PYTHON}`、`${REPO_ROOT}` 和 `${RUN_DIR}` 表示；这些只是展示占位符，不改变实际执行的命令或检查。CI evidence 的复现命令使用 `${CI_RUN_DIR}` 和 `${CI_EVIDENCE}`；手动重放前须替换为已存在的运行目录及该目录下的直接子文件。既有 evidence 保持原样。

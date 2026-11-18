@@ -1,0 +1,13 @@
+{
+  "context_sha256": "a003f550cef6d51068cf3109a136a96286a51006164ea1a3e1a1339a0f776853",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-18T15:59:06Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-design-reviewer-task0162",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent review confirmed remote main at 5ad71cf8 and the three upstream files introduced by PR 173. They are outside the 35 allowed implementation paths. The initialized candidate contains only the new ledger, and the allowed path set exactly matches the 35 non-ledger changes at 1ed54255 relative to its original main. The delta from 4ccd9a0f is confined to the process runner and its test. The design checks mode and blob identity for transferred files and separately verifies the upstream documents. Local Linux validation is feasible through installed WSL and requires the current branch, interpreter, dependencies and full native V1 evidence, with the new implementation review, Gate, exact-head hosted required check and branch protection all still applicable. Shared governance features and POSIX acceptance remain bound to this successor, and delivery stays within the approved repository and branch scope.",
+  "task_id": "TASK-0162"
+}

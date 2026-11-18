@@ -33,22 +33,18 @@ jobs:
         run: |
           uv lock --check
           uv sync --locked --all-extras
-      - name: Detect repository governance mode
+      - name: Resolve PR governance
         id: governance
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        shell: bash
-        run: |
-          marker="$RUNNER_TEMP/base-bootstrap-mode.yaml"
-          if git show "${BASE_SHA}:.ai/bootstrap-mode.yaml" > "$marker" 2>/dev/null \
-            && grep -qx 'mode: bootstrap_auto' "$marker" \
-            && grep -qx 'status: active' "$marker"; then
-            echo "bootstrap_active=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "bootstrap_active=false" >> "$GITHUB_OUTPUT"
-          fi
+          AI_FLOW_TASK_ID: ${{ vars.AI_FLOW_TASK_ID }}
+        run: >-
+          uv run --locked python tools/ci/resolve_task.py --route
+          --base "${{ github.event.pull_request.base.sha }}"
+          --head "${{ github.event.pull_request.head.sha }}"
+          --task "$AI_FLOW_TASK_ID"
+          --output "$GITHUB_OUTPUT"
       - name: Attach exact PR head branch
-        if: steps.governance.outputs.bootstrap_active != 'true'
+        if: steps.governance.outputs.task_id != ''
         env:
           PR_HEAD_REF: ${{ github.head_ref }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -60,57 +56,70 @@ jobs:
           git switch --force-create "$PR_HEAD_REF" "$PR_HEAD_SHA"
           test "$(git symbolic-ref --quiet --short HEAD)" = "$PR_HEAD_REF"
           test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+      - name: Read repository identity
+        if: steps.governance.outputs.task_id != ''
+        run: test -s .ai/repository-id && sha256sum .ai/repository-id
       - name: Validate contracts
-        # Bootstrap mode runs the full suite below; formal V0 runs no pytest.
-        if: steps.governance.outputs.bootstrap_active != 'true'
+        if: steps.governance.outputs.task_id != ''
         run: >-
           uv run --locked python -m pytest
           tests/unit/test_contracts.py tests/integration/test_templates_and_policy.py -q
-      - name: Bootstrap quality checks
-        if: steps.governance.outputs.bootstrap_active == 'true'
+      - name: Validate retained task records
+        if: steps.governance.outputs.closeouts != '' || steps.governance.outputs.retained != ''
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CLOSEOUTS: ${{ steps.governance.outputs.closeouts }}
+          RETAINED: ${{ steps.governance.outputs.retained }}
         run: |
-          COVERAGE_FILE="$RUNNER_TEMP/.coverage" \
-            uv run --locked python -m pytest -q \
-            --cov=aiflow --cov-branch \
-            --cov-report=term-missing \
-            --cov-report="xml:$RUNNER_TEMP/coverage.xml"
-          uv run --locked python tools/ci/check_coverage.py --run-dir "$RUNNER_TEMP" --base "$BASE_SHA"
-          git diff --check "$BASE_SHA..$HEAD_SHA"
-          uv run --locked ruff check .
-          uv run --locked ruff format --check .
-          uv run --locked mypy
-      - name: Read repository identity
-        if: steps.governance.outputs.bootstrap_active != 'true'
-        run: test -s .ai/repository-id && sha256sum .ai/repository-id
-      - name: Resolve task
-        if: steps.governance.outputs.bootstrap_active != 'true'
-        id: task
-        env:
-          AI_FLOW_TASK_ID: ${{ vars.AI_FLOW_TASK_ID }}
-        run: >-
-          uv run --locked python tools/ci/resolve_task.py
-          --base "${{ github.event.pull_request.base.sha }}"
-          --head "${{ github.event.pull_request.head.sha }}"
-          --task "$AI_FLOW_TASK_ID"
-          --output "$GITHUB_OUTPUT"
+          for task in $CLOSEOUTS $RETAINED; do
+            uv run --locked python -m aiflow validate "$task"
+          done
+          for task in $RETAINED; do
+            uv run --locked python -m tools.ci.verify_closeout --retained --base "$BASE_SHA" --head "$HEAD_SHA" --task "$task"
+          done
+          for task in $CLOSEOUTS; do
+            uv run --locked python -m tools.ci.verify_closeout --base "$BASE_SHA" --head "$HEAD_SHA" --task "$task"
+          done
       - name: Verify and Gate
-        if: steps.governance.outputs.bootstrap_active != 'true'
+        id: verify
+        if: steps.governance.outputs.task_id != ''
         env:
-          TASK_ID: ${{ steps.task.outputs.task_id }}
+          TASK_ID: ${{ steps.governance.outputs.task_id }}
           TMPDIR: ${{ runner.temp }}
         run: |
           run_dir="$TMPDIR/aiflow"
           mkdir -p "$run_dir"
           uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir" --output "$run_dir/evidence.json"
           uv run --locked python -m aiflow gate "$TASK_ID" --evidence "$run_dir/evidence.json" --format json > "$run_dir/gate.json"
+          level=$(python -c 'import json,sys; print(json.load(sys.stdin)["verification_level"])' < "$run_dir/evidence.json")
+          echo "level=$level" >> "$GITHUB_OUTPUT"
+      - name: Maintenance quality checks
+        if: steps.governance.outputs.bootstrap_active == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          VERIFIED_LEVEL: ${{ steps.verify.outputs.level }}
+        run: |
+          coverage_dir="$RUNNER_TEMP/aiflow"
+          if [[ "$VERIFIED_LEVEL" != V1 && "$VERIFIED_LEVEL" != V2 ]]; then
+            coverage_dir="$RUNNER_TEMP"
+            COVERAGE_FILE="$coverage_dir/.coverage" \
+              uv run --locked python -m pytest -q \
+              --cov=aiflow --cov-branch \
+              --cov-report=term-missing \
+              --cov-report="xml:$coverage_dir/coverage.xml"
+          fi
+          uv run --locked python tools/ci/check_coverage.py --run-dir "$coverage_dir" --base "$BASE_SHA"
+          git diff --check "$BASE_SHA..$HEAD_SHA"
+          uv run --locked ruff check .
+          uv run --locked ruff format --check .
+          uv run --locked mypy
       - name: Upload AI Flow diagnostics
-        if: always() && steps.governance.outputs.bootstrap_active != 'true'
+        if: always() && steps.governance.outputs.task_id != ''
         uses: actions/upload-artifact@v4
         with:
-          name: ai-flow-${{ steps.task.outputs.task_id }}
+          name: ai-flow-${{ steps.governance.outputs.task_id }}
           path: ${{ runner.temp }}/aiflow
           retention-days: 14
           if-no-files-found: warn
