@@ -1,0 +1,138 @@
+allowed_scope:
+- .ai/schemas/approval.schema.json
+- src/aiflow/approval.py
+- src/aiflow/ask_service.py
+- src/aiflow/cli.py
+- src/aiflow/contracts.py
+- src/aiflow/facts_service.py
+- src/aiflow/gate.py
+- src/aiflow/initialization.py
+- src/aiflow/installed_mutations.py
+- src/aiflow/mutation_manifest.py
+- src/aiflow/node_execution.py
+- src/aiflow/node_verification.py
+- src/aiflow/observation_service.py
+- src/aiflow/policy.py
+- src/aiflow/scope.py
+- src/aiflow/sdk_review.py
+- src/aiflow/status_service.py
+- src/aiflow/task_service.py
+- src/aiflow/verification_service.py
+- tests/integration/test_approve_command.py
+- tests/integration/test_tool_wrappers.py
+- tests/unit/test_contracts.py
+- tests/unit/test_import_boundaries.py
+- tests/unit/test_observation.py
+- tests/unit/test_review_package.py
+- tests/unit/test_sdk_review.py
+- tools/hooks/pre_command.py
+- tools/hooks/pre_commit.py
+- .github/workflows/ai-quality-gate.yml
+- tests/integration/test_github_workflow.py
+- tests/unit/test_verify_closeout.py
+- tools/ci/resolve_task.py
+- tools/ci/verify_closeout.py
+- src/aiflow/process_runner.py
+- tests/unit/test_process_runner.py
+base_commit: 5ad71cf845e1253a0ca821f6d68790f4cc4116c4
+branch: codex/governance-main-aligned
+created_at: '2026-11-18T15:56:53Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - same_repository_branch_push
+  - same_repository_pull_request
+  - same_repository_merge_commit
+  goal: Deliver the integrated governance and POSIX verification repairs on the protected
+    main version containing the adoption guidance
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  - external_action
+  impact_scope:
+  - .ai/schemas/approval.schema.json
+  - src/aiflow/approval.py
+  - src/aiflow/ask_service.py
+  - src/aiflow/cli.py
+  - src/aiflow/contracts.py
+  - src/aiflow/facts_service.py
+  - src/aiflow/gate.py
+  - src/aiflow/initialization.py
+  - src/aiflow/installed_mutations.py
+  - src/aiflow/mutation_manifest.py
+  - src/aiflow/node_execution.py
+  - src/aiflow/node_verification.py
+  - src/aiflow/observation_service.py
+  - src/aiflow/policy.py
+  - src/aiflow/scope.py
+  - src/aiflow/sdk_review.py
+  - src/aiflow/status_service.py
+  - src/aiflow/task_service.py
+  - src/aiflow/verification_service.py
+  - tests/integration/test_approve_command.py
+  - tests/integration/test_tool_wrappers.py
+  - tests/unit/test_contracts.py
+  - tests/unit/test_import_boundaries.py
+  - tests/unit/test_observation.py
+  - tests/unit/test_review_package.py
+  - tests/unit/test_sdk_review.py
+  - tools/hooks/pre_command.py
+  - tools/hooks/pre_commit.py
+  - .github/workflows/ai-quality-gate.yml
+  - tests/integration/test_github_workflow.py
+  - tests/unit/test_verify_closeout.py
+  - tools/ci/resolve_task.py
+  - tools/ci/verify_closeout.py
+  - src/aiflow/process_runner.py
+  - tests/unit/test_process_runner.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0162
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: f7d972dc061de30fe1cc42da4215409c50125862c6c1444166000e4f655fa042
+goal: Deliver the integrated governance and POSIX verification repairs on the protected
+  main version containing the adoption guidance
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-18T15:57:36Z'
+subject_commit: 8012c41584193276147f0762c1c316dc5bd84010
+task_id: TASK-0162
+updated_at: '2026-11-18T16:13:30Z'
+worktree_dirty: false
+worktree_dirty_paths: []

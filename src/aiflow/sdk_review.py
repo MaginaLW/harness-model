@@ -55,7 +55,12 @@ OUTPUT_SCHEMA: dict[str, Any] = {
 def _git(root: Path, *arguments: str) -> bytes:
     try:
         result = subprocess.run(
-            ["git", *arguments], cwd=root, capture_output=True, check=False, timeout=10
+            ["git", *arguments],
+            cwd=root,
+            capture_output=True,
+            check=False,
+            timeout=10,
+            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
         )
     except (OSError, subprocess.TimeoutExpired) as error:
         raise ValueError("Git input is unavailable") from error
@@ -580,6 +585,7 @@ def execute_review(
             check=False,
             capture_output=True,
             timeout=10,
+            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
         ).returncode:
             raise ValueError("Execution output must be ignored")
         expected: dict[str, str] = {}
