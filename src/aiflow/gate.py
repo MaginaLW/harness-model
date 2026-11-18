@@ -360,6 +360,9 @@ def _v2_gate_facts(
     return result
 
 
+v2_gate_facts = _v2_gate_facts
+
+
 def classification_matches_policy(
     task: Mapping[str, Any], classification: Mapping[str, Any], policy: PolicyBundle
 ) -> bool:

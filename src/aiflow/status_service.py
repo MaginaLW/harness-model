@@ -17,7 +17,7 @@ from aiflow.freshness import (
     current_classification_input_digest,
     evaluate_freshness,
 )
-from aiflow.gate import _v2_gate_facts, classification_matches_policy, policy_v2_checks
+from aiflow.gate import classification_matches_policy, policy_v2_checks, v2_gate_facts
 from aiflow.git_context import GitContext, collect_git_context, commits_are_ancestral
 from aiflow.policy import is_node_policy, is_node_policy_candidate, load_policy_bundle
 from aiflow.routing import ROUTE_ORDER
@@ -171,7 +171,7 @@ def _current_facts(
                         if isinstance(unit, dict) and "decision_unit_id" in unit
                     )
                     facts.update(
-                        _v2_gate_facts(
+                        v2_gate_facts(
                             repository_root,
                             task_id,
                             evidence,
@@ -436,7 +436,7 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
                 bundle = load_policy_bundle(repository_root)
                 if is_node_policy(bundle) and bundle.policy_version == "3.2.0":
                     current.update(
-                        _v2_gate_facts(
+                        v2_gate_facts(
                             repository_root,
                             task_id,
                             evidence_value,

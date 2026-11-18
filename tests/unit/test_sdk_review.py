@@ -376,6 +376,17 @@ def test_execute_records_started_before_the_only_runtime_call_and_refuses_reuse(
     monkeypatch.chdir(root)
     output = root / "build/review-success"
     calls: list[dict[str, Any]] = []
+    run = subprocess.run
+    monkeypatch.setenv("GIT_OPTIONAL_LOCKS", "1")
+    monkeypatch.setenv("AIFLOW_SDK_TEST_MARKER", "inherited")
+
+    def read_only_git(command: list[str], **kwargs: Any) -> Any:
+        child_env = kwargs["env"]
+        assert child_env.get("GIT_OPTIONAL_LOCKS") == "0"
+        assert child_env.get("AIFLOW_SDK_TEST_MARKER") == "inherited"
+        return run(command, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", read_only_git)
 
     def fake_sdk(
         prepared: dict[str, Any], workdir: Path, expected_instructions: Any

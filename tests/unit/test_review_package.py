@@ -122,6 +122,19 @@ def test_spec_approval_is_bound_to_current_versions() -> None:
     assert approval_is_current(prepared.record, context(spec_sha256="c" * 64)) is False
 
 
+def test_prepare_approval_rejects_invalid_authorization_mode() -> None:
+    with pytest.raises(ContractError) as caught:
+        prepare_approval(
+            approval_type="spec",
+            context=context(task_state="WAITING_FOR_SPEC_REVIEW"),
+            actor="reviewer",
+            reason="reviewed",
+            approved_at=NOW,
+            authorization_mode="unknown",
+        )
+    assert caught.value.code == "APPROVAL_AUTHORIZATION_MODE_INVALID"
+
+
 def test_code_approval_requires_review_evidence_and_clean_governance_context() -> None:
     with pytest.raises(ContractError) as caught:
         prepare_approval(

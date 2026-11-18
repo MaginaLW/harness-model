@@ -117,6 +117,8 @@ def test_contract_rejects_unsafe_or_kind_mismatched_summaries(
 def test_contract_rejects_missing_required_bindings(field: str) -> None:
     payload = _payload("scope_out_of_bounds", {"paths": ["src/a.py"]})
     payload.pop(field)
+    with pytest.raises(ContractValidationError):
+        parse_observation(payload)
     assert any(
         error.startswith(f"/{field}:") for error in validate_contract("observation", payload)
     )
