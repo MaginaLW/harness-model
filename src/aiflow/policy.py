@@ -67,7 +67,7 @@ class ActionPermission:
     rule_id: str | None = None
 
 
-class _UniqueKeyLoader(yaml.SafeLoader):
+class UniqueKeyLoader(yaml.SafeLoader):
     """Reject ambiguous mappings in the permissions Policy, including nested ones."""
 
     def __init__(self, stream: Any) -> None:
@@ -197,7 +197,7 @@ def _load_document(
     try:
         text = path.read_text(encoding="utf-8")
         value = (
-            yaml.load(text, Loader=_UniqueKeyLoader)
+            yaml.load(text, Loader=UniqueKeyLoader)
             if filename == "permissions.yaml"
             else load_yaml_text(text)
         )

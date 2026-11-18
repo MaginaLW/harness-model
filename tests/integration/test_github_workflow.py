@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 from aiflow.gate import GateFacts, evaluate_gate_facts
-from tools.ci.resolve_task import resolve_task_id
+from tools.ci.resolve_task import _bootstrap_active, classify_pr, main, resolve_task_id
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / ".github" / "workflows" / "ai-quality-gate.yml"
@@ -51,21 +51,6 @@ def _repo(tmp_path: Path) -> tuple[Path, str]:
     return root, _git(root, "rev-parse", "HEAD")
 
 
-def _bootstrap_active_at_commit(root: Path, commit: str) -> bool:
-    result = subprocess.run(
-        ["git", "show", f"{commit}:.ai/bootstrap-mode.yaml"],
-        cwd=root,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=20,
-    )
-    if result.returncode != 0:
-        return False
-    lines = result.stdout.splitlines()
-    return "mode: bootstrap_auto" in lines and "status: active" in lines
-
-
 def test_workflow_is_read_only_reproducible_and_bounded() -> None:
     workflow = _workflow()
     text = WORKFLOW.read_text(encoding="utf-8")
@@ -105,7 +90,7 @@ def test_workflow_attaches_exact_event_head_to_the_pr_source_branch() -> None:
     }
 
     names = [step.get("name") for step in steps]
-    governance_index = names.index("Detect repository governance mode")
+    governance_index = names.index("Resolve PR governance")
     attachment_index = next(
         index
         for index, step in enumerate(steps)
@@ -115,14 +100,12 @@ def test_workflow_attaches_exact_event_head_to_the_pr_source_branch() -> None:
             "PR_HEAD_SHA": "${{ github.event.pull_request.head.sha }}",
         }
     )
-    identity_index = names.index("Read repository identity")
-    task_index = names.index("Resolve task")
-    assert governance_index < attachment_index < identity_index < task_index
+    assert governance_index < attachment_index < names.index("Verify and Gate")
 
     attachment = steps[attachment_index]
-    assert attachment["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert attachment["if"] == "steps.governance.outputs.task_id != ''"
     contracts = steps[names.index("Validate contracts")]
-    assert contracts["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
+    assert contracts["if"] == "steps.governance.outputs.task_id != ''"
     assert governance_index < names.index("Validate contracts")
     assert attachment["env"] == {
         "PR_HEAD_REF": "${{ github.head_ref }}",
@@ -234,61 +217,54 @@ def test_branch_attachment_rejects_post_switch_branch_or_sha_mismatch(
             _attach_event_head_to_source_branch(root, "feature/task-0030", event_head)
 
 
-def test_resolved_task_output_flows_to_verify_and_gate() -> None:
-    workflow = _workflow()
-    text = WORKFLOW.read_text(encoding="utf-8")
-    gate_command = (
-        'uv run --locked python -m aiflow gate "$TASK_ID" '
-        '--evidence "$run_dir/evidence.json" --format json'
-    )
-    steps = workflow["jobs"]["ai-quality-gate"]["steps"]
-    assert isinstance(steps, list)
-    verify = next(step for step in steps if step.get("name") == "Verify and Gate")
-    upload = next(step for step in steps if step.get("name") == "Upload AI Flow diagnostics")
+def test_governance_outputs_feed_verify_closeout_and_maintenance_checks() -> None:
+    steps = {step.get("name"): step for step in _workflow()["jobs"]["ai-quality-gate"]["steps"]}
+    governance = steps["Resolve PR governance"]
+    assert governance["id"] == "governance"
+    assert "tools/ci/resolve_task.py --route" in governance["run"]
+    assert "github.event.pull_request.base.sha" in governance["run"]
+    assert "github.event.pull_request.head.sha" in governance["run"]
 
-    assert "task_id=" in (ROOT / "tools" / "ci" / "resolve_task.py").read_text(encoding="utf-8")
-    assert verify["if"] == "steps.governance.outputs.bootstrap_active != 'true'"
-    assert verify["env"] == {
-        "TASK_ID": "${{ steps.task.outputs.task_id }}",
-        "TMPDIR": "${{ runner.temp }}",
-    }
-    assert text.count("TMPDIR: ${{ runner.temp }}") == 1
+    verify = steps["Verify and Gate"]
+    assert verify["if"] == "steps.governance.outputs.task_id != ''"
+    assert verify["env"]["TASK_ID"] == "${{ steps.governance.outputs.task_id }}"
+    assert verify["env"]["TMPDIR"] == "${{ runner.temp }}"
     assert 'run_dir="$TMPDIR/aiflow"' in verify["run"]
-    assert 'run_dir="$RUNNER_TEMP/aiflow"' not in verify["run"]
-    assert 'uv run --locked python -m aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir"' in text
-    assert gate_command in text
-    assert upload["if"] == "always() && steps.governance.outputs.bootstrap_active != 'true'"
-    assert upload["with"]["path"] == "${{ runner.temp }}/aiflow"
-
-
-def test_bootstrap_mode_runs_quality_checks_without_self_governance() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    coverage_command = (
-        "uv run --locked python tools/ci/check_coverage.py "
-        '--run-dir "$RUNNER_TEMP" --base "$BASE_SHA"'
+    ordered = [
+        'aiflow verify "$TASK_ID" --ci --ci-run-dir "$run_dir" --output "$run_dir/evidence.json"',
+        'aiflow gate "$TASK_ID" --evidence "$run_dir/evidence.json"',
+        'echo "level=$level" >> "$GITHUB_OUTPUT"',
+    ]
+    assert [verify["run"].index(command) for command in ordered] == sorted(
+        verify["run"].index(command) for command in ordered
+    )
+    assert (
+        steps["Upload AI Flow diagnostics"]["if"]
+        == "always() && steps.governance.outputs.task_id != ''"
+    )
+    closeout = steps["Validate retained task records"]
+    assert 'aiflow validate "$task"' in closeout["run"]
+    assert (
+        'tools.ci.verify_closeout --base "$BASE_SHA" --head "$HEAD_SHA" --task "$task"'
+        in closeout["run"]
     )
 
-    assert "mode: bootstrap_auto" in text
-    assert "status: active" in text
-    assert "BASE_SHA: ${{ github.event.pull_request.base.sha }}" in text
-    assert 'git show "${BASE_SHA}:.ai/bootstrap-mode.yaml"' in text
-    assert "bootstrap_active=true" in text
-    assert "if: steps.governance.outputs.bootstrap_active == 'true'" in text
-    assert text.count("if: steps.governance.outputs.bootstrap_active != 'true'") == 5
-    assert 'COVERAGE_FILE="$RUNNER_TEMP/.coverage"' in text
-    assert "--cov=aiflow --cov-branch" in text
-    assert "--cov=tools/analysis" not in text
-    assert "--cov-report=term-missing" in text
-    assert '--cov-report="xml:$RUNNER_TEMP/coverage.xml"' in text
-    assert coverage_command in text
-    assert text.index('--cov-report="xml:$RUNNER_TEMP/coverage.xml"') < text.index(coverage_command)
-    assert "--cov-fail-under" not in text
-    assert "uv run --locked diff-cover" not in text
-    assert 'git diff --check "$BASE_SHA..$HEAD_SHA"' in text
-    assert "uv run --locked ruff check ." in text
-    assert "uv run --locked ruff format --check ." in text
-    assert "uv run --locked mypy" in text
-    assert "always() && steps.governance.outputs.bootstrap_active != 'true'" in text
+    quality = steps["Maintenance quality checks"]
+    assert quality["if"] == "steps.governance.outputs.bootstrap_active == 'true'"
+    assert quality["env"]["VERIFIED_LEVEL"] == "${{ steps.verify.outputs.level }}"
+    script = quality["run"]
+    assert 'coverage_dir="$RUNNER_TEMP/aiflow"' in script
+    fallback = script.index('if [[ "$VERIFIED_LEVEL" != V1 && "$VERIFIED_LEVEL" != V2 ]]')
+    assert fallback < script.index("--cov=aiflow --cov-branch") < script.index("\nfi\n")
+    assert script.index("\nfi\n") < script.index(
+        'check_coverage.py --run-dir "$coverage_dir" --base "$BASE_SHA"'
+    )
+    assert 'git diff --check "$BASE_SHA..$HEAD_SHA"' in script
+    assert (
+        "ruff check ." in script
+        and "ruff format --check ." in script
+        and "uv run --locked mypy" in script
+    )
 
 
 @pytest.mark.parametrize(
@@ -309,7 +285,7 @@ def test_bootstrap_detection_is_canonical_and_fail_closed(
     _git(root, "add", "-A")
     _git(root, "commit", "--allow-empty", "-m", "marker state")
 
-    assert _bootstrap_active_at_commit(root, _git(root, "rev-parse", "HEAD")) is expected
+    assert _bootstrap_active(root, _git(root, "rev-parse", "HEAD")) is expected
 
 
 def test_base_commit_controls_bootstrap_transition(tmp_path: Path) -> None:
@@ -332,10 +308,10 @@ def test_base_commit_controls_bootstrap_transition(tmp_path: Path) -> None:
     _git(entering, "commit", "-m", "attempt bootstrap")
     entering_head = _git(entering, "rev-parse", "HEAD")
 
-    assert _bootstrap_active_at_commit(exiting, active_base) is True
-    assert _bootstrap_active_at_commit(exiting, exit_head) is False
-    assert _bootstrap_active_at_commit(entering, inactive_base) is False
-    assert _bootstrap_active_at_commit(entering, entering_head) is True
+    assert _bootstrap_active(exiting, active_base) is True
+    assert _bootstrap_active(exiting, exit_head) is False
+    assert _bootstrap_active(entering, inactive_base) is False
+    assert _bootstrap_active(entering, entering_head) is True
 
 
 @pytest.mark.parametrize("count", [0, 1, 2])
@@ -429,3 +405,130 @@ def test_diff_task_resolution_still_rejects_two_tasks_introduced_by_the_head(
 
     with pytest.raises(ValueError, match="exactly one"):
         resolve_task_id(root, advanced_base, head)
+
+
+def _active_base(root: Path) -> str:
+    marker = root / ".ai" / "bootstrap-mode.yaml"
+    marker.write_text("mode: bootstrap_auto\nstatus: active\n", encoding="utf-8")
+    policy = root / ".ai" / "policy" / "hard-rules.yaml"
+    policy.parent.mkdir()
+    policy.write_bytes((ROOT / ".ai" / "policy" / "hard-rules.yaml").read_bytes())
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "enable maintenance")
+    return _git(root, "rev-parse", "HEAD")
+
+
+def _set_task_state(root: Path, identifier: str, state: str) -> None:
+    path = root / ".ai" / "tasks" / identifier / "task.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"task_id: {identifier}\ncurrent_state: {state}\n", encoding="utf-8")
+
+
+def test_router_distinguishes_maintenance_docs_and_governance_renames(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, _ = _repo(tmp_path)
+    base = _active_base(root)
+    governed = root / ".github" / "CODEOWNERS"
+    governed.parent.mkdir()
+    governed.write_text("initial\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "tracked governance file")
+    base = _git(root, "rev-parse", "HEAD")
+    (root / "README.md").write_text("guide\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "ordinary docs")
+    head = _git(root, "rev-parse", "HEAD")
+    monkeypatch.chdir(root)
+    output = tmp_path / "output"
+    assert main(["--route", "--base", base, "--head", head, "--output", str(output)]) == 0
+    assert output.read_text(encoding="utf-8").splitlines() == [
+        "bootstrap_active=true",
+        "task_id=",
+        "closeouts=",
+        "retained=",
+    ]
+    _git(root, "mv", ".github/CODEOWNERS", "guide.md")
+    _git(root, "commit", "-m", "move former governance file")
+    with pytest.raises(ValueError, match="implementation task"):
+        classify_pr(root, base, _git(root, "rev-parse", "HEAD"))
+
+
+def test_router_requires_formal_task_for_docs_outside_maintenance(tmp_path: Path) -> None:
+    root, base = _repo(tmp_path)
+    (root / "README.md").write_text("documentation\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "docs")
+    with pytest.raises(ValueError, match="implementation task"):
+        classify_pr(root, base, _git(root, "rev-parse", "HEAD"))
+
+
+def test_router_separates_implementation_from_multiple_closeouts_and_failed_attempt(
+    tmp_path: Path,
+) -> None:
+    root, _ = _repo(tmp_path)
+    base = _active_base(root)
+    _set_task_state(root, "TASK-0001", "MERGED")
+    _set_task_state(root, "TASK-0002", "MERGED")
+    (root / "README.md").write_text("documentation\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "close two tasks")
+    close_head = _git(root, "rev-parse", "HEAD")
+    _set_task_state(root, "TASK-0001", "NEW")  # Routing reads the named commit.
+    route = classify_pr(root, base, close_head)
+    assert route.task_id is None and route.closeouts == ("TASK-0001", "TASK-0002")
+    _git(root, "restore", ".ai/tasks/TASK-0001/task.yaml")
+    _set_task_state(root, "TASK-0003", "FAILED")
+    _set_task_state(root, "TASK-0004", "APPROVED_FOR_MERGE")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "deliver implementation and retain failed attempt")
+    head = _git(root, "rev-parse", "HEAD")
+    route = classify_pr(root, base, head)
+    assert route.task_id == "TASK-0004" and route.retained == ("TASK-0003",)
+    assert route.closeouts == ("TASK-0001", "TASK-0002")
+    with pytest.raises(ValueError, match="not an implementation candidate"):
+        classify_pr(root, base, head, "TASK-0001")
+    _set_task_state(root, "TASK-0005", "APPROVED_FOR_MERGE")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "additional implementation candidate")
+    ambiguous = _git(root, "rev-parse", "HEAD")
+    with pytest.raises(ValueError, match="if ambiguous"):
+        classify_pr(root, base, ambiguous)
+    assert classify_pr(root, base, ambiguous, "TASK-0005").task_id == "TASK-0005"
+
+
+@pytest.mark.parametrize(
+    "earlier_file", ["README.md", "src/aiflow/version.py", "src/aiflow/old.py"]
+)
+def test_pr_route_checks_the_implementation_range(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    earlier_file: str,
+) -> None:
+    root, _ = _repo(tmp_path)
+    base = _active_base(root)
+    version = root / "src" / "aiflow" / "version.py"
+    version.parent.mkdir(parents=True)
+    (root / earlier_file).write_text("first revision\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "work before task creation")
+    task_base = _git(root, "rev-parse", "HEAD")
+    task = "TASK-0007"
+    _set_task_state(root, task, "APPROVED_FOR_MERGE")
+    with (root / ".ai" / "tasks" / task / "task.yaml").open("a", encoding="utf-8") as stream:
+        stream.write(f"base_commit: {task_base}\n")
+    if earlier_file == "src/aiflow/old.py":
+        (root / earlier_file).rename(version)
+    else:
+        version.write_text("reviewed revision\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "record the reviewed candidate")
+    head = _git(root, "rev-parse", "HEAD")
+    monkeypatch.chdir(root)
+    result = main(["--route", "--base", base, "--head", head])
+    output = capsys.readouterr()
+    if earlier_file == "README.md":
+        assert result == 0 and f"task_id={task}" in output.out
+    else:
+        assert result == 1 and f"PR changes precede task base: {earlier_file}" in output.err

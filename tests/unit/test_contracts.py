@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import uuid
 from copy import deepcopy
@@ -377,6 +378,30 @@ def test_batch_rejects_resource_drift_before_return(tmp_path: Path, change: str)
                 assert validate(valid_fixture("task")) == []
 
 
+@pytest.mark.parametrize(
+    ("filename", "pointer"),
+    [
+        ("task.schema.json", "/task_id"),
+        ("decision-unit.schema.json", "/decision_units/0/task_id"),
+    ],
+)
+def test_single_validation_observes_same_stat_schema_edit(
+    tmp_path: Path, filename: str, pointer: str
+) -> None:
+    directory = tmp_path / "schemas"
+    shutil.copytree(REPOSITORY_ROOT / ".ai/schemas", directory)
+    value = valid_fixture("task")
+    path = directory / filename
+    with schema_directory_context(directory):
+        assert validate_contract("task", value) == []
+        previous = path.stat()
+        path.write_bytes(path.read_bytes().replace(b"^TASK-", b"^WORK-"))
+        os.utime(path, ns=(previous.st_atime_ns, previous.st_mtime_ns))
+        assert validate_contract("task", value) == [
+            f"{pointer}: contract constraint failed (pattern)"
+        ]
+
+
 def test_batch_is_context_local_and_single_api_remains_fresh(tmp_path: Path) -> None:
     directory = tmp_path / "schemas"
     shutil.copytree(REPOSITORY_ROOT / ".ai/schemas", directory)
@@ -424,18 +449,21 @@ def test_batch_missing_unreferenced_schema_is_allowed_but_root_is_required(tmp_p
 
 
 def test_batch_empty_does_not_read_and_single_preserves_fresh_behavior(
-    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
-    import aiflow.contracts as contracts
-
-    def unexpected(*args, **kwargs):
-        pytest.fail("empty/single batch must not prepare a resource snapshot")
-
-    monkeypatch.setattr(contracts, "_schema_contents", unexpected)
-    with contract_validation_batch("task", 0):
-        pass
-    with contract_validation_batch("task", 1) as validate:
-        assert validate(valid_fixture("task")) == []
+    directory = tmp_path / "schemas"
+    with schema_directory_context(directory):
+        with contract_validation_batch("task", 0):
+            pass
+        shutil.copytree(REPOSITORY_ROOT / ".ai/schemas", directory)
+        value = valid_fixture("task")
+        with contract_validation_batch("task", 1) as validate:
+            assert validate(value) == []
+            path = directory / "task.schema.json"
+            schema = json.loads(path.read_text(encoding="utf-8"))
+            schema["required"].append("new_field")
+            path.write_text(json.dumps(schema), encoding="utf-8")
+            assert validate(value) == ["/new_field: required property is missing"]
 
 
 def test_batch_rejects_bad_reference_like_single_validation(tmp_path: Path) -> None:

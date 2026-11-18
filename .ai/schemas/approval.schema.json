@@ -31,7 +31,10 @@
     "evidence_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "action_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "expires_at": {"type": "string", "format": "date-time"},
-    "single_use": {"const": true}
+    "single_use": {"const": true},
+    "authorization_mode": {
+      "enum": ["direct_human", "standing_delegation"]
+    }
   },
   "allOf": [
     {

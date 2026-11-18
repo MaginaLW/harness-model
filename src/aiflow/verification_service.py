@@ -1164,7 +1164,7 @@ def verify_task(
                     "Node verification actor is invalid", code="VERIFY_ACTOR_REQUIRED"
                 )
             if run_id is not None:
-                from aiflow.node_verification import _path
+                from aiflow.node_verification import validate_canonical_path
 
                 if (
                     not isinstance(run_id, str)
@@ -1173,7 +1173,7 @@ def verify_task(
                     raise ContractError(
                         "Node run ID is invalid", code="VERIFICATION_RUN_ID_INVALID"
                     )
-                _path(run_id)
+                validate_canonical_path(run_id)
                 try:
                     (root / ".ai/tasks" / task_id / "logs" / run_id).lstat()
                 except FileNotFoundError:

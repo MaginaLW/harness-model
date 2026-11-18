@@ -30,12 +30,12 @@ from aiflow.node_verification import (
     COVERAGE_ISTANBUL_METHOD,
     COVERAGE_METHOD,
     PRODUCT_TESTS,
-    _ordered_paths,
-    _path,
     validate_node_istanbul_line_coverage,
     validate_node_line_coverage,
     validate_node_product_tests,
 )
+from aiflow.node_verification import validate_canonical_path as _path
+from aiflow.node_verification import validate_ordered_paths as _ordered_paths
 from aiflow.policy import PolicyBundle, load_policy_bundle
 from aiflow.process_runner import run_node_process
 from aiflow.verification import VerificationContext, parse_verification_plan
@@ -382,6 +382,10 @@ def _read(path: Path, *, limit: int = MAX_FILE_BYTES, os_role: str | None = None
 
 def _json(path: Path, *, limit: int = MAX_JSON_BYTES) -> Any:
     return _json_bytes(_read(path, limit=limit))
+
+
+read_material_bytes = _read
+read_material_json = _json
 
 
 def _take_budget(budget: list[int], size: int = 0) -> None:
@@ -2104,7 +2108,7 @@ def _governance_snapshot(
         require_valid_contract("approval", approval)
     marker_path = root / prefix / "approval_pending.json"
     if include_pending and marker_path.exists():
-        from aiflow.approval import _validate_node_code_approval_marker
+        from aiflow.approval import validate_node_code_approval_marker
         from aiflow.task_service import read_task_record_strict
 
         marker = _json(marker_path)
@@ -2134,7 +2138,7 @@ def _governance_snapshot(
         require_valid_contract("classification", classification)
         evidence = _json(root / prefix / "evidence.json")
         require_valid_contract("evidence", evidence)
-        _validate_node_code_approval_marker(
+        validate_node_code_approval_marker(
             marker,
             task_id=task_id,
             current_task=current.task,
