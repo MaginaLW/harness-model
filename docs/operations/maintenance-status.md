@@ -6,7 +6,7 @@
 
 **当前方向：仓库维护。** 入口治理和已授权的维护收口已完成，后续按具体需求或可复现问题推进；Stage B、旧 mutation 加固、真实评分、自动审核、Desktop 附着及 Phase 3/4 继续暂停。维护交付不自动恢复这些工作，Policy、授权和质量阈值保持不变。
 
-**治理资料归属**：[治理建议](HARNESS_MODEL_GOVERNANCE_RECOMMENDATIONS.md)与[执行计划](HARNESS_MODEL_GOVERNANCE_EXECUTION_PLAN.md)已从 dotfiles 归入本仓，原文按规划时点保留；其中“待执行”“本次未执行”描述原文编写阶段。实际治理已由 [PR #154](https://github.com/MaginaLW/harness-model/pull/154) 合入：P0/P1/P2/P5 收口，P3/P4 按证据不实施；入口固定集合字符减少 53.62%，实际 token 与自然任务工时效果未测。Stage B 与旧加固仍停止。
+**治理资料归属**：[治理建议](../archive/operations/HARNESS_MODEL_GOVERNANCE_RECOMMENDATIONS.md)与[执行计划](../archive/operations/HARNESS_MODEL_GOVERNANCE_EXECUTION_PLAN.md)已从 dotfiles 归入本仓，原文按规划时点保留；其中“待执行”“本次未执行”描述原文编写阶段。实际治理已由 [PR #154](https://github.com/MaginaLW/harness-model/pull/154) 合入：P0/P1/P2/P5 收口，P3/P4 按证据不实施；入口固定集合字符减少 53.62%，实际 token 与自然任务工时效果未测。Stage B 与旧加固仍停止。
 
 ### 版本与用途
 

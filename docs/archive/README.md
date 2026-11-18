@@ -1,7 +1,6 @@
 # 文档归档
 
-本目录保存已被后续文档取代、但仍需可追溯的历史执行文档。归档只改变存放位置，不改变
-任何文件内容，也不改变它们作为历史事实的效力。
+本目录保存已被后续文档取代、但仍需可追溯的历史执行文档。归档保留历史正文和结论。移动文档时可更新相对链接；下表记录原路径和归档位置，原始字节可在归档前提交中回读。
 
 ## 归档原则
 
@@ -57,15 +56,15 @@
 - 按日期的运营记录（证据与追溯；当前状态只以[维护收尾与待办](../operations/maintenance-status.md)为准）：
   - [维护状态历史记录](operations/maintenance-status-history.md)（原 `maintenance-status.md` 的逐窗口日记）
   - [follow-up-preparation-2026-09-13.md](operations/follow-up-preparation-2026-09-13.md)
-  - [zcode-retrospective-2026-09-20.md](../operations/zcode-retrospective-2026-09-20.md)
-  - [follow-up-backlog-2026-09-22.md](../operations/follow-up-backlog-2026-09-22.md)
-  - [local-tools-closeout-2026-09-22.md](../operations/local-tools-closeout-2026-09-22.md)
-  - [pilot-evidence-review-2026-09-22.md](../operations/pilot-evidence-review-2026-09-22.md)
-  - [e4-gap-assessment-2026-09-23.md](../operations/e4-gap-assessment-2026-09-23.md)
-  - [e4-preflight-closeout-2026-09-23.md](../operations/e4-preflight-closeout-2026-09-23.md)
+  - [zcode-retrospective-2026-09-20.md](operations/zcode-retrospective-2026-09-20.md)
+  - [follow-up-backlog-2026-09-22.md](operations/follow-up-backlog-2026-09-22.md)
+  - [local-tools-closeout-2026-09-22.md](operations/local-tools-closeout-2026-09-22.md)
+  - [pilot-evidence-review-2026-09-22.md](operations/pilot-evidence-review-2026-09-22.md)
+  - [e4-gap-assessment-2026-09-23.md](operations/e4-gap-assessment-2026-09-23.md)
+  - [e4-preflight-closeout-2026-09-23.md](operations/e4-preflight-closeout-2026-09-23.md)
   - [self-hosted-runner-inventory-2026-09-12.md](operations/self-hosted-runner-inventory-2026-09-12.md)
-  - [next-stage-start-conditions-2026-10-02.md](../operations/next-stage-start-conditions-2026-10-02.md)
-  - [zcode-next-stage-assignments-2026-10-02.md](../operations/zcode-next-stage-assignments-2026-10-02.md)
+  - [next-stage-start-conditions-2026-10-02.md](operations/next-stage-start-conditions-2026-10-02.md)
+  - [zcode-next-stage-assignments-2026-10-02.md](operations/zcode-next-stage-assignments-2026-10-02.md)
   - [f-real-import-acceptance-2026-10-03.md](operations/f-real-import-acceptance-2026-10-03.md)
   - [zcode-report-recovery-2026-10-03.md](operations/zcode-report-recovery-2026-10-03.md)
   - [backlog-execution-2026-10-04.md](operations/backlog-execution-2026-10-04.md)
@@ -73,7 +72,7 @@
   - [f-successor-decision-2026-10-04.md](operations/f-successor-decision-2026-10-04.md)
   - [phase-entry-proposals-2026-10-04.md](operations/phase-entry-proposals-2026-10-04.md)
   - [publication-package-2026-10-04.md](operations/publication-package-2026-10-04.md)
-  - [verification-budget-decision-2026-10-04.md](../operations/verification-budget-decision-2026-10-04.md)
+  - [verification-budget-decision-2026-10-04.md](operations/verification-budget-decision-2026-10-04.md)
   - [windows-private-timeout-repair-2026-10-04.md](operations/windows-private-timeout-repair-2026-10-04.md)
   - [windows-production-design-2026-10-04.md](operations/windows-production-design-2026-10-04.md)
   - [next-plan-execution-2026-10-08.md](operations/next-plan-execution-2026-10-08.md)
@@ -146,11 +145,27 @@
 | `docs/operations/review-detection-preparation.md` | [review-detection-preparation.md](operations/review-detection-preparation.md) |
 | `docs/operations/review-feedback.md` | [review-feedback.md](operations/review-feedback.md) |
 | `docs/operations/review-feedback-simulation.md` | [review-feedback-simulation.md](operations/review-feedback-simulation.md) |
+| `docs/operations/HARNESS_MODEL_GOVERNANCE_EXECUTION_PLAN.md` | [HARNESS_MODEL_GOVERNANCE_EXECUTION_PLAN.md](operations/HARNESS_MODEL_GOVERNANCE_EXECUTION_PLAN.md) |
+| `docs/operations/HARNESS_MODEL_GOVERNANCE_RECOMMENDATIONS.md` | [HARNESS_MODEL_GOVERNANCE_RECOMMENDATIONS.md](operations/HARNESS_MODEL_GOVERNANCE_RECOMMENDATIONS.md) |
+| `docs/operations/controlled-tool-discovery.md` | [controlled-tool-discovery.md](operations/controlled-tool-discovery.md) |
+| `docs/operations/e4-gap-assessment-2026-09-23.md` | [e4-gap-assessment-2026-09-23.md](operations/e4-gap-assessment-2026-09-23.md) |
+| `docs/operations/e4-preflight-closeout-2026-09-23.md` | [e4-preflight-closeout-2026-09-23.md](operations/e4-preflight-closeout-2026-09-23.md) |
+| `docs/operations/evidence-handoff.md` | [evidence-handoff.md](operations/evidence-handoff.md) |
+| `docs/operations/external-review-import.md` | [external-review-import.md](operations/external-review-import.md) |
+| `docs/operations/follow-up-backlog-2026-09-22.md` | [follow-up-backlog-2026-09-22.md](operations/follow-up-backlog-2026-09-22.md) |
+| `docs/operations/local-tools-closeout-2026-09-22.md` | [local-tools-closeout-2026-09-22.md](operations/local-tools-closeout-2026-09-22.md) |
+| `docs/operations/next-stage-start-conditions-2026-10-02.md` | [next-stage-start-conditions-2026-10-02.md](operations/next-stage-start-conditions-2026-10-02.md) |
+| `docs/operations/pilot-evidence-review-2026-09-22.md` | [pilot-evidence-review-2026-09-22.md](operations/pilot-evidence-review-2026-09-22.md) |
+| `docs/operations/pytest-temporary-roots.md` | [pytest-temporary-roots.md](operations/pytest-temporary-roots.md) |
+| `docs/operations/runner-health-checks.md` | [runner-health-checks.md](operations/runner-health-checks.md) |
+| `docs/operations/verification-budget-decision-2026-10-04.md` | [verification-budget-decision-2026-10-04.md](operations/verification-budget-decision-2026-10-04.md) |
+| `docs/operations/zcode-next-stage-assignments-2026-10-02.md` | [zcode-next-stage-assignments-2026-10-02.md](operations/zcode-next-stage-assignments-2026-10-02.md) |
+| `docs/operations/zcode-retrospective-2026-09-20.md` | [zcode-retrospective-2026-09-20.md](operations/zcode-retrospective-2026-09-20.md) |
 | `docs/operations/examples/**` | `docs/archive/operations/examples/**` |
 
 ## 已移除的试点工具（2026-10-10）
 
-- [自托管执行基础设施](operations/self-hosted-runners.md)、[Runner 盘点与健康检查](../operations/runner-health-checks.md)、[执行回执](operations/runner-receipts.md)、[受控工具发现](../operations/controlled-tool-discovery.md)、[本地证据移交](../operations/evidence-handoff.md)：对应工具已删除，文档保留历史事实或恢复指引。
+- [自托管执行基础设施](operations/self-hosted-runners.md)、[Runner 盘点与健康检查](operations/runner-health-checks.md)、[执行回执](operations/runner-receipts.md)、[受控工具发现](operations/controlled-tool-discovery.md)、[本地证据移交](operations/evidence-handoff.md)：对应工具已删除，文档保留历史事实或恢复指引。
 
 ## 已退场的离线分析与合成演练工具
 
