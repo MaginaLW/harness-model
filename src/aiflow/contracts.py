@@ -6,6 +6,7 @@ import json
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from contextvars import ContextVar
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -81,17 +82,39 @@ def load_schema(contract_name: str, schema_directory: Path | None = None) -> Jso
     return value
 
 
-def _schema_registry(schema_directory: Path | None = None) -> Registry[Any]:
-    schema_directory = _effective_schema_directory(schema_directory)
+@lru_cache(maxsize=8)
+def _schema_registry(contents: tuple[bytes | None, ...]) -> Registry[Any]:
     resources: list[tuple[str, Resource[Any]]] = []
-    for filename in SCHEMA_FILES.values():
-        path = schema_directory / filename
-        if not path.is_file():
+    for raw in contents:
+        if raw is None:
             continue
-        schema = json.loads(path.read_text(encoding="utf-8"))
+        schema = json.loads(raw.decode("utf-8"))
         if isinstance(schema, dict) and isinstance(schema.get("$id"), str):
             resources.append((schema["$id"], Resource.from_contents(schema)))
     return Registry().with_resources(resources)
+
+
+@lru_cache(maxsize=32)
+def _compiled_validator(
+    contract_name: str, root: bytes, contents: tuple[bytes | None, ...]
+) -> Draft202012Validator:
+    schema = json.loads(root.decode("utf-8"))
+    if not isinstance(schema, dict):
+        raise TypeError(f"Schema {contract_name} must contain a JSON object")
+    return Draft202012Validator(
+        schema, format_checker=FormatChecker(), registry=_schema_registry(contents)
+    )
+
+
+def _validator_from_contents(
+    contract_name: str, directory: Path, contents: dict[str, bytes | None]
+) -> Draft202012Validator:
+    root = contents.get(contract_name)
+    if root is None:
+        # Preserve the public loader's unknown-contract and required-file errors.
+        load_schema(contract_name, directory)
+        raise FileNotFoundError(directory / SCHEMA_FILES[contract_name])
+    return _compiled_validator(contract_name, root, tuple(contents.values()))
 
 
 def _escape_pointer_part(part: object) -> str:
@@ -127,12 +150,8 @@ def _safe_schema_errors(
     value: object,
     schema_directory: Path | None = None,
 ) -> list[str]:
-    schema_directory = _effective_schema_directory(schema_directory)
-    validator = Draft202012Validator(
-        load_schema(contract_name, schema_directory),
-        format_checker=FormatChecker(),
-        registry=_schema_registry(schema_directory),
-    )
+    directory = _effective_schema_directory(schema_directory)
+    validator = _validator_from_contents(contract_name, directory, _schema_contents(directory))
     return _validator_errors(validator, value)
 
 
@@ -180,7 +199,8 @@ def contract_validation_batch(
         finally:
             active = False
         return
-    filename = SCHEMA_FILES[contract_name]
+    if contract_name not in SCHEMA_FILES:
+        raise KeyError(contract_name)
     directory = _effective_schema_directory(None)
     contents: dict[str, bytes | None] | None = None
     validator: Draft202012Validator | None = None
@@ -191,26 +211,7 @@ def contract_validation_batch(
             raise ContractError("Validation batch is closed", code="CONTRACT_BATCH_CLOSED")
         if validator is None:
             contents = _schema_contents(directory)
-            root = contents[contract_name]
-            if root is None:
-                # Retain the single-value loader's required-root failure.
-                load_schema(contract_name, directory)
-                raise FileNotFoundError(directory / filename)
-            schema = json.loads(root.decode("utf-8"))
-            if not isinstance(schema, dict):
-                raise TypeError(f"Schema {contract_name} must contain a JSON object")
-            resources: list[tuple[str, Resource[Any]]] = []
-            for raw in contents.values():
-                if raw is None:
-                    continue
-                resource = json.loads(raw.decode("utf-8"))
-                if isinstance(resource, dict) and isinstance(resource.get("$id"), str):
-                    resources.append((resource["$id"], Resource.from_contents(resource)))
-            validator = Draft202012Validator(
-                schema,
-                format_checker=FormatChecker(),
-                registry=Registry().with_resources(resources),
-            )
+            validator = _validator_from_contents(contract_name, directory, contents)
         return sorted(
             set(_validator_errors(validator, value) + _cross_field_errors(contract_name, value))
         )
@@ -294,7 +295,7 @@ def validate_contract(contract_name: str, value: object) -> list[str]:
     )
 
 
-def _require_valid_contract_with_schema_directory(
+def require_valid_contract_with_schema_directory(
     contract_name: str,
     value: object,
     schema_directory: Path,
@@ -302,6 +303,9 @@ def _require_valid_contract_with_schema_directory(
     errors = _validate_contract_with_schema_directory(contract_name, value, schema_directory)
     if errors:
         raise ContractValidationError(contract_name, errors)
+
+
+_require_valid_contract_with_schema_directory = require_valid_contract_with_schema_directory
 
 
 def require_valid_contract(contract_name: str, value: object) -> None:

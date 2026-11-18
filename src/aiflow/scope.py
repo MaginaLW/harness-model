@@ -284,6 +284,33 @@ def _status_paths(output: bytes) -> set[str]:
     return paths
 
 
+def changed_task_paths(repository_root: Path) -> set[str]:
+    """Read changed task paths in the worktree and on the current branch."""
+    task_root = ".ai/tasks"
+    paths = _status_paths(
+        _run_git(
+            repository_root,
+            ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--", task_root),
+        )
+    )
+    main_refs = ("refs/remotes/origin/main", "refs/heads/main")
+    found = _run_git(
+        repository_root, ("for-each-ref", "--format=%(refname)", *main_refs)
+    ).splitlines()
+    for main_ref in main_refs:
+        if main_ref.encode("ascii") in found:
+            paths.update(
+                _diff_paths(
+                    _run_git(
+                        repository_root,
+                        ("diff", "--name-status", "-z", f"{main_ref}...HEAD", "--", task_root),
+                    )
+                )
+            )
+            break
+    return paths
+
+
 def collect_changed_paths(
     repository_root: Path,
     *,

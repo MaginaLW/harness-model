@@ -43,6 +43,7 @@ from aiflow.policy import (
 from aiflow.scope import (
     AutoPreflightFacts,
     assess_auto_scope,
+    changed_task_paths,
     collect_changed_paths,
     collect_verification_changed_paths,
     evaluate_auto_preflight,
@@ -447,6 +448,36 @@ def _persist_event_and_task(
             code="STATE_MATERIALIZATION_FAILED",
             details={"task_id": task_directory.name},
         ) from error
+
+
+persist_event_and_task = _persist_event_and_task
+
+
+def resolve_hook_task_id(repository_root: Path, explicit: str | None) -> str:
+    """Select the changed active task, falling back to a unique repository-wide task."""
+    if explicit is not None:
+        return explicit  # The caller reads the selected record strictly.
+    changed = {
+        path.split("/")[2]
+        for path in changed_task_paths(repository_root)
+        if path.startswith(".ai/tasks/TASK-")
+    }
+    task_root = repository_root / ".ai/tasks"
+    all_names = {directory.name for directory in task_root.glob("TASK-*") if directory.is_dir()}
+    for names in (changed, all_names - changed):
+        active = [
+            name
+            for name in sorted(names)
+            if read_task_record_strict(repository_root, name).task["current_state"] != "MERGED"
+        ]
+        if len(active) == 1:
+            return active[0]
+        if active:
+            break
+    raise ContractError(
+        "Exactly one active task is required when --task is omitted",
+        code="HOOK_TASK_AMBIGUOUS",
+    )
 
 
 def _is_subject_sync_staged_patch(

@@ -268,8 +268,9 @@ def _record_review(
     )
 
 
+@pytest.mark.parametrize("mode", [None, "direct_human", "standing_delegation"])
 def test_spec_approval_persists_all_review_units_and_is_idempotent(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str | None
 ) -> None:
     repository = _prepare(tmp_path, monkeypatch, state="WAITING_FOR_SPEC_REVIEW")
     arguments = [
@@ -282,6 +283,8 @@ def test_spec_approval_persists_all_review_units_and_is_idempotent(
         "--reason",
         "direction approved",
     ]
+    if mode is not None:
+        arguments.extend(["--authorization-mode", mode])
 
     assert main(arguments) == 1
     assert load_task_record(repository, "TASK-0001").task["current_state"] == (
@@ -294,12 +297,37 @@ def test_spec_approval_persists_all_review_units_and_is_idempotent(
     assert first.task["current_state"] == "READY_TO_IMPLEMENT"
     assert isinstance(approvals, list) and len(approvals) == 1
     assert approvals[0]["approval_type"] == "spec"
+    if mode is None:
+        assert "authorization_mode" not in approvals[0]
+    else:
+        assert approvals[0]["authorization_mode"] == mode
     assert first.events[-1]["event_type"] == "spec_approved"
+    assert first.events[-1]["payload"]["approvals"] == approvals
 
     assert main(arguments) == 0
     second = load_task_record(repository, "TASK-0001")
     assert second.events == first.events
     assert read_task_json(repository, "TASK-0001", "approvals.json") == approvals
+
+
+def test_approve_rejects_unknown_authorization_mode(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as caught:
+        main(
+            [
+                "approve",
+                "TASK-0001",
+                "--type",
+                "spec",
+                "--actor",
+                "reviewer",
+                "--reason",
+                "reviewed",
+                "--authorization-mode",
+                "unknown",
+            ]
+        )
+    assert caught.value.code == 2
+    assert "--authorization-mode" in capsys.readouterr().err
 
 
 def test_code_approval_requires_package_and_current_passing_evidence(

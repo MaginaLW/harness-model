@@ -79,6 +79,10 @@ def _ordered_paths(paths: object) -> tuple[str, ...]:
     return result
 
 
+validate_canonical_path = _path
+validate_ordered_paths = _ordered_paths
+
+
 def _output_paths(paths: object) -> tuple[str, ...]:
     outputs = _ordered_paths(paths)
     if any(segment.casefold() == ".git" for path in outputs for segment in path.split("/")):

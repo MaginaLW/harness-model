@@ -28,7 +28,7 @@ from aiflow.policy import (
     NODE_POLICY_VERSION,
     NODE_V2_POLICY_VERSION,
     POLICY_FILES,
-    _UniqueKeyLoader,
+    UniqueKeyLoader,
     is_node_policy,
     load_policy_bundle,
 )
@@ -225,7 +225,7 @@ def _materials(
             data = _read(selected / name, MAX_RESOURCE_BYTES).replace(b"\r\n", b"\n")
             if b"\r" in data:
                 raise _error("POLICY_ENCODING_INVALID")
-            yaml.load(data.decode("utf-8"), Loader=_UniqueKeyLoader)
+            yaml.load(data.decode("utf-8"), Loader=UniqueKeyLoader)
             resources["policy/" + name] = data
         if sum(len(data) for data in resources.values()) > MAX_BUNDLE_BYTES:
             raise _error("BUNDLE_TOO_LARGE")

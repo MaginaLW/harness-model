@@ -125,6 +125,13 @@ def _environment(check: VerificationCheck, run_dir: Path, temporary_root: Path) 
     if set(check.environment) - {"COVERAGE_FILE"}:
         raise ContractError("Verification environment is not allowed", code="RUNNER_ENV_INVALID")
     path_entries = [entry for entry in os.defpath.split(os.pathsep) if entry]
+    if os.name == "posix":
+        # A default such as /bin may be an alias for /usr/bin on merged-/usr systems.
+        path_entries = list(
+            dict.fromkeys(
+                os.path.realpath(entry) if os.path.isabs(entry) else entry for entry in path_entries
+            )
+        )
     git_program = shutil.which("git")
     if git_program is not None:
         git_directory = str(Path(git_program).resolve().parent)
