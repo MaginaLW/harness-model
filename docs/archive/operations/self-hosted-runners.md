@@ -7,7 +7,7 @@
 没有把公开 PR 路由到个人电脑，也没有新增调度守护进程或收费 fallback。
 
 当前实施范围和未完成验收见[任务 02 执行记录](../../superpowers/plans/2026-09-13-runner-infrastructure-execution.md)。
-运维工具入口见[盘点与健康检查](../../operations/runner-health-checks.md)，数据接口见[执行回执](runner-receipts.md)。
+运维工具入口见[盘点与健康检查](runner-health-checks.md)，数据接口见[执行回执](runner-receipts.md)。
 盘点使用私有机器配置，回执使用可移植的冻结执行要求；两者是独立契约，不能直接互传。
 运行观察须经过来源与版本核对后另建回执，不能把盘点输出或示例配置充作执行证明。
 历史[首次盘点](self-hosted-runner-inventory-2026-09-12.md)和

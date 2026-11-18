@@ -3,7 +3,7 @@
 先运行 `python -m aiflow status <TASK-ID> --format json` 和 `git status --short --branch`。保留 `.ai/tasks/<TASK-ID>/events.jsonl`、失败 marker、evidence 和 logs；不通过直接改写 `current_state`、删除事件或伪造批准来“修复”任务。
 
 `aiflow external-review` 与 `verify --pytest-temp-root` 已退役；旧子命令和选项会被 CLI 拒绝。
-历史任务及其原记录继续保留；功能恢复来源见[外部审核导入](external-review-import.md)和[pytest 临时目录](pytest-temporary-roots.md)，不通过修改历史证据恢复功能。
+历史任务及其原记录继续保留；功能恢复来源见[外部审核导入](../archive/operations/external-review-import.md)和[pytest 临时目录](../archive/operations/pytest-temporary-roots.md)，不通过修改历史证据恢复功能。
 
 ## 运行时证据、精确清理与路径边界
 

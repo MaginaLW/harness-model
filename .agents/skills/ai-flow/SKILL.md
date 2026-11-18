@@ -24,7 +24,7 @@ Run `aiflow status TASK-ID` before resuming an existing task. For new work, run 
 5. Run `aiflow verify TASK-ID --actor ACTOR`. A targeted or provisional result is diagnostic and cannot replace final evidence; avoid speculative test bloat or unrequested full-suite loops.
 6. For `WAITING_FOR_FINAL_REVIEW`, complete the [review package](../../../.ai/templates/review-package.md) including the five-point delivery-boundary check, resolve its explicit questions, attach `A01 | optional 0–3` when requesting human approval, and obtain `aiflow approve TASK-ID --type code ...`. Code approval never authorizes an external action.
 7. Run `aiflow gate TASK-ID`. A passing Gate records readiness; it does not push, merge, deploy, spend money, use credentials, or perform another external action.
-8. After an authorized actor completes the merge externally, record that fact with `aiflow close TASK-ID --actor ACTOR --merge-commit COMMIT` and summarize `S / Q / U / H` decision opportunities (`S`=Stop/Wait, `Q`=Self-questioned/Deferred, `U`=Unneeded interruption, `H`=High-value guard) solely from observed facts without creating an external private ledger.
+8. After an authorized actor completes the merge externally, record that fact with `aiflow close TASK-ID --result merged --actor ACTOR --merge-commit COMMIT` and summarize `S / Q / U / H` decision opportunities (`S`=Stop/Wait, `Q`=Self-questioned/Deferred, `U`=Unneeded interruption, `H`=High-value guard) solely from observed facts without creating an external private ledger.
 
 ## Escalation and recovery
 
