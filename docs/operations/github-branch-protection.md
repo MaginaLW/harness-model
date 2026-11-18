@@ -16,28 +16,25 @@ disallows force pushes and branch deletion. It requires zero GitHub reviewer app
 single-maintainer repository is not deadlocked; AI Flow approvals and applicable external-action
 authorization remain independent requirements.
 
-The workflow uses only `contents: read`, receives no secrets, and runs on `pull_request`, not `pull_request_target`. It verifies and gates the PR head, uploads runner-temp evidence and redacted logs, and performs no merge, push, deployment, approval, or branch-protection mutation.
+The `pull_request` workflow grants `contents: read`, checks out the event head SHA and installs the locked environment. The job timeout is 90 minutes. `Resolve PR governance` uses the PR base and head to identify the implementation task, closeouts and retained records. Maintenance mode applies when the base commit's `.ai/bootstrap-mode.yaml` contains the exact lines `mode: bootstrap_auto` and `status: active`. A marker change takes effect for subsequent PRs after merge. [Workflow](../../.github/workflows/ai-quality-gate.yml) · [PR routing](../../tools/ci/resolve_task.py)
 
-For a formal `pull_request` run, checkout continues to use the event head SHA. After governance detection only, the formal path creates or overwrites a runner-local branch named from `github.head_ref`, with that same event SHA as its explicit start point; the bootstrap path is unchanged. The workflow validates the branch name with `git check-ref-format`, checks the SHA before binding, then checks both the symbolic branch and SHA afterward. It does not fetch or push, treats `github.head_ref` only as the local branch name rather than commit authority, and never substitutes it for the event SHA.
+| PR contents | Checks to look for |
+|---|---|
+| Implementation task, including a governed change in maintenance mode | `Attach exact PR head branch` validates the branch name, creates the runner-local branch at the event SHA, and checks both name and SHA. `Validate contracts` and `Verify and Gate` run for the selected task. `Upload AI Flow diagnostics` collects its evidence and logs from the runner's temporary directory, with 14-day retention. |
+| Changed `MERGED` records or retained `FAILED` / `BLOCKED` records | `Validate retained task records` validates each ledger and checks its base-to-head changes. In maintenance mode ordinary docs may accompany a closeout without a new implementation task. Retained failures require an implementation task. |
+| Ordinary maintenance outside the governed paths, with no task changes | `Maintenance quality checks` runs without an implementation task. |
 
-For that same formal path only, the `Verify` and `Gate` step explicitly set Python's `TMPDIR` to `${{ runner.temp }}`. This places the run directory, evidence, Gate output, and uploaded artifacts under one runner-managed temporary root, while retaining the CLI's existing strict-descendant and output-containment checks unchanged. Bootstrap and all other workflow steps keep their prior environment and behavior.
+`Maintenance quality checks` applies to all three routes when maintenance mode is active. It reuses the full-suite coverage database from successful V1 or V2 verification. Otherwise it runs the full pytest suite with branch coverage. The coverage checker requires at least 85% total branch-enabled coverage for `src/aiflow` and 90% coverage of changed lines in that domain against the PR base. The step also runs `git diff --check` on the PR range, Ruff lint and format checks, and mypy. [Coverage checker](../../tools/ci/check_coverage.py)
 
-While the pull request's base commit contains `.ai/bootstrap-mode.yaml` with the exact canonical lines `mode: bootstrap_auto` and `status: active`, the same required `ai-quality-gate` job validates and consumes `uv.lock`, runs one full branch-coverage pytest pass with an 85 percent total threshold, enforces 90 percent diff coverage and `git diff --check` over the PR range, and then runs Ruff, format, and mypy. It deliberately skips task resolution and AI Flow `verify`/`gate`. The base commit is authoritative: the owner-authorized PR that removes or disables the marker still uses bootstrap checks, while a PR cannot activate bootstrap merely by adding the marker to its head. After the exit PR merges, subsequent PRs use the normal AI Flow path without changing the required check name or branch-protection rule. The job has a 90-minute bound because the active V2 fixed checks may consume 68.5 minutes at their declared serial limits; the remainder covers locked installation, Gate evaluation, diagnostics, and normal runner variance without weakening any check or threshold.
+To inspect a PR locally, run `uv run --locked python tools/ci/resolve_task.py --route --base <BASE-SHA> --head <HEAD-SHA>` from the repository root. For TASK-0162, the implementation returned `task_id=TASK-0162` and passed both verification and maintenance checks. The follow-up returned `closeouts=TASK-0162` with an empty `task_id` and passed both ledger validation and maintenance checks. [PR #175 implementation run](https://github.com/MaginaLW/harness-model/actions/runs/44344933819) · [PR #176 closeout run](https://github.com/MaginaLW/harness-model/actions/runs/44347779029)
 
 The workflow file is not proof that enforcement is active. Before claiming the repository is protected, run it on a real pull request, configure `ai-quality-gate` as required, and retain platform evidence that the target branch rejects direct/force pushes and bypasses outside the named emergency roles.
 
-Bootstrap mode has never granted push, merge, deployment, deletion, secret-export, or paid-call authority, and still does not. The project owner ended bootstrap once and has since re-entered it as repository maintenance mode, so PRs again take the bootstrap path: task resolution, AI Flow `verify`, and the Gate are skipped, while every quality check and threshold above, the branch-protection rule, the required check name, and the applicable authorization for external actions all remain in force. Standing authorization
-for the bounded delivery actions is defined in AGENTS.md; other actions retain their applicable
-individual approval requirements. AGENTS.md carries the escalation list of change classes that still go through AI Flow.
+Branch protection and the `ai-quality-gate` required check apply in both modes. The project owner defines the governed change classes, standing delivery authorization and actions requiring separate approval in [AGENTS.md](../../AGENTS.md).
 
 ## Formal-mode canary evidence
 
-A post-bootstrap pull request is accepted as a live formal-mode canary only when the required
-`ai-quality-gate` succeeds for its exact final head. The matching run must show `Resolve task`,
-`Verify and Gate`, and `Upload AI Flow diagnostics` succeeding on the formal path while
-`Bootstrap quality checks` is skipped. Its diagnostics artifact must be named
-`ai-flow-<TASK-ID>` and is retained for 14 days for investigation. The pull request, merge commit,
-final-head check, and Actions run metadata are the durable platform record; the artifact is not.
+A formal-mode implementation canary requires a successful `ai-quality-gate` on the exact final PR head. In the current workflow, confirm that `Resolve PR governance`, `Verify and Gate` and `Upload AI Flow diagnostics` succeeded, and that `Maintenance quality checks` was skipped because the base had no active maintenance marker. Use the `ai-flow-<TASK-ID>` artifact during its retention window. The PR, merge commit, final-head check and Actions run metadata provide the durable record.
 
 Do not commit the run URL back into the same governed pull request. That changes the final head,
 invalidates the previous run's subject binding, and requires a new successful check. Record the
@@ -45,7 +42,7 @@ final task, head, and run in a later governed document or another immutable exte
 If the base or head changes before merge, accept only a new successful check for the resulting
 exact head.
 
-The first observed canary was [PR #2](https://github.com/MaginaLW/harness-model/pull/2):
+The first observed canary used the step names in effect at the time. [PR #2](https://github.com/MaginaLW/harness-model/pull/2)
 
 | Fact | Retained value |
 |---|---|
