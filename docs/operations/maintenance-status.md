@@ -12,13 +12,16 @@
 
 | 对象 | 固定版本与用途 | 可用结论及限制 |
 |---|---|---|
-| 状态核对基线 | main `4836820a964709c0fdb9be74f06db038b4db2931`（含 PR #157–#167，`TASK-0155` / `TASK-0156` 已关闭为 MERGED）。 | 已合并代码与下述候选分开；源码包与安装包不能只按相同版本号互相认证。 |
-| 原主根与旧 WIP | `codex/agent-bridge-phased-adoption` / `4ab57ce5b0291ec2841c90782a751c920e284403`；仍属原任务，非本轮写入对象。 | 八个暂存 mutation/schema 文件、TASK-0094/0095/0124 及三份未跟踪建议稿保留。本轮已核对路径和内容校验值；不得整文件覆盖、stash、reset、clean 或当作重复删除。 |
+| 治理修复的收尾基线 | `main` 合并提交 `3ef032a1`。TASK-0162 的账本已记录实现合并提交 `94632d43`，状态为 `MERGED`。 | 下列源码、安装包及跨仓候选各自绑定固定提交和验收结果，即使版本号相同也须核对来源。[任务记录](../../.ai/tasks/TASK-0162/task.yaml) |
+| Stage B 停止时的原主根与旧 WIP | `codex/agent-bridge-phased-adoption` / `4ab57ce5b0291ec2841c90782a751c920e284403`。 | 当时已核对八个暂存 mutation/schema 文件、TASK-0094/0095/0124 及三份未跟踪建议稿的路径和内容校验值。材料归原任务保管，不得整文件覆盖、stash、reset、clean 或当作重复删除。 |
 | 已验收本地候选 | 普通安装候选 `c60b663427e73ca2d551d7a9aca2dc68b443c954`；Stage A 自有治理根。 | 原记录报告本地采用通过，不代表本维护基线含有全部候选代码，也不代表 Stage B 验收。 |
 | source6 发布候选 | `5ce4cbd841a4656d346c9b17938a0b42d5f1d897`；[PR #150](https://github.com/MaginaLW/harness-model/pull/150)。 | 原记录报告 Native、7354 项测试/9 项跳过、变异及源 Gate/CI 通过；本轮未重验，不扩大为 main 或目标消费成功。 |
 | 已停止消费候选 | agent-bridge TASK-0017 / REVIEW / V2；原独立目标根及原任务所有者保留现场。 | 原记录为 BLOCKED，Missing: block_resolution；历史干净封账 `d1fbd37a7df351610021b0a4a509073a573d8cab` 属较早窗口，不冒称 probe5 后新 HEAD。 |
 
 ### 已完成的维护收口
+
+- 原 PR #169 的 0–4 批已完成交付。16 篇历史文档已归档，13 个旧入口保留转引。治理修复覆盖审批来源、子目录 Hook 的任务选择与观察记录绑定、Schema 校验器缓存、SDK 的只读 Git 查询，以及 Linux 受控子进程的 Git 查找顺序。原 PR 保留作对照。[文档归档 #170](https://github.com/MaginaLW/harness-model/pull/170) · [实现 #175](https://github.com/MaginaLW/harness-model/pull/175) · [原候选 #169](https://github.com/MaginaLW/harness-model/pull/169)
+- TASK-0162 在实现提交 `8012c415` 上通过 Linux 原生 V1 的全部 10 项检查。pytest 通过 4,701 项、跳过 77 项，核心覆盖率 90%，差异覆盖率 97%。实现与收尾 PR 各自在最终提交上通过必需 CI。维护者可按 PR 内容核对任务验证、历史记录和质量检查分别何时运行。[本地审核与实测结果](../../.ai/tasks/TASK-0162/review-package.md) · [收尾 #176](https://github.com/MaginaLW/harness-model/pull/176) · [CI 路由说明](github-branch-protection.md)
 
 [PR #157](https://github.com/MaginaLW/harness-model/pull/157)已合并 Windows 新任务事件的规范 UTF-8/LF 字节修复、clean-checkout 的 Git/构建/安装/CLI 配置隔离及离线 wheel 验收，并保留资源包规范化与大小限制说明。TASK-0149 的独立设计与实现审核通过，原生 Windows V1 的十项检查通过（6507 passed、9 项条件跳过），本地 Gate 与当前候选 required CI 通过；[PR #158](https://github.com/MaginaLW/harness-model/pull/158)已合并任务关闭记录，账本状态为 MERGED。证据见[任务记录](../../.ai/tasks/TASK-0149/task.yaml)与[验收索引](../../.ai/tasks/TASK-0149/evidence.json)，原始日志仍在实际验收克隆中。
 
