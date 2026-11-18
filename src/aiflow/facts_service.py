@@ -167,7 +167,7 @@ def record_risk_facts(
             )
             updated["updated_at"] = event["occurred_at"]
             require_valid_contract("task", updated)
-            task_service._persist_event_and_task(
+            task_service.persist_event_and_task(
                 resolve_task_path(repository_root, task_id),
                 updated,
                 event,

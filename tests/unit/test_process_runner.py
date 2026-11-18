@@ -312,9 +312,12 @@ def test_runner_hides_known_paths_in_summary_without_changing_execution(
     assert isinstance(environment, dict)
     assert set(environment) <= {"PATH", "SystemRoot", "COVERAGE_FILE", "TEMP", "TMP", "TMPDIR"}
     assert "PATH" in environment
-    assert {entry for entry in os.defpath.split(os.pathsep) if entry} <= set(
-        environment["PATH"].split(os.pathsep)
-    )
+    defaults = {entry for entry in os.defpath.split(os.pathsep) if entry}
+    if os.name == "posix":
+        defaults = {
+            os.path.realpath(entry) if os.path.isabs(entry) else entry for entry in defaults
+        }
+    assert defaults <= set(environment["PATH"].split(os.pathsep))
     if os.name == "nt" and os.environ.get("SystemRoot"):
         assert environment["SystemRoot"] == os.environ["SystemRoot"]
     else:
@@ -331,6 +334,42 @@ def test_runner_hides_known_paths_in_summary_without_changing_execution(
     assert "config.toml" in result.command_summary and "coverage.xml" in result.command_summary
     assert "-c" in result.command_summary and "ordinary-check" in result.command_summary
     assert "top-secret" not in result.command_summary
+
+
+@pytest.mark.parametrize("git_in_defaults", [False, True])
+def test_runner_preserves_search_order_when_resolving_default_directories(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, git_in_defaults: bool
+) -> None:
+    first, second = tmp_path / "first", tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    if os.name == "posix":
+        alias = tmp_path / "alias"
+        alias.symlink_to(first, target_is_directory=True)
+        defaults = [str(alias), str(second), str(first)]
+        expected = [str(first.resolve()), str(second.resolve())]
+    else:
+        defaults = [".", str(first), str(second)]
+        expected = defaults.copy()
+    git_directory = first if git_in_defaults else tmp_path / "extra"
+    if not git_in_defaults:
+        git_directory.mkdir()
+        expected.append(str(git_directory.resolve()))
+    monkeypatch.setattr(os, "defpath", os.pathsep.join(defaults))
+    monkeypatch.setattr(process_runner.shutil, "which", lambda _: str(git_directory / "git"))
+    item = check((sys.executable, "-c", "import os; print(os.environ['PATH'])"))
+    run_dir = tmp_path / "logs" / "run"
+    result = run_execution(
+        execution(item),
+        {"check": item},
+        run_dir=run_dir,
+        allowed_run_root=run_dir.parent,
+        repository_root=Path.cwd(),
+        sequence=1,
+    )[0]
+    assert result.conclusion == "passed"
+    output = (run_dir / result.stdout_log_ref).read_text(encoding="utf-8").strip()
+    assert output.split(os.pathsep) == expected
 
 
 @pytest.mark.parametrize("selected", ["TMPDIR", "TEMP", "TMP", "default"])

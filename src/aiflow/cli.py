@@ -91,6 +91,11 @@ def build_parser() -> ArgumentParser:
     approve.add_argument("--actor", required=True)
     approve.add_argument("--reason", required=True)
     approve.add_argument("--action-file", type=Path)
+    approve.add_argument(
+        "--authorization-mode",
+        choices=["direct_human", "standing_delegation"],
+        help="explicit authorization mode (direct_human or standing_delegation)",
+    )
     escalate = subparsers.add_parser("escalate", help="raise a task's governance route")
     escalate.add_argument("task_id")
     escalate.add_argument("--to", required=True, choices=["ASK", "REVIEW", "BLOCK"])
@@ -414,6 +419,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             actor=arguments.actor,
             reason=arguments.reason,
             action_file=arguments.action_file,
+            authorization_mode=arguments.authorization_mode,
         )
         print(f"{arguments.task_id} {approval_result.task['current_state']}")
     elif arguments.command == "escalate":
