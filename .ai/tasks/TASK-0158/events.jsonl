@@ -1,0 +1,1 @@
+{"actor": "aiflow", "event_type": "task_created", "from_state": "NEW", "occurred_at": "2026-11-18T12:16:53Z", "payload": {"objective": "Repair governed approval provenance, repository-bound hook observation, schema validation freshness and shared core import boundaries"}, "schema_version": "1.0", "sequence": 1, "task_id": "TASK-0158", "to_state": "NEW"}
