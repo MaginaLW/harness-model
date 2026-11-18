@@ -11,5 +11,20 @@
     "spec_sha256": "53ba378d3c2772e37a3ee543d49c4dea4a07f9240a7dc5639752b35c67c6ca29",
     "subject_commit": "220242b156a79477f9cdbfd843ec15c304164177",
     "task_id": "TASK-0161"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-18T15:51:39Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "220242b156a79477f9cdbfd843ec15c304164177",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "64f817107c693d1ecf8cb94dd304a6a10fe1fd4b6a0a83d6895b62d8a60f1ff6",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权：当前集成修复的独立实现审核为 APPROVE，无未关闭发现，跨平台定向验证与当前 V1 已通过。",
+    "schema_version": "1.0",
+    "spec_sha256": "53ba378d3c2772e37a3ee543d49c4dea4a07f9240a7dc5639752b35c67c6ca29",
+    "subject_commit": "1ed54255c1894485aad63926a953a4f83ea05182",
+    "task_id": "TASK-0161"
   }
 ]

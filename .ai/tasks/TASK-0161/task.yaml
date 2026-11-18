@@ -37,7 +37,7 @@ allowed_scope:
 base_commit: 220242b156a79477f9cdbfd843ec15c304164177
 branch: codex/governance-posix-integrated
 created_at: '2026-11-18T14:55:25Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -133,6 +133,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-18T14:57:19Z'
 subject_commit: 1ed54255c1894485aad63926a953a4f83ea05182
 task_id: TASK-0161
-updated_at: '2026-11-18T15:46:39Z'
+updated_at: '2026-11-18T15:51:40Z'
 worktree_dirty: false
 worktree_dirty_paths: []
