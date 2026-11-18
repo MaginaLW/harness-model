@@ -127,8 +127,8 @@ goal: Deliver integrated core and CI governance repairs on the current protected
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-18T13:37:14Z'
-subject_commit: 220242b156a79477f9cdbfd843ec15c304164177
+subject_commit: 4ccd9a0fe0315232ef32cd71a4d29925728c685a
 task_id: TASK-0160
-updated_at: '2026-11-18T13:40:06Z'
+updated_at: '2026-11-18T13:40:56Z'
 worktree_dirty: false
 worktree_dirty_paths: []
