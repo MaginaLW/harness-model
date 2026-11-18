@@ -1,14 +1,4 @@
-schema_version: '1.0'
-task_id: TASK-0161
-goal: Deliver integrated governance repairs with a canonical POSIX path for controlled
-  verification
-repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
-branch: codex/governance-posix-integrated
-base_commit: 220242b156a79477f9cdbfd843ec15c304164177
-subject_commit: 220242b156a79477f9cdbfd843ec15c304164177
-worktree_dirty: false
-worktree_dirty_paths: []
-allowed_scope: &id001
+allowed_scope:
 - .ai/schemas/approval.schema.json
 - src/aiflow/approval.py
 - src/aiflow/ask_service.py
@@ -44,60 +34,105 @@ allowed_scope: &id001
 - tools/ci/verify_closeout.py
 - src/aiflow/process_runner.py
 - tests/unit/test_process_runner.py
+base_commit: 220242b156a79477f9cdbfd843ec15c304164177
+branch: codex/governance-posix-integrated
+created_at: '2026-11-18T14:55:25Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects:
+  - same_repository_branch_push
+  - same_repository_pull_request
+  - same_repository_merge_commit
+  goal: Deliver integrated governance repairs with a canonical POSIX path for controlled
+    verification
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  - external_action
+  impact_scope:
+  - .ai/schemas/approval.schema.json
+  - src/aiflow/approval.py
+  - src/aiflow/ask_service.py
+  - src/aiflow/cli.py
+  - src/aiflow/contracts.py
+  - src/aiflow/facts_service.py
+  - src/aiflow/gate.py
+  - src/aiflow/initialization.py
+  - src/aiflow/installed_mutations.py
+  - src/aiflow/mutation_manifest.py
+  - src/aiflow/node_execution.py
+  - src/aiflow/node_verification.py
+  - src/aiflow/observation_service.py
+  - src/aiflow/policy.py
+  - src/aiflow/scope.py
+  - src/aiflow/sdk_review.py
+  - src/aiflow/status_service.py
+  - src/aiflow/task_service.py
+  - src/aiflow/verification_service.py
+  - tests/integration/test_approve_command.py
+  - tests/integration/test_tool_wrappers.py
+  - tests/unit/test_contracts.py
+  - tests/unit/test_import_boundaries.py
+  - tests/unit/test_observation.py
+  - tests/unit/test_review_package.py
+  - tests/unit/test_sdk_review.py
+  - tools/hooks/pre_command.py
+  - tools/hooks/pre_commit.py
+  - .github/workflows/ai-quality-gate.yml
+  - tests/integration/test_github_workflow.py
+  - tests/unit/test_verify_closeout.py
+  - tools/ci/resolve_task.py
+  - tools/ci/verify_closeout.py
+  - src/aiflow/process_runner.py
+  - tests/unit/test_process_runner.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0161
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
 forbidden_actions:
 - deploy
 - delete
 - secret_export
 - paid_external_call
-current_state: WAITING_FOR_SPEC_REVIEW
-created_at: '2026-11-18T14:55:25Z'
-updated_at: '2026-11-18T14:57:19Z'
-decision_units:
-- schema_version: '1.0'
-  task_id: TASK-0161
-  decision_unit_id: DU-001
-  goal: Deliver integrated governance repairs with a canonical POSIX path for controlled
-    verification
-  inputs: []
-  planned_actions:
-  - Implement the bounded task objective
-  impact_scope: *id001
-  reversibility: reversible
-  verification_methods:
-  - Define and run executable verification
-  external_side_effects:
-  - same_repository_branch_push
-  - same_repository_pull_request
-  - same_repository_merge_commit
-  permission_requirements:
-  - spec_approval
-  - code_approval
-  scope:
-    clear: true
-  impact:
-    level: medium
-  protections:
-    verified_backup: false
-    dry_run: false
-  verification:
-    automatic: true
-    tools_missing: false
-  impact_categories:
-  - ci
-  - external_action
-  controlled_actions: []
-  business_direction_count: 1
-  change_characteristics:
-    mechanical: false
-    behavior_changed: true
-    code_modified: true
-    interaction_scope: cross_module
-    regression_risk: true
-    error_detectability: high
-  verification_requirements:
-    acceptance_required: false
-    integration_required: false
-    targeted_mutation_required: false
-    independent_verifier_required: false
 frozen_spec_sha256: 53ba378d3c2772e37a3ee543d49c4dea4a07f9240a7dc5639752b35c67c6ca29
+goal: Deliver integrated governance repairs with a canonical POSIX path for controlled
+  verification
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
 spec_frozen_at: '2026-11-18T14:57:19Z'
+subject_commit: 220242b156a79477f9cdbfd843ec15c304164177
+task_id: TASK-0161
+updated_at: '2026-11-18T15:01:07Z'
+worktree_dirty: false
+worktree_dirty_paths: []

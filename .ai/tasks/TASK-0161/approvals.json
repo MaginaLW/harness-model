@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-18T15:01:06Z",
+    "base_commit": "220242b156a79477f9cdbfd843ec15c304164177",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。TASK-0161 当前独立设计审核 REV-0001 r0001 APPROVE，零未关闭发现，仅批准冻结规格内实施。",
+    "schema_version": "1.0",
+    "spec_sha256": "53ba378d3c2772e37a3ee543d49c4dea4a07f9240a7dc5639752b35c67c6ca29",
+    "subject_commit": "220242b156a79477f9cdbfd843ec15c304164177",
+    "task_id": "TASK-0161"
+  }
+]
