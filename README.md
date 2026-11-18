@@ -6,9 +6,8 @@
 
 ## 开始参与
 
-1. 阅读 [AGENTS.md](AGENTS.md)（升级清单与常设授权）；Codex 可按任务需要使用 [AI Flow Skill](.agents/skills/ai-flow/SKILL.md)。
-2. 非治理面日常维护按[低干预工作方式](docs/operations/low-intervention.md)推进；触及治理/核心代码时，运行 `python -m aiflow --help` 并按 CLI、active Policy 与当前 task ledger 的确定性结论推进。
-3. 准备接入 ZCode、Codex 或其他项目时，从[接入指南](docs/operations/adoption.md)与 [Quickstart](docs/operations/quickstart.md) 开始：先合并轻量规则并沿用目标质量检查，再评估是否需要跨仓引擎；不要复制本仓 `.ai` 账本、身份或模型配置。
+- **维护本仓**。先查 [AGENTS.md](AGENTS.md) 的升级清单。普通维护沿用项目质量检查；进入 AI Flow 时使用[项目技能](.agents/skills/ai-flow/SKILL.md)和 `python -m aiflow --help`，按当前 Policy 与 task 状态推进。
+- **接入其他项目**。从[接入指南](docs/operations/adoption.md)选取适用的项目规则，用目标仓已有命令验证。需要试运行完整引擎时，按 [Quickstart](docs/operations/quickstart.md) 在干净克隆中操作。
 
 ## 当前状态
 
