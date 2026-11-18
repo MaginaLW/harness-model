@@ -33,7 +33,7 @@ allowed_scope:
 base_commit: e23b0668c2295870c1f27e907941d96911528699
 branch: codex/governance-core-repair
 created_at: '2026-11-18T12:16:53Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -124,7 +124,7 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-18T12:20:51Z'
 subject_commit: bf56c1a95c5c5507ee125a418c61e17e67a3d9d0
 task_id: TASK-0158
-updated_at: '2026-11-18T13:14:47Z'
+updated_at: '2026-11-18T13:19:11Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - .ai/tasks/TASK-0157/approvals.json

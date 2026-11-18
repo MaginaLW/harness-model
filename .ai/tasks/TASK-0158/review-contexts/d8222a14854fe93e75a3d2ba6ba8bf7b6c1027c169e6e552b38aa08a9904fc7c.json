@@ -1,0 +1,408 @@
+{
+  "base_commit": "e23b0668c2295870c1f27e907941d96911528699",
+  "branch": "codex/governance-core-repair",
+  "classification_input_sha256": "65acfcbb1ad0e3c46d98c741a16db264b8eae616ea1191fe1a47b49250bf9c29",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/approval.schema.json",
+      "src/aiflow/approval.py",
+      "src/aiflow/ask_service.py",
+      "src/aiflow/classification_service.py",
+      "src/aiflow/cli.py",
+      "src/aiflow/contracts.py",
+      "src/aiflow/facts_service.py",
+      "src/aiflow/gate.py",
+      "src/aiflow/git_context.py",
+      "src/aiflow/initialization.py",
+      "src/aiflow/installed_mutations.py",
+      "src/aiflow/mutation_manifest.py",
+      "src/aiflow/node_execution.py",
+      "src/aiflow/node_verification.py",
+      "src/aiflow/observation.py",
+      "src/aiflow/observation_service.py",
+      "src/aiflow/policy.py",
+      "src/aiflow/scope.py",
+      "src/aiflow/sdk_review.py",
+      "src/aiflow/status_service.py",
+      "src/aiflow/task_service.py",
+      "src/aiflow/verification_service.py",
+      "tools/hooks/pre_commit.py",
+      "tools/hooks/pre_command.py",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_import_boundaries.py",
+      "tests/unit/test_observation.py",
+      "tests/unit/test_sdk_review.py",
+      "tests/unit/test_review_package.py",
+      "tests/integration/test_tool_wrappers.py",
+      "tests/integration/test_approve_command.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Repair governed approval provenance, repository-bound hook observation, schema validation freshness and shared core import boundaries",
+        "impact_scope": [
+          ".ai/schemas/approval.schema.json",
+          "src/aiflow/approval.py",
+          "src/aiflow/ask_service.py",
+          "src/aiflow/classification_service.py",
+          "src/aiflow/cli.py",
+          "src/aiflow/contracts.py",
+          "src/aiflow/facts_service.py",
+          "src/aiflow/gate.py",
+          "src/aiflow/git_context.py",
+          "src/aiflow/initialization.py",
+          "src/aiflow/installed_mutations.py",
+          "src/aiflow/mutation_manifest.py",
+          "src/aiflow/node_execution.py",
+          "src/aiflow/node_verification.py",
+          "src/aiflow/observation.py",
+          "src/aiflow/observation_service.py",
+          "src/aiflow/policy.py",
+          "src/aiflow/scope.py",
+          "src/aiflow/sdk_review.py",
+          "src/aiflow/status_service.py",
+          "src/aiflow/task_service.py",
+          "src/aiflow/verification_service.py",
+          "tools/hooks/pre_commit.py",
+          "tools/hooks/pre_command.py",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_import_boundaries.py",
+          "tests/unit/test_observation.py",
+          "tests/unit/test_sdk_review.py",
+          "tests/unit/test_review_package.py",
+          "tests/integration/test_tool_wrappers.py",
+          "tests/integration/test_approve_command.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/approval.schema.json",
+        ".ai/tasks/TASK-0158/approvals.json",
+        ".ai/tasks/TASK-0158/classification.json",
+        ".ai/tasks/TASK-0158/events.jsonl",
+        ".ai/tasks/TASK-0158/review-contexts/6f63512894fb99ce854b46642af1d611a099a68936ba76c92ea794f424f2887d.json",
+        ".ai/tasks/TASK-0158/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0158/spec.md",
+        ".ai/tasks/TASK-0158/task.yaml",
+        "src/aiflow/approval.py",
+        "src/aiflow/ask_service.py",
+        "src/aiflow/cli.py",
+        "src/aiflow/contracts.py",
+        "src/aiflow/facts_service.py",
+        "src/aiflow/gate.py",
+        "src/aiflow/initialization.py",
+        "src/aiflow/installed_mutations.py",
+        "src/aiflow/mutation_manifest.py",
+        "src/aiflow/node_execution.py",
+        "src/aiflow/node_verification.py",
+        "src/aiflow/observation_service.py",
+        "src/aiflow/policy.py",
+        "src/aiflow/scope.py",
+        "src/aiflow/sdk_review.py",
+        "src/aiflow/status_service.py",
+        "src/aiflow/task_service.py",
+        "src/aiflow/verification_service.py",
+        "tests/integration/test_approve_command.py",
+        "tests/integration/test_tool_wrappers.py",
+        "tests/unit/test_contracts.py",
+        "tests/unit/test_import_boundaries.py",
+        "tests/unit/test_observation.py",
+        "tests/unit/test_review_package.py",
+        "tests/unit/test_sdk_review.py",
+        "tools/hooks/pre_command.py",
+        "tools/hooks/pre_commit.py"
+      ],
+      "files": [
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/schemas/approval.schema.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0158/approvals.json"
+        },
+        {
+          "additions": 64,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0158/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0158/events.jsonl"
+        },
+        {
+          "additions": 95,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0158/review-contexts/6f63512894fb99ce854b46642af1d611a099a68936ba76c92ea794f424f2887d.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0158/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 33,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0158/spec.md"
+        },
+        {
+          "additions": 133,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0158/task.yaml"
+        },
+        {
+          "additions": 25,
+          "binary": false,
+          "deletions": 11,
+          "path": "src/aiflow/approval.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 4,
+          "path": "src/aiflow/ask_service.py"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 38,
+          "binary": false,
+          "deletions": 34,
+          "path": "src/aiflow/contracts.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/facts_service.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/gate.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/initialization.py"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 40,
+          "path": "src/aiflow/installed_mutations.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/mutation_manifest.py"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 4,
+          "path": "src/aiflow/node_execution.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/node_verification.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 4,
+          "path": "src/aiflow/observation_service.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/policy.py"
+        },
+        {
+          "additions": 27,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/scope.py"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/sdk_review.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/status_service.py"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/verification_service.py"
+        },
+        {
+          "additions": 29,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_approve_command.py"
+        },
+        {
+          "additions": 61,
+          "binary": false,
+          "deletions": 38,
+          "path": "tests/integration/test_tool_wrappers.py"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 11,
+          "path": "tests/unit/test_contracts.py"
+        },
+        {
+          "additions": 45,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_import_boundaries.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_observation.py"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_review_package.py"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_sdk_review.py"
+        },
+        {
+          "additions": 35,
+          "binary": false,
+          "deletions": 50,
+          "path": "tools/hooks/pre_command.py"
+        },
+        {
+          "additions": 44,
+          "binary": false,
+          "deletions": 61,
+          "path": "tools/hooks/pre_commit.py"
+        }
+      ],
+      "totals": {
+        "additions": 859,
+        "deletions": 272,
+        "files": 35
+      }
+    },
+    "goal": "Repair governed approval provenance, repository-bound hook observation, schema validation freshness and shared core import boundaries",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0158",
+        "--actor",
+        "codex-implementer"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "d8222a14854fe93e75a3d2ba6ba8bf7b6c1027c169e6e552b38aa08a9904fc7c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "fb671e10c400c734cde4cb3e3cc5d3a514dfd7e8ccd706e139854f1da9809e3e",
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "c0a3f6548bab18107427ec7ba674ed03162ed05cbc2081929e8afc2716910e37",
+  "subject_commit": "bf56c1a95c5c5507ee125a418c61e17e67a3d9d0",
+  "task_id": "TASK-0158"
+}
