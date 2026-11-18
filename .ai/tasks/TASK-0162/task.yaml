@@ -131,8 +131,8 @@ goal: Deliver the integrated governance and POSIX verification repairs on the pr
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-18T15:57:36Z'
-subject_commit: 5ad71cf845e1253a0ca821f6d68790f4cc4116c4
+subject_commit: 8012c41584193276147f0762c1c316dc5bd84010
 task_id: TASK-0162
-updated_at: '2026-11-18T15:59:34Z'
+updated_at: '2026-11-18T16:00:39Z'
 worktree_dirty: false
 worktree_dirty_paths: []
