@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-18T13:40:05Z",
+    "base_commit": "220242b156a79477f9cdbfd843ec15c304164177",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。新 main 基线下独立设计审核 REV-0001 r0001 APPROVE，零发现，仅批准本任务冻结的双来源集成规格。",
+    "schema_version": "1.0",
+    "spec_sha256": "63ce9583dc4135d402d1c922a390d72e2fb03f0030001383f169f5c2a7146e16",
+    "subject_commit": "220242b156a79477f9cdbfd843ec15c304164177",
+    "task_id": "TASK-0160"
+  }
+]
