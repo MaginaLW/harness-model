@@ -11,5 +11,20 @@
     "spec_sha256": "f7d972dc061de30fe1cc42da4215409c50125862c6c1444166000e4f655fa042",
     "subject_commit": "5ad71cf845e1253a0ca821f6d68790f4cc4116c4",
     "task_id": "TASK-0162"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-18T16:13:29Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "5ad71cf845e1253a0ca821f6d68790f4cc4116c4",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "6778cbbc107ac0422a384b58cccc3955383090db81cf19d1b36d231251e15f23",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。独立实施审核 REV-0002 APPROVE，无未关闭发现；本任务 Linux 原生 V1 十项通过，已确认实际范围、当前实现、证据及用户的公开交付授权。",
+    "schema_version": "1.0",
+    "spec_sha256": "f7d972dc061de30fe1cc42da4215409c50125862c6c1444166000e4f655fa042",
+    "subject_commit": "8012c41584193276147f0762c1c316dc5bd84010",
+    "task_id": "TASK-0162"
   }
 ]
