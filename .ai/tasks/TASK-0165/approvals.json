@@ -12,5 +12,36 @@
     "spec_sha256": "98dbc3485ee61ef5a4c709fc9cb24b50c1ee5047506021866bc093508ee9d8b3",
     "subject_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
     "task_id": "TASK-0165"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-19T16:36:14Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "Under standing delegation, record approval of the A01 phase specification following independent REV-0002 APPROVE, zero findings. The owner directly granted the single local action budget; this specification approval does not consume it.",
+    "schema_version": "1.0",
+    "spec_sha256": "a35228677107121ad381c23d8976704f768fe9b729c75fa18d33d6cbc29edd6a",
+    "subject_commit": "79cc4425943fd892edbfb0fd71c4033ac29f947a",
+    "task_id": "TASK-0165"
+  },
+  {
+    "action_sha256": "8819c919c840790eb032eac7cbeb9a2048b0f8c708fa97885bcf5404477e035c",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-19T16:36:47Z",
+    "authorization_mode": "direct_human",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-19T17:34:00Z",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "The owner directly approved one local A01 action. REV-0002 independently approved concrete digest 8819c919c840790eb032eac7cbeb9a2048b0f8c708fa97885bcf5404477e035c. No retry, external transfer or additional spend.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "a35228677107121ad381c23d8976704f768fe9b729c75fa18d33d6cbc29edd6a",
+    "subject_commit": "79cc4425943fd892edbfb0fd71c4033ac29f947a",
+    "task_id": "TASK-0165"
   }
 ]

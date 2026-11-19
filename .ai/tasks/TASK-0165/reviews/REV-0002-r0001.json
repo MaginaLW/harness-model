@@ -1,0 +1,13 @@
+{
+  "context_sha256": "cb164d27df2daa60f8146ff0be4d683ca43be77e909ce3f05638c5423e70221e",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-19T16:34:54Z",
+  "review_id": "REV-0002",
+  "review_stage": "design",
+  "reviewer": "a01-budget-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "独立审核 A01 预算补充与具体动作，结论 APPROVE。动作规范摘要 8819c919c840790eb032eac7cbeb9a2048b0f8c708fa97885bcf5404477e035c，绑定 DU-001、当前分类及实施提交 79cc4425943fd892edbfb0fd71c4033ac29f947a。规范检出的 264 份材料全部与提交匹配，清单与冻结设计上下文经独立重算一致，原阻塞历史保留。动作在条件齐备并完成正式批准后，仅限独立验证者通过原生 verify 的 targeted_mutation 单项执行一次。锁内能力预检上限 10 秒，五个声明串行，每项至多一个基线和一个变异检测，每个检测限 60 秒，每流限 16 KiB。无效基线、无效报告、超时或清理失败终止。有效 survived 如实保留。消费后重试额度为零，截止 2026-11-19T17:34:00Z。完整原生 V2、私有 CI、对外传输、跨仓写入、发布与 Stage B 均在本动作之外。",
+  "task_id": "TASK-0165"
+}
