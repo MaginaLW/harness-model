@@ -120,5 +120,18 @@
     "spec_sha256": "4ed1c776503fb9c234668cb03c9c29edea3d328f940373f3da5911f009581668",
     "subject_commit": "e8b97f3822b68f1e95b0a396f9ac43fd802290dd",
     "task_id": "TASK-0165"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-19T23:51:27Z",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权：REV-0006 independently approved the frozen test-only repair with zero findings. The new phase uses synthetic, local focused tests only.",
+    "schema_version": "1.0",
+    "spec_sha256": "f5539d525edf76dba76db43d845aed31d5d6c33e364d61c80b4ed591d4c766a6",
+    "subject_commit": "e8b97f3822b68f1e95b0a396f9ac43fd802290dd",
+    "task_id": "TASK-0165"
   }
 ]
