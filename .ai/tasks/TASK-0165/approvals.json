@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-19T15:54:38Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "依常设授权记录实施规格批准。最终冻结设计已独立 APPROVE，现有 Node 默认值及 002 锚点已核定；真实变异、私有传输和跨仓额度均为零。",
+    "schema_version": "1.0",
+    "spec_sha256": "98dbc3485ee61ef5a4c709fc9cb24b50c1ee5047506021866bc093508ee9d8b3",
+    "subject_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "task_id": "TASK-0165"
+  }
+]
