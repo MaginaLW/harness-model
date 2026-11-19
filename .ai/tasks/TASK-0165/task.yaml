@@ -20,7 +20,7 @@ allowed_scope:
 base_commit: b510d46197dcead7c27763246dfb474f8aa5a671
 branch: codex/mutation-attribution-implementation
 created_at: '2026-11-19T15:49:56Z'
-current_state: IMPLEMENTING
+current_state: BLOCKED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -95,9 +95,9 @@ goal: "\u590D\u7528\u53D7\u63A7 Job \u542F\u52A8\u5668\u548C\u53CC\u7AEF 16 KiB 
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-19T15:53:24Z'
-subject_commit: 7a2e0d06df962f2c9ba800a58669bbdcf6e2049e
+subject_commit: 79cc4425943fd892edbfb0fd71c4033ac29f947a
 task_id: TASK-0165
-updated_at: '2026-11-19T16:16:21Z'
+updated_at: '2026-11-19T16:25:29Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - .ai/schemas/mutation-evidence.schema.json
