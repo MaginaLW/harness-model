@@ -105,5 +105,20 @@
     "spec_sha256": "4ed1c776503fb9c234668cb03c9c29edea3d328f940373f3da5911f009581668",
     "subject_commit": "e8b97f3822b68f1e95b0a396f9ac43fd802290dd",
     "task_id": "TASK-0165"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-19T18:34:48Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "8a98b24f96cc4442485a4d6bed5eee4da3c79e1791aa91ec76f7d3bd2ac0a5d3",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "Under standing delegation, approve candidate e8b97f38 after all fourteen local V2 checks passed, zero unresolved findings in independent implementation review REV-0005, and finalized evidence bound to snapshot 26995db415bb05fbe966b691b0a31c02da3d1b2c3446a54078b39d4097a43af9. Private CI transfer and publication require separate scope.",
+    "schema_version": "1.0",
+    "spec_sha256": "4ed1c776503fb9c234668cb03c9c29edea3d328f940373f3da5911f009581668",
+    "subject_commit": "e8b97f3822b68f1e95b0a396f9ac43fd802290dd",
+    "task_id": "TASK-0165"
   }
 ]
