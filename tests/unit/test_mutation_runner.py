@@ -1740,6 +1740,31 @@ def test_reporter_matches_real_pytest_raises_exit_code(
     }
 
 
+def test_reporter_normalizes_crlf_but_rejects_a_bare_cr(tmp_path: Path) -> None:
+    detector = tmp_path / "test_detector.py"
+    lf = b"# detector\nassert True\n"
+    expected = hashlib.sha256(lf).hexdigest()
+    for content in (lf, lf.replace(b"\n", b"\r\n")):
+        detector.write_bytes(content)
+        assert reporter._test_digest(detector) == expected
+
+    detector.write_bytes(b"# detector\rassert True\r\n")
+    with pytest.raises(ValueError, match="invalid detector line ending"):
+        reporter._test_digest(detector)
+
+
+def test_reporter_requires_directories_and_a_regular_source_file(tmp_path: Path) -> None:
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    detector = tests_dir / "test_detector.py"
+    detector.touch()
+    assert reporter._safe_file(tmp_path, "tests/test_detector.py") == detector
+    with pytest.raises(ValueError, match="invalid controlled file"):
+        reporter._safe_file(tmp_path, "tests")
+    with pytest.raises(ValueError, match="invalid controlled directory"):
+        reporter._safe_file(tmp_path, "tests/test_detector.py/child.py")
+
+
 @pytest.mark.parametrize("mutation_id", tuple(protocol.CASES))
 def test_reporter_checks_target_and_direct_import_identity(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutation_id: str
@@ -1818,6 +1843,9 @@ def test_reporter_checks_target_and_direct_import_identity(
     )
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     assert reporter._reference_ok(mutation_id, tmp_path, digest, item)
+    with monkeypatch.context() as patch:
+        patch.setattr(package, "__file__", None)
+        assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
     item.obj = lambda: None
     assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
     item.obj = getattr(detector_module, contract[2])
@@ -2056,6 +2084,23 @@ def test_report_requires_one_complete_pytest_session(
         )
         == "passed"
     )
+
+
+def test_reporter_rejects_partial_actor_detector_collection(
+    tmp_path: Path, manifest: MutationManifest, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    actor_detector = next(m for m in manifest.mutations if m.mutation_id == "MUT-V2-002")
+    node = f"{actor_detector.expected_detector}[ -VERIFIER_ACTOR_REQUIRED]"
+    session = SimpleNamespace(items=[SimpleNamespace(nodeid=node)])
+    monkeypatch.setattr(reporter, "_PYTEST", pytest)
+    instance = reporter._Reporter(actor_detector.mutation_id, tmp_path, "a" * 64)
+
+    with pytest.raises(pytest.exit.Exception, match="invalid detector collection") as stopped:
+        instance.pytest_collection_finish(session)
+    assert stopped.value.returncode == 2
+    instance.pytest_sessionfinish(session, stopped.value.returncode)
+    with pytest.raises(ValueError, match="invalid detector run"):
+        instance.report()
 
 
 def _run_reporter(
