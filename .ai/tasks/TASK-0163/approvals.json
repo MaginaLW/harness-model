@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-19T15:15:52Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "依常设授权记录。本次仅批准 928e135d 上冻结的本地规格。独立设计审核 REV-0001 为 APPROVE，无发现。真实变异、跨仓写入和付费额度均为零，既有三项发现保持原状态。",
+    "schema_version": "1.0",
+    "spec_sha256": "06f1b7ef2709ce0dec01f8c5dee96e3539ccdff1e4978f021e5850dac7f6f45d",
+    "subject_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "task_id": "TASK-0163"
+  }
+]

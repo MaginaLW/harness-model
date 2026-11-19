@@ -1,0 +1,13 @@
+{
+  "context_sha256": "576ca2cb5d2ed5f4eecba6d05a69b28674dfc48495fc2d9ab2b0d930ab90d40f",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-19T15:15:06Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-spec-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "批准本次本地设计交付。在基线 928e135d 上独立核对了清单及四个检测文件的规范 Git 内容摘要、五个变异操作和预期失败语句。pytest 9.1.1 收集到六个指定节点，002 的两个参数身份与签名均匹配。规格将完整基线、唯一预期 call 失败、其他阶段、来源与清理绑定为归因依据，并要求历史制品保持历史语义。真实变异和原生 CI 仍无本轮运行证据。TASK-0095 的私有原件传递与重放、Ubuntu 后代生命周期、旧账本隔离三项仍待各自候选验收。",
+  "task_id": "TASK-0163"
+}

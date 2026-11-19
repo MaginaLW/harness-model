@@ -1,0 +1,35 @@
+{
+  "base_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+  "branch": "codex/mutation-attribution-spec-928e135d",
+  "classification_input_sha256": "9c16683aa1ce8a0360f28b5dab2563e3d86d90d11088c5ed65016abd96ea03e4",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0163/spec.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "固定 928e135d 的五项 V2 检测归因规格并完成一次本地独立设计审核",
+        "impact_scope": [
+          ".ai/tasks/TASK-0163/spec.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "固定 928e135d 的五项 V2 检测归因规格并完成一次本地独立设计审核",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "576ca2cb5d2ed5f4eecba6d05a69b28674dfc48495fc2d9ab2b0d930ab90d40f",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "06f1b7ef2709ce0dec01f8c5dee96e3539ccdff1e4978f021e5850dac7f6f45d",
+  "task_id": "TASK-0163"
+}

@@ -1,0 +1,45 @@
+# V2 定向变异的检测归因规格
+
+## 目标
+
+在主线 `928e135d4145d0263fd204b241f5af1ac10e71ac` 上，固定五项治理保护各自预期的检测信号，让审核者能区分预期保护生效、测试未检出变化和运行结果无法归因。本次交付为一份本地规格及一次独立设计审核。运行时尚采用 `mutation_evidence._derive_outcome` 的退出码合同。
+
+## 范围
+
+复用 `.ai/mutations/phase-02-critical-manifest.json` 的五个 ID、目标符号、操作和检测函数，以及现有 runner、制品加载器、审批和 Gate。清单的规范 Git blob 内容 SHA-256 为 `1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0`。本次只写本任务规格与 CLI 生成的本任务记录。
+
+以下行为供后续实现验收。预期只针对表列基线、Python 3.11 和锁定的 pytest 9.1.1，实际变异结果尚待独立运行。每项 node ID 取清单中的完整 `expected_detector`，002 另拼接表列的原样参数后缀，保留空格。函数与断言的行号定位到基线的测试文件。
+
+| 清单 ID 后三位 | 预期失败的位置和语义 | 规范 Git blob 内容 SHA-256 |
+|---|---|---|
+| 001 | `tests/unit/test_policy.py:198` 的首次有效策略检查抛出精确类型 `PolicyError`，其 code 等于 `POLICY_CHECK_REFERENCE_INVALID`。 | `25721c57de7a8a4e0bbdddf15fb147a8f9cf46304f1c191c08b3ef5aac627962` |
+| 002 | `tests/integration/test_verify_command.py:1146` 的 `unexpected` 回调抛出精确类型 `AssertionError`，哨兵为 `V2 rejection must happen before plan parsing or runner start`。预期失败后缀为 `[ implementer -VERIFIER_ACTOR_NOT_INDEPENDENT]`，同批 `[ -VERIFIER_ACTOR_REQUIRED]` 应全部通过。 | `893e291360f1fd797d129e031c944a1aba0a1d567bd393dc9a4dc2339af772b3` |
+| 003 | `tests/integration/test_mutation_manifest_contract.py:148` 针对不通过的必需检查，`assert not approval._v2_evidence_current(...)` 抛出精确类型 `AssertionError`。 | `353656eb2dc585c76751a5eebd7ee5654723949ecff1b621f9b9a217e2f516d9` |
+| 004 | 同一文件第 169 行，`assert facts["v2_mutation_killed"] is False` 抛出精确类型 `AssertionError`。 | 同 003 |
+| 005 | `tests/unit/test_evidence.py:165` 的首个 `pytest.raises(ContractError)` 因期望异常未抛出而产生 pytest 的精确 `Failed` 类型。仅匹配此上下文退出及缺失预期异常的信号。 | `d27687837225257ac2ae89c89f5eae267f40d31a046d32d0099283b8a54005a8` |
+
+## 验收条件
+
+1. **本次规格验收。** 用固定提交核对清单、检测文件字节、节点、参数和预期失败的测试语句。以禁用第三方插件自动加载的锁定 pytest 收集上述五项检测，应得到六个节点；在未修改的引擎上六个均应通过。独立审核者用本任务 design context 出具一次结论，按原结论记录发现及其适用范围。
+2. **归因判定。** 后续对每一项先要求基线退出 0，全部指定节点的 setup/call/teardown 唯一且均通过。变异侧只有退出 1、唯一的预期节点在 call 阶段以固定签名失败、其余节点和阶段通过，且材料、进程结束、EOF 与清理均已核实时，才可报告 `killed`。同一完整节点集全部通过且退出 0 为 `survived`。其余为 `unverified`，包括 setup 或 teardown 单独失败、无关断言、跳过、xfail/xpass、超时或缺少节点。
+3. **报告与重放。** 显式加载已绑定的 pytest 报告组件，禁用第三方插件自动加载。发送和接收端各限每次报告 16 KiB，单节点三条阶段结果，最多两个节点；限定收集、结束以及每节点每阶段各一条，拒绝重复 JSON 键、额外节点、缺失阶段、超限及截断。父进程在同一截止时间内并发读取、核验退出与 EOF。只持久化白名单标识、结果、签名 token 和摘要。制品绑定任务、subject、清单、操作、已隔离引擎及实际导入、检测及其 fixtures/config、报告组件、Python/pytest 版本、报告与日志；加载器独立复核这些原件和绑定。文本锚点按 UTF-8、规范 LF Git 内容核对。共享 pytest 进程中的报告依赖受信测试代码和工具，匹配签名仅支持已声明的检测归因。
+4. **历史及现行消费者。** 内层制品 1.0 仅提供可回读的历史退出事实，原件缺失返回未知。新合同使用独立的 2.0 严格分支，现行 verify、approve、Gate、原生 CI 必须回读并验证 2.0 才能接受强化归因；保持既有审批、账本和证据原样。现有外层摘要能绑定新制品时继续沿用；若需修改外层 Schema，先对具体消费者重新分类、审核兼容性。
+5. **后续验证与门限。** 合成回归包括 exit 1 的 setup 失败和无关 call 失败，以及错误参数、来源漂移、篡改、重复、超限、退出与 EOF 不一致。完整保障还需对独立且受支持的平台、固定 subject 和五项真实变异分别留存可重放证据。原生 CI、实现审核、当前 Gate、完整测试、85% 核心总覆盖率和 90% 差异覆盖率在各自实施候选上验证。此次设计审核不能关闭这些验收项。
+
+## 非目标
+
+现阶段交付截至设计审核。Stage B、本地安装包、生产评分、外仓消费和宿主接入采用各自规则。五项现有保护与项目依赖范围维持原约定。
+
+## 禁止动作
+
+真实变异、跨仓写入和付费预算均为零。禁止触发私有 CI、上传私有原件、变更执行权限或改写历史证据。当前额度只含一次独立设计审核。
+
+## 错误行为
+
+基线、Python/pytest 支持组合、节点或导入来源变化时使该绑定失效，先重新核对和审核预期。后续实现需在一次性授权消费前预检平台与材料，在消费时原子复核。缺判据或缺平台清理证据时返回 `unverified`，不得按运行后的结果调整本轮预期。
+
+沿用 TASK-0095 的三项未闭合发现。私有 CI 需要明确允许的原件、接收方及可复现重放；Ubuntu 需要能约束后代生命周期并独立验证退出、EOF 与清理；旧账本需从本任务写入范围隔离并在实际候选上核对字节。本次只使用新任务记录，不迁移旧账本或代填旧发现。上述三项分别有证据后才可裁定其关闭。
+
+## 回滚
+
+保留本任务原规格、审核和结果。若设计需要更正，在追加记录的后继版本复核受影响的签名与消费者。当前主线运行行为保持在所列基线。
