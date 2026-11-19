@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
 import importlib
 import json
@@ -9,11 +11,13 @@ import os
 import re
 import secrets
 import stat
+import sys
 import tempfile
-from collections.abc import Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, fields
 from datetime import datetime, timezone
+from importlib import metadata
 from pathlib import Path, PureWindowsPath
 from threading import Lock
 from typing import Any, cast
@@ -21,6 +25,7 @@ from typing import Any, cast
 from aiflow.approval import (
     APPROVAL_MARKER,
     ApprovalContext,
+    approval_is_current,
     canonical_action_sha256,
     matching_approval,
     validate_action_file,
@@ -37,13 +42,30 @@ from aiflow.git_context import (
 )
 from aiflow.mutation_manifest import (
     CANONICAL_MANIFEST_PATH,
+    MutationDeclaration,
     MutationManifest,
     load_mutation_manifest,
 )
+from aiflow.mutation_materials import (
+    _git as _material_git,
+)
+from aiflow.mutation_materials import (
+    _is_link,
+    loaded_engine_matches,
+    material_file_matches,
+    materials_sha256,
+    subject_materials,
+)
+from aiflow.mutation_process import ProcessLifecycle, preflight_mutation_runtime
+from aiflow.mutation_protocol import REVIEWED_INPUT_SHA256, classify_report, parse_report
 from aiflow.mutation_runner import (
     MutationProbe,
     MutationRun,
+    _assert_no_checkout_filters,
     _issue_runner_authorization,
+    _minimal_environment,
+    _RunFailure,
+    mutation_bytes,
     run_targeted_mutations,
 )
 from aiflow.policy import load_policy_bundle
@@ -60,6 +82,26 @@ _EVIDENCE_REF = re.compile(
     r"targeted-mutation/evidence\.json$"
 )
 _MANIFEST_REF = CANONICAL_MANIFEST_PATH.as_posix()
+_MAX_ARTIFACT_BYTES = 131072
+_MAX_LOG_BYTES = 65536
+_REQUIRED_MATERIALS = frozenset(
+    {
+        "src/aiflow/__init__.py",
+        "src/aiflow/mutation_evidence.py",
+        "src/aiflow/mutation_manifest.py",
+        "src/aiflow/mutation_materials.py",
+        "src/aiflow/mutation_process.py",
+        "src/aiflow/mutation_protocol.py",
+        "src/aiflow/mutation_reporter.py",
+        "src/aiflow/mutation_runner.py",
+        "src/aiflow/process_runner.py",
+        "tests/conftest.py",
+        "tests/integration/test_begin_close_commands.py",
+        "tests/fixtures/contracts/valid/evidence-v2.json",
+        "pyproject.toml",
+        "uv.lock",
+    }
+)
 _V2_MUTATION_ACTION_GLOB = "action-v2-targeted-mutation-*.json"
 _V2_MUTATION_ACTION_TYPE = "targeted_mutation_v2"
 _ACTION_CONSUMPTION_THREAD_LOCK = Lock()
@@ -82,6 +124,14 @@ _LOG_KEYS = frozenset(
         "main_tree_unchanged",
     )
 )
+_V2_LOG_KEYS = _LOG_KEYS | {
+    "baseline_report",
+    "mutant_report",
+    "baseline_target_sha256",
+    "mutant_target_sha256",
+    "baseline_lifecycle",
+    "mutant_lifecycle",
+}
 
 
 @dataclass(frozen=True)
@@ -102,6 +152,16 @@ class TargetedMutationFacts:
     mutation_evidence_sha256: str | None
     manifest_ref: str | None
     results: tuple[Mapping[str, object], ...]
+
+
+@dataclass(frozen=True)
+class HistoricalMutationEvidence:
+    """Legacy exit-only observations; never a current attribution or gate fact."""
+
+    record_id: str
+    integrity: str
+    exit_outcomes: tuple[tuple[str, str], ...]
+    exit_codes: tuple[tuple[str, int | None, int | None], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -159,10 +219,23 @@ def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
-def _read_json(path: Path) -> dict[str, Any]:
+def _bounded_bytes(path: Path, limit: int) -> bytes:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_unique_object)
-    except (OSError, UnicodeError, json.JSONDecodeError, _DuplicateKey) as error:
+        with path.open("rb") as source:
+            data = source.read(limit + 1)
+        if len(data) > limit:
+            raise ValueError("JSON exceeds its bound")
+        return data
+    except (OSError, ValueError) as error:
+        raise _error(
+            "Mutation evidence JSON is invalid", "MUTATION_EVIDENCE_LOG_INVALID"
+        ) from error
+
+
+def _parse_json(data: bytes) -> dict[str, Any]:
+    try:
+        value = json.loads(data.decode("utf-8", "strict"), object_pairs_hook=_unique_object)
+    except (ValueError, RecursionError) as error:
         raise _error(
             "Mutation evidence JSON is invalid", "MUTATION_EVIDENCE_LOG_INVALID"
         ) from error
@@ -171,10 +244,22 @@ def _read_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def _read_json(path: Path) -> dict[str, Any]:
+    return _parse_json(_bounded_bytes(path, _MAX_ARTIFACT_BYTES))
+
+
+def _read_hashed_log(path: Path, expected_sha256: object) -> dict[str, Any]:
+    """Hash and parse the same bounded byte snapshot, avoiding check/read races."""
+    data = _bounded_bytes(path, _MAX_LOG_BYTES)
+    if not isinstance(expected_sha256, str) or _sha256_bytes(data) != expected_sha256:
+        raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+    return _parse_json(data)
+
+
 def _source_sha256(path: Path) -> str:
     try:
-        return _sha256_bytes(path.read_bytes())
-    except OSError as error:
+        return _sha256_bytes(_bounded_bytes(path, _MAX_LOG_BYTES))
+    except ContractError as error:
         raise _error(
             "Mutation evidence input could not be read", "MUTATION_EVIDENCE_INPUT_MISMATCH"
         ) from error
@@ -195,7 +280,7 @@ def _relative_path(value: str, *, root: Path) -> Path:
     current = lexical_root
     for part in path.parts:
         current = current / part
-        if current.is_symlink():
+        if current.is_symlink() or (current.exists() and _is_link(current)):
             raise _error("Mutation evidence path escapes its root", "MUTATION_EVIDENCE_PATH_ESCAPE")
     candidate = lexical.resolve()
     try:
@@ -207,18 +292,115 @@ def _relative_path(value: str, *, root: Path) -> Path:
     return candidate
 
 
-def _derive_outcome(probe: MutationProbe, run: MutationRun) -> str:
+def _derive_outcome(
+    probe: MutationProbe,
+    run: MutationRun,
+    declaration: MutationDeclaration,
+    materials: Mapping[str, bytes],
+) -> str:
     if (
         run.reason_code is not None
         or run.main_tree_unchanged is not True
         or probe.reason_code is not None
+        or probe.timed_out is not False
     ):
         return "unverified"
-    if probe.baseline_exit_code == 0 and probe.mutant_exit_code == 1 and probe.timed_out is False:
-        return "killed"
-    if probe.baseline_exit_code == 0 and probe.mutant_exit_code == 0 and probe.timed_out is False:
-        return "survived"
+    try:
+        original = materials[declaration.target]
+        if (
+            not isinstance(probe.baseline_report, bytes)
+            or not isinstance(probe.mutant_report, bytes)
+            or type(probe.baseline_exit_code) is not int
+            or type(probe.mutant_exit_code) is not int
+            or probe.baseline_lifecycle is None
+            or probe.mutant_lifecycle is None
+            or not probe.baseline_lifecycle.matches_observation(
+                probe.baseline_report, probe.baseline_exit_code
+            )
+            or not probe.mutant_lifecycle.matches_observation(
+                probe.mutant_report, probe.mutant_exit_code
+            )
+        ):
+            return "unverified"
+        original.decode("utf-8", "strict")
+        if b"\r" in original or b"\x00" in original:
+            return "unverified"
+        candidates = (original, original.replace(b"\n", b"\r\n"))
+        matching = [
+            data for data in candidates if _sha256_bytes(data) == probe.baseline_target_sha256
+        ]
+        if not matching:
+            return "unverified"
+        baseline_sha = _sha256_bytes(matching[0])
+        mutant_sha = _sha256_bytes(mutation_bytes(declaration, matching[0]))
+        if probe.mutant_target_sha256 != mutant_sha:
+            return "unverified"
+        baseline = parse_report(probe.baseline_report, probe.mutation_id, baseline_sha)
+        mutant = parse_report(probe.mutant_report, probe.mutation_id, mutant_sha)
+        if (
+            classify_report(
+                baseline,
+                mutation_id=probe.mutation_id,
+                target_sha256=baseline_sha,
+                exit_code=probe.baseline_exit_code,
+                baseline=True,
+            )
+            != "passed"
+        ):
+            return "unverified"
+        outcome = classify_report(
+            mutant,
+            mutation_id=probe.mutation_id,
+            target_sha256=mutant_sha,
+            exit_code=probe.mutant_exit_code,
+            baseline=False,
+        )
+        if outcome in {"killed", "survived"}:
+            return outcome
+    except (KeyError, ValueError, TypeError, UnicodeError, _RunFailure):
+        return "unverified"
     return "unverified"
+
+
+def _safe_report(data: bytes | None, mutation_id: str, digest: str | None) -> str | None:
+    """Persist only reports accepted by the closed protocol, never arbitrary output."""
+    if data is None or digest is None:
+        return None
+    try:
+        parse_report(data, mutation_id, digest)
+    except (TypeError, ValueError):
+        return None
+    return base64.b64encode(data).decode("ascii")
+
+
+def _decode_report(value: object) -> bytes | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or len(value) > 21848:
+        raise _error("Mutation report is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+    try:
+        data = base64.b64decode(value, validate=True)
+    except (ValueError, binascii.Error) as error:
+        raise _error("Mutation report is invalid", "MUTATION_EVIDENCE_LOG_INVALID") from error
+    if len(data) > 16384 or base64.b64encode(data).decode("ascii") != value:
+        raise _error("Mutation report is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+    return data
+
+
+def _decode_lifecycle(value: object) -> ProcessLifecycle | None:
+    if value is None:
+        return None
+    names = {field.name for field in fields(ProcessLifecycle)}
+    if (
+        not isinstance(value, dict)
+        or value.keys() != names
+        or any(type(value[key]) is not bool for key in names - {"returncode", "report_sha256"})
+        or type(value["returncode"]) is not int
+        or not isinstance(value["report_sha256"], str)
+        or _SHA256.fullmatch(value["report_sha256"]) is None
+    ):
+        raise _error("Mutation lifecycle is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+    return ProcessLifecycle(**value)
 
 
 def _validate_bindings(
@@ -666,13 +848,19 @@ def _consume_targeted_mutation_action(
     task: Mapping[str, object],
     classification: Mapping[str, object],
     policy_sha256: str,
+    *,
+    check_inputs: Callable[[], None] | None = None,
 ) -> MutationActionUse:
     # Keep missing/stale/unapproved calls read-only; the locked lookup below is
     # repeated because only that one participates in the atomic reservation.
     _current_targeted_mutation_action(
         root, task_id, subject_commit, task, classification, policy_sha256
     )
+    if check_inputs is not None:
+        check_inputs()
     with _locked_action_consumption(root, task_id):
+        if check_inputs is not None:
+            check_inputs()
         digest, action, action_path, decision_unit_id = _current_targeted_mutation_action(
             root, task_id, subject_commit, task, classification, policy_sha256
         )
@@ -1080,6 +1268,7 @@ def _make_artifact(
     manifest: MutationManifest,
     manifest_sha: str,
     runner_sha: str,
+    subject_materials_sha256: str,
 ) -> MutationEvidenceArtifact:
     if now.tzinfo is None or now.utcoffset() is None:
         raise _error("Mutation evidence clock is invalid", "MUTATION_EVIDENCE_ID_FAILED")
@@ -1094,6 +1283,9 @@ def _make_artifact(
     ):
         raise _error("Mutation evidence record path is invalid", "MUTATION_EVIDENCE_PATH_INVALID")
     _validate_run(manifest, run, subject_commit)
+    materials = subject_materials(root, subject_commit)
+    if materials_sha256(materials) != subject_materials_sha256:
+        raise _error("Mutation subject materials changed", "MUTATION_EVIDENCE_INPUT_MISMATCH")
     evidence_dir = record_root / "targeted-mutation"
     log_dir = evidence_dir / "logs"
     try:
@@ -1109,7 +1301,12 @@ def _make_artifact(
     results: list[dict[str, object]] = []
     log_refs: list[str] = []
     for declaration, probe in zip(manifest.mutations, run.probes, strict=True):
-        outcome = _derive_outcome(probe, run)
+        outcome = _derive_outcome(probe, run, declaration, materials)
+        for code in (probe.reason_code, run.reason_code):
+            if code is not None and (
+                not isinstance(code, str) or re.fullmatch(r"[A-Z][A-Z0-9_]{0,127}", code) is None
+            ):
+                raise _error("Mutation reason is invalid", "MUTATION_EVIDENCE_INPUT_MISMATCH")
         log = {
             "mutation_id": probe.mutation_id,
             "safeguard_id": declaration.safeguard_id,
@@ -1126,8 +1323,28 @@ def _make_artifact(
             "outcome": outcome,
             "run_reason_code": run.reason_code,
             "main_tree_unchanged": run.main_tree_unchanged,
+            "baseline_report": _safe_report(
+                probe.baseline_report, probe.mutation_id, probe.baseline_target_sha256
+            ),
+            "mutant_report": _safe_report(
+                probe.mutant_report, probe.mutation_id, probe.mutant_target_sha256
+            ),
+            "baseline_target_sha256": probe.baseline_target_sha256
+            if isinstance(probe.baseline_target_sha256, str)
+            and _SHA256.fullmatch(probe.baseline_target_sha256)
+            else None,
+            "mutant_target_sha256": probe.mutant_target_sha256
+            if isinstance(probe.mutant_target_sha256, str)
+            and _SHA256.fullmatch(probe.mutant_target_sha256)
+            else None,
+            "baseline_lifecycle": asdict(probe.baseline_lifecycle)
+            if probe.baseline_lifecycle
+            else None,
+            "mutant_lifecycle": asdict(probe.mutant_lifecycle) if probe.mutant_lifecycle else None,
         }
-        if set(log) != _LOG_KEYS:
+        _decode_lifecycle(log["baseline_lifecycle"])
+        _decode_lifecycle(log["mutant_lifecycle"])
+        if set(log) != _V2_LOG_KEYS:
             raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
         log_path = log_dir / f"{probe.mutation_id}.json"
         _write_new_json(log_path, log)
@@ -1154,7 +1371,8 @@ def _make_artifact(
         )
     uncovered = [result["mutation_id"] for result in results if result["outcome"] != "killed"]
     evidence: dict[str, object] = {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
+        "subject_materials_sha256": subject_materials_sha256,
         "record_id": record_id,
         "task_id": task_id,
         "repository_id": task["repository_id"],
@@ -1193,22 +1411,78 @@ def _make_artifact(
     )
 
 
+def _reviewed_materials_match(materials: Mapping[str, bytes]) -> bool:
+    return _REQUIRED_MATERIALS.issubset(materials) and all(
+        name in materials and _sha256_bytes(materials[name]) == digest
+        for name, digest in REVIEWED_INPUT_SHA256.items()
+    )
+
+
+def _preflight_targeted_mutation(
+    root: Path, subject: str, materials: Mapping[str, bytes], exercise_runtime: bool
+) -> None:
+    """Reject unsupported runtime or engine identity before consuming authorization."""
+    try:
+        if (
+            sys.platform != "win32"
+            or sys.version_info[:2] != (3, 11)
+            or metadata.version("pytest") != "9.1.1"
+            or not _reviewed_materials_match(materials)
+            or not all(
+                material_file_matches(root, name, content) for name, content in materials.items()
+            )
+            or not loaded_engine_matches(root, materials)
+        ):
+            raise ValueError("unsupported mutation runtime or source")
+        with tempfile.TemporaryDirectory(prefix="aiflow-mutation-hooks-") as hooks:
+            _assert_no_checkout_filters(root, Path(hooks), subject, tuple(sorted(materials)))
+            if exercise_runtime:
+                preflight_mutation_runtime(root, _minimal_environment(root, Path(hooks)))
+    except (OSError, ValueError, _RunFailure, metadata.PackageNotFoundError) as error:
+        raise _error(
+            "Mutation execution preflight failed", "MUTATION_EVIDENCE_INPUT_MISMATCH"
+        ) from error
+
+
 def record_targeted_mutation_evidence(
     repository_root: Path, task_id: str, subject_commit: str
 ) -> MutationEvidenceArtifact:
     """Run the fixed runner once and persist a new immutable evidence record."""
     root = Path(repository_root).resolve()
     task, classification, policy_sha = _validate_bindings(root, task_id, subject_commit)
+    prepared: tuple[MutationManifest, str, str, str] | None = None
+
+    def check_inputs() -> None:
+        nonlocal prepared
+        if _validate_bindings(root, task_id, subject_commit) != (task, classification, policy_sha):
+            raise _error("Mutation task bindings changed", "MUTATION_EVIDENCE_BINDING_STALE")
+        manifest = _load_manifest(root)
+        materials = subject_materials(root, subject_commit)
+        try:
+            current = (
+                manifest,
+                _sha256_bytes(materials[_MANIFEST_REF]),
+                _sha256_bytes(materials["src/aiflow/mutation_runner.py"]),
+                materials_sha256(materials),
+            )
+        except KeyError as error:
+            raise _error(
+                "Mutation subject materials are incomplete", "MUTATION_EVIDENCE_INPUT_MISMATCH"
+            ) from error
+        if prepared is not None and current != prepared:
+            raise _error("Mutation subject inputs changed", "MUTATION_EVIDENCE_INPUT_MISMATCH")
+        # Only the second check holds the consumption lock. Exercise the Job once.
+        _preflight_targeted_mutation(root, subject_commit, materials, prepared is not None)
+        prepared = current
+
     action_use = _consume_targeted_mutation_action(
-        root, task_id, subject_commit, task, classification, policy_sha
+        root, task_id, subject_commit, task, classification, policy_sha, check_inputs=check_inputs
     )
     task, classification, policy_sha = _revalidate_targeted_mutation_action(
         root, task_id, subject_commit, action_use
     )
-    manifest_path = root / CANONICAL_MANIFEST_PATH
-    manifest = _load_manifest(root)
-    manifest_sha = _source_sha256(manifest_path)
-    runner_sha = _source_sha256(root / "src/aiflow/mutation_runner.py")
+    assert prepared is not None
+    manifest, manifest_sha, runner_sha, subject_materials_sha256 = prepared
     now = _utc_now()
     record_id, record_root = _reserve_record_root(root, task_id, now)
     task, classification, policy_sha = _revalidate_targeted_mutation_action(
@@ -1242,9 +1516,366 @@ def record_targeted_mutation_evidence(
         manifest=manifest,
         manifest_sha=manifest_sha,
         runner_sha=runner_sha,
+        subject_materials_sha256=subject_materials_sha256,
     )
     _complete_targeted_mutation_action(action_use, artifact)
     return artifact
+
+
+def _historical_git_log(root: Path, head: str, ref: str, checkout: bytes, digest: str) -> bytes:
+    """Read the exact retained blob when Git expanded its LF bytes in this checkout."""
+    canonical = checkout.replace(b"\r\n", b"\n")
+    if (
+        b"\r" in canonical
+        or checkout != canonical.replace(b"\n", b"\r\n")
+        or _sha256_bytes(canonical) != digest
+    ):
+        raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+    try:
+        tree = _material_git(root, "ls-tree", "-l", "-z", "--full-tree", head, "--", ref)
+        meta, name = tree.removesuffix(b"\0").split(b"\t")
+        mode, item_type, oid, size = meta.split()
+        if (
+            name != ref.encode("utf-8")
+            or mode not in {b"100644", b"100755"}
+            or item_type != b"blob"
+            or int(size) != len(canonical)
+            or re.fullmatch(rb"[a-f0-9]{40}", oid) is None
+        ):
+            raise ValueError("not the bounded regular blob")
+        original = _material_git(root, "cat-file", "blob", oid.decode("ascii"))
+        if original != canonical:
+            raise ValueError("checkout differs from original")
+    except (ContractError, UnicodeError, ValueError) as error:
+        raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID") from error
+    return original
+
+
+def read_historical_mutation_evidence(
+    repository_root: Path, task_id: str, evidence_ref: str
+) -> HistoricalMutationEvidence:
+    """Read v1 exit observations without granting current attribution.
+
+    Even intact logs cannot establish all historical source and task bindings here;
+    their integrity is therefore unknown until original materials are verified.
+    """
+    root = Path(repository_root).resolve()
+    match = _EVIDENCE_REF.fullmatch(evidence_ref)
+    if match is None or match.group("task_id") != task_id:
+        raise _error("Mutation evidence path is invalid", "MUTATION_EVIDENCE_PATH_INVALID")
+    evidence_path = _relative_path(evidence_ref, root=root)
+    if not evidence_path.exists():
+        return HistoricalMutationEvidence(match.group("record_id"), "unknown", ())
+    value = _read_json(evidence_path)
+    require_valid_contract("mutation-evidence", value)
+    unsigned = {key: item for key, item in value.items() if key != "mutation_evidence_sha256"}
+    if value.get("schema_version") != "1.0" or value.get(
+        "mutation_evidence_sha256"
+    ) != _sha256_bytes(_canonical_bytes(unsigned)):
+        raise _error("Historical mutation evidence is invalid", "MUTATION_EVIDENCE_DIGEST_INVALID")
+    record_id = match.group("record_id")
+    if (
+        value.get("task_id") != task_id
+        or value.get("record_id") != record_id
+        or not _record_time_matches(record_id, value.get("generated_at"))
+    ):
+        raise _error("Mutation evidence path is invalid", "MUTATION_EVIDENCE_PATH_INVALID")
+    outcomes: list[tuple[str, str]] = []
+    exit_codes: list[tuple[str, int | None, int | None]] = []
+    head: str | None = None
+    for result in value["results"]:
+        mutation_id = result["mutation_id"]
+        log_ref = f".ai/tasks/{task_id}/logs/{record_id}/targeted-mutation/logs/{mutation_id}.json"
+        if result["log_ref"] != log_ref:
+            raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+        path = _relative_path(log_ref, root=root)
+        if not path.is_file():
+            return HistoricalMutationEvidence(record_id, "unknown", ())
+        raw_log = _bounded_bytes(path, _MAX_LOG_BYTES)
+        if _sha256_bytes(raw_log) != result["log_sha256"]:
+            if head is None:
+                try:
+                    head = (
+                        _material_git(root, "rev-parse", "--verify", "HEAD^{commit}")
+                        .decode("ascii")
+                        .strip()
+                    )
+                    if _COMMIT.fullmatch(head) is None:
+                        raise ValueError("invalid HEAD")
+                except (ContractError, UnicodeError, ValueError) as error:
+                    raise _error(
+                        "Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID"
+                    ) from error
+            raw_log = _historical_git_log(root, head, log_ref, raw_log, result["log_sha256"])
+        log = _parse_json(raw_log)
+        expected = {
+            key: result.get(key)
+            for key in _LOG_KEYS
+            if key not in {"run_reason_code", "main_tree_unchanged"}
+        }
+        expected.update(
+            run_reason_code=value["run_reason_code"],
+            main_tree_unchanged=value["main_tree_unchanged"],
+        )
+        if log != expected:
+            raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+        baseline, mutant = result["baseline_exit_code"], result["mutant_exit_code"]
+        outcome = "unverified"
+        if (
+            value["run_reason_code"] is None
+            and value["main_tree_unchanged"] is True
+            and result["reason_code"] is None
+            and result["timed_out"] is False
+            and baseline == 0
+            and mutant in (0, 1)
+        ):
+            outcome = "killed" if mutant == 1 else "survived"
+        if outcome != result["outcome"]:
+            raise _error("Historical exit facts disagree", "MUTATION_EVIDENCE_SEMANTICS_INVALID")
+        outcomes.append((mutation_id, outcome))
+        exit_codes.append((mutation_id, baseline, mutant))
+    if [item[0] for item in outcomes] != [f"MUT-V2-{i:03d}" for i in range(1, 6)] or value[
+        "uncovered_mutation_ids"
+    ] != [mid for mid, outcome in outcomes if outcome != "killed"]:
+        raise _error("Historical exit facts disagree", "MUTATION_EVIDENCE_SEMANTICS_INVALID")
+    return HistoricalMutationEvidence(record_id, "unknown", tuple(outcomes), tuple(exit_codes))
+
+
+def _timestamp(value: object) -> datetime:
+    if not isinstance(value, str):
+        raise ValueError("missing timestamp")
+    result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if result.tzinfo is None:
+        raise ValueError("timestamp lacks timezone")
+    return result.astimezone(timezone.utc)
+
+
+def _verify_recorded_action(
+    root: Path,
+    task_id: str,
+    evidence_ref: str,
+    artifact: Mapping[str, object],
+    task: Mapping[str, object],
+    classification: Mapping[str, object],
+    policy_sha: str,
+) -> None:
+    """Replay the sole consumed approval and receipt that names this artifact.
+
+    The local append-only audit trail is a binding, not cryptographic authentication
+    against an actor who can rewrite all files under the same permissions.
+    """
+    try:
+        record = read_task_record_strict(root, task_id)
+        consumed = _used_action_digests(root, task_id)
+        approvals = _action_approvals(root, task_id)
+        units = {str(unit["decision_unit_id"]): unit for unit in parse_decision_units(task)}
+        action_paths = tuple(
+            sorted(resolve_task_path(root, task_id).glob(_V2_MUTATION_ACTION_GLOB))
+        )
+        matching_receipts = 0
+        for event_index, event in enumerate(record.events):
+            payload = event.get("payload")
+            if (
+                event.get("event_type") != "approval_recorded"
+                or not isinstance(payload, Mapping)
+                or payload.get("approval_type") != "action"
+                or payload.get("action_status") != "consumed"
+            ):
+                continue
+            digest = payload.get("action_sha256")
+            if not isinstance(digest, str) or digest not in consumed:
+                raise ValueError("invalid consumption event")
+            receipt_ref = f".ai/tasks/{task_id}/action-use-{digest}.md"
+            if consumed[digest][0] != receipt_ref:
+                raise ValueError("invalid receipt reference")
+            receipt = _relative_path(receipt_ref, root=root)
+            if not receipt.is_file():
+                continue
+            content = _bounded_bytes(receipt, _MAX_LOG_BYTES).decode("utf-8", "strict")
+            expected_ref = f"- Evidence ref: `{evidence_ref}`"
+            expected_digest = (
+                f"- Canonical mutation-evidence SHA-256: `{artifact['mutation_evidence_sha256']}`"
+            )
+            lines = content.splitlines()
+            if expected_ref not in lines and expected_digest not in lines:
+                continue
+            if lines.count(expected_ref) != 1 or lines.count(expected_digest) != 1:
+                raise ValueError("conflicting receipt")
+            matching_receipts += 1
+            unit_id = payload.get("decision_unit_id")
+            unit = units.get(str(unit_id))
+            if (
+                not isinstance(unit, Mapping)
+                or not isinstance(unit_id, str)
+                or "action_approval" not in unit.get("permission_requirements", [])
+                or not isinstance(unit.get("verification_requirements"), Mapping)
+                or unit["verification_requirements"].get("targeted_mutation_required") is not True
+                or payload.get("subject_commit") != artifact.get("subject_commit")
+                or payload.get("classification_input_sha256")
+                != artifact.get("classification_input_sha256")
+            ):
+                raise ValueError("invalid consumption binding")
+            event_time = _timestamp(event.get("occurred_at"))
+            actions = []
+            for action_path in action_paths:
+                if action_path.is_symlink():
+                    raise ValueError("linked action")
+                raw = _read_json(action_path)
+                try:
+                    action = validate_action_file(
+                        raw,
+                        subject_commit=str(artifact["subject_commit"]),
+                        now=str(event["occurred_at"]),
+                    )
+                except ContractError:
+                    continue
+                if canonical_action_sha256(action) == digest:
+                    actions.append(action)
+            if len(actions) != 1:
+                raise ValueError("action not unique")
+            action = actions[0]
+            if (
+                action.get("decision_unit_id") != unit_id
+                or action.get("classification_input_sha256")
+                != classification.get("classification_input_sha256")
+                or action.get("target") != task_id
+                or action.get("action_type") != _V2_MUTATION_ACTION_TYPE
+            ):
+                raise ValueError("invalid action binding")
+            context = ApprovalContext(
+                task_id,
+                unit_id,
+                str(task["current_state"]),
+                str(task["frozen_spec_sha256"]),
+                policy_sha,
+                str(task["base_commit"]),
+                str(artifact["subject_commit"]),
+                digest,
+            )
+            approved = [
+                approval
+                for approval in approvals
+                if approval.get("approval_type") == "action"
+                and approval.get("expires_at") == action.get("expires_at")
+                and approval_is_current(approval, context, now=str(event["occurred_at"]))
+                and _timestamp(approval.get("approved_at")) <= event_time
+                and any(
+                    prior.get("event_type") == "approval_recorded"
+                    and isinstance(prior.get("payload"), Mapping)
+                    and prior["payload"].get("approval_type") == "action"
+                    and isinstance(prior["payload"].get("approvals"), list)
+                    and approval in prior["payload"]["approvals"]
+                    for prior in record.events[:event_index]
+                )
+            ]
+            if not approved:
+                raise ValueError("action approval missing")
+            expected_lines = (
+                f"- Task: `{task_id}`",
+                f"- Decision unit: `{unit_id}`",
+                f"- Action type: `{_V2_MUTATION_ACTION_TYPE}`",
+                f"- Action SHA-256: `{digest}`",
+                f"- Subject commit: `{artifact['subject_commit']}`",
+                f"- Classification input SHA-256: `{artifact['classification_input_sha256']}`",
+                f"- Spec SHA-256: `{artifact['spec_sha256']}`",
+                f"- Policy SHA-256: `{policy_sha}`",
+                f"- Base commit: `{artifact['base_commit']}`",
+                f"- Expires at: `{action['expires_at']}`",
+                "- Status: `started`",
+                "- Status: `recorded`",
+                "- Approval consumed: `true`",
+                "- Reusable: `false`",
+                "## Result",
+            )
+            if any(lines.count(line) != 1 for line in expected_lines):
+                raise ValueError("invalid receipt fields")
+            unique_names = (
+                "Task",
+                "Decision unit",
+                "Action type",
+                "Action SHA-256",
+                "Subject commit",
+                "Classification input SHA-256",
+                "Spec SHA-256",
+                "Policy SHA-256",
+                "Base commit",
+                "Expires at",
+                "Approval consumed",
+                "Reusable",
+                "Evidence ref",
+                "Canonical mutation-evidence SHA-256",
+                "Started at",
+                "Recorded at",
+            )
+            if (
+                any(
+                    sum(line.startswith(f"- {name}:") for line in lines) != 1
+                    for name in unique_names
+                )
+                or sum(line.startswith("- Status:") for line in lines) != 2
+                or sum(line.startswith("## Result") for line in lines) != 1
+                or not (
+                    lines.index("- Status: `started`")
+                    < lines.index("## Result")
+                    < lines.index("- Status: `recorded`")
+                    < lines.index(expected_ref)
+                )
+            ):
+                raise ValueError("ambiguous receipt")
+
+            def receipt_time(label: str) -> datetime:
+                matches = [
+                    line[len(label) + 3 : -1]
+                    for line in lines
+                    if line.startswith(label + ": `") and line.endswith("`")
+                ]
+                if len(matches) != 1:
+                    raise ValueError("invalid receipt time")
+                return _timestamp(matches[0])
+
+            started = receipt_time("- Started at")
+            completed = receipt_time("- Recorded at")
+            generated = _timestamp(artifact.get("generated_at"))
+            claim_path = _relative_path(
+                f".ai/tasks/{task_id}/logs/action-launch-{digest}.json", root=root
+            )
+            if not claim_path.is_file():
+                raise ValueError("launch claim is missing or not a regular file")
+            claim = _read_json(claim_path)
+            claimed = _timestamp(claim.get("claimed_at"))
+            # The recorder reserves the record ID before it calls the runner.
+            # Replay the original receipt identity even when CI uses a fresh checkout.
+            expected_claim = {
+                "schema_version": "1.0",
+                "task_id": task_id,
+                "action_sha256": digest,
+                "subject_commit": artifact["subject_commit"],
+                "receipt_ref": receipt_ref,
+                "receipt_device": consumed[digest][1],
+                "receipt_inode": consumed[digest][2],
+                "claimed_at": claimed.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "single_use": True,
+            }
+            if _canonical_bytes(claim) != _canonical_bytes(expected_claim):
+                raise ValueError("launch claim differs from consumed action")
+            if not (started <= event_time <= generated <= claimed <= completed):
+                raise ValueError("invalid receipt chronology")
+            if claimed >= _timestamp(action["expires_at"]):
+                raise ValueError("launch occurred after approval expired")
+        if matching_receipts != 1:
+            raise ValueError("recorded receipt not unique")
+    except (
+        AiflowError,
+        OSError,
+        UnicodeError,
+        ValueError,
+        OverflowError,
+        KeyError,
+        TypeError,
+    ) as error:
+        raise _error(
+            "Mutation action evidence is invalid", "MUTATION_EVIDENCE_BINDING_STALE"
+        ) from error
 
 
 def load_targeted_mutation_evidence(
@@ -1266,6 +1897,11 @@ def load_targeted_mutation_evidence(
         raise _error(
             "Mutation evidence semantics are invalid", "MUTATION_EVIDENCE_SEMANTICS_INVALID"
         ) from error
+    if value.get("schema_version") != "2.0":
+        raise _error(
+            "Legacy mutation evidence cannot satisfy current gates",
+            "MUTATION_EVIDENCE_INPUT_MISMATCH",
+        )
     digest = value.get("mutation_evidence_sha256")
     unsigned = {key: item for key, item in value.items() if key != "mutation_evidence_sha256"}
     if not isinstance(digest, str) or digest != _sha256_bytes(_canonical_bytes(unsigned)):
@@ -1290,13 +1926,30 @@ def load_targeted_mutation_evidence(
         record_id, value.get("generated_at")
     ):
         raise _error("Mutation evidence path is invalid", "MUTATION_EVIDENCE_PATH_INVALID")
+    _verify_recorded_action(root, task_id, evidence_ref, value, task, classification, policy_sha)
     manifest = _load_manifest(root)
+    materials = subject_materials(root, str(value["subject_commit"]))
+    if (
+        not _reviewed_materials_match(materials)
+        or value.get("subject_materials_sha256") != materials_sha256(materials)
+        or not loaded_engine_matches(root, materials)
+    ):
+        raise _error("Mutation subject materials changed", "MUTATION_EVIDENCE_INPUT_MISMATCH")
+    for relative in (name for name in materials if name.startswith("src/aiflow/")):
+        try:
+            if not material_file_matches(root, relative, materials[relative]):
+                raise ValueError
+        except (OSError, KeyError, ValueError) as error:
+            raise _error(
+                "Mutation implementation differs from subject", "MUTATION_EVIDENCE_INPUT_MISMATCH"
+            ) from error
     if (
         value.get("manifest_id") != manifest.manifest_id
         or value.get("manifest_ref") != _MANIFEST_REF
-        or value.get("manifest_sha256") != _source_sha256(root / CANONICAL_MANIFEST_PATH)
+        or value.get("manifest_sha256") != _sha256_bytes(materials[_MANIFEST_REF])
+        or not material_file_matches(root, _MANIFEST_REF, materials[_MANIFEST_REF])
         or value.get("runner_source_sha256")
-        != _source_sha256(root / "src/aiflow/mutation_runner.py")
+        != _sha256_bytes(materials["src/aiflow/mutation_runner.py"])
     ):
         raise _error("Mutation evidence inputs are stale", "MUTATION_EVIDENCE_INPUT_MISMATCH")
     results = value.get("results")
@@ -1333,14 +1986,9 @@ def load_targeted_mutation_evidence(
             f".ai/tasks/{task_id}/logs/{record_id}/targeted-mutation/logs/"
             f"{declaration.mutation_id}.json"
         )
-        if (
-            log_ref != expected_log
-            or log_path.is_symlink()
-            or not log_path.is_file()
-            or result.get("log_sha256") != _source_sha256(log_path)
-        ):
+        if log_ref != expected_log or log_path.is_symlink() or not log_path.is_file():
             raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
-        log = _read_json(log_path)
+        log = _read_hashed_log(log_path, result.get("log_sha256"))
         expected_log_value = {
             key: result.get(key)
             for key in _LOG_KEYS
@@ -1352,8 +2000,28 @@ def load_targeted_mutation_evidence(
                 "main_tree_unchanged": value.get("main_tree_unchanged"),
             }
         )
-        if set(log) != _LOG_KEYS or log != expected_log_value:
+        if set(log) != _V2_LOG_KEYS or any(
+            log.get(key) != item for key, item in expected_log_value.items()
+        ):
             raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+        for name in ("baseline_target_sha256", "mutant_target_sha256"):
+            if log[name] is not None and (
+                not isinstance(log[name], str) or _SHA256.fullmatch(log[name]) is None
+            ):
+                raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
+        baseline_report = _decode_report(log["baseline_report"])
+        mutant_report = _decode_report(log["mutant_report"])
+        for report, digest in (
+            (baseline_report, log["baseline_target_sha256"]),
+            (mutant_report, log["mutant_target_sha256"]),
+        ):
+            if report is not None:
+                try:
+                    parse_report(report, declaration.mutation_id, digest)
+                except (TypeError, ValueError) as error:
+                    raise _error(
+                        "Mutation report is invalid", "MUTATION_EVIDENCE_LOG_INVALID"
+                    ) from error
         timed_out = result.get("timed_out")
         duration_ms = result.get("duration_ms")
         if not isinstance(timed_out, bool) or not isinstance(duration_ms, int):
@@ -1367,6 +2035,12 @@ def load_targeted_mutation_evidence(
             timed_out,
             duration_ms,
             cast(str | None, result.get("reason_code")),
+            baseline_report,
+            mutant_report,
+            log["baseline_target_sha256"],
+            log["mutant_target_sha256"],
+            _decode_lifecycle(log["baseline_lifecycle"]),
+            _decode_lifecycle(log["mutant_lifecycle"]),
         )
         run = MutationRun(
             manifest.manifest_id,
@@ -1375,7 +2049,7 @@ def load_targeted_mutation_evidence(
             bool(value["main_tree_unchanged"]),
             value.get("run_reason_code"),
         )
-        if result.get("outcome") != _derive_outcome(probe, run):
+        if result.get("outcome") != _derive_outcome(probe, run, declaration, materials):
             raise _error(
                 "Mutation evidence semantics are invalid", "MUTATION_EVIDENCE_SEMANTICS_INVALID"
             )
@@ -1470,8 +2144,7 @@ def consume_targeted_mutation_evidence(
             (),
         )
     if projected is not None:
-        actual = tuple(item for item in projected if isinstance(item, Mapping))
-        if manifest_ref != artifact_manifest or actual != expected:
+        if manifest_ref != artifact_manifest or tuple(projected) != expected:
             return TargetedMutationFacts(
                 False,
                 "MUTATION_EVIDENCE_PROJECTION_INVALID",

@@ -13,7 +13,6 @@ import hashlib
 import os
 import re
 import shutil
-import signal
 import stat
 import subprocess
 import sys
@@ -32,6 +31,15 @@ from aiflow.mutation_manifest import (
     MutationManifest,
     load_mutation_manifest,
 )
+from aiflow.mutation_materials import (
+    checkout_matches_materials,
+    git_environment,
+    loaded_engine_matches,
+    material_file_matches,
+    subject_materials,
+)
+from aiflow.mutation_process import ProcessLifecycle, run_bounded_process
+from aiflow.mutation_protocol import classify_report, parse_report
 
 _COMMIT = re.compile(r"^[0-9a-f]{40}$")
 _TIMEOUT_SECONDS = 60
@@ -58,6 +66,12 @@ class MutationProbe:
     timed_out: bool
     duration_ms: int
     reason_code: str | None
+    baseline_report: bytes | None = None
+    mutant_report: bytes | None = None
+    baseline_target_sha256: str | None = None
+    mutant_target_sha256: str | None = None
+    baseline_lifecycle: ProcessLifecycle | None = None
+    mutant_lifecycle: ProcessLifecycle | None = None
 
 
 @dataclass(frozen=True)
@@ -250,7 +264,7 @@ def _within(candidate: Path, parent: Path, *, direct: bool = False) -> bool:
 
 
 def _git(
-    root: Path, hooks: Path, *arguments: str, check: bool = True
+    root: Path, hooks: Path, *arguments: str, check: bool = True, input_bytes: bytes | None = None
 ) -> subprocess.CompletedProcess[bytes]:
     """Run a fixed Git command with hooks disabled and no shell."""
     if not hooks.is_dir() or any(hooks.iterdir()):
@@ -258,6 +272,8 @@ def _git(
     return subprocess.run(
         ["git", "-c", f"core.hooksPath={hooks}", *arguments],
         cwd=root,
+        env=git_environment(),
+        input=input_bytes,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=check,
@@ -329,24 +345,59 @@ def _assert_controlled_paths_at_subject(
 def _assert_no_checkout_filters(
     root: Path, hooks: Path, subject: str, paths: tuple[str, ...]
 ) -> None:
-    for path in paths:
-        try:
-            output = _git(
-                root, hooks, "check-attr", f"--source={subject}", "filter", "--", path
-            ).stdout.decode("utf-8", "strict")
-        except (OSError, UnicodeDecodeError, subprocess.SubprocessError) as error:
-            raise _contract(
-                "Checkout filters could not be checked", "MUTATION_WORKSPACE_INVALID"
-            ) from error
-        lines = output.splitlines()
-        fields = lines[0].rsplit(": ", 2) if len(lines) == 1 else []
+    """Check the exact tree Git will populate, including paths outside the evidence materials."""
+    try:
+        tree = _git(
+            root, hooks, "ls-tree", "-r", "-z", "--name-only", "--full-tree", subject
+        ).stdout
+        if not tree.endswith(b"\0") or len(tree) > 8 * 1024 * 1024:
+            raise ValueError
+        tracked = tree[:-1].split(b"\0")
+        names = set(tracked)
         if (
-            len(fields) != 3
-            or fields[0] != path
-            or fields[1] != "filter"
-            or fields[2] not in {"unspecified", "unset"}
+            b"" in names
+            or len(names) != len(tracked)
+            or any(path.encode("utf-8") not in names for path in paths)
         ):
-            raise _contract("Checkout filters are not permitted", "MUTATION_WORKSPACE_INVALID")
+            raise ValueError
+        output = _git(
+            root,
+            hooks,
+            "check-attr",
+            f"--source={subject}",
+            "-z",
+            "--stdin",
+            "filter",
+            input_bytes=tree,
+        ).stdout
+        fields = output.split(b"\0")
+        if fields.pop() or len(fields) != 3 * len(tracked):
+            raise ValueError
+        for index, path_bytes in enumerate(tracked):
+            name, attribute, value = fields[3 * index : 3 * index + 3]
+            if (
+                name != path_bytes
+                or attribute != b"filter"
+                or value not in (b"unspecified", b"unset")
+            ):
+                raise ValueError
+        # check-attr renders literal driver names and its two inactive states identically.
+        states = "|".join(sorted({value.decode("ascii") for value in fields[2::3]}))
+        drivers = _git(
+            root,
+            hooks,
+            "config",
+            "--name-only",
+            "--get-regexp",
+            rf"^filter\.({states})\.(clean|smudge|process|required)$",
+            check=False,
+        )
+        if drivers.returncode != 1 or drivers.stdout or drivers.stderr:
+            raise ValueError
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        raise _contract(
+            "Checkout filters could not be verified", "MUTATION_WORKSPACE_INVALID"
+        ) from error
 
 
 def _digest(path: Path) -> str:
@@ -405,6 +456,7 @@ def _create_detached_worktree(repository_root: Path, hooks: Path, path: Path, su
             str(path),
             subject,
         )
+        _assert_no_checkout_filters(path, hooks, subject, ())
         _git(path, hooks, "checkout", "--detach", subject)
     except (OSError, subprocess.SubprocessError) as error:
         raise _RunFailure("MUTATION_WORKTREE_CREATE_FAILED") from error
@@ -527,16 +579,16 @@ def _outside_target_dump(tree: ast.Module, symbol: str) -> tuple[str, ...]:
     )
 
 
-def _apply_mutation(declaration: MutationDeclaration, path: Path) -> None:
-    """Apply one closed AST transformation, rejecting all unexpected shapes."""
+def mutation_bytes(declaration: MutationDeclaration, original: bytes) -> bytes:
+    """Derive the fixed transformation without executing or writing target code."""
     if _OPERATOR_BINDINGS.get(declaration.operator) != (
         declaration.target,
         declaration.target_symbol,
     ):
         raise _RunFailure("MUTATION_OPERATOR_UNSUPPORTED")
     try:
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-    except (OSError, UnicodeDecodeError, SyntaxError) as error:
+        tree = ast.parse(original.decode("utf-8", "strict"), filename=declaration.target)
+    except (UnicodeDecodeError, SyntaxError) as error:
         raise _RunFailure("MUTATION_OPERATOR_PRECONDITION_FAILED") from error
     functions = [
         node
@@ -637,11 +689,17 @@ def _apply_mutation(declaration: MutationDeclaration, path: Path) -> None:
         raise _RunFailure("MUTATION_OPERATOR_PRECONDITION_FAILED")
     try:
         source = ast.unparse(tree)
-        compile(source, str(path), "exec")
+        compile(source, declaration.target, "exec")
     except (SyntaxError, ValueError, TypeError) as error:
         raise _RunFailure("MUTATION_OPERATOR_PRECONDITION_FAILED") from error
+    return (source + "\n").encode("utf-8")
+
+
+def _apply_mutation(declaration: MutationDeclaration, path: Path) -> None:
+    """Write the deterministic transformation to the isolated worktree only."""
     try:
-        path.write_text(source + "\n", encoding="utf-8", newline="\n")
+        original = path.read_bytes()
+        path.write_bytes(mutation_bytes(declaration, original))
     except OSError as error:
         raise _RunFailure("MUTATION_PATCH_WRITE_FAILED") from error
 
@@ -683,86 +741,87 @@ def _windows_system_root() -> Path:
         root = Path(value).resolve()
     except OSError as error:
         raise _RunFailure("MUTATION_DETECTOR_EXECUTION_FAILED") from error
-    if (
-        not root.is_absolute()
-        or not root.is_dir()
-        or not (root / "System32" / "taskkill.exe").is_file()
-    ):
+    if not root.is_absolute() or not root.is_dir() or not (root / "System32").is_dir():
         raise _RunFailure("MUTATION_DETECTOR_EXECUTION_FAILED")
     return root
 
 
-def _terminate_process_tree(process: subprocess.Popen[bytes]) -> None:
-    if os.name == "nt":
-        try:
-            taskkill = _windows_system_root() / "System32" / "taskkill.exe"
-            result = subprocess.run(
-                [str(taskkill), "/PID", str(process.pid), "/T", "/F"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                check=False,
-                shell=False,
-                timeout=5,
-            )
-            if result.returncode == 0:
-                return
-        except (OSError, subprocess.SubprocessError, _RunFailure):
-            pass
-    elif hasattr(os, "killpg"):
-        try:
-            os.killpg(process.pid, getattr(signal, "SIGKILL", signal.SIGTERM))
-            return
-        except OSError:
-            pass
-    process.kill()
-
-
 def _run_detector(
-    worktree: Path, scratch: Path, detector: str
-) -> tuple[int | None, bool, int, str | None]:
-    started = monotonic()
+    worktree: Path, scratch: Path, mutation_id: str, target_sha256: str
+) -> tuple[int | None, bool, int, str | None, bytes | None, ProcessLifecycle | None]:
+    """Run the controlled reporter with a bounded pipe and verified process cleanup."""
     try:
-        process = subprocess.Popen(
-            [sys.executable, "-m", "pytest", "-q", detector],
+        result = run_bounded_process(
+            [
+                sys.executable,
+                "-I",
+                "-B",
+                str(worktree / "src/aiflow/mutation_reporter.py"),
+                mutation_id,
+                str(worktree),
+                target_sha256,
+            ],
             cwd=worktree,
             env=_minimal_environment(worktree, scratch),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            shell=False,
-            start_new_session=os.name != "nt",
-            creationflags=(
-                getattr(subprocess, "CREATE_NEW_PROCESS_GROUP") if os.name == "nt" else 0
-            ),
+            timeout_seconds=_TIMEOUT_SECONDS,
+            max_output_bytes=16384,
         )
-        try:
-            exit_code = process.wait(timeout=_TIMEOUT_SECONDS)
-        except subprocess.TimeoutExpired:
-            _terminate_process_tree(process)
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                try:
-                    process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    return (
-                        None,
-                        True,
-                        round((monotonic() - started) * 1000),
-                        "MUTATION_DETECTOR_EXECUTION_FAILED",
-                    )
-            return None, True, round((monotonic() - started) * 1000), "MUTATION_DETECTOR_TIMEOUT"
-    except (OSError, subprocess.SubprocessError):
+    except _RunFailure:
+        return None, False, 0, "MUTATION_DETECTOR_EXECUTION_FAILED", None, None
+    except BaseException:
+        # A failed process wrapper cannot prove that descendants were reaped.
+        return None, False, 0, "MUTATION_PROCESS_CLEANUP_UNKNOWN", None, None
+    if result.cleanup_unknown:
         return (
+            result.returncode,
+            result.reason == "timeout",
+            result.duration_ms,
+            "MUTATION_PROCESS_CLEANUP_UNKNOWN",
             None,
-            False,
-            round((monotonic() - started) * 1000),
-            "MUTATION_DETECTOR_EXECUTION_FAILED",
+            None,
         )
-    duration = round((monotonic() - started) * 1000)
-    if exit_code not in {0, 1}:
-        return exit_code, False, duration, "MUTATION_DETECTOR_INFRA_FAILURE"
-    return exit_code, False, duration, None
+    if result.reason is not None:
+        reason = {
+            "timeout": "MUTATION_DETECTOR_TIMEOUT",
+            "overflow": "MUTATION_DETECTOR_REPORT_INVALID",
+            "read_error": "MUTATION_DETECTOR_REPORT_INVALID",
+            "report_incomplete": "MUTATION_DETECTOR_REPORT_INVALID",
+            "pytest_early_stop": "MUTATION_DETECTOR_EARLY_STOP",
+            "processes_remaining": "MUTATION_DETECTOR_PROCESSES_REMAIN",
+        }.get(result.reason, "MUTATION_DETECTOR_EXECUTION_FAILED")
+        return result.returncode, result.reason == "timeout", result.duration_ms, reason, None, None
+    if result.returncode not in {0, 1} or result.report is None:
+        return (
+            result.returncode,
+            False,
+            result.duration_ms,
+            "MUTATION_DETECTOR_INFRA_FAILURE",
+            None,
+            None,
+        )
+    if result.lifecycle is None or not result.lifecycle.matches_observation(
+        result.report, result.returncode
+    ):
+        return (
+            result.returncode,
+            False,
+            result.duration_ms,
+            "MUTATION_PROCESS_CLEANUP_UNKNOWN",
+            None,
+            None,
+        )
+    try:
+        parse_report(result.report, mutation_id, target_sha256)
+    except (ValueError, TypeError):
+        return (
+            result.returncode,
+            False,
+            result.duration_ms,
+            "MUTATION_DETECTOR_REPORT_INVALID",
+            None,
+            None,
+        )
+    return result.returncode, False, result.duration_ms, None, result.report, result.lifecycle
 
 
 def _not_executed(declarations: tuple[MutationDeclaration, ...]) -> list[MutationProbe]:
@@ -806,9 +865,17 @@ def run_targeted_mutations(
         if not hooks.is_dir() or any(hooks.iterdir()):
             raise _RunFailure("MUTATION_WORKSPACE_INVALID")
         _validate_subject(root, hooks, subject_commit)
-        paths = _controlled_paths(manifest)
-        _assert_controlled_paths_at_subject(root, hooks, subject_commit, paths)
+        declared_paths = _controlled_paths(manifest)
+        materials = subject_materials(root, subject_commit)
+        if not loaded_engine_matches(root, materials):
+            raise _RunFailure("MUTATION_SUBJECT_DRIFT")
+        paths = tuple(sorted(materials))
+        if not set(declared_paths).issubset(materials):
+            raise _RunFailure("MUTATION_SUBJECT_DRIFT")
         _assert_no_checkout_filters(root, hooks, subject_commit, paths)
+        _assert_controlled_paths_at_subject(root, hooks, subject_commit, paths)
+        if not all(material_file_matches(root, path, materials[path]) for path in paths):
+            raise _RunFailure("MUTATION_SUBJECT_DRIFT")
         snapshot = _snapshot_main_tree(root, hooks, paths)
     except _RunFailure as error:
         if not _cleanup_workspace_root(workspace):
@@ -835,6 +902,7 @@ def run_targeted_mutations(
     assert hooks is not None
     probes = _not_executed(manifest.mutations)
     cleanup_failed = False
+    cleanup_unknown = False
     run_reason: str | None = None
     unchanged = False
     try:
@@ -851,36 +919,84 @@ def run_targeted_mutations(
                 except OSError as error:
                     raise _RunFailure("MUTATION_WORKSPACE_INVALID") from error
                 _create_detached_worktree(root, hooks, worktree, subject_commit)
+                if not checkout_matches_materials(worktree, materials):
+                    raise _RunFailure("MUTATION_SUBJECT_DRIFT")
                 try:
                     isolated = load_mutation_manifest(worktree)
                 except (ContractError, OSError, UnicodeError) as error:
                     raise _RunFailure("MUTATION_SUBJECT_DRIFT") from error
                 if isolated != manifest:
                     raise _RunFailure("MUTATION_SUBJECT_DRIFT")
-                baseline, timeout, duration, reason = _run_detector(
-                    worktree, scratch, declaration.expected_detector
-                )
-                if reason is not None:
-                    probes[index] = MutationProbe(
-                        declaration.mutation_id, baseline, None, timeout, duration, reason
+                baseline_target_sha256 = _digest(worktree / declaration.target)
+                baseline, timeout, duration, reason, baseline_report, baseline_lifecycle = (
+                    _run_detector(
+                        worktree, scratch, declaration.mutation_id, baseline_target_sha256
                     )
-                    run_reason = reason
-                    break
-                if baseline != 0:
+                )
+                if reason is None and (baseline_report is None or baseline is None):
+                    reason = "MUTATION_DETECTOR_REPORT_INVALID"
+                if reason is None and baseline_report is not None and baseline is not None:
+                    baseline_facts = parse_report(
+                        baseline_report, declaration.mutation_id, baseline_target_sha256
+                    )
+                    if (
+                        classify_report(
+                            baseline_facts,
+                            mutation_id=declaration.mutation_id,
+                            target_sha256=baseline_target_sha256,
+                            exit_code=baseline,
+                            baseline=True,
+                        )
+                        != "passed"
+                    ):
+                        reason = "MUTATION_BASELINE_FAILED"
+                if reason is None and not checkout_matches_materials(worktree, materials):
+                    reason = "MUTATION_SUBJECT_DRIFT"
+                if reason is not None:
+                    cleanup_unknown = reason == "MUTATION_PROCESS_CLEANUP_UNKNOWN"
                     probes[index] = MutationProbe(
                         declaration.mutation_id,
                         baseline,
                         None,
-                        False,
+                        timeout,
                         duration,
-                        "MUTATION_BASELINE_FAILED",
+                        reason,
+                        baseline_report,
+                        None,
+                        baseline_target_sha256,
+                        None,
+                        baseline_lifecycle,
+                        None,
                     )
-                    run_reason = "MUTATION_BASELINE_FAILED"
+                    run_reason = reason
                     break
                 _apply_mutation(declaration, worktree / declaration.target)
-                mutant, timeout, mutant_duration, reason = _run_detector(
-                    worktree, scratch, declaration.expected_detector
+                mutant_target_sha256 = _digest(worktree / declaration.target)
+                mutant_materials = dict(materials)
+                mutant_materials[declaration.target] = mutation_bytes(
+                    declaration, materials[declaration.target]
                 )
+                if not checkout_matches_materials(worktree, mutant_materials):
+                    raise _RunFailure("MUTATION_SUBJECT_DRIFT")
+                mutant, timeout, mutant_duration, reason, mutant_report, mutant_lifecycle = (
+                    _run_detector(worktree, scratch, declaration.mutation_id, mutant_target_sha256)
+                )
+                if reason is None and (mutant_report is None or mutant is None):
+                    reason = "MUTATION_DETECTOR_REPORT_INVALID"
+                if reason is None and mutant_report is not None and mutant is not None:
+                    mutant_facts = parse_report(
+                        mutant_report, declaration.mutation_id, mutant_target_sha256
+                    )
+                    if classify_report(
+                        mutant_facts,
+                        mutation_id=declaration.mutation_id,
+                        target_sha256=mutant_target_sha256,
+                        exit_code=mutant,
+                        baseline=False,
+                    ) not in {"killed", "survived"}:
+                        reason = "MUTATION_DETECTOR_REPORT_INVALID"
+                if reason is None and not checkout_matches_materials(worktree, mutant_materials):
+                    reason = "MUTATION_SUBJECT_DRIFT"
                 probes[index] = MutationProbe(
                     declaration.mutation_id,
                     baseline,
@@ -888,17 +1004,25 @@ def run_targeted_mutations(
                     timeout,
                     duration + mutant_duration,
                     reason,
+                    baseline_report,
+                    mutant_report,
+                    baseline_target_sha256,
+                    mutant_target_sha256,
+                    baseline_lifecycle,
+                    mutant_lifecycle,
                 )
                 if reason is not None:
+                    cleanup_unknown = reason == "MUTATION_PROCESS_CLEANUP_UNKNOWN"
                     run_reason = reason
                     break
+
             except _RunFailure as error:
                 probes[index] = MutationProbe(
                     declaration.mutation_id, baseline, None, False, duration, error.code
                 )
                 run_reason = error.code
                 break
-            except (ContractError, OSError, subprocess.SubprocessError):
+            except (ContractError, OSError, ValueError, TypeError, subprocess.SubprocessError):
                 probes[index] = MutationProbe(
                     declaration.mutation_id,
                     baseline,
@@ -912,13 +1036,15 @@ def run_targeted_mutations(
             finally:
                 try:
                     if (
-                        worktree is not None
+                        not cleanup_unknown
+                        and worktree is not None
                         and worktree.exists()
                         and not _remove_worktree_with_retry(root, hooks, workspace, worktree)
                     ):
                         cleanup_failed = True
                     if (
-                        scratch is not None
+                        not cleanup_unknown
+                        and scratch is not None
                         and scratch.exists()
                         and not _remove_tree_with_retry(workspace, scratch)
                     ):
@@ -932,9 +1058,11 @@ def run_targeted_mutations(
             unchanged = _main_tree_unchanged(root, hooks, snapshot)
         except (ContractError, OSError, subprocess.SubprocessError):
             unchanged = False
-        if not _cleanup_workspace_root(workspace):
+        if not cleanup_unknown and not _cleanup_workspace_root(workspace):
             cleanup_failed = True
-    if not unchanged:
+    if cleanup_unknown:
+        run_reason = "MUTATION_PROCESS_CLEANUP_UNKNOWN"
+    elif not unchanged:
         run_reason = "MUTATION_MAIN_TREE_CHANGED"
     elif cleanup_failed:
         run_reason = "MUTATION_WORKTREE_CLEANUP_FAILED"
