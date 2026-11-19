@@ -74,5 +74,36 @@
     "spec_sha256": "c80e09300db2553666148c598b186de1fb91d74000e1f7a78da32be5c5e294c6",
     "subject_commit": "79cc4425943fd892edbfb0fd71c4033ac29f947a",
     "task_id": "TASK-0165"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-19T17:54:56Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "Under standing delegation, record the frozen A03 spec after independent REV-0004 APPROVE with zero findings. The owner authorized the one local run for e8b97f38.",
+    "schema_version": "1.0",
+    "spec_sha256": "4ed1c776503fb9c234668cb03c9c29edea3d328f940373f3da5911f009581668",
+    "subject_commit": "e8b97f3822b68f1e95b0a396f9ac43fd802290dd",
+    "task_id": "TASK-0165"
+  },
+  {
+    "action_sha256": "23046b925a1c062bea0e49d7b8506553d2ecd48aa53814d5a2034a987cfc99a7",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-19T17:54:59Z",
+    "authorization_mode": "direct_human",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-19T20:10:00Z",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "The owner directly authorized the displayed A03 single local V2 budget for e8b97f38. Independent REV-0004 approved action 23046b925a1c062bea0e49d7b8506553d2ecd48aa53814d5a2034a987cfc99a7. Zero retries or publication.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "4ed1c776503fb9c234668cb03c9c29edea3d328f940373f3da5911f009581668",
+    "subject_commit": "e8b97f3822b68f1e95b0a396f9ac43fd802290dd",
+    "task_id": "TASK-0165"
   }
 ]

@@ -1,0 +1,69 @@
+{
+  "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+  "branch": "codex/mutation-attribution-implementation",
+  "classification_input_sha256": "164b10fd9c88b2910862ad3b92d0b2df5438a4db7acc4b4e489c399693b0053f",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/mutation-evidence.schema.json",
+      "src/aiflow/mutation_evidence.py",
+      "src/aiflow/mutation_runner.py",
+      "src/aiflow/mutation_materials.py",
+      "src/aiflow/mutation_process.py",
+      "src/aiflow/mutation_protocol.py",
+      "src/aiflow/mutation_reporter.py",
+      "src/aiflow/verification_service.py",
+      "src/aiflow/process_runner.py",
+      "tests/unit/test_mutation_evidence.py",
+      "tests/unit/test_mutation_runner.py",
+      "tests/unit/test_contracts.py",
+      "tests/unit/test_process_runner.py",
+      "tests/integration/test_mutation_runner_contract.py",
+      "tests/integration/test_verify_command.py",
+      "tests/e2e/test_phase_02_negative_self_hosting.py",
+      "tests/e2e/test_phase_02_self_hosting_scenario.py",
+      "tests/mutation_evidence_helpers.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "复用受控 Job 启动器和双端 16 KiB 限额完成原生 V2 归因与历史证据隔离",
+        "impact_scope": [
+          ".ai/schemas/mutation-evidence.schema.json",
+          "src/aiflow/mutation_evidence.py",
+          "src/aiflow/mutation_runner.py",
+          "src/aiflow/mutation_materials.py",
+          "src/aiflow/mutation_process.py",
+          "src/aiflow/mutation_protocol.py",
+          "src/aiflow/mutation_reporter.py",
+          "src/aiflow/verification_service.py",
+          "src/aiflow/process_runner.py",
+          "tests/unit/test_mutation_evidence.py",
+          "tests/unit/test_mutation_runner.py",
+          "tests/unit/test_contracts.py",
+          "tests/unit/test_process_runner.py",
+          "tests/integration/test_mutation_runner_contract.py",
+          "tests/integration/test_verify_command.py",
+          "tests/e2e/test_phase_02_negative_self_hosting.py",
+          "tests/e2e/test_phase_02_self_hosting_scenario.py",
+          "tests/mutation_evidence_helpers.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "复用受控 Job 启动器和双端 16 KiB 限额完成原生 V2 归因与历史证据隔离",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "151081939e1397b6930a2d711b3e62ffd0183a75e8f641f9eab690791612e72d",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "4ed1c776503fb9c234668cb03c9c29edea3d328f940373f3da5911f009581668",
+  "task_id": "TASK-0165"
+}
