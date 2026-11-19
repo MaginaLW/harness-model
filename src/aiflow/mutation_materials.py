@@ -47,7 +47,7 @@ def git_environment() -> dict[str, str]:
     return environment
 
 
-def _git(root: Path, *args: str, input_bytes: bytes | None = None) -> bytes:
+def read_material_git(root: Path, *args: str, input_bytes: bytes | None = None) -> bytes:
     try:
         result = subprocess.run(
             ["git", *args],
@@ -69,7 +69,7 @@ def subject_materials(root: Path, subject: str) -> dict[str, bytes]:
     """Read the fixed, bounded closure directly from a full commit's Git blobs."""
     if re.fullmatch(r"[0-9a-f]{40}", subject) is None:
         raise _invalid()
-    tree = _git(root, "ls-tree", "-r", "-l", "-z", "--full-tree", subject)
+    tree = read_material_git(root, "ls-tree", "-r", "-l", "-z", "--full-tree", subject)
     if len(tree) > 8 * 1024 * 1024:
         raise _invalid()
     entries: list[tuple[str, str, int]] = []
@@ -105,7 +105,7 @@ def subject_materials(root: Path, subject: str) -> dict[str, bytes]:
         ):
             raise ValueError
         request = b"".join(oid.encode("ascii") + b"\n" for _, oid, _ in entries)
-        output = _git(root, "cat-file", "--batch", input_bytes=request)
+        output = read_material_git(root, "cat-file", "--batch", input_bytes=request)
         position = 0
         result: dict[str, bytes] = {}
         for path, object_id, length in entries:
@@ -146,7 +146,7 @@ def content_matches(actual: bytes, original: bytes) -> bool:
     return actual == original.replace(b"\n", b"\r\n")
 
 
-def _is_link(path: Path) -> bool:
+def is_link_or_reparse_point(path: Path) -> bool:
     info = path.lstat()
     return stat.S_ISLNK(info.st_mode) or bool(getattr(info, "st_file_attributes", 0) & 0x400)
 
@@ -164,7 +164,7 @@ def material_file_matches(root: Path, path: str, original: bytes) -> bool:
     try:
         for part in path.split("/"):
             current = current / part
-            if _is_link(current):
+            if is_link_or_reparse_point(current):
                 return False
         if not current.is_file():
             return False
@@ -182,11 +182,11 @@ def checkout_matches_materials(root: Path, materials: Mapping[str, bytes]) -> bo
     try:
         for directory in _DIRECTORIES:
             start = root / directory
-            if _is_link(start) or not start.is_dir():
+            if is_link_or_reparse_point(start) or not start.is_dir():
                 return False
             for current, dirs, files in os.walk(start, followlinks=False):
                 base = Path(current)
-                if any(_is_link(base / name) for name in (*dirs, *files)):
+                if any(is_link_or_reparse_point(base / name) for name in (*dirs, *files)):
                     return False
                 for name in files:
                     path = base / name
@@ -195,12 +195,12 @@ def checkout_matches_materials(root: Path, materials: Mapping[str, bytes]) -> bo
                     found.add(path.relative_to(root).as_posix())
         for name in _FILES:
             path = root / name
-            if _is_link(path) or not path.is_file():
+            if is_link_or_reparse_point(path) or not path.is_file():
                 return False
             found.add(name)
         for path in root.iterdir():
             if path.name.lower() in _OPTIONAL_FILES or path.name.lower().endswith(".py"):
-                if _is_link(path) or not path.is_file():
+                if is_link_or_reparse_point(path) or not path.is_file():
                     return False
                 found.add(path.name)
         if found != set(materials):

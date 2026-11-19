@@ -47,13 +47,11 @@ from aiflow.mutation_manifest import (
     load_mutation_manifest,
 )
 from aiflow.mutation_materials import (
-    _git as _material_git,
-)
-from aiflow.mutation_materials import (
-    _is_link,
+    is_link_or_reparse_point,
     loaded_engine_matches,
     material_file_matches,
     materials_sha256,
+    read_material_git,
     subject_materials,
 )
 from aiflow.mutation_process import ProcessLifecycle, preflight_mutation_runtime
@@ -61,10 +59,10 @@ from aiflow.mutation_protocol import REVIEWED_INPUT_SHA256, classify_report, par
 from aiflow.mutation_runner import (
     MutationProbe,
     MutationRun,
-    _assert_no_checkout_filters,
+    MutationRunError,
     _issue_runner_authorization,
-    _minimal_environment,
-    _RunFailure,
+    assert_no_checkout_filters,
+    detector_environment,
     mutation_bytes,
     run_targeted_mutations,
 )
@@ -280,7 +278,7 @@ def _relative_path(value: str, *, root: Path) -> Path:
     current = lexical_root
     for part in path.parts:
         current = current / part
-        if current.is_symlink() or (current.exists() and _is_link(current)):
+        if current.is_symlink() or (current.exists() and is_link_or_reparse_point(current)):
             raise _error("Mutation evidence path escapes its root", "MUTATION_EVIDENCE_PATH_ESCAPE")
     candidate = lexical.resolve()
     try:
@@ -357,7 +355,7 @@ def _derive_outcome(
         )
         if outcome in {"killed", "survived"}:
             return outcome
-    except (KeyError, ValueError, TypeError, UnicodeError, _RunFailure):
+    except (KeyError, ValueError, TypeError, UnicodeError, MutationRunError):
         return "unverified"
     return "unverified"
 
@@ -1435,10 +1433,10 @@ def _preflight_targeted_mutation(
         ):
             raise ValueError("unsupported mutation runtime or source")
         with tempfile.TemporaryDirectory(prefix="aiflow-mutation-hooks-") as hooks:
-            _assert_no_checkout_filters(root, Path(hooks), subject, tuple(sorted(materials)))
+            assert_no_checkout_filters(root, Path(hooks), subject, tuple(sorted(materials)))
             if exercise_runtime:
-                preflight_mutation_runtime(root, _minimal_environment(root, Path(hooks)))
-    except (OSError, ValueError, _RunFailure, metadata.PackageNotFoundError) as error:
+                preflight_mutation_runtime(root, detector_environment(root, Path(hooks)))
+    except (OSError, ValueError, MutationRunError, metadata.PackageNotFoundError) as error:
         raise _error(
             "Mutation execution preflight failed", "MUTATION_EVIDENCE_INPUT_MISMATCH"
         ) from error
@@ -1532,7 +1530,7 @@ def _historical_git_log(root: Path, head: str, ref: str, checkout: bytes, digest
     ):
         raise _error("Mutation evidence log is invalid", "MUTATION_EVIDENCE_LOG_INVALID")
     try:
-        tree = _material_git(root, "ls-tree", "-l", "-z", "--full-tree", head, "--", ref)
+        tree = read_material_git(root, "ls-tree", "-l", "-z", "--full-tree", head, "--", ref)
         meta, name = tree.removesuffix(b"\0").split(b"\t")
         mode, item_type, oid, size = meta.split()
         if (
@@ -1543,7 +1541,7 @@ def _historical_git_log(root: Path, head: str, ref: str, checkout: bytes, digest
             or re.fullmatch(rb"[a-f0-9]{40}", oid) is None
         ):
             raise ValueError("not the bounded regular blob")
-        original = _material_git(root, "cat-file", "blob", oid.decode("ascii"))
+        original = read_material_git(root, "cat-file", "blob", oid.decode("ascii"))
         if original != canonical:
             raise ValueError("checkout differs from original")
     except (ContractError, UnicodeError, ValueError) as error:
@@ -1596,7 +1594,7 @@ def read_historical_mutation_evidence(
             if head is None:
                 try:
                     head = (
-                        _material_git(root, "rev-parse", "--verify", "HEAD^{commit}")
+                        read_material_git(root, "rev-parse", "--verify", "HEAD^{commit}")
                         .decode("ascii")
                         .strip()
                     )

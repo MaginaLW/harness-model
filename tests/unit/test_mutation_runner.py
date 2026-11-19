@@ -35,7 +35,7 @@ def manifest() -> MutationManifest:
 
 
 def _failure_code(call: Any) -> str:
-    with pytest.raises(runner._RunFailure) as caught:
+    with pytest.raises(runner.MutationRunError) as caught:
         call()
     return caught.value.code
 
@@ -613,12 +613,12 @@ def test_checkout_filter_checks_the_whole_tree_in_order(
 
     monkeypatch.setattr(runner, "_git", git)
     if fault is None:
-        runner._assert_no_checkout_filters(
+        runner.assert_no_checkout_filters(
             tmp_path, tmp_path / "hooks", SUBJECT, (material.decode(),)
         )
     else:
         with pytest.raises(ContractError) as caught:
-            runner._assert_no_checkout_filters(
+            runner.assert_no_checkout_filters(
                 tmp_path, tmp_path / "hooks", SUBJECT, (material.decode(),)
             )
         assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
@@ -649,7 +649,7 @@ def test_controlled_checks_accept_exact_clean_outputs_and_normalize_git_errors(
         runner._assert_controlled_paths_at_subject(tmp_path, hooks, SUBJECT, paths)
     assert caught.value.code == "MUTATION_SUBJECT_INVALID"
     with pytest.raises(ContractError) as caught:
-        runner._assert_no_checkout_filters(tmp_path, hooks, SUBJECT, paths)
+        runner.assert_no_checkout_filters(tmp_path, hooks, SUBJECT, paths)
     assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
 
 
@@ -707,7 +707,7 @@ def test_minimal_environment_is_closed_and_contains_resolved_tool_dirs(
     worktree = tmp_path / "worktree"
     scratch = tmp_path / "scratch"
 
-    environment = runner._minimal_environment(worktree, scratch)
+    environment = runner.detector_environment(worktree, scratch)
 
     expected = {
         "PATH",
@@ -731,13 +731,13 @@ def test_minimal_environment_rejects_missing_tools_or_windows_root(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(runner.shutil, "which", lambda _name: None)
-    assert _failure_code(lambda: runner._minimal_environment(tmp_path, tmp_path)) == (
+    assert _failure_code(lambda: runner.detector_environment(tmp_path, tmp_path)) == (
         "MUTATION_DETECTOR_EXECUTION_FAILED"
     )
     if os.name == "nt":
         monkeypatch.setattr(runner.shutil, "which", lambda _name: str(tmp_path / "git.exe"))
         monkeypatch.delenv("SystemRoot", raising=False)
-        assert _failure_code(lambda: runner._minimal_environment(tmp_path, tmp_path)) == (
+        assert _failure_code(lambda: runner.detector_environment(tmp_path, tmp_path)) == (
             "MUTATION_DETECTOR_EXECUTION_FAILED"
         )
 
@@ -766,7 +766,7 @@ def test_detector_uses_exact_argv_and_normalizes_exit_codes(
             exit_code, report, None, False, 4, _clean_lifecycle(report, exit_code)
         )
 
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {"PATH": "fixed"})
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {"PATH": "fixed"})
     monkeypatch.setattr(runner, "run_bounded_process", execute)
     worktree = tmp_path / "worktree"
     result = runner._run_detector(worktree, tmp_path / "scratch", "MUT-V2-001", "a" * 64)
@@ -811,7 +811,7 @@ def test_detector_process_failure_is_unverified(
 ) -> None:
     from aiflow.mutation_process import ProcessOutcome
 
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {})
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {})
     monkeypatch.setattr(
         runner,
         "run_bounded_process",
@@ -826,7 +826,7 @@ def test_detector_rejects_bad_or_absent_report(
 ) -> None:
     from aiflow.mutation_process import ProcessOutcome
 
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {})
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {})
     for report, expected in (
         (None, "MUTATION_DETECTOR_INFRA_FAILURE"),
         (b"not a report", "MUTATION_DETECTOR_REPORT_INVALID"),
@@ -847,8 +847,8 @@ def test_detector_environment_failure_is_a_stable_execution_fact(
 ) -> None:
     monkeypatch.setattr(
         runner,
-        "_minimal_environment",
-        lambda *_args: (_ for _ in ()).throw(runner._RunFailure("MUTATION_WORKSPACE_INVALID")),
+        "detector_environment",
+        lambda *_args: (_ for _ in ()).throw(runner.MutationRunError("MUTATION_WORKSPACE_INVALID")),
     )
     result = runner._run_detector(tmp_path, tmp_path, "MUT-V2-001", "a" * 64)
     assert result == (None, False, 0, "MUTATION_DETECTOR_EXECUTION_FAILED", None, None)
@@ -857,7 +857,7 @@ def test_detector_environment_failure_is_a_stable_execution_fact(
 def test_detector_unexpected_process_exception_preserves_cleanup_unknown(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {})
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {})
     monkeypatch.setattr(
         runner,
         "run_bounded_process",
@@ -898,7 +898,7 @@ def test_worktree_create_and_cleanup_helpers_are_bounded_and_contained(
         assert path == worktree and supplied_hooks == hooks and subject == SUBJECT and not paths
         calls.append(("verify_checkout_filters",))
 
-    monkeypatch.setattr(runner, "_assert_no_checkout_filters", verify_checkout_filters)
+    monkeypatch.setattr(runner, "assert_no_checkout_filters", verify_checkout_filters)
     monkeypatch.setattr(runner, "_git", git)
     runner._create_detached_worktree(tmp_path, hooks, worktree, SUBJECT)
     assert calls[0][:4] == ("worktree", "add", "--detach", "--no-checkout")
@@ -908,7 +908,7 @@ def test_worktree_create_and_cleanup_helpers_are_bounded_and_contained(
     def reject_checkout(*_args: object) -> None:
         raise ContractError("filter present", code="MUTATION_WORKSPACE_INVALID")
 
-    monkeypatch.setattr(runner, "_assert_no_checkout_filters", reject_checkout)
+    monkeypatch.setattr(runner, "assert_no_checkout_filters", reject_checkout)
     with pytest.raises(ContractError) as caught:
         runner._create_detached_worktree(tmp_path, hooks, worktree, SUBJECT)
     assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
@@ -1043,7 +1043,7 @@ def _mock_orchestrator(
     monkeypatch.setattr(runner, "_create_workspace_root", lambda: workspace)
     monkeypatch.setattr(runner, "_validate_subject", lambda *_args: None)
     monkeypatch.setattr(runner, "_assert_controlled_paths_at_subject", lambda *_args: None)
-    monkeypatch.setattr(runner, "_assert_no_checkout_filters", lambda *_args: None)
+    monkeypatch.setattr(runner, "assert_no_checkout_filters", lambda *_args: None)
     materials = {path: b"synthetic" for path in runner._controlled_paths(manifest)}
     monkeypatch.setattr(runner, "subject_materials", lambda *_args: materials)
     monkeypatch.setattr(runner, "checkout_matches_materials", lambda *_args: True)
@@ -1058,7 +1058,7 @@ def _mock_orchestrator(
     def create(_root: Path, _hooks: Path, path: Path, _subject: str) -> None:
         attempts.append(path)
         if create_failure_at is not None and len(attempts) == create_failure_at:
-            raise runner._RunFailure("MUTATION_WORKTREE_CREATE_FAILED")
+            raise runner.MutationRunError("MUTATION_WORKTREE_CREATE_FAILED")
         path.mkdir()
 
     monkeypatch.setattr(runner, "_create_detached_worktree", create)
@@ -1089,7 +1089,7 @@ def _mock_orchestrator(
 
     def apply(*_args: object) -> None:
         if apply_failure is not None:
-            raise runner._RunFailure(apply_failure)
+            raise runner.MutationRunError(apply_failure)
 
     monkeypatch.setattr(runner, "_apply_mutation", apply)
     monkeypatch.setattr(runner, "_remove_worktree_with_retry", lambda *_args: cleanup_ok)
@@ -1372,7 +1372,7 @@ def test_orchestrator_rejects_isolated_manifest_drift(
     monkeypatch.setattr(runner, "_create_workspace_root", lambda: workspace)
     monkeypatch.setattr(runner, "_validate_subject", lambda *_args: None)
     monkeypatch.setattr(runner, "_assert_controlled_paths_at_subject", lambda *_args: None)
-    monkeypatch.setattr(runner, "_assert_no_checkout_filters", lambda *_args: None)
+    monkeypatch.setattr(runner, "assert_no_checkout_filters", lambda *_args: None)
     materials = {path: b"synthetic" for path in runner._controlled_paths(manifest)}
     monkeypatch.setattr(runner, "subject_materials", lambda *_args: materials)
     monkeypatch.setattr(runner, "checkout_matches_materials", lambda *_args: True)
@@ -1450,7 +1450,7 @@ def test_workspace_failure_before_first_worktree_is_a_contract_error(
     monkeypatch.setattr(
         runner,
         "_create_workspace_root",
-        lambda: (_ for _ in ()).throw(runner._RunFailure("MUTATION_WORKSPACE_INVALID")),
+        lambda: (_ for _ in ()).throw(runner.MutationRunError("MUTATION_WORKSPACE_INVALID")),
     )
     with pytest.raises(ContractError) as caught:
         _authorized_run(tmp_path, SUBJECT)
@@ -2058,33 +2058,96 @@ def test_report_requires_one_complete_pytest_session(
     )
 
 
-@pytest.mark.skipif(
-    sys.platform != "win32" or sys.version_info[:2] != (3, 11) or pytest.__version__ != "9.1.1",
-    reason="fixed native detector environment",
+def _run_reporter(
+    tmp_path: Path, arguments: list[str], *, stdin_bytes: bytes | None = None
+) -> subprocess.CompletedProcess[bytes]:
+    import coverage
+
+    script = Path(reporter.__file__).resolve()
+    command = [sys.executable, "-I", "-B"]
+    active = coverage.Coverage.current()
+    data_file = tmp_path / ".coverage-reporter"
+    if active is not None:
+        # Measure only this checkout's reporter in this test's own child.
+        command.extend(
+            [
+                "-m",
+                "coverage",
+                "run",
+                f"--rcfile={os.devnull}",
+                f"--data-file={data_file}",
+                f"--include={script}",
+            ]
+        )
+        if active.get_option("run:branch"):
+            command.append("--branch")
+
+    result = subprocess.run(
+        [*command, str(script), *arguments],
+        cwd=REPOSITORY_ROOT,
+        env=runner.detector_environment(REPOSITORY_ROOT, tmp_path),
+        stdin=subprocess.DEVNULL if stdin_bytes is None else None,
+        input=stdin_bytes,
+        capture_output=True,
+        check=False,
+        timeout=40,
+    )
+    if active is not None:
+        measured = coverage.CoverageData(basename=str(data_file))
+        measured.read()
+        assert {Path(name) for name in measured.measured_files()} == {script}, result.stderr
+        active.get_data().update(measured)
+    return result
+
+
+_FIXED_DETECTOR = (
+    sys.platform == "win32" and sys.version_info[:2] == (3, 11) and pytest.__version__ == "9.1.1"
 )
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "unexpected_stdin",
+        "unknown_detector",
+        pytest.param(
+            "missing_files",
+            marks=pytest.mark.skipif(
+                not _FIXED_DETECTOR, reason="file checks follow fixed-runtime admission"
+            ),
+        ),
+        pytest.param(
+            "wrong_digest",
+            marks=pytest.mark.skipif(
+                not _FIXED_DETECTOR, reason="file checks follow fixed-runtime admission"
+            ),
+        ),
+    ],
+)
+def test_reporter_rejects_invalid_inputs_without_emitting_report(
+    tmp_path: Path, manifest: MutationManifest, fault: str
+) -> None:
+    declaration = manifest.mutations[0]
+    digest = hashlib.sha256((REPOSITORY_ROOT / declaration.target).read_bytes()).hexdigest()
+    arguments = [
+        "unknown" if fault == "unknown_detector" else declaration.mutation_id,
+        str(tmp_path if fault == "missing_files" else REPOSITORY_ROOT),
+        "0" * 64 if fault == "wrong_digest" else digest,
+    ]
+    result = _run_reporter(
+        tmp_path, arguments, stdin_bytes=b"unexpected" if fault == "unexpected_stdin" else None
+    )
+    assert (result.returncode, result.stdout, result.stderr) == (2, b"", b"")
+
+
+@pytest.mark.skipif(not _FIXED_DETECTOR, reason="fixed native detector environment")
 @pytest.mark.parametrize("index", range(5))
 def test_reporter_records_each_node_of_the_unmodified_detector(
     tmp_path: Path, manifest: MutationManifest, index: int
 ) -> None:
     declaration = manifest.mutations[index]
     digest = hashlib.sha256((REPOSITORY_ROOT / declaration.target).read_bytes()).hexdigest()
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-I",
-            "-B",
-            str(Path(reporter.__file__)),
-            declaration.mutation_id,
-            str(REPOSITORY_ROOT),
-            digest,
-        ],
-        cwd=REPOSITORY_ROOT,
-        env=runner._minimal_environment(REPOSITORY_ROOT, tmp_path),
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        check=False,
-        timeout=40,
-    )
+    result = _run_reporter(tmp_path, [declaration.mutation_id, str(REPOSITORY_ROOT), digest])
 
     assert result.returncode == 0 and result.stderr == b""
     report = protocol.parse_report(result.stdout, declaration.mutation_id, digest)
@@ -2115,7 +2178,7 @@ def test_detector_rejects_receipt_from_different_observation(
     outcome = process.ProcessOutcome(
         0, raw, None, False, 1, None if fault == "missing" else receipt
     )
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {})
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {})
     monkeypatch.setattr(runner, "run_bounded_process", lambda *_args, **_kwargs: outcome)
     result = runner._run_detector(tmp_path, tmp_path, "MUT-V2-001", "a" * 64)
     assert result[3:] == ("MUTATION_PROCESS_CLEANUP_UNKNOWN", None, None)

@@ -1410,7 +1410,8 @@ def test_v2_loader_rejects_process_source_drift(
         evidence.load_targeted_mutation_evidence(root, "TASK-0014", artifact.evidence_ref)
 
 
-def test_material_closure_rejects_extra_pytest_config_and_src_module(tmp_path: Path) -> None:
+@pytest.fixture
+def material_checkout(tmp_path: Path) -> dict[str, bytes]:
     paths = (
         "src/aiflow/__init__.py",
         "tests/conftest.py",
@@ -1427,6 +1428,13 @@ def test_material_closure_rejects_extra_pytest_config_and_src_module(tmp_path: P
         path = tmp_path / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
+    return materials
+
+
+def test_material_closure_rejects_extra_pytest_config_and_src_module(
+    tmp_path: Path, material_checkout: dict[str, bytes]
+) -> None:
+    materials = material_checkout
     assert mutation_materials.checkout_matches_materials(tmp_path, materials)
     extra = tmp_path / "pytest.ini"
     extra.write_text("[pytest]\n", encoding="utf-8")
@@ -1436,6 +1444,24 @@ def test_material_closure_rejects_extra_pytest_config_and_src_module(tmp_path: P
     module = tmp_path / "src/sitecustomize.py"
     module.write_text("pass\n", encoding="utf-8")
     assert not mutation_materials.checkout_matches_materials(tmp_path, materials)
+
+
+@pytest.mark.parametrize("missing", ["src", "uv.lock"])
+def test_material_closure_requires_source_tree_and_lockfile(
+    tmp_path: Path, material_checkout: dict[str, bytes], missing: str
+) -> None:
+    (tmp_path / missing).rename(tmp_path / "omitted")
+    assert not mutation_materials.checkout_matches_materials(tmp_path, material_checkout)
+
+
+def test_material_closure_fails_closed_when_root_cannot_be_listed(
+    tmp_path: Path, material_checkout: dict[str, bytes], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def unreadable(_path: Path):
+        raise PermissionError("cannot list checkout")
+
+    monkeypatch.setattr(Path, "iterdir", unreadable)
+    assert not mutation_materials.checkout_matches_materials(tmp_path, material_checkout)
 
 
 def test_loaded_module_requires_exact_subject_path_and_function_source(tmp_path: Path) -> None:
@@ -1716,7 +1742,7 @@ def test_preflight_rejects_before_consuming_action(
     monkeypatch.setattr(evidence, "sys", SimpleNamespace(platform="win32", version_info=(3, 11)))
     monkeypatch.setattr(evidence.metadata, "version", lambda _: "9.1.1")
     monkeypatch.setattr(evidence, "preflight_mutation_runtime", lambda *_: None)
-    monkeypatch.setattr(evidence, "_assert_no_checkout_filters", lambda *_: None)
+    monkeypatch.setattr(evidence, "assert_no_checkout_filters", lambda *_: None)
     _PRODUCTION_PREFLIGHT(root, "a" * 40, evidence.subject_materials(root, "a" * 40), True)
     if failure == "unsupported_platform":
         evidence.sys.platform = "linux"
@@ -1863,7 +1889,7 @@ def test_subject_materials_include_root_config_templates_and_extra_src(
     def fake_git(_root: Path, *args: str, input_bytes: bytes | None = None) -> bytes:
         return tree if args[0] == "ls-tree" else objects
 
-    monkeypatch.setattr(mutation_materials, "_git", fake_git)
+    monkeypatch.setattr(mutation_materials, "read_material_git", fake_git)
     materials = mutation_materials.subject_materials(tmp_path, "a" * 40)
     assert set(materials) == set(paths)
     assert materials["conftest.py"] == b"x\n"
@@ -1930,7 +1956,7 @@ def test_subject_materials_reject_malformed_or_incomplete_git_objects(
             raise ContractError("git failed", code="MUTATION_SUBJECT_INVALID")
         return tree if args[0] == "ls-tree" else objects
 
-    monkeypatch.setattr(mutation_materials, "_git", fake_git)
+    monkeypatch.setattr(mutation_materials, "read_material_git", fake_git)
     with pytest.raises(ContractError) as caught:
         mutation_materials.subject_materials(tmp_path, "bad" if kind == "subject" else "a" * 40)
     assert caught.value.code == "MUTATION_SUBJECT_INVALID"
@@ -1948,14 +1974,14 @@ def test_material_git_wrapper_strips_git_environment_and_handles_failure(
         return SimpleNamespace(stdout=b"clean")
 
     monkeypatch.setattr(mutation_materials.subprocess, "run", fake_run)
-    assert mutation_materials._git(tmp_path, "status") == b"clean"
+    assert mutation_materials.read_material_git(tmp_path, "status") == b"clean"
 
     def fail(*_args, **_kwargs):
         raise OSError("missing git")
 
     monkeypatch.setattr(mutation_materials.subprocess, "run", fail)
     with pytest.raises(ContractError) as caught:
-        mutation_materials._git(tmp_path, "status")
+        mutation_materials.read_material_git(tmp_path, "status")
     assert caught.value.code == "MUTATION_SUBJECT_INVALID"
 
 
@@ -1986,9 +2012,11 @@ def test_material_files_reject_missing_links_and_invalid_paths(
     assert not mutation_materials.material_file_matches(tmp_path, "../mod.py", b"source\n")
     assert not mutation_materials.material_file_matches(tmp_path, "src\\mod.py", b"source\n")
     assert not mutation_materials.material_file_matches(tmp_path, "src/missing", b"x")
-    original = mutation_materials._is_link
+    original = mutation_materials.is_link_or_reparse_point
     monkeypatch.setattr(
-        mutation_materials, "_is_link", lambda candidate: candidate == path or original(candidate)
+        mutation_materials,
+        "is_link_or_reparse_point",
+        lambda candidate: candidate == path or original(candidate),
     )
     assert not mutation_materials.material_file_matches(tmp_path, "src/aiflow/mod.py", b"source\n")
 
@@ -2241,8 +2269,28 @@ def test_consumer_normalizes_oversized_json_integer_within_artifact_limit(
     assert not facts.passed and facts.reason_code == "MUTATION_EVIDENCE_INVALID"
 
 
+def test_historical_reader_rejects_unrelated_task_or_record(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, _, artifact, _ = _record_historical_exits(tmp_path, monkeypatch)
+    with pytest.raises(ContractError) as wrong_task:
+        evidence.read_historical_mutation_evidence(root, "TASK-0015", artifact.evidence_ref)
+    assert wrong_task.value.code == "MUTATION_EVIDENCE_PATH_INVALID"
+
+    other_ref = artifact.evidence_ref.replace(
+        artifact.record_id, "MUTRUN-20000102T000000Z-" + "1" * 16
+    )
+    misplaced = root / other_ref
+    misplaced.parent.mkdir(parents=True)
+    misplaced.write_bytes((root / artifact.evidence_ref).read_bytes())
+    with pytest.raises(ContractError) as wrong_record:
+        evidence.read_historical_mutation_evidence(root, "TASK-0014", other_ref)
+    assert wrong_record.value.code == "MUTATION_EVIDENCE_PATH_INVALID"
+
+
 @pytest.mark.parametrize(
-    "case", ["consistent", "mixed", "edited", "missing_blob", "other_blob", "symlink_blob"]
+    "case",
+    ["consistent", "mixed", "edited", "missing_blob", "other_blob", "symlink_blob", "unborn"],
 )
 def test_historical_crlf_requires_exact_regular_git_blob(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str
@@ -2260,16 +2308,17 @@ def test_historical_crlf_requires_exact_regular_git_blob(
     if case == "symlink_blob":
         blob = run_git(root, "hash-object", "-w", "--", ref)
         run_git(root, "update-index", "--cacheinfo", "120000", blob, ref)
-    run_git(
-        root,
-        "-c",
-        "user.name=AI Flow Tests",
-        "-c",
-        "user.email=aiflow@example.invalid",
-        "commit",
-        "-m",
-        "Synthetic historical log",
-    )
+    if case != "unborn":
+        run_git(
+            root,
+            "-c",
+            "user.name=AI Flow Tests",
+            "-c",
+            "user.email=aiflow@example.invalid",
+            "commit",
+            "-m",
+            "Synthetic historical log",
+        )
     checkout = original.replace(b"\n", b"\r\n")
     if case == "mixed":
         checkout = checkout.replace(b"\r\n", b"\n", 1)

@@ -245,10 +245,14 @@ class _MainSnapshot:
     digests: tuple[tuple[str, str], ...]
 
 
-class _RunFailure(Exception):
+class MutationRunError(Exception):
     def __init__(self, code: str) -> None:
         super().__init__(code)
         self.code = code
+
+
+# The installed mutation adapter also catches this exception under its original name.
+_RunFailure = MutationRunError
 
 
 def _contract(message: str, code: str) -> ContractError:
@@ -342,7 +346,7 @@ def _assert_controlled_paths_at_subject(
         )
 
 
-def _assert_no_checkout_filters(
+def assert_no_checkout_filters(
     root: Path, hooks: Path, subject: str, paths: tuple[str, ...]
 ) -> None:
     """Check the exact tree Git will populate, including paths outside the evidence materials."""
@@ -429,18 +433,18 @@ def _create_workspace_root() -> Path:
     try:
         root = Path(tempfile.mkdtemp(prefix="aiflow-mutation-", dir=system_temp)).resolve()
     except OSError as error:
-        raise _RunFailure("MUTATION_WORKSPACE_INVALID") from error
+        raise MutationRunError("MUTATION_WORKSPACE_INVALID") from error
     if not _within(root, system_temp, direct=True) or not root.name.startswith("aiflow-mutation-"):
-        raise _RunFailure("MUTATION_WORKSPACE_INVALID")
+        raise MutationRunError("MUTATION_WORKSPACE_INVALID")
     return root
 
 
 def _validated_child(root: Path, name: str) -> Path:
     if not name or name in {".", ".."} or "/" in name or "\\" in name or Path(name).name != name:
-        raise _RunFailure("MUTATION_WORKTREE_PATH_ESCAPE")
+        raise MutationRunError("MUTATION_WORKTREE_PATH_ESCAPE")
     candidate = (root / name).resolve()
     if not _within(candidate, root, direct=True):
-        raise _RunFailure("MUTATION_WORKTREE_PATH_ESCAPE")
+        raise MutationRunError("MUTATION_WORKTREE_PATH_ESCAPE")
     return candidate
 
 
@@ -456,10 +460,10 @@ def _create_detached_worktree(repository_root: Path, hooks: Path, path: Path, su
             str(path),
             subject,
         )
-        _assert_no_checkout_filters(path, hooks, subject, ())
+        assert_no_checkout_filters(path, hooks, subject, ())
         _git(path, hooks, "checkout", "--detach", subject)
     except (OSError, subprocess.SubprocessError) as error:
-        raise _RunFailure("MUTATION_WORKTREE_CREATE_FAILED") from error
+        raise MutationRunError("MUTATION_WORKTREE_CREATE_FAILED") from error
 
 
 def _remove_worktree_with_retry(
@@ -585,18 +589,18 @@ def mutation_bytes(declaration: MutationDeclaration, original: bytes) -> bytes:
         declaration.target,
         declaration.target_symbol,
     ):
-        raise _RunFailure("MUTATION_OPERATOR_UNSUPPORTED")
+        raise MutationRunError("MUTATION_OPERATOR_UNSUPPORTED")
     try:
         tree = ast.parse(original.decode("utf-8", "strict"), filename=declaration.target)
     except (UnicodeDecodeError, SyntaxError) as error:
-        raise _RunFailure("MUTATION_OPERATOR_PRECONDITION_FAILED") from error
+        raise MutationRunError("MUTATION_OPERATOR_PRECONDITION_FAILED") from error
     functions = [
         node
         for node in tree.body
         if isinstance(node, ast.FunctionDef) and node.name == declaration.target_symbol
     ]
     if len(functions) != 1:
-        raise _RunFailure("MUTATION_OPERATOR_PRECONDITION_FAILED")
+        raise MutationRunError("MUTATION_OPERATOR_PRECONDITION_FAILED")
     outside_before = _outside_target_dump(tree, declaration.target_symbol)
     function = functions[0]
     operator = declaration.operator
@@ -681,17 +685,17 @@ def mutation_bytes(declaration: MutationDeclaration, original: bytes) -> bytes:
             ),
         )
     else:
-        raise _RunFailure("MUTATION_OPERATOR_UNSUPPORTED")
+        raise MutationRunError("MUTATION_OPERATOR_UNSUPPORTED")
     if not changed:
-        raise _RunFailure("MUTATION_OPERATOR_PRECONDITION_FAILED")
+        raise MutationRunError("MUTATION_OPERATOR_PRECONDITION_FAILED")
     ast.fix_missing_locations(tree)
     if _outside_target_dump(tree, declaration.target_symbol) != outside_before:
-        raise _RunFailure("MUTATION_OPERATOR_PRECONDITION_FAILED")
+        raise MutationRunError("MUTATION_OPERATOR_PRECONDITION_FAILED")
     try:
         source = ast.unparse(tree)
         compile(source, declaration.target, "exec")
     except (SyntaxError, ValueError, TypeError) as error:
-        raise _RunFailure("MUTATION_OPERATOR_PRECONDITION_FAILED") from error
+        raise MutationRunError("MUTATION_OPERATOR_PRECONDITION_FAILED") from error
     return (source + "\n").encode("utf-8")
 
 
@@ -701,10 +705,10 @@ def _apply_mutation(declaration: MutationDeclaration, path: Path) -> None:
         original = path.read_bytes()
         path.write_bytes(mutation_bytes(declaration, original))
     except OSError as error:
-        raise _RunFailure("MUTATION_PATCH_WRITE_FAILED") from error
+        raise MutationRunError("MUTATION_PATCH_WRITE_FAILED") from error
 
 
-def _minimal_environment(worktree: Path, scratch: Path) -> dict[str, str]:
+def detector_environment(worktree: Path, scratch: Path) -> dict[str, str]:
     executable_dir = str(Path(sys.executable).resolve().parent)
     git = shutil.which("git")
     git_path = Path(git).resolve() if git is not None else None
@@ -713,7 +717,7 @@ def _minimal_environment(worktree: Path, scratch: Path) -> dict[str, str]:
         or not git_path.is_file()
         or git_path.name.lower() not in {"git", "git.exe"}
     ):
-        raise _RunFailure("MUTATION_DETECTOR_EXECUTION_FAILED")
+        raise MutationRunError("MUTATION_DETECTOR_EXECUTION_FAILED")
     git_dir = str(git_path.parent)
     environment = {
         "PATH": os.pathsep.join((executable_dir, git_dir)),
@@ -736,13 +740,13 @@ def _minimal_environment(worktree: Path, scratch: Path) -> dict[str, str]:
 def _windows_system_root() -> Path:
     value = os.environ.get("SystemRoot")
     if not value:
-        raise _RunFailure("MUTATION_DETECTOR_EXECUTION_FAILED")
+        raise MutationRunError("MUTATION_DETECTOR_EXECUTION_FAILED")
     try:
         root = Path(value).resolve()
     except OSError as error:
-        raise _RunFailure("MUTATION_DETECTOR_EXECUTION_FAILED") from error
+        raise MutationRunError("MUTATION_DETECTOR_EXECUTION_FAILED") from error
     if not root.is_absolute() or not root.is_dir() or not (root / "System32").is_dir():
-        raise _RunFailure("MUTATION_DETECTOR_EXECUTION_FAILED")
+        raise MutationRunError("MUTATION_DETECTOR_EXECUTION_FAILED")
     return root
 
 
@@ -762,11 +766,11 @@ def _run_detector(
                 target_sha256,
             ],
             cwd=worktree,
-            env=_minimal_environment(worktree, scratch),
+            env=detector_environment(worktree, scratch),
             timeout_seconds=_TIMEOUT_SECONDS,
             max_output_bytes=16384,
         )
-    except _RunFailure:
+    except MutationRunError:
         return None, False, 0, "MUTATION_DETECTOR_EXECUTION_FAILED", None, None
     except BaseException:
         # A failed process wrapper cannot prove that descendants were reaped.
@@ -863,21 +867,21 @@ def run_targeted_mutations(
         hooks = _validated_child(workspace, "hooks")
         hooks.mkdir()
         if not hooks.is_dir() or any(hooks.iterdir()):
-            raise _RunFailure("MUTATION_WORKSPACE_INVALID")
+            raise MutationRunError("MUTATION_WORKSPACE_INVALID")
         _validate_subject(root, hooks, subject_commit)
         declared_paths = _controlled_paths(manifest)
         materials = subject_materials(root, subject_commit)
         if not loaded_engine_matches(root, materials):
-            raise _RunFailure("MUTATION_SUBJECT_DRIFT")
+            raise MutationRunError("MUTATION_SUBJECT_DRIFT")
         paths = tuple(sorted(materials))
         if not set(declared_paths).issubset(materials):
-            raise _RunFailure("MUTATION_SUBJECT_DRIFT")
-        _assert_no_checkout_filters(root, hooks, subject_commit, paths)
+            raise MutationRunError("MUTATION_SUBJECT_DRIFT")
+        assert_no_checkout_filters(root, hooks, subject_commit, paths)
         _assert_controlled_paths_at_subject(root, hooks, subject_commit, paths)
         if not all(material_file_matches(root, path, materials[path]) for path in paths):
-            raise _RunFailure("MUTATION_SUBJECT_DRIFT")
+            raise MutationRunError("MUTATION_SUBJECT_DRIFT")
         snapshot = _snapshot_main_tree(root, hooks, paths)
-    except _RunFailure as error:
+    except MutationRunError as error:
         if not _cleanup_workspace_root(workspace):
             raise _contract(
                 "Mutation preflight workspace cleanup failed",
@@ -917,16 +921,16 @@ def run_targeted_mutations(
                 try:
                     scratch.mkdir()
                 except OSError as error:
-                    raise _RunFailure("MUTATION_WORKSPACE_INVALID") from error
+                    raise MutationRunError("MUTATION_WORKSPACE_INVALID") from error
                 _create_detached_worktree(root, hooks, worktree, subject_commit)
                 if not checkout_matches_materials(worktree, materials):
-                    raise _RunFailure("MUTATION_SUBJECT_DRIFT")
+                    raise MutationRunError("MUTATION_SUBJECT_DRIFT")
                 try:
                     isolated = load_mutation_manifest(worktree)
                 except (ContractError, OSError, UnicodeError) as error:
-                    raise _RunFailure("MUTATION_SUBJECT_DRIFT") from error
+                    raise MutationRunError("MUTATION_SUBJECT_DRIFT") from error
                 if isolated != manifest:
-                    raise _RunFailure("MUTATION_SUBJECT_DRIFT")
+                    raise MutationRunError("MUTATION_SUBJECT_DRIFT")
                 baseline_target_sha256 = _digest(worktree / declaration.target)
                 baseline, timeout, duration, reason, baseline_report, baseline_lifecycle = (
                     _run_detector(
@@ -977,7 +981,7 @@ def run_targeted_mutations(
                     declaration, materials[declaration.target]
                 )
                 if not checkout_matches_materials(worktree, mutant_materials):
-                    raise _RunFailure("MUTATION_SUBJECT_DRIFT")
+                    raise MutationRunError("MUTATION_SUBJECT_DRIFT")
                 mutant, timeout, mutant_duration, reason, mutant_report, mutant_lifecycle = (
                     _run_detector(worktree, scratch, declaration.mutation_id, mutant_target_sha256)
                 )
@@ -1016,7 +1020,7 @@ def run_targeted_mutations(
                     run_reason = reason
                     break
 
-            except _RunFailure as error:
+            except MutationRunError as error:
                 probes[index] = MutationProbe(
                     declaration.mutation_id, baseline, None, False, duration, error.code
                 )
