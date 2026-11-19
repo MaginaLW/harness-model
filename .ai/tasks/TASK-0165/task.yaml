@@ -97,7 +97,7 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-19T16:53:30Z'
 subject_commit: e8b97f3822b68f1e95b0a396f9ac43fd802290dd
 task_id: TASK-0165
-updated_at: '2026-11-19T17:47:27Z'
+updated_at: '2026-11-19T17:52:00Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - .ai/schemas/mutation-evidence.schema.json
