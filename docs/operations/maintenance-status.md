@@ -12,6 +12,7 @@
 
 | 对象 | 固定版本与用途 | 可用结论及限制 |
 |---|---|---|
+| 主线与原候选 | 本次核对的 `origin/main` 为 `43e0d699`。原候选 PR #169 的分支保留在 `a78bcc80`。 | 可用 `git branch -vv` 确认本地 `main` 跟踪 `origin/main`。 |
 | 治理修复的收尾基线 | `main` 合并提交 `3ef032a1`。TASK-0162 的账本已记录实现合并提交 `94632d43`，状态为 `MERGED`。 | 下列源码、安装包及跨仓候选各自绑定固定提交和验收结果，即使版本号相同也须核对来源。[任务记录](../../.ai/tasks/TASK-0162/task.yaml) |
 | Stage B 停止时的原主根与旧 WIP | `codex/agent-bridge-phased-adoption` / `4ab57ce5b0291ec2841c90782a751c920e284403`。 | 当时已核对八个暂存 mutation/schema 文件、TASK-0094/0095/0124 及三份未跟踪建议稿的路径和内容校验值。材料归原任务保管，不得整文件覆盖、stash、reset、clean 或当作重复删除。 |
 | 已验收本地候选 | 普通安装候选 `c60b663427e73ca2d551d7a9aca2dc68b443c954`；Stage A 自有治理根。 | 原记录报告本地采用通过，不代表本维护基线含有全部候选代码，也不代表 Stage B 验收。 |
@@ -21,6 +22,7 @@
 ### 已完成的维护收口
 
 - 原 PR #169 的 0–4 批已完成交付。16 篇历史文档已归档，13 个旧入口保留转引。治理修复覆盖审批来源、子目录 Hook 的任务选择与观察记录绑定、Schema 校验器缓存、SDK 的只读 Git 查询，以及 Linux 受控子进程的 Git 查找顺序。原 PR 保留作对照。[文档归档 #170](https://github.com/MaginaLW/harness-model/pull/170) · [实现 #175](https://github.com/MaginaLW/harness-model/pull/175) · [原候选 #169](https://github.com/MaginaLW/harness-model/pull/169)
+- PR #171、#172、#174 已关闭，三者的实现均已通过 #175 合入。原分支仍可用于核对各自的审核和 CI，其中 #172 的 Linux 运行保留原失败结论。[#171](https://github.com/MaginaLW/harness-model/pull/171) · [#172](https://github.com/MaginaLW/harness-model/pull/172) · [#174](https://github.com/MaginaLW/harness-model/pull/174) · [#172 的失败记录](https://github.com/MaginaLW/harness-model/actions/runs/44325839473)
 - TASK-0162 在实现提交 `8012c415` 上通过 Linux 原生 V1 的全部 10 项检查。pytest 通过 4,701 项、跳过 77 项，核心覆盖率 90%，差异覆盖率 97%。实现与收尾 PR 各自在最终提交上通过必需 CI。维护者可按 PR 内容核对任务验证、历史记录和质量检查分别何时运行。[本地审核与实测结果](../../.ai/tasks/TASK-0162/review-package.md) · [收尾 #176](https://github.com/MaginaLW/harness-model/pull/176) · [CI 路由说明](github-branch-protection.md)
 
 [PR #157](https://github.com/MaginaLW/harness-model/pull/157)已合并 Windows 新任务事件的规范 UTF-8/LF 字节修复、clean-checkout 的 Git/构建/安装/CLI 配置隔离及离线 wheel 验收，并保留资源包规范化与大小限制说明。TASK-0149 的独立设计与实现审核通过，原生 Windows V1 的十项检查通过（6507 passed、9 项条件跳过），本地 Gate 与当前候选 required CI 通过；[PR #158](https://github.com/MaginaLW/harness-model/pull/158)已合并任务关闭记录，账本状态为 MERGED。证据见[任务记录](../../.ai/tasks/TASK-0149/task.yaml)与[验收索引](../../.ai/tasks/TASK-0149/evidence.json)，原始日志仍在实际验收克隆中。
@@ -58,6 +60,8 @@
 ### 既定离线范围的收口
 
 现有离线范围已交付；没有新增必做准备队列。具体新需求或可复现问题才触发受影响部分的修改和检查；复用现有接口，不为填队列增加采集器、Schema 或服务。
+
+本地遥测草稿已单独留存。Python V0/V1 的逐项验证结果保存在任务 `evidence.json` 的 `checks[]` 中。`status` 给出检查结论，`reason_code`、`timed_out` 和日志引用用于追查失败。即使进程退出码为零，检查本身仍可判定失败。[超时证据示例](../../.ai/tasks/TASK-0154/evidence.json)
 
 ### 剩余缺口与推进条件
 
