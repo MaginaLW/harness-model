@@ -1446,7 +1446,7 @@ def test_loaded_module_requires_exact_subject_path_and_function_source(tmp_path:
     materials = {"src/aiflow/example.py": data}
     module = ModuleType("aiflow.example")
     module.__file__ = str(module_path)
-    exec(compile(data, str(module_path), "exec"), module.__dict__)
+    exec(compile(data, str(module_path), "exec", dont_inherit=True), module.__dict__)
     assert mutation_materials._module_identity_matches(
         tmp_path, materials, "aiflow.example", module
     )
