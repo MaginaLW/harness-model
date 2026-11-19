@@ -32,16 +32,20 @@ def test_recorder_module_with_contextmanager_matches_its_source() -> None:
     )
 
 
-def test_loaded_contextmanager_must_match_the_current_subject(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "previous",
+    [
+        b"from contextlib import contextmanager\n@contextmanager\ndef example():\n    yield 1\n",
+        b"class Example:\n    def outcome(self):\n        return 1\n",
+    ],
+)
+def test_loaded_code_must_match_the_current_subject(tmp_path: Path, previous: bytes) -> None:
     relative = "src/aiflow/example.py"
     path = tmp_path / relative
     path.parent.mkdir(parents=True)
     module = ModuleType("aiflow.example")
     module.__file__ = str(path)
-    previous = (
-        b"from contextlib import contextmanager\n@contextmanager\ndef example():\n    yield 1\n"
-    )
-    current = previous.replace(b"yield 1", b"yield 2")
+    current = previous.replace(b"1\n", b"2\n")
     path.write_bytes(previous)
     exec(compile(previous, str(path), "exec", dont_inherit=True), vars(module))
     path.write_bytes(current)

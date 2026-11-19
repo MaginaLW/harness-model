@@ -11,8 +11,9 @@ import stat
 import subprocess
 import sys
 from collections.abc import Mapping
+from inspect import CO_NEWLOCALS
 from pathlib import Path
-from types import FunctionType, ModuleType
+from types import CodeType, FunctionType, ModuleType
 
 from aiflow.errors import ContractError
 
@@ -209,6 +210,37 @@ def checkout_matches_materials(root: Path, materials: Mapping[str, bytes]) -> bo
         return False
 
 
+def _class_methods_match(cls: type, body: CodeType, path: Path, module: ModuleType) -> bool:
+    expected = {
+        code
+        for code in body.co_consts
+        if isinstance(code, CodeType)
+        and code.co_flags & CO_NEWLOCALS
+        and code.co_name.isidentifier()
+    }
+    observed: set[CodeType] = set()
+    for name, descriptor in vars(cls).items():
+        if isinstance(descriptor, (staticmethod, classmethod)):
+            descriptor = descriptor.__func__
+        functions = (
+            (descriptor.fget, descriptor.fset, descriptor.fdel)
+            if isinstance(descriptor, property)
+            else (descriptor,)
+        )
+        for function in functions:
+            if not isinstance(function, FunctionType):
+                continue
+            code = function.__code__
+            origin = Path(code.co_filename)
+            # dataclasses adds methods outside the class body. Only code from
+            # this source may satisfy (or add to) its declared methods.
+            if origin.is_absolute() and origin.resolve() == path:
+                if code.co_name != name or function.__globals__ is not vars(module):
+                    return False
+                observed.add(code)
+    return observed == expected
+
+
 def _module_identity_matches(
     root: Path, materials: Mapping[str, bytes], name: str, module: ModuleType
 ) -> bool:
@@ -237,6 +269,16 @@ def _module_identity_matches(
         # A long-lived caller can still hold old functions after switching the
         # checkout at the same path. Compare the code loaded by this interpreter.
         subject_code = compile(materials[relative], str(path), "exec", dont_inherit=True)
+        for body in subject_code.co_consts:
+            if isinstance(body, CodeType) and not body.co_flags & CO_NEWLOCALS:
+                cls = vars(module).get(body.co_name)
+                if (
+                    not isinstance(cls, type)
+                    or cls.__module__ != name
+                    or cls.__qualname__ != body.co_qualname
+                    or not _class_methods_match(cls, body, path, module)
+                ):
+                    return False
         for member in vars(module).values():
             if isinstance(member, FunctionType) and member.__module__ == name:
                 wrapped = getattr(member, "__wrapped__", None)
