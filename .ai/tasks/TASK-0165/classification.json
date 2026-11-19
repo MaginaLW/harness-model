@@ -4,7 +4,7 @@
   "classification_input_sha256": "d0e7d092414b67e6df6e65caa9aa02c7ed6013d7fc7a6241e416ca5533b0ccf3",
   "classifications": [
     {
-      "classified_at": "2026-11-19T16:33:22Z",
+      "classified_at": "2026-11-19T16:53:14Z",
       "decision_unit_id": "DU-001",
       "explanation": "Changes that can touch the governance surface require independent review.",
       "explanations": [
@@ -41,7 +41,7 @@
       ]
     }
   ],
-  "classified_at": "2026-11-19T16:33:22Z",
+  "classified_at": "2026-11-19T16:53:14Z",
   "effective_route": "REVIEW",
   "effective_verification_level": "V2",
   "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",

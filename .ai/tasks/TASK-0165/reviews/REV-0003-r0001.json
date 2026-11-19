@@ -1,0 +1,13 @@
+{
+  "context_sha256": "0ef65d570c12596386dc94dc9edd7c0b16849c9a06a54a28ccce569345d939f0",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-19T16:55:09Z",
+  "review_id": "REV-0003",
+  "review_stage": "design",
+  "reviewer": "a02-budget-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "已独立核对 A02 的冻结规格、所有者原始额度、独立验证者 CLI 入口和具体原生动作。动作规范摘要 9d5a2d3b7005552e998bcd63bb141db14b1c426957cfdee7ecc660f6d447d611，绑定候选 79cc4425943fd892edbfb0fd71c4033ac29f947a、DU-001 与当前分类。规范副本的 264 份候选材料及清单摘要匹配。完整本地计划含 14 项检查、8 个普通进程，完整 pytest 上限 3000 秒，普通进程时限合计 3750 秒，安装包测试中的真实变异属于此次 pytest。原生动作仅在同轮完整 verify 中运行，锁内复核后一次消费，每项至多一个基线和一个变异，每次限 60 秒。原 A01 已消费，本次摘要尚无消费记录。截止 2026-11-19T19:15:00Z。失败或中断保留结果，自动重试、跨仓写入、原件外传、付费及发布额度均为零。",
+  "task_id": "TASK-0165"
+}

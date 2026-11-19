@@ -43,5 +43,36 @@
     "spec_sha256": "a35228677107121ad381c23d8976704f768fe9b729c75fa18d33d6cbc29edd6a",
     "subject_commit": "79cc4425943fd892edbfb0fd71c4033ac29f947a",
     "task_id": "TASK-0165"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-19T16:55:37Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "Under standing delegation, record the frozen A02 phase specification after REV-0003 APPROVE, zero findings. The owner approved the complete local run on 79cc4425.",
+    "schema_version": "1.0",
+    "spec_sha256": "c80e09300db2553666148c598b186de1fb91d74000e1f7a78da32be5c5e294c6",
+    "subject_commit": "79cc4425943fd892edbfb0fd71c4033ac29f947a",
+    "task_id": "TASK-0165"
+  },
+  {
+    "action_sha256": "9d5a2d3b7005552e998bcd63bb141db14b1c426957cfdee7ecc660f6d447d611",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-19T16:55:40Z",
+    "authorization_mode": "direct_human",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-19T19:15:00Z",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "The owner approved the one A02 complete local V2 including the reviewed native action 9d5a2d3b7005552e998bcd63bb141db14b1c426957cfdee7ecc660f6d447d611. REV-0003 approved it. No retry or publication.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "c80e09300db2553666148c598b186de1fb91d74000e1f7a78da32be5c5e294c6",
+    "subject_commit": "79cc4425943fd892edbfb0fd71c4033ac29f947a",
+    "task_id": "TASK-0165"
   }
 ]
