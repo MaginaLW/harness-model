@@ -133,5 +133,36 @@
     "spec_sha256": "f5539d525edf76dba76db43d845aed31d5d6c33e364d61c80b4ed591d4c766a6",
     "subject_commit": "e8b97f3822b68f1e95b0a396f9ac43fd802290dd",
     "task_id": "TASK-0165"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-20T00:07:44Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权：REV-0007 approves the A04 frozen specification with no unresolved findings. The owner explicitly selected both bounded stages.",
+    "schema_version": "1.0",
+    "spec_sha256": "596ade78e7fbded2a86f2b7a8bfd13b39aaadf651153d0a488f56066d67ee0f1",
+    "subject_commit": "14899d3e30e29f6b21d10b845fac8f5f0a4700fc",
+    "task_id": "TASK-0165"
+  },
+  {
+    "action_sha256": "8d427d2a0b5fad68776cf825acfecd8b3fd4613cdb78061372b19ce3c7c72c66",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-20T00:07:47Z",
+    "authorization_mode": "direct_human",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-20T03:06:07Z",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "The owner explicitly approved A04 once per stage for 14899d3e. REV-0007 confirmed the canonical single-use native action and its Windows-only budget.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "596ade78e7fbded2a86f2b7a8bfd13b39aaadf651153d0a488f56066d67ee0f1",
+    "subject_commit": "14899d3e30e29f6b21d10b845fac8f5f0a4700fc",
+    "task_id": "TASK-0165"
   }
 ]
