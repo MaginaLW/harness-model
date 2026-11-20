@@ -164,5 +164,20 @@
     "spec_sha256": "596ade78e7fbded2a86f2b7a8bfd13b39aaadf651153d0a488f56066d67ee0f1",
     "subject_commit": "14899d3e30e29f6b21d10b845fac8f5f0a4700fc",
     "task_id": "TASK-0165"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-20T04:45:43Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "b510d46197dcead7c27763246dfb474f8aa5a671",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "25590498c79973f25b329622e0111ed96e97bd4996267be4a05b85798db84221",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权：REV-0008 independently approved the bound implementation with zero findings. Fresh finalized Windows V2 passed all fourteen checks; the private Ubuntu CI and its Gate are next under the A04 budget.",
+    "schema_version": "1.0",
+    "spec_sha256": "596ade78e7fbded2a86f2b7a8bfd13b39aaadf651153d0a488f56066d67ee0f1",
+    "subject_commit": "14899d3e30e29f6b21d10b845fac8f5f0a4700fc",
+    "task_id": "TASK-0165"
   }
 ]
