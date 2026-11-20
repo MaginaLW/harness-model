@@ -3,7 +3,7 @@ allowed_scope:
 base_commit: 928e135d4145d0263fd204b241f5af1ac10e71ac
 branch: codex/mutation-attribution-spec-928e135d
 created_at: '2026-11-19T15:10:58Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -60,6 +60,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-20T10:17:48Z'
 subject_commit: 928e135d4145d0263fd204b241f5af1ac10e71ac
 task_id: TASK-0163
-updated_at: '2026-11-20T11:00:17Z'
+updated_at: '2026-11-20T11:02:59Z'
 worktree_dirty: false
 worktree_dirty_paths: []
