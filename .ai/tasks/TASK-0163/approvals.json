@@ -1,0 +1,45 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-19T15:15:52Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "依常设授权记录。本次仅批准 928e135d 上冻结的本地规格。独立设计审核 REV-0001 为 APPROVE，无发现。真实变异、跨仓写入和付费额度均为零，既有三项发现保持原状态。",
+    "schema_version": "1.0",
+    "spec_sha256": "06f1b7ef2709ce0dec01f8c5dee96e3539ccdff1e4978f021e5850dac7f6f45d",
+    "subject_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "task_id": "TASK-0163"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-20T10:19:07Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权仅用于规格批准。A01 is the explicit owner authorization for the bounded delivery. REV-0002 approved the frozen specification without findings.",
+    "schema_version": "1.0",
+    "spec_sha256": "4245e9de56dd2d2485731af76d6e98c728cc8858bbaf60a905310fd5ad0875a3",
+    "subject_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "task_id": "TASK-0163"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-20T11:02:58Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "779c017745e273892cea0293c2c8892822f1372e10263f14981e5178ae2773c8",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。REV-0003 independently approved the exact V1 evidence with no findings. All ten local V1 checks passed. Public delivery is subject to A01 and the required check on the exact PR head.",
+    "schema_version": "1.0",
+    "spec_sha256": "4245e9de56dd2d2485731af76d6e98c728cc8858bbaf60a905310fd5ad0875a3",
+    "subject_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "task_id": "TASK-0163"
+  }
+]

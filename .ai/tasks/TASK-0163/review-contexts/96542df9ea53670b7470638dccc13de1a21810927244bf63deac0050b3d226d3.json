@@ -1,0 +1,101 @@
+{
+  "base_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+  "branch": "codex/mutation-attribution-spec-928e135d",
+  "classification_input_sha256": "9c16683aa1ce8a0360f28b5dab2563e3d86d90d11088c5ed65016abd96ea03e4",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0163/spec.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "固定 928e135d 的五项 V2 检测归因规格并完成一次本地独立设计审核",
+        "impact_scope": [
+          ".ai/tasks/TASK-0163/spec.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [],
+      "files": [],
+      "totals": {
+        "additions": 0,
+        "deletions": 0,
+        "files": 0
+      }
+    },
+    "goal": "固定 928e135d 的五项 V2 检测归因规格并完成一次本地独立设计审核",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0163",
+        "--actor",
+        "t163-independent-verifier"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "96542df9ea53670b7470638dccc13de1a21810927244bf63deac0050b3d226d3",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "779c017745e273892cea0293c2c8892822f1372e10263f14981e5178ae2773c8",
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "4245e9de56dd2d2485731af76d6e98c728cc8858bbaf60a905310fd5ad0875a3",
+  "subject_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+  "task_id": "TASK-0163"
+}
