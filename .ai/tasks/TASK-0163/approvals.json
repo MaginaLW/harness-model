@@ -12,5 +12,19 @@
     "spec_sha256": "06f1b7ef2709ce0dec01f8c5dee96e3539ccdff1e4978f021e5850dac7f6f45d",
     "subject_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
     "task_id": "TASK-0163"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-20T10:19:07Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权仅用于规格批准。A01 is the explicit owner authorization for the bounded delivery. REV-0002 approved the frozen specification without findings.",
+    "schema_version": "1.0",
+    "spec_sha256": "4245e9de56dd2d2485731af76d6e98c728cc8858bbaf60a905310fd5ad0875a3",
+    "subject_commit": "928e135d4145d0263fd204b241f5af1ac10e71ac",
+    "task_id": "TASK-0163"
   }
 ]
