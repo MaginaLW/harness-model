@@ -1,0 +1,67 @@
+{
+  "base_commit": "0526983f2e3e9bea6080b55c71a0479fac5798b4",
+  "branch": "codex/mutation-attribution-0526983f",
+  "classification_input_sha256": "0dcc6f634ec48e04ba8e9e65287d86df6175a250e172a606510f4a8128100053",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/mutation-evidence.schema.json",
+      "src/aiflow/mutation_evidence.py",
+      "src/aiflow/mutation_materials.py",
+      "src/aiflow/mutation_process.py",
+      "src/aiflow/mutation_protocol.py",
+      "src/aiflow/mutation_reporter.py",
+      "src/aiflow/mutation_runner.py",
+      "src/aiflow/process_runner.py",
+      "src/aiflow/verification_service.py",
+      "tests/e2e/test_phase_02_negative_self_hosting.py",
+      "tests/e2e/test_phase_02_self_hosting_scenario.py",
+      "tests/integration/test_mutation_runner_contract.py",
+      "tests/integration/test_verify_command.py",
+      "tests/mutation_evidence_helpers.py",
+      "tests/unit/test_mutation_evidence.py",
+      "tests/unit/test_mutation_runner.py",
+      "tests/unit/test_process_runner.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "在最新 origin/main (0526983f) 基线上交付已审核的 17 个 V2 变异归因实现与测试文件，完成单轮 Windows V2 与私有 Ubuntu V2 验证并替代 TASK-0167、TASK-0174 与 PR #180",
+        "impact_scope": [
+          ".ai/schemas/mutation-evidence.schema.json",
+          "src/aiflow/mutation_evidence.py",
+          "src/aiflow/mutation_materials.py",
+          "src/aiflow/mutation_process.py",
+          "src/aiflow/mutation_protocol.py",
+          "src/aiflow/mutation_reporter.py",
+          "src/aiflow/mutation_runner.py",
+          "src/aiflow/process_runner.py",
+          "src/aiflow/verification_service.py",
+          "tests/e2e/test_phase_02_negative_self_hosting.py",
+          "tests/e2e/test_phase_02_self_hosting_scenario.py",
+          "tests/integration/test_mutation_runner_contract.py",
+          "tests/integration/test_verify_command.py",
+          "tests/mutation_evidence_helpers.py",
+          "tests/unit/test_mutation_evidence.py",
+          "tests/unit/test_mutation_runner.py",
+          "tests/unit/test_process_runner.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "在最新 origin/main (0526983f) 基线上交付已审核的 17 个 V2 变异归因实现与测试文件，完成单轮 Windows V2 与私有 Ubuntu V2 验证并替代 TASK-0167、TASK-0174 与 PR #180",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "1b89a8cc3eec64a3a7a1494549f988584716397a4822b3c3de96c738c51e9d4a",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "c14d94092efbfc390a085fe6bb8eb0a16c95119b360953e331d8fb95e7c33e9f",
+  "task_id": "TASK-0175"
+}

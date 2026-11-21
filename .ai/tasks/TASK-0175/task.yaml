@@ -1,0 +1,101 @@
+allowed_scope:
+- .ai/schemas/mutation-evidence.schema.json
+- src/aiflow/mutation_evidence.py
+- src/aiflow/mutation_materials.py
+- src/aiflow/mutation_process.py
+- src/aiflow/mutation_protocol.py
+- src/aiflow/mutation_reporter.py
+- src/aiflow/mutation_runner.py
+- src/aiflow/process_runner.py
+- src/aiflow/verification_service.py
+- tests/e2e/test_phase_02_negative_self_hosting.py
+- tests/e2e/test_phase_02_self_hosting_scenario.py
+- tests/integration/test_mutation_runner_contract.py
+- tests/integration/test_verify_command.py
+- tests/mutation_evidence_helpers.py
+- tests/unit/test_mutation_evidence.py
+- tests/unit/test_mutation_runner.py
+- tests/unit/test_process_runner.py
+base_commit: 0526983f2e3e9bea6080b55c71a0479fac5798b4
+branch: codex/mutation-attribution-0526983f
+created_at: '2026-11-21T13:42:24Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: "\u5728\u6700\u65B0 origin/main (0526983f) \u57FA\u7EBF\u4E0A\u4EA4\u4ED8\u5DF2\
+    \u5BA1\u6838\u7684 17 \u4E2A V2 \u53D8\u5F02\u5F52\u56E0\u5B9E\u73B0\u4E0E\u6D4B\
+    \u8BD5\u6587\u4EF6\uFF0C\u5B8C\u6210\u5355\u8F6E Windows V2 \u4E0E\u79C1\u6709\
+    \ Ubuntu V2 \u9A8C\u8BC1\u5E76\u66FF\u4EE3 TASK-0167\u3001TASK-0174 \u4E0E PR\
+    \ #180"
+  impact:
+    level: high
+  impact_categories: []
+  impact_scope:
+  - .ai/schemas/mutation-evidence.schema.json
+  - src/aiflow/mutation_evidence.py
+  - src/aiflow/mutation_materials.py
+  - src/aiflow/mutation_process.py
+  - src/aiflow/mutation_protocol.py
+  - src/aiflow/mutation_reporter.py
+  - src/aiflow/mutation_runner.py
+  - src/aiflow/process_runner.py
+  - src/aiflow/verification_service.py
+  - tests/e2e/test_phase_02_negative_self_hosting.py
+  - tests/e2e/test_phase_02_self_hosting_scenario.py
+  - tests/integration/test_mutation_runner_contract.py
+  - tests/integration/test_verify_command.py
+  - tests/mutation_evidence_helpers.py
+  - tests/unit/test_mutation_evidence.py
+  - tests/unit/test_mutation_runner.py
+  - tests/unit/test_process_runner.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0175
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: c14d94092efbfc390a085fe6bb8eb0a16c95119b360953e331d8fb95e7c33e9f
+goal: "\u5728\u6700\u65B0 origin/main (0526983f) \u57FA\u7EBF\u4E0A\u4EA4\u4ED8\u5DF2\
+  \u5BA1\u6838\u7684 17 \u4E2A V2 \u53D8\u5F02\u5F52\u56E0\u5B9E\u73B0\u4E0E\u6D4B\
+  \u8BD5\u6587\u4EF6\uFF0C\u5B8C\u6210\u5355\u8F6E Windows V2 \u4E0E\u79C1\u6709 Ubuntu\
+  \ V2 \u9A8C\u8BC1\u5E76\u66FF\u4EE3 TASK-0167\u3001TASK-0174 \u4E0E PR #180"
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-21T13:43:05Z'
+subject_commit: 0526983f2e3e9bea6080b55c71a0479fac5798b4
+task_id: TASK-0175
+updated_at: '2026-11-21T13:48:01Z'
+worktree_dirty: false
+worktree_dirty_paths: []
