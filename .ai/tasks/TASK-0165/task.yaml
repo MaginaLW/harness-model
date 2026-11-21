@@ -1,0 +1,110 @@
+allowed_scope:
+- .ai/schemas/mutation-evidence.schema.json
+- src/aiflow/mutation_evidence.py
+- src/aiflow/mutation_runner.py
+- src/aiflow/mutation_materials.py
+- src/aiflow/mutation_process.py
+- src/aiflow/mutation_protocol.py
+- src/aiflow/mutation_reporter.py
+- src/aiflow/verification_service.py
+- src/aiflow/process_runner.py
+- tests/unit/test_mutation_evidence.py
+- tests/unit/test_mutation_runner.py
+- tests/unit/test_contracts.py
+- tests/unit/test_process_runner.py
+- tests/integration/test_mutation_runner_contract.py
+- tests/integration/test_verify_command.py
+- tests/e2e/test_phase_02_negative_self_hosting.py
+- tests/e2e/test_phase_02_self_hosting_scenario.py
+- tests/mutation_evidence_helpers.py
+base_commit: b510d46197dcead7c27763246dfb474f8aa5a671
+branch: codex/mutation-attribution-implementation
+created_at: '2026-11-19T15:49:56Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: "\u590D\u7528\u53D7\u63A7 Job \u542F\u52A8\u5668\u548C\u53CC\u7AEF 16 KiB\
+    \ \u9650\u989D\u5B8C\u6210\u539F\u751F V2 \u5F52\u56E0\u4E0E\u5386\u53F2\u8BC1\
+    \u636E\u9694\u79BB"
+  impact:
+    level: high
+  impact_categories: []
+  impact_scope:
+  - .ai/schemas/mutation-evidence.schema.json
+  - src/aiflow/mutation_evidence.py
+  - src/aiflow/mutation_runner.py
+  - src/aiflow/mutation_materials.py
+  - src/aiflow/mutation_process.py
+  - src/aiflow/mutation_protocol.py
+  - src/aiflow/mutation_reporter.py
+  - src/aiflow/verification_service.py
+  - src/aiflow/process_runner.py
+  - tests/unit/test_mutation_evidence.py
+  - tests/unit/test_mutation_runner.py
+  - tests/unit/test_contracts.py
+  - tests/unit/test_process_runner.py
+  - tests/integration/test_mutation_runner_contract.py
+  - tests/integration/test_verify_command.py
+  - tests/e2e/test_phase_02_negative_self_hosting.py
+  - tests/e2e/test_phase_02_self_hosting_scenario.py
+  - tests/mutation_evidence_helpers.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0165
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- private_evidence_transfer
+- cross_repository_write
+frozen_spec_sha256: 596ade78e7fbded2a86f2b7a8bfd13b39aaadf651153d0a488f56066d67ee0f1
+goal: "\u590D\u7528\u53D7\u63A7 Job \u542F\u52A8\u5668\u548C\u53CC\u7AEF 16 KiB \u9650\
+  \u989D\u5B8C\u6210\u539F\u751F V2 \u5F52\u56E0\u4E0E\u5386\u53F2\u8BC1\u636E\u9694\
+  \u79BB"
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-20T00:05:53Z'
+subject_commit: 14899d3e30e29f6b21d10b845fac8f5f0a4700fc
+task_id: TASK-0165
+updated_at: '2026-11-20T04:45:44Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- .ai/schemas/mutation-evidence.schema.json
+- src/aiflow/mutation_evidence.py
+- src/aiflow/mutation_materials.py
+- src/aiflow/mutation_process.py
+- src/aiflow/mutation_protocol.py
+- src/aiflow/mutation_reporter.py
+- src/aiflow/mutation_runner.py
+- src/aiflow/verification_service.py

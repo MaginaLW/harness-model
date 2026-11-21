@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "7e657961495615487b6697c5409ea1678fddbd81880727a3ac20eb3865f50f78",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0165",
+  "parameter_summary": "A04 funds one native mutation recording during the single complete Windows V2 on the portable reporter test candidate. Run the five phase-02-critical declarations serially.",
+  "subject_commit": "14899d3e30e29f6b21d10b845fac8f5f0a4700fc",
+  "conditions": [
+    "Require the frozen A04 specification, independent review and approval. Match 264 canonical materials with SHA-256 bce36a49e1fc555e78f5223fefb93f46994470ae72e5ae582a8873764dfc706f and manifest SHA-256 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0.",
+    "Start only within the one complete local aiflow verify TASK-0165 --actor a04-independent-verifier invocation. One complete pytest, including isolated installed-package fixtures, is limited to 3000 seconds. The eight ordinary process limits sum to 3750 seconds.",
+    "Pre-consumption Windows Job probe is limited to 10 seconds. For each of the five declarations allow one baseline and one mutant, each limited to 60 seconds and 16 KiB per stream. Follow the native contract for early failure or unconfirmed cleanup.",
+    "Stop after completion, failure or interruption. No automatic retries, cross-repository writes, external transfers of originals, paid calls or publication. Ubuntu is a separate, post-success private replay stage with no new native campaign."
+  ],
+  "expires_at": "2026-11-20T03:06:07Z",
+  "single_use": true
+}

@@ -3,19 +3,26 @@
 from __future__ import annotations
 
 import ast
+import hashlib
+import json
 import os
+import re
 import stat
 import subprocess
 import sys
 from dataclasses import FrozenInstanceError, fields, replace
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Iterator
 
 import pytest
 
 import aiflow.mutation_evidence as mutation_evidence
+import aiflow.mutation_process as process
+import aiflow.mutation_protocol as protocol
+import aiflow.mutation_reporter as reporter
 import aiflow.mutation_runner as runner
-from aiflow.errors import ContractError
+from aiflow.errors import ContractError, PolicyError
 from aiflow.mutation_manifest import MutationManifest, load_mutation_manifest
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -28,7 +35,7 @@ def manifest() -> MutationManifest:
 
 
 def _failure_code(call: Any) -> str:
-    with pytest.raises(runner._RunFailure) as caught:
+    with pytest.raises(runner.MutationRunError) as caught:
         call()
     return caught.value.code
 
@@ -314,14 +321,14 @@ def test_operator_normalizes_parse_compile_and_write_failures(
     )
 
     path.write_bytes((REPOSITORY_ROOT / declaration.target).read_bytes())
-    original_write = Path.write_text
+    original_write = Path.write_bytes
 
     def fail_write(self: Path, *_args: object, **_kwargs: object) -> int:
         if self == path:
             raise OSError("write blocked")
         return original_write(self, *_args, **_kwargs)  # type: ignore[arg-type]
 
-    monkeypatch.setattr(Path, "write_text", fail_write)
+    monkeypatch.setattr(Path, "write_bytes", fail_write)
     assert _failure_code(lambda: runner._apply_mutation(declaration, path)) == (
         "MUTATION_PATCH_WRITE_FAILED"
     )
@@ -337,6 +344,12 @@ def test_public_results_are_frozen_exact_and_do_not_expose_scratch_paths() -> No
         "timed_out",
         "duration_ms",
         "reason_code",
+        "baseline_report",
+        "mutant_report",
+        "baseline_target_sha256",
+        "mutant_target_sha256",
+        "baseline_lifecycle",
+        "mutant_lifecycle",
     )
     assert tuple(field.name for field in fields(result)) == (
         "manifest_id",
@@ -517,9 +530,7 @@ def test_subject_validation_rejects_invalid_nonancestor_and_unresolved_values(
     assert caught.value.code == "MUTATION_SUBJECT_INVALID"
 
 
-def test_controlled_drift_and_checkout_filter_checks_fail_closed(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_controlled_drift_fails_closed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     hooks = tmp_path / "hooks"
     hooks.mkdir()
     paths = ("src/aiflow/policy.py", "tests/unit/test_policy.py")
@@ -536,25 +547,81 @@ def test_controlled_drift_and_checkout_filter_checks_fail_closed(
         runner._assert_controlled_paths_at_subject(tmp_path, hooks, SUBJECT, paths)
     assert caught.value.code == "MUTATION_SUBJECT_DRIFT"
 
-    calls: list[tuple[str, ...]] = []
 
-    def attributes(
-        _root: Path, _hooks: Path, *arguments: str, check: bool = True
+@pytest.mark.parametrize(
+    "fault",
+    [
+        None,
+        "missing_material",
+        "duplicate_tree_path",
+        "missing_row",
+        "duplicate_row",
+        "out_of_order",
+        "extra_row",
+        "incomplete_row",
+        "unrelated_filter",
+        "wrong_attribute",
+        "reserved_driver",
+    ],
+)
+def test_checkout_filter_checks_the_whole_tree_in_order(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, fault: str | None
+) -> None:
+    material = b"src/aiflow/policy.py"
+    unrelated = b"docs/file\nwith newline"
+    tree = b"\0".join((material, unrelated, b""))
+    material_row = b"\0".join((material, b"filter", b"unset", b""))
+    unrelated_row = b"\0".join((unrelated, b"filter", b"unspecified", b""))
+    rows = material_row + unrelated_row
+    if fault == "missing_material":
+        tree = unrelated + b"\0"
+    elif fault == "duplicate_tree_path":
+        tree += unrelated + b"\0"
+    elif fault == "missing_row":
+        rows = material_row
+    elif fault == "duplicate_row":
+        rows = material_row * 2
+    elif fault == "out_of_order":
+        rows = unrelated_row + material_row
+    elif fault == "extra_row":
+        rows += unrelated_row
+    elif fault == "incomplete_row":
+        rows = rows[:-1]
+    elif fault == "unrelated_filter":
+        rows = material_row + unrelated_row.replace(b"unspecified", b"lfs")
+    elif fault == "wrong_attribute":
+        rows = rows.replace(b"filter", b"other")
+
+    def git(
+        root: Path, hooks: Path, *args: str, check: bool = True, input_bytes: bytes | None = None
     ) -> subprocess.CompletedProcess[bytes]:
-        del check
-        calls.append(arguments)
-        path = arguments[-1]
-        value = "lfs" if path.endswith("test_policy.py") else "unspecified"
-        return subprocess.CompletedProcess(
-            list(arguments), 0, f"{path}: filter: {value}\n".encode(), b""
+        assert root == tmp_path and hooks == tmp_path / "hooks"
+        if args[0] == "ls-tree":
+            assert args == ("ls-tree", "-r", "-z", "--name-only", "--full-tree", SUBJECT)
+            return subprocess.CompletedProcess(args, 0, tree, b"")
+        if args[0] == "check-attr":
+            assert args == ("check-attr", f"--source={SUBJECT}", "-z", "--stdin", "filter")
+            assert input_bytes == tree
+            return subprocess.CompletedProcess(args, 0, rows, b"")
+        assert args[:3] == ("config", "--name-only", "--get-regexp") and not check
+        assert all(
+            re.fullmatch(args[-1], f"filter.{name}.process") for name in ("unset", "unspecified")
         )
+        if fault == "reserved_driver":
+            return subprocess.CompletedProcess(args, 0, b"filter.unspecified.process\n", b"")
+        return subprocess.CompletedProcess(args, 1, b"", b"")
 
-    monkeypatch.setattr(runner, "_git", attributes)
-    with pytest.raises(ContractError) as caught:
-        runner._assert_no_checkout_filters(tmp_path, hooks, SUBJECT, paths)
-    assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
-    assert len(calls) == 2
-    assert all(call[1] == f"--source={SUBJECT}" for call in calls)
+    monkeypatch.setattr(runner, "_git", git)
+    if fault is None:
+        runner.assert_no_checkout_filters(
+            tmp_path, tmp_path / "hooks", SUBJECT, (material.decode(),)
+        )
+    else:
+        with pytest.raises(ContractError) as caught:
+            runner.assert_no_checkout_filters(
+                tmp_path, tmp_path / "hooks", SUBJECT, (material.decode(),)
+            )
+        assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
 
 
 def test_controlled_checks_accept_exact_clean_outputs_and_normalize_git_errors(
@@ -568,16 +635,10 @@ def test_controlled_checks_accept_exact_clean_outputs_and_normalize_git_errors(
         _root: Path, _hooks: Path, *arguments: str, check: bool = True
     ) -> subprocess.CompletedProcess[bytes]:
         del check
-        if arguments[0] == "check-attr":
-            path = arguments[-1]
-            return subprocess.CompletedProcess(
-                list(arguments), 0, f"{path}: filter: unset\n".encode(), b""
-            )
         return subprocess.CompletedProcess(list(arguments), 0, b"", b"")
 
     monkeypatch.setattr(runner, "_git", clean)
     runner._assert_controlled_paths_at_subject(tmp_path, hooks, SUBJECT, paths)
-    runner._assert_no_checkout_filters(tmp_path, hooks, SUBJECT, paths)
 
     monkeypatch.setattr(
         runner,
@@ -588,7 +649,7 @@ def test_controlled_checks_accept_exact_clean_outputs_and_normalize_git_errors(
         runner._assert_controlled_paths_at_subject(tmp_path, hooks, SUBJECT, paths)
     assert caught.value.code == "MUTATION_SUBJECT_INVALID"
     with pytest.raises(ContractError) as caught:
-        runner._assert_no_checkout_filters(tmp_path, hooks, SUBJECT, paths)
+        runner.assert_no_checkout_filters(tmp_path, hooks, SUBJECT, paths)
     assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
 
 
@@ -646,7 +707,7 @@ def test_minimal_environment_is_closed_and_contains_resolved_tool_dirs(
     worktree = tmp_path / "worktree"
     scratch = tmp_path / "scratch"
 
-    environment = runner._minimal_environment(worktree, scratch)
+    environment = runner.detector_environment(worktree, scratch)
 
     expected = {
         "PATH",
@@ -670,32 +731,15 @@ def test_minimal_environment_rejects_missing_tools_or_windows_root(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(runner.shutil, "which", lambda _name: None)
-    assert _failure_code(lambda: runner._minimal_environment(tmp_path, tmp_path)) == (
+    assert _failure_code(lambda: runner.detector_environment(tmp_path, tmp_path)) == (
         "MUTATION_DETECTOR_EXECUTION_FAILED"
     )
     if os.name == "nt":
         monkeypatch.setattr(runner.shutil, "which", lambda _name: str(tmp_path / "git.exe"))
         monkeypatch.delenv("SystemRoot", raising=False)
-        assert _failure_code(lambda: runner._minimal_environment(tmp_path, tmp_path)) == (
+        assert _failure_code(lambda: runner.detector_environment(tmp_path, tmp_path)) == (
             "MUTATION_DETECTOR_EXECUTION_FAILED"
         )
-
-
-class _FakeProcess:
-    def __init__(self, waits: Iterator[int | BaseException]) -> None:
-        self.pid = 321
-        self._waits = waits
-        self.killed = False
-
-    def wait(self, timeout: int) -> int:
-        del timeout
-        value = next(self._waits)
-        if isinstance(value, BaseException):
-            raise value
-        return value
-
-    def kill(self) -> None:
-        self.killed = True
 
 
 @pytest.mark.parametrize(
@@ -708,104 +752,119 @@ class _FakeProcess:
     ],
 )
 def test_detector_uses_exact_argv_and_normalizes_exit_codes(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    exit_code: int,
-    reason: str | None,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, exit_code: int, reason: str | None
 ) -> None:
-    captured: dict[str, object] = {}
-    process = _FakeProcess(iter((exit_code,)))
+    from aiflow.mutation_process import ProcessOutcome
 
-    def popen(arguments: list[str], **kwargs: object) -> _FakeProcess:
+    captured: dict[str, Any] = {}
+    report = protocol.encode_report(_synthetic_report("MUT-V2-001"))
+
+    def execute(arguments: list[str], **kwargs: object) -> ProcessOutcome:
         captured["arguments"] = arguments
         captured.update(kwargs)
-        return process
+        return ProcessOutcome(
+            exit_code, report, None, False, 4, _clean_lifecycle(report, exit_code)
+        )
 
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {"PATH": "fixed"})
-    monkeypatch.setattr(runner.subprocess, "Popen", popen)
-    detector = "tests/unit/test_policy.py::test_detector"
-    result = runner._run_detector(tmp_path / "worktree", tmp_path / "scratch", detector)
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {"PATH": "fixed"})
+    monkeypatch.setattr(runner, "run_bounded_process", execute)
+    worktree = tmp_path / "worktree"
+    result = runner._run_detector(worktree, tmp_path / "scratch", "MUT-V2-001", "a" * 64)
 
     assert result[0] == exit_code and result[1] is False and result[3] == reason
-    assert captured["arguments"] == [sys.executable, "-m", "pytest", "-q", detector]
-    assert captured["shell"] is False
-    assert captured["stdout"] == subprocess.DEVNULL
-    assert captured["stderr"] == subprocess.DEVNULL
+    assert captured["arguments"] == [
+        sys.executable,
+        "-I",
+        "-B",
+        str(worktree / "src/aiflow/mutation_reporter.py"),
+        "MUT-V2-001",
+        str(worktree),
+        "a" * 64,
+    ]
+    if reason is None:
+        assert result[4:] == (report, _clean_lifecycle(report, exit_code))
+    assert captured["cwd"] == worktree
+    assert captured["timeout_seconds"] == runner._TIMEOUT_SECONDS
+    assert captured["max_output_bytes"] == 16384
 
 
-def test_detector_timeout_terminates_and_reaps_with_bounds(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    timeout = subprocess.TimeoutExpired(["pytest"], runner._TIMEOUT_SECONDS)
-    process = _FakeProcess(iter((timeout, -9)))
-    terminated: list[int] = []
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {})
-    monkeypatch.setattr(runner.subprocess, "Popen", lambda *_args, **_kwargs: process)
-    monkeypatch.setattr(runner, "_terminate_process_tree", lambda item: terminated.append(item.pid))
-
-    result = runner._run_detector(tmp_path / "worktree", tmp_path / "scratch", "nodeid")
-
-    assert result[0] is None and result[1] is True
-    assert result[3] == "MUTATION_DETECTOR_TIMEOUT"
-    assert terminated == [321]
-
-
-def test_detector_reports_unreapable_timeout_as_execution_failure(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    timeout = subprocess.TimeoutExpired(["pytest"], runner._TIMEOUT_SECONDS)
-    process = _FakeProcess(iter((timeout, timeout, timeout)))
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {})
-    monkeypatch.setattr(runner.subprocess, "Popen", lambda *_args, **_kwargs: process)
-    monkeypatch.setattr(runner, "_terminate_process_tree", lambda _item: None)
-    result = runner._run_detector(tmp_path / "worktree", tmp_path / "scratch", "nodeid")
-    assert result[0] is None and result[1] is True
-    assert result[3] == "MUTATION_DETECTOR_EXECUTION_FAILED"
-    assert process.killed is True
-
-
-def test_detector_launch_failure_is_a_stable_execution_fact(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(runner, "_minimal_environment", lambda *_args: {})
-    monkeypatch.setattr(
-        runner.subprocess,
-        "Popen",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("missing")),
-    )
-    result = runner._run_detector(tmp_path / "worktree", tmp_path / "scratch", "nodeid")
-    assert result[0] is None and result[1] is False
-    assert result[3] == "MUTATION_DETECTOR_EXECUTION_FAILED"
-
-
-def test_process_tree_termination_has_a_kill_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
-    process = _FakeProcess(iter(()))
-    if os.name == "nt":
-        monkeypatch.setattr(
-            runner.subprocess,
-            "run",
-            lambda *_args, **_kwargs: subprocess.CompletedProcess([], 1, b"", b""),
-        )
-    else:
-        monkeypatch.setattr(runner.os, "killpg", lambda *_args: (_ for _ in ()).throw(OSError()))
-    runner._terminate_process_tree(process)  # type: ignore[arg-type]
-    assert process.killed is True
-
-
-def test_process_tree_termination_accepts_successful_platform_kill(
+@pytest.mark.parametrize(
+    ("process_reason", "unknown", "expected", "timed_out"),
+    [
+        ("timeout", False, "MUTATION_DETECTOR_TIMEOUT", True),
+        ("overflow", False, "MUTATION_DETECTOR_REPORT_INVALID", False),
+        ("read_error", False, "MUTATION_DETECTOR_REPORT_INVALID", False),
+        ("report_incomplete", False, "MUTATION_DETECTOR_REPORT_INVALID", False),
+        ("processes_remaining", False, "MUTATION_DETECTOR_PROCESSES_REMAIN", False),
+        ("launch_error", False, "MUTATION_DETECTOR_EXECUTION_FAILED", False),
+        ("timeout", True, "MUTATION_PROCESS_CLEANUP_UNKNOWN", True),
+        ("pytest_early_stop", False, "MUTATION_DETECTOR_EARLY_STOP", False),
+    ],
+)
+def test_detector_process_failure_is_unverified(
+    tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    process_reason: str,
+    unknown: bool,
+    expected: str,
+    timed_out: bool,
 ) -> None:
-    process = _FakeProcess(iter(()))
-    if os.name == "nt":
+    from aiflow.mutation_process import ProcessOutcome
+
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {})
+    monkeypatch.setattr(
+        runner,
+        "run_bounded_process",
+        lambda *_args, **_kwargs: ProcessOutcome(None, None, process_reason, unknown, 3),
+    )
+    result = runner._run_detector(tmp_path, tmp_path, "MUT-V2-001", "a" * 64)
+    assert result == (None, timed_out, 3, expected, None, None)
+
+
+def test_detector_rejects_bad_or_absent_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aiflow.mutation_process import ProcessOutcome
+
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {})
+    for report, expected in (
+        (None, "MUTATION_DETECTOR_INFRA_FAILURE"),
+        (b"not a report", "MUTATION_DETECTOR_REPORT_INVALID"),
+    ):
         monkeypatch.setattr(
-            runner.subprocess,
-            "run",
-            lambda *_args, **_kwargs: subprocess.CompletedProcess([], 0, b"", b""),
+            runner,
+            "run_bounded_process",
+            lambda *_args, report=report, **_kwargs: ProcessOutcome(
+                0, report, None, False, 1, _clean_lifecycle(report, 0) if report else None
+            ),
         )
-    else:
-        monkeypatch.setattr(runner.os, "killpg", lambda *_args: None)
-    runner._terminate_process_tree(process)  # type: ignore[arg-type]
-    assert process.killed is False
+        result = runner._run_detector(tmp_path, tmp_path, "MUT-V2-001", "a" * 64)
+        assert result[3] == expected and result[4] is None
+
+
+def test_detector_environment_failure_is_a_stable_execution_fact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        runner,
+        "detector_environment",
+        lambda *_args: (_ for _ in ()).throw(runner.MutationRunError("MUTATION_WORKSPACE_INVALID")),
+    )
+    result = runner._run_detector(tmp_path, tmp_path, "MUT-V2-001", "a" * 64)
+    assert result == (None, False, 0, "MUTATION_DETECTOR_EXECUTION_FAILED", None, None)
+
+
+def test_detector_unexpected_process_exception_preserves_cleanup_unknown(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {})
+    monkeypatch.setattr(
+        runner,
+        "run_bounded_process",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("unexpected")),
+    )
+    result = runner._run_detector(tmp_path, tmp_path, "MUT-V2-001", "a" * 64)
+    assert result[3] == "MUTATION_PROCESS_CLEANUP_UNKNOWN" and result[4] is None
 
 
 def test_windows_system_root_rejects_missing_or_invalid_values(
@@ -833,10 +892,27 @@ def test_worktree_create_and_cleanup_helpers_are_bounded_and_contained(
         calls.append(arguments)
         return subprocess.CompletedProcess(list(arguments), 0, b"", b"")
 
+    def verify_checkout_filters(
+        path: Path, supplied_hooks: Path, subject: str, paths: tuple[str, ...]
+    ) -> None:
+        assert path == worktree and supplied_hooks == hooks and subject == SUBJECT and not paths
+        calls.append(("verify_checkout_filters",))
+
+    monkeypatch.setattr(runner, "assert_no_checkout_filters", verify_checkout_filters)
     monkeypatch.setattr(runner, "_git", git)
     runner._create_detached_worktree(tmp_path, hooks, worktree, SUBJECT)
     assert calls[0][:4] == ("worktree", "add", "--detach", "--no-checkout")
-    assert calls[1] == ("checkout", "--detach", SUBJECT)
+    assert calls[1:] == [("verify_checkout_filters",), ("checkout", "--detach", SUBJECT)]
+    calls.clear()
+
+    def reject_checkout(*_args: object) -> None:
+        raise ContractError("filter present", code="MUTATION_WORKSPACE_INVALID")
+
+    monkeypatch.setattr(runner, "assert_no_checkout_filters", reject_checkout)
+    with pytest.raises(ContractError) as caught:
+        runner._create_detached_worktree(tmp_path, hooks, worktree, SUBJECT)
+    assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
+    assert [call[0] for call in calls] == ["worktree"]
 
     monkeypatch.setattr(
         runner,
@@ -967,7 +1043,14 @@ def _mock_orchestrator(
     monkeypatch.setattr(runner, "_create_workspace_root", lambda: workspace)
     monkeypatch.setattr(runner, "_validate_subject", lambda *_args: None)
     monkeypatch.setattr(runner, "_assert_controlled_paths_at_subject", lambda *_args: None)
-    monkeypatch.setattr(runner, "_assert_no_checkout_filters", lambda *_args: None)
+    monkeypatch.setattr(runner, "assert_no_checkout_filters", lambda *_args: None)
+    materials = {path: b"synthetic" for path in runner._controlled_paths(manifest)}
+    monkeypatch.setattr(runner, "subject_materials", lambda *_args: materials)
+    monkeypatch.setattr(runner, "checkout_matches_materials", lambda *_args: True)
+    monkeypatch.setattr(runner, "material_file_matches", lambda *_args: True)
+    monkeypatch.setattr(runner, "loaded_engine_matches", lambda *_args: True)
+    monkeypatch.setattr(runner, "_digest", lambda *_args: "a" * 64)
+    monkeypatch.setattr(runner, "mutation_bytes", lambda *_args: b"synthetic mutation")
     snapshot = runner._MainSnapshot(b"status", b"worktrees", ())
     monkeypatch.setattr(runner, "_snapshot_main_tree", lambda *_args: snapshot)
     monkeypatch.setattr(runner, "_main_tree_unchanged", lambda *_args: unchanged)
@@ -975,20 +1058,129 @@ def _mock_orchestrator(
     def create(_root: Path, _hooks: Path, path: Path, _subject: str) -> None:
         attempts.append(path)
         if create_failure_at is not None and len(attempts) == create_failure_at:
-            raise runner._RunFailure("MUTATION_WORKTREE_CREATE_FAILED")
+            raise runner.MutationRunError("MUTATION_WORKTREE_CREATE_FAILED")
         path.mkdir()
 
     monkeypatch.setattr(runner, "_create_detached_worktree", create)
-    monkeypatch.setattr(runner, "_run_detector", lambda *_args: next(detector_results))
+
+    def detector(_root: Path, _scratch: Path, mutation_id: str, _digest: str) -> tuple:
+        exit_code, timed_out, duration, reason = next(detector_results)
+        report = None
+        if reason is None and exit_code in {0, 1}:
+            facts = _synthetic_report(mutation_id)
+            if exit_code == 1:
+                case, exception, anchor, semantic = protocol.SIGNATURES[mutation_id]
+                target = next(item for item in facts["cases"] if item["case"] == case)
+                target["call"] = "failed"
+                target["failure"] = {
+                    "exception": exception,
+                    "anchor": anchor,
+                    "semantic": semantic,
+                }
+            report = protocol.encode_report(facts)
+        lifecycle = (
+            _clean_lifecycle(report, exit_code)
+            if report is not None and exit_code is not None
+            else None
+        )
+        return exit_code, timed_out, duration, reason, report, lifecycle
+
+    monkeypatch.setattr(runner, "_run_detector", detector)
 
     def apply(*_args: object) -> None:
         if apply_failure is not None:
-            raise runner._RunFailure(apply_failure)
+            raise runner.MutationRunError(apply_failure)
 
     monkeypatch.setattr(runner, "_apply_mutation", apply)
     monkeypatch.setattr(runner, "_remove_worktree_with_retry", lambda *_args: cleanup_ok)
     monkeypatch.setattr(runner, "_remove_tree_with_retry", lambda *_args: True)
     return attempts
+
+
+def test_orchestrator_rejects_main_source_drift_before_creating_worktree(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, manifest: MutationManifest
+) -> None:
+    attempts = _mock_orchestrator(monkeypatch, tmp_path, manifest, iter(()))
+    monkeypatch.setattr(runner, "material_file_matches", lambda *_args: False)
+    with pytest.raises(ContractError) as caught:
+        _authorized_run(tmp_path, SUBJECT)
+    assert caught.value.code == "MUTATION_SUBJECT_DRIFT"
+    assert attempts == []
+
+
+def test_orchestrator_rejects_loaded_engine_identity_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, manifest: MutationManifest
+) -> None:
+    attempts = _mock_orchestrator(monkeypatch, tmp_path, manifest, iter(()))
+    monkeypatch.setattr(runner, "loaded_engine_matches", lambda *_args: False)
+    with pytest.raises(ContractError) as caught:
+        _authorized_run(tmp_path, SUBJECT)
+    assert caught.value.code == "MUTATION_SUBJECT_DRIFT"
+    assert attempts == []
+
+
+@pytest.mark.parametrize("at_mutant", [False, True])
+def test_orchestrator_preserves_workspace_when_process_cleanup_is_unknown(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, manifest: MutationManifest, at_mutant: bool
+) -> None:
+    facts = [(None, False, 1, "MUTATION_PROCESS_CLEANUP_UNKNOWN")]
+    if at_mutant:
+        facts.insert(0, (0, False, 1, None))
+    attempts = _mock_orchestrator(monkeypatch, tmp_path, manifest, iter(facts))
+    removed: list[Path] = []
+    monkeypatch.setattr(
+        runner,
+        "_remove_worktree_with_retry",
+        lambda _root, _hooks, _workspace, path: removed.append(path) is None,
+    )
+    monkeypatch.setattr(
+        runner,
+        "_remove_tree_with_retry",
+        lambda _parent, path: removed.append(path) is None,
+    )
+    result = _authorized_run(tmp_path, SUBJECT)
+    assert result.reason_code == "MUTATION_PROCESS_CLEANUP_UNKNOWN"
+    assert result.probes[0].reason_code == "MUTATION_PROCESS_CLEANUP_UNKNOWN"
+    assert len(attempts) == 1 and attempts[0].exists()
+    assert removed == []
+
+
+@pytest.mark.parametrize("at_mutant", [False, True])
+def test_orchestrator_rejects_missing_report_before_classifying(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, manifest: MutationManifest, at_mutant: bool
+) -> None:
+    _mock_orchestrator(monkeypatch, tmp_path, manifest, iter(()))
+    report = protocol.encode_report(_synthetic_report("MUT-V2-001"))
+    facts = iter(
+        [(0, False, 1, None, report, _clean_lifecycle(report, 0)), (1, False, 1, None, None, None)]
+        if at_mutant
+        else [(0, False, 1, None, None, None)]
+    )
+    monkeypatch.setattr(runner, "_run_detector", lambda *_args: next(facts))
+    result = _authorized_run(tmp_path, SUBJECT)
+    assert result.reason_code == "MUTATION_DETECTOR_REPORT_INVALID"
+    assert result.probes[0].reason_code == "MUTATION_DETECTOR_REPORT_INVALID"
+
+
+def test_orchestrator_rejects_mutant_setup_failure_even_with_exit_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, manifest: MutationManifest
+) -> None:
+    _mock_orchestrator(monkeypatch, tmp_path, manifest, iter(()))
+    baseline = _synthetic_report("MUT-V2-001")
+    mutant = _synthetic_report("MUT-V2-001")
+    mutant["cases"][0]["setup"] = "failed"
+    mutant["cases"][0]["call"] = "skipped"
+    facts = iter(
+        (code, False, 1, None, raw, _clean_lifecycle(raw, code))
+        for code, raw in enumerate(
+            (protocol.encode_report(baseline), protocol.encode_report(mutant))
+        )
+    )
+    monkeypatch.setattr(runner, "_run_detector", lambda *_args: next(facts))
+    result = _authorized_run(tmp_path, SUBJECT)
+    assert result.probes[0].baseline_exit_code == 0
+    assert result.probes[0].mutant_exit_code == 1
+    assert result.reason_code == "MUTATION_DETECTOR_REPORT_INVALID"
 
 
 def test_orchestrator_returns_five_ordered_success_facts_without_persistence(
@@ -1008,6 +1200,10 @@ def test_orchestrator_returns_five_ordered_success_facts_without_persistence(
     assert all(probe.baseline_exit_code == 0 for probe in result.probes)
     assert all(probe.mutant_exit_code == 1 for probe in result.probes)
     assert all(probe.duration_ms == 5 and probe.reason_code is None for probe in result.probes)
+    for probe in result.probes:
+        assert probe.baseline_report is not None and probe.mutant_report is not None
+        assert probe.baseline_lifecycle == _clean_lifecycle(probe.baseline_report, 0)
+        assert probe.mutant_lifecycle == _clean_lifecycle(probe.mutant_report, 1)
     assert result.main_tree_unchanged is True and result.reason_code is None
 
 
@@ -1176,7 +1372,12 @@ def test_orchestrator_rejects_isolated_manifest_drift(
     monkeypatch.setattr(runner, "_create_workspace_root", lambda: workspace)
     monkeypatch.setattr(runner, "_validate_subject", lambda *_args: None)
     monkeypatch.setattr(runner, "_assert_controlled_paths_at_subject", lambda *_args: None)
-    monkeypatch.setattr(runner, "_assert_no_checkout_filters", lambda *_args: None)
+    monkeypatch.setattr(runner, "assert_no_checkout_filters", lambda *_args: None)
+    materials = {path: b"synthetic" for path in runner._controlled_paths(manifest)}
+    monkeypatch.setattr(runner, "subject_materials", lambda *_args: materials)
+    monkeypatch.setattr(runner, "checkout_matches_materials", lambda *_args: True)
+    monkeypatch.setattr(runner, "material_file_matches", lambda *_args: True)
+    monkeypatch.setattr(runner, "loaded_engine_matches", lambda *_args: True)
     monkeypatch.setattr(
         runner, "_snapshot_main_tree", lambda *_args: runner._MainSnapshot(b"", b"", ())
     )
@@ -1249,7 +1450,7 @@ def test_workspace_failure_before_first_worktree_is_a_contract_error(
     monkeypatch.setattr(
         runner,
         "_create_workspace_root",
-        lambda: (_ for _ in ()).throw(runner._RunFailure("MUTATION_WORKSPACE_INVALID")),
+        lambda: (_ for _ in ()).throw(runner.MutationRunError("MUTATION_WORKSPACE_INVALID")),
     )
     with pytest.raises(ContractError) as caught:
         _authorized_run(tmp_path, SUBJECT)
@@ -1303,3 +1504,805 @@ def test_preflight_cleanup_failure_overrides_the_original_error(
     with pytest.raises(ContractError) as caught:
         _authorized_run(tmp_path, SUBJECT)
     assert caught.value.code == "MUTATION_WORKTREE_CLEANUP_FAILED"
+
+
+def _synthetic_report(mutation_id: str) -> dict[str, Any]:
+    return {
+        "protocol": "1.0",
+        "mutation_id": mutation_id,
+        "python": "3.11",
+        "pytest": "9.1.1",
+        "platform": "windows",
+        "cases": [
+            {
+                "case": case,
+                "setup": "passed",
+                "call": "passed",
+                "teardown": "passed",
+                "failure": None,
+            }
+            for case in protocol.CASES[mutation_id]
+        ],
+        "imports": {"target_sha256": "a" * 64, "reference_ok": True},
+        "complete": True,
+    }
+
+
+@pytest.mark.parametrize(
+    ("mutation_id", "case_name", "exception", "anchor", "semantic"),
+    [
+        ("MUT-V2-001", "only", "policy_error", "policy_valid", "policy_check_reference_invalid"),
+        ("MUT-V2-002", "same_actor", "assertion_error", "actor_unexpected", "actor_sentinel"),
+        ("MUT-V2-003", "only", "assertion_error", "approval_assert", "none"),
+        ("MUT-V2-004", "only", "assertion_error", "gate_assert", "none"),
+        ("MUT-V2-005", "only", "pytest_failed", "snapshot_raises", "missing_contract_error"),
+    ],
+)
+def test_report_classifies_only_the_reviewed_call(
+    mutation_id: str, case_name: str, exception: str, anchor: str, semantic: str
+) -> None:
+    report = _synthetic_report(mutation_id)
+
+    def classify(exit_code: int, *, baseline: bool) -> str:
+        return protocol.classify_report(
+            report,
+            mutation_id=mutation_id,
+            target_sha256="a" * 64,
+            exit_code=exit_code,
+            baseline=baseline,
+        )
+
+    assert classify(0, baseline=True) == "passed"
+    assert classify(0, baseline=False) == "survived"
+    target = next(case for case in report["cases"] if case["case"] == case_name)
+    target.update(
+        call="failed", failure={"exception": exception, "anchor": anchor, "semantic": semantic}
+    )
+    assert classify(1, baseline=False) == "killed"
+    assert classify(0, baseline=False) == "unverified"
+    assert classify(1, baseline=True) == "unverified"
+
+
+@pytest.mark.parametrize(
+    "fault", ["setup", "teardown", "wrong_call", "skip", "xfail", "xpass", "reference"]
+)
+def test_protocol_synthetic_unrelated_or_incomplete_failure_is_unverified(fault: str) -> None:
+    report = _synthetic_report("MUT-V2-002")
+    target = report["cases"][1]
+    target["call"] = "failed"
+    target["failure"] = {
+        "exception": "assertion_error",
+        "anchor": "actor_unexpected",
+        "semantic": "actor_sentinel",
+    }
+    if fault == "setup":
+        target["setup"] = "failed"
+        target["call"] = "notrun"
+        target["failure"] = None
+    elif fault == "teardown":
+        target["teardown"] = "failed"
+    elif fault == "wrong_call":
+        target["failure"]["semantic"] = "unknown"
+    elif fault == "reference":
+        report["imports"]["reference_ok"] = False
+    else:
+        report["cases"][0]["call"] = {"skip": "skipped", "xfail": "xfailed", "xpass": "xpassed"}[
+            fault
+        ]
+    assert (
+        protocol.classify_report(
+            report, mutation_id="MUT-V2-002", target_sha256="a" * 64, exit_code=1, baseline=False
+        )
+        == "unverified"
+    )
+
+
+@pytest.mark.parametrize(
+    "fault", ["duplicate_case", "extra_case", "version", "target", "platform", "unknown_field"]
+)
+def test_protocol_rejects_synthetic_identity_and_schema_drift(fault: str) -> None:
+    report = _synthetic_report("MUT-V2-002")
+    if fault == "duplicate_case":
+        report["cases"][1]["case"] = "blank"
+    elif fault == "extra_case":
+        report["cases"].append(dict(report["cases"][0]))
+    elif fault == "version":
+        report["pytest"] = "8.0.0"
+    elif fault == "target":
+        report["imports"]["target_sha256"] = "b" * 64
+    elif fault == "platform":
+        report["platform"] = "linux"
+    else:
+        report["private_path"] = "discard"
+    with pytest.raises(ValueError):
+        protocol.parse_report(protocol.encode_report(report), "MUT-V2-002", "a" * 64)
+
+
+def test_protocol_rejects_duplicate_json_keys_trailing_bytes_and_overflow() -> None:
+    data = protocol.encode_report(_synthetic_report("MUT-V2-001"))
+    duplicate = data.replace(b'"complete":true', b'"complete":true,"complete":true')
+    assert duplicate != data
+    for invalid in (duplicate, data + b" ", b"x" * (protocol.MAX_REPORT_BYTES + 1)):
+        with pytest.raises(ValueError):
+            protocol.parse_report(invalid, "MUT-V2-001", "a" * 64)
+
+
+@pytest.mark.parametrize(
+    ("mutation_id", "line", "error", "expected"),
+    [
+        (
+            "MUT-V2-001",
+            198,
+            PolicyError("safe", code="POLICY_CHECK_REFERENCE_INVALID"),
+            ("policy_error", "policy_valid", "policy_check_reference_invalid"),
+        ),
+        (
+            "MUT-V2-002",
+            1146,
+            AssertionError("V2 rejection must happen before plan parsing or runner start"),
+            ("assertion_error", "actor_unexpected", "actor_sentinel"),
+        ),
+        (
+            "MUT-V2-003",
+            148,
+            AssertionError("private"),
+            ("assertion_error", "approval_assert", "none"),
+        ),
+        ("MUT-V2-004", 169, AssertionError("private"), ("assertion_error", "gate_assert", "none")),
+        (
+            "MUT-V2-005",
+            165,
+            pytest.fail.Exception("DID NOT RAISE ContractError"),
+            ("pytest_failed", "snapshot_raises", "missing_contract_error"),
+        ),
+    ],
+)
+def test_reporter_synthetic_failure_tokens_are_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mutation_id: str,
+    line: int,
+    error: BaseException,
+    expected: tuple[str, str, str],
+) -> None:
+    detector = tmp_path / "test_detector.py"
+    detector.write_text("synthetic", encoding="utf-8")
+    entry = SimpleNamespace(path=detector, lineno=line - 1)
+    trace = [entry]
+    if mutation_id == "MUT-V2-005":
+
+        def frame(code: object) -> SimpleNamespace:
+            return SimpleNamespace(
+                path=tmp_path / "pytest_internal.py",
+                lineno=0,
+                frame=SimpleNamespace(code=SimpleNamespace(raw=code)),
+            )
+
+        trace.extend(
+            [
+                frame(type(pytest.raises(ContractError)).__exit__.__code__),
+                frame(type(pytest.fail).__call__.__code__),
+            ]
+        )
+    call = SimpleNamespace(excinfo=SimpleNamespace(value=error, traceback=trace))
+    monkeypatch.setattr(reporter, "_PYTEST", pytest)
+    failure = reporter._failure(mutation_id, None, call, detector)
+    assert (failure["exception"], failure["anchor"], failure["semantic"]) == expected
+    assert "private" not in json.dumps(failure)
+    entry.lineno += -1 if mutation_id == "MUT-V2-002" else 1
+    assert reporter._failure(mutation_id, None, call, detector)["anchor"] == "unknown"
+
+
+@pytest.mark.parametrize(("mutation_id", "line"), [("MUT-V2-003", 148), ("MUT-V2-004", 169)])
+def test_reporter_rejects_assertion_raised_inside_called_function(
+    tmp_path: Path, mutation_id: str, line: int
+) -> None:
+    detector = tmp_path / "test_detector.py"
+    detector.write_text("synthetic", encoding="utf-8")
+    inner = tmp_path / "production.py"
+    inner.write_text("synthetic", encoding="utf-8")
+    call = SimpleNamespace(
+        excinfo=SimpleNamespace(
+            value=AssertionError("unrelated"),
+            traceback=[
+                SimpleNamespace(path=detector, lineno=line - 1),
+                SimpleNamespace(path=inner, lineno=18),
+            ],
+        )
+    )
+    assert reporter._failure(mutation_id, None, call, detector) == {
+        "exception": "unknown",
+        "anchor": "unknown",
+        "semantic": "unknown",
+    }
+
+
+def test_reporter_matches_real_pytest_raises_exit_code(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    detector = tmp_path / "test_detector.py"
+    detector.write_text("synthetic", encoding="utf-8")
+    with pytest.raises(pytest.fail.Exception) as missing:
+        with pytest.raises(ContractError):
+            pass
+    actual_trace = list(missing.traceback)
+    call = SimpleNamespace(
+        excinfo=SimpleNamespace(
+            value=missing.value,
+            traceback=[SimpleNamespace(path=detector, lineno=164), *actual_trace[-2:]],
+        )
+    )
+    monkeypatch.setattr(reporter, "_PYTEST", pytest)
+    assert reporter._failure("MUT-V2-005", None, call, detector) == {
+        "exception": "pytest_failed",
+        "anchor": "snapshot_raises",
+        "semantic": "missing_contract_error",
+    }
+
+
+def test_reporter_normalizes_crlf_but_rejects_a_bare_cr(tmp_path: Path) -> None:
+    detector = tmp_path / "test_detector.py"
+    lf = b"# detector\nassert True\n"
+    expected = hashlib.sha256(lf).hexdigest()
+    for content in (lf, lf.replace(b"\n", b"\r\n")):
+        detector.write_bytes(content)
+        assert reporter._test_digest(detector) == expected
+
+    detector.write_bytes(b"# detector\rassert True\r\n")
+    with pytest.raises(ValueError, match="invalid detector line ending"):
+        reporter._test_digest(detector)
+
+
+def test_reporter_requires_directories_and_a_regular_source_file(tmp_path: Path) -> None:
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    detector = tests_dir / "test_detector.py"
+    detector.touch()
+    assert reporter._safe_file(tmp_path, "tests/test_detector.py") == detector
+    with pytest.raises(ValueError, match="invalid controlled file"):
+        reporter._safe_file(tmp_path, "tests")
+    with pytest.raises(ValueError, match="invalid controlled directory"):
+        reporter._safe_file(tmp_path, "tests/test_detector.py/child.py")
+
+
+@pytest.mark.parametrize("mutation_id", tuple(protocol.CASES))
+def test_reporter_checks_target_and_direct_import_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutation_id: str
+) -> None:
+    """A correctly named detector cannot silently import another engine copy."""
+    from types import ModuleType
+
+    contract = list(reporter._CONTRACTS[mutation_id])
+    detector = tmp_path / contract[0]
+    target = tmp_path / contract[3]
+    package_path = tmp_path / "src/aiflow/__init__.py"
+    errors_path = tmp_path / "src/aiflow/errors.py"
+    for path in (detector, target, package_path, errors_path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# synthetic\n", encoding="utf-8")
+    contract[1] = reporter._test_digest(detector)
+    contracts = dict(reporter._CONTRACTS)
+    contracts[mutation_id] = tuple(contract)
+    monkeypatch.setattr(reporter, "_CONTRACTS", contracts)
+    package = ModuleType("aiflow")
+    package.__file__ = str(package_path)
+    errors = ModuleType("aiflow.errors")
+    errors.__file__ = str(errors_path)
+    errors.PolicyError = type("PolicyError", (Exception,), {})
+    errors.ContractError = type("ContractError", (Exception,), {})
+    module = ModuleType(contract[4])
+    module.__file__ = str(target)
+    exec(compile(f"def {contract[5]}():\n    pass\n", str(target), "exec"), module.__dict__)
+    function = getattr(module, contract[5])
+    detector_module = ModuleType("test_detector")
+    detector_module.__file__ = str(detector)
+    exec(
+        compile(f"def {contract[2]}():\n    pass\n", str(detector), "exec"),
+        detector_module.__dict__,
+    )
+    modules = {"aiflow": package, "aiflow.errors": errors, contract[4]: module}
+    if mutation_id == "MUT-V2-002":
+        service_path = tmp_path / "src/aiflow/verification_service.py"
+        service_path.write_text("# synthetic\n", encoding="utf-8")
+        service = ModuleType("aiflow.verification_service")
+        service.__file__ = str(service_path)
+        service.validate_verifier_actor = function
+        modules[service.__name__] = service
+        helper_path = tmp_path / "tests/integration/test_begin_close_commands.py"
+        helper = ModuleType("test_begin_close_commands")
+        helper.__file__ = str(helper_path)
+        helper_path.write_text("# synthetic\n", encoding="utf-8")
+        for name in ("create_repository", "start", "make_ready", "commit_all", "run_git"):
+            exec(compile(f"def {name}():\n    pass\n", str(helper_path), "exec"), helper.__dict__)
+            setattr(detector_module, name, getattr(helper, name))
+        modules[helper.__name__] = helper
+        detector_module.verification_service = service
+        detector_module.ContractError = errors.ContractError
+    elif mutation_id in {"MUT-V2-003", "MUT-V2-004"}:
+        setattr(detector_module, contract[4].rsplit(".", 1)[1], module)
+    else:
+        setattr(detector_module, contract[5], function)
+        setattr(
+            detector_module,
+            "PolicyError" if mutation_id == "MUT-V2-001" else "ContractError",
+            errors.PolicyError if mutation_id == "MUT-V2-001" else errors.ContractError,
+        )
+    monkeypatch.setattr(reporter, "sys", SimpleNamespace(modules=modules))
+    ini = tmp_path / "pyproject.toml"
+    ini.write_text("# synthetic\n", encoding="utf-8")
+    conftest = ModuleType("conftest")
+    conf = tmp_path / "tests/conftest.py"
+    conf.write_text("# synthetic\n", encoding="utf-8")
+    conftest.__file__ = str(conf)
+    plugins = {conftest}
+    config = SimpleNamespace(
+        rootpath=tmp_path, inipath=ini, pluginmanager=SimpleNamespace(get_plugins=lambda: plugins)
+    )
+    item = SimpleNamespace(
+        module=detector_module, obj=getattr(detector_module, contract[2]), config=config
+    )
+    digest = hashlib.sha256(target.read_bytes()).hexdigest()
+    assert reporter._reference_ok(mutation_id, tmp_path, digest, item)
+    with monkeypatch.context() as patch:
+        patch.setattr(package, "__file__", None)
+        assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
+    item.obj = lambda: None
+    assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
+    item.obj = getattr(detector_module, contract[2])
+    plugins.clear()
+    assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
+    plugins.add(conftest)
+    config.inipath = tmp_path / "other.toml"
+    assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
+    config.inipath = ini
+    if mutation_id == "MUT-V2-002":
+        detector_module.create_repository = lambda: None
+        assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
+        detector_module.create_repository = helper.create_repository
+    original_package = package.__file__
+    package.__file__ = str(detector)
+    assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
+    package.__file__ = original_package
+    if mutation_id in {"MUT-V2-001", "MUT-V2-002", "MUT-V2-005"}:
+        exception_name = "PolicyError" if mutation_id == "MUT-V2-001" else "ContractError"
+        original_exception = getattr(detector_module, exception_name)
+        setattr(detector_module, exception_name, object())
+        assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
+        setattr(detector_module, exception_name, original_exception)
+    assert not reporter._reference_ok(mutation_id, tmp_path, "0" * 64, item)
+    if mutation_id == "MUT-V2-002":
+        service.validate_verifier_actor = lambda: None
+    elif mutation_id in {"MUT-V2-003", "MUT-V2-004"}:
+        setattr(detector_module, contract[4].rsplit(".", 1)[1], object())
+    else:
+        setattr(detector_module, contract[5], lambda: None)
+    assert not reporter._reference_ok(mutation_id, tmp_path, digest, item)
+
+
+def _clean_lifecycle(report: bytes, code: int) -> process.ProcessLifecycle:
+    return process.ProcessLifecycle(
+        created_suspended=True,
+        assigned=True,
+        initial_membership=True,
+        resumed=True,
+        job_empty=True,
+        stdout_eof=True,
+        stderr_eof=True,
+        closed=True,
+        terminate_requested=False,
+        returncode=code,
+        report_sha256=hashlib.sha256(report).hexdigest(),
+    )
+
+
+@pytest.fixture
+def completed_job_receipt() -> dict[str, object]:
+    lifecycle = _clean_lifecycle(b"synthetic", 0)
+    receipt = {
+        field.name: getattr(lifecycle, field.name)
+        for field in fields(lifecycle)
+        if field.name not in {"returncode", "report_sha256"}
+    }
+    receipt.update(process_id=1, creation_time_filetime=1)
+    return receipt
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        None,
+        "stderr",
+        "stdout_overflow",
+        "stderr_overflow",
+        "execution_error",
+        "timed_out",
+        "cleanup_unknown",
+        "no_receipt",
+        "early_stop",
+        "early_stop_with_output",
+        "early_stop_without_cleanup",
+        "incomplete_report",
+        "job_empty",
+        "stdout_eof",
+        "stderr_eof",
+        "closed",
+        "created_suspended",
+        "assigned",
+        "initial_membership",
+        "resumed",
+        "terminate_requested",
+    ],
+)
+def test_process_adapter_requires_complete_child_and_channel_observations(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    fault: str | None,
+    completed_job_receipt: dict[str, object],
+) -> None:
+    from aiflow.process_runner import NodeProcessResult
+
+    data = protocol.encode_report(_synthetic_report("MUT-V2-001"))
+    lifecycle = _clean_lifecycle(data, 1)
+    receipt = completed_job_receipt
+    result = NodeProcessResult(1, False, data, b"", False, False, "confirmed", False, receipt)
+    if fault in receipt:
+        receipt[fault] = not receipt[fault]
+    elif fault == "stderr":
+        result = replace(result, stderr=b"unexpected")
+    elif fault in {"stdout_overflow", "stderr_overflow", "execution_error", "timed_out"}:
+        result = replace(result, **{fault: True})
+    elif fault == "cleanup_unknown":
+        result = replace(result, cleanup="unknown")
+    elif fault == "no_receipt":
+        result = replace(result, receipt=None)
+    elif fault in {"early_stop", "early_stop_with_output", "early_stop_without_cleanup"}:
+        result = replace(
+            result,
+            returncode=protocol.EARLY_STOP_EXIT_CODE,
+            stdout=b"unexpected" if fault == "early_stop_with_output" else b"",
+            receipt=None if fault == "early_stop_without_cleanup" else receipt,
+        )
+    elif fault == "incomplete_report":
+        result = replace(result, returncode=2, stdout=b"")
+
+    commands: list[tuple[str, ...]] = []
+
+    def fake_node(argv: tuple[str, ...], **kwargs: Any) -> NodeProcessResult:
+        commands.append(argv)
+        assert kwargs["cwd"] == tmp_path
+        assert kwargs["timeout_seconds"] == 60
+        assert kwargs["max_output_bytes"] == 16384
+        return result
+
+    monkeypatch.setattr(process, "run_node_process", fake_node)
+    outcome = process.run_bounded_process(
+        [sys.executable, "synthetic.py"],
+        cwd=tmp_path,
+        env={"PATH": "fixed"},
+        timeout_seconds=60,
+        max_output_bytes=16384,
+    )
+    assert commands == [(sys.executable, "synthetic.py")]
+    if fault is None:
+        assert outcome.reason is None and not outcome.cleanup_unknown
+        assert outcome.report == data and outcome.lifecycle == lifecycle
+    else:
+        assert outcome.reason is not None and outcome.report is None
+        assert outcome.lifecycle is None
+        if fault in {"cleanup_unknown", "early_stop_without_cleanup"}:
+            assert outcome.cleanup_unknown
+        if fault == "early_stop":
+            assert outcome.reason == "pytest_early_stop" and not outcome.cleanup_unknown
+        if fault in {"early_stop_with_output", "incomplete_report"}:
+            assert outcome.reason == "report_incomplete" and not outcome.cleanup_unknown
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        None,
+        "duplicate_collection",
+        "missing_collection",
+        "missing_sessionfinish",
+        "duplicate_sessionfinish",
+        "missing_call",
+        "missing_teardown",
+        "call_before_setup",
+        "teardown_before_call",
+        "failed_setup",
+        "skipped_setup",
+        "xfailed_setup",
+        "duplicate_setup",
+        "unknown_node",
+        "unknown_phase",
+        "mismatched_report_node",
+        "mismatched_call_phase",
+    ],
+)
+def test_report_requires_one_complete_pytest_session(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fault: str | None
+) -> None:
+    monkeypatch.setattr(reporter, "_PYTEST", pytest)
+    monkeypatch.setattr(reporter, "_reference_ok", lambda *_args: True)
+    instance = reporter._Reporter("MUT-V2-001", tmp_path, "a" * 64)
+    item = SimpleNamespace(nodeid=next(iter(instance.nodes)))
+    session = SimpleNamespace(items=[item])
+
+    stopped_setup = fault in {"failed_setup", "skipped_setup", "xfailed_setup"}
+
+    def session_report() -> dict[str, Any]:
+        if fault != "missing_collection":
+            instance.pytest_collection_finish(session)
+        if fault == "duplicate_collection":
+            instance.pytest_collection_finish(session)
+        phases = ["setup", "call", "teardown"]
+        if fault == "missing_call" or stopped_setup:
+            phases.remove("call")
+        if fault == "missing_teardown":
+            phases.remove("teardown")
+        if fault == "call_before_setup":
+            phases = ["call", "setup", "teardown"]
+        if fault == "teardown_before_call":
+            phases = ["setup", "teardown", "call"]
+        if fault == "duplicate_setup":
+            phases.insert(1, "setup")
+        if fault == "unknown_phase":
+            phases[1] = "unknown"
+        if fault == "unknown_node":
+            item.nodeid = "uncollected"
+        for phase in phases:
+            call_phase = "setup" if fault == "mismatched_call_phase" else phase
+            hook = instance.pytest_runtest_makereport(
+                item, SimpleNamespace(excinfo=None, when=call_phase)
+            )
+            next(hook)
+            report_node = "other" if fault == "mismatched_report_node" else item.nodeid
+            event = SimpleNamespace(nodeid=report_node, outcome="passed", when=phase)
+            if phase == "setup" and stopped_setup:
+                event.outcome = "failed" if fault == "failed_setup" else "skipped"
+                if fault == "xfailed_setup":
+                    event.wasxfail = "expected"
+                    event.skipped = True
+            with pytest.raises(StopIteration):
+                hook.send(SimpleNamespace(get_result=lambda result=event: result))
+        if fault != "missing_sessionfinish":
+            instance.pytest_sessionfinish(session, 1 if fault == "failed_setup" else 0)
+        if fault == "duplicate_sessionfinish":
+            instance.pytest_sessionfinish(session, 0)
+        return instance.report()
+
+    if fault is not None:
+        with pytest.raises((ValueError, pytest.exit.Exception)):
+            session_report()
+        assert instance.stopped_before_call() is stopped_setup
+        return
+    report = session_report()
+    assert not instance.stopped_before_call()
+    assert (
+        protocol.classify_report(
+            report, mutation_id="MUT-V2-001", target_sha256="a" * 64, exit_code=0, baseline=True
+        )
+        == "passed"
+    )
+
+
+def test_reporter_rejects_partial_actor_detector_collection(
+    tmp_path: Path, manifest: MutationManifest, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    actor_detector = next(m for m in manifest.mutations if m.mutation_id == "MUT-V2-002")
+    node = f"{actor_detector.expected_detector}[ -VERIFIER_ACTOR_REQUIRED]"
+    session = SimpleNamespace(items=[SimpleNamespace(nodeid=node)])
+    monkeypatch.setattr(reporter, "_PYTEST", pytest)
+    instance = reporter._Reporter(actor_detector.mutation_id, tmp_path, "a" * 64)
+
+    with pytest.raises(pytest.exit.Exception, match="invalid detector collection") as stopped:
+        instance.pytest_collection_finish(session)
+    assert stopped.value.returncode == 2
+    instance.pytest_sessionfinish(session, stopped.value.returncode)
+    with pytest.raises(ValueError, match="invalid detector run"):
+        instance.report()
+
+
+def _run_reporter(
+    tmp_path: Path, arguments: list[str], *, stdin_bytes: bytes | None = None
+) -> subprocess.CompletedProcess[bytes]:
+    import coverage
+
+    script = Path(reporter.__file__).resolve()
+    command = [sys.executable, "-I", "-B"]
+    active = coverage.Coverage.current()
+    data_file = tmp_path / ".coverage-reporter"
+    if active is not None:
+        # Measure only this checkout's reporter in this test's own child.
+        command.extend(
+            [
+                "-m",
+                "coverage",
+                "run",
+                f"--rcfile={os.devnull}",
+                f"--data-file={data_file}",
+                f"--include={script}",
+            ]
+        )
+        if active.get_option("run:branch"):
+            command.append("--branch")
+
+    result = subprocess.run(
+        [*command, str(script), *arguments],
+        cwd=REPOSITORY_ROOT,
+        env=runner.detector_environment(REPOSITORY_ROOT, tmp_path),
+        stdin=subprocess.DEVNULL if stdin_bytes is None else None,
+        input=stdin_bytes,
+        capture_output=True,
+        check=False,
+        timeout=40,
+    )
+    if active is not None:
+        measured = coverage.CoverageData(basename=str(data_file))
+        measured.read()
+        assert {Path(name) for name in measured.measured_files()} == {script}, result.stderr
+        active.get_data().update(measured)
+    return result
+
+
+_FIXED_DETECTOR = (
+    sys.platform == "win32" and sys.version_info[:2] == (3, 11) and pytest.__version__ == "9.1.1"
+)
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "unexpected_stdin",
+        "unknown_detector",
+        pytest.param(
+            "missing_files",
+            marks=pytest.mark.skipif(
+                not _FIXED_DETECTOR, reason="file checks follow fixed-runtime admission"
+            ),
+        ),
+        pytest.param(
+            "wrong_digest",
+            marks=pytest.mark.skipif(
+                not _FIXED_DETECTOR, reason="file checks follow fixed-runtime admission"
+            ),
+        ),
+    ],
+)
+def test_reporter_rejects_invalid_inputs_without_emitting_report(
+    tmp_path: Path, manifest: MutationManifest, fault: str
+) -> None:
+    declaration = manifest.mutations[0]
+    digest = hashlib.sha256((REPOSITORY_ROOT / declaration.target).read_bytes()).hexdigest()
+    arguments = [
+        "unknown" if fault == "unknown_detector" else declaration.mutation_id,
+        str(tmp_path if fault == "missing_files" else REPOSITORY_ROOT),
+        "0" * 64 if fault == "wrong_digest" else digest,
+    ]
+    result = _run_reporter(
+        tmp_path, arguments, stdin_bytes=b"unexpected" if fault == "unexpected_stdin" else None
+    )
+    assert (result.returncode, result.stdout, result.stderr) == (2, b"", b"")
+
+
+@pytest.mark.skipif(not _FIXED_DETECTOR, reason="fixed native detector environment")
+@pytest.mark.parametrize("index", range(5))
+def test_reporter_records_each_node_of_the_unmodified_detector(
+    tmp_path: Path, manifest: MutationManifest, index: int
+) -> None:
+    declaration = manifest.mutations[index]
+    digest = hashlib.sha256((REPOSITORY_ROOT / declaration.target).read_bytes()).hexdigest()
+    result = _run_reporter(tmp_path, [declaration.mutation_id, str(REPOSITORY_ROOT), digest])
+
+    assert result.returncode == 0 and result.stderr == b""
+    report = protocol.parse_report(result.stdout, declaration.mutation_id, digest)
+    expected_cases = ["blank", "same_actor"] if index == 1 else ["only"]
+    assert [case["case"] for case in report["cases"]] == expected_cases
+    assert (
+        protocol.classify_report(
+            report,
+            mutation_id=declaration.mutation_id,
+            target_sha256=digest,
+            exit_code=result.returncode,
+            baseline=True,
+        )
+        == "passed"
+    )
+
+
+@pytest.mark.parametrize("fault", ["missing", "wrong_exit", "wrong_report"])
+def test_detector_rejects_receipt_from_different_observation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fault: str
+) -> None:
+    raw = protocol.encode_report(_synthetic_report("MUT-V2-001"))
+    receipt = _clean_lifecycle(raw, 0)
+    if fault == "wrong_exit":
+        receipt = replace(receipt, returncode=1)
+    elif fault == "wrong_report":
+        receipt = replace(receipt, report_sha256="0" * 64)
+    outcome = process.ProcessOutcome(
+        0, raw, None, False, 1, None if fault == "missing" else receipt
+    )
+    monkeypatch.setattr(runner, "detector_environment", lambda *_args: {})
+    monkeypatch.setattr(runner, "run_bounded_process", lambda *_args, **_kwargs: outcome)
+    result = runner._run_detector(tmp_path, tmp_path, "MUT-V2-001", "a" * 64)
+    assert result[3:] == ("MUTATION_PROCESS_CLEANUP_UNKNOWN", None, None)
+
+
+@pytest.mark.parametrize("size", [0, 16 * 1024 + 1, True])
+def test_process_adapter_rejects_invalid_report_budget_before_launch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, size: int
+) -> None:
+    monkeypatch.setattr(
+        process, "run_node_process", lambda *_a, **_kw: pytest.fail("unexpected child")
+    )
+    outcome = process.run_bounded_process(
+        [sys.executable],
+        cwd=tmp_path,
+        env={},
+        timeout_seconds=60,
+        max_output_bytes=size,
+    )
+    assert (
+        outcome.reason == "invalid_input" and outcome.lifecycle is None and outcome.report is None
+    )
+
+
+@pytest.mark.parametrize("platform,arch", [("linux", "linux-x86_64"), ("win32", "win32")])
+def test_process_preflight_rejects_unsupported_platform_before_launch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, platform: str, arch: str
+) -> None:
+    monkeypatch.setattr(process, "sys", SimpleNamespace(platform=platform))
+    monkeypatch.setattr(process.sysconfig, "get_platform", lambda: arch)
+    monkeypatch.setattr(
+        process, "run_node_process", lambda *_a, **_kw: pytest.fail("unexpected child")
+    )
+    with pytest.raises(ContractError) as caught:
+        process.preflight_mutation_runtime(tmp_path, {})
+    assert caught.value.code == "MUTATION_EVIDENCE_INPUT_MISMATCH"
+
+
+@pytest.mark.parametrize(
+    "fault", [None, "assigned", "stdout_eof", "stderr_eof", "wrong_version", "not_started"]
+)
+def test_process_preflight_requires_version_from_the_completed_job(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    completed_job_receipt: dict[str, object],
+    fault: str | None,
+) -> None:
+    from aiflow.process_runner import NodeProcessResult
+
+    monkeypatch.setattr(
+        process, "sys", SimpleNamespace(platform="win32", executable=sys.executable)
+    )
+    monkeypatch.setattr(process.sysconfig, "get_platform", lambda: "win-amd64")
+    version = b"3.11 9.1.1" if fault != "wrong_version" else b"3.11 9.1.0"
+    if fault in completed_job_receipt:
+        completed_job_receipt[fault] = False
+    result = NodeProcessResult(
+        0, False, version, b"", False, False, "confirmed", False, completed_job_receipt
+    )
+    if fault == "not_started":
+        result = replace(
+            result,
+            returncode=None,
+            stdout=b"",
+            cleanup="not_started",
+            execution_error=True,
+            receipt=None,
+        )
+
+    def run(argv: tuple[str, ...], **kwargs: Any) -> NodeProcessResult:
+        assert argv[:4] == (sys.executable, "-I", "-B", "-c") and len(argv) == 5
+        assert kwargs["cwd"] == tmp_path and kwargs["environment"] == {"PATH": "fixed"}
+        assert kwargs["timeout_seconds"] == 10 and kwargs["max_output_bytes"] == 64
+        return result
+
+    monkeypatch.setattr(process, "run_node_process", run)
+    if fault is None:
+        process.preflight_mutation_runtime(tmp_path, {"PATH": "fixed"})
+    else:
+        with pytest.raises(ContractError) as caught:
+            process.preflight_mutation_runtime(tmp_path, {"PATH": "fixed"})
+        assert caught.value.code == "MUTATION_EVIDENCE_INPUT_MISMATCH"

@@ -19,6 +19,36 @@ from aiflow.process_runner import run_execution
 from aiflow.verification import VerificationCheck, VerificationExecution
 
 
+@pytest.mark.parametrize("limit", [0, 1024 * 1024 + 1, True])
+def test_invalid_output_limit_is_rejected_before_process_creation(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, limit: int
+) -> None:
+    def unexpected() -> None:
+        pytest.fail("invalid limits must be rejected before loading the kernel")
+
+    monkeypatch.setattr(process_runner, "_node_kernel", unexpected)
+    result = process_runner.run_node_process(
+        (sys.executable,), cwd=tmp_path, environment={}, timeout_seconds=2, max_output_bytes=limit
+    )
+    assert result.cleanup == "not_started" and result.execution_error
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows Job output boundary")
+def test_configured_limit_detects_the_first_excess_byte_per_stream(tmp_path: Path) -> None:
+    limit = 16 * 1024
+    payload = f"import os; os.write(1, b'A' * {limit}); os.write(2, b'B' * {limit + 1})"
+    result = process_runner.run_node_process(
+        (sys.executable, "-I", "-S", "-c", payload),
+        cwd=tmp_path,
+        environment={"SystemRoot": os.environ["SystemRoot"]},
+        timeout_seconds=10,
+        max_output_bytes=limit,
+    )
+    assert result.returncode == 0 and result.cleanup == "confirmed"
+    assert result.stdout == b"A" * limit and not result.stdout_overflow
+    assert result.stderr == b"B" * limit and result.stderr_overflow
+
+
 def check(
     argv: tuple[str, ...], *, timeout: int = 2, environment: dict[str, str] | None = None
 ) -> VerificationCheck:

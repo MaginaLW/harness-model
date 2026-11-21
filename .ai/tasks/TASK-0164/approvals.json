@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-19T15:43:19Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "bfced2785606f9472b8d8eefbb7c5cd53796b749",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "依常设授权记录本任务实施规格批准。独立设计审核 APPROVE，无发现；当前范围只含本地实现与非变异检查，真实变异、私有传输与跨仓写入预算均为零。",
+    "schema_version": "1.0",
+    "spec_sha256": "b9d319a872ebed91a7a2e78155f55c83f3891a3628efc5cd2f53322e436309a7",
+    "subject_commit": "bfced2785606f9472b8d8eefbb7c5cd53796b749",
+    "task_id": "TASK-0164"
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "d0e7d092414b67e6df6e65caa9aa02c7ed6013d7fc7a6241e416ca5533b0ccf3",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0165",
+  "parameter_summary": "A02 funds one native mutation recording within the sole full local V2 invocation on this subject. Run MUT-V2-001 through MUT-V2-005 serially using the phase-02-critical manifest.",
+  "subject_commit": "79cc4425943fd892edbfb0fd71c4033ac29f947a",
+  "conditions": [
+    "Require the A02 frozen specification, independent review and approval, clean canonical candidate materials and manifest SHA-256 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0.",
+    "Only record in the one complete local aiflow verify TASK-0165 --actor a02-independent-verifier invocation, after the ordinary plan. The plan permits one complete pytest including its isolated package fixtures, up to 3000 seconds; all eight ordinary process limits sum to 3750 seconds.",
+    "Allow a 10-second pre-consumption Windows Job capability probe. Each declaration allows at most one baseline and one mutant, each at most 60 seconds and 16 KiB per stream. Preserve valid survived results. Invalid baseline, execution or cleanup failure ends the native campaign per its contract.",
+    "No retry, additional verification invocation or replacement action for A02. Cross-repository writes, private transfer, paid calls and publication have zero budget. Preserve A01 receipts and A02 originals."
+  ],
+  "expires_at": "2026-11-19T19:15:00Z",
+  "single_use": true
+}

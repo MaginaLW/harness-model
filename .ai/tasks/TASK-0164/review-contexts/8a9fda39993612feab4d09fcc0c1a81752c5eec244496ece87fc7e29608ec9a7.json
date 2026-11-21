@@ -1,0 +1,61 @@
+{
+  "base_commit": "bfced2785606f9472b8d8eefbb7c5cd53796b749",
+  "branch": "codex/mutation-attribution-implementation",
+  "classification_input_sha256": "0109acc04a7b148841af9730f207d5c8aa658dabc7aa54e6265b173769340ffb",
+  "content": {
+    "allowed_scope": [
+      ".ai/schemas/mutation-evidence.schema.json",
+      "src/aiflow/mutation_evidence.py",
+      "src/aiflow/mutation_runner.py",
+      "src/aiflow/mutation_materials.py",
+      "src/aiflow/mutation_process.py",
+      "src/aiflow/mutation_protocol.py",
+      "src/aiflow/mutation_reporter.py",
+      "src/aiflow/verification_service.py",
+      "tests/unit/test_mutation_evidence.py",
+      "tests/unit/test_mutation_runner.py",
+      "tests/unit/test_contracts.py",
+      "tests/integration/test_mutation_runner_contract.py",
+      "tests/e2e/test_phase_02_negative_self_hosting.py",
+      "tests/e2e/test_phase_02_self_hosting_scenario.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "落实 TASK-0163 的五项原生 V2 检测归因和证据回读合同，保留历史与平台准入条件",
+        "impact_scope": [
+          ".ai/schemas/mutation-evidence.schema.json",
+          "src/aiflow/mutation_evidence.py",
+          "src/aiflow/mutation_runner.py",
+          "src/aiflow/mutation_materials.py",
+          "src/aiflow/mutation_process.py",
+          "src/aiflow/mutation_protocol.py",
+          "src/aiflow/mutation_reporter.py",
+          "src/aiflow/verification_service.py",
+          "tests/unit/test_mutation_evidence.py",
+          "tests/unit/test_mutation_runner.py",
+          "tests/unit/test_contracts.py",
+          "tests/integration/test_mutation_runner_contract.py",
+          "tests/e2e/test_phase_02_negative_self_hosting.py",
+          "tests/e2e/test_phase_02_self_hosting_scenario.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "落实 TASK-0163 的五项原生 V2 检测归因和证据回读合同，保留历史与平台准入条件",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "8a9fda39993612feab4d09fcc0c1a81752c5eec244496ece87fc7e29608ec9a7",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "b9d319a872ebed91a7a2e78155f55c83f3891a3628efc5cd2f53322e436309a7",
+  "task_id": "TASK-0164"
+}

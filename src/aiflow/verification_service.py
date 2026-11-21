@@ -67,6 +67,7 @@ from aiflow.verifier_service import (
 
 VersionProbe = Callable[[VerificationCheck], str]
 _V2_CHAPTER11_CHECK_IDS = frozenset({"targeted_mutation"})
+_NATIVE_MUTATION_TOOL_VERSION = "aiflow-mutation-evidence-v2"
 
 
 @dataclass(frozen=True)
@@ -422,7 +423,7 @@ def _upgrade_v2_pre_evidence(
                 "stdout_log_ref": None,
                 "stderr_log_ref": None,
                 "command_summary": "loader-validated targeted mutation evidence",
-                "tool_version": "aiflow-mutation-evidence-v1",
+                "tool_version": _NATIVE_MUTATION_TOOL_VERSION,
             }
         )
     raw_unverified = evidence.get("unverified_scenarios")
@@ -1354,7 +1355,7 @@ def verify_task(
         mutation_facts = None
     versions = {
         check.check_id: (
-            "aiflow-mutation-evidence-v1"
+            _NATIVE_MUTATION_TOOL_VERSION
             if check.check_id in _V2_CHAPTER11_CHECK_IDS
             else "aiflow-local"
             if check.check_id == "independent_verifier"

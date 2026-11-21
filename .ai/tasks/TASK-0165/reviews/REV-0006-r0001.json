@@ -1,0 +1,13 @@
+{
+  "context_sha256": "e015c3c9f99c0e5a7a50aa0c3ede9deed7af34ffa509ad35d0c5d0e57484a52e",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-19T23:51:14Z",
+  "review_id": "REV-0006",
+  "review_stage": "design",
+  "reviewer": "portable-independent-design-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent design review confirmed the frozen specification f5539d525edf76dba76db43d845aed31d5d6c33e364d61c80b4ed591d4c766a6, bound subject and REVIEW/V2 route. Ubuntu replayed all five results but covered 931/1043 lines. The approved test file can exercise the portable input and incomplete collection behaviors while preserving Windows admission and the 90 percent threshold. Focused coverage is diagnostic. No new full V2, native campaign or private CI was approved.",
+  "task_id": "TASK-0165"
+}

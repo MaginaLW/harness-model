@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "d0e7d092414b67e6df6e65caa9aa02c7ed6013d7fc7a6241e416ca5533b0ccf3",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0165",
+  "parameter_summary": "One local invocation of the targeted_mutation check with the original phase-02-critical manifest. Run MUT-V2-001 through MUT-V2-005 serially in disposable Windows worktrees using the bound Python 3.11 and pytest 9.1.1 runtime.",
+  "subject_commit": "79cc4425943fd892edbfb0fd71c4033ac29f947a",
+  "conditions": [
+    "Require the reviewed A01 specification, independent action review and the exact classification and candidate. Manifest SHA-256 is 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0.",
+    "Start only through aiflow verify TASK-0165 --check targeted_mutation with an independent verifier. Allow one 10-second pre-consumption runtime check, at most five baseline and five mutant detector invocations, each limited to 60 seconds and 16 KiB per stream.",
+    "Stop on invalid baseline, execution failure, timeout or failed cleanup. Record a valid survived result and continue the remaining declarations. Preserve all receipts and failed results. No retry or replacement action after consumption.",
+    "Keep originals local to this repository. External transfers, cross-repository writes, paid calls, full-suite execution, private CI and publication are outside this budget."
+  ],
+  "expires_at": "2026-11-19T17:34:00Z",
+  "single_use": true
+}
