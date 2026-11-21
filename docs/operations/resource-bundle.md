@@ -17,7 +17,7 @@ uv sync --locked --all-extras
 .\.venv\Scripts\python.exe -m build --no-isolation --wheel --outdir "<EMPTY_REBUILT_WHEEL_DIR>" "<SDIST_PATH>"
 ```
 
-POSIX 环境使用 `.venv/bin/python`。已有环境中的硬链接不会仅因修改配置自动变为独立文件；分发验收使用新建环境并核对链接数。构建或重试遇到现存输出、链接或未知内容时保留现场，改用新的输出目录；不要为重试删除不明文件。源码包不携带仓库身份、历史任务、批准、日志或维护标记。
+POSIX 环境使用 `.venv/bin/python`。已有环境中的硬链接不会仅因修改配置自动变为独立文件；曾由 `pip` 安装的运行依赖在 `.dist-info/RECORD` 中留下的 `__pycache__` 条目（例如顶层 `__pycache__/typing_extensions.*.pyc`）也不会在版本相同时被常规 `uv sync --locked --all-extras` 覆盖，会导致分发验收拒绝 `unknown RECORD path`。分发验收应使用新建环境并核对链接数，或按 [Quickstart](quickstart.md#环境自检与常见问题) 用 `--reinstall` / `--reinstall-package` 重装受影响包。构建或重试遇到现存输出、链接或未知内容时保留现场，改用新的输出目录；不要为重试删除不明文件。源码包不携带仓库身份、历史任务、批准、日志或维护标记。
 
 ## 读取
 
