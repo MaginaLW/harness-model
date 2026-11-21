@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "0dcc6f634ec48e04ba8e9e65287d86df6175a250e172a606510f4a8128100053",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0175",
+  "parameter_summary": "Owner A01 authorized single-round Windows V2 native targeted mutation on the 0526983f-based 17-file candidate (5 phase-02-critical declarations serially).",
+  "subject_commit": "f444677e5952a9f8c068dcebb27450de888a7f8a",
+  "conditions": [
+    "Require the frozen TASK-0175 specification, independent review and approval. Match 264 canonical materials with SHA-256 9296f49e688986c327d9d38a2475ce32e2343af983e1e9b45e05a531d0d25d65 and manifest SHA-256 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0.",
+    "Start only within the one complete local aiflow verify TASK-0175 --actor r2b-independent-verifier invocation. One complete pytest, including isolated installed-package fixtures, is limited to 3000 seconds. The eight ordinary process limits sum to 3750 seconds.",
+    "Pre-consumption Windows Job probe is limited to 10 seconds. For each of the five declarations allow one baseline and one mutant, each limited to 60 seconds and 16 KiB per stream. Follow the native contract for early failure or unconfirmed cleanup.",
+    "Stop after completion, failure or interruption. No automatic retries, cross-repository writes, external transfers of originals, paid calls or publication. Ubuntu is a separate, post-success private replay stage with no new native campaign."
+  ],
+  "expires_at": "2026-11-22T13:49:30Z",
+  "single_use": true
+}

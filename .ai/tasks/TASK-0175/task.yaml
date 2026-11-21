@@ -94,8 +94,8 @@ goal: "\u5728\u6700\u65B0 origin/main (0526983f) \u57FA\u7EBF\u4E0A\u4EA4\u4ED8\
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-21T13:43:05Z'
-subject_commit: 0526983f2e3e9bea6080b55c71a0479fac5798b4
+subject_commit: f444677e5952a9f8c068dcebb27450de888a7f8a
 task_id: TASK-0175
-updated_at: '2026-11-21T13:48:01Z'
+updated_at: '2026-11-21T13:49:23Z'
 worktree_dirty: false
 worktree_dirty_paths: []
