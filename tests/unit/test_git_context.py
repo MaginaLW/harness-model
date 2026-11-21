@@ -33,7 +33,41 @@ def run_git(repository: Path, *arguments: str) -> str:
     return result.stdout.rstrip("\r\n")
 
 
+_SEED_REPOSITORY: Path | None = None
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _git_context_seed_repository(tmp_path_factory: pytest.TempPathFactory) -> None:
+    global _SEED_REPOSITORY
+    seed = tmp_path_factory.mktemp("git-context-seed")
+    run_git(seed, "init", "-b", "main")
+    (seed / ".ai").mkdir()
+    (seed / ".ai" / "repository-id").write_text(f"{REPOSITORY_ID}\n", encoding="utf-8")
+    (seed / "tracked.txt").write_text("initial\n", encoding="utf-8")
+    (seed / "folder").mkdir()
+    (seed / "folder" / "nested.txt").write_text("nested\n", encoding="utf-8")
+    run_git(seed, "add", ".ai/repository-id", "tracked.txt", "folder/nested.txt")
+    run_git(
+        seed,
+        "-c",
+        "user.name=AI Flow Tests",
+        "-c",
+        "user.email=aiflow@example.invalid",
+        "commit",
+        "-m",
+        "initial",
+    )
+    _SEED_REPOSITORY = seed
+    try:
+        yield
+    finally:
+        _SEED_REPOSITORY = None
+
+
 def create_repository(path: Path) -> Path:
+    if _SEED_REPOSITORY is not None:
+        shutil.copytree(_SEED_REPOSITORY, path)
+        return path
     path.mkdir()
     run_git(path, "init", "-b", "main")
     (path / ".ai").mkdir()

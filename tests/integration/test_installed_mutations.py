@@ -15,8 +15,10 @@ import stat
 import subprocess
 import sys
 import tempfile
+import threading
 import zipfile
 from collections.abc import Generator
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
@@ -68,6 +70,9 @@ def _copy_git(root: Path) -> Path:
     return root / "cmd"
 
 
+_COVERAGE_MERGE_LOCK = threading.Lock()
+
+
 @dataclass(frozen=True)
 class OrdinaryEngine:
     python: Path
@@ -83,6 +88,7 @@ class OrdinaryEngine:
         *arguments: str,
         original_git: bool = False,
         instrument: bool = True,
+        env_root: Path | None = None,
     ) -> dict:
         import coverage
 
@@ -120,25 +126,37 @@ finally:
             argv = [wrapper, code, str(Path(coverage.__file__)), str(data_file)]
         else:
             argv = [code]
-        environment = _environment(self.root)
         original = shutil.which("git")
         assert original
         git = Path(original).absolute().parent if original_git else self.git
-        environment["PATH"] = str(git) + os.pathsep + environment["PATH"]
-        environment["GIT_CONFIG_GLOBAL"] = os.devnull
-        environment["GIT_CONFIG_NOSYSTEM"] = "1"
-        environment["GIT_OPTIONAL_LOCKS"] = "0"
-        environment["PYTHONDONTWRITEBYTECODE"] = "1"
-        completed = subprocess.run(
-            [str(self.python), "-I", "-B", "-c", *argv, str(target), *arguments],
-            cwd=target,
-            env=environment,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            timeout=900,
-            check=False,
-        )
+        temp_env: tempfile.TemporaryDirectory[str] | None = None
+        if env_root is None:
+            temp_env = tempfile.TemporaryDirectory(
+                prefix="env-", dir=self.root, ignore_cleanup_errors=True
+            )
+            isolated_root = Path(temp_env.name)
+        else:
+            isolated_root = env_root
+        try:
+            environment = _environment(isolated_root)
+            environment["PATH"] = str(git) + os.pathsep + environment["PATH"]
+            environment["GIT_CONFIG_GLOBAL"] = os.devnull
+            environment["GIT_CONFIG_NOSYSTEM"] = "1"
+            environment["GIT_OPTIONAL_LOCKS"] = "0"
+            environment["PYTHONDONTWRITEBYTECODE"] = "1"
+            completed = subprocess.run(
+                [str(self.python), "-I", "-B", "-c", *argv, str(target), *arguments],
+                cwd=target,
+                env=environment,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=900,
+                check=False,
+            )
+        finally:
+            if temp_env is not None:
+                temp_env.cleanup()
         if active is not None and data_file.exists():
             installed = self.python.parents[1] / "Lib/site-packages/aiflow"
             measured = coverage.CoverageData(basename=str(data_file))
@@ -151,7 +169,8 @@ finally:
                 assert source.read_bytes() == path.read_bytes(), "installed/source bytes differ"
                 return str(source.resolve())
 
-            active.get_data().update(measured, map_path=source_path)
+            with _COVERAGE_MERGE_LOCK:
+                active.get_data().update(measured, map_path=source_path)
         assert completed.returncode == 0, completed.stdout + "\n" + completed.stderr
         assert completed.stderr == "", completed.stderr
         return json.loads(completed.stdout.strip())
@@ -165,11 +184,29 @@ def ordinary_engines(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Ordi
     assert not root.resolve().is_relative_to(ROOT), "ordinary acceptance must run outside checkout"
     source = root / "s"
     _source(source, crlf=False, identity=b"public-synthetic-installed-mutations-only")
+    source_sdist = root / "s-sd"
+    shutil.copytree(source, source_sdist, copy_function=shutil.copyfile)
     wheels = root / "wh"
-    locked = _wheelhouse(wheels)
-    direct = _build(source, root / "wd", "wheel", root)
-    sdist = _build(source, root / "sd", "sdist", root)
-    rebuilt = _build(sdist, root / "wr", "wheel", root)
+    env_wd = root / "env-wd"
+    env_sd = root / "env-sd"
+    env_wr = root / "env-wr"
+    for directory in (env_wd, env_sd, env_wr):
+        directory.mkdir()
+
+    def build_rebuilt() -> Path:
+        sdist = _build(source_sdist, root / "sd", "sdist", env_sd)
+        return _build(sdist, root / "wr", "wheel", env_wr)
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        git_future = executor.submit(_copy_git, root / "g")
+        wheelhouse_future = executor.submit(_wheelhouse, wheels)
+        direct_future = executor.submit(_build, source, root / "wd", "wheel", env_wd)
+        rebuilt_future = executor.submit(build_rebuilt)
+        git = git_future.result()
+        locked = wheelhouse_future.result()
+        direct = direct_future.result()
+        rebuilt = rebuilt_future.result()
+
     contents = []
     for wheel in (direct, rebuilt):
         with zipfile.ZipFile(wheel) as archive:
@@ -177,11 +214,12 @@ def ordinary_engines(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Ordi
         assert payload == {name: (ROOT / "src/aiflow" / name).read_bytes() for name in MODULES}
         contents.append(payload)
     assert contents[0] == contents[1]
-    git = _copy_git(root / "g")
-    result = {}
-    for origin, wheel in (("direct", direct), ("rebuilt", rebuilt)):
+
+    def install_origin(origin: str, wheel: Path) -> OrdinaryEngine:
         prefix = root / origin
-        _installed_bundle(wheel, wheels, locked, prefix, root)
+        env_dir = root / f"env-{origin}"
+        env_dir.mkdir()
+        _installed_bundle(wheel, wheels, locked, prefix, env_dir)
         if origin == "direct":
             # Keep setuptools installed in "rebuilt" for _engine_startup coverage, and drop
             # build-only tools from "direct" so installed closures stay lean during replay.
@@ -196,16 +234,23 @@ def ordinary_engines(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Ordi
                     "pip",
                     "setuptools",
                 ],
-                cwd=root,
-                env=_environment(root),
+                cwd=env_dir,
+                env=_environment(env_dir),
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
                 check=True,
                 timeout=60,
             )
-        result[origin] = OrdinaryEngine(prefix / "Scripts/python.exe", root, git, wheel, origin)
-    return result
+        return OrdinaryEngine(prefix / "Scripts/python.exe", root, git, wheel, origin)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        direct_engine_future = executor.submit(install_origin, "direct", direct)
+        rebuilt_engine_future = executor.submit(install_origin, "rebuilt", rebuilt)
+        return {
+            "direct": direct_engine_future.result(),
+            "rebuilt": rebuilt_engine_future.result(),
+        }
 
 
 PREPARE = r"""
@@ -309,6 +354,13 @@ class PreparedTask:
     prepared: dict
 
 
+def _new_ir_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    temporary = tmp_path_factory.getbasetemp().parent
+    if temporary.name.startswith("aiflow-check-"):
+        temporary = temporary.parent
+    return temporary / f"ir-{uuid4().hex[:12]}"
+
+
 def _prepare_task(engine: OrdinaryEngine, tmp_path_factory: pytest.TempPathFactory) -> PreparedTask:
     temporary = tmp_path_factory.getbasetemp().parent
     if temporary.name.startswith("aiflow-check-"):
@@ -335,13 +387,61 @@ def _prepare_task(engine: OrdinaryEngine, tmp_path_factory: pytest.TempPathFacto
     return PreparedTask(engine, target, prepared)
 
 
-@pytest.mark.parametrize("origin", ["direct", "rebuilt"])
-def test_ordinary_wheel_prepares_real_current_inputs_without_consumption(
+def _clone_prepared_task(
+    seed: PreparedTask, tmp_path_factory: pytest.TempPathFactory
+) -> PreparedTask:
+    target = _new_ir_dir(tmp_path_factory)
+    shutil.copytree(seed.root, target, copy_function=shutil.copyfile)
+    cloned_prepared = dict(seed.prepared)
+    cloned_prepared["action"] = str(
+        target / ".ai/tasks" / TASK / "action-installed-engine-mutation-fixture.json"
+    )
+    review_src = Path(seed.prepared["review"])
+    review_dst = target.parent / f"{target.name}-prepared.json"
+    if review_src.is_file():
+        shutil.copyfile(review_src, review_dst)
+    cloned_prepared["review"] = str(review_dst)
+    return PreparedTask(seed.engine, target, cloned_prepared)
+
+
+def _host_fast_snapshot(root: Path) -> dict[str, tuple[int, int, int, int]]:
+    result: dict[str, tuple[int, int, int, int]] = {}
+    stack: list[tuple[str, Path]] = [("", root)]
+    while stack:
+        rel_prefix, current = stack.pop()
+        with os.scandir(current) as entries:
+            for entry in entries:
+                rel = entry.name if not rel_prefix else f"{rel_prefix}{os.sep}{entry.name}"
+                info = os.lstat(entry.path)
+                if stat.S_ISDIR(info.st_mode):
+                    stack.append((rel, Path(entry.path)))
+                elif stat.S_ISREG(info.st_mode):
+                    result[rel] = (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns)
+    return result
+
+
+@pytest.fixture(scope="module")
+def prepared_origins(
     ordinary_engines: dict[str, OrdinaryEngine],
     tmp_path_factory: pytest.TempPathFactory,
+) -> dict[str, PreparedTask]:
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        direct_future = executor.submit(_prepare_task, ordinary_engines["direct"], tmp_path_factory)
+        rebuilt_future = executor.submit(
+            _prepare_task, ordinary_engines["rebuilt"], tmp_path_factory
+        )
+        return {
+            "direct": direct_future.result(),
+            "rebuilt": rebuilt_future.result(),
+        }
+
+
+@pytest.mark.parametrize("origin", ["direct", "rebuilt"])
+def test_ordinary_wheel_prepares_real_current_inputs_without_consumption(
+    prepared_origins: dict[str, PreparedTask],
     origin: str,
 ) -> None:
-    prepared = _prepare_task(ordinary_engines[origin], tmp_path_factory)
+    prepared = prepared_origins[origin]
     task = prepared.root / ".ai/tasks" / TASK
     assert not list((task / "logs").glob("installed-action-*"))
     assert not list((task / "logs").glob("IMUT-*"))
@@ -390,7 +490,7 @@ def test_cold_installed_import_has_no_process_or_filesystem_writes(
 
 
 REPLAY_BASE = r"""
-import builtins, hashlib, io, json, os, subprocess, sys
+import builtins, hashlib, io, json, os, stat, subprocess, sys
 from contextlib import ExitStack
 from dataclasses import asdict, replace
 from pathlib import Path
@@ -406,22 +506,29 @@ from aiflow.storage import read_task_yaml
 root=Path(sys.argv[1]); task='TASK-0001'; actor='fixture-independent-verifier'
 assert Path(aiflow.__file__).is_relative_to(Path(sys.prefix))
 assert Path(runtime.__file__).is_relative_to(Path(sys.prefix))
+def _iter_regular_files():
+    stack=[('',str(root))]
+    while stack:
+        rel_prefix,current=stack.pop()
+        with os.scandir(current) as entries:
+            for entry in entries:
+                rel=entry.name if not rel_prefix else rel_prefix+os.sep+entry.name
+                info=os.lstat(entry.path)
+                if stat.S_ISDIR(info.st_mode):
+                    stack.append((rel,entry.path))
+                elif stat.S_ISREG(info.st_mode):
+                    yield rel,entry.path,info
 def snapshot():
     result={}
-    for path in root.rglob('*'):
-        info=path.lstat()
-        if path.is_file():
-            result[str(path.relative_to(root))]=(
-                info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns,
-                hashlib.sha256(path.read_bytes()).hexdigest())
+    for rel,full_path,info in _iter_regular_files():
+        with builtins.open(full_path,'rb') as handle:
+            digest=hashlib.file_digest(handle,'sha256').hexdigest()
+        result[rel]=(info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns,digest)
     return result
 def fast_snapshot():
     result={}
-    for path in root.rglob('*'):
-        info=path.lstat()
-        if path.is_file():
-            result[str(path.relative_to(root))]=(
-                info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns)
+    for rel,_,info in _iter_regular_files():
+        result[rel]=(info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns)
     return result
 attempts=[]
 def forbidden(*args,**kwargs):
@@ -489,43 +596,60 @@ def approve_fixture_action():
 )
 
 
-MISSING_REFERENCE = (
+MISSING_REFERENCES_BATCH = (
     REPLAY_BASE
     + r"""
-value=sys.argv[2]
-reference=runtime.InstalledMutationReference(value,1,'0'*64)
+references=json.loads(sys.argv[2])
 before=snapshot()
-try:
-    facts=replay(reference)
-except AiflowError as error:
-    assert error.code
-    current=False; passed=False; reasons=[error.code]; rejected_by='authority'
-else:
-    assert not facts.current and not facts.all_killed and not facts.passed and facts.reason_codes
-    current=facts.current; passed=facts.passed; reasons=facts.reason_codes; rejected_by='reader'
+results={}
+for value in references:
+    reference=runtime.InstalledMutationReference(value,1,'0'*64)
+    try:
+        facts=replay(reference,full_hash=False)
+    except AiflowError as error:
+        assert error.code
+        current=False; passed=False; reasons=[error.code]; rejected_by='authority'
+    else:
+        assert not facts.current and not facts.all_killed
+        assert not facts.passed and facts.reason_codes
+        current=facts.current; passed=facts.passed; reasons=facts.reason_codes; rejected_by='reader'
+    assert not attempts
+    results[value]=dict(current=current,passed=passed,reasons=reasons,rejected_by=rejected_by)
 assert snapshot()==before and not attempts
 assert read_task_yaml(root,task,'task.yaml')['current_state']=='IMPLEMENTING'
-print(json.dumps(dict(current=current,passed=passed,reasons=reasons,rejected_by=rejected_by)))
+print(json.dumps(results))
 """
 )
 
 
+MISSING_REFERENCE_CASES = (
+    ".ai/tasks/TASK-0001/logs/IMUT-0000000000000000/run.json",
+    "../outside.json",
+    ".ai/tasks/TASK-0002/logs/IMUT-0000000000000000/run.json",
+)
+
+
+@pytest.fixture(scope="module")
+def pure_reader_rejections(
+    prepared_origins: dict[str, PreparedTask],
+    tmp_path_factory: pytest.TempPathFactory,
+) -> dict[str, dict]:
+    prepared = _clone_prepared_task(prepared_origins["direct"], tmp_path_factory)
+    return prepared.engine.run(
+        prepared.root, MISSING_REFERENCES_BATCH, json.dumps(list(MISSING_REFERENCE_CASES))
+    )
+
+
 @pytest.mark.parametrize(
     "reference",
-    [
-        ".ai/tasks/TASK-0001/logs/IMUT-0000000000000000/run.json",
-        "../outside.json",
-        ".ai/tasks/TASK-0002/logs/IMUT-0000000000000000/run.json",
-    ],
+    list(MISSING_REFERENCE_CASES),
     ids=["missing-original", "traversal", "other-task"],
 )
 def test_pure_reader_rejects_missing_or_invalid_references_without_processes_or_writes(
-    ordinary_engines: dict[str, OrdinaryEngine],
-    tmp_path_factory: pytest.TempPathFactory,
+    pure_reader_rejections: dict[str, dict],
     reference: str,
 ) -> None:
-    prepared = _prepare_task(ordinary_engines["direct"], tmp_path_factory)
-    result = prepared.engine.run(prepared.root, MISSING_REFERENCE, reference)
+    result = pure_reader_rejections[reference]
     assert not result["current"] and not result["passed"] and result["reasons"]
 
 
@@ -560,7 +684,7 @@ event_path=root/'.ai/tasks'/task/'events.jsonl'
 events=[json.loads(line) for line in event_path.read_text().splitlines()]
 uses=[event for event in events if event['payload'].get('action_status')=='consumed']
 assert len(uses)==1
-before=snapshot()
+before=fast_snapshot()
 try:
     runtime.record_installed_mutations(root,task,verifier_actor=actor,
         expected_inputs_sha256=inputs.sha256)
@@ -568,7 +692,7 @@ except AiflowError:
     pass
 else:
     raise AssertionError('spent installed action was reused')
-assert snapshot()==before,'reused action wrote or started another run'
+assert fast_snapshot()==before,'reused action wrote or started another run'
 print(json.dumps(dict(reference=asdict(reference),facts=asdict(facts),processes=len(receipts),
     engine=str(Path(runtime.__file__)),inputs_sha256=inputs.sha256)))
 """
@@ -576,27 +700,83 @@ print(json.dumps(dict(reference=asdict(reference),facts=asdict(facts),processes=
 
 
 @pytest.fixture(scope="module")
-def recorded_runs(
-    ordinary_engines: dict[str, OrdinaryEngine],
+def _installed_suite_runs(
+    prepared_origins: dict[str, PreparedTask],
     tmp_path_factory: pytest.TempPathFactory,
-) -> Generator[dict[str, tuple[PreparedTask, dict]], None, None]:
+) -> Generator[dict[str, object], None, None]:
     # Actual invocation of this fixture requires the reviewed fixture-action
     # execution boundary; defining/collecting the test never starts a pair.
-    runs = {}
-    for origin in ("direct", "rebuilt"):
-        prepared = _prepare_task(ordinary_engines[origin], tmp_path_factory)
-        runs[origin] = prepared, prepared.engine.run(prepared.root, REAL_PAIRS)
-    yield runs
-    for prepared, result in runs.values():
-        checked = prepared.engine.run(
-            prepared.root,
-            REPLAY_BASE
-            + "\nreference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))"
-            "\nfacts=replay(reference)\nassert facts.passed,asdict(facts)"
-            "\nprint(json.dumps(dict(passed=facts.passed)))",
+    assert tuple(fault for shard in FAULT_SHARDS for fault in shard) == FAULTS or (
+        len(FAULT_SHARDS) == 3
+        and sum(len(shard) for shard in FAULT_SHARDS) == len(FAULTS)
+        and {fault for shard in FAULT_SHARDS for fault in shard} == set(FAULTS)
+    )
+    rebuilt_task = _clone_prepared_task(prepared_origins["rebuilt"], tmp_path_factory)
+    direct_task = _clone_prepared_task(prepared_origins["direct"], tmp_path_factory)
+    shard1_task = _clone_prepared_task(prepared_origins["direct"], tmp_path_factory)
+    shard2_task = _clone_prepared_task(prepared_origins["direct"], tmp_path_factory)
+
+    def run_rebuilt() -> tuple[dict, dict[str, tuple[int, int, int, int]]]:
+        result = rebuilt_task.engine.run(rebuilt_task.root, REAL_PAIRS)
+        return result, _host_fast_snapshot(rebuilt_task.root)
+
+    def run_direct_and_shard0() -> tuple[dict, dict[str, dict]]:
+        result = direct_task.engine.run(direct_task.root, REAL_PAIRS)
+        shard0 = direct_task.engine.run(
+            direct_task.root,
+            REHASHED_FAULTS_BATCH,
             json.dumps(result["reference"]),
+            json.dumps(list(FAULT_SHARDS[0])),
         )
-        assert checked["passed"], "tamper cases did not restore the retained originals"
+        return result, shard0
+
+    def run_shard(task: PreparedTask, shard: tuple[str, ...]) -> dict[str, dict]:
+        return task.engine.run(
+            task.root,
+            RECORD_AND_REHASHED_FAULTS_BATCH,
+            json.dumps(list(shard)),
+        )
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        rebuilt_future = executor.submit(run_rebuilt)
+        direct_future = executor.submit(run_direct_and_shard0)
+        shard1_future = executor.submit(run_shard, shard1_task, FAULT_SHARDS[1])
+        shard2_future = executor.submit(run_shard, shard2_task, FAULT_SHARDS[2])
+        rebuilt_result, rebuilt_snapshot = rebuilt_future.result()
+        direct_result, shard0_results = direct_future.result()
+        shard1_results = shard1_future.result()
+        shard2_results = shard2_future.result()
+
+    fault_results: dict[str, dict] = {}
+    fault_results.update(shard0_results)
+    fault_results.update(shard1_results)
+    fault_results.update(shard2_results)
+    runs = {
+        "direct": (direct_task, direct_result),
+        "rebuilt": (rebuilt_task, rebuilt_result),
+    }
+    yield {"runs": runs, "faults": fault_results}
+    checked = direct_task.engine.run(
+        direct_task.root,
+        REPLAY_BASE + "\nreference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))"
+        "\nfacts=replay(reference)\nassert facts.passed,asdict(facts)"
+        "\nprint(json.dumps(dict(passed=facts.passed)))",
+        json.dumps(direct_result["reference"]),
+        instrument=False,
+    )
+    assert checked["passed"], "tamper cases did not restore the retained originals"
+    assert _host_fast_snapshot(rebuilt_task.root) == rebuilt_snapshot, (
+        "rebuilt run was unexpectedly modified"
+    )
+
+
+@pytest.fixture(scope="module")
+def recorded_runs(
+    _installed_suite_runs: dict[str, object],
+) -> dict[str, tuple[PreparedTask, dict]]:
+    runs = _installed_suite_runs["runs"]
+    assert isinstance(runs, dict)
+    return runs
 
 
 @pytest.fixture(params=["direct", "rebuilt"])
@@ -703,14 +883,31 @@ print(json.dumps(dict(consumptions=len(uses),process_starts=len(starts),mode=mod
 )
 
 
+@pytest.fixture(scope="module")
+def interrupted_action_results(
+    prepared_origins: dict[str, PreparedTask],
+    tmp_path_factory: pytest.TempPathFactory,
+) -> dict[str, dict]:
+    modes = ("launch-error", "interrupted", "concurrent")
+    clones = {
+        mode: _clone_prepared_task(prepared_origins["direct"], tmp_path_factory) for mode in modes
+    }
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {
+            mode: executor.submit(
+                clones[mode].engine.run, clones[mode].root, INTERRUPTED_RECORD, mode
+            )
+            for mode in modes
+        }
+        return {mode: futures[mode].result() for mode in modes}
+
+
 @pytest.mark.parametrize("mode", ["launch-error", "interrupted", "concurrent"])
 def test_failed_interrupted_and_concurrent_actions_remain_single_use(
-    ordinary_engines: dict[str, OrdinaryEngine],
-    tmp_path_factory: pytest.TempPathFactory,
+    interrupted_action_results: dict[str, dict],
     mode: str,
 ) -> None:
-    prepared = _prepare_task(ordinary_engines["direct"], tmp_path_factory)
-    result = prepared.engine.run(prepared.root, INTERRUPTED_RECORD, mode)
+    result = interrupted_action_results[mode]
     assert result["consumptions"] == result["process_starts"] == 1
     assert result["mode"] == mode
     expected = (
@@ -858,13 +1055,40 @@ FAULTS = (
 )
 
 
-REHASHED_FAULTS_BATCH = (
-    REPLAY_BASE
-    + r"""
+FAULT_SHARDS = (
+    (
+        "missing_report",
+        "missing_receipt",
+        "missing_completion",
+        "closure_binding",
+        "root_snapshot_rows",
+        "root_snapshot_metadata",
+        "survived",
+    ),
+    (
+        "context_binding",
+        "extra_report_field",
+        "duplicate_json_key",
+        "wrong_loaded_origin",
+        "loaded_name_path_mismatch",
+        "wrong_observation",
+        "unrelated_assertion",
+    ),
+    (
+        "unreported_stderr",
+        "receipt_cleanup",
+        "receipt_eof",
+        "process_timeout",
+        "output_overflow",
+        "setup_error",
+        "teardown_error",
+    ),
+)
+
+
+_REHASHED_FAULTS_BODY = r"""
 from copy import deepcopy
 from aiflow.redaction import redact_text
-reference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))
-faults=json.loads(sys.argv[3])
 path=root/reference.ref; run=path.parent; phase=run/'0/m'
 base_document=json.loads(path.read_bytes())
 base_completion=json.loads((run/'completion.json').read_bytes())
@@ -995,20 +1219,33 @@ for fault in faults:
 assert content_snapshot()==initial
 print(json.dumps(results))
 """
+
+
+REHASHED_FAULTS_BATCH = (
+    REPLAY_BASE
+    + "\nreference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))"
+    + "\nfaults=json.loads(sys.argv[3])\n"
+    + _REHASHED_FAULTS_BODY
+)
+
+
+RECORD_AND_REHASHED_FAULTS_BATCH = (
+    CURRENT
+    + "\napprove_fixture_action()"
+    + "\nreference=runtime.record_installed_mutations(root,task,verifier_actor=actor,"
+    + "expected_inputs_sha256=inputs.sha256)"
+    + "\nfaults=json.loads(sys.argv[2])\n"
+    + _REHASHED_FAULTS_BODY
 )
 
 
 @pytest.fixture(scope="module")
 def rehashed_fault_results(
-    recorded_runs: dict[str, tuple[PreparedTask, dict]],
+    _installed_suite_runs: dict[str, object],
 ) -> dict[str, dict]:
-    prepared, result = recorded_runs["direct"]
-    return prepared.engine.run(
-        prepared.root,
-        REHASHED_FAULTS_BATCH,
-        json.dumps(result["reference"]),
-        json.dumps(list(FAULTS)),
-    )
+    faults = _installed_suite_runs["faults"]
+    assert isinstance(faults, dict)
+    return faults
 
 
 @pytest.mark.parametrize("fault", FAULTS)

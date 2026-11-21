@@ -8,6 +8,7 @@ or a second TypeScript parser.
 
 from __future__ import annotations
 
+import atexit
 import base64
 import hashlib
 import json
@@ -22,6 +23,7 @@ import tempfile
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 import yaml
@@ -105,8 +107,7 @@ def tmp_path(tmp_path_factory: pytest.TempPathFactory, request) -> Path:
     return tmp_path_factory.mktemp("n")
 
 
-@pytest.fixture(scope="module")
-def node_policy_seed_bytes() -> tuple[tuple[str, bytes], ...]:
+def _build_node_policy_seed_bytes() -> tuple[tuple[str, bytes], ...]:
     seeds = []
     checks = [{"id": name, "required": True, "timeout_seconds": timeout} for name, timeout in V0]
     for name in POLICY_FILES:
@@ -145,6 +146,11 @@ def node_policy_seed_bytes() -> tuple[tuple[str, bytes], ...]:
         data = yaml.safe_dump(document, sort_keys=False).replace("\n", os.linesep).encode("utf-8")
         seeds.append((name, data))
     return tuple(seeds)
+
+
+@pytest.fixture(scope="module")
+def node_policy_seed_bytes() -> tuple[tuple[str, bytes], ...]:
+    return _build_node_policy_seed_bytes()
 
 
 @pytest.fixture
@@ -1256,12 +1262,19 @@ def _negative_process_original(runtime, directory, argv, cwd, environment, stdou
     return receipt
 
 
-@pytest.fixture
-def negative_material_originals(tmp_path, monkeypatch):
-    """Real file inventories, with upstream Git/host trust seams held constant."""
+_NEGATIVE_MATERIAL_PAYLOAD_SEED_CACHE: list[Path] = []
+
+
+def _get_negative_material_payload_seed() -> Path:
+    if _NEGATIVE_MATERIAL_PAYLOAD_SEED_CACHE:
+        return _NEGATIVE_MATERIAL_PAYLOAD_SEED_CACHE[0]
     import aiflow.node_execution as runtime
 
-    payload = tmp_path / ".ai/tasks/TASK-0001/logs/node-payload/preparation"
+    seed_dir = tempfile.TemporaryDirectory(
+        prefix="aiflow-neg-mat-seed-", ignore_cleanup_errors=True
+    )
+    atexit.register(seed_dir.cleanup)
+    payload = Path(seed_dir.name) / "preparation"
     node_root = payload / "node"
     npm_root = node_root / "node_modules/npm"
     (npm_root / "bin").mkdir(parents=True)
@@ -1278,7 +1291,6 @@ def negative_material_originals(tmp_path, monkeypatch):
     for path in (node_root / "npm.cmd", npm_root / "bin/npm.cmd", npm_root / "bin/npm-cli.js"):
         path.write_bytes(b"fixed synthetic fixture bytes")
     deps = payload / "dependencies/node_modules"
-    packages = {}
     for name, version in (
         ("vitest", runtime.VERSIONS["vitest"]),
         ("@vitest/coverage-v8", runtime.VERSIONS["vitest"]),
@@ -1289,6 +1301,28 @@ def negative_material_originals(tmp_path, monkeypatch):
         (folder / "package.json").write_bytes(
             runtime._canonical({"name": name, "version": version})
         )
+    _NEGATIVE_MATERIAL_PAYLOAD_SEED_CACHE.append(payload)
+    return payload
+
+
+@pytest.fixture
+def negative_material_originals(tmp_path, monkeypatch):
+    """Real file inventories, with upstream Git/host trust seams held constant."""
+    import aiflow.node_execution as runtime
+
+    payload = tmp_path / ".ai/tasks/TASK-0001/logs/node-payload/preparation"
+    payload.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(_get_negative_material_payload_seed(), payload)
+    node_root = payload / "node"
+    npm_root = node_root / "node_modules/npm"
+    package = {"name": "npm", "version": runtime.VERSIONS["npm"]}
+    deps = payload / "dependencies/node_modules"
+    packages = {}
+    for name, version in (
+        ("vitest", runtime.VERSIONS["vitest"]),
+        ("@vitest/coverage-v8", runtime.VERSIONS["vitest"]),
+        ("vite", runtime.VERSIONS["vite"]),
+    ):
         packages["node_modules/" + name] = {
             "version": version,
             "resolved": "https://registry.npmjs.org/synthetic/-/synthetic.tgz",
@@ -1679,26 +1713,37 @@ def _controlled_git(root, *arguments):
     )
 
 
-@pytest.fixture
-def governance_advancement(tmp_path, monkeypatch):
+@pytest.fixture(scope="module")
+def _governance_advancement_seed(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, str]:
     import aiflow.node_execution as runtime
 
-    _controlled_git(tmp_path, "init", "--quiet")
-    _controlled_git(tmp_path, "config", "user.name", "Synthetic Test")
-    _controlled_git(tmp_path, "config", "user.email", "synthetic@example.invalid")
-    _controlled_git(tmp_path, "config", "core.autocrlf", "false")
-    task = tmp_path / ".ai/tasks/TASK-0001"
+    seed = tmp_path_factory.mktemp("governance-advancement-seed")
+    _controlled_git(seed, "init", "--quiet")
+    _controlled_git(seed, "config", "user.name", "Synthetic Test")
+    _controlled_git(seed, "config", "user.email", "synthetic@example.invalid")
+    _controlled_git(seed, "config", "core.autocrlf", "false")
+    task = seed / ".ai/tasks/TASK-0001"
     task.mkdir(parents=True)
     (task / "approvals.json").write_bytes(b"[]")
-    (tmp_path / "protected.txt").write_bytes(b"protected input\n")
-    _controlled_git(tmp_path, "add", ".")
-    _controlled_git(tmp_path, "commit", "--quiet", "-m", "Synthetic baseline")
+    (seed / "protected.txt").write_bytes(b"protected input\n")
+    _controlled_git(seed, "add", ".")
+    _controlled_git(seed, "commit", "--quiet", "-m", "Synthetic baseline")
+    return seed, runtime._sha((seed / "protected.txt").read_bytes())
+
+
+@pytest.fixture
+def governance_advancement(tmp_path, monkeypatch, _governance_advancement_seed):
+    import aiflow.node_execution as runtime
+
+    seed, protected_sha256 = _governance_advancement_seed
+    shutil.copytree(seed, tmp_path, dirs_exist_ok=True)
+    task = tmp_path / ".ai/tasks/TASK-0001"
     before = {
         "identity": runtime._identity(tmp_path.lstat()),
         "files": [
             {
                 "path": "protected.txt",
-                "sha256": runtime._sha((tmp_path / "protected.txt").read_bytes()),
+                "sha256": protected_sha256,
             }
         ],
         "task": {"task_id": "TASK-0001"},
@@ -1884,34 +1929,38 @@ def test_preparation_late_failure_never_publishes_a_usable_selection(
         assert list((payload.parent.parent / "node-prepared").glob("*/source.json"))
 
 
-@pytest.fixture
-def negative_node_transaction(
-    negative_material_originals, node_policy_directory, monkeypatch, request
-):
-    """Real Git/source/copies/raw files; fake process prefix MUST end in failure.
+_NEGATIVE_TRANSACTION_GIT_SEEDS: dict[tuple[int, bool], tuple[Path, str, str, dict[str, Any]]] = {}
 
-    The trusted task/material and Windows API seams are controlled unit inputs.
-    These fabricated ownership observations never establish an ordinary-wheel PASS.
-    """
+
+def _get_negative_transaction_git_seed(
+    revision: int, native_sources: bool
+) -> tuple[Path, str, str, dict[str, Any]]:
+    key = (revision, native_sources)
+    if key in _NEGATIVE_TRANSACTION_GIT_SEEDS:
+        return _NEGATIVE_TRANSACTION_GIT_SEEDS[key]
     import aiflow.node_execution as runtime
-    import aiflow.storage as storage
-    import aiflow.task_service as task_service
-    from aiflow.decision_units import classification_input_digest, parse_decision_units
-    from aiflow.evidence import EvidenceFacts
-    from aiflow.specification import specification_digest
 
-    _runtime, payload, _prepared, manifests = negative_material_originals
-    root = payload.parents[5]
-    revision, native_sources = getattr(request, "param", (1, False))
+    seed_dir = tempfile.TemporaryDirectory(
+        prefix=f"aiflow-neg-tx-r{revision}-n{int(native_sources)}-",
+        ignore_cleanup_errors=True,
+    )
+    atexit.register(seed_dir.cleanup)
+    root = Path(seed_dir.name)
+    policy_dir = root / ".ai/policy"
+    policy_dir.mkdir(parents=True)
     if revision == 2:
         from test_node_v2_contract import node_documents
 
         for name, document in node_documents().items():
-            (node_policy_directory / name).write_text(
+            (policy_dir / name).write_text(
                 yaml.safe_dump(document, sort_keys=False), encoding="utf-8"
             )
+    else:
+        for name, data in _build_node_policy_seed_bytes():
+            (policy_dir / name).write_bytes(data)
     task_id = "TASK-0001"
     task_dir = root / ".ai/tasks" / task_id
+    task_dir.mkdir(parents=True)
     (task_dir / "approvals.json").write_bytes(b"[]")
     spec_text = "# Controlled negative transaction specification\n"
     (task_dir / "spec.md").write_text(spec_text, encoding="utf-8")
@@ -1936,11 +1985,6 @@ def negative_node_transaction(
             path = root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
-        monkeypatch.setattr(
-            runtime,
-            "NATIVE_OWNERSHIP_INPUTS",
-            {name: runtime._sha(data) for name, data in _NATIVE_OWNERSHIP_UNIT_BYTES.items()},
-        )
     _controlled_git(root, "init", "--quiet")
     _controlled_git(root, "checkout", "-b", "codex/synthetic-transaction")
     _controlled_git(root, "config", "user.name", "Synthetic Test")
@@ -1954,6 +1998,44 @@ def negative_node_transaction(
     _controlled_git(root, "commit", "--quiet", "-m", "Synthetic transaction subject")
     subject = _controlled_git(root, "rev-parse", "HEAD")
     source = _transaction_source(root, subject)
+    _NEGATIVE_TRANSACTION_GIT_SEEDS[key] = (root, base, subject, source)
+    return _NEGATIVE_TRANSACTION_GIT_SEEDS[key]
+
+
+@pytest.fixture
+def negative_node_transaction(
+    negative_material_originals, node_policy_directory, monkeypatch, request
+):
+    """Real Git/source/copies/raw files; fake process prefix MUST end in failure.
+
+    The trusted task/material and Windows API seams are controlled unit inputs.
+    These fabricated ownership observations never establish an ordinary-wheel PASS.
+    """
+    import aiflow.node_execution as runtime
+    import aiflow.storage as storage
+    import aiflow.task_service as task_service
+    from aiflow.decision_units import classification_input_digest, parse_decision_units
+    from aiflow.evidence import EvidenceFacts
+    from aiflow.specification import specification_digest
+
+    _runtime, payload, _prepared, manifests = negative_material_originals
+    root = payload.parents[5]
+    revision, native_sources = getattr(request, "param", (1, False))
+    seed_root, base, subject, seed_source = _get_negative_transaction_git_seed(
+        revision, native_sources
+    )
+    shutil.copytree(seed_root, root, dirs_exist_ok=True)
+    task_id = "TASK-0001"
+    task_dir = root / ".ai/tasks" / task_id
+    spec_text = "# Controlled negative transaction specification\n"
+    repository_id = "11111111-2222-3333-4444-555555555555"
+    if native_sources:
+        monkeypatch.setattr(
+            runtime,
+            "NATIVE_OWNERSHIP_INPUTS",
+            {name: runtime._sha(data) for name, data in _NATIVE_OWNERSHIP_UNIT_BYTES.items()},
+        )
+    source = deepcopy(seed_source)
     manifests["source.json"] = source
     manifests["host-tools.json"] = {
         "python": {"path": sys.executable},
@@ -2234,6 +2316,44 @@ def test_failed_transaction_cannot_be_consumed_after_readonly_original_recheck(
     assert bool(witnessed) is (fault == "derived_results")
 
 
+@pytest.fixture(scope="module")
+def _source_contract_git_seeds(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> tuple[Path, Path, dict[str, Any]]:
+    import aiflow.node_execution as runtime
+
+    empty_repo = tmp_path_factory.mktemp("source-contract-empty-git")
+    _controlled_git(empty_repo, "init", "--quiet")
+    _controlled_git(empty_repo, "config", "user.name", "Synthetic Test")
+    _controlled_git(empty_repo, "config", "user.email", "synthetic@example.invalid")
+    _controlled_git(empty_repo, "config", "core.autocrlf", "false")
+
+    baseline_repo = tmp_path_factory.mktemp("source-contract-baseline-git")
+    shutil.copytree(empty_repo, baseline_repo, dirs_exist_ok=True)
+    package = {
+        "scripts": {
+            name: "controlled unit fixture"
+            for name in ("build", "check", "typecheck", "docs:check", "clean")
+        }
+    }
+    package["scripts"]["test"] = runtime.SEMANTIC_CONTRACT["test_script"]
+    files = {
+        "package.json": runtime._canonical(package),
+        "package-lock.json": runtime._canonical({"lockfileVersion": 3}),
+        "tsconfig.json": b"{}",
+        "tsconfig.tests.json": b"{}",
+        "vitest.config.ts": b"export default {};\n",
+        "agent-commands.json": b"{}",
+    }
+    for name, data in files.items():
+        (baseline_repo / name).write_bytes(data)
+    _controlled_git(baseline_repo, "add", ".")
+    _controlled_git(baseline_repo, "commit", "--quiet", "-m", "Controlled invalid source contract")
+    subject = _controlled_git(baseline_repo, "rev-parse", "HEAD")
+    source = _transaction_source(baseline_repo, subject)
+    return empty_repo, baseline_repo, source
+
+
 @pytest.mark.parametrize(
     "mutation",
     [
@@ -2265,83 +2385,89 @@ def test_failed_transaction_cannot_be_consumed_after_readonly_original_recheck(
     ],
 )
 def test_source_contract_rejects_real_git_execution_input_drift(
-    tmp_path, monkeypatch, mutation
+    tmp_path, monkeypatch, _source_contract_git_seeds, mutation
 ) -> None:
     import aiflow.node_execution as runtime
 
     monkeypatch.delenv("NODE_OPTIONS", raising=False)
-    _controlled_git(tmp_path, "init", "--quiet")
-    _controlled_git(tmp_path, "config", "user.name", "Synthetic Test")
-    _controlled_git(tmp_path, "config", "user.email", "synthetic@example.invalid")
-    _controlled_git(tmp_path, "config", "core.autocrlf", "false")
-    package = {
-        "scripts": {
-            name: "controlled unit fixture"
-            for name in ("build", "check", "typecheck", "docs:check", "clean")
+    empty_repo, baseline_repo, baseline_source = _source_contract_git_seeds
+    if mutation in {"git_hooks", "git_include", "git_diff", "node_options"}:
+        shutil.copytree(baseline_repo, tmp_path, dirs_exist_ok=True)
+        source = deepcopy(baseline_source)
+        if mutation == "node_options":
+            monkeypatch.setenv("NODE_OPTIONS", "--require=unreviewed")
+        else:
+            key = {
+                "git_hooks": "core.hooksPath",
+                "git_include": "include.path",
+                "git_diff": "diff.external",
+            }[mutation]
+            _controlled_git(tmp_path, "config", key, "unit-undeclared")
+    else:
+        shutil.copytree(empty_repo, tmp_path, dirs_exist_ok=True)
+        package = {
+            "scripts": {
+                name: "controlled unit fixture"
+                for name in ("build", "check", "typecheck", "docs:check", "clean")
+            }
         }
-    }
-    package["scripts"]["test"] = runtime.SEMANTIC_CONTRACT["test_script"]
-    lock = {"lockfileVersion": 3}
-    files = {
-        "package.json": b"",
-        "package-lock.json": b"",
-        "tsconfig.json": b"{}",
-        "tsconfig.tests.json": b"{}",
-        "vitest.config.ts": b"export default {};\n",
-        "agent-commands.json": b"{}",
-    }
-    if mutation.startswith("attributes_"):
-        attribute = {
-            "attributes_filter": "filter=unit-undeclared",
-            "attributes_encoding": "working-tree-encoding=UTF-8",
-            "attributes_ident": "ident",
-        }[mutation]
-        files[".gitattributes"] = ("* " + attribute + "\n").encode()
-    elif mutation == "missing_config":
-        del files["agent-commands.json"]
-    elif mutation == "nested_npmrc":
-        files["scripts/.npmrc"] = b"script-shell=unreviewed\n"
-    elif mutation == "missing_script":
-        del package["scripts"]["clean"]
-    elif mutation == "non_string_script":
-        package["scripts"]["build"] = True
-    elif mutation == "test_script":
-        package["scripts"]["test"] = "vitest run --cache"
-    elif mutation == "script_shell":
-        package["config"] = {"script-shell": "unreviewed"}
-    elif mutation.startswith("config_root_"):
-        package["config"] = {
-            "config_root_list": [],
-            "config_root_null": None,
-            "config_root_bool": True,
-        }[mutation]
-    elif mutation == "node_options":
-        monkeypatch.setenv("NODE_OPTIONS", "--require=unreviewed")
-    elif mutation.startswith("package_root_"):
-        package = {"package_root_list": [], "package_root_null": None, "package_root_bool": True}[
-            mutation
-        ]
-    elif mutation.startswith("lock_root_"):
-        lock = {"lock_root_list": [], "lock_root_null": None, "lock_root_bool": True}[mutation]
-    elif mutation.startswith("lock_"):
-        lock["lockfileVersion"] = {"lock_bool": True, "lock_float": 3.0, "lock_old": 2}[mutation]
-    files["package.json"] = runtime._canonical(package)
-    files["package-lock.json"] = runtime._canonical(lock)
-    for name, data in files.items():
-        path = tmp_path / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(data)
-    _controlled_git(tmp_path, "add", ".")
-    _controlled_git(tmp_path, "commit", "--quiet", "-m", "Controlled invalid source contract")
-    subject = _controlled_git(tmp_path, "rev-parse", "HEAD")
-    source = _transaction_source(tmp_path, subject)
-    if mutation.startswith("git_"):
-        key = {
-            "git_hooks": "core.hooksPath",
-            "git_include": "include.path",
-            "git_diff": "diff.external",
-        }[mutation]
-        _controlled_git(tmp_path, "config", key, "unit-undeclared")
+        package["scripts"]["test"] = runtime.SEMANTIC_CONTRACT["test_script"]
+        lock = {"lockfileVersion": 3}
+        files = {
+            "package.json": b"",
+            "package-lock.json": b"",
+            "tsconfig.json": b"{}",
+            "tsconfig.tests.json": b"{}",
+            "vitest.config.ts": b"export default {};\n",
+            "agent-commands.json": b"{}",
+        }
+        if mutation.startswith("attributes_"):
+            attribute = {
+                "attributes_filter": "filter=unit-undeclared",
+                "attributes_encoding": "working-tree-encoding=UTF-8",
+                "attributes_ident": "ident",
+            }[mutation]
+            files[".gitattributes"] = ("* " + attribute + "\n").encode()
+        elif mutation == "missing_config":
+            del files["agent-commands.json"]
+        elif mutation == "nested_npmrc":
+            files["scripts/.npmrc"] = b"script-shell=unreviewed\n"
+        elif mutation == "missing_script":
+            del package["scripts"]["clean"]
+        elif mutation == "non_string_script":
+            package["scripts"]["build"] = True
+        elif mutation == "test_script":
+            package["scripts"]["test"] = "vitest run --cache"
+        elif mutation == "script_shell":
+            package["config"] = {"script-shell": "unreviewed"}
+        elif mutation.startswith("config_root_"):
+            package["config"] = {
+                "config_root_list": [],
+                "config_root_null": None,
+                "config_root_bool": True,
+            }[mutation]
+        elif mutation.startswith("package_root_"):
+            package = {
+                "package_root_list": [],
+                "package_root_null": None,
+                "package_root_bool": True,
+            }[mutation]
+        elif mutation.startswith("lock_root_"):
+            lock = {"lock_root_list": [], "lock_root_null": None, "lock_root_bool": True}[mutation]
+        elif mutation.startswith("lock_"):
+            lock["lockfileVersion"] = {"lock_bool": True, "lock_float": 3.0, "lock_old": 2}[
+                mutation
+            ]
+        files["package.json"] = runtime._canonical(package)
+        files["package-lock.json"] = runtime._canonical(lock)
+        for name, data in files.items():
+            path = tmp_path / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        _controlled_git(tmp_path, "add", ".")
+        _controlled_git(tmp_path, "commit", "--quiet", "-m", "Controlled invalid source contract")
+        subject = _controlled_git(tmp_path, "rev-parse", "HEAD")
+        source = _transaction_source(tmp_path, subject)
 
     def forbidden_process(*_args, **_kwargs):
         pytest.fail("Invalid source JSON reached a Node process boundary")
@@ -3462,11 +3588,49 @@ def native_ownership_transaction(negative_node_transaction, monkeypatch):
     monkeypatch.setattr(runtime, "_process", controlled_process)
     monkeypatch.setattr(runtime, "_native_ownership_inventory", observe_inventory)
     monkeypatch.setattr(runtime, "_coverage", lambda *_args, **_kwargs: None)
+    check_root = runtime._check_root
+    checkout_files = runtime._checkout_files
+
+    def guarded_execute(*args, **kwargs):
+        captured: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
+        checkout_captured: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
+        checkout_baseline: list[dict[str, object]] = []
+
+        def check_baseline(*guard_args, **guard_kwargs):
+            arguments = deepcopy((guard_args, guard_kwargs))
+            if not captured:
+                check_root(*guard_args, **guard_kwargs)
+            else:
+                assert arguments == captured[0], "Baseline root guard inputs changed"
+            captured.append(arguments)
+
+        def checkout_snapshot(*guard_args, **guard_kwargs):
+            arguments = deepcopy((guard_args, guard_kwargs))
+            if not checkout_captured:
+                checkout_baseline.append(deepcopy(checkout_files(*guard_args, **guard_kwargs)))
+            else:
+                assert arguments == checkout_captured[0], "Baseline checkout inputs changed"
+            checkout_captured.append(arguments)
+            return deepcopy(checkout_baseline[0])
+
+        with monkeypatch.context() as execution_guard:
+            execution_guard.setattr(runtime, "_check_root", check_baseline)
+            execution_guard.setattr(runtime, "_checkout_files", checkout_snapshot)
+            result = execute(*args, **kwargs)
+        if captured:
+            check_root(*captured[0][0], **captured[0][1])
+        if checkout_captured:
+            assert (
+                checkout_files(*checkout_captured[0][0], **checkout_captured[0][1])
+                == checkout_baseline[0]
+            )
+        return result
+
     return SimpleNamespace(
         runtime=runtime,
         root=root,
         settings=settings,
-        execute=execute,
+        execute=guarded_execute,
         events=events,
         sealed=sealed,
     )
