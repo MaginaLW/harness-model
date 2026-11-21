@@ -79,22 +79,14 @@ _TEMPLATE: list[tempfile.TemporaryDirectory[str]] = []
 
 
 def create_repository(path: Path) -> Path:
-    """Copy one lazily built initial repository; git status refreshes copied stat data."""
+    """Copy one lazily built initial repository."""
     if not _TEMPLATE:
         template = tempfile.TemporaryDirectory(
             prefix="aiflow-template-", ignore_cleanup_errors=True
         )
         _populate_repository(Path(template.name))
         _TEMPLATE.append(template)
-    copied = Path(shutil.copytree(_TEMPLATE[0].name, path))
-    subprocess.run(
-        ["git", "update-index", "--refresh", "-q"],
-        cwd=copied,
-        capture_output=True,
-        check=False,
-        timeout=10,
-    )
-    return copied
+    return Path(shutil.copytree(_TEMPLATE[0].name, path))
 
 
 def start(repository: Path, monkeypatch: pytest.MonkeyPatch) -> None:
