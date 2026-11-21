@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 from copy import deepcopy
@@ -22,6 +23,7 @@ from aiflow.gate import GateFacts, evaluate_gate_facts
 from aiflow.mutation_evidence import (
     consume_targeted_mutation_evidence,
     load_targeted_mutation_evidence,
+    read_historical_mutation_evidence,
 )
 from aiflow.review_service import (
     latest_review_assessment,
@@ -85,18 +87,26 @@ def historical_replay(tmp_path: Path) -> dict[str, object]:
     manifest = load_bundle_manifest()
     bundled_by_target = bundle_files_by_target(manifest)
     source_commit = manifest["source_governance_commit"]
-    assert isinstance(source_commit, str)
+    evidence_ref = manifest["pre_evidence_original_ref"]
+    assert isinstance(evidence_ref, str)
+    evidence = json.loads(bundled_by_target[evidence_ref].read_text(encoding="utf-8"))
+    assert evidence["subject_commit"] == manifest["source_subject_commit"]
+    commits = (source_commit, evidence["base_commit"], evidence["subject_commit"])
+    assert all(isinstance(sha, str) and re.fullmatch("[0-9a-f]{40}", sha) for sha in commits)
 
     replay = tmp_path / "replay"
+    subprocess.run(["git", "init", "-q", str(replay)], check=True)
+    # The checkout and the two diff endpoints are the only historical commits the replay reads.
     subprocess.run(
         [
             "git",
-            "clone",
-            "-c",
-            "core.autocrlf=true",
-            "--no-hardlinks",
-            str(ROOT),
+            "-C",
             str(replay),
+            "fetch",
+            "--no-tags",
+            "--depth=1",
+            ROOT.as_uri(),
+            *commits,
         ],
         check=True,
         capture_output=True,
@@ -279,7 +289,13 @@ def test_historical_h1_replays_real_artifacts_without_current_readiness(
     evidence = json.loads(
         (replay / manifest["pre_evidence_original_ref"]).read_text(encoding="utf-8")
     )
-    artifact = load_targeted_mutation_evidence(replay, TASK_ID, manifest["artifact_original_ref"])
+    artifact_ref = manifest["artifact_original_ref"]
+    assert isinstance(artifact_ref, str)
+    historical = read_historical_mutation_evidence(replay, TASK_ID, artifact_ref)
+    artifact = json.loads((replay / artifact_ref).read_text(encoding="utf-8"))
+    with pytest.raises(ContractError) as legacy:
+        load_targeted_mutation_evidence(replay, TASK_ID, artifact_ref)
+    assert legacy.value.code == "MUTATION_EVIDENCE_INPUT_MISMATCH"
     facts = consume_targeted_mutation_evidence(replay, TASK_ID, evidence)
     action = json.loads(
         (task_dir / "action-v2-targeted-mutation-fe30565e.json").read_text(encoding="utf-8")
@@ -307,7 +323,9 @@ def test_historical_h1_replays_real_artifacts_without_current_readiness(
         *V2_EXTRA_CHECK_IDS,
     )
     assert all(item["required"] and item["status"] == "passed" for item in evidence["checks"])
-    assert facts.passed and facts.mutation_evidence_sha256 == manifest["mutation_evidence_sha256"]
+    assert not facts.passed and facts.reason_code == "MUTATION_EVIDENCE_INVALID"
+    assert historical.exit_outcomes == tuple((f"MUT-V2-{i:03d}", "killed") for i in range(1, 6))
+    assert artifact["mutation_evidence_sha256"] == manifest["mutation_evidence_sha256"]
     assert [item["mutation_id"] for item in artifact["results"]] == [
         f"MUT-V2-{i:03d}" for i in range(1, 6)
     ]
@@ -458,19 +476,19 @@ def write_mutation_variant(
 
 
 @pytest.mark.parametrize(
-    "scenario, expected_reason",
+    "scenario, historical_outcome",
     [
-        ("survived", "MUTATION_EVIDENCE_NOT_KILLED"),
-        ("missing", "MUTATION_EVIDENCE_INVALID"),
-        ("unexecuted", "MUTATION_EVIDENCE_NOT_KILLED"),
-        ("unknown", "MUTATION_EVIDENCE_INVALID"),
+        ("survived", "survived"),
+        ("missing", None),
+        ("unexecuted", "unverified"),
+        ("unknown", None),
     ],
 )
 def test_non_killed_or_invalid_mutant_fails_public_replay_and_gate(
     historical_replay: dict[str, object],
     modeled_non_authoritative_gate_facts: GateFacts,
     scenario: str,
-    expected_reason: str,
+    historical_outcome: str | None,
 ) -> None:
     manifest = historical_replay["manifest"]
     replay = historical_replay["replay"]
@@ -480,9 +498,17 @@ def test_non_killed_or_invalid_mutant_fails_public_replay_and_gate(
     evidence = json.loads((replay / evidence_ref).read_text(encoding="utf-8"))
     assert isinstance(evidence, dict)
     candidate = write_mutation_variant(replay, manifest, evidence, scenario)
+    artifact_ref = manifest["artifact_original_ref"]
+    assert isinstance(artifact_ref, str)
+    if historical_outcome is None:
+        with pytest.raises(ContractError):
+            read_historical_mutation_evidence(replay, TASK_ID, artifact_ref)
+    else:
+        historical = read_historical_mutation_evidence(replay, TASK_ID, artifact_ref)
+        assert historical.exit_outcomes[0] == ("MUT-V2-001", historical_outcome)
     mutation = consume_targeted_mutation_evidence(replay, TASK_ID, candidate)
     assert mutation.passed is False
-    assert mutation.reason_code == expected_reason
+    assert mutation.reason_code == "MUTATION_EVIDENCE_INVALID"
     gate_facts = GateFacts(
         **{
             **modeled_non_authoritative_gate_facts.__dict__,
