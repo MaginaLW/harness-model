@@ -113,6 +113,12 @@ macOS/Linux 将最后三条命令中的 `.\.venv\Scripts\python.exe` 换成
   `uv pip check`、锁文件检查和项目测试结果为准，不需要仅为消除提示而升级项目环境。
 - 若 `uv sync --locked --all-extras --dry-run` 计划修改环境，先检查是否使用了仓库根目录的
   `.venv` 和当前 `uv.lock`；确认后再运行不带 `--dry-run` 的同步命令。
+- 若在复用旧 `.venv` 运行资源包或已安装变异测试（`test_resource_bundle_distribution.py` /
+  `test_installed_mutations.py`）时报 `ValueError: unknown RECORD path`，常见原因是锁定的运行依赖曾由
+  `pip` 安装并在 `.dist-info/RECORD` 中留有 `__pycache__` 条目（例如单文件包
+  `typing-extensions` 的顶层 `__pycache__/typing_extensions.*.pyc`），而版本号相同时常规
+  `uv sync --locked --all-extras` 不会重装已有包。应改用新建 `.venv`，或运行
+  `uv sync --locked --all-extras --reinstall-package <包名>`（或 `--reinstall`）用 `uv` 重装受影响包。
 
 ## 运行无外部动作示例
 
