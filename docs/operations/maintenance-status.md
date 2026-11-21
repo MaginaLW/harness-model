@@ -6,6 +6,8 @@
 
 **当前方向：仓库维护。** 入口治理和已授权的维护收口已完成，后续按具体需求或可复现问题推进；Stage B、旧 mutation 加固、真实评分、自动审核、Desktop 附着及 Phase 3/4 继续暂停。维护交付不自动恢复这些工作，Policy、授权和质量阈值保持不变。
 
+**G（影子验收）暂缓。** 保留现有配置，暂不新增 App。
+
 **治理资料归属**：[治理建议](../archive/operations/HARNESS_MODEL_GOVERNANCE_RECOMMENDATIONS.md)与[执行计划](../archive/operations/HARNESS_MODEL_GOVERNANCE_EXECUTION_PLAN.md)已从 dotfiles 归入本仓，原文按规划时点保留；其中“待执行”“本次未执行”描述原文编写阶段。实际治理已由 [PR #154](https://github.com/MaginaLW/harness-model/pull/154) 合入：P0/P1/P2/P5 收口，P3/P4 按证据不实施；入口固定集合字符减少 53.62%，实际 token 与自然任务工时效果未测。Stage B 与旧加固仍停止。
 
 ### 版本与用途
@@ -69,7 +71,8 @@
 
 ### 剩余缺口与推进条件
 
-- **私有 V2 CI 回放与 PR #186 合并**：本地候选 `TASK-0169`（受保护验签工作流，私有 Ubuntu V2 与本地 Gate 通过，`APPROVED_FOR_MERGE`）、`TASK-0171`（普通工作流上下文标记，`IMPLEMENTING`）与 `TASK-0173`（Linux `--ci-sandbox` 隔离执行，`IMPLEMENTING`）保留各自原有 `forbidden_actions` 暂缓推进；`TASK-0170`（单仓 GitHub App 合成检查传输）已基于远端已验证的 `completed/success`（[check run 136411424968](https://github.com/MaginaLW/harness-model/runs/136411424968)）与本机 `READBACK/RESERVED/0` 诊断在本地分支 `codex/private-replay-transport-governance`（`c0fb8172`）以 `BLOCKED` 收口，剩余外部额度为 `0`。解锁 [PR #186](https://github.com/MaginaLW/harness-model/pull/186) 合入前，仍须由项目所有者统一决定 `TASK-0171`/`TASK-0173` 正式 V2 预算、`TASK-0169`/`0171`/`0173` 推送合入顺序、受保护 Environment 与独立 GitHub App 配置，以及端到端串接切换方案。
+- **私有 V2 CI 回放与 PR #186 合并**：本地候选 `TASK-0169`（受保护验签工作流，私有 Ubuntu V2 与本地 Gate 通过，`APPROVED_FOR_MERGE`）、`TASK-0171`（普通工作流上下文标记，`IMPLEMENTING`）与 `TASK-0173`（Linux `--ci-sandbox` 隔离执行，`IMPLEMENTING`）保留各自原有 `forbidden_actions` 暂缓推进；`TASK-0170`（单仓 GitHub App 合成检查传输）已基于远端已验证的 `completed/success`（[check run 136411424968](https://github.com/MaginaLW/harness-model/runs/136411424968)）与本机 `READBACK/RESERVED/0` 诊断在本地分支 `codex/private-replay-transport-governance`（`c0fb8172`）以 `BLOCKED` 收口，剩余外部额度为 `0`。解锁 [PR #186](https://github.com/MaginaLW/harness-model/pull/186) 合入前，仍须由项目所有者统一决定 `TASK-0171`/`TASK-0173` 正式 V2 预算、`TASK-0169`/`0171`/`0173` 推送合入顺序，以及端到端串接切换方案。
+- **G 的恢复条件。** 仅在确有正式切换需求时恢复影子验收。合成成功、预期拒绝、普通维护 PR 检查各保留一次，三项均未使用（0/3），每项均不重试。
 - **真实观察**：B（3-A 非评分准备、3-B 独立 V3）、首用途、`review_detection`、95% 等尾区间/总宽不超过20个百分点及有限研究范围已采用，不重复请求这些决定。真实自然任务的预声明候选、旧契约、实际输入/职责/原预算、完整报告、独立裁定与预算关闭原件仍缺；`T0/T1` 未设置，不制造样本、不启动30日窗口。见[观察准备](../archive/operations/review-detection-preparation.md)、[准入](../superpowers/specs/review-detection-admission.md)。
 - **宿主接入**：仍缺受支持的既有 Desktop 通道、实例绑定、实际 server/协议版本、全部返回面及接收前累计限制。既有[issue #55904](https://github.com/openai/codex/issues/55904)是回复入口，未在本轮重查回复；不重复提问、不重启已关闭读取。新材料按[核对步骤](../superpowers/specs/review-detection-host-evidence.md#维护方回复后的核对步骤)处理，齐备也不自动连接。
 - **Phase 3/4**：Phase 3 仍 `not_started`；[进入输入](../implementation/phase-03-entry-inputs.md)的样本门 partial、真实 V3/统一度量 not_met 保留。3-A 单独完成不打开整体退出或 Phase 4。
