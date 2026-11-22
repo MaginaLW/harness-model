@@ -72,8 +72,8 @@ goal: Rebuild the TASK-0171 ordinary workflow marker on the current public main 
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-22T04:27:23Z'
-subject_commit: fa58164d1f3207bcf2e773aa2da02b81d36fcb44
+subject_commit: 0aa35d273538b95eff66da74f7eb5904d7f7f8b9
 task_id: TASK-0183
-updated_at: '2026-11-22T04:28:57Z'
+updated_at: '2026-11-22T04:28:58Z'
 worktree_dirty: false
 worktree_dirty_paths: []
