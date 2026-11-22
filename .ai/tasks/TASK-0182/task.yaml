@@ -70,7 +70,7 @@ forbidden_actions:
 - start_g
 - enable_or_dispatch_live_workflow
 - change_required_gate
-frozen_spec_sha256: 97ba67e355e999d91a552296538423fd477d4ab7611ef1a84af8f0742c64d163
+frozen_spec_sha256: df1c41fc30817c8c3d62a0e44cd8aff8fc9373ec5157d026d877f4a35a5aa657
 goal: "\u4ECE\u516C\u5F00 main \u91CD\u5EFA TASK-0181 \u7684\u672C\u5730\u9A8C\u7B7E\
   \u5668\u5019\u9009\uFF0C\u8865\u5168\u56DB\u4E2A V2 \u7248\u672C\u5B57\u6BB5\u7684\
   \u62D2\u7EDD\u6761\u4EF6\u5E76\u901A\u8FC7\u5B9A\u5411\u56DE\u5F52\u4E0E\u72EC\u7ACB\
@@ -78,9 +78,9 @@ goal: "\u4ECE\u516C\u5F00 main \u91CD\u5EFA TASK-0181 \u7684\u672C\u5730\u9A8C\u
   \u6279\u51C6\u3002"
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
-spec_frozen_at: '2026-11-22T02:01:36Z'
+spec_frozen_at: '2026-11-22T02:13:04Z'
 subject_commit: ede60b17e4f81f2ef4162f10aef3e785a9e2c6e0
 task_id: TASK-0182
-updated_at: '2026-11-22T02:04:04Z'
+updated_at: '2026-11-22T02:15:14Z'
 worktree_dirty: false
 worktree_dirty_paths: []

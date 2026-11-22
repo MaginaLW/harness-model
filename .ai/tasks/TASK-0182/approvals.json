@@ -12,5 +12,36 @@
     "spec_sha256": "97ba67e355e999d91a552296538423fd477d4ab7611ef1a84af8f0742c64d163",
     "subject_commit": "d0be6ce67004f11d575e1a135df35e164d712b79",
     "task_id": "TASK-0182"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-22T02:14:35Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "d0be6ce67004f11d575e1a135df35e164d712b79",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。所有者已批准单次本地 V2 预算，独立设计审核 REV-0002 对本阶段冻结规格给出 APPROVE、零未关闭发现。单次动作须另行独立核对并批准。",
+    "schema_version": "1.0",
+    "spec_sha256": "df1c41fc30817c8c3d62a0e44cd8aff8fc9373ec5157d026d877f4a35a5aa657",
+    "subject_commit": "ede60b17e4f81f2ef4162f10aef3e785a9e2c6e0",
+    "task_id": "TASK-0182"
+  },
+  {
+    "action_sha256": "f41ad4bbef61271dee448f0e964e637d61bf84fda8fb7d8e86f040b65ced520a",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-22T02:15:14Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "d0be6ce67004f11d575e1a135df35e164d712b79",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-22T04:30:00Z",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。所有者明确授权 TASK-0182 的一次本地正式 V2；独立审核者 pre-v2-independent-reviewer-182 在执行前批准单次动作 f41ad4bbef61271dee448f0e964e637d61bf84fda8fb7d8e86f040b65ced520a、零未关闭发现。适用 ede60b17、DU-001、固定五项变异、单槽 90 分钟含清理、无重试。到期 04:30 UTC。",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "df1c41fc30817c8c3d62a0e44cd8aff8fc9373ec5157d026d877f4a35a5aa657",
+    "subject_commit": "ede60b17e4f81f2ef4162f10aef3e785a9e2c6e0",
+    "task_id": "TASK-0182"
   }
 ]
