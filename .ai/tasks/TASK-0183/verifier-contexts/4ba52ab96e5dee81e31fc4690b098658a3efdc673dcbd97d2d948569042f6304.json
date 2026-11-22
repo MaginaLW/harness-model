@@ -1,0 +1,60 @@
+{
+  "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+  "branch": "codex/marker-0171-main-alignment",
+  "classification_input_sha256": "bda489994f23a5182758ad1c22576b51702827f9fe41e6c2cd177f0ada6ce0fe",
+  "content": {
+    "acceptance_conditions": [
+      "1. 在 Git 原始对象上核对基线、前驱与本候选的两个软件文件，确认去掉新增的两行后，普通工作流与基线逐字节一致。区分事件提交、工作流来源提交与实际 checkout 的 PR head。",
+      "2. 标记的唯一性、位置、两项表达式与空操作由既有工作流测试验证。核对受保护工作流与验签器 blob，明确普通 workflow 的 base/head blob 一致性条件，分别记录历史现场观测、当前静态证据及缺少的正式证据。",
+      "3. 本地冻结软件提交。提案绑定 DU-001、基线、软件提交、规格、Policy、分类和独立验证者角色；提交可单独决定的一次私有 Ubuntu 正式 V2。批准前停在准备阶段。",
+      "4. 如获所有者明确确认，先核实绑定、具备实际隔离和独立性的验证环境、可用资源及覆盖窗口的单次动作批准。建议限 1 个本地独占无凭据、断外网的 Ubuntu x86-64 槽，1 次原生 V2 收集，90 分钟含清理，最多 1 次 targeted_mutation_v2 动作，不重试。此次仅申请 0171 标记线的既有预留。正式验收采用当前 Policy 的全部必需检查、覆盖率阈值与固定变异清单，独立实施审核绑定本次通过快照，再由同一 verifier finalize 并核对本地 Gate。公开 CI、披露与交付分开办理。"
+    ],
+    "code_map": {
+      "allowed_scope": [
+        ".github/workflows/ai-quality-gate.yml",
+        "tests/integration/test_github_workflow.py"
+      ],
+      "changed_paths": [
+        ".ai/tasks/TASK-0183/approvals.json",
+        ".ai/tasks/TASK-0183/classification.json",
+        ".ai/tasks/TASK-0183/events.jsonl",
+        ".ai/tasks/TASK-0183/review-contexts/297b5e0203758369c2875f3ede1a7fe60c91442d369338cbd0e156c5bd6a526c.json",
+        ".ai/tasks/TASK-0183/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0183/spec.md",
+        ".ai/tasks/TASK-0183/task.yaml",
+        ".github/workflows/ai-quality-gate.yml",
+        "tests/integration/test_github_workflow.py"
+      ]
+    },
+    "diff_summary": {
+      "additions": 256,
+      "binary_files": 0,
+      "deletions": 1,
+      "files": 9
+    },
+    "frozen_spec": "# TASK-0171 普通 PR 工作流标记的主线对齐\n\n## 目标\n\n在公开 main 的 fa58164d1f3207bcf2e773aa2da02b81d36fcb44 上重建原 TASK-0171 的普通 PR 标记，在本地固定候选、核对工作流版本并提交一次正式 V2 的确认单。原软件提交为 82d6694f389bb4d6cd2dd8726508148b3e559c71，原任务保持原有记录与限制。\n\n## 范围\n\n唯一软件增量取自上述原提交的 .github/workflows/ai-quality-gate.yml 和 tests/integration/test_github_workflow.py。在普通质量作业的首次 checkout 之前增加一个只执行 shell 内建空操作的步骤；展示名称分别展开 github.sha 和 github.workflow_sha，checkout 继续显式绑定 PR head。沿用现有集成测试、只读权限及验证命令。治理记录在 TASK-0183 自身账本追加。\n\n## 非目标\n\nTASK-0173、G、私有端传输、正式切换及 #186 合并继续暂停。受保护验签工作流、验签器、Gate、Policy、现有覆盖率与依赖保持主线版本。\n\n## 验收条件\n\n1. 在 Git 原始对象上核对基线、前驱与本候选的两个软件文件，确认去掉新增的两行后，普通工作流与基线逐字节一致。区分事件提交、工作流来源提交与实际 checkout 的 PR head。\n2. 标记的唯一性、位置、两项表达式与空操作由既有工作流测试验证。核对受保护工作流与验签器 blob，明确普通 workflow 的 base/head blob 一致性条件，分别记录历史现场观测、当前静态证据及缺少的正式证据。\n3. 本地冻结软件提交。提案绑定 DU-001、基线、软件提交、规格、Policy、分类和独立验证者角色；提交可单独决定的一次私有 Ubuntu 正式 V2。批准前停在准备阶段。\n4. 如获所有者明确确认，先核实绑定、具备实际隔离和独立性的验证环境、可用资源及覆盖窗口的单次动作批准。建议限 1 个本地独占无凭据、断外网的 Ubuntu x86-64 槽，1 次原生 V2 收集，90 分钟含清理，最多 1 次 targeted_mutation_v2 动作，不重试。此次仅申请 0171 标记线的既有预留。正式验收采用当前 Policy 的全部必需检查、覆盖率阈值与固定变异清单，独立实施审核绑定本次通过快照，再由同一 verifier finalize 并核对本地 Gate。公开 CI、披露与交付分开办理。\n\n## 禁止动作\n\n本轮不运行正式 V2、真实变异，不创建或消费动作批准，不获取私有原件，不发布、签发、触发工作流或更改远端设置。正式执行需要新的明确确认、本次任务的动作准入与独立审核。保留所有已用额度和停止记录。\n\n## 错误行为\n\n基线或候选漂移、工作流字节不符、缺少独立验证者、一次性授权或隔离资源时，保留缺项并停止。正式启动后发生失败、中断、超时或结果不明即停止并保留原件，连续失败上限 1，自动重试 0。\n\n## 回滚\n\n本地候选独立于原分支及公开主线。保留追加式历史，若需撤回软件增量，另作受治理的反向提交。\n",
+    "goal": "Rebuild the TASK-0171 ordinary workflow marker on the current public main and prepare one private Ubuntu V2 decision.",
+    "known_limitations": [
+      "Acceptance, integration, and targeted mutation execution are owned by Chapter 11."
+    ],
+    "reproduce_command": [
+      "python",
+      "-m",
+      "aiflow",
+      "verify",
+      "TASK-0183",
+      "--actor",
+      "<verifier>"
+    ]
+  },
+  "context_sha256": "4ba52ab96e5dee81e31fc4690b098658a3efdc673dcbd97d2d948569042f6304",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "schema_version": "1.0",
+  "spec_sha256": "b5776fe3437125fe0703cccddb8fa68e773a384d0cfd5b6ebddaae5481e62b45",
+  "subject_commit": "0aa35d273538b95eff66da74f7eb5904d7f7f8b9",
+  "task_id": "TASK-0183"
+}
