@@ -1,0 +1,184 @@
+{
+  "base_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+  "branch": "codex/marker-6a4a6456-local",
+  "classification_input_sha256": "62e1f8a2819ab12d718bbdb13fbe4376f38f8d3daf53039cdae7c9335c77b08c",
+  "content": {
+    "allowed_scope": [
+      ".github/workflows/ai-quality-gate.yml",
+      "tests/integration/test_github_workflow.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prepare a local successor to the PR 194 workflow marker on main 6a4a6456, bind its software subject and request one separately approved local V2.",
+        "impact_scope": [
+          ".github/workflows/ai-quality-gate.yml",
+          "tests/integration/test_github_workflow.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0186/approvals.json",
+        ".ai/tasks/TASK-0186/classification.json",
+        ".ai/tasks/TASK-0186/events.jsonl",
+        ".ai/tasks/TASK-0186/review-contexts/45c52b69d11704a3fa5d265e0fed8d30cf7c941aeca680f13aefc9c41693c881.json",
+        ".ai/tasks/TASK-0186/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0186/spec.md",
+        ".ai/tasks/TASK-0186/task.yaml",
+        ".github/workflows/ai-quality-gate.yml",
+        "tests/integration/test_github_workflow.py"
+      ],
+      "files": [
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0186/approvals.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0186/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0186/events.jsonl"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0186/review-contexts/45c52b69d11704a3fa5d265e0fed8d30cf7c941aeca680f13aefc9c41693c881.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0186/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 32,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0186/spec.md"
+        },
+        {
+          "additions": 83,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0186/task.yaml"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": ".github/workflows/ai-quality-gate.yml"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_github_workflow.py"
+        }
+      ],
+      "totals": {
+        "additions": 260,
+        "deletions": 1,
+        "files": 9
+      }
+    },
+    "goal": "Prepare a local successor to the PR 194 workflow marker on main 6a4a6456, bind its software subject and request one separately approved local V2.",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0186",
+        "--actor",
+        "ubuntu-independent-verifier-186"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "0f43f03a3c2f23635ff7ecb3f31c3e101fabdafd325ded3e5d64b838fb8d7651",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "87705df4f7d158f7ff36b258b04434776006ba49a3fa5db3d6137c22b1a621cf",
+  "subject_commit": "84a7bb14a3c673fb761452cc46d410f9f50f9b4b",
+  "task_id": "TASK-0186",
+  "verification_snapshot_sha256": "24fbe47c3803789d731abb140a7233c171fbecb086813c8c18975d1dcb889a27"
+}

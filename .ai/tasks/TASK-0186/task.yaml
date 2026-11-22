@@ -4,7 +4,7 @@ allowed_scope:
 base_commit: 6a4a6456a323d62137d152849f3ca18114ba85bc
 branch: codex/marker-6a4a6456-local
 created_at: '2026-11-22T08:21:56Z'
-current_state: IMPLEMENTING
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -78,6 +78,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-22T08:22:44Z'
 subject_commit: 84a7bb14a3c673fb761452cc46d410f9f50f9b4b
 task_id: TASK-0186
-updated_at: '2026-11-22T08:26:57Z'
+updated_at: '2026-11-22T08:45:03Z'
 worktree_dirty: false
 worktree_dirty_paths: []

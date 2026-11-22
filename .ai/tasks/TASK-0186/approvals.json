@@ -12,5 +12,37 @@
     "spec_sha256": "87705df4f7d158f7ff36b258b04434776006ba49a3fa5db3d6137c22b1a621cf",
     "subject_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
     "task_id": "TASK-0186"
+  },
+  {
+    "action_sha256": "1a2676808261795c8dd6246bfa5cdc19dbe6b45c9ee35a37b1e5ca01cb547c72",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-22T08:34:12Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-22T10:02:45Z",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Owner explicitly authorized one offline local V2 for 84a7bb14 at preparation ledger 7571a134. Exact action independently APPROVED by independent-design-reviewer-186 at 2026-11-22T08:33:37Z, findings empty. File SHA256 e6976fc61d7744418d18fcd466b7def62d15ef54e7e122ba8394ddf55831cac9, canonical 1a2676808261795c8dd6246bfa5cdc19dbe6b45c9ee35a37b1e5ca01cb547c72. Only ubuntu-independent-verifier-186, 5 fixed native pairs, 1 slot, 90 minutes including cleanup, no retries. Production signing and any CI or remote action excluded.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "87705df4f7d158f7ff36b258b04434776006ba49a3fa5db3d6137c22b1a621cf",
+    "subject_commit": "84a7bb14a3c673fb761452cc46d410f9f50f9b4b",
+    "task_id": "TASK-0186"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-22T08:45:03Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "f24095d884bab5ddb0445cc798c51ca54479c34f79bb724878f20ad127157eb2",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Local scope only. Independent implementation review REV-0002 APPROVE with zero findings covers subject 84a7bb14 and snapshot 24fbe47c3803789d731abb140a7233c171fbecb086813c8c18975d1dcb889a27. The same verifier finalized evidence cb5fe9293eb67f1ca93c59d8865ef1d91053341a0ce69b63ec0eda786bae1d2f. All 14 required checks passed and all five fixed mutants were killed. No remote delivery or CI authorized.",
+    "schema_version": "1.0",
+    "spec_sha256": "87705df4f7d158f7ff36b258b04434776006ba49a3fa5db3d6137c22b1a621cf",
+    "subject_commit": "84a7bb14a3c673fb761452cc46d410f9f50f9b4b",
+    "task_id": "TASK-0186"
   }
 ]

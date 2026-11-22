@@ -1,0 +1,60 @@
+{
+  "base_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+  "branch": "codex/marker-6a4a6456-local",
+  "classification_input_sha256": "62e1f8a2819ab12d718bbdb13fbe4376f38f8d3daf53039cdae7c9335c77b08c",
+  "content": {
+    "acceptance_conditions": [
+      "1. Git 原始字节须证明工作流从 `e8f71c6a189446b0ba8f5b61e22cbd8ea9b7c2d9` 变为 `5027a41d3fbc9b64e189b6d6c337636a4b5c4e37`，测试从 `bfd418763451224bbb6ef4f114292fb8d9440916` 变为 `5d54150d5c2f64faae01e46728d3c17e532493a4`。运行该测试模块，记录结果。",
+      "2. 固定 base → subject → 准备 head 的祖先链。第一段只允许上述两项软件文件及本任务账本；第二段必须非空且限本任务账本。逐段校验新增或修改状态、完整路径数与受保护验签器的范围函数。治理路由只选本任务。",
+      "3. 新任务独立分类、冻结规格、独立设计审核并按 CLI 绑定软件 subject。正式 local-final 确认单须绑定新任务、分支、base、subject、治理 head、独立验证者、清单和单次预算。本轮验收止于候选准备。",
+      "4. 正式本机 V2 若另获批准，由独立验证者在独占离线环境执行一次完整收集。新变异动作经独立审核并单次批准后才可消费，固定五项均须 killed，14 项检查均须通过。实施审核须绑定本次真实快照，同一验证者在同一检出 finalize 后核对本地代码批准和 Gate。方案预算为 1 个隔离槽、90 分钟含清理，失败不重试。后置 CI 回放单独审批。"
+    ],
+    "code_map": {
+      "allowed_scope": [
+        ".github/workflows/ai-quality-gate.yml",
+        "tests/integration/test_github_workflow.py"
+      ],
+      "changed_paths": [
+        ".ai/tasks/TASK-0186/approvals.json",
+        ".ai/tasks/TASK-0186/classification.json",
+        ".ai/tasks/TASK-0186/events.jsonl",
+        ".ai/tasks/TASK-0186/review-contexts/45c52b69d11704a3fa5d265e0fed8d30cf7c941aeca680f13aefc9c41693c881.json",
+        ".ai/tasks/TASK-0186/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0186/spec.md",
+        ".ai/tasks/TASK-0186/task.yaml",
+        ".github/workflows/ai-quality-gate.yml",
+        "tests/integration/test_github_workflow.py"
+      ]
+    },
+    "diff_summary": {
+      "additions": 260,
+      "binary_files": 0,
+      "deletions": 1,
+      "files": 9
+    },
+    "frozen_spec": "# TASK-0186 · 新 main 上的普通 PR 工作流标记候选\n\n## 目标\n\n在 `6a4a6456a323d62137d152849f3ca18114ba85bc` 建立独立的本地标记候选，固定软件提交，并准备单次正式本机 V2 的确认单。#194 的原 head 为 `0bcd65dbf674afc688313c13f77b1db54fce6d39`。\n\n## 范围\n\n从旧软件提交 `0aa35d273538b95eff66da74f7eb5904d7f7f8b9` 复用两个 Git 对象。普通工作流 `.github/workflows/ai-quality-gate.yml` 只在首次 checkout 前插入两行，展示事件合并提交和工作流来源提交，执行 shell 空操作。实际 checkout 仍指向 PR head。沿用 `tests/integration/test_github_workflow.py` 中对标记的顺序、唯一性和内容的断言。任务治理记录仅在 `.ai/tasks/TASK-0186/` 追加。\n\n## 非目标\n\n旧任务、旧分支和旧 R2 原件各自保留。受保护验签器、Policy、依赖、权限和 required check 来源沿用当前 main。3S、3P0 保持 HOLD，#186 保持打开，TASK-0173 和 G 暂缓。\n\n## 验收条件\n\n1. Git 原始字节须证明工作流从 `e8f71c6a189446b0ba8f5b61e22cbd8ea9b7c2d9` 变为 `5027a41d3fbc9b64e189b6d6c337636a4b5c4e37`，测试从 `bfd418763451224bbb6ef4f114292fb8d9440916` 变为 `5d54150d5c2f64faae01e46728d3c17e532493a4`。运行该测试模块，记录结果。\n2. 固定 base → subject → 准备 head 的祖先链。第一段只允许上述两项软件文件及本任务账本；第二段必须非空且限本任务账本。逐段校验新增或修改状态、完整路径数与受保护验签器的范围函数。治理路由只选本任务。\n3. 新任务独立分类、冻结规格、独立设计审核并按 CLI 绑定软件 subject。正式 local-final 确认单须绑定新任务、分支、base、subject、治理 head、独立验证者、清单和单次预算。本轮验收止于候选准备。\n4. 正式本机 V2 若另获批准，由独立验证者在独占离线环境执行一次完整收集。新变异动作经独立审核并单次批准后才可消费，固定五项均须 killed，14 项检查均须通过。实施审核须绑定本次真实快照，同一验证者在同一检出 finalize 后核对本地代码批准和 Gate。方案预算为 1 个隔离槽、90 分钟含清理，失败不重试。后置 CI 回放单独审批。\n\n## 禁止动作\n\n准备授权不含占正式槽、建立或消费正式变异动作批准、完整 V2 收集、finalize、CI 回放、签发、披露、远端写入、公开 CI 重跑或合并。原有任务和以往动作的批准不得转用。\n\n## 错误行为\n\n基线、文件字节、两段范围或验证者身份漂移时停止。正式阶段若准入不完整、首次失败、中断或清理余量不足，记录实况并停止，不补跑。\n\n## 回滚\n\n保留已有分支与账本。本候选仅在新的本地分支准备，撤回软件变更须保留追加式历史。\n",
+    "goal": "Prepare a local successor to the PR 194 workflow marker on main 6a4a6456, bind its software subject and request one separately approved local V2.",
+    "known_limitations": [
+      "Acceptance, integration, and targeted mutation execution are owned by Chapter 11."
+    ],
+    "reproduce_command": [
+      "python",
+      "-m",
+      "aiflow",
+      "verify",
+      "TASK-0186",
+      "--actor",
+      "<verifier>"
+    ]
+  },
+  "context_sha256": "c148c690af6680f8f4aa1f63a33085179ce5e27588d9d6c2726c6ce95e2a880a",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "schema_version": "1.0",
+  "spec_sha256": "87705df4f7d158f7ff36b258b04434776006ba49a3fa5db3d6137c22b1a621cf",
+  "subject_commit": "84a7bb14a3c673fb761452cc46d410f9f50f9b4b",
+  "task_id": "TASK-0186"
+}

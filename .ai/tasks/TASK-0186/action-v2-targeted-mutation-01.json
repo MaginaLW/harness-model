@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "62e1f8a2819ab12d718bbdb13fbe4376f38f8d3daf53039cdae7c9335c77b08c",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0186",
+  "subject_commit": "84a7bb14a3c673fb761452cc46d410f9f50f9b4b",
+  "parameter_summary": "Collect one complete offline native local V2 for the fixed workflow marker on new main using the original independent verifier and the five fixed mutation pairs.",
+  "conditions": [
+    "Repository b85e5a53-4935-4436-bdbc-c26a241bfae8 (MaginaLW/harness-model); branch codex/marker-6a4a6456-local; base 6a4a6456a323d62137d152849f3ca18114ba85bc; subject 84a7bb14a3c673fb761452cc46d410f9f50f9b4b; prepared ledger 7571a134003d33efc6ffd631101f4159bb21affe; #194 head 0bcd65dbf674afc688313c13f77b1db54fce6d39. Only TASK-0186 governance may differ.",
+    "DU-001 REVIEW/V2; spec 87705df4f7d158f7ff36b258b04434776006ba49a3fa5db3d6137c22b1a621cf; Policy 2.6.0 SHA256 72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e; verifier context c148c690af6680f8f4aa1f63a33085179ce5e27588d9d6c2726c6ce95e2a880a. Require an independent exact-action approval review and one current unused approval before the original verifier may collect.",
+    "One official local verify entry by ubuntu-independent-verifier-186. Manifest .ai/mutations/phase-02-critical-manifest.json 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0; native runner 029ef6707c58138f488af0bb8d40df3e0469b63ec85b641b7b5273bb5790894e. MUT-V2-001 through MUT-V2-005 each use their declared baseline and detector once. No direct runner invocation or retry.",
+    "One offline Ubuntu x86-64 slot. Lock 7e7fdadd96769f3c9968b46fef0ff48d7b8debef138a0673f3629a5cf7f0aa65; runtime tree 1da25b4aa4132e02fbf3cbb7007705db9b5971fad753486eb5be41baa94bc40a; wheel inventory a5fbb7b9a81a38a7e413fb976db0fee8d43a6e0b7d689dfcf6d0be88a31f04d9; seed e59899a2344b2649024f2f4d1f46e6928e31fa11bdb16a3c3f3b65f9e4c57edf. No host drives or credentials. Fixture-only temporary synthetic signatures are allowed; production signing zero.",
+    "Within the one slot and hard 90-minute window including cleanup: stop on first failure, interruption, timeout, drift, ambiguity or insufficient cleanup margin. Preserve evidence locally; only if all prechecks pass and the exact snapshot receives independent implementation APPROVE may the same verifier finalize once without recollection. Check local code approval and local Gate only when eligible. No old R2 originals, post-CI, disclosure, remote write, public CI, protection change, merge or retry. 3S and 3P0 HOLD. #194 and #186 stay open; TASK-0173 and G deferred.",
+    "Slot acquired 2026-11-22T08:32:45.273736Z. Stop before timed cleanup at 2026-11-22T10:00:45Z; release by 2026-11-22T10:02:45.273736Z. No extensions or second slot."
+  ],
+  "single_use": true,
+  "expires_at": "2026-11-22T10:02:45Z"
+}
