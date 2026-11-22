@@ -1,0 +1,13 @@
+{
+  "context_sha256": "d500d10107439816643142535874b2d202425946f7a3830db863c007b142e529",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-22T11:16:33Z",
+  "review_id": "REV-0002",
+  "review_stage": "implementation",
+  "reviewer": "independent-design-reviewer-187",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Reviewed TASK-0187 DU-001 at 366cd006d8eca8d7a48f8980cad3aa34cdc5a7d2. The reviewed verifier and test blobs select exactly one protected commitment domain, preserve v1 and v2 semantics, and require a round-free v3 body and matching SSHSIG protocol. The independently recomputed implementation context binds the fresh local V2 snapshot e45760e35d360f88edb1f1d797232252899343b432d1f579e4cd18d26c30e867. All 14 required checks passed, with 4,869 tests passed, 77 skipped, 168 verifier-module cases passed, no mapped changed lines, five fixed mutants killed, and one consumption of the final reviewed action. Core coverage was 17,417/19,389 (89.82928%). No open findings. Six original identities were captured at pre-review; comparison with those baselines belongs to finalization.",
+  "task_id": "TASK-0187"
+}

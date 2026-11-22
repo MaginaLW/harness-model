@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "eb508137bbe38efdd6e25e57b13522948e9274df9bca8c3382de03fd56777a09",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0187",
+  "subject_commit": "366cd006d8eca8d7a48f8980cad3aa34cdc5a7d2",
+  "parameter_summary": "One native V2 targeted mutation transaction, only from the complete local verify entry point for TASK-0187, run by ubuntu-independent-verifier-187 with the fixed five detectors.",
+  "conditions": [
+    "Repository b85e5a53-4935-4436-bdbc-c26a241bfae8, branch codex/pr197-receipt-verifier-v3, base 6a4a6456a323d62137d152849f3ca18114ba85bc, software subject 366cd006d8eca8d7a48f8980cad3aa34cdc5a7d2, ledger anchor 6aa53447abaab452d2822748a17aff013af62e8b, PR 197 reference head 74222ee5734c21588707cef46a225773caae963d.",
+    "Frozen specification 1e268eb8d89bcf814e776a77d86771e9ede8b3c56afa978d39a067ce0393b106, policy 72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e, classification eb508137bbe38efdd6e25e57b13522948e9274df9bca8c3382de03fd56777a09, verifier context 7fb6795f132b0be3742ab2c01c469f3341627d942d35662b735f3bfabf579364; implementer coordinator-187 and independent verifier ubuntu-independent-verifier-187.",
+    "Manifest 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0, runner 029ef6707c58138f488af0bb8d40df3e0469b63ec85b641b7b5273bb5790894e. Run MUT-V2-001 through MUT-V2-005 serially in native temporary worktrees, only the fixed detectors, per probe 60 seconds, baseline 0 and mutant 1, all five killed without timeout or infrastructure error; 14/14 complete local checks.",
+    "Time window 2026-11-22T11:03:57.980985Z to 2026-11-22T12:33:57.980985Z including cleanup. Reserve cleanup from 12:31:57.980985Z. One isolated offline Ubuntu slot, one collect, at most one consumption; first failure, interruption, timeout, drift, unclear result or insufficient cleanup time stops the run. No retries or extensions.",
+    "Runtime tree 1da25b4aa4132e02fbf3cbb7007705db9b5971fad753486eb5be41baa94bc40a; isolated checkout, locked 34 public wheels, public cache seed e59899a2344b2649024f2f4d1f46e6928e31fa11bdb16a3c3f3b65f9e4c57edf; fresh 35-package venv, candidate-local sources, fixture-only ephemeral Ed25519 signing. New originals remain in local custody; no prior TASK-0186 six private originals or old R2 inputs, credentials, host mounts, network, formal signing, CI replay, remote writes, paid calls or merge. 3S and 3P0 on hold; #194, #186, TASK-0173 and G untouched.",
+    "After pre-evidence passes, independent review must bind this subject, implementation context and snapshot. Only the same verifier may finalize in this same checkout with these new originals, without recollection. Keep distinct native exit codes and cleanup receipt; record remaining uncertainty if release evidence is incomplete."
+  ],
+  "single_use": true,
+  "expires_at": "2026-11-22T12:33:57.980985Z"
+}
