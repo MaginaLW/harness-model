@@ -69,8 +69,8 @@ goal: Implement the approved domain-bound round-free v3 receipt verifier for PR 
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-22T10:43:00Z'
-subject_commit: 6a4a6456a323d62137d152849f3ca18114ba85bc
+subject_commit: 366cd006d8eca8d7a48f8980cad3aa34cdc5a7d2
 task_id: TASK-0187
-updated_at: '2026-11-22T10:44:11Z'
+updated_at: '2026-11-22T10:48:12Z'
 worktree_dirty: false
 worktree_dirty_paths: []
