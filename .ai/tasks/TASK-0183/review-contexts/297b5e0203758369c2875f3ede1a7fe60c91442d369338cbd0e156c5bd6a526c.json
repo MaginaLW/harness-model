@@ -1,0 +1,37 @@
+{
+  "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+  "branch": "codex/marker-0171-main-alignment",
+  "classification_input_sha256": "bda489994f23a5182758ad1c22576b51702827f9fe41e6c2cd177f0ada6ce0fe",
+  "content": {
+    "allowed_scope": [
+      ".github/workflows/ai-quality-gate.yml",
+      "tests/integration/test_github_workflow.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Rebuild the TASK-0171 ordinary workflow marker on the current public main and prepare one private Ubuntu V2 decision.",
+        "impact_scope": [
+          ".github/workflows/ai-quality-gate.yml",
+          "tests/integration/test_github_workflow.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Rebuild the TASK-0171 ordinary workflow marker on the current public main and prepare one private Ubuntu V2 decision.",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "297b5e0203758369c2875f3ede1a7fe60c91442d369338cbd0e156c5bd6a526c",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "b5776fe3437125fe0703cccddb8fa68e773a384d0cfd5b6ebddaae5481e62b45",
+  "task_id": "TASK-0183"
+}
