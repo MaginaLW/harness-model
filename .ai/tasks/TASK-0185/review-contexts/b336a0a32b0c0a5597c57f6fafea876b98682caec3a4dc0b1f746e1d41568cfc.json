@@ -1,0 +1,193 @@
+{
+  "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+  "branch": "codex/pr194-receipt-verifier-v2",
+  "classification_input_sha256": "09d622402febb9ca65172fe16cc9aa8aa99c6f047b94508e0002bc9e97c73b49",
+  "content": {
+    "allowed_scope": [
+      "tools/ci/verify_private_replay_receipt.py",
+      ".github/workflows/private-replay-receipt.yml",
+      "tests/integration/test_private_replay_receipt.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Implement the approved opt-in PR 194 receipt verifier, successor to TASK-0184 with full V2 facts; local synthetic checks only",
+        "impact_scope": [
+          "tools/ci/verify_private_replay_receipt.py",
+          ".github/workflows/private-replay-receipt.yml",
+          "tests/integration/test_private_replay_receipt.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0185/approvals.json",
+        ".ai/tasks/TASK-0185/classification.json",
+        ".ai/tasks/TASK-0185/events.jsonl",
+        ".ai/tasks/TASK-0185/review-contexts/09a2a99f84d0116086b994a967eb6a77a4c043c95a0101557e900bbe54392c34.json",
+        ".ai/tasks/TASK-0185/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0185/spec.md",
+        ".ai/tasks/TASK-0185/task.yaml",
+        ".github/workflows/private-replay-receipt.yml",
+        "tests/integration/test_private_replay_receipt.py",
+        "tools/ci/verify_private_replay_receipt.py"
+      ],
+      "files": [
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0185/approvals.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0185/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0185/events.jsonl"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0185/review-contexts/09a2a99f84d0116086b994a967eb6a77a4c043c95a0101557e900bbe54392c34.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0185/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 34,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0185/spec.md"
+        },
+        {
+          "additions": 83,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0185/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 0,
+          "path": ".github/workflows/private-replay-receipt.yml"
+        },
+        {
+          "additions": 470,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_private_replay_receipt.py"
+        },
+        {
+          "additions": 394,
+          "binary": false,
+          "deletions": 18,
+          "path": "tools/ci/verify_private_replay_receipt.py"
+        }
+      ],
+      "totals": {
+        "additions": 1120,
+        "deletions": 18,
+        "files": 10
+      }
+    },
+    "goal": "Implement the approved opt-in PR 194 receipt verifier, successor to TASK-0184 with full V2 facts; local synthetic checks only",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0185",
+        "--actor",
+        "independent-verifier-185"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "b336a0a32b0c0a5597c57f6fafea876b98682caec3a4dc0b1f746e1d41568cfc",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870",
+  "subject_commit": "7858fa737d55ad923eb75f27c632465d364f6b92",
+  "task_id": "TASK-0185",
+  "verification_snapshot_sha256": "e7b87a9ee4b55ac4e814505249301236044f48f677f7e3e7887f2034a3560d1e"
+}

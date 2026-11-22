@@ -1,0 +1,13 @@
+{
+  "context_sha256": "09a2a99f84d0116086b994a967eb6a77a4c043c95a0101557e900bbe54392c34",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-22T06:45:51Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-design-reviewer-185",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Reviewed DU-001 against the frozen specification, existing v1 verifier and protected workflow, and the approved public protocol. The three-file design preserves the v1 wire contract and read-only permissions. The v2 approval commitment binds the exact approved bytes independently of the staging App. Acceptance requires the same authenticated staging record, signature domain, current main and run bindings, the exact marker-only workflow change, and a distinct account of the failed ordinary job and signed private result. Local implementation with synthetic inputs and temporary test keys is within scope. Formal REVIEW/V2 still requires independent verification, original mutation evidence and the applicable Gate. Production signing, remote actions and release require separate authorization. I previously reviewed protocol feasibility and did not author this task specification or its implementation.",
+  "task_id": "TASK-0185"
+}

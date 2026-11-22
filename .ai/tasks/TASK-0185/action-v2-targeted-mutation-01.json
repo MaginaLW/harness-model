@@ -1,0 +1,18 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "09d622402febb9ca65172fe16cc9aa8aa99c6f047b94508e0002bc9e97c73b49",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0185",
+  "subject_commit": "7858fa737d55ad923eb75f27c632465d364f6b92",
+  "parameter_summary": "Conduct exactly one offline native V2 mutation collection from the official full local verify entry point for TASK-0185. Use the fixed five manifest pairs and independent-verifier-185.",
+  "conditions": [
+    "Repository b85e5a53-4935-4436-bdbc-c26a241bfae8, branch codex/pr194-receipt-verifier-v2, base fa58164d1f3207bcf2e773aa2da02b81d36fcb44, subject 7858fa737d55ad923eb75f27c632465d364f6b92, ledger anchor 45173df4d88d147137234ec9e7f27209df0eb51c, PR 194 head 0bcd65dbf674afc688313c13f77b1db54fce6d39. No software changes. Only TASK-0185 governance differences permitted.",
+    "Frozen specification 0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870, Policy 72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e, REVIEW/V2 and DU-001. Require fresh independent design and exact action reviews and a single unspent unexpired action approval.",
+    "Use native .ai/mutations/phase-02-critical-manifest.json SHA-256 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0, IDs MUT-V2-001 through MUT-V2-005, one baseline and one mutant per declared detector, through the single complete formal collection. No substitute, rerun or direct runner call.",
+    "Only the original independent verifier independent-verifier-185 may collect; one exclusive Ubuntu x86-64 offline slot, lock SHA-256 7e7fdadd96769f3c9968b46fef0ff48d7b8debef138a0673f3629a5cf7f0aa65, no host mounts, credentials or old R2. Test fixtures may sign synthetic material temporarily. Production signing, 3S, 3P0, publishing, remote writes, public CI, repository settings and merging are excluded. #186 stays open; TASK-0173 and G deferred.",
+    "Single use; 90 minutes total from acquiring the slot including termination, cleanup and local preservation. Stop after the first failure, interruption, timeout or ambiguity; zero retries. If pre-evidence passes, require independent review of that exact snapshot and same-verifier finalization in the same checkout without recollection.",
+    "Slot acquired 2026-11-22T07:12:54.460650Z; stop collection before the reserved cleanup begins at 08:40:54Z and release by 08:42:54.460650Z on that date. No extension. Runtime tree 1da25b4aa4132e02fbf3cbb7007705db9b5971fad753486eb5be41baa94bc40a and public seed e59899a2344b2649024f2f4d1f46e6928e31fa11bdb16a3c3f3b65f9e4c57edf."
+  ],
+  "single_use": true,
+  "expires_at": "2026-11-22T08:42:55Z"
+}

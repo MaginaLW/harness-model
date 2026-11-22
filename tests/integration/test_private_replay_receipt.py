@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import subprocess
 import tempfile
@@ -409,6 +410,9 @@ def test_workflow_is_opt_in_read_only_and_executes_only_pinned_code() -> None:
     assert "checkout" not in bootstrap and "${{" not in bootstrap
     assert step["env"]["TRUSTED_WORKFLOW_SHA"] == "${{ vars.PRIVATE_REPLAY_WORKFLOW_SHA }}"
     assert step["env"]["VERIFIER_SHA256"] == "${{ vars.PRIVATE_REPLAY_VERIFIER_SHA256 }}"
+    assert (
+        step["env"]["V2_APPROVAL_COMMITMENT"] == "${{ vars.PRIVATE_REPLAY_V2_APPROVAL_COMMITMENT }}"
+    )
     required_order = [
         '"$GITHUB_WORKFLOW_SHA" == "$TRUSTED_WORKFLOW_SHA"',
         "contents/tools/ci/verify_private_replay_receipt.py?ref=$TRUSTED_WORKFLOW_SHA",
@@ -417,3 +421,469 @@ def test_workflow_is_opt_in_read_only_and_executes_only_pinned_code() -> None:
     ]
     positions = [bootstrap.index(part) for part in required_order]
     assert positions == sorted(positions)
+
+
+V2 = "aiflow-private-v2-receipt-v2"
+MERGE = "5" * 40
+CHECKS = (
+    "contract scope ruff_check ruff_format_check smoke unit_tests regression_tests mypy "
+    "coverage_xml diff_coverage acceptance integration targeted_mutation independent_verifier"
+).split()
+JOBS = "actions/runs/83/attempts/2/jobs?per_page=100"
+PROTECTED_RUN = "actions/runs/89"
+ORDINARY_CHECK = "check-runs/101"
+POLICY = ".ai/policy/verification-levels.yaml"
+
+
+def _git_contents(raw: bytes) -> Json:
+    oid = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
+    return {"sha": oid, "encoding": "base64", "content": base64.encodebytes(raw).decode("ascii")}
+
+
+def _attempt_steps() -> list[Json]:
+    rows = [
+        (1, "Set up job", "success"),
+        (2, f"Replay request merge={MERGE} workflow={MERGE}", "success"),
+        (3, "Run actions/checkout@v7", "success"),
+        (4, "Run actions/setup-python@v7", "success"),
+        (5, "Run astral-sh/setup-uv@v10.0.1", "success"),
+        (6, "Install locked project environment", "success"),
+        (7, "Resolve PR governance", "success"),
+        (8, "Attach exact PR head branch", "success"),
+        (9, "Read repository identity", "success"),
+        (10, "Validate contracts", "success"),
+        (11, "Validate retained task records", "skipped"),
+        (12, "Verify and Gate", "failure"),
+        (13, "Maintenance quality checks", "skipped"),
+        (14, "Upload AI Flow diagnostics", "success"),
+        (26, "Post Run astral-sh/setup-uv@v10.0.1", "skipped"),
+        (27, "Post Run actions/setup-python@v7", "skipped"),
+        (28, "Post Run actions/checkout@v7", "success"),
+        (29, "Complete job", "success"),
+    ]
+    return [
+        dict(number=n, name=name, status="completed", conclusion=result) for n, name, result in rows
+    ]
+
+
+@pytest.fixture
+def synthetic_fields(api: dict, evidence: Json) -> Json:
+    # Use synthetic bytes so a later checkout or a shallow clone does not alter the fixture.
+    checkout = b"      - uses: actions/checkout@v7\n"
+    before = b"jobs:\n  synthetic:\n    steps:\n" + checkout
+    insertion = (
+        b"      - name: Replay request merge=${{ github.sha }} "
+        b"workflow=${{ github.workflow_sha }}\n"
+        b"        run: ':'\n"
+    )
+    after = before.replace(checkout, insertion + checkout, 1)
+    for ref, raw in [(BASE, before), (HEAD, after), (MERGE, after)]:
+        api[f"contents/{ORDINARY}?ref={ref}"] = _git_contents(raw)
+    api[f"contents/{POLICY}?ref={BASE}"] = {"sha": "ec1511b24896fe5c7c169ec4c397c07eaa406ca8"}
+    for branch in ("base", "head"):
+        api[PR][branch]["repo"]["id"] = 73
+    for name in ("repository", "head_repository"):
+        api[RUN][name]["id"] = 73
+    api[RUN].update(
+        name="ai-quality-gate",
+        path=ORDINARY,
+        status="completed",
+        conclusion="failure",
+        check_suite_id=103,
+        referenced_workflows=[],
+    )
+    job = {
+        "id": 101,
+        "run_id": 83,
+        "run_attempt": 2,
+        "head_sha": HEAD,
+        "name": "ai-quality-gate",
+        "workflow_name": "ai-quality-gate",
+        "status": "completed",
+        "conclusion": "failure",
+        "steps": _attempt_steps(),
+        "check_run_url": f"https://api.github.com/repos/{REPO}/check-runs/101",
+    }
+    api[JOBS] = {"total_count": 1, "jobs": [job]}
+    api[ORDINARY_CHECK] = {
+        "id": 101,
+        "name": "ai-quality-gate",
+        "head_sha": HEAD,
+        "status": "completed",
+        "conclusion": "failure",
+        "check_suite": {"id": 103},
+        "app": {"id": 15368},
+        "details_url": f"https://github.com/{REPO}/actions/runs/83/job/101",
+    }
+    api[f"git/commits/{MERGE}"] = {"sha": MERGE, "parents": [{"sha": BASE}, {"sha": HEAD}]}
+    api[PROTECTED_RUN] = {
+        "id": 89,
+        "run_attempt": 3,
+        "head_sha": BASE,
+        "head_branch": "main",
+        "event": "workflow_dispatch",
+        "path": PROTECTED,
+        "repository": {"full_name": REPO},
+    }
+    api[f"compare/{BASE}...{SUBJECT}?per_page=1"]["files"] = [
+        {"filename": ORDINARY, "status": "modified"}
+    ]
+    api[f"compare/{SUBJECT}...{HEAD}?per_page=1"]["files"] = [
+        {"filename": f".ai/tasks/{TASK}/approvals.json", "status": "modified"}
+    ]
+    evidence["checks"] = [dict(evidence["checks"][0], check_id=name) for name in CHECKS]
+    evidence["verification_snapshot_sha256"] = verification_snapshot_sha256(evidence)
+    api[EVIDENCE] = _contents(evidence)
+    return {
+        "repository": REPO,
+        "github_repository_id": 73,
+        "pr": 71,
+        "task_id": TASK,
+        "decision_unit_ids": evidence["decision_unit_ids"],
+        "head_ref": BRANCH,
+        "base": BASE,
+        "subject": SUBJECT,
+        "head": HEAD,
+        "ordinary": {
+            "workflow_path": ORDINARY,
+            "workflow_id": 79,
+            "event": "pull_request",
+            "run_id": 83,
+            "run_attempt": 2,
+            "check_run_id": 101,
+            "app_id": 15368,
+            "conclusion": "failure",
+            "merge_sha": MERGE,
+            "merge_parents": [BASE, HEAD],
+            "workflow_sha": MERGE,
+            "base_workflow_blob": _git_contents(before)["sha"],
+            "head_workflow_blob": _git_contents(after)["sha"],
+            "executed_workflow_blob": _git_contents(after)["sha"],
+        },
+        "replay": {
+            "round": "R2",
+            "attestation": {
+                "mode": "ci",
+                "verification_level": "V2",
+                "phase": "pre_implementation_review",
+                "conclusion": "passed",
+                "attestation_head": HEAD,
+                "attestation_governance_only": True,
+            },
+            "checks_passed": list(CHECKS),
+            "existing_mutations_killed": 5,
+            "new_mutation_actions": 0,
+            "pytest_passed": 37,
+            "pytest_skipped": 2,
+            "core_coverage": {
+                "lines-covered": 97,
+                "lines-valid": 100,
+                "branches-covered": 19,
+                "branches-valid": 20,
+            },
+            "no_mapped_core_diff": True,
+            "maintenance_exit_codes": dict.fromkeys(
+                [
+                    "maintenance_coverage",
+                    "whitespace",
+                    "maintenance_lint",
+                    "maintenance_format",
+                    "maintenance_mypy",
+                ],
+                0,
+            ),
+            "gate": {
+                "route": "REVIEW",
+                "verification_level": "V2",
+                "passed": True,
+                "reason_codes": [],
+                "exit_code": 0,
+            },
+        },
+        "evidence": {
+            "spec_sha256": evidence["spec_sha256"],
+            "policy_sha256": evidence["policy_sha256"],
+            "classification_input_sha256": evidence["classification_input_sha256"],
+            "local_final_snapshot": evidence["verification_snapshot_sha256"],
+            "mutation_evidence_sha256": MUTATION,
+            **{
+                name: hashlib.sha256(("synthetic/" + name).encode()).hexdigest()
+                for name in ["redacted_receipt_sha256", "ci_sha256", "ci_snapshot", "gate_sha256"]
+            },
+        },
+    }
+
+
+@pytest.fixture
+def v2_fields(synthetic_fields: Json, monkeypatch: pytest.MonkeyPatch) -> Json:
+    ordinary = synthetic_fields["ordinary"]
+    monkeypatch.setattr(verifier, "_BASE_WORKFLOW_BLOB", ordinary["base_workflow_blob"])
+    monkeypatch.setattr(verifier, "_MARKED_WORKFLOW_BLOB", ordinary["head_workflow_blob"])
+    return synthetic_fields
+
+
+def _stage_v2(env: dict, api: dict, body: str, key: Path, namespace: str = V2) -> None:
+    raw_digest = hashlib.sha256(body.encode("utf-8")).digest()
+    env["V2_APPROVAL_COMMITMENT"] = hashlib.sha256(V2.encode() + b"\0" + raw_digest).hexdigest()
+    key_blob = base64.b64decode(env["RECEIPT_PUBLIC_KEY"].split()[1])
+    fingerprint = base64.b64encode(hashlib.sha256(key_blob).digest()).decode("ascii").rstrip("=")
+    statement = {
+        "protocol": V2,
+        "algorithm": "ssh-ed25519",
+        "signer_fingerprint": f"SHA256:{fingerprint}",
+        "protected_workflow_ref": PROTECTED_REF,
+        "protected_workflow_sha": env["TRUSTED_WORKFLOW_SHA"],
+        "verifier_sha256": VERIFIER,
+        "engine_sha256": ENGINE,
+        "protected_run": 89,
+        "protected_attempt": 3,
+        "app_id": 91,
+        "staging_check_id": 97,
+        "final_check_name": "private-v2-receipt/verified",
+        "fixed_fields_sha256": raw_digest.hex(),
+    }
+    wire = json.dumps(statement, separators=(",", ":"), sort_keys=True).encode("ascii")
+    api[CHECK]["output"] = {"summary": _sign(key, wire, namespace), "text": body}
+
+
+def _document(fields: Json) -> str:
+    return json.dumps(fields, indent=2) + "\n"
+
+
+def test_v2_accepts_independent_sshsig_on_approved_fields(env, api, v2_fields, keys) -> None:
+    _stage_v2(env, api, _document(v2_fields), keys[0])
+    verifier.verify(env, api.__getitem__)
+
+
+def test_v2_production_pins_reject_synthetic_workflows(env, api, synthetic_fields, keys) -> None:
+    # These two Git blob IDs were independently reviewed for the historical marker change.
+    assert verifier._BASE_WORKFLOW_BLOB == "e8f71c6a189446b0ba8f5b61e22cbd8ea9b7c2d9"
+    assert verifier._MARKED_WORKFLOW_BLOB == "5027a41d3fbc9b64e189b6d6c337636a4b5c4e37"
+    _stage_v2(env, api, _document(synthetic_fields), keys[0])
+    with pytest.raises(ValueError, match="Unreviewed ordinary workflow"):
+        verifier.verify(env, api.__getitem__)
+
+
+def test_v2_rejects_optional_duplicate_of_required_local_final_check(
+    env, api, evidence, v2_fields, keys
+) -> None:
+    evidence["checks"].append(dict(evidence["checks"][0], required=False))
+    snapshot = verification_snapshot_sha256(evidence)
+    evidence["verification_snapshot_sha256"] = snapshot
+    api[EVIDENCE] = _contents(evidence)
+    v2_fields["evidence"]["local_final_snapshot"] = snapshot
+    _stage_v2(env, api, _document(v2_fields), keys[0])
+    with pytest.raises(ValueError, match="Duplicate final check ID"):
+        verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize(
+    ("section", "field", "value"),
+    [
+        ("ordinary", "conclusion", "success"),
+        ("ordinary", "run_attempt", 1),
+        ("ordinary", "merge_parents", [HEAD, BASE]),
+        ("ordinary", "workflow_sha", HEAD),
+        ("ordinary", "executed_workflow_blob", WORKFLOW_BLOB),
+        ("replay", "checks_passed", CHECKS[:-1] + [CHECKS[0]]),
+        ("replay", "existing_mutations_killed", 4),
+        ("replay", "new_mutation_actions", False),
+        ("replay", "no_mapped_core_diff", False),
+        ("attestation", "attestation_head", SUBJECT),
+        ("gate", "exit_code", False),
+        ("maintenance_exit_codes", "maintenance_lint", 1),
+        ("core_coverage", "lines-covered", 10),
+        ("evidence", "spec_sha256", "f" * 64),
+        ("evidence", "ci_sha256", "z" * 64),
+        ("evidence", "local_final_snapshot", "0" * 64),
+    ],
+)
+def test_v2_even_authorized_and_signed_fields_require_semantics(
+    env, api, v2_fields, keys, section, field, value
+) -> None:
+    parent = v2_fields if section in v2_fields else v2_fields["replay"]
+    parent[section][field] = value
+    _stage_v2(env, api, _document(v2_fields), keys[0])
+    with pytest.raises(ValueError):
+        verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        "missing pin",
+        "wrong pin",
+        "changed text",
+        "changed signature",
+        "runtime",
+        "key",
+        "v1 domain",
+    ],
+)
+def test_v2_requires_independent_approval_and_authentic_sshsig(
+    env, api, v2_fields, keys, case
+) -> None:
+    key = keys[1] if case == "key" else keys[0]
+    _stage_v2(env, api, _document(v2_fields), key, DOMAIN if case == "v1 domain" else V2)
+    if case == "missing pin":
+        del env["V2_APPROVAL_COMMITMENT"]
+    elif case == "wrong pin":
+        env["V2_APPROVAL_COMMITMENT"] = "a" * 64
+    elif case == "changed text":
+        api[CHECK]["output"]["text"] = _document(
+            dict(v2_fields, replay=dict(v2_fields["replay"], pytest_passed=38))
+        )
+    elif case == "changed signature":
+        armor = api[CHECK]["output"]["summary"].splitlines()
+        raw = bytearray(base64.b64decode("".join(armor[1:-1])))
+        raw[-1] ^= 1
+        api[CHECK]["output"]["summary"] = "\n".join(
+            [armor[0], base64.encodebytes(raw).decode("ascii").rstrip(), armor[-1], ""]
+        )
+    elif case == "runtime":
+        env["ENGINE_SHA256"] = "d" * 64
+    with pytest.raises(ValueError):
+        verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize("raw_edit", ["unknown field", "duplicate key", "no final LF"])
+def test_v2_rejects_approved_malformed_documents(env, api, v2_fields, keys, raw_edit) -> None:
+    body = _document(v2_fields)
+    if raw_edit == "unknown field":
+        body = _document(dict(v2_fields, extra="unapproved shape"))
+    elif raw_edit == "duplicate key":
+        body = body.replace('"pr": 71', '"pr": 71, "pr": 71')
+    else:
+        body = body.rstrip("\n")
+    _stage_v2(env, api, body, keys[0])
+    with pytest.raises(ValueError):
+        verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize("drift", ["protected attempt", "ordinary attempt", "staging text"])
+def test_v2_rechecks_api_after_signature_verification(env, api, v2_fields, keys, drift) -> None:
+    _stage_v2(env, api, _document(v2_fields), keys[0])
+    target = {"protected attempt": PROTECTED_RUN, "ordinary attempt": RUN, "staging text": CHECK}[
+        drift
+    ]
+    observations = 0
+
+    def read(path: str) -> Json:
+        nonlocal observations
+        if path == target:
+            observations += 1
+            if observations == 2:
+                if target == CHECK:
+                    api[target]["output"]["text"] += "\n"
+                else:
+                    api[target]["run_attempt"] += 1
+        return api[path]
+
+    with pytest.raises(ValueError):
+        verifier.verify(env, read)
+    assert observations == 2
+
+
+@pytest.mark.parametrize(
+    ("path", "fields", "value"),
+    [
+        (JOBS, ("total_count",), 2),
+        (JOBS, ("jobs", 0, "steps", 2, "conclusion"), "skipped"),
+        (JOBS, ("jobs", 0, "steps", 1, "name"), f"Replay request merge={MERGE} workflow={HEAD}"),
+        (RUN, ("referenced_workflows",), [{"path": "other/workflow.yml", "sha": BASE}]),
+        (ORDINARY_CHECK, ("check_suite", "id"), 111),
+        (ORDINARY_CHECK, ("app", "id"), 92),
+        (CHECK, ("app", "id"), 92),
+        (f"git/commits/{MERGE}", ("parents",), [{"sha": HEAD}, {"sha": BASE}]),
+        (f"contents/{ORDINARY}?ref={HEAD}", ("content",), base64.b64encode(b"unreviewed").decode()),
+        (
+            f"compare/{BASE}...{SUBJECT}?per_page=1",
+            ("files",),
+            [
+                {"filename": ORDINARY, "status": "modified"},
+                {"filename": "src/aiflow/gate.py", "status": "modified"},
+            ],
+        ),
+        (
+            f"compare/{SUBJECT}...{HEAD}?per_page=1",
+            ("files",),
+            [
+                {"filename": "src/aiflow/gate.py", "status": "modified"},
+            ],
+        ),
+    ],
+)
+def test_v2_binds_signed_results_to_independent_github_facts(
+    env, api, v2_fields, keys, path, fields, value
+) -> None:
+    _stage_v2(env, api, _document(v2_fields), keys[0])
+    target = api[path]
+    for field in fields[:-1]:
+        target = target[field]
+    target[fields[-1]] = value
+    with pytest.raises(ValueError):
+        verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize(
+    ("refresh_local_final", "reason"),
+    [(False, "Invalid public final evidence"), (True, "Fixed R2 fields differ")],
+)
+def test_v2_rejects_old_r2_on_consistent_new_protected_main(
+    env, api, evidence, v2_fields, keys, refresh_local_final, reason
+) -> None:
+    # A real main advance changes every live main pointer, not just the launch environment.
+    new_base, new_merge = "6" * 40, "7" * 40
+    for name in ("TRUSTED_WORKFLOW_SHA", "GITHUB_SHA", "GITHUB_WORKFLOW_SHA"):
+        env[name] = new_base
+    api[MAIN]["object"]["sha"] = new_base
+    api[PR]["base"]["sha"] = new_base
+    new_run_id = 84
+    env["ORDINARY_RUN_ID"] = str(new_run_id)
+    new_run = dict(api[RUN], id=new_run_id, check_suite_id=104)
+    new_run["pull_requests"] = [{"number": 71, "base": {"sha": new_base}, "head": {"sha": HEAD}}]
+    api[f"actions/runs/{new_run_id}"] = new_run
+    job = dict(
+        api[JOBS]["jobs"][0],
+        id=102,
+        run_id=new_run_id,
+        steps=_attempt_steps(),
+        check_run_url=f"https://api.github.com/repos/{REPO}/check-runs/102",
+    )
+    job["steps"][1]["name"] = f"Replay request merge={new_merge} workflow={new_merge}"
+    api[f"actions/runs/{new_run_id}/attempts/2/jobs?per_page=100"] = {
+        "total_count": 1,
+        "jobs": [job],
+    }
+    api["check-runs/102"] = dict(
+        api[ORDINARY_CHECK],
+        id=102,
+        check_suite={"id": 104},
+        details_url=f"https://github.com/{REPO}/actions/runs/{new_run_id}/job/102",
+    )
+    api[PROTECTED_RUN]["head_sha"] = new_base
+    api[f"git/commits/{new_merge}"] = {
+        "sha": new_merge,
+        "parents": [{"sha": new_base}, {"sha": HEAD}],
+    }
+    api[f"contents/{ORDINARY}?ref={new_merge}"] = api[f"contents/{ORDINARY}?ref={MERGE}"]
+    for path in (ORDINARY, POLICY):
+        api[f"contents/{path}?ref={new_base}"] = api[f"contents/{path}?ref={BASE}"]
+    old_compare = api[f"compare/{BASE}...{SUBJECT}?per_page=1"]
+    api[f"compare/{new_base}...{SUBJECT}?per_page=1"] = {
+        **old_compare,
+        "merge_base_commit": {"sha": new_base},
+    }
+    if refresh_local_final:
+        evidence["base_commit"] = new_base
+        evidence["verification_snapshot_sha256"] = verification_snapshot_sha256(evidence)
+        api[EVIDENCE] = _contents(evidence)
+    _stage_v2(env, api, _document(v2_fields), keys[0])
+    with pytest.raises(ValueError, match=reason):
+        verifier.verify(env, api.__getitem__)
+
+
+def test_v2_pin_disallows_v1_fallback_even_for_valid_v1_signature(env, api) -> None:
+    env["V2_APPROVAL_COMMITMENT"] = "d" * 64
+    with pytest.raises(ValueError):
+        verifier.verify(env, api.__getitem__)

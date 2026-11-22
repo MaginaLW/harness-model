@@ -49,6 +49,7 @@ jobs:
           ENGINE_SHA256: ${{ vars.PRIVATE_REPLAY_ENGINE_SHA256 }}
           RECEIPT_PUBLIC_KEY: ${{ vars.PRIVATE_REPLAY_PUBLIC_KEY }}
           RECEIPT_APP_ID: ${{ vars.PRIVATE_REPLAY_APP_ID }}
+          V2_APPROVAL_COMMITMENT: ${{ vars.PRIVATE_REPLAY_V2_APPROVAL_COMMITMENT }}
         run: |
           set -euo pipefail
           umask 077

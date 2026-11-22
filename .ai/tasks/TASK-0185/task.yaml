@@ -1,0 +1,83 @@
+allowed_scope:
+- tools/ci/verify_private_replay_receipt.py
+- .github/workflows/private-replay-receipt.yml
+- tests/integration/test_private_replay_receipt.py
+base_commit: fa58164d1f3207bcf2e773aa2da02b81d36fcb44
+branch: codex/pr194-receipt-verifier-v2
+created_at: '2026-11-22T06:44:36Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Implement the approved opt-in PR 194 receipt verifier, successor to TASK-0184
+    with full V2 facts; local synthetic checks only
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  impact_scope:
+  - tools/ci/verify_private_replay_receipt.py
+  - .github/workflows/private-replay-receipt.yml
+  - tests/integration/test_private_replay_receipt.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0185
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- push
+- merge
+- private_evidence_access
+- formal_signing
+- github_check_write
+- public_ci_rerun
+- repository_settings
+- 3S
+- 3P0
+frozen_spec_sha256: 0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870
+goal: Implement the approved opt-in PR 194 receipt verifier, successor to TASK-0184
+  with full V2 facts; local synthetic checks only
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-22T06:44:51Z'
+subject_commit: 7858fa737d55ad923eb75f27c632465d364f6b92
+task_id: TASK-0185
+updated_at: '2026-11-22T07:28:11Z'
+worktree_dirty: true
+worktree_dirty_paths:
+- .ai/tasks/TASK-0184/approvals.json
+- .ai/tasks/TASK-0184/classification.json
+- .ai/tasks/TASK-0184/events.jsonl
+- .ai/tasks/TASK-0184/spec.md
+- .ai/tasks/TASK-0184/task.yaml

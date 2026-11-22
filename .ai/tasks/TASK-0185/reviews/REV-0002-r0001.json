@@ -1,0 +1,13 @@
+{
+  "context_sha256": "0eebea8567041b2bcef22908b5e5a8be710aaa9b70b055b4036160241c96a62f",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-22T07:14:30Z",
+  "review_id": "REV-0002",
+  "review_stage": "design",
+  "reviewer": "independent-design-reviewer-185",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Reviewed recovered TASK-0185 DU-001 at software subject 7858fa737d55ad923eb75f27c632465d364f6b92 under classification 09d622402febb9ca65172fe16cc9aa8aa99c6f047b94508e0002bc9e97c73b49. Frozen scope preserves v1 and requires protected v2 approval, authenticated staging and current workflow bindings. The owner-authorized single offline native REVIEW/V2 retains its independent action and final evidence gates; production signing and remote activation stay on hold.",
+  "task_id": "TASK-0185"
+}
