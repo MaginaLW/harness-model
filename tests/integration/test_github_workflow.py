@@ -83,7 +83,13 @@ def test_workflow_attaches_exact_event_head_to_the_pr_source_branch() -> None:
     steps = workflow["jobs"]["ai-quality-gate"]["steps"]
     assert isinstance(steps, list)
 
-    checkout = steps[0]
+    marker, checkout = steps[:2]
+    assert marker == {
+        "name": "Replay request merge=${{ github.sha }} workflow=${{ github.workflow_sha }}",
+        "run": ":",
+    }
+    assert sum(step.get("name") == marker["name"] for step in steps) == 1
+    assert checkout["uses"] == "actions/checkout@v7"
     assert checkout["with"] == {
         "fetch-depth": "0",
         "ref": "${{ github.event.pull_request.head.sha }}",

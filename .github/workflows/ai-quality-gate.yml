@@ -19,6 +19,8 @@ jobs:
     # evaluation, diagnostics, and runner variance.
     timeout-minutes: 90
     steps:
+      - name: Replay request merge=${{ github.sha }} workflow=${{ github.workflow_sha }}
+        run: ':'
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
