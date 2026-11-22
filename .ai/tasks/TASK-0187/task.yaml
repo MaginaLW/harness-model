@@ -4,7 +4,7 @@ allowed_scope:
 base_commit: 6a4a6456a323d62137d152849f3ca18114ba85bc
 branch: codex/pr197-receipt-verifier-v3
 created_at: '2026-11-22T10:42:15Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -71,6 +71,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-22T10:43:00Z'
 subject_commit: 366cd006d8eca8d7a48f8980cad3aa34cdc5a7d2
 task_id: TASK-0187
-updated_at: '2026-11-22T11:20:43Z'
+updated_at: '2026-11-22T11:43:05Z'
 worktree_dirty: false
 worktree_dirty_paths: []
