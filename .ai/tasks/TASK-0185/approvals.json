@@ -12,5 +12,51 @@
     "spec_sha256": "0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870",
     "subject_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
     "task_id": "TASK-0185"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-22T07:15:23Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Owner approved the original REVIEW/V2 recovery. Fresh design REV-0002 on 0eebea8567041b2bcef22908b5e5a8be710aaa9b70b055b4036160241c96a62f approved, no findings, scope and frozen spec unchanged.",
+    "schema_version": "1.0",
+    "spec_sha256": "0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870",
+    "subject_commit": "7858fa737d55ad923eb75f27c632465d364f6b92",
+    "task_id": "TASK-0185"
+  },
+  {
+    "action_sha256": "70e964611433affeb7a24dc31fd16fa1cf219b85a2dd727458d289c0b813a389",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-22T07:15:24Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-22T08:42:55Z",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Owner authorized one exact local formal V2, subject 7858fa73, anchor 45173df4. Independent action reviewer independent-design-reviewer-185 approved at 2026-11-22T07:14:30Z, findings empty, file SHA256 7a3ee1fdeee8185e43477eb139b648adeebbeadbf4b8509163365f3580aa8230, canonical 70e964611433affeb7a24dc31fd16fa1cf219b85a2dd727458d289c0b813a389. Five fixed native pairs, original verifier, one offline slot, hard stop including cleanup, no retry, no production signing or remote operations.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870",
+    "subject_commit": "7858fa737d55ad923eb75f27c632465d364f6b92",
+    "task_id": "TASK-0185"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-22T07:28:11Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "9eaeca9c5446b7f376bdd80f89a4f5bcf11fa56bac7b6d65cf351de39aff746a",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Independent implementation review REV-0003 APPROVE, zero open findings, subject 7858fa73, verification snapshot e7b87a9ee4b55ac4e814505249301236044f48f677f7e3e7887f2034a3560d1e. Same independent verifier finalized local V2, final file ee63c065b07cd4c8579972e4edfa11b164c34cef049a862ad8fb9dac75bf5788, all 14 checks passed and 5 native mutations killed. Local code approval only. Owner prohibits remote writes and merge.",
+    "schema_version": "1.0",
+    "spec_sha256": "0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870",
+    "subject_commit": "7858fa737d55ad923eb75f27c632465d364f6b92",
+    "task_id": "TASK-0185"
   }
 ]

@@ -5,7 +5,7 @@ allowed_scope:
 base_commit: fa58164d1f3207bcf2e773aa2da02b81d36fcb44
 branch: codex/pr194-receipt-verifier-v2
 created_at: '2026-11-22T06:44:36Z'
-current_state: BLOCKED
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -73,7 +73,7 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-22T06:44:51Z'
 subject_commit: 7858fa737d55ad923eb75f27c632465d364f6b92
 task_id: TASK-0185
-updated_at: '2026-11-22T06:55:48Z'
+updated_at: '2026-11-22T07:28:11Z'
 worktree_dirty: true
 worktree_dirty_paths:
 - .ai/tasks/TASK-0184/approvals.json
