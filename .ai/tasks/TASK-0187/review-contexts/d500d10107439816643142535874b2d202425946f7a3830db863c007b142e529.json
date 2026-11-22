@@ -1,0 +1,184 @@
+{
+  "base_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+  "branch": "codex/pr197-receipt-verifier-v3",
+  "classification_input_sha256": "eb508137bbe38efdd6e25e57b13522948e9274df9bca8c3382de03fd56777a09",
+  "content": {
+    "allowed_scope": [
+      "tools/ci/verify_private_replay_receipt.py",
+      "tests/integration/test_private_replay_receipt.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Implement the approved domain-bound round-free v3 receipt verifier for PR 197; synthetic local verification only in this phase",
+        "impact_scope": [
+          "tools/ci/verify_private_replay_receipt.py",
+          "tests/integration/test_private_replay_receipt.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0187/approvals.json",
+        ".ai/tasks/TASK-0187/classification.json",
+        ".ai/tasks/TASK-0187/events.jsonl",
+        ".ai/tasks/TASK-0187/review-contexts/df95ea6a938a8c67e0eb1671f5f021cf2300c31ed74aefb0b2e5bc4ee4bfccc1.json",
+        ".ai/tasks/TASK-0187/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0187/spec.md",
+        ".ai/tasks/TASK-0187/task.yaml",
+        "tests/integration/test_private_replay_receipt.py",
+        "tools/ci/verify_private_replay_receipt.py"
+      ],
+      "files": [
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0187/approvals.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0187/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0187/events.jsonl"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0187/review-contexts/df95ea6a938a8c67e0eb1671f5f021cf2300c31ed74aefb0b2e5bc4ee4bfccc1.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0187/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 32,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0187/spec.md"
+        },
+        {
+          "additions": 76,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0187/task.yaml"
+        },
+        {
+          "additions": 134,
+          "binary": false,
+          "deletions": 25,
+          "path": "tests/integration/test_private_replay_receipt.py"
+        },
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 28,
+          "path": "tools/ci/verify_private_replay_receipt.py"
+        }
+      ],
+      "totals": {
+        "additions": 409,
+        "deletions": 53,
+        "files": 9
+      }
+    },
+    "goal": "Implement the approved domain-bound round-free v3 receipt verifier for PR 197; synthetic local verification only in this phase",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0187",
+        "--actor",
+        "ubuntu-independent-verifier-187"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "d500d10107439816643142535874b2d202425946f7a3830db863c007b142e529",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "1e268eb8d89bcf814e776a77d86771e9ede8b3c56afa978d39a067ce0393b106",
+  "subject_commit": "366cd006d8eca8d7a48f8980cad3aa34cdc5a7d2",
+  "task_id": "TASK-0187",
+  "verification_snapshot_sha256": "e45760e35d360f88edb1f1d797232252899343b432d1f579e4cd18d26c30e867"
+}

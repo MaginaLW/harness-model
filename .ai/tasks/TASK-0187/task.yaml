@@ -1,0 +1,76 @@
+allowed_scope:
+- tools/ci/verify_private_replay_receipt.py
+- tests/integration/test_private_replay_receipt.py
+base_commit: 6a4a6456a323d62137d152849f3ca18114ba85bc
+branch: codex/pr197-receipt-verifier-v3
+created_at: '2026-11-22T10:42:15Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Implement the approved domain-bound round-free v3 receipt verifier for PR
+    197; synthetic local verification only in this phase
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  impact_scope:
+  - tools/ci/verify_private_replay_receipt.py
+  - tests/integration/test_private_replay_receipt.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0187
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- push
+- merge
+- private_evidence_access
+- formal_signing
+- github_check_write
+- public_ci_rerun
+- repository_settings
+- 3S
+- 3P0
+frozen_spec_sha256: 1e268eb8d89bcf814e776a77d86771e9ede8b3c56afa978d39a067ce0393b106
+goal: Implement the approved domain-bound round-free v3 receipt verifier for PR 197;
+  synthetic local verification only in this phase
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-22T10:43:00Z'
+subject_commit: 366cd006d8eca8d7a48f8980cad3aa34cdc5a7d2
+task_id: TASK-0187
+updated_at: '2026-11-22T11:20:43Z'
+worktree_dirty: false
+worktree_dirty_paths: []

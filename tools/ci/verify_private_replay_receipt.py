@@ -17,6 +17,7 @@ ORDINARY = ".github/workflows/ai-quality-gate.yml"
 PROTECTED = ".github/workflows/private-replay-receipt.yml"
 NAMESPACE = "aiflow-private-v2-receipt-v1"
 V2_NAMESPACE = "aiflow-private-v2-receipt-v2"
+V3_NAMESPACE = "aiflow-private-v2-receipt-v3"
 V2_CHECKS = frozenset(
     "contract scope ruff_check ruff_format_check smoke unit_tests regression_tests mypy "
     "coverage_xml diff_coverage acceptance integration "
@@ -257,7 +258,7 @@ def ordinary_observation(
 
 
 def request_bindings(
-    env: Mapping[str, str], read: READ, *, v2: bool
+    env: Mapping[str, str], read: READ, *, with_fixed_fields: bool
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Authenticate the request and collect independently observable public fields."""
     sha = r"[0-9a-f]{40}"
@@ -309,7 +310,7 @@ def request_bindings(
         "Ordinary workflow binding mismatch",
     )
     observed: dict[str, Any] = {}
-    if v2:
+    if with_fixed_fields:
         ordinary = ordinary_observation(read, run, trusted, head_sha)
         original_blob = ordinary["base_workflow_blob"]
         repository_id = base["repo"]["id"]
@@ -363,9 +364,9 @@ def request_bindings(
     for ancestor, descendant in ((trusted, subject), (subject, head_sha)):
         comparison = read(f"compare/{ancestor}...{descendant}?per_page=1")
         require(comparison["merge_base_commit"]["sha"] == ancestor, "Subject ancestry mismatch")
-        if v2:
+        if with_fixed_fields:
             check_marker_scope(comparison["files"], task, software=ancestor == trusted)
-    if v2:
+    if with_fixed_fields:
         # This stdlib-only verifier supports the frozen policy that defines the fourteen checks.
         policy = read(f"contents/.ai/policy/verification-levels.yaml?ref={trusted}")
         require(policy["sha"] == "ec1511b24896fe5c7c169ec4c397c07eaa406ca8", "Unreviewed V2 policy")
@@ -426,7 +427,7 @@ def request_bindings(
 
 def statement_for(env: Mapping[str, str], read: READ) -> dict[str, object]:
     """The original v1 wire statement."""
-    return request_bindings(env, read, v2=False)[0]
+    return request_bindings(env, read, with_fixed_fields=False)[0]
 
 
 def staged_output(statement: Mapping[str, object], read: READ) -> tuple[str, object]:
@@ -469,7 +470,7 @@ def unique_fields(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 def count(value: object, minimum: int = 0) -> int:
     if type(value) is not int or value < minimum:
-        raise ValueError("Invalid R2 measurement")
+        raise ValueError("Invalid replay measurement")
     return value
 
 
@@ -477,7 +478,7 @@ def expected_replay(replay: Mapping[str, Any], head: str) -> dict[str, Any]:
     checks = replay["checks_passed"]
     require(
         isinstance(checks, list) and len(checks) == len(V2_CHECKS) and set(checks) == V2_CHECKS,
-        "Incomplete R2 checks",
+        "Incomplete replay checks",
     )
     coverage = replay["core_coverage"]
     totals = {
@@ -495,7 +496,6 @@ def expected_replay(replay: Mapping[str, Any], head: str) -> dict[str, Any]:
         "Core coverage below threshold",
     )
     return {
-        "round": "R2",
         "attestation": {
             "mode": "ci",
             "verification_level": "V2",
@@ -531,28 +531,34 @@ def expected_replay(replay: Mapping[str, Any], head: str) -> dict[str, Any]:
     }
 
 
-def v2_statement(
+def approved_statement(
     bindings: Mapping[str, Any], observed: dict[str, Any], text: object, commitment: str, key: str
 ) -> dict[str, Any]:
     if not isinstance(text, str) or not 0 < len(text) <= 16384:
-        raise ValueError("Missing or oversized R2 text")
+        raise ValueError("Missing or oversized receipt text")
     body = text.encode("utf-8")
-    require(len(body) <= 16384 and body.endswith(b"\n"), "Invalid R2 wire bytes")
+    require(len(body) <= 16384 and body.endswith(b"\n"), "Invalid receipt wire bytes")
     digest = hashlib.sha256(body).digest()
-    require(
-        hashlib.sha256(V2_NAMESPACE.encode("ascii") + b"\0" + digest).hexdigest() == commitment,
-        "Unapproved fixed fields",
-    )
+    # Only the protected commitment selects the protocol, before interpreting any fields.
+    matches = [
+        namespace
+        for namespace in (V2_NAMESPACE, V3_NAMESPACE)
+        if hashlib.sha256(namespace.encode("ascii") + b"\0" + digest).hexdigest() == commitment
+    ]
+    require(len(matches) == 1, "Unapproved or ambiguous fixed fields")
+    namespace = matches[0]
     fixed = json.loads(body, object_pairs_hook=unique_fields)
     observed["replay"] = expected_replay(fixed["replay"], bindings["head"])
+    if namespace == V2_NAMESPACE:
+        observed["replay"]["round"] = "R2"
     for name in ("redacted_receipt_sha256", "ci_sha256", "ci_snapshot", "gate_sha256"):
         observed["evidence"][name] = field(fixed["evidence"][name], r"[0-9a-f]{64}", name)
     # Compare the entire schema, including extra keys, JSON types (false vs 0) and nested values.
-    require(canonical(fixed) == canonical(observed), "Fixed R2 fields differ from expected")
+    require(canonical(fixed) == canonical(observed), "Fixed receipt fields differ from expected")
     key_blob = base64.b64decode(key.split()[1], validate=True)
     fingerprint = base64.b64encode(hashlib.sha256(key_blob).digest()).decode("ascii").rstrip("=")
     return {
-        "protocol": V2_NAMESPACE,
+        "protocol": namespace,
         "algorithm": "ssh-ed25519",
         "signer_fingerprint": "SHA256:" + fingerprint,
         "protected_workflow_ref": bindings["protected_workflow"],
@@ -587,18 +593,15 @@ def check_protected_run(bindings: Mapping[str, Any], read: READ) -> None:
 def verify(env: Mapping[str, str], read: READ) -> None:
     try:
         commitment = env.get("V2_APPROVAL_COMMITMENT", "")
-        v2 = bool(commitment)
-        if v2:
-            field(commitment, r"[0-9a-f]{64}", "v2 approval commitment")
-        statement, observed = request_bindings(env, read, v2=v2)
+        if commitment:
+            field(commitment, r"[0-9a-f]{64}", "approval commitment")
+        statement, observed = request_bindings(env, read, with_fixed_fields=bool(commitment))
         signature, text = staged_output(statement, read)
         key = field(env["RECEIPT_PUBLIC_KEY"], r"ssh-ed25519 [A-Za-z0-9+/]+={0,2}", "Ed25519 key")
         wire = statement
-        namespace = NAMESPACE
-        if v2:
+        if commitment:
             check_protected_run(statement, read)
-            wire = v2_statement(statement, observed, text, commitment, key)
-            namespace = V2_NAMESPACE
+            wire = approved_statement(statement, observed, text, commitment, key)
         with tempfile.TemporaryDirectory() as directory:
             signers = Path(directory, "allowed_signers")
             sig = Path(directory, "receipt.sig")
@@ -614,7 +617,7 @@ def verify(env: Mapping[str, str], read: READ) -> None:
                     "-I",
                     "private-verifier",
                     "-n",
-                    namespace,
+                    wire["protocol"],
                     "-s",
                     str(sig),
                 ],
@@ -633,13 +636,13 @@ def verify(env: Mapping[str, str], read: READ) -> None:
             and latest["base"]["sha"] == statement["base"]
             and latest["head"]["sha"] == statement["head"]
             and latest_signature == signature
-            and (not v2 or latest_text == text)
+            and (not commitment or latest_text == text)
             and type(latest_attempt) is int
             and latest_attempt == statement["ordinary_attempt"]
             and read("git/ref/heads/main")["object"]["sha"] == statement["base"],
             "Request changed during verification",
         )
-        if v2:
+        if commitment:
             check_protected_run(statement, read)
     except (KeyError, TypeError, AttributeError, UnicodeError, RecursionError) as error:
         raise ValueError("Invalid receipt input") from error
