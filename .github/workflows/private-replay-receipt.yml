@@ -1,0 +1,64 @@
+name: Verify staged private V2 receipt
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number
+        required: true
+        type: string
+      task_id:
+        description: AI Flow task ID
+        required: true
+        type: string
+      ordinary_run_id:
+        description: Ordinary PR quality workflow run ID
+        required: true
+        type: string
+      check_run_id:
+        description: Staging check run ID from the dedicated App
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+  checks: read
+
+jobs:
+  verify-receipt:
+    if: >-
+      github.repository == 'MaginaLW/harness-model' &&
+      github.ref == 'refs/heads/main' &&
+      vars.PRIVATE_REPLAY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: private-replay-verification
+    timeout-minutes: 5
+    steps:
+      - name: Verify with pinned main code
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          TASK_ID: ${{ inputs.task_id }}
+          ORDINARY_RUN_ID: ${{ inputs.ordinary_run_id }}
+          CHECK_RUN_ID: ${{ inputs.check_run_id }}
+          TRUSTED_WORKFLOW_SHA: ${{ vars.PRIVATE_REPLAY_WORKFLOW_SHA }}
+          VERIFIER_SHA256: ${{ vars.PRIVATE_REPLAY_VERIFIER_SHA256 }}
+          ENGINE_SHA256: ${{ vars.PRIVATE_REPLAY_ENGINE_SHA256 }}
+          RECEIPT_PUBLIC_KEY: ${{ vars.PRIVATE_REPLAY_PUBLIC_KEY }}
+          RECEIPT_APP_ID: ${{ vars.PRIVATE_REPLAY_APP_ID }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ "$GITHUB_EVENT_NAME" == workflow_dispatch && "$GITHUB_REF" == refs/heads/main ]]
+          [[ "$GITHUB_REPOSITORY" == MaginaLW/harness-model ]]
+          [[ "$GITHUB_WORKFLOW_REF" == "$GITHUB_REPOSITORY/.github/workflows/private-replay-receipt.yml@refs/heads/main" ]]
+          [[ "$TRUSTED_WORKFLOW_SHA" =~ ^[0-9a-f]{40}$ && "$GITHUB_WORKFLOW_SHA" == "$TRUSTED_WORKFLOW_SHA" && "$GITHUB_SHA" == "$TRUSTED_WORKFLOW_SHA" ]]
+          [[ "$VERIFIER_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          verifier="$(mktemp "$RUNNER_TEMP/receipt-verifier-XXXXXXXX.py")"
+          gh api --hostname github.com -H 'Accept: application/vnd.github.raw+json' \
+            "repos/$GITHUB_REPOSITORY/contents/tools/ci/verify_private_replay_receipt.py?ref=$TRUSTED_WORKFLOW_SHA" > "$verifier"
+          printf '%s  %s\n' "$VERIFIER_SHA256" "$verifier" | sha256sum --check --status
+          python -I "$verifier"
