@@ -424,6 +424,7 @@ def test_workflow_is_opt_in_read_only_and_executes_only_pinned_code() -> None:
 
 
 V2 = "aiflow-private-v2-receipt-v2"
+V3 = "aiflow-private-v2-receipt-v3"
 MERGE = "5" * 40
 CHECKS = (
     "contract scope ruff_check ruff_format_check smoke unit_tests regression_tests mypy "
@@ -622,13 +623,31 @@ def v2_fields(synthetic_fields: Json, monkeypatch: pytest.MonkeyPatch) -> Json:
     return synthetic_fields
 
 
-def _stage_v2(env: dict, api: dict, body: str, key: Path, namespace: str = V2) -> None:
+@pytest.fixture(params=[V2, V3], ids=["v2", "v3"])
+def versioned_fields(request, v2_fields: Json) -> tuple[str, Json]:
+    if request.param == V3:
+        del v2_fields["replay"]["round"]
+    return request.param, v2_fields
+
+
+def _stage_receipt(
+    env: dict,
+    api: dict,
+    body: str,
+    key: Path,
+    *,
+    protocol: str = V2,
+    namespace: str | None = None,
+    commitment_domain: str | None = None,
+) -> None:
     raw_digest = hashlib.sha256(body.encode("utf-8")).digest()
-    env["V2_APPROVAL_COMMITMENT"] = hashlib.sha256(V2.encode() + b"\0" + raw_digest).hexdigest()
+    env["V2_APPROVAL_COMMITMENT"] = hashlib.sha256(
+        (commitment_domain or protocol).encode("ascii") + b"\0" + raw_digest
+    ).hexdigest()
     key_blob = base64.b64decode(env["RECEIPT_PUBLIC_KEY"].split()[1])
     fingerprint = base64.b64encode(hashlib.sha256(key_blob).digest()).decode("ascii").rstrip("=")
     statement = {
-        "protocol": V2,
+        "protocol": protocol,
         "algorithm": "ssh-ed25519",
         "signer_fingerprint": f"SHA256:{fingerprint}",
         "protected_workflow_ref": PROTECTED_REF,
@@ -643,23 +662,98 @@ def _stage_v2(env: dict, api: dict, body: str, key: Path, namespace: str = V2) -
         "fixed_fields_sha256": raw_digest.hex(),
     }
     wire = json.dumps(statement, separators=(",", ":"), sort_keys=True).encode("ascii")
-    api[CHECK]["output"] = {"summary": _sign(key, wire, namespace), "text": body}
+    api[CHECK]["output"] = {"summary": _sign(key, wire, namespace or protocol), "text": body}
 
 
 def _document(fields: Json) -> str:
     return json.dumps(fields, indent=2) + "\n"
 
 
-def test_v2_accepts_independent_sshsig_on_approved_fields(env, api, v2_fields, keys) -> None:
-    _stage_v2(env, api, _document(v2_fields), keys[0])
+def test_accepts_independent_sshsig_on_versioned_fields(env, api, versioned_fields, keys) -> None:
+    protocol, fields = versioned_fields
+    _stage_receipt(env, api, _document(fields), keys[0], protocol=protocol)
     verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize(
+    ("protocol", "round_value"),
+    [(V2, MISSING), (V2, "R1"), (V2, None), (V3, "R2"), (V3, "R1"), (V3, None), (V3, 2)],
+)
+def test_round_shape_is_enforced_even_when_approved_and_signed(
+    env, api, v2_fields, keys, protocol, round_value
+) -> None:
+    if round_value is MISSING:
+        del v2_fields["replay"]["round"]
+    else:
+        v2_fields["replay"]["round"] = round_value
+    _stage_receipt(env, api, _document(v2_fields), keys[0], protocol=protocol)
+    with pytest.raises(ValueError, match="Fixed receipt fields differ"):
+        verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize("mismatch", ["commitment", "statement", "sshsig"])
+def test_versioned_domains_must_agree(env, api, versioned_fields, keys, mismatch) -> None:
+    protocol, fields = versioned_fields
+    other = V3 if protocol == V2 else V2
+    _stage_receipt(
+        env,
+        api,
+        _document(fields),
+        keys[0],
+        protocol=other if mismatch == "statement" else protocol,
+        namespace=other if mismatch == "sshsig" else protocol,
+        commitment_domain=other if mismatch == "commitment" else protocol,
+    )
+    reason = "Fixed receipt fields differ" if mismatch == "commitment" else "signature rejected"
+    with pytest.raises(ValueError, match=reason):
+        verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize("wrong_input", ["no delimiter", "hex digest", "unknown namespace"])
+def test_rejects_other_commitment_preimages(env, api, v2_fields, keys, wrong_input) -> None:
+    del v2_fields["replay"]["round"]
+    body = _document(v2_fields)
+    _stage_receipt(env, api, body, keys[0], protocol=V3)
+    digest = hashlib.sha256(body.encode("utf-8"))
+    preimage = {
+        "no delimiter": V3.encode("ascii") + digest.digest(),
+        "hex digest": V3.encode("ascii") + b"\0" + digest.hexdigest().encode("ascii"),
+        "unknown namespace": b"synthetic-unknown\0" + digest.digest(),
+    }[wrong_input]
+    env["V2_APPROVAL_COMMITMENT"] = hashlib.sha256(preimage).hexdigest()
+    with pytest.raises(ValueError, match="Unapproved or ambiguous fixed fields"):
+        verifier.verify(env, api.__getitem__)
+
+
+@pytest.mark.parametrize(
+    ("field", "refresh_commitment", "reason"),
+    [
+        ("ci_sha256", False, "Unapproved or ambiguous fixed fields"),
+        ("gate_sha256", True, "Receipt signature rejected"),
+    ],
+)
+def test_v3_stale_approval_or_signature_rejects_changed_evidence_digest(
+    env, api, v2_fields, keys, field, refresh_commitment, reason
+) -> None:
+    del v2_fields["replay"]["round"]
+    _stage_receipt(env, api, _document(v2_fields), keys[0], protocol=V3)
+    v2_fields["evidence"][field] = hashlib.sha256(b"changed synthetic evidence").hexdigest()
+    changed = _document(v2_fields)
+    api[CHECK]["output"]["text"] = changed
+    if refresh_commitment:
+        digest = hashlib.sha256(changed.encode("utf-8")).digest()
+        env["V2_APPROVAL_COMMITMENT"] = hashlib.sha256(
+            V3.encode("ascii") + b"\0" + digest
+        ).hexdigest()
+    with pytest.raises(ValueError, match=reason):
+        verifier.verify(env, api.__getitem__)
 
 
 def test_v2_production_pins_reject_synthetic_workflows(env, api, synthetic_fields, keys) -> None:
     # These two Git blob IDs were independently reviewed for the historical marker change.
     assert verifier._BASE_WORKFLOW_BLOB == "e8f71c6a189446b0ba8f5b61e22cbd8ea9b7c2d9"
     assert verifier._MARKED_WORKFLOW_BLOB == "5027a41d3fbc9b64e189b6d6c337636a4b5c4e37"
-    _stage_v2(env, api, _document(synthetic_fields), keys[0])
+    _stage_receipt(env, api, _document(synthetic_fields), keys[0])
     with pytest.raises(ValueError, match="Unreviewed ordinary workflow"):
         verifier.verify(env, api.__getitem__)
 
@@ -672,7 +766,7 @@ def test_v2_rejects_optional_duplicate_of_required_local_final_check(
     evidence["verification_snapshot_sha256"] = snapshot
     api[EVIDENCE] = _contents(evidence)
     v2_fields["evidence"]["local_final_snapshot"] = snapshot
-    _stage_v2(env, api, _document(v2_fields), keys[0])
+    _stage_receipt(env, api, _document(v2_fields), keys[0])
     with pytest.raises(ValueError, match="Duplicate final check ID"):
         verifier.verify(env, api.__getitem__)
 
@@ -685,6 +779,7 @@ def test_v2_rejects_optional_duplicate_of_required_local_final_check(
         ("ordinary", "merge_parents", [HEAD, BASE]),
         ("ordinary", "workflow_sha", HEAD),
         ("ordinary", "executed_workflow_blob", WORKFLOW_BLOB),
+        ("replay", "checks_passed", CHECKS[:-1]),
         ("replay", "checks_passed", CHECKS[:-1] + [CHECKS[0]]),
         ("replay", "existing_mutations_killed", 4),
         ("replay", "new_mutation_actions", False),
@@ -698,12 +793,13 @@ def test_v2_rejects_optional_duplicate_of_required_local_final_check(
         ("evidence", "local_final_snapshot", "0" * 64),
     ],
 )
-def test_v2_even_authorized_and_signed_fields_require_semantics(
-    env, api, v2_fields, keys, section, field, value
+def test_even_authorized_and_signed_versioned_fields_require_semantics(
+    env, api, versioned_fields, keys, section, field, value
 ) -> None:
-    parent = v2_fields if section in v2_fields else v2_fields["replay"]
+    protocol, fields = versioned_fields
+    parent = fields if section in fields else fields["replay"]
     parent[section][field] = value
-    _stage_v2(env, api, _document(v2_fields), keys[0])
+    _stage_receipt(env, api, _document(fields), keys[0], protocol=protocol)
     with pytest.raises(ValueError):
         verifier.verify(env, api.__getitem__)
 
@@ -724,7 +820,9 @@ def test_v2_requires_independent_approval_and_authentic_sshsig(
     env, api, v2_fields, keys, case
 ) -> None:
     key = keys[1] if case == "key" else keys[0]
-    _stage_v2(env, api, _document(v2_fields), key, DOMAIN if case == "v1 domain" else V2)
+    _stage_receipt(
+        env, api, _document(v2_fields), key, namespace=DOMAIN if case == "v1 domain" else V2
+    )
     if case == "missing pin":
         del env["V2_APPROVAL_COMMITMENT"]
     elif case == "wrong pin":
@@ -755,17 +853,25 @@ def test_v2_rejects_approved_malformed_documents(env, api, v2_fields, keys, raw_
         body = body.replace('"pr": 71', '"pr": 71, "pr": 71')
     else:
         body = body.rstrip("\n")
-    _stage_v2(env, api, body, keys[0])
+    _stage_receipt(env, api, body, keys[0])
     with pytest.raises(ValueError):
         verifier.verify(env, api.__getitem__)
 
 
-@pytest.mark.parametrize("drift", ["protected attempt", "ordinary attempt", "staging text"])
-def test_v2_rechecks_api_after_signature_verification(env, api, v2_fields, keys, drift) -> None:
-    _stage_v2(env, api, _document(v2_fields), keys[0])
-    target = {"protected attempt": PROTECTED_RUN, "ordinary attempt": RUN, "staging text": CHECK}[
-        drift
-    ]
+@pytest.mark.parametrize(
+    "drift", ["protected attempt", "ordinary attempt", "staging text", "PR head"]
+)
+def test_versioned_rechecks_after_signature_verification(
+    env, api, versioned_fields, keys, drift
+) -> None:
+    protocol, fields = versioned_fields
+    _stage_receipt(env, api, _document(fields), keys[0], protocol=protocol)
+    target = {
+        "protected attempt": PROTECTED_RUN,
+        "ordinary attempt": RUN,
+        "staging text": CHECK,
+        "PR head": PR,
+    }[drift]
     observations = 0
 
     def read(path: str) -> Json:
@@ -775,6 +881,8 @@ def test_v2_rechecks_api_after_signature_verification(env, api, v2_fields, keys,
             if observations == 2:
                 if target == CHECK:
                     api[target]["output"]["text"] += "\n"
+                elif target == PR:
+                    api[target]["head"]["sha"] = SUBJECT
                 else:
                     api[target]["run_attempt"] += 1
         return api[path]
@@ -816,7 +924,7 @@ def test_v2_rechecks_api_after_signature_verification(env, api, v2_fields, keys,
 def test_v2_binds_signed_results_to_independent_github_facts(
     env, api, v2_fields, keys, path, fields, value
 ) -> None:
-    _stage_v2(env, api, _document(v2_fields), keys[0])
+    _stage_receipt(env, api, _document(v2_fields), keys[0])
     target = api[path]
     for field in fields[:-1]:
         target = target[field]
@@ -827,10 +935,10 @@ def test_v2_binds_signed_results_to_independent_github_facts(
 
 @pytest.mark.parametrize(
     ("refresh_local_final", "reason"),
-    [(False, "Invalid public final evidence"), (True, "Fixed R2 fields differ")],
+    [(False, "Invalid public final evidence"), (True, "Fixed receipt fields differ")],
 )
-def test_v2_rejects_old_r2_on_consistent_new_protected_main(
-    env, api, evidence, v2_fields, keys, refresh_local_final, reason
+def test_rejects_old_versioned_fields_on_consistent_new_protected_main(
+    env, api, evidence, versioned_fields, keys, refresh_local_final, reason
 ) -> None:
     # A real main advance changes every live main pointer, not just the launch environment.
     new_base, new_merge = "6" * 40, "7" * 40
@@ -878,7 +986,8 @@ def test_v2_rejects_old_r2_on_consistent_new_protected_main(
         evidence["base_commit"] = new_base
         evidence["verification_snapshot_sha256"] = verification_snapshot_sha256(evidence)
         api[EVIDENCE] = _contents(evidence)
-    _stage_v2(env, api, _document(v2_fields), keys[0])
+    protocol, fields = versioned_fields
+    _stage_receipt(env, api, _document(fields), keys[0], protocol=protocol)
     with pytest.raises(ValueError, match=reason):
         verifier.verify(env, api.__getitem__)
 
