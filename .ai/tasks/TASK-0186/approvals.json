@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-22T08:23:47Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。仅准备新 main 上的本地标记候选和正式 V2 确认单。REV-0001 对冻结规格作出 APPROVE，零发现。正式收集与变异动作须另获批准。",
+    "schema_version": "1.0",
+    "spec_sha256": "87705df4f7d158f7ff36b258b04434776006ba49a3fa5db3d6137c22b1a621cf",
+    "subject_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+    "task_id": "TASK-0186"
+  }
+]

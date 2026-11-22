@@ -1,0 +1,83 @@
+allowed_scope:
+- .github/workflows/ai-quality-gate.yml
+- tests/integration/test_github_workflow.py
+base_commit: 6a4a6456a323d62137d152849f3ca18114ba85bc
+branch: codex/marker-6a4a6456-local
+created_at: '2026-11-22T08:21:56Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_file
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Prepare a local successor to the PR 194 workflow marker on main 6a4a6456,
+    bind its software subject and request one separately approved local V2.
+  impact:
+    level: high
+  impact_categories:
+  - ci
+  impact_scope:
+  - .github/workflows/ai-quality-gate.yml
+  - tests/integration/test_github_workflow.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0186
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- push
+- pull_request
+- merge
+- remote_write
+- public_ci_rerun
+- repository_settings_write
+- old_private_evidence_access
+- private_evidence_transfer
+- formal_signing
+- 3S
+- 3P0
+- full_v2_without_current_owner_confirmation
+- real_mutation_without_current_bound_action_and_owner_confirmation
+- automatic_retry
+frozen_spec_sha256: 87705df4f7d158f7ff36b258b04434776006ba49a3fa5db3d6137c22b1a621cf
+goal: Prepare a local successor to the PR 194 workflow marker on main 6a4a6456, bind
+  its software subject and request one separately approved local V2.
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-22T08:22:44Z'
+subject_commit: 6a4a6456a323d62137d152849f3ca18114ba85bc
+task_id: TASK-0186
+updated_at: '2026-11-22T08:23:47Z'
+worktree_dirty: false
+worktree_dirty_paths: []
