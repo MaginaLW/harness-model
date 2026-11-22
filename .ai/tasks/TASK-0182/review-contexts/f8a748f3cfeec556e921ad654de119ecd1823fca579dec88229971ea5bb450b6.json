@@ -1,0 +1,39 @@
+{
+  "base_commit": "d0be6ce67004f11d575e1a135df35e164d712b79",
+  "branch": "codex/receipt-version-fields-candidate",
+  "classification_input_sha256": "61464d199428427e06c72ae2613f1dca601b81a8e80e8dfa08092d0aca9fa6f9",
+  "content": {
+    "allowed_scope": [
+      ".github/workflows/private-replay-receipt.yml",
+      "tools/ci/verify_private_replay_receipt.py",
+      "tests/integration/test_private_replay_receipt.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "从公开 main 重建 TASK-0181 的本地验签器候选，补全四个 V2 版本字段的拒绝条件并通过定向回归与独立审核，提交一次 V2 预算等待明确批准。",
+        "impact_scope": [
+          ".github/workflows/private-replay-receipt.yml",
+          "tools/ci/verify_private_replay_receipt.py",
+          "tests/integration/test_private_replay_receipt.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "从公开 main 重建 TASK-0181 的本地验签器候选，补全四个 V2 版本字段的拒绝条件并通过定向回归与独立审核，提交一次 V2 预算等待明确批准。",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "f8a748f3cfeec556e921ad654de119ecd1823fca579dec88229971ea5bb450b6",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "97ba67e355e999d91a552296538423fd477d4ab7611ef1a84af8f0742c64d163",
+  "task_id": "TASK-0182"
+}

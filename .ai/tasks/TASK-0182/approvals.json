@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-22T02:02:30Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "d0be6ce67004f11d575e1a135df35e164d712b79",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权；当前冻结规格已获独立设计审核 REV-0001 APPROVE、零发现。仅开展本地软件修复、定向测试、候选复审与预算提案，正式 V2 待所有者单独批准。",
+    "schema_version": "1.0",
+    "spec_sha256": "97ba67e355e999d91a552296538423fd477d4ab7611ef1a84af8f0742c64d163",
+    "subject_commit": "d0be6ce67004f11d575e1a135df35e164d712b79",
+    "task_id": "TASK-0182"
+  }
+]

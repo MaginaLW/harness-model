@@ -1,0 +1,86 @@
+allowed_scope:
+- .github/workflows/private-replay-receipt.yml
+- tools/ci/verify_private_replay_receipt.py
+- tests/integration/test_private_replay_receipt.py
+base_commit: d0be6ce67004f11d575e1a135df35e164d712b79
+branch: codex/receipt-version-fields-candidate
+created_at: '2026-11-22T02:01:20Z'
+current_state: IMPLEMENTING
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: "\u4ECE\u516C\u5F00 main \u91CD\u5EFA TASK-0181 \u7684\u672C\u5730\u9A8C\u7B7E\
+    \u5668\u5019\u9009\uFF0C\u8865\u5168\u56DB\u4E2A V2 \u7248\u672C\u5B57\u6BB5\u7684\
+    \u62D2\u7EDD\u6761\u4EF6\u5E76\u901A\u8FC7\u5B9A\u5411\u56DE\u5F52\u4E0E\u72EC\
+    \u7ACB\u5BA1\u6838\uFF0C\u63D0\u4EA4\u4E00\u6B21 V2 \u9884\u7B97\u7B49\u5F85\u660E\
+    \u786E\u6279\u51C6\u3002"
+  impact:
+    level: medium
+  impact_categories:
+  - ci
+  - authentication
+  impact_scope:
+  - .github/workflows/private-replay-receipt.yml
+  - tools/ci/verify_private_replay_receipt.py
+  - tests/integration/test_private_replay_receipt.py
+  inputs: []
+  permission_requirements:
+  - spec_approval
+  - code_approval
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0182
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+- formal_v2_without_new_owner_decision
+- native_mutation_without_new_owner_decision
+- push
+- merge
+- private_evidence_transfer
+- start_g
+- enable_or_dispatch_live_workflow
+- change_required_gate
+frozen_spec_sha256: 97ba67e355e999d91a552296538423fd477d4ab7611ef1a84af8f0742c64d163
+goal: "\u4ECE\u516C\u5F00 main \u91CD\u5EFA TASK-0181 \u7684\u672C\u5730\u9A8C\u7B7E\
+  \u5668\u5019\u9009\uFF0C\u8865\u5168\u56DB\u4E2A V2 \u7248\u672C\u5B57\u6BB5\u7684\
+  \u62D2\u7EDD\u6761\u4EF6\u5E76\u901A\u8FC7\u5B9A\u5411\u56DE\u5F52\u4E0E\u72EC\u7ACB\
+  \u5BA1\u6838\uFF0C\u63D0\u4EA4\u4E00\u6B21 V2 \u9884\u7B97\u7B49\u5F85\u660E\u786E\
+  \u6279\u51C6\u3002"
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-22T02:01:36Z'
+subject_commit: d0be6ce67004f11d575e1a135df35e164d712b79
+task_id: TASK-0182
+updated_at: '2026-11-22T02:02:31Z'
+worktree_dirty: false
+worktree_dirty_paths: []
