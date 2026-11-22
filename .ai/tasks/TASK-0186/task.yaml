@@ -76,8 +76,8 @@ goal: Prepare a local successor to the PR 194 workflow marker on main 6a4a6456, 
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-22T08:22:44Z'
-subject_commit: 6a4a6456a323d62137d152849f3ca18114ba85bc
+subject_commit: 84a7bb14a3c673fb761452cc46d410f9f50f9b4b
 task_id: TASK-0186
-updated_at: '2026-11-22T08:23:47Z'
+updated_at: '2026-11-22T08:26:57Z'
 worktree_dirty: false
 worktree_dirty_paths: []
