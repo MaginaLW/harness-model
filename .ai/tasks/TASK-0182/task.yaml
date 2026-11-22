@@ -79,8 +79,8 @@ goal: "\u4ECE\u516C\u5F00 main \u91CD\u5EFA TASK-0181 \u7684\u672C\u5730\u9A8C\u
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-22T02:01:36Z'
-subject_commit: d0be6ce67004f11d575e1a135df35e164d712b79
+subject_commit: ede60b17e4f81f2ef4162f10aef3e785a9e2c6e0
 task_id: TASK-0182
-updated_at: '2026-11-22T02:02:31Z'
+updated_at: '2026-11-22T02:04:04Z'
 worktree_dirty: false
 worktree_dirty_paths: []
