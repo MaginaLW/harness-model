@@ -1,0 +1,37 @@
+{
+  "base_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+  "branch": "codex/pr197-receipt-verifier-v3",
+  "classification_input_sha256": "eb508137bbe38efdd6e25e57b13522948e9274df9bca8c3382de03fd56777a09",
+  "content": {
+    "allowed_scope": [
+      "tools/ci/verify_private_replay_receipt.py",
+      "tests/integration/test_private_replay_receipt.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Implement the approved domain-bound round-free v3 receipt verifier for PR 197; synthetic local verification only in this phase",
+        "impact_scope": [
+          "tools/ci/verify_private_replay_receipt.py",
+          "tests/integration/test_private_replay_receipt.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Implement the approved domain-bound round-free v3 receipt verifier for PR 197; synthetic local verification only in this phase",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "df95ea6a938a8c67e0eb1671f5f021cf2300c31ed74aefb0b2e5bc4ee4bfccc1",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "1e268eb8d89bcf814e776a77d86771e9ede8b3c56afa978d39a067ce0393b106",
+  "task_id": "TASK-0187"
+}

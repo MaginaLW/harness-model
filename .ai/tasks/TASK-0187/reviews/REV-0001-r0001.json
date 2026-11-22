@@ -1,0 +1,13 @@
+{
+  "context_sha256": "df95ea6a938a8c67e0eb1671f5f021cf2300c31ed74aefb0b2e5bc4ee4bfccc1",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-22T10:43:32Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-design-reviewer-187",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Reviewed TASK-0187 DU-001 frozen specification 1e268eb8d89bcf814e776a77d86771e9ede8b3c56afa978d39a067ce0393b106 against main 6a4a6456a323d62137d152849f3ca18114ba85bc. A single protected commitment must select exactly one domain for the original body bytes before checking the signed protocol and SSHSIG namespace. V3 omits replay.round entirely, v2 requires R2, and v1 retains its existing wire contract. Unknown or ambiguous commitments, cross-domain inputs, schema violations and drift fail closed. The two-file change preserves the common evidence and head bindings. This phase covers local software and synthetic tests only. No open findings.",
+  "task_id": "TASK-0187"
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-22T10:44:10Z",
+    "authorization_mode": "direct_human",
+    "base_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "Owner approved #197 A01 two-file local implementation and synthetic fixtures only. REV-0001 approved the frozen design. Formal V2 and mutation require separate authorization.",
+    "schema_version": "1.0",
+    "spec_sha256": "1e268eb8d89bcf814e776a77d86771e9ede8b3c56afa978d39a067ce0393b106",
+    "subject_commit": "6a4a6456a323d62137d152849f3ca18114ba85bc",
+    "task_id": "TASK-0187"
+  }
+]
