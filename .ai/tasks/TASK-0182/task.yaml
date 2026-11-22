@@ -5,7 +5,7 @@ allowed_scope:
 base_commit: d0be6ce67004f11d575e1a135df35e164d712b79
 branch: codex/receipt-version-fields-candidate
 created_at: '2026-11-22T02:01:20Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -81,6 +81,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-22T02:13:04Z'
 subject_commit: ede60b17e4f81f2ef4162f10aef3e785a9e2c6e0
 task_id: TASK-0182
-updated_at: '2026-11-22T02:33:01Z'
+updated_at: '2026-11-22T02:34:45Z'
 worktree_dirty: false
 worktree_dirty_paths: []
