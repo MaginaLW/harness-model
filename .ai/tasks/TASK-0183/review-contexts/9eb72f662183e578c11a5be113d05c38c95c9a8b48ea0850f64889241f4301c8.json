@@ -1,0 +1,184 @@
+{
+  "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+  "branch": "codex/marker-0171-main-alignment",
+  "classification_input_sha256": "bda489994f23a5182758ad1c22576b51702827f9fe41e6c2cd177f0ada6ce0fe",
+  "content": {
+    "allowed_scope": [
+      ".github/workflows/ai-quality-gate.yml",
+      "tests/integration/test_github_workflow.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Rebuild the TASK-0171 ordinary workflow marker on the current public main and prepare one private Ubuntu V2 decision.",
+        "impact_scope": [
+          ".github/workflows/ai-quality-gate.yml",
+          "tests/integration/test_github_workflow.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0183/approvals.json",
+        ".ai/tasks/TASK-0183/classification.json",
+        ".ai/tasks/TASK-0183/events.jsonl",
+        ".ai/tasks/TASK-0183/review-contexts/297b5e0203758369c2875f3ede1a7fe60c91442d369338cbd0e156c5bd6a526c.json",
+        ".ai/tasks/TASK-0183/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0183/spec.md",
+        ".ai/tasks/TASK-0183/task.yaml",
+        ".github/workflows/ai-quality-gate.yml",
+        "tests/integration/test_github_workflow.py"
+      ],
+      "files": [
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0183/approvals.json"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0183/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0183/events.jsonl"
+        },
+        {
+          "additions": 37,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0183/review-contexts/297b5e0203758369c2875f3ede1a7fe60c91442d369338cbd0e156c5bd6a526c.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0183/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 32,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0183/spec.md"
+        },
+        {
+          "additions": 79,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0183/task.yaml"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 0,
+          "path": ".github/workflows/ai-quality-gate.yml"
+        },
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/integration/test_github_workflow.py"
+        }
+      ],
+      "totals": {
+        "additions": 256,
+        "deletions": 1,
+        "files": 9
+      }
+    },
+    "goal": "Rebuild the TASK-0171 ordinary workflow marker on the current public main and prepare one private Ubuntu V2 decision.",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0183",
+        "--actor",
+        "ubuntu-independent-verifier-183"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "9eb72f662183e578c11a5be113d05c38c95c9a8b48ea0850f64889241f4301c8",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "b5776fe3437125fe0703cccddb8fa68e773a384d0cfd5b6ebddaae5481e62b45",
+  "subject_commit": "0aa35d273538b95eff66da74f7eb5904d7f7f8b9",
+  "task_id": "TASK-0183",
+  "verification_snapshot_sha256": "f9ff7c435bc79421c08c4ebb0b3be648d4385c52a57e251c3662888eab952d6d"
+}
