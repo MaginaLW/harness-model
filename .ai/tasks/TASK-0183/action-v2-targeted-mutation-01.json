@@ -1,0 +1,17 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "bda489994f23a5182758ad1c22576b51702827f9fe41e6c2cd177f0ada6ce0fe",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0183",
+  "parameter_summary": "One native local V2 collection on the TASK-0171 marker successor. Its official recorder may consume this action once for the fixed five baseline/mutant pairs.",
+  "subject_commit": "0aa35d273538b95eff66da74f7eb5904d7f7f8b9",
+  "conditions": [
+    "Repository b85e5a53-4935-4436-bdbc-c26a241bfae8, branch codex/marker-0171-main-alignment, base fa58164d1f3207bcf2e773aa2da02b81d36fcb44, proposal head 61c16bec849d246b4d9873afdfeca80fd0971e2f. Bind frozen spec b5776fe3437125fe0703cccddb8fa68e773a384d0cfd5b6ebddaae5481e62b45, recorded classification, and Policy 72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e. Review all post-subject changes as task-local governance. Recheck main, clean checkout, unused approval and verifier before launch.",
+    "Only the unchanged committed manifest .ai/mutations/phase-02-critical-manifest.json (SHA-256 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0) and its five fixed pairs, via python -m aiflow verify TASK-0183 --actor ubuntu-independent-verifier-183. Do not invoke the recorder separately. Use candidate-owned inputs and the locked public dependency set (uv.lock SHA-256 7e7fdadd96769f3c9968b46fef0ff48d7b8debef138a0673f3629a5cf7f0aa65).",
+    "One exclusive private local Ubuntu x86-64 slot. The independently contacted verifier /root/v2_budget, actor ubuntu-independent-verifier-183, must verify tool tree and resource/isolation admission and personally run collection. Clean isolated candidate, no external network, credentials, host drives, host sockets or Windows interop. Retain the exact checkout and local originals for review and same-verifier finalization.",
+    "The 90-minute formal window includes termination and cleanup. Start only when a complete 90-minute window fits before expiry. One attempt, at most one action consumption, first failure/interruption/timeout/unknown stops; zero retries. Preserve actual consumption and all outcomes. On passed pre-evidence only, independent implementation review must bind its snapshot before same-verifier --finalize; never recollect.",
+    "No --ci second run, push, PR, merge, evidence disclosure, paid action, signing, live workflow or settings changes. TASK-0173 and G remain deferred."
+  ],
+  "expires_at": "2026-11-22T07:15:00Z",
+  "single_use": true
+}

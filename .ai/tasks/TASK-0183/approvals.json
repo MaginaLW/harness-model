@@ -12,5 +12,22 @@
     "spec_sha256": "b5776fe3437125fe0703cccddb8fa68e773a384d0cfd5b6ebddaae5481e62b45",
     "subject_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
     "task_id": "TASK-0183"
+  },
+  {
+    "action_sha256": "fabe6ca3ea70cd9bab7bcb7685e3ad819675c147bef5e33f83b26018aef70ca8",
+    "actor": "project-owner",
+    "approval_type": "action",
+    "approved_at": "2026-11-22T04:36:47Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+    "decision_unit_id": "DU-001",
+    "expires_at": "2026-11-22T07:15:00Z",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权. Owner explicitly authorized TASK-0183/DU-001 on 0aa35d27. independent-marker-design-183 approved exact action fabe6ca3ea70cd9bab7bcb7685e3ad819675c147bef5e33f83b26018aef70ca8 with no findings. Original verifier /root/v2_budget confirmed isolated Ubuntu and exclusive-slot admission at 04:36:02Z. One 90-minute local attempt including cleanup, no retries. Expires 07:15 UTC.",
+    "schema_version": "1.0",
+    "single_use": true,
+    "spec_sha256": "b5776fe3437125fe0703cccddb8fa68e773a384d0cfd5b6ebddaae5481e62b45",
+    "subject_commit": "0aa35d273538b95eff66da74f7eb5904d7f7f8b9",
+    "task_id": "TASK-0183"
   }
 ]
