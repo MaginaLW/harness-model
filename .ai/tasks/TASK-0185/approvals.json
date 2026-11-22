@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-22T06:46:43Z",
+    "authorization_mode": "direct_human",
+    "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "Project owner explicitly approved the #194 minimum verifier implementation and synthetic verification on local main, including the independent protected commitment. Scope excludes activation, formal signing, private originals and all remote writes.",
+    "schema_version": "1.0",
+    "spec_sha256": "0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870",
+    "subject_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+    "task_id": "TASK-0185"
+  }
+]

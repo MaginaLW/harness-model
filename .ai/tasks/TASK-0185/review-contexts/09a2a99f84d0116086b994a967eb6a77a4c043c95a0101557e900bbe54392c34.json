@@ -1,0 +1,39 @@
+{
+  "base_commit": "fa58164d1f3207bcf2e773aa2da02b81d36fcb44",
+  "branch": "codex/pr194-receipt-verifier-v2",
+  "classification_input_sha256": "f4dcb393168cc2b6c317dc454ef20c9719e531e50ee3fe09863e4e0622c19b14",
+  "content": {
+    "allowed_scope": [
+      "tools/ci/verify_private_replay_receipt.py",
+      ".github/workflows/private-replay-receipt.yml",
+      "tests/integration/test_private_replay_receipt.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Implement the approved opt-in PR 194 receipt verifier, successor to TASK-0184 with full V2 facts; local synthetic checks only",
+        "impact_scope": [
+          "tools/ci/verify_private_replay_receipt.py",
+          ".github/workflows/private-replay-receipt.yml",
+          "tests/integration/test_private_replay_receipt.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Implement the approved opt-in PR 194 receipt verifier, successor to TASK-0184 with full V2 facts; local synthetic checks only",
+    "route": "REVIEW",
+    "verification_level": "V2"
+  },
+  "context_sha256": "09a2a99f84d0116086b994a967eb6a77a4c043c95a0101557e900bbe54392c34",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "0b5023ed04bcd342129adb33459d38fead4c74b7cf14e6c73f1f15de22d6e870",
+  "task_id": "TASK-0185"
+}

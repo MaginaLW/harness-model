@@ -1,0 +1,34 @@
+# TASK-0185 · 受保护回执验签器 v2
+
+## 目标
+
+继承 TASK-0184 已批准的范围，正式治理验收须 REVIEW/V2、独立验证和原生变异证据。本轮合成检查不替代正式 Gate。
+
+在 main fa58164d1f3207bcf2e773aa2da02b81d36fcb44 上实现已批准的 #194 最小方案，保持既有 v1 用法，并用合成字段在本机验证治理标记差异的 v2 正反例。参考候选为 0bcd65dbf674afc688313c13f77b1db54fce6d39。
+
+## 范围
+
+软件范围限 tools/ci/verify_private_replay_receipt.py、.github/workflows/private-replay-receipt.yml 和 tests/integration/test_private_replay_receipt.py。沿用只读 main workflow、GET 客户端、独立 GitHub 与 local-final 绑定、现有 canonical JSON 与 SSHSIG 实现。只有 v2 使用独立受保护校验值，为 SHA-256(ASCII v2 namespace || NUL || SHA-256(批准文件的精确 UTF-8 字节) 的原始 32 字节)。除现有最小权限、变量及四项路由输入之外只接入这个校验值。所有真实数据留在已批准接收范围。
+
+## 非目标
+
+生产责任人及指纹留空，3S、3P0 保持 HOLD。当前只实施与验证验签端，不做发布方或规则切换，不构造真实 R2 签名。#186 保持打开，TASK-0173 和 G 暂缓。
+
+## 验收条件
+
+1. v1 保留旧 wire bytes、namespace、相同 workflow blob 规则和现有用例。v2 核对同一 staging check 的正文与 SSHSIG、受信公钥及 App，拒绝无批准值或失败后的降级。
+2. 核对 ordinary attempt 唯一作业、suite/check/App/步骤、marker 记录的 merge 与 workflow SHA、双亲与三处 blob。唯一可接受的工作流变动是 #194 已审的 checkout 前两行空操作。公开失败与私有回放分别表达。
+3. v2 严格核对已批准字段结构、14 项 V2 检查、证据摘要与 local-final、维护与 Gate、覆盖率和变异结果。12 个运行时字段连同固定字段摘要进入 v2 规范化语句。返回前重查请求、两次 run 的 attempt、受信 main 和 staging 的内容与来源。
+4. 使用合成材料和临时密钥在本机验证两个协议，覆盖成功、错 namespace/密钥/语句、错工作流或漏检查、字节篡改、版本漂移；新 main 即使保留旧 head 或旧 R2 仍应拒绝。运行针对性质量检查。明确区分这些测试与 AI Flow 正式证据。
+
+## 禁止动作
+
+不触及私有原件、真实签发或登记，不写远端、重跑公开 CI、更改分支保护或合并。任何后续真实执行须单独核定版本、授权与预算。
+
+## 错误行为
+
+输入缺项、类型错误、未知工作流差异、签名错误、外部读数冲突或状态漂移均拒绝。不得降低 Gate、CI 阈值或分支保护以推进交付。
+
+## 回滚
+
+本地分支和本任务账本保留可追溯记录；如需撤回软件变更，可在独立授权内创建反向提交。本轮无远端状态需要恢复。
