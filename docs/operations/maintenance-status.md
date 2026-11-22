@@ -71,6 +71,9 @@
 
 ### 剩余缺口与推进条件
 
+- **单次回放的 v3 验签。** 验签器保留 v1 和历史 v2（`round="R2"`），为省略 `round` 的 v3 使用独立 SSHSIG namespace。正文、签名、PR head、main、运行 attempt 或必需检查不匹配时，验证失败。软件提交 `366cd006` 的独立本机 V2 通过 14/14 项检查，检出 5/5 个固定变异。公开必需检查在 `6d51f04c` 通过，软件以 `1eeccab9` 合入 main，`TASK-0187` 已关闭。[软件 #198](https://github.com/MaginaLW/harness-model/pull/198) · [任务账本](../../.ai/tasks/TASK-0187/task.yaml) · [披露范围](../../.ai/tasks/TASK-0187/delivery-authorization.md)
+- **#197 的启用条件。** 工作流标记候选 `74222ee5` 的单次回放基于旧 main `6a4a6456`。为它签发或发布检查前，仍需重新核对届时的 main、候选 head 与对应回放证据。生产签发责任人和受信指纹尚待登记，3S、3P0 继续 HOLD。[标记 #197](https://github.com/MaginaLW/harness-model/pull/197)
+
 - **首次受保护 CI 验签交付。** `TASK-0181` 的本地正式 V2 以 `FAILED` 结束。后继 `TASK-0182` 在获批的本地 Ubuntu 槽内完成唯一一次正式 V2，14/14 项必需检查通过，5/5 个固定变异均被检出。经项目所有者批准，该任务的 1 份变异证据和 5 份检测日志已公开。[实施审核包](../../.ai/tasks/TASK-0182/review-package.md) · [六份公开记录](https://github.com/MaginaLW/harness-model/commit/e8a26ec91dfe4b165a2f364c7772a5fd51ee32c2)
 - **合并与启用边界。** 实现 PR #191（`ad2fc6e6`）与收尾 PR #192（`a4701aca`）均已合入 `main`，`TASK-0182` 账本状态为 `MERGED`。验签工作流默认关闭，仅允许从受保护的 `main` 手动触发。PR #186 的七份私有原件仍仅存本机，其公开 `ai-quality-gate` 仍阻塞合并。[实现 #191](https://github.com/MaginaLW/harness-model/pull/191) · [收尾 #192](https://github.com/MaginaLW/harness-model/pull/192) · [验签工作流](../../.github/workflows/private-replay-receipt.yml) · [PR #186](https://github.com/MaginaLW/harness-model/pull/186)
 - **普通 PR 工作流标记。** `TASK-0183` 在公开主线上重建了 `TASK-0171` 的标记，用完该线预留的一次正式本地 V2。候选在首次 checkout 前显示事件提交和工作流来源提交。[PR #194](https://github.com/MaginaLW/harness-model/pull/194)
