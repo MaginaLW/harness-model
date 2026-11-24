@@ -188,6 +188,7 @@ class _ModelSeedBundle:
 
 def _seed_tree_digest(root: Path) -> str:
     """Hash every directory and file under a read-only module seed without following links."""
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
     entries: list[list[object]] = []
     for directory, directories, filenames in os.walk(root, followlinks=False):
         directories.sort()
@@ -197,10 +198,14 @@ def _seed_tree_digest(root: Path) -> str:
             info = path.lstat()
             relative = path.relative_to(root).as_posix()
             assert not stat.S_ISLNK(info.st_mode), f"Unexpected link in module seed: {relative}"
-            assert info.st_nlink == 1, f"Unexpected hardlink in module seed: {relative}"
+            assert not getattr(info, "st_file_attributes", 0) & reparse_flag, (
+                f"Unexpected reparse point in module seed: {relative}"
+            )
             if stat.S_ISDIR(info.st_mode):
                 entries.append(["dir", relative])
             else:
+                assert stat.S_ISREG(info.st_mode), f"Unexpected non-regular seed file: {relative}"
+                assert info.st_nlink == 1, f"Unexpected hardlink in module seed: {relative}"
                 data = path.read_bytes()
                 entries.append(["file", relative, len(data), hashlib.sha256(data).hexdigest()])
     entries.sort(key=lambda item: (str(item[1]), str(item[0])))
