@@ -8,7 +8,7 @@
 |---|---|
 | 工作约定 | 推荐起点。合并少量通用规则到目标项目已有指令入口，保留本项目原有安全与治理规则；不安装依赖、Hook 或后台服务。 |
 | 项目验证 | 沿用目标仓库已定义的测试、静态检查与 required CI。没有检查时如实标缺失，不靠复制本仓 Python 命令制造通过结果。 |
-| 完整 AI Flow | 仅在确实需要确定性任务分流、版本绑定审批与证据 Gate 时评估。版本化[资源包](resource-bundle.md)、Python/Node [非覆盖初始化](initialization.md)及 [Node 本地 V0/V1](node-verification.md)已交付；installed 外仓 V2、目标 CI 和真实接入仍待交付，见[完整引擎边界](#完整引擎的跨仓库边界)，不是普通试点的前置条件。 |
+| 完整 AI Flow | 仅在确实需要确定性任务分流、版本绑定审批与证据 Gate 时评估。版本化[资源包](resource-bundle.md)、Python/Node [非覆盖初始化](initialization.md)和[普通安装的 Node 本地验证](node-verification.md)已交付。完整接入的待验收项见[完整引擎边界](#完整引擎的跨仓库边界)。轻量试点可独立开展。 |
 
 全局指令保存跨项目偏好，项目入口写本仓特有的约束、验证命令和授权边界。重复使用的流程可写成技能，`SKILL.md` 的描述说明何时调用，操作细节留在正文和引用文件中。[Agent Skills 规范](https://agentskills.io/specification#progressive-disclosure)
 
@@ -105,8 +105,8 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 [PR #140](https://github.com/MaginaLW/harness-model/pull/140)已交付 `init preview/apply/inspect/migration-plan`：
 `native-python-v1` 面向已有提交、Python 源码及 `[project].name`、尚无 `.ai` 的普通 Git 工作树；
 apply 限 Windows x64、CPython 3.11、本地 NTFS。它生成目标自己的 UUID，不覆盖旧配置；
-精确恢复与重放边界见[初始化用法](initialization.md)。初始化不准备验证工具或依赖，
-[Node 本地 V0/V1](node-verification.md)及 Node 非覆盖初始化已交付；installed 外仓 V2、目标 CI 适配和 agent-bridge 真实接入仍未交付。
+精确恢复与重放边界见[初始化用法](initialization.md)。初始化不准备验证工具或依赖。
+已交付 Node 非覆盖初始化、[本地 V0/V1](node-verification.md)及[普通安装的本地 V2](node-verification.md#revision-2-local-v2)。目标 Node CI、combined Gate 与真实 agent-bridge 接入待验收。当前状态见[维护收尾与待办](maintenance-status.md#版本与用途)。
 
 CLI 的定位与兼容边界见[仓库根定位规格](../superpowers/specs/repository-root.md)：
 无环境覆盖时使用最近 Git 工作树根；该根缺少 `.ai` 时拒绝，不借用父仓资源；
