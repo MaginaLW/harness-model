@@ -28,6 +28,12 @@
   - `src/aiflow/mutation_protocol.py`：更新 `REVIEWED_INPUT_SHA256` 中随 Wave 2B/Wave 1 变更的两项规范 LF SHA-256（`tests/unit/test_policy.py` -> `32292a52c992fa5827bc5c2e446b37ce41751c0175d57237fab45b6c30a5fb9b`；`tests/integration/test_verify_command.py` -> `51857857dda18bd293e7ebf1487dd6997ac87864481e6c1ecd1c46bb0198e755`），其余 3 项与 `BASE_A` 一致。
   - `src/aiflow/mutation_reporter.py` 与 `tests/unit/test_mutation_runner.py`：同步 `MUT-V2-001` 失败锚点行号 `(206,)` 与 `MUT-V2-002` 失败锚点行号 `(1272,)` 及对应参数化合成夹具行号。
 
+## 语义变更
+
+- **V2 变异归因协议与独立子进程检测**：新增 `mutation-evidence.schema.json` `2.0` 严格分支、`mutation_protocol.py` 16 KiB 封闭线协议及 `fail-closed` 判定（仅精确节点、阶段、行锚点、异常类型与语义签名全部匹配且进程生命周期与材料一致时返回 `killed`，其余一律 `unverified`/`survived`）、`mutation_materials.py` Git blob 与已加载 `aiflow.*` 运行时字节/函数一致性核验、`mutation_reporter.py` `-I -B` 无第三方插件隔离报告器，以及 `mutation_process.py` Windows Job 挂起创建/恢复与 EOF/清理验证。
+- **单次行动消费与历史隔离**：`mutation_evidence.py` 在跨进程锁下原子消费单次 `targeted_mutation_v2` 行动批准并生成不可变 2.0 证据，与 `1.0` 历史只读消费者 `read_historical_mutation_evidence` 严格隔离；`verification_service.py` 在 V2 流程中强制执行材料与运行时预检及归因消费。
+- **进程边界与 `BASE_A` 兼容**：`process_runner.py` 新增 `max_output_bytes` 边界参数并在 `BASE_A` 上完整保留 Wave 2A `_environment()` 对 `ssh-keygen` 与 Windows `ProgramData` 的转发；`test_verify_command.py` 保留 Wave 1 种子仓缓存；`mutation_protocol.py` / `mutation_reporter.py` 同步 `BASE_A` 上两项测试输入 SHA-256 与锚点行号 `(206,)` / `(1272,)`。
+
 ## 风险
 
 - **长耗时全量测试回归风险**：已由 Wave 1 种子仓缓存与 `BASE_A` 基线协同控制；本轮独立 V2 实测 `unit_tests` 耗时 `1654563 ms`（约 27.6 分钟），低于 `3000s` 预算上限。
