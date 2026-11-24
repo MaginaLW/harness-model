@@ -1,0 +1,13 @@
+{
+  "context_sha256": "fb482a893edb8fa786c84725948db59df274f1b45d563d723aad0c3d703737f2",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-24T18:58:00Z",
+  "review_id": "REV-0002",
+  "review_stage": "design",
+  "reviewer": "independent-reviewer-procfix",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Reviewed amended TASK-0189 DU-001 frozen specification (ac8feb69e5eba1b7ef5b03d8f3adf735544761e7a7141cf45bc024c4facb3c01) and classification (REVIEW / V1, policy 2.6.0) at commit 725a687ed359268bc53aef0d4c06cc09d284e768 after spec_changed resolution. Forwarding non-empty ProgramData alongside SystemRoot strictly under os.name == 'nt' preserves isolation of arbitrary environment variables while unblocking Windows OpenSSH ssh-keygen.exe, and the required unit tests explicitly cover all ('git', 'ssh-keygen') PATH branches, allowlist updates, and direct cross-platform nt/posix _environment() checks without spawning subprocesses under patched os.name. No open findings.",
+  "task_id": "TASK-0189"
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-24T18:23:30Z",
+    "base_commit": "1807c540f03be987df9115373036f72498553fc6",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Independent REV-0001 design APPROVE.",
+    "schema_version": "1.0",
+    "spec_sha256": "69824c22d6579f9cfc66c30a7a260a6092e2b75293b3a4e4a7999390a801bf69",
+    "subject_commit": "1807c540f03be987df9115373036f72498553fc6",
+    "task_id": "TASK-0189"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-24T18:58:29Z",
+    "base_commit": "1807c540f03be987df9115373036f72498553fc6",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Independent REV-0002 design APPROVE after spec_changed resolution.",
+    "schema_version": "1.0",
+    "spec_sha256": "ac8feb69e5eba1b7ef5b03d8f3adf735544761e7a7141cf45bc024c4facb3c01",
+    "subject_commit": "3d5c243b4c92c01cf08b4645ee34df62430b94f2",
+    "task_id": "TASK-0189"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-24T19:28:25Z",
+    "base_commit": "1807c540f03be987df9115373036f72498553fc6",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "38cf2971f6b9ac81eb468b8ff54590b9041d2b04bd8b7ae3a858482556d6422d",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Independent REV-0003 implementation APPROVE and V1 verification passed.",
+    "schema_version": "1.0",
+    "spec_sha256": "ac8feb69e5eba1b7ef5b03d8f3adf735544761e7a7141cf45bc024c4facb3c01",
+    "subject_commit": "f534d25b0f4ba57fc5d2871fb31c26face120fde",
+    "task_id": "TASK-0189"
+  }
+]
