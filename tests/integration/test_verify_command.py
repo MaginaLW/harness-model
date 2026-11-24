@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import atexit
 import hashlib
 import json
 import os
 import shutil
 import sys
+import tempfile
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
@@ -157,6 +159,13 @@ def _plan(*, failed: bool = False):
 
 _SEED_BASE_DIR: Path | None = None
 _SEED_ENTRIES: dict[str, tuple[Path, dict[str, str]]] = {}
+_FALLBACK_SEED_TEMPDIRS: list[tempfile.TemporaryDirectory[str]] = []
+_ATEXIT_REGISTERED = False
+
+
+def _cleanup_fallback_seed_dirs() -> None:
+    while _FALLBACK_SEED_TEMPDIRS:
+        _FALLBACK_SEED_TEMPDIRS.pop().cleanup()
 
 
 def _snapshot_tree_sha256(root: Path) -> dict[str, str]:
@@ -257,10 +266,19 @@ def _build_seed_repo(key: str, repository: Path) -> None:
 
 
 def _get_seed_repo(key: str) -> Path:
+    global _ATEXIT_REGISTERED, _SEED_BASE_DIR
     entry = _SEED_ENTRIES.get(key)
     if entry is not None:
         return entry[0]
-    assert _SEED_BASE_DIR is not None, "Module seed guard fixture is not active"
+    if _SEED_BASE_DIR is None:
+        temp_dir = tempfile.TemporaryDirectory(
+            prefix="verify-cmd-seeds-", ignore_cleanup_errors=True
+        )
+        _FALLBACK_SEED_TEMPDIRS.append(temp_dir)
+        if not _ATEXIT_REGISTERED:
+            atexit.register(_cleanup_fallback_seed_dirs)
+            _ATEXIT_REGISTERED = True
+        _SEED_BASE_DIR = Path(temp_dir.name)
     repository = _SEED_BASE_DIR / key.replace(":", "-")
     _build_seed_repo(key, repository)
     _SEED_ENTRIES[key] = (repository, _snapshot_tree_sha256(repository))
