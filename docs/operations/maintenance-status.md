@@ -75,8 +75,9 @@
 
 ### 剩余缺口与推进条件
 
-- **工作流标记 #197、#194。** 有明确交付需求时先评估后继候选 #197（`74222ee5`）。它与 #194（`0bcd65db`）在首次 checkout 前显示事件提交和工作流来源提交，标记及配套测试的文件内容相同。#194 留作历史对照，保留 `TASK-0183` 重建 `TASK-0171` 标记时已用完的一次正式本地 V2 记录。两个候选的账本、回放和必需检查分别绑定各自 head，两次公开 `ai-quality-gate` 均在 `Verify and Gate` 失败。[后继 #197](https://github.com/MaginaLW/harness-model/pull/197) · [原候选 #194](https://github.com/MaginaLW/harness-model/pull/194)
-- **签发与发布。** #197 的单次回放基于旧 main `6a4a6456`。恢复时须核对届时的 main、候选 head 及与两者匹配的回放证据，并登记生产签发责任人和受信指纹。生产签发（3S）与检查发布（3P0）继续 `HOLD`。
+- **工作流标记 #197、#194。** #197（`74222ee5`）与 #194（`0bcd65db`）的工作流标记和配套测试内容相同，均在首次 checkout 前显示事件提交和工作流来源提交。两者的账本、回放和必需检查各自绑定候选 head，公开 `ai-quality-gate` 均在 `Verify and Gate` 失败。#197 的历史回放绑定主线 `6a4a6456`。#194 保留 `TASK-0183` 已用完的一次正式本地 V2 记录。[后继 #197](https://github.com/MaginaLW/harness-model/pull/197) · [原候选 #194](https://github.com/MaginaLW/harness-model/pull/194)
+- **本机后继 `TASK-0188`。** 在主线 `20c0a895` 准备软件提交 `4dfb2f89` 和账本候选 `470dedba`。单次离线 Ubuntu V2 经独立审核和同一验证者定稿，14 项必需检查、5 个固定变异和本地 Gate 通过。在同一候选上的离线 `verify --ci` 回放通过 14 项必需检查、5 项维护检查和 Gate。pytest 通过 4,869 项、跳过 77 项，核心覆盖率 89.83%。回放核验 5 个已有变异，新增变异执行为零，原件与账本的前后摘要一致。原件及未签名回放摘要留在本机，候选尚未公开。离线回放的 `--ci-run-dir` 使用 `TMPDIR` 的严格子目录，输出文件位于该回放目录内。
+- **签发与发布。** `TASK-0188` 的两份验收结果各自绑定上列主线与候选。生产签发（3S）与检查发布（3P0）继续 `HOLD`。主线或候选变化后须重新绑定回放证据。恢复时登记签发责任人、受信公钥指纹和专用 App。受保护工作流从主线获取验签器，摘要取该提交中的 Git 文件字节。当前合并门要求 GitHub Actions（App ID `15368`）的 `ai-quality-gate`，专用 App 的 `private-v2-receipt/verified` 若要参与合并门，须单独确定接入方式。[受保护工作流](../../.github/workflows/private-replay-receipt.yml)
 - **变异归因 #186。** `TASK-0175`（`2dd4e8e7`）单独交付变异归因。Windows 与私有 Ubuntu V2 各通过 14/14 项，两端本地 Gate 通过。七份私有原件仅存本机，当前 head 的公开必需检查失败。仅在明确需要交付变异归因时恢复，复核该 head 的证据及必需检查。标记候选的结果不能用于 #186 的合并验收。[变异归因 #186](https://github.com/MaginaLW/harness-model/pull/186)
 - **暂缓的回放工作。** `TASK-0169` 的受保护验签工作流候选已通过私有 Ubuntu V2 与本地 Gate，原任务状态为 `APPROVED_FOR_MERGE`。`TASK-0170` 的单仓 GitHub App 合成检查已返回 `completed/success`，该任务依据本机 `READBACK/RESERVED/0` 诊断在 `c0fb8172` 以 `BLOCKED` 收口，剩余外部额度为 0。`TASK-0173` 的 Linux `--ci-sandbox` 隔离工作（`IMPLEMENTING`）继续暂缓，其预留的一次私有 Ubuntu 正式 V2 尚未使用。启动前须由项目所有者针对该任务、提交、规格、独立验证者及单次动作明确放行，各原任务的授权边界继续有效。[TASK-0170 合成检查](https://github.com/MaginaLW/harness-model/runs/136411424968)
 - **G 的恢复条件。** 仅在确有正式切换需求时恢复影子验收。合成成功、预期拒绝、普通维护 PR 检查各保留一次，三项均未使用（0/3），每项均不重试。
