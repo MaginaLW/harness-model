@@ -12,5 +12,19 @@
     "spec_sha256": "b89905510c4b08b7ab5d115ddccfc7062b0a39a3eab547089265a1a002544e13",
     "subject_commit": "ae5dc1aaaf80875efff96ee7610a1ca4c939bdd4",
     "task_id": "TASK-0190"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-24T20:00:04Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "ae5dc1aaaf80875efff96ee7610a1ca4c939bdd4",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+    "reason": "常设授权与条件式预授权：spec_sha256 未变、新 Policy 下独立设计复审 REV-0002 结论为 APPROVE 且无未关闭 critical/high 发现、effective_route 仍为 REVIEW/V1 未降低，符合 docs/operations/low-intervention.md 与 AGENTS.md 常设授权条件",
+    "schema_version": "1.0",
+    "spec_sha256": "b89905510c4b08b7ab5d115ddccfc7062b0a39a3eab547089265a1a002544e13",
+    "subject_commit": "bb21d3bc0344bf766d39be9597c8a9b8d898196d",
+    "task_id": "TASK-0190"
   }
 ]
