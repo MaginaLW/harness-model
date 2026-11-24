@@ -238,7 +238,7 @@ def test_runner_preserves_actual_argv_and_minimal_environment(
     )[0]
     assert received["argv"] == list(selected.argv)
     assert received["shell"] is False
-    assert set(received["env"]) <= {"PATH", "SystemRoot", "TEMP", "TMP", "TMPDIR"}
+    assert set(received["env"]) <= {"PATH", "SystemRoot", "ProgramData", "TEMP", "TMP", "TMPDIR"}
     assert result.conclusion == "passed"
     assert "ordinary-check" in result.command_summary
 
@@ -310,7 +310,15 @@ def test_runner_hides_known_paths_in_summary_without_changing_execution(
     assert received["shell"] is False
     environment = received["env"]
     assert isinstance(environment, dict)
-    assert set(environment) <= {"PATH", "SystemRoot", "COVERAGE_FILE", "TEMP", "TMP", "TMPDIR"}
+    assert set(environment) <= {
+        "PATH",
+        "SystemRoot",
+        "ProgramData",
+        "COVERAGE_FILE",
+        "TEMP",
+        "TMP",
+        "TMPDIR",
+    }
     assert "PATH" in environment
     defaults = {entry for entry in os.defpath.split(os.pathsep) if entry}
     if os.name == "posix":
@@ -318,10 +326,11 @@ def test_runner_hides_known_paths_in_summary_without_changing_execution(
             os.path.realpath(entry) if os.path.isabs(entry) else entry for entry in defaults
         }
     assert defaults <= set(environment["PATH"].split(os.pathsep))
-    if os.name == "nt" and os.environ.get("SystemRoot"):
-        assert environment["SystemRoot"] == os.environ["SystemRoot"]
-    else:
-        assert "SystemRoot" not in environment
+    for key in ("SystemRoot", "ProgramData"):
+        if os.name == "nt" and os.environ.get(key):
+            assert environment[key] == os.environ[key]
+        else:
+            assert key not in environment
     assert environment["COVERAGE_FILE"] == str(run_dir / ".coverage")
     assert result.conclusion == "passed"
     assert sys.executable not in result.command_summary
@@ -410,6 +419,53 @@ def test_runner_includes_git_and_ssh_keygen_directories_in_path(
     assert result.conclusion == "passed"
     output = (run_dir / result.stdout_log_ref).read_text(encoding="utf-8").strip()
     assert output.split(os.pathsep) == expected
+
+
+@pytest.mark.parametrize(
+    ("platform", "program_data", "expected"),
+    [
+        ("nt", "C:\\ProgramData", {"SystemRoot": "C:\\Windows", "ProgramData": "C:\\ProgramData"}),
+        ("nt", None, {"SystemRoot": "C:\\Windows"}),
+        ("posix", "C:\\ProgramData", {}),
+    ],
+)
+def test_environment_forwards_windows_system_variables_only_on_nt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    platform: str,
+    program_data: str | None,
+    expected: dict[str, str],
+) -> None:
+    run_dir = tmp_path / "run"
+    temp_root = tmp_path / "temp"
+    run_dir.mkdir()
+    temp_root.mkdir()
+    monkeypatch.setattr(
+        process_runner,
+        "os",
+        SimpleNamespace(
+            name=platform,
+            defpath=os.defpath,
+            pathsep=os.pathsep,
+            path=os.path,
+            environ=os.environ,
+        ),
+    )
+    monkeypatch.setenv("SystemRoot", "C:\\Windows")
+    if program_data is None:
+        monkeypatch.delenv("ProgramData", raising=False)
+    else:
+        monkeypatch.setenv("ProgramData", program_data)
+
+    environment = process_runner._environment(
+        check((sys.executable, "-c", "pass")), run_dir, temp_root
+    )
+
+    for key in ("SystemRoot", "ProgramData"):
+        if key in expected:
+            assert environment[key] == expected[key]
+        else:
+            assert key not in environment
 
 
 @pytest.mark.parametrize("selected", ["TMPDIR", "TEMP", "TMP", "default"])
