@@ -1469,7 +1469,9 @@ def phase_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[P
     """Exact parser input files, not an assertion that their synthetic Job ran."""
     seed_bundle = _get_model_seed_bundle()
     attempts = _install_no_execution_guards(monkeypatch)
-    yield parser_phase(seed_bundle.material, tmp_path / "parser-phase", PROBE)
+    monkeypatch.setattr(runtime, "_materials", lambda: seed_bundle.material_bytes)
+    monkeypatch.setattr(node, "_windows_root", lambda: tmp_path / "public-windows-role")
+    yield parser_phase(deepcopy(seed_bundle.material), tmp_path / "parser-phase", PROBE)
     assert not attempts, "a caught launch attempt must not make a logical test pass"
 
 
