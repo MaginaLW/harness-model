@@ -1,0 +1,39 @@
+{
+  "base_commit": "1807c540f03be987df9115373036f72498553fc6",
+  "branch": "codex/fix-windows-runner-ssh-keygen-path",
+  "classification_input_sha256": "43b1f6e5ac4459152b8481054dc45bf9327d46762ff67945d954c78fefd8a1e1",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0189/**",
+      "src/aiflow/process_runner.py",
+      "tests/unit/test_process_runner.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Include ssh-keygen directory in isolated verification runner PATH for Windows native verification",
+        "impact_scope": [
+          ".ai/tasks/TASK-0189/**",
+          "src/aiflow/process_runner.py",
+          "tests/unit/test_process_runner.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Include ssh-keygen directory in isolated verification runner PATH for Windows native verification",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "fb482a893edb8fa786c84725948db59df274f1b45d563d723aad0c3d703737f2",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "ac8feb69e5eba1b7ef5b03d8f3adf735544761e7a7141cf45bc024c4facb3c01",
+  "task_id": "TASK-0189"
+}
