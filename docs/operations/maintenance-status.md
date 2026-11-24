@@ -19,7 +19,8 @@
 | 治理修复的收尾基线 | `main` 合并提交 `3ef032a1`。TASK-0162 的账本已记录实现合并提交 `94632d43`，状态为 `MERGED`。 | 下列源码、安装包及跨仓候选各自绑定固定提交和验收结果，即使版本号相同也须核对来源。[任务记录](../../.ai/tasks/TASK-0162/task.yaml) |
 | Stage B 停止时的原主根与旧 WIP | `codex/agent-bridge-phased-adoption` / `4ab57ce5b0291ec2841c90782a751c920e284403`。 | 当时已核对八个暂存 mutation/schema 文件、TASK-0094/0095/0124 及三份未跟踪建议稿的路径和内容校验值。材料归原任务保管，不得整文件覆盖、stash、reset、clean 或当作重复删除。 |
 | 已验收本地候选 | 普通安装候选 `c60b663427e73ca2d551d7a9aca2dc68b443c954`；Stage A 自有治理根。 | 原记录报告本地采用通过，不代表本维护基线含有全部候选代码，也不代表 Stage B 验收。 |
-| source6 发布候选 | `5ce4cbd841a4656d346c9b17938a0b42d5f1d897`；[PR #150](https://github.com/MaginaLW/harness-model/pull/150)。 | 原记录报告 Native、7354 项测试/9 项跳过、变异及源 Gate/CI 通过；本轮未重验，不扩大为 main 或目标消费成功。 |
+| 普通安装的本地 Node V2 | `agent-bridge-node@2` / Policy `3.2.0` 已合入 main。合并提交 `dd894e41` 交付已安装原生引擎的固定变异执行与重放。合并提交 `39898f30` 交付本地预验证、独立实现审核、同一验证者终结、代码批准与 Gate。 | #148 的必需 `ai-quality-gate` 在最终提交 `1f2f2cdf` 通过。[固定变异 #147](https://github.com/MaginaLW/harness-model/pull/147) · [本地生命周期 #148](https://github.com/MaginaLW/harness-model/pull/148) · [CI run 41427419940](https://github.com/MaginaLW/harness-model/actions/runs/41427419940) |
+| source6 发布候选 | `5ce4cbd841a4656d346c9b17938a0b42d5f1d897`；[PR #150](https://github.com/MaginaLW/harness-model/pull/150) 仍打开。 | 该候选的源仓检查通过。历史记录包含 Native、7354 项测试/9 项跳过、变异及源 Gate/CI；目标 Node CI、combined Gate 与真实 agent-bridge 接入仍待验收。 |
 | 已停止消费候选 | agent-bridge TASK-0017 / REVIEW / V2；原独立目标根及原任务所有者保留现场。 | 原记录为 BLOCKED，Missing: block_resolution；历史干净封账 `d1fbd37a7df351610021b0a4a509073a573d8cab` 属较早窗口，不冒称 probe5 后新 HEAD。 |
 
 ### 已完成的维护收口
@@ -64,7 +65,7 @@
 | 非评分准备（S0/S1） | [事实快照](effect-observations.md#固定提交的事实快照)；[正式账本回读](../archive/operations/review-feedback.md)、[PR 回读](../archive/operations/pr-feedback.md)、[只读建议](../archive/operations/review-advisory.md)已归档（脚本于 PR #166 退场）。 | 来源认证、实际身份、人时/费用、独立真值和原子一致性仍有 unknown；记录数不是独立样本。 |
 | 离线工具（S2 局部，已归档） | [公开外部参考](../archive/operations/benchmark-reference.md)、[输入检查与原件定位](../archive/operations/review-detection-input.md)、[区间计算](../archive/operations/review-detection.md)、[合成分析](../archive/operations/review-detection-analysis.md)、[合成反馈](../archive/operations/review-feedback-simulation.md)（对应脚本于 PR #166 退场）。 | synthetic 结果不能改标为真实数据；尚无生产评分、校准或自动路由效果证明。 |
 | SDK | [单次文档审核及可选上下文节点](../superpowers/specs/sdk-readonly-review.md#使用)已交付。 | 默认关闭；一次真实审核不证明长期效果，新实际调用需明确任务、输入与范围。 |
-| 跨仓引擎 | main 已合并[资源包](resource-bundle.md)、[非覆盖初始化](initialization.md)、[Node 本地 V0/V1](node-verification.md)与 [installed 变异切片](https://github.com/MaginaLW/harness-model/pull/147)。 | 后续本地 V2/source6/Stage A 按上表独立候选读取；Node CI 与目标 combined 验收未闭合。 |
+| 跨仓引擎 | main 已合并[资源包](resource-bundle.md)、[非覆盖初始化](initialization.md)、[Node 本地 V0/V1](node-verification.md)及[普通安装的本地 Node V2](node-verification.md#revision-2-local-v2)。 | 目标 Node CI、combined Gate 与真实 agent-bridge 接入待验收。source6 和 Stage A 的证据按上表对应版本读取。 |
 
 ### 既定离线范围的收口
 
