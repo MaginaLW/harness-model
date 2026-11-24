@@ -372,6 +372,46 @@ def test_runner_preserves_search_order_when_resolving_default_directories(
     assert output.split(os.pathsep) == expected
 
 
+@pytest.mark.parametrize("case", ["distinct", "shared", "missing_ssh_keygen"])
+def test_runner_includes_git_and_ssh_keygen_directories_in_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    default_dir = (tmp_path / "default").resolve()
+    git_dir = (tmp_path / "git-bin").resolve()
+    ssh_dir = (tmp_path / "ssh-bin").resolve()
+    for directory in (default_dir, git_dir, ssh_dir):
+        directory.mkdir()
+
+    resolved_programs: dict[str, str | None]
+    if case == "distinct":
+        resolved_programs = {"git": str(git_dir / "git"), "ssh-keygen": str(ssh_dir / "ssh-keygen")}
+        expected = [str(default_dir), str(git_dir), str(ssh_dir)]
+    elif case == "shared":
+        resolved_programs = {"git": str(git_dir / "git"), "ssh-keygen": str(git_dir / "ssh-keygen")}
+        expected = [str(default_dir), str(git_dir)]
+    else:
+        resolved_programs = {"git": str(git_dir / "git"), "ssh-keygen": None}
+        expected = [str(default_dir), str(git_dir)]
+
+    monkeypatch.setattr(os, "defpath", str(default_dir))
+    monkeypatch.setattr(
+        process_runner.shutil, "which", lambda program: resolved_programs.get(program)
+    )
+    item = check((sys.executable, "-c", "import os; print(os.environ['PATH'])"))
+    run_dir = tmp_path / "logs" / "run"
+    result = run_execution(
+        execution(item),
+        {"check": item},
+        run_dir=run_dir,
+        allowed_run_root=run_dir.parent,
+        repository_root=Path.cwd(),
+        sequence=1,
+    )[0]
+    assert result.conclusion == "passed"
+    output = (run_dir / result.stdout_log_ref).read_text(encoding="utf-8").strip()
+    assert output.split(os.pathsep) == expected
+
+
 @pytest.mark.parametrize("selected", ["TMPDIR", "TEMP", "TMP", "default"])
 def test_runner_gives_each_child_a_private_temp_in_selected_root(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, selected: str

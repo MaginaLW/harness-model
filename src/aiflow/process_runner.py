@@ -132,11 +132,12 @@ def _environment(check: VerificationCheck, run_dir: Path, temporary_root: Path) 
                 os.path.realpath(entry) if os.path.isabs(entry) else entry for entry in path_entries
             )
         )
-    git_program = shutil.which("git")
-    if git_program is not None:
-        git_directory = str(Path(git_program).resolve().parent)
-        if git_directory not in path_entries:
-            path_entries.append(git_directory)
+    for program in ("git", "ssh-keygen"):
+        located = shutil.which(program)
+        if located is not None:
+            directory = str(Path(located).resolve().parent)
+            if directory not in path_entries:
+                path_entries.append(directory)
     environment = {"PATH": os.pathsep.join(path_entries)}
     if os.name == "nt" and os.environ.get("SystemRoot"):
         environment["SystemRoot"] = os.environ["SystemRoot"]
