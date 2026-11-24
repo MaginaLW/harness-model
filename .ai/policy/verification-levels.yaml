@@ -99,7 +99,7 @@ levels:
         environment:
           COVERAGE_FILE: "{run_dir}/.coverage"
       - id: mypy
-        command: ["{python}", -m, mypy, src]
+        command: ["{python}", -m, mypy]
         timeout_seconds: 300
         required: true
         result_parser: exit_zero
@@ -183,7 +183,7 @@ levels:
         environment:
           COVERAGE_FILE: "{run_dir}/.coverage"
       - id: mypy
-        command: ["{python}", -m, mypy, src]
+        command: ["{python}", -m, mypy]
         timeout_seconds: 300
         required: true
         result_parser: exit_zero

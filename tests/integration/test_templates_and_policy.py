@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -368,3 +370,71 @@ def test_templates_and_policy_have_no_empty_placeholder_markers() -> None:
     text = "\n".join(path.read_text(encoding="utf-8") for path in paths if path.is_file())
 
     assert not re.search(r"TBD|TODO|稍后补充", text, flags=re.IGNORECASE)
+
+
+@pytest.mark.parametrize(
+    "governed_path",
+    ["setup.py", "MANIFEST.in", "tools/hooks/pre_command.py"],
+)
+def test_maintenance_route_requires_task_for_governance_surface_additions(
+    tmp_path: Path, governed_path: str
+) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    for args in (
+        ("init",),
+        ("config", "user.email", "ci@example.invalid"),
+        ("config", "user.name", "CI"),
+    ):
+        subprocess.run(["git", *args], cwd=root, check=True, capture_output=True, text=True)
+
+    (root / ".ai" / "policy").mkdir(parents=True)
+    (root / ".ai" / "repository-id").write_text("repo-stable\n", encoding="utf-8")
+    (root / ".ai" / "bootstrap-mode.yaml").write_text(
+        "mode: bootstrap_auto\nstatus: active\n", encoding="utf-8"
+    )
+    (root / ".ai" / "policy" / "hard-rules.yaml").write_bytes(
+        (POLICY_ROOT / "hard-rules.yaml").read_bytes()
+    )
+    subprocess.run(["git", "add", "."], cwd=root, check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "commit", "-m", "base"], cwd=root, check=True, capture_output=True, text=True
+    )
+    base = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+    target = root / governed_path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("# governance surface\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=root, check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "commit", "-m", "touch governed path"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(REPOSITORY_ROOT / "tools" / "ci" / "resolve_task.py"),
+            "--route",
+            "--base",
+            base,
+            "--head",
+            head,
+        ],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=20,
+    )
+
+    assert result.returncode == 1
+    assert "implementation task" in result.stderr

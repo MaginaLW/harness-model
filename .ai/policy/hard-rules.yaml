@@ -113,9 +113,12 @@ rules:
           - .ai/**
           - src/aiflow/**
           - tools/ci/**
+          - tools/hooks/**
           - AGENTS.md
           - CLAUDE.md
           - pyproject.toml
+          - setup.py
+          - MANIFEST.in
           - uv.lock
           - .gitignore
           - .gitattributes
