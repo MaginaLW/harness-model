@@ -5,7 +5,7 @@ allowed_scope:
 base_commit: 1807c540f03be987df9115373036f72498553fc6
 branch: codex/fix-windows-runner-ssh-keygen-path
 created_at: '2026-11-24T18:19:55Z'
-current_state: IMPLEMENTING
+current_state: WAITING_FOR_FINAL_REVIEW
 decision_units:
 - change_characteristics:
     behavior_changed: true
@@ -51,8 +51,8 @@ goal: Include ssh-keygen directory in isolated verification runner PATH for Wind
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-24T18:57:00Z'
-subject_commit: 3d5c243b4c92c01cf08b4645ee34df62430b94f2
+subject_commit: f534d25b0f4ba57fc5d2871fb31c26face120fde
 task_id: TASK-0189
-updated_at: '2026-11-24T18:58:30Z'
+updated_at: '2026-11-24T19:25:39Z'
 worktree_dirty: false
 worktree_dirty_paths: []
