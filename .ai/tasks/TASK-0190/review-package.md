@@ -37,7 +37,7 @@
 
 ## 证据
 
-1. **正式 V1 验证**：`uv run --locked --extra dev python -m aiflow verify TASK-0190 --actor author-track-b2`（已记录于 `.ai/tasks/TASK-0190/evidence.json`，绑定 `subject_commit: bb21d3bc0344bf766d39be9597c8a9b8d898196d`、`policy_sha256: d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff`）：
+1. **已验证结果（正式 V1 验证）**：`uv run --locked --extra dev python -m aiflow verify TASK-0190 --actor author-track-b2`（已记录于 `.ai/tasks/TASK-0190/evidence.json`，绑定 `subject_commit: bb21d3bc0344bf766d39be9597c8a9b8d898196d`、`policy_sha256: d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff`）：
    - 全部 10/10 项 V1 检查 `passed`（`contract`、`scope`、`ruff_check`、`ruff_format_check`、`smoke`、`unit_tests`、`regression_tests`、`mypy`、`coverage_xml`、`diff_coverage`）。
    - `pytest --cov=aiflow --cov-branch`：`4950 passed, 9 skipped`（`core` 总覆盖率 `90%` >= `85%`；本任务无 `src/` Python 代码变更，diff coverage 检查通过）。
    - `mypy`：`Success: no issues found in 57 source files`（覆盖 `src` + `tools`）。
