@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-24T19:56:37Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "ae5dc1aaaf80875efff96ee7610a1ca4c939bdd4",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权：2026-11-24 项目所有者直接批准 B1/B2 目标与范围，独立设计审核 REV-0001 结论为 APPROVE 且无未关闭 critical/high 发现，符合 AGENTS.md 常设授权条件",
+    "schema_version": "1.0",
+    "spec_sha256": "b89905510c4b08b7ab5d115ddccfc7062b0a39a3eab547089265a1a002544e13",
+    "subject_commit": "ae5dc1aaaf80875efff96ee7610a1ca4c939bdd4",
+    "task_id": "TASK-0190"
+  }
+]
