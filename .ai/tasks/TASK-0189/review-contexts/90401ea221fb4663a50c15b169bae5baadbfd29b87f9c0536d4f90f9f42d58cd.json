@@ -1,0 +1,198 @@
+{
+  "base_commit": "1807c540f03be987df9115373036f72498553fc6",
+  "branch": "codex/fix-windows-runner-ssh-keygen-path",
+  "classification_input_sha256": "43b1f6e5ac4459152b8481054dc45bf9327d46762ff67945d954c78fefd8a1e1",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0189/**",
+      "src/aiflow/process_runner.py",
+      "tests/unit/test_process_runner.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Include ssh-keygen directory in isolated verification runner PATH for Windows native verification",
+        "impact_scope": [
+          ".ai/tasks/TASK-0189/**",
+          "src/aiflow/process_runner.py",
+          "tests/unit/test_process_runner.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0189/approvals.json",
+        ".ai/tasks/TASK-0189/classification.json",
+        ".ai/tasks/TASK-0189/events.jsonl",
+        ".ai/tasks/TASK-0189/evidence.json",
+        ".ai/tasks/TASK-0189/review-contexts/0557ee02f2e8596d948e33eee63dbe3576c250635a07cd1daac9359218d39854.json",
+        ".ai/tasks/TASK-0189/review-contexts/fb482a893edb8fa786c84725948db59df274f1b45d563d723aad0c3d703737f2.json",
+        ".ai/tasks/TASK-0189/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0189/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0189/spec-amendment-resolution.md",
+        ".ai/tasks/TASK-0189/spec.md",
+        ".ai/tasks/TASK-0189/task.yaml",
+        "src/aiflow/process_runner.py",
+        "tests/unit/test_process_runner.py"
+      ],
+      "files": [
+        {
+          "additions": 28,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/classification.json"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/evidence.json"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/review-contexts/0557ee02f2e8596d948e33eee63dbe3576c250635a07cd1daac9359218d39854.json"
+        },
+        {
+          "additions": 39,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/review-contexts/fb482a893edb8fa786c84725948db59df274f1b45d563d723aad0c3d703737f2.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/spec-amendment-resolution.md"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/spec.md"
+        },
+        {
+          "additions": 58,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0189/task.yaml"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 7,
+          "path": "src/aiflow/process_runner.py"
+        },
+        {
+          "additions": 102,
+          "binary": false,
+          "deletions": 6,
+          "path": "tests/unit/test_process_runner.py"
+        }
+      ],
+      "totals": {
+        "additions": 610,
+        "deletions": 13,
+        "files": 13
+      }
+    },
+    "goal": "Include ssh-keygen directory in isolated verification runner PATH for Windows native verification",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0189",
+        "--actor",
+        "author-procfix"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "90401ea221fb4663a50c15b169bae5baadbfd29b87f9c0536d4f90f9f42d58cd",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "38cf2971f6b9ac81eb468b8ff54590b9041d2b04bd8b7ae3a858482556d6422d",
+  "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "ac8feb69e5eba1b7ef5b03d8f3adf735544761e7a7141cf45bc024c4facb3c01",
+  "subject_commit": "f534d25b0f4ba57fc5d2871fb31c26face120fde",
+  "task_id": "TASK-0189"
+}
