@@ -8,7 +8,6 @@ existing REVIEW task merge-ready.
 
 from __future__ import annotations
 
-import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -33,12 +32,11 @@ from test_v2_verifier_scenario import (  # noqa: E402
 from test_verify_command import _enable_v2, _prepare  # noqa: E402
 
 from aiflow import gate as gate_service  # noqa: E402
-from aiflow import mutation_evidence, mutation_runner, verification_service  # noqa: E402
+from aiflow import verification_service  # noqa: E402
 from aiflow.cli import main  # noqa: E402
 from aiflow.decision_units import classification_input_digest, parse_decision_units  # noqa: E402
 from aiflow.errors import ContractError  # noqa: E402
 from aiflow.gate import evaluate_gate  # noqa: E402
-from aiflow.mutation_manifest import load_mutation_manifest  # noqa: E402
 from aiflow.observation import parse_observation  # noqa: E402
 from aiflow.observation_service import apply_observation  # noqa: E402
 from aiflow.review_service import ReviewAssessment  # noqa: E402
@@ -50,6 +48,7 @@ from aiflow.storage import (  # noqa: E402
     resolve_task_path,
 )
 from aiflow.task_service import load_task_record  # noqa: E402
+from tests.mutation_evidence_helpers import replay_synthetic_mutation  # noqa: E402
 
 
 def _task_bytes(repository: Path) -> dict[Path, bytes]:
@@ -88,7 +87,7 @@ def test_invalid_v2_actor_verify_fails_before_side_effects(
 def test_survived_ci_mutation_replay_rejects_without_source_writes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """CI reaches the real public consumer and rejects one authentic survived result."""
+    """CI and Gate replay a valid synthetic report with one surviving mutation."""
     repository = _prepare(tmp_path, monkeypatch, route="REVIEW")
     prepared = load_task_record(repository, "TASK-0001").task
     prepared["decision_units"][0]["impact_scope"] = ["src/**"]
@@ -104,58 +103,9 @@ def test_survived_ci_mutation_replay_rejects_without_source_writes(
     )
     assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
     _enable_v2(repository)
-    record = load_task_record(repository, "TASK-0001")
-    manifest = load_mutation_manifest(ROOT)
-    record_id = "MUTRUN-20000101T000000Z-0000000000000000"
-    record_root = resolve_task_path(repository, "TASK-0001", Path("logs") / record_id)
-    record_root.mkdir(parents=True)
-    task = {
-        "task_id": "TASK-0001",
-        "repository_id": record.task["repository_id"],
-        "branch": record.task["branch"],
-        "base_commit": "b" * 40,
-        "subject_commit": "a" * 40,
-        "frozen_spec_sha256": "c" * 64,
-    }
-    classification = {"classification_input_sha256": "d" * 64}
-    run = mutation_runner.MutationRun(
-        manifest.manifest_id,
-        "a" * 40,
-        tuple(
-            mutation_runner.MutationProbe(
-                item.mutation_id,
-                0,
-                0 if index == 0 else 1,
-                False,
-                1,
-                None,
-            )
-            for index, item in enumerate(manifest.mutations)
-        ),
-        True,
-        None,
+    artifact, artifact_value = replay_synthetic_mutation(
+        repository, monkeypatch, now=datetime(2000, 1, 1, tzinfo=timezone.utc), first_survived=True
     )
-    monkeypatch.setattr(
-        mutation_evidence, "_validate_bindings", lambda *_args: (task, classification, "e" * 64)
-    )
-    monkeypatch.setattr(mutation_evidence, "_load_manifest", lambda _root: manifest)
-    monkeypatch.setattr(mutation_evidence, "_source_sha256", lambda _path: "f" * 64)
-    artifact = mutation_evidence._make_artifact(
-        repository,
-        "TASK-0001",
-        "a" * 40,
-        run=run,
-        now=datetime(2000, 1, 1, tzinfo=timezone.utc),
-        record_id=record_id,
-        record_root=record_root,
-        task=task,
-        classification=classification,
-        policy_sha="e" * 64,
-        manifest=manifest,
-        manifest_sha="f" * 64,
-        runner_sha="f" * 64,
-    )
-    artifact_value = json.loads((repository / artifact.evidence_ref).read_text(encoding="utf-8"))
     assert artifact_value["results"][0]["outcome"] == "survived"
     assert artifact_value["uncovered_mutation_ids"] == ["MUT-V2-001"]
     source = {

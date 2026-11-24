@@ -393,6 +393,7 @@ def run_node_process(
     cwd: Path,
     environment: Mapping[str, str],
     timeout_seconds: int,
+    max_output_bytes: int = 1024 * 1024,
 ) -> NodeProcessResult:
     """Run a caller-authenticated command in a new Windows Job with bounded output.
 
@@ -412,6 +413,8 @@ def run_node_process(
             or "\0" in str(cwd)
             or type(timeout_seconds) is not int
             or timeout_seconds <= 0
+            or type(max_output_bytes) is not int
+            or not 0 < max_output_bytes <= 1024 * 1024
             or not isinstance(environment, Mapping)
             or any(
                 not isinstance(key, str)
@@ -617,7 +620,6 @@ def run_node_process(
     outputs = [bytearray(), bytearray()]
     eof = [False, False]
     returncode = None
-    limit = 1024 * 1024
     receipt: dict[str, object] = {
         "process_id": None,
         "creation_time_filetime": None,
@@ -645,8 +647,8 @@ def run_node_process(
                     continue
                 raise OSError("Pipe observation failed")
             if available.value:
-                remaining = limit - len(outputs[index])
-                count = min(available.value, 16384, remaining + 1 if remaining else 16384)
+                remaining = max_output_bytes - len(outputs[index])
+                count = min(available.value, 16384, 16384 if overflow[index] else remaining + 1)
                 buffer = c.create_string_buffer(count)
                 got = dword()
                 require(read(reader_handle, buffer, count, c.byref(got), None))

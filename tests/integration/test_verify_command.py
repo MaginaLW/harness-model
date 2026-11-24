@@ -2231,53 +2231,12 @@ def test_v2_ci_real_consumer_rejects_tampered_log_before_plan_or_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Keep the CI seam on the public loader path for an actual artifact tamper."""
+    from tests.mutation_evidence_helpers import replay_synthetic_mutation
+
     repository = _prepare_verified_v2(tmp_path, monkeypatch)
-    record = load_task_record(repository, "TASK-0001")
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
-    record_id = "MUTRUN-20000101T000000Z-0000000000000000"
-    record_root = resolve_task_path(repository, "TASK-0001", Path("logs") / record_id)
-    record_root.mkdir(parents=True)
-    task = {
-        "task_id": "TASK-0001",
-        "repository_id": record.task["repository_id"],
-        "branch": record.task["branch"],
-        "base_commit": "b" * 40,
-        "subject_commit": "a" * 40,
-        "frozen_spec_sha256": "c" * 64,
-    }
-    classification = {"classification_input_sha256": "d" * 64}
-    run = mutation_runner.MutationRun(
-        manifest.manifest_id,
-        "a" * 40,
-        tuple(
-            mutation_runner.MutationProbe(item.mutation_id, 0, 1, False, 1, None)
-            for item in manifest.mutations
-        ),
-        True,
-        None,
+    artifact, artifact_value = replay_synthetic_mutation(
+        repository, monkeypatch, now=datetime(2000, 1, 1, tzinfo=timezone.utc)
     )
-    monkeypatch.setattr(
-        mutation_evidence, "_validate_bindings", lambda *_args: (task, classification, "e" * 64)
-    )
-    monkeypatch.setattr(mutation_evidence, "_load_manifest", lambda _root: manifest)
-    monkeypatch.setattr(mutation_evidence, "_source_sha256", lambda _path: "f" * 64)
-    artifact = mutation_evidence._make_artifact(
-        repository,
-        "TASK-0001",
-        "a" * 40,
-        run=run,
-        now=datetime(2000, 1, 1, tzinfo=timezone.utc),
-        record_id=record_id,
-        record_root=record_root,
-        task=task,
-        classification=classification,
-        policy_sha="e" * 64,
-        manifest=manifest,
-        manifest_sha="f" * 64,
-        runner_sha="f" * 64,
-    )
-    artifact_path = repository / artifact.evidence_ref
-    artifact_value = json.loads(artifact_path.read_text(encoding="utf-8"))
     first_log = repository / str(artifact_value["results"][0]["log_ref"])
     first_log.write_text("{}", encoding="utf-8")
     task_directory = resolve_task_path(repository, "TASK-0001")

@@ -1,13 +1,3 @@
-schema_version: '1.0'
-task_id: TASK-0191
-goal: Deliver V2 mutation attribution engine, protocol, schema, and tests from PR
-  186 on main
-repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
-branch: codex/mutation-attribution-delivery
-base_commit: c1037f503c3c53f35e2911468149fd05763fa2a3
-subject_commit: c1037f503c3c53f35e2911468149fd05763fa2a3
-worktree_dirty: false
-worktree_dirty_paths: []
 allowed_scope:
 - .ai/tasks/TASK-0191/**
 - .ai/schemas/mutation-evidence.schema.json
@@ -27,23 +17,27 @@ allowed_scope:
 - tests/unit/test_mutation_evidence.py
 - tests/unit/test_mutation_runner.py
 - tests/unit/test_process_runner.py
-forbidden_actions:
-- deploy
-- delete
-- secret_export
-- paid_external_call
-current_state: WAITING_FOR_SPEC_REVIEW
+base_commit: c1037f503c3c53f35e2911468149fd05763fa2a3
+branch: codex/mutation-attribution-delivery
 created_at: '2026-11-24T20:54:59Z'
-updated_at: '2026-11-24T20:59:50Z'
+current_state: IMPLEMENTING
 decision_units:
-- schema_version: '1.0'
-  task_id: TASK-0191
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
   decision_unit_id: DU-001
+  external_side_effects: []
   goal: Deliver V2 mutation attribution engine, protocol, schema, and tests from PR
     186 on main
-  inputs: []
-  planned_actions:
-  - Implement the bounded task objective
+  impact:
+    level: high
+  impact_categories: []
   impact_scope:
   - .ai/tasks/TASK-0191/**
   - .ai/schemas/mutation-evidence.schema.json
@@ -63,36 +57,42 @@ decision_units:
   - tests/unit/test_mutation_evidence.py
   - tests/unit/test_mutation_runner.py
   - tests/unit/test_process_runner.py
-  reversibility: conditionally_reversible
-  verification_methods:
-  - Define and run executable verification
-  external_side_effects: []
+  inputs: []
   permission_requirements:
   - action_approval
-  business_direction_count: 1
-  change_characteristics:
-    behavior_changed: true
-    code_modified: true
-    error_detectability: low
-    interaction_scope: cross_module
-    mechanical: false
-    regression_risk: true
-  controlled_actions: []
-  impact:
-    level: high
-  impact_categories: []
+  planned_actions:
+  - Implement the bounded task objective
   protections:
     dry_run: false
     verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
   scope:
     clear: true
+  task_id: TASK-0191
   verification:
     automatic: true
     tools_missing: false
+  verification_methods:
+  - Define and run executable verification
   verification_requirements:
     acceptance_required: true
     independent_verifier_required: true
     integration_required: true
     targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
 frozen_spec_sha256: fd8bb94382f06fc9ef36ca0c8ea0c94ba9b9dd41dce24d23ee06a830f1f4dd55
+goal: Deliver V2 mutation attribution engine, protocol, schema, and tests from PR
+  186 on main
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
 spec_frozen_at: '2026-11-24T20:58:03Z'
+subject_commit: c1037f503c3c53f35e2911468149fd05763fa2a3
+task_id: TASK-0191
+updated_at: '2026-11-24T21:00:25Z'
+worktree_dirty: false
+worktree_dirty_paths: []

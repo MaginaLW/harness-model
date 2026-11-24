@@ -3,17 +3,42 @@
 from __future__ import annotations
 
 import json
-from dataclasses import FrozenInstanceError
-from datetime import datetime, timezone
+import sys
+from contextlib import contextmanager
+from dataclasses import FrozenInstanceError, replace
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 import pytest
 
 import aiflow.mutation_evidence as evidence
+from aiflow import mutation_materials, mutation_protocol
 from aiflow.errors import AiflowError, ContractError, StorageError
 from aiflow.mutation_manifest import load_mutation_manifest
+from aiflow.mutation_process import ProcessLifecycle
 from aiflow.mutation_runner import MutationProbe, MutationRun
+from tests.integration.test_begin_close_commands import commit_all, run_git
+
+_PRODUCTION_PREFLIGHT = evidence._preflight_targeted_mutation
+
+
+def _lifecycle(report: bytes, code: int | None) -> ProcessLifecycle | None:
+    if code is None:
+        return None
+    return ProcessLifecycle(
+        created_suspended=True,
+        assigned=True,
+        initial_membership=True,
+        resumed=True,
+        job_empty=True,
+        stdout_eof=True,
+        stderr_eof=True,
+        closed=True,
+        terminate_requested=False,
+        returncode=code,
+        report_sha256=evidence._sha256_bytes(report),
+    )
 
 
 def _run(
@@ -26,16 +51,103 @@ def _run(
     timed_out=False,
     probe_reason=None,
 ) -> MutationRun:
+    def report(mutation_id: str, digest: str, failure: bool) -> bytes:
+        expected_case, exception, anchor, semantic = mutation_protocol.SIGNATURES[mutation_id]
+        cases = []
+        for case in mutation_protocol.CASES[mutation_id]:
+            failed = failure and case == expected_case
+            cases.append(
+                {
+                    "case": case,
+                    "setup": "passed",
+                    "call": "failed" if failed else "passed",
+                    "teardown": "passed",
+                    "failure": {"exception": exception, "anchor": anchor, "semantic": semantic}
+                    if failed
+                    else None,
+                }
+            )
+        return mutation_protocol.encode_report(
+            {
+                "protocol": "1.0",
+                "mutation_id": mutation_id,
+                "python": "3.11",
+                "pytest": "9.1.1",
+                "platform": "windows",
+                "cases": cases,
+                "imports": {"target_sha256": digest, "reference_ok": True},
+                "complete": True,
+            }
+        )
+
+    probes = []
+    for item in manifest.mutations:
+        original = f"synthetic {item.target}\n".encode()
+        baseline_hash = evidence._sha256_bytes(original)
+        mutant_hash = evidence._sha256_bytes(original + b"synthetic mutant\n")
+        baseline_report = report(item.mutation_id, baseline_hash, False)
+        mutant_report = report(item.mutation_id, mutant_hash, mutant == 1)
+        probes.append(
+            MutationProbe(
+                item.mutation_id,
+                baseline,
+                mutant,
+                timed_out,
+                1,
+                probe_reason,
+                baseline_report,
+                mutant_report,
+                baseline_hash,
+                mutant_hash,
+                baseline_lifecycle=_lifecycle(baseline_report, baseline),
+                mutant_lifecycle=_lifecycle(mutant_report, mutant),
+            )
+        )
     return MutationRun(
         manifest.manifest_id,
         "a" * 40,
-        tuple(
-            MutationProbe(item.mutation_id, baseline, mutant, timed_out, 1, probe_reason)
-            for item in manifest.mutations
-        ),
+        tuple(probes),
         unchanged,
         reason,
     )
+
+
+def _synthetic_materials(manifest) -> dict[str, bytes]:
+    source_root = Path(__file__).resolve().parents[2]
+    paths = {item.target for item in manifest.mutations} | {
+        ".ai/mutations/phase-02-critical-manifest.json",
+        ".ai/policy/permissions.yaml",
+        ".ai/schemas/mutation-evidence.schema.json",
+        ".ai/templates/mutation-evidence.json",
+        ".gitattributes",
+        "pyproject.toml",
+        "uv.lock",
+        "tests/conftest.py",
+        "tests/integration/test_begin_close_commands.py",
+        "tests/fixtures/contracts/valid/evidence-v2.json",
+        "tests/unit/test_policy.py",
+        "tests/integration/test_verify_command.py",
+        "tests/integration/test_mutation_manifest_contract.py",
+        "tests/unit/test_evidence.py",
+        *(
+            f"src/aiflow/{name}"
+            for name in (
+                "__init__.py",
+                "mutation_evidence.py",
+                "mutation_manifest.py",
+                "mutation_materials.py",
+                "mutation_process.py",
+                "process_runner.py",
+                "mutation_protocol.py",
+                "mutation_runner.py",
+                "mutation_reporter.py",
+            )
+        ),
+    }
+    materials = {name: (source_root / name).read_bytes().replace(b"\r\n", b"\n") for name in paths}
+    for item in manifest.mutations:
+        materials[item.target] = f"synthetic {item.target}\n".encode()
+    return materials
 
 
 def _prepare(
@@ -50,6 +162,7 @@ def _prepare(
     manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
     task = {
         "task_id": "TASK-0014",
+        "current_state": "IMPLEMENTING",
         "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
         "branch": "main",
         "base_commit": "b" * 40,
@@ -58,9 +171,20 @@ def _prepare(
     }
     classification = {"classification_input_sha256": "d" * 64}
     calls = {"runner": 0}
+    materials = _synthetic_materials(manifest)
+    for name, content in materials.items():
+        destination = root / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(content)
+    monkeypatch.setattr(evidence, "subject_materials", lambda *_: materials)
+    monkeypatch.setattr(
+        evidence, "mutation_bytes", lambda _item, data: data + b"synthetic mutant\n"
+    )
     monkeypatch.setattr(evidence, "_validate_bindings", lambda *_: (task, classification, "e" * 64))
     monkeypatch.setattr(evidence, "_load_manifest", lambda _: manifest)
-    monkeypatch.setattr(evidence, "_source_sha256", lambda _: "f" * 64)
+    monkeypatch.setattr(evidence, "loaded_engine_matches", lambda *_: True)
+    monkeypatch.setattr(evidence, "_preflight_targeted_mutation", lambda *_: None)
+    monkeypatch.setattr(evidence, "_verify_recorded_action", lambda *_: None)
     monkeypatch.setattr(evidence, "_utc_now", lambda: datetime(2000, 1, 1, tzinfo=timezone.utc))
     monkeypatch.setattr(evidence, "_nonce_hex", lambda: "0" * 16)
     if authorized:
@@ -82,11 +206,12 @@ def _prepare(
             receipt_stat.st_dev,
             receipt_stat.st_ino,
         )
-        monkeypatch.setattr(
-            evidence,
-            "_consume_targeted_mutation_action",
-            lambda *_args: action_use,
-        )
+
+        def fake_consume(*_args, check_inputs):
+            check_inputs()
+            return action_use
+
+        monkeypatch.setattr(evidence, "_consume_targeted_mutation_action", fake_consume)
         monkeypatch.setattr(
             evidence,
             "_revalidate_targeted_mutation_action",
@@ -505,13 +630,9 @@ def test_record_and_public_loader_round_trip_once(
     with pytest.raises(FrozenInstanceError):
         artifact.record_id = "changed"  # type: ignore[misc]
 
-    schema = json.loads(
-        (
-            Path(__file__).resolve().parents[2] / ".ai/schemas/mutation-evidence.schema.json"
-        ).read_text(encoding="utf-8")
-    )
-    first_log = json.loads((root / artifact.log_refs[0]).read_text(encoding="utf-8"))
-    assert set(first_log) == set(schema["$defs"]["execution_log"]["properties"])
+    assert loaded["schema_version"] == "2.0"
+    first_log = json.loads((root / artifact.log_refs[0]).read_bytes())
+    assert first_log["baseline_report"] and first_log["mutant_report"]
 
 
 @pytest.mark.parametrize(
@@ -523,10 +644,10 @@ def test_record_and_public_loader_round_trip_once(
         (0, 3221225781, None, True, False, None, "unverified"),
         (1, 1, None, True, False, None, "unverified"),
         (None, None, None, True, False, None, "unverified"),
-        (0, 1, "cleanup", True, False, None, "unverified"),
+        (0, 1, "CLEANUP", True, False, None, "unverified"),
         (0, 1, None, False, False, None, "unverified"),
         (0, 1, None, True, True, None, "unverified"),
-        (0, 1, None, True, False, "infra", "unverified"),
+        (0, 1, None, True, False, "INFRA", "unverified"),
     ],
 )
 def test_record_derives_closed_outcomes(
@@ -613,8 +734,8 @@ def test_loader_fails_closed_for_tampering(
         content = path.read_text(encoding="utf-8")
         path.write_text(
             content.replace(
-                '"schema_version": "1.0",',
-                '"schema_version": "1.0",\n  "schema_version": "1.0",',
+                '"schema_version": "2.0",',
+                '"schema_version": "2.0",\n  "schema_version": "2.0",',
                 1,
             ),
             encoding="utf-8",
@@ -1276,3 +1397,939 @@ def test_reserve_rejects_lexical_log_symlink_and_unconvertible_clock(
     with pytest.raises(ContractError) as caught:
         evidence._reserve_record_root(tmp_path, "TASK-0014", BadClock())  # type: ignore[arg-type]
     assert caught.value.code == "MUTATION_EVIDENCE_ID_FAILED"
+
+
+def test_v2_loader_rejects_process_source_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
+    artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    (root / "src/aiflow/mutation_process.py").write_text("changed", encoding="utf-8")
+    with pytest.raises(ContractError):
+        evidence.load_targeted_mutation_evidence(root, "TASK-0014", artifact.evidence_ref)
+
+
+@pytest.fixture
+def material_checkout(tmp_path: Path) -> dict[str, bytes]:
+    paths = (
+        "src/aiflow/__init__.py",
+        "tests/conftest.py",
+        ".ai/policy/rules.yml",
+        ".ai/schemas/schema.json",
+        ".ai/mutations/manifest.json",
+        ".ai/templates/task.yaml",
+        "pyproject.toml",
+        "uv.lock",
+        ".gitattributes",
+    )
+    materials = {name: b"sample\n" for name in paths}
+    for name, data in materials.items():
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+    return materials
+
+
+def test_material_closure_rejects_extra_pytest_config_and_src_module(
+    tmp_path: Path, material_checkout: dict[str, bytes]
+) -> None:
+    materials = material_checkout
+    assert mutation_materials.checkout_matches_materials(tmp_path, materials)
+    extra = tmp_path / "pytest.ini"
+    extra.write_text("[pytest]\n", encoding="utf-8")
+    assert not mutation_materials.checkout_matches_materials(tmp_path, materials)
+    materials["pytest.ini"] = extra.read_bytes()
+    assert mutation_materials.checkout_matches_materials(tmp_path, materials)
+    module = tmp_path / "src/sitecustomize.py"
+    module.write_text("pass\n", encoding="utf-8")
+    assert not mutation_materials.checkout_matches_materials(tmp_path, materials)
+
+
+@pytest.mark.parametrize("missing", ["src", "uv.lock"])
+def test_material_closure_requires_source_tree_and_lockfile(
+    tmp_path: Path, material_checkout: dict[str, bytes], missing: str
+) -> None:
+    (tmp_path / missing).rename(tmp_path / "omitted")
+    assert not mutation_materials.checkout_matches_materials(tmp_path, material_checkout)
+
+
+def test_material_closure_fails_closed_when_root_cannot_be_listed(
+    tmp_path: Path, material_checkout: dict[str, bytes], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def unreadable(_path: Path):
+        raise PermissionError("cannot list checkout")
+
+    monkeypatch.setattr(Path, "iterdir", unreadable)
+    assert not mutation_materials.checkout_matches_materials(tmp_path, material_checkout)
+
+
+def test_loaded_module_requires_exact_subject_path_and_function_source(tmp_path: Path) -> None:
+    module_path = tmp_path / "src/aiflow/example.py"
+    module_path.parent.mkdir(parents=True)
+    data = b"def example():\n    return 1\n"
+    module_path.write_bytes(data)
+    materials = {"src/aiflow/example.py": data}
+    module = ModuleType("aiflow.example")
+    module.__file__ = str(module_path)
+    exec(compile(data, str(module_path), "exec", dont_inherit=True), module.__dict__)
+    assert mutation_materials._module_identity_matches(
+        tmp_path, materials, "aiflow.example", module
+    )
+    module.example = lambda: None
+    module.example.__module__ = "aiflow.example"
+    assert not mutation_materials._module_identity_matches(
+        tmp_path, materials, "aiflow.example", module
+    )
+    module.__file__ = str(tmp_path / "wrong.py")
+    assert not mutation_materials._module_identity_matches(
+        tmp_path, materials, "aiflow.example", module
+    )
+
+
+def test_hashed_log_uses_one_bounded_snapshot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "log.json"
+    payload = b'{"value":1}'
+    path.write_bytes(payload)
+    reads = []
+    original = evidence._bounded_bytes
+
+    def read_once(path: Path, limit: int) -> bytes:
+        reads.append(path)
+        data = original(path, limit)
+        path.write_bytes(b'{"value":2}')
+        return data
+
+    monkeypatch.setattr(evidence, "_bounded_bytes", read_once)
+    assert evidence._read_hashed_log(path, evidence._sha256_bytes(payload)) == {"value": 1}
+    assert reads == [path]
+
+
+def test_artifact_and_log_reject_oversized_content(tmp_path: Path) -> None:
+    path = tmp_path / "huge.json"
+    path.write_bytes(b"x" * (evidence._MAX_ARTIFACT_BYTES + 1))
+    with pytest.raises(ContractError):
+        evidence._read_json(path)
+    with pytest.raises(ContractError):
+        evidence._read_hashed_log(path, "a" * 64)
+
+
+def test_missing_historical_artifact_reports_unknown(tmp_path: Path) -> None:
+    reference = (
+        ".ai/tasks/TASK-0014/logs/MUTRUN-20000101T000000Z-0000000000000000/"
+        "targeted-mutation/evidence.json"
+    )
+    facts = evidence.read_historical_mutation_evidence(tmp_path, "TASK-0014", reference)
+    assert facts.integrity == "unknown" and facts.exit_outcomes == ()
+
+
+def _record_synthetic_launch(
+    root: Path,
+    task_id: str,
+    artifact: evidence.MutationEvidenceArtifact,
+    now: datetime,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Write the consumed and completed action receipts and the exclusive launch claim."""
+    task_dir = root / ".ai/tasks" / task_id
+    subject, base, spec, policy, classification_sha = (
+        "a" * 40,
+        "b" * 40,
+        "c" * 64,
+        "e" * 64,
+        "d" * 64,
+    )
+    event_time = now.isoformat(timespec="seconds").replace("+00:00", "Z")
+    expires = (now + timedelta(days=1)).isoformat(timespec="seconds").replace("+00:00", "Z")
+    action = {
+        "decision_unit_id": "DU-001",
+        "classification_input_sha256": classification_sha,
+        "action_type": "targeted_mutation_v2",
+        "target": task_id,
+        "parameter_summary": "fixed tests",
+        "subject_commit": subject,
+        "conditions": [],
+        "expires_at": expires,
+        "single_use": True,
+    }
+    action_file = task_dir / "action-v2-targeted-mutation-test.json"
+    action_file.write_text(json.dumps(action), encoding="utf-8")
+    digest = evidence.canonical_action_sha256(
+        evidence.validate_action_file(action, subject_commit=subject)
+    )
+    approval = {
+        "schema_version": "1.0",
+        "task_id": task_id,
+        "decision_unit_id": "DU-001",
+        "approval_type": "action",
+        "actor": "project-owner",
+        "reason": "approved",
+        "spec_sha256": spec,
+        "policy_sha256": policy,
+        "base_commit": base,
+        "subject_commit": subject,
+        "approved_at": event_time,
+        "action_sha256": digest,
+        "expires_at": expires,
+        "single_use": True,
+    }
+    approvals = [approval]
+    approval_event = {
+        "event_type": "approval_recorded",
+        "occurred_at": event_time,
+        "payload": {"approval_type": "action", "approvals": [approval]},
+    }
+    events = [approval_event]
+    task = {"current_state": "IMPLEMENTING", "frozen_spec_sha256": spec, "base_commit": base}
+    unit = {
+        "decision_unit_id": "DU-001",
+        "permission_requirements": ["action_approval"],
+        "verification_requirements": {"targeted_mutation_required": True},
+    }
+    monkeypatch.setattr(
+        evidence, "read_task_record_strict", lambda *_: SimpleNamespace(events=events)
+    )
+    monkeypatch.setattr(evidence, "_action_approvals", lambda *_: tuple(approvals))
+    monkeypatch.setattr(evidence, "parse_decision_units", lambda *_: [unit])
+
+    def capture_event(root, task_id, *, event_type, actor, payload):
+        events.append({"event_type": event_type, "occurred_at": event_time, "payload": payload})
+
+    with monkeypatch.context() as writer:
+        writer.setattr(evidence, "record_task_event", capture_event)
+        writer.setattr(evidence, "_utc_text", lambda: event_time)
+        writer.setattr(
+            evidence,
+            "_current_targeted_mutation_action",
+            lambda *_: (digest, action, action_file, "DU-001"),
+        )
+        use = evidence._consume_targeted_mutation_action(
+            root,
+            task_id,
+            subject,
+            task,
+            {"classification_input_sha256": classification_sha},
+            policy,
+            check_inputs=lambda: None,
+        )
+        writer.setattr(
+            evidence,
+            "_revalidate_targeted_mutation_action",
+            lambda *_: (task, {"classification_input_sha256": classification_sha}, policy),
+        )
+        evidence._authorize_targeted_mutation_runner_launch(
+            root,
+            task_id,
+            subject,
+            action_sha256=use.action_sha256,
+            receipt_path=use.receipt_path,
+            action_path=use.action_path,
+            decision_unit_id=use.decision_unit_id,
+            spec_sha256=spec,
+            policy_sha256=policy,
+            base_commit=base,
+            classification_input_sha256=classification_sha,
+            receipt_device=use.receipt_device,
+            receipt_inode=use.receipt_inode,
+        )
+        evidence._complete_targeted_mutation_action(use, artifact)
+    return use, events, approvals
+
+
+@pytest.mark.parametrize(
+    "tamper",
+    [
+        None,
+        "expiry",
+        "missing_approval",
+        "late_approval",
+        "amended_receipt",
+        "wrong_material",
+        "missing_consumption",
+        "missing_launch",
+        "wrong_subject",
+        "false_single_use",
+        "wrong_inode_type",
+        "late_launch",
+    ],
+)
+def test_current_action_receipt_is_replayed_at_consumption_time(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tamper: str | None
+) -> None:
+    task_id = "TASK-0014"
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    original_action_functions = (
+        evidence._consume_targeted_mutation_action,
+        evidence._complete_targeted_mutation_action,
+        evidence._verify_recorded_action,
+    )
+    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
+    receipt = evidence.record_targeted_mutation_evidence(root, task_id, "a" * 40)
+    artifact = json.loads((root / receipt.evidence_ref).read_bytes())
+    for function in original_action_functions:
+        monkeypatch.setattr(evidence, function.__name__, function)
+    use, events, approvals = _record_synthetic_launch(
+        root, task_id, receipt, datetime(2000, 1, 1, tzinfo=timezone.utc), monkeypatch
+    )
+    projection = _v2_projection(artifact, receipt.evidence_ref)
+    claim = use.receipt_path.parent / "logs" / f"action-launch-{use.action_sha256}.json"
+    if tamper == "expiry":
+        events[-1]["occurred_at"] = "2002-01-01T00:00:00Z"
+    elif tamper == "missing_approval":
+        approvals.clear()
+    elif tamper == "late_approval":
+        events.reverse()
+    elif tamper == "amended_receipt":
+        with use.receipt_path.open("a", encoding="utf-8") as stream:
+            stream.write("- Approval consumed: `false`\n")
+    elif tamper == "wrong_material":
+        with use.receipt_path.open("a", encoding="utf-8") as stream:
+            stream.write("- Canonical mutation-evidence SHA-256: changed\n")
+    elif tamper == "missing_consumption":
+        events.pop()
+
+    elif tamper == "missing_launch":
+        claim.unlink()
+    elif tamper in {"wrong_subject", "false_single_use", "wrong_inode_type", "late_launch"}:
+        fields = json.loads(claim.read_bytes())
+        key, value = {
+            "wrong_subject": ("subject_commit", "0" * 40),
+            "false_single_use": ("single_use", False),
+            "wrong_inode_type": ("receipt_inode", str(use.receipt_inode)),
+            "late_launch": ("claimed_at", "2003-01-01T00:00:00Z"),
+        }[tamper]
+        fields[key] = value
+        claim.write_text(json.dumps(fields), encoding="utf-8")
+    facts = evidence.consume_targeted_mutation_evidence(root, task_id, projection)
+    if tamper is None:
+        assert facts.passed and facts.reason_code is None
+    else:
+        assert not facts.passed and facts.reason_code == "MUTATION_EVIDENCE_INVALID"
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "runtime",
+        "missing_pytest",
+        "identity",
+        "subject_bytes",
+        "unreviewed_detector",
+        "job",
+        "unsupported_platform",
+        "python",
+    ],
+)
+def test_preflight_rejects_before_consuming_action(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest), authorized=False)
+    task_dir = root / ".ai/tasks/TASK-0014"
+    monkeypatch.setattr(
+        evidence,
+        "_current_targeted_mutation_action",
+        lambda *_: (
+            "1" * 64,
+            {"expires_at": "2099-01-01T00:00:00Z"},
+            task_dir / "action.json",
+            "DU-001",
+        ),
+    )
+    monkeypatch.setattr(evidence, "_preflight_targeted_mutation", _PRODUCTION_PREFLIGHT)
+    monkeypatch.setattr(evidence, "sys", SimpleNamespace(platform="win32", version_info=(3, 11)))
+    monkeypatch.setattr(evidence.metadata, "version", lambda _: "9.1.1")
+    monkeypatch.setattr(evidence, "preflight_mutation_runtime", lambda *_: None)
+    monkeypatch.setattr(evidence, "assert_no_checkout_filters", lambda *_: None)
+    _PRODUCTION_PREFLIGHT(root, "a" * 40, evidence.subject_materials(root, "a" * 40), True)
+    if failure == "unsupported_platform":
+        evidence.sys.platform = "linux"
+    elif failure == "python":
+        evidence.sys.version_info = (3, 12)
+    elif failure == "runtime":
+        monkeypatch.setattr(evidence.metadata, "version", lambda _: "0.0")
+    elif failure == "missing_pytest":
+
+        def no_pytest(_name: str) -> str:
+            raise evidence.metadata.PackageNotFoundError("pytest")
+
+        monkeypatch.setattr(evidence.metadata, "version", no_pytest)
+    elif failure == "identity":
+        monkeypatch.setattr(evidence, "loaded_engine_matches", lambda *_: False)
+    elif failure == "unreviewed_detector":
+        detector = "tests/unit/test_policy.py"
+        materials = dict(evidence.subject_materials(root, "a" * 40))
+        materials[detector] += b"# detector source changed\n"
+        (root / detector).write_bytes(materials[detector])
+        monkeypatch.setattr(evidence, "subject_materials", lambda *_: materials)
+    elif failure == "job":
+
+        def job_unavailable(*_):
+            raise ContractError("Job unavailable", code="MUTATION_EVIDENCE_INPUT_MISMATCH")
+
+        monkeypatch.setattr(evidence, "preflight_mutation_runtime", job_unavailable)
+    else:
+        (root / "src/aiflow/mutation_process.py").write_text("drift", encoding="utf-8")
+    with pytest.raises(ContractError) as caught:
+        evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    assert caught.value.code == "MUTATION_EVIDENCE_INPUT_MISMATCH"
+    assert not list(task_dir.glob("action-use-*.md"))
+    assert not (task_dir / "events.jsonl").exists()
+    assert calls["runner"] == 0
+
+
+def test_material_drift_under_reservation_lock_keeps_approval_unused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest), authorized=False)
+    original_materials = evidence.subject_materials
+    materials = dict(original_materials(root, "a" * 40))
+    real_lock = evidence._locked_action_consumption
+    monkeypatch.setattr(evidence, "subject_materials", lambda *_: dict(materials))
+    task_dir = root / ".ai/tasks/TASK-0014"
+    monkeypatch.setattr(
+        evidence,
+        "_current_targeted_mutation_action",
+        lambda *_: (
+            "1" * 64,
+            {"expires_at": "2099-01-01T00:00:00Z"},
+            task_dir / "action.json",
+            "DU-001",
+        ),
+    )
+
+    @contextmanager
+    def change_materials_on_reservation(*args):
+        with real_lock(*args):
+            materials["tests/conftest.py"] = b"# fixture was changed before reservation\n"
+            yield
+
+    monkeypatch.setattr(evidence, "_locked_action_consumption", change_materials_on_reservation)
+    with pytest.raises(ContractError) as caught:
+        evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    assert caught.value.code == "MUTATION_EVIDENCE_INPUT_MISMATCH"
+    assert not list(task_dir.glob("action-use-*.md"))
+    assert not (task_dir / "events.jsonl").exists()
+    assert calls["runner"] == 0
+
+
+def _record_historical_exits(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
+    artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    artifact_path = root / artifact.evidence_ref
+    data = json.loads(artifact_path.read_text(encoding="utf-8"))
+    data["schema_version"] = "1.0"
+    data.pop("subject_materials_sha256")
+    for result in data["results"]:
+        log_path = root / result["log_ref"]
+        log = json.loads(log_path.read_text(encoding="utf-8"))
+        for key in (
+            "baseline_report",
+            "mutant_report",
+            "baseline_target_sha256",
+            "mutant_target_sha256",
+            "baseline_lifecycle",
+            "mutant_lifecycle",
+        ):
+            del log[key]
+        log_path.write_bytes(json.dumps(log, indent=2).encode("utf-8") + b"\n")
+        result["log_sha256"] = evidence._source_sha256(log_path)
+    _resign(data)
+    artifact_path.write_text(json.dumps(data), encoding="utf-8")
+    return root, manifest, artifact, data
+
+
+def test_historical_v1_reports_exits_and_never_satisfies_current_loader(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, manifest, artifact, data = _record_historical_exits(tmp_path, monkeypatch)
+    historical = evidence.read_historical_mutation_evidence(
+        root, "TASK-0014", artifact.evidence_ref
+    )
+    assert historical.integrity == "unknown"
+    assert historical.exit_outcomes == tuple(
+        (item.mutation_id, "killed") for item in manifest.mutations
+    )
+    assert historical.exit_codes == tuple((item.mutation_id, 0, 1) for item in manifest.mutations)
+    projection = _v2_projection(data, artifact.evidence_ref)
+    assert not evidence.consume_targeted_mutation_evidence(root, "TASK-0014", projection).passed
+    with pytest.raises(ContractError):
+        evidence.load_targeted_mutation_evidence(root, "TASK-0014", artifact.evidence_ref)
+    (root / data["results"][0]["log_ref"]).unlink()
+    missing = evidence.read_historical_mutation_evidence(root, "TASK-0014", artifact.evidence_ref)
+    assert (
+        missing.integrity == "unknown" and missing.exit_outcomes == () and missing.exit_codes == ()
+    )
+
+
+def test_subject_materials_include_root_config_templates_and_extra_src(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = (
+        "src/sitecustomize.py",
+        "tests/conftest.py",
+        ".ai/policy/rules.yml",
+        ".ai/schemas/schema.json",
+        ".ai/mutations/manifest.json",
+        ".ai/templates/task.yaml",
+        "pyproject.toml",
+        "uv.lock",
+        ".gitattributes",
+        "pytest.ini",
+        "conftest.py",
+    )
+    oid = "1" * 40
+    tree = b"".join(f"100644 blob {oid}       2\t{name}\0".encode() for name in paths)
+    objects = b"".join(f"{oid} blob 2\n".encode() + b"x\n\n" for _ in paths)
+
+    def fake_git(_root: Path, *args: str, input_bytes: bytes | None = None) -> bytes:
+        return tree if args[0] == "ls-tree" else objects
+
+    monkeypatch.setattr(mutation_materials, "read_material_git", fake_git)
+    materials = mutation_materials.subject_materials(tmp_path, "a" * 40)
+    assert set(materials) == set(paths)
+    assert materials["conftest.py"] == b"x\n"
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "subject",
+        "oversized_tree",
+        "duplicate",
+        "symlink",
+        "path_escape",
+        "negative_size",
+        "missing_file",
+        "header",
+        "truncated",
+        "trailing",
+        "git_failure",
+    ],
+)
+def test_subject_materials_reject_malformed_or_incomplete_git_objects(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    paths = [
+        "src/aiflow/__init__.py",
+        "tests/conftest.py",
+        ".ai/policy/rules.yml",
+        ".ai/schemas/schema.json",
+        ".ai/mutations/manifest.json",
+        ".ai/templates/task.yaml",
+        "pyproject.toml",
+        "uv.lock",
+        ".gitattributes",
+    ]
+    oid = "1" * 40
+
+    def row(name: str, *, mode: str = "100644", size: int = 2) -> bytes:
+        return f"{mode} blob {oid} {size}\t{name}\0".encode()
+
+    tree = b"".join(row(name) for name in paths)
+    objects = b"".join(f"{oid} blob 2\n".encode() + b"x\n\n" for _ in paths)
+    if kind == "oversized_tree":
+        tree = b"x" * (8 * 1024 * 1024 + 1)
+    elif kind == "duplicate":
+        tree += row(paths[0])
+    elif kind == "symlink":
+        tree = tree.replace(row(paths[0]), row(paths[0], mode="120000"))
+    elif kind == "path_escape":
+        tree += row("src/../escape.py")
+    elif kind == "negative_size":
+        tree = tree.replace(row(paths[0]), row(paths[0], size=-1))
+    elif kind == "missing_file":
+        tree = tree.replace(row("uv.lock"), b"")
+    elif kind == "header":
+        objects = objects.replace(f"{oid} blob 2\n".encode(), b"invalid header\n", 1)
+    elif kind == "truncated":
+        objects = objects[:-2]
+    elif kind == "trailing":
+        objects += b"unexpected"
+
+    def fake_git(_root: Path, *args: str, input_bytes: bytes | None = None) -> bytes:
+        if kind == "git_failure":
+            raise ContractError("git failed", code="MUTATION_SUBJECT_INVALID")
+        return tree if args[0] == "ls-tree" else objects
+
+    monkeypatch.setattr(mutation_materials, "read_material_git", fake_git)
+    with pytest.raises(ContractError) as caught:
+        mutation_materials.subject_materials(tmp_path, "bad" if kind == "subject" else "a" * 40)
+    assert caught.value.code == "MUTATION_SUBJECT_INVALID"
+
+
+def test_material_git_wrapper_strips_git_environment_and_handles_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GIT_DIR", "untrusted")
+
+    def fake_run(argv, **kwargs):
+        assert argv[:2] == ["git", "status"]
+        assert "GIT_DIR" not in kwargs["env"]
+        assert kwargs["env"]["GIT_CONFIG_NOSYSTEM"] == "1"
+        return SimpleNamespace(stdout=b"clean")
+
+    monkeypatch.setattr(mutation_materials.subprocess, "run", fake_run)
+    assert mutation_materials.read_material_git(tmp_path, "status") == b"clean"
+
+    def fail(*_args, **_kwargs):
+        raise OSError("missing git")
+
+    monkeypatch.setattr(mutation_materials.subprocess, "run", fail)
+    with pytest.raises(ContractError) as caught:
+        mutation_materials.read_material_git(tmp_path, "status")
+    assert caught.value.code == "MUTATION_SUBJECT_INVALID"
+
+
+@pytest.mark.parametrize(
+    ("original", "actual", "expected"),
+    [
+        (b"a\nb\n", b"a\r\nb\r\n", True),
+        (b"a\nb\n", b"a\r\nb\n", False),
+        (b"\0\n", b"\0\r\n", False),
+        (b"a\r\nb\n", b"a\r\nb\r\n", False),
+        (b"\xff\n", b"\xff\r\n", False),
+        (b"binary\0", b"binary\0", True),
+    ],
+)
+def test_material_checkout_allows_only_exact_or_whole_lf_conversion(
+    original: bytes, actual: bytes, expected: bool
+) -> None:
+    assert mutation_materials.content_matches(actual, original) is expected
+
+
+def test_material_files_reject_missing_links_and_invalid_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "src/aiflow/mod.py"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(b"source\n")
+    assert mutation_materials.material_file_matches(tmp_path, "src/aiflow/mod.py", b"source\n")
+    assert not mutation_materials.material_file_matches(tmp_path, "../mod.py", b"source\n")
+    assert not mutation_materials.material_file_matches(tmp_path, "src\\mod.py", b"source\n")
+    assert not mutation_materials.material_file_matches(tmp_path, "src/missing", b"x")
+    original = mutation_materials.is_link_or_reparse_point
+    monkeypatch.setattr(
+        mutation_materials,
+        "is_link_or_reparse_point",
+        lambda candidate: candidate == path or original(candidate),
+    )
+    assert not mutation_materials.material_file_matches(tmp_path, "src/aiflow/mod.py", b"source\n")
+
+
+def test_loaded_engine_identity_rejects_missing_and_foreign_modules(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package = tmp_path / "src/aiflow/__init__.py"
+    package.parent.mkdir(parents=True)
+    package.write_bytes(b"# bound\n")
+    bound = ModuleType("aiflow")
+    bound.__file__ = str(package)
+    materials = {"src/aiflow/__init__.py": b"# bound\n"}
+    fake_sys = SimpleNamespace(modules={"aiflow": bound})
+    monkeypatch.setattr(mutation_materials, "sys", fake_sys)
+    assert mutation_materials.loaded_engine_matches(tmp_path, materials)
+    fake_sys.modules["aiflow.unbound"] = ModuleType("aiflow.unbound")
+    assert not mutation_materials.loaded_engine_matches(tmp_path, materials)
+    fake_sys.modules.clear()
+    assert not mutation_materials.loaded_engine_matches(tmp_path, materials)
+
+
+@pytest.mark.parametrize("invalid", ["bad_base64", "noncanonical", "oversized", "nonstring"])
+def test_report_storage_rejects_invalid_encoded_inputs(invalid: str) -> None:
+    candidate = {
+        "bad_base64": "!!!!",
+        "noncanonical": "YQ",
+        "oversized": "A" * 21849,
+        "nonstring": 1,
+    }[invalid]
+    with pytest.raises(ContractError):
+        evidence._decode_report(candidate)
+    assert evidence._decode_report(None) is None
+    assert evidence._safe_report(b"untrusted output", "MUT-V2-001", "a" * 64) is None
+    assert evidence._safe_report(None, "MUT-V2-001", None) is None
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "baseline_setup",
+        "teardown",
+        "missing_report",
+        "target_drift",
+        "unknown_runtime",
+        "survived",
+        "no_source",
+    ],
+)
+def test_derive_outcome_requires_pinned_report_and_transform(
+    monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    declaration = manifest.mutations[0]
+    run = _run(manifest, mutant=0 if kind == "survived" else 1)
+    probe = run.probes[0]
+    materials = {declaration.target: f"synthetic {declaration.target}\n".encode()}
+    monkeypatch.setattr(
+        evidence, "mutation_bytes", lambda _item, data: data + b"synthetic mutant\n"
+    )
+    if kind in {"baseline_setup", "teardown", "unknown_runtime"}:
+        is_baseline = kind == "baseline_setup"
+        report = json.loads(probe.baseline_report if is_baseline else probe.mutant_report)
+        if kind == "baseline_setup":
+            report["cases"][0]["setup"] = "failed"
+            report["cases"][0]["call"] = "skipped"
+        elif kind == "teardown":
+            report["cases"][0]["teardown"] = "failed"
+        else:
+            report["imports"]["reference_ok"] = False
+        raw = mutation_protocol.encode_report(report)
+        probe = replace(
+            probe,
+            **(
+                {
+                    "baseline_report": raw,
+                    "baseline_lifecycle": _lifecycle(raw, probe.baseline_exit_code),
+                }
+                if is_baseline
+                else {
+                    "mutant_report": raw,
+                    "mutant_lifecycle": _lifecycle(raw, probe.mutant_exit_code),
+                }
+            ),
+        )
+    elif kind == "missing_report":
+        probe = replace(probe, mutant_report=None)
+    elif kind == "target_drift":
+        probe = replace(probe, mutant_target_sha256="0" * 64)
+    elif kind == "no_source":
+        materials.clear()
+    outcome = evidence._derive_outcome(probe, run, declaration, materials)
+    assert outcome == ("survived" if kind == "survived" else "unverified")
+
+
+@pytest.mark.parametrize("failure", ["unrelated_call", "setup"])
+def test_failed_mutant_requires_expected_call_to_satisfy_consumer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    run = _run(manifest)
+    probe = run.probes[0]
+    assert probe.mutant_report is not None
+    report = json.loads(probe.mutant_report)
+    failed_case = next(case for case in report["cases"] if case["call"] == "failed")
+    if failure == "unrelated_call":
+        failed_case["failure"]["anchor"] = "unknown"
+    else:
+        failed_case.update(setup="failed", call="skipped", failure=None)
+    raw = mutation_protocol.encode_report(report)
+    changed = replace(probe, mutant_report=raw, mutant_lifecycle=_lifecycle(raw, 1))
+    root, _, _ = _prepare(tmp_path, monkeypatch, replace(run, probes=(changed, *run.probes[1:])))
+    receipt = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", receipt.evidence_ref)
+    assert [item["outcome"] for item in artifact["results"]] == [
+        "unverified",
+        *("killed" for _ in run.probes[1:]),
+    ]
+    assert artifact["uncovered_mutation_ids"] == [probe.mutation_id]
+    assert not evidence.consume_targeted_mutation_evidence(
+        root, "TASK-0014", _v2_projection(artifact, receipt.evidence_ref)
+    ).passed
+
+
+@pytest.mark.parametrize(
+    ("phase", "tamper"),
+    [
+        ("baseline", "missing"),
+        ("mutant", "job_empty"),
+        ("baseline", "stderr_eof"),
+        ("mutant", "closed"),
+        ("mutant", "terminate_requested"),
+        ("baseline", "returncode"),
+        ("mutant", "report_sha256"),
+    ],
+)
+def test_replay_rejects_resigned_receipt_with_incomplete_or_unbound_lifecycle(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, phase: str, tamper: str
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
+    receipt = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    path = root / receipt.evidence_ref
+    artifact = json.loads(path.read_bytes())
+    item = artifact["results"][0]
+    log_path = root / item["log_ref"]
+    log = json.loads(log_path.read_bytes())
+    field = f"{phase}_lifecycle"
+    if tamper == "missing":
+        del log[field]
+    elif tamper == "report_sha256":
+        log[field][tamper] = "0" * 64
+    elif tamper == "returncode":
+        log[field][tamper] = 1
+    else:
+        log[field][tamper] = tamper == "terminate_requested"
+    log_path.write_text(json.dumps(log), encoding="utf-8")
+    item["log_sha256"] = evidence._source_sha256(log_path)
+    _resign(artifact)
+    path.write_text(json.dumps(artifact), encoding="utf-8")
+    with pytest.raises(ContractError):
+        evidence.load_targeted_mutation_evidence(root, "TASK-0014", receipt.evidence_ref)
+    assert not evidence.consume_targeted_mutation_evidence(
+        root, "TASK-0014", _v2_projection(artifact, receipt.evidence_ref)
+    ).passed
+
+
+@pytest.mark.parametrize("moment", ["initial", "locked"])
+def test_tracked_checkout_filter_rejects_before_action_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, moment: str
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest), authorized=False)
+    doc = root / "docs/fixture.txt"
+    doc.parent.mkdir()
+    doc.write_bytes(b"outside the mutation materials\n")
+    run_git(root, "init", "-b", "main")
+    commit_all(root, "Synthetic checkout")
+    subject = run_git(root, "rev-parse", "HEAD")
+    attributes = root / ".git/info/attributes"
+    filtered = b"docs/fixture.txt filter=unconfigured-fixture\n"
+    task_dir = root / ".ai/tasks/TASK-0014"
+    monkeypatch.setattr(
+        evidence,
+        "_current_targeted_mutation_action",
+        lambda *_: (
+            "1" * 64,
+            {"expires_at": "2099-01-01T00:00:00Z"},
+            task_dir / "action.json",
+            "DU-001",
+        ),
+    )
+    monkeypatch.setattr(evidence, "_preflight_targeted_mutation", _PRODUCTION_PREFLIGHT)
+    monkeypatch.setattr(evidence, "sys", SimpleNamespace(platform="win32", version_info=(3, 11)))
+    monkeypatch.setattr(evidence.metadata, "version", lambda _: "9.1.1")
+    monkeypatch.setattr(evidence, "preflight_mutation_runtime", lambda *_: None)
+    _PRODUCTION_PREFLIGHT(root, subject, evidence.subject_materials(root, subject), False)
+    real_lock = evidence._locked_action_consumption
+    entered = []
+
+    @contextmanager
+    def reserve(*args):
+        with real_lock(*args):
+            entered.append(True)
+            if moment == "locked":
+                attributes.write_bytes(filtered)
+            yield
+
+    if moment == "initial":
+        attributes.write_bytes(filtered)
+    monkeypatch.setattr(evidence, "_locked_action_consumption", reserve)
+    with pytest.raises(ContractError) as caught:
+        evidence.record_targeted_mutation_evidence(root, "TASK-0014", subject)
+    assert caught.value.code == "MUTATION_WORKSPACE_INVALID"
+    assert entered == ([True] if moment == "locked" else [])
+    assert not list(task_dir.glob("action-use-*.md"))
+    assert not (task_dir / "events.jsonl").exists()
+    assert calls["runner"] == 0
+
+
+@pytest.mark.parametrize("position", [0, 3, 5])
+def test_consumer_rejects_non_object_at_any_projection_position(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, position: int
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
+    record = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", record.evidence_ref)
+    projection = _v2_projection(artifact, record.evidence_ref)
+    projection["targeted_mutation"]["results"].insert(position, None)
+    facts = evidence.consume_targeted_mutation_evidence(root, "TASK-0014", projection)
+    assert not facts.passed and facts.reason_code == "MUTATION_EVIDENCE_PROJECTION_INVALID"
+
+
+def test_consumer_normalizes_oversized_json_integer_within_artifact_limit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
+    record = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
+    artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", record.evidence_ref)
+    projection = _v2_projection(artifact, record.evidence_ref)
+    saved_limit = sys.get_int_max_str_digits()
+    try:
+        sys.set_int_max_str_digits(4300)
+        (root / record.evidence_ref).write_bytes(b'{"count":' + b"1" * 5000 + b"}")
+        facts = evidence.consume_targeted_mutation_evidence(root, "TASK-0014", projection)
+    finally:
+        sys.set_int_max_str_digits(saved_limit)
+    assert not facts.passed and facts.reason_code == "MUTATION_EVIDENCE_INVALID"
+
+
+def test_historical_reader_rejects_unrelated_task_or_record(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, _, artifact, _ = _record_historical_exits(tmp_path, monkeypatch)
+    with pytest.raises(ContractError) as wrong_task:
+        evidence.read_historical_mutation_evidence(root, "TASK-0015", artifact.evidence_ref)
+    assert wrong_task.value.code == "MUTATION_EVIDENCE_PATH_INVALID"
+
+    other_ref = artifact.evidence_ref.replace(
+        artifact.record_id, "MUTRUN-20000102T000000Z-" + "1" * 16
+    )
+    misplaced = root / other_ref
+    misplaced.parent.mkdir(parents=True)
+    misplaced.write_bytes((root / artifact.evidence_ref).read_bytes())
+    with pytest.raises(ContractError) as wrong_record:
+        evidence.read_historical_mutation_evidence(root, "TASK-0014", other_ref)
+    assert wrong_record.value.code == "MUTATION_EVIDENCE_PATH_INVALID"
+
+
+@pytest.mark.parametrize(
+    "case",
+    ["consistent", "mixed", "edited", "missing_blob", "other_blob", "symlink_blob", "unborn"],
+)
+def test_historical_crlf_requires_exact_regular_git_blob(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    root, manifest, artifact, data = _record_historical_exits(tmp_path, monkeypatch)
+    ref = data["results"][0]["log_ref"]
+    log = root / ref
+    original = log.read_bytes()
+    run_git(root, "init", "-b", "main")
+    if case == "missing_blob":
+        log.unlink()
+    elif case == "other_blob":
+        log.write_bytes(original.replace(b"killed", b"failed"))
+    run_git(root, "add", ".")
+    if case == "symlink_blob":
+        blob = run_git(root, "hash-object", "-w", "--", ref)
+        run_git(root, "update-index", "--cacheinfo", "120000", blob, ref)
+    if case != "unborn":
+        run_git(
+            root,
+            "-c",
+            "user.name=AI Flow Tests",
+            "-c",
+            "user.email=aiflow@example.invalid",
+            "commit",
+            "-m",
+            "Synthetic historical log",
+        )
+    checkout = original.replace(b"\n", b"\r\n")
+    if case == "mixed":
+        checkout = checkout.replace(b"\r\n", b"\n", 1)
+    elif case == "edited":
+        checkout = checkout.replace(b"killed", b"failed")
+    log.write_bytes(checkout)
+    if case == "consistent":
+        facts = evidence.read_historical_mutation_evidence(root, "TASK-0014", artifact.evidence_ref)
+        assert facts.integrity == "unknown"
+        assert facts.exit_codes == tuple((item.mutation_id, 0, 1) for item in manifest.mutations)
+    else:
+        with pytest.raises(ContractError) as caught:
+            evidence.read_historical_mutation_evidence(root, "TASK-0014", artifact.evidence_ref)
+        assert caught.value.code == "MUTATION_EVIDENCE_LOG_INVALID"
