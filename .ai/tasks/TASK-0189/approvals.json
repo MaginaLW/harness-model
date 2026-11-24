@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-24T18:23:30Z",
+    "base_commit": "1807c540f03be987df9115373036f72498553fc6",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "72baefa4710edfc7ba10dc3de6b751d93c69226bab86222985f7b5009f11a50e",
+    "reason": "常设授权。Independent REV-0001 design APPROVE.",
+    "schema_version": "1.0",
+    "spec_sha256": "69824c22d6579f9cfc66c30a7a260a6092e2b75293b3a4e4a7999390a801bf69",
+    "subject_commit": "1807c540f03be987df9115373036f72498553fc6",
+    "task_id": "TASK-0189"
+  }
+]
