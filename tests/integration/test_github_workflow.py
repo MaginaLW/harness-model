@@ -532,3 +532,30 @@ def test_pr_route_checks_the_implementation_range(
         assert result == 0 and f"task_id={task}" in output.out
     else:
         assert result == 1 and f"PR changes precede task base: {earlier_file}" in output.err
+
+
+@pytest.mark.parametrize(
+    "governed_path",
+    ["setup.py", "MANIFEST.in", "tools/hooks/pre_command.py"],
+)
+def test_router_requires_task_for_packaging_and_hook_governance_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    governed_path: str,
+) -> None:
+    root, _ = _repo(tmp_path)
+    base = _active_base(root)
+    target = root / governed_path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("# governance change\n", encoding="utf-8")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", f"modify {governed_path}")
+    head = _git(root, "rev-parse", "HEAD")
+    monkeypatch.chdir(root)
+
+    result = main(["--route", "--base", base, "--head", head])
+    captured = capsys.readouterr()
+
+    assert result == 1
+    assert "implementation task" in captured.err

@@ -1,0 +1,208 @@
+{
+  "base_commit": "ae5dc1aaaf80875efff96ee7610a1ca4c939bdd4",
+  "branch": "codex/governance-surface-and-tools-mypy-v2",
+  "classification_input_sha256": "f50127cb2fa47fd9032188828156e6cf32921631acb27b9eee9872a49fb69f98",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0190/**",
+      "pyproject.toml",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/policy/hard-rules.yaml",
+      "AGENTS.md",
+      "tests/unit/test_policy.py",
+      "tests/integration/test_github_workflow.py",
+      "tests/integration/test_templates_and_policy.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add tools/ to strict mypy gate and add setup.py, MANIFEST.in, tools/hooks/** to governance surface",
+        "impact_scope": [
+          ".ai/tasks/TASK-0190/**",
+          "pyproject.toml",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/policy/hard-rules.yaml",
+          "AGENTS.md",
+          "tests/unit/test_policy.py",
+          "tests/integration/test_github_workflow.py",
+          "tests/integration/test_templates_and_policy.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/policy/hard-rules.yaml",
+        ".ai/policy/verification-levels.yaml",
+        ".ai/tasks/TASK-0190/classification.json",
+        ".ai/tasks/TASK-0190/events.jsonl",
+        ".ai/tasks/TASK-0190/review-contexts/3309491a9bdb17ffd34c37b35bd666c58df71b5cbc32d694982f69fb620d62e6.json",
+        ".ai/tasks/TASK-0190/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0190/spec.md",
+        ".ai/tasks/TASK-0190/task.yaml",
+        "AGENTS.md",
+        "pyproject.toml",
+        "tests/integration/test_github_workflow.py",
+        "tests/integration/test_templates_and_policy.py",
+        "tests/unit/test_policy.py"
+      ],
+      "files": [
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/policy/hard-rules.yaml"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": ".ai/policy/verification-levels.yaml"
+        },
+        {
+          "additions": 62,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0190/classification.json"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0190/events.jsonl"
+        },
+        {
+          "additions": 49,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0190/review-contexts/3309491a9bdb17ffd34c37b35bd666c58df71b5cbc32d694982f69fb620d62e6.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0190/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0190/spec.md"
+        },
+        {
+          "additions": 69,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0190/task.yaml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "AGENTS.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "pyproject.toml"
+        },
+        {
+          "additions": 27,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_github_workflow.py"
+        },
+        {
+          "additions": 70,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_templates_and_policy.py"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 1,
+          "path": "tests/unit/test_policy.py"
+        }
+      ],
+      "totals": {
+        "additions": 367,
+        "deletions": 5,
+        "files": 13
+      }
+    },
+    "goal": "Add tools/ to strict mypy gate and add setup.py, MANIFEST.in, tools/hooks/** to governance surface",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0190",
+        "--actor",
+        "author-track-b2"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "d2c14eae5025758c99d0a973b42399885e173e00784f97630c8bbd76181043a5",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "a4d3d774dd43d413b798dfd129275fad54ba1102cbe0ea2836083ea20504da1f",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "b89905510c4b08b7ab5d115ddccfc7062b0a39a3eab547089265a1a002544e13",
+  "subject_commit": "bb21d3bc0344bf766d39be9597c8a9b8d898196d",
+  "task_id": "TASK-0190"
+}

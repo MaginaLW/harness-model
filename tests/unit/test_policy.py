@@ -163,7 +163,15 @@ def test_active_policy_binds_exact_verification_time_budgets() -> None:
             "result_parser": "exit_zero",
             "threshold": 90,
         }
-        assert by_id["mypy"]["command"] == ["{python}", "-m", "mypy", "src"]
+        assert by_id["mypy"]["command"] == ["{python}", "-m", "mypy"]
+
+
+def test_governance_surface_includes_packaging_and_hook_paths() -> None:
+    rules = v2_documents()["hard-rules.yaml"]["rules"]
+    assert isinstance(rules, list)
+    rule = next(item for item in rules if item["id"] == "HARD-REVIEW-GOVERNANCE-SURFACE")
+    patterns = rule["conditions"][0]["value"]
+    assert {"setup.py", "MANIFEST.in", "tools/hooks/**"} <= set(patterns)
 
 
 def test_legacy_v1_policy_branch_remains_valid() -> None:
