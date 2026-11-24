@@ -10,6 +10,7 @@ Actual installed-wheel execution remains in the Windows integration suite.
 from __future__ import annotations
 
 import ast
+import atexit
 import builtins
 import hashlib
 import io
@@ -19,6 +20,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
@@ -179,7 +181,9 @@ class _ModelSeedBundle:
     material_bytes: bytes
     policy_seed: Path
     policy_bytes: bytes
+    policy_sha256: str
     variants: dict[str, _SeedVariant]
+    baseline_digest: str
 
 
 def _seed_tree_digest(root: Path) -> str:
@@ -274,9 +278,8 @@ def _write_action_file(
     return path
 
 
-def _build_seed_variant(seed_root: Path, variant: str, material_bytes: bytes) -> _SeedVariant:
-    seed_base = seed_root / ("n" if variant == "node-v2" else "d")
-    seed_base.mkdir()
+def _create_task_seed_repo(seed_base: Path, variant: str) -> tuple[Path, dict[str, Any]]:
+    seed_base.mkdir(parents=True, exist_ok=True)
     root = seed_base / "task"
     root.mkdir()
     for name in ("policy", "schemas", "templates"):
@@ -369,6 +372,18 @@ def _build_seed_variant(seed_root: Path, variant: str, material_bytes: bytes) ->
     begin_task(root, TASK, actor="fixture-implementer")
     verifier_context = build_verifier_context(root, TASK)
     save_verifier_context(root, TASK, verifier_context)
+    return root, verifier_context
+
+
+def _build_model_seed(variant: str) -> tuple[tempfile.TemporaryDirectory[str], dict[str, Any]]:
+    seed_dir = tempfile.TemporaryDirectory(prefix="aiflow-model-seed-", ignore_cleanup_errors=True)
+    _, verifier_context = _create_task_seed_repo(Path(seed_dir.name), variant)
+    return seed_dir, verifier_context
+
+
+def _build_seed_variant(seed_root: Path, variant: str, material_bytes: bytes) -> _SeedVariant:
+    seed_base = seed_root / ("n" if variant == "node-v2" else "d")
+    root, verifier_context = _create_task_seed_repo(seed_base, variant)
     with patch.object(runtime, "_materials", lambda: material_bytes):
         inputs = runtime.prepare_installed_mutations(root, TASK, verifier_actor=ACTOR)
         lr_root = seed_base / "lr"
@@ -393,38 +408,63 @@ def _build_seed_variant(seed_root: Path, variant: str, material_bytes: bytes) ->
     return _SeedVariant(root, lr_root, verifier_context, inputs, input_document, use, root_snapshot)
 
 
-@pytest.fixture(scope="module")
-def _model_seed_bundle(tmp_path_factory: pytest.TempPathFactory) -> Iterator[_ModelSeedBundle]:
-    seed_root = tmp_path_factory.mktemp("ms")
-    prefix, base, material, material_bytes = _build_engine_seed(seed_root)
-    policy_bytes = POLICY_SOURCE.read_bytes()
-    policy_sha256 = hashlib.sha256(policy_bytes).hexdigest()
-    policy_seed = seed_root / "policy.py"
-    shutil.copyfile(POLICY_SOURCE, policy_seed)
-    variants = {
-        variant: _build_seed_variant(seed_root, variant, material_bytes)
-        for variant in ("default", "node-v2")
-    }
-    bundle = _ModelSeedBundle(
-        seed_root=seed_root,
-        engine_prefix=prefix,
-        base_prefix=base,
-        material=material,
-        material_bytes=material_bytes,
-        policy_seed=policy_seed,
-        policy_bytes=policy_bytes,
-        variants=variants,
+_SEED_BUNDLE_CACHE: list[_ModelSeedBundle] = []
+_GUARDED_MODULES: set[int] = set()
+
+
+def _verify_seed_bundle_immutability(bundle: _ModelSeedBundle) -> None:
+    assert _seed_tree_digest(bundle.seed_root) == bundle.baseline_digest, (
+        "Module-scoped read-only seed was modified during tests"
     )
-    baseline_digest = _seed_tree_digest(seed_root)
+    assert hashlib.sha256(POLICY_SOURCE.read_bytes()).hexdigest() == bundle.policy_sha256, (
+        "Mutation touched the original Policy module"
+    )
+
+
+def _get_model_seed_bundle(request: pytest.FixtureRequest | None = None) -> _ModelSeedBundle:
+    if not _SEED_BUNDLE_CACHE:
+        seed_dir = tempfile.TemporaryDirectory(prefix="mt-", ignore_cleanup_errors=True)
+        atexit.register(seed_dir.cleanup)
+        seed_root = Path(seed_dir.name)
+        prefix, base, material, material_bytes = _build_engine_seed(seed_root)
+        policy_bytes = POLICY_SOURCE.read_bytes()
+        policy_sha256 = hashlib.sha256(policy_bytes).hexdigest()
+        policy_seed = seed_root / "policy.py"
+        shutil.copyfile(POLICY_SOURCE, policy_seed)
+        variants = {
+            variant: _build_seed_variant(seed_root, variant, material_bytes)
+            for variant in ("default", "node-v2")
+        }
+        _SEED_BUNDLE_CACHE.append(
+            _ModelSeedBundle(
+                seed_root=seed_root,
+                engine_prefix=prefix,
+                base_prefix=base,
+                material=material,
+                material_bytes=material_bytes,
+                policy_seed=policy_seed,
+                policy_bytes=policy_bytes,
+                policy_sha256=policy_sha256,
+                variants=variants,
+                baseline_digest=_seed_tree_digest(seed_root),
+            )
+        )
+    bundle = _SEED_BUNDLE_CACHE[0]
+    if request is not None:
+        module_node = request.node.getparent(pytest.Module)
+        if module_node is not None and id(module_node) not in _GUARDED_MODULES:
+            _GUARDED_MODULES.add(id(module_node))
+            module_node.addfinalizer(lambda: _verify_seed_bundle_immutability(bundle))
+    return bundle
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _model_seed_immutability_guard(request: pytest.FixtureRequest) -> Iterator[None]:
+    bundle = _get_model_seed_bundle(request)
     try:
-        yield bundle
+        yield
     finally:
-        assert _seed_tree_digest(seed_root) == baseline_digest, (
-            "Module-scoped read-only seed was modified during tests"
-        )
-        assert hashlib.sha256(POLICY_SOURCE.read_bytes()).hexdigest() == policy_sha256, (
-            "Mutation touched the original Policy module"
-        )
+        _verify_seed_bundle_immutability(bundle)
 
 
 def _install_no_execution_guards(monkeypatch: pytest.MonkeyPatch) -> list[str]:
@@ -464,9 +504,9 @@ def _install_no_execution_guards(monkeypatch: pytest.MonkeyPatch) -> list[str]:
 def model(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-    request,
-    _model_seed_bundle: _ModelSeedBundle,
+    request: pytest.FixtureRequest,
 ) -> Iterator[Model]:
+    seed_bundle = _get_model_seed_bundle(request)
     recorder, process_writer, material_collector = (
         runtime.record_installed_mutations,
         node._process,
@@ -474,7 +514,7 @@ def model(
     )
     attempts = _install_no_execution_guards(monkeypatch)
     variant = "node-v2" if getattr(request, "param", None) == "node-v2" else "default"
-    seed = _model_seed_bundle.variants[variant]
+    seed = seed_bundle.variants[variant]
     source_root = (
         seed.logical_run_task_root if "logical_run" in request.fixturenames else seed.task_root
     )
@@ -487,8 +527,8 @@ def model(
         timeout=10,
     )
     verifier_context = deepcopy(seed.verifier_context)
-    material = deepcopy(_model_seed_bundle.material)
-    material_bytes = _model_seed_bundle.material_bytes
+    material = deepcopy(seed_bundle.material)
+    material_bytes = seed_bundle.material_bytes
     monkeypatch.setattr(runtime, "_materials", lambda: material_bytes)
     monkeypatch.setattr(node, "_windows_root", lambda: tmp_path / "public-windows-role")
     yield Model(
@@ -787,12 +827,11 @@ def _rebind_root_snapshot(
 
 
 @pytest.fixture
-def logical_run(model: Model, _model_seed_bundle: _ModelSeedBundle) -> LogicalRun:
+def logical_run(model: Model) -> LogicalRun:
     """A closed failure record with no probe reports and no claimed Job execution."""
+    seed_bundle = _get_model_seed_bundle()
     seed = next(
-        variant
-        for variant in _model_seed_bundle.variants.values()
-        if variant.inputs == model.inputs
+        variant for variant in seed_bundle.variants.values() if variant.inputs == model.inputs
     )
     run = resolve_task_path(model.root, TASK, "logs") / ("IMUT-" + "0" * 16)
     assert run.is_dir()
@@ -1421,12 +1460,11 @@ class PhaseFixture:
 
 
 @pytest.fixture
-def phase_fixture(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, _model_seed_bundle: _ModelSeedBundle
-) -> Iterator[PhaseFixture]:
+def phase_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[PhaseFixture]:
     """Exact parser input files, not an assertion that their synthetic Job ran."""
+    seed_bundle = _get_model_seed_bundle()
     attempts = _install_no_execution_guards(monkeypatch)
-    yield parser_phase(_model_seed_bundle.material, tmp_path / "parser-phase", PROBE)
+    yield parser_phase(seed_bundle.material, tmp_path / "parser-phase", PROBE)
     assert not attempts, "a caught launch attempt must not make a logical test pass"
 
 
@@ -2032,11 +2070,12 @@ NODE_COMPARISON = ast.parse(
 
 
 @pytest.fixture
-def copied_policy(tmp_path: Path, _model_seed_bundle: _ModelSeedBundle) -> Iterator[Path]:
+def copied_policy(tmp_path: Path) -> Iterator[Path]:
+    seed_bundle = _get_model_seed_bundle()
     path = tmp_path / "policy.py"
-    shutil.copyfile(_model_seed_bundle.policy_seed, path)
+    shutil.copyfile(seed_bundle.policy_seed, path)
     yield path
-    assert POLICY_SOURCE.read_bytes() == _model_seed_bundle.policy_bytes, (
+    assert POLICY_SOURCE.read_bytes() == seed_bundle.policy_bytes, (
         "Mutation touched the original Policy module"
     )
 
