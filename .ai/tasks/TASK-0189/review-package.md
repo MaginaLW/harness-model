@@ -34,11 +34,11 @@ Windows 原生运行 `aiflow verify` 时，`process_runner._environment()` 构�
 
 ## 证据
 
-- 全部 10/10 正式 V1 检查在 Windows 原生环境下通过（`uv run --locked --extra dev python -m aiflow verify TASK-0189 --actor author-procfix`，`subject_commit: f534d25b0f4ba57fc5d2871fb31c26face120fde`）：
+- **已验证**：全部 10/10 正式 V1 检查在 Windows 原生环境下通过（`uv run --locked --extra dev python -m aiflow verify TASK-0189 --actor author-procfix`，`subject_commit: f534d25b0f4ba57fc5d2871fb31c26face120fde`）：
   - `contract`、`scope`、`ruff_check`、`ruff_format_check`、`smoke`、`mypy`、`unit_tests`、`regression_tests`、`coverage_xml`、`diff_coverage` 全部 `passed`。
   - `pytest` 全量：`4943 passed, 9 skipped in 1501.01s`（含 `tests/integration/test_private_replay_receipt.py` 全部 `168` 个用例通过、`0` 错误）。
   - 覆盖率：`src/aiflow/process_runner.py` diff coverage `100%`（`11/11` lines，`0` missed）；core 总分支覆盖率 `90%`（`>= 85%`）。
-- 尚待远程运行场景：PR 创建后 GitHub Actions `ai-quality-gate`（含 Ubuntu 运行器）CI 实跑验证。
+- **未验证**：PR 创建后 GitHub Actions `ai-quality-gate`（含 Ubuntu 运行器）CI 实跑尚未执行，将在推送并开启 PR 后观测。
 
 ## 审核问题
 
