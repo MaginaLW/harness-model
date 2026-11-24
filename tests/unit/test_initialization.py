@@ -7,9 +7,12 @@ import importlib
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
+from collections.abc import Iterator
+from copy import deepcopy
 from pathlib import Path
 from uuid import UUID
 
@@ -41,10 +44,26 @@ else:
         raise ImportError("initialization is not loaded from the tested checkout")
 
 
-@pytest.fixture(scope="session")
-def initialization_seed(tmp_path_factory: pytest.TempPathFactory) -> Path:
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if path.is_dir():
+            hasher.update(b"D\0" + relative + b"\0")
+        else:
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module")
+def initialization_seed(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
     root = tmp_path_factory.mktemp("initialization-seed")
-    git(root, "init", "-b", "feature")
+    git(root, "init", "--template=", "-b", "feature")
     (root / "README.md").write_bytes(b"Fixture source only.\n")
     (root / "pyproject.toml").write_bytes(
         b'[project]\nname = "initialization-fixture"\nversion = "0.0.0"\n'
@@ -64,7 +83,9 @@ def initialization_seed(tmp_path_factory: pytest.TempPathFactory) -> Path:
         "-m",
         "fixture baseline",
     )
-    return root
+    digest = _seed_tree_sha256(root)
+    yield root
+    assert _seed_tree_sha256(root) == digest
 
 
 @pytest.fixture
@@ -75,8 +96,8 @@ def repository(tmp_path: Path, initialization_seed: Path) -> Path:
     return root
 
 
-@pytest.fixture(scope="session")
-def initialization_bundle(tmp_path_factory: pytest.TempPathFactory) -> Path:
+@pytest.fixture(scope="module")
+def initialization_bundle(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
     root = tmp_path_factory.mktemp("initialization-bundle")
     manifest, resources = build_bundle(ROOT)
     for relative, data in resources.items():
@@ -84,7 +105,14 @@ def initialization_bundle(tmp_path_factory: pytest.TempPathFactory) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
     (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
-    return root
+    digest = _seed_tree_sha256(root)
+    yield root
+    assert _seed_tree_sha256(root) == digest
+
+
+@pytest.fixture
+def readonly_bundle(initialization_bundle: Path) -> Path:
+    return initialization_bundle
 
 
 @pytest.fixture
@@ -92,6 +120,27 @@ def bundle(tmp_path: Path, initialization_bundle: Path) -> Path:
     root = tmp_path / "bundle"
     shutil.copytree(initialization_bundle, root)
     return root
+
+
+@pytest.fixture(scope="module")
+def readonly_repository(
+    tmp_path_factory: pytest.TempPathFactory, initialization_seed: Path
+) -> Iterator[Path]:
+    root = tmp_path_factory.mktemp("readonly-repository") / "repository"
+    shutil.copytree(initialization_seed, root)
+    digest = _seed_tree_sha256(root)
+    yield root
+    assert _seed_tree_sha256(root) == digest
+
+
+@pytest.fixture(scope="module")
+def readonly_preview_context(
+    readonly_repository: Path, initialization_bundle: Path
+) -> Iterator[tuple[Path, Path, dict]]:
+    candidate = preview(readonly_repository, initialization_bundle)
+    digest = _seed_tree_sha256(readonly_repository)
+    yield readonly_repository, initialization_bundle, candidate
+    assert _seed_tree_sha256(readonly_repository) == digest
 
 
 def preview(repository: Path, bundle: Path) -> dict:
@@ -168,12 +217,12 @@ def portable_filesystem(request: pytest.FixtureRequest, monkeypatch: pytest.Monk
     assert leaked == 0, "initialization left fixture object handles open"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def complete_installation_seed(
     tmp_path_factory: pytest.TempPathFactory,
     initialization_seed: Path,
     initialization_bundle: Path,
-) -> Path:
+) -> Iterator[Path]:
     """One logical installation to copy for read-only integrity tests, not fresh apply."""
     root = tmp_path_factory.mktemp("completed-initialization") / "repository"
     shutil.copytree(initialization_seed, root)
@@ -182,23 +231,28 @@ def complete_installation_seed(
         candidate = preview(root, initialization_bundle)
         assert apply(root, candidate, initialization_bundle)["phase"] == "installed"
     assert all(not instance.handles for instance in PortableFilesystem.instances)
-    return root
+    initialization.require_initialization_ready(root)
+    digest = _seed_tree_sha256(root)
+    yield root
+    assert _seed_tree_sha256(root) == digest
 
 
 @pytest.fixture
 def installed_repository(tmp_path: Path, complete_installation_seed: Path) -> Path:
     root = tmp_path / "installed-repository"
     shutil.copytree(complete_installation_seed, root)
-    initialization.require_initialization_ready(root)
     return root
 
 
-def test_preview_is_read_only_and_binds_a_fresh_uuid(repository: Path, bundle: Path) -> None:
-    before, bundle_before = tree(repository), tree(bundle)
-    first, second = preview(repository, bundle), preview(repository / "folder", bundle)
+def test_preview_is_read_only_and_binds_a_fresh_uuid(
+    readonly_repository: Path, readonly_bundle: Path
+) -> None:
+    before, bundle_before = tree(readonly_repository), tree(readonly_bundle)
+    first = preview(readonly_repository, readonly_bundle)
+    second = preview(readonly_repository / "folder", readonly_bundle)
 
-    assert tree(repository) == before
-    assert tree(bundle) == bundle_before
+    assert tree(readonly_repository) == before
+    assert tree(readonly_bundle) == bundle_before
     assert first["schema_version"] == "1.0"
     assert first["kind"] == "aiflow-init-preview"
     assert first["profile"] == "native-python-v1"
@@ -208,10 +262,12 @@ def test_preview_is_read_only_and_binds_a_fresh_uuid(repository: Path, bundle: P
     assert first["repository_id"] != second["repository_id"]
     assert first["target"] == second["target"]
     assert len(first["preview_sha256"]) == 64
-    assert not (repository / ".ai").exists()
+    assert not (readonly_repository / ".ai").exists()
 
 
-def test_preview_keeps_existing_dirty_and_ignored_material(repository: Path, bundle: Path) -> None:
+def test_preview_keeps_existing_dirty_and_ignored_material(
+    repository: Path, readonly_bundle: Path
+) -> None:
     (repository / "README.md").write_bytes(b"user work\n")
     (repository / "untracked.txt").write_bytes(b"not an installer output\n")
     (repository / ".private").mkdir()
@@ -219,7 +275,7 @@ def test_preview_keeps_existing_dirty_and_ignored_material(repository: Path, bun
     secret.write_bytes(b"private-fixture-marker-do-not-copy")
     before = tree(repository)
 
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
 
     assert tree(repository) == before
     assert b"private-fixture-marker-do-not-copy" not in json.dumps(candidate).encode()
@@ -227,17 +283,19 @@ def test_preview_keeps_existing_dirty_and_ignored_material(repository: Path, bun
 
 
 def test_branch_named_detached_is_distinct_from_detached_head(
-    repository: Path, bundle: Path
+    repository: Path, readonly_bundle: Path
 ) -> None:
     git(repository, "switch", "-c", "DETACHED")
-    branch = preview(repository, bundle)
+    branch = preview(repository, readonly_bundle)
     git(repository, "switch", "--detach", "HEAD")
-    detached = preview(repository, bundle)
+    detached = preview(repository, readonly_bundle)
 
     assert branch["target"] != detached["target"]
 
 
-def test_preview_does_not_invoke_configured_fsmonitor(repository: Path, bundle: Path) -> None:
+def test_preview_does_not_invoke_configured_fsmonitor(
+    repository: Path, readonly_bundle: Path
+) -> None:
     marker = repository / ".git/fsmonitor-was-called"
     helper = repository / ".git/untrusted-fsmonitor.py"
     helper.write_text(
@@ -248,7 +306,7 @@ def test_preview_does_not_invoke_configured_fsmonitor(repository: Path, bundle: 
     git(repository, "config", "core.fsmonitor", f'"{sys.executable}" "{helper}"')
     before = tree(repository)
 
-    preview(repository, bundle)
+    preview(repository, readonly_bundle)
 
     assert not marker.exists()
     assert tree(repository) == before
@@ -256,21 +314,23 @@ def test_preview_does_not_invoke_configured_fsmonitor(repository: Path, bundle: 
 
 @pytest.mark.parametrize("profile", ["node-v0", "node-v1", "", "python", None, 1])
 def test_unsupported_profile_rejects_before_any_target_write(
-    repository: Path, bundle: Path, profile: object
+    readonly_repository: Path, readonly_bundle: Path, profile: object
 ) -> None:
-    before = tree(repository)
+    before = tree(readonly_repository)
     with pytest.raises(AiflowError):
-        initialization.preview_initialization(repository, bundle_root=bundle, profile=profile)
-    assert tree(repository) == before
+        initialization.preview_initialization(
+            readonly_repository, bundle_root=readonly_bundle, profile=profile
+        )
+    assert tree(readonly_repository) == before
 
 
 def test_node_target_cannot_be_installed_under_the_python_label(
-    repository: Path, bundle: Path
+    repository: Path, readonly_bundle: Path
 ) -> None:
     (repository / "package.json").write_bytes(b'{"name":"node-fixture","scripts":{"check":"true"}}')
     before = tree(repository)
     with pytest.raises(AiflowError):
-        preview(repository, bundle)
+        preview(repository, readonly_bundle)
     assert tree(repository) == before
 
 
@@ -278,7 +338,7 @@ def test_node_target_cannot_be_installed_under_the_python_label(
     "content", [None, b"", b"not valid [toml", b"[project]\n", b"[project]\nname=1\n"]
 )
 def test_missing_or_invalid_python_project_is_rejected(
-    repository: Path, bundle: Path, content: bytes | None
+    repository: Path, readonly_bundle: Path, content: bytes | None
 ) -> None:
     path = repository / "pyproject.toml"
     if content is None:
@@ -287,7 +347,7 @@ def test_missing_or_invalid_python_project_is_rejected(
         path.write_bytes(content)
     before = tree(repository)
     with pytest.raises(AiflowError):
-        preview(repository, bundle)
+        preview(repository, readonly_bundle)
     assert tree(repository) == before
 
 
@@ -295,43 +355,45 @@ def test_missing_or_invalid_python_project_is_rejected(
     "name", ["manifest.json", "schemas/policy.schema.json", "policy/routing.yaml"]
 )
 def test_missing_bundle_material_rejects_without_target_writes(
-    repository: Path, bundle: Path, name: str
+    readonly_repository: Path, bundle: Path, name: str
 ) -> None:
     (bundle / name).unlink()
-    before = tree(repository)
+    before = tree(readonly_repository)
     with pytest.raises(AiflowError):
-        preview(repository, bundle)
-    assert tree(repository) == before
+        preview(readonly_repository, bundle)
+    assert tree(readonly_repository) == before
 
 
 @pytest.mark.parametrize(
     "name", ["schemas/policy.schema.json", "policy/routing.yaml", "templates/spec.md"]
 )
 def test_changed_bundle_material_rejects_without_target_writes(
-    repository: Path, bundle: Path, name: str
+    readonly_repository: Path, bundle: Path, name: str
 ) -> None:
     with (bundle / name).open("ab") as stream:
         stream.write(b"\nchanged\n")
-    before = tree(repository)
+    before = tree(readonly_repository)
     with pytest.raises(AiflowError):
-        preview(repository, bundle)
-    assert tree(repository) == before
+        preview(readonly_repository, bundle)
+    assert tree(readonly_repository) == before
 
 
-def test_extra_bundle_entry_rejects_without_target_writes(repository: Path, bundle: Path) -> None:
+def test_extra_bundle_entry_rejects_without_target_writes(
+    readonly_repository: Path, bundle: Path
+) -> None:
     (bundle / "unexpected.txt").write_bytes(b"unknown\n")
-    before = tree(repository)
+    before = tree(readonly_repository)
     with pytest.raises(AiflowError):
-        preview(repository, bundle)
-    assert tree(repository) == before
+        preview(readonly_repository, bundle)
+    assert tree(readonly_repository) == before
 
 
 @pytest.mark.parametrize("change", ["missing", "extra", "invalid", "hardlink", "directory"])
 def test_policy_candidate_must_be_exact_and_ordinary(
-    repository: Path, bundle: Path, tmp_path: Path, change: str
+    readonly_repository: Path, readonly_bundle: Path, tmp_path: Path, change: str
 ) -> None:
     candidate = tmp_path / "candidate-policy"
-    shutil.copytree(bundle / "policy", candidate)
+    shutil.copytree(readonly_bundle / "policy", candidate)
     path = candidate / "routing.yaml"
     if change == "missing":
         path.unlink()
@@ -344,64 +406,64 @@ def test_policy_candidate_must_be_exact_and_ordinary(
     else:
         path.unlink()
         path.mkdir()
-    before = tree(repository)
+    before = tree(readonly_repository)
 
     with pytest.raises(AiflowError):
         initialization.preview_initialization(
-            repository, bundle_root=bundle, policy_directory=candidate
+            readonly_repository, bundle_root=readonly_bundle, policy_directory=candidate
         )
-    assert tree(repository) == before
+    assert tree(readonly_repository) == before
 
 
 def test_policy_candidate_cannot_supply_a_weaker_schema(
-    repository: Path, bundle: Path, tmp_path: Path
+    readonly_repository: Path, readonly_bundle: Path, tmp_path: Path
 ) -> None:
     candidate = tmp_path / "candidate-policy"
-    shutil.copytree(bundle / "policy", candidate)
+    shutil.copytree(readonly_bundle / "policy", candidate)
     (candidate / "policy.schema.json").write_bytes(b"{}")
     (candidate / "routing.yaml").write_bytes(b"arbitrary: true\n")
-    before = tree(repository)
+    before = tree(readonly_repository)
 
     with pytest.raises(AiflowError):
         initialization.preview_initialization(
-            repository, bundle_root=bundle, policy_directory=candidate
+            readonly_repository, bundle_root=readonly_bundle, policy_directory=candidate
         )
-    assert tree(repository) == before
+    assert tree(readonly_repository) == before
 
 
 def test_policy_review_binds_candidate_bytes_not_just_semantics(
-    repository: Path, bundle: Path, tmp_path: Path
+    readonly_repository: Path, readonly_bundle: Path, tmp_path: Path
 ) -> None:
     candidate = tmp_path / "candidate-policy"
-    shutil.copytree(bundle / "policy", candidate)
+    shutil.copytree(readonly_bundle / "policy", candidate)
     initial = initialization.preview_initialization(
-        repository, bundle_root=bundle, policy_directory=candidate
+        readonly_repository, bundle_root=readonly_bundle, policy_directory=candidate
     )
     decision = review(initial)
     with (candidate / "routing.yaml").open("ab") as stream:
         stream.write(b"\n# Different reviewed bytes with the same Policy semantics.\n")
-    before = tree(repository)
+    before = tree(readonly_repository)
 
     with pytest.raises(AiflowError):
         initialization.apply_initialization(
-            repository,
+            readonly_repository,
             initial,
             decision,
-            bundle_root=bundle,
+            bundle_root=readonly_bundle,
             policy_directory=candidate,
         )
-    assert tree(repository) == before
+    assert tree(readonly_repository) == before
 
 
 def test_policy_candidate_changed_in_place_during_apply_is_never_published(
-    repository: Path, bundle: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    repository: Path, readonly_bundle: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     policy_directory = tmp_path / "candidate-policy"
-    shutil.copytree(bundle / "policy", policy_directory)
+    shutil.copytree(readonly_bundle / "policy", policy_directory)
     routing = policy_directory / "routing.yaml"
     original_inode = routing.stat().st_ino
     candidate = initialization.preview_initialization(
-        repository, bundle_root=bundle, policy_directory=policy_directory
+        repository, bundle_root=readonly_bundle, policy_directory=policy_directory
     )
     decision = review(candidate)
     flush = PortableFilesystem.flush
@@ -422,7 +484,7 @@ def test_policy_candidate_changed_in_place_during_apply_is_never_published(
             repository,
             candidate,
             decision,
-            bundle_root=bundle,
+            bundle_root=readonly_bundle,
             policy_directory=policy_directory,
         )
     assert changed
@@ -431,15 +493,17 @@ def test_policy_candidate_changed_in_place_during_apply_is_never_published(
 
 
 def test_valid_individual_policies_cannot_exceed_the_aggregate_bundle_limit(
-    repository: Path, bundle: Path, tmp_path: Path
+    readonly_repository: Path, readonly_bundle: Path, tmp_path: Path
 ) -> None:
     from aiflow.contracts import schema_directory_context
     from aiflow.policy import POLICY_FILES, load_policy_bundle
 
     policy_directory = tmp_path / "large-policy"
-    shutil.copytree(bundle / "policy", policy_directory)
-    with schema_directory_context(bundle / "schemas"):
-        original = load_policy_bundle(repository, policy_directory=bundle / "policy")
+    shutil.copytree(readonly_bundle / "policy", policy_directory)
+    with schema_directory_context(readonly_bundle / "schemas"):
+        original = load_policy_bundle(
+            readonly_repository, policy_directory=readonly_bundle / "policy"
+        )
     for name in POLICY_FILES:
         path = policy_directory / name
         original_bytes = path.read_bytes()
@@ -447,26 +511,26 @@ def test_valid_individual_policies_cannot_exceed_the_aggregate_bundle_limit(
         path.write_bytes(original_bytes + padding)
         assert path.stat().st_size == MAX_RESOURCE_BYTES
     # These remain four independently valid Policies with unchanged semantics.
-    with schema_directory_context(bundle / "schemas"):
-        padded = load_policy_bundle(repository, policy_directory=policy_directory)
+    with schema_directory_context(readonly_bundle / "schemas"):
+        padded = load_policy_bundle(readonly_repository, policy_directory=policy_directory)
     assert padded.sha256 == original.sha256
     assert sum(path.stat().st_size for path in policy_directory.iterdir()) == MAX_BUNDLE_BYTES
-    before = tree(repository)
+    before = tree(readonly_repository)
 
     with pytest.raises(AiflowError):
         initialization.preview_initialization(
-            repository, bundle_root=bundle, policy_directory=policy_directory
+            readonly_repository, bundle_root=readonly_bundle, policy_directory=policy_directory
         )
 
-    assert tree(repository) == before
-    assert not (repository / ".ai").exists()
+    assert tree(readonly_repository) == before
+    assert not (readonly_repository / ".ai").exists()
 
 
 @pytest.mark.parametrize("kind", ["directory", "file", "case-alias"])
 def test_unknown_ai_created_after_preview_is_preserved(
-    repository: Path, bundle: Path, kind: str
+    repository: Path, readonly_bundle: Path, kind: str
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     if kind == "file":
         (repository / ".ai").write_bytes(b"unknown\n")
     else:
@@ -475,7 +539,7 @@ def test_unknown_ai_created_after_preview_is_preserved(
         (directory / "owner.txt").write_bytes(b"preexisting owner data\n")
     before = tree(repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert tree(repository) == before
 
 
@@ -483,9 +547,10 @@ def test_unknown_ai_created_after_preview_is_preserved(
     "field", ["repository_id", "profile", "preview_sha256", "objects", "target"]
 )
 def test_tampered_preview_is_rejected_without_writes(
-    repository: Path, bundle: Path, field: str
+    readonly_preview_context: tuple[Path, Path, dict], field: str
 ) -> None:
-    candidate = preview(repository, bundle)
+    repository, bundle, base_candidate = readonly_preview_context
+    candidate = deepcopy(base_candidate)
     decision = review(candidate)
     candidate[field] = "tampered"
     before = tree(repository)
@@ -508,9 +573,10 @@ def test_tampered_preview_is_rejected_without_writes(
     ],
 )
 def test_rehashed_preview_rejects_equal_numbers_of_the_wrong_json_type_without_writes(
-    repository: Path, bundle: Path, field: str, number_type: type
+    readonly_preview_context: tuple[Path, Path, dict], field: str, number_type: type
 ) -> None:
-    candidate = preview(repository, bundle)
+    repository, bundle, base_candidate = readonly_preview_context
+    candidate = deepcopy(base_candidate)
     owner, key = numeric_member(candidate, field)
     original = owner[key]
     assert type(original) is int
@@ -545,9 +611,10 @@ def test_rehashed_preview_rejects_equal_numbers_of_the_wrong_json_type_without_w
     ],
 )
 def test_policy_review_must_bind_exact_approved_material(
-    repository: Path, bundle: Path, field: str, value: object
+    readonly_preview_context: tuple[Path, Path, dict], field: str, value: object
 ) -> None:
-    candidate = preview(repository, bundle)
+    repository, bundle, base_candidate = readonly_preview_context
+    candidate = deepcopy(base_candidate)
     decision = review(candidate)
     decision[field] = value
     before = tree(repository)
@@ -557,8 +624,11 @@ def test_policy_review_must_bind_exact_approved_material(
 
 
 @pytest.mark.parametrize("entry", ["preview", "review"])
-def test_unknown_top_level_fields_are_rejected(repository: Path, bundle: Path, entry: str) -> None:
-    candidate = preview(repository, bundle)
+def test_unknown_top_level_fields_are_rejected(
+    readonly_preview_context: tuple[Path, Path, dict], entry: str
+) -> None:
+    repository, bundle, base_candidate = readonly_preview_context
+    candidate = deepcopy(base_candidate)
     decision = review(candidate)
     (candidate if entry == "preview" else decision)["unknown"] = True
     before = tree(repository)
@@ -569,9 +639,10 @@ def test_unknown_top_level_fields_are_rejected(repository: Path, bundle: Path, e
 
 @pytest.mark.parametrize("change", ["digest", "duplicate", "missing", "extra-field"])
 def test_review_requires_four_exact_policy_digests(
-    repository: Path, bundle: Path, change: str
+    readonly_preview_context: tuple[Path, Path, dict], change: str
 ) -> None:
-    candidate = preview(repository, bundle)
+    repository, bundle, base_candidate = readonly_preview_context
+    candidate = deepcopy(base_candidate)
     decision = review(candidate)
     if change == "digest":
         decision["policies"][0]["sha256"] = "0" * 64
@@ -590,9 +661,9 @@ def test_review_requires_four_exact_policy_digests(
 
 @pytest.mark.parametrize("drift", ["branch", "head", "index", "tracked", "untracked"])
 def test_apply_rejects_git_and_worktree_drift_without_overwriting_it(
-    repository: Path, bundle: Path, drift: str
+    repository: Path, readonly_bundle: Path, drift: str
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     if drift == "branch":
         git(repository, "switch", "-c", "other-branch")
     elif drift == "head":
@@ -616,51 +687,51 @@ def test_apply_rejects_git_and_worktree_drift_without_overwriting_it(
         (repository / "later.txt").write_bytes(b"new user data\n")
     before = tree(repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert tree(repository) == before
 
 
-def test_apply_rejects_bundle_drift_after_review(repository: Path, bundle: Path) -> None:
-    candidate = preview(repository, bundle)
+def test_apply_rejects_bundle_drift_after_review(readonly_repository: Path, bundle: Path) -> None:
+    candidate = preview(readonly_repository, bundle)
     (bundle / "templates/spec.md").write_bytes(b"changed after review\n")
-    before = tree(repository)
+    before = tree(readonly_repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
-    assert tree(repository) == before
+        apply(readonly_repository, candidate, bundle)
+    assert tree(readonly_repository) == before
 
 
 def test_preview_cannot_be_reused_for_another_clone(
-    repository: Path, bundle: Path, tmp_path: Path
+    readonly_preview_context: tuple[Path, Path, dict], tmp_path: Path
 ) -> None:
-    candidate = preview(repository, bundle)
+    repository, bundle, base_candidate = readonly_preview_context
     clone = tmp_path / "another-clone"
     shutil.copytree(repository, clone)
     before = tree(clone)
     with pytest.raises(AiflowError):
-        apply(clone, candidate, bundle)
+        apply(clone, deepcopy(base_candidate), bundle)
     assert tree(clone) == before
 
 
 def test_unsupported_platform_application_does_not_write(
-    repository: Path, bundle: Path, native_filesystem: None
+    readonly_preview_context: tuple[Path, Path, dict], native_filesystem: None
 ) -> None:
-    candidate = preview(repository, bundle)
+    repository, bundle, base_candidate = readonly_preview_context
     # This is the real boundary on POSIX; Windows behavior is covered below.
     if sys.platform == "win32":
         pytest.skip("unsupported-platform behavior is exercised on POSIX")
     before = tree(repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, deepcopy(base_candidate), bundle)
     assert tree(repository) == before
 
 
 def test_install_creates_only_planned_resources_and_a_fresh_identity(
-    repository: Path, bundle: Path
+    repository: Path, readonly_bundle: Path
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     original = tree(repository)
 
-    result = apply(repository, candidate, bundle)
+    result = apply(repository, candidate, readonly_bundle)
 
     assert result["phase"] == "installed"
     assert (repository / ".ai/repository-id").read_text("utf-8").strip() == candidate[
@@ -668,7 +739,9 @@ def test_install_creates_only_planned_resources_and_a_fresh_identity(
     ]
     assert not (repository / ".ai/.repository-id.pending").exists()
     for relative in RESOURCE_KINDS:
-        assert (repository / ".ai" / relative).read_bytes() == (bundle / relative).read_bytes()
+        assert (repository / ".ai" / relative).read_bytes() == (
+            readonly_bundle / relative
+        ).read_bytes()
     after = tree(repository)
     assert {path: value for path, value in after.items() if path.split("/")[0] != ".ai"} == original
     assert not (repository / ".ai/bootstrap-mode.yaml").exists()
@@ -676,21 +749,23 @@ def test_install_creates_only_planned_resources_and_a_fresh_identity(
     initialization.require_initialization_ready(repository)
 
 
-def test_completed_replay_is_byte_and_metadata_preserving(repository: Path, bundle: Path) -> None:
-    candidate = preview(repository, bundle)
-    apply(repository, candidate, bundle)
+def test_completed_replay_is_byte_and_metadata_preserving(
+    repository: Path, readonly_bundle: Path
+) -> None:
+    candidate = preview(repository, readonly_bundle)
+    apply(repository, candidate, readonly_bundle)
     before = tree(repository)
 
-    result = apply(repository, candidate, bundle)
+    result = apply(repository, candidate, readonly_bundle)
 
     assert result["phase"] == "already_complete"
     assert tree(repository) == before
 
 
 def test_verified_interruption_resumes_original_uuid_without_rewriting_completed_files(
-    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+    repository: Path, readonly_bundle: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     create = PortableFilesystem.create_file
 
     def interrupt(self, parent_handle, name, **keywords):
@@ -700,13 +775,13 @@ def test_verified_interruption_resumes_original_uuid_without_rewriting_completed
 
     monkeypatch.setattr(PortableFilesystem, "create_file", interrupt)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert (repository / ".ai/init-state.json").is_file()
     assert not (repository / ".ai/repository-id").exists()
     partial = tree(repository)
     monkeypatch.setattr(PortableFilesystem, "create_file", create)
 
-    result = apply(repository, candidate, bundle)
+    result = apply(repository, candidate, readonly_bundle)
 
     assert result["phase"] == "resumed"
     assert result["repository_id"] == candidate["repository_id"]
@@ -719,11 +794,11 @@ def test_verified_interruption_resumes_original_uuid_without_rewriting_completed
 
 
 def test_partially_written_object_is_preserved_and_cannot_be_resumed(
-    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+    repository: Path, readonly_bundle: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     write = PortableFilesystem.write
-    resource = (bundle / "schemas/task.schema.json").read_bytes()
+    resource = (readonly_bundle / "schemas/task.schema.json").read_bytes()
 
     def interrupted_write(self, handle, data):
         if data == resource:
@@ -733,21 +808,21 @@ def test_partially_written_object_is_preserved_and_cannot_be_resumed(
 
     monkeypatch.setattr(PortableFilesystem, "write", interrupted_write)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     monkeypatch.setattr(PortableFilesystem, "write", write)
     before = tree(repository)
 
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert tree(repository) == before
     assert not (repository / ".ai/repository-id").exists()
 
 
 @pytest.mark.parametrize("stage", ["first", "complete"])
 def test_flush_failure_never_publishes_a_successful_identity(
-    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch, stage: str
+    repository: Path, readonly_bundle: Path, monkeypatch: pytest.MonkeyPatch, stage: str
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     flush = PortableFilesystem.flush
     count = 0
 
@@ -762,16 +837,16 @@ def test_flush_failure_never_publishes_a_successful_identity(
     monkeypatch.setattr(PortableFilesystem, "flush", fail_flush)
 
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert not (repository / ".ai/repository-id").exists()
     with pytest.raises(AiflowError):
         initialization.require_initialization_ready(repository)
 
 
 def test_competitor_at_atomic_directory_creation_is_preserved(
-    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+    repository: Path, readonly_bundle: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     create = PortableFilesystem.create_directory
     foreign = repository / ".ai/foreign.txt"
 
@@ -784,15 +859,15 @@ def test_competitor_at_atomic_directory_creation_is_preserved(
     monkeypatch.setattr(PortableFilesystem, "create_directory", compete)
 
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert foreign.read_bytes() == b"competitor-owned bytes\n"
     assert sorted(path.name for path in foreign.parent.iterdir()) == ["foreign.txt"]
 
 
 def test_competitor_identity_is_not_replaced_at_publication(
-    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+    repository: Path, readonly_bundle: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     publish = PortableFilesystem.rename_no_replace
     foreign = repository / ".ai/repository-id"
 
@@ -803,18 +878,18 @@ def test_competitor_identity_is_not_replaced_at_publication(
     monkeypatch.setattr(PortableFilesystem, "rename_no_replace", compete)
 
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert foreign.read_bytes() == b"competitor identity\n"
     before = tree(repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert tree(repository) == before
 
 
 def test_wrong_publication_name_is_preserved_and_cannot_report_installation_success(
-    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+    repository: Path, readonly_bundle: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     publish = PortableFilesystem.rename_no_replace
     wrong_name = repository / ".ai/repository-id-unexpected"
     published = False
@@ -827,23 +902,23 @@ def test_wrong_publication_name_is_preserved_and_cannot_report_installation_succ
     monkeypatch.setattr(PortableFilesystem, "rename_no_replace", publish_to_wrong_name)
 
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
 
     assert published
     assert not (repository / ".ai/repository-id").exists()
     assert wrong_name.read_bytes() == (candidate["repository_id"] + "\n").encode("utf-8")
     before = tree(repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert tree(repository) == before
 
 
 @pytest.mark.parametrize("change", ["extra", "resource", "review", "identity", "state", "complete"])
 def test_complete_installation_tampering_blocks_ready_and_replay(
-    repository: Path, bundle: Path, change: str
+    repository: Path, readonly_bundle: Path, change: str
 ) -> None:
-    candidate = preview(repository, bundle)
-    apply(repository, candidate, bundle)
+    candidate = preview(repository, readonly_bundle)
+    apply(repository, candidate, readonly_bundle)
     paths = {
         "resource": "templates/spec.md",
         "review": "policy-review.json",
@@ -857,15 +932,15 @@ def test_complete_installation_tampering_blocks_ready_and_replay(
     with pytest.raises(AiflowError):
         initialization.require_initialization_ready(repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert tree(repository) == before
 
 
 def test_ready_guard_allows_normal_task_history_without_accepting_preview_replay(
-    repository: Path, bundle: Path
+    repository: Path, readonly_bundle: Path
 ) -> None:
-    candidate = preview(repository, bundle)
-    apply(repository, candidate, bundle)
+    candidate = preview(repository, readonly_bundle)
+    apply(repository, candidate, readonly_bundle)
     task = repository / ".ai/tasks/TASK-0001"
     task.mkdir(parents=True)
     (task / "history.txt").write_bytes(b"append-only fixture history\n")
@@ -873,15 +948,15 @@ def test_ready_guard_allows_normal_task_history_without_accepting_preview_replay
 
     initialization.require_initialization_ready(repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert tree(repository) == before
 
 
 def test_a_managed_file_with_another_hardlink_is_not_a_ready_installation(
-    repository: Path, bundle: Path, tmp_path: Path
+    repository: Path, readonly_bundle: Path, tmp_path: Path
 ) -> None:
-    candidate = preview(repository, bundle)
-    apply(repository, candidate, bundle)
+    candidate = preview(repository, readonly_bundle)
+    apply(repository, candidate, readonly_bundle)
     resource = repository / ".ai/templates/spec.md"
     os.link(resource, tmp_path / "another-link.md")
     before = tree(repository)
@@ -889,7 +964,7 @@ def test_a_managed_file_with_another_hardlink_is_not_a_ready_installation(
     with pytest.raises(AiflowError):
         initialization.require_initialization_ready(repository)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     assert tree(repository) == before
 
 
@@ -914,55 +989,59 @@ def test_corrupt_state_is_not_treated_as_legacy(repository: Path, contents: byte
     assert tree(repository) == before
 
 
-def test_inspect_and_migration_plan_are_read_only(repository: Path, bundle: Path) -> None:
-    candidate = preview(repository, bundle)
-    apply(repository, candidate, bundle)
-    before, bundle_before = tree(repository), tree(bundle)
+def test_inspect_and_migration_plan_are_read_only(
+    installed_repository: Path, readonly_bundle: Path
+) -> None:
+    repository_id = (installed_repository / ".ai/repository-id").read_text("utf-8").strip()
+    before, bundle_before = tree(installed_repository), tree(readonly_bundle)
 
-    inspected = initialization.inspect_initialization(repository)
-    migration = initialization.plan_initialization_migration(repository, bundle_root=bundle)
+    inspected = initialization.inspect_initialization(installed_repository)
+    migration = initialization.plan_initialization_migration(
+        installed_repository, bundle_root=readonly_bundle
+    )
 
     assert isinstance(inspected, dict)
     assert isinstance(migration, dict)
-    assert tree(repository) == before
-    assert tree(bundle) == bundle_before
+    assert tree(installed_repository) == before
+    assert tree(readonly_bundle) == bundle_before
     serialized = json.dumps(migration)
-    assert candidate["repository_id"] in serialized
+    assert repository_id in serialized
     assert "readonly" in serialized.lower() or "read_only" in serialized.lower()
 
 
-def test_persistent_installer_metadata_has_no_machine_paths(repository: Path, bundle: Path) -> None:
-    candidate = preview(repository, bundle)
-    apply(repository, candidate, bundle)
+def test_persistent_installer_metadata_has_no_machine_paths(
+    installed_repository: Path, complete_installation_seed: Path, readonly_bundle: Path
+) -> None:
+    repository_id = (installed_repository / ".ai/repository-id").read_text("utf-8").strip()
+    assert UUID(repository_id).version == 4
 
     for filename in ("init-state.json", "policy-review.json", "init-complete.json"):
-        raw = (repository / ".ai" / filename).read_bytes()
+        raw = (installed_repository / ".ai" / filename).read_bytes()
         document = json.loads(raw)
         assert isinstance(document, dict)
-        assert str(repository).encode() not in raw
-        assert repository.as_posix().encode() not in raw
-        assert str(bundle).encode() not in raw
-        assert bundle.as_posix().encode() not in raw
-    state = json.loads((repository / ".ai/init-state.json").read_bytes())
-    assert candidate["repository_id"] in json.dumps(state)
+        for path in (installed_repository, complete_installation_seed, readonly_bundle):
+            assert str(path).encode() not in raw
+            assert path.as_posix().encode() not in raw
+    state = json.loads((installed_repository / ".ai/init-state.json").read_bytes())
+    assert repository_id in json.dumps(state)
 
 
 def test_actual_windows_backend_installs_and_replays(
-    repository: Path, bundle: Path, native_filesystem: None
+    repository: Path, readonly_bundle: Path, native_filesystem: None
 ) -> None:
     require_windows_apply()
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
 
-    assert apply(repository, candidate, bundle)["phase"] == "installed"
+    assert apply(repository, candidate, readonly_bundle)["phase"] == "installed"
     initialization.require_initialization_ready(repository)
     before = tree(repository)
-    assert apply(repository, candidate, bundle)["phase"] == "already_complete"
+    assert apply(repository, candidate, readonly_bundle)["phase"] == "already_complete"
     assert tree(repository) == before
 
 
 def test_actual_windows_system_temp_installation_keeps_ancestors_pinned(
     initialization_seed: Path,
-    bundle: Path,
+    readonly_bundle: Path,
     native_filesystem: None,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -989,7 +1068,7 @@ def test_actual_windows_system_temp_installation_keeps_ancestors_pinned(
         moved.rename(parent)
         root = parent / "repository"
         shutil.copytree(initialization_seed, root)
-        candidate = preview(root, bundle)
+        candidate = preview(root, readonly_bundle)
 
         def checked_pin(self, path):
             handle = pin(self, path)
@@ -1008,7 +1087,7 @@ def test_actual_windows_system_temp_installation_keeps_ancestors_pinned(
 
         monkeypatch.setattr(WindowsFilesystem, "_pin_ancestor", checked_pin)
 
-        assert apply(root, candidate, bundle)["phase"] == "installed"
+        assert apply(root, candidate, readonly_bundle)["phase"] == "installed"
         assert system_temp in observed
         assert parent in observed
         assert (root / ".ai/repository-id").read_bytes() == (
@@ -1017,17 +1096,20 @@ def test_actual_windows_system_temp_installation_keeps_ancestors_pinned(
         initialization.require_initialization_ready(root)
         assert initialization.inspect_initialization(root)["status"] == "complete"
         before = tree(root)
-        assert apply(root, candidate, bundle)["phase"] == "already_complete"
+        assert apply(root, candidate, readonly_bundle)["phase"] == "already_complete"
         assert tree(root) == before
 
 
 def test_actual_windows_handles_hold_resources_until_identity_publication(
-    repository: Path, bundle: Path, native_filesystem: None, monkeypatch: pytest.MonkeyPatch
+    repository: Path,
+    readonly_bundle: Path,
+    native_filesystem: None,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     require_windows_apply()
     from aiflow.initialization_windows import WindowsFilesystem
 
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     publish = WindowsFilesystem.rename_no_replace
     observed = False
     script = (
@@ -1065,7 +1147,7 @@ def test_actual_windows_handles_hold_resources_until_identity_publication(
 
     monkeypatch.setattr(WindowsFilesystem, "rename_no_replace", checked_publish)
 
-    assert apply(repository, candidate, bundle)["phase"] == "installed"
+    assert apply(repository, candidate, readonly_bundle)["phase"] == "installed"
     assert observed
 
 
@@ -1085,29 +1167,29 @@ def run_cli(cwd: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
 
 
 def test_cli_preview_works_outside_any_repository_without_writing_target(
-    repository: Path, bundle: Path, tmp_path: Path
+    readonly_repository: Path, readonly_bundle: Path, tmp_path: Path
 ) -> None:
     outside = tmp_path / "outside"
     outside.mkdir()
-    before = tree(repository)
+    before = tree(readonly_repository)
 
     result = run_cli(
         outside,
         "init",
         "preview",
         "--target",
-        str(repository),
+        str(readonly_repository),
         "--profile",
         "native-python-v1",
         "--bundle-root",
-        str(bundle),
+        str(readonly_bundle),
     )
 
     assert result.returncode == 0, result.stderr
     candidate = json.loads(result.stdout)
     assert candidate["kind"] == "aiflow-init-preview"
     assert UUID(candidate["repository_id"]).version == 4
-    assert tree(repository) == before
+    assert tree(readonly_repository) == before
     assert list(outside.iterdir()) == []
 
 
@@ -1117,9 +1199,9 @@ def test_cli_preview_works_outside_any_repository_without_writing_target(
     ids=["empty-object", "array", "duplicate-key", "oversize"],
 )
 def test_cli_rejects_invalid_review_input_before_target_writes(
-    repository: Path, bundle: Path, tmp_path: Path, data: bytes
+    readonly_preview_context: tuple[Path, Path, dict], tmp_path: Path, data: bytes
 ) -> None:
-    candidate = preview(repository, bundle)
+    repository, bundle, candidate = readonly_preview_context
     preview_path = tmp_path / "preview.json"
     review_path = tmp_path / "review.json"
     preview_path.write_text(json.dumps(candidate), encoding="utf-8")
@@ -1147,10 +1229,10 @@ def test_cli_rejects_invalid_review_input_before_target_writes(
 
 
 def test_cli_apply_and_inspect_use_the_same_target_and_identity(
-    repository: Path, bundle: Path, tmp_path: Path, native_filesystem: None
+    repository: Path, readonly_bundle: Path, tmp_path: Path, native_filesystem: None
 ) -> None:
     require_windows_apply()
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     preview_path = tmp_path / "preview.json"
     review_path = tmp_path / "review.json"
     preview_path.write_text(json.dumps(candidate), encoding="utf-8")
@@ -1167,7 +1249,7 @@ def test_cli_apply_and_inspect_use_the_same_target_and_identity(
         "--policy-review",
         str(review_path),
         "--bundle-root",
-        str(bundle),
+        str(readonly_bundle),
     )
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["repository_id"] == candidate["repository_id"]
@@ -1292,19 +1374,19 @@ def test_inspect_distinguishes_unsupported_versions_from_corrupt_installations(
     assert tree(installed_repository) == before
 
 
-def test_inspect_absent_repository_does_not_create_state(repository: Path) -> None:
-    before = tree(repository)
-    inspected = initialization.inspect_initialization(repository)
+def test_inspect_absent_repository_does_not_create_state(readonly_repository: Path) -> None:
+    before = tree(readonly_repository)
+    inspected = initialization.inspect_initialization(readonly_repository)
     assert inspected["status"] == "absent"
     assert inspected["issues"] == []
     assert inspected["has_history"] is False
-    assert tree(repository) == before
+    assert tree(readonly_repository) == before
 
 
 def test_inspect_verified_partial_reports_relative_missing_paths_without_recovery(
-    repository: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+    repository: Path, readonly_bundle: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    candidate = preview(repository, bundle)
+    candidate = preview(repository, readonly_bundle)
     create = PortableFilesystem.create_file
 
     def interrupt(self, parent_handle, name, **keywords):
@@ -1314,7 +1396,7 @@ def test_inspect_verified_partial_reports_relative_missing_paths_without_recover
 
     monkeypatch.setattr(PortableFilesystem, "create_file", interrupt)
     with pytest.raises(AiflowError):
-        apply(repository, candidate, bundle)
+        apply(repository, candidate, readonly_bundle)
     before = tree(repository)
 
     inspected = initialization.inspect_initialization(repository)
@@ -1329,7 +1411,7 @@ def test_inspect_verified_partial_reports_relative_missing_paths_without_recover
 
 @pytest.mark.parametrize("change", ["modified", "missing", "unknown"])
 def test_inspect_and_migration_preserve_and_report_changed_managed_files(
-    installed_repository: Path, bundle: Path, change: str
+    installed_repository: Path, readonly_bundle: Path, change: str
 ) -> None:
     relative = ".ai/templates/spec.md"
     path = installed_repository / relative
@@ -1343,7 +1425,9 @@ def test_inspect_and_migration_preserve_and_report_changed_managed_files(
     before = tree(installed_repository)
 
     inspected = initialization.inspect_initialization(installed_repository)
-    planned = initialization.plan_initialization_migration(installed_repository, bundle_root=bundle)
+    planned = initialization.plan_initialization_migration(
+        installed_repository, bundle_root=readonly_bundle
+    )
 
     assert inspected["status"] == "conflict"
     assert planned["read_only"] is True
@@ -1354,7 +1438,7 @@ def test_inspect_and_migration_preserve_and_report_changed_managed_files(
 
 
 def test_migration_reports_unknown_files_and_preserves_task_history(
-    installed_repository: Path, bundle: Path
+    installed_repository: Path, readonly_bundle: Path
 ) -> None:
     unknown = installed_repository / ".ai/owner-note.txt"
     unknown.write_bytes(b"unknown owner material\n")
@@ -1363,7 +1447,9 @@ def test_migration_reports_unknown_files_and_preserves_task_history(
     history.write_bytes(b"frozen original history\n")
     before = tree(installed_repository)
 
-    planned = initialization.plan_initialization_migration(installed_repository, bundle_root=bundle)
+    planned = initialization.plan_initialization_migration(
+        installed_repository, bundle_root=readonly_bundle
+    )
 
     assert planned["has_history"] is True
     assert planned["read_only"] is True

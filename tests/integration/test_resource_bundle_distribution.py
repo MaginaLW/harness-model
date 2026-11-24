@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import concurrent.futures
 import configparser
 import csv
 import hashlib
@@ -21,6 +22,7 @@ import sysconfig
 import tarfile
 import tomllib
 import zipfile
+from collections.abc import Iterator
 from email.parser import BytesParser
 from pathlib import Path, PurePosixPath
 from types import SimpleNamespace
@@ -574,11 +576,118 @@ def _inspect_sdist(sdist: Path, identity: bytes, expected: set[str]) -> None:
             assert identity not in stream.read(), item.name
 
 
+def _tree_sha256(root: Path) -> str:
+    """Compute a structural SHA-256 digest to guard shared module seeds."""
+    digest = hashlib.sha256()
+    for path in sorted(root.rglob("*")):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode):
+            digest.update(b"L" + relative + b"\0" + str(path.readlink()).encode("utf-8") + b"\n")
+        elif stat.S_ISDIR(info.st_mode):
+            digest.update(b"D" + relative + b"\n")
+        elif stat.S_ISREG(info.st_mode):
+            digest.update(b"F" + relative + b"\0" + hashlib.sha256(path.read_bytes()).digest())
+        else:
+            raise ValueError(f"unexpected entry type in seed: {path}")
+    return digest.hexdigest()
+
+
+def _clone_tree(seed: Path, destination: Path) -> None:
+    """Clone a source seed with real file copies (st_nlink == 1, never hardlinks or symlinks)."""
+    shutil.copytree(seed, destination, symlinks=False, copy_function=shutil.copyfile)
+
+
+def _clone_venv(seed: Path, destination: Path) -> None:
+    """Clone a clean seed venv using real file copies for site/config and venv interpreter links."""
+    shutil.copytree(seed, destination, symlinks=True, copy_function=shutil.copyfile)
+
+
+@pytest.fixture(scope="module")
+def module_wheelhouse(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Iterator[tuple[Path, dict[str, str]]]:
+    wheelhouse = tmp_path_factory.mktemp("wheelhouse-seed") / "wheelhouse"
+    locked = _wheelhouse(wheelhouse)
+    expected = _tree_sha256(wheelhouse)
+    yield wheelhouse, locked
+    assert _tree_sha256(wheelhouse) == expected, "module wheelhouse seed was mutated"
+
+
+@pytest.fixture(scope="module")
+def module_seed_venv(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
+    work = tmp_path_factory.mktemp("venv-seed")
+    seed = work / "venv"
+    _run(sys.executable, "-I", "-m", "venv", str(seed), cwd=work)
+    expected = _tree_sha256(seed)
+    yield seed
+    assert _tree_sha256(seed) == expected, "module venv seed was mutated"
+
+
+@pytest.fixture(scope="module")
+def module_synthetic_lf_source(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
+    seed = tmp_path_factory.mktemp("synthetic-lf-seed") / "source"
+    _source(seed, crlf=False, identity=b"synthetic-only-identity")
+    expected = _tree_sha256(seed)
+    yield seed
+    assert _tree_sha256(seed) == expected, "module synthetic source seed was mutated"
+
+
+@pytest.fixture(scope="module")
+def module_synthetic_sdist(
+    tmp_path_factory: pytest.TempPathFactory, module_synthetic_lf_source: Path
+) -> Iterator[Path]:
+    work = tmp_path_factory.mktemp("synthetic-sdist-seed")
+    source = work / "source"
+    _clone_tree(module_synthetic_lf_source, source)
+    sdist = _build(source, work / "dist", "sdist", work)
+    expected = hashlib.sha256(sdist.read_bytes()).hexdigest()
+    yield sdist
+    assert hashlib.sha256(sdist.read_bytes()).hexdigest() == expected, (
+        "module synthetic sdist seed was mutated"
+    )
+
+
+@pytest.fixture(scope="module")
+def module_repo_sources(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Iterator[tuple[bytes, dict[str, Path]]]:
+    identity = (ROOT / ".ai/repository-id").read_bytes().strip()
+    assert identity
+    root = tmp_path_factory.mktemp("repo-sources-seed")
+    seeds: dict[str, Path] = {}
+    digests: dict[str, str] = {}
+    for mode in ("lf", "crlf"):
+        seed = root / mode
+        _source(seed, crlf=mode == "crlf", identity=identity)
+        seeds[mode] = seed
+        digests[mode] = _tree_sha256(seed)
+    yield identity, seeds
+    for mode, seed in seeds.items():
+        assert _tree_sha256(seed) == digests[mode], f"module {mode} source seed was mutated"
+
+
+@pytest.fixture
+def synthetic_source(tmp_path: Path, module_synthetic_lf_source: Path) -> Path:
+    source = tmp_path / "source"
+    _clone_tree(module_synthetic_lf_source, source)
+    return source
+
+
 def _installed_bundle(
-    wheel: Path, wheelhouse: Path, locked: dict[str, str], target: Path, cwd: Path
+    wheel: Path,
+    wheelhouse: Path,
+    locked: dict[str, str],
+    target: Path,
+    cwd: Path,
+    *,
+    seed_venv: Path | None = None,
 ) -> dict:
     assert not cwd.resolve().is_relative_to(ROOT.resolve()), "working directory is inside source"
-    _run(sys.executable, "-I", "-m", "venv", str(target), cwd=cwd)
+    if seed_venv is None:
+        _run(sys.executable, "-I", "-m", "venv", str(target), cwd=cwd)
+    else:
+        _clone_venv(seed_venv, target)
     python = target / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
     _run(
         str(python),
@@ -640,52 +749,91 @@ def _installed_bundle(
     return json.loads(result.stdout)
 
 
-def test_offline_distributions_are_complete_and_exclude_source_identity(tmp_path: Path) -> None:
-    identity = (ROOT / ".ai/repository-id").read_bytes().strip()
-    assert identity
-    wheelhouse = tmp_path / "wheelhouse"
-    locked = _wheelhouse(wheelhouse)
-    resources = []
-    manifests = []
-    for mode in ("lf", "crlf"):
-        source = tmp_path / mode
-        _source(source, crlf=mode == "crlf", identity=identity)
-        before = {
-            path.relative_to(source).as_posix(): path.read_bytes()
-            for path in (source / ".ai").rglob("*")
-            if path.is_file()
-        }
-        direct = _build(source, tmp_path / f"{mode}-direct", "wheel", tmp_path)
-        direct_resources = _wheel_resources(direct, identity)
-        direct_manifest = json.loads(direct_resources["manifest.json"])
-        sdist = _build(source, tmp_path / f"{mode}-sdist", "sdist", tmp_path)
-        _inspect_sdist(sdist, identity, {entry["path"] for entry in direct_manifest["files"]})
-        rebuilt = _build(sdist, tmp_path / f"{mode}-rebuilt", "wheel", tmp_path)
-        resources.extend([direct_resources, _wheel_resources(rebuilt, identity)])
-        for origin, wheel in (("direct", direct), ("rebuilt", rebuilt)):
-            manifests.append(
-                _installed_bundle(
-                    wheel, wheelhouse, locked, tmp_path / f"{mode}-{origin}-installed", tmp_path
-                )
+def test_offline_distributions_are_complete_and_exclude_source_identity(
+    tmp_path: Path,
+    module_wheelhouse: tuple[Path, dict[str, str]],
+    module_seed_venv: Path,
+    module_repo_sources: tuple[bytes, dict[str, Path]],
+) -> None:
+    identity, repo_seeds = module_repo_sources
+    wheelhouse, locked = module_wheelhouse
+    resources: list[dict[str, bytes]] = []
+    manifests: list[dict] = []
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+
+        def run_mode(
+            mode: str,
+        ) -> tuple[list[dict[str, bytes]], list[concurrent.futures.Future[dict]]]:
+            source = tmp_path / mode
+            _clone_tree(repo_seeds[mode], source)
+            build_cwd = tmp_path / f"work-{mode}"
+            build_cwd.mkdir()
+            before = {
+                path.relative_to(source).as_posix(): path.read_bytes()
+                for path in (source / ".ai").rglob("*")
+                if path.is_file()
+            }
+            direct = _build(source, tmp_path / f"{mode}-direct", "wheel", build_cwd)
+            direct_resources = _wheel_resources(direct, identity)
+            direct_manifest = json.loads(direct_resources["manifest.json"])
+            direct_work = tmp_path / f"work-{mode}-direct"
+            direct_work.mkdir()
+            direct_install = pool.submit(
+                _installed_bundle,
+                direct,
+                wheelhouse,
+                locked,
+                tmp_path / f"{mode}-direct-installed",
+                direct_work,
+                seed_venv=module_seed_venv,
             )
-        assert {
-            path.relative_to(source).as_posix(): path.read_bytes()
-            for path in (source / ".ai").rglob("*")
-            if path.is_file()
-        } == before
+            sdist = _build(source, tmp_path / f"{mode}-sdist", "sdist", build_cwd)
+            _inspect_sdist(sdist, identity, {entry["path"] for entry in direct_manifest["files"]})
+            rebuilt = _build(sdist, tmp_path / f"{mode}-rebuilt", "wheel", build_cwd)
+            rebuilt_resources = _wheel_resources(rebuilt, identity)
+            rebuilt_work = tmp_path / f"work-{mode}-rebuilt"
+            rebuilt_work.mkdir()
+            rebuilt_install = pool.submit(
+                _installed_bundle,
+                rebuilt,
+                wheelhouse,
+                locked,
+                tmp_path / f"{mode}-rebuilt-installed",
+                rebuilt_work,
+                seed_venv=module_seed_venv,
+            )
+            assert {
+                path.relative_to(source).as_posix(): path.read_bytes()
+                for path in (source / ".ai").rglob("*")
+                if path.is_file()
+            } == before
+            return [direct_resources, rebuilt_resources], [direct_install, rebuilt_install]
+
+        mode_futures = [pool.submit(run_mode, mode) for mode in ("lf", "crlf")]
+        install_futures: list[concurrent.futures.Future[dict]] = []
+        for mode_future in mode_futures:
+            mode_resources, mode_installs = mode_future.result()
+            resources.extend(mode_resources)
+            install_futures.extend(mode_installs)
+        for install_future in install_futures:
+            manifests.append(install_future.result())
+
     assert all(item == resources[0] for item in resources)
     assert len(resources[0]) == 21  # 20 inputs and manifest.json
     assert all(item == manifests[0] for item in manifests)
     assert len(manifests[0]["paths"]) == 20
 
 
-def test_incomplete_source_distribution_cannot_build_wheel(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
-    sdist = _build(source, tmp_path / "sdist", "sdist", tmp_path)
+def test_incomplete_source_distribution_cannot_build_wheel(
+    tmp_path: Path, module_synthetic_sdist: Path
+) -> None:
     incomplete = tmp_path / "incomplete.tar.gz"
     omitted = ".ai/schemas/task.schema.json"
-    with tarfile.open(sdist, "r:gz") as original, tarfile.open(incomplete, "w:gz") as modified:
+    with (
+        tarfile.open(module_synthetic_sdist, "r:gz") as original,
+        tarfile.open(incomplete, "w:gz") as modified,
+    ):
         members = original.getmembers()
         matches = [item for item in members if item.name.endswith(f"/{omitted}")]
         assert len(matches) == 1 and matches[0].isfile()
@@ -723,9 +871,10 @@ def test_incomplete_source_distribution_cannot_build_wheel(tmp_path: Path) -> No
     assert not list(output.glob("*.whl"))
 
 
-def test_editable_install_does_not_write_bundle_into_source(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_editable_install_does_not_write_bundle_into_source(
+    tmp_path: Path, synthetic_source: Path, module_seed_venv: Path
+) -> None:
+    source = synthetic_source
     output = tmp_path / "editable-wheel"
     output.mkdir()
     code = "import setuptools.build_meta as b,sys; b.build_editable(sys.argv[1])"
@@ -733,7 +882,7 @@ def test_editable_install_does_not_write_bundle_into_source(tmp_path: Path) -> N
     wheels = list(output.glob("*.whl"))
     assert len(wheels) == 1
     target = tmp_path / "editable-venv"
-    _run(sys.executable, "-I", "-m", "venv", str(target), cwd=tmp_path)
+    _clone_venv(module_seed_venv, target)
     python = target / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
     _run(
         str(python),
@@ -977,10 +1126,9 @@ def test_project_runtime_requirements_reject_new_dependency() -> None:
 @pytest.mark.parametrize("kind", ["symlink", "junction"])
 @pytest.mark.parametrize("position", ["build-lib", "package", "bundle"])
 def test_build_rejects_linked_output_before_writing_outside(
-    tmp_path: Path, kind: str, position: str
+    tmp_path: Path, synthetic_source: Path, kind: str, position: str
 ) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+    source = synthetic_source
     outside = tmp_path / "outside"
     outside.mkdir()
     marker = outside / ("manifest.json" if position == "bundle" else "marker.txt")
@@ -1049,9 +1197,10 @@ def test_build_rejects_linked_output_before_writing_outside(
             link.unlink()
 
 
-def test_build_rejects_linked_python_output_before_writing_outside(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_build_rejects_linked_python_output_before_writing_outside(
+    tmp_path: Path, synthetic_source: Path
+) -> None:
+    source = synthetic_source
     outside = tmp_path / "outside.py"
     outside.write_bytes(b"preserve outside file\n")
     build_lib = source / "build/lib"
@@ -1088,9 +1237,10 @@ def test_build_rejects_linked_python_output_before_writing_outside(tmp_path: Pat
         link.unlink()
 
 
-def test_build_rejects_preexisting_manifest_without_rewriting_it(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_build_rejects_preexisting_manifest_without_rewriting_it(
+    tmp_path: Path, synthetic_source: Path
+) -> None:
+    source = synthetic_source
     build_lib = source / "build/lib"
     bundle = build_lib / "aiflow/_bundled_resources"
     bundle.mkdir(parents=True)
@@ -1113,9 +1263,10 @@ def test_build_rejects_preexisting_manifest_without_rewriting_it(tmp_path: Path)
     assert sorted(path.name for path in bundle.parent.iterdir()) == ["_bundled_resources"]
 
 
-def test_build_rejects_different_python_output_without_overwriting_it(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_build_rejects_different_python_output_without_overwriting_it(
+    tmp_path: Path, synthetic_source: Path
+) -> None:
+    source = synthetic_source
     build_lib = source / "build/lib"
     existing = build_lib / "aiflow/cli.py"
     existing.parent.mkdir(parents=True)
@@ -1136,9 +1287,10 @@ def test_build_rejects_different_python_output_without_overwriting_it(tmp_path: 
     assert sorted(path.name for path in existing.parent.iterdir()) == ["cli.py"]
 
 
-def test_direct_wheel_rejects_existing_output_without_overwriting_it(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_direct_wheel_rejects_existing_output_without_overwriting_it(
+    tmp_path: Path, synthetic_source: Path
+) -> None:
+    source = synthetic_source
     output = tmp_path / "dist"
     output.mkdir()
     existing = output / "aiflow-0.2.0-py3-none-any.whl"
@@ -1159,9 +1311,10 @@ def test_direct_wheel_rejects_existing_output_without_overwriting_it(tmp_path: P
     assert sorted(path.name for path in output.iterdir()) == [existing.name]
 
 
-def test_direct_sdist_rejects_existing_archive_without_overwriting_it(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_direct_sdist_rejects_existing_archive_without_overwriting_it(
+    tmp_path: Path, synthetic_source: Path
+) -> None:
+    source = synthetic_source
     output = tmp_path / "dist"
     output.mkdir()
     existing = output / "aiflow-0.2.0.tar.gz"
@@ -1184,10 +1337,9 @@ def test_direct_sdist_rejects_existing_archive_without_overwriting_it(tmp_path: 
 
 @pytest.mark.parametrize("target", ["package", "bundle", "metadata"])
 def test_build_rejects_hardlinked_output_without_modifying_external_file(
-    tmp_path: Path, target: str
+    tmp_path: Path, synthetic_source: Path, target: str
 ) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+    source = synthetic_source
     outside = tmp_path / "outside"
     outside.write_bytes(b"preserve external file\n")
     build_lib = source / "build/lib"
@@ -1313,9 +1465,10 @@ def test_existing_build_output_rejects_unknown_link_count_before_read(
     assert source.read_bytes() == b"preserve\n"
 
 
-def test_repeated_build_reuses_identical_bundle_without_rewriting_it(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_repeated_build_reuses_identical_bundle_without_rewriting_it(
+    synthetic_source: Path,
+) -> None:
+    source = synthetic_source
     build_lib = source / "build/lib"
     arguments = [sys.executable, "-I", "setup.py", "build_py", "--build-lib", str(build_lib)]
     _run(*arguments, cwd=source)
@@ -1338,9 +1491,10 @@ def test_repeated_build_reuses_identical_bundle_without_rewriting_it(tmp_path: P
     assert after == before
 
 
-def test_build_rejects_parent_traversal_without_writing_outside(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_build_rejects_parent_traversal_without_writing_outside(
+    tmp_path: Path, synthetic_source: Path
+) -> None:
+    source = synthetic_source
     (source / "build").mkdir()
     outside = tmp_path / "outside"
     outside.mkdir()
@@ -1364,9 +1518,10 @@ def test_build_rejects_parent_traversal_without_writing_outside(tmp_path: Path) 
 
 
 @pytest.mark.parametrize("kind", ["file_symlink", "dir_symlink", "dir_junction"])
-def test_build_does_not_execute_linked_resource_helper(tmp_path: Path, kind: str) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_build_does_not_execute_linked_resource_helper(
+    tmp_path: Path, synthetic_source: Path, kind: str
+) -> None:
+    source = synthetic_source
     directory = source / "src/aiflow"
     if kind == "file_symlink":
         link = directory / "resource_bundle.py"
@@ -1431,9 +1586,10 @@ def test_build_does_not_execute_linked_resource_helper(tmp_path: Path, kind: str
 
 
 @pytest.mark.parametrize("kind", ["directory", "symlink", "junction"])
-def test_sdist_rejects_existing_staging_without_modification(tmp_path: Path, kind: str) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_sdist_rejects_existing_staging_without_modification(
+    tmp_path: Path, synthetic_source: Path, kind: str
+) -> None:
+    source = synthetic_source
     stage = source / "aiflow-0.2.0"
     outside = tmp_path / "outside"
     if kind == "directory":
@@ -1487,9 +1643,10 @@ def test_sdist_rejects_existing_staging_without_modification(tmp_path: Path, kin
 
 
 @pytest.mark.parametrize("kind", ["symlink", "junction"])
-def test_wheel_rejects_linked_package_before_discovery(tmp_path: Path, kind: str) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_wheel_rejects_linked_package_before_discovery(
+    tmp_path: Path, synthetic_source: Path, kind: str
+) -> None:
+    source = synthetic_source
     outside = tmp_path / "outside-package"
     outside.mkdir()
     marker = outside / "__init__.py"
@@ -1537,9 +1694,10 @@ def test_wheel_rejects_linked_package_before_discovery(tmp_path: Path, kind: str
 
 
 @pytest.mark.parametrize("kind", ["symlink", "junction"])
-def test_wheel_rejects_linked_sibling_package_before_discovery(tmp_path: Path, kind: str) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_wheel_rejects_linked_sibling_package_before_discovery(
+    tmp_path: Path, synthetic_source: Path, kind: str
+) -> None:
+    source = synthetic_source
     outside = tmp_path / "outside-package"
     outside.mkdir()
     marker = outside / "__init__.py"
@@ -1588,10 +1746,9 @@ def test_wheel_rejects_linked_sibling_package_before_discovery(tmp_path: Path, k
 
 @pytest.mark.parametrize("position", ["root", "package"])
 def test_build_rejects_unknown_cached_file_without_modification(
-    tmp_path: Path, position: str
+    tmp_path: Path, synthetic_source: Path, position: str
 ) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+    source = synthetic_source
     build_lib = source / "build/lib"
     marker = (build_lib if position == "root" else build_lib / "aiflow") / "unexpected.py"
     marker.parent.mkdir(parents=True)
@@ -1613,9 +1770,10 @@ def test_build_rejects_unknown_cached_file_without_modification(
 
 
 @pytest.mark.parametrize("kind", ["directory", "symlink", "junction"])
-def test_wheel_rejects_existing_staging_without_modification(tmp_path: Path, kind: str) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+def test_wheel_rejects_existing_staging_without_modification(
+    tmp_path: Path, synthetic_source: Path, kind: str
+) -> None:
+    source = synthetic_source
     stage = source / "build/wheel-staging"
     stage.parent.mkdir()
     outside = tmp_path / "outside"
@@ -1678,10 +1836,9 @@ def test_wheel_rejects_existing_staging_without_modification(tmp_path: Path, kin
 
 
 def test_changed_source_and_resources_build_without_rewriting_previous_outputs(
-    tmp_path: Path,
+    tmp_path: Path, synthetic_source: Path
 ) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+    source = synthetic_source
     first = _build(source, tmp_path / "first-wheel", "wheel", tmp_path)
     first_bytes = first.read_bytes()
     original_outputs = {
@@ -1710,10 +1867,9 @@ def test_changed_source_and_resources_build_without_rewriting_previous_outputs(
 @pytest.mark.parametrize("command", ["sdist", "pep517_metadata"])
 @pytest.mark.parametrize("kind", ["directory_symlink", "directory_junction", "file_symlink"])
 def test_metadata_refuses_links_before_any_outside_write(
-    tmp_path: Path, command: str, kind: str
+    tmp_path: Path, synthetic_source: Path, command: str, kind: str
 ) -> None:
-    source = tmp_path / "source"
-    _source(source, crlf=False, identity=b"synthetic-only-identity")
+    source = synthetic_source
     outside = tmp_path / "outside"
     outside.mkdir()
     marker = outside / "PKG-INFO"

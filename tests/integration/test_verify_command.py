@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
+import atexit
+import hashlib
 import json
+import os
+import shutil
 import sys
+import tempfile
+from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -151,23 +157,183 @@ def _plan(*, failed: bool = False):
     return build
 
 
+_SEED_BASE_DIR: Path | None = None
+_SEED_ENTRIES: dict[str, tuple[Path, dict[str, str]]] = {}
+_FALLBACK_SEED_TEMPDIRS: list[tempfile.TemporaryDirectory[str]] = []
+_ATEXIT_REGISTERED = False
+
+
+def _cleanup_fallback_seed_dirs() -> None:
+    while _FALLBACK_SEED_TEMPDIRS:
+        _FALLBACK_SEED_TEMPDIRS.pop().cleanup()
+
+
+def _snapshot_tree_sha256(root: Path) -> dict[str, str]:
+    """Capture relative path -> SHA-256 digest (or symlink target) for seed immutability checks."""
+    snapshot: dict[str, str] = {}
+    for path in sorted(root.rglob("*")):
+        rel = path.relative_to(root).as_posix()
+        if path.is_symlink():
+            snapshot[rel] = f"symlink:{os.readlink(path)}"
+        elif path.is_file():
+            snapshot[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return snapshot
+
+
+def _assert_seeds_immutable() -> None:
+    for key, (seed_path, expected_hashes) in _SEED_ENTRIES.items():
+        actual_hashes = _snapshot_tree_sha256(seed_path)
+        assert actual_hashes == expected_hashes, (
+            f"Module seed repository {key!r} was mutated during test execution"
+        )
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _verify_module_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _SEED_BASE_DIR
+    _SEED_BASE_DIR = tmp_path_factory.mktemp("verify-cmd-seeds")
+    _SEED_ENTRIES.clear()
+    try:
+        yield
+        _assert_seeds_immutable()
+    finally:
+        _SEED_ENTRIES.clear()
+        _SEED_BASE_DIR = None
+
+
+def _build_prepared_repo(repository: Path, route: str) -> None:
+    create_repository(repository)
+    with pytest.MonkeyPatch.context() as mp:
+        start(repository, mp)
+        make_ready(repository, route=route, valid_approval=route == "REVIEW")
+        if route == "REVIEW":
+            approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+            assert isinstance(approvals, list)
+            approvals[0]["base_commit"] = load_task_record(repository, "TASK-0001").task[
+                "base_commit"
+            ]
+            atomic_write_json(
+                resolve_task_path(repository, "TASK-0001", "approvals.json"), approvals
+            )
+        assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+
+
+def _build_seed_repo(key: str, repository: Path) -> None:
+    if key.startswith("prepared:"):
+        route = key.split(":", 1)[1]
+        _build_prepared_repo(repository, route)
+        return
+    if key == "v2_prepared":
+        shutil.copytree(_get_seed_repo("prepared:AUTO"), repository)
+        _enable_v2(repository)
+        return
+    if key == "v2_action_required":
+        shutil.copytree(_get_seed_repo("v2_prepared"), repository)
+        _enable_v2_action_requirement(repository)
+        return
+    if key == "v2_action_approved":
+        shutil.copytree(_get_seed_repo("v2_action_required"), repository)
+        with pytest.MonkeyPatch.context() as mp:
+            mp.chdir(repository)
+            _approve_v2_action(repository, "001")
+        return
+    if key == "verified_v1":
+        shutil.copytree(_get_seed_repo("prepared:AUTO"), repository)
+        with pytest.MonkeyPatch.context() as mp:
+            mp.chdir(repository)
+            mp.setattr(verification_service, "parse_verification_plan", _plan())
+            assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+        return
+    if key == "verified_v2":
+        shutil.copytree(_get_seed_repo("verified_v1"), repository)
+        _enable_v2(repository)
+        return
+    if key == "interrupted":
+        shutil.copytree(_get_seed_repo("prepared:AUTO"), repository)
+
+        def _killed(*_args: object, **_kwargs: object) -> list[object]:
+            raise KeyboardInterrupt
+
+        with pytest.MonkeyPatch.context() as mp:
+            mp.chdir(repository)
+            mp.setattr(verification_service, "parse_verification_plan", _plan())
+            mp.setattr(verification_service, "_execute_plan", _killed)
+            with pytest.raises(KeyboardInterrupt):
+                main(["verify", "TASK-0001", "--actor", "implementer"])
+        assert load_task_record(repository, "TASK-0001").task["current_state"] == "VERIFYING"
+        return
+    raise AssertionError(f"Unknown seed key: {key!r}")
+
+
+def _get_seed_repo(key: str) -> Path:
+    global _ATEXIT_REGISTERED, _SEED_BASE_DIR
+    entry = _SEED_ENTRIES.get(key)
+    if entry is not None:
+        return entry[0]
+    if _SEED_BASE_DIR is None:
+        temp_dir = tempfile.TemporaryDirectory(
+            prefix="verify-cmd-seeds-", ignore_cleanup_errors=True
+        )
+        _FALLBACK_SEED_TEMPDIRS.append(temp_dir)
+        if not _ATEXIT_REGISTERED:
+            atexit.register(_cleanup_fallback_seed_dirs)
+            _ATEXIT_REGISTERED = True
+        _SEED_BASE_DIR = Path(temp_dir.name)
+    repository = _SEED_BASE_DIR / key.replace(":", "-")
+    _build_seed_repo(key, repository)
+    _SEED_ENTRIES[key] = (repository, _snapshot_tree_sha256(repository))
+    return repository
+
+
+def _clone_seed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    key: str,
+) -> Path:
+    repository = tmp_path / "repository"
+    shutil.copytree(_get_seed_repo(key), repository)
+    monkeypatch.chdir(repository)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
+    return repository
+
+
 def _prepare(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     *,
     route: str = "AUTO",
 ) -> Path:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, route=route, valid_approval=route == "REVIEW")
-    if route == "REVIEW":
-        approvals = read_task_json(repository, "TASK-0001", "approvals.json")
-        assert isinstance(approvals, list)
-        approvals[0]["base_commit"] = load_task_record(repository, "TASK-0001").task["base_commit"]
-        atomic_write_json(resolve_task_path(repository, "TASK-0001", "approvals.json"), approvals)
-    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
-    monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
-    return repository
+    return _clone_seed(tmp_path, monkeypatch, f"prepared:{route}")
+
+
+def _prepare_v2(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    return _clone_seed(tmp_path, monkeypatch, "v2_prepared")
+
+
+def _prepare_v2_action_required(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    return _clone_seed(tmp_path, monkeypatch, "v2_action_required")
+
+
+def _prepare_v2_approved_action(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[Path, Path, str]:
+    repository = _clone_seed(tmp_path, monkeypatch, "v2_action_approved")
+    approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+    assert isinstance(approvals, list)
+    action_path = resolve_task_path(
+        repository,
+        "TASK-0001",
+        "action-v2-targeted-mutation-001.json",
+    )
+    return repository, action_path, str(approvals[-1]["action_sha256"])
+
+
+def _prepare_verified_v1(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    return _clone_seed(tmp_path, monkeypatch, "verified_v1")
+
+
+def _prepare_verified_v2(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    return _clone_seed(tmp_path, monkeypatch, "verified_v2")
 
 
 def _enable_v2(repository: Path) -> None:
@@ -277,8 +443,7 @@ def _approve_v2_action(
 def test_v2_recorder_without_action_approval_never_calls_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
+    repository = _prepare_v2(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
 
@@ -297,10 +462,7 @@ def test_v2_recorder_without_action_approval_never_calls_runner(
 def test_v2_recorder_rejects_pending_action_approval_transaction(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _approve_v2_action(repository, "001")
+    repository, _action_path, _digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
@@ -333,10 +495,7 @@ def test_v2_mutation_binding_allows_only_current_task_governance_attestation(
     attestation_path: str,
     reaches_consume: bool,
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _approve_v2_action(repository, "001")
+    repository, _action_path, _digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     subject = str(load_task_record(repository, "TASK-0001").task["subject_commit"])
     path = repository / attestation_path
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -376,10 +535,7 @@ def test_v2_mutation_binding_allows_only_current_task_governance_attestation(
 def test_v2_runner_allows_current_task_governance_head_after_subject(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _action_path, digest = _approve_v2_action(repository, "001")
+    repository, _action_path, digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     subject = str(load_task_record(repository, "TASK-0001").task["subject_commit"])
     attestation = repository / ".ai" / "tasks" / "TASK-0001" / "attestation.md"
     attestation.write_text("current task governance attestation\n", encoding="utf-8")
@@ -466,9 +622,7 @@ def test_v2_runner_allows_current_task_governance_head_after_subject(
 def test_v2_mutation_binding_rejects_equivalent_nonancestor_business_head(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
+    repository = _prepare_v2_action_required(tmp_path, monkeypatch)
     initial = load_task_record(repository, "TASK-0001").task
     base = str(initial["base_commit"])
     business_path = repository / "src" / "equivalent.py"
@@ -562,12 +716,9 @@ def test_v2_mutation_binding_rejects_equivalent_nonancestor_business_head(
 def test_v2_mutation_action_is_consumed_once_before_collection(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
+    repository, action_path, digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
-    action_path, digest = _approve_v2_action(repository, "001")
     record = load_task_record(repository, "TASK-0001")
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
     task, classification, policy_sha256 = mutation_evidence._validate_bindings(
@@ -639,10 +790,7 @@ def test_v2_mutation_action_is_consumed_once_before_collection(
 def test_v2_runner_rejects_synthetic_token_without_consumption_ledger(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    action_path, digest = _approve_v2_action(repository, "001")
+    repository, action_path, digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
@@ -677,10 +825,7 @@ def test_v2_runner_rejects_synthetic_token_without_consumption_ledger(
 def test_v2_consumption_ledger_blocks_replay_after_receipt_deletion(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _approve_v2_action(repository, "001")
+    repository, _action_path, _digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
@@ -717,10 +862,7 @@ def test_v2_consumption_ledger_blocks_replay_after_receipt_deletion(
 def test_v2_consumption_stays_used_when_event_persistence_fails(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _path, digest = _approve_v2_action(repository, "001")
+    repository, _path, digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
@@ -763,10 +905,7 @@ def test_v2_consumption_stays_used_when_event_persistence_fails(
 def test_v2_result_append_rejects_replaced_receipt(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _approve_v2_action(repository, "001")
+    repository, _action_path, _digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
@@ -829,10 +968,7 @@ def test_v2_action_digest_binds_decision_unit_and_classification() -> None:
 def test_v2_old_action_approval_is_rejected_after_reclassification(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _approve_v2_action(repository, "001")
+    repository, _action_path, _digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     task = record.task
     unit = task["decision_units"][0]
@@ -865,10 +1001,7 @@ def test_v2_old_action_approval_is_rejected_after_reclassification(
 def test_v2_used_action_allows_only_a_new_separately_approved_retry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _path, first_digest = _approve_v2_action(repository, "001")
+    repository, _path, first_digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
@@ -901,10 +1034,7 @@ def test_v2_used_action_allows_only_a_new_separately_approved_retry(
 def test_v2_multiple_unused_current_actions_are_ambiguous(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _approve_v2_action(repository, "001")
+    repository, _action_path, _digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     _approve_v2_action(repository, "002")
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
@@ -928,10 +1058,7 @@ def test_v2_multiple_unused_current_actions_are_ambiguous(
 def test_v2_concurrent_consumers_get_one_action_use(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
-    _enable_v2_action_requirement(repository)
-    _approve_v2_action(repository, "001")
+    repository, _action_path, _digest = _prepare_v2_approved_action(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     subject = str(record.task["subject_commit"])
     verification_service._start_local_verification(repository, "TASK-0001", record, "verifier")
@@ -1139,8 +1266,7 @@ def test_v2_actor_rejections_happen_before_plan_or_runner(
     actor: str,
     expected_code: str,
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
+    repository = _prepare_v2(tmp_path, monkeypatch)
 
     def unexpected(*_args, **_kwargs):
         raise AssertionError("V2 rejection must happen before plan parsing or runner start")
@@ -1159,8 +1285,7 @@ def test_v2_actor_rejections_happen_before_plan_or_runner(
 def test_v2_rejects_a_blank_current_implementer_before_plan_or_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
+    repository = _prepare_v2(tmp_path, monkeypatch)
     events_path = resolve_task_path(repository, "TASK-0001", "events.jsonl")
     events = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines()]
     events[-1]["actor"] = " "
@@ -1197,8 +1322,7 @@ def test_v2_live_run_consumes_current_mutation_or_fails_closed(
     expected_conclusion: str,
     expected_reason: str | None,
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
+    repository = _prepare_v2(tmp_path, monkeypatch)
     levels: list[str] = []
     loader_calls: list[str] = []
     base_plan = _plan()
@@ -1331,8 +1455,7 @@ def test_v2_live_run_consumes_current_mutation_or_fails_closed(
 def test_v2_selected_real_check_fails_when_mutation_evidence_is_missing(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, selected_check: str
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
+    repository = _prepare_v2(tmp_path, monkeypatch)
     base_plan = _plan()
 
     def v2_plan(bundle, context: VerificationContext, *, level: str) -> VerificationPlan:
@@ -1419,8 +1542,7 @@ def test_v2_selected_real_check_fails_when_mutation_evidence_is_missing(
 def test_v2_selected_failure_remains_failed(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
+    repository = _prepare_v2(tmp_path, monkeypatch)
     base_plan = _plan()
 
     def v2_plan(bundle, context: VerificationContext, *, level: str) -> VerificationPlan:
@@ -1504,8 +1626,7 @@ def test_v2_selected_failure_remains_failed(
 def test_v2_finalize_never_starts_a_runner_and_conflicting_check_is_rejected(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
+    repository = _prepare_v2(tmp_path, monkeypatch)
 
     def unexpected(*_args, **_kwargs):
         raise AssertionError("finalize must not parse or execute a verification plan")
@@ -1598,8 +1719,7 @@ def test_evidence_write_failure_enters_failed(
 def test_ci_verification_writes_only_external_run_directory(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    repository = _prepare_verified_v1(tmp_path, monkeypatch)
     task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
     events_path = resolve_task_path(repository, "TASK-0001", "events.jsonl")
     evidence_path = resolve_task_path(repository, "TASK-0001", "evidence.json")
@@ -1652,9 +1772,7 @@ def test_v2_ci_replays_final_source_without_mutation_collection_or_task_writes(
     actor: str | None,
 ) -> None:
     """The V2 CI seam consumes only the finalized source projection."""
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
-    _enable_v2(repository)
+    repository = _prepare_verified_v2(tmp_path, monkeypatch)
     task_directory = resolve_task_path(repository, "TASK-0001")
     before = {
         path.relative_to(task_directory): path.read_bytes()
@@ -1811,9 +1929,7 @@ def test_v2_ci_replays_final_source_without_mutation_collection_or_task_writes(
 def test_v2_ci_rejects_missing_source_before_plan_or_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
-    _enable_v2(repository)
+    repository = _prepare_verified_v2(tmp_path, monkeypatch)
     resolve_task_path(repository, "TASK-0001", "evidence.json").unlink()
 
     def unexpected(*_args: object, **_kwargs: object) -> object:
@@ -1846,9 +1962,7 @@ def test_v2_ci_rejects_partial_invocation_before_source_plan_or_runner(
     check_ids: str,
     provisional: bool,
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
-    _enable_v2(repository)
+    repository = _prepare_verified_v2(tmp_path, monkeypatch)
 
     def unexpected(*_args: object, **_kwargs: object) -> object:
         raise AssertionError("partial V2 CI must stop before source, plan, or runner")
@@ -1883,9 +1997,7 @@ def test_v2_ci_rejects_nonfinal_source_before_plan_or_runner(
     field: str,
     value: str,
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
-    _enable_v2(repository)
+    repository = _prepare_verified_v2(tmp_path, monkeypatch)
     source = {
         "schema_version": "2.0",
         "verification_level": "V2",
@@ -1925,9 +2037,7 @@ def test_v2_ci_rejects_nonfinal_source_before_plan_or_runner(
 def test_v2_ci_rejects_actor_mismatch_before_consumer_plan_or_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
-    _enable_v2(repository)
+    repository = _prepare_verified_v2(tmp_path, monkeypatch)
     task_directory = resolve_task_path(repository, "TASK-0001")
     before = {path: path.read_bytes() for path in task_directory.rglob("*") if path.is_file()}
     source = {
@@ -1979,9 +2089,7 @@ def test_v2_ci_rejects_actor_mismatch_before_consumer_plan_or_runner(
 def test_v2_ci_rejects_stale_or_tampered_source_before_plan_or_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
-    _enable_v2(repository)
+    repository = _prepare_verified_v2(tmp_path, monkeypatch)
     source = {
         "schema_version": "2.0",
         "verification_level": "V2",
@@ -2046,9 +2154,7 @@ def test_v2_ci_rejects_stale_context_or_reviews_before_plan_or_runner(
     failure: str,
     expected: str,
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
-    _enable_v2(repository)
+    repository = _prepare_verified_v2(tmp_path, monkeypatch)
     source = {
         "schema_version": "2.0",
         "verification_level": "V2",
@@ -2125,9 +2231,7 @@ def test_v2_ci_real_consumer_rejects_tampered_log_before_plan_or_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Keep the CI seam on the public loader path for an actual artifact tamper."""
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
-    _enable_v2(repository)
+    repository = _prepare_verified_v2(tmp_path, monkeypatch)
     record = load_task_record(repository, "TASK-0001")
     manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
     record_id = "MUTRUN-20000101T000000Z-0000000000000000"
@@ -2262,8 +2366,7 @@ def test_v2_ci_real_consumer_rejects_tampered_log_before_plan_or_runner(
 def test_ci_requires_temp_run_dir_and_contained_output(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    _prepare_verified_v1(tmp_path, monkeypatch)
     assert main(["verify", "TASK-0001", "--ci"]) == 1
     outside = tmp_path / "outside.json"
     run_dir = tmp_path / "ci-run"
@@ -2304,16 +2407,7 @@ def _governance_snapshot(repository: Path) -> dict[str, bytes]:
 
 def _interrupted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Leave TASK-0001 in VERIFYING the way a killed verification process does."""
-    repository = _prepare(tmp_path, monkeypatch)
-
-    def _killed(*_args: object, **_kwargs: object) -> list[object]:
-        raise KeyboardInterrupt
-
-    monkeypatch.setattr(verification_service, "_execute_plan", _killed)
-    with pytest.raises(KeyboardInterrupt):
-        main(["verify", "TASK-0001", "--actor", "implementer"])
-    assert load_task_record(repository, "TASK-0001").task["current_state"] == "VERIFYING"
-    return repository
+    return _clone_seed(tmp_path, monkeypatch, "interrupted")
 
 
 def test_abandon_records_interrupted_run_then_allows_retry(
@@ -2460,8 +2554,7 @@ def test_actual_implementation_review_context_has_default_verification_recipe(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Exercise the real context consumer with the existing short runner seam."""
-    repository = _prepare(tmp_path, monkeypatch)
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    repository = _prepare_verified_v1(tmp_path, monkeypatch)
     context = build_review_context(repository, "TASK-0001", "implementation")
     recipe = context["content"]["verification_summary"]["reproduce_command"]
     assert recipe == ["python", "-m", "aiflow", "verify", "TASK-0001", "--actor", "verifier"]

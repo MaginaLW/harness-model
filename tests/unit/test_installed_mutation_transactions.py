@@ -10,10 +10,14 @@ Actual installed-wheel execution remains in the Windows integration suite.
 from __future__ import annotations
 
 import ast
+import atexit
 import builtins
+import hashlib
 import io
+import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -26,6 +30,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from threading import Barrier, local
 from types import ModuleType, SimpleNamespace
+from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -156,16 +161,134 @@ class Model:
     material_collector: Callable
 
 
-_MODEL_SEEDS: dict[str, tuple[tempfile.TemporaryDirectory[str], dict[str, object]]] = {}
+@dataclass(frozen=True)
+class _SeedVariant:
+    task_root: Path
+    logical_run_task_root: Path
+    verifier_context: dict[str, Any]
+    inputs: runtime.InstalledMutationInputs
+    input_document: dict[str, Any]
+    action_use: dict[str, Any]
+    root_snapshot: dict[str, Any]
 
 
-def _build_model_seed(variant: str) -> tuple[tempfile.TemporaryDirectory[str], dict[str, object]]:
-    seed_dir = tempfile.TemporaryDirectory(prefix="aiflow-model-seed-", ignore_cleanup_errors=True)
-    seed_base = Path(seed_dir.name)
+@dataclass(frozen=True)
+class _ModelSeedBundle:
+    seed_root: Path
+    engine_prefix: Path
+    base_prefix: Path
+    material: dict[str, Any]
+    material_bytes: bytes
+    policy_seed: Path
+    policy_bytes: bytes
+    policy_sha256: str
+    variants: dict[str, _SeedVariant]
+    baseline_digest: str
+
+
+def _seed_tree_digest(root: Path) -> str:
+    """Hash every directory and file under a read-only module seed without following links."""
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    entries: list[list[object]] = []
+    for directory, directories, filenames in os.walk(root, followlinks=False):
+        directories.sort()
+        filenames.sort()
+        for name in (*directories, *filenames):
+            path = Path(directory) / name
+            info = path.lstat()
+            relative = path.relative_to(root).as_posix()
+            assert not stat.S_ISLNK(info.st_mode), f"Unexpected link in module seed: {relative}"
+            assert not getattr(info, "st_file_attributes", 0) & reparse_flag, (
+                f"Unexpected reparse point in module seed: {relative}"
+            )
+            if stat.S_ISDIR(info.st_mode):
+                entries.append(["dir", relative])
+            else:
+                assert stat.S_ISREG(info.st_mode), f"Unexpected non-regular seed file: {relative}"
+                assert info.st_nlink == 1, f"Unexpected hardlink in module seed: {relative}"
+                data = path.read_bytes()
+                entries.append(["file", relative, len(data), hashlib.sha256(data).hexdigest()])
+    entries.sort(key=lambda item: (str(item[1]), str(item[0])))
+    return hashlib.sha256(json.dumps(entries, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def _build_engine_seed(seed_root: Path) -> tuple[Path, Path, dict[str, Any], bytes]:
+    prefix, base = seed_root / "e", seed_root / "b"
+    site = prefix / "Lib/site-packages/aiflow"
+    site.mkdir(parents=True)
+    for name in (
+        "__init__.py",
+        "policy.py",
+        "verifier_service.py",
+        "approval.py",
+        "gate.py",
+        "evidence.py",
+        "errors.py",
+        "installed_probe.py",
+        "installed_mutations.py",
+    ):
+        shutil.copyfile(ROOT / "src/aiflow" / name, site / name)
+    (prefix / "Scripts").mkdir()
+    base.mkdir()
+    for path in (prefix / "Scripts/python.exe", base / "python.exe", base / "python311.dll"):
+        path.write_bytes(b"public fixture, not an executable\n")
+    interpreter = dict(
+        executable=runtime._file(prefix / "Scripts/python.exe"),
+        base_executable=runtime._file(base / "python.exe"),
+        runtime=runtime._file(base / "python311.dll"),
+        prefix=str(prefix),
+        site=str(site.parent),
+        base_prefix=str(base),
+        implementation="cpython",
+        version=[3, 11, 0],
+        cache_tag="cpython-311",
+    )
+    material = dict(
+        kind=runtime.ACTION_TYPE,
+        version=1,
+        engine={"installed": {}, "closure": node._inventory(prefix)},
+        interpreter=interpreter,
+        host_tools={},
+        probes=runtime._probe_contract(),
+        operators={},
+    )
+    return prefix, base, material, node._canonical(material)
+
+
+def _write_action_file(
+    root: Path, inputs: runtime.InstalledMutationInputs, *, approved: bool, suffix: str
+) -> Path:
+    action = dict(
+        action_type=runtime.ACTION_TYPE,
+        target=TASK,
+        parameter_summary=runtime._summary(inputs),
+        decision_unit_id="DU-001",
+        classification_input_sha256=inputs.classification_input_sha256,
+        subject_commit=inputs.subject_commit,
+        conditions=["Synthetic fixture only", suffix],
+        expires_at=(datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+        single_use=True,
+    )
+    path = resolve_task_path(root, TASK, "action-installed-engine-mutation-" + suffix + ".json")
+    put_json(path, action)
+    if approved:
+        approve_task(
+            root,
+            TASK,
+            approval_type="action",
+            actor="project-owner",
+            reason="Logical temporary fixture; never authorizes host execution",
+            action_file=path,
+        )
+    return path
+
+
+def _create_task_seed_repo(seed_base: Path, variant: str) -> tuple[Path, dict[str, Any]]:
+    seed_base.mkdir(parents=True, exist_ok=True)
     root = seed_base / "task"
     root.mkdir()
     for name in ("policy", "schemas", "templates"):
-        shutil.copytree(ROOT / ".ai" / name, root / ".ai" / name)
+        shutil.copytree(ROOT / ".ai" / name, root / ".ai" / name, copy_function=shutil.copyfile)
     if variant == "node-v2":
         import yaml
         from test_node_v2_contract import node_documents
@@ -254,16 +377,102 @@ def _build_model_seed(variant: str) -> tuple[tempfile.TemporaryDirectory[str], d
     begin_task(root, TASK, actor="fixture-implementer")
     verifier_context = build_verifier_context(root, TASK)
     save_verifier_context(root, TASK, verifier_context)
+    return root, verifier_context
+
+
+def _build_model_seed(variant: str) -> tuple[tempfile.TemporaryDirectory[str], dict[str, Any]]:
+    seed_dir = tempfile.TemporaryDirectory(prefix="aiflow-model-seed-", ignore_cleanup_errors=True)
+    _, verifier_context = _create_task_seed_repo(Path(seed_dir.name), variant)
     return seed_dir, verifier_context
 
 
-@pytest.fixture
-def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[Model]:
-    recorder, process_writer, material_collector = (
-        runtime.record_installed_mutations,
-        node._process,
-        runtime._materials,
+def _build_seed_variant(seed_root: Path, variant: str, material_bytes: bytes) -> _SeedVariant:
+    seed_base = seed_root / ("n" if variant == "node-v2" else "d")
+    root, verifier_context = _create_task_seed_repo(seed_base, variant)
+    with patch.object(runtime, "_materials", lambda: material_bytes):
+        inputs = runtime.prepare_installed_mutations(root, TASK, verifier_actor=ACTOR)
+        lr_root = seed_base / "lr"
+        shutil.copytree(root, lr_root, copy_function=shutil.copyfile)
+        subprocess.run(
+            ["git", "-c", "core.fsmonitor=false", "update-index", "--refresh", "-q"],
+            cwd=lr_root,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        _write_action_file(lr_root, inputs, approved=True, suffix="fixture")
+        run = resolve_task_path(lr_root, TASK, "logs") / ("IMUT-" + "0" * 16)
+        use = runtime._consume_action(lr_root, inputs, run.relative_to(lr_root).as_posix())
+        run.mkdir()
+        put_json(run / "context.json", verifier_context)
+        for index in range(5):
+            (run / str(index) / "b").mkdir(parents=True)
+            (run / str(index) / "m").mkdir()
+        root_snapshot = node._root_snapshot(lr_root, TASK, run)
+        input_document = runtime._input_document(inputs)
+    return _SeedVariant(root, lr_root, verifier_context, inputs, input_document, use, root_snapshot)
+
+
+_SEED_BUNDLE_CACHE: list[_ModelSeedBundle] = []
+_GUARDED_MODULES: set[int] = set()
+
+
+def _verify_seed_bundle_immutability(bundle: _ModelSeedBundle) -> None:
+    assert _seed_tree_digest(bundle.seed_root) == bundle.baseline_digest, (
+        "Module-scoped read-only seed was modified during tests"
     )
+    assert hashlib.sha256(POLICY_SOURCE.read_bytes()).hexdigest() == bundle.policy_sha256, (
+        "Mutation touched the original Policy module"
+    )
+
+
+def _get_model_seed_bundle(request: pytest.FixtureRequest | None = None) -> _ModelSeedBundle:
+    if not _SEED_BUNDLE_CACHE:
+        seed_dir = tempfile.TemporaryDirectory(prefix="mt-", ignore_cleanup_errors=True)
+        atexit.register(seed_dir.cleanup)
+        seed_root = Path(seed_dir.name)
+        prefix, base, material, material_bytes = _build_engine_seed(seed_root)
+        policy_bytes = POLICY_SOURCE.read_bytes()
+        policy_sha256 = hashlib.sha256(policy_bytes).hexdigest()
+        policy_seed = seed_root / "policy.py"
+        shutil.copyfile(POLICY_SOURCE, policy_seed)
+        variants = {
+            variant: _build_seed_variant(seed_root, variant, material_bytes)
+            for variant in ("default", "node-v2")
+        }
+        _SEED_BUNDLE_CACHE.append(
+            _ModelSeedBundle(
+                seed_root=seed_root,
+                engine_prefix=prefix,
+                base_prefix=base,
+                material=material,
+                material_bytes=material_bytes,
+                policy_seed=policy_seed,
+                policy_bytes=policy_bytes,
+                policy_sha256=policy_sha256,
+                variants=variants,
+                baseline_digest=_seed_tree_digest(seed_root),
+            )
+        )
+    bundle = _SEED_BUNDLE_CACHE[0]
+    if request is not None:
+        module_node = request.node.getparent(pytest.Module)
+        if module_node is not None and id(module_node) not in _GUARDED_MODULES:
+            _GUARDED_MODULES.add(id(module_node))
+            module_node.addfinalizer(lambda: _verify_seed_bundle_immutability(bundle))
+    return bundle
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _model_seed_immutability_guard(request: pytest.FixtureRequest) -> Iterator[None]:
+    bundle = _get_model_seed_bundle(request)
+    try:
+        yield
+    finally:
+        _verify_seed_bundle_immutability(bundle)
+
+
+def _install_no_execution_guards(monkeypatch: pytest.MonkeyPatch) -> list[str]:
     attempts: list[str] = []
 
     def no_execution(*args, **kwargs):
@@ -293,11 +502,28 @@ def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[
     ):
         for name in names:
             monkeypatch.setattr(module, name, no_execution)
+    return attempts
+
+
+@pytest.fixture
+def model(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    request: pytest.FixtureRequest,
+) -> Iterator[Model]:
+    seed_bundle = _get_model_seed_bundle(request)
+    recorder, process_writer, material_collector = (
+        runtime.record_installed_mutations,
+        node._process,
+        runtime._materials,
+    )
+    attempts = _install_no_execution_guards(monkeypatch)
     variant = "node-v2" if getattr(request, "param", None) == "node-v2" else "default"
-    if variant not in _MODEL_SEEDS:
-        _MODEL_SEEDS[variant] = _build_model_seed(variant)
-    seed_dir, seed_verifier_context = _MODEL_SEEDS[variant]
-    root = Path(shutil.copytree(Path(seed_dir.name) / "task", tmp_path / "task"))
+    seed = seed_bundle.variants[variant]
+    source_root = (
+        seed.logical_run_task_root if "logical_run" in request.fixturenames else seed.task_root
+    )
+    root = Path(shutil.copytree(source_root, tmp_path / "task", copy_function=shutil.copyfile))
     subprocess.run(
         ["git", "-c", "core.fsmonitor=false", "update-index", "--refresh", "-q"],
         cwd=root,
@@ -305,84 +531,19 @@ def model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request) -> Iterator[
         check=False,
         timeout=10,
     )
-    verifier_context = deepcopy(seed_verifier_context)
-
-    # The sole positive host seam: ordinary fixture files instead of Windows
-    # interpreter/distribution discovery. No probe or process result is supplied.
-    prefix, base = tmp_path / "engine", tmp_path / "base"
-    site = prefix / "Lib/site-packages/aiflow"
-    site.mkdir(parents=True)
-    for name in (
-        "__init__.py",
-        "policy.py",
-        "verifier_service.py",
-        "approval.py",
-        "gate.py",
-        "evidence.py",
-        "errors.py",
-        "installed_probe.py",
-        "installed_mutations.py",
-    ):
-        shutil.copyfile(ROOT / "src/aiflow" / name, site / name)
-    (prefix / "Scripts").mkdir()
-    base.mkdir()
-    for path in (prefix / "Scripts/python.exe", base / "python.exe", base / "python311.dll"):
-        path.write_bytes(b"public fixture, not an executable\n")
-    interpreter = dict(
-        executable=runtime._file(prefix / "Scripts/python.exe"),
-        base_executable=runtime._file(base / "python.exe"),
-        runtime=runtime._file(base / "python311.dll"),
-        prefix=str(prefix),
-        site=str(site.parent),
-        base_prefix=str(base),
-        implementation="cpython",
-        version=[3, 11, 0],
-        cache_tag="cpython-311",
-    )
-    material = dict(
-        kind=runtime.ACTION_TYPE,
-        version=1,
-        engine={"installed": {}, "closure": node._inventory(prefix)},
-        interpreter=interpreter,
-        host_tools={},
-        probes=runtime._probe_contract(),
-        operators={},
-    )
-    monkeypatch.setattr(runtime, "_materials", lambda: node._canonical(material))
+    verifier_context = deepcopy(seed.verifier_context)
+    material = deepcopy(seed_bundle.material)
+    material_bytes = seed_bundle.material_bytes
+    monkeypatch.setattr(runtime, "_materials", lambda: material_bytes)
     monkeypatch.setattr(node, "_windows_root", lambda: tmp_path / "public-windows-role")
-    inputs = runtime.prepare_installed_mutations(root, TASK, verifier_actor=ACTOR)
     yield Model(
-        root, inputs, verifier_context, material, recorder, process_writer, material_collector
+        root, seed.inputs, verifier_context, material, recorder, process_writer, material_collector
     )
     assert not attempts, "a caught launch attempt must not make a logical test pass"
 
 
 def action_file(model: Model, *, approved: bool = True, suffix: str = "fixture") -> Path:
-    action = dict(
-        action_type=runtime.ACTION_TYPE,
-        target=TASK,
-        parameter_summary=runtime._summary(model.inputs),
-        decision_unit_id="DU-001",
-        classification_input_sha256=model.inputs.classification_input_sha256,
-        subject_commit=model.inputs.subject_commit,
-        conditions=["Synthetic fixture only", suffix],
-        expires_at=(datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
-        single_use=True,
-    )
-    path = resolve_task_path(
-        model.root, TASK, "action-installed-engine-mutation-" + suffix + ".json"
-    )
-    put_json(path, action)
-    if approved:
-        approve_task(
-            model.root,
-            TASK,
-            approval_type="action",
-            actor="project-owner",
-            reason="Logical temporary fixture; never authorizes host execution",
-            action_file=path,
-        )
-    return path
+    return _write_action_file(model.root, model.inputs, approved=approved, suffix=suffix)
 
 
 def test_prepare_uses_real_git_without_consumption_or_target_writes(model: Model) -> None:
@@ -624,11 +785,93 @@ class LogicalRun:
     reference: runtime.InstalledMutationReference
 
 
+def _rebind_root_snapshot(
+    seed_snapshot: dict[str, Any], root: Path, run: Path, last_event: dict[str, Any]
+) -> dict[str, Any]:
+    git_dir = root / ".git"
+    rows: list[dict[str, Any]] = []
+    pending = [root]
+    while pending:
+        path = pending.pop()
+        if path == run:
+            continue
+        identity = node._metadata_identity(path)
+        rows.append({"path": str(path), "identity": identity})
+        if stat.S_ISDIR(identity["mode"]):
+            with os.scandir(path) as children:
+                pending.extend(Path(child.path) for child in children)
+    rows.sort(key=lambda row: row["path"].encode("utf-8"))
+    events = deepcopy(seed_snapshot["events"])
+    events[-1] = last_event
+    seed_git = Path(seed_snapshot["git_audit"]["git"])
+    return {
+        "identity": node._identity(node._safe_info(root, directory=True)),
+        "git": {
+            **seed_snapshot["git"],
+            "index_sha256": node._sha(node._read(git_dir / "index")),
+            "git_directory": str(git_dir),
+        },
+        "files": [
+            {**row, "identity": node._identity(node._safe_info(root / row["path"]))}
+            for row in seed_snapshot["files"]
+        ],
+        "task": deepcopy(seed_snapshot["task"]),
+        "events": events,
+        "governance": deepcopy(seed_snapshot["governance"]),
+        "metadata": rows,
+        "git_audit": {
+            "git": str(git_dir),
+            "common": str(git_dir),
+            "ref": seed_snapshot["git_audit"]["ref"],
+            "logs": {
+                str(git_dir / Path(path).relative_to(seed_git)): deepcopy(info)
+                for path, info in seed_snapshot["git_audit"]["logs"].items()
+            },
+        },
+    }
+
+
 @pytest.fixture
 def logical_run(model: Model) -> LogicalRun:
     """A closed failure record with no probe reports and no claimed Job execution."""
-    action_file(model)
-    return retained_logical_run(model)
+    seed_bundle = _get_model_seed_bundle()
+    seed = next(
+        variant for variant in seed_bundle.variants.values() if variant.inputs == model.inputs
+    )
+    run = resolve_task_path(model.root, TASK, "logs") / ("IMUT-" + "0" * 16)
+    assert run.is_dir()
+    seed_use = seed.action_use
+    digest = seed_use["digest"]
+    logs = resolve_task_path(model.root, TASK, "logs")
+    receipt_path = logs / f"installed-action-use-{digest}.json"
+    claim_path = logs / f"installed-action-launch-{digest}.json"
+    receipt_file = runtime._file(receipt_path)
+    claim = node._json(claim_path)
+    claim["receipt_identity"] = receipt_file["identity"]
+    put_json(claim_path, claim)
+    events_path = resolve_task_path(model.root, TASK, "events.jsonl")
+    event_lines = events_path.read_text(encoding="utf8").splitlines()
+    last_event = json.loads(event_lines[-1])
+    last_event["payload"]["receipt_device"] = receipt_file["identity"]["device"]
+    last_event["payload"]["receipt_inode"] = receipt_file["identity"]["inode"]
+    event_lines[-1] = json.dumps(last_event, ensure_ascii=False, sort_keys=True)
+    events_path.write_text("\n".join(event_lines) + "\n", encoding="utf8")
+    use = {**seed_use, "receipt": receipt_file, "claim": runtime._file(claim_path)}
+    snapshot = _rebind_root_snapshot(seed.root_snapshot, model.root, run, last_event)
+    document = dict(
+        kind="installed-mutation-run-v1",
+        version=1,
+        inputs=deepcopy(seed.input_document),
+        action=use,
+        before=snapshot,
+        after=snapshot,
+        pairs=[
+            dict(id=probe, overlay=None, baseline=None, mutant=None) for probe in runtime.PROBE_IDS
+        ],
+        failure="FIXTURE_NO_EXECUTION",
+    )
+    reference = rewrite_run(run / "run.json", document, model.inputs)
+    return LogicalRun(model, run / "run.json", reference)
 
 
 def retained_logical_run(model: Model) -> LogicalRun:
@@ -1222,20 +1465,26 @@ class PhaseFixture:
 
 
 @pytest.fixture
-def phase_fixture(model: Model, tmp_path: Path) -> PhaseFixture:
+def phase_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[PhaseFixture]:
     """Exact parser input files, not an assertion that their synthetic Job ran."""
-    return parser_phase(model, tmp_path / "parser-phase", PROBE)
+    seed_bundle = _get_model_seed_bundle()
+    attempts = _install_no_execution_guards(monkeypatch)
+    monkeypatch.setattr(runtime, "_materials", lambda: seed_bundle.material_bytes)
+    monkeypatch.setattr(node, "_windows_root", lambda: tmp_path / "public-windows-role")
+    yield parser_phase(deepcopy(seed_bundle.material), tmp_path / "parser-phase", PROBE)
+    assert not attempts, "a caught launch attempt must not make a logical test pass"
 
 
 def parser_phase(
-    model: Model, phase: Path, probe_id: str, *, stage=None, mutant=False
+    model: Model | dict[str, Any], phase: Path, probe_id: str, *, stage=None, mutant=False
 ) -> PhaseFixture:
+    materials = model.materials if isinstance(model, Model) else model
     if stage is None:
         phase.mkdir()
         closure = node._copy_tree(
-            Path(model.materials["engine"]["closure"]["root"]),
+            Path(materials["engine"]["closure"]["root"]),
             phase / "i",
-            model.materials["engine"]["closure"],
+            materials["engine"]["closure"],
         )
         for name in ("c", "t", "h"):
             (phase / name).mkdir()
@@ -1255,14 +1504,14 @@ def parser_phase(
                 observed=observation,
                 exception=None,
             )
-            for case_id, observation in model.materials["probes"]["cases"][probe_id]
+            for case_id, observation in materials["probes"]["cases"][probe_id]
         ],
     )
     if mutant:
-        anchor = model.materials["probes"]["anchors"][probe_id]
+        anchor = materials["probes"]["anchors"][probe_id]
         report["cases"][-1].update(
             call="failed",
-            observed=model.materials["probes"]["mutant_observations"][probe_id],
+            observed=materials["probes"]["mutant_observations"][probe_id],
             exception=dict(
                 type="AssertionError",
                 message="synthetic classifier input only",
@@ -1291,7 +1540,7 @@ def parser_phase(
     ):
         row = files[relative]
         loaded.append(dict(name=name, path=relative, size=row["size"], sha256=row["sha256"]))
-    interpreter = model.materials["interpreter"]
+    interpreter = materials["interpreter"]
     outer = dict(
         kind="installed-probe-execution-v1",
         probe=report,
@@ -1337,7 +1586,7 @@ def parser_phase(
         stderr_sha256=node._sha(b""),
         stdout_size=len(raw),
         stderr_size=0,
-        argv=list(runtime._argv(phase, probe_id, model.materials)),
+        argv=list(runtime._argv(phase, probe_id, materials)),
         cwd=str(phase),
         environment_sha256=node._sha(node._canonical(runtime._environment(phase, interpreter))),
         timeout_seconds=60,
@@ -1350,7 +1599,7 @@ def parser_phase(
     (phase / "raw/stderr.log").write_bytes(b"")
     put_json(phase / "raw/receipt.json", receipt)
     put_json(phase / "report.json", outer)
-    return PhaseFixture(phase, stage, model.materials, report)
+    return PhaseFixture(phase, stage, materials, report)
 
 
 def test_closed_report_parser_reads_valid_synthetic_protocol_without_side_effects(
@@ -1828,12 +2077,14 @@ NODE_COMPARISON = ast.parse(
 
 
 @pytest.fixture
-def copied_policy(tmp_path: Path):
-    original = POLICY_SOURCE.read_bytes()
+def copied_policy(tmp_path: Path) -> Iterator[Path]:
+    seed_bundle = _get_model_seed_bundle()
     path = tmp_path / "policy.py"
-    path.write_bytes(original)
+    shutil.copyfile(seed_bundle.policy_seed, path)
     yield path
-    assert POLICY_SOURCE.read_bytes() == original, "Mutation touched the original Policy module"
+    assert POLICY_SOURCE.read_bytes() == seed_bundle.policy_bytes, (
+        "Mutation touched the original Policy module"
+    )
 
 
 def _target(tree: ast.Module) -> ast.FunctionDef:

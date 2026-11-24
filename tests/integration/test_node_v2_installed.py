@@ -12,8 +12,13 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
+import stat
+import subprocess
 import sys
-from dataclasses import asdict
+from collections.abc import Iterator
+from copy import deepcopy
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -26,9 +31,13 @@ try:
     sys.path.insert(0, str(ROOT / "tests/unit"))
     from test_installed_mutation_transactions import (
         ACTOR,
+        OS_PROCESS_APIS,
         TASK,
-        logical_run,  # noqa: F401 -- Shared real task/Git and failure-original fixture.
-        model,  # noqa: F401 -- Shared material-discovery seam, never probe execution.
+        LogicalRun,
+        Model,
+        _build_model_seed,
+        action_file,
+        retained_logical_run,
         snapshot_tree,
     )
     from test_node_v2_evidence import public_node_evidence
@@ -37,10 +46,316 @@ finally:
 
 import aiflow.installed_mutations as installed
 import aiflow.node_execution as node
+import aiflow.process_runner as processes
 from aiflow.errors import AiflowError
 from aiflow.verification import VerificationContext
 
 RUN = "IMUT-0123456789abcdef"
+_SEED_ENGINE_MODULES = (
+    "__init__.py",
+    "policy.py",
+    "verifier_service.py",
+    "approval.py",
+    "gate.py",
+    "evidence.py",
+    "errors.py",
+    "installed_probe.py",
+    "installed_mutations.py",
+)
+
+
+def _seed_manifest(root: Path) -> tuple[tuple[str, int, str], ...]:
+    """Snapshot regular-file SHA-256 digests and reject link/reparse drift."""
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    entries: list[tuple[str, int, str]] = []
+    for current_dir, dirnames, filenames in os.walk(root, followlinks=False):
+        dirnames.sort()
+        filenames.sort()
+        current_path = Path(current_dir)
+        for name in dirnames:
+            entry = current_path / name
+            info = entry.lstat()
+            assert not stat.S_ISLNK(info.st_mode), f"seed symlink directory: {entry}"
+            assert not getattr(info, "st_file_attributes", 0) & reparse_flag, (
+                f"seed reparse directory: {entry}"
+            )
+            entries.append((entry.relative_to(root).as_posix() + "/", -1, "dir"))
+        for name in filenames:
+            entry = current_path / name
+            info = entry.lstat()
+            assert not stat.S_ISLNK(info.st_mode), f"seed symlink file: {entry}"
+            assert not getattr(info, "st_file_attributes", 0) & reparse_flag, (
+                f"seed reparse file: {entry}"
+            )
+            assert info.st_nlink == 1, f"seed hardlink file (st_nlink={info.st_nlink}): {entry}"
+            entries.append(
+                (
+                    entry.relative_to(root).as_posix(),
+                    info.st_size,
+                    hashlib.sha256(entry.read_bytes()).hexdigest(),
+                )
+            )
+    entries.sort()
+    return tuple(entries)
+
+
+@dataclass(frozen=True)
+class _NodeV2Seed:
+    root: Path
+    engine_dir: Path
+    base_dir: Path
+    task_dir: Path
+    inputs: installed.InstalledMutationInputs
+    verifier_context: dict
+    material: dict
+    material_bytes: bytes
+    reference: installed.InstalledMutationReference
+    action_digest: str
+    git_audit_ref: str
+    git_audit_logs_rel: dict[str, dict[str, object]]
+    baseline_manifest: tuple[tuple[str, int, str], ...]
+
+    def assert_untouched(self) -> None:
+        assert _seed_manifest(self.root) == self.baseline_manifest, (
+            "shared module-scoped node-v2 seed was modified"
+        )
+
+
+def _collect_root_metadata(root: Path, owned_run: Path) -> list[dict[str, object]]:
+    """Collect real metadata identities without spawning git rev-parse per clone."""
+    rows: list[dict[str, object]] = []
+    pending = [root]
+    while pending:
+        path = pending.pop()
+        if path == owned_run:
+            continue
+        identity = node._metadata_identity(path)
+        rows.append({"path": str(path), "identity": identity})
+        if stat.S_ISDIR(identity["mode"]):
+            with os.scandir(path) as children:
+                pending.extend(Path(child.path) for child in children)
+    rows.sort(key=lambda row: str(row["path"]).encode("utf-8"))
+    return rows
+
+
+@pytest.fixture(scope="module")
+def _node_v2_seed(tmp_path_factory: pytest.TempPathFactory) -> Iterator[_NodeV2Seed]:
+    seed_root = tmp_path_factory.mktemp("node-v2-seed")
+    prefix = seed_root / "engine"
+    base = seed_root / "base"
+    site = prefix / "Lib/site-packages/aiflow"
+    site.mkdir(parents=True)
+    for name in _SEED_ENGINE_MODULES:
+        shutil.copyfile(ROOT / "src/aiflow" / name, site / name)
+    (prefix / "Scripts").mkdir()
+    base.mkdir()
+    for path in (prefix / "Scripts/python.exe", base / "python.exe", base / "python311.dll"):
+        path.write_bytes(b"public fixture, not an executable\n")
+    interpreter = dict(
+        executable=installed._file(prefix / "Scripts/python.exe"),
+        base_executable=installed._file(base / "python.exe"),
+        runtime=installed._file(base / "python311.dll"),
+        prefix=str(prefix),
+        site=str(site.parent),
+        base_prefix=str(base),
+        implementation="cpython",
+        version=[3, 11, 0],
+        cache_tag="cpython-311",
+    )
+    material = dict(
+        kind=installed.ACTION_TYPE,
+        version=1,
+        engine={"installed": {}, "closure": node._inventory(prefix)},
+        interpreter=interpreter,
+        host_tools={},
+        probes=installed._probe_contract(),
+        operators={},
+    )
+    material_bytes = node._canonical(material)
+
+    task_dir = seed_root / "task"
+    model_seed_dir, verifier_context = _build_model_seed("node-v2")
+    try:
+        shutil.copytree(Path(model_seed_dir.name) / "task", task_dir, copy_function=shutil.copyfile)
+    finally:
+        model_seed_dir.cleanup()
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(installed, "_materials", lambda: material_bytes)
+        mp.setattr(node, "_windows_root", lambda: seed_root / "public-windows-role")
+        inputs = installed.prepare_installed_mutations(task_dir, TASK, verifier_actor=ACTOR)
+        seed_model = Model(
+            task_dir,
+            inputs,
+            deepcopy(verifier_context),
+            material,
+            installed.record_installed_mutations,
+            node._process,
+            installed._materials,
+        )
+        action_file(seed_model)
+        seed_logical = retained_logical_run(seed_model)
+
+    run_doc = json.loads(seed_logical.path.read_bytes())
+    git_audit = run_doc["before"]["git_audit"]
+    seed_git_dir = Path(git_audit["git"])
+    assert seed_git_dir == task_dir / ".git" and Path(git_audit["common"]) == seed_git_dir
+    git_audit_logs_rel = {
+        Path(path_str).relative_to(seed_git_dir).as_posix(): value
+        for path_str, value in git_audit["logs"].items()
+    }
+    seed = _NodeV2Seed(
+        root=seed_root,
+        engine_dir=prefix,
+        base_dir=base,
+        task_dir=task_dir,
+        inputs=inputs,
+        verifier_context=verifier_context,
+        material=material,
+        material_bytes=material_bytes,
+        reference=seed_logical.reference,
+        action_digest=str(run_doc["action"]["digest"]),
+        git_audit_ref=str(git_audit["ref"]),
+        git_audit_logs_rel=git_audit_logs_rel,
+        baseline_manifest=_seed_manifest(seed_root),
+    )
+    yield seed
+    seed.assert_untouched()
+
+
+@pytest.fixture
+def model(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    request: pytest.FixtureRequest,
+    _node_v2_seed: _NodeV2Seed,
+) -> Iterator[Model]:
+    if getattr(request, "param", None) != "node-v2":
+        raise ValueError(f"Unsupported model variant: {getattr(request, 'param', None)!r}")
+    _node_v2_seed.assert_untouched()
+    recorder, process_writer, material_collector = (
+        installed.record_installed_mutations,
+        node._process,
+        installed._materials,
+    )
+    attempts: list[str] = []
+
+    def no_execution(*args, **kwargs):
+        attempts.append("record-or-probe")
+        raise AssertionError("portable logic fixture must not record or launch a probe")
+
+    actual_popen = subprocess.Popen
+
+    class GitOnlyPopen(actual_popen):
+        # Keep Popen a class: Windows asyncio subclasses it during cold imports.
+        def __init__(self, argv, *args, **kwargs):
+            if not isinstance(argv, (tuple, list)) or Path(argv[0]).name.casefold() not in {
+                "git",
+                "git.exe",
+            }:
+                no_execution(argv)
+            super().__init__(argv, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "Popen", GitOnlyPopen)
+    monkeypatch.setattr(installed, "record_installed_mutations", no_execution)
+    for name in OS_PROCESS_APIS:
+        if hasattr(os, name):
+            monkeypatch.setattr(os, name, no_execution)
+    for module, names in (
+        (node, ("run_node_process", "_process")),
+        (processes, ("run_node_process", "run_execution")),
+    ):
+        for name in names:
+            monkeypatch.setattr(module, name, no_execution)
+    monkeypatch.setattr(installed, "_materials", lambda: _node_v2_seed.material_bytes)
+    monkeypatch.setattr(node, "_windows_root", lambda: tmp_path / "public-windows-role")
+
+    root = tmp_path / "task"
+    shutil.copytree(_node_v2_seed.task_dir, root, copy_function=shutil.copyfile)
+    yield Model(
+        root,
+        _node_v2_seed.inputs,
+        deepcopy(_node_v2_seed.verifier_context),
+        deepcopy(_node_v2_seed.material),
+        recorder,
+        process_writer,
+        material_collector,
+    )
+    assert not attempts, "a caught launch attempt must not make a logical test pass"
+    _node_v2_seed.assert_untouched()
+
+
+@pytest.fixture
+def logical_run(model: Model, _node_v2_seed: _NodeV2Seed) -> LogicalRun:
+    """Clone the module-scoped closed failure record with bound local paths and identities."""
+    root = model.root
+    logs_dir = root / ".ai/tasks" / TASK / "logs"
+    receipt_path = logs_dir / f"installed-action-use-{_node_v2_seed.action_digest}.json"
+    claim_path = logs_dir / f"installed-action-launch-{_node_v2_seed.action_digest}.json"
+    receipt_identity = node._identity(node._safe_info(receipt_path))
+
+    claim_doc = json.loads(claim_path.read_bytes())
+    claim_doc["receipt_identity"] = receipt_identity
+    claim_bytes = node._canonical(claim_doc)
+    claim_path.write_bytes(claim_bytes)
+    claim_identity = node._identity(node._safe_info(claim_path))
+
+    events_path = root / ".ai/tasks" / TASK / "events.jsonl"
+    events = [
+        json.loads(line)
+        for line in events_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    events[-1]["payload"]["receipt_device"] = receipt_identity["device"]
+    events[-1]["payload"]["receipt_inode"] = receipt_identity["inode"]
+    events_path.write_bytes(
+        "".join(
+            json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n" for event in events
+        ).encode("utf-8")
+    )
+
+    run_dir = logs_dir / f"IMUT-{'0' * 16}"
+    run_path = run_dir / "run.json"
+    metadata = _collect_root_metadata(root, run_dir)
+    root_identity = node._identity(node._safe_info(root, directory=True))
+    git_dir_str = str(root / ".git")
+    git_audit = {
+        "git": git_dir_str,
+        "common": git_dir_str,
+        "ref": _node_v2_seed.git_audit_ref,
+        "logs": {
+            str(root / ".git" / rel): value
+            for rel, value in _node_v2_seed.git_audit_logs_rel.items()
+        },
+    }
+
+    run_doc = json.loads(run_path.read_bytes())
+    run_doc["action"]["receipt"]["path"] = str(receipt_path)
+    run_doc["action"]["receipt"]["identity"] = receipt_identity
+    run_doc["action"]["claim"]["path"] = str(claim_path)
+    run_doc["action"]["claim"]["size"] = len(claim_bytes)
+    run_doc["action"]["claim"]["sha256"] = node._sha(claim_bytes)
+    run_doc["action"]["claim"]["identity"] = claim_identity
+    for snapshot_key in ("before", "after"):
+        snapshot = run_doc[snapshot_key]
+        snapshot["identity"] = root_identity
+        snapshot["git"]["git_directory"] = git_dir_str
+        for row in snapshot["files"]:
+            row["identity"] = node._identity(node._safe_info(root / row["path"]))
+        snapshot["events"] = events
+        snapshot["metadata"] = metadata
+        snapshot["git_audit"] = git_audit
+    raw_run = node._canonical(run_doc)
+    run_path.write_bytes(raw_run)
+
+    reference = installed.InstalledMutationReference(
+        _node_v2_seed.reference.ref, len(raw_run), node._sha(raw_run)
+    )
+    completion_path = run_dir / "completion.json"
+    completion_doc = json.loads(completion_path.read_bytes())
+    completion_doc["reference"] = asdict(reference)
+    completion_path.write_bytes(node._canonical(completion_doc))
+    return LogicalRun(model, run_path, reference)
 
 
 @pytest.fixture
