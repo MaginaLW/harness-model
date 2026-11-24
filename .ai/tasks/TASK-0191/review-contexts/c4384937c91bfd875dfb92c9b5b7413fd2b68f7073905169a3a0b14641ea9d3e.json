@@ -1,0 +1,321 @@
+{
+  "base_commit": "c1037f503c3c53f35e2911468149fd05763fa2a3",
+  "branch": "codex/mutation-attribution-delivery",
+  "classification_input_sha256": "63030394cbf9d175db9e2f484d62f08fda8c34aa1c6347cd8026946928c2a774",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0191/**",
+      ".ai/schemas/mutation-evidence.schema.json",
+      "src/aiflow/mutation_evidence.py",
+      "src/aiflow/mutation_materials.py",
+      "src/aiflow/mutation_process.py",
+      "src/aiflow/mutation_protocol.py",
+      "src/aiflow/mutation_reporter.py",
+      "src/aiflow/mutation_runner.py",
+      "src/aiflow/process_runner.py",
+      "src/aiflow/verification_service.py",
+      "tests/e2e/test_phase_02_negative_self_hosting.py",
+      "tests/e2e/test_phase_02_self_hosting_scenario.py",
+      "tests/integration/test_mutation_runner_contract.py",
+      "tests/integration/test_verify_command.py",
+      "tests/mutation_evidence_helpers.py",
+      "tests/unit/test_mutation_evidence.py",
+      "tests/unit/test_mutation_runner.py",
+      "tests/unit/test_process_runner.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Deliver V2 mutation attribution engine, protocol, schema, and tests from PR 186 on main",
+        "impact_scope": [
+          ".ai/tasks/TASK-0191/**",
+          ".ai/schemas/mutation-evidence.schema.json",
+          "src/aiflow/mutation_evidence.py",
+          "src/aiflow/mutation_materials.py",
+          "src/aiflow/mutation_process.py",
+          "src/aiflow/mutation_protocol.py",
+          "src/aiflow/mutation_reporter.py",
+          "src/aiflow/mutation_runner.py",
+          "src/aiflow/process_runner.py",
+          "src/aiflow/verification_service.py",
+          "tests/e2e/test_phase_02_negative_self_hosting.py",
+          "tests/e2e/test_phase_02_self_hosting_scenario.py",
+          "tests/integration/test_mutation_runner_contract.py",
+          "tests/integration/test_verify_command.py",
+          "tests/mutation_evidence_helpers.py",
+          "tests/unit/test_mutation_evidence.py",
+          "tests/unit/test_mutation_runner.py",
+          "tests/unit/test_process_runner.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/schemas/mutation-evidence.schema.json",
+        ".ai/tasks/TASK-0191/approvals.json",
+        ".ai/tasks/TASK-0191/classification.json",
+        ".ai/tasks/TASK-0191/events.jsonl",
+        ".ai/tasks/TASK-0191/review-contexts/c8c84249f3e4247ca5722ba56899779da35b87c1c708fe171c0f78c982f01b96.json",
+        ".ai/tasks/TASK-0191/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0191/spec.md",
+        ".ai/tasks/TASK-0191/task.yaml",
+        "src/aiflow/mutation_evidence.py",
+        "src/aiflow/mutation_materials.py",
+        "src/aiflow/mutation_process.py",
+        "src/aiflow/mutation_protocol.py",
+        "src/aiflow/mutation_reporter.py",
+        "src/aiflow/mutation_runner.py",
+        "src/aiflow/process_runner.py",
+        "src/aiflow/verification_service.py",
+        "tests/e2e/test_phase_02_negative_self_hosting.py",
+        "tests/e2e/test_phase_02_self_hosting_scenario.py",
+        "tests/integration/test_mutation_runner_contract.py",
+        "tests/integration/test_verify_command.py",
+        "tests/mutation_evidence_helpers.py",
+        "tests/unit/test_mutation_evidence.py",
+        "tests/unit/test_mutation_runner.py",
+        "tests/unit/test_process_runner.py"
+      ],
+      "files": [
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 1,
+          "path": ".ai/schemas/mutation-evidence.schema.json"
+        },
+        {
+          "additions": 15,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0191/approvals.json"
+        },
+        {
+          "additions": 52,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0191/classification.json"
+        },
+        {
+          "additions": 8,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0191/events.jsonl"
+        },
+        {
+          "additions": 69,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0191/review-contexts/c8c84249f3e4247ca5722ba56899779da35b87c1c708fe171c0f78c982f01b96.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0191/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 66,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0191/spec.md"
+        },
+        {
+          "additions": 98,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0191/task.yaml"
+        },
+        {
+          "additions": 705,
+          "binary": false,
+          "deletions": 34,
+          "path": "src/aiflow/mutation_evidence.py"
+        },
+        {
+          "additions": 321,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/mutation_materials.py"
+        },
+        {
+          "additions": 168,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/mutation_process.py"
+        },
+        {
+          "additions": 205,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/mutation_protocol.py"
+        },
+        {
+          "additions": 468,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/mutation_reporter.py"
+        },
+        {
+          "additions": 270,
+          "binary": false,
+          "deletions": 138,
+          "path": "src/aiflow/mutation_runner.py"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/process_runner.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/verification_service.py"
+        },
+        {
+          "additions": 5,
+          "binary": false,
+          "deletions": 55,
+          "path": "tests/e2e/test_phase_02_negative_self_hosting.py"
+        },
+        {
+          "additions": 41,
+          "binary": false,
+          "deletions": 15,
+          "path": "tests/e2e/test_phase_02_self_hosting_scenario.py"
+        },
+        {
+          "additions": 51,
+          "binary": false,
+          "deletions": 7,
+          "path": "tests/integration/test_mutation_runner_contract.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 45,
+          "path": "tests/integration/test_verify_command.py"
+        },
+        {
+          "additions": 85,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/mutation_evidence_helpers.py"
+        },
+        {
+          "additions": 1081,
+          "binary": false,
+          "deletions": 24,
+          "path": "tests/unit/test_mutation_evidence.py"
+        },
+        {
+          "additions": 1135,
+          "binary": false,
+          "deletions": 132,
+          "path": "tests/unit/test_mutation_runner.py"
+        },
+        {
+          "additions": 30,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_process_runner.py"
+        }
+      ],
+      "totals": {
+        "additions": 4952,
+        "deletions": 456,
+        "files": 24
+      }
+    },
+    "goal": "Deliver V2 mutation attribution engine, protocol, schema, and tests from PR 186 on main",
+    "route": "REVIEW",
+    "verification_level": "V2",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0191",
+        "--actor",
+        "independent-verifier-track-a"
+      ],
+      "required_checks": [
+        {
+          "check_id": "acceptance",
+          "status": "passed"
+        },
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "independent_verifier",
+          "status": "passed"
+        },
+        {
+          "check_id": "integration",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "targeted_mutation",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V2"
+    }
+  },
+  "context_sha256": "c4384937c91bfd875dfb92c9b5b7413fd2b68f7073905169a3a0b14641ea9d3e",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "2.0",
+  "spec_sha256": "fd8bb94382f06fc9ef36ca0c8ea0c94ba9b9dd41dce24d23ee06a830f1f4dd55",
+  "subject_commit": "aa231effb973007ddb42b9c10bd8dad8f02f2729",
+  "task_id": "TASK-0191",
+  "verification_snapshot_sha256": "353ebecd8b9274729509222762f8203ec2cd7e16982d8032ab4074c2cee30a97"
+}
