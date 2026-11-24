@@ -1,0 +1,49 @@
+{
+  "base_commit": "ae5dc1aaaf80875efff96ee7610a1ca4c939bdd4",
+  "branch": "codex/governance-surface-and-tools-mypy-v2",
+  "classification_input_sha256": "f50127cb2fa47fd9032188828156e6cf32921631acb27b9eee9872a49fb69f98",
+  "content": {
+    "allowed_scope": [
+      ".ai/tasks/TASK-0190/**",
+      "pyproject.toml",
+      ".ai/policy/verification-levels.yaml",
+      ".ai/policy/hard-rules.yaml",
+      "AGENTS.md",
+      "tests/unit/test_policy.py",
+      "tests/integration/test_github_workflow.py",
+      "tests/integration/test_templates_and_policy.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add tools/ to strict mypy gate and add setup.py, MANIFEST.in, tools/hooks/** to governance surface",
+        "impact_scope": [
+          ".ai/tasks/TASK-0190/**",
+          "pyproject.toml",
+          ".ai/policy/verification-levels.yaml",
+          ".ai/policy/hard-rules.yaml",
+          "AGENTS.md",
+          "tests/unit/test_policy.py",
+          "tests/integration/test_github_workflow.py",
+          "tests/integration/test_templates_and_policy.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Add tools/ to strict mypy gate and add setup.py, MANIFEST.in, tools/hooks/** to governance surface",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "f6139a60524c66c29637ef3e3f51b59da188c533d08624b39360c80a6f58374d",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "b89905510c4b08b7ab5d115ddccfc7062b0a39a3eab547089265a1a002544e13",
+  "task_id": "TASK-0190"
+}
