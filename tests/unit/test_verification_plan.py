@@ -703,3 +703,198 @@ def test_missing_coverage_xml_is_deterministic(tmp_path: Path) -> None:
         parse_check_result(coverage, returncode=0, coverage_xml_exists=False).reason_code
         == "VERIFICATION_COVERAGE_XML_MISSING"
     )
+
+
+def _configure_portable_python_checks(
+    bundle: PolicyBundle,
+    *,
+    cov_target: str = "sample_pkg",
+    sources: tuple[str, ...] = ("src/sample_pkg",),
+) -> None:
+    source_args = [arg for source in sources for arg in ("--source", source)]
+    for level_id in ("V1", "V2"):
+        for item in checks(bundle, level_id):
+            if item["id"] in {
+                "unit_tests",
+                "regression_tests",
+                "coverage_xml",
+                "acceptance",
+                "integration",
+            }:
+                item["command"] = [
+                    "{python}",
+                    "-m",
+                    "pytest",
+                    f"--cov={cov_target}",
+                    "--cov-branch",
+                    "--cov-report=xml:{run_dir}/coverage.xml",
+                ]
+            elif item["id"] == "diff_coverage":
+                item["command"] = [
+                    "{python}",
+                    "-m",
+                    "aiflow.coverage_check",
+                    "--run-dir",
+                    "{run_dir}",
+                    "--base",
+                    "{base_commit}",
+                    *source_args,
+                ]
+
+
+@pytest.mark.parametrize("level", ["V1", "V2"])
+@pytest.mark.parametrize("cov_target", ["sample_pkg", "src/sample_pkg", "pkg.subpkg"])
+@pytest.mark.parametrize("sources", [(), ("src/mypkg",), ("src/pkg_a", "src/pkg_b")])
+def test_portable_python_coverage_and_diff_coverage_plans_are_accepted(
+    tmp_path: Path,
+    level: str,
+    cov_target: str,
+    sources: tuple[str, ...],
+) -> None:
+    bundle = bundle_copy()
+    _configure_portable_python_checks(bundle, cov_target=cov_target, sources=sources)
+    parsed = parse_verification_plan(
+        bundle, context(tmp_path), level=level, tool_available=lambda _argv: True
+    )
+    pytest_executions = [item for item in parsed.executions if "pytest" in item.argv]
+    assert len(pytest_executions) == 1
+    assert f"--cov={cov_target}" in pytest_executions[0].argv
+    diff_check = next(item for item in parsed.checks if item.check_id == "diff_coverage")
+    expected_tail = tuple(arg for source in sources for arg in ("--source", source))
+    assert diff_check.argv == (
+        sys.executable,
+        "-m",
+        "aiflow.coverage_check",
+        "--run-dir",
+        parsed.run_dir.as_posix(),
+        "--base",
+        "a" * 40,
+        *expected_tail,
+    )
+    assert diff_check.threshold == 90
+
+
+@pytest.mark.parametrize(
+    "unsafe_cov",
+    [
+        "",
+        "../bad",
+        "src/../bad",
+        "/abs/pkg",
+        "src/pkg/",
+        "src\\pkg",
+        "pkg bad",
+        "--flag",
+        "C:/pkg",
+    ],
+)
+def test_unsafe_pytest_cov_target_is_rejected(tmp_path: Path, unsafe_cov: str) -> None:
+    bundle = bundle_copy()
+    _configure_portable_python_checks(bundle, cov_target=unsafe_cov)
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level="V1", tool_available=lambda _argv: True
+        )
+    assert caught.value.code in {
+        "VERIFICATION_COMMAND_INVALID",
+        "VERIFICATION_COVERAGE_CONFIG_INVALID",
+    }
+
+
+@pytest.mark.parametrize(
+    ("level", "mismatch_check_id"),
+    [
+        ("V1", "coverage_xml"),
+        ("V1", "regression_tests"),
+        ("V2", "acceptance"),
+        ("V2", "integration"),
+    ],
+)
+def test_mismatched_pytest_cov_targets_in_same_level_are_rejected(
+    tmp_path: Path, level: str, mismatch_check_id: str
+) -> None:
+    bundle = bundle_copy()
+    _configure_portable_python_checks(bundle, cov_target="pkg_a")
+    target_levels = ("V1", "V2") if level == "V1" else ("V2",)
+    for target_level in target_levels:
+        item = next(
+            check for check in checks(bundle, target_level) if check["id"] == mismatch_check_id
+        )
+        item["command"][3] = "--cov=pkg_b"
+
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level=level, tool_available=lambda _argv: True
+        )
+    assert caught.value.code == "VERIFICATION_COVERAGE_CONFIG_INVALID"
+
+
+@pytest.mark.parametrize(
+    "unsafe_source",
+    [
+        "",
+        ".",
+        "..",
+        "../bad",
+        "src/../bad",
+        "/abs",
+        "src/",
+        r"src\pkg",
+        "C:/bad",
+        "src pkg",
+    ],
+)
+def test_portable_diff_coverage_rejects_unsafe_source_args(
+    tmp_path: Path, unsafe_source: str
+) -> None:
+    bundle = bundle_copy()
+    _configure_portable_python_checks(bundle, sources=(unsafe_source,))
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level="V1", tool_available=lambda _argv: True
+        )
+    expected = (
+        "VERIFICATION_COMMAND_INVALID"
+        if unsafe_source == ""
+        else "VERIFICATION_DIFF_COVERAGE_CONFIG_INVALID"
+    )
+    assert caught.value.code == expected
+
+
+@pytest.mark.parametrize(
+    ("trailing", "threshold"),
+    [
+        (["--source"], 90),
+        (["--other", "src/mypkg"], 90),
+        (["--fail-under", "0"], 90),
+        (["--source", "src/mypkg", "--base", "c" * 40], 90),
+        (["--source", "src/mypkg"], 85),
+        (["--source", "src/mypkg"], None),
+    ],
+)
+def test_portable_diff_coverage_rejects_malformed_flags_and_threshold_tampering(
+    tmp_path: Path, trailing: list[str], threshold: int | None
+) -> None:
+    bundle = bundle_copy()
+    _configure_portable_python_checks(bundle, sources=())
+    for level_id in ("V1", "V2"):
+        item = next(check for check in checks(bundle, level_id) if check["id"] == "diff_coverage")
+        item["command"].extend(trailing)
+        item["threshold"] = threshold
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level="V1", tool_available=lambda _argv: True
+        )
+    assert caught.value.code == "VERIFICATION_DIFF_COVERAGE_CONFIG_INVALID"
+
+
+def test_legacy_check_coverage_rejects_source_flag(tmp_path: Path) -> None:
+    bundle = bundle_copy()
+    for level_id in ("V1", "V2"):
+        item = next(check for check in checks(bundle, level_id) if check["id"] == "diff_coverage")
+        item["command"].extend(["--source", "src/aiflow"])
+    with pytest.raises(ContractError) as caught:
+        parse_verification_plan(
+            bundle, context(tmp_path), level="V1", tool_available=lambda _argv: True
+        )
+    assert caught.value.code == "VERIFICATION_DIFF_COVERAGE_CONFIG_INVALID"
