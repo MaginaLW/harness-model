@@ -7,8 +7,11 @@ ordinary-installation, process, product-test or completed Gate evidence.
 from __future__ import annotations
 
 import hashlib
+import shutil
+import stat
 import subprocess
 import sys
+from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
@@ -223,19 +226,82 @@ def _digest(value: object) -> str:
     return hashlib.sha256(_canonical(value)).hexdigest()
 
 
+_STATIC_EVIDENCE_SEED_ROOT: Path | None = None
+_STATIC_EVIDENCE_SEED_TREE_SHA: str | None = None
+_STATIC_PUBLIC_EVIDENCE_CACHE: dict[str, tuple[dict, str]] = {}
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _static_public_evidence_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _STATIC_EVIDENCE_SEED_ROOT, _STATIC_EVIDENCE_SEED_TREE_SHA
+    _STATIC_EVIDENCE_SEED_ROOT = tmp_path_factory.mktemp("node-v2-static-policy")
+    _STATIC_EVIDENCE_SEED_TREE_SHA = None
+    _STATIC_PUBLIC_EVIDENCE_CACHE.clear()
+    try:
+        yield
+        if _STATIC_EVIDENCE_SEED_TREE_SHA is not None:
+            assert _STATIC_EVIDENCE_SEED_ROOT is not None
+            assert _seed_tree_sha256(_STATIC_EVIDENCE_SEED_ROOT) == _STATIC_EVIDENCE_SEED_TREE_SHA
+        for level, (cached, expected_digest) in _STATIC_PUBLIC_EVIDENCE_CACHE.items():
+            assert _digest(cached) == expected_digest, (
+                f"Static public_node_evidence({level!r}) seed was mutated during test execution"
+            )
+    finally:
+        _STATIC_PUBLIC_EVIDENCE_CACHE.clear()
+        _STATIC_EVIDENCE_SEED_TREE_SHA = None
+        _STATIC_EVIDENCE_SEED_ROOT = None
+
+
+def _static_public_node_evidence(*, level: str = "V2") -> dict:
+    global _STATIC_EVIDENCE_SEED_TREE_SHA
+    entry = _STATIC_PUBLIC_EVIDENCE_CACHE.get(level)
+    if entry is None:
+        assert _STATIC_EVIDENCE_SEED_ROOT is not None
+        if _STATIC_EVIDENCE_SEED_TREE_SHA is None:
+            write_policy(_STATIC_EVIDENCE_SEED_ROOT, node_documents())
+            _STATIC_EVIDENCE_SEED_TREE_SHA = _seed_tree_sha256(_STATIC_EVIDENCE_SEED_ROOT)
+        evidence = public_node_evidence(_STATIC_EVIDENCE_SEED_ROOT, level=level)
+        entry = (evidence, _digest(evidence))
+        _STATIC_PUBLIC_EVIDENCE_CACHE[level] = entry
+    return deepcopy(entry[0])
+
+
 @pytest.fixture
 def public_node_v2(tmp_path):
-    write_policy(tmp_path, node_documents())
-    return public_node_evidence(tmp_path)
+    evidence = _static_public_node_evidence(level="V2")
+    assert _STATIC_EVIDENCE_SEED_ROOT is not None
+    shutil.copytree(
+        _STATIC_EVIDENCE_SEED_ROOT / ".ai",
+        tmp_path / ".ai",
+        copy_function=shutil.copyfile,
+    )
+    return evidence
 
 
 @pytest.mark.parametrize("level", ["V0", "V1"])
-def test_second_node_profile_lower_levels_preserve_disjoint_public_contract(tmp_path, level):
+def test_second_node_profile_lower_levels_preserve_disjoint_public_contract(level):
     from aiflow.contracts import require_valid_contract
     from aiflow.evidence import validate_node_evidence
 
-    write_policy(tmp_path, node_documents())
-    evidence = public_node_evidence(tmp_path, level=level)
+    evidence = _static_public_node_evidence(level=level)
     validate_node_evidence(evidence, require_passed=True)
     require_valid_contract("evidence", evidence)
     assert evidence["schema_version"] == "3.2"
@@ -257,14 +323,11 @@ def test_second_node_profile_lower_levels_preserve_disjoint_public_contract(tmp_
         ("conclusion", "provisional"),
     ],
 )
-def test_second_node_profile_lower_schema_rejects_ci_and_provisional_fields(
-    tmp_path, level, field, value
-):
+def test_second_node_profile_lower_schema_rejects_ci_and_provisional_fields(level, field, value):
     from aiflow.contracts import require_valid_contract
     from aiflow.evidence import validate_node_evidence
 
-    write_policy(tmp_path, node_documents())
-    evidence = public_node_evidence(tmp_path, level=level)
+    evidence = _static_public_node_evidence(level=level)
     require_valid_contract("evidence", evidence)
     validate_node_evidence(evidence)
     evidence[field] = value
