@@ -1,0 +1,98 @@
+allowed_scope:
+- .ai/tasks/TASK-0191/**
+- .ai/schemas/mutation-evidence.schema.json
+- src/aiflow/mutation_evidence.py
+- src/aiflow/mutation_materials.py
+- src/aiflow/mutation_process.py
+- src/aiflow/mutation_protocol.py
+- src/aiflow/mutation_reporter.py
+- src/aiflow/mutation_runner.py
+- src/aiflow/process_runner.py
+- src/aiflow/verification_service.py
+- tests/e2e/test_phase_02_negative_self_hosting.py
+- tests/e2e/test_phase_02_self_hosting_scenario.py
+- tests/integration/test_mutation_runner_contract.py
+- tests/integration/test_verify_command.py
+- tests/mutation_evidence_helpers.py
+- tests/unit/test_mutation_evidence.py
+- tests/unit/test_mutation_runner.py
+- tests/unit/test_process_runner.py
+base_commit: c1037f503c3c53f35e2911468149fd05763fa2a3
+branch: codex/mutation-attribution-delivery
+created_at: '2026-11-24T20:54:59Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Deliver V2 mutation attribution engine, protocol, schema, and tests from PR
+    186 on main
+  impact:
+    level: high
+  impact_categories: []
+  impact_scope:
+  - .ai/tasks/TASK-0191/**
+  - .ai/schemas/mutation-evidence.schema.json
+  - src/aiflow/mutation_evidence.py
+  - src/aiflow/mutation_materials.py
+  - src/aiflow/mutation_process.py
+  - src/aiflow/mutation_protocol.py
+  - src/aiflow/mutation_reporter.py
+  - src/aiflow/mutation_runner.py
+  - src/aiflow/process_runner.py
+  - src/aiflow/verification_service.py
+  - tests/e2e/test_phase_02_negative_self_hosting.py
+  - tests/e2e/test_phase_02_self_hosting_scenario.py
+  - tests/integration/test_mutation_runner_contract.py
+  - tests/integration/test_verify_command.py
+  - tests/mutation_evidence_helpers.py
+  - tests/unit/test_mutation_evidence.py
+  - tests/unit/test_mutation_runner.py
+  - tests/unit/test_process_runner.py
+  inputs: []
+  permission_requirements:
+  - action_approval
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: false
+    verified_backup: false
+  reversibility: conditionally_reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0191
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: true
+    independent_verifier_required: true
+    integration_required: true
+    targeted_mutation_required: true
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: fd8bb94382f06fc9ef36ca0c8ea0c94ba9b9dd41dce24d23ee06a830f1f4dd55
+goal: Deliver V2 mutation attribution engine, protocol, schema, and tests from PR
+  186 on main
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-24T20:58:03Z'
+subject_commit: aa231effb973007ddb42b9c10bd8dad8f02f2729
+task_id: TASK-0191
+updated_at: '2026-11-24T21:41:03Z'
+worktree_dirty: false
+worktree_dirty_paths: []

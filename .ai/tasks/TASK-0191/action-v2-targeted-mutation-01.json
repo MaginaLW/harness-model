@@ -1,0 +1,16 @@
+{
+  "decision_unit_id": "DU-001",
+  "classification_input_sha256": "63030394cbf9d175db9e2f484d62f08fda8c34aa1c6347cd8026946928c2a774",
+  "action_type": "targeted_mutation_v2",
+  "target": "TASK-0191",
+  "parameter_summary": "Owner A1 authorized single-round Windows V2 native targeted mutation on the BASE_A (c1037f50) 17-file candidate aa231eff (5 phase-02-critical declarations serially).",
+  "subject_commit": "aa231effb973007ddb42b9c10bd8dad8f02f2729",
+  "conditions": [
+    "Require the frozen TASK-0191 specification (fd8bb94382f06fc9ef36ca0c8ea0c94ba9b9dd41dce24d23ee06a830f1f4dd55), independent design review REV-0001 APPROVE, and spec approval. Match 265 canonical materials with SHA-256 cf38d0f4f450d62e77b66d7c31a0ebd75a28f3b669341cdbe82bcf2216e8c987, manifest SHA-256 1dac9624e5a221784d56dc189e5bb225662334b550238b13ecf7587c96d277c0, and runner SHA-256 e3dad2e18b3d79ae00bd9b8e281301b93ab5bcfc74f4b7ebf51614e67142514b.",
+    "Start only within the one complete local aiflow verify TASK-0191 --actor independent-verifier-track-a invocation. One complete pytest, including isolated installed-package fixtures, is limited to 3000 seconds. The eight ordinary process limits sum to 3750 seconds.",
+    "Pre-consumption Windows Job probe is limited to 10 seconds. For each of the five declarations allow one baseline and one mutant, each limited to 60 seconds and 16 KiB per stream. Follow the native contract for early failure or unconfirmed cleanup.",
+    "Stop after completion, failure or interruption. No automatic retries, cross-repository writes, external transfers of unauthorized logs/secrets, paid calls or unauthorized publication. Only the 6 sanitized mutation JSONs plus delivery-authorization.md are authorized for A1 public disclosure after REV-0002 APPROVE and --finalize."
+  ],
+  "expires_at": "2026-11-25T21:00:00Z",
+  "single_use": true
+}
