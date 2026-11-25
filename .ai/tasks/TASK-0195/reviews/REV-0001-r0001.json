@@ -1,0 +1,13 @@
+{
+  "context_sha256": "913b6c4cb4ed65081bc6acc7357713148fe8bddc536ce5d3fab21db464e9f6a1",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-25T20:32:05Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Design scope (10 D3.2 files), REVIEW/V1 classification, 0.2.0->0.3.0 version bump across pyproject.toml/__init__.py/resource_bundle.py/uv.lock (aiflow only, no third-party dependency changes), version/distribution test updates, and no v0.3.0 tag or GitHub Release guardrails are sound with zero policy, schema, or workflow edits.",
+  "task_id": "TASK-0195"
+}
