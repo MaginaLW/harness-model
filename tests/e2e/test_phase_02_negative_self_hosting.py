@@ -8,7 +8,11 @@ existing REVIEW task merge-ready.
 
 from __future__ import annotations
 
+import hashlib
+import shutil
+import stat
 import sys
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -29,7 +33,7 @@ from test_v2_verifier_scenario import (  # noqa: E402
     _passed_v2_pre,
     _record_approving_review,
 )
-from test_verify_command import _enable_v2, _prepare  # noqa: E402
+from test_verify_command import _enable_v2, _plan  # noqa: E402
 
 from aiflow import gate as gate_service  # noqa: E402
 from aiflow import verification_service  # noqa: E402
@@ -50,6 +54,93 @@ from aiflow.storage import (  # noqa: E402
 from aiflow.task_service import load_task_record  # noqa: E402
 from tests.mutation_evidence_helpers import replay_synthetic_mutation  # noqa: E402
 
+_NEG_SEED_BASE_DIR: Path | None = None
+_NEG_SEED_ENTRIES: dict[tuple[str, str], tuple[Path, str]] = {}
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _neg_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _NEG_SEED_BASE_DIR
+    _NEG_SEED_BASE_DIR = tmp_path_factory.mktemp("phase02-neg-seeds")
+    _NEG_SEED_ENTRIES.clear()
+    try:
+        yield
+        for key, (seed_path, expected) in _NEG_SEED_ENTRIES.items():
+            assert _seed_tree_sha256(seed_path) == expected, (
+                f"Module seed {key!r} was mutated during test execution"
+            )
+    finally:
+        _NEG_SEED_ENTRIES.clear()
+        _NEG_SEED_BASE_DIR = None
+
+
+def _build_neg_seed(repository: Path, kind: str, route: str) -> None:
+    if kind == "prepared":
+        create_repository(repository)
+        with pytest.MonkeyPatch.context() as mp:
+            start(repository, mp)
+            make_ready(repository, route=route, valid_approval=(route == "REVIEW"))
+            if route == "REVIEW":
+                approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+                assert isinstance(approvals, list)
+                approvals[0]["base_commit"] = load_task_record(repository, "TASK-0001").task[
+                    "base_commit"
+                ]
+                atomic_write_json(
+                    resolve_task_path(repository, "TASK-0001", "approvals.json"), approvals
+                )
+            assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+        return
+    if kind == "v2":
+        shutil.copytree(_get_neg_seed("prepared", route), repository, copy_function=shutil.copyfile)
+        _enable_v2(repository)
+        return
+    raise AssertionError(f"unknown negative self-hosting seed kind: {kind!r}")
+
+
+def _get_neg_seed(kind: str, route: str) -> Path:
+    key = (kind, route)
+    entry = _NEG_SEED_ENTRIES.get(key)
+    if entry is None:
+        assert _NEG_SEED_BASE_DIR is not None
+        seed_repo = _NEG_SEED_BASE_DIR / f"seed-{kind}-{route}" / "repository"
+        _build_neg_seed(seed_repo, kind, route)
+        entry = (seed_repo, _seed_tree_sha256(seed_repo))
+        _NEG_SEED_ENTRIES[key] = entry
+    return entry[0]
+
+
+def _clone_neg_seed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    kind: str,
+    *,
+    route: str = "AUTO",
+) -> Path:
+    repository = tmp_path / "repository"
+    shutil.copytree(_get_neg_seed(kind, route), repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
+    monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
+    return repository
+
 
 def _task_bytes(repository: Path) -> dict[Path, bytes]:
     directory = resolve_task_path(repository, "TASK-0001")
@@ -68,8 +159,7 @@ def test_invalid_v2_actor_verify_fails_before_side_effects(
     actor: str,
     message: str,
 ) -> None:
-    repository = _prepare(tmp_path, monkeypatch)
-    _enable_v2(repository)
+    repository = _clone_neg_seed(tmp_path, monkeypatch, "v2", route="AUTO")
     before = _task_bytes(repository)
 
     def unexpected(*_args: object, **_kwargs: object) -> object:
@@ -88,7 +178,7 @@ def test_survived_ci_mutation_replay_rejects_without_source_writes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """CI and Gate replay a valid synthetic report with one surviving mutation."""
-    repository = _prepare(tmp_path, monkeypatch, route="REVIEW")
+    repository = _clone_neg_seed(tmp_path, monkeypatch, "prepared", route="REVIEW")
     prepared = load_task_record(repository, "TASK-0001").task
     prepared["decision_units"][0]["impact_scope"] = ["src/**"]
     atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), prepared)
@@ -221,10 +311,7 @@ def test_survived_ci_mutation_replay_rejects_without_source_writes(
 def test_scope_observation_persists_escalation_and_blocks_begin(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository)
-    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    repository = _clone_neg_seed(tmp_path, monkeypatch, "prepared", route="AUTO")
     task = load_task_record(repository, "TASK-0001").task
     observation = parse_observation(
         {

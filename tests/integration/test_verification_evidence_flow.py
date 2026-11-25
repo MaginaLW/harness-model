@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
+import shutil
+import stat
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -149,10 +153,46 @@ def _timeout_plan():
     return build
 
 
-def _prepare_real_policy_plan(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, review: bool
-) -> Path:
-    repository = create_repository(tmp_path / "repository")
+_FLOW_SEED_BASE_DIR: Path | None = None
+_FLOW_SEED_ENTRIES: dict[str, tuple[Path, str]] = {}
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _flow_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _FLOW_SEED_BASE_DIR
+    _FLOW_SEED_BASE_DIR = tmp_path_factory.mktemp("flow-evidence-seeds")
+    _FLOW_SEED_ENTRIES.clear()
+    try:
+        yield
+        for state, (seed_path, expected) in _FLOW_SEED_ENTRIES.items():
+            assert _seed_tree_sha256(seed_path) == expected, (
+                f"Module seed {state!r} was mutated during test execution"
+            )
+    finally:
+        _FLOW_SEED_ENTRIES.clear()
+        _FLOW_SEED_BASE_DIR = None
+
+
+def _build_real_policy_base_seed(repository: Path) -> None:
+    create_repository(repository)
     (repository / "src").mkdir()
     (repository / "src" / "sample.py").write_text("value: int = 1\n", encoding="utf-8")
     (repository / "tests" / "unit").mkdir(parents=True)
@@ -185,7 +225,29 @@ def _prepare_real_policy_plan(
         "-m",
         "verification fixture",
     )
-    start(repository, monkeypatch)
+    with pytest.MonkeyPatch.context() as mp:
+        start(repository, mp)
+
+
+def _clone_real_policy_base(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    key = "real_policy_base"
+    entry = _FLOW_SEED_ENTRIES.get(key)
+    if entry is None:
+        assert _FLOW_SEED_BASE_DIR is not None
+        seed_repo = _FLOW_SEED_BASE_DIR / "real-policy-base" / "repository"
+        _build_real_policy_base_seed(seed_repo)
+        entry = (seed_repo, _seed_tree_sha256(seed_repo))
+        _FLOW_SEED_ENTRIES[key] = entry
+    repository = tmp_path / "repository"
+    shutil.copytree(entry[0], repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
+    return repository
+
+
+def _prepare_real_policy_plan(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, review: bool
+) -> Path:
+    repository = _clone_real_policy_base(tmp_path, monkeypatch)
     task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
     unit = _auto_unit("TASK-0001")
     if review:

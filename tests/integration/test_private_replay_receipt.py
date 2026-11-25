@@ -50,7 +50,35 @@ def keys() -> Iterator[tuple[Path, Path]]:
         yield trusted, other
 
 
+_SIGNATURE_CACHE: dict[tuple[Path, bytes, str], str] = {}
+
+
+def _key_digests(keys: tuple[Path, Path]) -> dict[Path, str]:
+    paths = (
+        keys[0],
+        keys[0].with_suffix(".pub"),
+        keys[1],
+        keys[1].with_suffix(".pub"),
+    )
+    return {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _keys_guard(keys: tuple[Path, Path]) -> Iterator[None]:
+    before = _key_digests(keys)
+    _SIGNATURE_CACHE.clear()
+    try:
+        yield
+        assert _key_digests(keys) == before, "Module SSH keys were mutated during test execution"
+    finally:
+        _SIGNATURE_CACHE.clear()
+
+
 def _sign(key: Path, body: bytes, namespace: str = DOMAIN) -> str:
+    cache_key = (key.resolve(), body, namespace)
+    cached = _SIGNATURE_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
     result = subprocess.run(
         ["ssh-keygen", "-Y", "sign", "-f", str(key), "-n", namespace],
         input=body,
@@ -58,7 +86,9 @@ def _sign(key: Path, body: bytes, namespace: str = DOMAIN) -> str:
         capture_output=True,
         timeout=10,
     )
-    return result.stdout.decode("ascii")
+    signature = result.stdout.decode("ascii")
+    _SIGNATURE_CACHE[cache_key] = signature
+    return signature
 
 
 @pytest.fixture

@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+import shutil
+import stat
 import subprocess
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -38,8 +42,46 @@ def _attach_event_head_to_source_branch(root: Path, source_branch: str, event_he
         raise ValueError("attached branch changed the event head")
 
 
-def _repo(tmp_path: Path) -> tuple[Path, str]:
-    root = tmp_path / "checkout"
+_REPO_SEED_BASE_DIR: Path | None = None
+_REPO_SEED: tuple[Path, str, str] | None = None
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _github_workflow_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _REPO_SEED_BASE_DIR, _REPO_SEED
+    _REPO_SEED_BASE_DIR = tmp_path_factory.mktemp("github-workflow-seeds")
+    _REPO_SEED = None
+    try:
+        yield
+        if _REPO_SEED is not None:
+            seed_root, _, expected = _REPO_SEED
+            assert _seed_tree_sha256(seed_root) == expected, (
+                "Module repo seed was mutated during test execution"
+            )
+    finally:
+        _REPO_SEED = None
+        _REPO_SEED_BASE_DIR = None
+
+
+def _build_repo_seed(root: Path) -> tuple[Path, str]:
     root.mkdir(parents=True)
     _git(root, "init")
     _git(root, "config", "user.email", "ci@example.invalid")
@@ -49,6 +91,18 @@ def _repo(tmp_path: Path) -> tuple[Path, str]:
     _git(root, "add", ".")
     _git(root, "commit", "-m", "base")
     return root, _git(root, "rev-parse", "HEAD")
+
+
+def _repo(tmp_path: Path) -> tuple[Path, str]:
+    global _REPO_SEED
+    if _REPO_SEED is None:
+        assert _REPO_SEED_BASE_DIR is not None
+        seed_root, head = _build_repo_seed(_REPO_SEED_BASE_DIR / "checkout")
+        _REPO_SEED = (seed_root, head, _seed_tree_sha256(seed_root))
+    seed_root, head, _ = _REPO_SEED
+    root = tmp_path / "checkout"
+    shutil.copytree(seed_root, root, copy_function=shutil.copyfile)
+    return root, head
 
 
 def test_workflow_is_read_only_reproducible_and_bounded() -> None:
