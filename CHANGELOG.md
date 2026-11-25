@@ -7,6 +7,8 @@ package 已发布到外部 registry。
 
 ### Changed
 
+- 将 `tools/` 全部门禁与 Hook 脚本纳入严格 `mypy` 检查（`pyproject.toml` 与 `verification-levels.yaml`），并将 `setup.py`、`MANIFEST.in` 与 `tools/hooks/**` 补入 `HARD-REVIEW-GOVERNANCE-SURFACE` 与 `AGENTS.md` 升级清单（`policy_version` 保持 `"2.6.0"`，TASK-0190，PR #207 / #208）。
+- 完成第二轮纯测试夹具运行时优化（`tests/**` 5 个模块引入模块级只读种子与 SHA-256 守卫，用例节点 ID 保持 4,946 == 4,946 1-to-1 对等，显著压降 Windows 与 Ubuntu CI 全量耗时，PR #204）。
 - 退场未接入核心运行时的 `tools/analysis/*` 外围分析脚本（11 个模块）及 18 个专属测试文件，将覆盖率与 strict `mypy` 收敛至单核心域 `src/aiflow`（保持 85% 总分支覆盖率与 90% diff coverage 门禁不变），并将 9 篇关联运维说明及示例夹具归档至 `docs/archive/operations/`（TASK-0156，PR #166 / #167）。
 - 将 `git_context` 分支任务扫描改为 `git cat-file --batch` 批量读取并复用单次工作树状态，统一 `status_service` 与 `gate` 的策略、范围及原生 V2 证据新鲜度判定；同时归档 15 篇过期运维记录并精简 17 处 Windows 测试夹具消除 3000s 超时（TASK-0155，PR #164 / #165）。
 - 退役 `aiflow external-review` 与 `aiflow verify --pytest-temp-root`，合并八处相同的 UTC 时间戳辅助函数；同步退役说明、Policy 2.5.0 治理面升级清单与当前维护状态，保留历史记录（TASK-0076）。
@@ -24,6 +26,7 @@ package 已发布到外部 registry。
 
 ### Added
 
+- 交付 V2 定向变异检测归因实现与 schema `2.0`（`mutation_protocol`、`mutation_reporter`、`mutation_materials`、`mutation_process` 及 5 项定向变异锚点与失败归因，经独立 3 方 V2 14/14 验证与所有者授权 7 份脱敏披露合入 `main`，替代并关闭原候选 PR #186 / TASK-0175；TASK-0191，PR #209 / #210）。
 - 保全 TASK-0031 失败轮的详细验证证据为 `.ai/tasks/TASK-0031/evidence-failed-20260901T001936Z.json`。该轮 `unit_tests`、`regression_tests`、`coverage_xml` 三项失败，其明细被 01:03:10 通过轮重写 `evidence.json` 时覆盖，此后仅存于一个 GitHub Desktop 创建的 stash，而其依附分支已在分支整理中删除。事件账本记录了失败这一事实，重试理由亦写明本意是保留失败证据，但目录中并无保留明细的文件。落盘副本与原件 SHA-256 逐位相同，TASK-0031 的既有记录一字未改。依据 REC-04「保留失败证据以供审计」与「失败不得被后续成功覆盖」。
 
 - 阶段一 MVP 设计的核心设计原则新增「重复问题优先 CLI 化」：对规则明确、重复出现且需要一致回答或处理的诊断、治理和操作问题，优先沉淀为调用核心程序的统一 CLI 能力，命令应提供稳定契约、自动化测试和可审计输出；探索性、一次性或仍依赖语义判断的问题不强制 CLI 化。其后两条原则编号顺延，文字未变。
@@ -32,6 +35,7 @@ package 已发布到外部 registry。
 
 ### Fixed
 
+- 修复隔离验证运行器 `process_runner._environment()` 在 Windows 下缺失 `ssh-keygen` 目录与 `ProgramData` 转发导致 `test_private_replay_receipt.py` 166 项用例报错的问题，并补充跨平台 `nt`/`posix` 单元测试，恢复原生 Windows `aiflow verify` 全量通过（TASK-0189，PR #205 / #206）。
 - 收敛仓库卫生：为 Python 构建、分发、HTML 覆盖率与带后缀的 coverage 数据补充根级锚定的忽略规则，且不遮蔽 `.ai/tasks/**` 下的审计证据；把 AGENTS.md 确立为唯一共享 Agent 权威、CLAUDE.md 收敛为链接到它的受测 Claude 适配入口；在故障恢复手册记录运行期证据的追加式保留、有界清理与历史绝对路径例外。新增`tests/integration/test_repository_hygiene.py` 覆盖忽略规则契约的正负向路径，并扩展入口文件契约测试。不改变任何运行期行为，不重写历史审计记录。
 
 - 修复 CI 任务解析在 base 分支前移后无法唯一确定任务的缺陷。`tools/ci/resolve_task.py` 原先用两点 `git diff base head` 比较两棵树，一旦 base 合入了另一个任务的记录，该任务目录会作为 head 侧变更出现，解析随即以「must identify exactly one .ai/tasks/TASK-* directory」失败——即使 head 完全没变。改为以 merge-base 起算的三点 `git diff base...head`，只反映本 PR 引入的变更。显式 `AI_FLOW_TASK_ID` 的优先级、零个或多个任务目录的拒绝路径与原错误文案均不变。
