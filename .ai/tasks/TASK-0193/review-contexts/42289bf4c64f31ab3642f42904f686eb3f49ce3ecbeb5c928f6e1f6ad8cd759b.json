@@ -1,0 +1,223 @@
+{
+  "base_commit": "2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7",
+  "branch": "codex/d22-posix-init",
+  "classification_input_sha256": "06956c3d3fef8122dbce0d50a1fee6995ede2bc7110289728f300fb864b0573c",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/initialization_posix.py",
+      "src/aiflow/initialization.py",
+      "tests/unit/test_initialization_posix.py",
+      "tests/unit/test_initialization.py",
+      "docs/operations/initialization.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Support POSIX/Linux initialization apply via PosixFilesystem with atomic no-replace link publication",
+        "impact_scope": [
+          "src/aiflow/initialization_posix.py",
+          "src/aiflow/initialization.py",
+          "tests/unit/test_initialization_posix.py",
+          "tests/unit/test_initialization.py",
+          "docs/operations/initialization.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".ai/tasks/TASK-0193/approvals.json",
+        ".ai/tasks/TASK-0193/classification.json",
+        ".ai/tasks/TASK-0193/events.jsonl",
+        ".ai/tasks/TASK-0193/evidence.json",
+        ".ai/tasks/TASK-0193/review-contexts/19b4c06d2d8c6dcb47467998c62510dce9da8fe3801b56c2f876794169003bec.json",
+        ".ai/tasks/TASK-0193/review-contexts/d871f4066da171b4ebead1779aff4b9707fad8830dcdae4ce5bc3659b9e92246.json",
+        ".ai/tasks/TASK-0193/review-package.md",
+        ".ai/tasks/TASK-0193/reviews/REV-0001-r0001.json",
+        ".ai/tasks/TASK-0193/reviews/REV-0002-r0001.json",
+        ".ai/tasks/TASK-0193/spec.md",
+        ".ai/tasks/TASK-0193/task.yaml",
+        "docs/operations/initialization.md",
+        "src/aiflow/initialization.py",
+        "src/aiflow/initialization_posix.py",
+        "tests/unit/test_initialization.py",
+        "tests/unit/test_initialization_posix.py"
+      ],
+      "files": [
+        {
+          "additions": 31,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/approvals.json"
+        },
+        {
+          "additions": 56,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/classification.json"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/events.jsonl"
+        },
+        {
+          "additions": 170,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/evidence.json"
+        },
+        {
+          "additions": 146,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/review-contexts/19b4c06d2d8c6dcb47467998c62510dce9da8fe3801b56c2f876794169003bec.json"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/review-contexts/d871f4066da171b4ebead1779aff4b9707fad8830dcdae4ce5bc3659b9e92246.json"
+        },
+        {
+          "additions": 56,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/review-package.md"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/reviews/REV-0001-r0001.json"
+        },
+        {
+          "additions": 13,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/reviews/REV-0002-r0001.json"
+        },
+        {
+          "additions": 43,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/spec.md"
+        },
+        {
+          "additions": 67,
+          "binary": false,
+          "deletions": 0,
+          "path": ".ai/tasks/TASK-0193/task.yaml"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/initialization.md"
+        },
+        {
+          "additions": 17,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/initialization.py"
+        },
+        {
+          "additions": 434,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/initialization_posix.py"
+        },
+        {
+          "additions": 6,
+          "binary": false,
+          "deletions": 5,
+          "path": "tests/unit/test_initialization.py"
+        },
+        {
+          "additions": 916,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_initialization_posix.py"
+        }
+      ],
+      "totals": {
+        "additions": 2028,
+        "deletions": 8,
+        "files": 16
+      }
+    },
+    "goal": "Support POSIX/Linux initialization apply via PosixFilesystem with atomic no-replace link publication",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0193",
+        "--actor",
+        "verifier-v1"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "42289bf4c64f31ab3642f42904f686eb3f49ce3ecbeb5c928f6e1f6ad8cd759b",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "c297c50addcc394f31aac5e6c05c11266d84492ba7f95741bed5775bae91407d",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "4060c07c6de882d22753792dee1448b3848f25e81bf95cf04fb1898def233dce",
+  "subject_commit": "a5ce7b075582f7b49e4e6500be174e602dfc31b4",
+  "task_id": "TASK-0193"
+}
