@@ -6,7 +6,6 @@ import errno
 import importlib
 import json
 import os
-import shutil
 import stat
 from copy import deepcopy
 from pathlib import Path
@@ -881,23 +880,21 @@ def test_real_posix_preview_apply_resume_replay_and_no_replace(tmp_path: Path) -
     assert tree(root) == before
 
     # Partial resume path on real POSIX (uses open_file(..., allow_rename=True)).
-    partial_repo = tmp_path / "partial"
-    shutil.copytree(root, partial_repo)
-    (partial_repo / ".ai/repository-id").unlink()
-    (partial_repo / ".ai/init-complete.json").unlink()
+    (root / ".ai/repository-id").unlink()
+    (root / ".ai/init-complete.json").unlink()
     for rel in RESOURCE_KINDS:
-        (partial_repo / ".ai" / rel).unlink()
+        (root / ".ai" / rel).unlink()
         break
-    (partial_repo / ".ai/.repository-id.pending").write_bytes(
+    (root / ".ai/.repository-id.pending").write_bytes(
         (proposal["repository_id"] + "\n").encode("utf-8")
     )
-    assert initialization.inspect_initialization(partial_repo)["status"] == "incomplete"
+    assert initialization.inspect_initialization(root)["status"] == "incomplete"
     resumed = initialization.apply_initialization(
-        partial_repo, deepcopy(proposal), deepcopy(decision), bundle_root=bundle
+        root, deepcopy(proposal), deepcopy(decision), bundle_root=bundle
     )
     assert resumed["phase"] == "resumed"
     assert resumed["repository_id"] == proposal["repository_id"]
-    assert initialization.inspect_initialization(partial_repo)["status"] == "complete"
+    assert initialization.inspect_initialization(root)["status"] == "complete"
 
     # Existing target cannot be overwritten by PosixFilesystem.rename_no_replace.
     fs = posix_fs.PosixFilesystem()
