@@ -7,6 +7,7 @@ package 已发布到外部 registry。
 
 ### Changed
 
+- 完成第四轮（Batch 3）纯测试夹具运行时优化（`tests/**` 9 个模块引入模块级只读 Git/策略种子与 SHA-256 守卫、`_sign` 签名缓存及只读材料树复用；用例节点 ID 保持 5,172 == 5,172 1-to-1 对等，Windows 全量 `--cov-branch` 由 `2107.18s` 降至 `1707.88s` 且核心分支覆盖率保持 90%，Ubuntu `ai-quality-gate` 由 `9m19s` 降至 `5m12s`，PR #214）。
 - 完成第三轮（Batch 2）纯测试夹具运行时优化（`tests/**` 11 个模块引入模块级只读种子与 SHA-256 守卫，并收敛 `test_installed_mutations.py` 冗余并发安装回放；用例节点 ID 保持 5,172 == 5,172 1-to-1 对等，核心分支覆盖率保持 90%，PR #212）。
 - 将 `tools/` 全部门禁与 Hook 脚本纳入严格 `mypy` 检查（`pyproject.toml` 与 `verification-levels.yaml`），并将 `setup.py`、`MANIFEST.in` 与 `tools/hooks/**` 补入 `HARD-REVIEW-GOVERNANCE-SURFACE` 与 `AGENTS.md` 升级清单（`policy_version` 保持 `"2.6.0"`，TASK-0190，PR #207 / #208）。
 - 完成第二轮纯测试夹具运行时优化（`tests/**` 5 个模块引入模块级只读种子与 SHA-256 守卫，用例节点 ID 保持 4,946 == 4,946 1-to-1 对等，显著压降 Windows 与 Ubuntu CI 全量耗时，PR #204）。
