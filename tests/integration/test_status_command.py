@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import atexit
 import hashlib
 import json
 import shutil
+import stat
 import subprocess
+import tempfile
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -79,7 +83,53 @@ def run_git(repository: Path, *arguments: str) -> str:
     return result.stdout.rstrip("\r\n")
 
 
-def create_repository(path: Path) -> Path:
+_STATUS_SEED_BASE_DIR: Path | None = None
+_STATUS_BASE_SEED: tuple[Path, str] | None = None
+_STATUS_FALLBACK_TEMPDIRS: list[tempfile.TemporaryDirectory[str]] = []
+_STATUS_ATEXIT_REGISTERED = False
+
+
+def _cleanup_status_fallback_dirs() -> None:
+    while _STATUS_FALLBACK_TEMPDIRS:
+        _STATUS_FALLBACK_TEMPDIRS.pop().cleanup()
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _status_module_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _STATUS_SEED_BASE_DIR, _STATUS_BASE_SEED
+    _STATUS_SEED_BASE_DIR = tmp_path_factory.mktemp("status-cmd-seeds")
+    _STATUS_BASE_SEED = None
+    try:
+        yield
+        if _STATUS_BASE_SEED is not None:
+            seed_path, expected = _STATUS_BASE_SEED
+            assert _seed_tree_sha256(seed_path) == expected, (
+                "Status module base seed was mutated during test execution"
+            )
+    finally:
+        _STATUS_BASE_SEED = None
+        _STATUS_SEED_BASE_DIR = None
+
+
+def _build_repository(path: Path) -> Path:
     path.mkdir()
     run_git(path, "init", "-b", "main")
     ai_root = path / ".ai"
@@ -99,6 +149,31 @@ def create_repository(path: Path) -> Path:
         "initial",
     )
     return path
+
+
+def _get_base_seed() -> Path:
+    global _STATUS_BASE_SEED, _STATUS_ATEXIT_REGISTERED
+    if _STATUS_BASE_SEED is not None:
+        return _STATUS_BASE_SEED[0]
+    if _STATUS_SEED_BASE_DIR is None:
+        temp_dir = tempfile.TemporaryDirectory(
+            prefix="status-cmd-seeds-", ignore_cleanup_errors=True
+        )
+        _STATUS_FALLBACK_TEMPDIRS.append(temp_dir)
+        if not _STATUS_ATEXIT_REGISTERED:
+            atexit.register(_cleanup_status_fallback_dirs)
+            _STATUS_ATEXIT_REGISTERED = True
+        seed_base = Path(temp_dir.name)
+    else:
+        seed_base = _STATUS_SEED_BASE_DIR
+    seed_repo = _build_repository(seed_base / "repository")
+    _STATUS_BASE_SEED = (seed_repo, _seed_tree_sha256(seed_repo))
+    return seed_repo
+
+
+def create_repository(path: Path) -> Path:
+    seed = _get_base_seed()
+    return Path(shutil.copytree(seed, path, copy_function=shutil.copyfile))
 
 
 def create_task(repository: Path, state: str) -> Path:

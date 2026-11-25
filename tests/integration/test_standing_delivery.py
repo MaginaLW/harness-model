@@ -7,12 +7,16 @@ actual Git operation or verify the identity of a caller.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import shutil
+import stat
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 import yaml
-from test_begin_close_commands import create_repository
+from test_begin_close_commands import create_repository as _build_base_repository
 from test_governance_paths import _auto_unit
 from test_verify_command import _plan
 
@@ -27,6 +31,63 @@ from aiflow.task_service import load_task_record, transition_task_record
 ROOT = Path(__file__).resolve().parents[2]
 ACTIONS = {"push", "merge", "deploy", "delete", "secret_export", "paid_external_call"}
 OTHER_ACTIONS = ACTIONS - {"push", "merge"}
+
+_STANDING_SEED_BASE_DIR: Path | None = None
+_STANDING_SEED_ENTRIES: dict[str, tuple[Path, str]] = {}
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _standing_module_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _STANDING_SEED_BASE_DIR
+    _STANDING_SEED_BASE_DIR = tmp_path_factory.mktemp("standing-delivery-seeds")
+    _STANDING_SEED_ENTRIES.clear()
+    try:
+        yield
+        for state, (seed_path, expected) in _STANDING_SEED_ENTRIES.items():
+            assert _seed_tree_sha256(seed_path) == expected, (
+                f"Standing delivery module seed {state!r} was mutated during test execution"
+            )
+    finally:
+        _STANDING_SEED_ENTRIES.clear()
+        _STANDING_SEED_BASE_DIR = None
+
+
+def _get_seed(state: str) -> Path:
+    entry = _STANDING_SEED_ENTRIES.get(state)
+    if entry is not None:
+        return entry[0]
+    assert _STANDING_SEED_BASE_DIR is not None
+    seed_repo = _STANDING_SEED_BASE_DIR / state / "repository"
+    _build_base_repository(seed_repo)
+    if state == "started":
+        with pytest.MonkeyPatch.context() as mp:
+            assert _start(mp, seed_repo) == 0
+    elif state != "base":
+        raise AssertionError(f"unknown standing delivery seed state: {state}")
+    _STANDING_SEED_ENTRIES[state] = (seed_repo, _seed_tree_sha256(seed_repo))
+    return seed_repo
+
+
+def create_repository(path: Path) -> Path:
+    return Path(shutil.copytree(_get_seed("base"), path, copy_function=shutil.copyfile))
 
 
 def _permissions(repository: Path) -> tuple[Path, dict[str, object]]:
@@ -388,22 +449,33 @@ def test_start_api_uses_target_repository_schema_across_working_directories(
 def _classified_auto_with_declared_action(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, action: str, explicit: bool
 ) -> Path:
-    repository = create_repository(tmp_path / "repository")
-    assert _start(monkeypatch, repository) == 0
-    task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
-    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
-    assert isinstance(task, dict)
-    # Reproduce the new-task shape even on the pre-change implementation.
-    task["forbidden_actions"] = sorted(OTHER_ACTIONS | ({action} if explicit else set()))
-    unit = _auto_unit("TASK-0001")
-    unit["planned_actions"] = [action]
-    task["decision_units"] = [unit]
-    atomic_write_yaml(task_path, task)
-    assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
-    classification = read_task_json(repository, "TASK-0001", "classification.json")
-    assert isinstance(classification, dict)
-    assert classification["effective_route"] == "AUTO"
-    assert main(["freeze", "TASK-0001", "--actor", "specifier"]) == 0
+    key = f"classified:{action}:{explicit}"
+    entry = _STANDING_SEED_ENTRIES.get(key)
+    if entry is None:
+        assert _STANDING_SEED_BASE_DIR is not None
+        seed_repo = _STANDING_SEED_BASE_DIR / f"seed-{len(_STANDING_SEED_ENTRIES)}" / "repository"
+        shutil.copytree(_get_seed("started"), seed_repo, copy_function=shutil.copyfile)
+        with pytest.MonkeyPatch.context() as mp:
+            mp.chdir(seed_repo)
+            task_path = resolve_task_path(seed_repo, "TASK-0001", "task.yaml")
+            task = read_task_yaml(seed_repo, "TASK-0001", "task.yaml", contract_name="task")
+            assert isinstance(task, dict)
+            # Reproduce the new-task shape even on the pre-change implementation.
+            task["forbidden_actions"] = sorted(OTHER_ACTIONS | ({action} if explicit else set()))
+            unit = _auto_unit("TASK-0001")
+            unit["planned_actions"] = [action]
+            task["decision_units"] = [unit]
+            atomic_write_yaml(task_path, task)
+            assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
+            classification = read_task_json(seed_repo, "TASK-0001", "classification.json")
+            assert isinstance(classification, dict)
+            assert classification["effective_route"] == "AUTO"
+            assert main(["freeze", "TASK-0001", "--actor", "specifier"]) == 0
+        entry = (seed_repo, _seed_tree_sha256(seed_repo))
+        _STANDING_SEED_ENTRIES[key] = entry
+    repository = tmp_path / "repository"
+    shutil.copytree(entry[0], repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
     return repository
 
 

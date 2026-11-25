@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
+import atexit
+import hashlib
 import json
+import shutil
+import stat
+import tempfile
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -18,6 +24,51 @@ from aiflow.errors import StorageError
 from aiflow.policy import load_policy_bundle
 from aiflow.storage import atomic_write_json, read_task_json, read_task_yaml, resolve_task_path
 from aiflow.task_service import freeze_task, load_task_record, transition_task_record
+
+_DEFAULT_CREATE_REPOSITORY = create_repository
+_APPROVE_SEED_BASE_DIR: Path | None = None
+_APPROVE_SEED_ENTRIES: dict[str, tuple[Path, str]] = {}
+_APPROVE_FALLBACK_TEMPDIRS: list[tempfile.TemporaryDirectory[str]] = []
+_APPROVE_ATEXIT_REGISTERED = False
+
+
+def _cleanup_approve_fallback_dirs() -> None:
+    while _APPROVE_FALLBACK_TEMPDIRS:
+        _APPROVE_FALLBACK_TEMPDIRS.pop().cleanup()
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _approve_module_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _APPROVE_SEED_BASE_DIR
+    _APPROVE_SEED_BASE_DIR = tmp_path_factory.mktemp("approve-cmd-seeds")
+    _APPROVE_SEED_ENTRIES.clear()
+    try:
+        yield
+        for state, (seed_path, expected) in _APPROVE_SEED_ENTRIES.items():
+            assert _seed_tree_sha256(seed_path) == expected, (
+                f"Approve module seed {state!r} was mutated during test execution"
+            )
+    finally:
+        _APPROVE_SEED_ENTRIES.clear()
+        _APPROVE_SEED_BASE_DIR = None
 
 
 def review_package() -> str:
@@ -96,13 +147,12 @@ def _to_classified(repository: Path) -> None:
     )
 
 
-def _prepare(
-    tmp_path: Path,
+def _populate_prepared_repository(
+    repository: Path,
     monkeypatch: pytest.MonkeyPatch,
     *,
     state: str,
 ) -> Path:
-    repository = create_repository(tmp_path / "repository")
     start(repository, monkeypatch)
     (repository / ".ai" / "task-sequence").unlink(missing_ok=True)
     resolve_task_path(repository, "TASK-0001", "spec.md").write_text(
@@ -168,6 +218,50 @@ def _prepare(
         )
     elif state != "CLASSIFIED":
         raise AssertionError(f"unsupported test state: {state}")
+    return repository
+
+
+def _build_approve_seed(repository: Path, state: str) -> Path:
+    _DEFAULT_CREATE_REPOSITORY(repository)
+    with pytest.MonkeyPatch.context() as mp:
+        return _populate_prepared_repository(repository, mp, state=state)
+
+
+def _get_approve_seed(state: str) -> Path:
+    global _APPROVE_ATEXIT_REGISTERED
+    entry = _APPROVE_SEED_ENTRIES.get(state)
+    if entry is not None:
+        return entry[0]
+    if _APPROVE_SEED_BASE_DIR is None:
+        temp_dir = tempfile.TemporaryDirectory(
+            prefix="approve-cmd-seeds-", ignore_cleanup_errors=True
+        )
+        _APPROVE_FALLBACK_TEMPDIRS.append(temp_dir)
+        if not _APPROVE_ATEXIT_REGISTERED:
+            atexit.register(_cleanup_approve_fallback_dirs)
+            _APPROVE_ATEXIT_REGISTERED = True
+        seed_base = Path(temp_dir.name)
+    else:
+        seed_base = _APPROVE_SEED_BASE_DIR
+    seed_repo = seed_base / f"seed-{len(_APPROVE_SEED_ENTRIES)}" / "repository"
+    _build_approve_seed(seed_repo, state)
+    _APPROVE_SEED_ENTRIES[state] = (seed_repo, _seed_tree_sha256(seed_repo))
+    return seed_repo
+
+
+def _prepare(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    state: str,
+) -> Path:
+    if create_repository is not _DEFAULT_CREATE_REPOSITORY:
+        repository = create_repository(tmp_path / "repository")
+        return _populate_prepared_repository(repository, monkeypatch, state=state)
+    seed = _get_approve_seed(state)
+    repository = tmp_path / "repository"
+    shutil.copytree(seed, repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
     return repository
 
 
