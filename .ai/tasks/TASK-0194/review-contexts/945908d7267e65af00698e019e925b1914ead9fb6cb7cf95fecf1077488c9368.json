@@ -1,0 +1,137 @@
+{
+  "base_commit": "cc414e3a1dfe95bd3a8bd817bd7fa153880e2f63",
+  "branch": "codex/d4-aiflow-advise",
+  "classification_input_sha256": "2350bef0031f6880fdec1669f9cfd304174ad801de54833ef3012b10db2a9c9f",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/advisory_service.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_advisory_service.py",
+      "tests/integration/test_advise_command.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add read-only non-scoring aiflow advise command and advisory_service",
+        "impact_scope": [
+          "src/aiflow/advisory_service.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_advisory_service.py",
+          "tests/integration/test_advise_command.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "src/aiflow/advisory_service.py",
+        "src/aiflow/cli.py",
+        "tests/integration/test_advise_command.py",
+        "tests/unit/test_advisory_service.py"
+      ],
+      "files": [
+        {
+          "additions": 1051,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/advisory_service.py"
+        },
+        {
+          "additions": 11,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 600,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_advise_command.py"
+        },
+        {
+          "additions": 843,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_advisory_service.py"
+        }
+      ],
+      "totals": {
+        "additions": 2505,
+        "deletions": 0,
+        "files": 4
+      }
+    },
+    "goal": "Add read-only non-scoring aiflow advise command and advisory_service",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0194",
+        "--actor",
+        "verifier-v1"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "945908d7267e65af00698e019e925b1914ead9fb6cb7cf95fecf1077488c9368",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "05ace58c0d308c7a84d4c52e96f612bfd018d9267168bf67ec6df095173f110a",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "b117322831f03d861c389e433d88e16e344a4f5b1ddba8f7890b547e2736ffef",
+  "subject_commit": "019b426f8733aeabaa1fd35832b681cc5f06c6ed",
+  "task_id": "TASK-0194"
+}

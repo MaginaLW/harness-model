@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from aiflow import __version__
+from aiflow.advisory_service import advise_task, format_advisory_text
 from aiflow.approval import approve_task
 from aiflow.ask_service import answer_task
 from aiflow.classification_service import classify_task
@@ -150,6 +151,9 @@ def build_parser() -> ArgumentParser:
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
+    advise = subparsers.add_parser("advise", help="show a read-only non-scoring advisory report")
+    advise.add_argument("task_id")
+    advise.add_argument("--format", choices=["text", "json"], default="text")
     observe = subparsers.add_parser(
         "observe",
         help="apply or read-only evaluate one immutable observation",
@@ -529,6 +533,13 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
     elif arguments.command == "status":
         summary = summarize_task(repository_root, arguments.task_id)
         print(summary.to_json() if arguments.format == "json" else summary.to_text())
+    elif arguments.command == "advise":
+        report = advise_task(repository_root, arguments.task_id)
+        print(
+            json.dumps(report, ensure_ascii=False, sort_keys=True)
+            if arguments.format == "json"
+            else format_advisory_text(report)
+        )
     elif arguments.command == "observe":
         if arguments.task_id is None or arguments.input is None or arguments.mode is None:
             raise AiflowError(

@@ -1,0 +1,41 @@
+{
+  "base_commit": "cc414e3a1dfe95bd3a8bd817bd7fa153880e2f63",
+  "branch": "codex/d4-aiflow-advise",
+  "classification_input_sha256": "2350bef0031f6880fdec1669f9cfd304174ad801de54833ef3012b10db2a9c9f",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/advisory_service.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_advisory_service.py",
+      "tests/integration/test_advise_command.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add read-only non-scoring aiflow advise command and advisory_service",
+        "impact_scope": [
+          "src/aiflow/advisory_service.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_advisory_service.py",
+          "tests/integration/test_advise_command.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Add read-only non-scoring aiflow advise command and advisory_service",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "fa5a8648bcbdcf6323962806e849bb515f705454ea4a8edf9b5632322dd9ea9e",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "b117322831f03d861c389e433d88e16e344a4f5b1ddba8f7890b547e2736ffef",
+  "task_id": "TASK-0194"
+}
