@@ -7,7 +7,7 @@ allowed_scope:
 base_commit: 2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7
 branch: codex/d22-posix-init
 created_at: '2026-11-25T18:23:17Z'
-current_state: WAITING_FOR_FINAL_REVIEW
+current_state: APPROVED_FOR_MERGE
 decision_units:
 - change_characteristics:
     behavior_changed: true
@@ -62,6 +62,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-25T18:23:36Z'
 subject_commit: 67690043a86840047b27fc81be81f52c7cd523f8
 task_id: TASK-0193
-updated_at: '2026-11-25T18:50:13Z'
+updated_at: '2026-11-25T18:52:10Z'
 worktree_dirty: false
 worktree_dirty_paths: []
