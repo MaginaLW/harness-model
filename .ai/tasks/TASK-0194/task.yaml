@@ -6,7 +6,7 @@ allowed_scope:
 base_commit: cc414e3a1dfe95bd3a8bd817bd7fa153880e2f63
 branch: codex/d4-aiflow-advise
 created_at: '2026-11-25T19:44:20Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - change_characteristics:
     behavior_changed: true
@@ -58,6 +58,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-25T19:44:49Z'
 subject_commit: 019b426f8733aeabaa1fd35832b681cc5f06c6ed
 task_id: TASK-0194
-updated_at: '2026-11-25T20:14:00Z'
+updated_at: '2026-11-25T20:20:39Z'
 worktree_dirty: false
 worktree_dirty_paths: []
