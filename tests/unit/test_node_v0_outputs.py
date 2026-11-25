@@ -9,7 +9,10 @@ from __future__ import annotations
 
 # ruff: noqa: E402 -- Source-absence guard must precede candidate-only imports.
 import ctypes
+import hashlib
+import shutil
 import stat
+from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
@@ -911,26 +914,57 @@ def test_git_state_rejects_malformed_query_before_any_private_read(tmp_path, mon
     assert caught.value.code == "NODE_GIT_INVALID"
 
 
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module")
+def _original_root_seed(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
+    seed = tmp_path_factory.mktemp("original-root-seed")
+    _git_fixture(seed, "init", "--quiet")
+    _git_fixture(seed, "config", "user.name", "Synthetic Test")
+    _git_fixture(seed, "config", "user.email", "synthetic@example.invalid")
+    _git_fixture(seed, "config", "core.autocrlf", "false")
+    (seed / "protected.txt").write_bytes(b"protected\n")
+    (seed / ".gitignore").write_bytes(b".ai/\n")
+    _git_fixture(seed, "add", ".")
+    _git_fixture(seed, "commit", "--quiet", "-m", "Synthetic baseline")
+    task = seed / ".ai/tasks/TASK-0001"
+    task.mkdir(parents=True)
+    (task / "approvals.json").write_bytes(b"[]")
+    (seed / "untracked").mkdir()
+    (seed / ".ai/private").mkdir()
+    (seed / ".ai/private/note").write_bytes(b"first")
+    expected = _seed_tree_sha256(seed)
+    yield seed
+    assert _seed_tree_sha256(seed) == expected
+
+
 @pytest.fixture
-def original_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def original_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, _original_root_seed: Path
+) -> Path:
     from types import SimpleNamespace
 
     import aiflow.task_service
 
-    _git_fixture(tmp_path, "init", "--quiet")
-    _git_fixture(tmp_path, "config", "user.name", "Synthetic Test")
-    _git_fixture(tmp_path, "config", "user.email", "synthetic@example.invalid")
-    _git_fixture(tmp_path, "config", "core.autocrlf", "false")
-    (tmp_path / "protected.txt").write_bytes(b"protected\n")
-    (tmp_path / ".gitignore").write_bytes(b".ai/\n")
-    _git_fixture(tmp_path, "add", ".")
-    _git_fixture(tmp_path, "commit", "--quiet", "-m", "Synthetic baseline")
-    task = tmp_path / ".ai/tasks/TASK-0001"
-    task.mkdir(parents=True)
-    (task / "approvals.json").write_bytes(b"[]")
-    (tmp_path / "untracked").mkdir()
-    (tmp_path / ".ai/private").mkdir()
-    (tmp_path / ".ai/private/note").write_bytes(b"first")
+    shutil.copytree(
+        _original_root_seed, tmp_path, dirs_exist_ok=True, copy_function=shutil.copyfile
+    )
     record = SimpleNamespace(task={"task_id": "TASK-0001"}, events=[])
     monkeypatch.setattr(aiflow.task_service, "read_task_record_strict", lambda *_: record)
     return tmp_path

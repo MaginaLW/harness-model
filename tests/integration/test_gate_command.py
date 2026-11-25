@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
+import atexit
+import hashlib
 import json
+import shutil
+import stat
+import tempfile
+from collections.abc import Iterator
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -25,6 +31,127 @@ from aiflow.storage import (
 )
 from aiflow.task_service import freeze_task, load_task_record, transition_task_record
 
+_GATE_SEED_BASE_DIR: Path | None = None
+_GATE_SEED_ENTRIES: dict[tuple[bool, str | None], tuple[Path, str]] = {}
+_GATE_FALLBACK_TEMPDIRS: list[tempfile.TemporaryDirectory[str]] = []
+_GATE_ATEXIT_REGISTERED = False
+
+
+def _cleanup_gate_fallback_dirs() -> None:
+    while _GATE_FALLBACK_TEMPDIRS:
+        _GATE_FALLBACK_TEMPDIRS.pop().cleanup()
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _gate_module_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _GATE_SEED_BASE_DIR
+    _GATE_SEED_BASE_DIR = tmp_path_factory.mktemp("gate-cmd-seeds")
+    _GATE_SEED_ENTRIES.clear()
+    try:
+        yield
+        for key, (seed_path, expected) in _GATE_SEED_ENTRIES.items():
+            assert _seed_tree_sha256(seed_path) == expected, (
+                f"Gate module seed {key!r} was mutated during test execution"
+            )
+    finally:
+        _GATE_SEED_ENTRIES.clear()
+        _GATE_SEED_BASE_DIR = None
+
+
+def _build_gate_seed(repository: Path, *, review: bool, implementation_path: str | None) -> Path:
+    create_repository(repository)
+    with pytest.MonkeyPatch.context() as mp:
+        start(repository, mp)
+        task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+        assert isinstance(task, dict)
+        unit = _auto_unit("TASK-0001")
+        if review:
+            unit["impact"] = {"level": "medium"}
+            characteristics = unit["change_characteristics"]
+            assert isinstance(characteristics, dict)
+            characteristics.update(
+                {"mechanical": False, "behavior_changed": True, "code_modified": True}
+            )
+        task["decision_units"] = [unit]
+        atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
+        route = "REVIEW" if review else "AUTO"
+        make_ready(repository, route=route, valid_approval=review)
+        classification = read_task_json(
+            repository, "TASK-0001", "classification.json", contract_name="classification"
+        )
+        assert isinstance(classification, dict)
+        if not review:
+            classification["effective_verification_level"] = "V0"
+            classification["classifications"][0]["verification_level"] = "V0"
+            atomic_write_json(
+                resolve_task_path(repository, "TASK-0001", "classification.json"), classification
+            )
+        else:
+            approvals = read_task_json(repository, "TASK-0001", "approvals.json")
+            assert isinstance(approvals, list)
+            approvals[0]["base_commit"] = task["base_commit"]
+            atomic_write_json(
+                resolve_task_path(repository, "TASK-0001", "approvals.json"), approvals
+            )
+        assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+        if implementation_path is not None:
+            implementation = repository / implementation_path
+            implementation.parent.mkdir(parents=True, exist_ok=True)
+            implementation.write_text("implemented\n", encoding="utf-8")
+            run_git(repository, "add", implementation_path)
+            run_git(
+                repository,
+                "-c",
+                "user.name=AI Flow Tests",
+                "-c",
+                "user.email=aiflow@example.invalid",
+                "commit",
+                "-m",
+                "implementation",
+            )
+        mp.setattr(verification_service, "parse_verification_plan", _plan())
+        assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
+    return repository
+
+
+def _get_gate_seed(review: bool, implementation_path: str | None) -> Path:
+    global _GATE_ATEXIT_REGISTERED
+    key = (review, implementation_path)
+    entry = _GATE_SEED_ENTRIES.get(key)
+    if entry is not None:
+        return entry[0]
+    if _GATE_SEED_BASE_DIR is None:
+        temp_dir = tempfile.TemporaryDirectory(prefix="gate-cmd-seeds-", ignore_cleanup_errors=True)
+        _GATE_FALLBACK_TEMPDIRS.append(temp_dir)
+        if not _GATE_ATEXIT_REGISTERED:
+            atexit.register(_cleanup_gate_fallback_dirs)
+            _GATE_ATEXIT_REGISTERED = True
+        seed_base = Path(temp_dir.name)
+    else:
+        seed_base = _GATE_SEED_BASE_DIR
+    seed_repo = seed_base / f"seed-{len(_GATE_SEED_ENTRIES)}" / "repository"
+    _build_gate_seed(seed_repo, review=review, implementation_path=implementation_path)
+    _GATE_SEED_ENTRIES[key] = (seed_repo, _seed_tree_sha256(seed_repo))
+    return seed_repo
+
 
 def _prepare_gate(
     tmp_path: Path,
@@ -33,55 +160,11 @@ def _prepare_gate(
     review: bool = False,
     implementation_path: str | None = None,
 ) -> Path:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
-    assert isinstance(task, dict)
-    unit = _auto_unit("TASK-0001")
-    if review:
-        unit["impact"] = {"level": "medium"}
-        characteristics = unit["change_characteristics"]
-        assert isinstance(characteristics, dict)
-        characteristics.update(
-            {"mechanical": False, "behavior_changed": True, "code_modified": True}
-        )
-    task["decision_units"] = [unit]
-    atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)
-    route = "REVIEW" if review else "AUTO"
-    make_ready(repository, route=route, valid_approval=review)
-    classification = read_task_json(
-        repository, "TASK-0001", "classification.json", contract_name="classification"
-    )
-    assert isinstance(classification, dict)
-    if not review:
-        classification["effective_verification_level"] = "V0"
-        classification["classifications"][0]["verification_level"] = "V0"
-        atomic_write_json(
-            resolve_task_path(repository, "TASK-0001", "classification.json"), classification
-        )
-    else:
-        approvals = read_task_json(repository, "TASK-0001", "approvals.json")
-        assert isinstance(approvals, list)
-        approvals[0]["base_commit"] = task["base_commit"]
-        atomic_write_json(resolve_task_path(repository, "TASK-0001", "approvals.json"), approvals)
-    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
-    if implementation_path is not None:
-        implementation = repository / implementation_path
-        implementation.parent.mkdir(parents=True, exist_ok=True)
-        implementation.write_text("implemented\n", encoding="utf-8")
-        run_git(repository, "add", implementation_path)
-        run_git(
-            repository,
-            "-c",
-            "user.name=AI Flow Tests",
-            "-c",
-            "user.email=aiflow@example.invalid",
-            "commit",
-            "-m",
-            "implementation",
-        )
+    seed = _get_gate_seed(bool(review), implementation_path)
+    repository = tmp_path / "repository"
+    shutil.copytree(seed, repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
     monkeypatch.setattr(verification_service, "parse_verification_plan", _plan())
-    assert main(["verify", "TASK-0001", "--actor", "verifier"]) == 0
     return repository
 
 

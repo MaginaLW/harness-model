@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
+import stat
+from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -24,23 +27,55 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DECLARATION = {"scope": {"clear": True}, "impact_categories": [], "controlled_actions": []}
 
 
-@pytest.fixture
-def draft(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> tuple[Path, Path]:
-    repository = create_repository(tmp_path / "repository")
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module")
+def draft_seed(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
+    repository = create_repository(tmp_path_factory.mktemp("facts-rec-seed") / "repository")
     for name in ("schemas", "policy", "templates"):
         shutil.copytree(PROJECT_ROOT / ".ai" / name, repository / ".ai" / name)
-    monkeypatch.chdir(repository)
-    assert main(["start", "--objective", "bounded facts", "--allow", "src/**"]) == 0
+    with pytest.MonkeyPatch.context() as mp:
+        mp.chdir(repository)
+        assert main(["start", "--objective", "bounded facts", "--allow", "src/**"]) == 0
     path = resolve_task_path(repository, "TASK-0001", "task.yaml")
     task = yaml.safe_load(path.read_text(encoding="utf-8"))
     second = deepcopy(task["decision_units"][0])
     second["decision_unit_id"] = "DU-002"
     task["decision_units"].append(second)
     atomic_write_yaml(path, task)
+    (repository / "facts.json").write_text(json.dumps(DECLARATION), encoding="utf-8")
+    expected = _seed_tree_sha256(repository)
+    yield repository
+    assert _seed_tree_sha256(repository) == expected
+
+
+@pytest.fixture
+def draft(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    draft_seed: Path,
+) -> tuple[Path, Path]:
+    repository = tmp_path / "repository"
+    shutil.copytree(draft_seed, repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
     source = repository / "facts.json"
-    source.write_text(json.dumps(DECLARATION), encoding="utf-8")
     capsys.readouterr()
     return repository, source
 

@@ -8,7 +8,9 @@ import hashlib
 import json
 import re
 import shutil
+import stat
 import subprocess
+from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path
 
@@ -82,8 +84,28 @@ def bundle_files_by_target(manifest: dict[str, object]) -> dict[str, Path]:
     return bundled_by_target
 
 
-@pytest.fixture
-def historical_replay(tmp_path: Path) -> dict[str, object]:
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module")
+def _historical_replay_seed(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Iterator[tuple[dict[str, object], Path, dict[str, Path]]]:
     manifest = load_bundle_manifest()
     bundled_by_target = bundle_files_by_target(manifest)
     source_commit = manifest["source_governance_commit"]
@@ -94,7 +116,7 @@ def historical_replay(tmp_path: Path) -> dict[str, object]:
     commits = (source_commit, evidence["base_commit"], evidence["subject_commit"])
     assert all(isinstance(sha, str) and re.fullmatch("[0-9a-f]{40}", sha) for sha in commits)
 
-    replay = tmp_path / "replay"
+    replay = tmp_path_factory.mktemp("historical-replay-seed") / "replay"
     subprocess.run(["git", "init", "-q", str(replay)], check=True)
     # The checkout and the two diff endpoints are the only historical commits the replay reads.
     subprocess.run(
@@ -161,10 +183,23 @@ def historical_replay(tmp_path: Path) -> dict[str, object]:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(bundled_by_target[target_path], target)
         assert hashlib.sha256(target.read_bytes()).hexdigest() == digest
+    expected = _seed_tree_sha256(replay)
+    yield manifest, replay, bundled_by_target
+    assert _seed_tree_sha256(replay) == expected
+
+
+@pytest.fixture
+def historical_replay(
+    tmp_path: Path,
+    _historical_replay_seed: tuple[dict[str, object], Path, dict[str, Path]],
+) -> dict[str, object]:
+    manifest, seed_replay, bundled_by_target = _historical_replay_seed
+    replay = tmp_path / "replay"
+    shutil.copytree(seed_replay, replay, copy_function=shutil.copyfile)
     return {
-        "manifest": manifest,
+        "manifest": deepcopy(manifest),
         "replay": replay,
-        "bundled_by_target": bundled_by_target,
+        "bundled_by_target": dict(bundled_by_target),
     }
 
 

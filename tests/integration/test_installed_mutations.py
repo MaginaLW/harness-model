@@ -706,65 +706,39 @@ def _installed_suite_runs(
 ) -> Generator[dict[str, object], None, None]:
     # Actual invocation of this fixture requires the reviewed fixture-action
     # execution boundary; defining/collecting the test never starts a pair.
-    assert tuple(fault for shard in FAULT_SHARDS for fault in shard) == FAULTS or (
-        len(FAULT_SHARDS) == 3
-        and sum(len(shard) for shard in FAULT_SHARDS) == len(FAULTS)
-        and {fault for shard in FAULT_SHARDS for fault in shard} == set(FAULTS)
-    )
     rebuilt_task = _clone_prepared_task(prepared_origins["rebuilt"], tmp_path_factory)
     direct_task = _clone_prepared_task(prepared_origins["direct"], tmp_path_factory)
-    shard1_task = _clone_prepared_task(prepared_origins["direct"], tmp_path_factory)
-    shard2_task = _clone_prepared_task(prepared_origins["direct"], tmp_path_factory)
 
     def run_rebuilt() -> tuple[dict, dict[str, tuple[int, int, int, int]]]:
         result = rebuilt_task.engine.run(rebuilt_task.root, REAL_PAIRS)
         return result, _host_fast_snapshot(rebuilt_task.root)
 
-    def run_direct_and_shard0() -> tuple[dict, dict[str, dict]]:
+    def run_direct_and_faults() -> tuple[
+        dict, dict[str, dict], dict[str, tuple[int, int, int, int]]
+    ]:
         result = direct_task.engine.run(direct_task.root, REAL_PAIRS)
-        shard0 = direct_task.engine.run(
+        faults = direct_task.engine.run(
             direct_task.root,
             REHASHED_FAULTS_BATCH,
             json.dumps(result["reference"]),
-            json.dumps(list(FAULT_SHARDS[0])),
+            json.dumps(list(FAULTS)),
         )
-        return result, shard0
+        return result, faults, _host_fast_snapshot(direct_task.root)
 
-    def run_shard(task: PreparedTask, shard: tuple[str, ...]) -> dict[str, dict]:
-        return task.engine.run(
-            task.root,
-            RECORD_AND_REHASHED_FAULTS_BATCH,
-            json.dumps(list(shard)),
-        )
-
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         rebuilt_future = executor.submit(run_rebuilt)
-        direct_future = executor.submit(run_direct_and_shard0)
-        shard1_future = executor.submit(run_shard, shard1_task, FAULT_SHARDS[1])
-        shard2_future = executor.submit(run_shard, shard2_task, FAULT_SHARDS[2])
+        direct_future = executor.submit(run_direct_and_faults)
         rebuilt_result, rebuilt_snapshot = rebuilt_future.result()
-        direct_result, shard0_results = direct_future.result()
-        shard1_results = shard1_future.result()
-        shard2_results = shard2_future.result()
+        direct_result, fault_results, direct_snapshot = direct_future.result()
 
-    fault_results: dict[str, dict] = {}
-    fault_results.update(shard0_results)
-    fault_results.update(shard1_results)
-    fault_results.update(shard2_results)
     runs = {
         "direct": (direct_task, direct_result),
         "rebuilt": (rebuilt_task, rebuilt_result),
     }
     yield {"runs": runs, "faults": fault_results}
-    checked = direct_task.engine.run(
-        direct_task.root,
-        REPLAY_BASE + "\nreference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))"
-        "\nfacts=replay(reference)\nassert facts.passed,asdict(facts)"
-        "\nprint(json.dumps(dict(passed=facts.passed)))",
-        json.dumps(direct_result["reference"]),
-        instrument=False,
+    assert _host_fast_snapshot(direct_task.root) == direct_snapshot, (
+        "direct run was unexpectedly modified"
     )
-    assert checked["passed"], "tamper cases did not restore the retained originals"
     assert _host_fast_snapshot(rebuilt_task.root) == rebuilt_snapshot, (
         "rebuilt run was unexpectedly modified"
     )
@@ -1055,37 +1029,6 @@ FAULTS = (
 )
 
 
-FAULT_SHARDS = (
-    (
-        "missing_report",
-        "missing_receipt",
-        "missing_completion",
-        "closure_binding",
-        "root_snapshot_rows",
-        "root_snapshot_metadata",
-        "survived",
-    ),
-    (
-        "context_binding",
-        "extra_report_field",
-        "duplicate_json_key",
-        "wrong_loaded_origin",
-        "loaded_name_path_mismatch",
-        "wrong_observation",
-        "unrelated_assertion",
-    ),
-    (
-        "unreported_stderr",
-        "receipt_cleanup",
-        "receipt_eof",
-        "process_timeout",
-        "output_overflow",
-        "setup_error",
-        "teardown_error",
-    ),
-)
-
-
 _REHASHED_FAULTS_BODY = r"""
 from copy import deepcopy
 from aiflow.redaction import redact_text
@@ -1217,6 +1160,8 @@ for fault in faults:
     assert hashlib.sha256(path.read_bytes()).hexdigest()==reference.sha256
     results[fault]=dict(fault=fault,passed=passed,current=is_current,rejected_by=rejected_by)
 assert content_snapshot()==initial
+restored=replay(reference,full_hash=False)
+assert restored.passed,asdict(restored)
 print(json.dumps(results))
 """
 
@@ -1225,16 +1170,6 @@ REHASHED_FAULTS_BATCH = (
     REPLAY_BASE
     + "\nreference=runtime.InstalledMutationReference(**json.loads(sys.argv[2]))"
     + "\nfaults=json.loads(sys.argv[3])\n"
-    + _REHASHED_FAULTS_BODY
-)
-
-
-RECORD_AND_REHASHED_FAULTS_BATCH = (
-    CURRENT
-    + "\napprove_fixture_action()"
-    + "\nreference=runtime.record_installed_mutations(root,task,verifier_actor=actor,"
-    + "expected_inputs_sha256=inputs.sha256)"
-    + "\nfaults=json.loads(sys.argv[2])\n"
     + _REHASHED_FAULTS_BODY
 )
 

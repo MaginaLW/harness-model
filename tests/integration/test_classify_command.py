@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
+import stat
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -49,6 +52,77 @@ def _unit(task_id: str, **changes: object) -> dict[str, object]:
     }
     unit.update(changes)
     return unit
+
+
+_CLASSIFY_SEED_BASE_DIR: Path | None = None
+_CLASSIFY_SEED_ENTRIES: dict[str, tuple[Path, str]] = {}
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _classify_module_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _CLASSIFY_SEED_BASE_DIR
+    _CLASSIFY_SEED_BASE_DIR = tmp_path_factory.mktemp("classify-cmd-seeds")
+    _CLASSIFY_SEED_ENTRIES.clear()
+    try:
+        yield
+        for key, (seed_path, expected) in _CLASSIFY_SEED_ENTRIES.items():
+            assert _seed_tree_sha256(seed_path) == expected, (
+                f"Classify module seed {key!r} was mutated during test execution"
+            )
+    finally:
+        _CLASSIFY_SEED_ENTRIES.clear()
+        _CLASSIFY_SEED_BASE_DIR = None
+
+
+def _get_classify_seed(key: str) -> Path:
+    entry = _CLASSIFY_SEED_ENTRIES.get(key)
+    if entry is not None:
+        return entry[0]
+    assert _CLASSIFY_SEED_BASE_DIR is not None
+    seed_repo = _CLASSIFY_SEED_BASE_DIR / key / "repository"
+    create_repository(seed_repo)
+    with pytest.MonkeyPatch.context() as mp:
+        start(seed_repo, mp)
+    if key == "prepared_default":
+        task_path = resolve_task_path(seed_repo, "TASK-0001", "task.yaml")
+        task = read_task_yaml(seed_repo, "TASK-0001", "task.yaml", contract_name="task")
+        assert isinstance(task, dict)
+        task["decision_units"] = [_unit("TASK-0001")]
+        atomic_write_yaml(task_path, task)
+    _CLASSIFY_SEED_ENTRIES[key] = (seed_repo, _seed_tree_sha256(seed_repo))
+    return seed_repo
+
+
+def _started_repository(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, **changes: object) -> Path:
+    key = "started" if changes else "prepared_default"
+    repository = tmp_path / "repository"
+    shutil.copytree(_get_classify_seed(key), repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
+    if changes:
+        task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
+        task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
+        assert isinstance(task, dict)
+        task["decision_units"] = [_unit("TASK-0001", **changes)]
+        atomic_write_yaml(task_path, task)
+    return repository
 
 
 def _prepare(repository: Path, monkeypatch: pytest.MonkeyPatch, **changes: object) -> None:
@@ -139,8 +213,7 @@ def test_classify_routes_all_four_outcomes(
     route: str,
     event_type: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, **changes)
+    repository = _started_repository(tmp_path, monkeypatch, **changes)
 
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     record = load_task_record(repository, "TASK-0001")
@@ -171,8 +244,7 @@ def test_classify_routes_all_four_outcomes(
 def test_classify_same_identity_does_not_append_events(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     count = len(load_task_record(repository, "TASK-0001").events)
 
@@ -190,8 +262,7 @@ def test_classify_requires_explicit_risk_inputs_without_writes(
     capsys: pytest.CaptureFixture[str],
     missing_fields: tuple[str, ...],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
     task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
     assert isinstance(task, dict)
@@ -233,8 +304,7 @@ def test_classify_rejects_invalid_risk_inputs_without_writes(
     field: str,
     value: object,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, **{field: value})
+    repository = _started_repository(tmp_path, monkeypatch, **{field: value})
     task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
     paths = [
         task_path,
@@ -252,8 +322,7 @@ def test_classify_rejects_invalid_risk_inputs_without_writes(
 def test_legacy_same_identity_classification_remains_a_read_only_no_op(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
     task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
@@ -288,8 +357,7 @@ def test_classify_reports_every_missing_risk_fact_across_decision_units(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
     task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
     assert isinstance(task, dict)
@@ -323,8 +391,9 @@ def test_pending_classification_rechecks_identity_and_risk_before_any_write(
     capsys: pytest.CaptureFixture[str],
     stale_fact: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, external_side_effects=["credential_export"])
+    repository = _started_repository(
+        tmp_path, monkeypatch, external_side_effects=["credential_export"]
+    )
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     old = read_task_json(
         repository, "TASK-0001", "classification.json", contract_name="classification"
@@ -425,9 +494,8 @@ def test_pending_classification_rechecks_identity_and_risk_before_any_write(
 def test_reclassification_rejects_reverted_outside_task_history(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, outside_path: str
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(
-        repository,
+    repository = _started_repository(
+        tmp_path,
         monkeypatch,
         impact={"level": "medium"},
         permission_requirements=["action_approval"],
@@ -552,8 +620,9 @@ def test_reclassification_rejects_reverted_outside_task_history(
 def test_completed_pending_replay_allows_bound_recovery_and_only_cleans_marker(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, external_side_effects=["credential_export"])
+    repository = _started_repository(
+        tmp_path, monkeypatch, external_side_effects=["credential_export"]
+    )
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     old = read_task_json(
         repository, "TASK-0001", "classification.json", contract_name="classification"
@@ -626,8 +695,9 @@ def test_completed_pending_replay_allows_bound_recovery_and_only_cleans_marker(
 def test_co_matched_ask_and_review_waits_for_the_user_choice(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, business_direction_count=2, impact_categories=["ci"])
+    repository = _started_repository(
+        tmp_path, monkeypatch, business_direction_count=2, impact_categories=["ci"]
+    )
 
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     classification = read_task_json(
@@ -654,9 +724,8 @@ def test_co_matched_ask_and_review_waits_for_the_user_choice(
 def test_block_has_priority_over_a_co_matched_ask(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(
-        repository,
+    repository = _started_repository(
+        tmp_path,
         monkeypatch,
         business_direction_count=2,
         external_side_effects=["credential_export"],
@@ -743,8 +812,9 @@ def test_cli_rejects_reclassification_that_drops_a_co_matched_ask(
     capsys: pytest.CaptureFixture[str],
     changes: dict[str, object],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, business_direction_count=2, impact_categories=["ci"])
+    repository = _started_repository(
+        tmp_path, monkeypatch, business_direction_count=2, impact_categories=["ci"]
+    )
     _ready_reclassification(repository, changes=changes, escalation_route="REVIEW")
     paths = [
         resolve_task_path(repository, "TASK-0001", "task.yaml"),
@@ -761,8 +831,9 @@ def test_cli_rejects_reclassification_that_drops_a_co_matched_ask(
 def test_cli_allows_higher_block_reclassification_without_carrying_old_ask(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, business_direction_count=2, impact_categories=["ci"])
+    repository = _started_repository(
+        tmp_path, monkeypatch, business_direction_count=2, impact_categories=["ci"]
+    )
     _ready_reclassification(
         repository,
         changes={"external_side_effects": ["credential_export"]},
@@ -786,8 +857,9 @@ def test_cli_allows_higher_block_reclassification_without_carrying_old_ask(
 def test_mixed_ask_review_waits_for_answer_before_spec_review(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
+    repository = tmp_path / "repository"
+    shutil.copytree(_get_classify_seed("started"), repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
     task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
     task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
     assert isinstance(task, dict)
@@ -824,9 +896,8 @@ def test_v2_facts_use_the_v2_contract_independently_of_route(
     route_changes: dict[str, object],
     expected_route: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(
-        repository,
+    repository = _started_repository(
+        tmp_path,
         monkeypatch,
         verification_requirements={
             "acceptance_required": True,
@@ -882,8 +953,9 @@ def test_v2_to_v1_is_a_downgrade_and_v1_to_v2_is_an_upgrade() -> None:
 def test_blocked_reclassification_binds_old_and_new_identity_and_authorization(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, external_side_effects=["credential_export"])
+    repository = _started_repository(
+        tmp_path, monkeypatch, external_side_effects=["credential_export"]
+    )
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
     before = read_task_json(
         repository, "TASK-0001", "classification.json", contract_name="classification"
@@ -951,9 +1023,8 @@ def test_blocked_reclassification_binds_old_and_new_identity_and_authorization(
 def test_verification_only_block_can_upgrade_to_review_without_manual_authorization(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(
-        repository,
+    repository = _started_repository(
+        tmp_path,
         monkeypatch,
         verification={"automatic": True, "tools_missing": True},
     )
@@ -1021,8 +1092,7 @@ def test_classify_rejects_paths_outside_segment_aware_scope(
     impact_scope: list[str],
     allowed_scope: list[str],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch, impact_scope=impact_scope)
+    repository = _started_repository(tmp_path, monkeypatch, impact_scope=impact_scope)
     task_path = resolve_task_path(repository, "TASK-0001", "task.yaml")
     task = read_task_yaml(repository, "TASK-0001", "task.yaml", contract_name="task")
     assert isinstance(task, dict)
@@ -1036,8 +1106,7 @@ def test_classify_rejects_paths_outside_segment_aware_scope(
 def test_classify_rejects_repository_identity_mismatch(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     (repository / ".ai" / "repository-id").write_text(
         "123e4567-e89b-42d3-a456-426614174001\n", encoding="utf-8"
     )
@@ -1048,8 +1117,7 @@ def test_classify_rejects_repository_identity_mismatch(
 def test_classification_write_failure_does_not_change_state_or_events(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     from aiflow import classification_service
 
     def fail_write(_path: Path, _value: object) -> None:
@@ -1064,8 +1132,7 @@ def test_classification_write_failure_does_not_change_state_or_events(
 def test_invalid_policy_does_not_write_classification_or_transition(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     (repository / ".ai" / "policy" / "routing.yaml").write_text("invalid: [", encoding="utf-8")
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 1
     record = load_task_record(repository, "TASK-0001")
@@ -1080,8 +1147,7 @@ def test_invalid_persisted_matched_rules_do_not_write_task_state_or_events(
     capsys: pytest.CaptureFixture[str],
     invalid_case: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     assert main(["classify", "TASK-0001", "--actor", "classifier"]) == 0
 
     classification_path = resolve_task_path(repository, "TASK-0001", "classification.json")
@@ -1109,8 +1175,7 @@ def test_invalid_persisted_matched_rules_do_not_write_task_state_or_events(
 def test_second_transition_failure_recovers_from_classified_on_retry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    _prepare(repository, monkeypatch)
+    repository = _started_repository(tmp_path, monkeypatch)
     from aiflow import classification_service
 
     original = classification_service.transition_task_record
