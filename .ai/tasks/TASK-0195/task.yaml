@@ -1,0 +1,75 @@
+allowed_scope:
+- pyproject.toml
+- uv.lock
+- src/aiflow/__init__.py
+- src/aiflow/resource_bundle.py
+- tests/unit/test_cli.py
+- tests/unit/test_resource_bundle.py
+- tests/integration/test_resource_bundle_distribution.py
+- CHANGELOG.md
+- README.md
+- docs/operations/maintenance-status.md
+base_commit: 559a066352305e4e2baebc2104e530c9957e07a7
+branch: codex/d32-release-030-prep
+created_at: '2026-11-25T20:30:49Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Prepare 0.3.0 release milestone metadata, changelog, and documentation
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - pyproject.toml
+  - uv.lock
+  - src/aiflow/__init__.py
+  - src/aiflow/resource_bundle.py
+  - tests/unit/test_cli.py
+  - tests/unit/test_resource_bundle.py
+  - tests/integration/test_resource_bundle_distribution.py
+  - CHANGELOG.md
+  - README.md
+  - docs/operations/maintenance-status.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0195
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: b01e9b5f467254271a6dbf3218c8ab94b1e26c77084397fa8ab0b3731dc267ed
+goal: Prepare 0.3.0 release milestone metadata, changelog, and documentation
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-25T20:31:30Z'
+subject_commit: 9cd96b49c3be8f296788acc32e830501afc5ebb9
+task_id: TASK-0195
+updated_at: '2026-11-25T21:02:45Z'
+worktree_dirty: false
+worktree_dirty_paths: []

@@ -1,12 +1,16 @@
 # Changelog
 
-本项目使用语义化版本。`0.1.0` 与 `0.2.0` 均固定本地可安装、可审计的源码基线；不代表
+本项目使用语义化版本。`0.1.0`、`0.2.0` 与 `0.3.0` 均固定本地可安装、可审计的源码基线；不代表
 package 已发布到外部 registry。
 
 ## Unreleased
 
+## 0.3.0 - 2026-11-26
+
 ### Changed
 
+- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.2.0` 提升至 `0.3.0`（仓库内里程碑准备，未创建 `v0.3.0` Git tag 或 GitHub Release；TASK-0195）。
+- 扩展跨仓 Python 验证支持：将核心覆盖率检查内核抽离至可安装的 `src/aiflow/coverage_check.py`（保留 `tools/ci/check_coverage.py` 兼容薄包装、延迟导入 `coverage`、公共 `validate_source_domain` 路径校验与硬编码 `85%`/`90%` 门槛），并支持 `verification.py` 解析安全 `--cov=<target>` 与 `-m aiflow.coverage_check --source ...`（TASK-0192，PR #216 / #217）。
 - 完成第四轮（Batch 3）纯测试夹具运行时优化（`tests/**` 9 个模块引入模块级只读 Git/策略种子与 SHA-256 守卫、`_sign` 签名缓存及只读材料树复用；用例节点 ID 保持 5,172 == 5,172 1-to-1 对等，Windows 全量 `--cov-branch` 由 `2107.18s` 降至 `1707.88s` 且核心分支覆盖率保持 90%，Ubuntu `ai-quality-gate` 由 `9m19s` 降至 `5m12s`，PR #214）。
 - 完成第三轮（Batch 2）纯测试夹具运行时优化（`tests/**` 11 个模块引入模块级只读种子与 SHA-256 守卫，并收敛 `test_installed_mutations.py` 冗余并发安装回放；用例节点 ID 保持 5,172 == 5,172 1-to-1 对等，核心分支覆盖率保持 90%，PR #212）。
 - 将 `tools/` 全部门禁与 Hook 脚本纳入严格 `mypy` 检查（`pyproject.toml` 与 `verification-levels.yaml`），并将 `setup.py`、`MANIFEST.in` 与 `tools/hooks/**` 补入 `HARD-REVIEW-GOVERNANCE-SURFACE` 与 `AGENTS.md` 升级清单（`policy_version` 保持 `"2.6.0"`，TASK-0190，PR #207 / #208）。
@@ -28,6 +32,8 @@ package 已发布到外部 registry。
 
 ### Added
 
+- 交付 POSIX/Linux `init apply` 后端 `src/aiflow/initialization_posix.py`（`PosixFilesystem` 强制 `O_NOFOLLOW | O_CLOEXEC`、严格子名称与路径校验、`link`/`unlink`/`fsync` 原子非覆盖发布及发布后 `volume`/`file_id`/`links == 1` 核验），在 `initialization.py` 按平台分派并保持 `WindowsFilesystem` monkeypatch 接缝（TASK-0193，PR #218 / #219）。
+- 新增只读非评分命令 `aiflow advise <TASK-ID> [--format {text,json}]` 与 `src/aiflow/advisory_service.py`，基于原生 `status`/`gate`/`review`/`task` 服务组合生成确定性状态解释报告（固定 `probability_status="unestimated"`、`execution_allowed=False`、`permission_effect="none"`、`ledger_effect="none"`，字节级零写入 `.ai/`；TASK-0194，PR #220 / #221）。
 - 交付 V2 定向变异检测归因实现与 schema `2.0`（`mutation_protocol`、`mutation_reporter`、`mutation_materials`、`mutation_process` 及 5 项定向变异锚点与失败归因，经独立 3 方 V2 14/14 验证与所有者授权 7 份脱敏披露合入 `main`，替代并关闭原候选 PR #186 / TASK-0175；TASK-0191，PR #209 / #210）。
 - 保全 TASK-0031 失败轮的详细验证证据为 `.ai/tasks/TASK-0031/evidence-failed-20260901T001936Z.json`。该轮 `unit_tests`、`regression_tests`、`coverage_xml` 三项失败，其明细被 01:03:10 通过轮重写 `evidence.json` 时覆盖，此后仅存于一个 GitHub Desktop 创建的 stash，而其依附分支已在分支整理中删除。事件账本记录了失败这一事实，重试理由亦写明本意是保留失败证据，但目录中并无保留明细的文件。落盘副本与原件 SHA-256 逐位相同，TASK-0031 的既有记录一字未改。依据 REC-04「保留失败证据以供审计」与「失败不得被后续成功覆盖」。
 
