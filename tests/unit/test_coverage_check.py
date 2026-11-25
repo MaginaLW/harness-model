@@ -47,7 +47,7 @@ def _setup_repo(
     ],
 )
 def test_validate_source_domain_accepts_clean_relative_posix_paths(valid_source: str) -> None:
-    assert coverage_check._validate_source_domain(valid_source) == valid_source
+    assert coverage_check.validate_source_domain(valid_source) == valid_source
 
 
 @pytest.mark.parametrize(
@@ -76,7 +76,7 @@ def test_validate_source_domain_accepts_clean_relative_posix_paths(valid_source:
 )
 def test_validate_source_domain_rejects_unsafe_paths(invalid_source: str) -> None:
     with pytest.raises(ValueError):
-        coverage_check._validate_source_domain(invalid_source)
+        coverage_check.validate_source_domain(invalid_source)
 
 
 def test_importing_coverage_check_does_not_require_coverage_package() -> None:
@@ -84,7 +84,7 @@ def test_importing_coverage_check_does_not_require_coverage_package() -> None:
         "import sys; sys.modules['coverage'] = None; "
         "import aiflow.coverage_check as m; "
         "assert 'coverage' in sys.modules and sys.modules['coverage'] is None; "
-        "assert m._validate_source_domain('src/pkg') == 'src/pkg'"
+        "assert m.validate_source_domain('src/pkg') == 'src/pkg'"
     )
     src_root = str(Path(__file__).resolve().parents[2] / "src")
     env = dict(os.environ)

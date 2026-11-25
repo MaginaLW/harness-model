@@ -12,7 +12,7 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Literal
 
-from aiflow.coverage_check import _validate_source_domain
+from aiflow.coverage_check import validate_source_domain
 from aiflow.errors import ContractError
 from aiflow.policy import PolicyBundle
 
@@ -282,7 +282,7 @@ def _is_valid_diff_coverage_argv(
         if trailing[index] != "--source":
             return False
         try:
-            _validate_source_domain(trailing[index + 1])
+            validate_source_domain(trailing[index + 1])
         except ValueError:
             return False
     return True

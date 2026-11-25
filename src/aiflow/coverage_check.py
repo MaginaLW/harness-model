@@ -16,7 +16,7 @@ _BASE_SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
 _DOMAIN_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 
 
-def _validate_source_domain(source: str) -> str:
+def validate_source_domain(source: str) -> str:
     """Validate a clean repository-relative POSIX directory path."""
     if not isinstance(source, str) or not source or source.startswith("/") or source.endswith("/"):
         raise ValueError("source domain must be a non-empty relative POSIX path")
@@ -43,7 +43,7 @@ def _validate_domains(domains: Sequence[tuple[str, str]]) -> tuple[tuple[str, st
         if name in seen_names:
             raise ValueError(f"{name}: duplicate coverage domain name")
         seen_names.add(name)
-        validated.append((name, _validate_source_domain(relative)))
+        validated.append((name, validate_source_domain(relative)))
     return tuple(validated)
 
 
@@ -136,7 +136,7 @@ def check_coverage(
 def _domains_from_sources(sources: Sequence[str] | None) -> tuple[tuple[str, str], ...]:
     if not sources:
         return DEFAULT_DOMAINS
-    unique_sources = tuple(dict.fromkeys(_validate_source_domain(source) for source in sources))
+    unique_sources = tuple(dict.fromkeys(validate_source_domain(source) for source in sources))
     if len(unique_sources) == 1:
         return (("target", unique_sources[0]),)
     return tuple(
