@@ -1,0 +1,45 @@
+{
+  "base_commit": "f9420c095fd9648d878717bdf7e1f12a4f65a688",
+  "branch": "codex/d21-cross-repo-python-verify",
+  "classification_input_sha256": "f663aabdb23b79e4fb40658d6607ffcaa36e49f4b250a83fb215bb558b448bd1",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/coverage_check.py",
+      "tools/ci/check_coverage.py",
+      "src/aiflow/verification.py",
+      "tests/unit/test_coverage_check.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/integration/test_external_python_verify.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Support cross-repo Python verification via portable coverage_check and verification plan",
+        "impact_scope": [
+          "src/aiflow/coverage_check.py",
+          "tools/ci/check_coverage.py",
+          "src/aiflow/verification.py",
+          "tests/unit/test_coverage_check.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/integration/test_external_python_verify.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Support cross-repo Python verification via portable coverage_check and verification plan",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "5d608ad9b76f7a4bb870ad7dcd0bf155ef52dc785c8208037af8b65e57319364",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "05891d34e0efbb41719557214f88a3492de4133c3423fb04a9dc6b3dd6673cb8",
+  "task_id": "TASK-0192"
+}

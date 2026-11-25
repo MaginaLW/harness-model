@@ -1,0 +1,69 @@
+allowed_scope:
+- src/aiflow/coverage_check.py
+- tools/ci/check_coverage.py
+- src/aiflow/verification.py
+- tests/unit/test_coverage_check.py
+- tests/unit/test_verification_plan.py
+- tests/integration/test_external_python_verify.py
+base_commit: f9420c095fd9648d878717bdf7e1f12a4f65a688
+branch: codex/d21-cross-repo-python-verify
+created_at: '2026-11-25T16:52:16Z'
+current_state: WAITING_FOR_FINAL_REVIEW
+decision_units:
+- change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Support cross-repo Python verification via portable coverage_check and verification
+    plan
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/coverage_check.py
+  - tools/ci/check_coverage.py
+  - src/aiflow/verification.py
+  - tests/unit/test_coverage_check.py
+  - tests/unit/test_verification_plan.py
+  - tests/integration/test_external_python_verify.py
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0192
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 05891d34e0efbb41719557214f88a3492de4133c3423fb04a9dc6b3dd6673cb8
+goal: Support cross-repo Python verification via portable coverage_check and verification
+  plan
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-25T16:53:01Z'
+subject_commit: 83359313df1e84c8174087672d6dde1ae9901477
+task_id: TASK-0192
+updated_at: '2026-11-25T18:02:41Z'
+worktree_dirty: false
+worktree_dirty_paths: []
