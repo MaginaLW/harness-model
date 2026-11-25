@@ -31,7 +31,7 @@
 
 ## 证据
 
-1. **正式 V1 验证（REC-04 重试后全量通过）**：`uv run --locked python -m aiflow verify TASK-0192 --actor verifier-v1`（已记录于 `.ai/tasks/TASK-0192/evidence.json`，绑定 `subject_commit: 83359313df1e84c8174087672d6dde1ae9901477`）：
+1. **已验证结果（REC-04 重试后正式 V1 验证全量通过）**：`uv run --locked python -m aiflow verify TASK-0192 --actor verifier-v1`（已记录于 `.ai/tasks/TASK-0192/evidence.json`，绑定 `subject_commit: 83359313df1e84c8174087672d6dde1ae9901477`）：
    - 全部 10/10 项 V1 检查 `passed`（`contract`、`scope`、`ruff_check`、`ruff_format_check`、`smoke`、`unit_tests`、`regression_tests`、`mypy`、`coverage_xml`、`diff_coverage`）。
    - `pytest --cov=aiflow --cov-branch`：`5256 passed, 9 skipped in 1415.12s`（`core` 总分支覆盖率 `90%` >= `85%`；`src/aiflow/coverage_check.py` 分支覆盖率 `97%`；`src/aiflow/verification.py` 分支覆盖率 `92%`）。
    - `diff_coverage`：Diff coverage **98%** >= `90%`（`130` 行、`2` 行未覆盖；`coverage_check.py` `98.0%`、`verification.py` `100%`）。

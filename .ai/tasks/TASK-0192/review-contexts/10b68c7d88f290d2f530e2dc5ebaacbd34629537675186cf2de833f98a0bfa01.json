@@ -1,0 +1,155 @@
+{
+  "base_commit": "f9420c095fd9648d878717bdf7e1f12a4f65a688",
+  "branch": "codex/d21-cross-repo-python-verify",
+  "classification_input_sha256": "f663aabdb23b79e4fb40658d6607ffcaa36e49f4b250a83fb215bb558b448bd1",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/coverage_check.py",
+      "tools/ci/check_coverage.py",
+      "src/aiflow/verification.py",
+      "tests/unit/test_coverage_check.py",
+      "tests/unit/test_verification_plan.py",
+      "tests/integration/test_external_python_verify.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Support cross-repo Python verification via portable coverage_check and verification plan",
+        "impact_scope": [
+          "src/aiflow/coverage_check.py",
+          "tools/ci/check_coverage.py",
+          "src/aiflow/verification.py",
+          "tests/unit/test_coverage_check.py",
+          "tests/unit/test_verification_plan.py",
+          "tests/integration/test_external_python_verify.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "src/aiflow/coverage_check.py",
+        "src/aiflow/verification.py",
+        "tests/integration/test_external_python_verify.py",
+        "tests/unit/test_coverage_check.py",
+        "tests/unit/test_verification_plan.py",
+        "tools/ci/check_coverage.py"
+      ],
+      "files": [
+        {
+          "additions": 167,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/coverage_check.py"
+        },
+        {
+          "additions": 46,
+          "binary": false,
+          "deletions": 18,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 435,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_external_python_verify.py"
+        },
+        {
+          "additions": 394,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_coverage_check.py"
+        },
+        {
+          "additions": 195,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_verification_plan.py"
+        },
+        {
+          "additions": 14,
+          "binary": false,
+          "deletions": 64,
+          "path": "tools/ci/check_coverage.py"
+        }
+      ],
+      "totals": {
+        "additions": 1251,
+        "deletions": 82,
+        "files": 6
+      }
+    },
+    "goal": "Support cross-repo Python verification via portable coverage_check and verification plan",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0192",
+        "--actor",
+        "verifier-v1"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "10b68c7d88f290d2f530e2dc5ebaacbd34629537675186cf2de833f98a0bfa01",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "e68f9954964e8f3bf874311f81e2d6db8b0c5f0a976aa34aa57a28ad2ed7da0c",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "05891d34e0efbb41719557214f88a3492de4133c3423fb04a9dc6b3dd6673cb8",
+  "subject_commit": "83359313df1e84c8174087672d6dde1ae9901477",
+  "task_id": "TASK-0192"
+}

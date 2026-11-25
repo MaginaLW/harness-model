@@ -12,5 +12,20 @@
     "spec_sha256": "05891d34e0efbb41719557214f88a3492de4133c3423fb04a9dc6b3dd6673cb8",
     "subject_commit": "f9420c095fd9648d878717bdf7e1f12a4f65a688",
     "task_id": "TASK-0192"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-25T18:05:30Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "f9420c095fd9648d878717bdf7e1f12a4f65a688",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "e68f9954964e8f3bf874311f81e2d6db8b0c5f0a976aa34aa57a28ad2ed7da0c",
+    "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+    "reason": "常设授权：独立实现审核 APPROVE，无未关闭 critical/high 发现，本地 V1 全项通过，不触及所有者逐次决定事项",
+    "schema_version": "1.0",
+    "spec_sha256": "05891d34e0efbb41719557214f88a3492de4133c3423fb04a9dc6b3dd6673cb8",
+    "subject_commit": "83359313df1e84c8174087672d6dde1ae9901477",
+    "task_id": "TASK-0192"
   }
 ]
