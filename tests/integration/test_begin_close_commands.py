@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import shutil
+import stat
 import subprocess
 import tempfile
+from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -86,7 +88,84 @@ def create_repository(path: Path) -> Path:
         )
         _populate_repository(Path(template.name))
         _TEMPLATE.append(template)
-    return Path(shutil.copytree(_TEMPLATE[0].name, path))
+    return Path(shutil.copytree(_TEMPLATE[0].name, path, copy_function=shutil.copyfile))
+
+
+_BEGIN_CLOSE_SEED_BASE_DIR: Path | None = None
+_BEGIN_CLOSE_SEED_ENTRIES: dict[str, tuple[Path, str]] = {}
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _begin_close_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _BEGIN_CLOSE_SEED_BASE_DIR
+    _BEGIN_CLOSE_SEED_BASE_DIR = tmp_path_factory.mktemp("begin-close-seeds")
+    _BEGIN_CLOSE_SEED_ENTRIES.clear()
+    try:
+        yield
+        for state, (seed_path, expected) in _BEGIN_CLOSE_SEED_ENTRIES.items():
+            assert _seed_tree_sha256(seed_path) == expected, (
+                f"Module seed {state!r} was mutated during test execution"
+            )
+    finally:
+        _BEGIN_CLOSE_SEED_ENTRIES.clear()
+        _BEGIN_CLOSE_SEED_BASE_DIR = None
+
+
+def _build_begin_close_seed(repository: Path, state: str) -> None:
+    create_repository(repository)
+    with pytest.MonkeyPatch.context() as mp:
+        start(repository, mp)
+        if state == "started":
+            return
+        if state == "ready:AUTO:False:unfrozen":
+            make_ready(repository, freeze_spec=False)
+            return
+        if state.startswith("ready:"):
+            _, route, approval_flag = state.split(":")
+            make_ready(repository, route=route, valid_approval=(approval_flag == "True"))
+            return
+        if state == "implementing:AUTO":
+            make_ready(repository)
+            assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+            return
+        if state == "approved:AUTO":
+            make_ready(repository)
+            assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+            make_approved(repository)
+            return
+        raise AssertionError(f"unknown begin-close seed state: {state}")
+
+
+def _clone_prepared_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, state: str) -> Path:
+    entry = _BEGIN_CLOSE_SEED_ENTRIES.get(state)
+    if entry is None:
+        assert _BEGIN_CLOSE_SEED_BASE_DIR is not None
+        seed_repo = _BEGIN_CLOSE_SEED_BASE_DIR / f"seed-{len(_BEGIN_CLOSE_SEED_ENTRIES)}" / "repo"
+        _build_begin_close_seed(seed_repo, state)
+        entry = (seed_repo, _seed_tree_sha256(seed_repo))
+        _BEGIN_CLOSE_SEED_ENTRIES[state] = entry
+    repository = tmp_path / "repository"
+    shutil.copytree(entry[0], repository, copy_function=shutil.copyfile)
+    monkeypatch.chdir(repository)
+    return repository
 
 
 def start(repository: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -254,9 +333,7 @@ def test_begin_ready_task(
     route: str,
     with_approval: bool,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, route=route, valid_approval=with_approval)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, f"ready:{route}:{with_approval}")
 
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
 
@@ -269,9 +346,7 @@ def test_begin_and_status_accept_spec_approval_after_subject_changes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, route="REVIEW", valid_approval=True)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "ready:REVIEW:True")
     commit_all(repository, "record approved specification")
     task = load_task_record(repository, "TASK-0001").task
     task["subject_commit"] = run_git(repository, "rev-parse", "HEAD")
@@ -317,9 +392,7 @@ def test_begin_rejects_invalid_spec_approval_without_writes(
     field: str,
     replacement: str | None,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, route="REVIEW", valid_approval=True)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "ready:REVIEW:True")
     approvals = read_task_json(repository, "TASK-0001", "approvals.json")
     if replacement is None:
         approvals[0].pop(field)
@@ -345,9 +418,7 @@ def test_begin_accepts_current_approval_among_stale_history(
     monkeypatch: pytest.MonkeyPatch,
     valid_first: bool,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, route="REVIEW", valid_approval=True)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "ready:REVIEW:True")
     valid = read_task_json(repository, "TASK-0001", "approvals.json")[0]
     stale = dict(valid, base_commit="0" * 40)
     approvals = [valid, stale] if valid_first else [stale, valid]
@@ -367,8 +438,7 @@ def test_begin_requires_approval_for_each_review_unit(
     capsys: pytest.CaptureFixture[str],
     approve_second: bool,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "started")
     task = load_task_record(repository, "TASK-0001").task
     second = deepcopy(task["decision_units"][0])
     second["decision_unit_id"] = "DU-002"
@@ -404,9 +474,7 @@ def test_begin_rejects_missing_frozen_spec(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, freeze_spec=False)
+    _clone_prepared_repo(tmp_path, monkeypatch, "ready:AUTO:False:unfrozen")
 
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
     assert "frozen" in capsys.readouterr().err.lower()
@@ -417,9 +485,7 @@ def test_begin_rejects_missing_review_approval(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, route="REVIEW")
+    _clone_prepared_repo(tmp_path, monkeypatch, "ready:REVIEW:False")
 
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
     assert "approval" in capsys.readouterr().err.lower()
@@ -430,9 +496,7 @@ def test_begin_rejects_business_worktree_drift(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "ready:AUTO:False")
     (repository / "tracked.txt").write_text("changed after start\n", encoding="utf-8")
 
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
@@ -443,9 +507,7 @@ def test_begin_accepts_current_task_governance_only_commits(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, route="REVIEW", valid_approval=True)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "ready:REVIEW:True")
     commit_all(repository, "record current task governance")
 
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
@@ -462,9 +524,7 @@ def test_begin_rejects_non_current_task_commits_after_subject(
     capsys: pytest.CaptureFixture[str],
     drift: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository, route="REVIEW", valid_approval=True)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "ready:REVIEW:True")
     if drift == "business":
         (repository / "tracked.txt").write_text("committed business drift\n", encoding="utf-8")
     else:
@@ -482,10 +542,7 @@ def test_failed_retry_requires_reason_and_records_normal_retry(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository)
-    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "implementing:AUTO")
     make_failed(repository, {"summary": "tests failed"})
 
     assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 1
@@ -526,10 +583,7 @@ def test_risky_failure_requires_escalation(
     capsys: pytest.CaptureFixture[str],
     marker: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository)
-    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "implementing:AUTO")
     make_failed(repository, {marker: True})
 
     assert main(["begin", "TASK-0001", "--actor", "implementer", "--reason", "retry"]) == 1
@@ -541,9 +595,7 @@ def test_close_rejects_early_state_and_unknown_commit(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "ready:AUTO:False")
 
     close = [
         "close",
@@ -602,11 +654,7 @@ def test_close_rejects_unmerged_candidate_without_writes(
     capsys: pytest.CaptureFixture[str],
     history: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository)
-    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
-    make_approved(repository)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "approved:AUTO")
     base = run_git(repository, "rev-parse", "HEAD")
     subject = close_commit(repository, "reviewed candidate", base)
     unrelated = close_commit(repository, "unrelated root")
@@ -675,11 +723,7 @@ def test_close_records_existing_merge_without_running_merge(
     monkeypatch: pytest.MonkeyPatch,
     history: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository)
-    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
-    make_approved(repository)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "approved:AUTO")
     base = run_git(repository, "rev-parse", "HEAD")
     subject = close_commit(repository, "reviewed candidate", base)
     target = close_commit(repository, "target branch", base)
@@ -745,11 +789,7 @@ def test_close_rejects_unavailable_merge_facts_without_writes(
     capsys: pytest.CaptureFixture[str],
     failure: str,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
-    make_ready(repository)
-    assert main(["begin", "TASK-0001", "--actor", "implementer"]) == 0
-    make_approved(repository)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "approved:AUTO")
     base = run_git(repository, "rev-parse", "HEAD")
     target = close_commit(repository, "target branch", base)
     incoming = close_commit(repository, "incoming branch", base)
@@ -818,8 +858,7 @@ def test_classify_records_durable_evidence_and_is_idempotent(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    repository = create_repository(tmp_path / "repository")
-    start(repository, monkeypatch)
+    repository = _clone_prepared_repo(tmp_path, monkeypatch, "started")
     task = load_task_record(repository, "TASK-0001").task
     task["decision_units"][0].update(impact_categories=[], controlled_actions=[])
     atomic_write_yaml(resolve_task_path(repository, "TASK-0001", "task.yaml"), task)

@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import shutil
+import stat
 import subprocess
 import sys
+from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -47,15 +51,48 @@ FACTS: dict[str, Any] = {
 }
 
 
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module")
+def draft_seed(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
+    seed = tmp_path_factory.mktemp("facts-cmd-seed") / "repository"
+    create_repository(seed)
+    with pytest.MonkeyPatch.context() as mp:
+        mp.chdir(seed)
+        assert main(["start", "--objective", "bounded", "--allow", "src/module.py"]) == 0
+    (seed / "facts.json").write_text(json.dumps(FACTS), encoding="utf-8")
+    expected = _seed_tree_sha256(seed)
+    yield seed
+    assert _seed_tree_sha256(seed) == expected
+
+
 @pytest.fixture
 def draft(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    draft_seed: Path,
 ) -> tuple[Path, Path]:
-    repository = create_repository(tmp_path / "repository")
+    repository = tmp_path / "repository"
+    shutil.copytree(draft_seed, repository, copy_function=shutil.copyfile)
     monkeypatch.chdir(repository)
-    assert main(["start", "--objective", "bounded", "--allow", "src/module.py"]) == 0
     source = repository / "facts.json"
-    source.write_text(json.dumps(FACTS), encoding="utf-8")
     capsys.readouterr()
     return repository, source
 

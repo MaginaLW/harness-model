@@ -8,9 +8,12 @@ import hashlib
 import importlib
 import importlib.metadata
 import json
+import shutil
+import stat
 import subprocess
 import threading
 import tomllib
+from collections.abc import Iterator
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -47,11 +50,29 @@ def commit(repository: Path, message: str) -> str:
     return git(repository, "rev-parse", "HEAD")
 
 
-@pytest.fixture
-def repository(tmp_path: Path) -> tuple[Path, str, str]:
-    root = tmp_path / "repository"
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module")
+def _repository_seed(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Path, str, str]]:
+    root = tmp_path_factory.mktemp("sdk-review-seed") / "repository"
     root.mkdir()
-    git(root, "init", "-b", "main")
+    git(root, "init", "--template=", "-b", "main")
     (root / "docs").mkdir()
     (root / ".gitignore").write_text("/build/\n", encoding="utf-8")
     (root / "docs/candidate.md").write_text(
@@ -63,6 +84,16 @@ def repository(tmp_path: Path) -> tuple[Path, str, str]:
         "# Contract\n\nUpdated requirement.\n", encoding="utf-8"
     )
     candidate = commit(root, "docs: naturally required contract revision")
+    expected = _seed_tree_sha256(root)
+    yield root, candidate, reference
+    assert _seed_tree_sha256(root) == expected
+
+
+@pytest.fixture
+def repository(tmp_path: Path, _repository_seed: tuple[Path, str, str]) -> tuple[Path, str, str]:
+    seed_root, candidate, reference = _repository_seed
+    root = tmp_path / "repository"
+    shutil.copytree(seed_root, root, copy_function=shutil.copyfile)
     return root, candidate, reference
 
 

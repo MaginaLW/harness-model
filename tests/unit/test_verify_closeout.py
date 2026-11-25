@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import shutil
+import stat
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -26,22 +30,57 @@ from tools.ci.verify_closeout import verify_closeout, verify_retained
 TASK = "TASK-0001"
 
 
-@pytest.fixture
-def closed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, str, str]:
-    root = create_repository(tmp_path / "repo")
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module")
+def _closed_seed(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Path, str, str]]:
+    root = create_repository(tmp_path_factory.mktemp("closeout-closed-seed") / "repo")
     initial = run_git(root, "rev-parse", "HEAD")
-    start(root, monkeypatch)
-    make_ready(root)
-    assert aiflow(["begin", TASK, "--actor", "implementer"]) == 0
-    make_approved(root)
-    commit_all(root, "approved candidate")
-    approved = run_git(root, "rev-parse", "HEAD")
-    target = close_commit(root, "target advances", initial)
-    merge = close_commit(root, "merge implementation", target, approved)
-    run_git(root, "switch", "-c", "closeout", merge)
-    close_task(root, TASK, actor="closer", result="merged", merge_commit=merge)
-    commit_all(root, "record native close")
-    return root, merge, run_git(root, "rev-parse", "HEAD")
+    with pytest.MonkeyPatch.context() as mp:
+        start(root, mp)
+        make_ready(root)
+        assert aiflow(["begin", TASK, "--actor", "implementer"]) == 0
+        make_approved(root)
+        commit_all(root, "approved candidate")
+        approved = run_git(root, "rev-parse", "HEAD")
+        target = close_commit(root, "target advances", initial)
+        merge = close_commit(root, "merge implementation", target, approved)
+        run_git(root, "switch", "-c", "closeout", merge)
+        close_task(root, TASK, actor="closer", result="merged", merge_commit=merge)
+        commit_all(root, "record native close")
+    head = run_git(root, "rev-parse", "HEAD")
+    expected = _seed_tree_sha256(root)
+    yield root, merge, head
+    assert _seed_tree_sha256(root) == expected
+
+
+@pytest.fixture
+def closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    _closed_seed: tuple[Path, str, str],
+) -> tuple[Path, str, str]:
+    seed_root, merge, head = _closed_seed
+    root = tmp_path / "repo"
+    shutil.copytree(seed_root, root, copy_function=shutil.copyfile)
+    monkeypatch.chdir(root)
+    return root, merge, head
 
 
 def test_native_closeout_uses_pr_snapshots_even_after_target_advances(
@@ -97,26 +136,43 @@ def test_closeout_accepts_only_native_changes(
         verify_closeout(root, merge, run_git(root, "rev-parse", "HEAD"), TASK)
 
 
+@pytest.fixture(scope="module")
+def _failed_seed(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Path, str, str]]:
+    root = create_repository(tmp_path_factory.mktemp("closeout-failed-seed") / "repo")
+    with pytest.MonkeyPatch.context() as mp:
+        start(root, mp)
+        make_ready(root)
+        assert aiflow(["begin", TASK, "--actor", "implementer"]) == 0
+        directory = root / ".ai" / "tasks" / TASK
+        (directory / "evidence.json").write_bytes(
+            (
+                Path(__file__).resolve().parents[1] / "fixtures/contracts/valid/evidence.json"
+            ).read_bytes()
+        )
+        commit_all(root, "keep implementation and original evidence")
+        before_failure = run_git(root, "rev-parse", "HEAD")
+        make_failed(root, {"conclusion": "failed"})
+        (directory / "failure-notes.md").write_text(
+            "Preserve the failed verification.\n", encoding="utf-8"
+        )
+        commit_all(root, "retain failed verification")
+    head = run_git(root, "rev-parse", "HEAD")
+    expected = _seed_tree_sha256(root)
+    yield root, before_failure, head
+    assert _seed_tree_sha256(root) == expected
+
+
 @pytest.fixture
-def failed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, str, str]:
-    root = create_repository(tmp_path / "repo")
-    start(root, monkeypatch)
-    make_ready(root)
-    assert aiflow(["begin", TASK, "--actor", "implementer"]) == 0
-    directory = root / ".ai" / "tasks" / TASK
-    (directory / "evidence.json").write_bytes(
-        (
-            Path(__file__).resolve().parents[1] / "fixtures/contracts/valid/evidence.json"
-        ).read_bytes()
-    )
-    commit_all(root, "keep implementation and original evidence")
-    before_failure = run_git(root, "rev-parse", "HEAD")
-    make_failed(root, {"conclusion": "failed"})
-    (directory / "failure-notes.md").write_text(
-        "Preserve the failed verification.\n", encoding="utf-8"
-    )
-    commit_all(root, "retain failed verification")
-    return root, before_failure, run_git(root, "rev-parse", "HEAD")
+def failed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    _failed_seed: tuple[Path, str, str],
+) -> tuple[Path, str, str]:
+    seed_root, before_failure, head = _failed_seed
+    root = tmp_path / "repo"
+    shutil.copytree(seed_root, root, copy_function=shutil.copyfile)
+    monkeypatch.chdir(root)
+    return root, before_failure, head
 
 
 def test_retained_new_ledger_and_existing_task_transition(failed: tuple[Path, str, str]) -> None:
