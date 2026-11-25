@@ -12,6 +12,7 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Literal
 
+from aiflow.coverage_check import _validate_source_domain
 from aiflow.errors import ContractError
 from aiflow.policy import PolicyBundle
 
@@ -31,6 +32,7 @@ ALLOWED_VARIABLES = frozenset(
 ALLOWED_PARSERS = frozenset({"exit_zero", "pytest", "coverage_xml", "diff_cover"})
 _VARIABLE_PATTERN = re.compile(r"\{([^{}]+)\}")
 _RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+_COV_TARGET_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*(?:/[A-Za-z_][A-Za-z0-9_.]*)*$")
 # Every pytest check runs the same full coverage suite, so the plan executes it once.
 PYTEST_CHECK_IDS = frozenset(
     {"unit_tests", "regression_tests", "coverage_xml", "acceptance", "integration"}
@@ -250,23 +252,51 @@ def _tool_available(argv: tuple[str, ...]) -> bool:
     )
 
 
+def _is_valid_pytest_argv(
+    argv: tuple[str, ...], context: VerificationContext, run_dir: Path
+) -> bool:
+    if (
+        len(argv) != 6
+        or argv[:3] != (context.python, "-m", "pytest")
+        or not argv[3].startswith("--cov=")
+        or argv[4:] != ("--cov-branch", f"--cov-report=xml:{(run_dir / 'coverage.xml').as_posix()}")
+    ):
+        return False
+    cov_target = argv[3].removeprefix("--cov=")
+    return _COV_TARGET_PATTERN.fullmatch(cov_target) is not None
+
+
+def _is_valid_diff_coverage_argv(
+    argv: tuple[str, ...], context: VerificationContext, run_dir: Path
+) -> bool:
+    common_args = ("--run-dir", run_dir.as_posix(), "--base", context.base_commit)
+    if argv == (context.python, "tools/ci/check_coverage.py", *common_args):
+        return True
+    portable_prefix = (context.python, "-m", "aiflow.coverage_check", *common_args)
+    if argv[: len(portable_prefix)] != portable_prefix:
+        return False
+    trailing = argv[len(portable_prefix) :]
+    if len(trailing) % 2 != 0:
+        return False
+    for index in range(0, len(trailing), 2):
+        if trailing[index] != "--source":
+            return False
+        try:
+            _validate_source_domain(trailing[index + 1])
+        except ValueError:
+            return False
+    return True
+
+
 def _require_output_semantics(
     check: VerificationCheck, context: VerificationContext, run_dir: Path
 ) -> None:
     if check.check_id == "smoke" and check.argv[1:] != ("-m", "aiflow", "--help"):
         raise ContractError("Smoke command is invalid", code="VERIFICATION_COMMAND_INVALID")
     if check.check_id in PYTEST_CHECK_IDS:
-        expected_argv = (
-            context.python,
-            "-m",
-            "pytest",
-            "--cov=aiflow",
-            "--cov-branch",
-            f"--cov-report=xml:{(run_dir / 'coverage.xml').as_posix()}",
-        )
         expected_parser = "coverage_xml" if check.check_id == "coverage_xml" else "pytest"
         if (
-            check.argv != expected_argv
+            not _is_valid_pytest_argv(check.argv, context, run_dir)
             or check.environment != {"COVERAGE_FILE": (run_dir / ".coverage").as_posix()}
             or check.timeout_seconds != FULL_SUITE_TIMEOUT_SECONDS
             or check.result_parser != expected_parser
@@ -278,16 +308,8 @@ def _require_output_semantics(
                 else "VERIFICATION_COMMAND_INVALID",
             )
     if check.check_id == "diff_coverage":
-        expected_coverage_argv = (
-            context.python,
-            "tools/ci/check_coverage.py",
-            "--run-dir",
-            run_dir.as_posix(),
-            "--base",
-            context.base_commit,
-        )
         if (
-            check.argv != expected_coverage_argv
+            not _is_valid_diff_coverage_argv(check.argv, context, run_dir)
             or check.environment != {}
             or check.timeout_seconds != 120
             or check.required is not True
@@ -591,6 +613,12 @@ def parse_verification_plan(
         )
         for check_id in required_ids
     )
+    pytest_cov_targets = {check.argv[3] for check in checks if check.check_id in PYTEST_CHECK_IDS}
+    if len(pytest_cov_targets) > 1:
+        raise ContractError(
+            "Pytest checks must share the same coverage target",
+            code="VERIFICATION_COVERAGE_CONFIG_INVALID",
+        )
     grouped: dict[tuple[object, ...], list[str]] = {}
     execution_checks: dict[tuple[object, ...], VerificationCheck] = {}
     for check in checks:
