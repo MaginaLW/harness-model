@@ -2,7 +2,7 @@
 
 [PR #140](https://github.com/MaginaLW/harness-model/pull/140) 引入 Python 非覆盖初始化；[PR #143](https://github.com/MaginaLW/harness-model/pull/143) 增加 Node profile 和本地 V0/V1。
 
-普通 wheel 提供 `init preview`、`apply`、`inspect` 和 `migration-plan`，支持 `native-python-v1` 与 `agent-bridge-node@1`。目标均须是已有提交的普通 Git 工作树，首次预览尚无 `.ai`。Python profile 要求 Python 源码及 `[project].name`，根目录不能有 `package.json`；Node profile 要求根 `package.json` 的非空 name 和 check/build/test 脚本，以及显式输入的四份完整 `3.1.0` Policy。写入限 Windows x64、CPython 3.11、本地 NTFS；[Node 本地 V0/V1](node-verification.md)已提供，真实 agent-bridge 采用另行交付。
+普通 wheel 提供 `init preview`、`apply`、`inspect` 和 `migration-plan`，支持 `native-python-v1` 与 `agent-bridge-node@1`。目标均须是已有提交的普通 Git 工作树，首次预览尚无 `.ai`。Python profile 要求 Python 源码及 `[project].name`，根目录不能有 `package.json`；Node profile 要求根 `package.json` 的非空 name 和 check/build/test 脚本，以及显式输入的四份完整 `3.1.0` Policy。写入支持 Windows x64（CPython 3.11、本地 NTFS）及 POSIX / Linux（CPython >= 3.11）；[Node 本地 V0/V1](node-verification.md)已提供，真实 agent-bridge 采用另行交付。
 
 先按[资源包说明](resource-bundle.md)构建并安装普通 wheel。可编辑安装没有内置资源，不会隐式读取源码仓 `.ai`。运行材料中的绝对路径只保存在本地，预览和审核文件放在目标仓之外。
 
@@ -57,6 +57,8 @@ apply 重核原预览和材料，只创建固定清单内的新对象，以最�
 inspect 和 migration-plan 只报告状态、文件差异与历史存在性，不自动恢复、迁移或删除。升级 Python 包不会暗改目标 Policy 或 Schema。未知或修改后的对象需要目标负责人按当前规则处理。
 
 Windows 句柄在创建和身份发布期间保持对象保护；祖先目录仅需 TRAVERSE/READ_ATTRIBUTES，不要求系统 Temp 的 LIST_DIRECTORY。实际目标根和安装目录保留目录访问与共享约束。
+
+POSIX / Linux 使用持有目录文件描述符（`dir_fd`）及 `O_NOFOLLOW | O_CLOEXEC`（目录附加 `O_DIRECTORY`，新建文件附加 `O_CREAT | O_EXCL`）拒绝符号链接和既有对象覆盖，并通过同目录 `link`、`unlink` 与 `fsync` 原子无覆盖发布 `.ai/repository-id` 后复核对象标识（`st_dev`、`st_ino` 与 `st_nlink == 1`）。POSIX 不提供 Windows 风格打开句柄共享排他锁，不防备同用户并发写入。
 
 初始化只校验固定验证合同的结构，不准备工具或依赖、不探测 Node/npm、不运行 suite，也不证明目标验证已可执行。Node 本地 V0/V1 须显式准备绑定材料并完成任务验证、审核批准及 Gate，见[Node 验证](node-verification.md)。installed 外仓 V2 和目标 CI 当前仍不受支持。
 

@@ -23,6 +23,7 @@ import yaml
 from aiflow import initialization_git as git
 from aiflow.contracts import schema_directory_context
 from aiflow.errors import AiflowError
+from aiflow.initialization_posix import PosixFilesystem
 from aiflow.initialization_windows import WindowsFilesystem
 from aiflow.policy import (
     NODE_POLICY_VERSION,
@@ -55,6 +56,19 @@ IDENTITY = ".ai/repository-id"
 DIRECTORIES = (".ai", ".ai/policy", ".ai/schemas", ".ai/templates")
 RUNTIME_DIRECTORIES = frozenset({"tasks", "mutations"})
 _HEX = re.compile(r"[0-9a-f]{64}\Z")
+_DEFAULT_WINDOWS_FILESYSTEM = WindowsFilesystem
+
+
+def _platform_name() -> str:
+    return os.name
+
+
+def _open_filesystem() -> WindowsFilesystem | PosixFilesystem:
+    if WindowsFilesystem is not _DEFAULT_WINDOWS_FILESYSTEM or _platform_name() == "nt":
+        return WindowsFilesystem()
+    if _platform_name() == "posix":
+        return PosixFilesystem()
+    raise _error("UNSUPPORTED")
 
 
 def _error(reason: str) -> AiflowError:
@@ -546,7 +560,7 @@ def apply_initialization(
             "profile": profile,
             "phase": "already_complete",
         }
-    fs = WindowsFilesystem()
+    fs = _open_filesystem()
     handles: list[int] = []
     held: dict[str, int] = {}
     phase = "resumed" if found else "installed"
@@ -565,7 +579,8 @@ def apply_initialization(
                 raise _error("DIRECTORY_IDENTITY_CHANGED")
             if path == root:
                 held[""] = handle
-        if fs.volume(held[""])["filesystem"] != "NTFS":
+        expected_fs = "POSIX" if isinstance(fs, PosixFilesystem) else "NTFS"
+        if fs.volume(held[""])["filesystem"] != expected_fs:
             raise _error("FILESYSTEM_UNSUPPORTED")
         _same_target(root, proposal["target"], sources, profile)
         for relative in DIRECTORIES:

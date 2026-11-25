@@ -713,15 +713,16 @@ def test_preview_cannot_be_reused_for_another_clone(
 
 
 def test_unsupported_platform_application_does_not_write(
-    readonly_preview_context: tuple[Path, Path, dict], native_filesystem: None
+    readonly_preview_context: tuple[Path, Path, dict],
+    native_filesystem: None,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     repository, bundle, base_candidate = readonly_preview_context
-    # This is the real boundary on POSIX; Windows behavior is covered below.
-    if sys.platform == "win32":
-        pytest.skip("unsupported-platform behavior is exercised on POSIX")
+    monkeypatch.setattr(initialization, "_platform_name", lambda: "unsupported")
     before = tree(repository)
-    with pytest.raises(AiflowError):
+    with pytest.raises(AiflowError) as error:
         apply(repository, deepcopy(base_candidate), bundle)
+    assert error.value.code == "INITIALIZATION_UNSUPPORTED"
     assert tree(repository) == before
 
 
