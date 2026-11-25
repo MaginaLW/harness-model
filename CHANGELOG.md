@@ -9,7 +9,7 @@ package 已发布到外部 registry。
 
 ### Changed
 
-- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.2.0` 提升至 `0.3.0`（仓库内里程碑准备，未创建 `v0.3.0` Git tag 或 GitHub Release；TASK-0195）。
+- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.2.0` 提升至 `0.3.0`（仓库内里程碑准备，未创建 `v0.3.0` Git tag 或 GitHub Release；TASK-0195，PR #222 / #223）。
 - 扩展跨仓 Python 验证支持：将核心覆盖率检查内核抽离至可安装的 `src/aiflow/coverage_check.py`（保留 `tools/ci/check_coverage.py` 兼容薄包装、延迟导入 `coverage`、公共 `validate_source_domain` 路径校验与硬编码 `85%`/`90%` 门槛），并支持 `verification.py` 解析安全 `--cov=<target>` 与 `-m aiflow.coverage_check --source ...`（TASK-0192，PR #216 / #217）。
 - 完成第四轮（Batch 3）纯测试夹具运行时优化（`tests/**` 9 个模块引入模块级只读 Git/策略种子与 SHA-256 守卫、`_sign` 签名缓存及只读材料树复用；用例节点 ID 保持 5,172 == 5,172 1-to-1 对等，Windows 全量 `--cov-branch` 由 `2107.18s` 降至 `1707.88s` 且核心分支覆盖率保持 90%，Ubuntu `ai-quality-gate` 由 `9m19s` 降至 `5m12s`，PR #214）。
 - 完成第三轮（Batch 2）纯测试夹具运行时优化（`tests/**` 11 个模块引入模块级只读种子与 SHA-256 守卫，并收敛 `test_installed_mutations.py` 冗余并发安装回放；用例节点 ID 保持 5,172 == 5,172 1-to-1 对等，核心分支覆盖率保持 90%，PR #212）。

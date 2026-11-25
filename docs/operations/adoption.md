@@ -88,7 +88,7 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 
 ## 完整引擎的跨仓库边界
 
-当前 `0.2.0` 的[Quickstart](quickstart.md)针对 harness-model 的完整克隆。
+当前 `0.3.0` 的[Quickstart](quickstart.md)针对 harness-model 的完整克隆。
 仅安装 wheel 或执行 `pip install` 并不能把另一仓库变成 AI Flow 项目：
 
 - 普通 wheel 分发 `src/aiflow` 及[版本化资源包](resource-bundle.md)：15 份 Schema、四份 Policy 种子和规格模板。
@@ -104,7 +104,7 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 `facts` 提供显式风险事实的本地录入入口，[PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付版本化资源分发。
 [PR #140](https://github.com/MaginaLW/harness-model/pull/140)已交付 `init preview/apply/inspect/migration-plan`：
 `native-python-v1` 面向已有提交、Python 源码及 `[project].name`、尚无 `.ai` 的普通 Git 工作树；
-apply 限 Windows x64、CPython 3.11、本地 NTFS。它生成目标自己的 UUID，不覆盖旧配置；
+apply 支持 Windows x64（CPython 3.11、本地 NTFS）与 POSIX / Linux（CPython >= 3.11）。它生成目标自己的 UUID，不覆盖旧配置；
 精确恢复与重放边界见[初始化用法](initialization.md)。初始化不准备验证工具或依赖。
 已交付 Node 非覆盖初始化、[本地 V0/V1](node-verification.md)及[普通安装的本地 V2](node-verification.md#revision-2-local-v2)。目标 Node CI、combined Gate 与真实 agent-bridge 接入待验收。当前状态见[维护收尾与待办](maintenance-status.md#版本与用途)。
 
