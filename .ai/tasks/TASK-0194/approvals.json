@@ -1,0 +1,16 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-25T19:45:50Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "cc414e3a1dfe95bd3a8bd817bd7fa153880e2f63",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+    "reason": "常设授权：独立设计审核 APPROVE，无未关闭 critical/high 发现，不触及所有者逐次决定事项",
+    "schema_version": "1.0",
+    "spec_sha256": "b117322831f03d861c389e433d88e16e344a4f5b1ddba8f7890b547e2736ffef",
+    "subject_commit": "cc414e3a1dfe95bd3a8bd817bd7fa153880e2f63",
+    "task_id": "TASK-0194"
+  }
+]
