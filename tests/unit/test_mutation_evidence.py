@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import shutil
+import stat
 import sys
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import FrozenInstanceError, replace
 from datetime import datetime, timedelta, timezone
@@ -15,12 +19,17 @@ import pytest
 import aiflow.mutation_evidence as evidence
 from aiflow import mutation_materials, mutation_protocol
 from aiflow.errors import AiflowError, ContractError, StorageError
-from aiflow.mutation_manifest import load_mutation_manifest
+from aiflow.mutation_manifest import MutationManifest, load_mutation_manifest
 from aiflow.mutation_process import ProcessLifecycle
 from aiflow.mutation_runner import MutationProbe, MutationRun
 from tests.integration.test_begin_close_commands import commit_all, run_git
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _PRODUCTION_PREFLIGHT = evidence._preflight_targeted_mutation
+_CACHED_MANIFEST: MutationManifest | None = None
+_CACHED_MATERIALS: dict[str, bytes] | None = None
+_MATERIAL_SEED_BASE_DIR: Path | None = None
+_MATERIAL_SEED_ENTRY: tuple[Path, str] | None = None
 
 
 def _lifecycle(report: bytes, code: int | None) -> ProcessLifecycle | None:
@@ -113,7 +122,7 @@ def _run(
 
 
 def _synthetic_materials(manifest) -> dict[str, bytes]:
-    source_root = Path(__file__).resolve().parents[2]
+    source_root = PROJECT_ROOT
     paths = {item.target for item in manifest.mutations} | {
         ".ai/mutations/phase-02-critical-manifest.json",
         ".ai/policy/permissions.yaml",
@@ -150,6 +159,69 @@ def _synthetic_materials(manifest) -> dict[str, bytes]:
     return materials
 
 
+def _cached_manifest() -> MutationManifest:
+    global _CACHED_MANIFEST
+    if _CACHED_MANIFEST is None:
+        _CACHED_MANIFEST = load_mutation_manifest(PROJECT_ROOT)
+    return _CACHED_MANIFEST
+
+
+def _cached_materials() -> dict[str, bytes]:
+    global _CACHED_MATERIALS
+    if _CACHED_MATERIALS is None:
+        _CACHED_MATERIALS = _synthetic_materials(_cached_manifest())
+    return _CACHED_MATERIALS
+
+
+def _seed_tree_sha256(root: Path) -> str:
+    """Digest every directory, file byte, and link count inside a shared module seed."""
+    hasher = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix().encode("utf-8")
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise AssertionError(f"shared seed contains link: {path}")
+        if stat.S_ISDIR(info.st_mode):
+            hasher.update(b"D\0" + relative + b"\0")
+        elif stat.S_ISREG(info.st_mode):
+            assert info.st_nlink == 1, f"shared seed file has hardlink: {path}"
+            hasher.update(b"F\0" + relative + b"\0" + path.read_bytes() + b"\0")
+        else:
+            raise AssertionError(f"unexpected seed entry: {path}")
+    return hasher.hexdigest()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _material_seed_guard(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    global _MATERIAL_SEED_BASE_DIR, _MATERIAL_SEED_ENTRY
+    _MATERIAL_SEED_BASE_DIR = tmp_path_factory.mktemp("mutation-evidence-seeds")
+    _MATERIAL_SEED_ENTRY = None
+    try:
+        yield
+        if _MATERIAL_SEED_ENTRY is not None:
+            seed_path, expected = _MATERIAL_SEED_ENTRY
+            assert _seed_tree_sha256(seed_path) == expected, (
+                "Module material seed was mutated during test execution"
+            )
+    finally:
+        _MATERIAL_SEED_ENTRY = None
+        _MATERIAL_SEED_BASE_DIR = None
+
+
+def _ensure_material_seed() -> Path:
+    global _MATERIAL_SEED_ENTRY
+    if _MATERIAL_SEED_ENTRY is None:
+        assert _MATERIAL_SEED_BASE_DIR is not None
+        seed_dir = _MATERIAL_SEED_BASE_DIR / "materials"
+        seed_dir.mkdir(parents=True, exist_ok=True)
+        for name, content in _cached_materials().items():
+            destination = seed_dir / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(content)
+        _MATERIAL_SEED_ENTRY = (seed_dir, _seed_tree_sha256(seed_dir))
+    return _MATERIAL_SEED_ENTRY[0]
+
+
 def _prepare(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -158,8 +230,14 @@ def _prepare(
     authorized: bool = True,
 ):
     root = tmp_path
-    (root / ".ai" / "tasks" / "TASK-0014").mkdir(parents=True)
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    shutil.copytree(
+        _ensure_material_seed(),
+        root,
+        dirs_exist_ok=True,
+        copy_function=shutil.copyfile,
+    )
+    (root / ".ai" / "tasks" / "TASK-0014").mkdir(parents=True, exist_ok=True)
+    manifest = _cached_manifest()
     task = {
         "task_id": "TASK-0014",
         "current_state": "IMPLEMENTING",
@@ -171,11 +249,7 @@ def _prepare(
     }
     classification = {"classification_input_sha256": "d" * 64}
     calls = {"runner": 0}
-    materials = _synthetic_materials(manifest)
-    for name, content in materials.items():
-        destination = root / name
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(content)
+    materials = dict(_cached_materials())
     monkeypatch.setattr(evidence, "subject_materials", lambda *_: materials)
     monkeypatch.setattr(
         evidence, "mutation_bytes", lambda _item, data: data + b"synthetic mutant\n"
@@ -237,7 +311,7 @@ def _prepare(
 def test_public_recorder_rejects_missing_action_before_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest), authorized=False)
 
     with pytest.raises(ContractError) as caught:
@@ -570,7 +644,7 @@ def test_v2_consumer_rejects_incomplete_projection_before_loader(
 def test_v2_consumer_uses_only_current_loader_replay(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     receipt = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", receipt.evidence_ref)
@@ -590,7 +664,7 @@ def test_v2_consumer_uses_only_current_loader_replay(
 def test_v2_consumer_fails_closed_for_missing_or_non_killed_artifacts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tamper: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(
         tmp_path, monkeypatch, _run(manifest, mutant=0 if tamper == "survived" else 1)
     )
@@ -619,7 +693,7 @@ def test_v2_consumer_fails_closed_for_missing_or_non_killed_artifacts(
 def test_record_and_public_loader_round_trip_once(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest))
     artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     loaded = evidence.load_targeted_mutation_evidence(root, "TASK-0014", artifact.evidence_ref)
@@ -661,7 +735,7 @@ def test_record_derives_closed_outcomes(
     probe_reason,
     expected,
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(
         tmp_path,
         monkeypatch,
@@ -687,7 +761,7 @@ def test_record_derives_closed_outcomes(
 def test_record_rejects_noncanonical_runner_probes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     run = _run(manifest)
     probes = list(run.probes)
     if kind == "missing":
@@ -725,7 +799,7 @@ def test_record_rejects_noncanonical_runner_probes(
 def test_loader_fails_closed_for_tampering(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tamper: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     path = root / artifact.evidence_ref
@@ -787,7 +861,7 @@ def test_loader_fails_closed_for_tampering(
 def test_collision_and_symlink_fail_before_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest))
     logs = root / ".ai/tasks/TASK-0014/logs"
     logs.mkdir(parents=True)
@@ -803,7 +877,7 @@ def test_collision_and_symlink_fail_before_runner(
 
 
 def test_log_root_symlink_fails_closed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest))
     target = root / "outside"
     target.mkdir()
@@ -819,7 +893,7 @@ def test_log_root_symlink_fails_closed(tmp_path: Path, monkeypatch: pytest.Monke
 
 
 def test_partial_write_fails_closed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest))
     original = evidence._write_new_json
     writes = {"count": 0}
@@ -877,7 +951,7 @@ def test_create_new_publish_is_immutable(tmp_path: Path) -> None:
 def test_invalid_clock_or_nonce_fails_before_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, clock: datetime, nonce: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest))
     monkeypatch.setattr(evidence, "_utc_now", lambda: clock)
     monkeypatch.setattr(evidence, "_nonce_hex", lambda: nonce)
@@ -1217,7 +1291,7 @@ def test_reserve_logs_mkdir_oserror_is_stable(
 
 @pytest.mark.parametrize("bad_run", [None, object()])
 def test_runner_type_and_manifest_fail_before_artifact(bad_run: object) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     with pytest.raises(ContractError) as caught:
         evidence._validate_run(manifest, bad_run, "a" * 40)  # type: ignore[arg-type]
     assert caught.value.code == "MUTATION_EVIDENCE_INPUT_MISMATCH"
@@ -1227,7 +1301,7 @@ def test_runner_type_and_manifest_fail_before_artifact(bad_run: object) -> None:
 def test_loader_stable_codes_for_structural_tampering(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tamper: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     path = root / artifact.evidence_ref
@@ -1254,7 +1328,7 @@ def test_loader_stable_codes_for_structural_tampering(
 def test_manifest_load_failure_stops_before_runner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest))
     monkeypatch.setattr(
         evidence,
@@ -1272,7 +1346,7 @@ def test_manifest_load_failure_stops_before_runner(
 def test_loader_semantic_tampering_is_stable_after_schema_validation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     path = root / artifact.evidence_ref
@@ -1328,7 +1402,7 @@ def test_load_manifest_and_contract_key_errors_are_normalized(
         evidence._load_manifest(tmp_path)
     assert caught.value.code == "MUTATION_EVIDENCE_INPUT_MISMATCH"
 
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     monkeypatch.setattr(
         evidence, "require_valid_contract", lambda *_: (_ for _ in ()).throw(KeyError("x"))
@@ -1341,7 +1415,7 @@ def test_load_manifest_and_contract_key_errors_are_normalized(
 def test_loader_internal_semantics_cover_reordered_and_uncovered_records(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest, mutant=0))
     artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     path = root / artifact.evidence_ref
@@ -1402,7 +1476,7 @@ def test_reserve_rejects_lexical_log_symlink_and_unconvertible_clock(
 def test_v2_loader_rejects_process_source_drift(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     (root / "src/aiflow/mutation_process.py").write_text("changed", encoding="utf-8")
@@ -1659,7 +1733,7 @@ def test_current_action_receipt_is_replayed_at_consumption_time(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tamper: str | None
 ) -> None:
     task_id = "TASK-0014"
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     original_action_functions = (
         evidence._consume_targeted_mutation_action,
         evidence._complete_targeted_mutation_action,
@@ -1725,7 +1799,7 @@ def test_current_action_receipt_is_replayed_at_consumption_time(
 def test_preflight_rejects_before_consuming_action(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest), authorized=False)
     task_dir = root / ".ai/tasks/TASK-0014"
     monkeypatch.setattr(
@@ -1783,7 +1857,7 @@ def test_preflight_rejects_before_consuming_action(
 def test_material_drift_under_reservation_lock_keeps_approval_unused(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest), authorized=False)
     original_materials = evidence.subject_materials
     materials = dict(original_materials(root, "a" * 40))
@@ -1817,7 +1891,7 @@ def test_material_drift_under_reservation_lock_keeps_approval_unused(
 
 
 def _record_historical_exits(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     artifact = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     artifact_path = root / artifact.evidence_ref
@@ -2069,7 +2143,7 @@ def test_report_storage_rejects_invalid_encoded_inputs(invalid: str) -> None:
 def test_derive_outcome_requires_pinned_report_and_transform(
     monkeypatch: pytest.MonkeyPatch, kind: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     declaration = manifest.mutations[0]
     run = _run(manifest, mutant=0 if kind == "survived" else 1)
     probe = run.probes[0]
@@ -2116,7 +2190,7 @@ def test_derive_outcome_requires_pinned_report_and_transform(
 def test_failed_mutant_requires_expected_call_to_satisfy_consumer(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     run = _run(manifest)
     probe = run.probes[0]
     assert probe.mutant_report is not None
@@ -2156,7 +2230,7 @@ def test_failed_mutant_requires_expected_call_to_satisfy_consumer(
 def test_replay_rejects_resigned_receipt_with_incomplete_or_unbound_lifecycle(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, phase: str, tamper: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     receipt = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     path = root / receipt.evidence_ref
@@ -2188,7 +2262,7 @@ def test_replay_rejects_resigned_receipt_with_incomplete_or_unbound_lifecycle(
 def test_tracked_checkout_filter_rejects_before_action_receipt(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, moment: str
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, calls = _prepare(tmp_path, monkeypatch, _run(manifest), authorized=False)
     doc = root / "docs/fixture.txt"
     doc.parent.mkdir()
@@ -2241,7 +2315,7 @@ def test_tracked_checkout_filter_rejects_before_action_receipt(
 def test_consumer_rejects_non_object_at_any_projection_position(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, position: int
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     record = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", record.evidence_ref)
@@ -2254,7 +2328,7 @@ def test_consumer_rejects_non_object_at_any_projection_position(
 def test_consumer_normalizes_oversized_json_integer_within_artifact_limit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    manifest = load_mutation_manifest(Path(__file__).resolve().parents[2])
+    manifest = _cached_manifest()
     root, _, _ = _prepare(tmp_path, monkeypatch, _run(manifest))
     record = evidence.record_targeted_mutation_evidence(root, "TASK-0014", "a" * 40)
     artifact = evidence.load_targeted_mutation_evidence(root, "TASK-0014", record.evidence_ref)
