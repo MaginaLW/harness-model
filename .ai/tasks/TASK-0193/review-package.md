@@ -2,7 +2,7 @@
 
 ## 审核目标
 
-对 `TASK-0193`（分支 `codex/d22-posix-init`，基线 `2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7`，实现提交 `67690043a86840047b27fc81be81f52c7cd523f8`）进行独立实现审核（`REV-0002` / `--stage implementation`）：确认改动严格限定于批准的 5 个 D2.2 文件与 `.ai/tasks/TASK-0193/**`（不含 `logs/`），`initialization_windows.py`、`test_initialization_windows.py`、`cli.py`、`verification.py`、`.ai/policy/*` 与 `.ai/schemas/*` 零改动，保留 `WindowsFilesystem` monkeypatch 接缝与原子 `O_NOFOLLOW` / `link` 非覆盖语义，且本机 V1 全套 10 项验证全部通过。
+对 `TASK-0193`（分支 `codex/d22-posix-init`，基线 `2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7`，实现提交 `a5ce7b075582f7b49e4e6500be174e602dfc31b4`）进行独立实现审核（`REV-0003` / `--stage implementation`）：确认改动严格限定于批准的 5 个 D2.2 文件与 `.ai/tasks/TASK-0193/**`（不含 `logs/`），`initialization_windows.py`、`test_initialization_windows.py`、`cli.py`、`verification.py`、`.ai/policy/*` 与 `.ai/schemas/*` 零改动，保留 `WindowsFilesystem` monkeypatch 接缝与原子 `O_NOFOLLOW` / `link` 非覆盖语义，且在修复 `test_initialization_posix.py` 实盘 POSIX 局部续跑路径后重跑本机 V1 全套 10 项验证全部通过。
 
 ## 背景
 
@@ -10,7 +10,7 @@
 
 ## 代码地图
 
-仅修改/新增以下 5 个非账本文件（`git diff 2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7..67690043a86840047b27fc81be81f52c7cd523f8`）：
+仅修改/新增以下 5 个非账本文件（`git diff 2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7..a5ce7b075582f7b49e4e6500be174e602dfc31b4`）：
 - `src/aiflow/initialization_posix.py`（新增）：实现 `PosixFilesystem(api=None)`（`_pin_ancestor`、`open_directory`、`open_file`、`create_directory`、`create_file`、`read`、`write`、`flush`、`identity`、`volume`、`rename_no_replace`、`close`），全程使用 `O_NOFOLLOW | O_CLOEXEC`，通过 `link` + `unlink` + `fsync` 与发布后 `volume`/`file_id`/`links == 1` 核验实现原子非覆盖发布，并支持注入 `api` 以在 Windows 上覆盖全部分支。
 - `src/aiflow/initialization.py`（修改）：保留 `_DEFAULT_WINDOWS_FILESYSTEM = WindowsFilesystem` 接缝，新增 `_platform_name()` 与 `_open_filesystem()`（在 monkeypatch 替换 `WindowsFilesystem` 或 `_platform_name() == "nt"` 时返回 `WindowsFilesystem()`，`_platform_name() == "posix"` 时返回 `PosixFilesystem()`，其余抛出 `INITIALIZATION_UNSUPPORTED`），并将卷校验扩展为按后端接受 `"NTFS"` 或 `"POSIX"`。
 - `tests/unit/test_initialization_posix.py`（新增）：使用伪造 POSIX `api` 覆盖全部分支与故障路径（符号链接、`st_nlink != 1`、`FileExistsError`、短写、读溢出、非法句柄/名称、关闭失败、不支持平台），并包含在 `os.name == "posix"` 上运行的真实文件系统集成测试。
@@ -29,17 +29,17 @@
 
 ## 证据
 
-1. **已验证结果（正式 V1 全量通过）**：`uv run --locked python -m aiflow verify TASK-0193 --actor verifier-v1`（记录于 `.ai/tasks/TASK-0193/evidence.json`，绑定 `subject_commit: 67690043a86840047b27fc81be81f52c7cd523f8`）：
+1. **已验证结果（正式 V1 全量通过）**：`uv run --locked python -m aiflow verify TASK-0193 --actor verifier-v1`（记录于 `.ai/tasks/TASK-0193/evidence.json`，绑定 `subject_commit: a5ce7b075582f7b49e4e6500be174e602dfc31b4`）：
    - 全部 10/10 项 V1 检查 `passed`（`contract`、`scope`、`ruff_check`、`ruff_format_check`、`smoke`、`unit_tests`、`regression_tests`、`mypy`、`coverage_xml`、`diff_coverage`）。
-   - `pytest --cov=aiflow --cov-branch`：`5313 passed, 9 skipped in 1445.92s`（`core` 总分支覆盖率 `90%` >= `85%`；`src/aiflow/initialization_posix.py` `100%`（268 语句、68 分支全覆盖）；`src/aiflow/initialization.py` `89%`）。
+   - `pytest --cov=aiflow --cov-branch`：`5313 passed, 9 skipped in 1458.71s`（`core` 总分支覆盖率 `90%` >= `85%`；`src/aiflow/initialization_posix.py` `100%`（268 语句、68 分支全覆盖）；`src/aiflow/initialization.py` `89%`）。
    - `diff_coverage`：Diff coverage **100%** >= `90%`（`281` 行、`0` 行未覆盖；`initialization.py` `100%`、`initialization_posix.py` `100%`）。
    - `mypy`、`ruff check .`、`ruff format --check .`：全部通过。
-2. **未验证场景**：远端 GitHub Actions Ubuntu `ai-quality-gate` 工作流（含 `os.name == "posix"` 真实文件系统初始化集成测试，将在开 PR 后执行）。
+2. **未验证场景**：远端 GitHub Actions Ubuntu `ai-quality-gate` 工作流（含 `os.name == "posix"` 真实文件系统初始化集成测试，将在推送 `a5ce7b07` 后续提交后重新执行）。
 
 ## 审核问题
 
 请独立审核者明确裁决以下问题：
-1. `git diff 2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7..67690043a86840047b27fc81be81f52c7cd523f8` 是否严格仅触及批准的 5 个文件，且 `initialization_windows.py`、`test_initialization_windows.py`、`cli.py`、`verification.py`、`.ai/policy/*`、`.ai/schemas/*` 均未改动？
+1. `git diff 2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7..a5ce7b075582f7b49e4e6500be174e602dfc31b4` 是否严格仅触及批准的 5 个文件，且 `initialization_windows.py`、`test_initialization_windows.py`、`cli.py`、`verification.py`、`.ai/policy/*`、`.ai/schemas/*` 均未改动？
 2. `PosixFilesystem` 是否严格强制 `O_NOFOLLOW | O_CLOEXEC`、原子 `link`/`unlink`/`fsync` 非覆盖语义、发布后 `links == 1` 与严格子名称校验，且 `_DEFAULT_WINDOWS_FILESYSTEM` 接缝保持完整？
 3. `evidence.json`（10/10 `passed`，`5313 passed, 9 skipped`，`90%` core、`100%` diff coverage）与 `.ai/tasks/TASK-0193/` 账本记录是否一致且不含本机绝对路径、用户名或 `logs/` 目录？
 

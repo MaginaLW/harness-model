@@ -7,7 +7,7 @@ allowed_scope:
 base_commit: 2eb2d8a6328ccd5d0bb11903d099f5cfb0c021b7
 branch: codex/d22-posix-init
 created_at: '2026-11-25T18:23:17Z'
-current_state: APPROVED_FOR_MERGE
+current_state: WAITING_FOR_FINAL_REVIEW
 decision_units:
 - change_characteristics:
     behavior_changed: true
@@ -60,8 +60,8 @@ goal: Support POSIX/Linux initialization apply via PosixFilesystem with atomic n
 repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
 schema_version: '1.0'
 spec_frozen_at: '2026-11-25T18:23:36Z'
-subject_commit: 67690043a86840047b27fc81be81f52c7cd523f8
+subject_commit: a5ce7b075582f7b49e4e6500be174e602dfc31b4
 task_id: TASK-0193
-updated_at: '2026-11-25T18:52:10Z'
+updated_at: '2026-11-25T19:26:30Z'
 worktree_dirty: false
 worktree_dirty_paths: []
