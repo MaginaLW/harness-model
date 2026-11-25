@@ -34,4 +34,4 @@ manifest, resources = read_bundle(files("aiflow").joinpath("_bundled_resources")
 
 构建检查其负责的源码、资源、缓存、元数据、暂存和输出路径，拒绝检测到的链接或冲突；这些检查不提供并发修改下的原子保证。
 
-资源版本为 `1.0`，兼容 CLI `0.2.0`，Policy 种子版本为 `2.6.0`。摘要证明包内一致性，不认证发行者。运行时 Schema 和 Policy 仍来自目标自己的 `.ai`，升级 Python 包不会自动替换它们。非覆盖初始化已另行交付；资源分发与初始化均不证明目标 npm 验证、installed 外仓 V2、目标 CI 或 agent-bridge 真实接入已完成。
+资源版本为 `1.0`，兼容 CLI `0.3.0`，Policy 种子版本为 `2.6.0`。摘要证明包内一致性，不认证发行者。运行时 Schema 和 Policy 仍来自目标自己的 `.ai`，升级 Python 包不会自动替换它们。非覆盖初始化已另行交付；资源分发与初始化均不证明目标 npm 验证、installed 外仓 V2、目标 CI 或 agent-bridge 真实接入已完成。
