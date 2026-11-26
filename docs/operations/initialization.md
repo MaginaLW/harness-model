@@ -2,7 +2,7 @@
 
 [PR #140](https://github.com/MaginaLW/harness-model/pull/140) 引入 Python 非覆盖初始化；[PR #143](https://github.com/MaginaLW/harness-model/pull/143) 增加 Node profile 和本地 V0/V1。
 
-普通 wheel 提供 `init preview`、`apply`、`inspect` 和 `migration-plan`，支持 `native-python-v1`、`agent-bridge-node@1` 与 `agent-bridge-node@2`。目标均须是已有提交的普通 Git 工作树，首次预览尚无 `.ai`。Python profile 要求 Python 源码及 `[project].name`，根目录不能有 `package.json`；Node profile 要求根 `package.json` 的非空 name 和 check/build/test 脚本，以及显式输入的四份完整 `3.1.0`（`@1`）或 `3.2.0`（`@2`，本地 Node V2）Policy。写入支持 Windows x64（CPython 3.11、本地 NTFS）及 POSIX / Linux（CPython >= 3.11）；[Node 本地 V0/V1](node-verification.md)与[普通安装的本地 Node V2](node-verification.md#revision-2-local-v2)已提供，真实 agent-bridge 采用另行交付。
+普通 wheel 提供 `init preview`、`apply`、`inspect`、`migration-plan` 与 `render-python-policy`，支持 `native-python-v1`、`agent-bridge-node@1` 与 `agent-bridge-node@2`。目标均须是已有提交的普通 Git 工作树，首次预览尚无 `.ai`。Python profile 要求 Python 源码及 `[project].name`，根目录不能有 `package.json`；Node profile 要求根 `package.json` 的非空 name 和 check/build/test 脚本，以及显式输入的四份完整 `3.1.0`（`@1`）或 `3.2.0`（`@2`，本地 Node V2）Policy。写入支持 Windows x64（CPython 3.11、本地 NTFS）及 POSIX / Linux（CPython >= 3.11）；[Node 本地 V0/V1](node-verification.md)与[普通安装的本地 Node V2](node-verification.md#revision-2-local-v2)已提供，真实 agent-bridge 采用另行交付。
 
 先按[资源包说明](resource-bundle.md)构建并安装普通 wheel。可编辑安装没有内置资源，不会隐式读取源码仓 `.ai`。运行材料中的绝对路径只保存在本地，预览和审核文件放在目标仓之外。
 

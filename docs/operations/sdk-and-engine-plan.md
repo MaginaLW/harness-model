@@ -92,7 +92,7 @@ TASK-0083 已交付显式风险事实 `facts` CLI；[PR #138](https://github.com
 目标 CI 适配涉及核心验证代码，不只是修改 YAML：[验证器](../../src/aiflow/verification.py)
 的 Python 分支已于 [PR #216](https://github.com/MaginaLW/harness-model/pull/216)（`TASK-0192`）扩展为支持
 可配置 `--cov=<target>` 与可安装的 `python -m aiflow.coverage_check --source ...`（保留 `85%`/`90%`
-硬编码门槛、命令白名单与旧 `tools/ci/check_coverage.py` 兼容薄包装）；Node 分支仍只提供封闭本地合同，
+硬编码门槛、命令白名单与旧 `tools/ci/check_coverage.py` 兼容薄包装），并由 [PR #227](https://github.com/MaginaLW/harness-model/pull/227)（`TASK-0196`）新增非覆盖 `aiflow init render-python-policy` 生成对应的四份便携候选 Policy 供 `--policy-candidate-root` 传入；Node 分支仍只提供封闭本地合同，
 CI 组合明确拒绝。只复制 `.ai` 不能让完整验证在任意外仓成立，也不能承诺支持任意语言和 CI。
 
 ### 最小分阶段交付
@@ -101,7 +101,7 @@ CI 组合明确拒绝。只复制 `.ai` 不能让完整验证在任意外仓成�
 |---|---|---|
 | 0．确定目标 | 已选择 agent-bridge；核对其完整任务、审核、验证和 Gate 的需求及当前规则。已交付的 Python 初始化要求已有 Git 提交、Python 源码及 `[project].name`，首次预览时没有 `.ai`，根目录无 `package.json`。`agent-bridge-node@1` 的固定 package.json 与四份候选 Policy 要求见 [Node 验证](node-verification.md#初始化与任务前置条件)。 | 目标、负责方、基线、原规则及质量要求明确；不为假设的其他目标建设通用安装框架。 |
 | 1．版本化资源 | [资源切片](resource-bundle.md)已交付：分发 15 份 Schema、四份待目标审核的 Policy 种子及规格模板；清单绑定 CLI 兼容范围、资源版本、Policy 版本及文件哈希。目标验证工具适配仍见阶段 3。 | 普通 wheel 在源码树外可校验和读取资源；直接构建及 sdist 重建不携带源仓身份或历史，不自动写入目标仓。 |
-| 2．非覆盖计划与应用 | 已交付 `native-python-v1` 及 `agent-bridge-node@1`、`agent-bridge-node@2`。Node 须显式输入与 profile 对应的四份完整 Policy（`3.1.0` 或 `3.2.0`）。`init preview` 零写入，展示 Git 基线、写入清单、UUID 及资源／Policy 摘要；`apply` 重核内容审核与原预览。写入支持 Windows x64（CPython 3.11、本地 NTFS）与 POSIX / Linux（CPython >= 3.11）。 | 已有无关 `.ai` 拒绝拼接；精确 partial 以同一预览、同一 UUID 恢复；无历史的 complete 原样重放。命令与限制见[初始化用法](initialization.md)。 |
+| 2．非覆盖计划与应用 | 已交付 `native-python-v1` 及 `agent-bridge-node@1`、`agent-bridge-node@2`，以及便携 Python 候选策略渲染命令 `init render-python-policy`。Node 须显式输入与 profile 对应的四份完整 Policy（`3.1.0` 或 `3.2.0`）；外仓 Python 接入可先通过 `init render-python-policy` 生成四份候选 Policy 再传入 `--policy-candidate-root`。`init preview` 零写入，展示 Git 基线、写入清单、UUID 及资源／Policy 摘要；`apply` 重核内容审核与原预览。写入支持 Windows x64（CPython 3.11、本地 NTFS）与 POSIX / Linux（CPython >= 3.11）。 | 已有无关 `.ai` 拒绝拼接；精确 partial 以同一预览、同一 UUID 恢复；无历史的 complete 原样重放。命令与限制见[初始化用法](initialization.md)。 |
 | 3．指令与验证适配 | AGENTS 与 CI 适配独立交付，与资源安装分开。[Node 本地 V0/V1](node-verification.md)已交付固定材料、工具、检查顺序、TS line 85/90、环境、输出及只读重核合同。普通安装的本地 Node V2 支持固定变异与证据重放，目标 CI 另行验收。 | 配置版本及摘要绑定任务与验证证据；保留目标原规则和本仓质量门，不开放任意 shell。 |
 | 4．外仓端到端验收 | 普通安装支持 Node 本地任务至 Gate 的生命周期。完整接入仍须审阅真实目标应用计划，并验收目标本地验证、目标 CI 和 combined Gate。 | 不借用父仓或 harness-model 克隆资源；本地与 CI 检查同一候选并覆盖真实目标源码。 |
 | 5．更新与恢复 | 已交付只读 `init inspect` 与 `migration-plan`，报告安装状态、资源差异和历史存在性，保留未知文件；不自动迁移或删除。 | 包升级不暗改目标资源；修改过的配置、任务、批准、事件和证据保留，实际迁移另行设计和审核。 |

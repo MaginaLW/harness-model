@@ -7,13 +7,13 @@ package 已发布到外部 registry。
 
 ### Added
 
-- 新增非覆盖候选策略渲染命令 `aiflow init render-python-policy`（`--output-dir`、`--cov-target`、可重复 `--source`、可选 `--bundle-root`），并在 `verification.py` 导出公共 `validate_coverage_target`；命令仅改写 `verification-levels.yaml` 中的 `--cov` 与 `aiflow.coverage_check --source` 参数、保持其余三份策略原字节与 `85%`/`90%` 门槛不变，在临时目录完成 Schema 与 `V0`/`V1`/`V2` 验证计划解析后原子创建输出目录并返回确定性 JSON 摘要，可直接接入 `init preview`/`apply`/`migration-plan` 与外部 Python 仓库验证闭环（TASK-0196）。
+- 新增非覆盖候选策略渲染命令 `aiflow init render-python-policy`（`--output-dir`、`--cov-target`、可重复 `--source`、可选 `--bundle-root`），并在 `verification.py` 导出公共 `validate_coverage_target`；命令仅改写 `verification-levels.yaml` 中的 `--cov` 与 `aiflow.coverage_check --source` 参数、保持其余三份策略原字节与 `85%`/`90%` 门槛不变，在临时目录完成 Schema 与 `V0`/`V1`/`V2` 验证计划解析后原子创建输出目录并返回确定性 JSON 摘要，可直接接入 `init preview`/`apply`/`migration-plan` 与外部 Python 仓库验证闭环（TASK-0196，PR #227 / #228）。
 
 ## 0.3.0 - 2026-11-26
 
 ### Changed
 
-- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.2.0` 提升至 `0.3.0`（仓库内里程碑准备，未创建 `v0.3.0` Git tag 或 GitHub Release；TASK-0195，PR #222 / #223）。
+- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.2.0` 提升至 `0.3.0`（TASK-0195，PR #222 / #223 仅完成仓库内准备；随后经 W1/W2 文档与跨平台测试收口 PR #225 / #226 于 `c98faf9d` 同步完成 `v0.3.0` annotated tag `073ea8dd` 与 GitHub Release 发布）。
 - 扩展跨仓 Python 验证支持：将核心覆盖率检查内核抽离至可安装的 `src/aiflow/coverage_check.py`（保留 `tools/ci/check_coverage.py` 兼容薄包装、延迟导入 `coverage`、公共 `validate_source_domain` 路径校验与硬编码 `85%`/`90%` 门槛），并支持 `verification.py` 解析安全 `--cov=<target>` 与 `-m aiflow.coverage_check --source ...`（TASK-0192，PR #216 / #217）。
 - 完成第四轮（Batch 3）纯测试夹具运行时优化（`tests/**` 9 个模块引入模块级只读 Git/策略种子与 SHA-256 守卫、`_sign` 签名缓存及只读材料树复用；用例节点 ID 保持 5,172 == 5,172 1-to-1 对等，Windows 全量 `--cov-branch` 由 `2107.18s` 降至 `1707.88s` 且核心分支覆盖率保持 90%，Ubuntu `ai-quality-gate` 由 `9m19s` 降至 `5m12s`，PR #214）。
 - 完成第三轮（Batch 2）纯测试夹具运行时优化（`tests/**` 11 个模块引入模块级只读种子与 SHA-256 守卫，并收敛 `test_installed_mutations.py` 冗余并发安装回放；用例节点 ID 保持 5,172 == 5,172 1-to-1 对等，核心分支覆盖率保持 90%，PR #212）。
