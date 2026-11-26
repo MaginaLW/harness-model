@@ -197,6 +197,11 @@ def require_windows_apply() -> None:
         pytest.skip("actual installation is supported only on Windows NTFS")
 
 
+def require_native_apply() -> None:
+    if sys.platform != "win32" and os.name != "posix":
+        pytest.skip("actual installation is supported only on Windows NTFS or POSIX")
+
+
 @pytest.fixture
 def native_filesystem() -> None:
     """Select the actual helper instead of the portable state-machine model."""
@@ -1232,7 +1237,7 @@ def test_cli_rejects_invalid_review_input_before_target_writes(
 def test_cli_apply_and_inspect_use_the_same_target_and_identity(
     repository: Path, readonly_bundle: Path, tmp_path: Path, native_filesystem: None
 ) -> None:
-    require_windows_apply()
+    require_native_apply()
     candidate = preview(repository, readonly_bundle)
     preview_path = tmp_path / "preview.json"
     review_path = tmp_path / "review.json"

@@ -12,7 +12,12 @@ from aiflow import cli
 from aiflow.errors import AiflowError, StorageError
 from aiflow.gate import GateDecision
 
-JSON_COMMANDS = [("status", "TASK-0001"), ("gate", "TASK-0001"), ("review", "show", "TASK-0001")]
+JSON_COMMANDS = [
+    ("status", "TASK-0001"),
+    ("advise", "TASK-0001"),
+    ("gate", "TASK-0001"),
+    ("review", "show", "TASK-0001"),
+]
 
 
 @pytest.mark.parametrize("command", JSON_COMMANDS)
@@ -95,6 +100,7 @@ def test_text_domain_failure_retains_existing_contract(
     ("command", "filename"),
     [
         (("status", "TASK-0001"), "task.yaml"),
+        (("advise", "TASK-0001"), "task.yaml"),
         (("gate", "TASK-0001"), "task.yaml"),
         (("review", "show", "TASK-0001"), "reviews/REV-0001-r0001.json"),
     ],
@@ -143,6 +149,7 @@ def test_non_utf8_task_input_reports_safe_failure_without_mutation(
     "arguments",
     [
         ["status", "--format", "json"],
+        ["advise", "--format", "json"],
         ["review", "show", "--format", "json"],
         ["gate", "TASK-0001", "--format", "invalid"],
         ["start", "--format", "json"],

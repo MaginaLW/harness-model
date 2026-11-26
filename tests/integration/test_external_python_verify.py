@@ -15,6 +15,8 @@ from typing import Any
 import pytest
 import yaml
 
+from aiflow.resource_bundle import POLICIES, build_bundle
+
 ROOT = Path(__file__).resolve().parents[2]
 REPOSITORY_ID = "123e4567-e89b-42d3-a456-426614174000"
 
@@ -68,6 +70,37 @@ def _create_isolated_python(venv_dir: Path) -> str:
     return str(python_exe)
 
 
+@pytest.fixture(scope="module")
+def isolated_python(tmp_path_factory: pytest.TempPathFactory) -> str:
+    """Create one shared isolated venv for this module's external-repo CLI runs."""
+    return _create_isolated_python(tmp_path_factory.mktemp("isolated-python") / "venv")
+
+
+def _snapshot_tree(root: Path) -> dict[str, bytes | None]:
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes() if path.is_file() else None
+        for path in sorted(root.rglob("*"))
+    }
+
+
+def _build_local_bundle(bundle_root: Path) -> Path:
+    manifest, resources = build_bundle(ROOT)
+    for relative, data in resources.items():
+        path = bundle_root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+    (bundle_root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    return bundle_root
+
+
+def _create_portable_policy_dir(policy_dir: Path) -> Path:
+    policy_dir.mkdir(parents=True, exist_ok=True)
+    for filename in POLICIES:
+        shutil.copy2(ROOT / ".ai" / "policy" / filename, policy_dir / filename)
+    _portable_verification_policy(policy_dir)
+    return policy_dir
+
+
 def _portable_verification_policy(policy_dir: Path) -> None:
     policy_path = policy_dir / "verification-levels.yaml"
     document = yaml.safe_load(policy_path.read_text(encoding="utf-8"))
@@ -91,15 +124,18 @@ def _portable_verification_policy(policy_dir: Path) -> None:
     policy_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
 
 
-def _init_external_repo(repo: Path) -> None:
+def _init_external_repo(
+    repo: Path, *, with_ai: bool = True, branch: str | None = "feat/external-change"
+) -> None:
     repo.mkdir(parents=True)
     _run(["git", "init", "-b", "main"], cwd=repo)
-    ai_root = repo / ".ai"
-    ai_root.mkdir()
-    for subdir in ("schemas", "policy", "templates"):
-        shutil.copytree(ROOT / ".ai" / subdir, ai_root / subdir)
-    _portable_verification_policy(ai_root / "policy")
-    (ai_root / "repository-id").write_text(f"{REPOSITORY_ID}\n", encoding="utf-8")
+    if with_ai:
+        ai_root = repo / ".ai"
+        ai_root.mkdir()
+        for subdir in ("schemas", "policy", "templates"):
+            shutil.copytree(ROOT / ".ai" / subdir, ai_root / subdir)
+        _portable_verification_policy(ai_root / "policy")
+        (ai_root / "repository-id").write_text(f"{REPOSITORY_ID}\n", encoding="utf-8")
 
     (repo / "src" / "sample_pkg").mkdir(parents=True)
     (repo / "src" / "sample_pkg" / "__init__.py").write_text(
@@ -120,6 +156,9 @@ def _init_external_repo(repo: Path) -> None:
         encoding="utf-8",
     )
     (repo / "pyproject.toml").write_text(
+        "[project]\n"
+        'name = "sample-pkg"\n'
+        'version = "0.1.0"\n\n'
         "[tool.pytest.ini_options]\n"
         'testpaths = ["tests"]\n'
         'pythonpath = ["src"]\n\n'
@@ -153,7 +192,8 @@ def _init_external_repo(repo: Path) -> None:
         ],
         cwd=repo,
     )
-    _run(["git", "switch", "-c", "feat/external-change"], cwd=repo)
+    if branch is not None:
+        _run(["git", "switch", "-c", branch], cwd=repo)
 
 
 def _write_spec(repo: Path, task_id: str) -> None:
@@ -266,16 +306,13 @@ def _record_review(
     )
 
 
-@pytest.mark.parametrize("review", [False, True], ids=["V0", "V1"])
-def test_external_python_repo_full_verify_and_gate_pass(tmp_path: Path, review: bool) -> None:
-    python_exe = _create_isolated_python(tmp_path / "venv")
-    outside_dir = tmp_path / "outside"
-    outside_dir.mkdir()
-    repo = tmp_path / "external_repo"
-    _init_external_repo(repo)
-    assert not (repo / "src" / "aiflow").exists()
-    assert not (repo / "tools").exists()
-
+def _run_lifecycle_through_verify(
+    python_exe: str,
+    repo: Path,
+    outside_dir: Path,
+    *,
+    review: bool,
+) -> str:
     start_out = _run(
         [
             python_exe,
@@ -377,7 +414,6 @@ def test_external_python_repo_full_verify_and_gate_pass(tmp_path: Path, review: 
         cwd=repo,
     )
     _run([python_exe, "-m", "aiflow", "sync", task_id, "--actor", "implementer"], cwd=repo)
-
     _run([python_exe, "-m", "aiflow", "verify", task_id, "--actor", "verifier"], cwd=repo)
 
     evidence = json.loads(
@@ -393,7 +429,18 @@ def test_external_python_repo_full_verify_and_gate_pass(tmp_path: Path, review: 
         run_dir = repo / ".ai" / "tasks" / task_id / log_parent
         assert (run_dir / "coverage.xml").is_file()
         assert (run_dir / "coverage-target.xml").is_file()
+    return task_id
 
+
+def _complete_final_review_and_gate(
+    python_exe: str,
+    repo: Path,
+    outside_dir: Path,
+    task_id: str,
+    *,
+    review: bool,
+) -> None:
+    if review:
         (repo / ".ai" / "tasks" / task_id / "review-package.md").write_text(
             "# Review Package\n\n"
             "## 审核目标\n\nAccept external Python verification change.\n\n"
@@ -433,3 +480,143 @@ def test_external_python_repo_full_verify_and_gate_pass(tmp_path: Path, review: 
     gate_payload = json.loads(gate_out)
     assert gate_payload["passed"] is True
     assert gate_payload["reason_codes"] == []
+
+
+@pytest.mark.parametrize("review", [False, True], ids=["V0", "V1"])
+def test_external_python_repo_full_verify_and_gate_pass(
+    tmp_path: Path, isolated_python: str, review: bool
+) -> None:
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    repo = tmp_path / "external_repo"
+    _init_external_repo(repo)
+    assert not (repo / "src" / "aiflow").exists()
+    assert not (repo / "tools").exists()
+
+    task_id = _run_lifecycle_through_verify(isolated_python, repo, outside_dir, review=review)
+    _complete_final_review_and_gate(isolated_python, repo, outside_dir, task_id, review=review)
+
+
+def test_initialized_external_python_repo_verify_advise_and_gate_pass(
+    tmp_path: Path, isolated_python: str
+) -> None:
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    bundle_root = _build_local_bundle(outside_dir / "bundle")
+    policy_dir = _create_portable_policy_dir(outside_dir / "policy")
+    repo = tmp_path / "external_repo"
+    _init_external_repo(repo, with_ai=False, branch=None)
+    assert not (repo / ".ai").exists()
+    assert not (repo / "src" / "aiflow").exists()
+    assert not (repo / "tools").exists()
+
+    preview_out = _run(
+        [
+            isolated_python,
+            "-m",
+            "aiflow",
+            "init",
+            "preview",
+            "--target",
+            str(repo),
+            "--profile",
+            "native-python-v1",
+            "--bundle-root",
+            str(bundle_root),
+            "--policy-candidate-root",
+            str(policy_dir),
+        ],
+        cwd=outside_dir,
+    ).stdout
+    candidate = json.loads(preview_out)
+    assert candidate["kind"] == "aiflow-init-preview"
+    assert candidate["profile"] == "native-python-v1"
+
+    preview_path = outside_dir / "preview.json"
+    review_path = outside_dir / "policy-review.json"
+    preview_path.write_text(preview_out, encoding="utf-8")
+    review_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "kind": "aiflow-policy-review",
+                "preview_sha256": candidate["preview_sha256"],
+                "repository_id": candidate["repository_id"],
+                "profile": candidate["profile"],
+                "policy_version": candidate["policy"]["policy_version"],
+                "policies": [
+                    {"path": entry["path"], "sha256": entry["sha256"]}
+                    for entry in candidate["policy"]["files"]
+                ],
+                "reviewer": "independent-policy-reviewer",
+                "outcome": "APPROVE",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    apply_out = _run(
+        [
+            isolated_python,
+            "-m",
+            "aiflow",
+            "init",
+            "apply",
+            "--target",
+            str(repo),
+            "--preview",
+            str(preview_path),
+            "--policy-review",
+            str(review_path),
+            "--bundle-root",
+            str(bundle_root),
+            "--policy-candidate-root",
+            str(policy_dir),
+        ],
+        cwd=outside_dir,
+    ).stdout
+    apply_payload = json.loads(apply_out)
+    assert apply_payload["phase"] == "installed"
+    assert apply_payload["repository_id"] == candidate["repository_id"]
+
+    inspect_out = _run(
+        [isolated_python, "-m", "aiflow", "init", "inspect", "--target", str(repo)],
+        cwd=outside_dir,
+    ).stdout
+    inspect_payload = json.loads(inspect_out)
+    assert inspect_payload["status"] == "complete"
+    assert inspect_payload["repository_id"] == candidate["repository_id"]
+
+    _run(["git", "add", ".ai"], cwd=repo)
+    _run(
+        [
+            "git",
+            "-c",
+            "user.name=External Repo",
+            "-c",
+            "user.email=external@example.invalid",
+            "commit",
+            "-m",
+            "initialize aiflow",
+        ],
+        cwd=repo,
+    )
+    _run(["git", "switch", "-c", "feat/external-change"], cwd=repo)
+
+    task_id = _run_lifecycle_through_verify(isolated_python, repo, outside_dir, review=True)
+
+    before_advise = _snapshot_tree(repo / ".ai")
+    advise_out = _run(
+        [isolated_python, "-m", "aiflow", "advise", task_id, "--format", "json"],
+        cwd=repo,
+    ).stdout
+    assert _snapshot_tree(repo / ".ai") == before_advise
+    advise_payload = json.loads(advise_out)
+    assert advise_payload["execution_allowed"] is False
+    assert advise_payload["probability_status"] == "unestimated"
+    assert any(
+        item["category"] == "residual_human_decision" and item["condition"] == "code_approval"
+        for item in advise_payload["advice_items"]
+    )
+
+    _complete_final_review_and_gate(isolated_python, repo, outside_dir, task_id, review=True)
