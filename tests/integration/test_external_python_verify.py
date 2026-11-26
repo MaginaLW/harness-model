@@ -497,13 +497,13 @@ def test_external_python_repo_full_verify_and_gate_pass(
     _complete_final_review_and_gate(isolated_python, repo, outside_dir, task_id, review=review)
 
 
-def test_initialized_external_python_repo_verify_advise_and_gate_pass(
-    tmp_path: Path, isolated_python: str
+def _initialize_and_verify_external_repo(
+    tmp_path: Path,
+    isolated_python: str,
+    outside_dir: Path,
+    bundle_root: Path,
+    policy_dir: Path,
 ) -> None:
-    outside_dir = tmp_path / "outside"
-    outside_dir.mkdir()
-    bundle_root = _build_local_bundle(outside_dir / "bundle")
-    policy_dir = _create_portable_policy_dir(outside_dir / "policy")
     repo = tmp_path / "external_repo"
     _init_external_repo(repo, with_ai=False, branch=None)
     assert not (repo / ".ai").exists()
@@ -620,3 +620,51 @@ def test_initialized_external_python_repo_verify_advise_and_gate_pass(
     )
 
     _complete_final_review_and_gate(isolated_python, repo, outside_dir, task_id, review=True)
+
+
+def test_initialized_external_python_repo_verify_advise_and_gate_pass(
+    tmp_path: Path, isolated_python: str
+) -> None:
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    bundle_root = _build_local_bundle(outside_dir / "bundle")
+    policy_dir = _create_portable_policy_dir(outside_dir / "policy")
+    _initialize_and_verify_external_repo(
+        tmp_path, isolated_python, outside_dir, bundle_root, policy_dir
+    )
+
+
+def test_rendered_python_policy_external_repo_verify_advise_and_gate_pass(
+    tmp_path: Path, isolated_python: str
+) -> None:
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    bundle_root = _build_local_bundle(outside_dir / "bundle")
+    policy_dir = outside_dir / "rendered-policy"
+
+    render_out = _run(
+        [
+            isolated_python,
+            "-m",
+            "aiflow",
+            "init",
+            "render-python-policy",
+            "--output-dir",
+            str(policy_dir),
+            "--cov-target",
+            "sample_pkg",
+            "--source",
+            "src/sample_pkg",
+            "--bundle-root",
+            str(bundle_root),
+        ],
+        cwd=outside_dir,
+    ).stdout
+    rendered = json.loads(render_out)
+    assert rendered["kind"] == "aiflow-rendered-python-policy"
+    assert rendered["cov_target"] == "sample_pkg"
+    assert rendered["sources"] == ["src/sample_pkg"]
+
+    _initialize_and_verify_external_repo(
+        tmp_path, isolated_python, outside_dir, bundle_root, policy_dir
+    )

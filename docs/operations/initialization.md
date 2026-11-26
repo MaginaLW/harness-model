@@ -66,8 +66,14 @@ POSIX / Linux 使用持有目录文件描述符（`dir_fd`）及 `O_NOFOLLOW | O
 
 ## 外部 Python 仓库便携验证
 
-默认内置的 `native-python-v1` 种子 Policy（`2.6.0`）面向本仓 `src/aiflow` 与 `tools/ci/check_coverage.py`。外部 Python 仓库通过 `TASK-0192` 交付的便携 Python 验证接入时，应准备四份同版本候选 Policy 并在 `init preview` 与 `init apply` 中同时传入 `--policy-candidate-root <POLICY_DIR>`（按上文保存目标仓外的 `<PREVIEW_JSON>` 与 `<REVIEW_JSON>`）：
+默认内置的 `native-python-v1` 种子 Policy（`2.6.0`）面向本仓 `src/aiflow` 与 `tools/ci/check_coverage.py`。外部 Python 仓库通过 `TASK-0192` 交付的便携 Python 验证接入时，可使用非覆盖渲染命令从内置或指定资源包直接生成四份同版本候选 Policy，再在 `init preview`、`init apply` 与 `init migration-plan` 中传入 `--policy-candidate-root <POLICY_DIR>`（按上文保存目标仓外的 `<PREVIEW_JSON>` 与 `<REVIEW_JSON>`）：
 
-- 保持 `verification-levels.yaml` 中的 `allowed_commands`（`{python}`、`diff-cover`）、`allowed_placeholders`、`allowed_environment`（`COVERAGE_FILE`）以及 `85%` 总覆盖率 / `90%` 变更覆盖率门槛不变。
-- 将测试命令中的 `--cov=aiflow` 替换为 `--cov=<target_pkg>`。
-- 将 `diff_coverage` 命令中的 `tools/ci/check_coverage.py` 替换为 `["{python}", "-m", "aiflow.coverage_check", "--run-dir", "{run_dir}", "--base", "{base_commit}", "--source", "src/<target_pkg>"]`。
+```text
+python -m aiflow init render-python-policy --output-dir <POLICY_DIR> --cov-target <COV_TARGET> --source <SOURCE_DIR>
+```
+
+- `--output-dir` 必须指向尚不存在的新目录（不可含 `..` 遍历，且父目录须为真实普通目录，拒绝符号链接、重解析点或既有目标）。
+- `--cov-target` 须满足覆盖率目标白名单（如 `sample_pkg` 或 `src/sample_pkg`）；`--source` 至少传一次且可重复指定多个仓库内相对源码目录（如 `--source src/pkg_a --source src/pkg_b`），按首次出现顺序去重。
+- 可选 `--bundle-root <BUNDLE_DIR>` 用于可编辑安装或离线指定已校验资源包目录。
+- 渲染仅改写 `verification-levels.yaml` 中测试命令的 `--cov=aiflow` 为 `--cov=<COV_TARGET>`，并将 `diff_coverage` 改写为 `["{python}", "-m", "aiflow.coverage_check", "--run-dir", "{run_dir}", "--base", "{base_commit}", "--source", ...]`；其余三份策略（`hard-rules.yaml`、`routing.yaml`、`permissions.yaml`）、允许命令/环境变量及 `85%` / `90%` 覆盖率门槛均保持原字节不变。
+- 命令先在临时目录以资源包 Schema 完成四份策略与 `V0` / `V1` / `V2` 验证计划的完整解析校验，再原子创建 `<POLICY_DIR>` 并以非覆盖模式写入规范化 UTF-8/LF 文件，最后输出确定性 JSON 摘要（`schema_version`、`kind`、`policy_version`、`semantic_sha256`、`cov_target`、`sources`、`files`）。

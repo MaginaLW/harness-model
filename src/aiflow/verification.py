@@ -252,6 +252,17 @@ def _tool_available(argv: tuple[str, ...]) -> bool:
     )
 
 
+def validate_coverage_target(target: str) -> str:
+    """Validate a clean pytest coverage module or relative path target."""
+    if (
+        not isinstance(target, str)
+        or ".." in target
+        or _COV_TARGET_PATTERN.fullmatch(target) is None
+    ):
+        raise ValueError("coverage target is invalid")
+    return target
+
+
 def _is_valid_pytest_argv(
     argv: tuple[str, ...], context: VerificationContext, run_dir: Path
 ) -> bool:
@@ -263,7 +274,11 @@ def _is_valid_pytest_argv(
     ):
         return False
     cov_target = argv[3].removeprefix("--cov=")
-    return _COV_TARGET_PATTERN.fullmatch(cov_target) is not None
+    try:
+        validate_coverage_target(cov_target)
+    except ValueError:
+        return False
+    return True
 
 
 def _is_valid_diff_coverage_argv(

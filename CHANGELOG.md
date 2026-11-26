@@ -5,6 +5,10 @@ package 已发布到外部 registry。
 
 ## Unreleased
 
+### Added
+
+- 新增非覆盖候选策略渲染命令 `aiflow init render-python-policy`（`--output-dir`、`--cov-target`、可重复 `--source`、可选 `--bundle-root`），并在 `verification.py` 导出公共 `validate_coverage_target`；命令仅改写 `verification-levels.yaml` 中的 `--cov` 与 `aiflow.coverage_check --source` 参数、保持其余三份策略原字节与 `85%`/`90%` 门槛不变，在临时目录完成 Schema 与 `V0`/`V1`/`V2` 验证计划解析后原子创建输出目录并返回确定性 JSON 摘要，可直接接入 `init preview`/`apply`/`migration-plan` 与外部 Python 仓库验证闭环（TASK-0196）。
+
 ## 0.3.0 - 2026-11-26
 
 ### Changed
