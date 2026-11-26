@@ -1,0 +1,73 @@
+allowed_scope:
+- src/aiflow/verification.py
+- src/aiflow/initialization.py
+- src/aiflow/cli.py
+- tests/unit/test_render_python_policy.py
+- tests/integration/test_external_python_verify.py
+- docs/operations/initialization.md
+- CHANGELOG.md
+base_commit: c98faf9d7e5a7628ef2773ca5aaf7878894c98c0
+branch: codex/w4-init-render-python-policy
+created_at: '2026-11-26T14:56:32Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Add non-overwriting aiflow init render-python-policy for external Python repositories
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - src/aiflow/verification.py
+  - src/aiflow/initialization.py
+  - src/aiflow/cli.py
+  - tests/unit/test_render_python_policy.py
+  - tests/integration/test_external_python_verify.py
+  - docs/operations/initialization.md
+  - CHANGELOG.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0196
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: e38bbc8b9a78b4da060aa9eb9fd120a8f3ce8ec0ca74b461bc9b3d80d9f87073
+goal: Add non-overwriting aiflow init render-python-policy for external Python repositories
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-26T14:57:06Z'
+subject_commit: 62ba9a683dba85614c64beed1bb7dbc7b0f3e568
+task_id: TASK-0196
+updated_at: '2026-11-26T15:36:42Z'
+worktree_dirty: false
+worktree_dirty_paths: []
