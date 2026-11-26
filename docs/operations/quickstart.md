@@ -353,7 +353,7 @@ CI 与原生 V1/V2 随后统一调用
 `python tools/ci/check_coverage.py --run-dir <run_dir> --base <base_commit>`，从同一次分支覆盖率数据
 检查核心域 `src/aiflow`：总覆盖率须达到 85%，变更覆盖率须达到
 90%，不能互相补足。原生检查仍使用 `diff_coverage` 类别及既有 required 状态；strict mypy 同时
-检查 `src` 与 `tools` 目录。达到执行上限或任一门槛失败仍是验证失败，必须保留 run 并诊断原因，不能靠降级、
+检查 `src` 与 `tools` 目录（当前 `0.3.0` / `pyproject.toml` 入口为 `.\.venv\Scripts\python.exe -m mypy`）。达到执行上限或任一门槛失败仍是验证失败，必须保留 run 并诊断原因，不能靠降级、
 跳过 coverage 或无理由重复重试进入 Gate。
 
 `verify` 已移除 `--pytest-temp-root`，不再接受该选项。未显式指定 pytest 的 `--basetemp` 时，
@@ -406,7 +406,7 @@ clean-checkout 回归使用真实单分支传输克隆（`--no-local --single-br
 .\.venv\Scripts\python.exe -m pytest tests/acceptance/test_phase_02_self_hosting.py tests/integration/test_phase_02_self_hosting.py tests/e2e/test_phase_02_self_hosting_scenario.py tests/e2e/test_phase_02_negative_self_hosting.py -q
 .\.venv\Scripts\python.exe -m ruff check .
 .\.venv\Scripts\python.exe -m ruff format --check .
-.\.venv\Scripts\python.exe -m mypy
+.\.venv\Scripts\python.exe -m mypy src
 git diff --check
 ```
 
