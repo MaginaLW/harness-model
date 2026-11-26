@@ -1,0 +1,164 @@
+{
+  "base_commit": "c98faf9d7e5a7628ef2773ca5aaf7878894c98c0",
+  "branch": "codex/w4-init-render-python-policy",
+  "classification_input_sha256": "75dd1259683c9c369679d69083fa4b5363b80b98b84cf68a2ad72afb1db4b9ec",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/verification.py",
+      "src/aiflow/initialization.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_render_python_policy.py",
+      "tests/integration/test_external_python_verify.py",
+      "docs/operations/initialization.md",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add non-overwriting aiflow init render-python-policy for external Python repositories",
+        "impact_scope": [
+          "src/aiflow/verification.py",
+          "src/aiflow/initialization.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_render_python_policy.py",
+          "tests/integration/test_external_python_verify.py",
+          "docs/operations/initialization.md",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "CHANGELOG.md",
+        "docs/operations/initialization.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/initialization.py",
+        "src/aiflow/verification.py",
+        "tests/integration/test_external_python_verify.py",
+        "tests/unit/test_render_python_policy.py"
+      ],
+      "files": [
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 0,
+          "path": "CHANGELOG.md"
+        },
+        {
+          "additions": 10,
+          "binary": false,
+          "deletions": 4,
+          "path": "docs/operations/initialization.md"
+        },
+        {
+          "additions": 12,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 167,
+          "binary": false,
+          "deletions": 19,
+          "path": "src/aiflow/initialization.py"
+        },
+        {
+          "additions": 16,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/verification.py"
+        },
+        {
+          "additions": 54,
+          "binary": false,
+          "deletions": 6,
+          "path": "tests/integration/test_external_python_verify.py"
+        },
+        {
+          "additions": 568,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_render_python_policy.py"
+        }
+      ],
+      "totals": {
+        "additions": 831,
+        "deletions": 30,
+        "files": 7
+      }
+    },
+    "goal": "Add non-overwriting aiflow init render-python-policy for external Python repositories",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0196",
+        "--actor",
+        "verifier-v1"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "4cca20d23527dfc75d3a02949586ea538d47f5c88dff37100f7f74343f6454ad",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "dc803b314524afb9014f350fa833cf1601c53eb5bf0cff5ad348ac4582b3792c",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "e38bbc8b9a78b4da060aa9eb9fd120a8f3ce8ec0ca74b461bc9b3d80d9f87073",
+  "subject_commit": "62ba9a683dba85614c64beed1bb7dbc7b0f3e568",
+  "task_id": "TASK-0196"
+}

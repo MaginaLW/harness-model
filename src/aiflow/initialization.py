@@ -11,8 +11,9 @@ import json
 import os
 import re
 import stat
+import tempfile
 import tomllib
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from importlib.resources import files
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,7 @@ import yaml
 
 from aiflow import initialization_git as git
 from aiflow.contracts import schema_directory_context
+from aiflow.coverage_check import validate_source_domain
 from aiflow.errors import AiflowError
 from aiflow.initialization_posix import PosixFilesystem
 from aiflow.initialization_windows import WindowsFilesystem
@@ -29,6 +31,7 @@ from aiflow.policy import (
     NODE_POLICY_VERSION,
     NODE_V2_POLICY_VERSION,
     POLICY_FILES,
+    PolicyBundle,
     UniqueKeyLoader,
     is_node_policy,
     load_policy_bundle,
@@ -41,7 +44,12 @@ from aiflow.resource_bundle import (
     RESOURCE_KINDS,
     read_bundle,
 )
-from aiflow.verification import VerificationContext, parse_verification_plan
+from aiflow.verification import (
+    PYTEST_CHECK_IDS,
+    VerificationContext,
+    parse_verification_plan,
+    validate_coverage_target,
+)
 
 PROFILE = "native-python-v1"
 NODE_PROFILE = "agent-bridge-node@1"
@@ -208,17 +216,32 @@ def _source_fact(path: Path, *, directory: bool = False) -> dict[str, Any]:
     return result
 
 
-def _materials(
-    root: Path, bundle_root: Path | None, policy_directory: Path | None, profile: str = PROFILE
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, bytes], list[dict[str, Any]]]:
-    if profile in NODE_PROFILES and policy_directory is None:
-        raise _error("NODE_POLICY_REQUIRED")
+def _bundle_directory(bundle_root: Path | None) -> Path:
     candidate = (
         files("aiflow").joinpath("_bundled_resources") if bundle_root is None else bundle_root
     )
     if not isinstance(candidate, Path):
         raise _error("BUNDLE_FILESYSTEM_REQUIRED")
-    bundle = candidate.absolute()
+    return candidate.absolute()
+
+
+def _validate_python_policy(root: Path, policy_directory: Path) -> PolicyBundle:
+    policy = load_policy_bundle(root, policy_directory=policy_directory)
+    if policy.policy_version.split(".", 1)[0] not in {"1", "2"}:
+        raise _error("TARGET_PROFILE_UNSUPPORTED")
+    context = VerificationContext(root, "TASK-0001", "0" * 40, "0" * 40, "python", "init")
+    # Pure structural validation; never probes tools/import hooks.
+    for level in ("V0", "V1", "V2"):
+        parse_verification_plan(policy, context, level=level, tool_available=lambda _: True)
+    return policy
+
+
+def _materials(
+    root: Path, bundle_root: Path | None, policy_directory: Path | None, profile: str = PROFILE
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, bytes], list[dict[str, Any]]]:
+    if profile in NODE_PROFILES and policy_directory is None:
+        raise _error("NODE_POLICY_REQUIRED")
+    bundle = _bundle_directory(bundle_root)
     selected = bundle / "policy" if policy_directory is None else policy_directory.absolute()
     sources = [bundle, selected]
     source_files = [bundle / "manifest.json", *(bundle / name for name in RESOURCE_KINDS)]
@@ -244,8 +267,8 @@ def _materials(
         if sum(len(data) for data in resources.values()) > MAX_BUNDLE_BYTES:
             raise _error("BUNDLE_TOO_LARGE")
         with schema_directory_context(bundle / "schemas"):
-            policy = load_policy_bundle(root, policy_directory=selected)
             if profile in NODE_PROFILES:
+                policy = load_policy_bundle(root, policy_directory=selected)
                 # The loader validates the entire closed contract without runtime materials.
                 expected_version = (
                     NODE_V2_POLICY_VERSION if profile == NODE_V2_PROFILE else NODE_POLICY_VERSION
@@ -253,16 +276,7 @@ def _materials(
                 if not is_node_policy(policy) or policy.policy_version != expected_version:
                     raise _error("TARGET_PROFILE_UNSUPPORTED")
             else:
-                if policy.policy_version.split(".", 1)[0] not in {"1", "2"}:
-                    raise _error("TARGET_PROFILE_UNSUPPORTED")
-                context = VerificationContext(
-                    root, "TASK-0001", "0" * 40, "0" * 40, "python", "init"
-                )
-                # Pure structural validation; never probes tools/import hooks.
-                for level in ("V0", "V1", "V2"):
-                    parse_verification_plan(
-                        policy, context, level=level, tool_available=lambda _: True
-                    )
+                policy = _validate_python_policy(root, selected)
         for name in POLICY_FILES:
             current = _read(selected / name, MAX_RESOURCE_BYTES).replace(b"\r\n", b"\n")
             if current != resources["policy/" + name]:
@@ -897,5 +911,139 @@ def plan_initialization_migration(
             {"path": issue["path"], "status": "unknown"}
             for issue in inspected["issues"]
             if issue["code"] == "unknown"
+        ],
+    }
+
+
+def _render_verification_policy(
+    raw_bytes: bytes, *, cov_target: str, sources: Sequence[str]
+) -> bytes:
+    document = yaml.load(raw_bytes.decode("utf-8"), Loader=UniqueKeyLoader)
+    if not isinstance(document, dict) or not isinstance(document.get("levels"), list):
+        raise _error("BUNDLE_OR_POLICY_INVALID")
+    diff_command = [
+        "{python}",
+        "-m",
+        "aiflow.coverage_check",
+        "--run-dir",
+        "{run_dir}",
+        "--base",
+        "{base_commit}",
+        *(pair for src in sources for pair in ("--source", src)),
+    ]
+    for level in document["levels"]:
+        if not isinstance(level, dict) or not isinstance(level.get("checks"), list):
+            raise _error("BUNDLE_OR_POLICY_INVALID")
+        for check in level["checks"]:
+            if not isinstance(check, dict):
+                raise _error("BUNDLE_OR_POLICY_INVALID")
+            check_id = check.get("id")
+            if check_id in PYTEST_CHECK_IDS:
+                command = check.get("command")
+                if not isinstance(command, list) or "--cov=aiflow" not in command:
+                    raise _error("BUNDLE_OR_POLICY_INVALID")
+                check["command"] = [
+                    f"--cov={cov_target}" if item == "--cov=aiflow" else item for item in command
+                ]
+            elif check_id == "diff_coverage":
+                check["command"] = list(diff_command)
+    rendered = yaml.safe_dump(document, sort_keys=False, allow_unicode=True).replace("\r\n", "\n")
+    return rendered.encode("utf-8")
+
+
+def render_python_policy(
+    output_dir: Path,
+    *,
+    cov_target: str,
+    sources: Sequence[str],
+    bundle_root: Path | None = None,
+) -> dict[str, Any]:
+    """Render validated non-overwriting candidate Policy files for an external Python repo."""
+    try:
+        validated_cov_target = validate_coverage_target(cov_target)
+    except ValueError as error:
+        raise _error("PYTHON_COV_TARGET_INVALID") from error
+    if isinstance(sources, (str, bytes)) or not sources:
+        raise _error("PYTHON_SOURCE_INVALID")
+    unique_sources: list[str] = []
+    seen_sources: set[str] = set()
+    for source in sources:
+        try:
+            validated_source = validate_source_domain(source)
+        except ValueError as error:
+            raise _error("PYTHON_SOURCE_INVALID") from error
+        if validated_source not in seen_sources:
+            seen_sources.add(validated_source)
+            unique_sources.append(validated_source)
+
+    output_path = Path(output_dir)
+    if ".." in output_path.parts:
+        raise _error("OUTPUT_PATH_INVALID")
+    output_abs = output_path.absolute()
+    if os.path.lexists(output_abs):
+        raise _error("OUTPUT_EXISTS")
+    _plain(output_abs.parent, directory=True)
+
+    bundle = _bundle_directory(bundle_root)
+    _plain(bundle, directory=True)
+    _plain(bundle / "manifest.json", directory=False)
+    for relative in RESOURCE_KINDS:
+        _plain(bundle / relative, directory=False)
+    try:
+        _, resources = read_bundle(bundle)
+    except (ValueError, OSError, UnicodeError, yaml.YAMLError, RecursionError) as error:
+        raise _error("BUNDLE_OR_POLICY_INVALID") from error
+
+    rendered_verification = _render_verification_policy(
+        resources["policy/verification-levels.yaml"],
+        cov_target=validated_cov_target,
+        sources=unique_sources,
+    )
+    rendered_policies = {
+        filename: (
+            rendered_verification
+            if filename == "verification-levels.yaml"
+            else resources["policy/" + filename]
+        )
+        for filename in POLICY_FILES
+    }
+
+    with tempfile.TemporaryDirectory() as staging_dir:
+        staging_root = Path(staging_dir)
+        staging_policy = staging_root / "policy"
+        staging_policy.mkdir()
+        for filename, data in rendered_policies.items():
+            (staging_policy / filename).write_bytes(data)
+        with schema_directory_context(bundle / "schemas"):
+            policy = _validate_python_policy(staging_root, staging_policy)
+
+    _plain(output_abs.parent, directory=True)
+    try:
+        os.mkdir(output_abs)
+    except FileExistsError as error:
+        raise _error("OUTPUT_EXISTS") from error
+    except OSError as error:
+        raise _error("WRITE_FAILED") from error
+    try:
+        for filename in sorted(POLICY_FILES):
+            with open(output_abs / filename, "xb") as stream:
+                stream.write(rendered_policies[filename])
+    except OSError as error:
+        raise _error("WRITE_FAILED") from error
+
+    return {
+        "schema_version": "1.0",
+        "kind": "aiflow-rendered-python-policy",
+        "policy_version": policy.policy_version,
+        "semantic_sha256": policy.sha256,
+        "cov_target": validated_cov_target,
+        "sources": unique_sources,
+        "files": [
+            {
+                "path": filename,
+                "size": len(rendered_policies[filename]),
+                "sha256": _sha(rendered_policies[filename]),
+            }
+            for filename in sorted(POLICY_FILES)
         ],
     }

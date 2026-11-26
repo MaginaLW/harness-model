@@ -1,0 +1,47 @@
+{
+  "base_commit": "c98faf9d7e5a7628ef2773ca5aaf7878894c98c0",
+  "branch": "codex/w4-init-render-python-policy",
+  "classification_input_sha256": "75dd1259683c9c369679d69083fa4b5363b80b98b84cf68a2ad72afb1db4b9ec",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/verification.py",
+      "src/aiflow/initialization.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_render_python_policy.py",
+      "tests/integration/test_external_python_verify.py",
+      "docs/operations/initialization.md",
+      "CHANGELOG.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add non-overwriting aiflow init render-python-policy for external Python repositories",
+        "impact_scope": [
+          "src/aiflow/verification.py",
+          "src/aiflow/initialization.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_render_python_policy.py",
+          "tests/integration/test_external_python_verify.py",
+          "docs/operations/initialization.md",
+          "CHANGELOG.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Add non-overwriting aiflow init render-python-policy for external Python repositories",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "8dd561060dd928d4f8826387166fe01c954ae25b18a9301bc543bc5ff7c00ba8",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "e38bbc8b9a78b4da060aa9eb9fd120a8f3ce8ec0ca74b461bc9b3d80d9f87073",
+  "task_id": "TASK-0196"
+}

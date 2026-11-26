@@ -212,6 +212,11 @@ def build_parser() -> ArgumentParser:
         if name == "apply":
             command.add_argument("--preview", required=True, type=Path)
             command.add_argument("--policy-review", required=True, type=Path)
+    render_python = init_commands.add_parser("render-python-policy")
+    render_python.add_argument("--output-dir", required=True, type=Path)
+    render_python.add_argument("--cov-target", required=True)
+    render_python.add_argument("--source", required=True, action="append")
+    render_python.add_argument("--bundle-root", type=Path)
     return parser
 
 
@@ -222,6 +227,13 @@ def _dispatch_initialization(arguments: Namespace) -> int:
     name = arguments.init_command
     if name == "inspect":
         result = initialization.inspect_initialization(arguments.target)
+    elif name == "render-python-policy":
+        result = initialization.render_python_policy(
+            arguments.output_dir,
+            cov_target=arguments.cov_target,
+            sources=arguments.source,
+            bundle_root=arguments.bundle_root,
+        )
     else:
         options = {
             "bundle_root": arguments.bundle_root,
