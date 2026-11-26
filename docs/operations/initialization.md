@@ -2,7 +2,7 @@
 
 [PR #140](https://github.com/MaginaLW/harness-model/pull/140) 引入 Python 非覆盖初始化；[PR #143](https://github.com/MaginaLW/harness-model/pull/143) 增加 Node profile 和本地 V0/V1。
 
-普通 wheel 提供 `init preview`、`apply`、`inspect` 和 `migration-plan`，支持 `native-python-v1` 与 `agent-bridge-node@1`。目标均须是已有提交的普通 Git 工作树，首次预览尚无 `.ai`。Python profile 要求 Python 源码及 `[project].name`，根目录不能有 `package.json`；Node profile 要求根 `package.json` 的非空 name 和 check/build/test 脚本，以及显式输入的四份完整 `3.1.0` Policy。写入支持 Windows x64（CPython 3.11、本地 NTFS）及 POSIX / Linux（CPython >= 3.11）；[Node 本地 V0/V1](node-verification.md)已提供，真实 agent-bridge 采用另行交付。
+普通 wheel 提供 `init preview`、`apply`、`inspect` 和 `migration-plan`，支持 `native-python-v1`、`agent-bridge-node@1` 与 `agent-bridge-node@2`。目标均须是已有提交的普通 Git 工作树，首次预览尚无 `.ai`。Python profile 要求 Python 源码及 `[project].name`，根目录不能有 `package.json`；Node profile 要求根 `package.json` 的非空 name 和 check/build/test 脚本，以及显式输入的四份完整 `3.1.0`（`@1`）或 `3.2.0`（`@2`，本地 Node V2）Policy。写入支持 Windows x64（CPython 3.11、本地 NTFS）及 POSIX / Linux（CPython >= 3.11）；[Node 本地 V0/V1](node-verification.md)与[普通安装的本地 Node V2](node-verification.md#revision-2-local-v2)已提供，真实 agent-bridge 采用另行交付。
 
 先按[资源包说明](resource-bundle.md)构建并安装普通 wheel。可编辑安装没有内置资源，不会隐式读取源码仓 `.ai`。运行材料中的绝对路径只保存在本地，预览和审核文件放在目标仓之外。
 
@@ -60,6 +60,14 @@ Windows 句柄在创建和身份发布期间保持对象保护；祖先目录仅
 
 POSIX / Linux 使用持有目录文件描述符（`dir_fd`）及 `O_NOFOLLOW | O_CLOEXEC`（目录附加 `O_DIRECTORY`，新建文件附加 `O_CREAT | O_EXCL`）拒绝符号链接和既有对象覆盖，并通过同目录 `link`、`unlink` 与 `fsync` 原子无覆盖发布 `.ai/repository-id` 后复核对象标识（`st_dev`、`st_ino` 与 `st_nlink == 1`）。POSIX 不提供 Windows 风格打开句柄共享排他锁，不防备同用户并发写入。
 
-初始化只校验固定验证合同的结构，不准备工具或依赖、不探测 Node/npm、不运行 suite，也不证明目标验证已可执行。Node 本地 V0/V1 须显式准备绑定材料并完成任务验证、审核批准及 Gate，见[Node 验证](node-verification.md)。installed 外仓 V2 和目标 CI 当前仍不受支持。
+初始化只校验固定验证合同的结构，不准备工具或依赖、不探测 Node/npm、不运行 suite，也不证明目标验证已可执行。Node 本地 V0/V1 须显式准备绑定材料并完成任务验证、审核批准及 Gate，见[Node 验证](node-verification.md)。普通安装的本地 Node V2（`agent-bridge-node@2`）已在 `main` 交付（见[Revision 2 local V2](node-verification.md#revision-2-local-v2)）；目标 Node CI、combined Gate、真实 `agent-bridge` 接入以及 installed 外仓 Python V2 当前仍未验收／不受支持。
 
 这些边界不提供整棵 Git 工作树的原子锁、恶意同用户代码沙箱或断电事务保证。完整跨仓步骤见[接入方案](sdk-and-engine-plan.md#完整引擎跨仓初始化)。
+
+## 外部 Python 仓库便携验证
+
+默认内置的 `native-python-v1` 种子 Policy（`2.6.0`）面向本仓 `src/aiflow` 与 `tools/ci/check_coverage.py`。外部 Python 仓库通过 `TASK-0192` 交付的便携 Python 验证接入时，应准备四份同版本候选 Policy 并在 `init preview` 与 `init apply` 中同时传入 `--policy-candidate-root <POLICY_DIR>`（按上文保存目标仓外的 `<PREVIEW_JSON>` 与 `<REVIEW_JSON>`）：
+
+- 保持 `verification-levels.yaml` 中的 `allowed_commands`（`{python}`、`diff-cover`）、`allowed_placeholders`、`allowed_environment`（`COVERAGE_FILE`）以及 `85%` 总覆盖率 / `90%` 变更覆盖率门槛不变。
+- 将测试命令中的 `--cov=aiflow` 替换为 `--cov=<target_pkg>`。
+- 将 `diff_coverage` 命令中的 `tools/ci/check_coverage.py` 替换为 `["{python}", "-m", "aiflow.coverage_check", "--run-dir", "{run_dir}", "--base", "{base_commit}", "--source", "src/<target_pkg>"]`。

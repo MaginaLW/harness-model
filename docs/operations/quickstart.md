@@ -259,6 +259,17 @@ observation 仍会以 exit 2 返回 `execution_allowed: false`：这是有效、
 结论，不会执行或允许所描述的动作。输入、contract 或 binding 错误返回 exit 1，必须先修复
 当前事实，不能借 exit code 或新建空任务绕过它。
 
+## 只读非评分建议（advise）
+
+需要基于既有只读状态与 Gate 事实获取下一步建议时，可运行 `aiflow advise`：
+
+```sh
+python -m aiflow advise <TASK-ID>
+python -m aiflow advise <TASK-ID> --format json
+```
+
+`advise` 固定以非评分、只读方式输出解释（`probability_status="unestimated"`、`execution_allowed=false`、`permission_effect="none"`、`ledger_effect="none"`），对 `.ai/` 零写入，不计算成功概率，也不构成执行授权、审批或自动状态推进。
+
 ## 继续实际任务前
 
 实际任务是否需要 task，以 [AGENTS.md](../../AGENTS.md) 的维护模式及升级清单为准。选择进入 AI Flow 时，先在合格 `NEW` 状态用 `facts` 补齐显式风险事实，再冻结 `spec.md` 并分类，按 route 执行 ASK/REVIEW 决定或批准，然后运行 `begin`、实施、`sync`、`verify` 和 Gate。所有命令都以 `python -m aiflow ...` 为权威入口。
@@ -267,7 +278,7 @@ observation 仍会以 exit 2 返回 `execution_allowed: false`：这是有效、
 
 ## REVIEW 双阶段审核
 
-`status`、`gate` 与 `review show` 的 `--format json` 在参数解析成功后遇到领域错误时，
+`status`、`advise`、`gate` 与 `review show` 的 `--format json` 在参数解析成功后遇到领域错误时，
 向 stderr 输出只含 `code` 和 `message` 的 JSON，stdout 为空，退出 `1`。内部 details
 和异常原因不输出；文本模式仍输出一行错误消息。非法参数沿用 argparse 的 usage 与退出 `2`；
 有效但未通过的 Gate 决策仍在 stdout 输出原 JSON 并退出 `2`。读取到非法 UTF-8 任务文档时，
@@ -342,7 +353,7 @@ CI 与原生 V1/V2 随后统一调用
 `python tools/ci/check_coverage.py --run-dir <run_dir> --base <base_commit>`，从同一次分支覆盖率数据
 检查核心域 `src/aiflow`：总覆盖率须达到 85%，变更覆盖率须达到
 90%，不能互相补足。原生检查仍使用 `diff_coverage` 类别及既有 required 状态；strict mypy 同时
-检查 `src` 目录。达到执行上限或任一门槛失败仍是验证失败，必须保留 run 并诊断原因，不能靠降级、
+检查 `src` 与 `tools` 目录。达到执行上限或任一门槛失败仍是验证失败，必须保留 run 并诊断原因，不能靠降级、
 跳过 coverage 或无理由重复重试进入 Gate。
 
 `verify` 已移除 `--pytest-temp-root`，不再接受该选项。未显式指定 pytest 的 `--basetemp` 时，
@@ -395,7 +406,7 @@ clean-checkout 回归使用真实单分支传输克隆（`--no-local --single-br
 .\.venv\Scripts\python.exe -m pytest tests/acceptance/test_phase_02_self_hosting.py tests/integration/test_phase_02_self_hosting.py tests/e2e/test_phase_02_self_hosting_scenario.py tests/e2e/test_phase_02_negative_self_hosting.py -q
 .\.venv\Scripts\python.exe -m ruff check .
 .\.venv\Scripts\python.exe -m ruff format --check .
-.\.venv\Scripts\python.exe -m mypy src
+.\.venv\Scripts\python.exe -m mypy
 git diff --check
 ```
 
@@ -431,6 +442,8 @@ finally {
 `aiflow verify` 流程生成 task-local run，而不是把这个临时目录当作权威 evidence。只有在确认
 无需保留诊断信息后，才可用精确路径 `Remove-Item -LiteralPath $runDir -Recurse` 删除本次
 临时运行；不要对临时目录的父目录执行递归清理，也不要删除任何 task 运行记录。
+
+外部 Python 仓库接入便携 Python 验证时，应使用 `python -m aiflow.coverage_check --run-dir <run_dir> --base <base_commit> --source src/<target_pkg>` 替代本仓专用的 `tools/ci/check_coverage.py`，并在候选 Policy 初始化中显式配置；详见[非覆盖初始化：外部 Python 仓库便携验证](initialization.md#外部-python-仓库便携验证)。
 
 需要重放某个 attestation 的 Gate 时，应在该精确提交的隔离只读 checkout/worktree 中使用
 索引记录的 argv 和原 task-local artifact；Windows 必须在 checkout 前按索引固定 LF。ignored
