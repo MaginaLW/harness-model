@@ -102,7 +102,7 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
   外仓必须映射自己的质量检查与治理模式，不能通过复制 bootstrap 标记跳过原有 Gate。
 
 `facts` 提供显式风险事实的本地录入入口，[PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付版本化资源分发。
-[PR #140](https://github.com/MaginaLW/harness-model/pull/140)已交付 `init preview/apply/inspect/migration-plan`：
+[PR #140](https://github.com/MaginaLW/harness-model/pull/140)已交付 `init preview/apply/inspect/migration-plan`，[PR #227](https://github.com/MaginaLW/harness-model/pull/227)已补充 `init render-python-policy`：
 `native-python-v1` 面向已有提交、Python 源码及 `[project].name`、尚无 `.ai` 的普通 Git 工作树；
 apply 支持 Windows x64（CPython 3.11、本地 NTFS）与 POSIX / Linux（CPython >= 3.11）。它生成目标自己的 UUID，不覆盖旧配置；
 精确恢复与重放边界见[初始化用法](initialization.md)。初始化不准备验证工具或依赖。
