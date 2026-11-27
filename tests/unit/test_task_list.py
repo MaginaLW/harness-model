@@ -328,7 +328,7 @@ def test_list_cli_dispatch_help_and_json_error_contract(
             TaskListEntry(
                 task_id="TASK-0001",
                 current_state="NEW",
-                goal="Sample",
+                goal="Sample 中文 🎯",
                 branch="main",
                 created_at="2026-11-27T10:00:00Z",
                 updated_at="2026-11-27T10:00:00Z",
@@ -337,6 +337,8 @@ def test_list_cli_dispatch_help_and_json_error_contract(
         incomplete_tasks=(),
         logs_only_tasks=(),
     )
+    assert report.to_json().isascii()
+    assert json.loads(report.to_json())["tasks"][0]["goal"] == "Sample 中文 🎯"
     monkeypatch.setattr(cli, "resolve_repository_root", lambda _cwd: tmp_path)
     monkeypatch.setattr(cli, "list_tasks", lambda *_args, **_kwargs: report)
 

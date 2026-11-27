@@ -577,8 +577,8 @@ class TaskListReport:
         }
 
     def to_json(self) -> str:
-        """Serialize the task listing report to canonical JSON."""
-        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True)
+        """Serialize the task listing report to canonical ASCII-escaped JSON."""
+        return json.dumps(self.to_dict(), ensure_ascii=True, sort_keys=True)
 
     def to_text(self) -> str:
         """Format a human-readable summary of listed tasks."""
