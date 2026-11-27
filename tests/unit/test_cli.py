@@ -27,12 +27,12 @@ def test_module_version_is_stable(
     result = run_aiflow("--version")
 
     assert result.returncode == 0
-    assert result.stdout == "aiflow 0.3.0\n"
+    assert result.stdout == "aiflow 0.3.1\n"
     assert result.stderr == ""
 
 
 def test_package_metadata_matches_runtime_version() -> None:
-    assert version("aiflow") == aiflow.__version__ == "0.3.0"
+    assert version("aiflow") == aiflow.__version__ == "0.3.1"
     package_metadata = metadata("aiflow")
     assert package_metadata["License-Expression"] == "MIT"
     assert package_metadata.get_all("License-File") == ["LICENSE"]
