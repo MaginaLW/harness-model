@@ -186,12 +186,16 @@ python -m aiflow facts <TASK-ID> --decision-unit DU-001 --input build/local/fact
 ```powershell
 python -m aiflow classify <TASK-ID> --actor quickstart
 python -m aiflow status <TASK-ID> --format json
+python -m aiflow list --format json
 ```
 
 ```sh
 python -m aiflow classify <TASK-ID> --actor quickstart
 python -m aiflow status <TASK-ID> --format json
+python -m aiflow list --format json
 ```
+
+需要总览当前工作树 `.ai/tasks/` 中的任务时，可使用只读命令 `aiflow list`（默认排除 `MERGED`、`--all` 包含全部状态、可重复 `--state <STATE>` 按状态过滤，并支持 `--format {text,json}`；对 `.ai/` 保持零写入）。
 
 对上述低影响、可逆、无外部副作用的完整事实，预期 route 为 `AUTO`。若决策单元的 `impact_scope` 触及治理面（`.github/**`、`.ai/**`、`src/aiflow/**`、`tools/ci/**`、`AGENTS.md` 等，清单见 `HARD-REVIEW-GOVERNANCE-SURFACE`），无论自报影响如何，route 至少为 `REVIEW`。两风险字段缺失时，
 先处理上述零写输入错误；其他事实不足则按 Policy 分类，若得到可解释的 `BLOCK`，

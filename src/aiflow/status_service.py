@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import stat
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,7 +14,7 @@ from typing import Any
 
 from aiflow.contracts import require_valid_contract
 from aiflow.decision_units import parse_decision_units
-from aiflow.errors import AiflowError, ContractError
+from aiflow.errors import AiflowError, ContractError, StorageError
 from aiflow.freshness import (
     V2_CODE_APPROVAL_FACTS,
     current_classification_input_digest,
@@ -27,8 +30,8 @@ from aiflow.scope import (
     collect_verification_changed_paths,
 )
 from aiflow.specification import specification_digest
-from aiflow.state import TRANSITIONS
-from aiflow.storage import read_task_json, resolve_task_path
+from aiflow.state import ALL_STATES, TRANSITIONS
+from aiflow.storage import TASK_ID_PATTERN, read_task_json, resolve_task_path, task_root
 from aiflow.task_service import TaskRecord, read_task_record_strict
 
 MISSING_BY_STATE: dict[str, tuple[str, ...]] = {
@@ -523,4 +526,253 @@ def summarize_task(repository_root: Path, task_id: str) -> StatusSummary:
         classification=classification_status,
         approvals=approval_status,
         evidence=evidence_status,
+    )
+
+
+@dataclass(frozen=True)
+class TaskListEntry:
+    """Summary of one materialized AI Flow task in ``aiflow list``."""
+
+    task_id: str
+    current_state: str
+    goal: str
+    branch: str
+    created_at: str
+    updated_at: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-serializable representation of one task entry."""
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class TaskListReport:
+    """Strictly read-only listing of local AI Flow tasks and directory anomalies."""
+
+    repository_id: str
+    include_merged: bool
+    states: tuple[str, ...]
+    counts_by_state: dict[str, int]
+    tasks: tuple[TaskListEntry, ...]
+    incomplete_tasks: tuple[str, ...]
+    logs_only_tasks: tuple[str, ...]
+    schema_version: str = "1.0"
+    kind: str = "aiflow-task-list"
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a deterministic dictionary representation of the task listing."""
+        ordered_counts = dict(sorted(self.counts_by_state.items()))
+        return {
+            "schema_version": self.schema_version,
+            "kind": self.kind,
+            "repository_id": self.repository_id,
+            "include_merged": self.include_merged,
+            "states": list(self.states),
+            "total_tasks": sum(ordered_counts.values()),
+            "matched_tasks": len(self.tasks),
+            "counts_by_state": ordered_counts,
+            "tasks": [entry.to_dict() for entry in self.tasks],
+            "incomplete_tasks": list(self.incomplete_tasks),
+            "logs_only_tasks": list(self.logs_only_tasks),
+        }
+
+    def to_json(self) -> str:
+        """Serialize the task listing report to canonical JSON."""
+        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True)
+
+    def to_text(self) -> str:
+        """Format a human-readable summary of listed tasks."""
+        ordered_counts = dict(sorted(self.counts_by_state.items()))
+        counts_text = (
+            ", ".join(f"{state}={count}" for state, count in ordered_counts.items()) or "none"
+        )
+        lines = [
+            f"Repository: {self.repository_id}",
+            f"Tasks: {len(self.tasks)} shown ({sum(ordered_counts.values())} total)",
+            f"Counts by state: {counts_text}",
+        ]
+        if self.tasks:
+            for entry in self.tasks:
+                lines.append(
+                    f"- {entry.task_id} [{entry.current_state}] ({entry.branch}) {entry.goal}"
+                )
+        else:
+            lines.append("No matching tasks.")
+        if self.incomplete_tasks:
+            lines.append(f"Incomplete tasks: {', '.join(self.incomplete_tasks)}")
+        if self.logs_only_tasks:
+            lines.append(f"Logs-only tasks: {', '.join(self.logs_only_tasks)}")
+        return "\n".join(lines)
+
+
+def _is_reparse_or_symlink(info: os.stat_result) -> bool:
+    return stat.S_ISLNK(info.st_mode) or bool(getattr(info, "st_file_attributes", 0) & 0x400)
+
+
+def _require_plain_dir(path: Path, *, message: str, task_id: str | None = None) -> None:
+    try:
+        info = path.lstat()
+    except OSError as error:
+        raise StorageError(
+            message,
+            code="STORAGE_READ_FAILED",
+            details={"task_id": task_id} if task_id is not None else {},
+        ) from error
+    if _is_reparse_or_symlink(info) or not stat.S_ISDIR(info.st_mode):
+        raise StorageError(
+            message,
+            code="STORAGE_READ_FAILED",
+            details={"task_id": task_id} if task_id is not None else {},
+        )
+
+
+def _validate_list_filters(
+    states: Sequence[str] | None, *, include_merged: bool
+) -> tuple[str, ...]:
+    if isinstance(states, str):
+        raise ContractError(
+            "Task state filter must be a sequence of state names",
+            code="TASK_LIST_FILTER_INVALID",
+            details={"states": states},
+        )
+    normalized = tuple(dict.fromkeys(states or ()))
+    unknown = [state for state in normalized if state not in ALL_STATES]
+    if unknown:
+        raise ContractError(
+            "Task list filter contains an unknown state",
+            code="TASK_LIST_FILTER_INVALID",
+            details={"states": unknown},
+        )
+    if include_merged and normalized:
+        raise ContractError(
+            "Cannot combine include_merged with explicit state filters",
+            code="TASK_LIST_FILTER_INVALID",
+            details={"states": list(normalized)},
+        )
+    return normalized
+
+
+def list_tasks(
+    repository_root: Path,
+    *,
+    states: Sequence[str] | None = None,
+    include_merged: bool = False,
+) -> TaskListReport:
+    """Scan ``.ai/tasks/`` strictly read-only and summarize governed tasks."""
+    normalized_states = _validate_list_filters(states, include_merged=include_merged)
+    repository_id = collect_git_context(repository_root).repository_id
+
+    lexical_tasks_root = repository_root / ".ai" / "tasks"
+    try:
+        root_info = lexical_tasks_root.lstat()
+    except FileNotFoundError:
+        task_root(repository_root)
+        return TaskListReport(
+            repository_id=repository_id,
+            include_merged=include_merged,
+            states=normalized_states,
+            counts_by_state={},
+            tasks=(),
+            incomplete_tasks=(),
+            logs_only_tasks=(),
+        )
+    except OSError as error:
+        raise StorageError("Could not inspect task root", code="STORAGE_READ_FAILED") from error
+
+    if _is_reparse_or_symlink(root_info) or not stat.S_ISDIR(root_info.st_mode):
+        raise StorageError("Task root must be a plain directory", code="STORAGE_READ_FAILED")
+    tasks_dir = task_root(repository_root)
+
+    try:
+        entries = sorted(tasks_dir.iterdir(), key=lambda item: item.name)
+    except OSError as error:
+        raise StorageError("Could not list task root", code="STORAGE_READ_FAILED") from error
+
+    counts_by_state: dict[str, int] = {}
+    matched_entries: list[TaskListEntry] = []
+    incomplete_tasks: list[str] = []
+    logs_only_tasks: list[str] = []
+    state_filter = set(normalized_states)
+
+    for entry in entries:
+        if TASK_ID_PATTERN.fullmatch(entry.name) is None:
+            continue
+        task_id = entry.name
+        _require_plain_dir(entry, message="Task entry must be a plain directory", task_id=task_id)
+        try:
+            children = sorted(entry.iterdir(), key=lambda item: item.name)
+        except OSError as error:
+            raise StorageError(
+                "Could not read task directory",
+                code="STORAGE_READ_FAILED",
+                details={"task_id": task_id},
+            ) from error
+        child_names = {child.name: child for child in children}
+
+        if any(name in child_names for name in ("task.yaml", "events.jsonl", "task.yaml.next")):
+            record = read_task_record_strict(repository_root, task_id)
+            task = record.task
+            state = str(task["current_state"])
+            counts_by_state[state] = counts_by_state.get(state, 0) + 1
+            include = (
+                state in state_filter if state_filter else (include_merged or state != "MERGED")
+            )
+            if include:
+                matched_entries.append(
+                    TaskListEntry(
+                        task_id=task_id,
+                        current_state=state,
+                        goal=str(task["goal"]),
+                        branch=str(task["branch"]),
+                        created_at=str(task["created_at"]),
+                        updated_at=str(task["updated_at"]),
+                    )
+                )
+        elif "creation_failed.json" in child_names:
+            marker_path = child_names["creation_failed.json"]
+            try:
+                marker_info = marker_path.lstat()
+            except OSError as error:
+                raise StorageError(
+                    "Could not inspect creation marker",
+                    code="STORAGE_READ_FAILED",
+                    details={"task_id": task_id},
+                ) from error
+            if _is_reparse_or_symlink(marker_info) or not stat.S_ISREG(marker_info.st_mode):
+                raise StorageError(
+                    "Creation marker must be a plain file",
+                    code="STORAGE_READ_FAILED",
+                    details={"task_id": task_id},
+                )
+            marker = read_task_json(repository_root, task_id, "creation_failed.json")
+            if not isinstance(marker, dict):
+                raise StorageError(
+                    "Creation marker must be a JSON object",
+                    code="STORAGE_PARSE_FAILED",
+                    details={"task_id": task_id},
+                )
+            incomplete_tasks.append(task_id)
+        elif not children or (len(children) == 1 and children[0].name == "logs"):
+            if children:
+                _require_plain_dir(
+                    children[0],
+                    message="Task logs entry must be a plain directory",
+                    task_id=task_id,
+                )
+            logs_only_tasks.append(task_id)
+        else:
+            raise StorageError(
+                "Task directory is incomplete or contains unexpected entries",
+                code="STORAGE_READ_FAILED",
+                details={"task_id": task_id},
+            )
+
+    return TaskListReport(
+        repository_id=repository_id,
+        include_merged=include_merged,
+        states=normalized_states,
+        counts_by_state=dict(sorted(counts_by_state.items())),
+        tasks=tuple(matched_entries),
+        incomplete_tasks=tuple(incomplete_tasks),
+        logs_only_tasks=tuple(logs_only_tasks),
     )

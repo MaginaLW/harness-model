@@ -32,7 +32,8 @@ from aiflow.review_service import (
     resolve_review_finding,
     validate_review_context,
 )
-from aiflow.status_service import summarize_task
+from aiflow.state import ALL_STATES
+from aiflow.status_service import list_tasks, summarize_task
 from aiflow.storage import atomic_write_json
 from aiflow.task_service import (
     begin_task,
@@ -151,6 +152,23 @@ def build_parser() -> ArgumentParser:
     status = subparsers.add_parser("status", help="show a read-only task summary")
     status.add_argument("task_id")
     status.add_argument("--format", choices=["text", "json"], default="text")
+    list_parser = subparsers.add_parser("list", help="list governed tasks without mutating files")
+    list_filter = list_parser.add_mutually_exclusive_group()
+    list_filter.add_argument(
+        "--all",
+        action="store_true",
+        dest="include_merged",
+        help="include MERGED tasks in the output",
+    )
+    list_filter.add_argument(
+        "--state",
+        action="append",
+        dest="states",
+        default=[],
+        choices=sorted(ALL_STATES),
+        help="filter to one or more explicit task states",
+    )
+    list_parser.add_argument("--format", choices=["text", "json"], default="text")
     advise = subparsers.add_parser("advise", help="show a read-only non-scoring advisory report")
     advise.add_argument("task_id")
     advise.add_argument("--format", choices=["text", "json"], default="text")
@@ -545,6 +563,13 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
     elif arguments.command == "status":
         summary = summarize_task(repository_root, arguments.task_id)
         print(summary.to_json() if arguments.format == "json" else summary.to_text())
+    elif arguments.command == "list":
+        task_list = list_tasks(
+            repository_root,
+            states=arguments.states,
+            include_merged=arguments.include_merged,
+        )
+        print(task_list.to_json() if arguments.format == "json" else task_list.to_text())
     elif arguments.command == "advise":
         report = advise_task(repository_root, arguments.task_id)
         print(
