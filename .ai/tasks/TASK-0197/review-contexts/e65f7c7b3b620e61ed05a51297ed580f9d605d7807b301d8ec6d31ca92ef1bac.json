@@ -1,0 +1,191 @@
+{
+  "base_commit": "e8f79e176c36b6e4c040958c918ae8d655c6c045",
+  "branch": "codex/release-031-prep",
+  "classification_input_sha256": "e9a9092566e89771e480893c3d9b290bcab0accf4ea51ce88c5f4b05d30dd418",
+  "content": {
+    "allowed_scope": [
+      "pyproject.toml",
+      "uv.lock",
+      "src/aiflow/__init__.py",
+      "src/aiflow/resource_bundle.py",
+      "tests/unit/test_cli.py",
+      "tests/unit/test_resource_bundle.py",
+      "tests/integration/test_resource_bundle_distribution.py",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prepare 0.3.1 release milestone metadata, changelog, and documentation",
+        "impact_scope": [
+          "pyproject.toml",
+          "uv.lock",
+          "src/aiflow/__init__.py",
+          "src/aiflow/resource_bundle.py",
+          "tests/unit/test_cli.py",
+          "tests/unit/test_resource_bundle.py",
+          "tests/integration/test_resource_bundle_distribution.py",
+          "CHANGELOG.md",
+          "README.md",
+          "docs/operations/maintenance-status.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/operations/maintenance-status.md",
+        "pyproject.toml",
+        "src/aiflow/__init__.py",
+        "src/aiflow/resource_bundle.py",
+        "tests/integration/test_resource_bundle_distribution.py",
+        "tests/unit/test_cli.py",
+        "tests/unit/test_resource_bundle.py",
+        "uv.lock"
+      ],
+      "files": [
+        {
+          "additions": 7,
+          "binary": false,
+          "deletions": 1,
+          "path": "CHANGELOG.md"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "README.md"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/maintenance-status.md"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "pyproject.toml"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/__init__.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/resource_bundle.py"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 4,
+          "path": "tests/integration/test_resource_bundle_distribution.py"
+        },
+        {
+          "additions": 2,
+          "binary": false,
+          "deletions": 2,
+          "path": "tests/unit/test_cli.py"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 3,
+          "path": "tests/unit/test_resource_bundle.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "uv.lock"
+        }
+      ],
+      "totals": {
+        "additions": 23,
+        "deletions": 16,
+        "files": 10
+      }
+    },
+    "goal": "Prepare 0.3.1 release milestone metadata, changelog, and documentation",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0197",
+        "--actor",
+        "verifier-v1"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "e65f7c7b3b620e61ed05a51297ed580f9d605d7807b301d8ec6d31ca92ef1bac",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "ce37454b0eea897112d7f101445c92a308316dfbfebc31a6f58b26e76e833637",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "89f7877fa84ff1e64bc07d4c663d660762355ab639b94a397ac0ef13db46f8bb",
+  "subject_commit": "99dace48f5d9e2d2dd7ab5ce7b23f8bbc6d06043",
+  "task_id": "TASK-0197"
+}
