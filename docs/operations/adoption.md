@@ -88,7 +88,7 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
 
 ## 完整引擎的跨仓库边界
 
-当前 `0.3.0` 的[Quickstart](quickstart.md)针对 harness-model 的完整克隆。
+当前 `0.3.1` 的[Quickstart](quickstart.md)针对 harness-model 的完整克隆。
 仅安装 wheel 或执行 `pip install` 并不能把另一仓库变成 AI Flow 项目：
 
 - 普通 wheel 分发 `src/aiflow` 及[版本化资源包](resource-bundle.md)：15 份 Schema、四份 Policy 种子和规格模板。

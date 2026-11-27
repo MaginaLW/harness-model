@@ -12,7 +12,7 @@ allowed_scope:
 base_commit: e8f79e176c36b6e4c040958c918ae8d655c6c045
 branch: codex/release-031-prep
 created_at: '2026-11-27T00:20:47Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -74,6 +74,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-27T00:21:10Z'
 subject_commit: 99dace48f5d9e2d2dd7ab5ce7b23f8bbc6d06043
 task_id: TASK-0197
-updated_at: '2026-11-27T00:50:09Z'
+updated_at: '2026-11-27T00:59:51Z'
 worktree_dirty: false
 worktree_dirty_paths: []
