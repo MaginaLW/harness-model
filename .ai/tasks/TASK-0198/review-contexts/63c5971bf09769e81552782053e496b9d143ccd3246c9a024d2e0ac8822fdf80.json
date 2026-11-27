@@ -1,0 +1,45 @@
+{
+  "base_commit": "ea614587afdbe1a09f910eef837dd30ceb0ad8da",
+  "branch": "codex/task-0198-aiflow-list",
+  "classification_input_sha256": "da419b8d8304be401d9250cdb9c061f22a02ced66df5c12e40b39d1744dfa71c",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/status_service.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_task_list.py",
+      "tests/integration/test_list_command.py",
+      "docs/operations/quickstart.md",
+      ".agents/skills/ai-flow/SKILL.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add governed read-only aiflow list command and status_service.list_tasks",
+        "impact_scope": [
+          "src/aiflow/status_service.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_task_list.py",
+          "tests/integration/test_list_command.py",
+          "docs/operations/quickstart.md",
+          ".agents/skills/ai-flow/SKILL.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Add governed read-only aiflow list command and status_service.list_tasks",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "63c5971bf09769e81552782053e496b9d143ccd3246c9a024d2e0ac8822fdf80",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "2ae87769f80b64e64d2673f30c37269581c5286afe3fbe1cf94bad6eef1ebd85",
+  "task_id": "TASK-0198"
+}
