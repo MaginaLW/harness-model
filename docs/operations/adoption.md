@@ -99,7 +99,7 @@ Codex 的[官方 AGENTS.md 文档](https://learn.chatgpt.com/docs/agent-configur
   [Quickstart 用法与恢复边界](quickstart.md#分类前风险事实录入)。命令只用于原 Git 绑定下、尚未冻结或分类的 `NEW` 任务，
   不推断缺省事实，不证明声明真实，也不授权执行；缺机械字段不是向人类求批的理由。
 - 本仓 CI 命令、路径、85% / 90% 阈值及维护模式是本仓约束，不是外仓通用安装模板。
-  外仓必须映射自己的质量检查与治理模式，不能通过复制 bootstrap 标记跳过原有 Gate。
+  外仓必须映射自己的质量检查与治理模式，不能通过复制 bootstrap 标记跳过原有 Gate；外仓 Python CI 接入示例见[外仓 Python CI 参考工作流](../../examples/adoption/external-python-ci.yml)。
 
 `facts` 提供显式风险事实的本地录入入口，[PR #138](https://github.com/MaginaLW/harness-model/pull/138)已交付版本化资源分发。
 [PR #140](https://github.com/MaginaLW/harness-model/pull/140)已交付 `init preview/apply/inspect/migration-plan`，[PR #227](https://github.com/MaginaLW/harness-model/pull/227)已补充 `init render-python-policy`：

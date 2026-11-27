@@ -1,0 +1,85 @@
+# Reference GitHub Actions workflow for external Python repositories using AI Flow.
+#
+# Prerequisites in your target repository (${REPO_ROOT}):
+# 1. Initialize `${REPO_ROOT}/.ai` via `aiflow init render-python-policy`, `preview`,
+#    and `apply` from an installed `aiflow` wheel (never copy `harness-model`'s
+#    `.ai/repository-id`, task history, or `.ai/bootstrap-mode.yaml`).
+# 2. Do NOT copy `harness-model/tools/ci/resolve_task.py` into `${REPO_ROOT}`; that helper
+#    is specific to `harness-model`'s own governance routing and bootstrap mode.
+# 3. Install `aiflow` (from a built wheel or release package) alongside your repository's
+#    own Python dependencies (`pytest`, `pytest-cov`, `diff-cover`, `ruff`, `mypy`).
+
+name: ai-flow-python-gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  ai-flow-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install target repository and aiflow dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install ${REPO_ROOT} with its test/lint tools plus the built aiflow wheel.
+          python -m pip install -e ".[dev]"
+          python -m pip install "${AIFLOW_WHEEL_PATH:-aiflow}"
+
+      - name: Resolve task and attach PR head branch
+        id: task
+        env:
+          AI_FLOW_TASK_ID: ${{ vars.AI_FLOW_TASK_ID }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git switch --force-create "$PR_HEAD_REF" "$HEAD_SHA"
+          # Resolve TASK_ID from AI_FLOW_TASK_ID or the single task directory changed in this PR.
+          # Do NOT copy tools/ci/resolve_task.py or .ai/bootstrap-mode.yaml from harness-model.
+          task_id="$AI_FLOW_TASK_ID"
+          if [ -z "$task_id" ]; then
+            task_id=$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- .ai/tasks/ \
+              | awk -F/ 'NF>=3 && $3 ~ /^TASK-/ {print $3}' | sort -u)
+          fi
+          test "$(printf '%s\n' "$task_id" | grep -c '^TASK-')" -eq 1
+          echo "task_id=$task_id" >> "$GITHUB_OUTPUT"
+
+      - name: Validate task artifacts
+        env:
+          TASK_ID: ${{ steps.task.outputs.task_id }}
+        run: python -m aiflow validate "$TASK_ID"
+
+      - name: Run portable CI verification
+        env:
+          TASK_ID: ${{ steps.task.outputs.task_id }}
+          TMPDIR: ${{ runner.temp }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/aiflow"
+          python -m aiflow verify "$TASK_ID" \
+            --ci \
+            --ci-run-dir "$RUNNER_TEMP/aiflow" \
+            --output "$RUNNER_TEMP/aiflow/evidence.json"
+
+      - name: Evaluate AI Flow merge gate
+        env:
+          TASK_ID: ${{ steps.task.outputs.task_id }}
+        run: |
+          python -m aiflow gate "$TASK_ID" \
+            --evidence "$RUNNER_TEMP/aiflow/evidence.json" \
+            --format json

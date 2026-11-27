@@ -8,7 +8,9 @@ import re
 import shutil
 import site
 import subprocess
+import sys
 import venv
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -74,6 +76,65 @@ def _create_isolated_python(venv_dir: Path) -> str:
 def isolated_python(tmp_path_factory: pytest.TempPathFactory) -> str:
     """Create one shared isolated venv for this module's external-repo CLI runs."""
     return _create_isolated_python(tmp_path_factory.mktemp("isolated-python") / "venv")
+
+
+@pytest.fixture(scope="module")
+def built_wheel_python(tmp_path_factory: pytest.TempPathFactory) -> tuple[str, Path]:
+    """Build an ordinary wheel strictly in tmp_path and install it into an isolated venv."""
+    work_dir = tmp_path_factory.mktemp("built-wheel-python")
+    source = work_dir / "source"
+    source.mkdir()
+    for name in ("pyproject.toml", "README.md", "LICENSE", "setup.py", "MANIFEST.in"):
+        candidate = ROOT / name
+        if candidate.is_file():
+            shutil.copyfile(candidate, source / name)
+    shutil.copytree(
+        ROOT / "src" / "aiflow",
+        source / "src" / "aiflow",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "_bundled_resources"),
+        copy_function=shutil.copyfile,
+    )
+    for subdir in ("schemas", "policy"):
+        shutil.copytree(
+            ROOT / ".ai" / subdir,
+            source / ".ai" / subdir,
+            copy_function=shutil.copyfile,
+        )
+    (source / ".ai" / "templates").mkdir(parents=True)
+    shutil.copyfile(
+        ROOT / ".ai" / "templates" / "spec.md",
+        source / ".ai" / "templates" / "spec.md",
+    )
+
+    wheel_dir = work_dir / "wheel"
+    wheel_dir.mkdir()
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "build",
+            "--no-isolation",
+            "--wheel",
+            "--outdir",
+            str(wheel_dir),
+            str(source),
+        ],
+        cwd=work_dir,
+    )
+    wheels = list(wheel_dir.glob("*.whl"))
+    assert len(wheels) == 1, wheels
+
+    venv_dir = work_dir / "venv"
+    venv.create(venv_dir, with_pip=False, symlinks=False)
+    site_packages = next(venv_dir.glob("**/site-packages"))
+    with zipfile.ZipFile(wheels[0]) as archive:
+        archive.extractall(site_packages)
+    # Expose only runtime/dev dependencies from the test interpreter; never ROOT/src.
+    (site_packages / "00-external-deps.pth").write_text(
+        "\n".join(site.getsitepackages()) + "\n", encoding="utf-8"
+    )
+    python_exe = venv_dir / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+    return str(python_exe), venv_dir
 
 
 def _snapshot_tree(root: Path) -> dict[str, bytes | None]:
@@ -501,7 +562,7 @@ def _initialize_and_verify_external_repo(
     tmp_path: Path,
     isolated_python: str,
     outside_dir: Path,
-    bundle_root: Path,
+    bundle_root: Path | None,
     policy_dir: Path,
 ) -> None:
     repo = tmp_path / "external_repo"
@@ -510,24 +571,22 @@ def _initialize_and_verify_external_repo(
     assert not (repo / "src" / "aiflow").exists()
     assert not (repo / "tools").exists()
 
-    preview_out = _run(
-        [
-            isolated_python,
-            "-m",
-            "aiflow",
-            "init",
-            "preview",
-            "--target",
-            str(repo),
-            "--profile",
-            "native-python-v1",
-            "--bundle-root",
-            str(bundle_root),
-            "--policy-candidate-root",
-            str(policy_dir),
-        ],
-        cwd=outside_dir,
-    ).stdout
+    preview_cmd = [
+        isolated_python,
+        "-m",
+        "aiflow",
+        "init",
+        "preview",
+        "--target",
+        str(repo),
+        "--profile",
+        "native-python-v1",
+        "--policy-candidate-root",
+        str(policy_dir),
+    ]
+    if bundle_root is not None:
+        preview_cmd.extend(["--bundle-root", str(bundle_root)])
+    preview_out = _run(preview_cmd, cwd=outside_dir).stdout
     candidate = json.loads(preview_out)
     assert candidate["kind"] == "aiflow-init-preview"
     assert candidate["profile"] == "native-python-v1"
@@ -555,29 +614,31 @@ def _initialize_and_verify_external_repo(
         encoding="utf-8",
     )
 
-    apply_out = _run(
-        [
-            isolated_python,
-            "-m",
-            "aiflow",
-            "init",
-            "apply",
-            "--target",
-            str(repo),
-            "--preview",
-            str(preview_path),
-            "--policy-review",
-            str(review_path),
-            "--bundle-root",
-            str(bundle_root),
-            "--policy-candidate-root",
-            str(policy_dir),
-        ],
-        cwd=outside_dir,
-    ).stdout
+    apply_cmd = [
+        isolated_python,
+        "-m",
+        "aiflow",
+        "init",
+        "apply",
+        "--target",
+        str(repo),
+        "--preview",
+        str(preview_path),
+        "--policy-review",
+        str(review_path),
+        "--policy-candidate-root",
+        str(policy_dir),
+    ]
+    if bundle_root is not None:
+        apply_cmd.extend(["--bundle-root", str(bundle_root)])
+    apply_out = _run(apply_cmd, cwd=outside_dir).stdout
     apply_payload = json.loads(apply_out)
     assert apply_payload["phase"] == "installed"
     assert apply_payload["repository_id"] == candidate["repository_id"]
+    assert (repo / ".ai" / "repository-id").read_text(encoding="utf-8").strip() != (
+        ROOT / ".ai" / "repository-id"
+    ).read_text(encoding="utf-8").strip()
+    assert not (repo / ".ai" / "bootstrap-mode.yaml").exists()
 
     inspect_out = _run(
         [isolated_python, "-m", "aiflow", "init", "inspect", "--target", str(repo)],
@@ -668,3 +729,50 @@ def test_rendered_python_policy_external_repo_verify_advise_and_gate_pass(
     _initialize_and_verify_external_repo(
         tmp_path, isolated_python, outside_dir, bundle_root, policy_dir
     )
+
+
+def test_built_wheel_external_python_repo_verify_advise_and_gate_pass(
+    tmp_path: Path, built_wheel_python: tuple[str, Path]
+) -> None:
+    python_exe, venv_dir = built_wheel_python
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+
+    _run(
+        [
+            python_exe,
+            "-c",
+            (
+                "import sys; from pathlib import Path; import aiflow; "
+                "pkg = Path(aiflow.__file__).resolve(); "
+                "assert pkg.is_relative_to(Path(sys.argv[1]).resolve()), pkg; "
+                "assert (pkg.parent / '_bundled_resources' / 'manifest.json').is_file()"
+            ),
+            str(venv_dir),
+        ],
+        cwd=outside_dir,
+    )
+
+    policy_dir = outside_dir / "rendered-policy"
+    render_out = _run(
+        [
+            python_exe,
+            "-m",
+            "aiflow",
+            "init",
+            "render-python-policy",
+            "--output-dir",
+            str(policy_dir),
+            "--cov-target",
+            "sample_pkg",
+            "--source",
+            "src/sample_pkg",
+        ],
+        cwd=outside_dir,
+    ).stdout
+    rendered = json.loads(render_out)
+    assert rendered["kind"] == "aiflow-rendered-python-policy"
+    assert rendered["cov_target"] == "sample_pkg"
+    assert rendered["sources"] == ["src/sample_pkg"]
+
+    _initialize_and_verify_external_repo(tmp_path, python_exe, outside_dir, None, policy_dir)
