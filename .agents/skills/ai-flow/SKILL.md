@@ -13,7 +13,7 @@ Whether a change needs a task, and what maintenance mode does not relax, is deci
 
 ## Start and inspect
 
-Run `aiflow status TASK-ID` (and optionally `aiflow advise TASK-ID` for read-only, non-scoring next-step guidance) before resuming an existing task. For new work, run `aiflow start ...`, then complete the task decision units and [specification template](../../../.ai/templates/spec.md). Treat the CLI-reported state, current [Policy](../../../.ai/policy/), and task record as authoritative. If a command rejects the state or freshness, stop and follow its recovery guidance instead of editing state files.
+Run `aiflow list` (optionally `--all`, repeatable `--state <STATE>`, `--format json`) to inspect current tasks read-only, and `aiflow status TASK-ID` (and optionally `aiflow advise TASK-ID` for read-only, non-scoring next-step guidance) before resuming an existing task. For new work, run `aiflow start ...`, then complete the task decision units and [specification template](../../../.ai/templates/spec.md). Treat the CLI-reported state, current [Policy](../../../.ai/policy/), and task record as authoritative. If a command rejects the state or freshness, stop and follow its recovery guidance instead of editing state files.
 
 ## Governed lifecycle
 

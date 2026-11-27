@@ -1,0 +1,31 @@
+[
+  {
+    "actor": "project-owner",
+    "approval_type": "spec",
+    "approved_at": "2026-11-27T15:08:36Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "ea614587afdbe1a09f910eef837dd30ceb0ad8da",
+    "decision_unit_id": "DU-001",
+    "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+    "reason": "常设授权：独立设计审核 REV-0001 APPROVE，无未关闭 critical/high 发现，不触及所有者逐次决定事项",
+    "schema_version": "1.0",
+    "spec_sha256": "2ae87769f80b64e64d2673f30c37269581c5286afe3fbe1cf94bad6eef1ebd85",
+    "subject_commit": "ea614587afdbe1a09f910eef837dd30ceb0ad8da",
+    "task_id": "TASK-0198"
+  },
+  {
+    "actor": "project-owner",
+    "approval_type": "code",
+    "approved_at": "2026-11-27T16:56:32Z",
+    "authorization_mode": "standing_delegation",
+    "base_commit": "ea614587afdbe1a09f910eef837dd30ceb0ad8da",
+    "decision_unit_id": "DU-001",
+    "evidence_sha256": "c3a23fbc429e7ebde1d7e57cd3c215a4e3df3a65486821e5f8c9d551ffab6f3d",
+    "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+    "reason": "常设授权：独立实现审核 REV-0002 APPROVE，无未关闭 critical/high 发现，本地 V1 全项通过，不触及所有者逐次决定事项",
+    "schema_version": "1.0",
+    "spec_sha256": "2ae87769f80b64e64d2673f30c37269581c5286afe3fbe1cf94bad6eef1ebd85",
+    "subject_commit": "a93c1d4443aecb1f69032659594c4c03fb795a7e",
+    "task_id": "TASK-0198"
+  }
+]

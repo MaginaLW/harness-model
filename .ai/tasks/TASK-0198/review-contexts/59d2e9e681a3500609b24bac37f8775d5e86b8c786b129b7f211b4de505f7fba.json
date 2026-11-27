@@ -1,0 +1,155 @@
+{
+  "base_commit": "ea614587afdbe1a09f910eef837dd30ceb0ad8da",
+  "branch": "codex/task-0198-aiflow-list",
+  "classification_input_sha256": "da419b8d8304be401d9250cdb9c061f22a02ced66df5c12e40b39d1744dfa71c",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/status_service.py",
+      "src/aiflow/cli.py",
+      "tests/unit/test_task_list.py",
+      "tests/integration/test_list_command.py",
+      "docs/operations/quickstart.md",
+      ".agents/skills/ai-flow/SKILL.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Add governed read-only aiflow list command and status_service.list_tasks",
+        "impact_scope": [
+          "src/aiflow/status_service.py",
+          "src/aiflow/cli.py",
+          "tests/unit/test_task_list.py",
+          "tests/integration/test_list_command.py",
+          "docs/operations/quickstart.md",
+          ".agents/skills/ai-flow/SKILL.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        ".agents/skills/ai-flow/SKILL.md",
+        "docs/operations/quickstart.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/status_service.py",
+        "tests/integration/test_list_command.py",
+        "tests/unit/test_task_list.py"
+      ],
+      "files": [
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": ".agents/skills/ai-flow/SKILL.md"
+        },
+        {
+          "additions": 4,
+          "binary": false,
+          "deletions": 0,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 26,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 255,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/status_service.py"
+        },
+        {
+          "additions": 249,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/integration/test_list_command.py"
+        },
+        {
+          "additions": 384,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_task_list.py"
+        }
+      ],
+      "totals": {
+        "additions": 919,
+        "deletions": 5,
+        "files": 6
+      }
+    },
+    "goal": "Add governed read-only aiflow list command and status_service.list_tasks",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0198",
+        "--actor",
+        "implementer"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "59d2e9e681a3500609b24bac37f8775d5e86b8c786b129b7f211b4de505f7fba",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "c3a23fbc429e7ebde1d7e57cd3c215a4e3df3a65486821e5f8c9d551ffab6f3d",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "2ae87769f80b64e64d2673f30c37269581c5286afe3fbe1cf94bad6eef1ebd85",
+  "subject_commit": "a93c1d4443aecb1f69032659594c4c03fb795a7e",
+  "task_id": "TASK-0198"
+}

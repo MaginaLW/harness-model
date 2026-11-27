@@ -1,0 +1,13 @@
+{
+  "context_sha256": "63c5971bf09769e81552782053e496b9d143ccd3246c9a024d2e0ac8822fdf80",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-27T15:07:53Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Design review approved for TASK-0198 (aiflow list and status_service.list_tasks): bounded 6-file scope matches classification (REVIEW/V1), public-only imports respect test_import_boundaries.py, strict read_task_record_strict preserves zero-write guarantee, logs_only_tasks handles real-repo TASK-0165/logs edge case, fail-closed error contracts and V1 verification requirements are complete.",
+  "task_id": "TASK-0198"
+}
