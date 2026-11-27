@@ -1,0 +1,13 @@
+{
+  "context_sha256": "1dfed43a84de0e49d8f4da91569d661ad0ac304e546395529989e7787b3c5a1e",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-27T00:21:31Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "TASK-0197 design scope (exact 10 allowed paths), REVIEW/V1 classification under policy 2.6.0, frozen spec.md (all 7 sections, no TBD/TODO), 0.3.0->0.3.1 in-repo release prep without third-party dependency bumps, policy/schema/workflow edits, v0.3.1 tag/Release, or local paths/usernames are verified.",
+  "task_id": "TASK-0197"
+}

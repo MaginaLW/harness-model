@@ -1,0 +1,79 @@
+allowed_scope:
+- pyproject.toml
+- uv.lock
+- src/aiflow/__init__.py
+- src/aiflow/resource_bundle.py
+- tests/unit/test_cli.py
+- tests/unit/test_resource_bundle.py
+- tests/integration/test_resource_bundle_distribution.py
+- CHANGELOG.md
+- README.md
+- docs/operations/maintenance-status.md
+base_commit: e8f79e176c36b6e4c040958c918ae8d655c6c045
+branch: codex/release-031-prep
+created_at: '2026-11-27T00:20:47Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Prepare 0.3.1 release milestone metadata, changelog, and documentation
+  impact:
+    level: medium
+  impact_categories: []
+  impact_scope:
+  - pyproject.toml
+  - uv.lock
+  - src/aiflow/__init__.py
+  - src/aiflow/resource_bundle.py
+  - tests/unit/test_cli.py
+  - tests/unit/test_resource_bundle.py
+  - tests/integration/test_resource_bundle_distribution.py
+  - CHANGELOG.md
+  - README.md
+  - docs/operations/maintenance-status.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0197
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 89f7877fa84ff1e64bc07d4c663d660762355ab639b94a397ac0ef13db46f8bb
+goal: Prepare 0.3.1 release milestone metadata, changelog, and documentation
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-27T00:21:10Z'
+subject_commit: 99dace48f5d9e2d2dd7ab5ce7b23f8bbc6d06043
+task_id: TASK-0197
+updated_at: '2026-11-27T00:50:09Z'
+worktree_dirty: false
+worktree_dirty_paths: []
