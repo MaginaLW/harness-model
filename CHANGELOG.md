@@ -9,7 +9,7 @@ package 已发布到外部 registry。
 
 ### Changed
 
-- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.3.0` 提升至 `0.3.1`（TASK-0197，仅完成仓库内发布准备，尚未创建 `v0.3.1` Git tag 或 GitHub Release）。
+- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.3.0` 提升至 `0.3.1`（TASK-0197，PR #232 / #233；经项目所有者授权，于 `e9cbfe1c` 同步完成 `v0.3.1` annotated tag `ea6d5c37` 与 GitHub Release 发布）。
 
 ### Added
 
