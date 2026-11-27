@@ -5,6 +5,10 @@ package 已发布到外部 registry。
 
 ## Unreleased
 
+### Added
+
+- 新增严格只读任务列表命令 `aiflow list`（`--all` 与可重复 `--state <STATE>` 互斥，支持 `--format {text,json}`，默认排除 `MERGED`、`counts_by_state` 统计全部已扫描有效任务），并在 `src/aiflow/status_service.py` 导出 `TaskListEntry`、`TaskListReport`（`schema_version="1.0"`、`kind="aiflow-task-list"`、`to_json()` 使用 `ensure_ascii=True`）与 `list_tasks`；兼容 `creation_failed.json`（`incomplete_tasks`）与空/仅含普通 `logs/` 子目录的历史任务目录（`logs_only_tasks`），对符号链接、重解析点、损坏/待物化任务及意外文件 fail closed，对 `.ai/` 保持零写入（TASK-0198，PR #236）。
+
 ## 0.3.1 - 2026-11-27
 
 ### Changed

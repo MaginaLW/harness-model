@@ -8,7 +8,7 @@ allowed_scope:
 base_commit: ea614587afdbe1a09f910eef837dd30ceb0ad8da
 branch: codex/task-0198-aiflow-list
 created_at: '2026-11-27T15:06:08Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -66,6 +66,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-27T15:06:40Z'
 subject_commit: a93c1d4443aecb1f69032659594c4c03fb795a7e
 task_id: TASK-0198
-updated_at: '2026-11-27T16:56:33Z'
+updated_at: '2026-11-27T17:03:49Z'
 worktree_dirty: false
 worktree_dirty_paths: []
