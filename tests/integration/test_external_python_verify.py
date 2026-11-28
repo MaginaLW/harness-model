@@ -564,7 +564,7 @@ def _initialize_and_verify_external_repo(
     outside_dir: Path,
     bundle_root: Path | None,
     policy_dir: Path,
-) -> None:
+) -> tuple[Path, str]:
     repo = tmp_path / "external_repo"
     _init_external_repo(repo, with_ai=False, branch=None)
     assert not (repo / ".ai").exists()
@@ -681,6 +681,36 @@ def _initialize_and_verify_external_repo(
     )
 
     _complete_final_review_and_gate(isolated_python, repo, outside_dir, task_id, review=True)
+    return repo, task_id
+
+
+def _render_python_policy(
+    python_exe: str,
+    outside_dir: Path,
+    policy_dir: Path,
+    *,
+    bundle_root: Path | None = None,
+) -> None:
+    cmd = [
+        python_exe,
+        "-m",
+        "aiflow",
+        "init",
+        "render-python-policy",
+        "--output-dir",
+        str(policy_dir),
+        "--cov-target",
+        "sample_pkg",
+        "--source",
+        "src/sample_pkg",
+    ]
+    if bundle_root is not None:
+        cmd.extend(["--bundle-root", str(bundle_root)])
+    render_out = _run(cmd, cwd=outside_dir).stdout
+    rendered = json.loads(render_out)
+    assert rendered["kind"] == "aiflow-rendered-python-policy"
+    assert rendered["cov_target"] == "sample_pkg"
+    assert rendered["sources"] == ["src/sample_pkg"]
 
 
 def test_initialized_external_python_repo_verify_advise_and_gate_pass(
@@ -702,29 +732,7 @@ def test_rendered_python_policy_external_repo_verify_advise_and_gate_pass(
     outside_dir.mkdir()
     bundle_root = _build_local_bundle(outside_dir / "bundle")
     policy_dir = outside_dir / "rendered-policy"
-
-    render_out = _run(
-        [
-            isolated_python,
-            "-m",
-            "aiflow",
-            "init",
-            "render-python-policy",
-            "--output-dir",
-            str(policy_dir),
-            "--cov-target",
-            "sample_pkg",
-            "--source",
-            "src/sample_pkg",
-            "--bundle-root",
-            str(bundle_root),
-        ],
-        cwd=outside_dir,
-    ).stdout
-    rendered = json.loads(render_out)
-    assert rendered["kind"] == "aiflow-rendered-python-policy"
-    assert rendered["cov_target"] == "sample_pkg"
-    assert rendered["sources"] == ["src/sample_pkg"]
+    _render_python_policy(isolated_python, outside_dir, policy_dir, bundle_root=bundle_root)
 
     _initialize_and_verify_external_repo(
         tmp_path, isolated_python, outside_dir, bundle_root, policy_dir
@@ -754,25 +762,89 @@ def test_built_wheel_external_python_repo_verify_advise_and_gate_pass(
     )
 
     policy_dir = outside_dir / "rendered-policy"
-    render_out = _run(
+    _render_python_policy(python_exe, outside_dir, policy_dir)
+
+    _initialize_and_verify_external_repo(tmp_path, python_exe, outside_dir, None, policy_dir)
+
+
+def test_built_wheel_external_python_repo_portable_ci_and_list_pass(
+    tmp_path: Path, built_wheel_python: tuple[str, Path]
+) -> None:
+    python_exe, _ = built_wheel_python
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    policy_dir = outside_dir / "rendered-policy"
+    _render_python_policy(python_exe, outside_dir, policy_dir)
+
+    repo, task_id = _initialize_and_verify_external_repo(
+        tmp_path, python_exe, outside_dir, None, policy_dir
+    )
+
+    ci_tmp = (tmp_path / "ci-tmp").resolve()
+    ci_run_dir = ci_tmp / "run"
+    ci_run_dir.mkdir(parents=True)
+    ci_env = _clean_env()
+    ci_env["TMPDIR"] = str(ci_tmp)
+    ci_env["TEMP"] = str(ci_tmp)
+    ci_env["TMP"] = str(ci_tmp)
+
+    _run([python_exe, "-m", "aiflow", "validate", task_id], cwd=repo, env=ci_env)
+
+    ci_evidence_path = ci_run_dir / "evidence.json"
+    _run(
         [
             python_exe,
             "-m",
             "aiflow",
-            "init",
-            "render-python-policy",
-            "--output-dir",
-            str(policy_dir),
-            "--cov-target",
-            "sample_pkg",
-            "--source",
-            "src/sample_pkg",
+            "verify",
+            task_id,
+            "--ci",
+            "--ci-run-dir",
+            str(ci_run_dir),
+            "--output",
+            str(ci_evidence_path),
         ],
-        cwd=outside_dir,
-    ).stdout
-    rendered = json.loads(render_out)
-    assert rendered["kind"] == "aiflow-rendered-python-policy"
-    assert rendered["cov_target"] == "sample_pkg"
-    assert rendered["sources"] == ["src/sample_pkg"]
+        cwd=repo,
+        env=ci_env,
+    )
+    ci_evidence = json.loads(ci_evidence_path.read_text(encoding="utf-8"))
+    assert ci_evidence["conclusion"] == "passed", json.dumps(ci_evidence, indent=2)
+    assert ci_evidence["verification_level"] == "V1"
+    assert all(check["status"] == "passed" for check in ci_evidence["checks"])
+    assert any(
+        check["check_id"] == "diff_coverage" and check["status"] == "passed"
+        for check in ci_evidence["checks"]
+    )
 
-    _initialize_and_verify_external_repo(tmp_path, python_exe, outside_dir, None, policy_dir)
+    ci_gate_out = _run(
+        [
+            python_exe,
+            "-m",
+            "aiflow",
+            "gate",
+            task_id,
+            "--evidence",
+            str(ci_evidence_path),
+            "--format",
+            "json",
+        ],
+        cwd=repo,
+        env=ci_env,
+    ).stdout
+    ci_gate_payload = json.loads(ci_gate_out)
+    assert ci_gate_payload["passed"] is True
+    assert ci_gate_payload["reason_codes"] == []
+
+    before_list = _snapshot_tree(repo / ".ai")
+    list_out = _run(
+        [python_exe, "-m", "aiflow", "list", "--format", "json"],
+        cwd=repo,
+        env=ci_env,
+    ).stdout
+    assert _snapshot_tree(repo / ".ai") == before_list
+    list_payload = json.loads(list_out)
+    expected_repo_id = (repo / ".ai" / "repository-id").read_text(encoding="utf-8").strip()
+    assert list_payload["repository_id"] == expected_repo_id
+    matching = [entry for entry in list_payload["tasks"] if entry["task_id"] == task_id]
+    assert len(matching) == 1, list_payload
+    assert matching[0]["current_state"] == "APPROVED_FOR_MERGE"

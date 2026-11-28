@@ -410,7 +410,7 @@ clean-checkout 回归使用真实单分支传输克隆（`--no-local --single-br
 .\.venv\Scripts\python.exe -m pytest tests/acceptance/test_phase_02_self_hosting.py tests/integration/test_phase_02_self_hosting.py tests/e2e/test_phase_02_self_hosting_scenario.py tests/e2e/test_phase_02_negative_self_hosting.py -q
 .\.venv\Scripts\python.exe -m ruff check .
 .\.venv\Scripts\python.exe -m ruff format --check .
-.\.venv\Scripts\python.exe -m mypy src
+.\.venv\Scripts\python.exe -m mypy
 git diff --check
 ```
 
