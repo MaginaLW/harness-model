@@ -1,0 +1,43 @@
+{
+  "base_commit": "189a5e8dc350c4af32ee10707a26ad82d0093d75",
+  "branch": "codex/cli-json-ascii-pipes",
+  "classification_input_sha256": "153e8693b713c438289c697301d4e2abe296a288abfbc86ff6b746eeeb3a0576",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "src/aiflow/status_service.py",
+      "src/aiflow/gate.py",
+      "tests/unit/test_cli_error_output.py",
+      "docs/operations/quickstart.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Escape non-ASCII characters in CLI JSON stdout outputs for cross-platform Windows pipe safety",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "src/aiflow/status_service.py",
+          "src/aiflow/gate.py",
+          "tests/unit/test_cli_error_output.py",
+          "docs/operations/quickstart.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Escape non-ASCII characters in CLI JSON stdout outputs for cross-platform Windows pipe safety",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "4b98ed22d170057b0852309dbc16fce46309081fd5025c2b65bd0920504460f6",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "535202d34096442daf74e5aeac96151c8bb0953c1067325bcea683bbe986d2ed",
+  "task_id": "TASK-0199"
+}

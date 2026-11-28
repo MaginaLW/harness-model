@@ -115,7 +115,7 @@ class GateDecision:
         return value
 
     def to_json(self) -> str:
-        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True)
+        return json.dumps(self.to_dict(), ensure_ascii=True, sort_keys=True)
 
     def to_text(self) -> str:
         outcome = "PASS" if self.passed else "REJECT"

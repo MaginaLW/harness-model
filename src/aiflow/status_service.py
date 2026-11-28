@@ -80,7 +80,7 @@ class StatusSummary:
         return value
 
     def to_json(self) -> str:
-        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True)
+        return json.dumps(self.to_dict(), ensure_ascii=True, sort_keys=True)
 
     def to_text(self) -> str:
         next_events = ", ".join(self.next_events) or "none"

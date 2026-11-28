@@ -1,0 +1,146 @@
+{
+  "base_commit": "189a5e8dc350c4af32ee10707a26ad82d0093d75",
+  "branch": "codex/cli-json-ascii-pipes",
+  "classification_input_sha256": "153e8693b713c438289c697301d4e2abe296a288abfbc86ff6b746eeeb3a0576",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "src/aiflow/status_service.py",
+      "src/aiflow/gate.py",
+      "tests/unit/test_cli_error_output.py",
+      "docs/operations/quickstart.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Escape non-ASCII characters in CLI JSON stdout outputs for cross-platform Windows pipe safety",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "src/aiflow/status_service.py",
+          "src/aiflow/gate.py",
+          "tests/unit/test_cli_error_output.py",
+          "docs/operations/quickstart.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "docs/operations/quickstart.md",
+        "src/aiflow/cli.py",
+        "src/aiflow/gate.py",
+        "src/aiflow/status_service.py",
+        "tests/unit/test_cli_error_output.py"
+      ],
+      "files": [
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "docs/operations/quickstart.md"
+        },
+        {
+          "additions": 3,
+          "binary": false,
+          "deletions": 3,
+          "path": "src/aiflow/cli.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/gate.py"
+        },
+        {
+          "additions": 1,
+          "binary": false,
+          "deletions": 1,
+          "path": "src/aiflow/status_service.py"
+        },
+        {
+          "additions": 269,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_cli_error_output.py"
+        }
+      ],
+      "totals": {
+        "additions": 275,
+        "deletions": 6,
+        "files": 5
+      }
+    },
+    "goal": "Escape non-ASCII characters in CLI JSON stdout outputs for cross-platform Windows pipe safety",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0199",
+        "--actor",
+        "batch2-author"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "94ae4e67f891a81ca617001bf3d92499b10ea3062f0c6f89faef9ca8a675f212",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "6d3fbdbafab992fdc866a7decb938846507cf9ba7f9b24a8c60b35f9d7a523e2",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "535202d34096442daf74e5aeac96151c8bb0953c1067325bcea683bbe986d2ed",
+  "subject_commit": "a3b516bc0ba07af919df1cec897701395d508795",
+  "task_id": "TASK-0199"
+}
