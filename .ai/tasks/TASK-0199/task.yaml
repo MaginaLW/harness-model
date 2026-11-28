@@ -7,7 +7,7 @@ allowed_scope:
 base_commit: 189a5e8dc350c4af32ee10707a26ad82d0093d75
 branch: codex/cli-json-ascii-pipes
 created_at: '2026-11-28T06:05:30Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -67,6 +67,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-28T06:06:44Z'
 subject_commit: a3b516bc0ba07af919df1cec897701395d508795
 task_id: TASK-0199
-updated_at: '2026-11-28T06:46:25Z'
+updated_at: '2026-11-28T06:53:57Z'
 worktree_dirty: false
 worktree_dirty_paths: []
