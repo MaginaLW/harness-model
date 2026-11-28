@@ -180,7 +180,7 @@ def test_bundle_is_exact_and_manifest_hashes_canonical_bytes(source: Path) -> No
     }
     assert manifest["schema_version"] == "1.0"
     assert manifest["bundle_version"] == "1.0"
-    assert manifest["compatible_cli_versions"] == ["0.3.1"]
+    assert manifest["compatible_cli_versions"] == ["0.3.2"]
     assert manifest["policy_version"] == "2.6.0"
     entries = manifest["files"]
     assert [entry["path"] for entry in entries] == sorted(PATHS)
@@ -441,8 +441,8 @@ def test_resource_read_is_limited_by_resource_cap(
 def test_builder_limits_raw_and_normalized_resources(
     source: Path, monkeypatch: pytest.MonkeyPatch, content: bytes
 ) -> None:
-    (source / "pyproject.toml").write_text('[project]\nversion = "0.3.1"\n', encoding="utf-8")
-    (source / "src/aiflow/__init__.py").write_text('__version__ = "0.3.1"\n', encoding="utf-8")
+    (source / "pyproject.toml").write_text('[project]\nversion = "0.3.2"\n', encoding="utf-8")
+    (source / "src/aiflow/__init__.py").write_text('__version__ = "0.3.2"\n', encoding="utf-8")
     for relative in PATHS:
         path = source / ".ai" / relative
         if relative.startswith("policy/"):

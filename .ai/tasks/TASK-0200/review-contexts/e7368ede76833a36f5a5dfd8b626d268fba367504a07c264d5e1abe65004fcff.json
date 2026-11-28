@@ -1,0 +1,53 @@
+{
+  "base_commit": "fbf3f1a8437f2beff0d39e6bf6380313e504f6d1",
+  "branch": "codex/release-032-prep",
+  "classification_input_sha256": "b8a47f2de221930f2ba4e24dfe5a6af2404e1e30ab3f0a1fae24c6096307df82",
+  "content": {
+    "allowed_scope": [
+      "pyproject.toml",
+      "uv.lock",
+      "src/aiflow/__init__.py",
+      "src/aiflow/resource_bundle.py",
+      "tests/unit/test_cli.py",
+      "tests/unit/test_resource_bundle.py",
+      "tests/integration/test_resource_bundle_distribution.py",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/operations/maintenance-status.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Prepare 0.3.2 milestone version metadata, tests, and release docs",
+        "impact_scope": [
+          "pyproject.toml",
+          "uv.lock",
+          "src/aiflow/__init__.py",
+          "src/aiflow/resource_bundle.py",
+          "tests/unit/test_cli.py",
+          "tests/unit/test_resource_bundle.py",
+          "tests/integration/test_resource_bundle_distribution.py",
+          "CHANGELOG.md",
+          "README.md",
+          "docs/operations/maintenance-status.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Prepare 0.3.2 milestone version metadata, tests, and release docs",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "e7368ede76833a36f5a5dfd8b626d268fba367504a07c264d5e1abe65004fcff",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "bea665280c1199e932f264eaeb42d2f6cb7cf9a37eddae0cad70c491eb8e1456",
+  "task_id": "TASK-0200"
+}

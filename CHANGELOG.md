@@ -1,9 +1,16 @@
 # Changelog
 
-本项目使用语义化版本。`0.1.0`、`0.2.0`、`0.3.0` 与 `0.3.1` 均固定本地可安装、可审计的源码基线；不代表
+本项目使用语义化版本。`0.1.0`、`0.2.0`、`0.3.0`、`0.3.1` 与 `0.3.2` 均固定本地可安装、可审计的源码基线；不代表
 package 已发布到外部 registry。
 
 ## Unreleased
+
+## 0.3.2 - 2026-11-28
+
+### Changed
+
+- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.3.1` 提升至 `0.3.2`（TASK-0200，仅完成仓库内发布准备，尚未创建 `v0.3.2` Git tag 或 GitHub Release）。
+- 加固内置资源包 wheel 下的外仓 Python CI 便携端到端验证（含 `aiflow list` 闭环）、`external-python-ci.yml` 与运维接入文档，并对齐 `test_acceptance_traceability.py` mypy 入口断言（PR #239）。
 
 ### Added
 
@@ -12,7 +19,7 @@ package 已发布到外部 registry。
 
 ### Fixed
 
-- 将受影响 CLI stdout JSON 展示输出（`status_service.StatusSummary.to_json`、`gate.GateDecision.to_json` 与 `cli.py` 中 `review context` stdout、`review show --format json`、`advise --format json`）统一改为 `ensure_ascii=True`，并在 `tests/unit/test_cli_error_output.py` 补充单元测试与 `PYTHONIOENCODING=cp1252`/`gbk` 真实子进程编码回归测试，消除 Windows 非 UTF-8 管道下的 `UnicodeEncodeError`，同时保持规范摘要哈希、磁盘原子写与 `aiflow observe` stdout 契约零变更（TASK-0199，PR #240）。
+- 将受影响 CLI stdout JSON 展示输出（`status_service.StatusSummary.to_json`、`gate.GateDecision.to_json` 与 `cli.py` 中 `review context` stdout、`review show --format json`、`advise --format json`）统一改为 `ensure_ascii=True`，并在 `tests/unit/test_cli_error_output.py` 补充单元测试与 `PYTHONIOENCODING=cp1252`/`gbk` 真实子进程编码回归测试，消除 Windows 非 UTF-8 管道下的 `UnicodeEncodeError`，同时保持规范摘要哈希、磁盘原子写与 `aiflow observe` stdout 契约零变更（TASK-0199，PR #240 / #241）。
 
 ## 0.3.1 - 2026-11-27
 

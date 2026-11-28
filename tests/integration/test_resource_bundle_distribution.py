@@ -1293,7 +1293,7 @@ def test_direct_wheel_rejects_existing_output_without_overwriting_it(
     source = synthetic_source
     output = tmp_path / "dist"
     output.mkdir()
-    existing = output / "aiflow-0.3.1-py3-none-any.whl"
+    existing = output / "aiflow-0.3.2-py3-none-any.whl"
     existing.write_bytes(b"preserve existing wheel\n")
     result = subprocess.run(
         [sys.executable, "-I", "setup.py", "bdist_wheel", "--dist-dir", str(output)],
@@ -1317,7 +1317,7 @@ def test_direct_sdist_rejects_existing_archive_without_overwriting_it(
     source = synthetic_source
     output = tmp_path / "dist"
     output.mkdir()
-    existing = output / "aiflow-0.3.1.tar.gz"
+    existing = output / "aiflow-0.3.2.tar.gz"
     existing.write_bytes(b"preserve existing archive\n")
     result = subprocess.run(
         [sys.executable, "-I", "setup.py", "sdist", "--dist-dir", str(output)],
@@ -1590,7 +1590,7 @@ def test_sdist_rejects_existing_staging_without_modification(
     tmp_path: Path, synthetic_source: Path, kind: str
 ) -> None:
     source = synthetic_source
-    stage = source / "aiflow-0.3.1"
+    stage = source / "aiflow-0.3.2"
     outside = tmp_path / "outside"
     if kind == "directory":
         outside = stage
@@ -1876,7 +1876,7 @@ def test_metadata_refuses_links_before_any_outside_write(
     marker.write_bytes(b"preserve\n")
     metadata = source / "src/aiflow.egg-info" if command == "sdist" else tmp_path / "metadata"
     if kind == "file_symlink":
-        directory = metadata if command == "sdist" else metadata / "aiflow-0.3.1.dist-info"
+        directory = metadata if command == "sdist" else metadata / "aiflow-0.3.2.dist-info"
         directory.mkdir(parents=True)
         link = directory / "PKG-INFO"
     else:
