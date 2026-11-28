@@ -9,7 +9,7 @@ package 已发布到外部 registry。
 
 ### Changed
 
-- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.3.1` 提升至 `0.3.2`（TASK-0200，仅完成仓库内发布准备，尚未创建 `v0.3.2` Git tag 或 GitHub Release）。
+- 将源码包版本、运行期 `__version__`、`CLI_VERSION`、`uv.lock` 元数据、版本断言与发布文档从 `0.3.1` 提升至 `0.3.2`（TASK-0200，PR #242 / #243；经项目所有者授权，于 `a0e8bb14` 同步完成 `v0.3.2` annotated tag `a978a134` 与 GitHub Release 发布）。
 - 加固内置资源包 wheel 下的外仓 Python CI 便携端到端验证（含 `aiflow list` 闭环）、`external-python-ci.yml` 与运维接入文档，并对齐 `test_acceptance_traceability.py` mypy 入口断言（PR #239）。
 
 ### Added
