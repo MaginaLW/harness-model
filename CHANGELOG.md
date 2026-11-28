@@ -5,6 +5,10 @@ package 已发布到外部 registry。
 
 ## Unreleased
 
+### Changed
+
+- 将收尾与保留账本校验能力抽离至可安装模块 `src/aiflow/closeout_check.py`（自包含只读 `_git_bytes` 含 `GIT_OPTIONAL_LOCKS=0`、仅导入 `aiflow.*` 公共符号并通过 `schema_directory_context(root / SCHEMA_RELATIVE_DIRECTORY)` 从目标仓库加载 Schema），在 `src/aiflow/task_service.py` 公开 `is_subject_sync_staged_patch` 与 `require_merge_commit`（保留私有别名向后兼容），将 `tools/ci/verify_closeout.py` 收敛为兼容薄包装，并在 `tests/unit/test_verify_closeout.py` 补充直接 API 与 `python -m aiflow.closeout_check` 子进程便携性测试（TASK-0202，PR #247）。
+
 ### Fixed
 
 - 为 `src/aiflow/cli.py` 默认文本 stdout 与 stderr 输出新增 `_write_line(...)` 回退（仅对当前流编码无法表示的字符执行 `backslashreplace`，UTF-8 流与可编码字符 100% 字节一致，且保持 `aiflow observe` stdout、`atomic_write_json` 与规范摘要零变更），并在 `tests/unit/test_cli_error_output.py` 补充 `cp1252` / `gbk` / `utf-8` 流单测与子进程回归测试（TASK-0201，PR #245）。

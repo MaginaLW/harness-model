@@ -6,7 +6,7 @@ allowed_scope:
 base_commit: d991674c81b6e874007e11515336780800384cee
 branch: codex/portable-closeout-check
 created_at: '2026-11-28T13:17:48Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -65,6 +65,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-28T13:18:40Z'
 subject_commit: f44a2727e41aff3871b3040881546c4499680eab
 task_id: TASK-0202
-updated_at: '2026-11-28T13:54:26Z'
+updated_at: '2026-11-28T14:01:53Z'
 worktree_dirty: false
 worktree_dirty_paths: []
