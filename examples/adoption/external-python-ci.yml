@@ -49,7 +49,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test -n "$PR_HEAD_REF"
+          git check-ref-format --branch "$PR_HEAD_REF"
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
           git switch --force-create "$PR_HEAD_REF" "$HEAD_SHA"
+          test "$(git symbolic-ref --quiet --short HEAD)" = "$PR_HEAD_REF"
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
           # Resolve TASK_ID from AI_FLOW_TASK_ID or the single task directory changed in this PR.
           # Do NOT copy tools/ci/resolve_task.py or .ai/bootstrap-mode.yaml from harness-model.
           task_id="$AI_FLOW_TASK_ID"

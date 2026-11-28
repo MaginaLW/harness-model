@@ -286,7 +286,8 @@ def test_quality_replay_keeps_coverage_artifacts_out_of_repository_root() -> Non
     assert "核心域须" in replay
     assert "总分支覆盖率不低于 85%" in replay
     assert "变更覆盖率不低于 90%" in replay
-    assert "-m mypy src" in replay
+    assert ".\\.venv\\Scripts\\python.exe -m mypy\n" in replay
+    assert "-m mypy src" not in replay
     assert "mypy src tools/analysis" not in replay
     assert "Remove-Item Env:COVERAGE_FILE -ErrorAction SilentlyContinue" in quickstart
     assert unsafe_coverage_command not in quickstart
