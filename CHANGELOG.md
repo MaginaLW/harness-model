@@ -5,6 +5,10 @@ package 已发布到外部 registry。
 
 ## Unreleased
 
+### Fixed
+
+- 为 `src/aiflow/cli.py` 默认文本 stdout 与 stderr 输出新增 `_write_line(...)` 回退（仅对当前流编码无法表示的字符执行 `backslashreplace`，UTF-8 流与可编码字符 100% 字节一致，且保持 `aiflow observe` stdout、`atomic_write_json` 与规范摘要零变更），并在 `tests/unit/test_cli_error_output.py` 补充 `cp1252` / `gbk` / `utf-8` 流单测与子进程回归测试（TASK-0201，PR #245）。
+
 ## 0.3.2 - 2026-11-28
 
 ### Changed
