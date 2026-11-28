@@ -1,0 +1,13 @@
+{
+  "context_sha256": "9f6cdfa497bcdcfc7412b7acc832f173acb8907dceee99a34e9c7460827b1566",
+  "findings": [],
+  "outcome": "APPROVE",
+  "recorded_at": "2026-11-28T13:19:40Z",
+  "review_id": "REV-0001",
+  "review_stage": "design",
+  "reviewer": "independent-reviewer",
+  "revision": 1,
+  "schema_version": "1.0",
+  "summary": "Independent design review passed for TASK-0202: spec.md cleanly bounds changes to src/aiflow/task_service.py, src/aiflow/closeout_check.py, tools/ci/verify_closeout.py, and tests/unit/test_verify_closeout.py; exposes public is_subject_sync_staged_patch and require_merge_commit with private aliases for compatibility; enforces public-only aiflow.* imports and avoids tools.*/node_*/installed_*; binds schema_directory_context(root / SCHEMA_RELATIVE_DIRECTORY) for portable wheel execution; and preserves existing CLI/error semantics and rollback.",
+  "task_id": "TASK-0202"
+}

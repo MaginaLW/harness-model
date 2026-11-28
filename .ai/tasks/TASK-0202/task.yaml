@@ -1,0 +1,70 @@
+allowed_scope:
+- src/aiflow/task_service.py
+- src/aiflow/closeout_check.py
+- tools/ci/verify_closeout.py
+- tests/unit/test_verify_closeout.py
+base_commit: d991674c81b6e874007e11515336780800384cee
+branch: codex/portable-closeout-check
+created_at: '2026-11-28T13:17:48Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: high
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Extract portable closeout verification into aiflow.closeout_check with compatible
+    tools/ci wrapper
+  impact:
+    level: low
+  impact_categories:
+  - ci
+  impact_scope:
+  - src/aiflow/task_service.py
+  - src/aiflow/closeout_check.py
+  - tools/ci/verify_closeout.py
+  - tests/unit/test_verify_closeout.py
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0202
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: 8e7877d7d8bb195a590051da9a1dab477f1d6563f9f39d2ae4291fb5afa5b356
+goal: Extract portable closeout verification into aiflow.closeout_check with compatible
+  tools/ci wrapper
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-28T13:18:40Z'
+subject_commit: f44a2727e41aff3871b3040881546c4499680eab
+task_id: TASK-0202
+updated_at: '2026-11-28T13:54:26Z'
+worktree_dirty: false
+worktree_dirty_paths: []
