@@ -1,0 +1,41 @@
+{
+  "base_commit": "d991674c81b6e874007e11515336780800384cee",
+  "branch": "codex/portable-closeout-check",
+  "classification_input_sha256": "3e491f9bce56f286431176cd3c16bc7fa9a3f4cc984399df8a7b2831ff549e73",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "src/aiflow/closeout_check.py",
+      "tools/ci/verify_closeout.py",
+      "tests/unit/test_verify_closeout.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Extract portable closeout verification into aiflow.closeout_check with compatible tools/ci wrapper",
+        "impact_scope": [
+          "src/aiflow/task_service.py",
+          "src/aiflow/closeout_check.py",
+          "tools/ci/verify_closeout.py",
+          "tests/unit/test_verify_closeout.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Extract portable closeout verification into aiflow.closeout_check with compatible tools/ci wrapper",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "9f6cdfa497bcdcfc7412b7acc832f173acb8907dceee99a34e9c7460827b1566",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "8e7877d7d8bb195a590051da9a1dab477f1d6563f9f39d2ae4291fb5afa5b356",
+  "task_id": "TASK-0202"
+}

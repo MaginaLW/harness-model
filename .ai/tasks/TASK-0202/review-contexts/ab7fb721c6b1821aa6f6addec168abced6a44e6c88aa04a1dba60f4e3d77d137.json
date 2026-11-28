@@ -1,0 +1,137 @@
+{
+  "base_commit": "d991674c81b6e874007e11515336780800384cee",
+  "branch": "codex/portable-closeout-check",
+  "classification_input_sha256": "3e491f9bce56f286431176cd3c16bc7fa9a3f4cc984399df8a7b2831ff549e73",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/task_service.py",
+      "src/aiflow/closeout_check.py",
+      "tools/ci/verify_closeout.py",
+      "tests/unit/test_verify_closeout.py"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Extract portable closeout verification into aiflow.closeout_check with compatible tools/ci wrapper",
+        "impact_scope": [
+          "src/aiflow/task_service.py",
+          "src/aiflow/closeout_check.py",
+          "tools/ci/verify_closeout.py",
+          "tests/unit/test_verify_closeout.py"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "diff_summary": {
+      "changed_paths": [
+        "src/aiflow/closeout_check.py",
+        "src/aiflow/task_service.py",
+        "tests/unit/test_verify_closeout.py",
+        "tools/ci/verify_closeout.py"
+      ],
+      "files": [
+        {
+          "additions": 252,
+          "binary": false,
+          "deletions": 0,
+          "path": "src/aiflow/closeout_check.py"
+        },
+        {
+          "additions": 9,
+          "binary": false,
+          "deletions": 2,
+          "path": "src/aiflow/task_service.py"
+        },
+        {
+          "additions": 201,
+          "binary": false,
+          "deletions": 0,
+          "path": "tests/unit/test_verify_closeout.py"
+        },
+        {
+          "additions": 18,
+          "binary": false,
+          "deletions": 184,
+          "path": "tools/ci/verify_closeout.py"
+        }
+      ],
+      "totals": {
+        "additions": 480,
+        "deletions": 186,
+        "files": 4
+      }
+    },
+    "goal": "Extract portable closeout verification into aiflow.closeout_check with compatible tools/ci wrapper",
+    "route": "REVIEW",
+    "verification_level": "V1",
+    "verification_summary": {
+      "reproduce_command": [
+        "python",
+        "-m",
+        "aiflow",
+        "verify",
+        "TASK-0202",
+        "--actor",
+        "closeout-author"
+      ],
+      "required_checks": [
+        {
+          "check_id": "contract",
+          "status": "passed"
+        },
+        {
+          "check_id": "coverage_xml",
+          "status": "passed"
+        },
+        {
+          "check_id": "diff_coverage",
+          "status": "passed"
+        },
+        {
+          "check_id": "mypy",
+          "status": "passed"
+        },
+        {
+          "check_id": "regression_tests",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "ruff_format_check",
+          "status": "passed"
+        },
+        {
+          "check_id": "scope",
+          "status": "passed"
+        },
+        {
+          "check_id": "smoke",
+          "status": "passed"
+        },
+        {
+          "check_id": "unit_tests",
+          "status": "passed"
+        }
+      ],
+      "unverified_scenarios": [],
+      "verification_level": "V1"
+    }
+  },
+  "context_sha256": "ab7fb721c6b1821aa6f6addec168abced6a44e6c88aa04a1dba60f4e3d77d137",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "evidence_sha256": "afaa537afcf79a196d574194bf79c8656437a930cc0d132722176aa412e52b2e",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "implementation",
+  "schema_version": "1.0",
+  "spec_sha256": "8e7877d7d8bb195a590051da9a1dab477f1d6563f9f39d2ae4291fb5afa5b356",
+  "subject_commit": "f44a2727e41aff3871b3040881546c4499680eab",
+  "task_id": "TASK-0202"
+}

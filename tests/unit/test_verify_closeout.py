@@ -4,14 +4,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 import stat
+import subprocess
+import sys
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 import yaml
 
+from aiflow import closeout_check
 from aiflow.cli import main as aiflow
 from aiflow.storage import atomic_write_yaml
 from aiflow.task_service import close_task
@@ -25,6 +29,7 @@ from tests.integration.test_begin_close_commands import (
     run_git,
     start,
 )
+from tools.ci import verify_closeout as verify_closeout_wrapper
 from tools.ci.verify_closeout import verify_closeout, verify_retained
 
 TASK = "TASK-0001"
@@ -219,3 +224,199 @@ def test_retained_existing_ledger_preserves_originals(
     commit_all(root, f"change {change}")
     with pytest.raises(ValueError, match=reason):
         verify_retained(root, base, run_git(root, "rev-parse", "HEAD"), TASK)
+
+
+def test_portable_closeout_check_api_and_subprocess_for_closed(
+    closed: tuple[Path, str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    closed_root, merge, closed_head = closed
+    advanced = close_commit(closed_root, "later target change", merge)
+
+    # Run from a directory with no .ai/schemas to verify target root/.ai/schemas is used.
+    monkeypatch.chdir(closed_root.parent)
+    closeout_check.verify_closeout(closed_root, advanced, closed_head, TASK)
+
+    clean_env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
+    valid_closeout = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "aiflow.closeout_check",
+            "--base",
+            advanced,
+            "--head",
+            closed_head,
+            "--task",
+            TASK,
+        ],
+        cwd=closed_root,
+        env=clean_env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+    assert valid_closeout.returncode == 0, valid_closeout.stderr
+    assert f"Verified closeout for {TASK}" in valid_closeout.stdout
+
+    monkeypatch.chdir(closed_root)
+    assert closeout_check.main(["--base", advanced, "--head", closed_head, "--task", TASK]) == 0
+    assert f"Verified closeout for {TASK}" in capsys.readouterr().out
+    assert (
+        verify_closeout_wrapper.main(["--base", advanced, "--head", closed_head, "--task", TASK])
+        == 0
+    )
+    assert f"Verified closeout for {TASK}" in capsys.readouterr().out
+    assert (
+        verify_closeout_wrapper.main(["--base", advanced, "--head", closed_head, "--task", "BAD"])
+        == 1
+    )
+    assert "Ledger verification failed:" in capsys.readouterr().err
+
+    (closed_root / ".ai" / "tasks" / TASK / "spec.md").write_text(
+        "tampered after merge\n", encoding="utf-8"
+    )
+    commit_all(closed_root, "tamper closeout")
+    tampered_head = run_git(closed_root, "rev-parse", "HEAD")
+
+    tampered_run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "aiflow.closeout_check",
+            "--base",
+            merge,
+            "--head",
+            tampered_head,
+            "--task",
+            TASK,
+        ],
+        cwd=closed_root,
+        env=clean_env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+    assert tampered_run.returncode == 1
+    assert "Ledger verification failed:" in tampered_run.stderr
+
+    assert closeout_check.main(["--base", merge, "--head", closed_head, "--task", "INVALID"]) == 1
+    assert "invalid task ID" in capsys.readouterr().err
+    assert closeout_check.main(["--base", "0" * 40, "--head", closed_head, "--task", TASK]) == 1
+    assert "Ledger verification failed:" in capsys.readouterr().err
+
+    run_git(closed_root, "switch", "--detach", advanced)
+    (closed_root / ".ai" / "repository-id").write_text(
+        "00000000-0000-4000-8000-000000000000\n", encoding="utf-8"
+    )
+    commit_all(closed_root, "different repository")
+    wrong_repo = run_git(closed_root, "rev-parse", "HEAD")
+    with pytest.raises(ValueError, match="approved and belong to this repository"):
+        closeout_check.verify_closeout(closed_root, wrong_repo, closed_head, TASK)
+
+    monkeypatch.chdir(closed_root.parent)
+    (closed_root / ".ai" / "schemas" / "task.schema.json").unlink()
+    with pytest.raises(FileNotFoundError):
+        closeout_check.verify_closeout(closed_root, advanced, closed_head, TASK)
+
+
+def test_portable_closeout_check_api_and_subprocess_for_retained(
+    failed: tuple[Path, str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    failed_root, before_failure, failed_head = failed
+
+    monkeypatch.chdir(failed_root.parent)
+    closeout_check.verify_retained(failed_root, before_failure, failed_head, TASK)
+
+    clean_env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
+    valid_retained = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "aiflow.closeout_check",
+            "--retained",
+            "--base",
+            before_failure,
+            "--head",
+            failed_head,
+            "--task",
+            TASK,
+        ],
+        cwd=failed_root,
+        env=clean_env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+    assert valid_retained.returncode == 0, valid_retained.stderr
+    assert f"Verified retained record for {TASK}" in valid_retained.stdout
+
+    monkeypatch.chdir(failed_root)
+    assert (
+        closeout_check.main(
+            ["--retained", "--base", before_failure, "--head", failed_head, "--task", TASK]
+        )
+        == 0
+    )
+    assert f"Verified retained record for {TASK}" in capsys.readouterr().out
+
+    (failed_root / ".ai" / "tasks" / TASK / "classification.json").unlink()
+    commit_all(failed_root, "tamper retained")
+    tampered_head = run_git(failed_root, "rev-parse", "HEAD")
+
+    tampered_run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "aiflow.closeout_check",
+            "--retained",
+            "--base",
+            before_failure,
+            "--head",
+            tampered_head,
+            "--task",
+            TASK,
+        ],
+        cwd=failed_root,
+        env=clean_env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+    assert tampered_run.returncode == 1
+    assert "Ledger verification failed:" in tampered_run.stderr
+
+
+def test_portable_closeout_check_retained_sync_and_frozen_history(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = create_repository(tmp_path / "repo")
+    with monkeypatch.context() as mp:
+        start(root, mp)
+        commit_all(root, "started")
+        fork = run_git(root, "rev-parse", "HEAD")
+        make_ready(root)
+        assert aiflow(["begin", TASK, "--actor", "implementer"]) == 0
+        (root / "src").mkdir(exist_ok=True)
+        (root / "src" / "app.py").write_text("VALUE = 1\n", encoding="utf-8")
+        commit_all(root, "subject change")
+        assert aiflow(["sync", TASK, "--actor", "implementer"]) == 0
+        make_failed(root, {"conclusion": "failed"})
+        commit_all(root, "retained failed after sync")
+    head = run_git(root, "rev-parse", "HEAD")
+    monkeypatch.chdir(tmp_path)
+    closeout_check.verify_retained(root, fork, head, TASK)
+
+    (root / ".ai" / "repository-id").write_text("00000000-0000-4000-8000-000000000000\n")
+    commit_all(root, "different repo")
+    different_repo = run_git(root, "rev-parse", "HEAD")
+    with pytest.raises(ValueError, match="failed or blocked task"):
+        closeout_check.verify_retained(root, different_repo, head, TASK)

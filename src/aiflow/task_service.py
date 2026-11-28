@@ -480,7 +480,7 @@ def resolve_hook_task_id(repository_root: Path, explicit: str | None) -> str:
     )
 
 
-def _is_subject_sync_staged_patch(
+def is_subject_sync_staged_patch(
     raw_task: Mapping[str, object], staged_task: Mapping[str, object], event: Mapping[str, object]
 ) -> bool:
     """Accept only the exact materialization left after a subject-sync replace interruption."""
@@ -506,6 +506,9 @@ def _is_subject_sync_staged_patch(
             return False
     expected = {**raw_task, "subject_commit": new_subject, "updated_at": occurred_at}
     return raw_task.get("subject_commit") == old_subject and dict(staged_task) == expected
+
+
+_is_subject_sync_staged_patch = is_subject_sync_staged_patch
 
 
 def _require_materialized_risk_facts(record: TaskRecord) -> None:
@@ -1210,9 +1213,10 @@ def begin_task(
     )
 
 
-def _require_merge_commit(
+def require_merge_commit(
     repository_root: Path, commit: str, *, base_commit: str, subject_commit: str | None
 ) -> None:
+    """Verify a merge commit carries the task candidate through an incoming parent."""
     if COMMIT_PATTERN.fullmatch(commit) is None:
         raise ContractError("Merge commit is invalid", code="CLOSE_COMMIT_INVALID")
     try:
@@ -1253,6 +1257,9 @@ def _require_merge_commit(
             "Merge commit does not include the task candidate through an incoming parent",
             code="CLOSE_SUBJECT_NOT_MERGED",
         )
+
+
+_require_merge_commit = require_merge_commit
 
 
 def close_task(
