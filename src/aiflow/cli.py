@@ -7,7 +7,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, TextIO
 
 from aiflow import __version__
 from aiflow.advisory_service import advise_task, format_advisory_text
@@ -47,6 +47,18 @@ from aiflow.verification_checks import validate_task_artifacts, validate_task_sc
 from aiflow.verification_service import verify_task
 
 DESCRIPTION = "Auditable AI code collaboration CLI"
+
+
+def _write_line(text: str, *, stream: TextIO | None = None) -> None:
+    """Write a line, backslash-escaping characters the target encoding cannot represent."""
+    target = sys.stdout if stream is None else stream
+    encoding = getattr(target, "encoding", None)
+    if isinstance(encoding, str) and encoding:
+        try:
+            text.encode(encoding)
+        except UnicodeEncodeError:
+            text = text.encode(encoding, errors="backslashreplace").decode(encoding)
+    print(text, file=target)
 
 
 def build_parser() -> ArgumentParser:
@@ -281,7 +293,7 @@ def _dispatch_initialization(arguments: Namespace) -> int:
             result = initialization.plan_initialization_migration(
                 arguments.target, profile=arguments.profile, **options
             )
-    print(json.dumps(result, sort_keys=True))
+    _write_line(json.dumps(result, sort_keys=True))
     return 0
 
 
@@ -304,9 +316,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _dispatch(arguments, repository_root)
     except AiflowError as error:
         if arguments is not None and getattr(arguments, "format", None) == "json":
-            print(json.dumps({"code": error.code, "message": error.message}), file=sys.stderr)
+            _write_line(
+                json.dumps({"code": error.code, "message": error.message}), stream=sys.stderr
+            )
         else:
-            print(error.message, file=sys.stderr)
+            _write_line(error.message, stream=sys.stderr)
         return 1
 
 
@@ -377,7 +391,7 @@ def _run_sdk_context_supplement(
             code="SDK_REVIEW_UNAVAILABLE",
         ) from error
     status = receipt.get("status", "unknown")
-    print(f"Supplemental SDK review: {status}", file=sys.stderr)
+    _write_line(f"Supplemental SDK review: {status}", stream=sys.stderr)
     return 0 if status == "completed" else 1
 
 
@@ -399,8 +413,8 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
                 forbidden_actions=arguments.forbid_action,
                 allow_detached=arguments.allow_detached,
             )
-        print(start_result.task_id)
-        print(start_result.task_directory.resolve())
+        _write_line(start_result.task_id)
+        _write_line(str(start_result.task_directory.resolve()))
     elif arguments.command == "facts":
         facts_result = record_risk_facts(
             repository_root,
@@ -410,7 +424,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             actor=arguments.actor,
             dry_run=arguments.dry_run,
         )
-        print(json.dumps(facts_result, ensure_ascii=True, sort_keys=True))
+        _write_line(json.dumps(facts_result, ensure_ascii=True, sort_keys=True))
     elif arguments.command == "begin":
         transition_result = begin_task(
             repository_root,
@@ -418,7 +432,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             actor=arguments.actor,
             reason=arguments.reason,
         )
-        print(f"{arguments.task_id} {transition_result.task['current_state']}")
+        _write_line(f"{arguments.task_id} {transition_result.task['current_state']}")
     elif arguments.command == "close":
         transition_result = close_task(
             repository_root,
@@ -427,13 +441,13 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             merge_commit=arguments.merge_commit,
             actor=arguments.actor,
         )
-        print(f"{arguments.task_id} {transition_result.task['current_state']}")
+        _write_line(f"{arguments.task_id} {transition_result.task['current_state']}")
     elif arguments.command == "classify":
         classification = classify_task(repository_root, arguments.task_id, actor=arguments.actor)
-        print(f"{arguments.task_id} {classification['effective_route']}")
+        _write_line(f"{arguments.task_id} {classification['effective_route']}")
     elif arguments.command == "freeze":
         freeze_result = freeze_task(repository_root, arguments.task_id, actor=arguments.actor)
-        print(f"{arguments.task_id} {freeze_result.task['current_state']}")
+        _write_line(f"{arguments.task_id} {freeze_result.task['current_state']}")
     elif arguments.command == "answer":
         answer_result = answer_task(
             repository_root,
@@ -443,8 +457,8 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             actor=arguments.actor,
             reason=arguments.reason,
         )
-        print(f"{arguments.task_id} {answer_result.task['current_state']}")
-        print("ASK option structure was validated; semantic exclusivity was not proven.")
+        _write_line(f"{arguments.task_id} {answer_result.task['current_state']}")
+        _write_line("ASK option structure was validated; semantic exclusivity was not proven.")
     elif arguments.command == "approve":
         approval_result = approve_task(
             repository_root,
@@ -455,7 +469,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             action_file=arguments.action_file,
             authorization_mode=arguments.authorization_mode,
         )
-        print(f"{arguments.task_id} {approval_result.task['current_state']}")
+        _write_line(f"{arguments.task_id} {approval_result.task['current_state']}")
     elif arguments.command == "escalate":
         escalation_result = escalate_task(
             repository_root,
@@ -467,7 +481,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             actor=arguments.actor,
             existing_work_disposition=arguments.existing_work,
         )
-        print(f"{arguments.task_id} {escalation_result.task['current_state']}")
+        _write_line(f"{arguments.task_id} {escalation_result.task['current_state']}")
     elif arguments.command == "resolve":
         resolution_result = record_resolution(
             repository_root,
@@ -478,7 +492,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             reason=arguments.reason,
             authorize_downgrade=arguments.authorize_downgrade,
         )
-        print(f"{arguments.task_id} {resolution_result.task['current_state']}")
+        _write_line(f"{arguments.task_id} {resolution_result.task['current_state']}")
     elif arguments.command == "review":
         if arguments.review_command == "context":
             sdk_options = (
@@ -515,9 +529,9 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
             context = build_review_context(repository_root, arguments.task_id, arguments.stage)
             if arguments.output is not None:
                 atomic_write_json(arguments.output, context)
-                print(str(arguments.output.resolve()))
+                _write_line(str(arguments.output.resolve()))
             else:
-                print(json.dumps(context, ensure_ascii=True, sort_keys=True))
+                _write_line(json.dumps(context, ensure_ascii=True, sort_keys=True))
             if arguments.sdk_review_enable_once:
                 return _run_sdk_context_supplement(arguments, repository_root, context)
         elif arguments.review_command == "record":
@@ -527,7 +541,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
                 input_path=arguments.input,
                 actor=arguments.actor,
             )
-            print(
+            _write_line(
                 f"{arguments.task_id} {record_result.record['review_id']} "
                 f"r{int(record_result.record['revision']):04d}"
             )
@@ -540,14 +554,14 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
                 reason=arguments.reason,
                 actor=arguments.actor,
             )
-            print(
+            _write_line(
                 f"{arguments.task_id} {finding_result.record['review_id']} "
                 f"r{int(finding_result.record['revision']):04d}"
             )
         elif arguments.review_command == "show":
             reviews = list_review_records(repository_root, arguments.task_id, stage=arguments.stage)
             if arguments.format == "json":
-                print(
+                _write_line(
                     json.dumps(
                         {"task_id": arguments.task_id, "reviews": list(reviews)},
                         ensure_ascii=True,
@@ -556,23 +570,23 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
                 )
             else:
                 for record in reviews:
-                    print(
+                    _write_line(
                         f"{record['review_id']} r{int(record['revision']):04d} "
                         f"{record['review_stage']} {record['outcome']}"
                     )
     elif arguments.command == "status":
         summary = summarize_task(repository_root, arguments.task_id)
-        print(summary.to_json() if arguments.format == "json" else summary.to_text())
+        _write_line(summary.to_json() if arguments.format == "json" else summary.to_text())
     elif arguments.command == "list":
         task_list = list_tasks(
             repository_root,
             states=arguments.states,
             include_merged=arguments.include_merged,
         )
-        print(task_list.to_json() if arguments.format == "json" else task_list.to_text())
+        _write_line(task_list.to_json() if arguments.format == "json" else task_list.to_text())
     elif arguments.command == "advise":
         report = advise_task(repository_root, arguments.task_id)
-        print(
+        _write_line(
             json.dumps(report, ensure_ascii=True, sort_keys=True)
             if arguments.format == "json"
             else format_advisory_text(report)
@@ -618,22 +632,24 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
                 else {}
             ),
         )
-        print(f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}")
+        _write_line(
+            f"{verify_result.task_id} {verify_result.state or 'CI'} {verify_result.conclusion}"
+        )
     elif arguments.command == "gate":
         decision = evaluate_gate(
             repository_root, arguments.task_id, evidence_path=arguments.evidence
         )
-        print(decision.to_json() if arguments.format == "json" else decision.to_text())
+        _write_line(decision.to_json() if arguments.format == "json" else decision.to_text())
         return 0 if decision.passed else 2
     elif arguments.command == "validate":
         validate_task_artifacts(repository_root, arguments.task_id)
-        print(f"{arguments.task_id} valid")
+        _write_line(f"{arguments.task_id} valid")
     elif arguments.command == "scope":
         validate_task_scope(repository_root, arguments.task_id)
-        print(f"{arguments.task_id} scope-valid")
+        _write_line(f"{arguments.task_id} scope-valid")
     elif arguments.command == "sync":
         assessment = evaluate_and_sync_verification_subject(
             repository_root, arguments.task_id, mode="final", actor=arguments.actor
         )
-        print(f"{arguments.task_id} {assessment.subject_commit}")
+        _write_line(f"{arguments.task_id} {assessment.subject_commit}")
     return 0
