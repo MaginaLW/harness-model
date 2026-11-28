@@ -517,7 +517,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
                 atomic_write_json(arguments.output, context)
                 print(str(arguments.output.resolve()))
             else:
-                print(json.dumps(context, ensure_ascii=False, sort_keys=True))
+                print(json.dumps(context, ensure_ascii=True, sort_keys=True))
             if arguments.sdk_review_enable_once:
                 return _run_sdk_context_supplement(arguments, repository_root, context)
         elif arguments.review_command == "record":
@@ -550,7 +550,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
                 print(
                     json.dumps(
                         {"task_id": arguments.task_id, "reviews": list(reviews)},
-                        ensure_ascii=False,
+                        ensure_ascii=True,
                         sort_keys=True,
                     )
                 )
@@ -573,7 +573,7 @@ def _dispatch(arguments: Namespace, repository_root: Path) -> int:
     elif arguments.command == "advise":
         report = advise_task(repository_root, arguments.task_id)
         print(
-            json.dumps(report, ensure_ascii=False, sort_keys=True)
+            json.dumps(report, ensure_ascii=True, sort_keys=True)
             if arguments.format == "json"
             else format_advisory_text(report)
         )
