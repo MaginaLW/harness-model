@@ -11,7 +11,7 @@
 
 ## 当前状态
 
-- **已交付能力**：阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13（`0.2.0`）已完成，当前源码包版本 `0.3.1`（已发布 [v0.3.1 Release](https://github.com/MaginaLW/harness-model/releases/tag/v0.3.1)），active Policy `2.6.0`；支持确定性分流、版本绑定证据、结构化审核、V2、独立 Verifier、required CI 门禁（`ai-quality-gate` + `main` 分支保护）、跨仓 Python 覆盖率验证（`aiflow.coverage_check`）、POSIX/Linux 原子非覆盖 `init apply`、便携 Python 候选策略渲染（`aiflow init render-python-policy`）与只读非评分 `aiflow advise` 状态解释命令。
+- **已交付能力**：阶段一 MVP（`0.1.0`）与阶段二 Chapters 8–13（`0.2.0`）已完成，当前源码包版本 `0.3.1`（已发布 [v0.3.1 Release](https://github.com/MaginaLW/harness-model/releases/tag/v0.3.1)），active Policy `2.6.0`；支持确定性分流、版本绑定证据、结构化审核、V2、独立 Verifier、required CI 门禁（`ai-quality-gate` + `main` 分支保护）、跨仓 Python 覆盖率验证（`aiflow.coverage_check`）、POSIX/Linux 原子非覆盖 `init apply`、便携 Python 候选策略渲染（`aiflow init render-python-policy`）、只读非评分 `aiflow advise` 状态解释与只读任务列表（`aiflow list`）。
 - **明确边界**：Phase 3 仍为 `not_started` 且进入门未满足，Phase 4 依赖其整体退出；系统当前不提供 V3、真实自动评分/模型路由、通用命令拦截器或 OS 沙箱，`aiflow observe` 与 pre-command wrapper 只提供反馈和拒绝，不授予执行权（见 [Hooks](docs/operations/hooks.md)）。
 - **暂停与退役项**：跨仓 `agent-bridge` Stage B 接入在探针失败后已停止，旧 mutation 加固与宿主接入继续暂停；`aiflow external-review` 与 `aiflow verify --pytest-temp-root` 已移除（见[外部审核导入](docs/archive/operations/external-review-import.md)和[pytest 临时目录](docs/archive/operations/pytest-temporary-roots.md)）；外围未接入的 `tools/analysis/*` 分析与合成演练脚本及专属测试已退场，说明归档至[归档索引](docs/archive/README.md#已退场的离线分析与合成演练工具)。实时状态与待决定事项只在[维护收尾与待办](docs/operations/maintenance-status.md)维护，[overall state](docs/superpowers/state/overall.yaml) 仅作 2026-08-30 阶段二冻结投影，不再作为当前事实来源。
 

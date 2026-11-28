@@ -282,7 +282,7 @@ python -m aiflow advise <TASK-ID> --format json
 
 ## REVIEW 双阶段审核
 
-`status`、`advise`、`gate` 与 `review show` 的 `--format json` 在参数解析成功后遇到领域错误时，
+`list`、`status`、`advise`、`gate` 与 `review show` 的 `--format json` 在参数解析成功后遇到领域错误时，
 向 stderr 输出只含 `code` 和 `message` 的 JSON，stdout 为空，退出 `1`。内部 details
 和异常原因不输出；文本模式仍输出一行错误消息。非法参数沿用 argparse 的 usage 与退出 `2`；
 有效但未通过的 Gate 决策仍在 stdout 输出原 JSON 并退出 `2`。读取到非法 UTF-8 任务文档时，

@@ -6,7 +6,7 @@
 
 ## 可重放的起点
 
-> 注：`tools/analysis/approval_overhead.py` 已随 PR #166（`TASK-0156`）从活跃 `main` 退场。本页下列 `approval_overhead.py` 命令均为**固定历史提交的隔离检出重放口令**（`8ee402d1be781d94a73b215a225837c77ef8d1c8` 对应下表基线，`75cb3198daf02ebd440097dc4b127460a314fd00` 对应 `--snapshot` / `--availability` 覆盖参考），不应在当前活跃 `HEAD` 直接执行该路径；当前活跃任务状态统一通过 `python -m aiflow status <TASK-ID>` 查询。
+> 注：`tools/analysis/approval_overhead.py` 已随 PR #166（`TASK-0156`）从活跃 `main` 退场。本页下列 `approval_overhead.py` 命令均为**固定历史提交的隔离检出重放口令**（`8ee402d1be781d94a73b215a225837c77ef8d1c8` 对应下表基线，`75cb3198daf02ebd440097dc4b127460a314fd00` 对应 `--snapshot` / `--availability` 覆盖参考），不应在当前活跃 `HEAD` 直接执行该路径；当前活跃任务状态统一通过 `python -m aiflow list` 与 `python -m aiflow status <TASK-ID>` 查询。
 
 固定基线与统计工具版本均为 `8ee402d1be781d94a73b215a225837c77ef8d1c8`，
 已包含 PR #31 的修复与 PR #32 的关闭记录。在该版本的独立、干净检出中运行：

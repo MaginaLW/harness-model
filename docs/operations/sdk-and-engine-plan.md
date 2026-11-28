@@ -92,7 +92,7 @@ TASK-0083 已交付显式风险事实 `facts` CLI；[PR #138](https://github.com
 目标 CI 适配涉及核心验证代码，不只是修改 YAML：[验证器](../../src/aiflow/verification.py)
 的 Python 分支已于 [PR #216](https://github.com/MaginaLW/harness-model/pull/216)（`TASK-0192`）扩展为支持
 可配置 `--cov=<target>` 与可安装的 `python -m aiflow.coverage_check --source ...`（保留 `85%`/`90%`
-硬编码门槛、命令白名单与旧 `tools/ci/check_coverage.py` 兼容薄包装），并由 [PR #227](https://github.com/MaginaLW/harness-model/pull/227)（`TASK-0196`）新增非覆盖 `aiflow init render-python-policy` 生成对应的四份便携候选 Policy 供 `--policy-candidate-root` 传入；Node 分支仍只提供封闭本地合同，
+硬编码门槛、命令白名单与旧 `tools/ci/check_coverage.py` 兼容薄包装），并由 [PR #227](https://github.com/MaginaLW/harness-model/pull/227)（`TASK-0196`）新增非覆盖 `aiflow init render-python-policy` 生成对应的四份便携候选 Policy 供 `--policy-candidate-root` 传入，并由 [PR #235](https://github.com/MaginaLW/harness-model/pull/235) 补齐内置资源包 wheel 端到端外仓验证与[外仓 Python CI 参考工作流](../../examples/adoption/external-python-ci.yml)；Node 分支仍只提供封闭本地合同，
 CI 组合明确拒绝。只复制 `.ai` 不能让完整验证在任意外仓成立，也不能承诺支持任意语言和 CI。
 
 ### 最小分阶段交付
