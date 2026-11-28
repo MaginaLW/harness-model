@@ -848,3 +848,143 @@ def test_built_wheel_external_python_repo_portable_ci_and_list_pass(
     matching = [entry for entry in list_payload["tasks"] if entry["task_id"] == task_id]
     assert len(matching) == 1, list_payload
     assert matching[0]["current_state"] == "APPROVED_FOR_MERGE"
+
+    _run(["git", "add", ".ai"], cwd=repo, env=ci_env)
+    _run(
+        [
+            "git",
+            "-c",
+            "user.name=External Repo",
+            "-c",
+            "user.email=external@example.invalid",
+            "commit",
+            "-m",
+            "record approved task ledger",
+        ],
+        cwd=repo,
+        env=ci_env,
+    )
+    assert _run(["git", "status", "--porcelain"], cwd=repo, env=ci_env).stdout.strip() == ""
+
+    _run(["git", "switch", "main"], cwd=repo, env=ci_env)
+    _run(
+        [
+            "git",
+            "-c",
+            "user.name=External Repo",
+            "-c",
+            "user.email=external@example.invalid",
+            "merge",
+            "--no-ff",
+            "feat/external-change",
+            "-m",
+            "merge external feature",
+        ],
+        cwd=repo,
+        env=ci_env,
+    )
+    merge_sha = _run(["git", "rev-parse", "HEAD"], cwd=repo, env=ci_env).stdout.strip()
+
+    _run(["git", "switch", "-c", "closeout/external-change"], cwd=repo, env=ci_env)
+    _run(
+        [
+            python_exe,
+            "-m",
+            "aiflow",
+            "close",
+            task_id,
+            "--result",
+            "merged",
+            "--merge-commit",
+            merge_sha,
+            "--actor",
+            "maintainer",
+        ],
+        cwd=repo,
+        env=ci_env,
+    )
+    _run(
+        [
+            "git",
+            "add",
+            f".ai/tasks/{task_id}/task.yaml",
+            f".ai/tasks/{task_id}/events.jsonl",
+        ],
+        cwd=repo,
+        env=ci_env,
+    )
+    _run(
+        [
+            "git",
+            "-c",
+            "user.name=External Repo",
+            "-c",
+            "user.email=external@example.invalid",
+            "commit",
+            "-m",
+            "close task as merged",
+        ],
+        cwd=repo,
+        env=ci_env,
+    )
+    closeout_head = _run(["git", "rev-parse", "HEAD"], cwd=repo, env=ci_env).stdout.strip()
+
+    status_out = _run(
+        [python_exe, "-m", "aiflow", "status", task_id, "--format", "json"],
+        cwd=repo,
+        env=ci_env,
+    ).stdout
+    assert json.loads(status_out)["current_state"] == "MERGED"
+
+    _run([python_exe, "-m", "aiflow", "validate", task_id], cwd=repo, env=ci_env)
+    _run(
+        [
+            python_exe,
+            "-m",
+            "aiflow.closeout_check",
+            "--base",
+            merge_sha,
+            "--head",
+            closeout_head,
+            "--task",
+            task_id,
+        ],
+        cwd=repo,
+        env=ci_env,
+    )
+
+    spec_path = repo / ".ai" / "tasks" / task_id / "spec.md"
+    spec_path.write_text(spec_path.read_text(encoding="utf-8") + "\nTampered.\n", encoding="utf-8")
+    _run(["git", "add", f".ai/tasks/{task_id}/spec.md"], cwd=repo, env=ci_env)
+    _run(
+        [
+            "git",
+            "-c",
+            "user.name=External Repo",
+            "-c",
+            "user.email=external@example.invalid",
+            "commit",
+            "-m",
+            "tamper spec during closeout",
+        ],
+        cwd=repo,
+        env=ci_env,
+    )
+    tampered_head = _run(["git", "rev-parse", "HEAD"], cwd=repo, env=ci_env).stdout.strip()
+    tampered_result = _run(
+        [
+            python_exe,
+            "-m",
+            "aiflow.closeout_check",
+            "--base",
+            merge_sha,
+            "--head",
+            tampered_head,
+            "--task",
+            task_id,
+        ],
+        cwd=repo,
+        env=ci_env,
+        expected=1,
+    )
+    assert "closeout must update only task.yaml and events.jsonl" in tampered_result.stderr

@@ -63,14 +63,25 @@ jobs:
               | awk -F/ 'NF>=3 && $3 ~ /^TASK-/ {print $3}' | sort -u)
           fi
           test "$(printf '%s\n' "$task_id" | grep -c '^TASK-')" -eq 1
+          task_state=$(python -m aiflow status "$task_id" --format json | python -c 'import json, sys; print(json.load(sys.stdin)["current_state"])')
           echo "task_id=$task_id" >> "$GITHUB_OUTPUT"
+          echo "task_state=$task_state" >> "$GITHUB_OUTPUT"
 
       - name: Validate task artifacts
         env:
           TASK_ID: ${{ steps.task.outputs.task_id }}
         run: python -m aiflow validate "$TASK_ID"
 
+      - name: Verify post-merge task closeout
+        if: steps.task.outputs.task_state == 'MERGED'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          TASK_ID: ${{ steps.task.outputs.task_id }}
+        run: python -m aiflow.closeout_check --base "$BASE_SHA" --head "$HEAD_SHA" --task "$TASK_ID"
+
       - name: Run portable CI verification
+        if: steps.task.outputs.task_state != 'MERGED'
         env:
           TASK_ID: ${{ steps.task.outputs.task_id }}
           TMPDIR: ${{ runner.temp }}
@@ -82,6 +93,7 @@ jobs:
             --output "$RUNNER_TEMP/aiflow/evidence.json"
 
       - name: Evaluate AI Flow merge gate
+        if: steps.task.outputs.task_state != 'MERGED'
         env:
           TASK_ID: ${{ steps.task.outputs.task_id }}
         run: |
