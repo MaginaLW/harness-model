@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import shutil
@@ -19,7 +20,7 @@ from aiflow.errors import AiflowError, StorageError
 from aiflow.facts_service import record_risk_facts
 from aiflow.gate import GateDecision
 from aiflow.review_service import build_review_context, record_review
-from aiflow.status_service import StatusSummary
+from aiflow.status_service import StatusSummary, TaskListEntry, TaskListReport
 from aiflow.task_service import freeze_task, start_task
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -500,3 +501,192 @@ def test_cli_json_stdout_survives_non_utf8_pipe_encoding(
     content = decoded_payloads["review_context"]["content"]
     assert isinstance(content, dict)
     assert content["goal"] == UNICODE_PAYLOAD
+
+
+@pytest.mark.parametrize("encoding", ["cp1252", "gbk", "utf-8"])
+def test_default_text_output_escapes_unencodable_chars_and_preserves_utf8(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, encoding: str
+) -> None:
+    expected_payload = UNICODE_PAYLOAD.encode(encoding, errors="backslashreplace").decode(encoding)
+    monkeypatch.setattr(cli, "resolve_repository_root", lambda _cwd: tmp_path)
+
+    def make_stream() -> tuple[io.BytesIO, io.TextIOWrapper]:
+        raw = io.BytesIO()
+        wrapper = io.TextIOWrapper(raw, encoding=encoding, newline="\n", write_through=True)
+        return raw, wrapper
+
+    def run_with_streams(argv: list[str]) -> tuple[int, bytes, bytes]:
+        out_raw, out_stream = make_stream()
+        err_raw, err_stream = make_stream()
+        monkeypatch.setattr(sys, "stdout", out_stream)
+        monkeypatch.setattr(sys, "stderr", err_stream)
+        exit_code = cli.main(argv)
+        return exit_code, out_raw.getvalue(), err_raw.getvalue()
+
+    task_list = TaskListReport(
+        repository_id="123e4567-e89b-42d3-a456-426614174000",
+        include_merged=False,
+        states=(),
+        counts_by_state={"NEW": 1},
+        tasks=(
+            TaskListEntry(
+                task_id="TASK-0001",
+                current_state="NEW",
+                goal=UNICODE_PAYLOAD,
+                branch="codex/test",
+                created_at="2026-11-28T06:00:00Z",
+                updated_at="2026-11-28T06:00:00Z",
+            ),
+        ),
+        incomplete_tasks=(),
+        logs_only_tasks=(),
+    )
+    monkeypatch.setattr(cli, "list_tasks", lambda *_args, **_kwargs: task_list)
+    code, out_bytes, err_bytes = run_with_streams(["list"])
+    assert code == 0
+    assert err_bytes == b""
+    assert expected_payload in out_bytes.decode(encoding, errors="strict")
+
+    status_summary = StatusSummary(
+        task_id="TASK-0001",
+        goal=UNICODE_PAYLOAD,
+        repository_id="123e4567-e89b-42d3-a456-426614174000",
+        current_state="NEW",
+        merge_readiness="not_applicable",
+        route="REVIEW",
+        verification_level="V1",
+        next_events=(),
+        missing_conditions=(),
+        base_commit="0" * 40,
+        subject_commit="0" * 40,
+        observed_head="0" * 40,
+        worktree_dirty=False,
+        dirty_paths=(),
+        classification="fresh",
+        approvals="not_available",
+        evidence="not_available",
+    )
+    monkeypatch.setattr(cli, "summarize_task", lambda *_args: status_summary)
+    code, out_bytes, err_bytes = run_with_streams(["status", "TASK-0001"])
+    assert code == 0
+    assert err_bytes == b""
+    assert out_bytes.decode(encoding, errors="strict").startswith(
+        f"Task: TASK-0001\nGoal: {expected_payload}\n"
+    )
+    if encoding == "utf-8":
+        assert f"Goal: {UNICODE_PAYLOAD}\n".encode("utf-8") in out_bytes
+
+    monkeypatch.setattr(cli, "advise_task", lambda *_args: {"goal": UNICODE_PAYLOAD})
+    monkeypatch.setattr(cli, "format_advisory_text", lambda report: f"Goal: {report['goal']}")
+    code, out_bytes, err_bytes = run_with_streams(["advise", "TASK-0001"])
+    assert code == 0
+    assert err_bytes == b""
+    assert out_bytes.decode(encoding, errors="strict") == f"Goal: {expected_payload}\n"
+    if encoding == "utf-8":
+        assert out_bytes == f"Goal: {UNICODE_PAYLOAD}\n".encode("utf-8")
+
+    decision = GateDecision("TASK-0001", False, "REVIEW", "V1", (UNICODE_PAYLOAD,), ())
+    monkeypatch.setattr(cli, "evaluate_gate", lambda *_args, **_kwargs: decision)
+    code, out_bytes, err_bytes = run_with_streams(["gate", "TASK-0001"])
+    assert code == 2
+    assert err_bytes == b""
+    assert f"Reasons: {expected_payload}\n" in out_bytes.decode(encoding, errors="strict")
+
+    monkeypatch.setattr(
+        cli,
+        "list_review_records",
+        lambda *_args, **_kwargs: (
+            {
+                "review_id": "REV-0001",
+                "revision": 1,
+                "review_stage": UNICODE_PAYLOAD,
+                "outcome": "APPROVE",
+            },
+        ),
+    )
+    code, out_bytes, err_bytes = run_with_streams(["review", "show", "TASK-0001"])
+    assert code == 0
+    assert err_bytes == b""
+    assert (
+        out_bytes.decode(encoding, errors="strict")
+        == f"REV-0001 r0001 {expected_payload} APPROVE\n"
+    )
+
+    def fail(*_args: object) -> int:
+        raise AiflowError(f"Domain failure: {UNICODE_PAYLOAD}")
+
+    monkeypatch.setattr(cli, "_dispatch", fail)
+    code, out_bytes, err_bytes = run_with_streams(["status", "TASK-0001"])
+    assert code == 1
+    assert out_bytes == b""
+    assert err_bytes.decode(encoding, errors="strict") == f"Domain failure: {expected_payload}\n"
+    if encoding == "utf-8":
+        assert err_bytes == f"Domain failure: {UNICODE_PAYLOAD}\n".encode("utf-8")
+
+
+@pytest.mark.parametrize("encoding", ["cp1252", "gbk", "utf-8"])
+def test_cli_text_stdout_and_stderr_survive_non_utf8_pipe_encoding(
+    unicode_task_repository: Path, encoding: str
+) -> None:
+    environment = os.environ.copy()
+    environment.pop("PYTHONUTF8", None)
+    environment["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+    environment["PYTHONIOENCODING"] = encoding
+    expected_payload = UNICODE_PAYLOAD.encode(encoding, errors="backslashreplace").decode(encoding)
+
+    cases: tuple[tuple[tuple[str, ...], int], ...] = (
+        (("list",), 0),
+        (("status", "TASK-0001"), 0),
+        (("advise", "TASK-0001"), 0),
+        (("gate", "TASK-0001"), 2),
+        (("review", "show", "TASK-0001"), 0),
+    )
+
+    decoded_outputs: dict[str, str] = {}
+    for arguments, expected_code in cases:
+        result = subprocess.run(
+            [sys.executable, "-m", "aiflow", *arguments],
+            cwd=unicode_task_repository,
+            env=environment,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+        assert result.returncode == expected_code, result.stderr.decode(encoding, errors="replace")
+        assert result.stderr == b""
+        assert b"UnicodeEncodeError" not in result.stderr
+        decoded_outputs[arguments[0] if arguments[0] != "review" else f"review_{arguments[1]}"] = (
+            result.stdout.decode(encoding, errors="strict")
+        )
+
+    assert expected_payload in decoded_outputs["list"]
+    assert f"Goal: {expected_payload}" in decoded_outputs["status"]
+    assert "TASK-0001" in decoded_outputs["advise"]
+    assert "Gate: REJECT" in decoded_outputs["gate"]
+    assert "REV-0001 r0001 design APPROVE" in decoded_outputs["review_show"]
+    if encoding == "utf-8":
+        assert UNICODE_PAYLOAD in decoded_outputs["list"]
+        assert f"Goal: {UNICODE_PAYLOAD}" in decoded_outputs["status"]
+
+    error_script = (
+        "import sys; "
+        "from aiflow import cli, errors; "
+        "cli._dispatch = lambda *_: (_ for _ in ()).throw("
+        f"errors.AiflowError({f'Domain failure: {UNICODE_PAYLOAD}'!r})"
+        "); "
+        "sys.exit(cli.main(['status', 'TASK-0001']))"
+    )
+    error_result = subprocess.run(
+        [sys.executable, "-c", error_script],
+        cwd=unicode_task_repository,
+        env=environment,
+        capture_output=True,
+        check=False,
+        timeout=30,
+    )
+    assert error_result.returncode == 1
+    assert error_result.stdout == b""
+    assert b"UnicodeEncodeError" not in error_result.stderr
+    assert error_result.stderr.decode(encoding, errors="strict").splitlines() == [
+        f"Domain failure: {expected_payload}"
+    ]

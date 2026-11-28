@@ -286,7 +286,7 @@ python -m aiflow advise <TASK-ID> --format json
 向 stderr 输出只含 `code` 和 `message` 的 JSON，stdout 为空，退出 `1`。内部 details
 和异常原因不输出；文本模式仍输出一行错误消息。非法参数沿用 argparse 的 usage 与退出 `2`；
 有效但未通过的 Gate 决策仍在 stdout 输出原 JSON 并退出 `2`。读取到非法 UTF-8 任务文档时，
-错误码为 `STORAGE_READ_FAILED`，原文件保持不变。此外，`list`、`status`、`advise`、`gate`、`review show` 与 stdout `review context` 正常输出的 JSON 均采用 ASCII 转义以兼容 Windows 非 UTF-8 管道，同时完整保留解码后文本。
+错误码为 `STORAGE_READ_FAILED`，原文件保持不变。此外，`list`、`status`、`advise`、`gate`、`review show` 与 stdout `review context` 正常输出的 JSON 均采用 ASCII 转义以兼容 Windows 非 UTF-8 管道，同时完整保留解码后文本；默认文本输出在 UTF-8 流下原样保留字符，仅对当前输出流编码无法表示的字符执行反斜杠转义（`backslashreplace`）。
 
 `REVIEW` 任务的规格批准前，先生成只含规格、Policy、base、分类和决策单元的 design context，由审核者提交结构化结论：
 

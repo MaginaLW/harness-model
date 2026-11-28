@@ -1,0 +1,66 @@
+{
+  "base_commit": "a81122e9a88d7e42c301fbda58b38c31735790ad",
+  "change_reason": "unchanged",
+  "classification_input_sha256": "dd2b46eb3016db4e8d77cb0a9a9d0c18b6021b8843711206c6a464a21738e1ac",
+  "classifications": [
+    {
+      "classified_at": "2026-11-28T12:23:35Z",
+      "decision_unit_id": "DU-001",
+      "explanation": "Changes that can touch the governance surface require independent review.",
+      "explanations": [
+        "Changes that can touch the governance surface require independent review.",
+        "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects."
+      ],
+      "matched_rules": [
+        {
+          "explanation": "Changes that can touch the governance surface require independent review.",
+          "predicate_explanations": [
+            "impact_scope: overlaps_paths -> true"
+          ],
+          "priority": 750,
+          "route": "REVIEW",
+          "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE"
+        },
+        {
+          "explanation": "AUTO requires clear scope, low impact, recovery, automatic verification, and no side effects.",
+          "predicate_explanations": [
+            "scope.clear: equals -> true",
+            "impact.level: equals -> true",
+            "reversibility: in -> true",
+            "verification.automatic: equals -> true",
+            "external_side_effects: is_empty -> true"
+          ],
+          "priority": 100,
+          "route": "AUTO",
+          "rule_id": "ROUTE-AUTO-EXPLICIT-GUARDS"
+        }
+      ],
+      "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+      "policy_version": "2.6.0",
+      "route": "REVIEW",
+      "rule_id": "HARD-REVIEW-GOVERNANCE-SURFACE",
+      "verification_blocking_reasons": [],
+      "verification_explanations": [
+        "Behavior changes require V1.",
+        "Code changes require V1.",
+        "Regression risk requires V1.",
+        "Non-mechanical work requires V1."
+      ],
+      "verification_level": "V1",
+      "verification_rule_ids": [
+        "VERIFICATION-BEHAVIOR-CHANGED",
+        "VERIFICATION-CODE-MODIFIED",
+        "VERIFICATION-REGRESSION-RISK",
+        "VERIFICATION-NON-MECHANICAL"
+      ]
+    }
+  ],
+  "classified_at": "2026-11-28T12:23:35Z",
+  "effective_route": "REVIEW",
+  "effective_verification_level": "V1",
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "policy_version": "2.6.0",
+  "schema_version": "1.0",
+  "subject_commit": "a81122e9a88d7e42c301fbda58b38c31735790ad",
+  "task_id": "TASK-0201"
+}

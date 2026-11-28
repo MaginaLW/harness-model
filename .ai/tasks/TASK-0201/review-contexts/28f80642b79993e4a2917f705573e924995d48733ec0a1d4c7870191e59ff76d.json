@@ -1,0 +1,39 @@
+{
+  "base_commit": "a81122e9a88d7e42c301fbda58b38c31735790ad",
+  "branch": "codex/cli-text-pipe-encoding",
+  "classification_input_sha256": "dd2b46eb3016db4e8d77cb0a9a9d0c18b6021b8843711206c6a464a21738e1ac",
+  "content": {
+    "allowed_scope": [
+      "src/aiflow/cli.py",
+      "tests/unit/test_cli_error_output.py",
+      "docs/operations/quickstart.md"
+    ],
+    "decision_units": [
+      {
+        "decision_unit_id": "DU-001",
+        "goal": "Escape unencodable characters in CLI default text stdout and stderr outputs for non-UTF-8 pipes",
+        "impact_scope": [
+          "src/aiflow/cli.py",
+          "tests/unit/test_cli_error_output.py",
+          "docs/operations/quickstart.md"
+        ],
+        "planned_actions": [
+          "Implement the bounded task objective"
+        ]
+      }
+    ],
+    "goal": "Escape unencodable characters in CLI default text stdout and stderr outputs for non-UTF-8 pipes",
+    "route": "REVIEW",
+    "verification_level": "V1"
+  },
+  "context_sha256": "28f80642b79993e4a2917f705573e924995d48733ec0a1d4c7870191e59ff76d",
+  "decision_unit_ids": [
+    "DU-001"
+  ],
+  "policy_sha256": "d664125e3ff172ab4e9ffb0b142eaa21f96953c6e067618dc4434f3ca4b039ff",
+  "repository_id": "b85e5a53-4935-4436-bdbc-c26a241bfae8",
+  "review_stage": "design",
+  "schema_version": "1.0",
+  "spec_sha256": "bd151a459ce86d5dffdbe3eb7a24ba86efd5bbe09652e18d468ae5b0803a8aea",
+  "task_id": "TASK-0201"
+}
