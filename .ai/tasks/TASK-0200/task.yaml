@@ -1,0 +1,80 @@
+allowed_scope:
+- pyproject.toml
+- uv.lock
+- src/aiflow/__init__.py
+- src/aiflow/resource_bundle.py
+- tests/unit/test_cli.py
+- tests/unit/test_resource_bundle.py
+- tests/integration/test_resource_bundle_distribution.py
+- CHANGELOG.md
+- README.md
+- docs/operations/maintenance-status.md
+base_commit: fbf3f1a8437f2beff0d39e6bf6380313e504f6d1
+branch: codex/release-032-prep
+created_at: '2026-11-28T07:07:01Z'
+current_state: APPROVED_FOR_MERGE
+decision_units:
+- business_direction_count: 1
+  change_characteristics:
+    behavior_changed: true
+    code_modified: true
+    error_detectability: low
+    interaction_scope: cross_module
+    mechanical: false
+    regression_risk: true
+  controlled_actions: []
+  decision_unit_id: DU-001
+  external_side_effects: []
+  goal: Prepare 0.3.2 milestone version metadata, tests, and release docs
+  impact:
+    level: medium
+  impact_categories:
+  - documentation
+  impact_scope:
+  - pyproject.toml
+  - uv.lock
+  - src/aiflow/__init__.py
+  - src/aiflow/resource_bundle.py
+  - tests/unit/test_cli.py
+  - tests/unit/test_resource_bundle.py
+  - tests/integration/test_resource_bundle_distribution.py
+  - CHANGELOG.md
+  - README.md
+  - docs/operations/maintenance-status.md
+  inputs: []
+  permission_requirements: []
+  planned_actions:
+  - Implement the bounded task objective
+  protections:
+    dry_run: true
+    verified_backup: true
+  reversibility: reversible
+  schema_version: '1.0'
+  scope:
+    clear: true
+  task_id: TASK-0200
+  verification:
+    automatic: true
+    tools_missing: false
+  verification_methods:
+  - Define and run executable verification
+  verification_requirements:
+    acceptance_required: false
+    independent_verifier_required: false
+    integration_required: false
+    targeted_mutation_required: false
+forbidden_actions:
+- deploy
+- delete
+- secret_export
+- paid_external_call
+frozen_spec_sha256: bea665280c1199e932f264eaeb42d2f6cb7cf9a37eddae0cad70c491eb8e1456
+goal: Prepare 0.3.2 milestone version metadata, tests, and release docs
+repository_id: b85e5a53-4935-4436-bdbc-c26a241bfae8
+schema_version: '1.0'
+spec_frozen_at: '2026-11-28T07:07:57Z'
+subject_commit: 4100bcb6f46d34bc4ab5e15ee4bd259cf166ac72
+task_id: TASK-0200
+updated_at: '2026-11-28T07:42:45Z'
+worktree_dirty: false
+worktree_dirty_paths: []
