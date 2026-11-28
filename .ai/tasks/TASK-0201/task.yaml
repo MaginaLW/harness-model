@@ -5,7 +5,7 @@ allowed_scope:
 base_commit: a81122e9a88d7e42c301fbda58b38c31735790ad
 branch: codex/cli-text-pipe-encoding
 created_at: '2026-11-28T12:22:43Z'
-current_state: APPROVED_FOR_MERGE
+current_state: MERGED
 decision_units:
 - business_direction_count: 1
   change_characteristics:
@@ -63,6 +63,6 @@ schema_version: '1.0'
 spec_frozen_at: '2026-11-28T12:23:36Z'
 subject_commit: fd95e533aec73afee35e10b4905d650183276a10
 task_id: TASK-0201
-updated_at: '2026-11-28T13:00:09Z'
+updated_at: '2026-11-28T13:08:28Z'
 worktree_dirty: false
 worktree_dirty_paths: []
